@@ -1,0 +1,30 @@
+{
+  "name": "rfxchange",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "node": ">=24.18.0 <25"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "validate:product-system": "node scripts/validate-product-system.mjs",
+    "check": "npm run validate:product-system && npm run typecheck && npm run lint && npm run build"
+  },
+  "dependencies": {
+    "next": "16.2.11",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "eslint": "10.7.0",
+    "eslint-config-next": "16.2.11",
+    "typescript": "6.0.3"
+  }
+}
