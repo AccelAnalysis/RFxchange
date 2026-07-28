@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "validate:product-system": "node scripts/validate-product-system.mjs",
     "check": "npm run validate:product-system && npm run typecheck && npm run lint && npm run build"
   },
