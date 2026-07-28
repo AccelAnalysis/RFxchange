@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   },
   description:
     "A map-based business growth network for capability discovery, opportunities, referrals, partnerships, resources, and measured activity.",
-  metadataBase: new URL("https://rfxchange.com"),
   openGraph: {
     title: "The RFxchange™",
     description:
