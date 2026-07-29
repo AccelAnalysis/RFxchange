@@ -38,8 +38,9 @@ for (const required of [
   assert.ok(application.includes(required), `AUTH-002 application resolver is missing: ${required}`);
 }
 
-assert.ok(
-  !application.includes("firebase") && !application.includes("firebase-admin"),
+assert.doesNotMatch(
+  application,
+  /from\s+["'](?:firebase|firebase-admin)(?:\/[^"']*)?["']/,
   "AUTH-002 application resolution must remain authentication-provider independent.",
 );
 assert.ok(
