@@ -85,11 +85,13 @@ INF-005 remains responsible for `firestore.indexes.json`. No speculative composi
 
 The validator is included in `npm run validate` and therefore in production CI.
 
+Production CI also launches the Firestore emulator with pinned Firebase CLI `15.24.0` and Java 21. This is a compiler smoke test for the source-controlled rules; invalid Firestore Rules syntax fails the pull request even if the static architecture validator passes.
+
 ## Emulator strategy
 
 The Firestore emulator remains configured on port `8080` from INF-001.
 
-INF-004 establishes the rules source and static architecture guardrails. AUTH-005 is responsible for the full Firebase Auth + Firestore emulator security suite, including authenticated identity, wrong-user, wrong-organization, inactive-membership, restriction, permission, and authorized-access cases.
+INF-004 establishes the rules source, static architecture guardrails, and Firebase emulator compile gate. AUTH-005 is responsible for the full Firebase Auth + Firestore emulator security suite, including authenticated identity, wrong-user, wrong-organization, inactive-membership, restriction, permission, and authorized-access cases.
 
 A later client Firestore surface must not be enabled until emulator tests prove its query and authorization rules.
 
@@ -106,4 +108,4 @@ A later client Firestore surface must not be enabled until emulator tests prove 
 
 ## Acceptance result
 
-INF-004 is complete when the repository contains a source-controlled, deny-by-default Firestore ruleset tied to all canonical collections, Firebase configuration points to it, append-only paths are protected, undeclared paths are denied, and CI prevents accidental broad client access before the identity/authorization model is implemented.
+INF-004 is complete when the repository contains a source-controlled, deny-by-default Firestore ruleset tied to all canonical collections, Firebase configuration points to it, append-only paths are protected, undeclared paths are denied, Firebase's emulator compiler accepts the ruleset, and CI prevents accidental broad client access before the identity/authorization model is implemented.
