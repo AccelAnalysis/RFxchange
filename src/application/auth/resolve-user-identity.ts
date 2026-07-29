@@ -1,6 +1,7 @@
 import {
   createUserIdentity,
   loginSubject,
+  userId,
   type UserIdentity,
 } from "../../domain/users/model";
 import type { UserIdentityRepository } from "../../domain/users/repository";
@@ -129,8 +130,8 @@ export async function resolveUserIdentity(
     );
   }
 
-  const id = dependencies.ids.createId({ provider, subject });
-  const occupant = await dependencies.users.getById(id as UserIdentity["id"]);
+  const id = userId(dependencies.ids.createId({ provider, subject }));
+  const occupant = await dependencies.users.getById(id);
   if (occupant) {
     if (sameLogin(occupant, provider, subject)) {
       return Object.freeze({
