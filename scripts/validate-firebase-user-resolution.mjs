@@ -5,6 +5,7 @@ const files = {
   package: "package.json",
   application: "src/application/auth/resolve-user-identity.ts",
   firebase: "src/infrastructure/auth/firebase-user-resolution.ts",
+  server: "src/infrastructure/auth/firebase-user-resolution-server.ts",
   smoke: "scripts/smoke-firebase-user-resolution-emulator.mjs",
 };
 
@@ -15,6 +16,7 @@ async function read(path) {
 const packageJson = JSON.parse(await read(files.package));
 const application = await read(files.application);
 const firebase = await read(files.firebase);
+const server = await read(files.server);
 const smoke = await read(files.smoke);
 
 assert.equal(
@@ -61,21 +63,30 @@ for (const required of [
   assert.ok(firebase.includes(required), `AUTH-002 Firebase adapter is missing: ${required}`);
 }
 
+for (const required of [
+  "createServerFirestoreFoundationRepositories",
+  "FirebaseUserIdentityResolver",
+  ".users.users",
+]) {
+  assert.ok(server.includes(required), `AUTH-002 server composition is missing: ${required}`);
+}
+
 for (const forbidden of ["verifyIdToken", "createSessionCookie", "verifySessionCookie"]) {
   assert.ok(
-    !application.includes(forbidden) && !firebase.includes(forbidden),
+    !application.includes(forbidden) && !firebase.includes(forbidden) && !server.includes(forbidden),
     `AUTH-002 must not absorb AUTH-003 credential/session responsibility: ${forbidden}`,
   );
 }
 
 for (const required of [
   "FIRESTORE_EMULATOR_HOST",
-  "FirebaseBrowserAuthenticationProvider",
+  "EmulatorUserIdentityRepository",
   "FirebaseUserIdentityResolver",
-  "FirestoreUserIdentityRepository",
+  "createUserWithEmailAndPassword",
   'assert.equal(first.kind, "created")',
   'assert.equal(second.kind, "existing")',
   "Repeated sign-in must resolve the same RFxchange UserId",
+  "await db.terminate()",
 ]) {
   assert.ok(smoke.includes(required), `AUTH-002 emulator smoke test is missing: ${required}`);
 }
