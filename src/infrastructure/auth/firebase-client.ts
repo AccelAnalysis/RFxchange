@@ -2,6 +2,7 @@ import { getApps, initializeApp, type FirebaseApp, type FirebaseOptions } from "
 import { connectAuthEmulator, getAuth, type Auth } from "firebase/auth";
 
 import { FirebaseBrowserAuthenticationProvider } from "./firebase-browser";
+import { FirebaseBrowserAuthenticationLifecycle } from "./firebase-browser-lifecycle";
 
 interface RFxFirebaseClientGlobals {
   __rfxFirebaseClientApp?: FirebaseApp;
@@ -76,4 +77,8 @@ export function getClientFirebaseAuth(): Auth {
 
 export function createClientAuthenticationProvider(): FirebaseBrowserAuthenticationProvider {
   return new FirebaseBrowserAuthenticationProvider(getClientFirebaseAuth());
+}
+
+export function createClientAuthenticationLifecycle(): FirebaseBrowserAuthenticationLifecycle {
+  return new FirebaseBrowserAuthenticationLifecycle(getClientFirebaseAuth());
 }
