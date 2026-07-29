@@ -12,7 +12,7 @@ import {
   type AuthenticationPrincipal,
   type AuthenticationStateListener,
   type BrowserAuthenticationProvider,
-} from "./provider";
+} from "./provider.ts";
 
 function toPrincipal(user: User): AuthenticationPrincipal {
   return Object.freeze({
@@ -26,7 +26,11 @@ function toPrincipal(user: User): AuthenticationPrincipal {
 }
 
 export class FirebaseBrowserAuthenticationProvider implements BrowserAuthenticationProvider {
-  constructor(private readonly auth: Auth) {}
+  private readonly auth: Auth;
+
+  constructor(auth: Auth) {
+    this.auth = auth;
+  }
 
   currentPrincipal(): AuthenticationPrincipal | null {
     return this.auth.currentUser ? toPrincipal(this.auth.currentUser) : null;
