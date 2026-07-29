@@ -8,7 +8,6 @@ import {
   type UserIdentityResolution,
 } from "../../application/auth/resolve-user-identity";
 import type { UserIdentityRepository } from "../../domain/users/repository";
-import { createServerFirestoreFoundationRepositories } from "../firestore/runtime";
 import {
   FIREBASE_AUTH_PROVIDER,
   type AuthenticationPrincipal,
@@ -45,17 +44,22 @@ export interface FirebaseUserIdentityResolutionInput {
 }
 
 /**
- * Server-side composition for AUTH-002.
+ * Injectable Firebase-to-RFxchange identity resolver.
  *
  * The supplied principal must already be trusted. AUTH-003 will verify Firebase ID tokens and then
  * call this resolver; browser-provided subject strings must never be passed directly here.
  */
 export class FirebaseUserIdentityResolver {
+  private readonly users: UserIdentityRepository;
+  private readonly ids: UserIdentityIdStrategy;
+
   constructor(
-    private readonly users: UserIdentityRepository =
-      createServerFirestoreFoundationRepositories().users.users,
-    private readonly ids: UserIdentityIdStrategy = new FirebaseUserIdentityIdStrategy(),
-  ) {}
+    users: UserIdentityRepository,
+    ids: UserIdentityIdStrategy = new FirebaseUserIdentityIdStrategy(),
+  ) {
+    this.users = users;
+    this.ids = ids;
+  }
 
   resolve(input: FirebaseUserIdentityResolutionInput): Promise<UserIdentityResolution> {
     const applicationInput: ResolveUserIdentityInput = {
