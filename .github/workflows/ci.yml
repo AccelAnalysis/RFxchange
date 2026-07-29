@@ -11,7 +11,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,8 +25,13 @@ jobs:
         run: npm install
       - name: Repository guardrails
         run: npm run validate
-      - name: Firebase Auth and Firestore emulator smoke tests
-        run: npx --yes firebase-tools@15.24.0 emulators:exec --only auth,firestore --project demo-rfxchange "node scripts/smoke-firebase-auth-emulator.mjs && node scripts/smoke-firebase-user-resolution-emulator.mjs && node scripts/smoke-firebase-server-session-emulator.mjs && node scripts/smoke-firebase-authentication-lifecycle-emulator.mjs && node scripts/smoke-firebase-auth-firestore-security-emulator.mjs"
+      - name: Cloud Functions build and unit tests
+        run: npm run build:functions && npm run test:functions
+      - name: Firebase Auth, Firestore and Functions emulator smoke tests
+        env:
+          RFXCHANGE_ENV: development
+          RFXCHANGE_EXPECTED_PROJECT_ID: demo-rfxchange
+        run: npx --yes firebase-tools@15.24.0 emulators:exec --only auth,firestore,functions --project demo-rfxchange "node scripts/smoke-firebase-auth-emulator.mjs && node scripts/smoke-firebase-user-resolution-emulator.mjs && node scripts/smoke-firebase-server-session-emulator.mjs && node scripts/smoke-firebase-authentication-lifecycle-emulator.mjs && node scripts/smoke-firebase-auth-firestore-security-emulator.mjs && node scripts/smoke-firebase-functions-runtime-emulator.mjs"
       - name: Architecture tests
         run: npm run test:architecture
       - name: Typecheck
