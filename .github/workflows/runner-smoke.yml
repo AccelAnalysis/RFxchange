@@ -1,6 +1,7 @@
 name: runner-smoke
 
 on:
+  pull_request:
   push:
     branches: [diagnostic/actions-runner]
 
