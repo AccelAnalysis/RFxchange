@@ -3,7 +3,9 @@ import { readFile } from "node:fs/promises";
 
 const application = await readFile("src/application/auth/account-security.ts", "utf8");
 const browser = await readFile("src/infrastructure/auth/firebase-browser-lifecycle.ts", "utf8");
+const client = await readFile("src/infrastructure/auth/firebase-client.ts", "utf8");
 const server = await readFile("src/infrastructure/auth/firebase-account-security.ts", "utf8");
+const runtime = await readFile("src/infrastructure/auth/firebase-account-security-runtime.ts", "utf8");
 const session = await readFile("src/infrastructure/auth/firebase-server-session.ts", "utf8");
 const appIndex = await readFile("src/application/auth/index.ts", "utf8");
 const infraIndex = await readFile("src/infrastructure/auth/index.ts", "utf8");
@@ -40,6 +42,11 @@ for (const required of [
   assert.ok(browser.includes(required), `AUTH-004 browser lifecycle is missing ${required}.`);
 }
 
+assert.ok(
+  client.includes("createClientAuthenticationLifecycle"),
+  "AUTH-004 browser lifecycle production composition is missing.",
+);
+
 for (const required of [
   "getUser(uid)",
   "updateUser(uid, { disabled: true })",
@@ -50,6 +57,11 @@ for (const required of [
 ]) {
   assert.ok(server.includes(required), `AUTH-004 provider account security is missing ${required}.`);
 }
+
+assert.ok(
+  runtime.includes("createServerFirebaseAccountSecurityService"),
+  "AUTH-004 server account-security production composition is missing.",
+);
 
 for (const required of [
   'code === "auth/user-disabled"',
