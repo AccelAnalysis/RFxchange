@@ -27,6 +27,8 @@ export interface AuthenticatedServerContext {
 export type ServerSessionErrorCode =
   | "credential-required"
   | "credential-invalid"
+  | "credential-revoked"
+  | "account-disabled"
   | "csrf-verification-required"
   | "recent-authentication-required";
 
