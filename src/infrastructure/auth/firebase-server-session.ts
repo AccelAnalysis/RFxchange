@@ -38,6 +38,24 @@ export interface IssuedServerSession {
   }>;
 }
 
+function firebaseErrorCode(error: unknown): string | null {
+  if (typeof error !== "object" || error === null || !("code" in error)) return null;
+  return typeof (error as { code?: unknown }).code === "string"
+    ? (error as { code: string }).code
+    : null;
+}
+
+function credentialFailure(error: unknown, label: string): ServerSessionError {
+  const code = firebaseErrorCode(error);
+  if (code === "auth/user-disabled") {
+    return new ServerSessionError("account-disabled", "The Firebase account is disabled.");
+  }
+  if (code === "auth/id-token-revoked" || code === "auth/session-cookie-revoked") {
+    return new ServerSessionError("credential-revoked", `${label} has been revoked.`);
+  }
+  return new ServerSessionError("credential-invalid", `${label} is invalid.`);
+}
+
 function isoFromSeconds(value: number, label: string): string {
   if (!Number.isFinite(value) || value <= 0) {
     throw new ServerSessionError("credential-invalid", `${label} claim is invalid.`);
@@ -117,8 +135,8 @@ export class FirebaseServerSessionBoundary {
     let decoded: DecodedIdToken;
     try {
       decoded = await this.auth.verifyIdToken(idToken, true);
-    } catch {
-      throw new ServerSessionError("credential-invalid", "Firebase ID token is invalid or revoked.");
+    } catch (error) {
+      throw credentialFailure(error, "Firebase ID token");
     }
     return this.resolve(trustedClaimsFromFirebaseToken(decoded), "id-token", input.now, input.requestedName);
   }
@@ -140,8 +158,8 @@ export class FirebaseServerSessionBoundary {
     let decoded: DecodedIdToken;
     try {
       decoded = await this.auth.verifyIdToken(idToken, true);
-    } catch {
-      throw new ServerSessionError("credential-invalid", "Firebase ID token is invalid or revoked.");
+    } catch (error) {
+      throw credentialFailure(error, "Firebase ID token");
     }
 
     const claims = trustedClaimsFromFirebaseToken(decoded);
@@ -162,8 +180,8 @@ export class FirebaseServerSessionBoundary {
     let value: string;
     try {
       value = await this.auth.createSessionCookie(idToken, { expiresIn: RFXCHANGE_SESSION_DURATION_MS });
-    } catch {
-      throw new ServerSessionError("credential-invalid", "Firebase session cookie could not be created.");
+    } catch (error) {
+      throw credentialFailure(error, "Firebase session cookie");
     }
 
     return Object.freeze({
@@ -188,8 +206,8 @@ export class FirebaseServerSessionBoundary {
     let decoded: DecodedIdToken;
     try {
       decoded = await this.auth.verifySessionCookie(sessionCookie, true);
-    } catch {
-      throw new ServerSessionError("credential-invalid", "RFxchange session is invalid or revoked.");
+    } catch (error) {
+      throw credentialFailure(error, "RFxchange session");
     }
     return this.resolve(trustedClaimsFromFirebaseToken(decoded), "session-cookie", input.now);
   }

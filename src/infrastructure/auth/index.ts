@@ -1,4 +1,7 @@
+export * from "./firebase-account-security";
+export * from "./firebase-account-security-runtime";
 export * from "./firebase-browser";
+export * from "./firebase-browser-lifecycle";
 export * from "./firebase-client";
 export * from "./firebase-server";
 export * from "./firebase-server-session";
