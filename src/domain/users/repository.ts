@@ -1,5 +1,6 @@
 import type { OrganizationId } from "../organizations/model";
 import type {
+  LoginSubject,
   OrganizationMembership,
   OrganizationMembershipId,
   UserId,
@@ -9,6 +10,7 @@ import type {
 export interface UserIdentityRepository {
   getById(id: UserId): Promise<UserIdentity | null>;
   getByPrimaryEmail(primaryEmail: string): Promise<UserIdentity | null>;
+  getByLogin(provider: string, subject: LoginSubject): Promise<UserIdentity | null>;
   create(user: UserIdentity): Promise<void>;
 }
 
