@@ -12,8 +12,8 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "validate:product-system": "node scripts/validate-product-system.mjs",
-    "validate:architecture": "node scripts/validate-organization-tenancy.mjs",
-    "test:architecture": "node --test test/organization-tenancy.test.mjs",
+    "validate:architecture": "node scripts/validate-organization-tenancy.mjs && node scripts/validate-user-membership.mjs",
+    "test:architecture": "node --test test/*.test.mjs",
     "validate": "npm run validate:product-system && npm run validate:architecture",
     "check": "npm run validate && npm run test:architecture && npm run typecheck && npm run lint && npm run build"
   },
