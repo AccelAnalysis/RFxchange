@@ -1,22 +1,17 @@
-import { getApps, initializeApp, type App } from "firebase-admin/app";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
+import { getFirebaseAdminApp } from "../firebase/admin";
 import {
   createFirestoreFoundationRepositories,
   type FirestoreFoundationRepositories,
 } from "./repositories";
 
 /**
- * Server-only Firebase Admin composition boundary.
+ * Server-only Firestore composition boundary.
  *
- * No service-account key is accepted here. In Google-hosted runtimes the Admin SDK resolves
- * Application Default Credentials. Local development should point this runtime at the Firestore
- * emulator; remote credential strategy remains an environment/deployment concern.
+ * Firebase Admin application initialization is shared with Authentication through the dedicated
+ * infrastructure Firebase boundary. No service-account key is accepted here.
  */
-export function getFirebaseAdminApp(): App {
-  return getApps()[0] ?? initializeApp();
-}
-
 export function getServerFirestore(): Firestore {
   return getFirestore(getFirebaseAdminApp());
 }
