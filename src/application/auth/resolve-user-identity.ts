@@ -41,12 +41,12 @@ export type UserIdentityResolutionErrorCode =
   | "user-id-collision";
 
 export class UserIdentityResolutionError extends Error {
-  constructor(
-    readonly code: UserIdentityResolutionErrorCode,
-    message: string,
-  ) {
+  readonly code: UserIdentityResolutionErrorCode;
+
+  constructor(code: UserIdentityResolutionErrorCode, message: string) {
     super(message);
     this.name = "UserIdentityResolutionError";
+    this.code = code;
   }
 }
 
