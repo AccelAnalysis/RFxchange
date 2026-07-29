@@ -5,13 +5,26 @@ export type FirestoreEqualityFilter = Readonly<{
   operator: "==";
 }>;
 
+export type FirestoreIndexStrategy =
+  | "automatic-single-field"
+  | "automatic-equality-merge"
+  | "manual-composite";
+
 export interface FirestoreQueryContract {
   readonly name: string;
   readonly collection: FirestoreCollectionKey;
   readonly filters: readonly FirestoreEqualityFilter[];
   readonly cardinality: "zero-or-one" | "many";
-  /** INF-005 materializes indexes only where these approved query shapes require them. */
-  readonly compositeIndexCandidate: boolean;
+  /**
+   * INF-005 records the index decision for every approved query shape.
+   * Equality-only queries remain on Firestore automatic indexes; manual composite
+   * indexes are reserved for query shapes that actually require them.
+   */
+  readonly indexStrategy: FirestoreIndexStrategy;
+}
+
+function equalityIndexStrategy(fields: readonly string[]): FirestoreIndexStrategy {
+  return fields.length > 1 ? "automatic-equality-merge" : "automatic-single-field";
 }
 
 const contract = (
@@ -25,12 +38,16 @@ const contract = (
     collection,
     filters: Object.freeze(fields.map((field) => Object.freeze({ field, operator: "==" as const }))),
     cardinality,
-    compositeIndexCandidate: fields.length > 1,
+    indexStrategy: equalityIndexStrategy(fields),
   });
 
 /**
- * Approved INF-002 Firestore query shapes. INF-005 uses this inventory to create the minimum
- * required composite indexes rather than speculating about future access patterns.
+ * Approved INF-002 Firestore query shapes and their INF-005 index decisions.
+ *
+ * Firestore automatic indexes support single equality filters and can merge
+ * automatic indexes for compound equality filters. A future range, inequality,
+ * array-plus-clause, or sort query must extend this contract model and explicitly
+ * declare the manual index it needs before being accepted into the repository layer.
  */
 export const FIRESTORE_QUERY_CONTRACTS: readonly FirestoreQueryContract[] = Object.freeze([
   contract("organization-profile-by-organization", "organizationProfiles", ["organizationId"], "zero-or-one"),
@@ -62,6 +79,15 @@ export const FIRESTORE_QUERY_CONTRACTS: readonly FirestoreQueryContract[] = Obje
   contract("admin-grants-by-administrator", "adminPermissionGrants", ["administratorId"], "many"),
 ]);
 
-export const FIRESTORE_COMPOSITE_INDEX_CANDIDATES = Object.freeze(
-  FIRESTORE_QUERY_CONTRACTS.filter((query) => query.compositeIndexCandidate),
+export const FIRESTORE_AUTOMATIC_INDEX_CONTRACTS = Object.freeze(
+  FIRESTORE_QUERY_CONTRACTS.filter((query) => query.indexStrategy !== "manual-composite"),
+);
+
+/**
+ * The list is intentionally empty for the current foundation query set.
+ * INF-005 keeps this export so future repository queries have an explicit place
+ * to declare and validate manual composite index requirements.
+ */
+export const FIRESTORE_MANUAL_INDEX_CONTRACTS = Object.freeze(
+  FIRESTORE_QUERY_CONTRACTS.filter((query) => query.indexStrategy === "manual-composite"),
 );

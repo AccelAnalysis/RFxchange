@@ -22,10 +22,11 @@ test("INF-002 uses stable ids, server timestamps, schema versions, and append-on
   assert.doesNotMatch(support, /\.add\(/);
 });
 
-test("INF-002 exposes concrete query shapes for INF-005 instead of speculative indexes", () => {
+test("INF-002 exposes concrete query shapes to INF-005 index planning", () => {
   assert.match(queryContracts, /user-by-login/);
   assert.match(queryContracts, /active-memberships-by-user/);
   assert.match(queryContracts, /restriction-by-membership/);
   assert.match(queryContracts, /legal-document-by-kind-version/);
-  assert.match(queryContracts, /FIRESTORE_COMPOSITE_INDEX_CANDIDATES/);
+  assert.match(queryContracts, /FIRESTORE_QUERY_CONTRACTS/);
+  assert.match(queryContracts, /FIRESTORE_MANUAL_INDEX_CONTRACTS/);
 });

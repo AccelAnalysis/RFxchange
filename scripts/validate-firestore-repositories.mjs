@@ -121,8 +121,9 @@ for (const forbidden of ["serviceAccount", "private_key", "credential.cert", "FI
 }
 
 assert.ok(
-  queryContracts.includes("FIRESTORE_COMPOSITE_INDEX_CANDIDATES"),
-  "INF-002 must expose approved query shapes for INF-005 index materialization.",
+  queryContracts.includes("FIRESTORE_QUERY_CONTRACTS") &&
+    queryContracts.includes("FIRESTORE_MANUAL_INDEX_CONTRACTS"),
+  "INF-002 query shapes must remain exposed to INF-005 index planning.",
 );
 assert.ok(
   queryContracts.includes("active-memberships-by-user") &&
