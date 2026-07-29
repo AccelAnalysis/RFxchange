@@ -4,8 +4,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // INF-004 establishes a server-managed Firestore boundary.
     // The Firebase Admin SDK bypasses Firestore Security Rules and is governed by IAM.
-    // Client access remains closed until AUTH-002/AUTH-003 define the identity/session mapping
-    // and AUTH-005 adds emulator-backed authorization scenarios.
+    // AUTH-005 proves that authenticated and unauthenticated direct clients remain denied while
+    // verified server operations apply RFxchange identity, membership, restriction, and permission checks.
     function serverManagedOnly() {
       return false;
     }
