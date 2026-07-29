@@ -12,7 +12,9 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "validate:product-system": "node scripts/validate-product-system.mjs",
-    "check": "npm run validate:product-system && npm run typecheck && npm run lint && npm run build"
+    "validate:architecture": "node scripts/validate-organization-tenancy.mjs",
+    "validate": "npm run validate:product-system && npm run validate:architecture",
+    "check": "npm run validate && npm run typecheck && npm run lint && npm run build"
   },
   "dependencies": {
     "next": "16.2.11",
