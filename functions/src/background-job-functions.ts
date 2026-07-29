@@ -9,7 +9,10 @@ import {
   type BackgroundJobExecutionResult,
 } from "./application/background-jobs.js";
 import { functionsRuntimeContextFromEnvironment } from "./runtime/environment.js";
-import { backgroundJobPayloadFingerprint } from "./runtime/background-job-identifiers.js";
+import {
+  backgroundJobPayloadFingerprint,
+  sha256Hex,
+} from "./runtime/background-job-identifiers.js";
 import { getFunctionsFirestore } from "./runtime/firebase-admin.js";
 import { FirestoreBackgroundJobStore } from "./runtime/firestore-background-job-store.js";
 import {
@@ -46,7 +49,7 @@ function logJobResult(
     operation: input.operation,
     durationMs: input.durationMs,
     outcome: failed ? "failed" : "succeeded",
-    errorCode: "errorCode" in result ? result.errorCode : undefined,
+    ...("errorCode" in result ? { errorCode: result.errorCode } : {}),
   });
 }
 
@@ -65,14 +68,17 @@ export const scheduledBackgroundJobHeartbeat = onSchedule(
   async (event) => {
     const runtime = functionsRuntimeContextFromEnvironment();
     const startedAt = Date.now();
-    const requestedAt = event.time || new Date().toISOString();
-    const correlationId = event.id;
+    const requestedAt = event.scheduleTime;
+    const schedulerJob = event.jobName ?? "manual-scheduler-invocation";
+    const idempotencyKey = `${schedulerJob}:${requestedAt}`;
+    const correlationId = sha256Hex(idempotencyKey).slice(0, 32);
     const request = createBackgroundJobRequest({
       jobName: "system.runtime-heartbeat",
       category: "system",
-      idempotencyKey: event.id,
+      idempotencyKey,
       payloadFingerprint: backgroundJobPayloadFingerprint({
         schedule: "every 15 minutes",
+        schedulerJob,
         requestedAt,
       }),
       correlationId,
