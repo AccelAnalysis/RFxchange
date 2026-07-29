@@ -53,6 +53,7 @@ const appendOnlyCollections = [
   "retentionPolicies",
   "retentionAssignments",
   "adminPermissionGrants",
+  "backgroundJobEvents",
 ];
 
 for (const collection of appendOnlyCollections) {
@@ -82,7 +83,7 @@ assert.doesNotMatch(
 assert.doesNotMatch(
   rules,
   /request\.auth/,
-  "INF-004 must not open authenticated client access before AUTH-002/AUTH-003 define identity/session mapping.",
+  "INF-004 must not open authenticated client access before an approved UID/domain rules mapping.",
 );
 
 for (const requiredStatement of [

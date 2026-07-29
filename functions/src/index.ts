@@ -102,3 +102,8 @@ export const runtimeFoundationHealth = onRequest(
     }
   },
 );
+
+export {
+  backgroundJobFrameworkProbe,
+  scheduledBackgroundJobHeartbeat,
+} from "./background-job-functions.js";

@@ -31,7 +31,7 @@ jobs:
         env:
           RFXCHANGE_ENV: development
           RFXCHANGE_EXPECTED_PROJECT_ID: demo-rfxchange
-        run: npx --yes firebase-tools@15.24.0 emulators:exec --only auth,firestore,functions --project demo-rfxchange "node scripts/smoke-firebase-auth-emulator.mjs && node scripts/smoke-firebase-user-resolution-emulator.mjs && node scripts/smoke-firebase-server-session-emulator.mjs && node scripts/smoke-firebase-authentication-lifecycle-emulator.mjs && node scripts/smoke-firebase-auth-firestore-security-emulator.mjs && node scripts/smoke-firebase-functions-runtime-emulator.mjs"
+        run: npx --yes firebase-tools@15.24.0 emulators:exec --only auth,firestore,functions --project demo-rfxchange "node scripts/smoke-firebase-auth-emulator.mjs && node scripts/smoke-firebase-user-resolution-emulator.mjs && node scripts/smoke-firebase-server-session-emulator.mjs && node scripts/smoke-firebase-authentication-lifecycle-emulator.mjs && node scripts/smoke-firebase-auth-firestore-security-emulator.mjs && node scripts/smoke-firebase-functions-runtime-emulator.mjs && node scripts/smoke-firebase-background-jobs-emulator.mjs"
       - name: Architecture tests
         run: npm run test:architecture
       - name: Typecheck

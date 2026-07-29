@@ -30,6 +30,8 @@ test("defines schema version and canonical collection names", () => {
     retentionAssignments: "retentionAssignments",
     adminAuthorityContexts: "adminAuthorityContexts",
     adminPermissionGrants: "adminPermissionGrants",
+    backgroundJobs: "backgroundJobs",
+    backgroundJobEvents: "backgroundJobEvents",
   });
 });
 
@@ -40,7 +42,7 @@ test("document paths derive deterministically from stable IDs", () => {
     "organizationMemberships/membership-1",
   );
   assert.throws(() => firestoreDocumentPath("users", " "), /document id is required/);
-  assert.throws(() => firestoreDocumentPath("users", "a/b"), /cannot contain a slash/);
+  assert.throws(() => firestoreDocumentPath("users", "a\/b"), /cannot contain a slash/);
   assert.throws(() => firestoreDocumentPath("users", ".."), /cannot be/);
 });
 
@@ -61,11 +63,13 @@ test("organization-scoped collections explicitly require organizationId", () => 
     assert.doesNotThrow(() => assertOrganizationScopedFirestoreRecord(key, "org-alpha"));
   }
 
-  assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.users.organizationIdRequired, false);
-  assert.doesNotThrow(() => assertOrganizationScopedFirestoreRecord("users", undefined));
+  for (const key of ["users", "backgroundJobs", "backgroundJobEvents"]) {
+    assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, false);
+    assert.doesNotThrow(() => assertOrganizationScopedFirestoreRecord(key, undefined));
+  }
 });
 
-test("append-only domain history remains non-mutable in Firestore conventions", () => {
+test("append-only domain and operational history remains non-mutable", () => {
   for (const key of [
     "organizationAuditEvents",
     "legalDocumentVersions",
@@ -75,11 +79,15 @@ test("append-only domain history remains non-mutable in Firestore conventions", 
     "retentionPolicies",
     "retentionAssignments",
     "adminPermissionGrants",
+    "backgroundJobEvents",
   ]) {
     const convention = FIRESTORE_COLLECTION_CONVENTIONS[key];
     assert.equal(convention.appendOnly, true, `${key} must be append-only`);
     assert.equal(convention.mutable, false, `${key} must not be mutable`);
   }
+
+  assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.backgroundJobs.appendOnly, false);
+  assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.backgroundJobs.mutable, true);
 });
 
 test("relationship and index policies remain provider-independent and query driven", () => {
