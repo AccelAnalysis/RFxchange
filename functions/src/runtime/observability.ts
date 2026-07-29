@@ -34,7 +34,19 @@ export function observeRuntime(level: RuntimeLogLevel, observation: RuntimeObser
     ...observation,
   });
 
-  logger[level](observation.event, payload);
+  switch (level) {
+    case "debug":
+      logger.debug(observation.event, payload);
+      return;
+    case "info":
+      logger.info(observation.event, payload);
+      return;
+    case "warn":
+      logger.warn(observation.event, payload);
+      return;
+    case "error":
+      logger.error(observation.event, payload);
+  }
 }
 
 export function safeRuntimeErrorCode(error: unknown): string {
