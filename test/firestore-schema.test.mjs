@@ -1,0 +1,93 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+import {
+  FIRESTORE_COLLECTION_CONVENTIONS,
+  FIRESTORE_COLLECTIONS,
+  FIRESTORE_INDEX_POLICY,
+  FIRESTORE_REFERENCE_POLICY,
+  FIRESTORE_SCHEMA_VERSION,
+  assertOrganizationScopedFirestoreRecord,
+  firestoreDocumentPath,
+} from "../src/infrastructure/firestore/schema.ts";
+
+test("defines schema version and canonical collection names", () => {
+  assert.equal(FIRESTORE_SCHEMA_VERSION, 1);
+  assert.deepEqual(FIRESTORE_COLLECTIONS, {
+    organizations: "organizations",
+    organizationProfiles: "organizationProfiles",
+    users: "users",
+    organizationMemberships: "organizationMemberships",
+    organizationAuthorizations: "organizationAuthorizations",
+    organizationAuditEvents: "organizationAuditEvents",
+    accessJourneys: "accessJourneys",
+    accessRestrictions: "accessRestrictions",
+    legalDocumentVersions: "legalDocumentVersions",
+    legalAcknowledgements: "legalAcknowledgements",
+    organizationAuthorityRepresentations: "organizationAuthorityRepresentations",
+    platformChangeDirectives: "platformChangeDirectives",
+    retentionPolicies: "retentionPolicies",
+    retentionAssignments: "retentionAssignments",
+    adminAuthorityContexts: "adminAuthorityContexts",
+    adminPermissionGrants: "adminPermissionGrants",
+  });
+});
+
+test("document paths derive deterministically from stable IDs", () => {
+  assert.equal(firestoreDocumentPath("organizations", "org-alpha"), "organizations/org-alpha");
+  assert.equal(
+    firestoreDocumentPath("organizationMemberships", "membership-1"),
+    "organizationMemberships/membership-1",
+  );
+  assert.throws(() => firestoreDocumentPath("users", " "), /document id is required/);
+  assert.throws(() => firestoreDocumentPath("users", "a/b"), /cannot contain a slash/);
+  assert.throws(() => firestoreDocumentPath("users", ".."), /cannot be/);
+});
+
+test("organization-scoped collections explicitly require organizationId", () => {
+  for (const key of [
+    "organizationProfiles",
+    "organizationMemberships",
+    "organizationAuthorizations",
+    "organizationAuditEvents",
+    "legalAcknowledgements",
+    "organizationAuthorityRepresentations",
+  ]) {
+    assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, true);
+    assert.throws(
+      () => assertOrganizationScopedFirestoreRecord(key, ""),
+      /require an explicit organizationId/,
+    );
+    assert.doesNotThrow(() => assertOrganizationScopedFirestoreRecord(key, "org-alpha"));
+  }
+
+  assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.users.organizationIdRequired, false);
+  assert.doesNotThrow(() => assertOrganizationScopedFirestoreRecord("users", undefined));
+});
+
+test("append-only domain history remains non-mutable in Firestore conventions", () => {
+  for (const key of [
+    "organizationAuditEvents",
+    "legalDocumentVersions",
+    "legalAcknowledgements",
+    "organizationAuthorityRepresentations",
+    "platformChangeDirectives",
+    "retentionPolicies",
+    "retentionAssignments",
+    "adminPermissionGrants",
+  ]) {
+    const convention = FIRESTORE_COLLECTION_CONVENTIONS[key];
+    assert.equal(convention.appendOnly, true, `${key} must be append-only`);
+    assert.equal(convention.mutable, false, `${key} must not be mutable`);
+  }
+});
+
+test("relationship and index policies remain provider-independent and query driven", () => {
+  assert.equal(FIRESTORE_REFERENCE_POLICY, "stable-id-fields-not-document-references");
+  assert.equal(FIRESTORE_INDEX_POLICY, "query-contract-driven-composite-indexes");
+});
+
+test("singleton relationship state uses the owning stable identity as document ID", () => {
+  assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.organizationAuthorizations.documentIdSource, "membershipId");
+  assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.adminAuthorityContexts.documentIdSource, "administratorId");
+});
