@@ -12,9 +12,10 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "validate:product-system": "node scripts/validate-product-system.mjs",
+    "validate:firebase-environment": "node scripts/validate-firebase-environment.mjs",
     "validate:architecture": "node scripts/validate-organization-tenancy.mjs && node scripts/validate-user-membership.mjs && node scripts/validate-organization-assets.mjs && node scripts/validate-organization-permissions.mjs && node scripts/validate-organization-audit.mjs && node scripts/validate-access-lifecycle.mjs && node scripts/validate-legal-acknowledgement.mjs && node scripts/validate-governance-authority.mjs && node scripts/validate-retention-classification.mjs && node scripts/validate-admin-authorization.mjs && node scripts/validate-admin-scoped-grants.mjs",
     "test:architecture": "node --test test/*.test.mjs",
-    "validate": "npm run validate:product-system && npm run validate:architecture",
+    "validate": "npm run validate:product-system && npm run validate:architecture && npm run validate:firebase-environment",
     "check": "npm run validate && npm run test:architecture && npm run typecheck && npm run lint && npm run build"
   },
   "dependencies": {
