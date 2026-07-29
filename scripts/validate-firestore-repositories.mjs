@@ -8,6 +8,7 @@ const branchFiles = {
   support: "src/infrastructure/firestore/support.ts",
   repositories: "src/infrastructure/firestore/repositories.ts",
   runtime: "src/infrastructure/firestore/runtime.ts",
+  firebaseAdmin: "src/infrastructure/firebase/admin.ts",
   queryContracts: "src/infrastructure/firestore/query-contracts.ts",
 };
 
@@ -37,6 +38,7 @@ assert.equal(
 const support = await read(branchFiles.support);
 const repositories = await read(branchFiles.repositories);
 const runtime = await read(branchFiles.runtime);
+const firebaseAdmin = await read(branchFiles.firebaseAdmin);
 const queryContracts = await read(branchFiles.queryContracts);
 
 for (const required of [
@@ -104,20 +106,20 @@ assert.ok(
   "The static administrative permission catalog must remain a code-backed domain catalog.",
 );
 
-for (const required of [
-  "getApps()",
-  "initializeApp()",
-  "getFirestore(",
-  "createFirestoreFoundationRepositories",
-]) {
+for (const required of ["getFirestore(", "getFirebaseAdminApp", "createFirestoreFoundationRepositories"]) {
   assert.ok(runtime.includes(required), `Firestore server composition is missing: ${required}`);
 }
+for (const required of ["getApps()", "initializeApp()", "getFirebaseAdminApp"]) {
+  assert.ok(firebaseAdmin.includes(required), `Shared Firebase Admin composition is missing: ${required}`);
+}
 
-for (const forbidden of ["serviceAccount", "private_key", "credential.cert", "FIREBASE_PRIVATE_KEY"]) {
-  assert.ok(
-    !runtime.includes(forbidden),
-    `INF-002 runtime must not embed or request long-lived Firebase credentials: ${forbidden}`,
-  );
+for (const source of [runtime, firebaseAdmin]) {
+  for (const forbidden of ["serviceAccount", "private_key", "credential.cert", "FIREBASE_PRIVATE_KEY"]) {
+    assert.ok(
+      !source.includes(forbidden),
+      `Firebase Admin runtime must not embed or request long-lived credentials: ${forbidden}`,
+    );
+  }
 }
 
 assert.ok(

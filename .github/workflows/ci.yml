@@ -25,8 +25,8 @@ jobs:
         run: npm install
       - name: Repository guardrails
         run: npm run validate
-      - name: Firestore rules compile smoke test
-        run: npx --yes firebase-tools@15.24.0 emulators:exec --only firestore --project demo-rfxchange "node -e \"console.log('Firestore rules compiled successfully.')\""
+      - name: Firebase Auth and Firestore emulator smoke tests
+        run: npx --yes firebase-tools@15.24.0 emulators:exec --only auth,firestore --project demo-rfxchange "node scripts/smoke-firebase-auth-emulator.mjs"
       - name: Architecture tests
         run: npm run test:architecture
       - name: Typecheck
