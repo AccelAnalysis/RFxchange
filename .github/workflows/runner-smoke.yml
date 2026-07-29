@@ -1,0 +1,16 @@
+name: runner-smoke
+
+on:
+  push:
+    branches: [diagnostic/actions-runner]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Confirm runner started
+        run: echo "GitHub-hosted runner started successfully."
