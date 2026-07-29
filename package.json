@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "validate:product-system": "node scripts/validate-product-system.mjs",
-    "validate:architecture": "node scripts/validate-organization-tenancy.mjs && node scripts/validate-user-membership.mjs && node scripts/validate-organization-assets.mjs",
+    "validate:architecture": "node scripts/validate-organization-tenancy.mjs && node scripts/validate-user-membership.mjs && node scripts/validate-organization-assets.mjs && node scripts/validate-organization-permissions.mjs",
     "test:architecture": "node --test test/*.test.mjs",
     "validate": "npm run validate:product-system && npm run validate:architecture",
     "check": "npm run validate && npm run test:architecture && npm run typecheck && npm run lint && npm run build"
