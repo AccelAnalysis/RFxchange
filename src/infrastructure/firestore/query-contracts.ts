@@ -42,7 +42,7 @@ const contract = (
   });
 
 /**
- * Approved INF-002 Firestore query shapes and their INF-005 index decisions.
+ * Approved Firestore query shapes and their INF-005 index decisions.
  *
  * Firestore automatic indexes support single equality filters and can merge
  * automatic indexes for compound equality filters. A future range, inequality,
@@ -77,6 +77,7 @@ export const FIRESTORE_QUERY_CONTRACTS: readonly FirestoreQueryContract[] = Obje
   contract("retention-policies-by-key", "retentionPolicies", ["policyKey"], "many"),
   contract("retention-assignments-by-record", "retentionAssignments", ["record.recordId"], "many"),
   contract("admin-grants-by-administrator", "adminPermissionGrants", ["administratorId"], "many"),
+  contract("background-job-events-by-job", "backgroundJobEvents", ["jobId"], "many"),
 ]);
 
 export const FIRESTORE_AUTOMATIC_INDEX_CONTRACTS = Object.freeze(
@@ -84,9 +85,8 @@ export const FIRESTORE_AUTOMATIC_INDEX_CONTRACTS = Object.freeze(
 );
 
 /**
- * The list is intentionally empty for the current foundation query set.
- * INF-005 keeps this export so future repository queries have an explicit place
- * to declare and validate manual composite index requirements.
+ * The list is intentionally empty for the current equality-only query set.
+ * Future repository queries that require manual indexes must declare them here before merge.
  */
 export const FIRESTORE_MANUAL_INDEX_CONTRACTS = Object.freeze(
   FIRESTORE_QUERY_CONTRACTS.filter((query) => query.indexStrategy === "manual-composite"),
