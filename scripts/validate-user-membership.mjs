@@ -45,6 +45,10 @@ assert(
   "user identity and organization membership persistence ports must remain explicit",
 );
 assert(
+  repository.includes("getByLogin(provider: string, subject: LoginSubject)"),
+  "user persistence must support stable provider/subject login resolution",
+);
+assert(
   repository.includes("listActiveByUserId(userId: UserId)"),
   "membership persistence must support active membership resolution by user",
 );
