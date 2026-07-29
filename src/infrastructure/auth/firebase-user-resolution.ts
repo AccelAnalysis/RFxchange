@@ -6,12 +6,12 @@ import {
   type TrustedAuthenticationIdentity,
   type UserIdentityIdStrategy,
   type UserIdentityResolution,
-} from "../../application/auth/resolve-user-identity";
-import type { UserIdentityRepository } from "../../domain/users/repository";
+} from "../../application/auth/resolve-user-identity.ts";
+import type { UserIdentityRepository } from "../../domain/users/repository.ts";
 import {
   FIREBASE_AUTH_PROVIDER,
   type AuthenticationPrincipal,
-} from "./provider";
+} from "./provider.ts";
 
 export class FirebaseUserIdentityIdStrategy implements UserIdentityIdStrategy {
   createId(identity: Pick<TrustedAuthenticationIdentity, "provider" | "subject">): string {
