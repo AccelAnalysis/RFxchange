@@ -8,7 +8,10 @@ import {
   terminalBackgroundJobError,
   type BackgroundJobExecutionResult,
 } from "./application/background-jobs.js";
-import { functionsRuntimeContextFromEnvironment } from "./runtime/environment.js";
+import {
+  functionsRuntimeContextFromEnvironment,
+  RFXCHANGE_FUNCTIONS_REGION,
+} from "./runtime/environment.js";
 import {
   backgroundJobPayloadFingerprint,
   sha256Hex,
@@ -62,6 +65,7 @@ function logJobResult(
  */
 export const scheduledBackgroundJobHeartbeat = onSchedule(
   {
+    region: RFXCHANGE_FUNCTIONS_REGION,
     schedule: "every 15 minutes",
     timeZone: "UTC",
     retryCount: 3,
@@ -121,7 +125,7 @@ export const scheduledBackgroundJobHeartbeat = onSchedule(
 
 /** Emulator-only acceptance surface for deterministic success, retry, and terminal scenarios. */
 export const backgroundJobFrameworkProbe = onRequest(
-  { invoker: "private", timeoutSeconds: 30 },
+  { region: RFXCHANGE_FUNCTIONS_REGION, invoker: "private", timeoutSeconds: 30 },
   async (request, response) => {
     const correlationId = correlationIdFromHeaders(request.headers);
     const startedAt = Date.now();
