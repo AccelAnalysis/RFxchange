@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type BrandWordmarkProps = {
   onDark?: boolean;
   compact?: boolean;
@@ -5,7 +7,7 @@ type BrandWordmarkProps = {
 
 export function BrandWordmark({ onDark = false, compact = false }: BrandWordmarkProps) {
   return (
-    <a
+    <Link
       className="brand-wordmark"
       data-on-dark={onDark}
       data-compact={compact}
@@ -15,6 +17,6 @@ export function BrandWordmark({ onDark = false, compact = false }: BrandWordmark
       <span className="brand-rf">RF</span>
       <span className="brand-xchange">xchange</span>
       <sup className="brand-tm">™</sup>
-    </a>
+    </Link>
   );
 }
