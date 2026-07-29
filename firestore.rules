@@ -82,6 +82,17 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // INF-007 background processing state is server-only. The mutable aggregate coordinates
+    // idempotency/leases/retries; the event ledger remains append-only.
+    match /backgroundJobs/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /backgroundJobEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     // Any collection introduced without an explicit security review is closed by default.
     match /{document=**} {
       allow read, write: if false;
