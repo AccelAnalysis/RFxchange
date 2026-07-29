@@ -100,7 +100,7 @@ try {
   await browser.signOut();
   await assert.rejects(
     browser.signInWithEmailAndPassword(email, originalPassword),
-    (error) => error?.code === "auth/invalid-credential",
+    (error) => ["auth/invalid-credential", "auth/wrong-password"].includes(error?.code),
   );
   await browser.signInWithEmailAndPassword(email, recoveredPassword);
 
