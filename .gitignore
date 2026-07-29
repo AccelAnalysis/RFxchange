@@ -1,5 +1,6 @@
 # dependencies
 /node_modules
+/functions/node_modules/
 
 # next.js
 /.next/
@@ -7,6 +8,7 @@
 
 # production
 /build
+/functions/lib/
 
 # local env
 .env*
