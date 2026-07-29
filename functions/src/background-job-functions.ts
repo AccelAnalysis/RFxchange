@@ -21,10 +21,13 @@ import {
   safeRuntimeErrorCode,
 } from "./runtime/observability.js";
 
-function queryValue(value: string | string[] | undefined): string | null {
-  const candidate = Array.isArray(value) ? value[0] : value;
-  const normalized = candidate?.trim();
-  return normalized || null;
+function queryValue(value: unknown): string | null {
+  if (typeof value === "string") {
+    const normalized = value.trim();
+    return normalized || null;
+  }
+  if (Array.isArray(value)) return queryValue(value[0]);
+  return null;
 }
 
 function logJobResult(
