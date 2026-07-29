@@ -12,6 +12,15 @@
 .env*
 !.env.example
 
+# Firebase local/runtime artifacts and credentials
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+**/*service-account*.json
+**/*serviceAccount*.json
+**/service-account*.json
+
 # debug
 npm-debug.log*
 yarn-debug.log*
