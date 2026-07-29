@@ -19,8 +19,10 @@ jobs:
           node-version: 24.18.0
       - name: Install dependencies
         run: npm install
-      - name: Product-system guardrails
-        run: npm run validate:product-system
+      - name: Repository guardrails
+        run: npm run validate
+      - name: Architecture tests
+        run: npm run test:architecture
       - name: Typecheck
         run: npm run typecheck
       - name: Lint
