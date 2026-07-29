@@ -1,0 +1,90 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // INF-004 establishes a server-managed Firestore boundary.
+    // The Firebase Admin SDK bypasses Firestore Security Rules and is governed by IAM.
+    // Client access remains closed until AUTH-002/AUTH-003 define the identity/session mapping
+    // and AUTH-005 adds emulator-backed authorization scenarios.
+    function serverManagedOnly() {
+      return false;
+    }
+
+    match /organizations/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationProfiles/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /users/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationMemberships/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationAuthorizations/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationAuditEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /accessJourneys/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /accessRestrictions/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /legalDocumentVersions/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /legalAcknowledgements/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /organizationAuthorityRepresentations/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /platformChangeDirectives/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /retentionPolicies/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /retentionAssignments/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /adminAuthorityContexts/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /adminPermissionGrants/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    // Any collection introduced without an explicit security review is closed by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
