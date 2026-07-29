@@ -17,6 +17,8 @@ export const FIRESTORE_COLLECTIONS = {
   retentionAssignments: "retentionAssignments",
   adminAuthorityContexts: "adminAuthorityContexts",
   adminPermissionGrants: "adminPermissionGrants",
+  backgroundJobs: "backgroundJobs",
+  backgroundJobEvents: "backgroundJobEvents",
 } as const;
 
 export type FirestoreCollectionKey = keyof typeof FIRESTORE_COLLECTIONS;
@@ -175,6 +177,22 @@ export const FIRESTORE_COLLECTION_CONVENTIONS: Readonly<
     appendOnly: true,
     mutable: false,
   }),
+  backgroundJobs: Object.freeze({
+    collection: FIRESTORE_COLLECTIONS.backgroundJobs,
+    documentIdSource: "id",
+    scope: "platform-scoped",
+    organizationIdRequired: false,
+    appendOnly: false,
+    mutable: true,
+  }),
+  backgroundJobEvents: Object.freeze({
+    collection: FIRESTORE_COLLECTIONS.backgroundJobEvents,
+    documentIdSource: "id",
+    scope: "platform-scoped",
+    organizationIdRequired: false,
+    appendOnly: true,
+    mutable: false,
+  }),
 });
 
 export const FIRESTORE_SYSTEM_FIELDS = Object.freeze({
@@ -228,8 +246,5 @@ export function assertOrganizationScopedFirestoreRecord(
  */
 export const FIRESTORE_REFERENCE_POLICY = "stable-id-fields-not-document-references" as const;
 
-/**
- * Composite indexes are deliberately not declared here. INF-005 will materialize only the
- * indexes required by approved query contracts in firestore.indexes.json.
- */
+/** Composite indexes are materialized only from approved query contracts. */
 export const FIRESTORE_INDEX_POLICY = "query-contract-driven-composite-indexes" as const;
