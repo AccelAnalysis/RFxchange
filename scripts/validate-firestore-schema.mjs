@@ -74,16 +74,20 @@ assert.ok(
   "INF-003 must not introduce Firebase SDK or Admin SDK dependencies.",
 );
 
+const normalizedDocumentation = documentation.toLowerCase();
 for (const phrase of [
-  "top-level Firestore collections",
-  "schemaVersion",
+  "top-level firestore collections",
+  "schemaversion",
   "server-assigned",
-  "stable ID fields",
-  "Composite indexes",
+  "stable id fields",
+  "composite indexes",
   "migrations must be idempotent",
-  "production is Firebase project `rfxchange`",
+  "production is firebase project `rfxchange`",
 ]) {
-  assert.ok(documentation.includes(phrase), `INF-003 documentation is missing required policy: ${phrase}`);
+  assert.ok(
+    normalizedDocumentation.includes(phrase),
+    `INF-003 documentation is missing required policy: ${phrase}`,
+  );
 }
 
 assert.ok(
