@@ -3,7 +3,7 @@ import {
   type AdminPermissionKey,
   type PlatformAdministratorAuthorityContext,
   type PlatformAdministratorId,
-} from "./model";
+} from "./model.ts";
 
 type Brand<T, Name extends string> = T & { readonly __brand: Name };
 
