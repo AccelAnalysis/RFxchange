@@ -31,12 +31,12 @@ export type ServerSessionErrorCode =
   | "recent-authentication-required";
 
 export class ServerSessionError extends Error {
-  constructor(
-    readonly code: ServerSessionErrorCode,
-    message: string,
-  ) {
+  readonly code: ServerSessionErrorCode;
+
+  constructor(code: ServerSessionErrorCode, message: string) {
     super(message);
     this.name = "ServerSessionError";
+    this.code = code;
   }
 }
 
