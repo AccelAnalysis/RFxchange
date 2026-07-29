@@ -27,6 +27,8 @@ const requiredCollections = [
   "retentionAssignments",
   "adminAuthorityContexts",
   "adminPermissionGrants",
+  "backgroundJobs",
+  "backgroundJobEvents",
 ];
 
 for (const collection of requiredCollections) {
@@ -59,6 +61,7 @@ for (const appendOnlyCollection of [
   "retentionPolicies",
   "retentionAssignments",
   "adminPermissionGrants",
+  "backgroundJobEvents",
 ]) {
   const start = schema.indexOf(`${appendOnlyCollection}: Object.freeze({`);
   assert.ok(start >= 0, `Missing collection convention for ${appendOnlyCollection}.`);
@@ -66,6 +69,15 @@ for (const appendOnlyCollection of [
   assert.ok(block.includes("appendOnly: true"), `${appendOnlyCollection} must remain append-only.`);
   assert.ok(block.includes("mutable: false"), `${appendOnlyCollection} must not become mutable.`);
 }
+
+const backgroundJobStart = schema.indexOf("backgroundJobs: Object.freeze({");
+assert.ok(backgroundJobStart >= 0, "Missing background job aggregate convention.");
+const backgroundJobBlock = schema.slice(
+  backgroundJobStart,
+  schema.indexOf("}),", backgroundJobStart) + 3,
+);
+assert.ok(backgroundJobBlock.includes("appendOnly: false"));
+assert.ok(backgroundJobBlock.includes("mutable: true"));
 
 assert.ok(
   !schema.includes('from "firebase') &&
