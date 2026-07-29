@@ -3,8 +3,8 @@ import {
   loginSubject,
   userId,
   type UserIdentity,
-} from "../../domain/users/model";
-import type { UserIdentityRepository } from "../../domain/users/repository";
+} from "../../domain/users/model.ts";
+import type { UserIdentityRepository } from "../../domain/users/repository.ts";
 
 export interface TrustedAuthenticationIdentity {
   readonly provider: string;
