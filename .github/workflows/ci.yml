@@ -26,7 +26,7 @@ jobs:
       - name: Repository guardrails
         run: npm run validate
       - name: Firebase Auth and Firestore emulator smoke tests
-        run: npx --yes firebase-tools@15.24.0 emulators:exec --only auth,firestore --project demo-rfxchange "node scripts/smoke-firebase-auth-emulator.mjs && node scripts/smoke-firebase-user-resolution-emulator.mjs"
+        run: npx --yes firebase-tools@15.24.0 emulators:exec --only auth,firestore --project demo-rfxchange "node scripts/smoke-firebase-auth-emulator.mjs && node scripts/smoke-firebase-user-resolution-emulator.mjs && node scripts/smoke-firebase-server-session-emulator.mjs"
       - name: Architecture tests
         run: npm run test:architecture
       - name: Typecheck
