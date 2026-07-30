@@ -14,6 +14,21 @@ export const colorUsage = {
   dataColors: 0.03,
 } as const;
 
+export const participantSurfaces = {
+  defaultCanvas: colors.warmIvory,
+  lightGlass: "rgba(247, 243, 234, 0.84)",
+  strongLightGlass: "rgba(247, 243, 234, 0.94)",
+  structuralText: colors.exchangeBlack,
+  secondaryStructure: colors.graphite,
+} as const;
+
+export const participantLayout = {
+  navigationHeight: 64,
+  compactNavigationHeight: 56,
+  mapOverlayInset: 18,
+  edgeSheetWidth: 430,
+} as const;
+
 export const typography = {
   display: '"Aptos Display", "Aptos", "Segoe UI", Helvetica, Arial, sans-serif',
   body: '"Aptos", "Segoe UI", Helvetica, Arial, sans-serif',

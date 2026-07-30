@@ -72,7 +72,6 @@ export function EssentialProfilePanel({
       <section className={styles.mapRegion} aria-label="Confirmed organization geography">
         <ControlledLocalityCanvas
           model={mapModel}
-          headingLevel="h2"
           pointOverlays={CONFIRMED_LOCATION}
         />
         <p className={styles.mapNote}>

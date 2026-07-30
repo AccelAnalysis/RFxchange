@@ -294,18 +294,33 @@ Rules:
 - responsive repositioning without obscuring the selected locality unnecessarily;
 - overlay contrast must remain readable over all map regions.
 
+Participant-facing map glass derives from Warm Ivory rather than generic cool-white or
+dark translucent surfaces. Search, filter, locality state, controls and legends are
+composable application overlays, not reasons to place the geographic renderer inside a
+headed card.
+
+The renderer and application shell have separate responsibilities:
+
+- the renderer owns projection, authoritative geometry, semantic layers, coordinate
+  anchoring, accessible spatial descriptions and camera/zoom behavior;
+- the Spatial Workspace owns participant navigation, search/filter hierarchy, edge
+  drawers/mobile sheets, route-level copy and workflow state;
+- explanatory text remains available through structured/accessibility paths without a
+  persistent visual caption that consumes map height.
+
 ---
 
 ## 14. Desktop behavior
 
 Desktop map experiences should favor:
 
-- large continuous spatial canvas;
+- an edge-to-edge map filling the entire viewport below the one participant navigation;
 - edge/side drawers for results/details;
 - compact floating controls;
 - persistent geographic context while users compare entities/opportunities/resources.
 
 Avoid reducing the map to a small card beside a conventional dashboard when geography is central to the task.
+Do not add a separate persistent map-title bar or ordinary page margin around the map.
 
 ---
 
@@ -315,6 +330,7 @@ Use:
 
 - full-width/full-height map canvas where relevant;
 - bottom sheets or full-height drawers for list/detail;
+- compact/collapsible activation information that keeps the newly active marker visible;
 - thumb-reachable controls;
 - fewer simultaneous labels/overlays at small viewports;
 - preserved marker/locality anchoring under rotation and resize.
@@ -351,7 +367,11 @@ At minimum:
 
 ## 18. Current implementation compatibility
 
-Wave 2 Slice 2.2 is already complete. Its Census/TIGERweb boundary model, selected/surrounding treatment and layer ordering are the current production baseline.
+Wave 2 Slice 2.2 is already complete. Its Census/TIGERweb boundary model,
+selected/surrounding treatment and layer ordering are the current production baseline.
+The Design Convergence Gate after Slice 2.8 separates that renderer from route-level
+header/footer chrome and makes it fill the shared Spatial Workspace without changing
+geography authority.
 
 This design system does not reopen that completed slice. Where later design refinement suggests a visual improvement to the 2.2 preview/component, migrate it when that surface is next legitimately in scope or when a specific visual refactor is authorized.
 

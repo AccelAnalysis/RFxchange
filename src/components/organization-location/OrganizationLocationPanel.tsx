@@ -7,6 +7,12 @@ import {
   ControlledLocalityCanvas,
   type ControlledLocalityPointOverlay,
 } from "../map/ControlledLocalityCanvas";
+import {
+  LocalityStatusOverlay,
+  MapOverlaySurface,
+  ResponsiveEdgeSheet,
+  SpatialWorkspace,
+} from "../participant/ParticipantWorkspace";
 
 import styles from "./OrganizationLocationPanel.module.css";
 
@@ -28,16 +34,24 @@ export function OrganizationLocationPanel({
         }];
 
   return (
-    <div className={styles.workspace}>
-      <section className={styles.mapRegion} aria-label="Location confirmation map">
-        <ControlledLocalityCanvas
-          model={mapModel}
-          headingLevel="h2"
-          pointOverlays={pointOverlays}
-        />
-      </section>
+    <SpatialWorkspace ariaLabel="Organization location confirmation workspace">
+      <ControlledLocalityCanvas
+        model={mapModel}
+        overlaySide="left"
+        pointOverlays={pointOverlays}
+      />
+      <MapOverlaySurface position="top-center">
+        <div className={styles.localityOverlay}>
+          <LocalityStatusOverlay
+            locality="Portsmouth, Virginia"
+            state="Location confirmation"
+            supportingText="Candidate and confirmed points remain geographically anchored"
+          />
+        </div>
+      </MapOverlaySurface>
 
-      <aside className={styles.sheet} aria-labelledby="location-heading">
+      <ResponsiveEdgeSheet ariaLabelledBy="location-heading">
+        <div className={styles.sheet}>
         <p className={styles.eyebrow}>Activation · location</p>
         <h1 id="location-heading">Confirm where Harborlight is based.</h1>
         <p className={styles.lead}>
@@ -152,7 +166,8 @@ export function OrganizationLocationPanel({
           Mailing address and exact internal coordinates remain private unless the approved
           public precision explicitly permits an exact projection.
         </p>
-      </aside>
-    </div>
+        </div>
+      </ResponsiveEdgeSheet>
+    </SpatialWorkspace>
   );
 }

@@ -1,24 +1,5 @@
-.workspace {
-  width: min(calc(100% - 40px), 1460px);
-  margin: 0 auto;
-  padding: 28px 0 54px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(380px, 0.72fr);
-  gap: 24px;
-  align-items: start;
-}
-
-.mapRegion {
-  position: sticky;
-  top: 22px;
-}
-
 .sheet {
-  padding: 30px;
-  border-radius: 24px;
   color: #0b0b0d;
-  background: rgba(247, 243, 234, 0.97);
-  box-shadow: 0 26px 72px rgba(11, 11, 13, 0.25);
 }
 
 .eyebrow {
@@ -32,9 +13,9 @@
 
 .sheet h1 {
   margin: 0;
-  font-size: clamp(2.3rem, 4vw, 4.25rem);
-  line-height: 0.94;
-  letter-spacing: -0.058em;
+  font-size: clamp(2rem, 3.4vw, 3.25rem);
+  line-height: 0.96;
+  letter-spacing: -0.052em;
 }
 
 .lead {
@@ -44,7 +25,7 @@
 }
 
 .progress {
-  margin: 28px 0;
+  margin: 24px 0;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -67,7 +48,7 @@
 
 .form {
   display: grid;
-  gap: 24px;
+  gap: 22px;
 }
 
 .form fieldset {
@@ -148,7 +129,10 @@
 
 .radio {
   padding: 10px 0;
-  border-bottom: 1px solid rgba(37, 41, 50, 0.12);
+}
+
+.radio + .radio {
+  margin-top: 2px;
 }
 
 .radio strong,
@@ -212,27 +196,13 @@
   margin: 24px 0 0;
 }
 
-@media (max-width: 1060px) {
-  .workspace {
-    grid-template-columns: 1fr;
-  }
-
-  .mapRegion {
-    position: static;
+@media (max-width: 1100px) {
+  .localityOverlay {
+    display: none;
   }
 }
 
 @media (max-width: 560px) {
-  .workspace {
-    width: min(calc(100% - 24px), 1460px);
-    padding-top: 12px;
-  }
-
-  .sheet {
-    padding: 24px 19px;
-    border-radius: 20px;
-  }
-
   .fieldRow {
     grid-template-columns: 1fr 0.6fr;
   }

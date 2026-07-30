@@ -77,9 +77,9 @@ Avoid visual language that resembles:
 
 | Token | Hex | Meaning |
 | --- | --- | --- |
-| Exchange Black | `#0B0B0D` | primary depth, dark canvas, high-contrast text/structure |
+| Exchange Black | `#0B0B0D` | primary typography, RFxchange structure, selected dark treatments and occasional intentional dark surfaces |
 | RF Gold | `#D6A23A` | brand accent, focal signal, selected/connection emphasis |
-| Warm Ivory | `#F7F3EA` | light canvas, warm high-contrast surface, reverse text |
+| Warm Ivory | `#F7F3EA` | default participant environment, light workflow canvas, light glass and reverse text |
 | Graphite | `#252932` | panels, structure, dark secondary surface/type |
 | Signal Blue | `#2E5EAA` | intelligence, data, links, discovery/information cues |
 | Growth Green | `#3B7B57` | outcomes, progress, positive completion/growth cues |
@@ -88,12 +88,19 @@ Avoid visual language that resembles:
 
 The brand deck establishes the directional composition target:
 
-- ~70% light/dark canvas;
+- ~70% canvas/geographic environment;
 - ~20% black/graphite structure;
 - ~7% gold accent;
 - ~3% data colors.
 
 This is a composition principle, not a literal pixel-count requirement. The intent is that canvas and structure dominate while gold and semantic colors remain meaningful because they are scarce.
+
+For participant product surfaces, the canvas portion is explicitly **Warm Ivory/light
+surface and/or the geographic map**. Exchange Black and Graphite provide typography,
+navigation and structure; they are not the default full-page participant background.
+“Black and gold branding” must never be interpreted as “build the participant application
+on a black canvas.” Intentional dark surfaces remain appropriate where the workflow,
+contrast or audience genuinely requires them.
 
 ### 3.3 Semantic discipline
 
@@ -175,7 +182,13 @@ Use denser spacing in operational/admin tables than in onboarding or map explora
 
 ### 6.1 Base surfaces
 
-Use Warm Ivory/light surfaces and Exchange Black/Graphite dark surfaces as the two principal visual modes.
+Warm Ivory is the default participant application canvas. Participant drawers, sheets,
+forms and non-map workflow environments should derive from Warm Ivory or a closely
+related light surface.
+
+Exchange Black and Graphite are structural colors. Use dark surfaces intentionally for
+contrast, administrative/operational emphasis, marketing sections or consequential
+moments—not as the ordinary full-screen participant shell.
 
 ### 6.2 Glass surfaces
 
@@ -268,37 +281,81 @@ Keyboard focus must be obvious. Gold is an approved focus accent on dark surface
 
 ## 8. Navigation and layout
 
-### 8.1 Product workspace
+### 8.1 Participant shell and primary navigation
 
-The core workspace should feel continuous rather than like a collection of disconnected dashboard cards.
+Participant routes share one restrained primary navigation, normally `60–64px` high on
+desktop and more compact on mobile. It carries the RFxchange identity, approved primary
+product navigation and appropriate account/menu access.
 
-When map-centered:
+Do not add a permanent left rail for Intelligence, Referrals, Opportunities, Resources or
+other participant primary modes. Avoid stacking a global bar, route header, map title bar
+and search toolbar. Spatial routes normally consist of:
 
-- keep the map visible whenever feasible;
-- use overlay or edge drawers for lists/detail;
-- preserve the user's viewport and selected geography when switching relevant product modes;
-- avoid forcing full-page navigation for every marker/detail interaction.
+```text
+participant top navigation
++ map filling the entire remaining viewport
+```
 
-### 8.2 Desktop
+### 8.2 Spatial Workspace
 
-Desktop should support:
+Use the Spatial Workspace when geography is integral to the task: network/discovery,
+Intelligence, geographically relevant opportunity/resource/referral/team discovery,
+locality entry/release, location confirmation and marker activation.
 
-- full map canvas;
-- persistent but restrained primary navigation;
-- side or floating drawers for results/detail;
-- contextual controls positioned consistently.
+The Spatial Workspace:
 
-### 8.3 Mobile
+- fills the entire viewport beneath the participant navigation;
+- extends edge-to-edge horizontally without ordinary page margin;
+- gives the map all remaining height;
+- contains no large persistent page heading or second map header;
+- keeps search, filters, locality state, controls, legends and selected detail in
+  composable overlays or responsive edge sheets;
+- preserves the geographic viewport when ordinary detail opens;
+- uses restrained Warm Ivory glass by default;
+- avoids a permanent dashboard frame around the map.
+
+The map renderer owns geographic projection, geometry, coordinates, semantic layers and
+accessible spatial representation. The application shell owns navigation, search, filters,
+drawers, sheets, contextual explanation and workflow hierarchy. A renderer may expose
+composable map controls, legends and accessible descriptions, but must not embed a
+persistent route heading/footer frame.
+
+### 8.3 Operational Workspace
+
+Use the Operational Workspace when geography is not the primary interaction surface,
+including focused profile/composition/editing, administrative, policy/configuration,
+billing/settings and dense table workflows.
+
+The Operational Workspace:
+
+- uses Warm Ivory as its default canvas;
+- shares the participant top navigation where it is participant-facing;
+- establishes hierarchy through typography, whitespace and surface shifts before adding
+  containers;
+- uses panels only for real interaction or data boundaries;
+- may include contextual geography without forcing the workflow into a map shell.
+
+Organization 360 is an administrative/operational surface and must not be forced into the
+participant Spatial Workspace.
+
+### 8.4 Desktop
+
+Desktop Spatial Workspaces use the full map canvas, restrained floating controls and edge
+drawers for results/detail. Operational Workspaces use generous hierarchy and introduce
+denser panels only where the work requires them.
+
+### 8.5 Mobile
 
 Mobile should not shrink the desktop layout proportionally.
 
 Prefer:
 
-- map-first viewport;
+- map-first viewport for Spatial Workspaces;
 - bottom sheet or full-height drawer for results/detail;
+- a compact success sheet that keeps a newly activated marker visible;
 - thumb-reachable primary actions;
 - compact top controls;
-- progressive disclosure of secondary filters.
+- progressive disclosure of secondary filters and activation detail.
 
 ---
 
@@ -342,6 +399,8 @@ Rules:
 - no continuous decorative bouncing/pulsing;
 - camera motion should preserve geographic orientation;
 - marker activation may animate into place once to reinforce the success moment;
+- any activation motion belongs to an internal marker visual child; never animate or
+  transition the geographic renderer-owned positioning transform;
 - respect reduced-motion preferences;
 - never use motion as the only indication that state changed.
 
@@ -432,6 +491,10 @@ Avoid:
 - unreadably translucent glass panels;
 - generic stock-business imagery when product/map context would be stronger;
 - dense copy where structured steps/status can communicate better.
+- full-screen Exchange Black/Graphite participant shells used as a default;
+- a large headed/captioned card around a geography renderer;
+- stacked persistent participant navigation, route header and map header bars;
+- a permanent left primary-navigation rail.
 
 ---
 

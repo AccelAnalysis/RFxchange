@@ -10,6 +10,7 @@ import {
   viewportForZoom,
   type ControlledLocalityZoomLevel,
 } from "../../application/geography/geographic-projection";
+import { MapControlGroup } from "../participant/ParticipantWorkspace";
 
 import styles from "./ControlledLocalityCanvas.module.css";
 
@@ -25,7 +26,8 @@ export interface ControlledLocalityPointOverlay {
 export interface ControlledLocalityCanvasProps {
   readonly model: ControlledLocalityMapModel;
   readonly initialZoom?: ControlledLocalityZoomLevel;
-  readonly headingLevel?: "h1" | "h2";
+  readonly mobileControlPosition?: "top" | "bottom";
+  readonly overlaySide?: "left" | "right" | "split";
   readonly pointOverlays?: readonly ControlledLocalityPointOverlay[];
 }
 
@@ -35,10 +37,10 @@ const VIEWBOX_HEIGHT = 700;
 export function ControlledLocalityCanvas({
   model,
   initialZoom = "locality",
-  headingLevel = "h1",
+  mobileControlPosition = "top",
+  overlaySide = "split",
   pointOverlays = [],
 }: ControlledLocalityCanvasProps) {
-  const Heading = headingLevel;
   const titleId = useId();
   const descriptionId = useId();
   const [zoomIndex, setZoomIndex] = useState(() => {
@@ -61,47 +63,43 @@ export function ControlledLocalityCanvas({
   );
 
   return (
-    <figure className={styles.figure} data-selected-geography={model.selectedGeography.id}>
-      <div className={styles.header}>
-        <div>
-          <p className={styles.eyebrow}>Controlled locality</p>
-          <Heading className={styles.title}>{model.selectedGeography.name}</Heading>
-          <p className={styles.detail}>
-            Selected geography is shown in full focus. Surrounding localities remain visible
-            for geographic context.
-          </p>
-        </div>
-        <div className={styles.controls} aria-label="Map zoom controls">
-          <button
-            type="button"
-            onClick={() => setZoomIndex((current) => Math.max(0, current - 1))}
-            disabled={zoomIndex === 0}
-            aria-label="Zoom out"
-          >
-            −
-          </button>
-          <output aria-live="polite">{zoom.id}</output>
-          <button
-            type="button"
-            onClick={() =>
-              setZoomIndex((current) =>
-                Math.min(CONTROLLED_LOCALITY_ZOOM_LEVELS.length - 1, current + 1),
-              )
-            }
-            disabled={zoomIndex === CONTROLLED_LOCALITY_ZOOM_LEVELS.length - 1}
-            aria-label="Zoom in"
-          >
-            +
-          </button>
-        </div>
-      </div>
-
+    <figure
+      className={styles.figure}
+      data-mobile-controls={mobileControlPosition}
+      data-selected-geography={model.selectedGeography.id}
+      data-overlay-side={overlaySide}
+    >
       <div className={styles.canvas}>
+        <div className={styles.controls} data-map-controls>
+          <MapControlGroup label="Map zoom controls">
+            <button
+              type="button"
+              onClick={() => setZoomIndex((current) => Math.max(0, current - 1))}
+              disabled={zoomIndex === 0}
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <output aria-live="polite">{zoom.id}</output>
+            <button
+              type="button"
+              onClick={() =>
+                setZoomIndex((current) =>
+                  Math.min(CONTROLLED_LOCALITY_ZOOM_LEVELS.length - 1, current + 1),
+                )
+              }
+              disabled={zoomIndex === CONTROLLED_LOCALITY_ZOOM_LEVELS.length - 1}
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+          </MapControlGroup>
+        </div>
         <svg
           viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
           role="img"
           aria-labelledby={`${titleId} ${descriptionId}`}
-          preserveAspectRatio="xMidYMid meet"
+          preserveAspectRatio="xMidYMid slice"
         >
           <title id={titleId}>
             {`${model.selectedGeography.name} controlled locality map`}
@@ -245,7 +243,6 @@ export function ControlledLocalityCanvas({
                     aria-pressed={selected}
                     data-marker-id={overlay.id}
                     data-marker-selected={selected}
-                    data-marker-activated={overlay.activated ?? false}
                     transform={`translate(${point.x} ${point.y})`}
                     className={styles.organizationMarker}
                     onClick={select}
@@ -256,20 +253,25 @@ export function ControlledLocalityCanvas({
                       }
                     }}
                   >
-                    <circle
-                      r="24"
-                      className={selected ? styles.markerHaloSelected : styles.markerHalo}
-                      data-layer-order="80"
-                    />
-                    <path
-                      d="M 0 18 C -3 10 -15 2 -15 -10 C -15 -20 -8 -27 0 -27 C 8 -27 15 -20 15 -10 C 15 2 3 10 0 18 Z"
-                      className={styles.organizationPin}
-                    />
-                    <path
-                      d="M -6 -14 H 6 V 2 H -6 Z M -3 -10 H 0 V -6 H -3 Z M 2 -10 H 5 V -6 H 2 Z M -3 -4 H 0 V 0 H -3 Z M 2 -4 H 5 V 0 H 2 Z"
-                      className={styles.organizationGlyph}
-                      fillRule="evenodd"
-                    />
+                    <g
+                      className={styles.markerVisual}
+                      data-marker-activated={overlay.activated ?? false}
+                    >
+                      <circle
+                        r="24"
+                        className={selected ? styles.markerHaloSelected : styles.markerHalo}
+                        data-layer-order="80"
+                      />
+                      <path
+                        d="M 0 18 C -3 10 -15 2 -15 -10 C -15 -20 -8 -27 0 -27 C 8 -27 15 -20 15 -10 C 15 2 3 10 0 18 Z"
+                        className={styles.organizationPin}
+                      />
+                      <path
+                        d="M -6 -14 H 6 V 2 H -6 Z M -3 -10 H 0 V -6 H -3 Z M 2 -10 H 5 V -6 H 2 Z M -3 -4 H 0 V 0 H -3 Z M 2 -4 H 5 V 0 H 2 Z"
+                        className={styles.organizationGlyph}
+                        fillRule="evenodd"
+                      />
+                    </g>
                   </g>
                 );
               })}
@@ -293,7 +295,7 @@ export function ControlledLocalityCanvas({
         </a>
       </div>
 
-      <figcaption className={styles.caption}>
+      <figcaption className={styles.srOnly}>
         Boundary geometry is anchored in EPSG:4326 coordinates and reprojected as the camera
         changes; layer order keeps locality outlines above all fills.
         {pointOverlays.length > 0 ? (

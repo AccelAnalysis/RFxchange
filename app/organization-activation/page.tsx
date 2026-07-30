@@ -1,10 +1,7 @@
-import Link from "next/link";
-
 import { MarkerActivationPanel } from "@/src/components/organization-marker/MarkerActivationPanel";
+import { ParticipantShell } from "@/src/components/participant/ParticipantWorkspace";
 import { createPortsmouthActivatedOrganizationPreview } from "@/src/data/geography/portsmouth-activated-organization-preview";
 import { createPortsmouthControlledLocalityPreview } from "@/src/data/geography/portsmouth-controlled-locality-preview";
-
-import styles from "./page.module.css";
 
 export default async function OrganizationActivationPage() {
   const [mapModel, preview] = await Promise.all([
@@ -12,14 +9,8 @@ export default async function OrganizationActivationPage() {
     Promise.resolve(createPortsmouthActivatedOrganizationPreview()),
   ]);
   return (
-    <main className={styles.page}>
-      <header className={styles.topbar}>
-        <Link href="/" className={styles.wordmark} aria-label="RFxchange home">
-          <span>RF</span>xchange<sup>™</sup>
-        </Link>
-        <span>Controlled activation · real geography · privacy-safe presence</span>
-      </header>
+    <ParticipantShell activeItem="Intelligence">
       <MarkerActivationPanel mapModel={mapModel} marker={preview.marker} />
-    </main>
+    </ParticipantShell>
   );
 }
