@@ -12,15 +12,15 @@
 
 ## Progress
 
-**438 total · 62 Done · 376 Not Started**
+**438 total · 64 Done · 374 Not Started**
 - 0 - Product System: **0/14**
-- 1 - Foundation: **56/64**
+- 1 - Foundation: **57/64**
 - 2 - Activation: **2/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **0/50**
-- 7 - Institutional & Scale: **0/47**
+- 7 - Institutional & Scale: **1/47**
 
 ## Active build sequence — revised 2026-07-30
 
@@ -96,7 +96,7 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 - [x] `ADM-069` — PR #39
 - [ ] `ADM-084`
 - [x] `ADM-085` — PR #38
-- [ ] `ADM-086`
+- [x] `ADM-086` — PR #49
 - [x] `ADM-088` — PR #35
 - [x] `ADM-090` — PR #37
 - [x] `ADM-091` — PR #45
@@ -493,7 +493,7 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 - [ ] `ADM-053`
 - [ ] `ADM-054`
 - [ ] `ADM-080`
-- [ ] `ADM-083`
+- [x] `ADM-083` — PR #49
 - [ ] `ADM-087`
 - [ ] `ADM-089`
 
