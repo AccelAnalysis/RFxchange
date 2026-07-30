@@ -3,6 +3,10 @@
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import type { PublicOrganizationMarker } from "../../domain/organization-markers/model";
 import { ControlledLocalityCanvas } from "../map/ControlledLocalityCanvas";
+import {
+  ResponsiveEdgeSheet,
+  SpatialWorkspace,
+} from "../participant/ParticipantWorkspace";
 
 import styles from "./MarkerActivationPanel.module.css";
 
@@ -16,34 +20,11 @@ export function MarkerActivationPanel({
   marker,
 }: MarkerActivationPanelProps) {
   return (
-    <section className={styles.shell}>
-      <header className={styles.success}>
-        <p className={styles.eyebrow}>Profile Complete · marker active</p>
-        <h1>Portsmouth Works is now on the Exchange map.</h1>
-        <p>
-          Your marker is anchored to your confirmed location and shown through your
-          approved approximate-public privacy setting. This is controlled platform
-          entry—not OPEN release.
-        </p>
-        <dl>
-          <div>
-            <dt>Geography</dt>
-            <dd>Portsmouth, Virginia · Released</dd>
-          </div>
-          <div>
-            <dt>Map presence</dt>
-            <dd>Approximate public position</dd>
-          </div>
-          <div>
-            <dt>Activation source</dt>
-            <dd>Confirmed location + Profile Complete</dd>
-          </div>
-        </dl>
-      </header>
-
+    <SpatialWorkspace ariaLabel="Activated organization map workspace">
       <ControlledLocalityCanvas
         model={mapModel}
-        headingLevel="h2"
+        initialZoom="nearby"
+        overlaySide="right"
         pointOverlays={[
           {
             id: marker.id,
@@ -56,16 +37,53 @@ export function MarkerActivationPanel({
         ]}
       />
 
-      <aside className={styles.note} aria-label="Marker privacy explanation">
-        <span aria-hidden="true">⌖</span>
-        <div>
-          <strong>Privacy-safe map presence</strong>
-          <p>
-            The public point is a deterministic projection. Your confirmed canonical
-            coordinate remains unchanged inside RFxchange.
-          </p>
-        </div>
-      </aside>
-    </section>
+      <ResponsiveEdgeSheet
+        ariaLabelledBy="marker-activation-heading"
+        side="left"
+      >
+        <header className={styles.success}>
+          <p className={styles.eyebrow}>Profile Complete · marker active</p>
+          <h1 id="marker-activation-heading">
+            You are now on the Exchange map.
+          </h1>
+        </header>
+
+        <details className={styles.activationDetails}>
+          <summary>View activation details</summary>
+          <div className={styles.activationDetailContent}>
+            <p>
+              Portsmouth Works is anchored to its confirmed location and shown through your
+              approved approximate-public privacy setting. This is controlled platform
+              entry—not OPEN release.
+            </p>
+            <dl>
+              <div>
+                <dt>Geography</dt>
+                <dd>Portsmouth, Virginia · Released</dd>
+              </div>
+              <div>
+                <dt>Map presence</dt>
+                <dd>Approximate public position</dd>
+              </div>
+              <div>
+                <dt>Activation source</dt>
+                <dd>Confirmed location + Profile Complete</dd>
+              </div>
+            </dl>
+
+            <div className={styles.note} aria-label="Marker privacy explanation">
+              <span aria-hidden="true">⌖</span>
+              <div>
+                <strong>Privacy-safe map presence</strong>
+                <p>
+                  The public point is a deterministic projection. Your confirmed canonical
+                  coordinate remains unchanged inside RFxchange.
+                </p>
+              </div>
+            </div>
+          </div>
+        </details>
+      </ResponsiveEdgeSheet>
+    </SpatialWorkspace>
   );
 }

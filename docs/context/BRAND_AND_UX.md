@@ -35,6 +35,10 @@ The established palette uses:
 
 Use gold as an attention signal, not blanket decoration. Preserve the deck's directional composition discipline: canvas/structure dominate; gold and semantic data colors stay scarce enough to remain meaningful.
 
+Warm Ivory and the geographic map are the default participant environment. Exchange
+Black and Graphite provide typography and structure; they do not make a full-screen dark
+participant shell the normal application canvas.
+
 ## Map UX
 
 The user's selected locality should be visibly dominant. Surrounding localities remain legible but muted. Localities use authoritative GIS geometry; markers are anchored to real coordinates and do not drift with camera changes.
@@ -44,6 +48,17 @@ Organization/resource/opportunity pins should not use a permanent exterior outli
 Service areas and locality focus are area/geometry layers rather than pin substitutes.
 
 Use restrained glassmorphism where it supports map readability. Avoid excessive cards, container borders and separators. The map should remain the primary spatial canvas rather than background decoration behind a dashboard.
+
+Participant applications use two shared modes:
+
+- **Spatial Workspace** — one top navigation plus an edge-to-edge map filling the
+  remaining viewport, with Ivory overlays and responsive edge drawer/mobile sheet UI;
+- **Operational Workspace** — a Warm Ivory workflow canvas for form, composition,
+  policy, settings, table or administrative work where geography is contextual rather
+  than primary.
+
+Do not add a permanent participant left navigation rail or stack route/map headers above a
+Spatial Workspace.
 
 ## Information hierarchy
 

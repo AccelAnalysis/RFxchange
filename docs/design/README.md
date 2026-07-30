@@ -33,6 +33,8 @@ The design system is based on:
 - current RFxchange product/user-journey rules;
 - approved map direction: authoritative locality geometry, prominent selected geography, muted non-focus geography, real-coordinate markers, service-area overlays, restrained glassmorphism, less container chrome and higher-detail rendering;
 - merged Wave 2 Slice 2.2 geography rendering, which establishes the first controlled locality layer contract.
+- the post-Slice 2.8 Design Convergence Gate, which establishes the Warm Ivory
+  participant default plus shared Spatial and Operational Workspace shells.
 
 The PowerPoint deck remains provenance and presentation guidance. This directory is the normalized implementation authority for current product design.
 

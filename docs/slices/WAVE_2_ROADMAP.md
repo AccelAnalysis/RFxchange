@@ -21,6 +21,27 @@ Wave 2 begins from the canonical merged state **2/43 Activation features complet
 | **2.11 — Orientation: Response to Outcome** | `EDU-005`, `EDU-006`, `EDU-007`, `EDU-008` | Continue the tutorial: teammate invite/accept → joint response → issuer evaluation/selection → complete network-effect visualization. |
 | **2.12 — First Value & OPEN Gate** | `EDU-009`, `EDU-010` | Route the user according to stated goals, then release them into the Exchange only after account, organization, geography, marker, and education gates are satisfied. This closes Wave 2. |
 
+## Design convergence authority for Slices 2.9–2.12
+
+The Design Convergence Gate completed after Slice 2.8 establishes the shared participant
+application architecture. Slices 2.9–2.12 must consume it rather than inventing independent
+page shells:
+
+- acquisition continuity enters the appropriate shared Spatial or Operational Workspace
+  without adding stacked route/map headers;
+- the three-organization orientation journey uses the Spatial Workspace because
+  geographic discovery, teaming, response and network-effect visualization are integral;
+- first-value routing selects the correct shared workspace for the chosen objective;
+- OPEN release returns the participant to the shared Exchange environment rather than a
+  new dashboard shell;
+- all spatial steps preserve one participant top navigation, an edge-to-edge map filling
+  the remaining viewport, Ivory overlays and responsive edge drawer/mobile sheet behavior;
+- no future slice may add a permanent participant left navigation rail or reinterpret
+  Exchange Black as the default participant canvas.
+
+These requirements correct presentation architecture only. They do not change the
+Feature-ID scope, acceptance intent or completion status of Slices 2.9–2.12.
+
 ## Operating sequence
 
 Use a single-active-slice implementation model unless explicit task instructions change it:

@@ -1,12 +1,5 @@
 .panel {
-  color: #f7f3ea;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 28px;
-  padding: clamp(24px, 4vw, 42px);
-  background:
-    radial-gradient(circle at 100% 0, rgba(214, 162, 58, 0.14), transparent 30%),
-    linear-gradient(145deg, rgba(37, 41, 50, 0.98), rgba(18, 20, 25, 0.98));
-  box-shadow: 0 30px 90px rgba(11, 11, 13, 0.3);
+  color: #0b0b0d;
 }
 
 .progress,
@@ -20,8 +13,11 @@
 
 .progress {
   padding-bottom: 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(247, 243, 234, 0.58);
+  color: #666b74;
+  background: linear-gradient(
+    rgba(37, 41, 50, 0.14),
+    rgba(37, 41, 50, 0.14)
+  ) bottom left / 72px 1px no-repeat;
   font-size: 0.68rem;
   font-weight: 750;
   letter-spacing: 0.13em;
@@ -42,7 +38,7 @@
 .status {
   display: block;
   margin: 0 0 8px;
-  color: #d6a23a;
+  color: #2e5eaa;
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.13em;
@@ -52,7 +48,7 @@
 .intro h1 {
   max-width: 650px;
   margin: 0;
-  font-size: clamp(2.25rem, 4.5vw, 4.6rem);
+  font-size: clamp(2.25rem, 4vw, 3.85rem);
   line-height: 0.94;
   letter-spacing: -0.055em;
 }
@@ -60,14 +56,14 @@
 .intro > p:last-child {
   max-width: 620px;
   margin: 20px 0 0;
-  color: rgba(247, 243, 234, 0.68);
+  color: #626771;
   line-height: 1.55;
 }
 
 .search label {
   display: block;
   margin-bottom: 8px;
-  color: rgba(247, 243, 234, 0.72);
+  color: #4f545e;
   font-size: 0.76rem;
   font-weight: 700;
 }
@@ -75,15 +71,15 @@
 .search > div {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(37, 41, 50, 0.18);
   border-radius: 14px;
   padding: 5px;
-  background: rgba(11, 11, 13, 0.45);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .search input {
   min-width: 0;
-  color: #f7f3ea;
+  color: #0b0b0d;
   border: 0;
   outline: 0;
   padding: 12px 14px;
@@ -97,11 +93,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #111318;
+  color: #f7f3ea;
   border: 0;
   border-radius: 10px;
   padding: 12px 16px;
-  background: #d6a23a;
+  background: #0b0b0d;
   font: inherit;
   font-size: 0.78rem;
   font-weight: 800;
@@ -113,24 +109,23 @@
 .claim:focus-visible,
 .matchCard a:focus-visible,
 .create:focus-visible {
-  outline: 3px solid #f7f3ea;
+  outline: 3px solid #d6a23a;
   outline-offset: 3px;
 }
 
 .search small {
   display: block;
   margin-top: 9px;
-  color: rgba(247, 243, 234, 0.48);
+  color: #70757e;
   font-size: 0.7rem;
 }
 
 .seededProfile,
 .matches {
   margin-top: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 18px;
   padding: 20px;
-  background: rgba(247, 243, 234, 0.055);
+  background: rgba(255, 255, 255, 0.52);
 }
 
 .profileHeading {
@@ -144,7 +139,7 @@
   height: 52px;
   place-items: center;
   color: #f7f3ea;
-  border: 1px solid rgba(214, 162, 58, 0.7);
+  border: 0;
   border-radius: 14px;
   background: #3b7b57;
   font-size: 0.85rem;
@@ -165,7 +160,7 @@
 .profileHeading p,
 .matchCard p {
   margin: 5px 0 0;
-  color: rgba(247, 243, 234, 0.58);
+  color: #666b74;
   font-size: 0.77rem;
   line-height: 1.45;
 }
@@ -178,17 +173,16 @@
 }
 
 .categories span {
-  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
   padding: 7px 9px;
-  color: rgba(247, 243, 234, 0.72);
-  background: rgba(11, 11, 13, 0.24);
+  color: #555b65;
+  background: rgba(37, 41, 50, 0.07);
   font-size: 0.68rem;
 }
 
 .provenance {
   margin: 0 0 16px;
-  color: rgba(247, 243, 234, 0.44);
+  color: #7a7f87;
   font-size: 0.66rem;
 }
 
@@ -209,8 +203,8 @@
   width: 34px;
   height: 34px;
   place-items: center;
-  color: #d6a23a;
-  border: 1px solid rgba(214, 162, 58, 0.35);
+  color: #2e5eaa;
+  border: 1px solid rgba(46, 94, 170, 0.28);
   border-radius: 50%;
   font-size: 0.78rem;
 }
@@ -222,20 +216,20 @@
   gap: 14px;
   margin-top: 16px;
   padding: 16px;
-  border: 1px solid rgba(93, 139, 112, 0.4);
+  border: 1px solid rgba(46, 94, 170, 0.2);
   border-radius: 14px;
-  background: rgba(93, 139, 112, 0.09);
+  background: rgba(46, 94, 170, 0.06);
 }
 
 .matchCard a {
   color: #f7f3ea;
-  background: #3b7b57;
+  background: #2e5eaa;
 }
 
 .create {
   display: block;
   margin-top: 15px;
-  color: rgba(247, 243, 234, 0.78);
+  color: #343943;
   font-size: 0.78rem;
   font-weight: 720;
   text-align: center;
@@ -252,16 +246,12 @@
 
 .boundary p {
   margin: 0;
-  color: rgba(247, 243, 234, 0.56);
+  color: #666b74;
   font-size: 0.73rem;
   line-height: 1.5;
 }
 
 @media (max-width: 620px) {
-  .panel {
-    border-radius: 22px;
-  }
-
   .search > div,
   .matchCard {
     grid-template-columns: 1fr;
