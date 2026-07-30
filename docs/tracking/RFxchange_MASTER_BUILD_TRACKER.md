@@ -12,8 +12,8 @@
 
 ## Progress
 
-**438 total · 70 Done · 368 Not Started**
-- 0 - Product System: **1/14**
+**438 total · 74 Done · 364 Not Started**
+- 0 - Product System: **5/14**
 - 1 - Foundation: **62/64**
 - 2 - Activation: **2/43**
 - 3 - Network: **4/38**
@@ -38,11 +38,11 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 ### 0 - Product System
 
 - [x] `ACQ-001` — PR #54
-- [ ] `BRD-001`
+- [x] `BRD-001` — PR #56
 - [ ] `BRD-002`
-- [ ] `BRD-003`
+- [x] `BRD-003` — PR #56
 - [ ] `BRD-004`
-- [ ] `BRD-005`
+- [x] `BRD-005` — PR #56
 - [ ] `BRD-006`
 - [ ] `BRD-007`
 - [ ] `BRD-008`
@@ -50,7 +50,7 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 - [ ] `BRD-010`
 - [ ] `BRD-011`
 - [ ] `BRD-012`
-- [ ] `BRD-014`
+- [x] `BRD-014` — PR #56
 
 ### 1 - Foundation
 
