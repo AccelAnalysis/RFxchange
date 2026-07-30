@@ -40,6 +40,8 @@ The Firestore unit of work updates the mutable case and appends the immutable ev
 - stale prior-state transitions;
 - event/case identity mismatches.
 
+The stored prior status is re-read inside the transaction before any write. Two administrators therefore cannot both commit different transitions from the same stale case snapshot; the second transaction fails rather than overwriting the first transition or producing contradictory lifecycle evidence.
+
 ## SLA state
 
 A case can resolve to one of five SLA states:
