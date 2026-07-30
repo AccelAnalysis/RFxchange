@@ -16,6 +16,7 @@ const requiredCollections = [
   "users",
   "organizationMemberships",
   "organizationAuthorizations",
+  "organizationUserInvitations",
   "organizationAuditEvents",
   "accessJourneys",
   "accessRestrictions",
@@ -78,6 +79,16 @@ const backgroundJobBlock = schema.slice(
 );
 assert.ok(backgroundJobBlock.includes("appendOnly: false"));
 assert.ok(backgroundJobBlock.includes("mutable: true"));
+
+const invitationStart = schema.indexOf("organizationUserInvitations: Object.freeze({");
+assert.ok(invitationStart >= 0, "Missing organization invitation convention.");
+const invitationBlock = schema.slice(
+  invitationStart,
+  schema.indexOf("}),", invitationStart) + 3,
+);
+assert.ok(invitationBlock.includes("organizationIdRequired: true"));
+assert.ok(invitationBlock.includes("appendOnly: false"));
+assert.ok(invitationBlock.includes("mutable: true"));
 
 assert.ok(
   !schema.includes('from "firebase') &&

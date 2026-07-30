@@ -19,6 +19,7 @@ test("defines schema version and canonical collection names", () => {
     users: "users",
     organizationMemberships: "organizationMemberships",
     organizationAuthorizations: "organizationAuthorizations",
+    organizationUserInvitations: "organizationUserInvitations",
     organizationAuditEvents: "organizationAuditEvents",
     accessJourneys: "accessJourneys",
     accessRestrictions: "accessRestrictions",
@@ -42,7 +43,7 @@ test("document paths derive deterministically from stable IDs", () => {
     "organizationMemberships/membership-1",
   );
   assert.throws(() => firestoreDocumentPath("users", " "), /document id is required/);
-  assert.throws(() => firestoreDocumentPath("users", "a\/b"), /cannot contain a slash/);
+  assert.throws(() => firestoreDocumentPath("users", "a/b"), /cannot contain a slash/);
   assert.throws(() => firestoreDocumentPath("users", ".."), /cannot be/);
 });
 
@@ -51,6 +52,7 @@ test("organization-scoped collections explicitly require organizationId", () => 
     "organizationProfiles",
     "organizationMemberships",
     "organizationAuthorizations",
+    "organizationUserInvitations",
     "organizationAuditEvents",
     "legalAcknowledgements",
     "organizationAuthorityRepresentations",
@@ -86,6 +88,8 @@ test("append-only domain and operational history remains non-mutable", () => {
     assert.equal(convention.mutable, false, `${key} must not be mutable`);
   }
 
+  assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.organizationUserInvitations.appendOnly, false);
+  assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.organizationUserInvitations.mutable, true);
   assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.backgroundJobs.appendOnly, false);
   assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.backgroundJobs.mutable, true);
 });

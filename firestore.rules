@@ -30,6 +30,12 @@ service cloud.firestore {
       allow read, write: if serverManagedOnly();
     }
 
+    // ORG-021 invitations contain email, organization and role/permission assignment data and stay
+    // behind the verified server boundary. Invitation acceptance is committed atomically server-side.
+    match /organizationUserInvitations/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
     match /organizationAuditEvents/{documentId} {
       allow read, create: if serverManagedOnly();
       allow update, delete: if false;
