@@ -1,7 +1,7 @@
 import type { Firestore } from "firebase-admin/firestore";
 
 import { GovernedConfigurationService } from "../../application/admin/governed-configuration-service.ts";
-import { getServerFirestore } from "../firestore/server.ts";
+import { getServerFirestore } from "../firestore/runtime.ts";
 import { FirestoreGovernedConfigurationRepository } from "../firestore/governed-configuration-repository.ts";
 
 export function createServerGovernedConfigurationService(
