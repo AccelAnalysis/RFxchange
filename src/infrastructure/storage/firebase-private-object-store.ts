@@ -25,12 +25,11 @@ export function firebaseStorageBucketFromEnvironment(
 }
 
 export class FirebasePrivateObjectStore implements PrivateObjectStore {
+  private readonly app: App;
   private readonly bucketName: string;
 
-  constructor(
-    private readonly app: App,
-    bucketName: string,
-  ) {
+  constructor(app: App, bucketName: string) {
+    this.app = app;
     this.bucketName = requiredBucketName(bucketName);
   }
 
