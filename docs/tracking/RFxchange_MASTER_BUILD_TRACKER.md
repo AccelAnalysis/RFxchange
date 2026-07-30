@@ -12,11 +12,11 @@
 
 ## Progress
 
-**438 total · 54 Done · 384 Not Started**
+**438 total · 56 Done · 382 Not Started**
 - 0 - Product System: **0/14**
 - 1 - Foundation: **50/64**
 - 2 - Activation: **2/43**
-- 3 - Network: **2/38**
+- 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **0/50**
@@ -199,8 +199,8 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 - [ ] `RES-005`
 - [ ] `RES-007`
 - [ ] `RES-008`
-- [ ] `ADM-055`
-- [ ] `ADM-056`
+- [x] `ADM-055` — PR #43
+- [x] `ADM-056` — PR #43
 - [ ] `ADM-070`
 - [ ] `COMMS-003`
 - [ ] `COMMS-004`
