@@ -2,8 +2,12 @@
   "name": "rfxchange",
   "version": "0.0.1",
   "private": true,
-  "workspaces": ["functions"],
-  "engines": {"node": ">=24.18.0 <25"},
+  "workspaces": [
+    "functions"
+  ],
+  "engines": {
+    "node": ">=24.18.0 <25"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -31,6 +35,19 @@
     "validate": "npm run validate:product-system && npm run validate:architecture && npm run validate:firebase-environment && npm run validate:firestore-schema && npm run validate:firestore-repositories && npm run validate:firestore-security-rules && npm run validate:firestore-indexes && npm run validate:firebase-auth-provider && npm run validate:firebase-user-resolution && npm run validate:firebase-server-session && npm run validate:firebase-authentication-lifecycle && npm run validate:firebase-auth-firestore-security-suite && npm run validate:firebase-functions-runtime && npm run validate:background-job-framework && npm run validate:firebase-storage-foundation",
     "check": "npm run validate && npm run build:functions && npm run test:functions && npm run test:architecture && npm run typecheck && npm run lint && npm run build"
   },
-  "dependencies": {"firebase":"12.16.0","firebase-admin":"14.2.0","next":"16.2.11","react":"19.2.8","react-dom":"19.2.8"},
-  "devDependencies": {"@types/node":"24.13.3","@types/react":"19.2.17","@types/react-dom":"19.2.3","eslint":"9.39.5","eslint-config-next":"16.2.11","typescript":"6.0.3"}
+  "dependencies": {
+    "firebase": "12.16.0",
+    "firebase-admin": "14.2.0",
+    "next": "16.2.11",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.2.11",
+    "typescript": "6.0.3"
+  }
 }
