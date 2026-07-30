@@ -11,9 +11,9 @@
 
 ## Progress
 
-**438 total · 38 Done · 400 Not Started**
+**438 total · 46 Done · 392 Not Started**
 - 0 - Product System: **0/14**
-- 1 - Foundation: **36/64**
+- 1 - Foundation: **44/64**
 - 2 - Activation: **2/43**
 - 3 - Network: **0/38**
 - 4 - RFx Core: **0/41**
@@ -64,15 +64,15 @@
 - [x] `ADM-013` — PR #32
 - [x] `ADM-014` — PR #16
 - [x] `ADM-015` — PR #33
-- [ ] `ADM-016`
-- [ ] `ADM-017`
-- [ ] `ADM-019`
-- [ ] `ADM-021`
-- [ ] `ADM-033`
+- [x] `ADM-016` — PR #34
+- [x] `ADM-017` — PR #34
+- [x] `ADM-019` — PR #36
+- [x] `ADM-021` — PR #36
+- [x] `ADM-033` — PR #36
 - [ ] `ADM-046`
 - [ ] `ADM-047`
 - [ ] `ADM-048`
-- [ ] `ADM-049`
+- [x] `ADM-049` — PR #36
 - [ ] `ADM-057`
 - [ ] `ADM-058`
 - [ ] `ADM-059`
@@ -85,13 +85,13 @@
 - [ ] `ADM-084`
 - [ ] `ADM-085`
 - [ ] `ADM-086`
-- [ ] `ADM-088`
+- [x] `ADM-088` — PR #35
 - [ ] `ADM-090`
 - [ ] `ADM-091`
 - [x] `ADM-092` — PR #15
 - [x] `ADM-093` — PR #16
 - [x] `ADM-094` — PR #31
-- [ ] `ADM-095`
+- [x] `ADM-095` — PR #36
 - [x] `INF-001` — PR #17
 - [x] `INF-002` — merge 6ea999e
 - [x] `INF-003` — PR #18
