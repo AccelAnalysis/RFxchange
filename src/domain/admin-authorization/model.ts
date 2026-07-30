@@ -46,6 +46,7 @@ const RAW_ADMIN_PERMISSION_CATALOG = [
   ["admin.security.reauthentication.require", "admin", "Require recent re-authentication before privileged administrator access resumes."],
   ["admin.security.session.terminate", "admin", "Terminate an administrator's privileged sessions."],
   ["config.value.read", "config", "Read governed configuration values."],
+  ["config.value.manage", "config", "Change governed configuration values subject to privileged checks and immutable audit."],
   ["config.history.read", "config", "Read governed configuration history."],
   ["organization.profile.read", "organization", "Read organization profile data."],
   ["organization.profile.update", "organization", "Update organization profile data when separately authorized."],

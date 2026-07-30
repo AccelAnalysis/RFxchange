@@ -200,7 +200,7 @@ const DEFAULT_PRESET_INPUTS = [
     displayName: "Technical / System Administrator",
     description: "Infrastructure, configuration and maintenance operations without marketplace authority.",
     permissions: P(
-      "config.value.read", "config.history.read", "system.health.read",
+      "config.value.read", "config.value.manage", "config.history.read", "system.health.read",
       "system.maintenance.request", "audit.event.read",
     ),
   },
