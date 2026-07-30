@@ -70,6 +70,17 @@ service cloud.firestore {
       allow read, write: if serverManagedOnly();
     }
 
+    // ORG-007/008/010/011/012 essential profile completion is server derived from the
+    // canonical organization profile, location and service-geography records.
+    match /organizationProfileCompletions/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationProfileEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /users/{documentId} {
       allow read, write: if serverManagedOnly();
     }

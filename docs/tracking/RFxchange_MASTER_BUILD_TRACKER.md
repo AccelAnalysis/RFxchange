@@ -12,10 +12,10 @@
 
 ## Progress
 
-**438 total · 98 Done · 340 Not Started**
+**438 total · 103 Done · 335 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **23/43**
+- 2 - Activation: **28/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -159,12 +159,12 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [x] `ORG-004` — PR #73; five-path authority, private-evidence/conflict/lifecycle tests, Firestore emulator acceptance, desktop/mobile browser QA, and `npm run check`
 - [x] `ORG-005` — PR #74
 - [x] `ORG-006` — PR #74
-- [ ] `ORG-007`
-- [ ] `ORG-008`
+- [x] `ORG-007` — PR #75
+- [x] `ORG-008` — PR #75
 - [x] `ORG-009` — PR #74
-- [ ] `ORG-010`
-- [ ] `ORG-011`
-- [ ] `ORG-012`
+- [x] `ORG-010` — PR #75
+- [x] `ORG-011` — PR #75
+- [x] `ORG-012` — PR #75
 - [ ] `ADM-063`
 - [ ] `ADM-064`
 - [x] `ADM-065` — PR #73; category/geography/scope tests, desktop/mobile browser QA, and `npm run check`
