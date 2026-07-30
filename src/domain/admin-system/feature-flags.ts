@@ -115,6 +115,32 @@ function iso(value: string, field: string): string {
   return new Date(parsed).toISOString();
 }
 
+export function createFeatureFlagState(input: Readonly<{
+  flag: string;
+  environment: string;
+  scopeKind: string;
+  scopeId?: string | null;
+  enabled: boolean;
+  revision: number;
+  updatedAt: string;
+  updatedByAdministratorId: PlatformAdministratorId;
+}>): FeatureFlagState {
+  if (!Number.isInteger(input.revision) || input.revision < 1) throw new Error("Feature flag revision must be a positive integer.");
+  const flag = approvedFeatureFlagKey(input.flag);
+  const environment = featureFlagEnvironment(input.environment);
+  const scope = featureFlagScope(input.scopeKind, input.scopeId);
+  return Object.freeze({
+    id: featureFlagStateId({ flag, environment, scopeKind: scope.kind, scopeId: scope.id }),
+    flag,
+    environment,
+    scope,
+    enabled: input.enabled,
+    revision: input.revision,
+    updatedAt: iso(input.updatedAt, "Feature flag updated timestamp"),
+    updatedByAdministratorId: input.updatedByAdministratorId,
+  });
+}
+
 export function proposeFeatureFlagChange(input: Readonly<{
   current: FeatureFlagState | null;
   flag: string;
@@ -136,14 +162,14 @@ export function proposeFeatureFlagChange(input: Readonly<{
   }
   if (input.current && input.current.id !== id) throw new Error("Feature flag current state belongs to a different flag scope.");
   if (input.current?.enabled === input.enabled) throw new Error(`Feature flag ${id} already has enabled=${input.enabled}.`);
-  return Object.freeze({
-    id,
+  return createFeatureFlagState({
     flag,
     environment,
-    scope,
+    scopeKind: scope.kind,
+    scopeId: scope.id,
     enabled: input.enabled,
     revision: revision + 1,
-    updatedAt: iso(input.changedAt, "Feature flag changed timestamp"),
+    updatedAt: input.changedAt,
     updatedByAdministratorId: input.administratorId,
   });
 }
