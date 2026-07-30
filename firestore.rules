@@ -93,6 +93,11 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // INF-008 metadata is private and server-managed together with its Storage object.
+    match /storedAssets/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
     // Any collection introduced without an explicit security review is closed by default.
     match /{document=**} {
       allow read, write: if false;
