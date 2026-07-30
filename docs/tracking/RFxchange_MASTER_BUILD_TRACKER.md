@@ -12,10 +12,10 @@
 
 ## Progress
 
-**438 total · 82 Done · 356 Not Started**
+**438 total · 85 Done · 353 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **7/43**
+- 2 - Activation: **10/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -135,9 +135,9 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [x] `GEO-001` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-002` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-003` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
-- [ ] `GEO-004`
-- [ ] `GEO-005`
-- [ ] `GEO-006`
+- [x] `GEO-004` — PR #69; authoritative boundary tests, desktop/mobile browser QA, and `npm run check`
+- [x] `GEO-005` — PR #69; layer/camera interaction tests, desktop/mobile browser QA, and `npm run check`
+- [x] `GEO-006` — PR #69; layer-order/muting tests, desktop/mobile browser QA, and `npm run check`
 - [x] `GEO-007` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-008` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [ ] `GEO-009`
