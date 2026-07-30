@@ -15,7 +15,6 @@ assert.equal(DEFAULT_PRIVILEGED_ADMIN_SECURITY_POLICY.requireExplicitProductionA
 const domain = await readFile("src/domain/admin-authorization/privileged-security.ts", "utf8");
 assert.equal(/firebase-admin|firebase\//.test(domain), false, "privileged security domain must remain provider-independent");
 for (const token of [
-  "mfa-required",
   "session-expired",
   "session-idle-expired",
   "sensitive-reauthentication-required",
@@ -23,6 +22,8 @@ for (const token of [
   "privileged.login.anomaly",
   "privileged.login.new-device",
 ]) assert.match(domain, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+assert.match(domain, /requireMfa/);
+assert.match(domain, /mfaEnrolled/);
 
 const repository = await readFile("src/infrastructure/firestore/privileged-admin-security-repository.ts", "utf8");
 assert.match(repository, /privilegedAdministratorSessions/);
