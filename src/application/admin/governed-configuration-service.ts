@@ -14,14 +14,20 @@ import {
   type GovernedConfigurationKey,
   type GovernedConfigurationState,
 } from "../../domain/admin-configuration/model.ts";
+import {
+  createGovernedConfigurationChangeRecord,
+  resolveGovernedConfigurationValueAt,
+  type GovernedConfigurationChangeRecord,
+} from "../../domain/admin-configuration/history.ts";
 import type {
   GovernedConfigurationChangeUnitOfWork,
+  GovernedConfigurationHistoryRepository,
   GovernedConfigurationRepository,
 } from "../../domain/admin-configuration/repository.ts";
 
 function assertPermission(
   authority: PlatformAdministratorAuthorityContext,
-  permission: "config.value.read" | "config.value.manage",
+  permission: "config.value.read" | "config.value.manage" | "config.history.read",
   conditions: "none" | "pre-resolved" = "none",
 ): void {
   const decision = authorizeAdministrativeAction(
@@ -50,6 +56,7 @@ function configurationAuditState(
 
 export interface GovernedConfigurationChangeExecution {
   readonly auditEventId: string;
+  readonly changeRecordId?: string;
   readonly relatedCaseId?: string | null;
   readonly securityContext: CreatePlatformAdministrativeAuditEventInput["securityContext"];
   readonly evidenceReferences?: readonly string[];
@@ -59,13 +66,16 @@ export interface GovernedConfigurationChangeExecution {
 export class GovernedConfigurationService {
   private readonly repository: GovernedConfigurationRepository;
   private readonly changes: GovernedConfigurationChangeUnitOfWork;
+  private readonly history: GovernedConfigurationHistoryRepository | null;
 
   constructor(input: Readonly<{
     repository: GovernedConfigurationRepository;
     changes: GovernedConfigurationChangeUnitOfWork;
+    history?: GovernedConfigurationHistoryRepository | null;
   }>) {
     this.repository = input.repository;
     this.changes = input.changes;
+    this.history = input.history ?? null;
   }
 
   catalog(authority: PlatformAdministratorAuthorityContext) {
@@ -84,6 +94,24 @@ export class GovernedConfigurationService {
   async list(authority: PlatformAdministratorAuthorityContext): Promise<readonly GovernedConfigurationState[]> {
     assertPermission(authority, "config.value.read");
     return this.repository.listAll();
+  }
+
+  async listHistory(
+    authority: PlatformAdministratorAuthorityContext,
+    rawKey: string,
+  ): Promise<readonly GovernedConfigurationChangeRecord[]> {
+    assertPermission(authority, "config.history.read");
+    if (!this.history) throw new Error("Governed configuration history repository is not configured.");
+    return this.history.listHistoryByKey(governedConfigurationKey(rawKey));
+  }
+
+  async valueEffectiveAt(
+    authority: PlatformAdministratorAuthorityContext,
+    rawKey: string,
+    at: string,
+  ): Promise<GovernedConfigurationChangeRecord | null> {
+    const history = await this.listHistory(authority, rawKey);
+    return resolveGovernedConfigurationValueAt(history, at);
   }
 
   async change(input: Readonly<{
@@ -127,9 +155,23 @@ export class GovernedConfigurationService {
       evidenceReferences: input.execution.evidenceReferences,
       approvalReferences: input.execution.approvalReferences,
     });
+    const changeRecord = createGovernedConfigurationChangeRecord({
+      id: input.execution.changeRecordId ?? input.execution.auditEventId,
+      key,
+      revision: next.revision,
+      previousValue: current?.value ?? null,
+      newValue: next.value,
+      effectiveAt: next.effectiveAt,
+      recordedAt: next.updatedAt,
+      actorAdministratorId: input.authority.administratorId,
+      reason: input.reason,
+      policyVersion: next.policyVersion,
+      auditEventId: auditEvent.id,
+    });
     await this.changes.commitChange({
       expectedRevision: input.expectedRevision,
       state: next,
+      changeRecord,
       auditEvent,
     });
     return next;
