@@ -98,11 +98,19 @@ function validateGuardrails(input: Readonly<{
 }
 
 export class SystemMaintenanceOperationService {
+  private readonly store: SystemMaintenanceOperationStore;
+  private readonly executor: SystemMaintenanceExecutor;
+  private readonly runtimeEnvironment: SystemMaintenanceEnvironment;
+
   constructor(
-    private readonly store: SystemMaintenanceOperationStore,
-    private readonly executor: SystemMaintenanceExecutor,
-    private readonly runtimeEnvironment: SystemMaintenanceEnvironment,
-  ) {}
+    store: SystemMaintenanceOperationStore,
+    executor: SystemMaintenanceExecutor,
+    runtimeEnvironment: SystemMaintenanceEnvironment,
+  ) {
+    this.store = store;
+    this.executor = executor;
+    this.runtimeEnvironment = runtimeEnvironment;
+  }
 
   async get(
     authority: PlatformAdministratorAuthorityContext,
