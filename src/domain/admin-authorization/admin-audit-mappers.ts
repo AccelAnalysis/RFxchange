@@ -26,6 +26,12 @@ const SENSITIVE_LIFECYCLE_ACTIONS = new Set<PlatformAdministratorLifecycleEvent[
   "administrator.security.sessions-terminated",
 ]);
 
+function lifecycleState(
+  value: PlatformAdministratorLifecycleEvent["before"] | PlatformAdministratorLifecycleEvent["after"],
+): Readonly<Record<string, unknown>> | null {
+  return value ? Object.freeze({ ...value }) : null;
+}
+
 export function createLifecyclePlatformAdministrativeAuditEvent(
   actor: PlatformAdministratorAuthorityContext,
   event: PlatformAdministratorLifecycleEvent,
@@ -42,8 +48,8 @@ export function createLifecyclePlatformAdministrativeAuditEvent(
     action: event.action,
     outcome: "allowed",
     sensitivity: sensitive ? "sensitive" : "ordinary",
-    priorState: event.before,
-    newState: event.after,
+    priorState: lifecycleState(event.before),
+    newState: lifecycleState(event.after),
     reason: event.reason,
     relatedCaseId: execution.relatedCaseId,
     occurredAt: event.occurredAt,
