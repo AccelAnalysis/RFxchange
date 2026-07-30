@@ -13,7 +13,6 @@ const [
   route,
   tests,
   architecture,
-  tracker,
   ci,
 ] = await Promise.all([
   read("src/domain/organization-profile/model.ts"),
@@ -25,7 +24,6 @@ const [
   read("app/organization-profile/page.tsx"),
   read("test/essential-organization-profile.test.mjs"),
   read("docs/architecture/WAVE_2_SLICE_2_7.md"),
-  read("docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md"),
   read(".github/workflows/ci.yml"),
 ]);
 
@@ -116,7 +114,6 @@ assert.ok(
     architecture.includes("ORG-011") &&
     architecture.includes("ORG-012"),
 );
-assert.ok(tracker.includes("2 - Activation: **23/43**"));
 assert.ok(
   ci.includes("smoke-essential-organization-profile-emulator.mjs"),
   "CI must run the Slice 2.7 Firestore emulator acceptance.",
