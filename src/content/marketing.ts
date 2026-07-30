@@ -8,6 +8,24 @@ export const publicPositioning = {
   ],
 } as const;
 
+export const publicDifferentiation = [
+  {
+    label: "More than a directory",
+    detail:
+      "Organization profiles describe capability, geography, and context so discovery can lead into opportunity, referral, teaming, or support workflows.",
+  },
+  {
+    label: "Not a social feed",
+    detail:
+      "The network is organized around organizations, capabilities, opportunities, referrals, resources, and business relationships—not followers or general posting.",
+  },
+  {
+    label: "Broader than a bid portal",
+    detail:
+      "RFx activity sits beside business discovery, partnerships, referrals, resources, and market context rather than standing alone as a list of solicitations.",
+  },
+] as const;
+
 export const audienceEmphasis = [
   {
     name: "Economic developers + civic leaders",

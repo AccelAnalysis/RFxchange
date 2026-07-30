@@ -23,10 +23,28 @@ const home = (await read("app/page.tsx")).toLowerCase();
 for (const cta of [">join<", ">see how it works<"]) {
   if (!home.includes(cta)) throw new Error(`Public positioning missing required CTA: ${cta}`);
 }
+if (!home.includes('href="#join"')) throw new Error("Join CTA must resolve to the public join surface.");
+if (!home.includes('href="#how-it-works"')) throw new Error("See How It Works CTA must resolve to the public journey surface.");
+if (!home.includes('publicdifferentiation.map')) {
+  throw new Error("ACQ-001 requires the public differentiation model to render on the landing page.");
+}
+
+const marketing = await read("src/content/marketing.ts");
+const marketingLower = marketing.toLowerCase();
+for (const requirement of [
+  "shared environment to be discovered by capability",
+  "more than a directory",
+  "not a social feed",
+  "broader than a bid portal",
+]) {
+  if (!marketingLower.includes(requirement)) {
+    throw new Error(`ACQ-001 public positioning missing requirement: ${requirement}`);
+  }
+}
 
 const publicCopy = [
   await read("app/page.tsx"),
-  await read("src/content/marketing.ts"),
+  marketing,
 ].join("\n").toLowerCase();
 
 const prohibited = [
@@ -48,4 +66,4 @@ if (wordmark.includes("®")) throw new Error("Registered mark may not be used un
 const network = await read("src/components/marketing/NetworkField.tsx");
 if (!network.includes("#D6A23A")) throw new Error("Golden connection path language is missing.");
 
-console.log("Wave 0 product-system validation passed.");
+console.log("Wave 0 product-system validation passed, including ACQ-001 public positioning.");
