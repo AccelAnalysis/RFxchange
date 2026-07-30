@@ -171,7 +171,7 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [ ] `ADM-066`
 - [x] `INF-007` — PR #29
 - [x] `INF-008` — PR #30
-- [x] `COMMS-002` — Slice 2.4; Microsoft Graph adapter/INF-007 integration tests and `npm run check`
+- [x] `COMMS-002` — PR #72; Microsoft Graph adapter/INF-007 integration tests and `npm run check`
 
 ### 3 - Network
 
