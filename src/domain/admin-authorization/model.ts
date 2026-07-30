@@ -36,6 +36,15 @@ const RAW_ADMIN_PERMISSION_CATALOG = [
   ["platform.policy.change-directive.read", "platform", "Read platform governance change directives."],
   ["admin.authority.read", "admin", "Read administrator authority context."],
   ["admin.permission.catalog.read", "admin", "Read the administrative permission catalog."],
+  ["admin.lifecycle.create", "admin", "Create a non-protected platform administrator account."],
+  ["admin.lifecycle.access.manage", "admin", "Assign or revoke administrator roles, permissions and scope limits."],
+  ["admin.lifecycle.disable", "admin", "Disable a non-protected platform administrator account."],
+  ["admin.lifecycle.remove", "admin", "Remove a previously disabled non-protected platform administrator account."],
+  ["admin.security.lock", "admin", "Lock a non-protected administrator and invalidate privileged sessions."],
+  ["admin.security.credential-reset.require", "admin", "Require an administrator credential reset before privileged access resumes."],
+  ["admin.security.mfa.require", "admin", "Require MFA enrollment before privileged administrator access resumes."],
+  ["admin.security.reauthentication.require", "admin", "Require recent re-authentication before privileged administrator access resumes."],
+  ["admin.security.session.terminate", "admin", "Terminate an administrator's privileged sessions."],
   ["config.value.read", "config", "Read governed configuration values."],
   ["config.history.read", "config", "Read governed configuration history."],
   ["organization.profile.read", "organization", "Read organization profile data."],
@@ -79,11 +88,7 @@ const RAW_ADMIN_PERMISSION_CATALOG = [
 
 function requiredValue(value: string, field: string): string {
   const normalized = value.trim();
-
-  if (!normalized) {
-    throw new Error(`${field} is required.`);
-  }
-
+  if (!normalized) throw new Error(`${field} is required.`);
   return normalized;
 }
 
@@ -93,11 +98,9 @@ export function platformAdministratorId(value: string): PlatformAdministratorId 
 
 export function adminRolePresetKey(value: string): AdminRolePresetKey {
   const normalized = requiredValue(value, "Admin role preset key");
-
   if (!/^[a-z0-9][a-z0-9._-]{0,95}$/.test(normalized)) {
     throw new Error("Admin role preset key must be a stable lowercase identifier.");
   }
-
   return normalized as AdminRolePresetKey;
 }
 
@@ -106,18 +109,13 @@ function parseAdminPermissionKey(value: string): {
   readonly normalized: string;
 } {
   const normalized = requiredValue(value, "Administrative permission key");
-
   if (!/^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*){2,5}$/.test(normalized)) {
-    throw new Error(
-      "Administrative permission key must be namespaced lowercase segments separated by dots.",
-    );
+    throw new Error("Administrative permission key must be namespaced lowercase segments separated by dots.");
   }
-
   const namespace = normalized.split(".", 1)[0] as AdminPermissionNamespace;
   if (!ADMIN_PERMISSION_NAMESPACES.includes(namespace)) {
     throw new Error(`Unsupported administrative permission namespace: ${namespace}.`);
   }
-
   return Object.freeze({ namespace, normalized });
 }
 
@@ -128,34 +126,22 @@ export function adminPermissionKey(value: string): AdminPermissionKey {
 export const ADMIN_PERMISSION_CATALOG: readonly AdminPermissionDefinition[] = Object.freeze(
   RAW_ADMIN_PERMISSION_CATALOG.map(([rawKey, namespace, description]) => {
     const parsed = parseAdminPermissionKey(rawKey);
-
-    if (parsed.namespace !== namespace) {
-      throw new Error(`Permission ${rawKey} is assigned to the wrong namespace.`);
-    }
-
-    return Object.freeze({
-      key: parsed.normalized as AdminPermissionKey,
-      namespace,
-      description,
-    });
+    if (parsed.namespace !== namespace) throw new Error(`Permission ${rawKey} is assigned to the wrong namespace.`);
+    return Object.freeze({ key: parsed.normalized as AdminPermissionKey, namespace, description });
   }),
 );
 
 const ADMIN_PERMISSION_KEYS = new Set(ADMIN_PERMISSION_CATALOG.map((definition) => definition.key));
 
-export function isCataloguedAdminPermission(
-  permission: AdminPermissionKey,
-): boolean {
+export function isCataloguedAdminPermission(permission: AdminPermissionKey): boolean {
   return ADMIN_PERMISSION_KEYS.has(permission);
 }
 
 export function requireCataloguedAdminPermission(value: string): AdminPermissionKey {
   const permission = adminPermissionKey(value);
-
   if (!isCataloguedAdminPermission(permission)) {
     throw new Error(`Administrative permission is not in the catalog: ${permission}.`);
   }
-
   return permission;
 }
 
@@ -166,20 +152,9 @@ export interface AdminGlobalScopeResolution {
 }
 
 export type AdminConditionResolution =
-  | Readonly<{
-      readonly requirement: "none";
-      readonly status: "not-required";
-    }>
-  | Readonly<{
-      readonly requirement: "pre-resolved";
-      readonly status: "satisfied";
-      readonly evidenceKeys: readonly string[];
-    }>
-  | Readonly<{
-      readonly requirement: "pre-resolved";
-      readonly status: "unsatisfied";
-      readonly evidenceKeys: readonly string[];
-    }>;
+  | Readonly<{ readonly requirement: "none"; readonly status: "not-required" }>
+  | Readonly<{ readonly requirement: "pre-resolved"; readonly status: "satisfied"; readonly evidenceKeys: readonly string[] }>
+  | Readonly<{ readonly requirement: "pre-resolved"; readonly status: "unsatisfied"; readonly evidenceKeys: readonly string[] }>;
 
 export interface PlatformAdministratorAuthorityContext {
   readonly administratorId: PlatformAdministratorId;
@@ -196,30 +171,21 @@ export interface CreatePlatformAdministratorAuthorityContextInput {
   readonly scopeSatisfied?: boolean;
   readonly conditions?:
     | Readonly<{ readonly requirement: "none" }>
-    | Readonly<{
-        readonly requirement: "pre-resolved";
-        readonly status: "satisfied" | "unsatisfied";
-        readonly evidenceKeys?: readonly string[];
-      }>;
+    | Readonly<{ readonly requirement: "pre-resolved"; readonly status: "satisfied" | "unsatisfied"; readonly evidenceKeys?: readonly string[] }>;
 }
 
 function uniqueValues<T>(values: readonly T[]): readonly T[] {
   return Object.freeze([...new Set(values)]);
 }
 
-function createConditionResolution(
-  input: CreatePlatformAdministratorAuthorityContextInput["conditions"],
-): AdminConditionResolution {
+function createConditionResolution(input: CreatePlatformAdministratorAuthorityContextInput["conditions"]): AdminConditionResolution {
   if (!input || input.requirement === "none") {
     return Object.freeze({ requirement: "none" as const, status: "not-required" as const });
   }
-
   return Object.freeze({
     requirement: "pre-resolved" as const,
     status: input.status,
-    evidenceKeys: uniqueValues(
-      (input.evidenceKeys ?? []).map((key) => requiredValue(key, "Condition evidence key")),
-    ),
+    evidenceKeys: uniqueValues((input.evidenceKeys ?? []).map((key) => requiredValue(key, "Condition evidence key"))),
   });
 }
 
@@ -227,24 +193,15 @@ export function createPlatformAdministratorAuthorityContext(
   input: CreatePlatformAdministratorAuthorityContextInput,
 ): PlatformAdministratorAuthorityContext {
   const roles = uniqueValues(input.rolePresetKeys.map(adminRolePresetKey));
-
   if (roles.length === 0) {
-    throw new Error(
-      "Administrative authority context requires at least one role preset reference; role definitions are resolved separately.",
-    );
+    throw new Error("Administrative authority context requires at least one role preset reference; role definitions are resolved separately.");
   }
-
   const permissions = uniqueValues(input.effectivePermissions.map(requireCataloguedAdminPermission));
-
   return Object.freeze({
     administratorId: platformAdministratorId(input.administratorId),
     rolePresetKeys: roles,
     effectivePermissions: permissions,
-    scope: Object.freeze({
-      required: "GLOBAL" as const,
-      resolved: "GLOBAL" as const,
-      satisfied: input.scopeSatisfied ?? true,
-    }),
+    scope: Object.freeze({ required: "GLOBAL" as const, resolved: "GLOBAL" as const, satisfied: input.scopeSatisfied ?? true }),
     conditions: createConditionResolution(input.conditions),
   });
 }
@@ -272,80 +229,34 @@ export function createAdministrativeActionRequirement(
 }
 
 export type AdministrativeAuthorizationDecision =
-  | Readonly<{
-      readonly kind: "allow";
-      readonly administratorId: PlatformAdministratorId;
-      readonly permission: AdminPermissionKey;
-      readonly scope: "GLOBAL";
-    }>
-  | Readonly<{
-      readonly kind: "deny";
-      readonly administratorId: PlatformAdministratorId;
-      readonly permission: AdminPermissionKey;
-      readonly reason:
-        | "role-context-missing"
-        | "permission-not-granted"
-        | "scope-not-satisfied"
-        | "conditions-not-satisfied";
-    }>;
+  | Readonly<{ readonly kind: "allow"; readonly administratorId: PlatformAdministratorId; readonly permission: AdminPermissionKey; readonly scope: "GLOBAL" }>
+  | Readonly<{ readonly kind: "deny"; readonly administratorId: PlatformAdministratorId; readonly permission: AdminPermissionKey; readonly reason: "role-context-missing" | "permission-not-granted" | "scope-not-satisfied" | "conditions-not-satisfied" }>;
 
 export function authorizeAdministrativeAction(
   context: PlatformAdministratorAuthorityContext,
   requirement: AdministrativeActionRequirement,
 ): AdministrativeAuthorizationDecision {
   if (context.rolePresetKeys.length === 0) {
-    return Object.freeze({
-      kind: "deny" as const,
-      administratorId: context.administratorId,
-      permission: requirement.permission,
-      reason: "role-context-missing" as const,
-    });
+    return Object.freeze({ kind: "deny" as const, administratorId: context.administratorId, permission: requirement.permission, reason: "role-context-missing" as const });
   }
-
   if (!context.effectivePermissions.includes(requirement.permission)) {
-    return Object.freeze({
-      kind: "deny" as const,
-      administratorId: context.administratorId,
-      permission: requirement.permission,
-      reason: "permission-not-granted" as const,
-    });
+    return Object.freeze({ kind: "deny" as const, administratorId: context.administratorId, permission: requirement.permission, reason: "permission-not-granted" as const });
   }
-
   if (
     requirement.scope !== "GLOBAL" ||
     context.scope.required !== requirement.scope ||
     context.scope.resolved !== requirement.scope ||
     !context.scope.satisfied
   ) {
-    return Object.freeze({
-      kind: "deny" as const,
-      administratorId: context.administratorId,
-      permission: requirement.permission,
-      reason: "scope-not-satisfied" as const,
-    });
+    return Object.freeze({ kind: "deny" as const, administratorId: context.administratorId, permission: requirement.permission, reason: "scope-not-satisfied" as const });
   }
-
   if (
     requirement.conditions === "pre-resolved" &&
-    !(
-      context.conditions.requirement === "pre-resolved" &&
-      context.conditions.status === "satisfied"
-    )
+    !(context.conditions.requirement === "pre-resolved" && context.conditions.status === "satisfied")
   ) {
-    return Object.freeze({
-      kind: "deny" as const,
-      administratorId: context.administratorId,
-      permission: requirement.permission,
-      reason: "conditions-not-satisfied" as const,
-    });
+    return Object.freeze({ kind: "deny" as const, administratorId: context.administratorId, permission: requirement.permission, reason: "conditions-not-satisfied" as const });
   }
-
-  return Object.freeze({
-    kind: "allow" as const,
-    administratorId: context.administratorId,
-    permission: requirement.permission,
-    scope: requirement.scope,
-  });
+  return Object.freeze({ kind: "allow" as const, administratorId: context.administratorId, permission: requirement.permission, scope: requirement.scope });
 }
 
 export function assertAdministrativeActionAuthorized(
@@ -353,12 +264,8 @@ export function assertAdministrativeActionAuthorized(
   requirement: AdministrativeActionRequirement,
 ): AdministrativeAuthorizationDecision & { readonly kind: "allow" } {
   const decision = authorizeAdministrativeAction(context, requirement);
-
   if (decision.kind !== "allow") {
-    throw new Error(
-      `Administrative action denied for ${decision.permission}: ${decision.reason}.`,
-    );
+    throw new Error(`Administrative action denied for ${decision.permission}: ${decision.reason}.`);
   }
-
   return decision;
 }
