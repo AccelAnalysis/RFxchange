@@ -12,10 +12,10 @@
 
 ## Progress
 
-**438 total · 90 Done · 348 Not Started**
+**438 total · 93 Done · 345 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **15/43**
+- 2 - Activation: **18/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -156,7 +156,7 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [x] `ORG-001` — PR #70; explainable entity-match tests, desktop/mobile browser QA, Firestore emulator acceptance, and `npm run check`
 - [x] `ORG-002` — PR #70; select/create lifecycle tests, Firestore emulator acceptance, and `npm run check`
 - [x] `ORG-003` — PR #70; duplicate/conflict and atomic entity-key tests, Firestore emulator acceptance, and `npm run check`
-- [ ] `ORG-004`
+- [x] `ORG-004` — PR #73; five-path authority, private-evidence/conflict/lifecycle tests, Firestore emulator acceptance, desktop/mobile browser QA, and `npm run check`
 - [ ] `ORG-005`
 - [ ] `ORG-006`
 - [ ] `ORG-007`
@@ -167,8 +167,8 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [ ] `ORG-012`
 - [ ] `ADM-063`
 - [ ] `ADM-064`
-- [ ] `ADM-065`
-- [ ] `ADM-066`
+- [x] `ADM-065` — PR #73; category/geography/scope tests, desktop/mobile browser QA, and `npm run check`
+- [x] `ADM-066` — PR #73; evidence-review, case-scope, atomic adjudication/audit tests, Firestore emulator acceptance, and `npm run check`
 - [x] `INF-007` — PR #29
 - [x] `INF-008` — PR #30
 - [x] `COMMS-002` — PR #72; Microsoft Graph adapter/INF-007 integration tests and `npm run check`
