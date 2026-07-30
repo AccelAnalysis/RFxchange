@@ -37,6 +37,12 @@ export type AccessRestrictionState = (typeof ACCESS_RESTRICTION_STATES)[number];
 
 export interface AccessLifecycleRecord {
   readonly id: AccessJourneyId;
+  /**
+   * Bound after account activation. Early visitor journeys remain valid without
+   * a user, but geography-dependent authenticated transitions require this
+   * server-established association.
+   */
+  readonly userId?: UserId;
   readonly state: AccessLifecycleState;
   readonly createdAt: LifecycleTimestamp;
   readonly updatedAt: LifecycleTimestamp;
@@ -178,7 +184,32 @@ export function advanceAccessLifecycle(
 
   return Object.freeze({
     id: record.id,
+    ...(record.userId ? { userId: record.userId } : {}),
     state: next,
+    createdAt: record.createdAt,
+    updatedAt: lifecycleTimestamp(now),
+  });
+}
+
+export function associateAccessJourneyWithUser(
+  record: AccessLifecycleRecord,
+  userId: UserId,
+  now: string,
+): AccessLifecycleRecord {
+  if (record.state === "visitor") {
+    throw new Error("A visitor access journey cannot be bound to a user.");
+  }
+
+  if (record.userId && record.userId !== userId) {
+    throw new Error("Access journey is already bound to a different user.");
+  }
+
+  if (record.userId === userId) return record;
+
+  return Object.freeze({
+    id: record.id,
+    userId,
+    state: record.state,
     createdAt: record.createdAt,
     updatedAt: lifecycleTimestamp(now),
   });

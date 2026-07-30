@@ -21,6 +21,9 @@ test("defines schema version and canonical collection names", () => {
     organizationAuthorizations: "organizationAuthorizations",
     organizationUserInvitations: "organizationUserInvitations",
     organizationAuditEvents: "organizationAuditEvents",
+    geographies: "geographies",
+    primaryGeographySelections: "primaryGeographySelections",
+    geographyParticipationAuthorizations: "geographyParticipationAuthorizations",
     accessJourneys: "accessJourneys",
     accessRestrictions: "accessRestrictions",
     legalDocumentVersions: "legalDocumentVersions",
@@ -102,4 +105,5 @@ test("relationship and index policies remain provider-independent and query driv
 test("singleton relationship state uses the owning stable identity as document ID", () => {
   assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.organizationAuthorizations.documentIdSource, "membershipId");
   assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.adminAuthorityContexts.documentIdSource, "administratorId");
+  assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.primaryGeographySelections.documentIdSource, "userId");
 });

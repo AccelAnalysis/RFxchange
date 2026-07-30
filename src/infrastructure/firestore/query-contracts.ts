@@ -61,6 +61,7 @@ export const FIRESTORE_QUERY_CONTRACTS: readonly FirestoreQueryContract[] = Obje
   contract("audit-events-by-organization", "organizationAuditEvents", ["organizationId"], "many"),
   contract("audit-events-by-user", "organizationAuditEvents", ["actor.userId"], "many"),
   contract("audit-events-by-membership", "organizationAuditEvents", ["actor.membershipId"], "many"),
+  contract("geography-authorizations-by-user-and-geography", "geographyParticipationAuthorizations", ["subject.kind", "subject.userId", "geographyId"], "many"),
   contract("restriction-by-organization", "accessRestrictions", ["target.kind", "target.organizationId"], "zero-or-one"),
   contract("restriction-by-membership", "accessRestrictions", ["target.kind", "target.membershipId"], "zero-or-one"),
   contract("legal-document-by-kind-version", "legalDocumentVersions", ["kind", "version"], "zero-or-one"),

@@ -29,6 +29,12 @@ const DOMAIN_TIMESTAMP_EXPOSURE: Readonly<Record<FirestoreCollectionKey, DomainT
     organizationAuthorizations: Object.freeze({ createdAt: true, updatedAt: true }),
     organizationUserInvitations: Object.freeze({ createdAt: true, updatedAt: true }),
     organizationAuditEvents: Object.freeze({ createdAt: false, updatedAt: false }),
+    geographies: Object.freeze({ createdAt: true, updatedAt: true }),
+    primaryGeographySelections: Object.freeze({ createdAt: false, updatedAt: false }),
+    geographyParticipationAuthorizations: Object.freeze({
+      createdAt: false,
+      updatedAt: false,
+    }),
     accessJourneys: Object.freeze({ createdAt: true, updatedAt: true }),
     accessRestrictions: Object.freeze({ createdAt: true, updatedAt: true }),
     legalDocumentVersions: Object.freeze({ createdAt: true, updatedAt: false }),
@@ -137,6 +143,46 @@ function mutablePayload(record: object, createdAt: unknown): DocumentData {
     createdAt,
     updatedAt: FieldValue.serverTimestamp(),
   };
+}
+
+export interface AtomicMutableFirestoreRecord {
+  readonly key: FirestoreCollectionKey;
+  readonly id: string;
+  readonly record: object;
+}
+
+export async function saveMutableFirestoreRecordsAtomically(
+  db: Firestore,
+  records: readonly AtomicMutableFirestoreRecord[],
+): Promise<void> {
+  if (records.length === 0) {
+    throw new Error("Atomic mutable Firestore write requires at least one record.");
+  }
+  const paths: string[] = [];
+  const writes = records.map((entry) => {
+    const convention = FIRESTORE_COLLECTION_CONVENTIONS[entry.key];
+    if (!convention.mutable || convention.appendOnly) {
+      throw new Error(`${convention.collection} is not mutable.`);
+    }
+    assertWriteContract(entry.key, entry.record);
+    const path = firestoreDocumentPath(entry.key, entry.id);
+    if (paths.includes(path)) throw new Error(`Duplicate atomic Firestore write: ${path}.`);
+    paths.push(path);
+    return Object.freeze({ ...entry, ref: db.doc(path) });
+  });
+
+  await db.runTransaction(async (transaction) => {
+    const existing = await Promise.all(writes.map((entry) => transaction.get(entry.ref)));
+    for (const [index, entry] of writes.entries()) {
+      transaction.set(
+        entry.ref,
+        mutablePayload(
+          entry.record,
+          existing[index]?.data()?.createdAt ?? FieldValue.serverTimestamp(),
+        ),
+      );
+    }
+  });
 }
 
 export async function createMutableFirestoreRecord(

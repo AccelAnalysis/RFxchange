@@ -87,6 +87,20 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // GEO-001/002/003/007/008 geography metadata, selections and participation authority are
+    // server managed. Browser map, route and local-storage state never grants locality access.
+    match /geographies/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /primaryGeographySelections/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /geographyParticipationAuthorizations/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
     match /accessJourneys/{documentId} {
       allow read, write: if serverManagedOnly();
     }

@@ -48,9 +48,9 @@ This creates a stable persisted state machine without yet deciding which UI, ser
 
 The lifecycle begins before an organization necessarily exists and may begin before a stable user identity exists.
 
-For that reason, `AccessLifecycleRecord` does **not** require `organizationId`, `membershipId`, or `userId` fields.
+For that reason, `AccessLifecycleRecord` does **not** require `organizationId`, `membershipId`, or a user binding at creation.
 
-Later workflow slices may associate an access journey with resolved entities as those entities become available, but Slice 1.6 does not invent bindings that are impossible at the `visitor` stage.
+Slice 2.1 later exercised the deferred association point by adding an optional `userId` binding after the visitor stage. Visitor journeys remain valid without identity. Once bound, the journey cannot be rebound to a different user, and authenticated geography transitions require the binding to match the trusted RFxchange user. Organization and membership identity remain absent until their later lifecycle stages.
 
 ## ARC-008 restriction states
 
