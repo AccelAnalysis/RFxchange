@@ -15,7 +15,17 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 - [`CREDIBILITY_SYSTEM.md`](CREDIBILITY_SYSTEM.md) — organization-level credibility, badge families, evidence and commercial neutrality.
 - [`COMMERCIAL_MODEL.md`](COMMERCIAL_MODEL.md) — free network access, Founding membership, provider status and monetization boundaries.
 - [`ACQUISITION_AND_RETENTION.md`](ACQUISITION_AND_RETENTION.md) — acquisition objects, preserved entry context, first value and flywheel logic.
-- [`BRAND_AND_UX.md`](BRAND_AND_UX.md) — map-first visual/product presentation principles relevant to implementation.
+- [`BRAND_AND_UX.md`](BRAND_AND_UX.md) — concise map-first brand/UX principles and pointer to the canonical design system.
+
+## Canonical design authority
+
+Detailed visual/UI rules live in `docs/design/`:
+
+- `docs/design/RFxchange_DESIGN_SYSTEM.md` — product UI identity, color, typography, surfaces, controls, motion, accessibility and responsive behavior;
+- `docs/design/MAP_VISUAL_SYSTEM.md` — locality, marker, service-area, connection-path, release-state and map-layer behavior;
+- `docs/design/PRESENTATION_SYSTEM.md` — presentation/deck hierarchy, composition and audience adaptation.
+
+User-facing UI work should read the design-system index and applicable specialized guide rather than reconstructing current visual direction from source decks or prototype screenshots.
 
 ## Canonical build authorities
 
@@ -25,7 +35,7 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 
 ## Reference artifacts
 
-`docs/reference/` is reserved for provenance, prototypes, screenshots and other evidence that may contain important intent but is not itself production architecture. See the READMEs under that directory before using a reference artifact as an implementation source.
+`docs/reference/` is reserved for provenance, prototypes, screenshots and other evidence that may contain important intent but is not itself production architecture or current design authority. See the READMEs under that directory before using a reference artifact as an implementation source.
 
 ## Normalization rule
 
@@ -33,4 +43,4 @@ When an approved source document contains broad narrative, these context documen
 
 ## Updating context
 
-Update a context document when an approved product decision changes a cross-cutting rule. Do not rewrite context simply to match an implementation accident. If production architecture reveals a genuine product conflict, document the conflict and resolve it explicitly rather than silently changing the product model.
+Update a context document when an approved product decision changes a cross-cutting rule. Update `docs/design/` when a visual/UI rule changes. Do not rewrite context or design authority simply to match an implementation accident. If production architecture reveals a genuine product/design conflict, document the conflict and resolve it explicitly rather than silently changing the product model.

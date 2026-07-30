@@ -21,10 +21,11 @@ Use these sources together rather than treating one file as universally authorit
 3. `docs/tracking/RFxchange_DEPENDENCY_MAP.md` is the live sequencing/dependency authority. Reviewed corrections there supersede seeded spreadsheet dependencies for scheduling.
 4. The applicable `docs/slices/` brief defines the approved implementation boundary for that slice. A brief cannot mark a feature complete or waive its documented acceptance intent.
 5. `docs/context/` contains normalized cross-cutting product rules distilled from approved source material.
-6. Existing production architecture and merged architecture decisions govern implementation mechanics unless the current task intentionally changes them.
-7. `docs/reference/` contains provenance and visual/prototype references. Reference artifacts demonstrate product intent; they are not automatically production architecture.
+6. `docs/design/` is the canonical visual/UI/presentation design authority. For user-facing UI read `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`; map/geography work also requires `docs/design/MAP_VISUAL_SYSTEM.md`.
+7. Existing production architecture and merged architecture decisions govern implementation mechanics unless the current task intentionally changes them.
+8. `docs/reference/` contains provenance and visual/prototype references. Reference artifacts demonstrate product intent; they are not automatically production architecture.
 
-If two sources appear to conflict, do not silently choose the easiest interpretation. Preserve the stricter security/privacy requirement and report the conflict before widening scope.
+If two sources appear to conflict, do not silently choose the easiest interpretation. Preserve the stricter security/privacy requirement and report the conflict before widening scope. A design rule never grants authority or expands slice scope.
 
 ## Build sequencing
 
@@ -49,6 +50,8 @@ Before implementing any slice:
 5. Read the specific slice brief.
 6. Read the context documents listed in that brief under **Must read**.
 7. Inspect existing production abstractions before designing new ones.
+8. If the slice creates or materially changes user-facing UI, read `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`.
+9. If the slice creates or materially changes map/geography UI, also read `docs/design/MAP_VISUAL_SYSTEM.md`.
 
 ## Engineering invariants
 
@@ -79,11 +82,13 @@ Key scripts are defined in `package.json`. Add focused validation scripts/tests 
 - Update evidence in the same PR as implementation whenever practical.
 - Documentation-only planning work must not change progress totals or completion statuses.
 
-## Prototype and visual references
+## Design and visual references
 
+- Treat `docs/design/` as canonical for current visual/UI behavior; do not reconstruct design rules from screenshots when the design system addresses the topic.
 - Read `docs/reference/prototypes/README.md` before using prototype code.
 - Read `docs/reference/screenshots/README.md` before treating screenshots as visual requirements.
-- Preserve anchored geographic markers, locality-based map behavior, restrained glassmorphism, strong locality outlines and an uncluttered map-first workspace where those references apply.
+- Preserve anchored geographic markers, authoritative locality geometry, strong selected-locality treatment, muted surrounding context, restrained glassmorphism, reduced container/border chrome and a continuous map-first workspace where those rules apply.
+- Normal markers/pins are not outlined as a default treatment; use fill, glyph, shadow and separate hover/selection emphasis while keeping the geographic anchor fixed.
 - Never copy prototype architecture wholesale merely because it visually demonstrates the desired behavior.
 
 ## Completion report

@@ -21,6 +21,8 @@ Put the approved Microsoft delivery mechanism behind the already-merged provider
 - merged `INF-007` event/job framework evidence
 - `docs/slices/WAVE_2_ROADMAP.md`
 
+If Slice 2.4 introduces any user-visible HTML/email presentation beyond the minimum acceptance fixture, also read `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`. Do not expand the slice into a broad email-template system merely to apply brand styling.
+
 ## Prerequisite state
 
 The canonical tracker records `COMMS-001` and `INF-007` complete. Slice 2.4 consumes those abstractions; it must not bypass them.
@@ -33,6 +35,7 @@ The canonical tracker records `COMMS-001` and `INF-007` complete. Slice 2.4 cons
 - Provider responses/failures should be recordable/auditable enough for operational diagnosis.
 - Delivery retry/background behavior should use the merged job/event framework where applicable rather than inventing a second queue mechanism.
 - Message content must obey existing privacy/minimum-data boundaries; do not place sensitive evidence into email merely because delivery is available.
+- Any user-visible email styling introduced in-scope should use the canonical brand identity/palette/claims discipline while remaining robust across email clients.
 
 ## Acceptance intent
 
@@ -57,6 +60,7 @@ Do **not** implement in Slice 2.4:
 - claim/authority workflow emails beyond the minimum test/integration hooks needed to prove the adapter;
 - broad marketing-email campaigns;
 - newsletter tooling;
+- a generalized email-design/template subsystem;
 - user notification-center features;
 - unrelated SMS/push providers;
 - changes to organization claim authority;

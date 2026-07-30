@@ -22,6 +22,8 @@ At slice exit, organization resolution can progress into an evidence-based autho
 - `docs/context/CREDIBILITY_SYSTEM.md`
 - `docs/context/USER_JOURNEY.md`
 - `docs/context/PRODUCT_PRINCIPLES.md`
+- `docs/design/README.md`
+- `docs/design/RFxchange_DESIGN_SYSTEM.md`
 - canonical tracker/dependency map
 - merged Slice 2.3 organization-resolution contracts
 - merged Slice 2.4 communications adapter when claim communications use it
@@ -37,6 +39,7 @@ The reviewed dependency map intentionally makes `INF-008` an infrastructure prer
 ## Product rules
 
 ### `ORG-004`
+
 Authority means the user may manage the organization. Establish it through approved evidence/pathways such as domain email, existing administrator invitation, administrative review, organization documents or authoritative records.
 
 Successful authority creates/updates the legitimate organization membership/administrator relationship. It does **not** automatically grant Organization Verified status.
@@ -44,11 +47,15 @@ Successful authority creates/updates the legitimate organization membership/admi
 Sensitive evidence remains private and follows the existing storage/security architecture.
 
 ### `ADM-065`
+
 The claims console must allow authorized admins to locate organization records across at least the documented categories: seeded, unclaimed, claimed, active, incomplete, verification pending, verified, provider, issuer, duplicate, restricted, suspended, terminated and geography.
 
 The console is an administrative projection over authoritative organization/claim state; it must not become a second conflicting source of truth.
 
+Visually, the claims console should use the canonical RFxchange admin design language: restrained density, clear scoped context, explicit status text, minimal decorative container chrome and consistent search/filter controls. Do not communicate consequential claim state by color alone.
+
 ### `ADM-066`
+
 Conflicting claims use a controlled workflow:
 
 ```text
@@ -62,6 +69,8 @@ Claim submitted
 ```
 
 No existing organization history is silently overwritten. Do not resolve conflicts by destructive merge or by replacing the current administrator without evidence/history.
+
+Adjudication UI must prioritize evidence, decision state, scope and auditability over decorative dashboard treatment. Sensitive evidence remains visually and technically separated from public organization information.
 
 ## Acceptance intent
 
@@ -77,6 +86,7 @@ No existing organization history is silently overwritten. Do not resolve conflic
 - membership/admin assignment reuses existing organization access architecture instead of creating a parallel authority flag;
 - claim events/decisions integrate with canonical administrative audit/case patterns where applicable;
 - communications use the provider-neutral email boundary;
+- user-facing/admin UI follows the canonical product design system without weakening authorization clarity;
 - tests cover approved, denied, conflicting, unauthorized-admin and cross-organization/scope cases;
 - Verification remains separate from authority in data, UI copy and tests.
 
@@ -90,7 +100,8 @@ Do **not** implement in Slice 2.5:
 - Profile Complete;
 - organization marker activation;
 - full Organization 360 (`ADM-063`, `ADM-064`);
-- future institutional/locality claim administration beyond existing scoped platform authority.
+- future institutional/locality claim administration beyond existing scoped platform authority;
+- a broad visual refactor of already-merged Wave 2 geography surfaces.
 
 ## Exit checkpoint
 
