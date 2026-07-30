@@ -12,14 +12,14 @@
 
 ## Progress
 
-**438 total · 74 Done · 364 Not Started**
+**438 total · 77 Done · 361 Not Started**
 - 0 - Product System: **5/14**
-- 1 - Foundation: **62/64**
+- 1 - Foundation: **64/64**
 - 2 - Activation: **2/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
-- 6 - Commercial: **0/50**
+- 6 - Commercial: **1/50**
 - 7 - Institutional & Scale: **1/47**
 
 ## Active build sequence — revised 2026-07-30
@@ -30,6 +30,10 @@
 - **Slice 1.25 — `ADM-061` + `ADM-062`**: canonical administrative case model and lifecycle/SLA controls.
 - **Slice 1.26 — `ADM-083` + `ADM-086`**: Policy & Configuration Center foundation and additive audit corrections.
 - **Slice 1.27 — `ADM-047` + `ADM-048` + `ADM-084`**: controlled feature flags, recovery/maintenance operations, and versioned configuration history.
+- **Slice 1.28 — `INF-009`**: first persisted authenticated vertical slice across Firebase Auth, membership authorization and Firestore persistence.
+- **Slice 1.29 — `COMMS-001`**: provider-neutral transactional email boundary.
+- **Slice 1.30 — `ARC-010` + `COM-038`**: organization-owned commercial state and provider-neutral payment boundary.
+- **Slice 1.31 — `ADM-068`**: controlled user administration actions and Wave 1 Foundation closure.
 
 This sequence is planning guidance, not a completion claim. Recalculate dependency eligibility from merged `main` after every slice and mark an item Done only after its acceptance check and CI evidence pass.
 
@@ -92,7 +96,7 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 - [x] `ADM-061` — PR #46
 - [x] `ADM-062` — PR #46
 - [x] `ADM-067` — PR #39
-- [ ] `ADM-068`
+- [x] `ADM-068` — PR #64
 - [x] `ADM-069` — PR #39
 - [x] `ADM-084` — PR #51
 - [x] `ADM-085` — PR #38
@@ -116,7 +120,7 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 - [x] `AUTH-005` — PR #27
 - [x] `INF-006` — PR #28
 - [x] `COMMS-001` — PR #53
-- [ ] `COM-038`
+- [x] `COM-038` — PR #61
 - [x] `INF-009` — PR #52
 
 ### 2 - Activation
@@ -396,7 +400,7 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 
 ### 6 - Commercial
 
-- [ ] `ARC-010`
+- [x] `ARC-010` — PR #61
 - [ ] `ACQ-005`
 - [ ] `ISS-004`
 - [ ] `ISS-021`
