@@ -15,7 +15,21 @@ const expectedColors = {
 const css = (await read("app/globals.css")).toLowerCase();
 for (const [token, value] of Object.entries(expectedColors)) {
   if (!css.includes(`${token}: ${value}`)) {
-    throw new Error(`Missing or changed brand token ${token}: ${value}`);
+    throw new Error(`BRD-003 missing or changed brand token ${token}: ${value}`);
+  }
+}
+
+for (const typographyRequirement of [
+  '--font-display: "aptos display", "aptos"',
+  '--font-body: "aptos"',
+  "font-family: var(--font-body)",
+  "h1, h2, h3 { font-family: var(--font-display)",
+  "h1 { font-size:",
+  "h2 { font-size:",
+  "h3 { font-size:",
+]) {
+  if (!css.includes(typographyRequirement)) {
+    throw new Error(`BRD-005 typography hierarchy missing requirement: ${typographyRequirement}`);
   }
 }
 
@@ -25,7 +39,7 @@ for (const cta of [">join<", ">see how it works<"]) {
 }
 if (!home.includes('href="#join"')) throw new Error("Join CTA must resolve to the public join surface.");
 if (!home.includes('href="#how-it-works"')) throw new Error("See How It Works CTA must resolve to the public journey surface.");
-if (!home.includes('publicdifferentiation.map')) {
+if (!home.includes("publicdifferentiation.map")) {
   throw new Error("ACQ-001 requires the public differentiation model to render on the landing page.");
 }
 
@@ -60,10 +74,32 @@ for (const phrase of prohibited) {
 }
 
 const wordmark = await read("src/components/brand/BrandWordmark.tsx");
-if (!wordmark.includes("™")) throw new Error("Trademark mark must be present in the primary wordmark.");
-if (wordmark.includes("®")) throw new Error("Registered mark may not be used until counsel approval is recorded.");
+for (const requirement of [
+  '<span className="brand-rf">RF</span>',
+  '<span className="brand-xchange">xchange</span>',
+  '<sup className="brand-tm">™</sup>',
+  "data-on-dark={onDark}",
+]) {
+  if (!wordmark.includes(requirement)) throw new Error(`BRD-001 wordmark missing requirement: ${requirement}`);
+}
+for (const styleRequirement of [
+  ".brand-rf { color: var(--rf-gold)",
+  ".brand-xchange { color: var(--exchange-black)",
+  '.brand-wordmark[data-on-dark="true"] .brand-xchange',
+  "color: var(--white)",
+]) {
+  if (!css.includes(styleRequirement.toLowerCase())) {
+    throw new Error(`BRD-001 wordmark styling missing requirement: ${styleRequirement}`);
+  }
+}
+
+const trademarkSurfaces = [wordmark, await read("app/page.tsx"), marketing].join("\n");
+if (!wordmark.includes("™")) throw new Error("BRD-014 requires the trademark mark in the primary wordmark.");
+if (trademarkSurfaces.includes("®")) {
+  throw new Error("BRD-014 registered mark may not be used in product/public surfaces until counsel approval is recorded.");
+}
 
 const network = await read("src/components/marketing/NetworkField.tsx");
 if (!network.includes("#D6A23A")) throw new Error("Golden connection path language is missing.");
 
-console.log("Wave 0 product-system validation passed, including ACQ-001 public positioning.");
+console.log("Wave 0 product-system validation passed, including ACQ-001 and core brand foundation BRD-001/003/005/014.");
