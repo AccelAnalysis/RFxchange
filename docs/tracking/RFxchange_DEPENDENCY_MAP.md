@@ -30,6 +30,18 @@
 | `EDU-009` Objective-based first-value pathway | none | `ORG-011` | The first-value pathway is explicitly driven by the organization's selected business objectives, so the objective preferences must exist first. |
 | `EDU-010` Open-platform release gating | `ARC-007` | `ARC-003`, `ARC-008`, `AUTH-004`, `GOV-001`, `GOV-002`, `GOV-003`, `ORG-004`, `ORG-012`, `GEO-011`, `EDU-008`, `EDU-009` | OPEN is a terminal activation gate, not merely a lifecycle-state capability. It requires a usable attached user with no blocking restriction, completed authentication/policy obligations, an established organization relationship, minimum profile completion, real marker activation, orientation completion and presentation of the first-value pathway. |
 
+## Wave 3 Network dependency corrections — 2026-07-30
+
+| Feature | Seeded dependency | Canonical dependency | Reason for correction |
+| --- | --- | --- | --- |
+| `RES-001` Official Resource Provider application | `ORG-019` | `ORG-012`, `ORG-010` | Additional locations are optional enrichment and cannot be a prerequisite for applying as a provider. A legitimate Profile Complete organization with the applicable role is sufficient to enter provider review. |
+| `DSC-011` Contextual official resource search | none | `RES-003` | Resource discovery needs the structured provider service profile that defines services, territory, eligibility, intake and related search fields. |
+| `REF-006` Provider referral/request connection | none | `REF-005`, `RES-003` | Provider routing must reuse the consent/minimum-necessary referral boundary and target a provider with a structured service profile. |
+| `ACQ-006` Invite non-member to receive referral | none | `ACQ-003`, `REF-001`, `COMMS-003` | Referral acquisition requires a real referral, preserved acquisition context through activation and a versioned transactional invitation event/template. |
+| `ACQ-008` Provider-shared opportunity/profile invitations | none | `ACQ-003`, `RES-002`, `COMMS-003` | Provider-driven acquisition requires preserved context, approved Official Resource Provider state and versioned transactional communications. |
+
+Official Resource Provider approval in Wave 3 is a controlled provider-role/status decision. It must remain separate from the later substantive Credibility `Organization Verified` and `Verified Resource Provider` badges; commercial status cannot satisfy either concept.
+
 ## Wave 1 high-leverage dependency chain — closed historical reference
 
 ```text
@@ -124,6 +136,37 @@ Wave 2 begins from the merged tracker state **2/43 complete** (`INF-007`, `INF-0
 11. **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
 12. **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: objective-driven first action followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
 
-**Implementation hold:** this roadmap is adopted as planning authority, but **Slice 2.1 must not begin until explicit follow-up authorization is given**.
-
 The sequence above is planning order, not a completion claim. Recalculate dependency eligibility from merged `main` after every slice and mark an item Done only after its acceptance checks and CI evidence pass.
+
+## Wave 3 Network critical path
+
+```text
+Wave 2 OPEN/marker
+  → COMMS-003/004/005
+  → GEO-012 + DSC-001/002/003
+  → ORG-013/014/016/017
+  → ORG-015/018/019
+  → REF-001/002/003/004/005 + EDU-014 + ACQ-006
+  → RES-001/002/003 + ADM-070
+  → RES-004/005 + DSC-011 + REF-006 + RES-007/008 + ACQ-008
+  → EDU-016/017
+```
+
+The already-complete Wave 3 foundations `ORG-021`, `ORG-022`, `ADM-055` and `ADM-056` remain inherited prerequisites and are not rebuilt.
+
+## Adopted Wave 3 Network slice roadmap — implementation hold until Wave 2 exit
+
+Wave 3 contains **38 Network features**. Four are already complete from Wave 1, leaving **34 features** across eight slices:
+
+1. **Slice 3.1 — `COMMS-003` + `COMMS-004` + `COMMS-005` — Transactional Communications Reliability**.
+2. **Slice 3.2 — `GEO-012` + `DSC-001` + `DSC-002` + `DSC-003` — Controlled Network Entry & Discovery**.
+3. **Slice 3.3 — `ORG-013` + `ORG-014` + `ORG-016` + `ORG-017` — Market Profile Enrichment**.
+4. **Slice 3.4 — `ORG-015` + `ORG-018` + `ORG-019` — Credential, Media & Location Enrichment**.
+5. **Slice 3.5 — `REF-001` + `REF-002` + `REF-003` + `REF-004` + `REF-005` + `EDU-014` + `ACQ-006` — Referral Network & Referral Acquisition**.
+6. **Slice 3.6 — `RES-001` + `RES-002` + `RES-003` + `ADM-070` — Official Resource Provider Foundation**.
+7. **Slice 3.7 — `RES-004` + `RES-005` + `DSC-011` + `REF-006` + `RES-007` + `RES-008` + `ACQ-008` — Resource Discovery, Routing & Provider Distribution**.
+8. **Slice 3.8 — `EDU-016` + `EDU-017` — Persistent Network Education**.
+
+**Implementation hold:** no Wave 3 implementation begins until the Wave 2 exit condition is verified from merged `main` and an explicit task authorizes Slice 3.1.
+
+See `docs/slices/WAVE_3_ROADMAP.md` and the applicable canonical slice brief for detailed boundaries and acceptance intent.
