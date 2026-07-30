@@ -51,6 +51,25 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // GEO-009/010 and ORG-005/006/009 keep private address/geocode state behind trusted
+    // organization authorization. Location events remain immutable evidence.
+    match /organizationLocationDrafts/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationLocations/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationLocationEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /organizationServiceGeographies/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
     match /users/{documentId} {
       allow read, write: if serverManagedOnly();
     }

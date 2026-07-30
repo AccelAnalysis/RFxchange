@@ -12,10 +12,10 @@
 
 ## Progress
 
-**438 total · 93 Done · 345 Not Started**
+**438 total · 98 Done · 340 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **18/43**
+- 2 - Activation: **23/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -140,8 +140,8 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [x] `GEO-006` — PR #69; layer-order/muting tests, desktop/mobile browser QA, and `npm run check`
 - [x] `GEO-007` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-008` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
-- [ ] `GEO-009`
-- [ ] `GEO-010`
+- [x] `GEO-009` — PR #74
+- [x] `GEO-010` — PR #74
 - [ ] `GEO-011`
 - [ ] `EDU-001`
 - [ ] `EDU-002`
@@ -157,11 +157,11 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [x] `ORG-002` — PR #70; select/create lifecycle tests, Firestore emulator acceptance, and `npm run check`
 - [x] `ORG-003` — PR #70; duplicate/conflict and atomic entity-key tests, Firestore emulator acceptance, and `npm run check`
 - [x] `ORG-004` — PR #73; five-path authority, private-evidence/conflict/lifecycle tests, Firestore emulator acceptance, desktop/mobile browser QA, and `npm run check`
-- [ ] `ORG-005`
-- [ ] `ORG-006`
+- [x] `ORG-005` — PR #74
+- [x] `ORG-006` — PR #74
 - [ ] `ORG-007`
 - [ ] `ORG-008`
-- [ ] `ORG-009`
+- [x] `ORG-009` — PR #74
 - [ ] `ORG-010`
 - [ ] `ORG-011`
 - [ ] `ORG-012`

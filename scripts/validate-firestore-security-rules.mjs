@@ -50,6 +50,7 @@ const appendOnlyCollections = [
   "organizationEntityKeys",
   "organizationAuthorityClaimEvents",
   "organizationAuthorityDecisions",
+  "organizationLocationEvents",
   "legalDocumentVersions",
   "legalAcknowledgements",
   "organizationAuthorityRepresentations",

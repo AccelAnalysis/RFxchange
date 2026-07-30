@@ -1,0 +1,49 @@
+.page {
+  min-height: 100vh;
+  color: #f7f3ea;
+  background:
+    radial-gradient(circle at 9% 2%, rgba(46, 94, 170, 0.19), transparent 31%),
+    linear-gradient(150deg, #171a20, #0b0b0d);
+}
+
+.topbar {
+  width: min(calc(100% - 40px), 1460px);
+  min-height: 76px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  color: rgba(247, 243, 234, 0.56);
+  font-size: 0.7rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.wordmark {
+  color: #f7f3ea;
+  font-size: 1.2rem;
+  font-weight: 760;
+  letter-spacing: -0.045em;
+  text-decoration: none;
+  text-transform: none;
+}
+
+.wordmark span {
+  color: #d6a23a;
+}
+
+.wordmark sup {
+  margin-left: 2px;
+  font-size: 0.38em;
+}
+
+@media (max-width: 620px) {
+  .topbar {
+    width: min(calc(100% - 24px), 1460px);
+  }
+
+  .topbar > span {
+    display: none;
+  }
+}

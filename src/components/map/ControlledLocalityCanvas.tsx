@@ -13,10 +13,18 @@ import {
 
 import styles from "./ControlledLocalityCanvas.module.css";
 
+export interface ControlledLocalityPointOverlay {
+  readonly id: string;
+  readonly position: readonly [longitude: number, latitude: number];
+  readonly label: string;
+  readonly kind: "location-candidate" | "confirmed-location";
+}
+
 export interface ControlledLocalityCanvasProps {
   readonly model: ControlledLocalityMapModel;
   readonly initialZoom?: ControlledLocalityZoomLevel;
   readonly headingLevel?: "h1" | "h2";
+  readonly pointOverlays?: readonly ControlledLocalityPointOverlay[];
 }
 
 const VIEWBOX_WIDTH = 1100;
@@ -26,6 +34,7 @@ export function ControlledLocalityCanvas({
   model,
   initialZoom = "locality",
   headingLevel = "h1",
+  pointOverlays = [],
 }: ControlledLocalityCanvasProps) {
   const Heading = headingLevel;
   const titleId = useId();
@@ -174,6 +183,39 @@ export function ControlledLocalityCanvas({
               );
             })}
           </g>
+
+          <g
+            className={styles.locationPoints}
+            aria-hidden="true"
+            data-layer-id="location-confirmation-points"
+            data-layer-order="70"
+          >
+            {pointOverlays.map((overlay) => {
+              const point = projectGeographicPosition(overlay.position, viewport);
+              return (
+                <g
+                  key={overlay.id}
+                  data-point-id={overlay.id}
+                  data-point-kind={overlay.kind}
+                  transform={`translate(${point.x} ${point.y})`}
+                >
+                  {overlay.kind === "location-candidate" ? (
+                    <circle r="18" className={styles.candidateHalo} />
+                  ) : null}
+                  <path
+                    d="M 0 -11 L 9 0 L 0 11 L -9 0 Z"
+                    className={
+                      overlay.kind === "location-candidate"
+                        ? styles.candidatePoint
+                        : styles.confirmedPoint
+                    }
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <circle r="2.7" className={styles.pointCore} />
+                </g>
+              );
+            })}
+          </g>
         </svg>
 
         <div className={styles.legend} aria-label="Map legend">
@@ -193,6 +235,17 @@ export function ControlledLocalityCanvas({
       <figcaption className={styles.caption}>
         Boundary geometry is anchored in EPSG:4326 coordinates and reprojected as the camera
         changes; layer order keeps locality outlines above all fills.
+        {pointOverlays.length > 0 ? (
+          <span className={styles.pointSummary}>
+            {pointOverlays.map((overlay) => (
+              <span key={overlay.id}>
+                {overlay.label}: {overlay.kind === "location-candidate"
+                  ? "temporary candidate awaiting confirmation"
+                  : "confirmed canonical location"}
+              </span>
+            ))}
+          </span>
+        ) : null}
       </figcaption>
     </figure>
   );
