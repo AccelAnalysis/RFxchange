@@ -13,6 +13,9 @@ const documentation = await readFile(
 const requiredCollections = [
   "organizations",
   "organizationProfiles",
+  "organizationDiscoveryRecords",
+  "organizationResolutions",
+  "organizationEntityKeys",
   "users",
   "organizationMemberships",
   "organizationAuthorizations",
@@ -55,6 +58,8 @@ assert.ok(
 
 for (const appendOnlyCollection of [
   "organizationAuditEvents",
+  "organizationResolutions",
+  "organizationEntityKeys",
   "legalDocumentVersions",
   "legalAcknowledgements",
   "organizationAuthorityRepresentations",

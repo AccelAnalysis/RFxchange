@@ -51,6 +51,10 @@ const contract = (
  */
 export const FIRESTORE_QUERY_CONTRACTS: readonly FirestoreQueryContract[] = Object.freeze([
   contract("organization-profile-by-organization", "organizationProfiles", ["organizationId"], "zero-or-one"),
+  contract("organization-discovery-by-organization", "organizationDiscoveryRecords", ["organizationId"], "zero-or-one"),
+  contract("organization-discovery-by-geography", "organizationDiscoveryRecords", ["geographyId.value"], "many"),
+  contract("organization-resolution-by-journey", "organizationResolutions", ["accessJourneyId"], "zero-or-one"),
+  contract("organization-resolutions-by-user", "organizationResolutions", ["userId"], "many"),
   contract("user-by-primary-email", "users", ["primaryEmail"], "zero-or-one"),
   contract("user-by-login", "users", ["login.provider", "login.subject"], "zero-or-one"),
   contract("memberships-by-user", "organizationMemberships", ["userId"], "many"),

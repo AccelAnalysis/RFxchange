@@ -53,6 +53,8 @@ Production runtime identity must use least-privilege IAM. A service-account priv
 The following canonical collections are append-only under INF-003 and INF-002:
 
 - `organizationAuditEvents`
+- `organizationResolutions`
+- `organizationEntityKeys`
 - `legalDocumentVersions`
 - `legalAcknowledgements`
 - `organizationAuthorityRepresentations`

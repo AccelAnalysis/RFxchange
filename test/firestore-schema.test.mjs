@@ -16,6 +16,9 @@ test("defines schema version and canonical collection names", () => {
   assert.deepEqual(FIRESTORE_COLLECTIONS, {
     organizations: "organizations",
     organizationProfiles: "organizationProfiles",
+    organizationDiscoveryRecords: "organizationDiscoveryRecords",
+    organizationResolutions: "organizationResolutions",
+    organizationEntityKeys: "organizationEntityKeys",
     users: "users",
     organizationMemberships: "organizationMemberships",
     organizationAuthorizations: "organizationAuthorizations",
@@ -53,6 +56,9 @@ test("document paths derive deterministically from stable IDs", () => {
 test("organization-scoped collections explicitly require organizationId", () => {
   for (const key of [
     "organizationProfiles",
+    "organizationDiscoveryRecords",
+    "organizationResolutions",
+    "organizationEntityKeys",
     "organizationMemberships",
     "organizationAuthorizations",
     "organizationUserInvitations",
@@ -77,6 +83,8 @@ test("organization-scoped collections explicitly require organizationId", () => 
 test("append-only domain and operational history remains non-mutable", () => {
   for (const key of [
     "organizationAuditEvents",
+    "organizationResolutions",
+    "organizationEntityKeys",
     "legalDocumentVersions",
     "legalAcknowledgements",
     "organizationAuthorityRepresentations",

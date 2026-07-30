@@ -20,6 +20,13 @@ const geographyRepositories = await readFile(
   new URL("../src/infrastructure/firestore/geography-repositories.ts", import.meta.url),
   "utf8",
 );
+const organizationResolutionRepositories = await readFile(
+  new URL(
+    "../src/infrastructure/firestore/organization-resolution-repositories.ts",
+    import.meta.url,
+  ),
+  "utf8",
+);
 
 test("firebase configuration source-controls Firestore indexes", () => {
   assert.equal(firebaseConfig.firestore?.indexes, "firestore.indexes.json");
@@ -38,13 +45,14 @@ test("foundation queries rely only on automatic Firestore indexing", () => {
 });
 
 test("current Firestore repository queries remain equality-only and unsorted", () => {
-  const operators = [...`${repositories}\n${geographyRepositories}`.matchAll(/\.where\(\s*"[^"]+"\s*,\s*"([^"]+)"/g)].map(
+  const operators = [...`${repositories}\n${geographyRepositories}\n${organizationResolutionRepositories}`.matchAll(/\.where\(\s*"[^"]+"\s*,\s*"([^"]+)"/g)].map(
     (match) => match[1],
   );
 
   assert.ok(operators.length > 0, "Expected repository query filters to validate.");
   assert.deepEqual([...new Set(operators)], ["=="]);
   assert.doesNotMatch(repositories, /\.orderBy\s*\(/);
+  assert.doesNotMatch(organizationResolutionRepositories, /\.orderBy\s*\(/);
 });
 
 test("compound equality contracts are explicitly planned for index merging", () => {
@@ -55,6 +63,7 @@ test("compound equality contracts are explicitly planned for index merging", () 
     "restriction-by-membership",
     "legal-document-by-kind-version",
     "geography-authorizations-by-user-and-geography",
+    "organization-resolution-by-journey",
   ]) {
     assert.ok(queryContracts.includes(`\"${queryName}\"`), `Missing compound equality query ${queryName}.`);
   }

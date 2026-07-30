@@ -46,6 +46,8 @@ for (const collection of canonicalCollections) {
 
 const appendOnlyCollections = [
   "organizationAuditEvents",
+  "organizationResolutions",
+  "organizationEntityKeys",
   "legalDocumentVersions",
   "legalAcknowledgements",
   "organizationAuthorityRepresentations",
