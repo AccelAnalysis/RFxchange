@@ -1,5 +1,7 @@
+import type { OrganizationUserAuthorization } from "../authorization/model.ts";
+import type { LegalAcknowledgement } from "../legal/model.ts";
 import type { OrganizationId } from "../organizations/model.ts";
-import type { UserId } from "../users/model.ts";
+import type { OrganizationMembership, UserId } from "../users/model.ts";
 import type {
   OrganizationUserInvitation,
   OrganizationUserInvitationId,
@@ -19,9 +21,9 @@ export interface OrganizationUserInvitationRepository {
 export interface OrganizationInvitationAcceptanceCommit {
   readonly invitation: OrganizationUserInvitation;
   readonly acceptedByUserId: UserId;
-  readonly membership: object;
-  readonly authorization: object;
-  readonly legalAcknowledgements: readonly object[];
+  readonly membership: OrganizationMembership;
+  readonly authorization: OrganizationUserAuthorization;
+  readonly legalAcknowledgements: readonly LegalAcknowledgement[];
 }
 
 /**
