@@ -6,6 +6,7 @@ const configService = await readFile(new URL("../src/application/admin/governed-
 const configRepo = await readFile(new URL("../src/infrastructure/firestore/governed-configuration-repository.ts", import.meta.url), "utf8");
 const flags = await readFile(new URL("../src/domain/admin-system/feature-flags.ts", import.meta.url), "utf8");
 const flagService = await readFile(new URL("../src/application/admin/feature-flag-administration.ts", import.meta.url), "utf8");
+const maintenanceModel = await readFile(new URL("../src/domain/admin-system/maintenance-operations.ts", import.meta.url), "utf8");
 const maintenance = await readFile(new URL("../src/application/admin/system-maintenance-operations.ts", import.meta.url), "utf8");
 const dispatcher = await readFile(new URL("../src/infrastructure/system/controlled-maintenance-executor.ts", import.meta.url), "utf8");
 const rules = await readFile(new URL("../firestore.rules", import.meta.url), "utf8");
@@ -51,7 +52,7 @@ for (const action of [
   "background-repair",
   "maintenance-mode",
 ]) {
-  assert.ok(maintenance.includes(action), `ADM-048 maintenance controls are missing ${action}.`);
+  assert.ok(maintenanceModel.includes(`"${action}"`), `ADM-048 maintenance controls are missing ${action}.`);
 }
 assert.ok(
   maintenance.includes('permission: "system.maintenance.request"') && maintenance.includes('conditions: "pre-resolved"') &&
@@ -79,7 +80,7 @@ assert.ok(
   "Configuration and feature-flag change evidence must remain append-only to direct clients.",
 );
 
-for (const source of [history, configService, flags, flagService, maintenance]) {
+for (const source of [history, configService, flags, flagService, maintenanceModel, maintenance]) {
   assert.equal(source.includes('from "firebase'), false, "Slice 1.27 domain/application contracts must remain Firebase-independent.");
 }
 
