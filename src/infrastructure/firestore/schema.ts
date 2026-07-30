@@ -6,6 +6,7 @@ export const FIRESTORE_COLLECTIONS = {
   users: "users",
   organizationMemberships: "organizationMemberships",
   organizationAuthorizations: "organizationAuthorizations",
+  organizationUserInvitations: "organizationUserInvitations",
   organizationAuditEvents: "organizationAuditEvents",
   accessJourneys: "accessJourneys",
   accessRestrictions: "accessRestrictions",
@@ -84,6 +85,14 @@ export const FIRESTORE_COLLECTION_CONVENTIONS: Readonly<
   organizationAuthorizations: Object.freeze({
     collection: FIRESTORE_COLLECTIONS.organizationAuthorizations,
     documentIdSource: "membershipId",
+    scope: "organization-scoped",
+    organizationIdRequired: true,
+    appendOnly: false,
+    mutable: true,
+  }),
+  organizationUserInvitations: Object.freeze({
+    collection: FIRESTORE_COLLECTIONS.organizationUserInvitations,
+    documentIdSource: "id",
     scope: "organization-scoped",
     organizationIdRequired: true,
     appendOnly: false,
