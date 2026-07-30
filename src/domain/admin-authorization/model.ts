@@ -51,6 +51,8 @@ const RAW_ADMIN_PERMISSION_CATALOG = [
   ["organization.profile.read", "organization", "Read organization profile data."],
   ["organization.profile.update", "organization", "Update organization profile data when separately authorized."],
   ["organization.document.private.read", "organization", "Read private organization documents when explicitly authorized."],
+  ["organization.claim.read", "organization", "Read organization claim workflow state within an explicit scope."],
+  ["organization.claim.adjudicate", "organization", "Compare evidence and adjudicate organization authority claims within an explicit scope."],
   ["user.profile.read", "user", "Read user profile data."],
   ["user.access.read", "user", "Read user access metadata."],
   ["user.access.manage", "user", "Administer user organization memberships and access state without bypassing organization attachment requirements."],

@@ -35,6 +35,22 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ORG-004 claim state is mutable only through trusted authority services. Workflow events and
+    // decisions preserve append-only evidence, including denied and conflicting claims.
+    match /organizationAuthorityClaims/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationAuthorityClaimEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /organizationAuthorityDecisions/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /users/{documentId} {
       allow read, write: if serverManagedOnly();
     }
