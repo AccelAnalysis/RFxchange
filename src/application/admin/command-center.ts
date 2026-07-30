@@ -5,6 +5,7 @@ import {
   type AdminPermissionKey,
   type PlatformAdministratorAuthorityContext,
 } from "../../domain/admin-authorization/model.ts";
+import type { SystemOperationsHealthSnapshot } from "./system-operations-health.ts";
 
 export const ADMIN_COMMAND_CENTER_QUEUE_KEYS = [
   "claims",
@@ -121,6 +122,40 @@ function normalizeMetric(metric: AdminHealthMetric): AdminHealthMetric {
     throw new Error(`Admin health metric ${key} must contain a finite number.`);
   }
   return Object.freeze({ ...metric, key, label, unit: metric.unit?.trim() || null });
+}
+
+function metricState(state: string | undefined): AdminHealthMetric["state"] {
+  if (state === "outage") return "critical";
+  if (state === "degraded") return "attention";
+  if (state === "operational") return "normal";
+  return "unknown";
+}
+
+function numericMetric(
+  health: SystemOperationsHealthSnapshot,
+  surface: string,
+  key: string,
+): number | null {
+  const measurement = health.measurements.find((candidate) => candidate.surface === surface);
+  const value = measurement?.metrics[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+/** Reuses ADM-046 health evidence rather than creating a second technical-health authority. */
+export function systemHealthMetricsFromOperationsSnapshot(
+  health: SystemOperationsHealthSnapshot,
+): readonly AdminHealthMetric[] {
+  const errorMonitoring = health.measurements.find((candidate) => candidate.surface === "error-monitoring");
+  const webhooks = health.measurements.find((candidate) => candidate.surface === "webhooks");
+  const functions = health.measurements.find((candidate) => candidate.surface === "firebase-functions");
+  const deployment = health.measurements.find((candidate) => candidate.surface === "deployment");
+  return Object.freeze([
+    Object.freeze({ key: "overall", label: "Overall", value: health.overall, unit: null, state: metricState(health.overall) }),
+    Object.freeze({ key: "error-rate", label: "Error rate", value: numericMetric(health, "error-monitoring", "errorRate"), unit: "%", state: metricState(errorMonitoring?.state) }),
+    Object.freeze({ key: "webhook-failures", label: "Webhook failures", value: numericMetric(health, "webhooks", "failureCount"), unit: null, state: metricState(webhooks?.state) }),
+    Object.freeze({ key: "function-failures", label: "Function failures", value: numericMetric(health, "firebase-functions", "failureCount"), unit: null, state: metricState(functions?.state) }),
+    Object.freeze({ key: "deployment-status", label: "Deployment status", value: deployment?.state ?? "unknown", unit: null, state: metricState(deployment?.state) }),
+  ]);
 }
 
 export function buildAdminCommandCenterSnapshot(
