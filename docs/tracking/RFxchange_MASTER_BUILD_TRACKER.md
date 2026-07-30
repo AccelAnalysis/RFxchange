@@ -132,14 +132,14 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [ ] `ACQ-002`
 - [ ] `ACQ-003`
 - [ ] `ACQ-004`
-- [x] `GEO-001` — Slice 2.1 geography authority tests, Firestore emulator acceptance, and `npm run check`
-- [x] `GEO-002` — Slice 2.1 geography authority tests, Firestore emulator acceptance, and `npm run check`
-- [x] `GEO-003` — Slice 2.1 geography authority tests, Firestore emulator acceptance, and `npm run check`
+- [x] `GEO-001` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
+- [x] `GEO-002` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
+- [x] `GEO-003` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [ ] `GEO-004`
 - [ ] `GEO-005`
 - [ ] `GEO-006`
-- [x] `GEO-007` — Slice 2.1 geography authority tests, Firestore emulator acceptance, and `npm run check`
-- [x] `GEO-008` — Slice 2.1 geography authority tests, Firestore emulator acceptance, and `npm run check`
+- [x] `GEO-007` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
+- [x] `GEO-008` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [ ] `GEO-009`
 - [ ] `GEO-010`
 - [ ] `GEO-011`
