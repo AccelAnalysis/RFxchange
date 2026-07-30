@@ -14,9 +14,13 @@ export type SystemMaintenanceActionHandler = (
  * explicitly registered handlers can touch infrastructure. No arbitrary command/shell surface exists.
  */
 export class ControlledSystemMaintenanceExecutor implements SystemMaintenanceExecutor {
+  private readonly handlers: Readonly<Partial<Record<SystemMaintenanceAction, SystemMaintenanceActionHandler>>>;
+
   constructor(
-    private readonly handlers: Readonly<Partial<Record<SystemMaintenanceAction, SystemMaintenanceActionHandler>>>,
-  ) {}
+    handlers: Readonly<Partial<Record<SystemMaintenanceAction, SystemMaintenanceActionHandler>>>,
+  ) {
+    this.handlers = handlers;
+  }
 
   supports(action: SystemMaintenanceAction): boolean {
     return typeof this.handlers[action] === "function";
