@@ -12,9 +12,9 @@
 
 ## Progress
 
-**438 total · 68 Done · 370 Not Started**
+**438 total · 69 Done · 369 Not Started**
 - 0 - Product System: **0/14**
-- 1 - Foundation: **61/64**
+- 1 - Foundation: **62/64**
 - 2 - Activation: **2/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
@@ -115,7 +115,7 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 - [x] `AUTH-004` — PR #26
 - [x] `AUTH-005` — PR #27
 - [x] `INF-006` — PR #28
-- [ ] `COMMS-001`
+- [x] `COMMS-001` — PR #53
 - [ ] `COM-038`
 - [x] `INF-009` — PR #52
 
