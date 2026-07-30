@@ -1,7 +1,7 @@
 import { BrandWordmark } from "@/src/components/brand/BrandWordmark";
 import { NetworkField } from "@/src/components/marketing/NetworkField";
 import { JourneyRail } from "@/src/components/marketing/JourneyRail";
-import { audienceEmphasis, publicPositioning } from "@/src/content/marketing";
+import { audienceEmphasis, publicDifferentiation, publicPositioning } from "@/src/content/marketing";
 
 export default function HomePage() {
   return (
@@ -37,6 +37,24 @@ export default function HomePage() {
             <div key={pillar.title} className="proof-item">
               <span>{pillar.kicker}</span>
               <strong>{pillar.title}</strong>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="section shell differentiation-section" aria-labelledby="different-title">
+        <div className="section-intro">
+          <p className="eyebrow">Built for business action</p>
+          <h2 id="different-title">A working business network—not another place to post and scroll.</h2>
+          <p>
+            The RFxchange connects business identity, demand, relationships, and support so a useful discovery can move into a useful next step.
+          </p>
+        </div>
+        <div className="differentiation-grid">
+          {publicDifferentiation.map((item) => (
+            <div key={item.label} className="differentiation-item">
+              <h3>{item.label}</h3>
+              <p>{item.detail}</p>
             </div>
           ))}
         </div>
