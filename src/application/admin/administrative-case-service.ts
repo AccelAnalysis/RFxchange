@@ -14,7 +14,10 @@ import type {
   AdministrativeCaseLifecycleUnitOfWork,
   AdministrativeCaseRepository,
 } from "../../domain/admin-cases/repository.ts";
-import { createAdministrativeWorkItem } from "../../domain/admin-work-queue/model.ts";
+import {
+  createAdministrativeWorkItem,
+  type AdministrativeWorkQueueProvider,
+} from "../../domain/admin-work-queue/model.ts";
 
 function assertPermission(
   authority: PlatformAdministratorAuthorityContext,
@@ -56,6 +59,7 @@ export class AdministrativeCaseService {
     caseRecord: AdministrativeCase;
     eventId: string;
     nextStatus: AdministrativeCaseStatus;
+    assignedAdministratorId?: string | null;
     reason: string;
     now: string;
   }>): Promise<AdministrativeCase> {
@@ -65,6 +69,7 @@ export class AdministrativeCaseService {
       eventId: input.eventId,
       actorAdministratorId: input.authority.administratorId,
       nextStatus: input.nextStatus,
+      assignedAdministratorId: input.assignedAdministratorId,
       reason: input.reason,
       now: input.now,
     });
@@ -117,4 +122,18 @@ export function administrativeCaseToWorkItem(caseRecord: AdministrativeCase) {
     relatedCaseNumbers: [],
     requiredPermission: caseRecord.readPermission,
   });
+}
+
+export class AdministrativeCaseWorkQueueProvider implements AdministrativeWorkQueueProvider {
+  readonly source = "administrative-cases";
+  private readonly cases: AdministrativeCaseRepository;
+
+  constructor(cases: AdministrativeCaseRepository) {
+    this.cases = cases;
+  }
+
+  async listOpenWork() {
+    const records = await this.cases.listOpen();
+    return Object.freeze(records.map(administrativeCaseToWorkItem));
+  }
 }
