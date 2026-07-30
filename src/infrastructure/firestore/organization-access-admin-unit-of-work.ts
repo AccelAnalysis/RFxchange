@@ -1,4 +1,4 @@
-import { FieldValue, type Firestore, type Transaction } from "firebase-admin/firestore";
+import { FieldValue, type Firestore } from "firebase-admin/firestore";
 
 import type { OrganizationAccessAdministrationUnitOfWork } from "../../domain/admin-authorization/organization-access-admin-repository.ts";
 import type { PlatformAdministrativeAuditEvent } from "../../domain/admin-authorization/admin-audit.ts";
@@ -25,16 +25,14 @@ function roleBundlePayload(bundle: OrganizationRoleBundle): object {
   };
 }
 
-async function mutablePayload(
-  transaction: Transaction,
-  ref: FirebaseFirestore.DocumentReference,
+function mutablePayload(
   record: OrganizationMembership | OrganizationUserAuthorization,
-): Promise<object> {
-  const existing = await transaction.get(ref);
+  existingCreatedAt: unknown,
+): object {
   return {
     ...record,
     schemaVersion: FIRESTORE_SCHEMA_VERSION,
-    createdAt: existing.exists ? existing.data()?.createdAt ?? FieldValue.serverTimestamp() : FieldValue.serverTimestamp(),
+    createdAt: existingCreatedAt ?? FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
   };
 }
@@ -59,27 +57,36 @@ export class FirestoreOrganizationAccessAdministrationUnitOfWork
 
     await this.db.runTransaction(async (transaction) => {
       const auditRef = this.db.collection(PLATFORM_ADMIN_AUDIT_COLLECTION).doc(input.auditEvent.id);
-      if ((await transaction.get(auditRef)).exists) {
+      const membershipRef = input.membership
+        ? this.db.doc(firestoreDocumentPath("organizationMemberships", input.membership.id))
+        : null;
+      const authorizationRef = input.authorization
+        ? this.db.doc(
+            firestoreDocumentPath("organizationAuthorizations", input.authorization.membershipId),
+          )
+        : null;
+
+      const [auditSnapshot, membershipSnapshot, authorizationSnapshot] = await Promise.all([
+        transaction.get(auditRef),
+        membershipRef ? transaction.get(membershipRef) : Promise.resolve(null),
+        authorizationRef ? transaction.get(authorizationRef) : Promise.resolve(null),
+      ]);
+
+      if (auditSnapshot.exists) {
         throw new Error(`Platform admin audit event already exists: ${input.auditEvent.id}.`);
       }
 
-      if (input.membership) {
-        const membershipRef = this.db.doc(
-          firestoreDocumentPath("organizationMemberships", input.membership.id),
-        );
+      if (input.membership && membershipRef) {
         transaction.set(
           membershipRef,
-          await mutablePayload(transaction, membershipRef, input.membership),
+          mutablePayload(input.membership, membershipSnapshot?.data()?.createdAt),
         );
       }
 
-      if (input.authorization) {
-        const authorizationRef = this.db.doc(
-          firestoreDocumentPath("organizationAuthorizations", input.authorization.membershipId),
-        );
+      if (input.authorization && authorizationRef) {
         transaction.set(
           authorizationRef,
-          await mutablePayload(transaction, authorizationRef, input.authorization),
+          mutablePayload(input.authorization, authorizationSnapshot?.data()?.createdAt),
         );
       }
 
@@ -93,7 +100,8 @@ export class FirestoreOrganizationAccessAdministrationUnitOfWork
   }>): Promise<void> {
     await this.db.runTransaction(async (transaction) => {
       const auditRef = this.db.collection(PLATFORM_ADMIN_AUDIT_COLLECTION).doc(input.auditEvent.id);
-      if ((await transaction.get(auditRef)).exists) {
+      const auditSnapshot = await transaction.get(auditRef);
+      if (auditSnapshot.exists) {
         throw new Error(`Platform admin audit event already exists: ${input.auditEvent.id}.`);
       }
       const bundleRef = this.db.collection(ORGANIZATION_ROLE_BUNDLE_COLLECTION).doc(input.bundle.key);
