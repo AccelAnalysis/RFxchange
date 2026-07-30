@@ -101,15 +101,34 @@ function metric(input: AdminHealthMetric): AdminHealthMetric {
   return Object.freeze({ ...input });
 }
 
+function assertExactCoverage<T extends string>(
+  actual: readonly T[],
+  required: readonly T[],
+  label: string,
+): void {
+  if (new Set(actual).size !== actual.length) throw new Error(`${label} keys must be unique.`);
+  const missing = required.filter((key) => !actual.includes(key));
+  const extra = actual.filter((key) => !required.includes(key));
+  if (missing.length || extra.length) {
+    throw new Error(`${label} coverage mismatch; missing=${missing.join(",") || "none"}; extra=${extra.join(",") || "none"}.`);
+  }
+}
+
 export async function buildAdministrativeCommandCenter(
   authority: PlatformAdministratorAuthorityContext,
   queueProviders: readonly AdminAttentionQueueProvider[],
   healthProviders: readonly AdminHealthPanelProvider[],
 ): Promise<AdministrativeCommandCenter> {
-  const queueKeys = queueProviders.map((provider) => provider.key);
-  const healthKeys = healthProviders.map((provider) => provider.key);
-  if (new Set(queueKeys).size !== queueKeys.length) throw new Error("Command-center attention queue keys must be unique.");
-  if (new Set(healthKeys).size !== healthKeys.length) throw new Error("Command-center health panel keys must be unique.");
+  assertExactCoverage(
+    queueProviders.map((provider) => provider.key),
+    ADMIN_ATTENTION_QUEUE_KEYS,
+    "Command-center attention queue",
+  );
+  assertExactCoverage(
+    healthProviders.map((provider) => provider.key),
+    ADMIN_HEALTH_PANEL_KEYS,
+    "Command-center health panel",
+  );
 
   const visibleQueues = await Promise.all(
     queueProviders.map(async (provider) => {
