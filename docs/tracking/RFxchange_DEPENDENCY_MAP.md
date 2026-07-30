@@ -16,6 +16,7 @@
 | --- | --- | --- | --- |
 | `ADM-047` Feature-flag administration | `ADM-045` | `GOV-006`, `ADM-046`, `ADM-083`, `ADM-085`, `ADM-088` | Feature-flag control is governed technical configuration. It requires authority, operations visibility, governed configuration, immutable audit, and privileged-security controls; locality landing/announcement management is unrelated. |
 | `ADM-048` Safe job retry, reindex and maintenance controls | `ADM-045` | `INF-007`, `ADM-046`, `ADM-085`, `ADM-088` | Recovery operations depend on the background-job framework, operations health, audit evidence, and privileged-security controls; locality landing/announcement management is unrelated. |
+| `ADM-068` Controlled user administration actions | `ADM-065` | `ARC-008`, `ADM-014`, `ADM-056`, `ADM-069`, `ADM-085`, `ADM-088`, `ORG-021` | Controlled administration of an already-resolved user's organization access depends on restriction states, exact admin scope, membership/permission repair, orphan prevention, immutable audit, privileged security, and invitations. The Activation-wave organization claims console is not a server-side access-control prerequisite. |
 | `ADM-084` Versioned configuration change records | `ADM-081` | `ADM-083`, `ADM-085` | Versioned configuration history belongs to the Policy & Configuration Center and canonical audit system; the communications center is not an architectural prerequisite. |
 | `ADM-086` Audit corrections without history deletion | `ADM-083` | `ADM-085` | Additive corrections operate on immutable administrative audit events. Governed configuration is not required to append a correction referencing an existing audit event. |
 
@@ -52,6 +53,18 @@ ADM-085 [Done]
   └─ ADM-086 Audit corrections without history deletion
 ```
 
+## User administration branch
+
+```text
+ARC-008 [Done] ─┐
+ADM-014 [Done] ─┤
+ADM-056 [Done] ─┤
+ADM-069 [Done] ─┼─ ADM-068 Controlled user administration actions
+ADM-085 [Done] ─┤
+ADM-088 [Done] ─┤
+ORG-021 [Done] ─┘
+```
+
 ## Active revised slice sequence
 
 1. **Slice 1.22 — `ORG-021` + `ORG-022`**: organizational user invitations and standard organization role presets.
@@ -60,5 +73,9 @@ ADM-085 [Done]
 4. **Slice 1.25 — `ADM-061` + `ADM-062`**: canonical administrative case model and lifecycle/SLA controls.
 5. **Slice 1.26 — `ADM-083` + `ADM-086`**: Policy & Configuration Center foundation plus additive audit corrections.
 6. **Slice 1.27 — `ADM-047` + `ADM-048` + `ADM-084`**: controlled feature flags, recovery/maintenance actions, and versioned configuration history.
+7. **Slice 1.28 — `INF-009`**: first persisted authenticated vertical slice.
+8. **Slice 1.29 — `COMMS-001`**: transactional email provider abstraction.
+9. **Slice 1.30 — `ARC-010` + `COM-038`**: organization commercial state and payment-provider boundary.
+10. **Slice 1.31 — `ADM-068`**: controlled user administration actions and Wave 1 Foundation closeout.
 
 The sequence above is a planning order, not a completion claim. Each slice must still pass its own acceptance checks and production CI before the tracker status is changed.
