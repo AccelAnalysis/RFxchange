@@ -12,11 +12,11 @@
 
 ## Progress
 
-**438 total · 52 Done · 386 Not Started**
+**438 total · 54 Done · 384 Not Started**
 - 0 - Product System: **0/14**
 - 1 - Foundation: **50/64**
 - 2 - Activation: **2/43**
-- 3 - Network: **0/38**
+- 3 - Network: **2/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **0/50**
@@ -180,8 +180,8 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 - [ ] `ORG-017`
 - [ ] `ORG-018`
 - [ ] `ORG-019`
-- [ ] `ORG-021`
-- [ ] `ORG-022`
+- [x] `ORG-021` — PR #42
+- [x] `ORG-022` — PR #42
 - [ ] `DSC-001`
 - [ ] `DSC-002`
 - [ ] `DSC-003`
