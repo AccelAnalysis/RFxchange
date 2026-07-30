@@ -55,6 +55,7 @@ export interface AdministrativeCaseEvent {
   readonly actorAdministratorId: string;
   readonly fromStatus: AdministrativeCaseStatus;
   readonly toStatus: AdministrativeCaseStatus;
+  readonly assignedAdministratorId: string | null;
   readonly reason: string;
   readonly occurredAt: AdministrativeCaseTimestamp;
 }
@@ -161,6 +162,7 @@ export function transitionAdministrativeCase(input: Readonly<{
   eventId: string;
   actorAdministratorId: string;
   nextStatus: AdministrativeCaseStatus;
+  assignedAdministratorId?: string | null;
   reason: string;
   now: string;
 }>): Readonly<{ caseRecord: AdministrativeCase; event: AdministrativeCaseEvent }> {
@@ -172,8 +174,13 @@ export function transitionAdministrativeCase(input: Readonly<{
   if (Date.parse(occurredAt) < Date.parse(input.caseRecord.updatedAt)) {
     throw new Error("Administrative case transition cannot precede the current case state.");
   }
+  const assignedAdministratorId =
+    input.nextStatus === "assigned"
+      ? required(input.assignedAdministratorId ?? "", "Assigned administrator id")
+      : input.caseRecord.assignedAdministratorId;
   const updated = Object.freeze({
     ...input.caseRecord,
+    assignedAdministratorId,
     status: input.nextStatus,
     updatedAt: occurredAt,
     resolvedAt: input.nextStatus === "resolved" ? occurredAt : input.caseRecord.resolvedAt,
@@ -186,6 +193,7 @@ export function transitionAdministrativeCase(input: Readonly<{
     actorAdministratorId: required(input.actorAdministratorId, "Administrative case actor id"),
     fromStatus: input.caseRecord.status,
     toStatus: input.nextStatus,
+    assignedAdministratorId,
     reason: required(input.reason, "Administrative case transition reason"),
     occurredAt,
   });
