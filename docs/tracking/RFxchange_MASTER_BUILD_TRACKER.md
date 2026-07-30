@@ -135,9 +135,9 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [x] `GEO-001` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-002` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-003` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
-- [x] `GEO-004` — authoritative boundary tests, desktop/mobile browser QA, and `npm run check`
-- [x] `GEO-005` — layer/camera interaction tests, desktop/mobile browser QA, and `npm run check`
-- [x] `GEO-006` — layer-order/muting tests, desktop/mobile browser QA, and `npm run check`
+- [x] `GEO-004` — PR #69; authoritative boundary tests, desktop/mobile browser QA, and `npm run check`
+- [x] `GEO-005` — PR #69; layer/camera interaction tests, desktop/mobile browser QA, and `npm run check`
+- [x] `GEO-006` — PR #69; layer-order/muting tests, desktop/mobile browser QA, and `npm run check`
 - [x] `GEO-007` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-008` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [ ] `GEO-009`
