@@ -151,6 +151,61 @@
   fill: #d6a23a;
 }
 
+.organizationMarkers {
+  filter: drop-shadow(0 8px 10px rgba(11, 11, 13, 0.34));
+}
+
+.organizationMarker {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.organizationMarker[data-marker-activated="true"] {
+  animation: markerActivation 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.organizationMarker:focus-visible {
+  outline: none;
+}
+
+.organizationMarker:focus-visible .markerHalo,
+.organizationMarker:focus-visible .markerHaloSelected {
+  fill: rgba(214, 162, 58, 0.3);
+  stroke: #0b0b0d;
+  stroke-width: 2;
+}
+
+.markerHalo {
+  fill: transparent;
+  stroke: none;
+}
+
+.markerHaloSelected {
+  fill: rgba(214, 162, 58, 0.24);
+  stroke: #d6a23a;
+  stroke-width: 2;
+}
+
+.organizationPin {
+  fill: #252932;
+  stroke: none;
+}
+
+.organizationGlyph {
+  fill: #f7f3ea;
+}
+
+@keyframes markerActivation {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .legend {
   position: absolute;
   left: 20px;
@@ -190,6 +245,12 @@
 .surroundingSwatch {
   border: 1px solid rgba(37, 41, 50, 0.7);
   background: rgba(109, 115, 125, 0.36);
+}
+
+.organizationSwatch {
+  border-radius: 50% 50% 50% 0 !important;
+  background: #252932;
+  transform: rotate(-45deg);
 }
 
 .attribution {
@@ -239,5 +300,11 @@
   .legend {
     right: 12px;
     bottom: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .organizationMarker[data-marker-activated="true"] {
+    animation: none;
   }
 }

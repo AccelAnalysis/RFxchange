@@ -17,7 +17,9 @@ export interface ControlledLocalityPointOverlay {
   readonly id: string;
   readonly position: readonly [longitude: number, latitude: number];
   readonly label: string;
-  readonly kind: "location-candidate" | "confirmed-location";
+  readonly kind: "location-candidate" | "confirmed-location" | "organization-marker";
+  readonly privacyLabel?: string;
+  readonly activated?: boolean;
 }
 
 export interface ControlledLocalityCanvasProps {
@@ -45,6 +47,7 @@ export function ControlledLocalityCanvas({
     );
     return index >= 0 ? index : 1;
   });
+  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
   const zoom = CONTROLLED_LOCALITY_ZOOM_LEVELS[zoomIndex];
   const viewport = useMemo(
     () =>
@@ -190,37 +193,95 @@ export function ControlledLocalityCanvas({
             data-layer-id="location-confirmation-points"
             data-layer-order="70"
           >
-            {pointOverlays.map((overlay) => {
-              const point = projectGeographicPosition(overlay.position, viewport);
-              return (
-                <g
-                  key={overlay.id}
-                  data-point-id={overlay.id}
-                  data-point-kind={overlay.kind}
-                  transform={`translate(${point.x} ${point.y})`}
-                >
-                  {overlay.kind === "location-candidate" ? (
-                    <circle r="18" className={styles.candidateHalo} />
-                  ) : null}
-                  <path
-                    d="M 0 -11 L 9 0 L 0 11 L -9 0 Z"
-                    className={
-                      overlay.kind === "location-candidate"
-                        ? styles.candidatePoint
-                        : styles.confirmedPoint
-                    }
-                    vectorEffect="non-scaling-stroke"
-                  />
-                  <circle r="2.7" className={styles.pointCore} />
-                </g>
-              );
-            })}
+            {pointOverlays
+              .filter((overlay) => overlay.kind !== "organization-marker")
+              .map((overlay) => {
+                const point = projectGeographicPosition(overlay.position, viewport);
+                return (
+                  <g
+                    key={overlay.id}
+                    data-point-id={overlay.id}
+                    data-point-kind={overlay.kind}
+                    transform={`translate(${point.x} ${point.y})`}
+                  >
+                    {overlay.kind === "location-candidate" ? (
+                      <circle r="18" className={styles.candidateHalo} />
+                    ) : null}
+                    <path
+                      d="M 0 -11 L 9 0 L 0 11 L -9 0 Z"
+                      className={
+                        overlay.kind === "location-candidate"
+                          ? styles.candidatePoint
+                          : styles.confirmedPoint
+                      }
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <circle r="2.7" className={styles.pointCore} />
+                  </g>
+                );
+              })}
+          </g>
+
+          <g
+            className={styles.organizationMarkers}
+            data-layer-id="organization-markers"
+            data-layer-order="70"
+          >
+            {pointOverlays
+              .filter((overlay) => overlay.kind === "organization-marker")
+              .map((overlay) => {
+                const point = projectGeographicPosition(overlay.position, viewport);
+                const selected = selectedMarkerId === overlay.id;
+                const select = () =>
+                  setSelectedMarkerId((current) =>
+                    current === overlay.id ? null : overlay.id,
+                  );
+                return (
+                  <g
+                    key={overlay.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${overlay.label}. ${overlay.privacyLabel ?? "Public organization marker."}`}
+                    aria-pressed={selected}
+                    data-marker-id={overlay.id}
+                    data-marker-selected={selected}
+                    data-marker-activated={overlay.activated ?? false}
+                    transform={`translate(${point.x} ${point.y})`}
+                    className={styles.organizationMarker}
+                    onClick={select}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        select();
+                      }
+                    }}
+                  >
+                    <circle
+                      r="24"
+                      className={selected ? styles.markerHaloSelected : styles.markerHalo}
+                      data-layer-order="80"
+                    />
+                    <path
+                      d="M 0 18 C -3 10 -15 2 -15 -10 C -15 -20 -8 -27 0 -27 C 8 -27 15 -20 15 -10 C 15 2 3 10 0 18 Z"
+                      className={styles.organizationPin}
+                    />
+                    <path
+                      d="M -6 -14 H 6 V 2 H -6 Z M -3 -10 H 0 V -6 H -3 Z M 2 -10 H 5 V -6 H 2 Z M -3 -4 H 0 V 0 H -3 Z M 2 -4 H 5 V 0 H 2 Z"
+                      className={styles.organizationGlyph}
+                      fillRule="evenodd"
+                    />
+                  </g>
+                );
+              })}
           </g>
         </svg>
 
         <div className={styles.legend} aria-label="Map legend">
           <span><i className={styles.selectedSwatch} /> Selected locality</span>
           <span><i className={styles.surroundingSwatch} /> Surrounding context</span>
+          {pointOverlays.some((overlay) => overlay.kind === "organization-marker") ? (
+            <span><i className={styles.organizationSwatch} /> Active organization</span>
+          ) : null}
         </div>
         <a
           className={styles.attribution}
@@ -241,7 +302,9 @@ export function ControlledLocalityCanvas({
               <span key={overlay.id}>
                 {overlay.label}: {overlay.kind === "location-candidate"
                   ? "temporary candidate awaiting confirmation"
-                  : "confirmed canonical location"}
+                  : overlay.kind === "confirmed-location"
+                    ? "confirmed canonical location"
+                    : overlay.privacyLabel ?? "active public organization marker"}
               </span>
             ))}
           </span>

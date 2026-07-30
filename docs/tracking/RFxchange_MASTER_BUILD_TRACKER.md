@@ -12,10 +12,10 @@
 
 ## Progress
 
-**438 total · 103 Done · 335 Not Started**
+**438 total · 106 Done · 332 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **28/43**
+- 2 - Activation: **31/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -142,7 +142,7 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [x] `GEO-008` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-009` — PR #74
 - [x] `GEO-010` — PR #74
-- [ ] `GEO-011`
+- [x] `GEO-011` — PR #77; canonical gate/privacy/idempotency/anchoring tests, Firestore emulator acceptance, desktop/mobile browser QA, and `npm run check`
 - [ ] `EDU-001`
 - [ ] `EDU-002`
 - [ ] `EDU-003`
@@ -165,8 +165,8 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [x] `ORG-010` — PR #75
 - [x] `ORG-011` — PR #75
 - [x] `ORG-012` — PR #75
-- [ ] `ADM-063`
-- [ ] `ADM-064`
+- [x] `ADM-063` — PR #77; 14-context scope/permission/minimum-data tests, desktop/mobile browser QA, and `npm run check`
+- [x] `ADM-064` — PR #77; independent-state/restriction/case-link tests, desktop/mobile browser QA, and `npm run check`
 - [x] `ADM-065` — PR #73; category/geography/scope tests, desktop/mobile browser QA, and `npm run check`
 - [x] `ADM-066` — PR #73; evidence-review, case-scope, atomic adjudication/audit tests, Firestore emulator acceptance, and `npm run check`
 - [x] `INF-007` — PR #29

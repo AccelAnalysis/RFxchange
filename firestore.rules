@@ -81,6 +81,17 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // GEO-011 marker activation is a server-derived lifecycle aggregate. Transition
+    // events are immutable; direct clients cannot create a marker from browser state.
+    match /organizationMarkerActivations/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationMarkerEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /users/{documentId} {
       allow read, write: if serverManagedOnly();
     }

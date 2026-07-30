@@ -50,6 +50,7 @@ const RAW_ADMIN_PERMISSION_CATALOG = [
   ["config.history.read", "config", "Read governed configuration history."],
   ["organization.profile.read", "organization", "Read organization profile data."],
   ["organization.profile.update", "organization", "Update organization profile data when separately authorized."],
+  ["organization.location.private.read", "organization", "Read exact private organization location data when minimum-necessary access is explicitly authorized."],
   ["organization.document.private.read", "organization", "Read private organization documents when explicitly authorized."],
   ["organization.claim.read", "organization", "Read organization claim workflow state within an explicit scope."],
   ["organization.claim.adjudicate", "organization", "Compare evidence and adjudicate organization authority claims within an explicit scope."],

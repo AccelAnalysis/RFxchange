@@ -76,6 +76,26 @@ export const CONTROLLED_LOCALITY_LAYER_ORDER: readonly LocalityLayerId[] = Objec
   "selected-outline-accent",
 ]);
 
+/**
+ * Provider-neutral semantic layer contract for controlled-map content. Providers may
+ * use different numeric layer IDs, but geography, relationships, markers, emphasis,
+ * labels, and UI must preserve this deterministic ordering.
+ */
+export const CONTROLLED_MAP_SEMANTIC_LAYER_ORDER = Object.freeze({
+  "surrounding-fill": 10,
+  "selected-fill": 20,
+  "surrounding-outline": 30,
+  "selected-outline-contrast": 40,
+  "selected-outline-accent": 50,
+  "service-area": 55,
+  "locality-label": 60,
+  "relationship-path": 65,
+  "entity-marker": 70,
+  "marker-emphasis": 80,
+  "entity-label": 90,
+  "map-ui": 100,
+} as const);
+
 export const CONTROLLED_LOCALITY_LAYER_STYLES: Readonly<
   Record<LocalityLayerId, LocalityLayerStyle>
 > = Object.freeze({
