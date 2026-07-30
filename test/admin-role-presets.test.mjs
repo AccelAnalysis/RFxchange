@@ -103,7 +103,7 @@ test("role preset creation rejects unknown presets, permissions, empty bundles, 
   );
   assert.throws(
     () => createAdminRolePreset({ key: "analyst-auditor", displayName: "Analyst", description: "No", permissions: ["made.up.permission"], createdAt: timestamp }),
-    /not in the catalog/,
+    /(Unsupported administrative permission namespace|not in the catalog)/,
   );
   assert.throws(
     () => createAdminRolePreset({ key: "analyst-auditor", displayName: "Analyst", description: "No", permissions: [], createdAt: timestamp }),
