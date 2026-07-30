@@ -9,6 +9,7 @@ import {
 } from "../../domain/admin-authorization/admin-audit.ts";
 import {
   APPROVED_FEATURE_FLAG_KEYS,
+  featureFlagEnvironment,
   featureFlagStateId,
   proposeFeatureFlagChange,
   type FeatureFlagChangeRecord,
@@ -45,11 +46,19 @@ function stateAuditValue(state: FeatureFlagState | null): Readonly<Record<string
 }
 
 export class FeatureFlagAdministrationService {
+  private readonly repository: FeatureFlagRepository;
+  private readonly changes: FeatureFlagChangeUnitOfWork;
+  private readonly runtimeEnvironment: FeatureFlagEnvironment;
+
   constructor(
-    private readonly repository: FeatureFlagRepository,
-    private readonly changes: FeatureFlagChangeUnitOfWork,
-    private readonly runtimeEnvironment: FeatureFlagEnvironment,
-  ) {}
+    repository: FeatureFlagRepository,
+    changes: FeatureFlagChangeUnitOfWork,
+    runtimeEnvironment: FeatureFlagEnvironment,
+  ) {
+    this.repository = repository;
+    this.changes = changes;
+    this.runtimeEnvironment = runtimeEnvironment;
+  }
 
   catalog(authority: PlatformAdministratorAuthorityContext): readonly string[] {
     authorize(authority, "config.value.read");
@@ -77,18 +86,18 @@ export class FeatureFlagAdministrationService {
     securityContext: CreatePlatformAdministrativeAuditEventInput["securityContext"];
   }>): Promise<FeatureFlagState> {
     authorize(input.authority, "config.value.manage", "pre-resolved");
-    const id = featureFlagStateId(input);
-    const requestedEnvironment = id.split(":")[1];
+    const requestedEnvironment = featureFlagEnvironment(input.environment);
     if (requestedEnvironment !== this.runtimeEnvironment) {
       throw new Error(
         `Feature flag environment mismatch: operation targets ${requestedEnvironment}, runtime is ${this.runtimeEnvironment}.`,
       );
     }
+    const id = featureFlagStateId(input);
     const current = await this.repository.getById(id);
     const next = proposeFeatureFlagChange({
       current,
       flag: input.flag,
-      environment: input.environment,
+      environment: requestedEnvironment,
       scopeKind: input.scopeKind,
       scopeId: input.scopeId,
       enabled: input.enabled,
