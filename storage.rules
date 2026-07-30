@@ -1,0 +1,22 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // RFxchange keeps Firebase UID separate from the RFxchange UserId and organization membership.
+    // Direct client access therefore remains closed until a reviewed claim/mapping architecture can
+    // prove tenant membership, restrictions, and granular permissions inside Storage Rules.
+    function serverManagedOnly() {
+      return false;
+    }
+
+    // Canonical organization-owned object path. Every object is private in INF-008.
+    match /organizations/{organizationId}/private/{category}/{assetId}/{fileName} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    // Unknown or future paths are denied until explicitly reviewed.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
