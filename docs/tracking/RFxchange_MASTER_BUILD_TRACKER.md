@@ -11,10 +11,10 @@
 
 ## Progress
 
-**438 total · 26 Done · 412 Not Started**
+**438 total · 38 Done · 400 Not Started**
 - 0 - Product System: **0/14**
-- 1 - Foundation: **26/64**
-- 2 - Activation: **0/43**
+- 1 - Foundation: **36/64**
+- 2 - Activation: **2/43**
 - 3 - Network: **0/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -60,10 +60,10 @@
 - [x] `ADM-008` — PR #13
 - [x] `ADM-010` — PR #14
 - [x] `ADM-011` — PR #15
-- [ ] `ADM-012`
-- [ ] `ADM-013`
+- [x] `ADM-012` — PR #31
+- [x] `ADM-013` — PR #32
 - [x] `ADM-014` — PR #16
-- [ ] `ADM-015`
+- [x] `ADM-015` — PR #33
 - [ ] `ADM-016`
 - [ ] `ADM-017`
 - [ ] `ADM-019`
@@ -90,19 +90,19 @@
 - [ ] `ADM-091`
 - [x] `ADM-092` — PR #15
 - [x] `ADM-093` — PR #16
-- [ ] `ADM-094`
+- [x] `ADM-094` — PR #31
 - [ ] `ADM-095`
 - [x] `INF-001` — PR #17
 - [x] `INF-002` — merge 6ea999e
 - [x] `INF-003` — PR #18
 - [x] `INF-004` — merge 2f83a62
 - [x] `INF-005` — merge 4b9613d
-- [ ] `AUTH-001`
-- [ ] `AUTH-002`
-- [ ] `AUTH-003`
-- [ ] `AUTH-004`
-- [ ] `AUTH-005`
-- [ ] `INF-006`
+- [x] `AUTH-001` — PR #22
+- [x] `AUTH-002` — PR #24
+- [x] `AUTH-003` — PR #25
+- [x] `AUTH-004` — PR #26
+- [x] `AUTH-005` — PR #27
+- [x] `INF-006` — PR #28
 - [ ] `COMMS-001`
 - [ ] `COM-038`
 - [ ] `INF-009`
@@ -149,8 +149,8 @@
 - [ ] `ADM-064`
 - [ ] `ADM-065`
 - [ ] `ADM-066`
-- [ ] `INF-007`
-- [ ] `INF-008`
+- [x] `INF-007` — PR #29
+- [x] `INF-008` — PR #30
 - [ ] `COMMS-002`
 
 ### 3 - Network
