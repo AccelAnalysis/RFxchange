@@ -12,10 +12,10 @@
 
 ## Progress
 
-**438 total · 89 Done · 349 Not Started**
+**438 total · 90 Done · 348 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **14/43**
+- 2 - Activation: **15/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -171,7 +171,7 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [ ] `ADM-066`
 - [x] `INF-007` — PR #29
 - [x] `INF-008` — PR #30
-- [ ] `COMMS-002`
+- [x] `COMMS-002` — PR #72; Microsoft Graph adapter/INF-007 integration tests and `npm run check`
 
 ### 3 - Network
 

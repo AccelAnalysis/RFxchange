@@ -14,6 +14,36 @@ export interface TransactionalEmailProvider {
   deliver(request: TransactionalEmailRequest): Promise<TransactionalEmailDeliveryReceipt>;
 }
 
+/**
+ * Provider-neutral failure information that an asynchronous adapter can translate into the
+ * shared background-job retry policy. Provider response bodies and credentials must not cross
+ * this boundary.
+ */
+export class TransactionalEmailProviderError extends Error {
+  readonly code: string;
+  readonly retryable: boolean;
+  readonly providerKey: string;
+  readonly externalReference: string | null;
+  readonly retryAfterSeconds: number | null;
+
+  constructor(input: Readonly<{
+    code: string;
+    message: string;
+    retryable: boolean;
+    providerKey: string;
+    externalReference?: string | null;
+    retryAfterSeconds?: number | null;
+  }>) {
+    super(input.message);
+    this.name = "TransactionalEmailProviderError";
+    this.code = input.code;
+    this.retryable = input.retryable;
+    this.providerKey = input.providerKey;
+    this.externalReference = input.externalReference ?? null;
+    this.retryAfterSeconds = input.retryAfterSeconds ?? null;
+  }
+}
+
 export class TransactionalEmailService {
   private readonly provider: TransactionalEmailProvider;
 
