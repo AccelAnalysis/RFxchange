@@ -8,6 +8,9 @@ export const FIRESTORE_COLLECTIONS = {
   organizationAuthorizations: "organizationAuthorizations",
   organizationUserInvitations: "organizationUserInvitations",
   organizationAuditEvents: "organizationAuditEvents",
+  geographies: "geographies",
+  primaryGeographySelections: "primaryGeographySelections",
+  geographyParticipationAuthorizations: "geographyParticipationAuthorizations",
   accessJourneys: "accessJourneys",
   accessRestrictions: "accessRestrictions",
   legalDocumentVersions: "legalDocumentVersions",
@@ -36,7 +39,8 @@ export interface FirestoreCollectionConvention {
   readonly documentIdSource:
     | "id"
     | "membershipId"
-    | "administratorId";
+    | "administratorId"
+    | "userId";
   readonly scope: FirestoreRecordScope;
   readonly organizationIdRequired: boolean;
   readonly appendOnly: boolean;
@@ -105,6 +109,30 @@ export const FIRESTORE_COLLECTION_CONVENTIONS: Readonly<
     organizationIdRequired: true,
     appendOnly: true,
     mutable: false,
+  }),
+  geographies: Object.freeze({
+    collection: FIRESTORE_COLLECTIONS.geographies,
+    documentIdSource: "id",
+    scope: "platform-scoped",
+    organizationIdRequired: false,
+    appendOnly: false,
+    mutable: true,
+  }),
+  primaryGeographySelections: Object.freeze({
+    collection: FIRESTORE_COLLECTIONS.primaryGeographySelections,
+    documentIdSource: "userId",
+    scope: "user-scoped",
+    organizationIdRequired: false,
+    appendOnly: false,
+    mutable: true,
+  }),
+  geographyParticipationAuthorizations: Object.freeze({
+    collection: FIRESTORE_COLLECTIONS.geographyParticipationAuthorizations,
+    documentIdSource: "id",
+    scope: "mixed-scope",
+    organizationIdRequired: false,
+    appendOnly: false,
+    mutable: true,
   }),
   accessJourneys: Object.freeze({
     collection: FIRESTORE_COLLECTIONS.accessJourneys,

@@ -12,10 +12,10 @@
 
 ## Progress
 
-**438 total · 77 Done · 361 Not Started**
+**438 total · 82 Done · 356 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **2/43**
+- 2 - Activation: **7/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -132,14 +132,14 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [ ] `ACQ-002`
 - [ ] `ACQ-003`
 - [ ] `ACQ-004`
-- [ ] `GEO-001`
-- [ ] `GEO-002`
-- [ ] `GEO-003`
+- [x] `GEO-001` — Slice 2.1 geography authority tests, Firestore emulator acceptance, and `npm run check`
+- [x] `GEO-002` — Slice 2.1 geography authority tests, Firestore emulator acceptance, and `npm run check`
+- [x] `GEO-003` — Slice 2.1 geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [ ] `GEO-004`
 - [ ] `GEO-005`
 - [ ] `GEO-006`
-- [ ] `GEO-007`
-- [ ] `GEO-008`
+- [x] `GEO-007` — Slice 2.1 geography authority tests, Firestore emulator acceptance, and `npm run check`
+- [x] `GEO-008` — Slice 2.1 geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [ ] `GEO-009`
 - [ ] `GEO-010`
 - [ ] `GEO-011`

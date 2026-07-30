@@ -16,6 +16,10 @@ const repositories = await readFile(
   new URL("../src/infrastructure/firestore/repositories.ts", import.meta.url),
   "utf8",
 );
+const geographyRepositories = await readFile(
+  new URL("../src/infrastructure/firestore/geography-repositories.ts", import.meta.url),
+  "utf8",
+);
 
 test("firebase configuration source-controls Firestore indexes", () => {
   assert.equal(firebaseConfig.firestore?.indexes, "firestore.indexes.json");
@@ -34,7 +38,7 @@ test("foundation queries rely only on automatic Firestore indexing", () => {
 });
 
 test("current Firestore repository queries remain equality-only and unsorted", () => {
-  const operators = [...repositories.matchAll(/\.where\(\s*"[^"]+"\s*,\s*"([^"]+)"/g)].map(
+  const operators = [...`${repositories}\n${geographyRepositories}`.matchAll(/\.where\(\s*"[^"]+"\s*,\s*"([^"]+)"/g)].map(
     (match) => match[1],
   );
 
@@ -50,6 +54,7 @@ test("compound equality contracts are explicitly planned for index merging", () 
     "restriction-by-organization",
     "restriction-by-membership",
     "legal-document-by-kind-version",
+    "geography-authorizations-by-user-and-geography",
   ]) {
     assert.ok(queryContracts.includes(`\"${queryName}\"`), `Missing compound equality query ${queryName}.`);
   }

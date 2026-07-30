@@ -14,6 +14,10 @@ const repositories = await readFile(
   new URL("../src/infrastructure/firestore/repositories.ts", import.meta.url),
   "utf8",
 );
+const geographyRepositories = await readFile(
+  new URL("../src/infrastructure/firestore/geography-repositories.ts", import.meta.url),
+  "utf8",
+);
 
 const failures = [];
 
@@ -66,7 +70,7 @@ for (const contract of contracts) {
   }
 }
 
-const repositoryOperators = [...repositories.matchAll(/\.where\(\s*"[^"]+"\s*,\s*"([^"]+)"/g)].map(
+const repositoryOperators = [...`${repositories}\n${geographyRepositories}`.matchAll(/\.where\(\s*"[^"]+"\s*,\s*"([^"]+)"/g)].map(
   (match) => match[1],
 );
 

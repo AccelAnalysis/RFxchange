@@ -54,8 +54,16 @@ assert(
 
 const lifecycleBlock = model.match(/export interface AccessLifecycleRecord \{([\s\S]*?)\n\}/)?.[1] ?? "";
 assert(
-  !lifecycleBlock.includes("organizationId") && !lifecycleBlock.includes("membershipId") && !lifecycleBlock.includes("userId"),
-  "early lifecycle progress must not require organization/user binding before those entities exist",
+  !lifecycleBlock.includes("organizationId") &&
+    !lifecycleBlock.includes("membershipId") &&
+    lifecycleBlock.includes("readonly userId?: UserId"),
+  "early lifecycle progress must keep user binding optional and must not require organization/membership identity",
+);
+assert(
+  model.includes("associateAccessJourneyWithUser") &&
+    model.includes('if (record.state === "visitor")') &&
+    model.includes("already bound to a different user"),
+  "post-activation slices may bind a journey to one stable user without making visitor identity mandatory",
 );
 
 assert(

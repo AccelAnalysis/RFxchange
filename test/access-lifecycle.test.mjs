@@ -12,6 +12,7 @@ import {
   accessLifecycleState,
   accessRestrictionState,
   advanceAccessLifecycle,
+  associateAccessJourneyWithUser,
   canAdvanceAccessLifecycle,
   createAccessLifecycle,
   createAccessRestriction,
@@ -69,6 +70,33 @@ test("access lifecycle starts at visitor and advances one canonical step at a ti
 
   assert.equal(nextAccessLifecycleState("open-platform"), null);
   assert.equal(lifecycle.createdAt, new Date(now).toISOString());
+});
+
+test("post-activation journey binding remains optional for visitors and immutable once established", () => {
+  const { user } = membershipFixture();
+  const other = createUserIdentity({
+    id: "user-two",
+    name: "User Two",
+    primaryEmail: "user-two@example.com",
+    loginProvider: "example-idp",
+    loginSubject: "subject-two",
+    now,
+  });
+  const visitor = createAccessLifecycle({ id: "journey-binding", now });
+  assert.equal(visitor.userId, undefined);
+  assert.throws(
+    () => associateAccessJourneyWithUser(visitor, user.id, later),
+    /visitor access journey cannot be bound/,
+  );
+
+  const started = advanceAccessLifecycle(visitor, "account-started", later);
+  const bound = associateAccessJourneyWithUser(started, user.id, later);
+  assert.equal(bound.userId, user.id);
+  assert.equal(advanceAccessLifecycle(bound, "account-activated", later).userId, user.id);
+  assert.throws(
+    () => associateAccessJourneyWithUser(bound, other.id, later),
+    /already bound to a different user/,
+  );
 });
 
 test("lifecycle cannot skip, regress, or advance beyond open platform", () => {
