@@ -19,7 +19,8 @@ export const ORGANIZATION_ROLE_BUNDLE_KEYS = [
   "resource-manager",
 ] as const;
 
-export type OrganizationRoleBundleKey = (typeof ORGANIZATION_ROLE_BUNDLE_KEYS)[number];
+export type OrganizationRoleBundleKey = OrganizationRoleKey &
+  (typeof ORGANIZATION_ROLE_BUNDLE_KEYS)[number];
 export type OrganizationRoleBundleTimestamp = string & {
   readonly __brand: "OrganizationRoleBundleTimestamp";
 };
