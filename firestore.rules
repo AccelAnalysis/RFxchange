@@ -49,6 +49,18 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ADM-083 governed policy values are server-managed configuration. Changes are authorized and
+    // audited by the application layer rather than exposed as direct client writes.
+    match /governedConfigurationValues/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    // ADM-085/086 administrative history and corrections share one append-only evidence stream.
+    match /platformAdministrativeAuditEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /organizationAuditEvents/{documentId} {
       allow read, create: if serverManagedOnly();
       allow update, delete: if false;
