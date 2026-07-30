@@ -131,7 +131,7 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 
 - [ ] `ACQ-002`
 - [ ] `ACQ-003`
-- [x] `ACQ-004` — seeded public-projection tests, desktop/mobile browser QA, Firestore emulator acceptance, and `npm run check`
+- [x] `ACQ-004` — PR #70; seeded public-projection tests, desktop/mobile browser QA, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-001` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-002` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-003` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
@@ -153,9 +153,9 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [ ] `EDU-008`
 - [ ] `EDU-009`
 - [ ] `EDU-010`
-- [x] `ORG-001` — explainable entity-match tests, desktop/mobile browser QA, Firestore emulator acceptance, and `npm run check`
-- [x] `ORG-002` — select/create lifecycle tests, Firestore emulator acceptance, and `npm run check`
-- [x] `ORG-003` — duplicate/conflict and atomic entity-key tests, Firestore emulator acceptance, and `npm run check`
+- [x] `ORG-001` — PR #70; explainable entity-match tests, desktop/mobile browser QA, Firestore emulator acceptance, and `npm run check`
+- [x] `ORG-002` — PR #70; select/create lifecycle tests, Firestore emulator acceptance, and `npm run check`
+- [x] `ORG-003` — PR #70; duplicate/conflict and atomic entity-key tests, Firestore emulator acceptance, and `npm run check`
 - [ ] `ORG-004`
 - [ ] `ORG-005`
 - [ ] `ORG-006`
