@@ -31,6 +31,7 @@ const DOMAIN_TIMESTAMP_EXPOSURE: Readonly<Record<FirestoreCollectionKey, DomainT
     organizationAuditEvents: Object.freeze({ createdAt: false, updatedAt: false }),
     accessJourneys: Object.freeze({ createdAt: true, updatedAt: true }),
     accessRestrictions: Object.freeze({ createdAt: true, updatedAt: true }),
+    primaryOperatingGeographySelections: Object.freeze({ createdAt: false, updatedAt: true }),
     legalDocumentVersions: Object.freeze({ createdAt: true, updatedAt: false }),
     legalAcknowledgements: Object.freeze({ createdAt: false, updatedAt: false }),
     organizationAuthorityRepresentations: Object.freeze({ createdAt: false, updatedAt: false }),
