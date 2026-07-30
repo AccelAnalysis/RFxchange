@@ -9,10 +9,7 @@ import {
   governedConfigurationKey,
   proposeGovernedConfigurationChange,
 } from "../src/domain/admin-configuration/model.ts";
-import {
-  createPlatformAdministratorAuthorityContext,
-  type PlatformAdministratorAuthorityContext,
-} from "../src/domain/admin-authorization/model.ts";
+import { createPlatformAdministratorAuthorityContext } from "../src/domain/admin-authorization/model.ts";
 import {
   defaultAdminRolePreset,
   permissionsFromAdminRolePreset,
