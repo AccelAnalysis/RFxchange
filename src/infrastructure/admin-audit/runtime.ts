@@ -1,7 +1,7 @@
 import type { Firestore } from "firebase-admin/firestore";
 
 import { AdministrativeAuditCorrectionService } from "../../application/admin/administrative-audit-correction-service.ts";
-import { getServerFirestore } from "../firestore/server.ts";
+import { getServerFirestore } from "../firestore/runtime.ts";
 import { FirestorePlatformAdministrativeAuditRepository } from "../firestore/platform-admin-audit-repository.ts";
 
 export function createServerAdministrativeAuditCorrectionService(
