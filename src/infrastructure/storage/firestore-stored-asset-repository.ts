@@ -50,7 +50,11 @@ function payload(asset: StoredAsset, createdAt: unknown): DocumentData {
 }
 
 export class FirestoreStoredAssetRepository implements StoredAssetRepository {
-  constructor(private readonly db: Firestore) {}
+  private readonly db: Firestore;
+
+  constructor(db: Firestore) {
+    this.db = db;
+  }
 
   async getById(id: StoredAssetId): Promise<StoredAsset | null> {
     return toStoredAsset(await this.db.collection(STORED_ASSET_COLLECTION).doc(id).get());
