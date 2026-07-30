@@ -37,7 +37,7 @@ function toStoredAsset(snapshot: DocumentSnapshot): StoredAsset | null {
   if (typeof normalized.organizationId !== "string" || !normalized.organizationId.trim()) {
     throw new Error("Stored asset metadata requires organizationId.");
   }
-  return Object.freeze(normalized) as StoredAsset;
+  return Object.freeze(normalized) as unknown as StoredAsset;
 }
 
 function payload(asset: StoredAsset, createdAt: unknown): DocumentData {
