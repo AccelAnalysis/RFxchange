@@ -36,6 +36,12 @@ service cloud.firestore {
       allow read, write: if serverManagedOnly();
     }
 
+    // ADM-055 role bundles are platform-managed authorization configuration. Direct clients cannot
+    // rewrite bundle capabilities; server-side ADM-056 operations apply named admin permissions and audit.
+    match /organizationRoleBundles/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
     match /organizationAuditEvents/{documentId} {
       allow read, create: if serverManagedOnly();
       allow update, delete: if false;
