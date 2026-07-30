@@ -126,11 +126,12 @@ const DEFAULT_PRESET_INPUTS = [
     description: "Broad delegated day-to-day platform operations without reserved sensitive authority.",
     permissions: P(
       "admin.authority.read", "admin.permission.catalog.read", "organization.profile.read",
-      "organization.profile.update", "user.profile.read", "user.access.read", "rfx.record.read",
-      "rfx.moderation.review", "provider.application.read", "provider.application.review",
-      "referral.record.read", "referral.case.review", "geography.definition.read",
-      "geography.release.read", "support.case.read", "support.case.update", "trust.report.read",
-      "trust.case.review", "analytics.dashboard.read", "audit.event.read", "system.health.read",
+      "organization.profile.update", "user.profile.read", "user.access.read", "user.access.manage",
+      "rfx.record.read", "rfx.moderation.review", "provider.application.read",
+      "provider.application.review", "referral.record.read", "referral.case.review",
+      "geography.definition.read", "geography.release.read", "support.case.read",
+      "support.case.update", "trust.report.read", "trust.case.review", "analytics.dashboard.read",
+      "audit.event.read", "system.health.read",
     ),
   },
   {
@@ -181,8 +182,8 @@ const DEFAULT_PRESET_INPUTS = [
     description: "Onboarding, support, permitted profile correction and customer-success operations.",
     permissions: P(
       "organization.profile.read", "organization.profile.update", "user.profile.read",
-      "user.access.read", "provider.application.read", "support.case.read", "support.case.update",
-      "audit.event.read",
+      "user.access.read", "user.access.manage", "provider.application.read", "support.case.read",
+      "support.case.update", "audit.event.read",
     ),
   },
   {
