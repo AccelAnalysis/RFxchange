@@ -170,7 +170,10 @@ test("controlled canvas preserves layer order, accessible controls and focus con
   assert.ok(component.includes('role="img"'));
   assert.ok(component.includes("<title"));
   assert.ok(component.includes("<desc"));
-  assert.ok(styles.includes("prefers-reduced-motion") === false);
+  assert.ok(
+    styles.includes("prefers-reduced-motion"),
+    "Slice 2.8 marker activation motion must provide a reduced-motion treatment.",
+  );
   assert.ok(
     contrast(
       CONTROLLED_LOCALITY_LAYER_STYLES["selected-outline-contrast"].stroke,
