@@ -50,6 +50,16 @@ Every successful operation creates a sensitive `PlatformAdministrativeAuditEvent
 
 `ControlledUserAdministrationUnitOfWork` commits the controlled state mutation and immutable administrative audit event atomically. The Firestore implementation checks create/update expectations and duplicate audit IDs inside one transaction.
 
+## Wave 1 tracker reconciliation
+
+PR #61 already implemented `ARC-010` and `COM-038` on the merged production baseline. Its tracker update was intentionally deferred while concurrent work was landing. After ADM-068 itself passes the full production gate, the tracker-bearing closeout commit must mark all three implemented records with their evidence:
+
+- `ARC-010` — PR #61;
+- `COM-038` — PR #61;
+- `ADM-068` — this Slice 1.31 PR.
+
+That reconciliation closes Foundation at 64/64 while also recording the completed ARC-010 item in its Commercial-wave checklist; it does not claim the rest of the Commercial wave is complete.
+
 ## Deferred
 
 This slice does not add the claims console, admin UI design, bulk user operations, identity-provider password reset, automatic suspension rules, or a new global user restriction model.
