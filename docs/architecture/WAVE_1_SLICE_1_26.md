@@ -79,7 +79,7 @@ The correction workflow:
 
 The correction event uses action `audit.event.correction-appended`, identifies the original action/outcome/timestamp in prior-state context, and records `correctionOfEventId` with the corrected state in the new-state context.
 
-The service has no update or delete operation for the original audit record. Firestore rules also make `platformAdministrativeAuditEvents` append-only for direct clients: create remains behind the trusted server boundary while update/delete are explicitly denied.
+The service does not rewrite the original audit record and has no update or delete operation for it. Firestore rules also make `platformAdministrativeAuditEvents` append-only for direct clients: create remains behind the trusted server boundary while update/delete are explicitly denied.
 
 A correction therefore means **“this later event corrects action X”**. It never means “rewrite action X as though the original history never occurred.”
 
