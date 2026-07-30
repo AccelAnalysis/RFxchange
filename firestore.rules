@@ -55,6 +55,27 @@ service cloud.firestore {
       allow read, write: if serverManagedOnly();
     }
 
+    // ADM-084 records every governed configuration mutation as immutable version evidence.
+    match /governedConfigurationChanges/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    // ADM-047 feature flags are mutable controlled state with append-only change evidence.
+    match /featureFlagStates/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /featureFlagChanges/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    // ADM-048 recovery/maintenance state can only be driven through trusted server-side executors.
+    match /systemMaintenanceOperations/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
     // ADM-085/086 administrative history and corrections share one append-only evidence stream.
     match /platformAdministrativeAuditEvents/{documentId} {
       allow read, create: if serverManagedOnly();

@@ -12,9 +12,9 @@
 
 ## Progress
 
-**438 total · 64 Done · 374 Not Started**
+**438 total · 67 Done · 371 Not Started**
 - 0 - Product System: **0/14**
-- 1 - Foundation: **57/64**
+- 1 - Foundation: **60/64**
 - 2 - Activation: **2/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
@@ -82,8 +82,8 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 - [x] `ADM-021` — PR #36
 - [x] `ADM-033` — PR #36
 - [x] `ADM-046` — PR #40
-- [ ] `ADM-047`
-- [ ] `ADM-048`
+- [x] `ADM-047` — PR #51
+- [x] `ADM-048` — PR #51
 - [x] `ADM-049` — PR #36
 - [x] `ADM-057` — PR #39
 - [x] `ADM-058` — PR #45
@@ -94,7 +94,7 @@ This sequence is planning guidance, not a completion claim. Recalculate dependen
 - [x] `ADM-067` — PR #39
 - [ ] `ADM-068`
 - [x] `ADM-069` — PR #39
-- [ ] `ADM-084`
+- [x] `ADM-084` — PR #51
 - [x] `ADM-085` — PR #38
 - [x] `ADM-086` — PR #49
 - [x] `ADM-088` — PR #35

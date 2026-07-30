@@ -8,5 +8,5 @@ export function createServerGovernedConfigurationService(
   db: Firestore = getServerFirestore(),
 ): GovernedConfigurationService {
   const repository = new FirestoreGovernedConfigurationRepository(db);
-  return new GovernedConfigurationService({ repository, changes: repository });
+  return new GovernedConfigurationService({ repository, changes: repository, history: repository });
 }
