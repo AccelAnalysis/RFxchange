@@ -1,10 +1,10 @@
 # Wave 2 — Activation Roadmap
 
-**Status: ADOPTED PLANNING AUTHORITY — IMPLEMENTATION HOLD**
+**Status: ACTIVE SEQUENTIAL IMPLEMENTATION — SLICES 2.1–2.8 MERGED; SLICE 2.9 AUTHORIZED 2026-07-30**
 
-Wave 2 begins from the canonical merged state **2/43 Activation features complete** (`INF-007`, `INF-008`). The remaining 41 Activation features are organized into the 12 slices below.
+Current merged state after the Slice 2.8 and Design Convergence Gate merges is **31/43 Activation features complete**. Slices 2.1–2.8 are complete; 12 Activation features remain across Slices 2.9–2.12.
 
-**Do not begin Slice 2.1 or any later Wave 2 implementation from this document alone. Explicit task authorization is required.**
+**Each remaining slice still requires explicit task authorization after dependency eligibility is recalculated from merged `main`. Slice 2.9 received that authorization on 2026-07-30 after recalculation from merge `61f9aa02ca435cd8c9a168bcdacb9c1ae1d8f764`.**
 
 | Slice | Features | Purpose / exit from slice |
 | --- | --- | --- |
