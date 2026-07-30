@@ -1,5 +1,6 @@
 import type { OrganizationAccount } from "../../domain/organizations/model.ts";
 import {
+  commercialPlanKey,
   createOrganizationCommercialAccount,
   type OrganizationCommercialAccount,
   type PaymentProviderReference,
@@ -83,6 +84,7 @@ export class OrganizationCommercialAccountService {
     const account = await this.ensureFreeAccount(input.organization, input.now);
     const email = normalizedEmail(input.billingEmail);
     const idempotencyKey = required(input.idempotencyKey, "Payment idempotency key");
+    const requestedPlan = commercialPlanKey(input.planKey);
     let customer = customerReference(account);
 
     if (!customer) {
@@ -102,7 +104,7 @@ export class OrganizationCommercialAccountService {
 
     const result = await this.paymentProvider.beginSubscriptionCheckout({
       organizationId: input.organization.id,
-      planKey: account.planKey === input.planKey ? account.planKey : (input.planKey.trim() as typeof account.planKey),
+      planKey: requestedPlan,
       customerReference: customer,
       successUrl: required(input.successUrl, "Checkout success URL"),
       cancelUrl: required(input.cancelUrl, "Checkout cancel URL"),
