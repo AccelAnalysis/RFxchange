@@ -1,6 +1,6 @@
 # Slice 2.9 — Acquisition-to-Activation Continuity
 
-**Status: PLANNING BRIEF ONLY — DO NOT IMPLEMENT UNTIL EXPLICITLY AUTHORIZED**
+**Status: AUTHORIZED 2026-07-30 — IMPLEMENT ONLY `ACQ-002` + `ACQ-003`; DO NOT BEGIN SLICE 2.10**
 
 ## Feature IDs
 
@@ -33,6 +33,19 @@ At slice exit, a visitor can enter from a permitted opportunity or another suppo
 Slice 2.8 must have merged and dependency eligibility must be recalculated. The user/account lifecycle, organization resolution/authority, controlled geography, confirmed location, Profile Complete and real marker activation are authoritative prerequisites for authenticated activation.
 
 `ACQ-003` builds on the persisted lifecycle from `ARC-007`. Acquisition context is navigation intent, never authorization.
+
+### Authorization checkpoint — 2026-07-30
+
+Eligibility was recalculated from merged `main` after PR #76 merged at `61f9aa02ca435cd8c9a168bcdacb9c1ae1d8f764`.
+
+- canonical tracker: **31/43 Activation features Done**;
+- Slices 2.1–2.8 Feature IDs are Done;
+- `GEO-011`, `ADM-063` and `ADM-064` are Done via PR #77;
+- `ARC-007` is Done and supplies the persisted lifecycle prerequisite for `ACQ-003`;
+- the Design Convergence Gate is merged and must be consumed by this slice;
+- no unsatisfied canonical dependency blocks `ACQ-002` or `ACQ-003`.
+
+Slice 2.9 is therefore explicitly authorized. This authorization does not extend to Slice 2.10 or any Wave 3/4 workflow.
 
 ## Product rules
 
