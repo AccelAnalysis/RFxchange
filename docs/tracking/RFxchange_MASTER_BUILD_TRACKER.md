@@ -22,20 +22,24 @@
 - 6 - Commercial: **1/50**
 - 7 - Institutional & Scale: **1/47**
 
-## Active build sequence — revised 2026-07-30
+## Active build sequence — Wave 2 Activation roadmap — adopted 2026-07-30
 
-- **Slice 1.22 — `ORG-021` + `ORG-022`**: organizational user invitations and standard organization role presets.
-- **Slice 1.23 — `ADM-055` + `ADM-056`**: organization role-bundle catalog and platform-admin membership/permission repair controls.
-- **Slice 1.24 — `ADM-058` + `ADM-059` + `ADM-060` + `ADM-091`**: command center, health summary panels, unified work queue, and universal administrative search.
-- **Slice 1.25 — `ADM-061` + `ADM-062`**: canonical administrative case model and lifecycle/SLA controls.
-- **Slice 1.26 — `ADM-083` + `ADM-086`**: Policy & Configuration Center foundation and additive audit corrections.
-- **Slice 1.27 — `ADM-047` + `ADM-048` + `ADM-084`**: controlled feature flags, recovery/maintenance operations, and versioned configuration history.
-- **Slice 1.28 — `INF-009`**: first persisted authenticated vertical slice across Firebase Auth, membership authorization and Firestore persistence.
-- **Slice 1.29 — `COMMS-001`**: provider-neutral transactional email boundary.
-- **Slice 1.30 — `ARC-010` + `COM-038`**: organization-owned commercial state and provider-neutral payment boundary.
-- **Slice 1.31 — `ADM-068`**: controlled user administration actions and Wave 1 Foundation closure.
+- **Slice 2.1 — `GEO-001` + `GEO-002` + `GEO-003` + `GEO-007` + `GEO-008` — Geography Authority**: primary operating geography, server-side authorization, canonical FIPS/geography metadata, release states, bounds and locality camera.
+- **Slice 2.2 — `GEO-004` + `GEO-005` + `GEO-006` — Geography Rendering**: authoritative locality boundaries, prominent selected-locality treatment and muted surrounding geographies.
+- **Slice 2.3 — `ACQ-004` + `ORG-001` + `ORG-002` + `ORG-003` — Organization Resolution**: seeded/unclaimed profile, organization matching, claim/create flow and duplicate/entity-resolution protection.
+- **Slice 2.4 — `COMMS-002` — Microsoft Transactional Email**: production Microsoft delivery adapter behind the provider-neutral communication boundary.
+- **Slice 2.5 — `ORG-004` + `ADM-065` + `ADM-066` — Organization Authority & Claims**: establish organizational authority plus administrative claims discovery and auditable conflict adjudication.
+- **Slice 2.6 — `GEO-009` + `GEO-010` + `ORG-005` + `ORG-006` + `ORG-009` — Organization Geography & Location**: home-versus-service geography, address capture, geocoding/map confirmation, privacy and service-area capture.
+- **Slice 2.7 — `ORG-007` + `ORG-008` + `ORG-010` + `ORG-011` + `ORG-012` — Essential Organization Profile**: minimum identity, meaningful capability, multi-role classification, business objectives and legitimate Profile Complete state.
+- **Slice 2.8 — `GEO-011` + `ADM-063` + `ADM-064` — Marker Activation & Admin 360**: activate the real organization marker and provide complete scoped administrative organization context/status.
+- **Slice 2.9 — `ACQ-002` + `ACQ-003` — Acquisition-to-Activation Continuity**: public opportunity entry and preservation of opportunity/claim/referral/team/provider/buyer context through registration and first authenticated experience.
+- **Slice 2.10 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004` — Orientation: Discovery & Team Formation**: synthetic three-organization map tutorial from opportunity issuance through capability gap and teammate discovery.
+- **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
+- **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: objective-driven first action followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
 
-This sequence is planning guidance, not a completion claim. Recalculate dependency eligibility from merged `main` after every slice and mark an item Done only after its acceptance check and CI evidence pass.
+**Implementation hold:** the Wave 2 roadmap is adopted, but **Slice 2.1 must not begin until explicit follow-up authorization is given**.
+
+This sequence is planning guidance, not a completion claim. Wave 2 begins at **2/43 complete** because `INF-007` and `INF-008` were completed earlier. Recalculate dependency eligibility from merged `main` after every slice and mark an item Done only after its acceptance check and CI evidence pass.
 
 ## Feature-ID checklist
 
