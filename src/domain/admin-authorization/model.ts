@@ -52,6 +52,7 @@ const RAW_ADMIN_PERMISSION_CATALOG = [
   ["organization.document.private.read", "organization", "Read private organization documents when explicitly authorized."],
   ["user.profile.read", "user", "Read user profile data."],
   ["user.access.read", "user", "Read user access metadata."],
+  ["user.access.manage", "user", "Administer user organization memberships and access state without bypassing organization attachment requirements."],
   ["rfx.record.read", "rfx", "Read RFx records available to administrative workflows."],
   ["rfx.private-evidence.read", "rfx", "Read private RFx responses, submissions, attachments or other restricted RFx evidence."],
   ["rfx.moderation.review", "rfx", "Review an RFx for moderation without selecting an awardee."],

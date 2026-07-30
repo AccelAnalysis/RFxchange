@@ -11,9 +11,9 @@
 
 ## Progress
 
-**438 total · 48 Done · 390 Not Started**
+**438 total · 51 Done · 387 Not Started**
 - 0 - Product System: **0/14**
-- 1 - Foundation: **46/64**
+- 1 - Foundation: **49/64**
 - 2 - Activation: **2/43**
 - 3 - Network: **0/38**
 - 4 - RFx Core: **0/41**
@@ -73,15 +73,15 @@
 - [ ] `ADM-047`
 - [ ] `ADM-048`
 - [x] `ADM-049` — PR #36
-- [ ] `ADM-057`
+- [x] `ADM-057` — PR #39
 - [ ] `ADM-058`
 - [ ] `ADM-059`
 - [ ] `ADM-060`
 - [ ] `ADM-061`
 - [ ] `ADM-062`
-- [ ] `ADM-067`
+- [x] `ADM-067` — PR #39
 - [ ] `ADM-068`
-- [ ] `ADM-069`
+- [x] `ADM-069` — PR #39
 - [ ] `ADM-084`
 - [x] `ADM-085` — PR #38
 - [ ] `ADM-086`
