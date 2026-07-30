@@ -30,16 +30,23 @@ service cloud.firestore {
       allow read, write: if serverManagedOnly();
     }
 
-    // ORG-021 invitations contain email, organization and role/permission assignment data and stay
-    // behind the verified server boundary. Invitation acceptance is committed atomically server-side.
     match /organizationUserInvitations/{documentId} {
       allow read, write: if serverManagedOnly();
     }
 
-    // ADM-055 role bundles are platform-managed authorization configuration. Direct clients cannot
-    // rewrite bundle capabilities; server-side ADM-056 operations apply named admin permissions and audit.
     match /organizationRoleBundles/{documentId} {
       allow read, write: if serverManagedOnly();
+    }
+
+    // ADM-061 canonical administrative cases are mutable workflow aggregates; lifecycle events are
+    // immutable evidence and may only be appended by the trusted server boundary.
+    match /administrativeCases/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /administrativeCaseEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
     }
 
     match /organizationAuditEvents/{documentId} {
@@ -94,8 +101,6 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // INF-007 background processing state is server-only. The mutable aggregate coordinates
-    // idempotency/leases/retries; the event ledger remains append-only.
     match /backgroundJobs/{documentId} {
       allow read, write: if serverManagedOnly();
     }
@@ -105,12 +110,10 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // INF-008 metadata is private and server-managed together with its Storage object.
     match /storedAssets/{documentId} {
       allow read, write: if serverManagedOnly();
     }
 
-    // Any collection introduced without an explicit security review is closed by default.
     match /{document=**} {
       allow read, write: if false;
     }
