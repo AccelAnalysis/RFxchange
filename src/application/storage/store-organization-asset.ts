@@ -5,12 +5,12 @@ import type {
   StoredAssetCategory,
   StoredAssetId,
   StoredAssetObjectReceipt,
-} from "../../domain/storage/model";
+} from "../../domain/storage/model.ts";
 import {
   activateStoredAsset,
   createStoredAssetDraft,
   evaluateStoredAssetAccess,
-} from "../../domain/storage/model";
+} from "../../domain/storage/model.ts";
 import type { StoredAssetRepository } from "../../domain/storage/repository";
 import type { UserId } from "../../domain/users/model";
 
