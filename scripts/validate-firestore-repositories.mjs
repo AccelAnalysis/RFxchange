@@ -10,6 +10,8 @@ const branchFiles = {
   runtime: "src/infrastructure/firestore/runtime.ts",
   firebaseAdmin: "src/infrastructure/firebase/admin.ts",
   queryContracts: "src/infrastructure/firestore/query-contracts.ts",
+  organizationResolution:
+    "src/infrastructure/firestore/organization-resolution-repositories.ts",
 };
 
 async function read(relativePath) {
@@ -40,6 +42,7 @@ const repositories = await read(branchFiles.repositories);
 const runtime = await read(branchFiles.runtime);
 const firebaseAdmin = await read(branchFiles.firebaseAdmin);
 const queryContracts = await read(branchFiles.queryContracts);
+const organizationResolution = await read(branchFiles.organizationResolution);
 
 for (const required of [
   "FieldValue.serverTimestamp()",
@@ -127,6 +130,18 @@ assert.ok(
     queryContracts.includes("FIRESTORE_MANUAL_INDEX_CONTRACTS"),
   "INF-002 query shapes must remain exposed to INF-005 index planning.",
 );
+for (const required of [
+  "FirestoreOrganizationDiscoveryRepository",
+  "FirestoreOrganizationResolutionRepository",
+  "FirestoreOrganizationResolutionUnitOfWork",
+  "organizationEntityKeys",
+  "transaction.create",
+]) {
+  assert.ok(
+    organizationResolution.includes(required),
+    `Organization resolution persistence is missing: ${required}`,
+  );
+}
 assert.ok(
   queryContracts.includes("active-memberships-by-user") &&
     queryContracts.includes("legal-document-by-kind-version") &&

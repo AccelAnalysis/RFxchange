@@ -18,6 +18,23 @@ service cloud.firestore {
       allow read, write: if serverManagedOnly();
     }
 
+    // ACQ-004 / ORG-001 discovery data is projected by trusted server handlers; resolution-only
+    // identity signals are never directly readable by browser clients.
+    match /organizationDiscoveryRecords/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    // ORG-002/003 participant decisions and strong entity-key reservations are immutable evidence.
+    match /organizationResolutions/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /organizationEntityKeys/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /users/{documentId} {
       allow read, write: if serverManagedOnly();
     }

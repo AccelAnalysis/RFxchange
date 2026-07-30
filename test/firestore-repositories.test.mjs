@@ -8,6 +8,10 @@ const geographyRepositories = await readFile(
   "src/infrastructure/firestore/geography-repositories.ts",
   "utf8",
 );
+const organizationResolutionRepositories = await readFile(
+  "src/infrastructure/firestore/organization-resolution-repositories.ts",
+  "utf8",
+);
 const queryContracts = await readFile("src/infrastructure/firestore/query-contracts.ts", "utf8");
 
 test("INF-002 keeps Firestore provider details behind infrastructure adapters", () => {
@@ -32,6 +36,29 @@ test("GEO-001 persists geography selection and lifecycle advancement atomically"
   assert.match(geographyRepositories, /saveMutableFirestoreRecordsAtomically/);
   assert.match(geographyRepositories, /primaryGeographySelections/);
   assert.match(geographyRepositories, /accessJourneys/);
+});
+
+test("ORG-002/003 atomically resolves existing or creates duplicate-protected organization state", () => {
+  assert.match(
+    organizationResolutionRepositories,
+    /implements OrganizationResolutionUnitOfWork/,
+  );
+  assert.match(
+    organizationResolutionRepositories,
+    /organizationEntityKeys/,
+  );
+  assert.match(
+    organizationResolutionRepositories,
+    /transaction\.create/,
+  );
+  assert.match(
+    organizationResolutionRepositories,
+    /state !== "geography-selected"/,
+  );
+  assert.match(
+    organizationResolutionRepositories,
+    /OrganizationEntityKeyConflictError/,
+  );
 });
 
 test("INF-002 exposes concrete query shapes to INF-005 index planning", () => {

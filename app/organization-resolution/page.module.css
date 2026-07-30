@@ -1,0 +1,87 @@
+.page {
+  min-height: 100vh;
+  padding: clamp(24px, 5vw, 72px);
+  background:
+    radial-gradient(circle at 9% 5%, rgba(46, 94, 170, 0.14), transparent 27%),
+    radial-gradient(circle at 91% 20%, rgba(59, 123, 87, 0.12), transparent 26%),
+    #0b0b0d;
+}
+
+.header {
+  width: min(100%, 1420px);
+  margin: 0 auto 30px;
+  color: #f7f3ea;
+}
+
+.header p,
+.mapContext > p {
+  margin: 0 0 9px;
+  color: #d6a23a;
+  font-size: 0.7rem;
+  font-weight: 780;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  max-width: 980px;
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 5.1rem);
+  line-height: 0.94;
+  letter-spacing: -0.058em;
+}
+
+.workspace {
+  display: grid;
+  width: min(100%, 1420px);
+  margin-inline: auto;
+  grid-template-columns: minmax(470px, 0.86fr) minmax(590px, 1.14fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.mapContext {
+  min-width: 0;
+}
+
+.mapContext > p {
+  margin: 0 0 12px 10px;
+  color: rgba(247, 243, 234, 0.54);
+  letter-spacing: 0.09em;
+}
+
+.mapContext figure {
+  border-radius: 28px;
+}
+
+.mapContext figure h2 {
+  font-size: clamp(2rem, 4vw, 3.8rem);
+}
+
+@media (max-width: 1120px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .mapContext {
+    order: -1;
+  }
+}
+
+@media (max-width: 620px) {
+  .page {
+    padding: 22px 16px 44px;
+  }
+
+  .header {
+    margin-bottom: 22px;
+  }
+
+  .mapContext > p {
+    margin-left: 4px;
+  }
+
+  .mapContext figure {
+    border-radius: 22px;
+  }
+}

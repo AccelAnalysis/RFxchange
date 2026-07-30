@@ -12,10 +12,10 @@
 
 ## Progress
 
-**438 total · 85 Done · 353 Not Started**
+**438 total · 89 Done · 349 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **10/43**
+- 2 - Activation: **14/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -131,7 +131,7 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 
 - [ ] `ACQ-002`
 - [ ] `ACQ-003`
-- [ ] `ACQ-004`
+- [x] `ACQ-004` — seeded public-projection tests, desktop/mobile browser QA, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-001` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-002` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-003` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
@@ -153,9 +153,9 @@ This sequence is planning guidance, not a completion claim. Wave 2 begins at **2
 - [ ] `EDU-008`
 - [ ] `EDU-009`
 - [ ] `EDU-010`
-- [ ] `ORG-001`
-- [ ] `ORG-002`
-- [ ] `ORG-003`
+- [x] `ORG-001` — explainable entity-match tests, desktop/mobile browser QA, Firestore emulator acceptance, and `npm run check`
+- [x] `ORG-002` — select/create lifecycle tests, Firestore emulator acceptance, and `npm run check`
+- [x] `ORG-003` — duplicate/conflict and atomic entity-key tests, Firestore emulator acceptance, and `npm run check`
 - [ ] `ORG-004`
 - [ ] `ORG-005`
 - [ ] `ORG-006`

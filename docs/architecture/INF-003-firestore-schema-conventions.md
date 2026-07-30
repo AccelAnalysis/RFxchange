@@ -34,6 +34,9 @@ The current foundation maps to these collections:
 | --- | --- | --- | --- |
 | `organizations` | `OrganizationAccount.id` | organization root | mutable |
 | `organizationProfiles` | `OrganizationProfile.id` | organization | mutable |
+| `organizationDiscoveryRecords` | discovery record `id` | organization | mutable |
+| `organizationResolutions` | resolution record `id` | organization | append-only |
+| `organizationEntityKeys` | opaque strong-key hash `id` | organization | append-only |
 | `users` | `UserIdentity.id` | user | mutable |
 | `organizationMemberships` | `OrganizationMembership.id` | organization | mutable |
 | `organizationAuthorizations` | `membershipId` | organization | mutable |
@@ -98,7 +101,10 @@ Where an existing mutable domain aggregate already exposes `createdAt` / `update
 
 Collections marked append-only preserve the existing architecture invariant that history is not rewritten through normal repository operations.
 
-Append-only includes current legal acknowledgement evidence, organization audit events, organization authority representations, platform change directives, retention policies/assignments, and admin permission grants.
+Append-only includes current organization resolution decisions and entity-key
+reservations, legal acknowledgement evidence, organization audit events,
+organization authority representations, platform change directives, retention
+policies/assignments, and admin permission grants.
 
 Corrections or later state changes must be modeled as additional records/events where the owning domain requires that behavior. A Firestore adapter must not quietly introduce `update` or `delete` behavior for an append-only repository port.
 

@@ -18,6 +18,13 @@ const geographyRepositories = await readFile(
   new URL("../src/infrastructure/firestore/geography-repositories.ts", import.meta.url),
   "utf8",
 );
+const organizationResolutionRepositories = await readFile(
+  new URL(
+    "../src/infrastructure/firestore/organization-resolution-repositories.ts",
+    import.meta.url,
+  ),
+  "utf8",
+);
 
 const failures = [];
 
@@ -70,7 +77,7 @@ for (const contract of contracts) {
   }
 }
 
-const repositoryOperators = [...`${repositories}\n${geographyRepositories}`.matchAll(/\.where\(\s*"[^"]+"\s*,\s*"([^"]+)"/g)].map(
+const repositoryOperators = [...`${repositories}\n${geographyRepositories}\n${organizationResolutionRepositories}`.matchAll(/\.where\(\s*"[^"]+"\s*,\s*"([^"]+)"/g)].map(
   (match) => match[1],
 );
 
@@ -84,6 +91,9 @@ for (const operator of repositoryOperators) {
 
 if (/\.orderBy\s*\(/.test(repositories)) {
   failures.push("Repository orderBy queries require an explicit INF-005 manual index review.");
+}
+if (/\.orderBy\s*\(/.test(organizationResolutionRepositories)) {
+  failures.push("Organization resolution orderBy queries require an explicit INF-005 manual index review.");
 }
 
 const currentManualIndexes = Array.isArray(indexConfig.indexes) ? indexConfig.indexes : [];

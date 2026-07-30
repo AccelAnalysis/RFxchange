@@ -16,6 +16,7 @@ import styles from "./ControlledLocalityCanvas.module.css";
 export interface ControlledLocalityCanvasProps {
   readonly model: ControlledLocalityMapModel;
   readonly initialZoom?: ControlledLocalityZoomLevel;
+  readonly headingLevel?: "h1" | "h2";
 }
 
 const VIEWBOX_WIDTH = 1100;
@@ -24,7 +25,9 @@ const VIEWBOX_HEIGHT = 700;
 export function ControlledLocalityCanvas({
   model,
   initialZoom = "locality",
+  headingLevel = "h1",
 }: ControlledLocalityCanvasProps) {
+  const Heading = headingLevel;
   const titleId = useId();
   const descriptionId = useId();
   const [zoomIndex, setZoomIndex] = useState(() => {
@@ -50,7 +53,7 @@ export function ControlledLocalityCanvas({
       <div className={styles.header}>
         <div>
           <p className={styles.eyebrow}>Controlled locality</p>
-          <h1 className={styles.title}>{model.selectedGeography.name}</h1>
+          <Heading className={styles.title}>{model.selectedGeography.name}</Heading>
           <p className={styles.detail}>
             Selected geography is shown in full focus. Surrounding localities remain visible
             for geographic context.

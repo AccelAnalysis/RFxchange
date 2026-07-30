@@ -11,6 +11,9 @@ const firebaseConfig = JSON.parse(readFileSync(resolve(root, "firebase.json"), "
 const canonicalCollections = [
   "organizations",
   "organizationProfiles",
+  "organizationDiscoveryRecords",
+  "organizationResolutions",
+  "organizationEntityKeys",
   "users",
   "organizationMemberships",
   "organizationAuthorizations",
@@ -32,6 +35,8 @@ const canonicalCollections = [
 
 const appendOnlyCollections = [
   "organizationAuditEvents",
+  "organizationResolutions",
+  "organizationEntityKeys",
   "legalDocumentVersions",
   "legalAcknowledgements",
   "organizationAuthorityRepresentations",
