@@ -77,6 +77,15 @@ export interface ControlledUserAdministrationContext {
   }>[];
 }
 
+type ControlledUserAdministrationDependencies = Readonly<{
+  invitations: OrganizationUserInvitationRepository;
+  memberships: OrganizationMembershipRepository;
+  authorizations: OrganizationUserAuthorizationRepository;
+  restrictions: AccessRestrictionRepository;
+  roleBundles: OrganizationRoleBundleRepository;
+  unitOfWork: ControlledUserAdministrationUnitOfWork;
+}>;
+
 function required(value: string, field: string): string {
   const normalized = value.trim();
   if (!normalized) throw new Error(`${field} is required.`);
@@ -230,16 +239,11 @@ function renewInvitation(
 }
 
 export class ControlledUserAdministrationService {
-  constructor(
-    private readonly dependencies: Readonly<{
-      invitations: OrganizationUserInvitationRepository;
-      memberships: OrganizationMembershipRepository;
-      authorizations: OrganizationUserAuthorizationRepository;
-      restrictions: AccessRestrictionRepository;
-      roleBundles: OrganizationRoleBundleRepository;
-      unitOfWork: ControlledUserAdministrationUnitOfWork;
-    }>,
-  ) {}
+  private readonly dependencies: ControlledUserAdministrationDependencies;
+
+  constructor(dependencies: ControlledUserAdministrationDependencies) {
+    this.dependencies = dependencies;
+  }
 
   private async membership(
     organization: OrganizationAccount,
