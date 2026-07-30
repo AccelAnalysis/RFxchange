@@ -1,5 +1,6 @@
 export * from "./firebase-account-security";
 export * from "./firebase-account-security-runtime";
+export * from "./firebase-authenticated-organization-runtime";
 export * from "./firebase-browser";
 export * from "./firebase-browser-lifecycle";
 export * from "./firebase-client";
