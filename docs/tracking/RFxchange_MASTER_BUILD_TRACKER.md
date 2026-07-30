@@ -8,6 +8,7 @@
 - Do not infer completion from adjacent features.
 - Detailed requirements and acceptance criteria remain in the source specifications and slice architecture docs.
 - Update this file in the same PR as implementation whenever practical; Git history is the version history.
+- Build sequencing follows the reviewed dependency authority in `RFxchange_DEPENDENCY_MAP.md`; corrected dependencies supersede seeded spreadsheet edges for scheduling only.
 
 ## Progress
 
@@ -20,6 +21,17 @@
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **0/50**
 - 7 - Institutional & Scale: **0/47**
+
+## Active build sequence — revised 2026-07-30
+
+- **Slice 1.22 — `ORG-021` + `ORG-022`**: organizational user invitations and standard organization role presets.
+- **Slice 1.23 — `ADM-055` + `ADM-056`**: organization role-bundle catalog and platform-admin membership/permission repair controls.
+- **Slice 1.24 — `ADM-058` + `ADM-059` + `ADM-060` + `ADM-091`**: command center, health summary panels, unified work queue, and universal administrative search.
+- **Slice 1.25 — `ADM-061` + `ADM-062`**: canonical administrative case model and lifecycle/SLA controls.
+- **Slice 1.26 — `ADM-083` + `ADM-086`**: Policy & Configuration Center foundation and additive audit corrections.
+- **Slice 1.27 — `ADM-047` + `ADM-048` + `ADM-084`**: controlled feature flags, recovery/maintenance operations, and versioned configuration history.
+
+This sequence is planning guidance, not a completion claim. Recalculate dependency eligibility from merged `main` after every slice and mark an item Done only after its acceptance check and CI evidence pass.
 
 ## Feature-ID checklist
 
@@ -490,7 +502,7 @@
 2. Implement and validate the documented acceptance check.
 3. Mark `[x]` only after validation passes and add PR/commit/CI evidence.
 4. Refresh the progress totals above.
-5. Use the next dependency-eligible unchecked ID to plan the next slice.
+5. Use the next dependency-eligible unchecked ID to plan the next slice using `RFxchange_DEPENDENCY_MAP.md` as the dependency authority.
 
 ## Source tracker
-`RFxchange_Master_Feature_Build_Tracker_Updated_Infrastructure(1).xlsx` seeded this checklist. The Markdown tracker is now the live progress authority.
+`RFxchange_Master_Feature_Build_Tracker_Updated_Infrastructure(1).xlsx` seeded this checklist. The Markdown tracker is now the live progress authority; reviewed dependency corrections are maintained in `RFxchange_DEPENDENCY_MAP.md`.
