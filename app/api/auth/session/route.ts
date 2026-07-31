@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const activation = createServerActivationJourneyService();
     const state = await activation.bootstrap(
       issued.context,
-      body.provisionalOrganizationName?.trim() || body.requestedName?.trim() || "Organization",
+      body.provisionalOrganizationName?.trim() || body.requestedName?.trim() || "",
     );
 
     const response = NextResponse.json({ state });
