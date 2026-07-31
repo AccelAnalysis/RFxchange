@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { MarketingFooter, MarketingHeader } from "@/src/components/marketing/MarketingChrome";
+import referenceStyles from "@/src/components/marketing/MarketingReference.module.css";
 import styles from "@/src/components/marketing/MarketingSite.module.css";
 import { publicDifferentiation } from "@/src/content/marketing";
 
@@ -26,13 +27,13 @@ export default function HomePage() {
         <div className={styles.heroGrid} aria-hidden="true" />
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}>A Local Business Growth Network</p>
+            <div className={referenceStyles.eyebrow}>A Local Business Growth Network</div>
             <h1 id="hero-title">Where business capability meets <span className={styles.gold}>opportunity.</span></h1>
             <p className={styles.heroDeck}>
               Discover businesses. Find opportunities. Build partnerships. Connect to the resources that move business forward.
             </p>
             <div className={styles.heroActions}>
-              <Link className={styles.buttonGold} href="/join">Join</Link>
+              <Link className={styles.buttonGold} href="/join">Join the Exchange — Free</Link>
               <a className={styles.buttonLight} href="#how-it-works">See How It Works</a>
             </div>
           </div>
@@ -42,10 +43,10 @@ export default function HomePage() {
       <section className={styles.section} aria-labelledby="activity-title">
         <div className={styles.wrap}>
           <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>The economy is already moving</p>
+            <div className={referenceStyles.eyebrow}>The economy is already moving</div>
             <h2 id="activity-title">Opportunity is already moving through your community.</h2>
             <p>
-              Businesses are buying, selling, hiring, contracting, referring, partnering, and growing every day. RFxchange makes more of that activity visible and easier to act on.
+              Businesses are buying, selling, hiring, contracting, referring, partnering and growing every day. The RFxchange helps make that activity easier to find and act on.
             </p>
           </div>
           <div className={styles.mosaic} aria-label="Business activity across industries">
@@ -66,7 +67,7 @@ export default function HomePage() {
               <figcaption>Logistics & supply</figcaption>
             </figure>
             <figure>
-              <img src={images.region} alt="Aerial view of a city and waterways" />
+              <img src={images.region} alt="Aerial view of a major city and waterfront" />
               <figcaption>Local roots. Wider markets.</figcaption>
             </figure>
           </div>
@@ -78,13 +79,13 @@ export default function HomePage() {
           <img src={images.workshop} alt="Business owners working together in a workshop" />
         </div>
         <div className={styles.problemCopy}>
-          <p className={styles.eyebrow}>The connection gap</p>
+          <div className={referenceStyles.eyebrow}>The connection gap</div>
           <h2 id="problem-title">The opportunity may exist. The connection may not.</h2>
           <div className={styles.wordCloud} aria-label="Business connection categories">
             {["Buyers", "Suppliers", "RFx", "Partners", "Referrals", "Capital", "Workforce", "Resources"].map((word) => <span key={word}>{word}</span>)}
           </div>
           <p>
-            Those connections are often scattered across portals, directories, emails, events, institutional systems, and personal relationships.
+            Those connections are often scattered across portals, directories, emails, events, institutional systems and personal relationships. RFxchange creates a shared environment around business action.
           </p>
         </div>
       </section>
@@ -92,7 +93,7 @@ export default function HomePage() {
       <section className={styles.sectionTight} aria-labelledby="different-title">
         <div className={styles.wrap}>
           <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>Built for business action</p>
+            <div className={referenceStyles.eyebrow}>Built for business action</div>
             <h2 id="different-title">A working network—not another place to post and scroll.</h2>
           </div>
           <div className={styles.differentiationGrid}>
@@ -109,7 +110,7 @@ export default function HomePage() {
       <section className={styles.section} aria-labelledby="value-title">
         <div className={styles.wrap}>
           <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>One network</p>
+            <div className={referenceStyles.eyebrow}>One network</div>
             <h2 id="value-title">Multiple ways to move business forward.</h2>
           </div>
           <div className={styles.triPanel}>
@@ -133,7 +134,7 @@ export default function HomePage() {
               <img src={images.collaboration} alt="Professionals collaborating in a business meeting" />
               <div className={styles.cardContent}>
                 <span className={styles.cardIndex}>03 · Build the connection</span>
-                <h3>Find the business, partner, or resource you need next.</h3>
+                <h3>Find the business, partner or resource you need next.</h3>
                 <p>Partners · resources · referrals · teams</p>
               </div>
             </article>
@@ -146,10 +147,10 @@ export default function HomePage() {
           <img src={images.construction} alt="Project team reviewing plans on site" />
         </div>
         <div className={styles.splitCopy}>
-          <p className={styles.eyebrow}>The transaction cycle</p>
+          <div className={referenceStyles.eyebrow}>The transaction cycle</div>
           <h2 id="rfx-title">From need to opportunity.</h2>
           <p>
-            RFxchange connects a business need to the market around it—so discovery, matching, response, connection, and outcome can operate as one journey.
+            RFxchange connects the business need to the market around it—without reducing the experience to another bid list.
           </p>
           <div className={styles.flow} aria-label="RFx transaction flow">
             {["Need", "RFx", "Match", "Respond", "Select", "Outcome"].map((step, index, list) => (
@@ -162,15 +163,15 @@ export default function HomePage() {
 
       <section className={styles.split} aria-labelledby="partner-title">
         <div className={styles.splitCopy}>
-          <p className={styles.eyebrow}>Teaming</p>
+          <div className={referenceStyles.eyebrow}>Teaming</div>
           <h2 id="partner-title">The right opportunity may require the right partner.</h2>
           <p>
-            When capability, capacity, geography, or experience creates a gap, RFxchange helps surface complementary organizations to explore working together.
+            When capability, capacity, geography or experience creates a gap, the network can help surface complementary organizations to explore working together.
           </p>
           <p><Link className={styles.buttonDark} href="/businesses">For Businesses</Link></p>
         </div>
         <div className={styles.splitMedia}>
-          <img src={images.collaboration} alt="Professionals collaborating around business documents" />
+          <img src={images.collaboration} alt="Four professionals collaborating around business documents" />
         </div>
       </section>
 
@@ -180,7 +181,7 @@ export default function HomePage() {
             <img src={images.professional} alt="Professional team discussing business needs" />
           </div>
           <div className={styles.resourceList}>
-            <p className={styles.eyebrow}>Resources in context</p>
+            <div className={referenceStyles.eyebrow}>Resources in context</div>
             <h3 id="resource-title">When you need help, find the right door.</h3>
             {["Capital", "Contracting", "Workforce", "Technical Assistance", "Training & Business Support"].map((resource) => (
               <div className={styles.resourceItem} key={resource}><b>{resource}</b><span>↗</span></div>
@@ -193,7 +194,7 @@ export default function HomePage() {
       <section className={`${styles.section} ${styles.sectionDark}`} aria-labelledby="audience-title">
         <div className={styles.wrap}>
           <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>One network. Different entry points.</p>
+            <div className={referenceStyles.eyebrow}>One network. Different entry points.</div>
             <h2 id="audience-title">Built around the people who move business.</h2>
           </div>
           <div className={styles.audienceGrid}>
@@ -211,7 +212,7 @@ export default function HomePage() {
             </Link>
             <Link className={styles.audienceCard} href="/about">
               <img src={images.region} alt="Regional city and waterfront from above" />
-              <div className={styles.cardContent}><span className={styles.audienceLabel}>Communities</span><h3>Make the ecosystem more legible.</h3><p>See capabilities, connections, demand, and gaps.</p></div>
+              <div className={styles.cardContent}><span className={styles.audienceLabel}>Communities</span><h3>Make the ecosystem more legible.</h3><p>See capabilities, connections, demand and gaps.</p></div>
             </Link>
           </div>
         </div>
@@ -220,11 +221,11 @@ export default function HomePage() {
       <section className={styles.section} aria-labelledby="trust-title">
         <div className={`${styles.wrap} ${styles.trust}`}>
           <div>
-            <p className={styles.eyebrow}>Credibility</p>
+            <div className={referenceStyles.eyebrow}>Credibility</div>
             <div className={styles.sectionHead}>
               <h2 id="trust-title">Know more about who you&apos;re connecting with.</h2>
               <p>
-                Identity, activity, experience, completed interactions, and authorized endorsements can build an evidence-backed organizational history without reducing trust to a public numerical score.
+                Identity, activity, experience, completed interactions and authorized endorsements can build an evidence-backed organizational history—without turning participation into a public numerical score.
               </p>
             </div>
             <div className={styles.trustBadges} aria-label="Credibility families">
@@ -238,10 +239,10 @@ export default function HomePage() {
       </section>
 
       <section className={styles.fullBleed} aria-labelledby="scale-title">
-        <img src={images.region} alt="Aerial view of a city, region, and waterways" />
+        <img src={images.region} alt="Aerial view of a city, region and waterways" />
         <div className={styles.fullBleedContent}>
           <div>
-            <p className={styles.eyebrow}>Geography as context</p>
+            <div className={referenceStyles.eyebrow}>Geography as context</div>
             <h2 id="scale-title">Local roots. Wider opportunity.</h2>
             <p>Build relationships nearby. Pursue opportunity across regions. Let capability—not just proximity—define where your business can compete.</p>
           </div>
@@ -250,9 +251,9 @@ export default function HomePage() {
 
       <section className={styles.joinBand} aria-labelledby="join-title">
         <div className={styles.joinCopy}>
-          <p className={styles.eyebrow}>Free organization account</p>
+          <div className={referenceStyles.eyebrow}>Free organization account</div>
           <h2 id="join-title">Start building your position in the Exchange. Free.</h2>
-          <p>Establish your organization, describe your capabilities, and enter a network built around opportunity, referrals, teaming, and resources.</p>
+          <p>Establish your organization, describe your capabilities and enter a network built around opportunity, referrals, teaming and resources.</p>
           <div className={styles.stepsInline}><span><b>01</b>Create</span><span><b>02</b>Establish</span><span><b>03</b>Participate</span></div>
           <p><Link className={styles.buttonGold} href="/join">Join the Exchange — Free</Link></p>
         </div>
@@ -266,9 +267,9 @@ export default function HomePage() {
           <img src={images.warehouse} alt="Large warehouse and supply operation" />
         </div>
         <div className={styles.foundingCopy}>
-          <p className={styles.eyebrow}>Founding RFxchange</p>
+          <div className={referenceStyles.eyebrow}>Founding RFxchange</div>
           <h2 id="founding-title">Help build the network you want to use.</h2>
-          <p>Founding Organizations participate early, help shape practical workflows, and become part of the network&apos;s launch cohort. Current benefits and commercial terms are explained on the dedicated Founding page.</p>
+          <p>Founding Organizations participate early, help shape practical workflows and become part of the network&apos;s launch cohort. Founding benefits and commercial terms are presented on a dedicated page.</p>
           <p><Link className={styles.buttonGold} href="/founding">Explore Founding Membership</Link></p>
         </div>
       </section>
@@ -276,7 +277,7 @@ export default function HomePage() {
       <section className={styles.ctaBanner} aria-labelledby="cta-title">
         <img src={images.construction} alt="Business professionals working together on an active project" />
         <div className={styles.ctaInner}>
-          <p className={styles.eyebrow}>Enter the Exchange</p>
+          <div className={referenceStyles.eyebrow}>Enter the Exchange</div>
           <h2 id="cta-title">Be found.<br />Find opportunity.<br />Build the connection.</h2>
           <div className={styles.ctaActions}>
             <Link className={styles.buttonGold} href="/join">Join Free</Link>
