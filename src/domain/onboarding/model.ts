@@ -1,6 +1,16 @@
 import type { OrganizationId } from "../organizations/model.ts";
 import type { OrganizationMembershipId, UserId } from "../users/model.ts";
 
+export const ORGANIZATION_RELATIONSHIPS = [
+  "owner",
+  "executive-officer",
+  "employee",
+  "authorized-representative",
+  "advisor-contractor",
+  "other",
+] as const;
+export type OrganizationRelationship = (typeof ORGANIZATION_RELATIONSHIPS)[number];
+
 export interface ActivationLegalAcceptance {
   readonly acceptedTerms: true;
   readonly acceptedPlatformRules: true;
@@ -14,6 +24,11 @@ export interface ActivationJourneyContext {
   readonly userId: UserId;
   readonly accessJourneyId: string;
   readonly provisionalOrganizationName: string;
+  /**
+   * Descriptive onboarding metadata only. This value never grants organization authority or any
+   * permission; durable control continues to require membership + authorization establishment.
+   */
+  readonly organizationRelationship: OrganizationRelationship | null;
   readonly legalAcceptance: ActivationLegalAcceptance | null;
   /**
    * Temporary bridge only. It proves the user saw the canonical orientation position in the
@@ -40,6 +55,14 @@ function timestamp(value: string): string {
   return parsed.toISOString();
 }
 
+export function organizationRelationship(value: string): OrganizationRelationship {
+  const normalized = required(value, "Organization relationship", 64).toLowerCase();
+  if (!ORGANIZATION_RELATIONSHIPS.includes(normalized as OrganizationRelationship)) {
+    throw new Error(`Unsupported organization relationship: ${normalized}.`);
+  }
+  return normalized as OrganizationRelationship;
+}
+
 export function activationJourneyIdForUser(userId: UserId): string {
   return `activation-${String(userId)}`;
 }
@@ -47,6 +70,7 @@ export function activationJourneyIdForUser(userId: UserId): string {
 export function createActivationJourneyContext(input: Readonly<{
   userId: UserId;
   provisionalOrganizationName: string;
+  organizationRelationship?: string | null;
   now: string;
 }>): ActivationJourneyContext {
   const now = timestamp(input.now);
@@ -60,6 +84,9 @@ export function createActivationJourneyContext(input: Readonly<{
       "Provisional organization name",
       160,
     ),
+    organizationRelationship: input.organizationRelationship
+      ? organizationRelationship(input.organizationRelationship)
+      : null,
     legalAcceptance: null,
     orientationBridgeAcknowledgedAt: null,
     organizationId: null,
@@ -74,6 +101,7 @@ export function updateActivationJourneyContext(
   current: ActivationJourneyContext,
   input: Readonly<{
     provisionalOrganizationName?: string;
+    organizationRelationship?: string | null;
     legalAcceptance?: ActivationLegalAcceptance | null;
     orientationBridgeAcknowledgedAt?: string | null;
     organizationId?: OrganizationId | null;
@@ -92,6 +120,13 @@ export function updateActivationJourneyContext(
             "Provisional organization name",
             160,
           ),
+        }
+      : {}),
+    ...(input.organizationRelationship !== undefined
+      ? {
+          organizationRelationship: input.organizationRelationship
+            ? organizationRelationship(input.organizationRelationship)
+            : null,
         }
       : {}),
     ...(input.legalAcceptance !== undefined
