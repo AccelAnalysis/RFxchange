@@ -35,6 +35,16 @@ type SearchCandidate = Readonly<{
   evidence?: readonly Readonly<{ explanation: string }>[];
 }>;
 
+type GeographyCandidate = Readonly<{
+  reference: string;
+  name: string;
+  stateCode: string;
+  stateName: string;
+  fipsCode: string;
+  type: string;
+  source: string;
+}>;
+
 type LocationCandidate = Readonly<{
   id: string;
   coordinate: readonly [number, number];
@@ -128,6 +138,11 @@ export function ActivationJourneyClient({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [legalChecks, setLegalChecks] = useState({ terms: false, rules: false, privacy: false });
+  const [localityQuery, setLocalityQuery] = useState("");
+  const [localityStateCode, setLocalityStateCode] = useState("VA");
+  const [geographyCandidates, setGeographyCandidates] = useState<readonly GeographyCandidate[]>([]);
+  const [hasSearchedGeographies, setHasSearchedGeographies] = useState(false);
+  const [verificationNotice, setVerificationNotice] = useState<string | null>(null);
   const [orgDomain, setOrgDomain] = useState("");
   const [orgPhone, setOrgPhone] = useState("");
   const [searchCandidates, setSearchCandidates] = useState<readonly SearchCandidate[]>([]);
@@ -206,6 +221,7 @@ export function ActivationJourneyClient({
     });
     setState(result.state);
     setOrganizationName(result.state.provisionalOrganizationName);
+    return result.state;
   }
 
   async function postAction<T extends object = { state: ActivationJourneyState }>(
@@ -287,9 +303,12 @@ export function ActivationJourneyClient({
                     if (!userName.trim()) throw new Error("Your name is required.");
                     await auth.registerWithEmailAndPassword(email, password);
                     setAuthMode("signin");
-                    await createClientAuthenticationLifecycle()
-                      .sendVerificationEmail(`${window.location.origin}/join`)
-                      .catch(() => undefined);
+                    try {
+                      await createClientAuthenticationLifecycle().sendVerificationEmail(`${window.location.origin}/join`);
+                      setVerificationNotice(`Verification email sent to ${email.trim()}. Open the message, verify the address, then return to this registration.`);
+                    } catch {
+                      setVerificationNotice("Your account was created, but the first verification message could not be sent. Continue registration and use Send verification email on the verification step.");
+                    }
                     await exchangeSession(organizationName, userName, organizationRelationship);
                   } else {
                     await auth.signInWithEmailAndPassword(email, password);
@@ -331,14 +350,23 @@ export function ActivationJourneyClient({
             <p className={styles.stepLabel}>Account active</p>
             <h2>Accept the participation policies.</h2>
             <p>
-              This integration gate captures the required acceptance position now. Canonical
-              versioned legal acknowledgements remain subject to the published Terms, Platform
-              Rules, and Privacy Policy and will be rechecked by the OPEN gate.
+              Review the current published policies before accepting them. These activation
+              acknowledgements preserve the required registration position; the canonical
+              versioned legal gate can require renewed action when a material policy changes.
             </p>
             <div className={styles.checkList}>
-              <label><input type="checkbox" checked={legalChecks.terms} onChange={(e) => setLegalChecks((v) => ({ ...v, terms: e.target.checked }))} />I accept the current RFxchange Terms of Service.</label>
-              <label><input type="checkbox" checked={legalChecks.rules} onChange={(e) => setLegalChecks((v) => ({ ...v, rules: e.target.checked }))} />I agree to the Platform Rules / conduct requirements.</label>
-              <label><input type="checkbox" checked={legalChecks.privacy} onChange={(e) => setLegalChecks((v) => ({ ...v, privacy: e.target.checked }))} />I acknowledge the Privacy Policy.</label>
+              <label>
+                <input type="checkbox" checked={legalChecks.terms} onChange={(e) => setLegalChecks((v) => ({ ...v, terms: e.target.checked }))} />
+                <span>I accept the current RFxchange <Link className={styles.policyLink} href="/terms" target="_blank" rel="noreferrer">Terms of Service</Link>.</span>
+              </label>
+              <label>
+                <input type="checkbox" checked={legalChecks.rules} onChange={(e) => setLegalChecks((v) => ({ ...v, rules: e.target.checked }))} />
+                <span>I agree to the <Link className={styles.policyLink} href="/platform-rules" target="_blank" rel="noreferrer">Platform Rules / conduct requirements</Link>.</span>
+              </label>
+              <label>
+                <input type="checkbox" checked={legalChecks.privacy} onChange={(e) => setLegalChecks((v) => ({ ...v, privacy: e.target.checked }))} />
+                <span>I acknowledge the <Link className={styles.policyLink} href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</Link>.</span>
+              </label>
             </div>
             <button className={styles.primary} disabled={busy || !legalChecks.terms || !legalChecks.rules || !legalChecks.privacy} onClick={() => run(async () => {
               const result = await postAction("accept-legal");
@@ -351,17 +379,46 @@ export function ActivationJourneyClient({
           <section className={styles.card}>
             <p className={styles.stepLabel}>Home locality</p>
             <h2>Where is {state.provisionalOrganizationName} primarily based?</h2>
-            <p>The selection is validated server-side. Map navigation never changes this authority.</p>
-            <div className={styles.choiceGrid}>
-              {state.releasedGeographies.map((geography) => (
-                <button key={geography.id} className={styles.choiceCard} type="button" disabled={busy} onClick={() => run(async () => {
-                  const result = await postAction("select-geography", { geographyId: geography.id });
-                  setState(result.state);
-                })}>
-                  <strong>{geography.name}</strong><span>{geography.type}</span>
-                </button>
-              ))}
-            </div>
+            <p>
+              Search by city, county, or locality and state. Results come from U.S. Census Bureau
+              TIGERweb geography and the selection is resolved again on the server before it can
+              become your authoritative home locality.
+            </p>
+            <form className={styles.form} onSubmit={(event) => {
+              event.preventDefault();
+              void run(async () => {
+                const result = await postAction<{ candidates: readonly GeographyCandidate[] }>("search-geographies", {
+                  query: localityQuery,
+                  stateCode: localityStateCode,
+                });
+                setGeographyCandidates(result.candidates);
+                setHasSearchedGeographies(true);
+              });
+            }}>
+              <div className={styles.twoColumn}>
+                <label>City, county, or locality<input value={localityQuery} onChange={(event) => setLocalityQuery(event.target.value)} minLength={2} placeholder="Portsmouth, Richmond, Fairfax…" required /></label>
+                <label>State <small>Two-letter code</small><input value={localityStateCode} onChange={(event) => setLocalityStateCode(event.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2))} minLength={2} maxLength={2} placeholder="VA" required /></label>
+              </div>
+              <button className={styles.primary} type="submit" disabled={busy}>Search Census localities</button>
+            </form>
+            {hasSearchedGeographies ? (
+              <div className={styles.results}>
+                <h3>{geographyCandidates.length ? "Census matches" : "No matching Census locality found"}</h3>
+                {geographyCandidates.map((geography) => (
+                  <article key={geography.reference} className={styles.resultCard}>
+                    <div>
+                      <strong>{geography.name}, {geography.stateName}</strong>
+                      <span>{geography.type} · FIPS {geography.fipsCode} · {geography.source}</span>
+                    </div>
+                    <button className={styles.primary} type="button" disabled={busy} onClick={() => run(async () => {
+                      const result = await postAction("select-census-geography", { reference: geography.reference });
+                      setState(result.state);
+                      window.location.reload();
+                    })}>Use this home locality</button>
+                  </article>
+                ))}
+              </div>
+            ) : null}
           </section>
         ) : null}
 
@@ -387,13 +444,26 @@ export function ActivationJourneyClient({
             <p className={styles.stepLabel}>Identity security</p>
             <h2>Verify your email before establishing organization authority.</h2>
             <p>We stop here before creating or claiming an organization so a verification failure cannot leave a half-created organization relationship.</p>
+            {verificationNotice ? <div className={styles.notice} role="status">{verificationNotice}</div> : null}
             <div className={styles.actionRow}>
               <button className={styles.secondary} disabled={busy} onClick={() => run(async () => {
+                const principal = createClientAuthenticationProvider().currentPrincipal();
                 await createClientAuthenticationLifecycle().sendVerificationEmail(`${window.location.origin}/join`);
+                setVerificationNotice(`Verification email sent${principal?.email ? ` to ${principal.email}` : ""}. Open the message and click the verification link, then return here.`);
               })}>Send verification email</button>
               <button className={styles.primary} disabled={busy} onClick={() => run(async () => {
-                await createClientAuthenticationLifecycle().reloadCurrentPrincipal();
-                await refreshState();
+                const principal = await createClientAuthenticationLifecycle().reloadCurrentPrincipal();
+                if (!principal) throw new Error("Your sign-in session is no longer available. Sign in again to continue activation.");
+                if (!principal.emailVerified) {
+                  setVerificationNotice("Firebase still reports this email as unverified. Complete the verification link in the same account, then click this button again.");
+                  return;
+                }
+                setVerificationNotice("Email verified. Refreshing your RFxchange session…");
+                const refreshedSession = await exchangeSession(state.provisionalOrganizationName);
+                if (!refreshedSession.emailVerified) {
+                  throw new Error("Firebase verified the email, but the RFxchange session did not refresh the verified status. Sign out and sign back in, then continue.");
+                }
+                setVerificationNotice(null);
               })}>I verified — continue</button>
             </div>
           </section>
@@ -513,7 +583,7 @@ export function ActivationJourneyClient({
                 <label>Address line 2<input name="addressLine2" /></label>
                 <div className={styles.threeColumn}>
                   <label>City<input name="locality" defaultValue={state.selectedGeography?.name ?? ""} required /></label>
-                  <label>State<input name="regionCode" defaultValue="VA" maxLength={2} required /></label>
+                  <label>State<input name="regionCode" defaultValue={localityStateCode || "VA"} maxLength={2} required /></label>
                   <label>ZIP<input name="postalCode" required /></label>
                 </div>
                 <label className={styles.inlineCheck}><input name="isHomeOrPrivate" type="checkbox" />This is a home or private address</label>
