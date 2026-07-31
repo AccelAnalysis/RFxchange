@@ -1,3 +1,4 @@
+import type { OrganizationActionAuditEvent } from "../audit/model.ts";
 import type { GeographyId } from "../geography/model.ts";
 import type { AccessLifecycleRecord } from "../lifecycle/model.ts";
 import type { OrganizationUserAuthorization } from "../authorization/model.ts";
@@ -41,5 +42,6 @@ export interface OrganizationAuthorityClaimUnitOfWork {
     membership: OrganizationMembership;
     authorization: OrganizationUserAuthorization;
     lifecycle: AccessLifecycleRecord;
+    auditEvent: OrganizationActionAuditEvent;
   }>): Promise<void>;
 }
