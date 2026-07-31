@@ -15,6 +15,14 @@
   position: relative;
   z-index: 1;
   min-height: 100dvh;
+  opacity: 1;
+  transition: opacity 700ms ease, transform 700ms ease;
+}
+
+.experience[data-entering-workspace="true"] .content {
+  opacity: 0;
+  transform: translateY(-12px);
+  pointer-events: none;
 }
 
 .content > :global(main) {
@@ -39,9 +47,7 @@
 }
 
 .experience[data-map-visible="true"] .content :global(section section),
-.experience[data-map-visible="true"] .content :global(article),
-.experience[data-map-visible="true"] .content :global(.notice),
-.experience[data-map-visible="true"] .content :global(.error) {
+.experience[data-map-visible="true"] .content :global(article) {
   background: rgba(255, 253, 248, 0.69) !important;
   border-color: rgba(255, 255, 255, 0.46) !important;
   box-shadow: 0 20px 60px rgba(11, 11, 13, 0.16) !important;
@@ -70,5 +76,11 @@
 
   .experience[data-map-visible="true"] .content :global(section section) {
     background: rgba(255, 253, 248, 0.78) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content {
+    transition: none;
   }
 }
