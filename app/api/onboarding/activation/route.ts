@@ -6,6 +6,7 @@ import {
   RFXCHANGE_SESSION_COOKIE_NAME,
 } from "@/src/infrastructure/auth/firebase-server-session";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
+import { synchronizeActivationContextFromAuthority } from "@/src/infrastructure/onboarding/activation-context-sync";
 import { createServerActivationJourneyService } from "@/src/infrastructure/onboarding/runtime";
 
 async function authenticatedContext(request: NextRequest): Promise<AuthenticatedServerContext> {
@@ -15,6 +16,15 @@ async function authenticatedContext(request: NextRequest): Promise<Authenticated
     sessionCookie,
     now: new Date().toISOString(),
   });
+}
+
+async function synchronizedState(
+  service: ReturnType<typeof createServerActivationJourneyService>,
+  context: AuthenticatedServerContext,
+) {
+  const state = await service.state(context);
+  await synchronizeActivationContextFromAuthority(context, state);
+  return state;
 }
 
 function errorResponse(error: unknown) {
@@ -31,7 +41,8 @@ function errorResponse(error: unknown) {
 export async function GET(request: NextRequest) {
   try {
     const context = await authenticatedContext(request);
-    const state = await createServerActivationJourneyService().state(context);
+    const service = createServerActivationJourneyService();
+    const state = await synchronizedState(service, context);
     return NextResponse.json({ state });
   } catch (error) {
     return errorResponse(error);
@@ -70,7 +81,7 @@ export async function POST(request: NextRequest) {
         });
       }
       case "create-organization": {
-        const current = await service.state(context);
+        const current = await synchronizedState(service, context);
         if (!current.emailVerified) {
           return NextResponse.json(
             { error: "Verify your email before creating or claiming an organization.", code: "email-verification-required" },
@@ -90,7 +101,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ state });
       }
       case "select-existing-organization": {
-        const current = await service.state(context);
+        const current = await synchronizedState(service, context);
         if (!current.emailVerified) {
           return NextResponse.json(
             { error: "Verify your email before creating or claiming an organization.", code: "email-verification-required" },
@@ -109,6 +120,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ state });
       }
       case "begin-location": {
+        await synchronizedState(service, context);
         const result = await service.beginLocation(context, {
           addressLine1: typeof body.addressLine1 === "string" ? body.addressLine1 : "",
           ...(typeof body.addressLine2 === "string" && body.addressLine2.trim()
@@ -135,10 +147,12 @@ export async function POST(request: NextRequest) {
         });
       }
       case "confirm-location": {
+        await synchronizedState(service, context);
         const candidateId = typeof body.candidateId === "string" ? body.candidateId : "";
         return NextResponse.json({ state: await service.confirmLocation(context, candidateId) });
       }
       case "save-profile": {
+        await synchronizedState(service, context);
         const participationRoles = Array.isArray(body.participationRoles)
           ? body.participationRoles.filter((value): value is string => typeof value === "string")
           : [];
@@ -167,7 +181,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ state });
       }
       case "refresh": {
-        return NextResponse.json({ state: await service.state(context) });
+        return NextResponse.json({ state: await synchronizedState(service, context) });
       }
       default:
         return NextResponse.json({ error: "Unsupported activation action." }, { status: 400 });
