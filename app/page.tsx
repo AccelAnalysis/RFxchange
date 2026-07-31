@@ -129,6 +129,11 @@ export default function HomePage() {
       <footer className="site-footer shell">
         <BrandWordmark compact />
         <p>Be found. Find opportunity. Build the connection.</p>
+        <nav aria-label="Legal">
+          <Link href="/terms">Terms of Service</Link>
+          <Link href="/platform-rules">Platform Rules</Link>
+          <Link href="/privacy">Privacy Policy</Link>
+        </nav>
       </footer>
     </main>
   );
