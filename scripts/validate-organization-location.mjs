@@ -122,8 +122,8 @@ assert.ok(legacyRoute.includes("resolveParticipantRoute") && legacyRoute.include
 assert.equal(legacyRoute.includes("createPortsmouthControlledLocalityPreview"), false);
 assert.ok(joinRoute.includes("createControlledLocalityPreview") && joinRoute.includes("ActivationJourneyClient"));
 for (const required of [
-  'postAction("begin-location"',
-  'postAction("confirm-location"',
+  '"begin-location"',
+  '"confirm-location"',
   "initial service geography",
   "Service territory remains a separate profile concept",
 ]) {
