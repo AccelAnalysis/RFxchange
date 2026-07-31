@@ -10,40 +10,33 @@ export const metadata: Metadata = {
 export default function BuyersPage() {
   return (
     <MarketingStoryPage
-      eyebrow="For Buyers & Issuers"
-      title="Bring a need to the market with more context."
-      lede="RFxchange helps buyers, institutions, primes, and opportunity issuers describe what they need, discover relevant capability, and move into structured market activity without replacing the formal authority of their procurement process."
-      image="https://images.unsplash.com/photo-1742112125567-3e8967bad60f?auto=format&fit=crop&w=2000&q=82"
+      eyebrow="For issuers and organizations with demand"
+      title="Bring a need to the market—and make capability easier to discover."
+      lede="RFxchange helps buyers and issuers structure needs, publish RFx, discover potentially relevant organizations and manage a connected response and evaluation pathway."
+      image="https://images.unsplash.com/photo-1742112125567-3e8967bad60f?auto=format&fit=crop&w=2200&q=82"
       imageAlt="Project team reviewing requirements and plans"
       sections={[
         {
-          eyebrow: "Define",
-          title: "Start with the need, not the document format.",
-          body: "An issuer can describe a product, service, supplier, subcontractor, partner, or information need and select the RFx structure appropriate to the transaction.",
+          eyebrow: "The need",
+          title: "Start with what you need.",
+          body: "An issuer should not have to begin with a giant procurement form. The RFx journey begins with the business need, then structures scope, requirements, geography, response expectations and evaluation appropriate to the request.",
+          bullets: [
+            "Structure demand — Use RFx types and templates suited to information gathering, quotes, proposals, supplier discovery, subcontractor needs and other market requests.",
+            "See the market — Use capability, geography and explicit criteria to understand whether potentially relevant organizations are represented before and after publication.",
+            "Evaluate consistently — Keep the response connected to the requirements and criteria established for the RFx while preserving the issuer’s actual authority and rules.",
+          ],
         },
         {
-          eyebrow: "Understand the market",
-          title: "Use capability and geography to see who may be relevant.",
-          body: "Structured organization profiles can help a buyer identify potentially relevant organizations before and after publication. Discovery is informational and does not substitute for buyer qualification, due diligence, or procurement rules.",
-        },
-        {
-          eyebrow: "Publish",
-          title: "Turn the need into discoverable market activity.",
-          body: "A published RFx can become searchable, geographically contextual, matchable to capabilities, and available to participants through appropriate discovery and notification paths.",
-        },
-        {
-          eyebrow: "Evaluate",
-          title: "Keep evaluation aligned with the issuer's own authority.",
-          body: "RFxchange can organize requirements, responses, criteria, and workflow. The platform does not choose the winner, create procurement authority, or replace a buyer's governing process.",
-        },
-        {
-          eyebrow: "Connect",
-          title: "Let the transaction produce a useful next step.",
-          body: "Different RFx types can end in information learned, a supplier selected, a team conversation, an award recorded, or another business connection. The outcome can then contribute appropriately to future network intelligence.",
+          eyebrow: "Selection authority",
+          title: "Capability-based discovery, not automatic selection.",
+          body: "RFxchange can surface potentially relevant organizations, but it does not choose the winner or guarantee qualification. Formal procurement requirements, legal authority and external systems remain in force where applicable.",
         },
       ]}
-      ctaTitle="Bring your organization into the Exchange."
-      ctaBody="Establish organizational authority first, then use the network as approved buyer and RFx capabilities become available through the build plan."
+      ctaTitle={null}
+      ctaBody={null}
+      ctaLabel="Create an Organization"
+      ctaSecondaryHref="/how-it-works"
+      ctaSecondaryLabel="See the RFx Journey"
     />
   );
 }
