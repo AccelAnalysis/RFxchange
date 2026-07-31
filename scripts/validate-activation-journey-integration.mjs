@@ -7,6 +7,7 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 const [
   home,
   joinPage,
+  geographyRoute,
   client,
   sessionRoute,
   activationRoute,
@@ -20,6 +21,7 @@ const [
 ] = await Promise.all([
   read("app/page.tsx"),
   read("app/join/page.tsx"),
+  read("app/geography/canvas/page.tsx"),
   read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("app/api/auth/session/route.ts"),
   read("app/api/onboarding/activation/route.ts"),
@@ -145,6 +147,25 @@ assert.ok(
   "Activation context must support resumable registration without claiming canonical authority.",
 );
 
+for (const requirement of [
+  "createFirestoreOrganizationMarkerRepositories",
+  "projectPublicOrganizationMarker",
+  "TigerWebBoundarySnapshotRepository",
+  "accessibleLocationLabel",
+  "pointOverlays={pointOverlays}",
+]) {
+  assert.ok(
+    geographyRoute.includes(requirement),
+    `Controlled Exchange map is missing persisted marker projection requirement: ${requirement}.`,
+  );
+}
+assert.ok(
+  geographyRoute.includes('activation?.status === "active"') &&
+    geographyRoute.includes('kind: "organization-marker"') &&
+    geographyRoute.includes("activated: true"),
+  "Only a real active marker may be rendered as the participant's activated organization marker.",
+);
+
 const architectureLower = architecture.toLowerCase();
 for (const phrase of [
   "no feature-id completion change",
@@ -160,5 +181,5 @@ for (const phrase of [
 }
 
 console.log(
-  "Activation Journey Integration Gate validated: public Join, trusted Firebase session, canonical runtime order, resumable server orchestration, real geocoding/profile/marker activation, audited creator authority, orientation non-completion, and controlled-platform stop.",
+  "Activation Journey Integration Gate validated: public Join, trusted Firebase session, canonical runtime order, resumable server orchestration, real geocoding/profile/marker activation, privacy-safe real marker rendering, audited creator authority, orientation non-completion, and controlled-platform stop.",
 );
