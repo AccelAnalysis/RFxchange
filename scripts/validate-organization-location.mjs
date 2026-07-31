@@ -15,6 +15,7 @@ const [
   locationPanel,
   legacyRoute,
   joinRoute,
+  spatialActivation,
   activationUi,
   tests,
   architecture,
@@ -31,6 +32,7 @@ const [
   read("src/components/organization-location/OrganizationLocationPanel.tsx"),
   read("app/organization-location/page.tsx"),
   read("app/join/page.tsx"),
+  read("src/components/onboarding/SpatialActivationExperience.tsx"),
   read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("test/organization-location.test.mjs"),
   read("docs/architecture/WAVE_2_SLICE_2_6.md"),
@@ -120,7 +122,12 @@ assert.ok(mapCanvas.includes("temporary candidate awaiting confirmation"));
 
 assert.ok(legacyRoute.includes("resolveParticipantRoute") && legacyRoute.includes("redirect("));
 assert.equal(legacyRoute.includes("createPortsmouthControlledLocalityPreview"), false);
-assert.ok(joinRoute.includes("createControlledLocalityPreview") && joinRoute.includes("ActivationJourneyClient"));
+assert.ok(
+  joinRoute.includes("createControlledLocalityPreview") &&
+    joinRoute.includes("SpatialActivationExperience") &&
+    spatialActivation.includes("ActivationJourneyClient"),
+  "Join must compose the canonical activation client through the spatial activation runtime.",
+);
 for (const required of [
   '"begin-location"',
   '"confirm-location"',
