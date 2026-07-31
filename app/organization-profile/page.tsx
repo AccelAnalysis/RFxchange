@@ -58,7 +58,7 @@ export default async function OrganizationProfilePage() {
   return (
     <ParticipantShell activeItem="Account">
       <OperationalWorkspace ariaLabel="Organization account workspace">
-        <main className={styles.page}>
+        <section className={styles.page}>
           <header className={styles.header}>
             <div>
               <p className={styles.eyebrow}>Account · {controlledStatus}</p>
@@ -99,6 +99,11 @@ export default async function OrganizationProfilePage() {
                 <dt>Initial service geography</dt>
                 <dd>{access.state.selectedGeography?.name ?? "Not recorded"}</dd>
               </dl>
+              <p className={styles.empty}>
+                During minimum activation, RFxchange initializes the confirmed home locality as the
+                organization&apos;s initial service geography. Expanded service territories remain a
+                separate profile concept and can be refined in later profile enrichment.
+              </p>
             </article>
 
             <article className={styles.card}>
@@ -140,7 +145,7 @@ export default async function OrganizationProfilePage() {
               </p>
             </article>
           </section>
-        </main>
+        </section>
       </OperationalWorkspace>
     </ParticipantShell>
   );
