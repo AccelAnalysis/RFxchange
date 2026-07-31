@@ -4,9 +4,9 @@ import { useState } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import {
-  ControlledLocalityCanvas,
+  MapboxLocalityCanvas,
   type ControlledLocalityPointOverlay,
-} from "../map/ControlledLocalityCanvas";
+} from "../map/MapboxLocalityCanvas";
 import {
   LocalityStatusOverlay,
   MapOverlaySurface,
@@ -35,7 +35,7 @@ export function OrganizationLocationPanel({
 
   return (
     <SpatialWorkspace ariaLabel="Organization location confirmation workspace">
-      <ControlledLocalityCanvas
+      <MapboxLocalityCanvas
         model={mapModel}
         overlaySide="left"
         pointOverlays={pointOverlays}
