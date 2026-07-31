@@ -1,0 +1,74 @@
+.experience {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #f7f3ea;
+}
+
+.mapLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+}
+
+.content > :global(main) {
+  min-height: 100dvh;
+  background: transparent !important;
+}
+
+.content > :global(main) > :global(header) {
+  position: relative;
+  z-index: 4;
+  background: rgba(247, 243, 234, 0.66) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.38) !important;
+  backdrop-filter: blur(22px) saturate(132%);
+  -webkit-backdrop-filter: blur(22px) saturate(132%);
+}
+
+.experience[data-map-visible="true"] .content > :global(main) > :global(section) {
+  width: min(570px, calc(100% - 40px)) !important;
+  margin-right: auto !important;
+  margin-left: clamp(20px, 4vw, 66px) !important;
+  padding-top: 30px !important;
+}
+
+.experience[data-map-visible="true"] .content :global(section section),
+.experience[data-map-visible="true"] .content :global(article),
+.experience[data-map-visible="true"] .content :global(.notice),
+.experience[data-map-visible="true"] .content :global(.error) {
+  background: rgba(255, 253, 248, 0.69) !important;
+  border-color: rgba(255, 255, 255, 0.46) !important;
+  box-shadow: 0 20px 60px rgba(11, 11, 13, 0.16) !important;
+  backdrop-filter: blur(24px) saturate(134%);
+  -webkit-backdrop-filter: blur(24px) saturate(134%);
+}
+
+.experience[data-map-visible="true"] .content :global(input),
+.experience[data-map-visible="true"] .content :global(select),
+.experience[data-map-visible="true"] .content :global(textarea),
+.experience[data-map-visible="true"] .content :global(button) {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.experience[data-map-visible="true"] .content :global(figure) {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .experience[data-map-visible="true"] .content > :global(main) > :global(section) {
+    width: calc(100% - 20px) !important;
+    margin: 0 auto !important;
+    padding-top: min(26vh, 220px) !important;
+  }
+
+  .experience[data-map-visible="true"] .content :global(section section) {
+    background: rgba(255, 253, 248, 0.78) !important;
+  }
+}
