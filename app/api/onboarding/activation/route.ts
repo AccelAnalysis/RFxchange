@@ -6,6 +6,9 @@ import {
   RFXCHANGE_SESSION_COOKIE_NAME,
 } from "@/src/infrastructure/auth/firebase-server-session";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
+import { createFirestoreGeographyRepositories } from "@/src/infrastructure/firestore/geography-repositories";
+import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
+import { CensusTigerLocalityDirectory } from "@/src/infrastructure/geography/census-tiger-locality-directory";
 import { synchronizeActivationContextFromAuthority } from "@/src/infrastructure/onboarding/activation-context-sync";
 import { createServerActivationJourneyService } from "@/src/infrastructure/onboarding/runtime";
 
@@ -59,6 +62,32 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case "accept-legal": {
         return NextResponse.json({ state: await service.acceptLegal(context) });
+      }
+      case "search-geographies": {
+        const current = await synchronizedState(service, context);
+        if (!current.legalAccepted) {
+          return NextResponse.json(
+            { error: "Accept the current participation policies before selecting a home locality." },
+            { status: 409 },
+          );
+        }
+        const query = typeof body.query === "string" ? body.query : "";
+        const stateCode = typeof body.stateCode === "string" ? body.stateCode : "";
+        const candidates = await new CensusTigerLocalityDirectory().search({ query, stateCode });
+        return NextResponse.json({ candidates });
+      }
+      case "select-census-geography": {
+        const current = await synchronizedState(service, context);
+        if (!current.legalAccepted) {
+          return NextResponse.json(
+            { error: "Accept the current participation policies before selecting a home locality." },
+            { status: 409 },
+          );
+        }
+        const reference = typeof body.reference === "string" ? body.reference : "";
+        const geography = await new CensusTigerLocalityDirectory().resolve(reference);
+        await createFirestoreGeographyRepositories(getServerFirestore()).definitions.save(geography);
+        return NextResponse.json({ state: await service.selectGeography(context, String(geography.id)) });
       }
       case "select-geography": {
         const geographyId = typeof body.geographyId === "string" ? body.geographyId : "";

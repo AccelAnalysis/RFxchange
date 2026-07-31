@@ -61,7 +61,8 @@ for (const requirement of [
   "registerWithEmailAndPassword",
   "signInWithEmailAndPassword",
   "sendVerificationEmail",
-  "select-geography",
+  "search-geographies",
+  "select-census-geography",
   "search-organizations",
   "create-organization",
   "begin-location",
@@ -76,6 +77,18 @@ for (const requirement of [
 ]) {
   assert.ok(client.includes(requirement), `Activation client is missing ${requirement}.`);
 }
+assert.ok(
+  client.includes('href="/terms"') &&
+    client.includes('href="/platform-rules"') &&
+    client.includes('href="/privacy"'),
+  "Activation policy acceptance must expose the current readable legal documents.",
+);
+assert.ok(
+  client.includes("reloadCurrentPrincipal") &&
+    client.includes("await exchangeSession(state.provisionalOrganizationName)") &&
+    client.includes("Firebase still reports this email as unverified"),
+  "Email verification must be observable and refresh the trusted RFxchange session after Firebase verification.",
+);
 assert.ok(
   !client.includes('<Link href="/" aria-label="RFxchange home"><BrandWordmark compact /></Link>'),
   "Activation header must not wrap the already-linked BrandWordmark in another anchor.",
@@ -101,6 +114,8 @@ for (const requirement of [
 
 for (const action of [
   "accept-legal",
+  "search-geographies",
+  "select-census-geography",
   "select-geography",
   "acknowledge-orientation-position",
   "search-organizations",
@@ -115,6 +130,11 @@ for (const action of [
 assert.ok(
   activationRoute.includes("authenticateSessionCookie") && activationRoute.includes("email-verification-required"),
   "Activation mutations must require the trusted RFxchange session and gate organization resolution on verified email.",
+);
+assert.ok(
+  activationRoute.includes("CensusTigerLocalityDirectory") &&
+    activationRoute.includes("definitions.save(geography)"),
+  "Home locality selection must resolve and persist Census authority server-side before lifecycle selection.",
 );
 
 for (const authority of [
@@ -194,6 +214,8 @@ for (const requirement of [
   "createFirestoreOrganizationMarkerRepositories",
   "projectPublicOrganizationMarker",
   "TigerWebBoundarySnapshotRepository",
+  "ControlledLocalityMapService",
+  ".create(selection)",
   "accessibleLocationLabel",
   "pointOverlays={pointOverlays}",
   'markerActivation?.status !== "active"',
@@ -203,6 +225,7 @@ for (const requirement of [
   assert.ok(geographyRoute.includes(requirement), `Controlled Exchange map is missing ${requirement}.`);
 }
 assert.equal(geographyRoute.includes("map remains usable as a preview"), false, "Anonymous preview fallback must not return to the protected map route.");
+assert.equal(geographyRoute.includes("createControlledLocalityPreview"), false, "Protected Exchange map must never substitute the Portsmouth preview for another persisted locality.");
 
 const architectureLower = architecture.toLowerCase();
 for (const phrase of [
@@ -221,5 +244,5 @@ assert.ok(
 );
 
 console.log(
-  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, lifecycle-authoritative account-only participant routing, real marker rendering, canonical roles/objectives/relationship metadata, and controlled-platform stop.",
+  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, Census-authoritative locality selection, lifecycle-authoritative account-only participant routing, real marker rendering, canonical roles/objectives/relationship metadata, and controlled-platform stop.",
 );
