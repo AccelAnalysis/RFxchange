@@ -1,35 +1,21 @@
-import { MapboxLocalityCanvas } from "@/src/components/map/MapboxLocalityCanvas";
-import { OrganizationResolutionPanel } from "@/src/components/organization-resolution/OrganizationResolutionPanel";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
 import {
-  ParticipantShell,
-  ResponsiveEdgeSheet,
-  SpatialWorkspace,
-} from "@/src/components/participant/ParticipantWorkspace";
-import { createPortsmouthControlledLocalityPreview } from "@/src/data/geography/portsmouth-controlled-locality-preview";
-import { createPortsmouthOrganizationResolutionPreview } from "@/src/data/organization-resolution/portsmouth-resolution-preview";
+  RFXCHANGE_SESSION_COOKIE_NAME,
+  resolveParticipantRoute,
+} from "@/src/infrastructure/auth/participant-route-runtime";
 
+/** Legacy compatibility route; organization resolution now lives in the integrated /join journey. */
 export default async function OrganizationResolutionPage() {
-  const [map, resolution] = await Promise.all([
-    createPortsmouthControlledLocalityPreview(),
-    Promise.resolve(createPortsmouthOrganizationResolutionPreview()),
-  ]);
+  const cookieStore = await cookies();
+  const access = await resolveParticipantRoute({
+    sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
+  });
 
-  return (
-    <ParticipantShell activeItem="Account">
-      <SpatialWorkspace ariaLabel="Organization resolution geographic workspace">
-        <MapboxLocalityCanvas
-          model={map}
-          initialZoom="nearby"
-          overlaySide="right"
-        />
-        <ResponsiveEdgeSheet
-          ariaLabelledBy="organization-resolution-title"
-          side="left"
-          width="wide"
-        >
-          <OrganizationResolutionPanel model={resolution} />
-        </ResponsiveEdgeSheet>
-      </SpatialWorkspace>
-    </ParticipantShell>
-  );
+  if (access.kind === "unauthenticated") {
+    redirect("/signin?returnTo=%2Forganization-resolution");
+  }
+  if (access.kind === "authorized") redirect("/organization-profile");
+  redirect("/join");
 }
