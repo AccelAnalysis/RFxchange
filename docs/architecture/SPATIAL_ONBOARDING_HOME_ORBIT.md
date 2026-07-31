@@ -46,6 +46,8 @@ The activation runtime derives the scene from server-recognized state:
 - selected geography exists and no active home-marker transition: Locality Ambient;
 - active organization marker and authorized home-scene projection exist: Organization Home.
 
+Home-locality selection updates the activation state, retrieves the server-authoritative `ControlledLocalityMapModel`, updates the existing Mapbox sources, and flies the camera to the locality without a page reload. A browser reload must not be used as the mechanism for changing spatial scenes.
+
 ## Camera presets
 
 ### Regional and locality ambient
@@ -89,6 +91,8 @@ In the authenticated interactive workspace, drag, rotate, pitch, wheel, or touch
 
 Activation background scenes are noninteractive so map gestures cannot compete with registration forms.
 
+The authenticated home scene retains production map capabilities including Mapbox Search Box API search, Fit home, 2D/Perspective/3D view controls, navigation controls, authoritative locality focus/mask, and persistent organization-marker interaction.
+
 ## Persistent organization marker
 
 The current participant organization's marker is a first-class native GeoJSON map feature.
@@ -102,7 +106,7 @@ Required behavior:
 - `text-allow-overlap` and `text-ignore-placement` prevent the home marker from disappearing behind ordinary label collision;
 - the home marker is not dependent on popup state and is not folded into ordinary clustering.
 
-The popup, when later added, is additional detail. Closing it must never remove the organization marker.
+The popup is additional detail. Closing it must never remove the organization marker.
 
 ## Activation-to-workspace transition
 
@@ -116,6 +120,8 @@ When server state confirms the active marker and controlled-platform authorizati
 
 The home-scene endpoint must resolve the authenticated organization, active marker, confirmed location, authoritative locality geometry, and privacy-safe projected marker. It must reject unauthenticated, activation-incomplete, restricted, or otherwise unauthorized access.
 
+The selected-locality spatial-model endpoint must resolve the trusted RFxchange session, persisted primary geography selection, canonical geography definition, and authoritative TIGER boundary. Browser-provided geometry or viewport coordinates are never accepted as locality authority.
+
 ## Implementation authority
 
 Canonical implementation files include:
@@ -123,13 +129,15 @@ Canonical implementation files include:
 - `src/components/map/ExchangeSpatialScene.tsx`;
 - `src/components/map/map-motion-preference.ts`;
 - `src/components/onboarding/SpatialActivationExperience.tsx`;
+- `src/components/onboarding/ActivationJourneyClient.tsx`;
 - `src/components/account/MapMotionPreferenceToggle.tsx`;
+- `app/api/onboarding/spatial-model/route.ts`;
 - `app/api/onboarding/home-scene/route.ts`;
 - `app/join/page.tsx`;
 - `app/geography/canvas/page.tsx`;
 - `app/organization-profile/page.tsx`.
 
-`MapboxLocalityCanvas` remains available for existing map/search surfaces and deterministic convergence work. The spatial onboarding/home-orbit scene is the authority for the activation background and organization-home ambient entry.
+`MapboxLocalityCanvas` remains available for existing reference/location surfaces and deterministic convergence work. `ExchangeSpatialScene` is the authority for the activation background and organization-home ambient/operational entry.
 
 ## Regression guardrails
 
@@ -138,11 +146,14 @@ The following are regressions:
 - showing the operational map before account/session creation;
 - placing the activation map inside a card instead of edge-to-edge;
 - using an opaque activation page that hides the spatial scene;
+- reloading the page when a participant selects a home locality;
+- using a browser-provided geometry instead of the server-authoritative spatial model;
 - using an orbit period other than 225 seconds for canonical locality or organization scenes without an approved architecture change;
 - using a fixed locality zoom instead of fitting its bounds;
 - changing organization-home pitch from 75 degrees or zoom from 16 without an approved architecture change;
 - removing the Account rotation toggle;
 - ignoring reduced-motion preferences;
+- removing production search, fit-home, or view-mode controls from the authenticated map;
 - implementing the home marker as popup-only;
 - using a floating DOM element whose coordinate drifts during bearing changes;
 - centering the organization camera on an unapproved private coordinate;
@@ -154,4 +165,4 @@ Run:
 npm run validate:spatial-onboarding-home-orbit
 ```
 
-before merging changes to the activation background, camera presets, Account map settings, home marker, or authenticated geography entry.
+before merging changes to the activation background, camera presets, Account map settings, home marker, selected-locality transition, or authenticated geography entry.
