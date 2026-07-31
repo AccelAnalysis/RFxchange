@@ -433,7 +433,7 @@ export function ExchangeSpatialScene({
       }
       const elapsed = timestamp - orbitStartRef.current;
       const bearing = orbitBearingRef.current + (elapsed / EXCHANGE_ORBIT_PERIOD_MS) * 360;
-      activeMap.jumpTo({ center: activeTarget, bearing });
+      activeMap.jumpTo({ center: [activeTarget[0], activeTarget[1]], bearing });
       animationFrameRef.current = window.requestAnimationFrame(animate);
     };
 
@@ -469,7 +469,7 @@ export function ExchangeSpatialScene({
       orbitTargetRef.current = activeMarker.coordinate;
       setViewMode("3d");
       map.flyTo({
-        center: activeMarker.coordinate,
+        center: [activeMarker.coordinate[0], activeMarker.coordinate[1]],
         zoom: ORGANIZATION_ORBIT_ZOOM,
         pitch: ORGANIZATION_ORBIT_PITCH,
         bearing: map.getBearing(),
@@ -542,7 +542,7 @@ export function ExchangeSpatialScene({
     setActiveSearchResultId(result.id);
 
     searchMarkerRef.current = new mapboxgl.Marker({ color: "#2e5eaa", scale: 0.9 })
-      .setLngLat(result.center)
+      .setLngLat([result.center[0], result.center[1]])
       .addTo(map);
     const source = map.getSource(SEARCH_AREA_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     source?.setData(bboxFeatureCollection(result.bbox));
@@ -556,7 +556,7 @@ export function ExchangeSpatialScene({
       });
     } else {
       map.flyTo({
-        center: result.center,
+        center: [result.center[0], result.center[1]],
         zoom: searchZoom(result.featureType),
         duration: reducedMotionRef.current ? 0 : 850,
       });
@@ -804,7 +804,9 @@ export function ExchangeSpatialScene({
           map.getCanvas().style.cursor = "";
         });
         map.on("click", HOME_MARKER_CORE_LAYER_ID, (event) => {
-          const feature = event.features?.[0];
+          const feature = event.features?.[0] as unknown as
+            | { readonly properties?: Readonly<Record<string, unknown>> }
+            | undefined;
           const properties = feature?.properties ?? {};
           const popup = document.createElement("div");
           const title = document.createElement("strong");
