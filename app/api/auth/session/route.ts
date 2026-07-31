@@ -2,10 +2,13 @@ import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { ServerSessionError } from "@/src/application/auth/server-session";
+import { updateActivationJourneyContext } from "@/src/domain/onboarding/model";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
 } from "@/src/infrastructure/auth/firebase-server-session";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
+import { FirestoreActivationJourneyContextRepository } from "@/src/infrastructure/firestore/activation-journey";
+import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 import { createServerActivationJourneyService } from "@/src/infrastructure/onboarding/runtime";
 
 const ACTIVATION_CSRF_COOKIE = "rfx_activation_csrf";
@@ -42,6 +45,7 @@ export async function POST(request: NextRequest) {
       csrfToken?: string;
       requestedName?: string;
       provisionalOrganizationName?: string;
+      organizationRelationship?: string;
     }>;
     const expectedCsrf = request.cookies.get(ACTIVATION_CSRF_COOKIE)?.value ?? "";
     if (!body.csrfToken || !expectedCsrf || body.csrfToken !== expectedCsrf) {
@@ -59,10 +63,22 @@ export async function POST(request: NextRequest) {
       now: new Date().toISOString(),
     });
     const activation = createServerActivationJourneyService();
-    const state = await activation.bootstrap(
+    await activation.bootstrap(
       issued.context,
       body.provisionalOrganizationName?.trim() || body.requestedName?.trim() || "",
     );
+
+    if (body.organizationRelationship?.trim()) {
+      const contexts = new FirestoreActivationJourneyContextRepository(getServerFirestore());
+      const current = await contexts.getByUserId(issued.context.user.id);
+      if (current) {
+        await contexts.save(updateActivationJourneyContext(current, {
+          organizationRelationship: body.organizationRelationship,
+          now: new Date().toISOString(),
+        }));
+      }
+    }
+    const state = await activation.state(issued.context);
 
     const response = NextResponse.json({ state });
     response.cookies.set(RFXCHANGE_SESSION_COOKIE_NAME, issued.cookie.value, {
