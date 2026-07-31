@@ -10,33 +10,31 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <MarketingStoryPage
-      eyebrow="About The RFxchange"
-      title="Make the economic network easier to see and use."
-      lede="The RFxchange is a Hi-Coworking initiative designed as connective business infrastructure: a shared environment where organizations, opportunities, partners, referrals, resources, and measured activity can become easier to discover and act on."
+      eyebrow="Visible · Connected · Actionable"
+      title="Connect the assets already present in the business ecosystem."
+      lede="The RFxchange is a map-based local business growth network designed to make business capabilities, opportunities, resources, referrals and relationships easier to discover and act on."
       image="https://images.unsplash.com/photo-1633536584998-2d71cbd95d37?auto=format&fit=crop&w=2200&q=82"
       imageAlt="Aerial view of a city, businesses, and waterways"
       sections={[
         {
-          eyebrow: "The idea",
-          title: "The community may contain more capability than any one institution can see.",
-          body: "Businesses, buyers, governments, chambers, universities, workforce organizations, lenders, advisers, and other providers often operate through different systems. RFxchange creates a shared layer for discovery and interaction across those institutional boundaries.",
-        },
-        {
           eyebrow: "The role",
-          title: "Connect existing assets instead of pretending to replace them.",
-          body: "RFxchange is not intended to replace procurement systems, provider CRMs, chambers, economic-development organizations, lenders, advisers, or the professional judgment those institutions provide.",
+          title: "Connective economic infrastructure.",
+          body: "Communities already contain businesses, buyers, opportunities, institutions, resource providers and expertise. What is often missing is a common environment through which those assets can reliably find one another.",
+          bullets: [
+            "Visible — Make organizations, capabilities, service territories and market needs easier to understand.",
+            "Connected — Bring opportunities, referrals, teaming and resources into one business-centered operating environment.",
+            "Actionable — Organize activity into journeys that can progress toward responses, relationships, services and outcomes.",
+          ],
         },
         {
-          eyebrow: "The network",
-          title: "Visible. Connected. Actionable.",
-          body: "Visibility means capabilities and needs can be found. Connection means participants can identify a relevant next step. Actionable means the platform supports movement into RFx, referrals, teaming, resources, and other real workflows.",
-        },
-        {
-          eyebrow: "The boundary",
-          title: "Public marketing outside. Account-based participation inside.",
-          body: "Public visitors receive the marketing and authentication surface. The working Exchange is account-based so organization authority, permissions, geography, private activity, and transactional workflows can remain governed rather than becoming anonymous public browsing infrastructure.",
+          eyebrow: "Boundaries",
+          title: "What it does not replace.",
+          body: "RFxchange is not a substitute for public procurement systems, economic-development organizations, chambers, lenders, workforce providers, CRMs, universities or professional advisers. It is designed to improve discovery and interaction between them and the businesses they serve.",
         },
       ]}
+      ctaTitle={null}
+      ctaBody={null}
+      ctaLabel="Join the Exchange"
     />
   );
 }
