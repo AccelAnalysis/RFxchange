@@ -11,6 +11,17 @@ export function readMapRotationPreference(): boolean {
   }
 }
 
+export function subscribeMapRotationPreference(onStoreChange: () => void): () => void {
+  if (typeof window === "undefined") return () => undefined;
+  const notify = () => onStoreChange();
+  window.addEventListener(MAP_ROTATION_PREFERENCE_EVENT, notify);
+  window.addEventListener("storage", notify);
+  return () => {
+    window.removeEventListener(MAP_ROTATION_PREFERENCE_EVENT, notify);
+    window.removeEventListener("storage", notify);
+  };
+}
+
 export function writeMapRotationPreference(enabled: boolean): void {
   if (typeof window === "undefined") return;
   try {
