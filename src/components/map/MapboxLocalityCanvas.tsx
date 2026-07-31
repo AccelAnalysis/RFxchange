@@ -42,6 +42,7 @@ type PersistedCamera = Readonly<{
 
 const LOCALITY_SOURCE_ID = "rfx-authoritative-localities";
 const VIEWPORT_STORAGE_PREFIX = "rfxchange:map-camera:";
+const EMPTY_POINT_OVERLAYS: readonly ControlledLocalityPointOverlay[] = Object.freeze([]);
 const VIEW_MODE_OPTIONS: readonly Readonly<{
   id: MapViewMode;
   label: string;
@@ -169,7 +170,7 @@ export function MapboxLocalityCanvas({
   initialZoom = "locality",
   mobileControlPosition = "top",
   overlaySide = "split",
-  pointOverlays = [],
+  pointOverlays = EMPTY_POINT_OVERLAYS,
 }: MapboxLocalityCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
