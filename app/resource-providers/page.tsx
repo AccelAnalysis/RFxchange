@@ -10,40 +10,31 @@ export const metadata: Metadata = {
 export default function ResourceProvidersPage() {
   return (
     <MarketingStoryPage
-      eyebrow="For Resource Providers"
-      title="Become discoverable when the business actually needs help."
-      lede="RFxchange is designed to connect business activity to the providers that can help—without asking providers to surrender their programs, eligibility decisions, client relationships, or systems of record."
-      image="https://images.unsplash.com/photo-1758518729711-1cbacd55efdb?auto=format&fit=crop&w=2000&q=82"
+      eyebrow="Qualified routing in context"
+      title="Become visible when a business actually needs help."
+      lede="RFxchange connects resource-provider visibility to the business journey, helping businesses find appropriate services while preserving provider ownership of eligibility, intake and client relationships."
+      image="https://images.unsplash.com/photo-1758518729711-1cbacd55efdb?auto=format&fit=crop&w=2200&q=82"
       imageAlt="Professional advisers discussing business needs around a table"
       sections={[
         {
-          eyebrow: "Visibility",
-          title: "Show where and how your organization serves businesses.",
-          body: "Provider discovery should reflect services, eligibility, intake, delivery method, and service territory—not merely the location of an office.",
+          eyebrow: "Appropriate connections",
+          title: "More visibility is useful only if the connection is appropriate.",
+          body: "Providers may serve different territories, industries, stages and needs. RFxchange is designed to help businesses understand the right door—and to carry useful context into a referral without replacing the provider’s own intake or CRM.",
+          bullets: [
+            "Be discoverable — Describe services, territories, eligibility, intake methods, availability and programs in terms a business can use.",
+            "Receive context — Structured referrals can identify the business need, the reason for the connection and the relevant opportunity or workflow.",
+            "See the gaps — Aggregate activity can help the ecosystem identify unmet service needs, failed handoffs and geographic or capability coverage gaps.",
+          ],
         },
         {
-          eyebrow: "Context",
-          title: "Appear inside the business journey instead of beside it.",
-          body: "A business pursuing an RFx, financing, certification, workforce need, partnership, or growth objective can encounter relevant assistance without having to understand the entire institutional support landscape first.",
-        },
-        {
-          eyebrow: "Routing",
-          title: "Prioritize appropriate engagement over raw lead volume.",
-          body: "Clear service descriptions, eligibility, territory, and referral context can help reduce misdirected inquiries and improve how limited provider capacity is used.",
-        },
-        {
-          eyebrow: "Handoffs",
-          title: "Make the space between organizations easier to see.",
-          body: "Structured referrals can preserve purpose, consent, and status so participants can identify whether a handoff was accepted, redirected, completed, or lost without exposing unnecessary confidential information.",
-        },
-        {
-          eyebrow: "Intelligence",
-          title: "Learn from recurring needs and service gaps.",
-          body: "Aggregate platform activity can help participating providers recognize repeated searches, routing failures, geographic gaps, and emerging business needs. Exchange activity is a signal from participating users, not a census of the economy.",
+          eyebrow: "Provider authority",
+          title: "The provider remains the provider.",
+          body: "RFxchange does not make lending decisions, certify procurement eligibility, replace professional advice or take ownership of the provider’s client relationship. It strengthens discovery and the connections between independent organizations.",
         },
       ]}
-      ctaTitle="Establish your provider organization."
-      ctaBody="Create the organization account now; provider verification, service profiles, and advanced referral workflows follow the approved platform build sequence."
+      ctaTitle={null}
+      ctaBody={null}
+      ctaLabel="Join as a Resource Provider"
     />
   );
 }

@@ -10,36 +10,31 @@ export const metadata: Metadata = {
 export default function FoundingPage() {
   return (
     <MarketingStoryPage
-      eyebrow="Founding RFxchange"
+      eyebrow="The founding cohort"
       title="Help build the network you want to use."
-      lede="Founding Organizations participate early, establish real capability inventory, test the workflows that matter, and help shape a network built around business action rather than passive listings."
-      image="https://images.unsplash.com/photo-1777026321659-64941fb943dd?auto=format&fit=crop&w=2000&q=82"
+      lede="Founding Organizations participate early, help shape practical workflows and form the initial business cohort as the RFxchange network grows."
+      image="https://images.unsplash.com/photo-1777026321659-64941fb943dd?auto=format&fit=crop&w=2200&q=82"
       imageAlt="Large warehouse and supply operation"
       sections={[
         {
-          eyebrow: "Why early participation matters",
-          title: "Network usefulness begins with credible organizations and real activity.",
-          body: "Founding participants help establish capability categories, search language, referral norms, partner discovery, opportunity demand, resource connections, and practical feedback on how the Exchange should operate.",
+          eyebrow: "Purpose",
+          title: "Early participation with a purpose.",
+          body: "The Founding cohort is intended for organizations that want to actively use the network while contributing feedback on capability profiles, RFx workflows, referrals, teaming, resources and business intelligence.",
+          bullets: [
+            "Founding identity — Recognition as part of the launch cohort without implying preferential qualification, verification or search ranking.",
+            "Early participation — Structured opportunities to use new workflows, provide feedback and help refine the network around real business activity.",
+            "Recurring value — The paid offer should only launch with clearly defined benefits that exceed useful free participation.",
+          ],
         },
         {
-          eyebrow: "Founding identity",
-          title: "Recognition marks participation in the network's origin—not preferential qualification.",
-          body: "Founding recognition is historical participation. It does not make an organization more verified, trusted, qualified, or entitled to preferential RFx treatment.",
-        },
-        {
-          eyebrow: "Commercial boundaries",
-          title: "Paid membership and credibility remain separate.",
-          body: "Membership can provide approved premium value, but it cannot purchase substantive credibility. Current price, benefits, entitlements, cancellation rules, and any price-protection terms must be presented clearly before paid enrollment.",
-        },
-        {
-          eyebrow: "Participation",
-          title: "The strongest Founding members actively use the network.",
-          body: "Complete the organization profile, respond to relevant activity, maintain accurate information, participate thoughtfully in referrals and teaming, use resources when needed, and provide actionable product feedback.",
+          eyebrow: "Free entry",
+          title: "Free remains the entry point.",
+          body: "A useful free organization account is central to network density. Founding membership is a deeper participation layer—not a tollbooth in front of basic discovery and legitimate network activity.",
         },
       ]}
-      ctaTitle="Start with the free organization account."
-      ctaBody="Establish your organization first. Founding conversion should occur only through the approved commercial flow with current terms visible at the point of purchase."
-      ctaLabel="Join Free"
+      ctaTitle={null}
+      ctaBody={null}
+      ctaLabel="Join Free First"
     />
   );
 }

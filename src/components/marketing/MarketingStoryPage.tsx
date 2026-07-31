@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { MarketingFooter, MarketingHeader } from "./MarketingChrome";
+import referenceStyles from "./MarketingReference.module.css";
 import styles from "./MarketingSite.module.css";
 
 export interface MarketingStorySection {
@@ -17,10 +18,13 @@ export interface MarketingStoryPageProps {
   readonly image: string;
   readonly imageAlt: string;
   readonly sections: readonly MarketingStorySection[];
-  readonly ctaTitle?: string;
-  readonly ctaBody?: string;
+  readonly showCta?: boolean;
+  readonly ctaTitle?: string | null;
+  readonly ctaBody?: string | null;
   readonly ctaHref?: string;
   readonly ctaLabel?: string;
+  readonly ctaSecondaryHref?: string;
+  readonly ctaSecondaryLabel?: string;
 }
 
 export function MarketingStoryPage({
@@ -30,22 +34,25 @@ export function MarketingStoryPage({
   image,
   imageAlt,
   sections,
+  showCta = true,
   ctaTitle = "Establish your organization in the Exchange.",
   ctaBody = "Create a free organization account and begin building a discoverable business position.",
   ctaHref = "/join",
   ctaLabel = "Join Free",
+  ctaSecondaryHref,
+  ctaSecondaryLabel,
 }: MarketingStoryPageProps) {
   return (
     <main className={styles.site}>
       <MarketingHeader />
-      <section className={styles.storyHero}>
-        <div className={styles.storyHeroCopy}>
-          <p className={styles.eyebrow}>{eyebrow}</p>
-          <h1>{title}</h1>
-          <p>{lede}</p>
-        </div>
-        <div className={styles.storyHeroMedia}>
+      <section className={referenceStyles.storyHero}>
+        <div className={referenceStyles.storyHeroMedia}>
           <img src={image} alt={imageAlt} />
+        </div>
+        <div className={referenceStyles.storyHeroCopy}>
+          <div className={referenceStyles.eyebrow}>{eyebrow}</div>
+          <h1>{title}</h1>
+          <p className={referenceStyles.storyHeroLede}>{lede}</p>
         </div>
       </section>
 
@@ -70,14 +77,21 @@ export function MarketingStoryPage({
         ))}
       </div>
 
-      <section className={styles.storyCta}>
-        <div className={styles.storyCtaInner}>
-          <p className={styles.eyebrow}>Next step</p>
-          <h2>{ctaTitle}</h2>
-          <p>{ctaBody}</p>
-          <Link className={styles.buttonGold} href={ctaHref}>{ctaLabel}</Link>
-        </div>
-      </section>
+      {showCta ? (
+        <section className={styles.storyCta}>
+          <div className={styles.storyCtaInner}>
+            <div className={referenceStyles.eyebrow}>Next step</div>
+            {ctaTitle ? <h2>{ctaTitle}</h2> : null}
+            {ctaBody ? <p>{ctaBody}</p> : null}
+            <div className={styles.ctaActions}>
+              <Link className={styles.buttonGold} href={ctaHref}>{ctaLabel}</Link>
+              {ctaSecondaryHref && ctaSecondaryLabel ? (
+                <Link className={styles.buttonOutline} href={ctaSecondaryHref}>{ctaSecondaryLabel}</Link>
+              ) : null}
+            </div>
+          </div>
+        </section>
+      ) : null}
       <MarketingFooter />
     </main>
   );
