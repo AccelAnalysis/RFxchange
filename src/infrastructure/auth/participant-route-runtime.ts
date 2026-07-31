@@ -48,9 +48,9 @@ function activeRestrictionState(
  * Server-only participant route resolver.
  *
  * A valid Firebase/RFxchange session is necessary but not sufficient for participant workspace
- * access. Controlled/open workspace access additionally requires the persisted activation journey,
- * the active organization membership selected by that journey, organization isolation, and no
- * active organization or membership restriction.
+ * access. Controlled/open workspace access additionally requires the persisted lifecycle, the
+ * active organization membership selected by that journey, organization isolation, and no active
+ * organization or membership restriction. UI step labels never grant or revoke workspace access.
  */
 export async function resolveParticipantRoute(input: Readonly<{
   sessionCookie?: string | null;
@@ -80,12 +80,9 @@ export async function resolveParticipantRoute(input: Readonly<{
     });
   }
 
-  if (
-    state.nextStep !== "complete" ||
-    (state.lifecycleState !== "controlled-platform" && state.lifecycleState !== "open-platform") ||
-    !state.organization ||
-    !state.membershipId
-  ) {
+  const workspaceLifecycleEligible =
+    state.lifecycleState === "controlled-platform" || state.lifecycleState === "open-platform";
+  if (!workspaceLifecycleEligible || !state.organization || !state.membershipId) {
     return Object.freeze({
       kind: "activation-required" as const,
       context,
