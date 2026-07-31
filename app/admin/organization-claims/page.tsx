@@ -1,40 +1,81 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { notFound, redirect } from "next/navigation";
+
+import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
+import { resolveAdminRoute } from "@/src/infrastructure/auth/admin-route-runtime";
+import { getServerFirestore, createServerFirestoreFoundationRepositories } from "@/src/infrastructure/firestore/runtime";
+import { createFirestoreOrganizationAuthorityClaims } from "@/src/infrastructure/firestore/organization-authority-claims";
 
 import styles from "./page.module.css";
 
-const filters = [
-  "Seeded", "Unclaimed", "Claimed", "Active", "Incomplete", "Verification pending",
-  "Verified", "Provider", "Issuer", "Duplicate", "Restricted", "Suspended",
-  "Terminated", "Geography",
+const OPEN_CLAIM_STATUSES = [
+  "submitted",
+  "evidence-requested",
+  "existing-administrator-notified",
+  "evidence-compared",
+  "conflict",
 ] as const;
 
-const workflow = [
-  "Claim submitted",
-  "Evidence requested",
-  "Existing administrator notified",
-  "Evidence compared",
-  "Authorized admin decision",
-  "Membership assigned or rejected",
-  "Decision and audit evidence recorded",
-] as const;
+function readable(value: string): string {
+  return value
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
 
-export default function OrganizationClaimsAdminPage() {
+export default async function OrganizationClaimsAdminPage() {
+  const cookieStore = await cookies();
+  const access = await resolveAdminRoute({
+    sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
+    permission: "organization.claim.read",
+  });
+
+  if (access.kind === "unauthenticated") {
+    redirect("/signin?returnTo=%2Fadmin%2Forganization-claims");
+  }
+  if (access.kind === "privileged-access-denied" && access.reason === "recent-reauthentication-required") {
+    redirect("/signin?returnTo=%2Fadmin%2Forganization-claims");
+  }
+  if (access.kind !== "authorized") notFound();
+
+  const db = getServerFirestore();
+  const claimsRepository = createFirestoreOrganizationAuthorityClaims(db).claims;
+  const claimGroups = await Promise.all(
+    OPEN_CLAIM_STATUSES.map((status) => claimsRepository.listByStatus(status)),
+  );
+  const claims = [...new Map(claimGroups.flat().map((claim) => [String(claim.id), claim])).values()]
+    .sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt));
+
+  const foundation = createServerFirestoreFoundationRepositories(db);
+  const profileEntries = await Promise.all(
+    [...new Set(claims.map((claim) => String(claim.organizationId)))].map(async (organizationId) => {
+      const claim = claims.find((candidate) => String(candidate.organizationId) === organizationId)!;
+      const profile = await foundation.organizations.profiles.getByOrganizationId(claim.organizationId);
+      return [organizationId, profile?.displayName ?? "Organization"] as const;
+    }),
+  );
+  const profileNames = new Map(profileEntries);
+  const canAdjudicate = access.authority.effectivePermissions.includes(
+    "organization.claim.adjudicate" as (typeof access.authority.effectivePermissions)[number],
+  );
+
   return (
     <main className={styles.page}>
       <aside className={styles.sidebar}>
         <Link href="/" className={styles.wordmark}><span>RF</span>xchange<sup>™</sup></Link>
         <nav aria-label="Administrative navigation">
-          <a href="#queue" className={styles.active}>Organization claims</a>
-          <a href="#scope">Scope & permissions</a>
-          <a href="#evidence">Private evidence</a>
-          <a href="#audit">Audit history</a>
+          <span className={styles.active}>Organization claims</span>
+          <Link href="/organization-profile">Participant account</Link>
         </nav>
         <div className={styles.scope}>
-          <span>Current scope</span>
-          <strong>Portsmouth, VA</strong>
-          <small>Organization claim review</small>
+          <span>Authority</span>
+          <strong>{String(access.account.administratorId)}</strong>
+          <small>Scope: {access.authority.scope.resolved}</small>
         </div>
       </aside>
+
       <section className={styles.workspace}>
         <header className={styles.header}>
           <div>
@@ -42,90 +83,68 @@ export default function OrganizationClaimsAdminPage() {
             <h1>Claims & authority</h1>
           </div>
           <div className={styles.adminIdentity}>
-            <span>Scoped administrator</span>
-            <strong>Claims Operations</strong>
+            <span>Authorized administrator</span>
+            <strong>{access.permission}</strong>
           </div>
         </header>
-        <section className={styles.filters} aria-label="Organization claims filters">
-          <label>
-            <span>Search organizations or claim IDs</span>
-            <input type="search" defaultValue="Harborlight Fabrication" />
-          </label>
+
+        <section className={styles.filters} aria-label="Organization claims summary">
           <div className={styles.filterList}>
-            {filters.map((filter, index) => (
-              <button type="button" className={index === 9 ? styles.selectedFilter : ""} key={filter}>
-                {filter}
-              </button>
+            {OPEN_CLAIM_STATUSES.map((status) => (
+              <span key={status}>{readable(status)}</span>
             ))}
           </div>
         </section>
+
         <div className={styles.columns}>
           <section className={styles.queue} id="queue">
             <div className={styles.sectionHeading}>
-              <div><span>2 records</span><h2>Potential duplicate claims</h2></div>
-              <strong>Evidence review required</strong>
-            </div>
-            <article className={styles.claimRow} aria-current="true">
-              <div className={styles.monogram}>HF</div>
               <div>
-                <h3>Harborlight Fabrication</h3>
-                <p>Portsmouth, VA · Claim CLM-2048</p>
+                <span>{claims.length} open {claims.length === 1 ? "record" : "records"}</span>
+                <h2>Live authority claims</h2>
               </div>
-              <span>Conflict</span>
-            </article>
-            <article className={styles.claimRow}>
-              <div className={styles.monogram}>HF</div>
-              <div>
-                <h3>Harborlight Fabrication LLC</h3>
-                <p>Portsmouth, VA · Claim CLM-1984</p>
-              </div>
-              <span>Existing claim</span>
-            </article>
-            <div className={styles.identityNote}>
-              <strong>History is preserved.</strong>
-              <p>Adjudication changes claim and membership state; it does not merge or replace organization history.</p>
+              <strong>{canAdjudicate ? "Adjudication authority granted" : "Read-only authority"}</strong>
             </div>
+
+            {claims.length ? claims.map((claim) => (
+              <article className={styles.claimRow} key={String(claim.id)}>
+                <div className={styles.monogram} aria-hidden="true">
+                  {(profileNames.get(String(claim.organizationId)) ?? "O").slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <h3>{profileNames.get(String(claim.organizationId)) ?? "Organization"}</h3>
+                  <p>Claim {String(claim.id)} · Geography {String(claim.geographyId)}</p>
+                </div>
+                <span>{readable(claim.status)}</span>
+              </article>
+            )) : (
+              <div className={styles.identityNote}>
+                <strong>No open claims.</strong>
+                <p>The live authority-claim repository currently contains no non-terminal records.</p>
+              </div>
+            )}
           </section>
+
           <section className={styles.review}>
             <div className={styles.reviewHeader}>
               <div>
-                <p>Case CLM-2048 · Organization ORG-1842</p>
-                <h2>Authority conflict review</h2>
+                <p>Runtime convergence</p>
+                <h2>Protected administrative surface</h2>
               </div>
-              <span>Verification: Not evaluated</span>
+              <span>{canAdjudicate ? "Read + adjudicate" : "Read only"}</span>
             </div>
-            <div className={styles.evidence} id="evidence">
-              <h3>Evidence comparison</h3>
-              <div>
-                <span>Claimant evidence</span>
-                <strong>Virginia SCC authoritative record</strong>
-                <small>Verified · restricted reference only</small>
-              </div>
-              <div>
-                <span>Existing authority</span>
-                <strong>Administrator invitation history</strong>
-                <small>Notification sent · response recorded</small>
-              </div>
-              <p>Sensitive documents remain private and require explicit evidence-read authority.</p>
-            </div>
-            <ol className={styles.timeline}>
-              {workflow.map((step, index) => (
-                <li key={step} data-complete={index < 4}>
-                  <span>{index < 4 ? "Complete" : index === 4 ? "Current" : "Pending"}</span>
-                  <strong>{step}</strong>
-                </li>
-              ))}
-            </ol>
-            <div className={styles.decision} id="audit">
-              <label>
-                <span>Decision rationale</span>
-                <textarea defaultValue="Compare authoritative ownership evidence and the existing administrator response before assigning membership." />
-              </label>
-              <div>
-                <button type="button" className={styles.deny}>Deny claim</button>
-                <button type="button" className={styles.approve}>Approve authority</button>
-              </div>
-              <p>Approval requires recent re-authentication and creates immutable before/after audit evidence.</p>
+            <div className={styles.evidence}>
+              <h3>Access boundary</h3>
+              <p>
+                This route is resolved from the authenticated Firebase subject to a persisted
+                platform-administrator account, privileged security state, authority context, and
+                explicit permission. Ordinary participants and direct anonymous URL requests cannot
+                render this workspace.
+              </p>
+              <p>
+                Private claim evidence is intentionally not rendered by this list surface. Access
+                to restricted organization documents requires its own minimum-necessary permission.
+              </p>
             </div>
           </section>
         </div>
