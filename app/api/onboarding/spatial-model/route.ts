@@ -23,7 +23,7 @@ export async function GET() {
     return NextResponse.json({ error: "Spatial activation is restricted." }, { status: 403 });
   }
 
-  const selectedGeography = access.state.selectedGeography;
+  const selectedGeography = access.state?.selectedGeography;
   if (!selectedGeography) {
     return NextResponse.json({ error: "Home locality has not been selected." }, { status: 409 });
   }
