@@ -57,6 +57,19 @@ test("administrative routes require persisted authority permissions and scoped g
   assert.doesNotMatch(organization360, /createPortsmouthOrganization360Preview/);
 });
 
+test("trusted session establishment is not coupled to participant activation for administrators", async () => {
+  const session = await source("app/api/auth/session/route.ts");
+  assert.match(session, /issueSessionCookie/);
+  assert.match(session, /FirestorePlatformAdministratorLifecycleRepository/);
+  assert.match(session, /existingContext \|\| provisionalOrganizationName/);
+  assert.match(session, /Organization name is required to begin participant activation/);
+
+  const signIn = await source("src/components/auth/SignInClient.tsx");
+  assert.match(signIn, /isAdministrativeReturnTarget/);
+  assert.match(signIn, /ActivationJourneyState \| null/);
+  assert.match(signIn, /returnTo === "\/admin"/);
+});
+
 test("onboarding consumes canonical role and objective vocabularies", async () => {
   const client = await source("src/components/onboarding/ActivationJourneyClient.tsx");
   assert.match(client, /ORGANIZATION_PARTICIPATION_ROLES\.map/);
