@@ -10,37 +10,33 @@ export const metadata: Metadata = {
 export default function AccessibilityPage() {
   return (
     <MarketingStoryPage
-      eyebrow="Accessibility"
-      title="Build the Exchange so more people can use it."
-      lede="Accessibility is a product requirement across the public marketing surface and the account-based Exchange. The platform should support clear navigation, readable content, keyboard interaction, meaningful labels, and reduced-motion preferences as features are delivered."
-      image="https://images.unsplash.com/photo-1758518729711-1cbacd55efdb?auto=format&fit=crop&w=2000&q=82"
-      imageAlt="Professionals collaborating around a table"
+      eyebrow="Access for every participant"
+      title="Accessibility"
+      lede="RFxchange should be usable by people with different abilities, devices and ways of navigating digital services."
+      image="https://images.unsplash.com/photo-1633536584998-2d71cbd95d37?auto=format&fit=crop&w=2200&q=82"
+      imageAlt="Aerial view of a city, region, and waterways"
       sections={[
         {
-          eyebrow: "Structure",
-          title: "Use clear hierarchy and semantic page structure.",
-          body: "Pages should provide meaningful headings, landmarks, link text, labels, and reading order so content remains understandable beyond its visual presentation.",
+          eyebrow: "Design intent",
+          title: "Design intent",
+          body: "This static build uses semantic landmarks, keyboard-focusable links and controls, text alternatives for imagery, responsive layouts and contrast-aware brand colors.",
         },
         {
-          eyebrow: "Interaction",
-          title: "Core actions should not depend on a mouse alone.",
-          body: "Navigation, forms, dialogs, maps, and other controls should be designed with keyboard access and visible focus behavior where the interaction permits it.",
-        },
-        {
-          eyebrow: "Visual access",
-          title: "Maintain legibility as the visual system becomes richer.",
-          body: "The black, gold, ivory, graphite, blue, and green system should be applied with sufficient contrast, readable type sizes, non-color-only signals, and responsive layouts.",
-        },
-        {
-          eyebrow: "Motion + feedback",
-          title: "Respect user motion preferences and make system state understandable.",
-          body: "Decorative animation should respect reduced-motion settings. Important actions should provide perceivable status, errors, and next steps rather than depending on transient visual effects.",
+          eyebrow: "Production commitments",
+          title: "Production commitments",
+          body: "Accessibility issues should have a defined contact and remediation path before launch.",
+          bullets: [
+            "Keyboard-accessible navigation and workflows",
+            "Visible focus treatment",
+            "Meaningful labels and error messages",
+            "Text alternatives for nondecorative images",
+            "Color-independent states",
+            "Responsive layouts and zoom support",
+            "Ongoing accessibility testing of authenticated workflows",
+          ],
         },
       ]}
-      ctaTitle="Need to report an accessibility issue?"
-      ctaBody="Use the platform support path when available and include the page, action, device, browser, and assistive technology involved so the problem can be reproduced and corrected."
-      ctaHref="/about"
-      ctaLabel="About RFxchange"
+      showCta={false}
     />
   );
 }
