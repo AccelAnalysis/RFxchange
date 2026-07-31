@@ -7,6 +7,9 @@ const files = {
   preference: await readFile("src/components/map/map-motion-preference.ts", "utf8"),
   preferenceUi: await readFile("src/components/account/MapMotionPreferenceToggle.tsx", "utf8"),
   activation: await readFile("src/components/onboarding/SpatialActivationExperience.tsx", "utf8"),
+  activationClient: await readFile("src/components/onboarding/ActivationJourneyClient.tsx", "utf8"),
+  spatialModelRoute: await readFile("app/api/onboarding/spatial-model/route.ts", "utf8"),
+  homeSceneRoute: await readFile("app/api/onboarding/home-scene/route.ts", "utf8"),
   join: await readFile("app/join/page.tsx", "utf8"),
   workspace: await readFile("app/geography/canvas/page.tsx", "utf8"),
   account: await readFile("app/organization-profile/page.tsx", "utf8"),
@@ -23,6 +26,8 @@ assert.match(files.scene, /text-allow-overlap/);
 assert.match(files.scene, /text-ignore-placement/);
 assert.match(files.scene, /text-pitch-alignment": "viewport"/);
 assert.match(files.scene, /HOME_MARKER_LABEL_LAYER_ID/);
+assert.match(files.scene, /search\/searchbox\/v1\/forward/);
+assert.match(files.scene, /VIEW_MODE_OPTIONS/);
 
 assert.match(files.sceneCss, /position: fixed/);
 assert.match(files.sceneCss, /inset: 0/);
@@ -33,7 +38,29 @@ assert.match(files.preferenceUi, /Ambient map rotation/);
 assert.match(files.account, /MapMotionPreferenceToggle/);
 
 assert.match(files.activation, /activationState !== null/);
-assert.match(files.activation, /selectedGeography[\s\S]*\? "locality"[\s\S]*: "regional"/);
+assert.match(files.activation, /onStateChange=\{setActivationState\}/);
+assert.match(files.activation, /\/api\/onboarding\/spatial-model/);
+assert.match(files.activation, /sceneModelMatchesSelection/);
+assert.match(files.activation, /selectedGeographyId[\s\S]*\? "locality"[\s\S]*: "regional"/);
+assert.doesNotMatch(files.activationClient, /window\.location\.reload\(\)/);
+assert.match(files.activationClient, /onStateChange\?\.\(state\)/);
+
+for (const required of [
+  "resolveParticipantRoute",
+  "selections.getByUserId",
+  "ControlledLocalityMapService",
+  "TigerWebBoundarySnapshotRepository",
+]) {
+  assert.match(files.spatialModelRoute, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+}
+for (const required of [
+  "resolveParticipantRoute",
+  "projectPublicOrganizationMarker",
+  'access.kind !== "authorized"',
+]) {
+  assert.match(files.homeSceneRoute, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+}
+
 assert.match(files.join, /SpatialActivationExperience/);
 assert.match(files.workspace, /mode="organization"/);
 assert.match(files.workspace, /marker=\{authenticated\.homeMarker\}/);
@@ -44,5 +71,6 @@ assert.match(files.architecture, /75 degrees/);
 assert.match(files.architecture, /zoom 16/);
 assert.match(files.architecture, /edge-to-edge/);
 assert.match(files.architecture, /Account/);
+assert.match(files.architecture, /without a page reload/);
 
 console.log("Spatial onboarding and home-orbit regression contract validated.");
