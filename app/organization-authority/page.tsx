@@ -1,58 +1,28 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
 import {
-  OperationalWorkspace,
-  ParticipantShell,
-} from "@/src/components/participant/ParticipantWorkspace";
+  RFXCHANGE_SESSION_COOKIE_NAME,
+  resolveParticipantRoute,
+} from "@/src/infrastructure/auth/participant-route-runtime";
 
-import styles from "./page.module.css";
+/**
+ * Legacy compatibility route.
+ *
+ * Organization-authority establishment is part of the integrated activation journey at /join.
+ * Keeping a second fixture-driven authority workspace would let production navigation diverge from
+ * persisted activation state, so this route only resolves the authenticated state and forwards to
+ * the canonical runtime surface.
+ */
+export default async function OrganizationAuthorityPage() {
+  const cookieStore = await cookies();
+  const access = await resolveParticipantRoute({
+    sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
+  });
 
-const pathways = [
-  ["Domain email", "Verify an address on the organization’s business domain."],
-  ["Administrator invitation", "Accept an invitation from an existing authorized administrator."],
-  ["Organization document", "Submit private evidence through the controlled document boundary."],
-  ["Administrative review", "Request evidence-based review when automated paths are not available."],
-] as const;
-
-export default function OrganizationAuthorityPage() {
-  return (
-    <ParticipantShell activeItem="Account">
-      <OperationalWorkspace ariaLabel="Organization authority workspace">
-        <section className={styles.layout}>
-          <div className={styles.intro}>
-            <p className={styles.eyebrow}>Organization resolved</p>
-            <h1>Establish your authority to manage Harborlight Fabrication.</h1>
-            <p>
-              Resolution found the organization record. This step establishes your management
-              relationship. It does not make the organization Verified.
-            </p>
-            <div className={styles.separation}>
-              <strong>Authority ≠ Verification</strong>
-              <span>Verification remains not evaluated after authority is approved.</span>
-            </div>
-          </div>
-          <div className={styles.pathways} aria-label="Approved authority pathways">
-            <div className={styles.pathwayHeader}>
-              <div>
-                <p className={styles.eyebrow}>Choose one pathway</p>
-                <h2>How can you establish authority?</h2>
-              </div>
-              <span>Portsmouth, VA</span>
-            </div>
-            {pathways.map(([title, description], index) => (
-              <button className={styles.pathway} type="button" key={title}>
-                <span className={styles.number}>{String(index + 1).padStart(2, "0")}</span>
-                <span>
-                  <strong>{title}</strong>
-                  <small>{description}</small>
-                </span>
-                <span aria-hidden="true">→</span>
-              </button>
-            ))}
-            <p className={styles.privacy}>
-              Documents and review evidence stay private. They are not added to the public profile.
-            </p>
-          </div>
-        </section>
-      </OperationalWorkspace>
-    </ParticipantShell>
-  );
+  if (access.kind === "unauthenticated") {
+    redirect("/signin?returnTo=%2Forganization-authority");
+  }
+  if (access.kind === "authorized") redirect("/organization-profile");
+  redirect("/join");
 }
