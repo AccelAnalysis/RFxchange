@@ -17,7 +17,7 @@ assert.match(files.scene, /EXCHANGE_ORBIT_PERIOD_MS = 225_000/);
 assert.match(files.scene, /LOCALITY_ORBIT_PITCH = 60/);
 assert.match(files.scene, /ORGANIZATION_ORBIT_PITCH = 75/);
 assert.match(files.scene, /ORGANIZATION_ORBIT_ZOOM = 16/);
-assert.match(files.scene, /mode === "organization"/);
+assert.match(files.scene, /activeMode === "organization"/);
 assert.match(files.scene, /fitBounds\(bounds/);
 assert.match(files.scene, /text-allow-overlap/);
 assert.match(files.scene, /text-ignore-placement/);
@@ -33,7 +33,7 @@ assert.match(files.preferenceUi, /Ambient map rotation/);
 assert.match(files.account, /MapMotionPreferenceToggle/);
 
 assert.match(files.activation, /activationState !== null/);
-assert.match(files.activation, /selectedGeography \? "locality" : "regional"/);
+assert.match(files.activation, /selectedGeography[\s\S]*\? "locality"[\s\S]*: "regional"/);
 assert.match(files.join, /SpatialActivationExperience/);
 assert.match(files.workspace, /mode="organization"/);
 assert.match(files.workspace, /marker=\{authenticated\.homeMarker\}/);
