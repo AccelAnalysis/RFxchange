@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
+import { ServerSessionError } from "@/src/application/auth/server-session";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
 } from "@/src/infrastructure/auth/firebase-server-session";
@@ -17,6 +18,14 @@ function csrfCookieOptions() {
     path: "/",
     maxAge: 10 * 60,
   };
+}
+
+function sessionErrorStatus(error: unknown): number {
+  if (!(error instanceof ServerSessionError)) return 500;
+  if (error.code === "authentication-backend-unavailable") return 503;
+  if (error.code === "csrf-verification-required") return 403;
+  if (error.code === "credential-required") return 400;
+  return 401;
 }
 
 export async function GET() {
@@ -70,7 +79,7 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Session exchange failed.";
-    return NextResponse.json({ error: message }, { status: 401 });
+    return NextResponse.json({ error: message }, { status: sessionErrorStatus(error) });
   }
 }
 

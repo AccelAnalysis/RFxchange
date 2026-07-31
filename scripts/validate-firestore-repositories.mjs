@@ -112,7 +112,13 @@ assert.ok(
 for (const required of ["getFirestore(", "getFirebaseAdminApp", "createFirestoreFoundationRepositories"]) {
   assert.ok(runtime.includes(required), `Firestore server composition is missing: ${required}`);
 }
-for (const required of ["getApps()", "initializeApp()", "getFirebaseAdminApp"]) {
+for (const required of [
+  "getApps()",
+  "initializeApp({",
+  "applicationDefault()",
+  "projectId",
+  "getFirebaseAdminApp",
+]) {
   assert.ok(firebaseAdmin.includes(required), `Shared Firebase Admin composition is missing: ${required}`);
 }
 

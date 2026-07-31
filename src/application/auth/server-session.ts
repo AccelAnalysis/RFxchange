@@ -30,7 +30,8 @@ export type ServerSessionErrorCode =
   | "credential-revoked"
   | "account-disabled"
   | "csrf-verification-required"
-  | "recent-authentication-required";
+  | "recent-authentication-required"
+  | "authentication-backend-unavailable";
 
 export class ServerSessionError extends Error {
   readonly code: ServerSessionErrorCode;
