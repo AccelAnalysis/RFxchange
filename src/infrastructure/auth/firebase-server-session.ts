@@ -45,6 +45,24 @@ function firebaseErrorCode(error: unknown): string | null {
     : null;
 }
 
+function firebaseErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return "";
+}
+
+function isAdminRuntimeFailure(error: unknown): boolean {
+  const code = firebaseErrorCode(error);
+  const message = firebaseErrorMessage(error);
+  return (
+    code === "app/invalid-credential" ||
+    code === "app/invalid-app-options" ||
+    code === "auth/internal-error" ||
+    /application default credentials|credential implementation|failed to determine project id|service account|metadata server/i.test(
+      message,
+    )
+  );
+}
+
 function credentialFailure(error: unknown, label: string): ServerSessionError {
   const code = firebaseErrorCode(error);
   if (code === "auth/user-disabled") {
@@ -52,6 +70,12 @@ function credentialFailure(error: unknown, label: string): ServerSessionError {
   }
   if (code === "auth/id-token-revoked" || code === "auth/session-cookie-revoked") {
     return new ServerSessionError("credential-revoked", `${label} has been revoked.`);
+  }
+  if (isAdminRuntimeFailure(error)) {
+    return new ServerSessionError(
+      "authentication-backend-unavailable",
+      "Firebase Admin authentication is not available to the RFxchange server. Verify the server Firebase project binding and Application Default Credentials.",
+    );
   }
   return new ServerSessionError("credential-invalid", `${label} is invalid.`);
 }
