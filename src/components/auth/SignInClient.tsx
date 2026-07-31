@@ -92,8 +92,15 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
                     window.location.assign("/join");
                     return;
                   }
-                  if (result.state.nextStep === "complete" && result.state.controlledPlatformUrl) {
-                    window.location.assign(returnTo ?? result.state.controlledPlatformUrl);
+
+                  const participantWorkspaceEligible =
+                    result.state.lifecycleState === "controlled-platform" ||
+                    result.state.lifecycleState === "open-platform";
+                  if (participantWorkspaceEligible && result.state.organization) {
+                    const workspaceUrl =
+                      result.state.controlledPlatformUrl ??
+                      `/geography/canvas?organizationId=${encodeURIComponent(result.state.organization.id)}`;
+                    window.location.assign(returnTo ?? workspaceUrl);
                     return;
                   }
                   window.location.assign("/join");
