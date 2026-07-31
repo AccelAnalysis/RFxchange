@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
+import { geographyId as parseGeographyId } from "@/src/domain/geography/model";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
 import { resolveAdminRoute } from "@/src/infrastructure/auth/admin-route-runtime";
 import { getServerFirestore, createServerFirestoreFoundationRepositories } from "@/src/infrastructure/firestore/runtime";
@@ -17,6 +18,12 @@ const OPEN_CLAIM_STATUSES = [
   "conflict",
 ] as const;
 
+function firstSearchParam(value: string | string[] | undefined): string | null {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (Array.isArray(value) && typeof value[0] === "string" && value[0].trim()) return value[0].trim();
+  return null;
+}
+
 function readable(value: string): string {
   return value
     .split("-")
@@ -25,28 +32,53 @@ function readable(value: string): string {
     .join(" ");
 }
 
-export default async function OrganizationClaimsAdminPage() {
+export default async function OrganizationClaimsAdminPage({
+  searchParams,
+}: {
+  readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
+}) {
+  const params = searchParams ? await searchParams : {};
+  const requestedGeography = firstSearchParam(params.geographyId);
+  let geographyId = null;
+  if (requestedGeography) {
+    try {
+      geographyId = parseGeographyId(requestedGeography);
+    } catch {
+      notFound();
+    }
+  }
+
+  const scope = geographyId ? `GEOGRAPHY:${geographyId}` : "GLOBAL";
+  const returnPath = geographyId
+    ? `/admin/organization-claims?geographyId=${encodeURIComponent(String(geographyId))}`
+    : "/admin/organization-claims";
   const cookieStore = await cookies();
   const access = await resolveAdminRoute({
     sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
     permission: "organization.claim.read",
+    scope,
   });
 
   if (access.kind === "unauthenticated") {
-    redirect("/signin?returnTo=%2Fadmin%2Forganization-claims");
+    redirect(`/signin?returnTo=${encodeURIComponent(returnPath)}`);
   }
   if (access.kind === "privileged-access-denied" && access.reason === "recent-reauthentication-required") {
-    redirect("/signin?returnTo=%2Fadmin%2Forganization-claims");
+    redirect(`/signin?returnTo=${encodeURIComponent(returnPath)}`);
   }
   if (access.kind !== "authorized") notFound();
 
   const db = getServerFirestore();
   const claimsRepository = createFirestoreOrganizationAuthorityClaims(db).claims;
-  const claimGroups = await Promise.all(
-    OPEN_CLAIM_STATUSES.map((status) => claimsRepository.listByStatus(status)),
-  );
-  const claims = [...new Map(claimGroups.flat().map((claim) => [String(claim.id), claim])).values()]
-    .sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt));
+  const rawClaims = geographyId
+    ? await claimsRepository.listByGeographyId(geographyId)
+    : (await Promise.all(
+        OPEN_CLAIM_STATUSES.map((status) => claimsRepository.listByStatus(status)),
+      )).flat();
+  const claims = [...new Map(
+    rawClaims
+      .filter((claim) => OPEN_CLAIM_STATUSES.includes(claim.status as (typeof OPEN_CLAIM_STATUSES)[number]))
+      .map((claim) => [String(claim.id), claim]),
+  ).values()].sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt));
 
   const foundation = createServerFirestoreFoundationRepositories(db);
   const profileEntries = await Promise.all(
@@ -57,8 +89,8 @@ export default async function OrganizationClaimsAdminPage() {
     }),
   );
   const profileNames = new Map(profileEntries);
-  const canAdjudicate = access.authority.effectivePermissions.includes(
-    "organization.claim.adjudicate" as (typeof access.authority.effectivePermissions)[number],
+  const canAdjudicate = access.authority.effectivePermissions.some(
+    (permission) => permission === "organization.claim.adjudicate",
   );
 
   return (
@@ -70,12 +102,11 @@ export default async function OrganizationClaimsAdminPage() {
           <Link href="/organization-profile">Participant account</Link>
         </nav>
         <div className={styles.scope}>
-          <span>Authority</span>
-          <strong>{String(access.account.administratorId)}</strong>
-          <small>Scope: {access.authority.scope.resolved}</small>
+          <span>Current scope</span>
+          <strong>{access.scope.value}</strong>
+          <small>Grant {access.grantId}</small>
         </div>
       </aside>
-
       <section className={styles.workspace}>
         <header className={styles.header}>
           <div>
@@ -84,15 +115,13 @@ export default async function OrganizationClaimsAdminPage() {
           </div>
           <div className={styles.adminIdentity}>
             <span>Authorized administrator</span>
-            <strong>{access.permission}</strong>
+            <strong>{String(access.account.administratorId)}</strong>
           </div>
         </header>
 
         <section className={styles.filters} aria-label="Organization claims summary">
           <div className={styles.filterList}>
-            {OPEN_CLAIM_STATUSES.map((status) => (
-              <span key={status}>{readable(status)}</span>
-            ))}
+            {OPEN_CLAIM_STATUSES.map((status) => <span key={status}>{readable(status)}</span>)}
           </div>
         </section>
 
@@ -103,7 +132,7 @@ export default async function OrganizationClaimsAdminPage() {
                 <span>{claims.length} open {claims.length === 1 ? "record" : "records"}</span>
                 <h2>Live authority claims</h2>
               </div>
-              <strong>{canAdjudicate ? "Adjudication authority granted" : "Read-only authority"}</strong>
+              <strong>{canAdjudicate ? "Adjudication permission present" : "Read-only permission"}</strong>
             </div>
 
             {claims.length ? claims.map((claim) => (
@@ -120,7 +149,7 @@ export default async function OrganizationClaimsAdminPage() {
             )) : (
               <div className={styles.identityNote}>
                 <strong>No open claims.</strong>
-                <p>The live authority-claim repository currently contains no non-terminal records.</p>
+                <p>The live authority-claim repository currently contains no non-terminal records in this authorized scope.</p>
               </div>
             )}
           </section>
@@ -131,19 +160,19 @@ export default async function OrganizationClaimsAdminPage() {
                 <p>Runtime convergence</p>
                 <h2>Protected administrative surface</h2>
               </div>
-              <span>{canAdjudicate ? "Read + adjudicate" : "Read only"}</span>
+              <span>{access.scope.value}</span>
             </div>
             <div className={styles.evidence}>
               <h3>Access boundary</h3>
               <p>
-                This route is resolved from the authenticated Firebase subject to a persisted
-                platform-administrator account, privileged security state, authority context, and
-                explicit permission. Ordinary participants and direct anonymous URL requests cannot
-                render this workspace.
+                This route resolves the authenticated Firebase subject to a persisted platform
+                administrator, privileged security state, authority context, and an active grant
+                matching the requested scope. A geography-scoped administrator sees only claims in
+                that geography; GLOBAL access requires a GLOBAL grant.
               </p>
               <p>
-                Private claim evidence is intentionally not rendered by this list surface. Access
-                to restricted organization documents requires its own minimum-necessary permission.
+                Private evidence is intentionally excluded from this queue. Evidence access and
+                adjudication remain separate minimum-necessary permissions and workflows.
               </p>
             </div>
           </section>
