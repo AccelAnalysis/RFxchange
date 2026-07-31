@@ -143,6 +143,15 @@ export function MapboxLocalityCanvas({
       accessToken: token,
       container: containerRef.current,
       style: "mapbox://styles/mapbox/standard",
+      config: {
+        basemap: {
+          lightPreset: "day",
+          theme: "faded",
+          showPointOfInterestLabels: false,
+          showTransitLabels: false,
+          show3dObjects: true,
+        },
+      },
       center: persistedCamera
         ? [persistedCamera.longitude, persistedCamera.latitude]
         : [model.camera.center.longitude, model.camera.center.latitude],
@@ -178,7 +187,9 @@ export function MapboxLocalityCanvas({
             filter: ["==", ["get", "role"], layer.featureRole],
             paint: {
               "fill-color": layer.style.fill,
-              "fill-opacity": layer.style.fillOpacity,
+              "fill-opacity": layer.featureRole === "selected"
+                ? Math.min(layer.style.fillOpacity, 0.2)
+                : Math.min(layer.style.fillOpacity, 0.1),
             },
           });
         } else {
