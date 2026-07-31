@@ -80,12 +80,16 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
                     },
                   );
 
+                  // Administration is an independent authority plane. Once authentication succeeds,
+                  // an explicit admin return target is always evaluated by the protected admin route
+                  // itself; participant activation state cannot block or grant administrative access.
+                  if (isAdministrativeReturnTarget(returnTo)) {
+                    window.location.assign(returnTo);
+                    return;
+                  }
+
                   if (!result.state) {
-                    // Authentication is independent from participant activation. This supports
-                    // platform administrators who legitimately have no participant organization
-                    // context while still preventing a detached account from entering participant
-                    // workspaces.
-                    window.location.assign(isAdministrativeReturnTarget(returnTo) ? returnTo : "/join");
+                    window.location.assign("/join");
                     return;
                   }
                   if (result.state.nextStep === "complete" && result.state.controlledPlatformUrl) {
