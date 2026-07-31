@@ -1,20 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 import {
   readMapRotationPreference,
+  subscribeMapRotationPreference,
   writeMapRotationPreference,
 } from "../map/map-motion-preference";
 
 import styles from "./MapMotionPreferenceToggle.module.css";
 
 export function MapMotionPreferenceToggle() {
-  const [enabled, setEnabled] = useState(true);
-
-  useEffect(() => {
-    setEnabled(readMapRotationPreference());
-  }, []);
+  const enabled = useSyncExternalStore(
+    subscribeMapRotationPreference,
+    readMapRotationPreference,
+    () => true,
+  );
 
   return (
     <div className={styles.preference}>
@@ -29,11 +30,7 @@ export function MapMotionPreferenceToggle() {
         <input
           type="checkbox"
           checked={enabled}
-          onChange={(event) => {
-            const next = event.target.checked;
-            setEnabled(next);
-            writeMapRotationPreference(next);
-          }}
+          onChange={(event) => writeMapRotationPreference(event.target.checked)}
         />
         <span aria-hidden="true" />
         <strong>{enabled ? "On" : "Off"}</strong>
