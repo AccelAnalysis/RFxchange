@@ -145,14 +145,18 @@ assert.ok(
   "Activation context must support resumable registration without claiming canonical authority.",
 );
 
+const architectureLower = architecture.toLowerCase();
 for (const phrase of [
-  "no Feature-ID completion change",
-  "does not complete `EDU-001`–`EDU-008`",
+  "no feature-id completion change",
+  "does not complete `edu-001`–`edu-008`",
   "never advances `open-platform`",
   "participant-created organization",
   "real active marker",
 ]) {
-  assert.ok(architecture.includes(phrase), `Activation architecture authority is missing: ${phrase}`);
+  assert.ok(
+    architectureLower.includes(phrase),
+    `Activation architecture authority is missing: ${phrase}`,
+  );
 }
 
 console.log(
