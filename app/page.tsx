@@ -81,7 +81,7 @@ export default function HomePage() {
           <p className={styles.eyebrow}>The connection gap</p>
           <h2 id="problem-title">The opportunity may exist. The connection may not.</h2>
           <div className={styles.wordCloud} aria-label="Business connection categories">
-            {['Buyers', 'Suppliers', 'RFx', 'Partners', 'Referrals', 'Capital', 'Workforce', 'Resources'].map((word) => <span key={word}>{word}</span>)}
+            {["Buyers", "Suppliers", "RFx", "Partners", "Referrals", "Capital", "Workforce", "Resources"].map((word) => <span key={word}>{word}</span>)}
           </div>
           <p>
             Those connections are often scattered across portals, directories, emails, events, institutional systems, and personal relationships.
@@ -152,7 +152,7 @@ export default function HomePage() {
             RFxchange connects a business need to the market around it—so discovery, matching, response, connection, and outcome can operate as one journey.
           </p>
           <div className={styles.flow} aria-label="RFx transaction flow">
-            {['Need', 'RFx', 'Match', 'Respond', 'Select', 'Outcome'].map((step, index, list) => (
+            {["Need", "RFx", "Match", "Respond", "Select", "Outcome"].map((step, index, list) => (
               <span key={step}>{step}{index < list.length - 1 ? <b className={styles.arrow}> →</b> : null}</span>
             ))}
           </div>
@@ -182,7 +182,7 @@ export default function HomePage() {
           <div className={styles.resourceList}>
             <p className={styles.eyebrow}>Resources in context</p>
             <h3 id="resource-title">When you need help, find the right door.</h3>
-            {['Capital', 'Contracting', 'Workforce', 'Technical Assistance', 'Training & Business Support'].map((resource) => (
+            {["Capital", "Contracting", "Workforce", "Technical Assistance", "Training & Business Support"].map((resource) => (
               <div className={styles.resourceItem} key={resource}><b>{resource}</b><span>↗</span></div>
             ))}
             <p><Link className={styles.buttonOutline} href="/resource-providers">For Resource Providers</Link></p>
@@ -228,7 +228,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className={styles.trustBadges} aria-label="Credibility families">
-              {['Verified', 'Active', 'Experienced', 'Trusted', 'Endorsed'].map((badge) => <div className={styles.trustBadge} key={badge}>{badge}</div>)}
+              {["Verified", "Active", "Experienced", "Trusted", "Endorsed"].map((badge) => <div className={styles.trustBadge} key={badge}>{badge}</div>)}
             </div>
           </div>
           <div className={styles.trustMedia}>
@@ -280,7 +280,7 @@ export default function HomePage() {
           <h2 id="cta-title">Be found.<br />Find opportunity.<br />Build the connection.</h2>
           <div className={styles.ctaActions}>
             <Link className={styles.buttonGold} href="/join">Join Free</Link>
-            <Link className={styles.buttonLight} href="/signin">Sign In</Link>
+            <Link className={styles.buttonLight} href="/signin">Sign in</Link>
           </div>
         </div>
       </section>
