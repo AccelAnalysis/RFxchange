@@ -173,7 +173,7 @@ for (const requirement of [
   "authenticateSessionCookie",
   "controlled-platform",
   "open-platform",
-  "listActiveByUserId",
+  "memberships.getById",
   "getForOrganization",
   "getForMembership",
   "wrong-organization",
