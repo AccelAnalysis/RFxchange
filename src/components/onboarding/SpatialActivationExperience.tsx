@@ -17,43 +17,47 @@ interface HomeSceneResponse {
   readonly controlledPlatformUrl: string;
 }
 
+interface SpatialModelResponse {
+  readonly model: ControlledLocalityMapModel;
+}
+
 export function SpatialActivationExperience({
   mapModel,
 }: Readonly<{ mapModel: ControlledLocalityMapModel }>) {
   const [activationState, setActivationState] = useState<ActivationJourneyState | null>(null);
+  const [sceneModel, setSceneModel] = useState(mapModel);
   const [homeMarker, setHomeMarker] = useState<ExchangeHomeMarker | null>(null);
   const [workspaceUrl, setWorkspaceUrl] = useState("/geography/canvas");
+  const selectedGeographyId = activationState?.selectedGeography?.id ?? null;
+  const sceneModelMatchesSelection = selectedGeographyId !== null &&
+    String(sceneModel.selectedGeography.id) === selectedGeographyId;
 
   useEffect(() => {
+    if (!selectedGeographyId || sceneModelMatchesSelection) return;
     let cancelled = false;
-    let timer: number | undefined;
 
-    async function refreshActivationState() {
-      try {
-        const response = await fetch("/api/onboarding/activation", { cache: "no-store" });
-        if (!response.ok) {
-          if (!cancelled) setActivationState(null);
-          return;
-        }
-        const result = (await response.json()) as { state?: ActivationJourneyState };
-        if (!cancelled) setActivationState(result.state ?? null);
-      } catch {
-        // The account and activation forms remain usable if the visual background cannot refresh.
-      }
-    }
+    fetch("/api/onboarding/spatial-model", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        return (await response.json()) as SpatialModelResponse;
+      })
+      .then((result) => {
+        if (!cancelled && result?.model) setSceneModel(result.model);
+      })
+      .catch(() => undefined);
 
-    void refreshActivationState();
-    timer = window.setInterval(() => void refreshActivationState(), 1_500);
-    window.addEventListener("focus", refreshActivationState);
     return () => {
       cancelled = true;
-      if (timer !== undefined) window.clearInterval(timer);
-      window.removeEventListener("focus", refreshActivationState);
     };
-  }, []);
+  }, [sceneModelMatchesSelection, selectedGeographyId]);
 
   useEffect(() => {
-    if (activationState?.marker?.status !== "active" || homeMarker) return;
+    if (activationState?.marker?.status !== "active") {
+      setHomeMarker(null);
+      setWorkspaceUrl("/geography/canvas");
+      return;
+    }
+    if (homeMarker) return;
     let cancelled = false;
 
     fetch("/api/onboarding/home-scene", { cache: "no-store" })
@@ -85,7 +89,7 @@ export function SpatialActivationExperience({
   const mapVisible = activationState !== null;
   const sceneMode = homeMarker
     ? "organization"
-    : activationState?.selectedGeography
+    : selectedGeographyId && sceneModelMatchesSelection
       ? "locality"
       : "regional";
 
@@ -98,7 +102,7 @@ export function SpatialActivationExperience({
       {mapVisible ? (
         <div className={styles.mapLayer}>
           <ExchangeSpatialScene
-            model={mapModel}
+            model={sceneModel}
             mode={sceneMode}
             marker={homeMarker}
             activationOverlay={!homeMarker}
@@ -106,7 +110,10 @@ export function SpatialActivationExperience({
         </div>
       ) : null}
       <div className={styles.content}>
-        <ActivationJourneyClient mapModel={mapModel} />
+        <ActivationJourneyClient
+          mapModel={sceneModel}
+          onStateChange={setActivationState}
+        />
       </div>
     </div>
   );
