@@ -1,10 +1,10 @@
 # Wave 2 — Activation Roadmap
 
-**Status: ACTIVE SEQUENTIAL IMPLEMENTATION — SLICES 2.1–2.8 MERGED; RUNTIME CONVERGENCE GATE REQUIRED BEFORE 2.9**
+**Status: ACTIVE SEQUENTIAL IMPLEMENTATION — SLICES 2.1–2.8 + RUNTIME CONVERGENCE MERGED; 2.9 NEXT FEATURE SLICE**
 
-Current merged feature state after Slice 2.8 remains **31/43 Activation features complete**. Slices 2.1–2.8 are complete; 12 Activation features remain across Slices 2.9–2.12.
+Current merged feature state remains **31/43 Activation features complete**. Slices 2.1–2.8 are complete; the Runtime Convergence Gate merged in PR #92 on 2026-07-31; 12 Activation Feature IDs remain across Slices 2.9–2.12.
 
-Slice 2.9 received implementation authorization on 2026-07-30 after dependency recalculation. The subsequent runtime audit identified cross-slice authentication/session, route-boundary, fixture-surface and source-convergence defects in already-complete foundations. That authorization is therefore **paused, not canceled**, until the Wave 2 Runtime Convergence Gate merges and passes acceptance. The gate carries no Feature IDs and changes no tracker completion counts.
+Slice 2.9 received implementation authorization on 2026-07-30 after dependency recalculation. The subsequent runtime audit paused that authorization while cross-slice authentication/session, route-boundary, fixture-surface and source-convergence defects were repaired. PR #92 completed that repository-level gate and production CI passed. Slice 2.9 is therefore again the next authorized feature slice, subject to the normal configured-development/browser acceptance boundary and dependency check before implementation. The Runtime Convergence Gate carries no Feature IDs and changes no tracker completion counts.
 
 | Slice / Gate | Features | Purpose / exit |
 | --- | --- | --- |
@@ -16,21 +16,23 @@ Slice 2.9 received implementation authorization on 2026-07-30 after dependency r
 | **2.6 — Organization Geography & Location** | `GEO-009`, `GEO-010`, `ORG-005`, `ORG-006`, `ORG-009` | Separate home location from service area, capture/geocode/confirm location and privacy, and establish service geography. |
 | **2.7 — Essential Organization Profile** | `ORG-007`, `ORG-008`, `ORG-010`, `ORG-011`, `ORG-012` | Establish minimum identity, capability, multi-role classification, objectives and Profile Complete. |
 | **2.8 — Marker Activation & Admin 360** | `GEO-011`, `ADM-063`, `ADM-064` | Produce the real marker success moment and scoped Organization 360 foundation. |
-| **Runtime Convergence Gate** | **No Feature IDs** | Prove real auth/session operation; enforce account-only participant runtime; centralize lifecycle/membership/restriction route access; protect admin routes with explicit scoped authority; remove production fixture leakage; align onboarding role/objective/relationship semantics; add negative-path acceptance. |
-| **2.9 — Acquisition-to-Activation Continuity** | `ACQ-002`, `ACQ-003` | Preserve meaningful acquisition context through registration into the first authenticated experience. Begins only after Runtime Convergence Gate passes. |
+| **Runtime Convergence Gate — MERGED PR #92** | **No Feature IDs** | Enforce account-only participant runtime; centralize lifecycle/membership/restriction route access; protect admin routes with explicit scoped authority; remove production fixture leakage; align onboarding role/objective/relationship semantics; add positive/negative runtime guardrails. Repository CI passed on the merged tree. |
+| **2.9 — Acquisition-to-Activation Continuity** | `ACQ-002`, `ACQ-003` | Preserve meaningful acquisition context through registration into the first authenticated experience. Next authorized feature slice after convergence. |
 | **2.10 — Orientation: Discovery & Team Formation** | `EDU-001`, `EDU-002`, `EDU-003`, `EDU-004` | Synthetic three-organization map tutorial: issuer creates opportunity → responder match → capability gap → teammate discovery. |
 | **2.11 — Orientation: Response to Outcome** | `EDU-005`, `EDU-006`, `EDU-007`, `EDU-008` | Teammate invite/accept → joint response → issuer evaluation/selection → network-effect visualization. |
 | **2.12 — First Value & OPEN Gate** | `EDU-009`, `EDU-010` | Route according to goals and release OPEN only after all account, organization, geography, marker, education, legal and first-value gates are satisfied. |
 
 ## Runtime convergence authority
 
-The Runtime Convergence Gate and `docs/architecture/ACTIVATION_JOURNEY_INTEGRATION_GATE.md` are authoritative for the boundary Slices 2.9–2.12 inherit.
+The merged Runtime Convergence Gate and `docs/architecture/ACTIVATION_JOURNEY_INTEGRATION_GATE.md` are authoritative for the boundary Slices 2.9–2.12 inherit.
 
 Public visitors receive the marketing/authentication surface only. A valid RFxchange account/session is required for participant application routes. Free accounts are valid participant accounts; paid plans later add entitlements rather than creating the basic workspace-access boundary.
 
-Protected participant routes must resolve persisted lifecycle, active organization membership, organization isolation and restriction state. Protected administrator routes additionally require persisted platform-administrator identity, privileged security state, catalogued permission and active matching scope grant.
+Protected participant routes resolve persisted lifecycle, active organization membership, organization isolation and restriction state. Protected administrator routes additionally require persisted platform-administrator identity, privileged security state, catalogued permission and an active matching scoped grant.
 
 Reference/preview fixtures may support tests and design evidence but may not render as normal production participant/admin pages.
+
+Repository-level convergence acceptance is complete through guardrails, Functions build/unit tests, Firebase Auth/Firestore/Functions/Storage emulator smoke tests, architecture tests, typecheck, lint and production Next.js build. Configured-development acceptance against the selected real Firebase project and actual browser remains an environment acceptance check and must not be inferred from emulator CI.
 
 ## Design convergence authority for Slices 2.9–2.12
 
@@ -49,17 +51,17 @@ These requirements do not alter Feature-ID scope or completion status.
 
 ```text
 2.1–2.8 merged
-→ Runtime Convergence Gate
-→ runtime + negative-path acceptance
-→ recalculate dependencies
-→ resume 2.9
+→ Runtime Convergence Gate merged + repository CI passed
+→ configured-development/browser acceptance
+→ dependency check
+→ 2.9
 → 2.10
 → 2.11
 → 2.12
 → verify Wave 2 exit
 ```
 
-No production implementation for a later slice begins before the current authorized slice/gate merges and dependency eligibility is recalculated.
+No production implementation for a later slice begins before the current authorized slice/gate is complete and dependency eligibility is recalculated.
 
 ## Critical path
 
