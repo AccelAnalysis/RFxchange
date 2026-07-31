@@ -73,7 +73,9 @@ for (const required of [
 assert.match(server, /from "firebase-admin\/auth"/);
 assert.match(server, /getAuth\(getFirebaseAdminApp\(\)\)/);
 assert.match(firebaseAdmin, /getApps\(\)/);
-assert.match(firebaseAdmin, /initializeApp\(\)/);
+assert.match(firebaseAdmin, /initializeApp\(\{/);
+assert.match(firebaseAdmin, /applicationDefault\(\)/);
+assert.match(firebaseAdmin, /projectId/);
 
 for (const forbidden of [
   "serviceAccount",
