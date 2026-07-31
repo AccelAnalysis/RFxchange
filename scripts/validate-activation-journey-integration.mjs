@@ -54,6 +54,16 @@ for (const requirement of [
   assert.ok(client.includes(requirement), `Activation client is missing ${requirement}.`);
 }
 assert.ok(
+  !client.includes('<Link href="/" aria-label="RFxchange home"><BrandWordmark compact /></Link>'),
+  "Activation header must not wrap the already-linked BrandWordmark in another anchor.",
+);
+assert.ok(
+  client.includes('>Register</button>') &&
+    client.includes('>Sign in</button>') &&
+    client.includes('setAuthMode("signin")'),
+  "Activation entry must expose an explicit returning-user Sign in mode and return to it after registration/sign-out recovery.",
+);
+assert.ok(
   !client.includes("Harborlight") && !client.includes("200 High St"),
   "Production activation must not depend on deterministic Slice 2.x preview identities.",
 );
@@ -181,5 +191,5 @@ for (const phrase of [
 }
 
 console.log(
-  "Activation Journey Integration Gate validated: public Join, trusted Firebase session, canonical runtime order, resumable server orchestration, real geocoding/profile/marker activation, privacy-safe real marker rendering, audited creator authority, orientation non-completion, and controlled-platform stop.",
+  "Activation Journey Integration Gate validated: public Join, explicit returning-user sign in, valid wordmark markup, trusted Firebase session, canonical runtime order, resumable server orchestration, real geocoding/profile/marker activation, privacy-safe real marker rendering, audited creator authority, orientation non-completion, and controlled-platform stop.",
 );
