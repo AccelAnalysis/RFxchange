@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
@@ -123,7 +123,7 @@ function markerGeoJson(marker?: ExchangeHomeMarker | null) {
   };
 }
 
-function cameraPadding(activationOverlay: boolean): mapboxgl.PaddingOptions {
+function cameraPadding(activationOverlay: boolean) {
   if (!activationOverlay) {
     return { top: 84, right: 36, bottom: 36, left: 36 };
   }
@@ -144,17 +144,30 @@ export function ExchangeSpatialScene({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const orbitStartRef = useRef<number>(0);
-  const orbitBearingRef = useRef<number>(0);
+  const orbitStartRef = useRef(0);
+  const orbitBearingRef = useRef(0);
   const orbitTargetRef = useRef<readonly [number, number] | null>(null);
   const mapLoadedRef = useRef(false);
   const manuallyPausedRef = useRef(false);
-  const [rotationEnabled, setRotationEnabled] = useState(true);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const rotationEnabledRef = useRef(true);
+  const reducedMotionRef = useRef(false);
+  const modeRef = useRef(mode);
+  const modelRef = useRef(model);
+  const markerRef = useRef(marker);
+  const activationOverlayRef = useRef(activationOverlay);
+  const homeGeoJsonRef = useRef(localityGeoJson(model));
+  const homeMarkerGeoJsonRef = useRef(markerGeoJson(marker));
   const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN?.trim() ?? "";
 
   const homeGeoJson = useMemo(() => localityGeoJson(model), [model]);
   const homeMarkerGeoJson = useMemo(() => markerGeoJson(marker), [marker]);
+
+  modeRef.current = mode;
+  modelRef.current = model;
+  markerRef.current = marker;
+  activationOverlayRef.current = activationOverlay;
+  homeGeoJsonRef.current = homeGeoJson;
+  homeMarkerGeoJsonRef.current = homeMarkerGeoJson;
 
   const stopOrbit = useCallback(() => {
     if (animationFrameRef.current !== null) {
@@ -167,7 +180,15 @@ export function ExchangeSpatialScene({
     const map = mapRef.current;
     const target = orbitTargetRef.current;
     stopOrbit();
-    if (!map || !target || !rotationEnabled || reducedMotion || manuallyPausedRef.current) return;
+    if (
+      !map ||
+      !target ||
+      !rotationEnabledRef.current ||
+      reducedMotionRef.current ||
+      manuallyPausedRef.current
+    ) {
+      return;
+    }
 
     orbitStartRef.current = performance.now();
     orbitBearingRef.current = map.getBearing();
@@ -175,7 +196,16 @@ export function ExchangeSpatialScene({
     const animate = (timestamp: number) => {
       const activeMap = mapRef.current;
       const activeTarget = orbitTargetRef.current;
-      if (!activeMap || !activeTarget || manuallyPausedRef.current) return;
+      if (
+        !activeMap ||
+        !activeTarget ||
+        !rotationEnabledRef.current ||
+        reducedMotionRef.current ||
+        manuallyPausedRef.current
+      ) {
+        animationFrameRef.current = null;
+        return;
+      }
       const elapsed = timestamp - orbitStartRef.current;
       const bearing = orbitBearingRef.current + (elapsed / EXCHANGE_ORBIT_PERIOD_MS) * 360;
       activeMap.jumpTo({ center: activeTarget, bearing });
@@ -183,62 +213,75 @@ export function ExchangeSpatialScene({
     };
 
     animationFrameRef.current = window.requestAnimationFrame(animate);
-  }, [reducedMotion, rotationEnabled, stopOrbit]);
+  }, [stopOrbit]);
 
   const applyScene = useCallback(() => {
     const map = mapRef.current;
     if (!map || !mapLoadedRef.current) return;
+
     stopOrbit();
     manuallyPausedRef.current = false;
-    const padding = cameraPadding(activationOverlay);
+    const padding = cameraPadding(activationOverlayRef.current);
+    const activeMode = modeRef.current;
+    const activeMarker = markerRef.current;
 
-    if (mode === "organization" && marker) {
-      orbitTargetRef.current = marker.coordinate;
+    if (activeMode === "organization" && activeMarker) {
+      orbitTargetRef.current = activeMarker.coordinate;
       map.flyTo({
-        center: marker.coordinate,
+        center: activeMarker.coordinate,
         zoom: ORGANIZATION_ORBIT_ZOOM,
         pitch: ORGANIZATION_ORBIT_PITCH,
         bearing: map.getBearing(),
         padding,
-        duration: reducedMotion ? 0 : 2_400,
+        duration: reducedMotionRef.current ? 0 : 2_400,
         essential: true,
       });
       map.once("moveend", startOrbit);
       return;
     }
 
-    const bounds = mode === "regional" ? HAMPTON_ROADS_BOUNDS : localityBounds(model);
+    const bounds = activeMode === "regional"
+      ? HAMPTON_ROADS_BOUNDS
+      : localityBounds(modelRef.current);
     map.fitBounds(bounds, {
       padding,
       pitch: LOCALITY_ORBIT_PITCH,
       bearing: map.getBearing(),
-      maxZoom: mode === "regional" ? 9.3 : 12.2,
-      duration: reducedMotion ? 0 : 2_400,
+      maxZoom: activeMode === "regional" ? 9.3 : 12.2,
+      duration: reducedMotionRef.current ? 0 : 2_400,
     });
     map.once("moveend", () => {
       const center = map.getCenter();
       orbitTargetRef.current = [center.lng, center.lat];
       startOrbit();
     });
-  }, [activationOverlay, marker, mode, model, reducedMotion, startOrbit, stopOrbit]);
+  }, [startOrbit, stopOrbit]);
 
   useEffect(() => {
-    setRotationEnabled(readMapRotationPreference());
+    rotationEnabledRef.current = readMapRotationPreference();
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const updateReducedMotion = () => setReducedMotion(media.matches);
+    const updateReducedMotion = () => {
+      reducedMotionRef.current = media.matches;
+      if (media.matches) stopOrbit();
+      else startOrbit();
+    };
     updateReducedMotion();
     media.addEventListener("change", updateReducedMotion);
 
     const updatePreference = (event: Event) => {
       const custom = event as CustomEvent<boolean>;
-      setRotationEnabled(typeof custom.detail === "boolean" ? custom.detail : readMapRotationPreference());
+      rotationEnabledRef.current = typeof custom.detail === "boolean"
+        ? custom.detail
+        : readMapRotationPreference();
+      if (rotationEnabledRef.current) startOrbit();
+      else stopOrbit();
     };
     window.addEventListener(MAP_ROTATION_PREFERENCE_EVENT, updatePreference);
     return () => {
       media.removeEventListener("change", updateReducedMotion);
       window.removeEventListener(MAP_ROTATION_PREFERENCE_EVENT, updatePreference);
     };
-  }, []);
+  }, [startOrbit, stopOrbit]);
 
   useEffect(() => {
     if (!containerRef.current || !token.startsWith("pk.")) return;
@@ -286,7 +329,7 @@ export function ExchangeSpatialScene({
 
     map.on("load", () => {
       mapLoadedRef.current = true;
-      map.addSource(LOCALITY_SOURCE_ID, { type: "geojson", data: homeGeoJson });
+      map.addSource(LOCALITY_SOURCE_ID, { type: "geojson", data: homeGeoJsonRef.current });
       map.addLayer({
         id: LOCALITY_FILL_LAYER_ID,
         type: "fill",
@@ -307,7 +350,7 @@ export function ExchangeSpatialScene({
         },
       });
 
-      map.addSource(HOME_MARKER_SOURCE_ID, { type: "geojson", data: homeMarkerGeoJson });
+      map.addSource(HOME_MARKER_SOURCE_ID, { type: "geojson", data: homeMarkerGeoJsonRef.current });
       map.addLayer({
         id: HOME_MARKER_HALO_LAYER_ID,
         type: "circle",
@@ -337,7 +380,6 @@ export function ExchangeSpatialScene({
         layout: {
           "text-field": "RF",
           "text-size": 12,
-          "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
           "text-allow-overlap": true,
           "text-ignore-placement": true,
           "text-pitch-alignment": "viewport",
@@ -354,7 +396,6 @@ export function ExchangeSpatialScene({
         layout: {
           "text-field": ["get", "label"],
           "text-size": 13,
-          "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
           "text-offset": [0, 2.15],
           "text-anchor": "top",
           "text-allow-overlap": true,
@@ -379,7 +420,7 @@ export function ExchangeSpatialScene({
       mapRef.current = null;
       map.remove();
     };
-  }, [applyScene, homeGeoJson, homeMarkerGeoJson, interactive, stopOrbit, token]);
+  }, [applyScene, interactive, stopOrbit, token]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -389,15 +430,7 @@ export function ExchangeSpatialScene({
     const markerSource = map.getSource(HOME_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     markerSource?.setData(homeMarkerGeoJson);
     applyScene();
-  }, [applyScene, homeGeoJson, homeMarkerGeoJson]);
-
-  useEffect(() => {
-    if (!rotationEnabled || reducedMotion) {
-      stopOrbit();
-      return;
-    }
-    if (!manuallyPausedRef.current) startOrbit();
-  }, [reducedMotion, rotationEnabled, startOrbit, stopOrbit]);
+  }, [applyScene, homeGeoJson, homeMarkerGeoJson, mode, activationOverlay]);
 
   if (!token.startsWith("pk.")) {
     return (
