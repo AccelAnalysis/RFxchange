@@ -51,6 +51,13 @@ for (const requirement of [
   "window.sessionStorage",
   'token.startsWith("pk.")',
   "Map exploration does not change operating-geography authority.",
+  "VIEW_MODE_OPTIONS",
+  'label: "2D"',
+  'label: "Perspective"',
+  'label: "3D"',
+  "map.easeTo",
+  "aria-pressed",
+  "viewMode: resolvedViewMode",
 ]) {
   assert.ok(mapboxCanvas.includes(requirement), `Production Mapbox canvas is missing ${requirement}.`);
 }
@@ -73,5 +80,5 @@ for (const phrase of [
 }
 
 console.log(
-  "Mapbox production canvas validated: authoritative GeoJSON integration, continuous camera navigation, public-token hygiene, viewport/authority separation, and participant surface adoption.",
+  "Mapbox production canvas validated: authoritative GeoJSON integration, continuous camera navigation, explicit 2D/perspective/3D modes, public-token hygiene, viewport/authority separation, and participant surface adoption.",
 );

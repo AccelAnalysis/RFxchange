@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
@@ -29,16 +29,49 @@ type LocalityGeometry =
   | { readonly type: "Polygon"; readonly coordinates: number[][][] }
   | { readonly type: "MultiPolygon"; readonly coordinates: number[][][][] };
 
+type MapViewMode = "2d" | "perspective" | "3d";
+
 type PersistedCamera = Readonly<{
   longitude: number;
   latitude: number;
   zoom: number;
   pitch: number;
   bearing: number;
+  viewMode: MapViewMode;
 }>;
 
 const LOCALITY_SOURCE_ID = "rfx-authoritative-localities";
 const VIEWPORT_STORAGE_PREFIX = "rfxchange:map-camera:";
+const EMPTY_POINT_OVERLAYS: readonly ControlledLocalityPointOverlay[] = Object.freeze([]);
+const VIEW_MODE_OPTIONS: readonly Readonly<{
+  id: MapViewMode;
+  label: string;
+  pitch: number;
+  resetBearing: boolean;
+  description: string;
+}>[] = [
+  {
+    id: "2d",
+    label: "2D",
+    pitch: 0,
+    resetBearing: true,
+    description: "Flat north-up operational map",
+  },
+  {
+    id: "perspective",
+    label: "Perspective",
+    pitch: 35,
+    resetBearing: false,
+    description: "Tilted spatial context",
+  },
+  {
+    id: "3d",
+    label: "3D",
+    pitch: 58,
+    resetBearing: false,
+    description: "Deep 3D spatial view",
+  },
+] as const;
 
 function copyGeometry(
   geometry: ControlledLocalityMapModel["features"][number]["boundary"]["geometry"],
@@ -83,6 +116,16 @@ function featureProperties(feature: unknown): Readonly<Record<string, unknown>> 
   return properties as Readonly<Record<string, unknown>>;
 }
 
+function mapViewModeForPitch(pitch: number): MapViewMode {
+  if (pitch >= 48) return "3d";
+  if (pitch >= 15) return "perspective";
+  return "2d";
+}
+
+function isMapViewMode(value: unknown): value is MapViewMode {
+  return value === "2d" || value === "perspective" || value === "3d";
+}
+
 function readPersistedCamera(key: string): PersistedCamera | null {
   try {
     const raw = window.sessionStorage.getItem(key);
@@ -92,7 +135,16 @@ function readPersistedCamera(key: string): PersistedCamera | null {
     if (values.some((value) => typeof value !== "number" || !Number.isFinite(value))) {
       return null;
     }
-    return parsed as PersistedCamera;
+    return {
+      longitude: parsed.longitude as number,
+      latitude: parsed.latitude as number,
+      zoom: parsed.zoom as number,
+      pitch: parsed.pitch as number,
+      bearing: parsed.bearing as number,
+      viewMode: isMapViewMode(parsed.viewMode)
+        ? parsed.viewMode
+        : mapViewModeForPitch(parsed.pitch as number),
+    };
   } catch {
     return null;
   }
@@ -118,9 +170,11 @@ export function MapboxLocalityCanvas({
   initialZoom = "locality",
   mobileControlPosition = "top",
   overlaySide = "split",
-  pointOverlays = [],
+  pointOverlays = EMPTY_POINT_OVERLAYS,
 }: MapboxLocalityCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const [viewMode, setViewMode] = useState<MapViewMode>("2d");
   const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN?.trim() ?? "";
   const storageKey = `${VIEWPORT_STORAGE_PREFIX}${model.selectedGeography.id}`;
 
@@ -142,10 +196,27 @@ export function MapboxLocalityCanvas({
     [model],
   );
 
+  const selectViewMode = (nextMode: MapViewMode) => {
+    const map = mapRef.current;
+    if (!map) return;
+    const option = VIEW_MODE_OPTIONS.find((candidate) => candidate.id === nextMode);
+    if (!option) return;
+
+    setViewMode(nextMode);
+    map.easeTo({
+      pitch: option.pitch,
+      bearing: option.resetBearing ? 0 : map.getBearing(),
+      duration: 650,
+    });
+  };
+
   useEffect(() => {
     if (!containerRef.current || !token.startsWith("pk.")) return;
 
     const persistedCamera = readPersistedCamera(storageKey);
+    const initialViewMode = persistedCamera?.viewMode ?? mapViewModeForPitch(model.camera.pitchDegrees);
+    setViewMode(initialViewMode);
+
     const map = new mapboxgl.Map({
       accessToken: token,
       container: containerRef.current,
@@ -168,6 +239,7 @@ export function MapboxLocalityCanvas({
       minZoom: 2,
       maxZoom: model.camera.maximumZoom,
     });
+    mapRef.current = map;
 
     map.addControl(
       new mapboxgl.NavigationControl({ visualizePitch: true, showZoom: true, showCompass: true }),
@@ -290,12 +362,15 @@ export function MapboxLocalityCanvas({
 
     map.on("moveend", () => {
       const center = map.getCenter();
+      const resolvedViewMode = mapViewModeForPitch(map.getPitch());
+      setViewMode(resolvedViewMode);
       const camera: PersistedCamera = {
         longitude: center.lng,
         latitude: center.lat,
         zoom: map.getZoom(),
         pitch: map.getPitch(),
         bearing: map.getBearing(),
+        viewMode: resolvedViewMode,
       };
       try {
         window.sessionStorage.setItem(storageKey, JSON.stringify(camera));
@@ -305,6 +380,7 @@ export function MapboxLocalityCanvas({
     });
 
     return () => {
+      mapRef.current = null;
       for (const popup of popups) popup.remove();
       for (const marker of markers) marker.remove();
       map.remove();
@@ -346,6 +422,21 @@ export function MapboxLocalityCanvas({
         className={styles.map}
         aria-label={`${model.selectedGeography.name} RFxchange interactive map`}
       />
+      <div className={styles.viewModeControl} role="group" aria-label="Map view mode">
+        {VIEW_MODE_OPTIONS.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            className={styles.viewModeButton}
+            data-active={viewMode === option.id}
+            aria-pressed={viewMode === option.id}
+            title={option.description}
+            onClick={() => selectViewMode(option.id)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
       <a
         className={styles.attribution}
         href={model.attribution.sourceLayerUrl}
@@ -356,8 +447,8 @@ export function MapboxLocalityCanvas({
       </a>
       <figcaption className={styles.srOnly}>
         Interactive Mapbox canvas. {model.selectedGeography.name} remains the server-authorized
-        active geography while pan, zoom, pitch, bearing, and surrounding-locality exploration
-        change only the camera viewport.
+        active geography while pan, zoom, pitch, bearing, map view mode, and surrounding-locality
+        exploration change only the camera viewport.
       </figcaption>
     </figure>
   );
