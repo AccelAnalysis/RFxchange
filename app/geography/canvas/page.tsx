@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { ControlledLocalityMapService, type ControlledLocalityMapModel } from "@/src/application/geography/controlled-locality-map";
 import {
   MapboxLocalityCanvas,
   type ControlledLocalityPointOverlay,
@@ -9,8 +10,6 @@ import {
   ParticipantShell,
   SpatialWorkspace,
 } from "@/src/components/participant/ParticipantWorkspace";
-import { createControlledLocalityPreview } from "@/src/data/geography/portsmouth-controlled-locality-preview";
-import { HAMPTON_ROADS_CONTROLLED_LOCALITY_DEFINITIONS } from "@/src/data/geography/hampton-roads-controlled-locality";
 import { projectPublicOrganizationMarker } from "@/src/domain/organization-markers/model";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
@@ -30,7 +29,7 @@ interface GeographyCanvasPageProps {
 }
 
 interface AuthenticatedMapProjection {
-  readonly homeGeographyId: string;
+  readonly model: ControlledLocalityMapModel;
   readonly markerOverlay: ControlledLocalityPointOverlay;
 }
 
@@ -76,19 +75,25 @@ async function resolveAuthenticatedMapProjection(
   );
   if (!location) redirect("/join");
 
-  const [geography, markerActivation, profile] = await Promise.all([
+  const [geography, markerActivation, profile, selection] = await Promise.all([
     geographyRepositories.definitions.getById(location.geographyId),
     createFirestoreOrganizationMarkerRepositories(db).activations.getByOrganizationId(
       access.membership.organizationId,
     ),
     foundation.organizations.profiles.getByOrganizationId(access.membership.organizationId),
+    geographyRepositories.selections.getByUserId(access.context.user.id),
   ]);
-  if (!geography || markerActivation?.status !== "active") redirect("/join");
+  if (!geography || !selection || selection.geographyId !== geography.id || markerActivation?.status !== "active") {
+    redirect("/join");
+  }
 
-  const boundary = await new TigerWebBoundarySnapshotRepository(
-    geographyRepositories.definitions,
-  ).getByGeographyId(geography.id);
+  const boundaries = new TigerWebBoundarySnapshotRepository(geographyRepositories.definitions);
+  const boundary = await boundaries.getByGeographyId(geography.id);
   if (!boundary) redirect("/join");
+  const model = await new ControlledLocalityMapService(
+    geographyRepositories.definitions,
+    boundaries,
+  ).create(selection);
 
   const marker = projectPublicOrganizationMarker({
     activation: markerActivation,
@@ -98,7 +103,7 @@ async function resolveAuthenticatedMapProjection(
   });
 
   return Object.freeze({
-    homeGeographyId: String(location.geographyId),
+    model,
     markerOverlay: Object.freeze({
       id: marker.id,
       position: marker.coordinate,
@@ -116,19 +121,13 @@ export default async function GeographyCanvasPage({
   const params = searchParams ? await searchParams : {};
   const requestedOrganizationId = firstSearchParam(params.organizationId);
   const authenticated = await resolveAuthenticatedMapProjection(requestedOrganizationId);
-  const bundledHomeGeographyId = HAMPTON_ROADS_CONTROLLED_LOCALITY_DEFINITIONS.some(
-    (definition) => definition.id === authenticated.homeGeographyId,
-  )
-    ? authenticated.homeGeographyId
-    : undefined;
-  const model = await createControlledLocalityPreview(bundledHomeGeographyId);
   const pointOverlays = Object.freeze([authenticated.markerOverlay]);
 
   return (
     <ParticipantShell activeItem="Intelligence">
       <SpatialWorkspace ariaLabel="RFxchange Intelligence geographic workspace">
         <MapboxLocalityCanvas
-          model={model}
+          model={authenticated.model}
           initialZoom="locality"
           mobileControlPosition="bottom"
           pointOverlays={pointOverlays}
