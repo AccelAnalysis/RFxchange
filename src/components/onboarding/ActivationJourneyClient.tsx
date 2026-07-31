@@ -189,7 +189,7 @@ export function ActivationJourneyClient({
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <Link href="/" aria-label="RFxchange home"><BrandWordmark compact /></Link>
+        <BrandWordmark compact />
         {state ? (
           <button
             className={styles.textButton}
@@ -199,6 +199,7 @@ export function ActivationJourneyClient({
               await createClientAuthenticationProvider().signOut().catch(() => undefined);
               await fetch("/api/auth/session", { method: "DELETE" });
               setState(null);
+              setAuthMode("signin");
             })}
           >
             Sign out
@@ -231,8 +232,8 @@ export function ActivationJourneyClient({
         {!state ? (
           <section className={styles.card} aria-labelledby="account-title">
             <div className={styles.modeSwitch} role="group" aria-label="Account action">
-              <button type="button" data-active={authMode === "register"} onClick={() => setAuthMode("register")}>Create organization</button>
-              <button type="button" data-active={authMode === "signin"} onClick={() => setAuthMode("signin")}>Resume activation</button>
+              <button type="button" data-active={authMode === "register"} onClick={() => setAuthMode("register")}>Register</button>
+              <button type="button" data-active={authMode === "signin"} onClick={() => setAuthMode("signin")}>Sign in</button>
             </div>
             <h2 id="account-title">{authMode === "register" ? "Create the organization account" : "Sign in and continue"}</h2>
             <form
@@ -245,6 +246,7 @@ export function ActivationJourneyClient({
                     if (!organizationName.trim()) throw new Error("Organization name is required.");
                     if (!userName.trim()) throw new Error("Your name is required.");
                     await auth.registerWithEmailAndPassword(email, password);
+                    setAuthMode("signin");
                     await createClientAuthenticationLifecycle()
                       .sendVerificationEmail(`${window.location.origin}/join`)
                       .catch(() => undefined);
