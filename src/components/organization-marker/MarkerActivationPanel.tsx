@@ -2,7 +2,7 @@
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import type { PublicOrganizationMarker } from "../../domain/organization-markers/model";
-import { ControlledLocalityCanvas } from "../map/ControlledLocalityCanvas";
+import { MapboxLocalityCanvas } from "../map/MapboxLocalityCanvas";
 import {
   ResponsiveEdgeSheet,
   SpatialWorkspace,
@@ -21,7 +21,7 @@ export function MarkerActivationPanel({
 }: MarkerActivationPanelProps) {
   return (
     <SpatialWorkspace ariaLabel="Activated organization map workspace">
-      <ControlledLocalityCanvas
+      <MapboxLocalityCanvas
         model={mapModel}
         initialZoom="nearby"
         overlaySide="right"
