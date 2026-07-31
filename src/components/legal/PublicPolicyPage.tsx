@@ -9,7 +9,7 @@ export function PublicPolicyPage({ policy }: Readonly<{ policy: PublicPolicyDocu
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <Link href="/" aria-label="RFxchange home"><BrandWordmark /></Link>
+        <BrandWordmark />
         <nav aria-label="Policy navigation">
           <Link href="/terms">Terms</Link>
           <Link href="/platform-rules">Platform Rules</Link>
