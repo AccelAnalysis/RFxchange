@@ -50,9 +50,11 @@ assert.ok(signInPage.includes("SignInClient") && signInPage.includes("safeReturn
 assert.ok(
   signInClient.includes("signInWithEmailAndPassword") &&
     signInClient.includes('window.location.assign("/join")') &&
-    signInClient.includes("returnTo ?? result.state.controlledPlatformUrl") &&
+    signInClient.includes("participantWorkspaceEligible") &&
+    signInClient.includes("isAdministrativeReturnTarget") &&
+    signInClient.includes("returnTo ?? workspaceUrl") &&
     signInClient.includes("resume exactly where you left"),
-  "Returning-user sign in must establish the trusted session, resume incomplete activation, and return an activated account to the protected target/controlled Exchange.",
+  "Returning-user sign in must establish the trusted session, resume incomplete activation, keep admin routing independent, and return lifecycle-eligible participants to the protected target/Exchange.",
 );
 
 for (const requirement of [
@@ -91,6 +93,8 @@ for (const requirement of [
   "httpOnly: true",
   "createServerActivationJourneyService",
   "organizationRelationship",
+  "FirestorePlatformAdministratorLifecycleRepository",
+  "existingContext || provisionalOrganizationName",
 ]) {
   assert.ok(sessionRoute.includes(requirement), `Trusted session exchange is missing ${requirement}.`);
 }
@@ -178,9 +182,11 @@ for (const requirement of [
   "getForMembership",
   "wrong-organization",
   "restricted",
+  "workspaceLifecycleEligible",
 ]) {
   assert.ok(participantRuntime.includes(requirement), `Participant route runtime is missing ${requirement}.`);
 }
+assert.equal(participantRuntime.includes('state.nextStep !== "complete"'), false, "UI next-step labels must not become participant authorization criteria.");
 
 for (const requirement of [
   "resolveParticipantRoute",
@@ -214,5 +220,5 @@ assert.ok(
 );
 
 console.log(
-  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, account-only participant route authority, real marker rendering, canonical roles/objectives/relationship metadata, and controlled-platform stop.",
+  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, lifecycle-authoritative account-only participant routing, real marker rendering, canonical roles/objectives/relationship metadata, and controlled-platform stop.",
 );
