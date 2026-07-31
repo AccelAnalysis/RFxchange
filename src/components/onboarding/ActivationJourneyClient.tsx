@@ -6,6 +6,16 @@ import { useEffect, useMemo, useState } from "react";
 import type { ActivationJourneyState, ActivationJourneyStep } from "../../application/onboarding/activation-journey";
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import {
+  ORGANIZATION_BUSINESS_OBJECTIVES,
+  ORGANIZATION_PARTICIPATION_ROLES,
+  type OrganizationBusinessObjective,
+  type OrganizationParticipationRole,
+} from "../../domain/organization-profile/model";
+import {
+  ORGANIZATION_RELATIONSHIPS,
+  type OrganizationRelationship,
+} from "../../domain/onboarding/model";
+import {
   MapboxLocalityCanvas,
   type ControlledLocalityPointOverlay,
 } from "../map/MapboxLocalityCanvas";
@@ -46,16 +56,40 @@ const JOURNEY_STEPS: readonly Readonly<{ key: ActivationJourneyStep; label: stri
   { key: "complete", label: "Activated" },
 ];
 
-const ROLE_OPTIONS = ["business", "supplier", "buyer", "issuer", "resource-provider"] as const;
-const OBJECTIVE_OPTIONS = [
-  ["find-opportunities", "Find opportunities"],
-  ["issue-opportunities", "Issue opportunities"],
-  ["find-customers", "Find customers"],
-  ["find-suppliers", "Find suppliers"],
-  ["find-teammates", "Find teammates"],
-  ["find-resources-support", "Find resources and support"],
-  ["explore-local-network", "Explore the local network"],
-] as const;
+const ROLE_LABELS = Object.freeze({
+  business: "Business",
+  supplier: "Supplier",
+  buyer: "Buyer",
+  issuer: "Opportunity / RFx issuer",
+  government: "Government agency",
+  edo: "Economic development organization",
+  "resource-provider": "Resource provider",
+  chamber: "Chamber / association",
+  lender: "Lender / capital provider",
+  university: "University / educational institution",
+  nonprofit: "Nonprofit",
+  other: "Other",
+} satisfies Record<OrganizationParticipationRole, string>);
+
+const OBJECTIVE_LABELS = Object.freeze({
+  "find-opportunities": "Find opportunities",
+  "issue-opportunities": "Issue opportunities",
+  "find-customers": "Find customers",
+  "find-suppliers": "Find suppliers",
+  "find-teammates": "Find teammates",
+  "send-receive-referrals": "Send and receive referrals",
+  "find-resources-support": "Find resources and support",
+  "explore-local-network": "Explore the local network",
+} satisfies Record<OrganizationBusinessObjective, string>);
+
+const RELATIONSHIP_LABELS = Object.freeze({
+  owner: "Owner",
+  "executive-officer": "Executive / officer",
+  employee: "Employee",
+  "authorized-representative": "Authorized representative",
+  "advisor-contractor": "Advisor / contractor",
+  other: "Other",
+} satisfies Record<OrganizationRelationship, string>);
 
 async function jsonRequest<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
@@ -70,7 +104,7 @@ async function jsonRequest<T>(url: string, init?: RequestInit): Promise<T> {
   return body;
 }
 
-function toggle(values: readonly string[], value: string): readonly string[] {
+function toggle<T extends string>(values: readonly T[], value: T): readonly T[] {
   return values.includes(value)
     ? values.filter((item) => item !== value)
     : [...values, value];
@@ -90,6 +124,7 @@ export function ActivationJourneyClient({
   const [authMode, setAuthMode] = useState<"register" | "signin">("register");
   const [organizationName, setOrganizationName] = useState("");
   const [userName, setUserName] = useState("");
+  const [organizationRelationship, setOrganizationRelationship] = useState<OrganizationRelationship>("owner");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [legalChecks, setLegalChecks] = useState({ terms: false, rules: false, privacy: false });
@@ -99,8 +134,8 @@ export function ActivationJourneyClient({
   const [creationAllowed, setCreationAllowed] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [locationCandidates, setLocationCandidates] = useState<readonly LocationCandidate[]>([]);
-  const [roles, setRoles] = useState<readonly string[]>(["business"]);
-  const [objectives, setObjectives] = useState<readonly string[]>(["explore-local-network"]);
+  const [roles, setRoles] = useState<readonly OrganizationParticipationRole[]>(["business"]);
+  const [objectives, setObjectives] = useState<readonly OrganizationBusinessObjective[]>(["explore-local-network"]);
 
   const step = state ? effectiveStep(state) : null;
 
@@ -150,7 +185,11 @@ export function ActivationJourneyClient({
     }
   }
 
-  async function exchangeSession(provisionalOrganizationName: string, requestedName?: string) {
+  async function exchangeSession(
+    provisionalOrganizationName: string,
+    requestedName?: string,
+    relationship?: OrganizationRelationship,
+  ) {
     const auth = createClientAuthenticationProvider();
     const idToken = await auth.getIdToken(true);
     if (!idToken) throw new Error("Firebase sign-in did not produce an ID token.");
@@ -162,6 +201,7 @@ export function ActivationJourneyClient({
         csrfToken: csrf.csrfToken,
         provisionalOrganizationName,
         requestedName,
+        organizationRelationship: relationship,
       }),
     });
     setState(result.state);
@@ -250,7 +290,7 @@ export function ActivationJourneyClient({
                     await createClientAuthenticationLifecycle()
                       .sendVerificationEmail(`${window.location.origin}/join`)
                       .catch(() => undefined);
-                    await exchangeSession(organizationName, userName);
+                    await exchangeSession(organizationName, userName, organizationRelationship);
                   } else {
                     await auth.signInWithEmailAndPassword(email, password);
                     await exchangeSession(organizationName, userName || undefined);
@@ -259,7 +299,22 @@ export function ActivationJourneyClient({
               }}
             >
               {authMode === "register" ? (
-                <label>Organization name<input value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} required /></label>
+                <>
+                  <label>Organization name<input value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} required /></label>
+                  <label>
+                    Your relationship with this organization
+                    <select
+                      value={organizationRelationship}
+                      onChange={(event) => setOrganizationRelationship(event.target.value as OrganizationRelationship)}
+                      required
+                    >
+                      {ORGANIZATION_RELATIONSHIPS.map((relationship) => (
+                        <option key={relationship} value={relationship}>{RELATIONSHIP_LABELS[relationship]}</option>
+                      ))}
+                    </select>
+                    <small>This describes your relationship; it does not grant account authority.</small>
+                  </label>
+                </>
               ) : (
                 <label>Organization name <small>Only needed if this Firebase account has not begun activation before.</small><input value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} /></label>
               )}
@@ -413,6 +468,11 @@ export function ActivationJourneyClient({
           <section className={styles.card}>
             <p className={styles.stepLabel}>Confirmed organization location</p>
             <h2>Place {state.organization?.displayName ?? state.provisionalOrganizationName} in {state.selectedGeography?.name}.</h2>
+            <p>
+              Your confirmed home locality becomes the initial service geography for minimum
+              activation. Service territory remains a separate profile concept and can be expanded
+              after activation.
+            </p>
             {locationCandidates.length ? (
               <>
                 <div className={styles.mapFrame}>
@@ -507,8 +567,28 @@ export function ActivationJourneyClient({
               </div>
               <label className={styles.inlineCheck}><input name="contactPubliclyVisible" type="checkbox" />Show this contact publicly</label>
               <fieldset><legend>Meaningful capability</legend><label>Capability type<select name="capabilityKind" defaultValue="service"><option value="service">Service</option><option value="product">Product</option><option value="function">Function</option><option value="buying-need">Buying need</option><option value="resource-provider-function">Resource-provider function</option></select></label><label>Specific capability<input name="capabilityName" required /></label><label>Description<textarea name="capabilityDescription" minLength={20} required /></label></fieldset>
-              <fieldset><legend>Participation roles</legend><div className={styles.checkGrid}>{ROLE_OPTIONS.map((role) => <label key={role}><input type="checkbox" checked={roles.includes(role)} onChange={() => setRoles((current) => toggle(current, role))} />{role.replaceAll("-", " ")}</label>)}</div></fieldset>
-              <fieldset><legend>Business objectives</legend><div className={styles.checkGrid}>{OBJECTIVE_OPTIONS.map(([value, label]) => <label key={value}><input type="checkbox" checked={objectives.includes(value)} onChange={() => setObjectives((current) => toggle(current, value))} />{label}</label>)}</div></fieldset>
+              <fieldset>
+                <legend>Participation roles</legend>
+                <div className={styles.checkGrid}>
+                  {ORGANIZATION_PARTICIPATION_ROLES.map((role) => (
+                    <label key={role}>
+                      <input type="checkbox" checked={roles.includes(role)} onChange={() => setRoles((current) => toggle(current, role))} />
+                      {ROLE_LABELS[role]}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend>Business objectives</legend>
+                <div className={styles.checkGrid}>
+                  {ORGANIZATION_BUSINESS_OBJECTIVES.map((objective) => (
+                    <label key={objective}>
+                      <input type="checkbox" checked={objectives.includes(objective)} onChange={() => setObjectives((current) => toggle(current, objective))} />
+                      {OBJECTIVE_LABELS[objective]}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
               <button className={styles.primary} type="submit" disabled={busy || roles.length === 0 || objectives.length === 0}>Complete profile and activate marker</button>
             </form>
           </section>
@@ -530,8 +610,8 @@ export function ActivationJourneyClient({
             <h2>Your real marker is active.</h2>
             <p>
               {state.organization?.displayName} now has an active marker in {state.selectedGeography?.name}.
-              This completes the registration-to-marker integration gate. Full orientation and OPEN
-              release remain governed by Slices 2.10–2.12.
+              Organization activation is complete and the controlled Exchange is available. Full
+              orientation, first-value completion, and OPEN release remain governed by Slices 2.10–2.12.
             </p>
             {state.controlledPlatformUrl ? <Link className={styles.primaryLink} href={state.controlledPlatformUrl}>Enter the controlled Exchange</Link> : null}
           </section>
