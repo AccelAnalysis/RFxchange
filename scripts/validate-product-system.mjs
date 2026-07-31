@@ -34,7 +34,7 @@ for (const typographyRequirement of [
 }
 
 const home = (await read("app/page.tsx")).toLowerCase();
-for (const cta of [">join<", ">see how it works<"]) {
+for (const cta of [">join the exchange — free<", ">see how it works<"]) {
   if (!home.includes(cta)) throw new Error(`Public positioning missing required CTA: ${cta}`);
 }
 if (!home.includes('href="/join"')) throw new Error("Join CTA must resolve to the production organization-activation surface.");
