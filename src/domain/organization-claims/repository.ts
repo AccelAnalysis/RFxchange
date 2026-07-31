@@ -37,4 +37,9 @@ export interface OrganizationAuthorityClaimUnitOfWork {
     lifecycle: AccessLifecycleRecord;
     auditEvent?: PlatformAdministrativeAuditEvent;
   }>): Promise<void>;
+  establishParticipantCreated(input: Readonly<{
+    membership: OrganizationMembership;
+    authorization: OrganizationUserAuthorization;
+    lifecycle: AccessLifecycleRecord;
+  }>): Promise<void>;
 }
