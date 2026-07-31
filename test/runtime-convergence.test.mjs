@@ -85,7 +85,8 @@ test("onboarding consumes canonical role and objective vocabularies", async () =
 test("organization relationship metadata is descriptive and persisted separately from authorization", async () => {
   const onboarding = await source("src/domain/onboarding/model.ts");
   assert.match(onboarding, /ORGANIZATION_RELATIONSHIPS/);
-  assert.match(onboarding, /never grants organization authority or any permission/);
+  assert.match(onboarding, /Descriptive onboarding metadata only/);
+  assert.match(onboarding, /durable control continues to require membership \+ authorization establishment/);
   const session = await source("app/api/auth/session/route.ts");
   assert.match(session, /organizationRelationship/);
   assert.match(session, /updateActivationJourneyContext/);
