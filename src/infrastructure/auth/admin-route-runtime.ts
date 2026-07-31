@@ -1,9 +1,14 @@
 import type { AuthenticatedServerContext } from "../../application/auth/server-session.ts";
 import {
-  authorizeAdministrativeAction,
-  createAdministrativeActionRequirement,
-  type AdminPermissionKey,
-  type PlatformAdministratorAuthorityContext,
+  authorizeScopedAdministrativeAction,
+  createScopedAdministrativeActionRequirement,
+  type AdminGrantScope,
+  type AdminPermissionGrant,
+  type ScopedAdministrativeAuthorizationDecision,
+} from "../../domain/admin-authorization/grants.ts";
+import type {
+  AdminPermissionKey,
+  PlatformAdministratorAuthorityContext,
 } from "../../domain/admin-authorization/model.ts";
 import {
   evaluatePrivilegedAdministratorAccess,
@@ -33,14 +38,20 @@ export type AdminRouteResolution =
       readonly context: AuthenticatedServerContext;
       readonly account: PlatformAdministratorAccount;
       readonly authority: PlatformAdministratorAuthorityContext;
+      readonly grants: readonly AdminPermissionGrant[];
       readonly permission: AdminPermissionKey;
+      readonly scope: AdminGrantScope;
+      readonly reason: Extract<ScopedAdministrativeAuthorizationDecision, { readonly kind: "deny" }>["reason"];
     }>
   | Readonly<{
       readonly kind: "authorized";
       readonly context: AuthenticatedServerContext;
       readonly account: PlatformAdministratorAccount;
       readonly authority: PlatformAdministratorAuthorityContext;
+      readonly grants: readonly AdminPermissionGrant[];
       readonly permission: AdminPermissionKey;
+      readonly scope: AdminGrantScope;
+      readonly grantId: string;
     }>;
 
 /**
@@ -48,12 +59,15 @@ export type AdminRouteResolution =
  *
  * Administrative access requires a valid RFxchange session, a persisted platform-administrator
  * account bound to the authenticated provider subject, a passing privileged-security evaluation,
- * a persisted authority context, and the explicit named permission. No binary admin flag or role
- * name grants route access.
+ * a persisted authority context, the explicit named permission, and an active matching scoped
+ * grant. No binary admin flag or role name grants route access.
  */
 export async function resolveAdminRoute(input: Readonly<{
   sessionCookie?: string | null;
   permission: string;
+  scope?: string;
+  access?: "read" | "write";
+  satisfiedConditionKeys?: readonly string[];
 }>): Promise<AdminRouteResolution> {
   const sessionCookie = input.sessionCookie?.trim();
   if (!sessionCookie) return Object.freeze({ kind: "unauthenticated" as const });
@@ -93,22 +107,33 @@ export async function resolveAdminRoute(input: Readonly<{
   }
 
   const foundation = createServerFirestoreFoundationRepositories(db);
-  const authority = await foundation.adminAuthorization.authorityContexts.getByAdministratorId(
-    account.administratorId,
-  );
+  const [authority, grants] = await Promise.all([
+    foundation.adminAuthorization.authorityContexts.getByAdministratorId(account.administratorId),
+    foundation.adminAuthorization.grants.listByAdministratorId(account.administratorId),
+  ]);
   if (!authority) {
     return Object.freeze({ kind: "not-administrator" as const, context });
   }
 
-  const requirement = createAdministrativeActionRequirement({ permission: input.permission });
-  const decision = authorizeAdministrativeAction(authority, requirement);
+  const requirement = createScopedAdministrativeActionRequirement({
+    permission: input.permission,
+    access: input.access ?? "read",
+    scope: input.scope ?? "GLOBAL",
+  });
+  const decision = authorizeScopedAdministrativeAction(authority, grants, requirement, {
+    now: new Date().toISOString(),
+    satisfiedConditionKeys: input.satisfiedConditionKeys,
+  });
   if (decision.kind !== "allow") {
     return Object.freeze({
       kind: "permission-denied" as const,
       context,
       account,
       authority,
+      grants,
       permission: requirement.permission,
+      scope: requirement.scope,
+      reason: decision.reason,
     });
   }
 
@@ -117,6 +142,9 @@ export async function resolveAdminRoute(input: Readonly<{
     context,
     account,
     authority,
+    grants,
     permission: requirement.permission,
+    scope: requirement.scope,
+    grantId: String(decision.grantId),
   });
 }
