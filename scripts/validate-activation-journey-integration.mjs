@@ -168,7 +168,8 @@ for (const requirement of [
   "legalAcceptance",
   "activeLocationDraftId",
   "organizationRelationship",
-  "never grants organization authority or any permission",
+  "Descriptive onboarding metadata only",
+  "durable control continues to require membership + authorization establishment",
 ]) {
   assert.ok(activationContext.includes(requirement), `Activation context is missing ${requirement}.`);
 }
