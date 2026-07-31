@@ -34,7 +34,9 @@ test("AUTH-001 uses modular web SDK and localhost-only emulator wiring", () => {
 
 test("AUTH-001 shares server Firebase Admin initialization without session semantics", () => {
   assert.match(firebaseAdmin, /getApps\(\)/);
-  assert.match(firebaseAdmin, /initializeApp\(\)/);
+  assert.match(firebaseAdmin, /initializeApp\(\{/);
+  assert.match(firebaseAdmin, /applicationDefault\(\)/);
+  assert.match(firebaseAdmin, /projectId/);
   assert.match(server, /getAuth\(getFirebaseAdminApp\(\)\)/);
   assert.doesNotMatch(server, /verifyIdToken|createSessionCookie|verifySessionCookie/);
 });
