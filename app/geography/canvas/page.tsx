@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import {
   MapboxLocalityCanvas,
@@ -23,6 +24,7 @@ import {
   getServerFirestore,
 } from "@/src/infrastructure/firestore/runtime";
 import { TigerWebBoundarySnapshotRepository } from "@/src/infrastructure/geography/tigerweb-boundary-snapshot";
+import { createServerActivationJourneyService } from "@/src/infrastructure/onboarding/runtime";
 
 interface GeographyCanvasPageProps {
   readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
@@ -41,84 +43,115 @@ function firstSearchParam(value: string | string[] | undefined): string | null {
   return null;
 }
 
+function signInUrl(requestedOrganizationId: string | null): string {
+  const returnTo = requestedOrganizationId
+    ? `/geography/canvas?organizationId=${encodeURIComponent(requestedOrganizationId)}`
+    : "/geography/canvas";
+  return `/signin?returnTo=${encodeURIComponent(returnTo)}`;
+}
+
 async function resolveAuthenticatedMapProjection(
   requestedOrganizationId: string | null,
 ): Promise<AuthenticatedMapProjection> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
-  if (!sessionCookie) {
-    return Object.freeze({ homeGeographyId: null, markerOverlay: null });
-  }
+  if (!sessionCookie) redirect(signInUrl(requestedOrganizationId));
 
+  let context;
   try {
-    const context = await createServerAuthenticationBoundary().authenticateSessionCookie({
+    context = await createServerAuthenticationBoundary().authenticateSessionCookie({
       sessionCookie,
       now: new Date().toISOString(),
     });
-    const db = getServerFirestore();
-    const foundation = createServerFirestoreFoundationRepositories(db);
-    const memberships = await foundation.users.memberships.listActiveByUserId(context.user.id);
-
-    const membership = requestedOrganizationId
-      ? memberships.find((candidate) => candidate.organizationId === requestedOrganizationId)
-      : memberships.length === 1
-        ? memberships[0]
-        : null;
-
-    const geographyRepositories = createFirestoreGeographyRepositories(db);
-    if (membership) {
-      const locationRepositories = createFirestoreOrganizationLocationRepositories(db);
-      const location = await locationRepositories.locations.getByOrganizationId(
-        membership.organizationId,
-      );
-      if (location) {
-        const [geography, activation, profile] = await Promise.all([
-          geographyRepositories.definitions.getById(location.geographyId),
-          createFirestoreOrganizationMarkerRepositories(db).activations.getByOrganizationId(
-            membership.organizationId,
-          ),
-          foundation.organizations.profiles.getByOrganizationId(membership.organizationId),
-        ]);
-        if (geography && activation?.status === "active") {
-          const boundary = await new TigerWebBoundarySnapshotRepository(
-            geographyRepositories.definitions,
-          ).getByGeographyId(geography.id);
-          if (boundary) {
-            const marker = projectPublicOrganizationMarker({
-              activation,
-              location,
-              geography,
-              geographyGeometry: boundary.geometry,
-            });
-            return Object.freeze({
-              homeGeographyId: String(location.geographyId),
-              markerOverlay: Object.freeze({
-                id: marker.id,
-                position: marker.coordinate,
-                label: profile?.displayName ?? "Your organization",
-                kind: "organization-marker" as const,
-                privacyLabel: marker.accessibleLocationLabel,
-                activated: true,
-              }),
-            });
-          }
-        }
-        return Object.freeze({
-          homeGeographyId: String(location.geographyId),
-          markerOverlay: null,
-        });
-      }
-    }
-
-    const primarySelection = await geographyRepositories.selections.getByUserId(context.user.id);
-    return Object.freeze({
-      homeGeographyId: primarySelection ? String(primarySelection.geographyId) : null,
-      markerOverlay: null,
-    });
   } catch {
-    // The map remains usable as a preview even when local auth/Firebase is not configured.
-    return Object.freeze({ homeGeographyId: null, markerOverlay: null });
+    redirect(signInUrl(requestedOrganizationId));
   }
+
+  let activationState;
+  try {
+    activationState = await createServerActivationJourneyService().state(context);
+  } catch {
+    redirect("/join");
+  }
+
+  if (
+    activationState.nextStep !== "complete" ||
+    (activationState.lifecycleState !== "controlled-platform" &&
+      activationState.lifecycleState !== "open-platform") ||
+    !activationState.organization ||
+    !activationState.membershipId
+  ) {
+    redirect("/join");
+  }
+
+  if (
+    requestedOrganizationId &&
+    requestedOrganizationId !== activationState.organization.id
+  ) {
+    redirect(activationState.controlledPlatformUrl ?? "/join");
+  }
+
+  const organizationId = activationState.organization.id;
+  const db = getServerFirestore();
+  const foundation = createServerFirestoreFoundationRepositories(db);
+  const memberships = await foundation.users.memberships.listActiveByUserId(context.user.id);
+  const membership = memberships.find(
+    (candidate) =>
+      String(candidate.id) === activationState.membershipId &&
+      String(candidate.organizationId) === organizationId,
+  );
+  if (!membership) redirect("/join");
+
+  const [organizationRestriction, membershipRestriction] = await Promise.all([
+    foundation.lifecycle.restrictions.getForOrganization(membership.organizationId),
+    foundation.lifecycle.restrictions.getForMembership(membership.id),
+  ]);
+  if (
+    (organizationRestriction && organizationRestriction.state !== "none") ||
+    (membershipRestriction && membershipRestriction.state !== "none")
+  ) {
+    redirect("/join?access=restricted");
+  }
+
+  const geographyRepositories = createFirestoreGeographyRepositories(db);
+  const locationRepositories = createFirestoreOrganizationLocationRepositories(db);
+  const location = await locationRepositories.locations.getByOrganizationId(
+    membership.organizationId,
+  );
+  if (!location) redirect("/join");
+
+  const [geography, markerActivation, profile] = await Promise.all([
+    geographyRepositories.definitions.getById(location.geographyId),
+    createFirestoreOrganizationMarkerRepositories(db).activations.getByOrganizationId(
+      membership.organizationId,
+    ),
+    foundation.organizations.profiles.getByOrganizationId(membership.organizationId),
+  ]);
+  if (!geography || markerActivation?.status !== "active") redirect("/join");
+
+  const boundary = await new TigerWebBoundarySnapshotRepository(
+    geographyRepositories.definitions,
+  ).getByGeographyId(geography.id);
+  if (!boundary) redirect("/join");
+
+  const marker = projectPublicOrganizationMarker({
+    activation: markerActivation,
+    location,
+    geography,
+    geographyGeometry: boundary.geometry,
+  });
+
+  return Object.freeze({
+    homeGeographyId: String(location.geographyId),
+    markerOverlay: Object.freeze({
+      id: marker.id,
+      position: marker.coordinate,
+      label: profile?.displayName ?? "Your organization",
+      kind: "organization-marker" as const,
+      privacyLabel: marker.accessibleLocationLabel,
+      activated: true,
+    }),
+  });
 }
 
 export default async function GeographyCanvasPage({
