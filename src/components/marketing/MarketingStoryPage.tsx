@@ -18,10 +18,13 @@ export interface MarketingStoryPageProps {
   readonly image: string;
   readonly imageAlt: string;
   readonly sections: readonly MarketingStorySection[];
-  readonly ctaTitle?: string;
-  readonly ctaBody?: string;
+  readonly showCta?: boolean;
+  readonly ctaTitle?: string | null;
+  readonly ctaBody?: string | null;
   readonly ctaHref?: string;
   readonly ctaLabel?: string;
+  readonly ctaSecondaryHref?: string;
+  readonly ctaSecondaryLabel?: string;
 }
 
 export function MarketingStoryPage({
@@ -31,10 +34,13 @@ export function MarketingStoryPage({
   image,
   imageAlt,
   sections,
+  showCta = true,
   ctaTitle = "Establish your organization in the Exchange.",
   ctaBody = "Create a free organization account and begin building a discoverable business position.",
   ctaHref = "/join",
   ctaLabel = "Join Free",
+  ctaSecondaryHref,
+  ctaSecondaryLabel,
 }: MarketingStoryPageProps) {
   return (
     <main className={styles.site}>
@@ -71,14 +77,21 @@ export function MarketingStoryPage({
         ))}
       </div>
 
-      <section className={styles.storyCta}>
-        <div className={styles.storyCtaInner}>
-          <div className={referenceStyles.eyebrow}>Next step</div>
-          <h2>{ctaTitle}</h2>
-          <p>{ctaBody}</p>
-          <Link className={styles.buttonGold} href={ctaHref}>{ctaLabel}</Link>
-        </div>
-      </section>
+      {showCta ? (
+        <section className={styles.storyCta}>
+          <div className={styles.storyCtaInner}>
+            <div className={referenceStyles.eyebrow}>Next step</div>
+            {ctaTitle ? <h2>{ctaTitle}</h2> : null}
+            {ctaBody ? <p>{ctaBody}</p> : null}
+            <div className={styles.ctaActions}>
+              <Link className={styles.buttonGold} href={ctaHref}>{ctaLabel}</Link>
+              {ctaSecondaryHref && ctaSecondaryLabel ? (
+                <Link className={styles.buttonOutline} href={ctaSecondaryHref}>{ctaSecondaryLabel}</Link>
+              ) : null}
+            </div>
+          </div>
+        </section>
+      ) : null}
       <MarketingFooter />
     </main>
   );
