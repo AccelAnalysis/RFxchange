@@ -22,7 +22,7 @@ async function jsonRequest<T>(url: string, init?: RequestInit): Promise<T> {
   return body;
 }
 
-export function SignInClient() {
+export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }>) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -77,7 +77,7 @@ export function SignInClient() {
                   );
 
                   if (result.state.nextStep === "complete" && result.state.controlledPlatformUrl) {
-                    window.location.assign(result.state.controlledPlatformUrl);
+                    window.location.assign(returnTo ?? result.state.controlledPlatformUrl);
                     return;
                   }
                   window.location.assign("/join");
