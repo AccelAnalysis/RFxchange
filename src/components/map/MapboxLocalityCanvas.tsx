@@ -76,6 +76,13 @@ function releaseStateLabel(state: string): string {
   }
 }
 
+function featureProperties(feature: unknown): Readonly<Record<string, unknown>> | null {
+  if (!feature || typeof feature !== "object" || !("properties" in feature)) return null;
+  const properties = (feature as { readonly properties?: unknown }).properties;
+  if (!properties || typeof properties !== "object" || Array.isArray(properties)) return null;
+  return properties as Readonly<Record<string, unknown>>;
+}
+
 function readPersistedCamera(key: string): PersistedCamera | null {
   try {
     const raw = window.sessionStorage.getItem(key);
@@ -247,13 +254,13 @@ export function MapboxLocalityCanvas({
           map.getCanvas().style.cursor = "";
         });
         map.on("click", layerId, (event) => {
-          const feature = event.features?.[0];
-          if (!feature?.properties) return;
+          const properties = featureProperties(event.features?.[0]);
+          if (!properties) return;
           const popupContent = document.createElement("div");
           const title = document.createElement("strong");
-          title.textContent = String(feature.properties.name ?? "Locality");
+          title.textContent = String(properties.name ?? "Locality");
           const detail = document.createElement("div");
-          detail.textContent = releaseStateLabel(String(feature.properties.releaseState ?? ""));
+          detail.textContent = releaseStateLabel(String(properties.releaseState ?? ""));
           const authority = document.createElement("small");
           authority.textContent = "Map exploration does not change operating-geography authority.";
           popupContent.append(title, detail, authority);
