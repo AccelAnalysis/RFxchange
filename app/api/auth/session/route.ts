@@ -3,9 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { ServerSessionError } from "@/src/application/auth/server-session";
 import { updateActivationJourneyContext } from "@/src/domain/onboarding/model";
-import {
-  RFXCHANGE_SESSION_COOKIE_NAME,
-} from "@/src/infrastructure/auth/firebase-server-session";
+import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
 import { FirestoreActivationJourneyContextRepository } from "@/src/infrastructure/firestore/activation-journey";
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
@@ -62,23 +60,32 @@ export async function POST(request: NextRequest) {
       requestedName: body.requestedName?.trim() || undefined,
       now: new Date().toISOString(),
     });
-    const activation = createServerActivationJourneyService();
-    await activation.bootstrap(
-      issued.context,
-      body.provisionalOrganizationName?.trim() || body.requestedName?.trim() || "",
-    );
 
-    if (body.organizationRelationship?.trim()) {
-      const contexts = new FirestoreActivationJourneyContextRepository(getServerFirestore());
-      const current = await contexts.getByUserId(issued.context.user.id);
-      if (current) {
-        await contexts.save(updateActivationJourneyContext(current, {
-          organizationRelationship: body.organizationRelationship,
-          now: new Date().toISOString(),
-        }));
+    // Authentication/session establishment is independent of participant activation. A legitimate
+    // platform administrator may have no participant organization context. Existing participant
+    // journeys resume automatically; /join creates a new activation journey only when it supplies
+    // organization context.
+    const contexts = new FirestoreActivationJourneyContextRepository(getServerFirestore());
+    const existingContext = await contexts.getByUserId(issued.context.user.id);
+    const provisionalOrganizationName =
+      body.provisionalOrganizationName?.trim() || body.requestedName?.trim() || "";
+    let state = null;
+
+    if (existingContext || provisionalOrganizationName) {
+      const activation = createServerActivationJourneyService();
+      await activation.bootstrap(issued.context, provisionalOrganizationName);
+
+      if (body.organizationRelationship?.trim()) {
+        const current = await contexts.getByUserId(issued.context.user.id);
+        if (current) {
+          await contexts.save(updateActivationJourneyContext(current, {
+            organizationRelationship: body.organizationRelationship,
+            now: new Date().toISOString(),
+          }));
+        }
       }
+      state = await activation.state(issued.context);
     }
-    const state = await activation.state(issued.context);
 
     const response = NextResponse.json({ state });
     response.cookies.set(RFXCHANGE_SESSION_COOKIE_NAME, issued.cookie.value, {
