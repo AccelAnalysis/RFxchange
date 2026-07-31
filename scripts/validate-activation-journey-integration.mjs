@@ -7,6 +7,7 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 const [
   home,
   joinPage,
+  spatialActivation,
   signInPage,
   signInClient,
   geographyRoute,
@@ -24,6 +25,7 @@ const [
 ] = await Promise.all([
   read("app/page.tsx"),
   read("app/join/page.tsx"),
+  read("src/components/onboarding/SpatialActivationExperience.tsx"),
   read("app/signin/page.tsx"),
   read("src/components/auth/SignInClient.tsx"),
   read("app/geography/canvas/page.tsx"),
@@ -45,7 +47,11 @@ assert.ok(
   home.includes('href="/signin"') && home.includes(">Sign in</Link>"),
   "Public home must expose a direct returning-user Sign in entry alongside Join.",
 );
-assert.ok(joinPage.includes("ActivationJourneyClient"), "The /join route must render the real activation client.");
+assert.ok(
+  joinPage.includes("SpatialActivationExperience") &&
+    spatialActivation.includes("ActivationJourneyClient"),
+  "The /join route must compose the real activation client through the canonical spatial activation runtime.",
+);
 assert.ok(signInPage.includes("SignInClient") && signInPage.includes("safeReturnTo"), "The /signin route must render returning-user sign-in and constrain return targets.");
 assert.ok(
   signInClient.includes("signInWithEmailAndPassword") &&
@@ -98,6 +104,18 @@ assert.ok(
   "Activation entry must preserve an in-context sign-in fallback and return to it after registration/sign-out recovery.",
 );
 assert.ok(!client.includes("Harborlight") && !client.includes("200 High St"), "Production activation must not depend on deterministic preview identities.");
+
+for (const requirement of [
+  "ExchangeSpatialScene",
+  "activationState !== null",
+  '"regional"',
+  '"locality"',
+  '"organization"',
+  "/api/onboarding/home-scene",
+  "data-entering-workspace",
+]) {
+  assert.ok(spatialActivation.includes(requirement), `Spatial activation runtime is missing ${requirement}.`);
+}
 
 for (const requirement of [
   "issueSessionCookie",
@@ -217,10 +235,10 @@ for (const requirement of [
   "ControlledLocalityMapService",
   ".create(selection)",
   "accessibleLocationLabel",
-  "pointOverlays={pointOverlays}",
+  "ExchangeSpatialScene",
+  'mode="organization"',
+  "marker={authenticated.homeMarker}",
   'markerActivation?.status !== "active"',
-  'kind: "organization-marker"',
-  "activated: true",
 ]) {
   assert.ok(geographyRoute.includes(requirement), `Controlled Exchange map is missing ${requirement}.`);
 }
@@ -235,6 +253,7 @@ for (const phrase of [
   "real active marker",
   "public visitors receive the marketing/authentication surface only",
   "free account is a real rfxchange account",
+  "spatial activation background",
 ]) {
   assert.ok(architectureLower.includes(phrase), `Activation/convergence architecture authority is missing: ${phrase}`);
 }
@@ -244,5 +263,5 @@ assert.ok(
 );
 
 console.log(
-  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, Census-authoritative locality selection, lifecycle-authoritative account-only participant routing, real marker rendering, canonical roles/objectives/relationship metadata, and controlled-platform stop.",
+  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, spatial onboarding progression, Census-authoritative locality selection, lifecycle-authoritative account-only participant routing, real persistent marker rendering, canonical roles/objectives/relationship metadata, and controlled-platform stop.",
 );
