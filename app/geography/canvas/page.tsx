@@ -1,4 +1,4 @@
-import { ControlledLocalityCanvas } from "@/src/components/map/ControlledLocalityCanvas";
+import { MapboxLocalityCanvas } from "@/src/components/map/MapboxLocalityCanvas";
 import {
   LocalityStatusOverlay,
   MapOverlaySurface,
@@ -16,17 +16,18 @@ export default async function GeographyCanvasPage() {
   return (
     <ParticipantShell activeItem="Intelligence">
       <SpatialWorkspace ariaLabel="RFxchange Intelligence geographic workspace">
-        <ControlledLocalityCanvas
+        <MapboxLocalityCanvas
           model={model}
+          initialZoom="nearby"
           mobileControlPosition="bottom"
         />
         <MapOverlaySurface position="top-left">
           <div className={styles.overlayStack}>
             <SearchFilterOverlay />
             <LocalityStatusOverlay
-              locality="Portsmouth, Virginia"
+              locality={`${model.selectedGeography.name}, Virginia`}
               state="Released locality"
-              supportingText="Authoritative city boundary · active territory"
+              supportingText="Authoritative Census boundary · active operating geography"
             />
           </div>
         </MapOverlaySurface>
