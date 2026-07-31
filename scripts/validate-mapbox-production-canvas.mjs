@@ -65,7 +65,7 @@ for (const surface of [geographyRoute, resolutionRoute, locationPanel, markerPan
 for (const phrase of [
   "Mapbox GL JS is the canonical participant-facing map renderer",
   "Mapbox viewport state never grants geography participation",
-  "ControlledLocalityMapModel is the renderer input",
+  "ControlledLocalityMapModel",
   "Place this value in `.env.local`",
   "additional localities do not become selectable/participatory merely because the basemap displays them",
 ]) {
