@@ -13,6 +13,7 @@ export default function HomePage() {
         <nav aria-label="Primary">
           <a href="#how-it-works">How it works</a>
           <a href="#for-you">Who it serves</a>
+          <Link href="/signin">Sign in</Link>
           <Link className="nav-cta" href="/join">Join</Link>
         </nav>
       </header>
@@ -120,6 +121,7 @@ export default function HomePage() {
               Create the first user, select the home locality, resolve the organization, confirm the real location, complete the essential profile, and activate the organization marker.
             </p>
             <Link className="button button-primary" href="/join">Start organization activation</Link>
+            <p className="launch-note">Already registered? <Link href="/signin">Sign in and continue.</Link></p>
           </div>
         </div>
       </section>
