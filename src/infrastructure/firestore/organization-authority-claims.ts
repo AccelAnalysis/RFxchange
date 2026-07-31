@@ -215,14 +215,19 @@ export class FirestoreOrganizationAuthorityClaimUnitOfWork
     const lifecycleRef = this.db.doc(
       firestoreDocumentPath("accessJourneys", input.lifecycle.id),
     );
+    const auditRef = this.db.doc(
+      firestoreDocumentPath("organizationAuditEvents", input.auditEvent.id),
+    );
     await this.db.runTransaction(async (transaction) => {
-      const [membershipSnapshot, authorizationSnapshot, lifecycleSnapshot] = await Promise.all([
-        transaction.get(membershipRef),
-        transaction.get(authorizationRef),
-        transaction.get(lifecycleRef),
-      ]);
-      if (membershipSnapshot.exists || authorizationSnapshot.exists) {
-        throw new Error("Participant-created authority membership identity already exists.");
+      const [membershipSnapshot, authorizationSnapshot, lifecycleSnapshot, auditSnapshot] =
+        await Promise.all([
+          transaction.get(membershipRef),
+          transaction.get(authorizationRef),
+          transaction.get(lifecycleRef),
+          transaction.get(auditRef),
+        ]);
+      if (membershipSnapshot.exists || authorizationSnapshot.exists || auditSnapshot.exists) {
+        throw new Error("Participant-created authority identity or audit evidence already exists.");
       }
       if (
         !lifecycleSnapshot.exists ||
@@ -233,6 +238,7 @@ export class FirestoreOrganizationAuthorityClaimUnitOfWork
       }
       transaction.create(membershipRef, mutableCreate(input.membership));
       transaction.create(authorizationRef, mutableCreate(input.authorization));
+      transaction.create(auditRef, appendOnly(input.auditEvent));
       transaction.set(
         lifecycleRef,
         mutableUpdate(input.lifecycle, lifecycleSnapshot.data()?.createdAt),
