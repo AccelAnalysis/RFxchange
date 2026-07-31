@@ -29,6 +29,7 @@ export function SpatialActivationExperience({
   const [homeMarker, setHomeMarker] = useState<ExchangeHomeMarker | null>(null);
   const [workspaceUrl, setWorkspaceUrl] = useState("/geography/canvas");
   const selectedGeographyId = activationState?.selectedGeography?.id ?? null;
+  const markerActive = activationState?.marker?.status === "active";
   const sceneModelMatchesSelection = selectedGeographyId !== null &&
     String(sceneModel.selectedGeography.id) === selectedGeographyId;
 
@@ -52,12 +53,7 @@ export function SpatialActivationExperience({
   }, [sceneModelMatchesSelection, selectedGeographyId]);
 
   useEffect(() => {
-    if (activationState?.marker?.status !== "active") {
-      setHomeMarker(null);
-      setWorkspaceUrl("/geography/canvas");
-      return;
-    }
-    if (homeMarker) return;
+    if (!markerActive || homeMarker) return;
     let cancelled = false;
 
     fetch("/api/onboarding/home-scene", { cache: "no-store" })
@@ -76,7 +72,7 @@ export function SpatialActivationExperience({
     return () => {
       cancelled = true;
     };
-  }, [activationState?.marker?.status, homeMarker]);
+  }, [homeMarker, markerActive]);
 
   useEffect(() => {
     if (!homeMarker) return;
