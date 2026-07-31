@@ -7,6 +7,8 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 const [
   home,
   joinPage,
+  signInPage,
+  signInClient,
   geographyRoute,
   client,
   sessionRoute,
@@ -21,6 +23,8 @@ const [
 ] = await Promise.all([
   read("app/page.tsx"),
   read("app/join/page.tsx"),
+  read("app/signin/page.tsx"),
+  read("src/components/auth/SignInClient.tsx"),
   read("app/geography/canvas/page.tsx"),
   read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("app/api/auth/session/route.ts"),
@@ -35,7 +39,19 @@ const [
 ]);
 
 assert.ok(home.includes('href="/join"'), "Public Join must enter the activation journey.");
+assert.ok(
+  home.includes('href="/signin"') && home.includes(">Sign in</Link>"),
+  "Public home must expose a direct returning-user Sign in entry alongside Join.",
+);
 assert.ok(joinPage.includes("ActivationJourneyClient"), "The /join route must render the real activation client.");
+assert.ok(signInPage.includes("SignInClient"), "The /signin route must render the dedicated returning-user sign-in client.");
+assert.ok(
+  signInClient.includes("signInWithEmailAndPassword") &&
+    signInClient.includes('window.location.assign("/join")') &&
+    signInClient.includes("controlledPlatformUrl") &&
+    signInClient.includes("resume exactly where you left"),
+  "Returning-user sign in must establish the trusted session, resume incomplete activation, and enter the controlled Exchange when activation is complete.",
+);
 
 for (const requirement of [
   "registerWithEmailAndPassword",
@@ -61,7 +77,7 @@ assert.ok(
   client.includes('>Register</button>') &&
     client.includes('>Sign in</button>') &&
     client.includes('setAuthMode("signin")'),
-  "Activation entry must expose an explicit returning-user Sign in mode and return to it after registration/sign-out recovery.",
+  "Activation entry must preserve an in-context sign-in fallback and return to it after registration/sign-out recovery.",
 );
 assert.ok(
   !client.includes("Harborlight") && !client.includes("200 High St"),
@@ -191,5 +207,5 @@ for (const phrase of [
 }
 
 console.log(
-  "Activation Journey Integration Gate validated: public Join, explicit returning-user sign in, valid wordmark markup, trusted Firebase session, canonical runtime order, resumable server orchestration, real geocoding/profile/marker activation, privacy-safe real marker rendering, audited creator authority, orientation non-completion, and controlled-platform stop.",
+  "Activation Journey Integration Gate validated: distinct public Join and Sign in entry points, returning-user resume routing, valid wordmark markup, trusted Firebase session, canonical runtime order, resumable server orchestration, real geocoding/profile/marker activation, privacy-safe real marker rendering, audited creator authority, orientation non-completion, and controlled-platform stop.",
 );
