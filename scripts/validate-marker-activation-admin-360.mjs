@@ -14,6 +14,7 @@ const [
   mapCanvas,
   mapStyles,
   markerPage,
+  activationUi,
   organization360Page,
   rules,
   schema,
@@ -28,6 +29,7 @@ const [
   source("src/components/map/ControlledLocalityCanvas.tsx"),
   source("src/components/map/ControlledLocalityCanvas.module.css"),
   source("app/organization-activation/page.tsx"),
+  source("src/components/onboarding/ActivationJourneyClient.tsx"),
   source("app/admin/organizations/[organizationId]/page.tsx"),
   source("firestore.rules"),
   source("src/infrastructure/firestore/schema.ts"),
@@ -114,10 +116,7 @@ for (const independentState of [
   "investigation",
   "governingCase",
 ]) {
-  assert.ok(
-    organization360.includes(independentState),
-    `Status header is missing independent state: ${independentState}`,
-  );
+  assert.ok(organization360.includes(independentState), `Status header is missing independent state: ${independentState}`);
 }
 
 assert.ok(
@@ -134,15 +133,31 @@ assert.ok(
   "Organization markers must be coordinate-projected and keyboard accessible.",
 );
 assert.ok(
-  mapStyles.includes("@media (prefers-reduced-motion: reduce)") &&
-    mapStyles.includes("stroke: none"),
+  mapStyles.includes("@media (prefers-reduced-motion: reduce)") && mapStyles.includes("stroke: none"),
   "Marker activation must reduce motion and avoid a permanent pin outline.",
 );
+
 assert.ok(
-  markerPage.includes("MarkerActivationPanel") &&
-    organization360Page.includes("Organization360"),
-  "Participant activation and admin Organization 360 routes are missing.",
+  markerPage.includes("resolveParticipantRoute") && markerPage.includes("controlledPlatformUrl") && markerPage.includes("redirect("),
+  "Legacy marker-activation URL must forward through canonical participant runtime state.",
 );
+assert.equal(markerPage.includes("createPortsmouthActivatedOrganizationPreview"), false);
+assert.ok(
+  activationUi.includes("Your real marker is active") &&
+    activationUi.includes("Organization activated") &&
+    activationUi.includes("Enter the controlled Exchange"),
+  "Integrated activation must expose the real marker success state without implying OPEN.",
+);
+for (const required of [
+  "resolveAdminRoute",
+  'permission: "organization.profile.read"',
+  "ORGANIZATION:",
+  "buildOrganization360",
+  "Organization360",
+]) {
+  assert.ok(organization360Page.includes(required), `Protected Organization 360 route is missing ${required}.`);
+}
+assert.equal(organization360Page.includes("createPortsmouthOrganization360Preview"), false);
 
 for (const evidence of [
   "server-authoritative marker gate",
@@ -162,4 +177,4 @@ assert.ok(
   "Architecture must preserve post-marker release and non-scope boundaries.",
 );
 
-console.log("Slice 2.8 marker activation and Organization 360 architecture validated.");
+console.log("Slice 2.8 marker activation and protected scoped Organization 360 runtime validated.");
