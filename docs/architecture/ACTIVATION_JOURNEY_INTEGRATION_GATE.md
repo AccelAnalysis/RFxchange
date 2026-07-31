@@ -10,7 +10,7 @@ This gate does not add or mark complete any tracker Feature ID. It repairs compo
 
 ## Public versus account boundary
 
-RFxchange is free to join, but the RFxchange application is not public browsing infrastructure.
+RFxchange is free to join, but the RFxchange application is not public browsing infrastructure. **Public visitors receive the marketing/authentication surface only.**
 
 Canonical rule:
 
