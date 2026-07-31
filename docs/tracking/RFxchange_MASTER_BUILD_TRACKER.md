@@ -22,24 +22,16 @@
 - 6 - Commercial: **1/50**
 - 7 - Institutional & Scale: **1/47**
 
-## Active build sequence — Wave 2 Activation roadmap — adopted 2026-07-30
+## Active build sequence — Wave 2 Activation roadmap — current 2026-07-31
 
-- **Slice 2.1 — `GEO-001` + `GEO-002` + `GEO-003` + `GEO-007` + `GEO-008` — Geography Authority**: primary operating geography, server-side authorization, canonical FIPS/geography metadata, release states, bounds and locality camera.
-- **Slice 2.2 — `GEO-004` + `GEO-005` + `GEO-006` — Geography Rendering**: authoritative locality boundaries, prominent selected-locality treatment and muted surrounding geographies.
-- **Slice 2.3 — `ACQ-004` + `ORG-001` + `ORG-002` + `ORG-003` — Organization Resolution**: seeded/unclaimed profile, organization matching, claim/create flow and duplicate/entity-resolution protection.
-- **Slice 2.4 — `COMMS-002` — Microsoft Transactional Email**: production Microsoft delivery adapter behind the provider-neutral communication boundary.
-- **Slice 2.5 — `ORG-004` + `ADM-065` + `ADM-066` — Organization Authority & Claims**: establish organizational authority plus administrative claims discovery and auditable conflict adjudication.
-- **Slice 2.6 — `GEO-009` + `GEO-010` + `ORG-005` + `ORG-006` + `ORG-009` — Organization Geography & Location**: home-versus-service geography, address capture, geocoding/map confirmation, privacy and service-area capture.
-- **Slice 2.7 — `ORG-007` + `ORG-008` + `ORG-010` + `ORG-011` + `ORG-012` — Essential Organization Profile**: minimum identity, meaningful capability, multi-role classification, business objectives and legitimate Profile Complete state.
-- **Slice 2.8 — `GEO-011` + `ADM-063` + `ADM-064` — Marker Activation & Admin 360**: activate the real organization marker and provide complete scoped administrative organization context/status.
-- **Slice 2.9 — `ACQ-002` + `ACQ-003` — Acquisition-to-Activation Continuity**: public opportunity entry and preservation of opportunity/claim/referral/team/provider/buyer context through registration and first authenticated experience.
+- **Slices 2.1–2.8 — MERGED**: geography authority/rendering, organization resolution/authority, transactional email, organization geography/location, essential profile, marker activation and scoped Organization 360 are complete at their Feature-ID acceptance boundaries.
+- **Wave 2 Runtime Convergence Gate — MERGED PR #92; no Feature IDs**: account-only participant runtime, trusted auth/session composition, lifecycle/membership/restriction routing, scoped admin boundaries, production fixture removal, canonical onboarding vocabularies and convergence guardrails. Production CI passed on the merged tree.
+- **Slice 2.9 — `ACQ-002` + `ACQ-003` — Acquisition-to-Activation Continuity — NEXT FEATURE SLICE**: preserve opportunity/claim/referral/team/provider/buyer acquisition context through registration and the first authenticated experience. Begin after configured-development/browser acceptance of the convergence boundary and the normal dependency check.
 - **Slice 2.10 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004` — Orientation: Discovery & Team Formation**: synthetic three-organization map tutorial from opportunity issuance through capability gap and teammate discovery.
 - **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
 - **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: objective-driven first action followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
 
-**Implementation hold:** the Wave 2 roadmap is adopted, but **Slice 2.1 must not begin until explicit follow-up authorization is given**.
-
-This sequence is planning guidance, not a completion claim. Wave 2 begins at **2/43 complete** because `INF-007` and `INF-008` were completed earlier. Recalculate dependency eligibility from merged `main` after every slice and mark an item Done only after its acceptance check and CI evidence pass.
+Current Feature-ID completion is **31/43 Activation**. The Runtime Convergence Gate is an integration/repair gate and does not alter that count. Repository acceptance is complete; configured-development acceptance against the selected real Firebase project and actual browser remains an environment check and must not be inferred from emulator CI. Recalculate dependency eligibility from merged `main` before starting each feature slice and mark an item Done only after its acceptance check and CI evidence pass.
 
 ## Feature-ID checklist
 
