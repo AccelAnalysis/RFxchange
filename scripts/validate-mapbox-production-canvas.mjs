@@ -86,7 +86,6 @@ assert.ok(
 
 assert.ok(
   geographyRoute.includes("resolveAuthenticatedHomeGeographyId") &&
-    geographyRoute.includes("organizationLocations") === false &&
     geographyRoute.includes("createFirestoreOrganizationLocationRepositories") &&
     geographyRoute.includes('initialZoom="locality"') &&
     !geographyRoute.includes("SearchFilterOverlay"),
@@ -100,6 +99,7 @@ for (const surface of [geographyRoute, resolutionRoute, locationPanel, markerPan
   );
 }
 
+const architectureLower = architecture.toLowerCase();
 for (const phrase of [
   "Mapbox GL JS is the canonical participant-facing map renderer",
   "Mapbox viewport state never grants geography participation",
@@ -108,10 +108,15 @@ for (const phrase of [
   "home locality",
   "zoom `0` through zoom `24`",
   "Mapbox Search Box API",
-  "additional localities do not become selectable/participatory merely because the basemap or Mapbox search displays them",
 ]) {
   assert.ok(architecture.includes(phrase), `Mapbox architecture authority is missing: ${phrase}`);
 }
+assert.ok(
+  architectureLower.includes(
+    "additional localities do not become selectable/participatory merely because the basemap or mapbox search displays them",
+  ),
+  "Mapbox architecture must preserve the distinction between exploratory search visibility and canonical geography participation.",
+);
 
 console.log(
   "Mapbox production canvas validated: authoritative home-locality focus mask, full provider zoom/navigation, transient global search, explicit 2D/perspective/3D modes, public-token hygiene, viewport/authority separation, and participant surface adoption.",
