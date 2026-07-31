@@ -1,4 +1,4 @@
-import { ControlledLocalityCanvas } from "@/src/components/map/ControlledLocalityCanvas";
+import { MapboxLocalityCanvas } from "@/src/components/map/MapboxLocalityCanvas";
 import { OrganizationResolutionPanel } from "@/src/components/organization-resolution/OrganizationResolutionPanel";
 import {
   ParticipantShell,
@@ -17,7 +17,7 @@ export default async function OrganizationResolutionPage() {
   return (
     <ParticipantShell activeItem="Account">
       <SpatialWorkspace ariaLabel="Organization resolution geographic workspace">
-        <ControlledLocalityCanvas
+        <MapboxLocalityCanvas
           model={map}
           initialZoom="nearby"
           overlaySide="right"
