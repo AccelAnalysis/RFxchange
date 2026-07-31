@@ -1,0 +1,87 @@
+import { randomUUID } from "node:crypto";
+import { NextRequest, NextResponse } from "next/server";
+
+import {
+  RFXCHANGE_SESSION_COOKIE_NAME,
+} from "@/src/infrastructure/auth/firebase-server-session";
+import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
+import { createServerActivationJourneyService } from "@/src/infrastructure/onboarding/runtime";
+
+const ACTIVATION_CSRF_COOKIE = "rfx_activation_csrf";
+
+function csrfCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict" as const,
+    path: "/",
+    maxAge: 10 * 60,
+  };
+}
+
+export async function GET() {
+  const csrfToken = randomUUID();
+  const response = NextResponse.json({ csrfToken });
+  response.cookies.set(ACTIVATION_CSRF_COOKIE, csrfToken, csrfCookieOptions());
+  return response;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = (await request.json()) as Readonly<{
+      idToken?: string;
+      csrfToken?: string;
+      requestedName?: string;
+      provisionalOrganizationName?: string;
+    }>;
+    const expectedCsrf = request.cookies.get(ACTIVATION_CSRF_COOKIE)?.value ?? "";
+    if (!body.csrfToken || !expectedCsrf || body.csrfToken !== expectedCsrf) {
+      return NextResponse.json({ error: "CSRF verification failed." }, { status: 403 });
+    }
+    const idToken = body.idToken?.trim() ?? "";
+    if (!idToken) {
+      return NextResponse.json({ error: "Firebase ID token is required." }, { status: 400 });
+    }
+
+    const issued = await createServerAuthenticationBoundary().issueSessionCookie({
+      idToken,
+      csrfVerified: true,
+      requestedName: body.requestedName?.trim() || undefined,
+      now: new Date().toISOString(),
+    });
+    const activation = createServerActivationJourneyService();
+    const state = await activation.bootstrap(
+      issued.context,
+      body.provisionalOrganizationName?.trim() || body.requestedName?.trim() || "",
+    );
+
+    const response = NextResponse.json({ state });
+    response.cookies.set(RFXCHANGE_SESSION_COOKIE_NAME, issued.cookie.value, {
+      httpOnly: issued.cookie.httpOnly,
+      secure: issued.cookie.secure,
+      sameSite: issued.cookie.sameSite,
+      path: issued.cookie.path,
+      maxAge: issued.cookie.maxAgeSeconds,
+    });
+    response.cookies.set(ACTIVATION_CSRF_COOKIE, "", {
+      ...csrfCookieOptions(),
+      maxAge: 0,
+    });
+    return response;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Session exchange failed.";
+    return NextResponse.json({ error: message }, { status: 401 });
+  }
+}
+
+export async function DELETE() {
+  const response = NextResponse.json({ signedOut: true });
+  response.cookies.set(RFXCHANGE_SESSION_COOKIE_NAME, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+  return response;
+}

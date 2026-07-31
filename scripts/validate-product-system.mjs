@@ -37,7 +37,7 @@ const home = (await read("app/page.tsx")).toLowerCase();
 for (const cta of [">join<", ">see how it works<"]) {
   if (!home.includes(cta)) throw new Error(`Public positioning missing required CTA: ${cta}`);
 }
-if (!home.includes('href="#join"')) throw new Error("Join CTA must resolve to the public join surface.");
+if (!home.includes('href="/join"')) throw new Error("Join CTA must resolve to the production organization-activation surface.");
 if (!home.includes('href="#how-it-works"')) throw new Error("See How It Works CTA must resolve to the public journey surface.");
 if (!home.includes("publicdifferentiation.map")) {
   throw new Error("ACQ-001 requires the public differentiation model to render on the landing page.");

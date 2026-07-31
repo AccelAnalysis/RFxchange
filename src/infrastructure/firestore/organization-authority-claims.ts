@@ -202,6 +202,49 @@ export class FirestoreOrganizationAuthorityClaimUnitOfWork
       createOptionalAudit(transaction, this.db, input.auditEvent);
     });
   }
+
+  async establishParticipantCreated(
+    input: Parameters<OrganizationAuthorityClaimUnitOfWork["establishParticipantCreated"]>[0],
+  ): Promise<void> {
+    const membershipRef = this.db.doc(
+      firestoreDocumentPath("organizationMemberships", input.membership.id),
+    );
+    const authorizationRef = this.db.doc(
+      firestoreDocumentPath("organizationAuthorizations", input.authorization.membershipId),
+    );
+    const lifecycleRef = this.db.doc(
+      firestoreDocumentPath("accessJourneys", input.lifecycle.id),
+    );
+    const auditRef = this.db.doc(
+      firestoreDocumentPath("organizationAuditEvents", input.auditEvent.id),
+    );
+    await this.db.runTransaction(async (transaction) => {
+      const [membershipSnapshot, authorizationSnapshot, lifecycleSnapshot, auditSnapshot] =
+        await Promise.all([
+          transaction.get(membershipRef),
+          transaction.get(authorizationRef),
+          transaction.get(lifecycleRef),
+          transaction.get(auditRef),
+        ]);
+      if (membershipSnapshot.exists || authorizationSnapshot.exists || auditSnapshot.exists) {
+        throw new Error("Participant-created authority identity or audit evidence already exists.");
+      }
+      if (
+        !lifecycleSnapshot.exists ||
+        lifecycleSnapshot.data()?.state !== "organization-resolved" ||
+        lifecycleSnapshot.data()?.userId !== input.membership.userId
+      ) {
+        throw new Error("Participant-created authority lifecycle changed concurrently.");
+      }
+      transaction.create(membershipRef, mutableCreate(input.membership));
+      transaction.create(authorizationRef, mutableCreate(input.authorization));
+      transaction.create(auditRef, appendOnly(input.auditEvent));
+      transaction.set(
+        lifecycleRef,
+        mutableUpdate(input.lifecycle, lifecycleSnapshot.data()?.createdAt),
+      );
+    });
+  }
 }
 
 export function createFirestoreOrganizationAuthorityClaims(db: Firestore) {

@@ -85,11 +85,14 @@ assert.ok(
 );
 
 assert.ok(
-  geographyRoute.includes("resolveAuthenticatedHomeGeographyId") &&
+  geographyRoute.includes("resolveAuthenticatedMapProjection") &&
     geographyRoute.includes("createFirestoreOrganizationLocationRepositories") &&
+    geographyRoute.includes("createFirestoreOrganizationMarkerRepositories") &&
+    geographyRoute.includes("projectPublicOrganizationMarker") &&
     geographyRoute.includes('initialZoom="locality"') &&
+    geographyRoute.includes("pointOverlays={pointOverlays}") &&
     !geographyRoute.includes("SearchFilterOverlay"),
-  "Intelligence must prefer authenticated home-locality context, fit the home locality, and avoid a decorative duplicate search control.",
+  "Intelligence must prefer authenticated home-locality context, render the privacy-safe active organization marker, fit the home locality, and avoid a decorative duplicate search control.",
 );
 
 for (const surface of [geographyRoute, resolutionRoute, locationPanel, markerPanel]) {
@@ -119,5 +122,5 @@ assert.ok(
 );
 
 console.log(
-  "Mapbox production canvas validated: authoritative home-locality focus mask, full provider zoom/navigation, transient global search, explicit 2D/perspective/3D modes, public-token hygiene, viewport/authority separation, and participant surface adoption.",
+  "Mapbox production canvas validated: authoritative home-locality focus mask, full provider zoom/navigation, transient global search, explicit 2D/perspective/3D modes, public-token hygiene, viewport/authority separation, privacy-safe active marker projection, and participant surface adoption.",
 );

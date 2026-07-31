@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { BrandWordmark } from "@/src/components/brand/BrandWordmark";
 import { NetworkField } from "@/src/components/marketing/NetworkField";
 import { JourneyRail } from "@/src/components/marketing/JourneyRail";
@@ -11,7 +13,7 @@ export default function HomePage() {
         <nav aria-label="Primary">
           <a href="#how-it-works">How it works</a>
           <a href="#for-you">Who it serves</a>
-          <a className="nav-cta" href="#join">Join</a>
+          <Link className="nav-cta" href="/join">Join</Link>
         </nav>
       </header>
 
@@ -21,11 +23,11 @@ export default function HomePage() {
           <h1 id="hero-title">Make business capability, opportunity, and connection visible.</h1>
           <p className="hero-deck">{publicPositioning.summary}</p>
           <div className="hero-actions">
-            <a className="button button-primary" href="#join">Join</a>
+            <Link className="button button-primary" href="/join">Join</Link>
             <a className="button button-secondary" href="#how-it-works">See How It Works</a>
           </div>
           <p className="launch-note">
-            Founding access opens after the account, legal, geography, and commercial controls required for production enrollment are ready.
+            Organization activation is available now; richer Network, RFx, commercial, and OPEN functionality continues through the approved build waves.
           </p>
         </div>
         <NetworkField />
@@ -110,14 +112,14 @@ export default function HomePage() {
       <section id="join" className="join-section">
         <div className="shell join-layout">
           <div>
-            <p className="eyebrow">Founding launch</p>
+            <p className="eyebrow">Organization activation</p>
             <h2>Establish your organization where the network begins.</h2>
           </div>
           <div className="join-copy">
             <p>
-              The production enrollment flow will open when organization authority, controlled geography, legal acceptance, and approved commercial terms are enforceable end to end.
+              Create the first user, select the home locality, resolve the organization, confirm the real location, complete the essential profile, and activate the organization marker.
             </p>
-            <p className="join-status">Wave 0 establishes the product system that those flows will inherit.</p>
+            <Link className="button button-primary" href="/join">Start organization activation</Link>
           </div>
         </div>
       </section>

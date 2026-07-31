@@ -37,9 +37,9 @@ export function firebaseWebOptionsFromEnvironment(): FirebaseOptions {
   });
 }
 
-function localAuthEmulatorUrl(): string {
+function configuredAuthEmulatorUrl(): string | null {
   const configured = process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL?.trim();
-  return configured || "http://127.0.0.1:9099";
+  return configured || null;
 }
 
 function assertLocalEmulatorUrl(value: string): string {
@@ -65,8 +65,9 @@ export function getClientFirebaseAuth(): Auth {
   if (clientGlobals.__rfxFirebaseClientAuth) return clientGlobals.__rfxFirebaseClientAuth;
 
   const auth = getAuth(getClientFirebaseApp());
-  if (process.env.NODE_ENV !== "production") {
-    connectAuthEmulator(auth, assertLocalEmulatorUrl(localAuthEmulatorUrl()), {
+  const emulatorUrl = process.env.NODE_ENV !== "production" ? configuredAuthEmulatorUrl() : null;
+  if (emulatorUrl) {
+    connectAuthEmulator(auth, assertLocalEmulatorUrl(emulatorUrl), {
       disableWarnings: true,
     });
   }
