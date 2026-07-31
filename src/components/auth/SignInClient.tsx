@@ -22,6 +22,10 @@ async function jsonRequest<T>(url: string, init?: RequestInit): Promise<T> {
   return body;
 }
 
+function isAdministrativeReturnTarget(returnTo: string | null | undefined): returnTo is string {
+  return Boolean(returnTo && (returnTo === "/admin" || returnTo.startsWith("/admin/")));
+}
+
 export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }>) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +68,7 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
                   if (!idToken) throw new Error("Firebase sign-in did not produce an ID token.");
 
                   const csrf = await jsonRequest<{ csrfToken: string }>("/api/auth/session");
-                  const result = await jsonRequest<{ state: ActivationJourneyState }>(
+                  const result = await jsonRequest<{ state: ActivationJourneyState | null }>(
                     "/api/auth/session",
                     {
                       method: "POST",
@@ -76,6 +80,14 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
                     },
                   );
 
+                  if (!result.state) {
+                    // Authentication is independent from participant activation. This supports
+                    // platform administrators who legitimately have no participant organization
+                    // context while still preventing a detached account from entering participant
+                    // workspaces.
+                    window.location.assign(isAdministrativeReturnTarget(returnTo) ? returnTo : "/join");
+                    return;
+                  }
                   if (result.state.nextStep === "complete" && result.state.controlledPlatformUrl) {
                     window.location.assign(returnTo ?? result.state.controlledPlatformUrl);
                     return;
