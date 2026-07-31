@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 
 import { ControlledLocalityMapService, type ControlledLocalityMapModel } from "@/src/application/geography/controlled-locality-map";
 import {
-  MapboxLocalityCanvas,
-  type ControlledLocalityPointOverlay,
-} from "@/src/components/map/MapboxLocalityCanvas";
+  ExchangeSpatialScene,
+  type ExchangeHomeMarker,
+} from "@/src/components/map/ExchangeSpatialScene";
 import {
   ParticipantShell,
   SpatialWorkspace,
@@ -30,7 +30,7 @@ interface GeographyCanvasPageProps {
 
 interface AuthenticatedMapProjection {
   readonly model: ControlledLocalityMapModel;
-  readonly markerOverlay: ControlledLocalityPointOverlay;
+  readonly homeMarker: ExchangeHomeMarker;
 }
 
 function firstSearchParam(value: string | string[] | undefined): string | null {
@@ -104,13 +104,11 @@ async function resolveAuthenticatedMapProjection(
 
   return Object.freeze({
     model,
-    markerOverlay: Object.freeze({
+    homeMarker: Object.freeze({
       id: marker.id,
-      position: marker.coordinate,
+      coordinate: marker.coordinate,
       label: profile?.displayName ?? "Your organization",
-      kind: "organization-marker" as const,
-      privacyLabel: marker.accessibleLocationLabel,
-      activated: true,
+      accessibleLocationLabel: marker.accessibleLocationLabel,
     }),
   });
 }
@@ -121,16 +119,15 @@ export default async function GeographyCanvasPage({
   const params = searchParams ? await searchParams : {};
   const requestedOrganizationId = firstSearchParam(params.organizationId);
   const authenticated = await resolveAuthenticatedMapProjection(requestedOrganizationId);
-  const pointOverlays = Object.freeze([authenticated.markerOverlay]);
 
   return (
     <ParticipantShell activeItem="Intelligence">
       <SpatialWorkspace ariaLabel="RFxchange Intelligence geographic workspace">
-        <MapboxLocalityCanvas
+        <ExchangeSpatialScene
           model={authenticated.model}
-          initialZoom="locality"
-          mobileControlPosition="bottom"
-          pointOverlays={pointOverlays}
+          mode="organization"
+          marker={authenticated.homeMarker}
+          interactive
         />
       </SpatialWorkspace>
     </ParticipantShell>

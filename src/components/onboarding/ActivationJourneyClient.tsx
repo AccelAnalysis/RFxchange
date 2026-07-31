@@ -127,7 +127,11 @@ function effectiveStep(state: ActivationJourneyState): ActivationJourneyStep {
 
 export function ActivationJourneyClient({
   mapModel,
-}: Readonly<{ mapModel: ControlledLocalityMapModel }>) {
+  onStateChange,
+}: Readonly<{
+  mapModel: ControlledLocalityMapModel;
+  onStateChange?: (state: ActivationJourneyState | null) => void;
+}>) {
   const [state, setState] = useState<ActivationJourneyState | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -153,6 +157,10 @@ export function ActivationJourneyClient({
   const [objectives, setObjectives] = useState<readonly OrganizationBusinessObjective[]>(["explore-local-network"]);
 
   const step = state ? effectiveStep(state) : null;
+
+  useEffect(() => {
+    onStateChange?.(state);
+  }, [onStateChange, state]);
 
   useEffect(() => {
     let cancelled = false;
@@ -413,7 +421,6 @@ export function ActivationJourneyClient({
                     <button className={styles.primary} type="button" disabled={busy} onClick={() => run(async () => {
                       const result = await postAction("select-census-geography", { reference: geography.reference });
                       setState(result.state);
-                      window.location.reload();
                     })}>Use this home locality</button>
                   </article>
                 ))}

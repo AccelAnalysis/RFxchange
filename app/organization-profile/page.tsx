@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { MapMotionPreferenceToggle } from "@/src/components/account/MapMotionPreferenceToggle";
 import { SignOutButton } from "@/src/components/auth/SignOutButton";
 import {
   OperationalWorkspace,
@@ -104,6 +105,11 @@ export default async function OrganizationProfilePage() {
                 organization&apos;s initial service geography. Expanded service territories remain a
                 separate profile concept and can be refined in later profile enrichment.
               </p>
+            </article>
+
+            <article className={styles.card}>
+              <h2>Map settings</h2>
+              <MapMotionPreferenceToggle />
             </article>
 
             <article className={styles.card}>

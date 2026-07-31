@@ -124,6 +124,30 @@ Location capture uses the authorized primary geography, geocoding and authoritat
 
 Physical location, public precision and service geography remain separate concepts. For minimum low-friction activation, the confirmed home locality initializes the first service geography. The UI must disclose that assumption. Later profile enrichment can expand/refine service territory without changing the organization's home location.
 
+## Spatial activation background and camera progression
+
+The first account-creation screen remains map-free. Once Firebase account creation and RFxchange session exchange produce a server-recognized activation journey, the Exchange map becomes the edge-to-edge background beneath the activation overlays.
+
+The visual sequence is:
+
+```text
+Regional Ambient
+→ Locality Ambient after authoritative home-locality selection
+→ Organization Home after active marker + controlled-platform authorization
+```
+
+Regional and locality scenes use a 225-second orbit and 60-degree pitch. Locality zoom is calculated by fitting the authoritative locality bounds to the available viewport after overlay-aware padding.
+
+The Organization Home scene uses a 225-second orbit, 75-degree pitch and zoom 16 centered on the privacy-safe projected organization marker.
+
+Activation forms use semi-transparent glass overlays. The map must remain edge-to-edge beneath those overlays rather than being embedded inside the location card.
+
+The participant may disable ambient rotation from Account. The browser motion preference changes camera behavior only and cannot alter any activation or authorization state. `prefers-reduced-motion: reduce` suppresses animation regardless of the account preference.
+
+When active marker and controlled-platform authorization are confirmed, the activation overlays fade, the camera flies to the organization marker, and the runtime hands off to the authenticated workspace. The authorized home-scene endpoint must re-resolve organization membership, location, geography, marker activation, boundary and privacy projection rather than trusting browser state.
+
+The complete camera, marker, and regression contract is in `docs/architecture/SPATIAL_ONBOARDING_HOME_ORBIT.md`.
+
 ## Canonical participation roles and objectives
 
 Activation must consume the domain vocabularies rather than maintain UI-local subsets.
@@ -159,6 +183,8 @@ Internal `nextStep: "complete"` means registration-to-marker activation is compl
 ## Account workspace
 
 The participant Account destination must resolve the authenticated organization and display only real persisted state currently implemented. A production navigation item may be real, clearly disabled as later work, or omitted; it may never lead to a fixture/prototype masquerading as live data.
+
+The Account workspace owns the participant-facing Ambient map rotation preference. This preference defaults on, may be toggled without changing organization state, and applies to activation, locality and organization-home ambient scenes.
 
 Later Network, RFx, Trust, Commercial and expanded administration capabilities remain governed by their approved slices.
 
@@ -196,12 +222,16 @@ marketing
 → Join
 → Firebase registration
 → RFxchange session
+→ regional spatial background
 → policies
 → geography
+→ locality camera fit/orbit
 → organization resolution/authority
 → confirmed location
 → essential profile
-→ real marker active
+→ real persistent marker active
+→ activation overlays fade
+→ organization-home camera flight/orbit
 → controlled Exchange
 → logout
 → returning Sign In
@@ -211,12 +241,14 @@ marketing
 Negative paths include:
 
 - anonymous participant URL → Sign In, never participant UI;
+- account-creation form before session → no operational map;
 - incomplete authenticated account → exact activation continuation, never workspace bypass;
 - wrong organization identifier → canonical authorized organization context;
 - normal participant → admin URL denied;
 - scoped administrator → out-of-scope organization/geography denied;
 - restricted participant → normal workspace access denied;
-- legacy/reference route → canonical runtime redirect or unavailable production surface.
+- legacy/reference route → canonical runtime redirect or unavailable production surface;
+- map viewport, orbit target or marker popup → never geography/organization authority.
 
 ## Wave 2 consequence
 

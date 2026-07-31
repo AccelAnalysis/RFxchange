@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 
 import { ControlledLocalityMapService } from "@/src/application/geography/controlled-locality-map";
-import { ActivationJourneyClient } from "@/src/components/onboarding/ActivationJourneyClient";
+import { SpatialActivationExperience } from "@/src/components/onboarding/SpatialActivationExperience";
 import { createControlledLocalityPreview } from "@/src/data/geography/portsmouth-controlled-locality-preview";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
@@ -36,5 +36,5 @@ async function activationMapModel() {
 
 export default async function JoinPage() {
   const mapModel = await activationMapModel();
-  return <ActivationJourneyClient mapModel={mapModel} />;
+  return <SpatialActivationExperience mapModel={mapModel} />;
 }

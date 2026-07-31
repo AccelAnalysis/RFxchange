@@ -90,6 +90,23 @@ Location candidates, confirmed points, and organization markers use real longitu
 
 Future highlighted markers such as top resource providers, sponsors, opportunities, and other featured network entities layer on the same full-map renderer without changing the home-locality focus contract.
 
+## Spatial onboarding and home-orbit scene
+
+`ExchangeSpatialScene` is the canonical edge-to-edge renderer for authenticated activation ambience and organization-home entry. It supplements the operational search-oriented `MapboxLocalityCanvas`; it does not replace geography authority or the Mapbox renderer decision.
+
+The spatial scene fills the full viewport beneath activation, navigation, and workspace overlays. The account form remains map-free until a server-recognized RFxchange activation journey exists.
+
+Canonical ambient camera presets are:
+
+- regional/locality: 225-second orbit, 60-degree pitch, and fitted authoritative bounds;
+- organization home: 225-second orbit, 75-degree pitch, zoom 16, and the privacy-safe organization marker as target.
+
+The current participant organization marker is rendered as a native GeoJSON source/layer with viewport-aligned RF identity and organization name. It remains visible without a popup and uses collision-overlap settings appropriate to the participant's own home marker.
+
+Ambient rotation is user-controllable from Account through the `rfxchange:map-rotation-enabled` browser preference and is always suppressed by `prefers-reduced-motion: reduce`.
+
+The complete contract and regression criteria are in `docs/architecture/SPATIAL_ONBOARDING_HOME_ORBIT.md`.
+
 ## Token configuration
 
 Mapbox GL JS requires a browser-visible public access token beginning with `pk.`.
@@ -112,4 +129,18 @@ The Mapbox basemap and search are not limited to that reference snapshot: users 
 
 ## Regression guardrail
 
-Participant spatial surfaces must use `MapboxLocalityCanvas`. The SVG renderer may remain for deterministic tests/reference rendering, but it must not replace the production participant map without an explicit architecture decision.
+Production participant spatial surfaces must use either:
+
+- `MapboxLocalityCanvas` for the established full-map search/locality canvas contract; or
+- `ExchangeSpatialScene` for the canonical spatial activation and organization-home orbit contract.
+
+The SVG renderer may remain for deterministic tests/reference rendering, but it must not replace either production Mapbox surface without an explicit architecture decision.
+
+Run both:
+
+```bash
+npm run validate:mapbox-production-canvas
+npm run validate:spatial-onboarding-home-orbit
+```
+
+when changing production spatial rendering.

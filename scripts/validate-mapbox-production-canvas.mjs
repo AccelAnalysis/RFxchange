@@ -9,6 +9,7 @@ const [
   envExample,
   layout,
   mapboxCanvas,
+  spatialScene,
   geographyRoute,
   activationClient,
   locationPanel,
@@ -20,6 +21,7 @@ const [
   read(".env.example"),
   read("app/layout.tsx"),
   read("src/components/map/MapboxLocalityCanvas.tsx"),
+  read("src/components/map/ExchangeSpatialScene.tsx"),
   read("app/geography/canvas/page.tsx"),
   read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("src/components/organization-location/OrganizationLocationPanel.tsx"),
@@ -63,6 +65,31 @@ for (const requirement of [
   assert.ok(mapboxCanvas.includes(requirement), `Production Mapbox canvas is missing ${requirement}.`);
 }
 
+for (const requirement of [
+  "new mapboxgl.Map",
+  'style: "mapbox://styles/mapbox/standard"',
+  "createHomeLocalityMask",
+  "LOCALITY_MASK_SOURCE_ID",
+  "map.fitBounds",
+  "mapboxgl.NavigationControl",
+  'token.startsWith("pk.")',
+  "minZoom: 0",
+  "maxZoom: 24",
+  "search/searchbox/v1/forward",
+  "Search moves the camera only and never changes your home locality.",
+  "Fit home",
+  "VIEW_MODE_OPTIONS",
+  'label: "2D"',
+  'label: "Perspective"',
+  'label: "3D"',
+  "map.easeTo",
+  "aria-pressed",
+  "HOME_MARKER_LABEL_LAYER_ID",
+  "EXCHANGE_ORBIT_PERIOD_MS = 225_000",
+]) {
+  assert.ok(spatialScene.includes(requirement), `Spatial home-orbit Mapbox scene is missing ${requirement}.`);
+}
+
 assert.ok(
   !mapboxCanvas.includes("rfx-locality-surrounding-fill") && !mapboxCanvas.includes("rfx-locality-surrounding-outline"),
   "Participant Mapbox rendering must not restore the old adjacent-locality overlay treatment.",
@@ -77,8 +104,10 @@ for (const requirement of [
   "createFirestoreOrganizationLocationRepositories",
   "createFirestoreOrganizationMarkerRepositories",
   "projectPublicOrganizationMarker",
-  'initialZoom="locality"',
-  "pointOverlays={pointOverlays}",
+  "ExchangeSpatialScene",
+  'mode="organization"',
+  "marker={authenticated.homeMarker}",
+  "interactive",
 ]) {
   assert.ok(geographyRoute.includes(requirement), `Authenticated Intelligence map is missing ${requirement}.`);
 }
@@ -103,6 +132,7 @@ for (const phrase of [
   "home locality",
   "zoom `0` through zoom `24`",
   "Mapbox Search Box API",
+  "ExchangeSpatialScene",
 ]) {
   assert.ok(architecture.includes(phrase), `Mapbox architecture authority is missing: ${phrase}`);
 }
@@ -112,5 +142,5 @@ assert.ok(
 );
 
 console.log(
-  "Mapbox production canvas validated: account-only Intelligence adoption, integrated activation location confirmation, authoritative home-locality focus, provider navigation, public-token hygiene, and viewport/authority separation.",
+  "Mapbox production surfaces validated: account-only Intelligence adoption, operational search/view controls, spatial onboarding/home orbit, authoritative home-locality focus, public-token hygiene, and viewport/authority separation.",
 );
