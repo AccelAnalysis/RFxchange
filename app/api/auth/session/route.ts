@@ -2,10 +2,12 @@ import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { ServerSessionError } from "@/src/application/auth/server-session";
-import {
-  RFXCHANGE_SESSION_COOKIE_NAME,
-} from "@/src/infrastructure/auth/firebase-server-session";
+import { updateActivationJourneyContext } from "@/src/domain/onboarding/model";
+import { FirestorePlatformAdministratorLifecycleRepository } from "@/src/infrastructure/firestore/admin-lifecycle-repository";
+import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
+import { FirestoreActivationJourneyContextRepository } from "@/src/infrastructure/firestore/activation-journey";
+import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 import { createServerActivationJourneyService } from "@/src/infrastructure/onboarding/runtime";
 
 const ACTIVATION_CSRF_COOKIE = "rfx_activation_csrf";
@@ -42,6 +44,7 @@ export async function POST(request: NextRequest) {
       csrfToken?: string;
       requestedName?: string;
       provisionalOrganizationName?: string;
+      organizationRelationship?: string;
     }>;
     const expectedCsrf = request.cookies.get(ACTIVATION_CSRF_COOKIE)?.value ?? "";
     if (!body.csrfToken || !expectedCsrf || body.csrfToken !== expectedCsrf) {
@@ -58,11 +61,44 @@ export async function POST(request: NextRequest) {
       requestedName: body.requestedName?.trim() || undefined,
       now: new Date().toISOString(),
     });
-    const activation = createServerActivationJourneyService();
-    const state = await activation.bootstrap(
-      issued.context,
-      body.provisionalOrganizationName?.trim() || body.requestedName?.trim() || "",
-    );
+
+    // Authentication/session establishment is independent of participant activation. A legitimate
+    // platform administrator may have no participant organization context. Existing participant
+    // journeys resume automatically; /join creates a new activation journey only when it supplies
+    // organization context.
+    const db = getServerFirestore();
+    const contexts = new FirestoreActivationJourneyContextRepository(db);
+    const existingContext = await contexts.getByUserId(issued.context.user.id);
+    const provisionalOrganizationName = body.provisionalOrganizationName?.trim() || "";
+    let state = null;
+
+    if (existingContext || provisionalOrganizationName) {
+      const activation = createServerActivationJourneyService();
+      await activation.bootstrap(issued.context, provisionalOrganizationName);
+
+      if (body.organizationRelationship?.trim()) {
+        const current = await contexts.getByUserId(issued.context.user.id);
+        if (current) {
+          await contexts.save(updateActivationJourneyContext(current, {
+            organizationRelationship: body.organizationRelationship,
+            now: new Date().toISOString(),
+          }));
+        }
+      }
+      state = await activation.state(issued.context);
+    } else {
+      const administrator = await new FirestorePlatformAdministratorLifecycleRepository(db)
+        .getBySubject(issued.context.authentication.subject);
+      if (!administrator) {
+        return NextResponse.json(
+          {
+            error:
+              "Organization name is required to begin participant activation for this account.",
+          },
+          { status: 400 },
+        );
+      }
+    }
 
     const response = NextResponse.json({ state });
     response.cookies.set(RFXCHANGE_SESSION_COOKIE_NAME, issued.cookie.value, {

@@ -11,6 +11,7 @@ const [
   rules,
   panel,
   route,
+  activationUi,
   tests,
   architecture,
   ci,
@@ -22,6 +23,7 @@ const [
   read("firestore.rules"),
   read("src/components/organization-profile/EssentialProfilePanel.tsx"),
   read("app/organization-profile/page.tsx"),
+  read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("test/essential-organization-profile.test.mjs"),
   read("docs/architecture/WAVE_2_SLICE_2_7.md"),
   read(".github/workflows/ci.yml"),
@@ -96,9 +98,30 @@ for (const required of [
   "Profile Complete is not Organization Verified",
   "not an activated network marker",
 ]) {
-  assert.ok(panel.includes(required), `Essential-profile UI is missing ${required}.`);
+  assert.ok(panel.includes(required), `Reference essential-profile component is missing ${required}.`);
 }
-assert.ok(route.includes("createPortsmouthControlledLocalityPreview"));
+
+for (const required of [
+  "resolveParticipantRoute",
+  "hydrateEssentialOrganizationProfile",
+  "getByOrganizationId",
+  "Profile Complete",
+  "Participation roles",
+  "Business objectives",
+]) {
+  assert.ok(route.includes(required), `Authenticated Account profile route is missing ${required}.`);
+}
+assert.equal(route.includes("EssentialProfilePanel"), false);
+assert.equal(route.includes("Harborlight"), false);
+for (const required of [
+  "ORGANIZATION_PARTICIPATION_ROLES.map",
+  "ORGANIZATION_BUSINESS_OBJECTIVES.map",
+  '"save-profile"',
+  "Complete profile and activate marker",
+]) {
+  assert.ok(activationUi.includes(required), `Integrated essential-profile activation UI is missing ${required}.`);
+}
+
 for (const phrase of [
   "cannot bypass completion",
   "deactivates stale completion",
@@ -119,4 +142,4 @@ assert.ok(
   "CI must run the Slice 2.7 Firestore emulator acceptance.",
 );
 
-console.log("Slice 2.7 essential organization profile and Profile Complete validated.");
+console.log("Slice 2.7 essential organization profile, Profile Complete, and authenticated Account runtime validated.");

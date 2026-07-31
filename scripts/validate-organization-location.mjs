@@ -13,7 +13,9 @@ const [
   rules,
   mapCanvas,
   locationPanel,
-  route,
+  legacyRoute,
+  joinRoute,
+  activationUi,
   tests,
   architecture,
   ci,
@@ -28,6 +30,8 @@ const [
   read("src/components/map/ControlledLocalityCanvas.tsx"),
   read("src/components/organization-location/OrganizationLocationPanel.tsx"),
   read("app/organization-location/page.tsx"),
+  read("app/join/page.tsx"),
+  read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("test/organization-location.test.mjs"),
   read("docs/architecture/WAVE_2_SLICE_2_6.md"),
   read(".github/workflows/ci.yml"),
@@ -110,10 +114,22 @@ for (const required of [
   "Service geography",
   "A confirmed point is not yet an activated organization marker",
 ]) {
-  assert.ok(locationPanel.includes(required), `Location UI is missing ${required}.`);
+  assert.ok(locationPanel.includes(required), `Reference location component is missing ${required}.`);
 }
 assert.ok(mapCanvas.includes("temporary candidate awaiting confirmation"));
-assert.ok(route.includes("createPortsmouthControlledLocalityPreview"));
+
+assert.ok(legacyRoute.includes("resolveParticipantRoute") && legacyRoute.includes("redirect("));
+assert.equal(legacyRoute.includes("createPortsmouthControlledLocalityPreview"), false);
+assert.ok(joinRoute.includes("createControlledLocalityPreview") && joinRoute.includes("ActivationJourneyClient"));
+for (const required of [
+  '"begin-location"',
+  '"confirm-location"',
+  "initial service geography",
+  "Service territory remains a separate profile concept",
+]) {
+  assert.ok(activationUi.includes(required), `Integrated activation location UI is missing ${required}.`);
+}
+
 assert.ok(tests.includes("exact, approximate, and locality-only privacy"));
 assert.ok(tests.includes("browser geography"));
 assert.ok(
@@ -128,4 +144,4 @@ assert.ok(
   "CI must run the Slice 2.6 Firestore emulator acceptance.",
 );
 
-console.log("Slice 2.6 organization geography, location, privacy, and service area validated.");
+console.log("Slice 2.6 organization geography, location, privacy, service area, and integrated runtime validated.");

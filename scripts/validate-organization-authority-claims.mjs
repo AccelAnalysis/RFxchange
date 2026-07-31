@@ -3,16 +3,17 @@ import { readFile } from "node:fs/promises";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
-const [model, service, persistence, schema, rules, participantUi, adminUi, architecture, ci] =
+const [model, service, persistence, schema, rules, participantUi, adminUi, architecture, convergence, ci] =
   await Promise.all([
     read("src/domain/organization-claims/model.ts"),
     read("src/application/organization-claims/organization-authority.ts"),
     read("src/infrastructure/firestore/organization-authority-claims.ts"),
     read("src/infrastructure/firestore/schema.ts"),
     read("firestore.rules"),
-    read("app/organization-authority/page.tsx"),
+    read("src/components/onboarding/ActivationJourneyClient.tsx"),
     read("app/admin/organization-claims/page.tsx"),
     read("docs/architecture/WAVE_2_SLICE_2_5.md"),
+    read("docs/architecture/ACTIVATION_JOURNEY_INTEGRATION_GATE.md"),
     read(".github/workflows/ci.yml"),
   ]);
 
@@ -33,7 +34,7 @@ for (const category of [
   "verified", "provider", "issuer", "duplicate", "restricted", "suspended", "terminated",
   "geography",
 ]) {
-  assert.ok(model.includes(`"${category}"`), `Claims console filter is missing ${category}.`);
+  assert.ok(model.includes(`"${category}"`), `Claims console category model is missing ${category}.`);
 }
 for (const required of [
   "AuthenticatedServerContext",
@@ -65,11 +66,28 @@ for (const required of [
 ]) {
   assert.ok(persistence.includes(required), `Atomic authority persistence is missing ${required}.`);
 }
-assert.ok(participantUi.includes("Authority ≠ Verification"));
-for (const label of ["Seeded", "Unclaimed", "Claimed", "Verification pending", "Duplicate", "Terminated", "Geography"]) {
-  assert.ok(adminUi.includes(label), `Admin claims UI is missing ${label}.`);
+
+assert.ok(
+  participantUi.includes("Selecting an existing profile never grants control"),
+  "Integrated participant activation must preserve authority separation for an existing organization.",
+);
+assert.ok(
+  convergence.includes("This is not Organization Verification") ||
+    convergence.includes("not Organization Verification"),
+  "Canonical convergence architecture must preserve Authority ≠ Verification.",
+);
+for (const required of [
+  "resolveAdminRoute",
+  'permission: "organization.claim.read"',
+  "listByGeographyId",
+  "listByStatus",
+  "Private evidence",
+  "GLOBAL",
+  "GEOGRAPHY:",
+]) {
+  assert.ok(adminUi.includes(required), `Protected live claims console is missing ${required}.`);
 }
-assert.ok(adminUi.includes("History is preserved") && adminUi.includes("Evidence comparison"));
+assert.equal(adminUi.includes("Harborlight"), false, "Production claims console must not render fixture organizations.");
 assert.ok(
   ci.includes("smoke-organization-authority-claims-emulator.mjs"),
   "CI must run the Slice 2.5 Firestore emulator acceptance.",
@@ -81,4 +99,4 @@ assert.ok(
     architecture.includes("Organization Verification"),
 );
 
-console.log("Slice 2.5 organization authority, claims console, and adjudication validated.");
+console.log("Slice 2.5 organization authority, protected claims runtime, and adjudication validated.");

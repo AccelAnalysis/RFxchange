@@ -10,7 +10,7 @@ const [
   layout,
   mapboxCanvas,
   geographyRoute,
-  resolutionRoute,
+  activationClient,
   locationPanel,
   markerPanel,
   previewFactory,
@@ -21,25 +21,17 @@ const [
   read("app/layout.tsx"),
   read("src/components/map/MapboxLocalityCanvas.tsx"),
   read("app/geography/canvas/page.tsx"),
-  read("app/organization-resolution/page.tsx"),
+  read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("src/components/organization-location/OrganizationLocationPanel.tsx"),
   read("src/components/organization-marker/MarkerActivationPanel.tsx"),
   read("src/data/geography/portsmouth-controlled-locality-preview.ts"),
   read("docs/architecture/MAPBOX_PRODUCTION_SPATIAL_CANVAS.md"),
 ]);
 
+assert.ok(packageJson.includes('"mapbox-gl": "3.25.0"'), "Mapbox GL JS must remain an explicit application dependency.");
+assert.ok(layout.includes('import "mapbox-gl/dist/mapbox-gl.css"'), "Mapbox GL JS stylesheet must be loaded by the application root layout.");
 assert.ok(
-  packageJson.includes('"mapbox-gl": "3.25.0"'),
-  "Mapbox GL JS must remain an explicit application dependency.",
-);
-assert.ok(
-  layout.includes('import "mapbox-gl/dist/mapbox-gl.css"'),
-  "Mapbox GL JS stylesheet must be loaded by the application root layout.",
-);
-assert.ok(
-  envExample.includes("NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=pk.") &&
-    envExample.includes("Never place a Mapbox secret token") &&
-    envExample.includes('"sk."'),
+  envExample.includes("NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=pk.") && envExample.includes("Never place a Mapbox secret token") && envExample.includes('"sk."'),
   "Mapbox browser token configuration must require a public token and reject secret-token guidance.",
 );
 
@@ -72,34 +64,34 @@ for (const requirement of [
 }
 
 assert.ok(
-  !mapboxCanvas.includes("rfx-locality-surrounding-fill") &&
-    !mapboxCanvas.includes("rfx-locality-surrounding-outline"),
+  !mapboxCanvas.includes("rfx-locality-surrounding-fill") && !mapboxCanvas.includes("rfx-locality-surrounding-outline"),
   "Participant Mapbox rendering must not restore the old adjacent-locality overlay treatment.",
 );
-
 assert.ok(
-  previewFactory.includes("createControlledLocalityPreview") &&
-    previewFactory.includes("homeGeographyId") &&
-    previewFactory.includes("home-locality focus"),
+  previewFactory.includes("createControlledLocalityPreview") && previewFactory.includes("homeGeographyId") && previewFactory.includes("home-locality focus"),
   "The bundled map model must be generic around home locality rather than Portsmouth-only semantics.",
 );
 
-assert.ok(
-  geographyRoute.includes("resolveAuthenticatedMapProjection") &&
-    geographyRoute.includes("createFirestoreOrganizationLocationRepositories") &&
-    geographyRoute.includes("createFirestoreOrganizationMarkerRepositories") &&
-    geographyRoute.includes("projectPublicOrganizationMarker") &&
-    geographyRoute.includes('initialZoom="locality"') &&
-    geographyRoute.includes("pointOverlays={pointOverlays}") &&
-    !geographyRoute.includes("SearchFilterOverlay"),
-  "Intelligence must prefer authenticated home-locality context, render the privacy-safe active organization marker, fit the home locality, and avoid a decorative duplicate search control.",
-);
+for (const requirement of [
+  "resolveParticipantRoute",
+  "createFirestoreOrganizationLocationRepositories",
+  "createFirestoreOrganizationMarkerRepositories",
+  "projectPublicOrganizationMarker",
+  'initialZoom="locality"',
+  "pointOverlays={pointOverlays}",
+]) {
+  assert.ok(geographyRoute.includes(requirement), `Authenticated Intelligence map is missing ${requirement}.`);
+}
+assert.ok(!geographyRoute.includes("SearchFilterOverlay"), "Intelligence must avoid a decorative duplicate search control.");
 
-for (const surface of [geographyRoute, resolutionRoute, locationPanel, markerPanel]) {
-  assert.ok(
-    surface.includes("MapboxLocalityCanvas"),
-    "Participant spatial surfaces must use the production Mapbox locality renderer.",
-  );
+assert.ok(
+  activationClient.includes("MapboxLocalityCanvas") &&
+    activationClient.includes('kind: "location-candidate"') &&
+    activationClient.includes("Confirm this map position"),
+  "Integrated activation must use the production Mapbox renderer for real location confirmation.",
+);
+for (const referenceSurface of [locationPanel, markerPanel]) {
+  assert.ok(referenceSurface.includes("MapboxLocalityCanvas"), "Reference spatial evidence must remain compatible with the production Mapbox renderer.");
 }
 
 const architectureLower = architecture.toLowerCase();
@@ -115,12 +107,10 @@ for (const phrase of [
   assert.ok(architecture.includes(phrase), `Mapbox architecture authority is missing: ${phrase}`);
 }
 assert.ok(
-  architectureLower.includes(
-    "additional localities do not become selectable/participatory merely because the basemap or mapbox search displays them",
-  ),
+  architectureLower.includes("additional localities do not become selectable/participatory merely because the basemap or mapbox search displays them"),
   "Mapbox architecture must preserve the distinction between exploratory search visibility and canonical geography participation.",
 );
 
 console.log(
-  "Mapbox production canvas validated: authoritative home-locality focus mask, full provider zoom/navigation, transient global search, explicit 2D/perspective/3D modes, public-token hygiene, viewport/authority separation, privacy-safe active marker projection, and participant surface adoption.",
+  "Mapbox production canvas validated: account-only Intelligence adoption, integrated activation location confirmation, authoritative home-locality focus, provider navigation, public-token hygiene, and viewport/authority separation.",
 );

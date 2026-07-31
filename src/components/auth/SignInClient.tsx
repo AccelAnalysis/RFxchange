@@ -22,7 +22,11 @@ async function jsonRequest<T>(url: string, init?: RequestInit): Promise<T> {
   return body;
 }
 
-export function SignInClient() {
+function isAdministrativeReturnTarget(returnTo: string | null | undefined): returnTo is string {
+  return Boolean(returnTo && (returnTo === "/admin" || returnTo.startsWith("/admin/")));
+}
+
+export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }>) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -64,7 +68,7 @@ export function SignInClient() {
                   if (!idToken) throw new Error("Firebase sign-in did not produce an ID token.");
 
                   const csrf = await jsonRequest<{ csrfToken: string }>("/api/auth/session");
-                  const result = await jsonRequest<{ state: ActivationJourneyState }>(
+                  const result = await jsonRequest<{ state: ActivationJourneyState | null }>(
                     "/api/auth/session",
                     {
                       method: "POST",
@@ -76,8 +80,27 @@ export function SignInClient() {
                     },
                   );
 
-                  if (result.state.nextStep === "complete" && result.state.controlledPlatformUrl) {
-                    window.location.assign(result.state.controlledPlatformUrl);
+                  // Administration is an independent authority plane. Once authentication succeeds,
+                  // an explicit admin return target is always evaluated by the protected admin route
+                  // itself; participant activation state cannot block or grant administrative access.
+                  if (isAdministrativeReturnTarget(returnTo)) {
+                    window.location.assign(returnTo);
+                    return;
+                  }
+
+                  if (!result.state) {
+                    window.location.assign("/join");
+                    return;
+                  }
+
+                  const participantWorkspaceEligible =
+                    result.state.lifecycleState === "controlled-platform" ||
+                    result.state.lifecycleState === "open-platform";
+                  if (participantWorkspaceEligible && result.state.organization) {
+                    const workspaceUrl =
+                      result.state.controlledPlatformUrl ??
+                      `/geography/canvas?organizationId=${encodeURIComponent(result.state.organization.id)}`;
+                    window.location.assign(returnTo ?? workspaceUrl);
                     return;
                   }
                   window.location.assign("/join");
