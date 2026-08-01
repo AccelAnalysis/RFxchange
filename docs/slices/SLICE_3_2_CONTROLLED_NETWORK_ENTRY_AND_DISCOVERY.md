@@ -1,6 +1,6 @@
 # Slice 3.2 — Controlled Network Entry & Discovery
 
-**Status: PLANNING BRIEF ONLY — DO NOT IMPLEMENT UNTIL SLICE 3.1 AND BRAND GATES B1, B2, B3 AND B6A ARE MERGED AND THIS SLICE IS EXPLICITLY AUTHORIZED**
+**Status: PLANNING BRIEF ONLY — SLICE 3.1 AND B1 ARE COMPLETE; DO NOT IMPLEMENT UNTIL BRAND GATES B2, B3 AND B6A ARE MERGED AND THIS SLICE IS EXPLICITLY AUTHORIZED**
 
 ## Feature IDs
 
@@ -22,6 +22,7 @@ Convert the activated organization/map foundation into the first real Network wo
 - `docs/context/PRODUCT_PRINCIPLES.md`
 - `docs/brand/README.md`
 - `docs/brand/BRAND_GATE_B0_RECONCILIATION.md`
+- `docs/brand/BRAND_GATE_B1_SEMANTIC_FOUNDATION.md`
 - `docs/brand/RFXCHANGE_BRAND_EXPERIENCE_SYSTEM.md`
 - `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md`
 - `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md`
@@ -32,7 +33,8 @@ Convert the activated organization/map foundation into the first real Network wo
 - canonical tracker/dependency map
 - Wave 2 OPEN/marker contracts
 - merged Slice 3.1 communications contracts
-- merged Brand Gates B1, B2, B3 and B6a
+- merged Brand Gate B1 semantic contracts
+- merged Brand Gates B2, B3 and B6a
 - `docs/slices/WAVE_3_ROADMAP.md`
 
 ## Product rules
@@ -56,7 +58,7 @@ Expose permitted organizations and, only when their source domains become availa
 ## Brand and spatial rules
 
 - The map is the Spatial Workspace, not a dashboard card or decorative background.
-- Use the proprietary organization-node treatment from the converged B2/B3 primitives while preserving renderer-owned coordinates and PR #99 focal-marker visibility.
+- Consume the merged B1 semantic tokens and the proprietary organization-node treatment from the converged B2/B3 primitives while preserving renderer-owned coordinates and PR #99 focal-marker visibility.
 - Use authoritative locality fields and subdued surrounding geography.
 - Provide one search/filter system and synchronized map/list/detail behavior.
 - Do not render live opportunity beacons before authoritative Wave 4 RFx publication.

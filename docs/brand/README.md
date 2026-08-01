@@ -1,6 +1,6 @@
 # The RFxchange Brand Experience System
 
-**Status: CANONICAL TARGET BRAND AUTHORITY — B0 COMPLETE; B1 IMPLEMENTED IN PR #109 PENDING FINAL CI/MERGE; B2 NOT YET AUTHORIZED**
+**Status: CANONICAL TARGET BRAND AUTHORITY — B0 AND B1 COMPLETE; B2 IS NEXT AND READY FOR EXPLICIT AUTHORIZATION**
 
 This directory defines the approved target brand experience for **The RFxchange** and the sequential gates that converge it with production behavior.
 
@@ -12,18 +12,18 @@ The platform should feel like a living market, not a conventional dashboard. Bra
 
 ## Current baseline
 
-Brand Gate B1 branches from reconciled `main` after Wave 3 Slice 3.1:
+Brand Gate B1 is complete:
 
-- baseline SHA: `c059e69e956f1a18983c526a60d87bbfd3930a8b`;
-- tracker: **438 total · 121 Done · 317 Not Started**;
-- Activation: **43/43**;
-- Network: **7/38**;
-- `COMMS-003`, `COMMS-004` and `COMMS-005` are complete;
-- Brand Gate B0 is complete;
-- Slice 3.2 remains unstarted and blocked behind B1, B2, B3 and B6a;
-- Brand Gate B1 is implemented in PR #109 but is not complete until final CI passes and the PR merges.
+- B1 implementation merged through PR #109 at `c4c18272f46ad3e3120e2dcf6405fda8a274a685`;
+- production CI run **444** (`30720318973`) passed on the final implementation head;
+- tracker remains **438 total · 121 Done · 317 Not Started**;
+- Activation remains **43/43**;
+- Network remains **7/38**;
+- `COMMS-003`, `COMMS-004` and `COMMS-005` remain complete;
+- Slice 3.2 remains unstarted and blocked behind B2, B3 and B6a;
+- no Feature ID, tracker total or dependency edge changed in B1.
 
-See [`BRAND_GATE_B0_RECONCILIATION.md`](BRAND_GATE_B0_RECONCILIATION.md) for the governing authority order and [`BRAND_GATE_B1_SEMANTIC_FOUNDATION.md`](BRAND_GATE_B1_SEMANTIC_FOUNDATION.md) for the semantic token, compatibility, drift-control and B2 handoff contract.
+See [`BRAND_GATE_B0_RECONCILIATION.md`](BRAND_GATE_B0_RECONCILIATION.md) for the governing authority order and [`BRAND_GATE_B1_SEMANTIC_FOUNDATION.md`](BRAND_GATE_B1_SEMANTIC_FOUNDATION.md) for the completed semantic token, compatibility, drift-control and B2 handoff contract.
 
 ## Product architecture
 
@@ -88,30 +88,30 @@ These require explicit product scope, persistence, permissions, testing and trac
 | `BRAND_EXPERIENCE_ACCEPTANCE_MATRIX.md` | Required brand, state, accessibility, performance, provenance and domain-boundary acceptance for participant surfaces |
 | `BRAND_IMPLEMENTATION_ROADMAP.md` | Sequential Brand Gates, domain dependencies, code gates and release checkpoints |
 | `BRAND_GATE_B0_RECONCILIATION.md` | Completed Wave 2 reconciliation, authority order, Wave 3/4 integration and implementation holds |
-| `BRAND_GATE_B1_SEMANTIC_FOUNDATION.md` | Exchange Light semantic tokens, accessibility, compatibility, object semantics, drift controls and B2 handoff |
+| `BRAND_GATE_B1_SEMANTIC_FOUNDATION.md` | Completed Exchange Light semantic tokens, accessibility, compatibility, object semantics, drift controls and B2 handoff |
 | `CODEX_WAVE_2_BRAND_AUTHORITY_ADDENDUM.md` | Historical Wave 2 constraint record applied to Slices 2.9–2.12 |
 
 ## Current implementation boundary
 
-B0 is merged. B1 is the only active Brand Gate until PR #109 passes final CI and merges.
+B0 and B1 are merged. **B2 — Shared Component Primitives is the next gate ready for explicit authorization.**
 
-B1 may add semantic foundations but may not:
+Until B2 is explicitly authorized, do not:
 
-- consolidate or restyle shared components reserved for B2;
+- consolidate or restyle shared navigation, controls, drawers, sheets, cards, timelines, alerts, empty states, tables or statuses;
 - restyle Mapbox or alter marker/camera authority reserved for B3;
 - implement Intelligence Dark, Presentation Mode, sound or haptics;
 - display domain-dependent objects before their source domains exist;
 - change tracker counts, dependencies or Feature-ID completion;
 - fabricate organizations, opportunities, maps, statistics, outcomes, testimonials, provider availability or live activity.
 
-After B1 merges, B2 becomes ready for explicit authorization. B2 must branch from merged B1 `main`; it must not be stacked on the B1 branch.
+When authorized, B2 must branch from merged B1 `main` at or after `c4c18272f46ad3e3120e2dcf6405fda8a274a685` and consume the B1 semantic contracts. B2 has not begun in B1 or this reconciliation.
 
 ## Wave integration
 
 ### Wave 3
 
 - Slice 3.1 consumed the Content and Messaging System and is complete.
-- Complete B1, B2, B3 and B6a before Slice 3.2 to avoid rebuilding the first live Network workspace.
+- B1 is complete; B2, B3 and B6a remain required before Slice 3.2.
 - Referral paths become legitimate with Slice 3.5.
 - Provider service fields become legitimate with Slice 3.7.
 

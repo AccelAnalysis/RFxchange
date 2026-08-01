@@ -1,10 +1,12 @@
 # Wave 3 — Network Roadmap
 
-**Status: SLICE 3.1 COMPLETE; BRAND GATES B1, B2, B3 AND B6a ARE THE NEXT AUTHORIZED-SEQUENCE BOUNDARY BEFORE SLICE 3.2**
+**Status: SLICE 3.1 AND BRAND GATE B1 COMPLETE; B2, B3 AND B6a REMAIN BEFORE SLICE 3.2**
 
 Wave 2 is complete and Brand Gate B0 is merged. Wave 3 Slice 3.1 completed through PR #107 and merged to `main` at `368fdb5e0179ca7933eb33ffb6cbf12a2afe2bf1`. Feature state after Slice 3.1 is **438 total · 121 Done · 317 Not Started**, with Network at **7/38**: four inherited Wave 1 foundations plus `COMMS-003`, `COMMS-004` and `COMMS-005`.
 
-The dependency graph now makes Slice 3.2 Feature IDs eligible from the Network perspective, but Slice 3.2 remains on implementation hold until Brand Gates B1, B2, B3 and B6a are complete and the slice is explicitly authorized.
+Brand Gate B1 completed through PR #109 and merged to `main` at `c4c18272f46ad3e3120e2dcf6405fda8a274a685`. It established the Exchange Light semantic token foundation, Accessible Dark Gold, structural/type/motion roles, proprietary object-semantic contracts, compatibility aliases and static drift controls without changing Feature-ID state or beginning live Network behavior.
+
+The dependency graph makes Slice 3.2 Feature IDs eligible from the Network perspective, but Slice 3.2 remains on implementation hold until Brand Gates B2, B3 and B6a are complete and the slice is explicitly authorized. **Brand Gate B2 — Shared Component Primitives is the next Brand Gate ready for explicit authorization.**
 
 Wave 3 contains **38 Network features**. Four foundations were completed during Wave 1 because they were prerequisites for administration and organization access:
 
@@ -18,7 +20,7 @@ The remaining Network features are organized into eight implementation slices.
 | Slice | Features | Status / purpose |
 | --- | --- | --- |
 | **3.1 — Transactional Communications Reliability** | `COMMS-003`, `COMMS-004`, `COMMS-005` | **Complete via PR #107.** Versioned transactional templates/event mappings, delivery audit, idempotency, deterministic retry, interrupted-success healing and terminal-failure operations visibility are established. |
-| **3.2 — Controlled Network Entry & Discovery** | `GEO-012`, `DSC-001`, `DSC-002`, `DSC-003` | Turn the activated locality into the first real Network workspace: own organization, permitted organizations, capability search, geographic/service-area filters and interactive map discovery. Brand Gates B1, B2, B3 and B6a must be complete first to prevent a second spatial rewrite. |
+| **3.2 — Controlled Network Entry & Discovery** | `GEO-012`, `DSC-001`, `DSC-002`, `DSC-003` | Turn the activated locality into the first real Network workspace: own organization, permitted organizations, capability search, geographic/service-area filters and interactive map discovery. Brand Gates B2, B3 and B6a must be complete first to prevent a second spatial rewrite. |
 | **3.3 — Market Profile Enrichment** | `ORG-013`, `ORG-014`, `ORG-016`, `ORG-017` | Add structured products/services/capabilities, industry/NAICS context, past-performance/project context and teaming/referral/resource preferences without displacing capability-first discovery or implying verification. |
 | **3.4 — Credential, Media & Location Enrichment** | `ORG-015`, `ORG-018`, `ORG-019` | Add certifications/licenses/identifiers with provenance, organization media/documents/portfolio and additional locations using private-by-default storage, geography and subordinate-location visual treatment. |
 | **3.5 — Referral Network & Referral Acquisition** | `REF-001`, `REF-002`, `REF-003`, `REF-004`, `REF-005`, `EDU-014`, `ACQ-006` | Establish legitimate organization-to-organization referrals with context, consent, receive/accept/decline, lifecycle status, first-use education and external invitee continuity. This is the first legitimate source for live referral paths. |
@@ -34,7 +36,8 @@ Use the single-active-slice or single-active-gate model unless a future explicit
 Wave 2 exit verified
 → Brand Gate B0 merged
 → Slice 3.1 merged and reconciled
-→ Brand Gates B1 → B2 → B3 → B6a
+→ Brand Gate B1 merged in PR #109
+→ Brand Gates B2 → B3 → B6a
 → 3.2 merge → recalculate
 → 3.3 merge → recalculate
 → 3.4 merge → recalculate
@@ -55,7 +58,8 @@ Preparation/read-only inspection may occur ahead of the active slice/gate. Produ
 Wave 2 OPEN + marker
 → B0 brand authority
 → reliable communications [complete]
-→ semantic/component/cartographic/workspace foundations
+→ semantic foundation [B1 complete]
+→ component/cartographic/workspace foundations [B2/B3/B6a remain]
 → controlled Network map/search
 → richer market profiles
 → referral network
@@ -92,12 +96,27 @@ PR #107 established:
 
 Production CI run `30719532985` passed on implementation head `eba071e54e3a9cc88ec7fd353e943922917d6484`: repository guardrails, 19 Functions tests, the complete Firebase emulator suite, 353 architecture tests, TypeScript, lint and production build.
 
+## Brand Gate B1 acceptance result
+
+PR #109 established:
+
+- the exact approved palette plus Accessible Dark Gold for normal-size gold-family text on Warm Ivory;
+- mode-aware Exchange Light semantic color roles;
+- spacing, radius, elevation, border, focus, typography-role, motion-duration and easing tokens;
+- semantic design contracts for nodes, beacons, fields, paths, seals and locality states without authorizing runtime objects;
+- legacy raw-token compatibility and additive semantic CSS loading;
+- static raw-color drift, contrast, font-asset and unauthorized-dark-mode controls; and
+- architecture tests for semantic meaning and domain separation.
+
+Production CI run `30720318973` passed on implementation head `743493799d096040f4482863d699436bc4855c8a`: product-system/B1 guardrails, Functions build/tests, the complete Firebase emulator suite, architecture tests, TypeScript, lint and production build.
+
 ## Brand authority for Wave 3
 
 Every user-facing Wave 3 slice must read:
 
 - `docs/brand/README.md`;
 - `docs/brand/BRAND_GATE_B0_RECONCILIATION.md`;
+- `docs/brand/BRAND_GATE_B1_SEMANTIC_FOUNDATION.md`;
 - `docs/brand/BRAND_EXPERIENCE_ACCEPTANCE_MATRIX.md`;
 - `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md` for customer-facing copy/communications;
 - `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md` for spatial objects;

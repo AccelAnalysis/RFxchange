@@ -166,9 +166,10 @@ assert.ok(
   "Object semantic tokens must preserve the proprietary grammar without authorizing runtime objects.",
 );
 assert.ok(
-  roadmap.includes("Brand Gate B1 — Semantic design foundation") &&
-    roadmap.includes("no or minimal controlled visual change"),
-  "Brand B1 must remain aligned to the canonical roadmap acceptance boundary.",
+  roadmap.includes("Brand Gate B1 — Semantic design foundation — COMPLETE IN PR #109") &&
+    roadmap.includes("Brand Gate B2 — Shared component primitives — NEXT; EXPLICIT AUTHORIZATION REQUIRED") &&
+    roadmap.includes("no broad visual change"),
+  "Completed Brand B1 authority and the B2 handoff must remain explicit in the canonical roadmap.",
 );
 
 const governedPrimitiveDirectories = [
@@ -223,5 +224,5 @@ for (const directory of ["app", "src", "public"]) {
 }
 
 console.log(
-  "Brand Gate B1 semantic foundation validated: exact palette, accessible gold text, Exchange Light roles, compatibility aliases, object semantics, motion/type/layout tokens, and drift controls.",
+  "Brand Gate B1 semantic foundation validated: exact palette, accessible gold text, Exchange Light roles, compatibility aliases, object semantics, motion/type/layout tokens, drift controls, and completed B2 handoff authority.",
 );

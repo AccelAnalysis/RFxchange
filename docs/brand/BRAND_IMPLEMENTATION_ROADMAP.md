@@ -1,6 +1,6 @@
 # RFxchange Brand Experience Implementation Roadmap
 
-**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATE B0 RECONCILED; LATER GATES REQUIRE EXPLICIT AUTHORIZATION**
+**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 AND B1 COMPLETE; B2 IS NEXT AND REQUIRES EXPLICIT AUTHORIZATION**
 
 ## 1. Purpose
 
@@ -20,27 +20,49 @@ Every gate must preserve:
 - tracker evidence and Feature-ID discipline;
 - responsive, accessibility, recovery and performance requirements.
 
-## 2. Brand Gate B0 reconciliation result
+## 2. Completed gates and current baseline
 
-B0 reconciled this package against final Wave 2 `main`:
+### B0 reconciliation
 
-- final Wave 2 SHA: `097b574ccce8865d4127cfe381fb0bd6199de0a5`;
-- tracker: **438 total · 118 Done · 320 Not Started**;
+Brand Gate B0 reconciled the target Brand Experience System against final Wave 2 and established authority order, requirement classification, code ownership, test boundaries and Wave 3/4 integration. B0 merged in PR #100 without production behavior or Feature-ID changes.
+
+### B1 semantic foundation
+
+Brand Gate B1 implemented the reusable semantic foundation in PR #109 and merged at:
+
+`c4c18272f46ad3e3120e2dcf6405fda8a274a685`
+
+Production CI run **444** (`30720318973`) passed on the final implementation head. B1 added:
+
+- exact approved palette preservation;
+- Accessible Dark Gold for small gold-family text on Warm Ivory;
+- mode-aware Exchange Light semantic color roles;
+- spacing, radius, elevation, border, focus, typography-role, motion-duration and easing tokens;
+- object-semantic contracts for nodes, beacons, fields, paths, seals and locality states;
+- legacy raw-token compatibility;
+- semantic CSS loading before legacy globals;
+- static drift, contrast, font-asset and unauthorized-dark-mode validation;
+- architecture tests for semantic meaning and domain separation.
+
+B1 did not restyle shared components, Mapbox, markers, cameras or workflows; implement a dark mode, sound, haptics or Presentation Mode; create live domain objects; or change Feature IDs, tracker totals or dependency edges.
+
+Current product baseline:
+
+- tracker: **438 total · 121 Done · 317 Not Started**;
 - Activation: **43/43**;
-- all PR #99 marker-visibility and website-disposition boundaries remain authoritative;
-- Slices 2.9–2.12 are complete and their acquisition, tutorial-isolation, first-value and OPEN contracts remain intact;
-- Wave 3 Slice 3.1 is the earliest dependency-eligible candidate, but remains subject to explicit authorization.
+- Network: **7/38**;
+- Wave 3 Slice 3.1 complete;
+- Slice 3.2 remains unstarted and blocked behind B2, B3 and B6a.
 
-B0 changed documentation and repository authority only. It did not modify production code, CSS, Mapbox styling, markers, motion, sound, settings, tracker totals, dependency edges or Feature-ID state.
-
-See `BRAND_GATE_B0_RECONCILIATION.md` for authority order, requirement classification, code ownership, testing boundaries and Wave 3/4 integration.
+See `BRAND_GATE_B0_RECONCILIATION.md` and `BRAND_GATE_B1_SEMANTIC_FOUNDATION.md`.
 
 ## 3. Current implementation hold
 
 The target Brand Experience System is canonical planning/acceptance authority, but it does not authorize production implementation by itself.
 
-Until a specific Brand Gate is explicitly authorized, do not modify for brand purposes:
+**Brand Gate B2 — Shared Component Primitives is the next gate ready for explicit authorization.** Until a task explicitly authorizes B2, do not modify for brand purposes:
 
+- shared navigation, map controls, search/filter, drawers, sheets, cards, timelines, alerts, empty states, tables or status treatments;
 - activation APIs or lifecycle semantics;
 - participant/map composition outside an active gate;
 - marker geometry, anchoring, visibility, projection, orbit, pitch or zoom;
@@ -92,8 +114,8 @@ Use one active gate at a time unless the current task explicitly authorizes anot
 
 ```text
 B0 reconciliation — complete in PR #100
-→ B1 semantic foundation
-→ B2 shared component primitives
+→ B1 semantic foundation — complete in PR #109
+→ B2 shared component primitives — next; explicit authorization required
 → B3 cartographic convergence
 → B4 public marketing and acquisition
 → B5 onboarding and activation
@@ -132,29 +154,31 @@ Acceptance:
 - no conflict with security, lifecycle, geography, acquisition, marker or OPEN contracts;
 - production CI required on the final reconciled PR head.
 
-### Brand Gate B1 — Semantic design foundation
+### Brand Gate B1 — Semantic design foundation — COMPLETE IN PR #109
 
 **Objective:** create reusable semantic foundations without changing product behavior.
 
-Work:
+Completed work:
 
-- refactor raw palette into mode-aware semantic tokens;
-- preserve exact approved brand colors;
-- add Accessible Dark Gold for small text where needed;
-- define spacing, radius, elevation, border, focus, typography-role, motion-duration and easing tokens;
-- define object-semantic tokens for nodes, beacons, fields, paths, seals and locality states;
-- add static validation against one-off semantic drift;
-- preserve Aptos/system fallback until a licensed display/interface choice is approved.
+- refactored the raw palette into mode-aware Exchange Light semantic tokens while retaining compatibility;
+- preserved exact approved brand colors;
+- added Accessible Dark Gold for small text where contrast requires it;
+- defined spacing, radius, elevation, border, focus, typography-role, motion-duration and easing tokens;
+- defined object-semantic tokens for nodes, beacons, fields, paths, seals and locality states;
+- added static validation against one-off semantic drift;
+- preserved Aptos/system fallback and added no font assets;
+- documented and tested the semantic meanings and B2 handoff.
 
-Acceptance:
+Acceptance result:
 
-- no or minimal controlled visual change;
-- all existing routes compile and pass tests;
-- raw-token compatibility prevents broad breakage;
+- no broad visual change;
+- all existing routes compiled and passed tests;
+- raw-token compatibility prevented breakage;
 - no unlicensed fonts/assets;
-- semantic meaning is documented and testable.
+- semantic meaning is documented and testable;
+- CI run **444** passed before PR #109 merged.
 
-### Brand Gate B2 — Shared component primitives
+### Brand Gate B2 — Shared component primitives — NEXT; EXPLICIT AUTHORIZATION REQUIRED
 
 **Objective:** make canonical behavior reusable.
 
@@ -419,7 +443,7 @@ Acceptance:
 
 | Brand expression | Earliest safe implementation |
 | --- | --- |
-| Exchange Light semantic foundations | B1 |
+| Exchange Light semantic foundations | B1 — complete |
 | Shared organization-node primitive | B2; live migration B3 |
 | Additional-location satellite | B3 plus Wave 3 Slice 3.4 data |
 | Public opportunity beacon | Wave 2 public projection may remain conventional; full live beacon after Wave 4 authoritative publication |
@@ -436,8 +460,9 @@ Acceptance:
 
 ## 8. Wave 3 integration
 
-- B0 must merge before Wave 3 Slice 3.1 so customer-facing transactional templates read the Content and Messaging System.
-- Complete B1, B2, B3 and B6a before Slice 3.2 to avoid rebuilding the first live Network workspace.
+- B0 merged before Wave 3 Slice 3.1, and Slice 3.1 is complete.
+- B1 is complete.
+- Complete B2, B3 and B6a before Slice 3.2 to avoid rebuilding the first live Network workspace.
 - Slices 3.3–3.8 consume brand standards without widening their Feature-ID scope.
 - Run B6b only after the relevant live Network domains exist.
 
