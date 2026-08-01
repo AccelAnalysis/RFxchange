@@ -91,6 +91,17 @@ test("home-locality registration uses Census TIGERweb search rather than a Ports
   assert.match(route, /CensusTigerLocalityDirectory/);
 });
 
+test("locality input handlers clear stale suggestions without synchronous effect resets", async () => {
+  const client = await source("src/components/onboarding/ActivationJourneyClient.tsx");
+  assert.match(client, /if \(query\.length < 2 \|\| stateCode\.length !== 2\) return;/);
+  assert.match(client, /nextQuery\.trim\(\)\.length < 2/);
+  assert.match(client, /nextStateCode\.length !== 2/);
+  assert.doesNotMatch(
+    client,
+    /if \(query\.length < 2 \|\| stateCode\.length !== 2\) \{[\s\S]{0,250}setGeographyCandidates/,
+  );
+});
+
 test("Census TIGERweb directory searches and resolves a canonical released locality server-side", async () => {
   const directory = new CensusTigerLocalityDirectory({
     fetcher: censusFetcher,
