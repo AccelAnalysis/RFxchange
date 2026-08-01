@@ -23,7 +23,11 @@ export function NavigationFrame({
   className?: string;
 }>) {
   return (
-    <header className={classes(styles.navigation, className)} data-ui-navigation>
+    <header
+      className={classes(styles.navigation, className)}
+      data-ui-navigation
+      data-participant-navigation
+    >
       <div className={styles.navigationBrand}>{brand}</div>
       <nav className={styles.desktopNavigation} aria-label="Primary participant navigation">
         {desktopNavigation}
@@ -161,15 +165,16 @@ export function AlertBanner({
   tone?: PrimitiveTone;
   action?: ReactNode;
 }>) {
+  const labelledBy = `alert-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   return (
     <section
       className={styles.alertBanner}
       data-tone={tone}
       role={tone === "restricted" ? "alert" : "status"}
-      aria-labelledby={`alert-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+      aria-labelledby={labelledBy}
     >
       <div>
-        <strong id={`alert-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>{title}</strong>
+        <strong id={labelledBy}>{title}</strong>
         <div className={styles.alertBody}>{children}</div>
       </div>
       {action ? <div className={styles.alertAction}>{action}</div> : null}
