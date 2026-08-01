@@ -1,19 +1,33 @@
 import Link from "next/link";
 
 import { MarketingFooter, MarketingHeader } from "@/src/components/marketing/MarketingChrome";
-import referenceStyles from "@/src/components/marketing/MarketingReference.module.css";
-import styles from "@/src/components/marketing/MarketingSite.module.css";
-import { publicDifferentiation } from "@/src/content/marketing";
+import {
+  audienceEmphasis,
+  publicAvailability,
+  publicDifferentiation,
+  publicPositioning,
+} from "@/src/content/marketing";
+import { publicImageAssets } from "@/src/content/public-assets";
 
-const images = {
-  construction: "https://images.unsplash.com/photo-1742112125567-3e8967bad60f?auto=format&fit=crop&w=2400&q=82",
-  manufacturing: "https://images.unsplash.com/photo-1742934028777-4d283a3233cc?auto=format&fit=crop&w=1800&q=80",
-  workshop: "https://images.unsplash.com/photo-1770386291809-dfbd371046c9?auto=format&fit=crop&w=1600&q=80",
-  professional: "https://images.unsplash.com/photo-1758518729711-1cbacd55efdb?auto=format&fit=crop&w=1600&q=80",
-  collaboration: "https://images.unsplash.com/photo-1758518727929-4506fc031e1c?auto=format&fit=crop&w=1600&q=80",
-  warehouse: "https://images.unsplash.com/photo-1777026321659-64941fb943dd?auto=format&fit=crop&w=1800&q=80",
-  region: "https://images.unsplash.com/photo-1633536584998-2d71cbd95d37?auto=format&fit=crop&w=2400&q=82",
-} as const;
+import styles from "./home-b4.module.css";
+
+const liveJourney = [
+  ["Create the account", "Establish a verified participant identity and accept the governing policies."],
+  ["Select the locality", "Use authoritative geography to establish the organization’s operating context."],
+  ["Resolve the organization", "Find, claim, or create the organization without inventing authority."],
+  ["Confirm the location", "Geocode and confirm a real or privacy-safe location on the map."],
+  ["Describe one capability", "Add the minimum meaningful capability needed for Profile Complete."],
+  ["Activate the organization node", "Complete orientation and enter the authenticated Exchange workspace."],
+] as const;
+
+const productModel = [
+  ["Visible", "Organization", "A real organization and its capabilities become visible subject to permission."],
+  ["Demand", "Opportunity", "A later RFx publication domain introduces structured business demand."],
+  ["Fit", "Discovery", "Potential fit is explained without claiming qualification or endorsement."],
+  ["Connect", "Relationship", "Referrals, teams, and providers require real governed relationship records."],
+  ["Act", "Workflow", "The participant moves through an authorized operational workflow."],
+  ["Evidence", "Outcome", "Credibility and outcomes appear only when authoritative evidence exists."],
+] as const;
 
 export default function HomePage() {
   return (
@@ -22,83 +36,120 @@ export default function HomePage() {
 
       <section className={styles.hero} aria-labelledby="hero-title">
         <div className={styles.heroMedia}>
-          <img src={images.construction} alt="Construction professionals reviewing plans at an active job site" />
+          <img
+            src={publicImageAssets.construction.src}
+            alt={publicImageAssets.construction.alt}
+            fetchPriority="high"
+          />
         </div>
         <div className={styles.heroGrid} aria-hidden="true" />
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
-            <div className={referenceStyles.eyebrow}>A Local Business Growth Network</div>
-            <h1 id="hero-title">Where business capability meets <span className={styles.gold}>opportunity.</span></h1>
-            <p className={styles.heroDeck}>
-              Discover businesses. Find opportunities. Build partnerships. Connect to the resources that move business forward.
-            </p>
+            <p className={styles.eyebrow}>A Local Business Growth Network · By Accel Analysis</p>
+            <h1 id="hero-title">
+              The local market is already moving. <span className={styles.gold}>Make it visible.</span>
+            </h1>
+            <p className={styles.heroDeck}>{publicPositioning.summary}</p>
             <div className={styles.heroActions}>
               <Link className={styles.buttonGold} href="/join">Join the Exchange — Free</Link>
               <a className={styles.buttonLight} href="#how-it-works">See How It Works</a>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.section} aria-labelledby="activity-title">
-        <div className={styles.wrap}>
-          <div className={styles.sectionHead}>
-            <div className={referenceStyles.eyebrow}>The economy is already moving</div>
-            <h2 id="activity-title">Opportunity is already moving through your community.</h2>
-            <p>
-              Businesses are buying, selling, hiring, contracting, referring, partnering and growing every day. The RFxchange helps make that activity easier to find and act on.
+            <p className={styles.evidenceNote}>
+              Stock photography supplies atmosphere only. It does not depict RFxchange participants,
+              opportunities, outcomes, testimonials, or live platform activity.
             </p>
           </div>
-          <div className={styles.mosaic} aria-label="Business activity across industries">
-            <figure>
-              <img src={images.manufacturing} alt="Worker operating equipment on a manufacturing production line" />
-              <figcaption>Manufacturing</figcaption>
-            </figure>
-            <figure>
-              <img src={images.workshop} alt="Small business craftspeople working in a local workshop" />
-              <figcaption>Small business</figcaption>
-            </figure>
-            <figure>
-              <img src={images.professional} alt="Professional team discussing business work around a table" />
-              <figcaption>Professional services</figcaption>
-            </figure>
-            <figure>
-              <img src={images.warehouse} alt="Warehouse aisles filled with inventory" />
-              <figcaption>Logistics & supply</figcaption>
-            </figure>
-            <figure>
-              <img src={images.region} alt="Aerial view of a major city and waterfront" />
-              <figcaption>Local roots. Wider markets.</figcaption>
-            </figure>
+        </div>
+      </section>
+
+      <section className={styles.availabilityBand} aria-labelledby="availability-title">
+        <div className={styles.wrap}>
+          <div className={styles.availabilityIntro}>
+            <p className={styles.eyebrow}>Product availability</p>
+            <h2 id="availability-title">See what is live—and what is still being built.</h2>
+            <p>
+              The RFxchange does not manufacture market activity for presentation. Current capabilities,
+              active development, and later product pathways are identified separately.
+            </p>
+          </div>
+          <div className={styles.availabilityGrid}>
+            {publicAvailability.map((item) => (
+              <article className={styles.availabilityCard} key={item.title}>
+                <span>{item.status}</span>
+                <h3>{item.title}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className={styles.problemBand} aria-labelledby="problem-title">
-        <div className={styles.problemMedia}>
-          <img src={images.workshop} alt="Business owners working together in a workshop" />
-        </div>
-        <div className={styles.problemCopy}>
-          <div className={referenceStyles.eyebrow}>The connection gap</div>
-          <h2 id="problem-title">The opportunity may exist. The connection may not.</h2>
-          <div className={styles.wordCloud} aria-label="Business connection categories">
-            {["Buyers", "Suppliers", "RFx", "Partners", "Referrals", "Capital", "Workforce", "Resources"].map((word) => <span key={word}>{word}</span>)}
-          </div>
-          <p>
-            Those connections are often scattered across portals, directories, emails, events, institutional systems and personal relationships. RFxchange creates a shared environment around business action.
-          </p>
-        </div>
-      </section>
-
-      <section className={styles.sectionTight} aria-labelledby="different-title">
+      <section className={styles.section} aria-labelledby="live-title">
         <div className={styles.wrap}>
           <div className={styles.sectionHead}>
-            <div className={referenceStyles.eyebrow}>Built for business action</div>
-            <h2 id="different-title">A working network—not another place to post and scroll.</h2>
+            <p className={styles.eyebrow}>Available now</p>
+            <h2 id="live-title">Your organization comes into focus around real geography.</h2>
+            <p>
+              The current activation journey moves from account establishment to a real organization node
+              without requiring invented opportunity data, provider status, business objectives, or a paid plan.
+            </p>
+          </div>
+          <div className={styles.liveJourney}>
+            <figure className={styles.liveMedia}>
+              <img
+                src={publicImageAssets.workshop.src}
+                alt={publicImageAssets.workshop.alt}
+                loading="lazy"
+                decoding="async"
+              />
+            </figure>
+            <ol className={styles.liveSteps}>
+              {liveJourney.map(([title, detail]) => (
+                <li key={title}>
+                  <div>
+                    <strong>{title}</strong>
+                    <p>{detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section id="how-it-works" className={`${styles.section} ${styles.modelSection}`} aria-labelledby="model-title">
+        <div className={styles.wrap}>
+          <div className={styles.sectionHead}>
+            <p className={styles.eyebrow}>Visible. Connected. Actionable.</p>
+            <h2 id="model-title">One market environment. A governed path from visibility to evidence.</h2>
+            <p>
+              This is the approved product model. Later steps appear in the live product only after their
+              owning domains, permissions, evidence, and acceptance tests are implemented.
+            </p>
+            <span className={styles.modelLabel}>Planned product model · not live market activity</span>
+          </div>
+          <div className={styles.modelFlow} aria-label="RFxchange product model">
+            {productModel.map(([kicker, title, detail], index) => (
+              <article className={styles.modelStep} key={title}>
+                <span>{String(index + 1).padStart(2, "0")} · {kicker}</span>
+                <strong>{title}</strong>
+                <p>{detail}</p>
+              </article>
+            ))}
+          </div>
+          <p><Link className={styles.textLink} href="/how-it-works">Read the complete product pathway →</Link></p>
+        </div>
+      </section>
+
+      <section className={styles.sectionTight} aria-labelledby="difference-title">
+        <div className={styles.wrap}>
+          <div className={styles.sectionHead}>
+            <p className={styles.eyebrow}>A living market—not a conventional dashboard</p>
+            <h2 id="difference-title">Built around organizations, geography, and business action.</h2>
           </div>
           <div className={styles.differentiationGrid}>
             {publicDifferentiation.map((item) => (
-              <article className={styles.differentiationItem} key={item.label}>
+              <article className={styles.differentiationCard} key={item.label}>
                 <h3>{item.label}</h3>
                 <p>{item.detail}</p>
               </article>
@@ -107,178 +158,98 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className={styles.section} aria-labelledby="value-title">
+      <section className={styles.split} aria-labelledby="connection-title">
+        <figure className={styles.splitMedia}>
+          <img
+            src={publicImageAssets.collaboration.src}
+            alt={publicImageAssets.collaboration.alt}
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+        <div className={styles.splitCopy}>
+          <p className={styles.eyebrow}>Build the connection</p>
+          <h2 id="connection-title">Context should travel with the participant.</h2>
+          <p>
+            The product is designed so a capability, need, organization, geography, and next action can
+            remain connected. Referrals, teaming, provider routing, and RFx activity are introduced only
+            through their authorized implementation slices.
+          </p>
+          <p><Link className={styles.buttonDark} href="/about">Why The RFxchange exists</Link></p>
+        </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="audience-title">
         <div className={styles.wrap}>
           <div className={styles.sectionHead}>
-            <div className={referenceStyles.eyebrow}>One network</div>
-            <h2 id="value-title">Multiple ways to move business forward.</h2>
-          </div>
-          <div className={styles.triPanel}>
-            <article className={styles.visualCard}>
-              <img src={images.workshop} alt="People working inside a small business workshop" />
-              <div className={styles.cardContent}>
-                <span className={styles.cardIndex}>01 · Be found</span>
-                <h3>Show what your organization can actually do.</h3>
-                <p>Capabilities · geography · experience · services</p>
-              </div>
-            </article>
-            <article className={styles.visualCard}>
-              <img src={images.construction} alt="Construction professionals reviewing project details" />
-              <div className={styles.cardContent}>
-                <span className={styles.cardIndex}>02 · Find opportunity</span>
-                <h3>Find demand that fits your capabilities.</h3>
-                <p>RFx · contracts · supplier needs · referrals</p>
-              </div>
-            </article>
-            <article className={styles.visualCard}>
-              <img src={images.collaboration} alt="Professionals collaborating in a business meeting" />
-              <div className={styles.cardContent}>
-                <span className={styles.cardIndex}>03 · Build the connection</span>
-                <h3>Find the business, partner or resource you need next.</h3>
-                <p>Partners · resources · referrals · teams</p>
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section id="how-it-works" className={`${styles.split} ${styles.splitDark}`} aria-labelledby="rfx-title">
-        <div className={styles.splitMedia}>
-          <img src={images.construction} alt="Project team reviewing plans on site" />
-        </div>
-        <div className={styles.splitCopy}>
-          <div className={referenceStyles.eyebrow}>The transaction cycle</div>
-          <h2 id="rfx-title">From need to opportunity.</h2>
-          <p>
-            RFxchange connects the business need to the market around it—without reducing the experience to another bid list.
-          </p>
-          <div className={styles.flow} aria-label="RFx transaction flow">
-            {["Need", "RFx", "Match", "Respond", "Select", "Outcome"].map((step, index, list) => (
-              <span key={step}>{step}{index < list.length - 1 ? <b className={styles.arrow}> →</b> : null}</span>
-            ))}
-          </div>
-          <p><Link className={styles.buttonGold} href="/how-it-works">Explore the Process</Link></p>
-        </div>
-      </section>
-
-      <section className={styles.split} aria-labelledby="partner-title">
-        <div className={styles.splitCopy}>
-          <div className={referenceStyles.eyebrow}>Teaming</div>
-          <h2 id="partner-title">The right opportunity may require the right partner.</h2>
-          <p>
-            When capability, capacity, geography or experience creates a gap, the network can help surface complementary organizations to explore working together.
-          </p>
-          <p><Link className={styles.buttonDark} href="/businesses">For Businesses</Link></p>
-        </div>
-        <div className={styles.splitMedia}>
-          <img src={images.collaboration} alt="Four professionals collaborating around business documents" />
-        </div>
-      </section>
-
-      <section className={styles.section} aria-labelledby="resource-title">
-        <div className={`${styles.wrap} ${styles.resourceStrip}`}>
-          <div className={styles.resourcePhoto}>
-            <img src={images.professional} alt="Professional team discussing business needs" />
-          </div>
-          <div className={styles.resourceList}>
-            <div className={referenceStyles.eyebrow}>Resources in context</div>
-            <h3 id="resource-title">When you need help, find the right door.</h3>
-            {["Capital", "Contracting", "Workforce", "Technical Assistance", "Training & Business Support"].map((resource) => (
-              <div className={styles.resourceItem} key={resource}><b>{resource}</b><span>↗</span></div>
-            ))}
-            <p><Link className={styles.buttonOutline} href="/resource-providers">For Resource Providers</Link></p>
-          </div>
-        </div>
-      </section>
-
-      <section className={`${styles.section} ${styles.sectionDark}`} aria-labelledby="audience-title">
-        <div className={styles.wrap}>
-          <div className={styles.sectionHead}>
-            <div className={referenceStyles.eyebrow}>One network. Different entry points.</div>
-            <h2 id="audience-title">Built around the people who move business.</h2>
+            <p className={styles.eyebrow}>One network · different responsibilities</p>
+            <h2 id="audience-title">A practical environment for the people who move local business.</h2>
           </div>
           <div className={styles.audienceGrid}>
-            <Link className={styles.audienceCard} href="/businesses">
-              <img src={images.workshop} alt="Local business workshop" />
-              <div className={styles.cardContent}><span className={styles.audienceLabel}>Business</span><h3>Find opportunity. Be discovered.</h3><p>Build a reusable position for growth.</p></div>
-            </Link>
-            <Link className={styles.audienceCard} href="/buyers">
-              <img src={images.construction} alt="Project professionals reviewing requirements" />
-              <div className={styles.cardContent}><span className={styles.audienceLabel}>Buyers & Issuers</span><h3>Bring needs to the market.</h3><p>Discover capable organizations and suppliers.</p></div>
-            </Link>
-            <Link className={styles.audienceCard} href="/resource-providers">
-              <img src={images.professional} alt="Professional business consultation" />
-              <div className={styles.cardContent}><span className={styles.audienceLabel}>Resource Providers</span><h3>Reach businesses when help matters.</h3><p>Support better routing and stronger handoffs.</p></div>
-            </Link>
-            <Link className={styles.audienceCard} href="/about">
-              <img src={images.region} alt="Regional city and waterfront from above" />
-              <div className={styles.cardContent}><span className={styles.audienceLabel}>Communities</span><h3>Make the ecosystem more legible.</h3><p>See capabilities, connections, demand and gaps.</p></div>
-            </Link>
+            {audienceEmphasis.map((audience, index) => {
+              const image = [
+                publicImageAssets.region,
+                publicImageAssets.manufacturing,
+                publicImageAssets.professional,
+              ][index];
+              return (
+                <article className={styles.audienceCard} key={audience.name}>
+                  <div className={styles.audienceCardMedia}>
+                    <img src={image.src} alt={image.alt} loading="lazy" decoding="async" />
+                  </div>
+                  <div className={styles.audienceCardBody}>
+                    <span>{audience.name}</span>
+                    <h3>{audience.promise}</h3>
+                    <p>{audience.detail}</p>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <section className={styles.section} aria-labelledby="trust-title">
-        <div className={`${styles.wrap} ${styles.trust}`}>
-          <div>
-            <div className={referenceStyles.eyebrow}>Credibility</div>
-            <div className={styles.sectionHead}>
-              <h2 id="trust-title">Know more about who you&apos;re connecting with.</h2>
-              <p>
-                Identity, activity, experience, completed interactions and authorized endorsements can build an evidence-backed organizational history—without turning participation into a public numerical score.
-              </p>
+      <section className={styles.sectionTight} aria-labelledby="evidence-title">
+        <div className={styles.wrap}>
+          <div className={styles.evidencePanel}>
+            <div>
+              <p className={styles.eyebrow}>Trust what you see</p>
+              <div className={styles.sectionHead}>
+                <h2 id="evidence-title">Real evidence—or a clear label.</h2>
+                <p>
+                  Marketing and product surfaces must not imply organizations, opportunities, statistics,
+                  outcomes, testimonials, provider availability, or dashboards that do not exist.
+                </p>
+              </div>
+              <Link className={styles.textLink} href="/image-credits">Review public image provenance →</Link>
             </div>
-            <div className={styles.trustBadges} aria-label="Credibility families">
-              {["Verified", "Active", "Experienced", "Trusted", "Endorsed"].map((badge) => <div className={styles.trustBadge} key={badge}>{badge}</div>)}
-            </div>
-          </div>
-          <div className={styles.trustMedia}>
-            <img src={images.collaboration} alt="Business professionals collaborating in an office" />
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.fullBleed} aria-labelledby="scale-title">
-        <img src={images.region} alt="Aerial view of a city, region and waterways" />
-        <div className={styles.fullBleedContent}>
-          <div>
-            <div className={referenceStyles.eyebrow}>Geography as context</div>
-            <h2 id="scale-title">Local roots. Wider opportunity.</h2>
-            <p>Build relationships nearby. Pursue opportunity across regions. Let capability—not just proximity—define where your business can compete.</p>
+            <ul className={styles.evidenceRules}>
+              <li>Stock photography is visual atmosphere, never proof of RFxchange activity.</li>
+              <li>Synthetic tutorial content remains labeled and isolated from live records.</li>
+              <li>Future product capabilities are identified as planned or in development.</li>
+              <li>Public opportunity context never grants private access or domain authority.</li>
+              <li>Credibility and outcomes require authoritative evidence before presentation.</li>
+            </ul>
           </div>
         </div>
       </section>
 
-      <section className={styles.joinBand} aria-labelledby="join-title">
-        <div className={styles.joinCopy}>
-          <div className={referenceStyles.eyebrow}>Free organization account</div>
-          <h2 id="join-title">Start building your position in the Exchange. Free.</h2>
-          <p>Establish your organization, describe your capabilities and enter a network built around opportunity, referrals, teaming and resources.</p>
-          <div className={styles.stepsInline}><span><b>01</b>Create</span><span><b>02</b>Establish</span><span><b>03</b>Participate</span></div>
-          <p><Link className={styles.buttonGold} href="/join">Join the Exchange — Free</Link></p>
+      <section className={styles.cta} aria-labelledby="cta-title">
+        <div className={styles.ctaMedia}>
+          <img
+            src={publicImageAssets.warehouse.src}
+            alt={publicImageAssets.warehouse.alt}
+            loading="lazy"
+            decoding="async"
+          />
         </div>
-        <div className={styles.joinMedia}>
-          <img src={images.manufacturing} alt="Worker on a production line" />
-        </div>
-      </section>
-
-      <section className={styles.founding} aria-labelledby="founding-title">
-        <div className={styles.foundingMedia}>
-          <img src={images.warehouse} alt="Large warehouse and supply operation" />
-        </div>
-        <div className={styles.foundingCopy}>
-          <div className={referenceStyles.eyebrow}>Founding RFxchange</div>
-          <h2 id="founding-title">Help build the network you want to use.</h2>
-          <p>Founding Organizations participate early, help shape practical workflows and become part of the network&apos;s launch cohort. Founding benefits and commercial terms are presented on a dedicated page.</p>
-          <p><Link className={styles.buttonGold} href="/founding">Explore Founding Membership</Link></p>
-        </div>
-      </section>
-
-      <section className={styles.ctaBanner} aria-labelledby="cta-title">
-        <img src={images.construction} alt="Business professionals working together on an active project" />
         <div className={styles.ctaInner}>
-          <div className={referenceStyles.eyebrow}>Enter the Exchange</div>
+          <p className={styles.eyebrow}>Enter The RFxchange</p>
           <h2 id="cta-title">Be found.<br />Find opportunity.<br />Build the connection.</h2>
+          <p>
+            Start with the part that is live: establish your organization, confirm its geography,
+            describe its capability, and become visible in the authenticated Exchange.
+          </p>
           <div className={styles.ctaActions}>
             <Link className={styles.buttonGold} href="/join">Join Free</Link>
             <Link className={styles.buttonLight} href="/signin">Sign in</Link>
