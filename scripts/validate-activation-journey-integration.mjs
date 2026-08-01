@@ -338,7 +338,7 @@ assert.equal(
 const architectureLower = architecture.toLowerCase();
 for (const phrase of [
   "no feature-id completion change",
-  "participant-created organization",
+  "selecting or creating an organization",
   "real marker activation",
   "public visitors receive marketing, authentication and required legal documents only",
   "free account is a real rfxchange account",
