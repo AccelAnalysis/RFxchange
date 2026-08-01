@@ -157,7 +157,7 @@ test("COMMS-004 records intent, attempt and provider acceptance around one INF-0
   assert.equal(jobs.calls.at(-1)[0], "success");
 });
 
-test("COMMS-005 accepted audit state prevents duplicate provider delivery on event replay", async () => {
+test("COMMS-005 accepted audit state and succeeded job suppress duplicate provider delivery", async () => {
   const { intent, request } = fixture();
   const audit = auditStore({ status: "accepted", attemptCount: 1, lastErrorCode: null });
   let delivered = false;
@@ -169,11 +169,18 @@ test("COMMS-005 accepted audit state prevents duplicate provider delivery on eve
     backgroundJobStore: {
       async claim() {
         claimed = true;
-        throw new Error("must not claim");
+        return {
+          kind: "duplicate",
+          jobId: "job-1",
+          status: "succeeded",
+          attemptCount: 1,
+        };
       },
-      async completeSuccess() {},
+      async completeSuccess() {
+        throw new Error("must not complete duplicate");
+      },
       async completeFailure() {
-        return { status: "terminal-failure", nextAttemptAt: null };
+        throw new Error("must not fail duplicate");
       },
     },
     auditStore: audit,
@@ -185,7 +192,30 @@ test("COMMS-005 accepted audit state prevents duplicate provider delivery on eve
   });
   assert.equal(result.outcome, "duplicate");
   assert.equal(delivered, false);
-  assert.equal(claimed, false);
+  assert.equal(claimed, true);
+});
+
+test("COMMS-005 accepted audit state heals interrupted INF-007 success without resending", async () => {
+  const { intent, request } = fixture();
+  const audit = auditStore({ status: "accepted", attemptCount: 1, lastErrorCode: null });
+  const jobs = backgroundStore(2);
+  let delivered = false;
+  const result = await executeReliableTransactionalEmailJob({
+    intent,
+    request,
+    runtime,
+    backgroundJobStore: jobs,
+    auditStore: audit,
+    now: NOW,
+    deliver: async () => {
+      delivered = true;
+      throw new Error("must not deliver");
+    },
+  });
+  assert.equal(result.outcome, "succeeded");
+  assert.equal(delivered, false);
+  assert.deepEqual(audit.calls, [["intent"]]);
+  assert.equal(jobs.calls.at(-1)[0], "success");
 });
 
 test("COMMS-005 transient failures are audited and scheduled by the existing deterministic retry policy", async () => {
