@@ -132,7 +132,7 @@ for (const required of [
   '"begin-location"',
   '"confirm-location"',
   "initial service geography",
-  "Service territory remains a separate profile concept",
+  "Service territory can be expanded after activation",
 ]) {
   assert.ok(activationUi.includes(required), `Integrated activation location UI is missing ${required}.`);
 }
