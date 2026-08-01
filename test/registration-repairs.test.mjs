@@ -84,7 +84,9 @@ test("home-locality registration uses Census TIGERweb search rather than a Ports
   const route = await source("app/api/onboarding/activation/route.ts");
   assert.match(client, /search-geographies/);
   assert.match(client, /select-census-geography/);
-  assert.match(client, /Search Census localities/);
+  assert.match(client, /placeholder="Portsmouth, Richmond, Fairfax…"/);
+  assert.match(client, /role="combobox"/);
+  assert.match(client, /role="listbox"/);
   assert.doesNotMatch(client, /state\.releasedGeographies\.map/);
   assert.match(route, /CensusTigerLocalityDirectory/);
 });
@@ -134,6 +136,7 @@ test("email verification gives visible feedback and refreshes the RFxchange sess
   assert.match(client, /setVerificationNotice/);
   assert.match(client, /reloadCurrentPrincipal/);
   assert.match(client, /if \(!principal\.emailVerified\)/);
-  assert.match(client, /await exchangeSession\(state\.provisionalOrganizationName\)/);
+  assert.match(client, /const refreshedSession = await exchangeSession\(\)/);
+  assert.match(client, /getIdToken\(true\)/);
   assert.match(client, /Firebase still reports this email as unverified/);
 });
