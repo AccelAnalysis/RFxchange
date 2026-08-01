@@ -103,5 +103,6 @@ const network = await read("src/components/marketing/NetworkField.tsx");
 if (!network.includes("#D6A23A")) throw new Error("Golden connection path language is missing.");
 
 await import("./validate-brand-semantic-foundation.mjs");
+await import("./validate-brand-shared-primitives.mjs");
 
 console.log("Wave 0 product-system validation passed, including ACQ-001 and core brand foundation BRD-001/003/005/014.");
