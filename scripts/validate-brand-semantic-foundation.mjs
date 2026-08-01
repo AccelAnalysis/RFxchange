@@ -96,7 +96,7 @@ for (const cssRole of [
 }
 
 assert.ok(
-  layout.includes('import "@/src/design/semantic-tokens.css";') &&
+  layout.includes('import "../src/design/semantic-tokens.css";') &&
     layout.indexOf("semantic-tokens.css") < layout.indexOf("./globals.css"),
   "Brand B1 semantic variables must load before legacy global compatibility styles.",
 );
@@ -179,7 +179,7 @@ const governedPrimitiveDirectories = [
 const codeExtensions = new Set([".css", ".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const rawApprovedPattern = /#(?:0b0b0d|f7f3ea|252932|d6a23a|8a6418|2e5eaa|3b7b57)\b/gi;
 
-async function walk(relativeDirectory) {
+async function walk(relativeDirectory, allowedExtensions = null) {
   const absoluteDirectory = resolve(root, relativeDirectory);
   let entries;
   try {
@@ -191,14 +191,17 @@ async function walk(relativeDirectory) {
   const paths = [];
   for (const entry of entries) {
     const relativePath = join(relativeDirectory, entry.name);
-    if (entry.isDirectory()) paths.push(...await walk(relativePath));
-    else if (codeExtensions.has(extname(entry.name))) paths.push(relativePath);
+    if (entry.isDirectory()) {
+      paths.push(...await walk(relativePath, allowedExtensions));
+    } else if (allowedExtensions === null || allowedExtensions.has(extname(entry.name))) {
+      paths.push(relativePath);
+    }
   }
   return paths;
 }
 
 for (const directory of governedPrimitiveDirectories) {
-  for (const path of await walk(directory)) {
+  for (const path of await walk(directory, codeExtensions)) {
     const source = await read(path);
     const rawColors = source.match(rawApprovedPattern) ?? [];
     assert.equal(
@@ -209,7 +212,7 @@ for (const directory of governedPrimitiveDirectories) {
   }
 }
 
-for (const directory of ["app", "src", "public"] ) {
+for (const directory of ["app", "src", "public"]) {
   for (const path of await walk(directory)) {
     assert.equal(
       /\.(?:woff2?|ttf|otf|eot)$/i.test(path),
