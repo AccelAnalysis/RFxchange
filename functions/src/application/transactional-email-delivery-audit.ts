@@ -252,21 +252,6 @@ export async function executeReliableTransactionalEmailJob(input: Readonly<{
   assertExecutionAlignment(input.intent, input.request);
   const observedAt = timestamp(input.now, "Transactional email execution timestamp");
   const current = await input.auditStore.ensureIntent(input.intent, observedAt);
-  if (current.status === "accepted") {
-    return Object.freeze({
-      outcome: "duplicate" as const,
-      jobId: current.deliveryId,
-      attemptCount: current.attemptCount,
-    });
-  }
-  if (current.status === "terminal-failure") {
-    return Object.freeze({
-      outcome: "terminal-failure" as const,
-      jobId: current.deliveryId,
-      attemptNumber: current.attemptCount,
-      errorCode: current.lastErrorCode ?? "transactional-email-terminal-failure",
-    });
-  }
 
   return executeBackgroundJob({
     request: input.request,
@@ -274,6 +259,23 @@ export async function executeReliableTransactionalEmailJob(input: Readonly<{
     store: input.backgroundJobStore,
     now: observedAt,
     handler: async (context) => {
+      // The provider may have accepted the message before INF-007 success persistence was
+      // interrupted. Reclaiming the background job heals that state without another send.
+      if (current.status === "accepted") {
+        return Object.freeze({
+          deliveryStatus: "accepted",
+          providerKey: null,
+          providerReference: null,
+          diagnosticCode: "transactional-email-accepted-replay-suppressed",
+        });
+      }
+      if (current.status === "terminal-failure") {
+        throw terminalBackgroundJobError(
+          current.lastErrorCode ?? "transactional-email-terminal-failure",
+          "Transactional email delivery was already terminally failed.",
+        );
+      }
+
       await input.auditStore.recordAttempt({
         intent: input.intent,
         deliveryId: current.deliveryId,
