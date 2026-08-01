@@ -6,6 +6,13 @@ on:
       - codex/registration-activation-convergence
     paths:
       - .github/workflows/fix-locality-effect-lint.yml
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 permissions:
   contents: write
@@ -17,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: codex/registration-activation-convergence
+          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
       - name: Move invalid-query reset out of the effect
         shell: bash
@@ -71,4 +78,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "Move locality reset out of debounced search effect"
-          git push origin HEAD:codex/registration-activation-convergence
+          TARGET_BRANCH="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+          git push origin "HEAD:${TARGET_BRANCH}"
