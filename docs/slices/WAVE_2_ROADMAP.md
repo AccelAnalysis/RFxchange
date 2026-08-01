@@ -1,10 +1,10 @@
 # Wave 2 — Activation Roadmap
 
-**Status: ACTIVE SEQUENTIAL IMPLEMENTATION — SLICES 2.1–2.11 COMPLETE; RECALCULATE FROM MERGED MAIN BEFORE 2.12**
+**Status: IMPLEMENTATION COMPLETE VIA PR #104 — 43/43 ACTIVATION FEATURES; POST-MERGE WAVE 3 RECALCULATION REQUIRED**
 
-Current feature state after Slice 2.11 is **41/43 Activation features complete**. Two Activation Feature IDs remain in Slice 2.12.
+Current feature state after Slice 2.12 acceptance is **43/43 Activation features complete**. Wave 2 implementation is complete; PR #104 must merge and Wave 3 eligibility must then be recalculated from the resulting `main` before any later implementation begins.
 
-PR #99 merged the narrow no-Feature-ID website carry-forward repair after both configured-browser paths and cleanup passed. Slice 2.9 then implemented bounded public acquisition and server-bound continuity in PR #101. Slice 2.10 implemented the first four ordered steps of one stable eight-step orientation in PR #102. Slice 2.11 completes that same protected aggregate through invitation, response, human selection and network effect in PR #103. Configured-browser acceptance exercised a fresh real activation against Firebase, Census/TIGERweb, Census geocoding and Mapbox, proved ordered progression, reload/re-entry, restart, responsive map/marker visibility and synthetic isolation, then removed every disposable record and Auth identity. Slice 2.12 remains gated on PR #103 merge and dependency recalculation from the resulting `main`.
+PR #99 merged the narrow no-Feature-ID website carry-forward repair after both configured-browser paths and cleanup passed. Slice 2.9 implemented bounded public acquisition and server-bound continuity in PR #101. Slices 2.10 and 2.11 implemented one stable protected eight-step orientation in PRs #102 and #103. Slice 2.12 closes Activation in PR #104 with explicit semantic first-value selection and the complete server-authoritative OPEN gate. Its configured-browser acceptance ran both direct and preserved-opportunity journeys against real Firebase, Census/TIGERweb, Census geocoding and Mapbox, proved neutral/recommended choice behavior, explicit OPEN, re-entry, responsive layout and later restriction enforcement, then removed 79 disposable Firestore records and both Auth identities with a zero-residual rescan.
 
 | Slice / Gate | Features | Purpose / exit |
 | --- | --- | --- |
@@ -22,7 +22,7 @@ PR #99 merged the narrow no-Feature-ID website carry-forward repair after both c
 | **2.9 — Acquisition-to-Activation Continuity — PR #101** | `ACQ-002`, `ACQ-003` | Privacy-safe public opportunity entry and server-bound semantic context persist through activation and first authenticated continuation. |
 | **2.10 — Orientation: Discovery & Team Formation — PR #102** | `EDU-001`, `EDU-002`, `EDU-003`, `EDU-004` | Protected, synthetic three-organization map tutorial: issuer creates opportunity → responder match → capability gap → teammate discovery. |
 | **2.11 — Orientation: Response to Outcome — PR #103** | `EDU-005`, `EDU-006`, `EDU-007`, `EDU-008` | Teammate invite/accept → joint response → issuer evaluation/selection → network-effect visualization. |
-| **2.12 — First Value & OPEN Gate** | `EDU-009`, `EDU-010` | Ask the participant to select a post-orientation first-value intent, then release OPEN only after all account, organization, geography, marker, education, legal and first-value gates are satisfied. |
+| **2.12 — First Value & OPEN Gate — PR #104** | `EDU-009`, `EDU-010` | Seven semantic choices are presented after orientation; OPEN persists only after every fresh canonical prerequisite passes, with explicit remediation otherwise. |
 
 ## Runtime convergence authority
 
@@ -62,7 +62,9 @@ These requirements do not alter Feature-ID scope or completion status.
 → 2.10
 → 2.11
 → 2.12
-→ verify Wave 2 exit
+→ Wave 2 exit verified
+→ merge PR #104
+→ recalculate Wave 3 from merged main
 ```
 
 No production implementation for a later slice begins before the current authorized slice/gate is complete and dependency eligibility is recalculated.

@@ -29,7 +29,11 @@ The `/exchange` route is not unlocked by a browser flag. It resolves the current
 - Domain and application tests cover every intent and acquisition recommendation, direct entry, truthful unavailable destinations, all eleven missing prerequisites independently, absence of optional gates, idempotency and cross-participant denial.
 - Source architecture validation protects semantic persistence, server-derived scope, fresh canonical reads, current-state enforcement, transaction evidence, protected re-entry and emulator coverage.
 - Firebase emulator acceptance proves persisted selection, the one controlled-to-OPEN transition, immutable evidence, idempotent repeat, direct-client denial and cleanup.
-- The complete repository gate, configured-browser journey, production CI and disposable-record cleanup remain required before merge.
+- `npm run check` passed with 347 architecture tests, Functions tests, TypeScript, lint and the production build. The full Auth/Firestore/Functions/Storage emulator chain passed, including the new selection/OPEN smoke.
+- Configured-browser acceptance completed a fresh direct journey and a fresh public-opportunity journey against real Firebase, Census/TIGERweb, Census geocoding and Mapbox. Direct entry was neutral. Opportunity context visibly recommended `find-opportunities` but left the participant controlled until explicit submission.
+- Both journeys presented all seven intents, persisted participant-bound choices and exactly two release events, reached OPEN, survived reload/re-entry and retained truthful unavailable-destination messaging. Mobile width had no horizontal overflow and the browser console contained no errors or warnings.
+- A temporary organization suspension introduced after OPEN redirected the protected request to exact suspended remediation; removal restored current authorized access. Cleanup then removed the two exact footprints: 79 Firestore records and two Auth identities, with zero residual references.
+- Production CI is required before merge.
 
 ## Explicit deferrals
 

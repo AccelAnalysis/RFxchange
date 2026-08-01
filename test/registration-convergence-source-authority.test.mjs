@@ -82,7 +82,7 @@ test("registration convergence remains aligned across runtime and canonical auth
       "Activation Profile Website Carry-Forward Repair — MERGED PR #99; no Feature IDs",
     ),
   );
-  assert.ok(tracker.includes("41/43 Activation"));
+  assert.ok(tracker.includes("43/43 Activation"));
   assert.ok(tracker.includes("PR #75 + PR #98 correction"));
   assert.ok(slice212.includes("It does not depend on `ORG-011`"));
   assert.ok(

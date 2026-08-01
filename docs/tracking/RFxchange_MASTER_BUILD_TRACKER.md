@@ -12,10 +12,10 @@
 
 ## Progress
 
-**438 total · 116 Done · 322 Not Started**
+**438 total · 118 Done · 320 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **41/43**
+- 2 - Activation: **43/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -31,9 +31,9 @@
 - **Slice 2.9 — MERGED VIA PR #101 — `ACQ-002` + `ACQ-003`**: privacy-safe public opportunity entry and server-bound acquisition context now survive authentication, activation, first authenticated continuation, browser history, reload, and sign-in re-entry without granting domain authority.
 - **Slice 2.10 — COMPLETE VIA PR #102 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004`**: one protected, resumable and restartable synthetic eight-step orientation model implements its first four ordered map steps through teammate discovery.
 - **Slice 2.11 — COMPLETE VIA PR #103 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008`**: the same protected aggregate now completes teammate invitation/acceptance, structured joint response, evaluation/human selection and the complete network-effect visualization.
-- **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: post-orientation first-value intent selection followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
+- **Slice 2.12 — COMPLETE VIA PR #104 — `EDU-009` + `EDU-010`**: seven semantic post-orientation first-value choices and the complete server-authoritative OPEN gate close Wave 2 Activation.
 
-Current Feature-ID completion is **41/43 Activation**. The Runtime Convergence Gate, Registration Convergence Correction, and Activation Profile Website Carry-Forward Repair remain no-Feature-ID integration/repair gates. Slice 2.11 configured-browser acceptance used the selected real Firebase project, actual Census/Mapbox integrations and a fresh disposable activation; it proved ordered completion, resume/restart/re-entry, responsive map controls and marker visibility, then removed all 43 disposable Firestore records and the Auth identity. Emulator CI remains separate evidence. Recalculate dependency eligibility from merged `main` before starting Slice 2.12.
+Current Feature-ID completion is **43/43 Activation**. The Runtime Convergence Gate, Registration Convergence Correction, and Activation Profile Website Carry-Forward Repair remain no-Feature-ID integration/repair gates. Slice 2.12 configured-browser acceptance used two fresh disposable identities against the selected real Firebase project and actual Census/Mapbox integrations. Direct entry remained neutral; preserved opportunity context visibly recommended but did not authorize or complete a choice. Both journeys completed all eight orientation steps, presented seven truthful intents, made one explicit selection, persisted one auditable OPEN transition, survived reload/re-entry, and honored a later suspension. Cleanup removed all 79 exact Firestore records and both Auth identities; the residual scan returned zero. Full emulator and repository gates passed. Wave 3 eligibility must be recalculated from PR #104's merged `main`; no Wave 3 implementation began in this slice.
 
 ## Feature-ID checklist
 
@@ -145,8 +145,8 @@ Current Feature-ID completion is **41/43 Activation**. The Runtime Convergence G
 - [x] `EDU-006` — PR #103; structured requirement ownership/completion, synthetic-submit isolation, configured-browser acceptance, emulator acceptance, and `npm run check`
 - [x] `EDU-007` — PR #103; stated evaluation criteria, accessible comparison, human selection authority, configured-browser acceptance, and deterministic tests
 - [x] `EDU-008` — PR #103; complete connected network-effect map, step-8-only persisted completion, restart/re-entry acceptance, cleanup, and `npm run check`
-- [ ] `EDU-009`
-- [ ] `EDU-010`
+- [x] `EDU-009` — PR #104; seven semantic destination contracts, direct/acquisition configured-browser acceptance, explicit participant choice, truthful unavailable states, persistence, and `npm run check`
+- [x] `EDU-010` — PR #104; complete fresh server gate, exact remediation, auditable idempotent OPEN transition, later-restriction enforcement, emulator/configured-browser acceptance, and cleanup
 - [x] `ORG-001` — PR #70; explainable entity-match tests, desktop/mobile browser QA, Firestore emulator acceptance, and `npm run check`
 - [x] `ORG-002` — PR #70; select/create lifecycle tests, Firestore emulator acceptance, and `npm run check`
 - [x] `ORG-003` — PR #70; duplicate/conflict and atomic entity-key tests, Firestore emulator acceptance, and `npm run check`
