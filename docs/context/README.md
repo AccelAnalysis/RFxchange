@@ -15,17 +15,39 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 - [`CREDIBILITY_SYSTEM.md`](CREDIBILITY_SYSTEM.md) — organization-level credibility, badge families, evidence and commercial neutrality.
 - [`COMMERCIAL_MODEL.md`](COMMERCIAL_MODEL.md) — free network access, Founding membership, provider status and monetization boundaries.
 - [`ACQUISITION_AND_RETENTION.md`](ACQUISITION_AND_RETENTION.md) — acquisition objects, preserved entry context, first value and flywheel logic.
-- [`BRAND_AND_UX.md`](BRAND_AND_UX.md) — concise map-first brand/UX principles and pointer to the canonical design system.
+- [`BRAND_AND_UX.md`](BRAND_AND_UX.md) — concise map-first brand/UX principles and pointers to the brand and design authorities.
 
-## Canonical design authority
+## Brand and design authority
 
-Detailed visual/UI rules live in `docs/design/`:
+Brand Gate B0 establishes this division:
 
-- `docs/design/RFxchange_DESIGN_SYSTEM.md` — product UI identity, color, typography, surfaces, controls, motion, accessibility and responsive behavior;
-- `docs/design/MAP_VISUAL_SYSTEM.md` — locality, marker, service-area, connection-path, release-state and map-layer behavior;
-- `docs/design/PRESENTATION_SYSTEM.md` — presentation/deck hierarchy, composition and audience adaptation.
+- `docs/brand/` defines the approved **target brand experience**: product architecture, semantic meaning, map/data grammar, messaging, motion, sonic boundaries, viewing modes, implementation sequencing and brand acceptance.
+- `docs/design/` defines the **currently implemented/converged visual baseline**: components, layouts, map presentation and presentation behavior.
 
-User-facing UI work should read the design-system index and applicable specialized guide rather than reconstructing current visual direction from source decks or prototype screenshots.
+For participant-facing work, use this order after security/domain/slice authority:
+
+1. the applicable `docs/brand/` rule for target meaning and acceptance;
+2. the applicable `docs/design/` rule for the current implementation baseline;
+3. existing runtime as compatibility evidence.
+
+Detailed brand authority:
+
+- `docs/brand/RFXCHANGE_BRAND_EXPERIENCE_SYSTEM.md` — product identity, governing experience and requirement classification;
+- `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md` — organization nodes, opportunity beacons, service fields, paths, seals, locality fields and density treatment;
+- `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md` — customer-facing terminology, claims, evidence, empty/error/success language and commercial/credibility boundaries;
+- `docs/brand/MOTION_SYSTEM.md` and `docs/brand/SONIC_EXPERIENCE_SYSTEM.md` — governed movement and optional sensory-event boundaries;
+- `docs/brand/VIEWING_MODES.md` — Exchange Light, future Intelligence Dark, Presentation Mode and High Contrast;
+- `docs/brand/BRAND_EXPERIENCE_ACCEPTANCE_MATRIX.md` — supplemental cross-surface acceptance;
+- `docs/brand/BRAND_IMPLEMENTATION_ROADMAP.md` — sequential Brand Gates;
+- `docs/brand/BRAND_GATE_B0_RECONCILIATION.md` — final Wave 2 reconciliation and Wave 3/4 integration boundaries.
+
+Detailed implemented design authority:
+
+- `docs/design/RFxchange_DESIGN_SYSTEM.md` — current product UI identity, color, typography, surfaces, controls, motion, accessibility and responsive behavior;
+- `docs/design/MAP_VISUAL_SYSTEM.md` — current locality, marker, service-area, connection-path, release-state and map-layer behavior;
+- `docs/design/PRESENTATION_SYSTEM.md` — current presentation/deck hierarchy, composition and audience adaptation.
+
+User-facing work must not implement a target brand expression by fabricating a domain object. Opportunity beacons, service fields, referral/team/RFx paths, credibility seals and outcome paths require their authoritative domains.
 
 ## Canonical build authorities
 
@@ -33,9 +55,11 @@ User-facing UI work should read the design-system index and applicable specializ
 - `docs/tracking/RFxchange_DEPENDENCY_MAP.md` — sequencing/dependency authority.
 - `docs/slices/` — approved implementation boundaries and exit conditions for planned slices.
 
+Wave 2 is complete and reconciled. Wave 3 Slice 3.1 is the earliest dependency-eligible candidate but remains subject to explicit implementation authorization.
+
 ## Reference artifacts
 
-`docs/reference/` is reserved for provenance, prototypes, screenshots and other evidence that may contain important intent but is not itself production architecture or current design authority. See the READMEs under that directory before using a reference artifact as an implementation source.
+`docs/reference/` is reserved for provenance, prototypes, screenshots and other evidence that may contain important intent but is not itself production architecture or current brand/design authority. See the READMEs under that directory before using a reference artifact as an implementation source.
 
 ## Normalization rule
 
@@ -43,4 +67,4 @@ When an approved source document contains broad narrative, these context documen
 
 ## Updating context
 
-Update a context document when an approved product decision changes a cross-cutting rule. Update `docs/design/` when a visual/UI rule changes. Do not rewrite context or design authority simply to match an implementation accident. If production architecture reveals a genuine product/design conflict, document the conflict and resolve it explicitly rather than silently changing the product model.
+Update a context document when an approved product decision changes a cross-cutting rule. Update `docs/brand/` when target brand meaning, acceptance or sequencing changes. Update `docs/design/` when a visual/UI rule is implemented or the current baseline changes. Do not rewrite context, brand or design authority simply to match an implementation accident. If production architecture reveals a genuine conflict, document and resolve it explicitly rather than silently changing the product model.
