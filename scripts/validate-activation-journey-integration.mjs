@@ -223,8 +223,8 @@ for (const authority of [
 assert.ok(
   coordinator.includes('"organization-activated"') &&
     coordinator.includes('"controlled-platform"') &&
-    !coordinator.includes('"open-platform"'),
-  "Integration gate must stop at controlled-platform and never manufacture OPEN.",
+    !coordinator.match(/advanceAccessLifecycle\([\s\S]{0,120}"open-platform"/),
+  "Activation coordinator must stop at controlled-platform; it may route an already-OPEN participant but cannot manufacture OPEN.",
 );
 assert.ok(
   coordinator.includes("orientationBridgeAcknowledgedAt") &&

@@ -8,6 +8,8 @@ import type {
 
 type Brand<T, Name extends string> = T & { readonly __brand: Name };
 
+export const CURRENT_PLATFORM_POLICY_VERSION = "2026.07.31" as const;
+
 export type LegalDocumentVersionId = Brand<string, "LegalDocumentVersionId">;
 export type LegalAcknowledgementId = Brand<string, "LegalAcknowledgementId">;
 export type LegalTimestamp = Brand<string, "LegalTimestamp">;
