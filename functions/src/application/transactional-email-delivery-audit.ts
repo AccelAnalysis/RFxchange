@@ -35,6 +35,8 @@ export interface TransactionalEmailDeliveryIntent {
   readonly recipientAddressHash: string;
   readonly recipientDomain: string;
   readonly correlationId: string;
+  readonly environment: string;
+  readonly projectId: string;
   readonly organizationId: string | null;
   readonly userId: string | null;
   readonly relatedObjectType: string | null;
@@ -149,6 +151,8 @@ export function createTransactionalEmailDeliveryIntent(input: Readonly<{
   templateVersion: number;
   recipientEmail: string;
   correlationId: string;
+  environment: string;
+  projectId: string;
   organizationId?: string | null;
   userId?: string | null;
   relatedObjectType?: string | null;
@@ -196,6 +200,8 @@ export function createTransactionalEmailDeliveryIntent(input: Readonly<{
     recipientAddressHash: route.addressHash,
     recipientDomain: route.domain,
     correlationId: required(input.correlationId, "Transactional email correlation id", 192),
+    environment: required(input.environment, "Transactional email environment", 32).toLowerCase(),
+    projectId: required(input.projectId, "Transactional email project id", 128),
     organizationId: optional(input.organizationId, "Transactional email organization id"),
     userId: optional(input.userId, "Transactional email user id"),
     relatedObjectType,
@@ -223,7 +229,9 @@ function assertExecutionAlignment(
   if (
     request.idempotencyKey !== intent.idempotencyKey ||
     request.payloadFingerprint !== intent.payloadFingerprint ||
-    request.correlationId !== intent.correlationId
+    request.correlationId !== intent.correlationId ||
+    request.environment !== intent.environment ||
+    request.projectId !== intent.projectId
   ) {
     throw terminalBackgroundJobError(
       "transactional-email-job-intent-mismatch",
