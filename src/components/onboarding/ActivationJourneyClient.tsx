@@ -248,7 +248,7 @@ export function ActivationJourneyClient({
       : [];
   }, [locationCandidates]);
 
-  async function run(task: () => Promise<void>) {
+  async function run<T>(task: () => Promise<T>): Promise<void> {
     setBusy(true);
     setError(null);
     try {
