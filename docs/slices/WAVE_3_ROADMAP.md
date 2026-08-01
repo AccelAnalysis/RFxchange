@@ -1,6 +1,8 @@
 # Wave 3 — Network Roadmap
 
-**Status: ADOPTED PLANNING AUTHORITY — IMPLEMENTATION HOLD UNTIL WAVE 2 EXIT IS VERIFIED AND A SLICE IS EXPLICITLY AUTHORIZED**
+**Status: ADOPTED PLANNING AUTHORITY — WAVE 2 EXIT VERIFIED; IMPLEMENTATION HOLD UNTIL SLICE 3.1 IS EXPLICITLY AUTHORIZED**
+
+Wave 2 exit was verified from merged `main` at `d599901d7ff35a4ee67eb2363dcf3334a2303dbc`, with production CI run `30715058244` passing on that exact tree. The canonical dependency graph identifies Slice 3.1 (`COMMS-003`, `COMMS-004`, `COMMS-005`) as the earliest eligible candidate. This planning status does not authorize implementation.
 
 Wave 3 contains **38 Network features**. Four foundations were completed during Wave 1 because they were prerequisites for administration and organization access:
 

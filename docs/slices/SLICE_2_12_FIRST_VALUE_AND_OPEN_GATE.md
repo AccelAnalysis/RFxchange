@@ -1,6 +1,6 @@
 # Slice 2.12 — First Value & OPEN Gate
 
-**Status: COMPLETE VIA PR #104 — `EDU-009` + `EDU-010`; WAVE 3 REQUIRES POST-MERGE RECALCULATION**
+**Status: MERGED VIA PR #104 — `EDU-009` + `EDU-010`; WAVE 2 EXIT VERIFIED**
 
 ## Feature IDs
 
@@ -114,3 +114,5 @@ After merge, reconcile the tracker against evidence and verify the **entire Wave
 ## Acceptance result
 
 Slice 2.12 passed its domain, architecture, full repository and Firebase emulator gates. Configured-browser acceptance completed two fresh real-environment journeys: direct entry presented a neutral seven-choice surface; preserved public-opportunity context recommended `find-opportunities` without selecting authority or releasing OPEN. Both participants explicitly selected a semantic path only after all eight orientation steps, reached persisted OPEN, and received truthful messaging for functionality not yet released. Reload/re-entry, a 390px mobile viewport, stale first-value routing, and a later organization suspension all honored current server state. Persistence audits found exactly one selection and the `first-value-selected` plus `open-released` evidence events per journey. Cleanup removed 79 scoped Firestore records and both Firebase Auth identities, and full residual scans returned zero.
+
+PR #104 merged at `d599901d7ff35a4ee67eb2363dcf3334a2303dbc`; production CI run `30715058244` passed on that merged tree. Final Wave 2 reconciliation retained **118/438 Done**, **320 Not Started**, and **43/43 Activation**, with all 34 remaining Wave 3 Feature IDs still Not Started. Slice 3.1 is the earliest dependency-eligible Wave 3 candidate, but no Wave 3 implementation was authorized or begun.

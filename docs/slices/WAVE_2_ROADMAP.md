@@ -1,8 +1,8 @@
 # Wave 2 — Activation Roadmap
 
-**Status: IMPLEMENTATION COMPLETE VIA PR #104 — 43/43 ACTIVATION FEATURES; POST-MERGE WAVE 3 RECALCULATION REQUIRED**
+**Status: COMPLETE — 43/43 ACTIVATION FEATURES; WAVE 2 EXIT VERIFIED ON MERGED `main`**
 
-Current feature state after Slice 2.12 acceptance is **43/43 Activation features complete**. Wave 2 implementation is complete; PR #104 must merge and Wave 3 eligibility must then be recalculated from the resulting `main` before any later implementation begins.
+Current feature state is **43/43 Activation features complete**. PR #104 merged at `d599901d7ff35a4ee67eb2363dcf3334a2303dbc`, and production CI run `30715058244` passed on that exact merged `main`. The post-merge dependency recalculation identifies Slice 3.1 (`COMMS-003`, `COMMS-004`, `COMMS-005`) as the earliest eligible Wave 3 candidate. Wave 3 remains on hold until a later task explicitly authorizes that slice.
 
 PR #99 merged the narrow no-Feature-ID website carry-forward repair after both configured-browser paths and cleanup passed. Slice 2.9 implemented bounded public acquisition and server-bound continuity in PR #101. Slices 2.10 and 2.11 implemented one stable protected eight-step orientation in PRs #102 and #103. Slice 2.12 closes Activation in PR #104 with explicit semantic first-value selection and the complete server-authoritative OPEN gate. Its configured-browser acceptance ran both direct and preserved-opportunity journeys against real Firebase, Census/TIGERweb, Census geocoding and Mapbox, proved neutral/recommended choice behavior, explicit OPEN, re-entry, responsive layout and later restriction enforcement, then removed 79 disposable Firestore records and both Auth identities with a zero-residual rescan.
 
@@ -63,8 +63,9 @@ These requirements do not alter Feature-ID scope or completion status.
 → 2.11
 → 2.12
 → Wave 2 exit verified
-→ merge PR #104
-→ recalculate Wave 3 from merged main
+→ PR #104 merged
+→ Wave 2 exit verified on merged main
+→ Slice 3.1 dependency-eligible; Wave 3 implementation held for explicit authorization
 ```
 
 No production implementation for a later slice begins before the current authorized slice/gate is complete and dependency eligibility is recalculated.
@@ -91,6 +92,12 @@ Organization type, descriptive participation roles and business objectives remai
 ## Wave 2 exit condition
 
 A new legitimate organization can arrive from a meaningful acquisition context, create/authenticate its RFxchange account, establish its organization relationship in an allowed geography, confirm location, complete the minimum essential profile without losing previously confirmed website identity, see its real marker, enter the authenticated controlled Exchange, understand the Exchange through orientation, select an appropriate first-value path, and enter OPEN only after the complete release gate is satisfied.
+
+## Final Wave 2 exit reconciliation
+
+The exit condition was verified from merged `main` after PR #104. All twelve Slice 2.9–2.12 Feature IDs retain their own acceptance evidence, and the tracker derives **118 Done / 320 Not Started** from 438 Feature IDs with **43/43 Activation** complete. Anonymous access remains limited to public marketing and acquisition surfaces; protected routes re-evaluate current lifecycle, membership, organization authority and restriction state; acquisition context can recommend but cannot authorize; orientation data remains synthetic and isolated; and OPEN remains an explainable server-authoritative transition.
+
+No new Wave 3 or Wave 4 Feature ID was implemented or marked Done. All 34 remaining Wave 3 Feature IDs remain Not Started. The actual dependency graph makes Slice 3.1 — Transactional Communications Reliability — the earliest eligible candidate, but this reconciliation does not authorize or begin it.
 
 ## Canonical dependency corrections relevant to Wave 2
 
