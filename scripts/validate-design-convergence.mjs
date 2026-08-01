@@ -6,6 +6,7 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 
 const [
   workspace,
+  existingWorkspace,
   sharedPrimitives,
   workspaceStyles,
   sharedPrimitiveStyles,
@@ -26,6 +27,7 @@ const [
   tracker,
 ] = await Promise.all([
   read("src/components/participant/ParticipantWorkspace.tsx"),
+  read("src/components/participant/ExistingWorkspaceFoundation.tsx"),
   read("src/components/ui/Primitives.tsx"),
   read("src/components/participant/ParticipantWorkspace.module.css"),
   read("src/components/ui/Primitives.module.css"),
@@ -95,8 +97,11 @@ assert.ok(
 );
 
 assert.ok(
-  geographyRoute.includes("ParticipantShell") && geographyRoute.includes("SpatialWorkspace"),
-  "Authenticated Intelligence must consume the shared Spatial Workspace.",
+  geographyRoute.includes("ExistingWorkspaceFoundation") &&
+    existingWorkspace.includes("ParticipantShell") &&
+    existingWorkspace.includes("SpatialWorkspace") &&
+    existingWorkspace.includes("ExchangeSpatialScene"),
+  "Authenticated Intelligence must consume the B6a foundation and shared Spatial Workspace.",
 );
 assert.ok(
   profileRoute.includes("ParticipantShell") && profileRoute.includes("OperationalWorkspace"),
@@ -199,5 +204,5 @@ assert.ok(
 );
 
 console.log(
-  "Participant design convergence validated: shared light controlled workspaces, integrated activation, full-viewport spatial map, responsive surfaces, renderer separation, marker anchoring, and current canonical feature counts.",
+  "Participant design convergence validated: shared light controlled workspaces, B6a organization home, integrated activation, full-viewport spatial map, responsive surfaces, renderer separation, marker anchoring, and current canonical feature counts.",
 );

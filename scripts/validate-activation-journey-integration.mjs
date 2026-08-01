@@ -11,6 +11,7 @@ const [
   signInPage,
   signInClient,
   geographyRoute,
+  existingWorkspace,
   participantMapRuntime,
   participantRuntime,
   client,
@@ -30,6 +31,7 @@ const [
   read("app/signin/page.tsx"),
   read("src/components/auth/SignInClient.tsx"),
   read("app/geography/canvas/page.tsx"),
+  read("src/components/participant/ExistingWorkspaceFoundation.tsx"),
   read("src/infrastructure/geography/participant-map-runtime.ts"),
   read("src/infrastructure/auth/participant-route-runtime.ts"),
   read("src/components/onboarding/ActivationJourneyClient.tsx"),
@@ -73,7 +75,7 @@ assert.equal(
   "Sign in must not ask for organization name.",
 );
 
-const authenticatedMapSurface = `${geographyRoute}\n${participantMapRuntime}`;
+const authenticatedMapSurface = `${geographyRoute}\n${existingWorkspace}\n${participantMapRuntime}`;
 for (const requirement of [
   "registerWithEmailAndPassword",
   "signInWithEmailAndPassword",
@@ -320,13 +322,19 @@ for (const requirement of [
   "ControlledLocalityMapService",
   ".create(selection)",
   "accessibleLocationLabel",
+  "ExistingWorkspaceFoundation",
   "ExchangeSpatialScene",
   'mode="organization"',
-  "marker={authenticated.homeMarker}",
+  "marker={homeMarker}",
   'markerActivation?.status !== "active"',
 ]) {
   assert.ok(authenticatedMapSurface.includes(requirement), `Exchange map is missing ${requirement}.`);
 }
+assert.ok(
+  geographyRoute.includes("organizationId={authenticated.organizationId}") &&
+    existingWorkspace.includes("Network discovery is not live yet"),
+  "B6a must receive server-authorized organization identity and preserve truthful future-domain absence.",
+);
 assert.equal(
   geographyRoute.includes("map remains usable as a preview"),
   false,
@@ -360,5 +368,5 @@ assert.ok(
 );
 
 console.log(
-  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, spatial onboarding progression, cached Census-authoritative locality selection, lifecycle-authoritative account-only participant routing, real persistent marker rendering, categorized capabilities, universal opportunity participation, carried identity, and controlled-platform stop.",
+  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, spatial onboarding progression, cached Census-authoritative locality selection, lifecycle-authoritative account-only B6a participant routing, real persistent marker rendering, categorized capabilities, universal opportunity participation, carried identity, and controlled-platform stop.",
 );
