@@ -35,20 +35,24 @@ jobs:
 
           path = Path("src/components/onboarding/ActivationJourneyClient.tsx")
           source = path.read_text()
-          option_open = '''                    aria-selected={index === activeGeographyIndex}
-                    data-active={index === activeGeographyIndex}
-                  >'''
-          option_replacement = '''                    aria-selected={index === activeGeographyIndex}
-                    aria-disabled={busy}
-                    data-active={index === activeGeographyIndex}
-                    onMouseEnter={() => setActiveGeographyIndex(index)}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => {
-                      if (!busy) void run(() => chooseGeography(geography));
-                    }}
-                  >'''
-          button = '''                    <button className={styles.primary} type="button" disabled={busy} onMouseEnter={() => setActiveGeographyIndex(index)} onClick={() => run(() => chooseGeography(geography))}>Use this locality</button>'''
-          label = '''                    <span className={styles.secondary} aria-hidden="true">Use this locality</span>'''
+          option_open = (
+              'aria-selected={index === activeGeographyIndex}\n'
+              '                    data-active={index === activeGeographyIndex}\n'
+              '                  >'
+          )
+          option_replacement = (
+              'aria-selected={index === activeGeographyIndex}\n'
+              '                    aria-disabled={busy}\n'
+              '                    data-active={index === activeGeographyIndex}\n'
+              '                    onMouseEnter={() => setActiveGeographyIndex(index)}\n'
+              '                    onMouseDown={(event) => event.preventDefault()}\n'
+              '                    onClick={() => {\n'
+              '                      if (!busy) void run(() => chooseGeography(geography));\n'
+              '                    }}\n'
+              '                  >'
+          )
+          button = '<button className={styles.primary} type="button" disabled={busy} onMouseEnter={() => setActiveGeographyIndex(index)} onClick={() => run(() => chooseGeography(geography))}>Use this locality</button>'
+          label = '<span className={styles.secondary} aria-hidden="true">Use this locality</span>'
           if source.count(option_open) != 1:
               raise SystemExit(f"Expected one locality option opening, found {source.count(option_open)}")
           if source.count(button) != 1:
