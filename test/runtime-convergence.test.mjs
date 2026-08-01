@@ -49,6 +49,17 @@ test("administrative routes require persisted authority permissions and scoped g
   assert.match(runtime, /authorizeScopedAdministrativeAction/);
   assert.match(runtime, /listByAdministratorId/);
   assert.doesNotMatch(runtime, /isAdmin/);
+
+  const claims = await source("app/admin/organization-claims/page.tsx");
+  assert.match(claims, /organization\.claim\.read/);
+  assert.match(claims, /GEOGRAPHY:/);
+  assert.doesNotMatch(claims, /Harborlight/i);
+
+  const organization360 = await source("app/admin/organizations/[organizationId]/page.tsx");
+  assert.match(organization360, /organization\.profile\.read/);
+  assert.match(organization360, /ORGANIZATION:/);
+  assert.match(organization360, /buildOrganization360/);
+  assert.doesNotMatch(organization360, /createPortsmouthOrganization360Preview/);
 });
 
 test("sign-in is authentication-only and account setup follows successful authentication", async () => {
@@ -61,6 +72,7 @@ test("sign-in is authentication-only and account setup follows successful authen
   const signIn = await source("src/components/auth/SignInClient.tsx");
   assert.match(signIn, /isAdministrativeReturnTarget/);
   assert.match(signIn, /ActivationJourneyState \| null/);
+  assert.match(signIn, /returnTo === "\/admin"/);
   assert.match(signIn, /\/join\?begin=1/);
   assert.doesNotMatch(signIn, /Organization name/);
 });
@@ -76,6 +88,16 @@ test("activation uses categorized capabilities and universal buyer-supplier part
   assert.doesNotMatch(client, /ORGANIZATION_BUSINESS_OBJECTIVES\.map/);
 });
 
+test("organization relationship metadata is descriptive and persisted separately from authorization", async () => {
+  const onboarding = await source("src/domain/onboarding/model.ts");
+  assert.match(onboarding, /ORGANIZATION_RELATIONSHIPS/);
+  assert.match(onboarding, /Descriptive onboarding metadata only/);
+  assert.match(onboarding, /durable control continues to require membership \+ authorization establishment/);
+  const session = await source("app/api/auth/session/route.ts");
+  assert.match(session, /organizationRelationship/);
+  assert.match(session, /updateActivationJourneyContext/);
+});
+
 test("activation context carries organization identity signals forward", async () => {
   const onboarding = await source("src/domain/onboarding/model.ts");
   assert.match(onboarding, /organizationIdentitySeed/);
@@ -86,6 +108,7 @@ test("activation context carries organization identity signals forward", async (
   assert.match(coordinator, /profileSeed/);
   assert.match(coordinator, /context\.user\.name/);
   assert.match(coordinator, /context\.user\.primaryEmail/);
+  assert.match(coordinator, /normalizedWebsiteUrl/);
 });
 
 test("locality search is cached, debounced and exposed as an accessible combobox", async () => {
