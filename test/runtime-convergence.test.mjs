@@ -121,6 +121,12 @@ test("locality search is cached, debounced and exposed as an accessible combobox
   assert.match(client, /role="combobox"/);
   assert.match(client, /role="listbox"/);
   assert.match(client, /aria-activedescendant/);
+  assert.match(client, /role="option"/);
+  assert.doesNotMatch(
+    client,
+    /role="option"[\s\S]{0,700}<button/,
+    "Listbox options must not contain nested interactive buttons.",
+  );
 });
 
 test("customer-facing activation copy enters the Exchange without internal terminology", async () => {
