@@ -1,1 +1,0 @@
-Slice 3.1 uses the canonical Content and Messaging System for reviewed transactional templates. It introduces no production UI, CSS, Mapbox, marker, motion, sound, viewing-mode, or presentation changes. This marker is temporary acceptance evidence and will be removed before merge if the slice validator does not require it.
