@@ -143,7 +143,7 @@ assert.ok(
 );
 assert.equal(markerPage.includes("createPortsmouthActivatedOrganizationPreview"), false);
 assert.ok(
-  activationUi.includes("Your real marker is active") &&
+  activationUi.includes("now has an active marker") &&
     activationUi.includes("Organization activated") &&
     activationUi.includes("Your organization is ready") &&
     activationUi.includes("Enter the Exchange"),
