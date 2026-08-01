@@ -242,6 +242,17 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // EDU-001-004 orientation progress is a participant-bound server aggregate. Tutorial events
+    // are immutable evidence, and neither collection is directly available to browser clients.
+    match /orientationJourneys/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /orientationJourneyEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /storedAssets/{documentId} {
       allow read, write: if serverManagedOnly();
     }

@@ -57,7 +57,7 @@ export default async function AcquisitionContinuationPage() {
   const opportunity = acquisition.kind === "opportunity" && acquisition.subjectReference
     ? await resolvePublicOpportunityProjection(acquisition.subjectReference)
     : null;
-  const mapUrl = `/geography/canvas?organizationId=${encodeURIComponent(String(access.membership.organizationId))}`;
+  const mapUrl = "/orientation";
 
   return (
     <ParticipantShell activeItem={acquisition.kind === "opportunity" ? "Opportunities" : "Intelligence"}>
@@ -95,7 +95,7 @@ export default async function AcquisitionContinuationPage() {
                 Review public opportunity
               </Link>
             ) : null}
-            <Link className={styles.secondary} href={mapUrl}>Continue to the Exchange map</Link>
+            <Link className={styles.secondary} href={mapUrl}>Continue to orientation</Link>
           </div>
         </section>
       </OperationalWorkspace>

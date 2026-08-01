@@ -12,10 +12,10 @@
 
 ## Progress
 
-**438 total · 108 Done · 330 Not Started**
+**438 total · 112 Done · 326 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **33/43**
+- 2 - Activation: **37/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -29,11 +29,11 @@
 - **Registration Convergence Correction — MERGED PR #98; no Feature IDs**: removes organization type, descriptive participation roles and business objectives from required registration; corrects Profile Complete; preserves optional enrichment; establishes post-orientation first-value selection; and keeps Official Resource Provider status in the separate Wave 3.6 application/review process.
 - **Activation Profile Website Carry-Forward Repair — MERGED PR #99; no Feature IDs**: preserved genuine omission of previously confirmed website fields at the activation API boundary, retained explicit `true` and `false`, rejected malformed supplied values, and passed both configured-browser website paths plus disposable-data cleanup.
 - **Slice 2.9 — MERGED VIA PR #101 — `ACQ-002` + `ACQ-003`**: privacy-safe public opportunity entry and server-bound acquisition context now survive authentication, activation, first authenticated continuation, browser history, reload, and sign-in re-entry without granting domain authority.
-- **Slice 2.10 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004` — Orientation: Discovery & Team Formation**: synthetic three-organization map tutorial from opportunity issuance through capability gap and teammate discovery.
+- **Slice 2.10 — COMPLETE VIA PR #102 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004`**: one protected, resumable and restartable synthetic eight-step orientation model now implements its first four ordered map steps through teammate discovery; later steps remain inert.
 - **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
 - **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: post-orientation first-value intent selection followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
 
-Current Feature-ID completion is **33/43 Activation**. The Runtime Convergence Gate, Registration Convergence Correction, and Activation Profile Website Carry-Forward Repair remain no-Feature-ID integration/repair gates. Slice 2.9 configured-browser acceptance used the selected real Firebase project and actual Census/Mapbox integrations; emulator CI remains separate evidence. Recalculate dependency eligibility from merged `main` before starting Slice 2.10 and every later feature slice.
+Current Feature-ID completion is **37/43 Activation**. The Runtime Convergence Gate, Registration Convergence Correction, and Activation Profile Website Carry-Forward Repair remain no-Feature-ID integration/repair gates. Slice 2.10 configured-browser acceptance used the selected real Firebase project, actual Census/Mapbox integrations and a fresh disposable activation; emulator CI remains separate evidence. Recalculate dependency eligibility from merged `main` before starting Slice 2.11 and every later feature slice.
 
 ## Feature-ID checklist
 
@@ -137,10 +137,10 @@ Current Feature-ID completion is **33/43 Activation**. The Runtime Convergence G
 - [x] `GEO-009` — PR #74
 - [x] `GEO-010` — PR #74
 - [x] `GEO-011` — PR #77; canonical gate/privacy/idempotency/anchoring tests, Firestore emulator acceptance, desktop/mobile browser QA, and `npm run check`
-- [ ] `EDU-001`
-- [ ] `EDU-002`
-- [ ] `EDU-003`
-- [ ] `EDU-004`
+- [x] `EDU-001` — PR #102; protected real-map synthetic three-organization scenario, responsive configured-browser acceptance, emulator acceptance, and `npm run check`
+- [x] `EDU-002` — PR #102; ordered synthetic opportunity issuance with no live record writes, configured-browser acceptance, emulator acceptance, and `npm run check`
+- [x] `EDU-003` — PR #102; explainable potential-fit demonstration without qualification claims, configured-browser acceptance, and deterministic tests
+- [x] `EDU-004` — PR #102; bounded gap and teammate discovery without invitation/legal-team creation, resume/restart browser acceptance, emulator acceptance, and cleanup
 - [ ] `EDU-005`
 - [ ] `EDU-006`
 - [ ] `EDU-007`

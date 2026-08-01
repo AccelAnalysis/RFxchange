@@ -11,6 +11,7 @@ const [
   mapboxCanvas,
   spatialScene,
   geographyRoute,
+  participantMapRuntime,
   activationClient,
   locationPanel,
   markerPanel,
@@ -23,6 +24,7 @@ const [
   read("src/components/map/MapboxLocalityCanvas.tsx"),
   read("src/components/map/ExchangeSpatialScene.tsx"),
   read("app/geography/canvas/page.tsx"),
+  read("src/infrastructure/geography/participant-map-runtime.ts"),
   read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("src/components/organization-location/OrganizationLocationPanel.tsx"),
   read("src/components/organization-marker/MarkerActivationPanel.tsx"),
@@ -37,6 +39,7 @@ assert.ok(
   "Mapbox browser token configuration must require a public token and reject secret-token guidance.",
 );
 
+const authenticatedMapSurface = `${geographyRoute}\n${participantMapRuntime}`;
 for (const requirement of [
   "new mapboxgl.Map",
   'style: "mapbox://styles/mapbox/standard"',
@@ -109,7 +112,7 @@ for (const requirement of [
   "marker={authenticated.homeMarker}",
   "interactive",
 ]) {
-  assert.ok(geographyRoute.includes(requirement), `Authenticated Intelligence map is missing ${requirement}.`);
+  assert.ok(authenticatedMapSurface.includes(requirement), `Authenticated Intelligence map is missing ${requirement}.`);
 }
 assert.ok(!geographyRoute.includes("SearchFilterOverlay"), "Intelligence must avoid a decorative duplicate search control.");
 

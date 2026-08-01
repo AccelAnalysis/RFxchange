@@ -1,10 +1,10 @@
 # Wave 2 — Activation Roadmap
 
-**Status: ACTIVE SEQUENTIAL IMPLEMENTATION — SLICES 2.1–2.9 MERGED; RECALCULATE BEFORE 2.10**
+**Status: ACTIVE SEQUENTIAL IMPLEMENTATION — SLICES 2.1–2.10 COMPLETE; RECALCULATE FROM MERGED MAIN BEFORE 2.11**
 
-Current merged feature state is **33/43 Activation features complete**. Slices 2.1–2.9 are complete; ten Activation Feature IDs remain across Slices 2.10–2.12.
+Current feature state after Slice 2.10 is **37/43 Activation features complete**. Six Activation Feature IDs remain across Slices 2.11–2.12.
 
-PR #99 merged the narrow no-Feature-ID website carry-forward repair after both configured-browser paths and cleanup passed. Slice 2.9 then implemented the bounded public acquisition projection and server-bound acquisition continuity in PR #101. Its configured-browser acceptance exercised a fresh real activation against Firebase, Census/TIGERweb, Census geocoding, and Mapbox, proved history and sign-in re-entry, and removed every disposable record. Slice 2.10 remains gated on PR #101 merge and dependency recalculation from the resulting `main`.
+PR #99 merged the narrow no-Feature-ID website carry-forward repair after both configured-browser paths and cleanup passed. Slice 2.9 then implemented bounded public acquisition and server-bound continuity in PR #101. Slice 2.10 implements the first four ordered steps of one stable eight-step orientation in PR #102. Its configured-browser acceptance exercised a fresh real activation against Firebase, Census/TIGERweb, Census geocoding and Mapbox, proved ordered progression, reload/re-entry, restart, responsive map/marker visibility and synthetic isolation, then removed every disposable record. Slice 2.11 remains gated on PR #102 merge and dependency recalculation from the resulting `main`.
 
 | Slice / Gate | Features | Purpose / exit |
 | --- | --- | --- |
@@ -20,7 +20,7 @@ PR #99 merged the narrow no-Feature-ID website carry-forward repair after both c
 | **Registration Convergence Correction — MERGED PR #98** | **No Feature IDs** | Remove optional organization classification, role and objective questions from activation; correct Profile Complete; retain optional enrichment; preserve Official Resource Provider as a separate Wave 3.6 application/review; establish post-orientation first-value selection. |
 | **Activation Profile Website Carry-Forward Repair — MERGED PR #99** | **No Feature IDs** | Preserved omitted website fields and proved both configured-browser website paths plus cleanup before Slice 2.9. |
 | **2.9 — Acquisition-to-Activation Continuity — PR #101** | `ACQ-002`, `ACQ-003` | Privacy-safe public opportunity entry and server-bound semantic context persist through activation and first authenticated continuation. |
-| **2.10 — Orientation: Discovery & Team Formation** | `EDU-001`, `EDU-002`, `EDU-003`, `EDU-004` | Synthetic three-organization map tutorial: issuer creates opportunity → responder match → capability gap → teammate discovery. |
+| **2.10 — Orientation: Discovery & Team Formation — PR #102** | `EDU-001`, `EDU-002`, `EDU-003`, `EDU-004` | Protected, synthetic three-organization map tutorial: issuer creates opportunity → responder match → capability gap → teammate discovery. |
 | **2.11 — Orientation: Response to Outcome** | `EDU-005`, `EDU-006`, `EDU-007`, `EDU-008` | Teammate invite/accept → joint response → issuer evaluation/selection → network-effect visualization. |
 | **2.12 — First Value & OPEN Gate** | `EDU-009`, `EDU-010` | Ask the participant to select a post-orientation first-value intent, then release OPEN only after all account, organization, geography, marker, education, legal and first-value gates are satisfied. |
 
