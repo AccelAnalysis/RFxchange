@@ -30,6 +30,8 @@ The map is not placed inside a card, constrained content column, or framed dashb
 
 Desktop camera padding accounts for the activation column. Mobile camera padding accounts for the activation sheet/vertical content. Padding changes composition only and never changes the authoritative geographic target.
 
+In the authenticated interactive workspace, persistent search and view controls must preserve an unobstructed center lane for the organization marker. Desktop panel width must stop before the horizontal viewport center, and mobile panel height must stop before the vertical viewport center. Search-result expansion remains scrollable inside those bounds rather than covering the marker target.
+
 ## Canonical scene sequence
 
 ```text
@@ -104,6 +106,7 @@ Required behavior:
 - the RF symbol and organization name use viewport-aligned text;
 - the marker label remains visible without opening a popup;
 - `text-allow-overlap` and `text-ignore-placement` prevent the home marker from disappearing behind ordinary label collision;
+- persistent interface panels preserve an unobstructed center lane so the organization marker is visibly rendered on desktop and mobile;
 - the home marker is not dependent on popup state and is not folded into ordinary clustering.
 
 The popup is additional detail. Closing it must never remove the organization marker.
@@ -155,6 +158,7 @@ The following are regressions:
 - ignoring reduced-motion preferences;
 - removing production search, fit-home, or view-mode controls from the authenticated map;
 - implementing the home marker as popup-only;
+- allowing a persistent search or control panel to cover the viewport-centered organization marker;
 - using a floating DOM element whose coordinate drifts during bearing changes;
 - centering the organization camera on an unapproved private coordinate;
 - allowing viewport state to establish geography or marker authority.
