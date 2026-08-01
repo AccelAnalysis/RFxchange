@@ -146,17 +146,11 @@ export class VersionedTransactionalEmailTemplateCatalog {
     text: string;
     html: string | null;
   }>> {
-    const definition = this.byTemplate.get(templateKey(request.templateKey, 1));
-    if (!definition || definition.eventKey !== request.eventKey) {
-      throw new Error(
-        `Transactional email request ${request.eventKey}/${request.templateKey} is not a reviewed event-template mapping.`,
-      );
-    }
     return this.renderVersioned({
-      eventKey: definition.eventKey,
-      eventVersion: definition.eventVersion,
-      templateKey: definition.templateKey,
-      templateVersion: definition.templateVersion,
+      eventKey: request.eventKey,
+      eventVersion: request.eventVersion,
+      templateKey: request.templateKey,
+      templateVersion: request.templateVersion,
       purpose: request.purpose,
       variables: request.variables,
     }).content;
