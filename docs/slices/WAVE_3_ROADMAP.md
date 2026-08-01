@@ -1,10 +1,10 @@
 # Wave 3 — Network Roadmap
 
-**Status: ADOPTED PLANNING AUTHORITY — WAVE 2 EXIT VERIFIED; BRAND GATE B0 REQUIRED BEFORE SLICE 3.1; IMPLEMENTATION REQUIRES EXPLICIT AUTHORIZATION**
+**Status: SLICE 3.1 COMPLETE; BRAND GATES B1, B2, B3 AND B6a ARE THE NEXT AUTHORIZED-SEQUENCE BOUNDARY BEFORE SLICE 3.2**
 
-Wave 2 is complete and reconciled on final merged `main` at `097b574ccce8865d4127cfe381fb0bd6199de0a5`, with **43/43 Activation** complete and the tracker at **438 total · 118 Done · 320 Not Started**. The canonical dependency graph identifies Slice 3.1 (`COMMS-003`, `COMMS-004`, `COMMS-005`) as the earliest eligible candidate.
+Wave 2 is complete and Brand Gate B0 is merged. Wave 3 Slice 3.1 completed through PR #107 and merged to `main` at `368fdb5e0179ca7933eb33ffb6cbf12a2afe2bf1`. Feature state after Slice 3.1 is **438 total · 121 Done · 317 Not Started**, with Network at **7/38**: four inherited Wave 1 foundations plus `COMMS-003`, `COMMS-004` and `COMMS-005`.
 
-PR #100 performs Brand Gate B0 documentation/authority reconciliation. B0 must merge before Slice 3.1 is authorized so transactional templates and later participant surfaces consume one brand/message authority. This roadmap does not authorize implementation.
+The dependency graph now makes Slice 3.2 Feature IDs eligible from the Network perspective, but Slice 3.2 remains on implementation hold until Brand Gates B1, B2, B3 and B6a are complete and the slice is explicitly authorized.
 
 Wave 3 contains **38 Network features**. Four foundations were completed during Wave 1 because they were prerequisites for administration and organization access:
 
@@ -13,11 +13,11 @@ Wave 3 contains **38 Network features**. Four foundations were completed during 
 - `ADM-055` — organization role bundle catalog
 - `ADM-056` — admin management of organization memberships and permission bundles
 
-The **34 remaining Network features** are organized into eight implementation slices.
+The remaining Network features are organized into eight implementation slices.
 
-| Slice | Features | Purpose / exit from slice |
+| Slice | Features | Status / purpose |
 | --- | --- | --- |
-| **3.1 — Transactional Communications Reliability** | `COMMS-003`, `COMMS-004`, `COMMS-005` | Establish versioned transactional templates/event mappings, delivery audit, idempotency, retry and terminal-failure visibility before Network workflows begin sending invitations and referrals. Customer-facing templates consume the Brand Content and Messaging System. |
+| **3.1 — Transactional Communications Reliability** | `COMMS-003`, `COMMS-004`, `COMMS-005` | **Complete via PR #107.** Versioned transactional templates/event mappings, delivery audit, idempotency, deterministic retry, interrupted-success healing and terminal-failure operations visibility are established. |
 | **3.2 — Controlled Network Entry & Discovery** | `GEO-012`, `DSC-001`, `DSC-002`, `DSC-003` | Turn the activated locality into the first real Network workspace: own organization, permitted organizations, capability search, geographic/service-area filters and interactive map discovery. Brand Gates B1, B2, B3 and B6a must be complete first to prevent a second spatial rewrite. |
 | **3.3 — Market Profile Enrichment** | `ORG-013`, `ORG-014`, `ORG-016`, `ORG-017` | Add structured products/services/capabilities, industry/NAICS context, past-performance/project context and teaming/referral/resource preferences without displacing capability-first discovery or implying verification. |
 | **3.4 — Credential, Media & Location Enrichment** | `ORG-015`, `ORG-018`, `ORG-019` | Add certifications/licenses/identifiers with provenance, organization media/documents/portfolio and additional locations using private-by-default storage, geography and subordinate-location visual treatment. |
@@ -32,8 +32,8 @@ Use the single-active-slice or single-active-gate model unless a future explicit
 
 ```text
 Wave 2 exit verified
-→ Brand Gate B0 merge
-→ 3.1 merge → recalculate
+→ Brand Gate B0 merged
+→ Slice 3.1 merged and reconciled
 → Brand Gates B1 → B2 → B3 → B6a
 → 3.2 merge → recalculate
 → 3.3 merge → recalculate
@@ -54,7 +54,7 @@ Preparation/read-only inspection may occur ahead of the active slice/gate. Produ
 ```text
 Wave 2 OPEN + marker
 → B0 brand authority
-→ reliable communications
+→ reliable communications [complete]
 → semantic/component/cartographic/workspace foundations
 → controlled Network map/search
 → richer market profiles
@@ -75,6 +75,22 @@ RES-003 + REF-005 → REF-006 → RES-007
 RES-003 → DSC-011
 RES-002 + COMMS-003 + ACQ-003 → ACQ-008
 ```
+
+## Slice 3.1 acceptance result
+
+PR #107 established:
+
+- explicit platform-event and template version identifiers;
+- reviewed event/template mapping with typed, bounded variables and HTML escaping;
+- a server-managed delivery aggregate plus append-only delivery evidence;
+- recipient-address minimization through hashing and domain-only routing evidence;
+- provider-neutral failure classification and deterministic INF-007 retries;
+- duplicate suppression after provider acceptance;
+- healing of interrupted INF-007 success persistence without another send;
+- a bounded terminal-failure projection integrated with the existing `email-delivery` operations-health surface; and
+- explicit anonymous/authenticated direct-client denial for the communications collections.
+
+Production CI run `30719532985` passed on implementation head `eba071e54e3a9cc88ec7fd353e943922917d6484`: repository guardrails, 19 Functions tests, the complete Firebase emulator suite, 353 architecture tests, TypeScript, lint and production build.
 
 ## Brand authority for Wave 3
 
