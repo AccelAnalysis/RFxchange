@@ -61,6 +61,12 @@ const DOMAIN_TIMESTAMP_EXPOSURE: Readonly<Record<FirestoreCollectionKey, DomainT
     adminPermissionGrants: Object.freeze({ createdAt: true, updatedAt: false }),
     backgroundJobs: Object.freeze({ createdAt: true, updatedAt: true }),
     backgroundJobEvents: Object.freeze({ createdAt: false, updatedAt: false }),
+    acquisitionContexts: Object.freeze({ createdAt: false, updatedAt: false }),
+    acquisitionContextEvents: Object.freeze({ createdAt: false, updatedAt: false }),
+    orientationJourneys: Object.freeze({ createdAt: false, updatedAt: false }),
+    orientationJourneyEvents: Object.freeze({ createdAt: false, updatedAt: false }),
+    firstValueSelections: Object.freeze({ createdAt: false, updatedAt: false }),
+    activationReleaseEvents: Object.freeze({ createdAt: false, updatedAt: false }),
   });
 
 function asDocumentData(record: object): DocumentData {

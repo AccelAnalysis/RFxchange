@@ -1,5 +1,7 @@
 import type { OrganizationId } from "../organizations/model.ts";
 import type { OrganizationMembershipId, UserId } from "../users/model.ts";
+import type { BoundAcquisitionContext } from "../acquisition/model.ts";
+import { CURRENT_PLATFORM_POLICY_VERSION } from "../legal/model.ts";
 
 export const ORGANIZATION_RELATIONSHIPS = [
   "owner",
@@ -12,6 +14,7 @@ export const ORGANIZATION_RELATIONSHIPS = [
 export type OrganizationRelationship = (typeof ORGANIZATION_RELATIONSHIPS)[number];
 
 export interface ActivationLegalAcceptance {
+  readonly policyVersion: typeof CURRENT_PLATFORM_POLICY_VERSION;
   readonly acceptedTerms: true;
   readonly acceptedPlatformRules: true;
   readonly acknowledgedPrivacy: true;
@@ -41,6 +44,8 @@ export interface ActivationJourneyContext {
    * the same website or phone twice.
    */
   readonly organizationIdentitySeed: ActivationOrganizationIdentitySeed;
+  /** Server-issued navigation intent, bound to this user and access journey. Never authority. */
+  readonly acquisitionContext: BoundAcquisitionContext | null;
   readonly legalAcceptance: ActivationLegalAcceptance | null;
   /**
    * Temporary bridge only. It proves the user saw the canonical orientation position in the
@@ -151,6 +156,7 @@ export function createActivationJourneyContext(input: Readonly<{
       ? organizationRelationship(input.organizationRelationship)
       : null,
     organizationIdentitySeed: identitySeed(input.organizationIdentitySeed),
+    acquisitionContext: null,
     legalAcceptance: null,
     orientationBridgeAcknowledgedAt: null,
     organizationId: null,
@@ -171,6 +177,7 @@ export function updateActivationJourneyContext(
       websiteUrl?: string | null;
       phone?: string | null;
     }>;
+    acquisitionContext?: BoundAcquisitionContext | null;
     legalAcceptance?: ActivationLegalAcceptance | null;
     orientationBridgeAcknowledgedAt?: string | null;
     organizationId?: OrganizationId | null;
@@ -180,6 +187,15 @@ export function updateActivationJourneyContext(
   }>,
 ): ActivationJourneyContext {
   const now = timestamp(input.now);
+  if (
+    input.acquisitionContext &&
+    (
+      input.acquisitionContext.boundUserId !== current.userId ||
+      String(input.acquisitionContext.boundAccessJourneyId) !== current.accessJourneyId
+    )
+  ) {
+    throw new Error("Acquisition context belongs to another participant journey.");
+  }
   return Object.freeze({
     ...current,
     ...(input.provisionalOrganizationName !== undefined
@@ -200,6 +216,17 @@ export function updateActivationJourneyContext(
       : {}),
     ...(input.organizationIdentitySeed !== undefined
       ? { organizationIdentitySeed: identitySeed(input.organizationIdentitySeed) }
+      : {}),
+    ...(input.acquisitionContext !== undefined
+      ? {
+          acquisitionContext: input.acquisitionContext
+            ? Object.freeze({
+                ...input.acquisitionContext,
+                intent: Object.freeze({ ...input.acquisitionContext.intent }),
+                source: Object.freeze({ ...input.acquisitionContext.source }),
+              })
+            : null,
+        }
       : {}),
     ...(input.legalAcceptance !== undefined
       ? { legalAcceptance: input.legalAcceptance }
@@ -222,9 +249,22 @@ export function updateActivationJourneyContext(
 
 export function createActivationLegalAcceptance(now: string): ActivationLegalAcceptance {
   return Object.freeze({
+    policyVersion: CURRENT_PLATFORM_POLICY_VERSION,
     acceptedTerms: true as const,
     acceptedPlatformRules: true as const,
     acknowledgedPrivacy: true as const,
     capturedAt: timestamp(now),
   });
+}
+
+export function isCurrentActivationLegalAcceptance(
+  acceptance: ActivationLegalAcceptance | null,
+): acceptance is ActivationLegalAcceptance {
+  return Boolean(
+    acceptance &&
+    acceptance.policyVersion === CURRENT_PLATFORM_POLICY_VERSION &&
+    acceptance.acceptedTerms === true &&
+    acceptance.acceptedPlatformRules === true &&
+    acceptance.acknowledgedPrivacy === true,
+  );
 }

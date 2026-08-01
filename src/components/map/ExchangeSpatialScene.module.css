@@ -46,7 +46,8 @@
   z-index: 20;
   top: 88px;
   left: 18px;
-  width: min(520px, calc(100vw - 36px));
+  /* Keep the viewport center and its organization marker outside this persistent panel. */
+  width: min(520px, calc(50vw - 72px));
   max-height: min(calc(100vh - 116px), 650px);
   padding: 12px;
   overflow: auto;
@@ -223,6 +224,14 @@
   -webkit-backdrop-filter: blur(20px) saturate(125%);
 }
 
+.scene[data-workspace-overlay="right"] .viewModeControl {
+  right: min(466px, calc(100vw - 172px));
+}
+
+.scene[data-workspace-overlay="right"] :global(.mapboxgl-ctrl-bottom-right) {
+  right: 448px;
+}
+
 .viewModeControl button {
   min-height: 36px;
   padding: 0 12px;
@@ -261,13 +270,25 @@
     top: 76px;
     left: 10px;
     width: calc(100vw - 20px);
-    max-height: min(46vh, calc(100vh - 104px));
+    /* Preserve a clear center lane for the marker while retaining a scrollable search surface. */
+    max-height: min(calc(50vh - 112px), calc(100vh - 104px));
     border-radius: 16px;
   }
 
   .viewModeControl {
     right: 10px;
     bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+
+  .scene[data-workspace-overlay="right"] .viewModeControl {
+    right: auto;
+    left: 10px;
+    bottom: calc(min(68svh, 590px) + 24px + env(safe-area-inset-bottom));
+  }
+
+  .scene[data-workspace-overlay="right"] :global(.mapboxgl-ctrl-bottom-right) {
+    right: 0;
+    bottom: calc(min(68svh, 590px) + 12px + env(safe-area-inset-bottom));
   }
 }
 

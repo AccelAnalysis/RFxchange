@@ -11,6 +11,7 @@ import {
 import mapboxgl from "mapbox-gl";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
+import type { SyntheticOrientationMapOverlay } from "../../application/orientation/synthetic-scenario";
 import {
   MAP_ROTATION_PREFERENCE_EVENT,
   readMapRotationPreference,
@@ -34,6 +35,9 @@ export interface ExchangeSpatialSceneProps {
   readonly marker?: ExchangeHomeMarker | null;
   readonly interactive?: boolean;
   readonly activationOverlay?: boolean;
+  readonly workspaceOverlay?: "left" | "right" | null;
+  readonly showSearch?: boolean;
+  readonly tutorialOverlay?: SyntheticOrientationMapOverlay | null;
   readonly className?: string;
 }
 
@@ -64,6 +68,13 @@ const HOME_MARKER_LABEL_LAYER_ID = "rfx-spatial-scene-home-marker-label";
 const SEARCH_AREA_SOURCE_ID = "rfx-spatial-scene-search-area";
 const SEARCH_AREA_FILL_LAYER_ID = "rfx-spatial-scene-search-fill";
 const SEARCH_AREA_LINE_LAYER_ID = "rfx-spatial-scene-search-line";
+const TUTORIAL_PATH_SOURCE_ID = "rfx-spatial-scene-tutorial-paths";
+const TUTORIAL_PATH_LAYER_ID = "rfx-spatial-scene-tutorial-paths-line";
+const TUTORIAL_NODE_SOURCE_ID = "rfx-spatial-scene-tutorial-nodes";
+const TUTORIAL_NODE_HALO_LAYER_ID = "rfx-spatial-scene-tutorial-node-halo";
+const TUTORIAL_NODE_CORE_LAYER_ID = "rfx-spatial-scene-tutorial-node-core";
+const TUTORIAL_NODE_GLYPH_LAYER_ID = "rfx-spatial-scene-tutorial-node-glyph";
+const TUTORIAL_NODE_LABEL_LAYER_ID = "rfx-spatial-scene-tutorial-node-label";
 
 export const EXCHANGE_ORBIT_PERIOD_MS = 225_000;
 export const LOCALITY_ORBIT_PITCH = 60;
@@ -89,7 +100,7 @@ const VIEW_MODE_OPTIONS: readonly Readonly<{
 
 const EMPTY_FEATURE_COLLECTION = Object.freeze({
   type: "FeatureCollection" as const,
-  features: Object.freeze([]) as readonly never[],
+  features: [] as never[],
 });
 
 function copyRing(ring: readonly (readonly [number, number])[]): number[][] {
@@ -200,6 +211,39 @@ function markerGeoJson(marker?: ExchangeHomeMarker | null) {
         },
       },
     ],
+  };
+}
+
+function tutorialNodeGeoJson(overlay?: SyntheticOrientationMapOverlay | null) {
+  if (!overlay) return EMPTY_FEATURE_COLLECTION;
+  return {
+    type: "FeatureCollection" as const,
+    features: overlay.nodes.map((node) => ({
+      type: "Feature" as const,
+      properties: {
+        id: node.id,
+        label: node.label,
+        role: node.role,
+        glyph: node.role === "opportunity" ? "!" : node.role === "issuer" ? "I" : node.role === "responder" ? "R" : "T",
+        provenance: node.provenance,
+      },
+      geometry: { type: "Point" as const, coordinates: [node.coordinate[0], node.coordinate[1]] },
+    })),
+  };
+}
+
+function tutorialPathGeoJson(overlay?: SyntheticOrientationMapOverlay | null) {
+  if (!overlay) return EMPTY_FEATURE_COLLECTION;
+  return {
+    type: "FeatureCollection" as const,
+    features: overlay.paths.map((path) => ({
+      type: "Feature" as const,
+      properties: { id: path.id, kind: path.kind, stage: overlay.stage, provenance: path.provenance },
+      geometry: {
+        type: "LineString" as const,
+        coordinates: path.coordinates.map(([longitude, latitude]) => [longitude, latitude]),
+      },
+    })),
   };
 }
 
@@ -333,14 +377,18 @@ function mapViewModeForPitch(pitch: number): MapViewMode {
   return "2d";
 }
 
-function cameraPadding(activationOverlay: boolean) {
-  if (!activationOverlay) {
+function cameraPadding(activationOverlay: boolean, workspaceOverlay: "left" | "right" | null) {
+  const overlay = workspaceOverlay ?? (activationOverlay ? "left" : null);
+  if (!overlay) {
     return { top: 84, right: 36, bottom: 36, left: 36 };
   }
   if (typeof window !== "undefined" && window.matchMedia("(max-width: 760px)").matches) {
     return { top: 72, right: 22, bottom: Math.min(window.innerHeight * 0.58, 520), left: 22 };
   }
-  return { top: 88, right: 72, bottom: 62, left: Math.min(window.innerWidth * 0.48, 620) };
+  const panelSpace = Math.min(window.innerWidth * 0.48, 620);
+  return overlay === "left"
+    ? { top: 88, right: 72, bottom: 62, left: panelSpace }
+    : { top: 88, right: panelSpace, bottom: 62, left: 72 };
 }
 
 export function ExchangeSpatialScene({
@@ -349,6 +397,9 @@ export function ExchangeSpatialScene({
   marker = null,
   interactive = false,
   activationOverlay = false,
+  workspaceOverlay = null,
+  showSearch = interactive,
+  tutorialOverlay = null,
   className,
 }: ExchangeSpatialSceneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -365,9 +416,12 @@ export function ExchangeSpatialScene({
   const modelRef = useRef(model);
   const markerRef = useRef(marker);
   const activationOverlayRef = useRef(activationOverlay);
+  const workspaceOverlayRef = useRef(workspaceOverlay);
   const homeGeoJsonRef = useRef(localityGeoJson(model));
   const homeMaskGeoJsonRef = useRef(localityMaskGeoJson(model));
   const homeMarkerGeoJsonRef = useRef(markerGeoJson(marker));
+  const tutorialNodeGeoJsonRef = useRef(tutorialNodeGeoJson(tutorialOverlay));
+  const tutorialPathGeoJsonRef = useRef(tutorialPathGeoJson(tutorialOverlay));
   const searchMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
   const [viewMode, setViewMode] = useState<MapViewMode>("3d");
@@ -380,14 +434,19 @@ export function ExchangeSpatialScene({
   const homeGeoJson = useMemo(() => localityGeoJson(model), [model]);
   const homeMaskGeoJson = useMemo(() => localityMaskGeoJson(model), [model]);
   const homeMarkerGeoJson = useMemo(() => markerGeoJson(marker), [marker]);
+  const tutorialNodes = useMemo(() => tutorialNodeGeoJson(tutorialOverlay), [tutorialOverlay]);
+  const tutorialPaths = useMemo(() => tutorialPathGeoJson(tutorialOverlay), [tutorialOverlay]);
 
   modeRef.current = mode;
   modelRef.current = model;
   markerRef.current = marker;
   activationOverlayRef.current = activationOverlay;
+  workspaceOverlayRef.current = workspaceOverlay;
   homeGeoJsonRef.current = homeGeoJson;
   homeMaskGeoJsonRef.current = homeMaskGeoJson;
   homeMarkerGeoJsonRef.current = homeMarkerGeoJson;
+  tutorialNodeGeoJsonRef.current = tutorialNodes;
+  tutorialPathGeoJsonRef.current = tutorialPaths;
 
   const stopOrbit = useCallback(() => {
     if (animationFrameRef.current !== null) {
@@ -460,7 +519,7 @@ export function ExchangeSpatialScene({
 
     stopOrbit();
     manuallyPausedRef.current = false;
-    const padding = cameraPadding(activationOverlayRef.current);
+    const padding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current);
     const activeMode = modeRef.current;
     const activeMarker = markerRef.current;
     setLocalityLayerVisibility(activeMode !== "regional");
@@ -505,7 +564,7 @@ export function ExchangeSpatialScene({
     pauseForInteraction();
     setLocalityLayerVisibility(true);
     map.fitBounds(localityBounds(modelRef.current), {
-      padding: cameraPadding(false),
+      padding: cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current),
       pitch: map.getPitch(),
       bearing: map.getBearing(),
       maxZoom: 12.2,
@@ -735,6 +794,71 @@ export function ExchangeSpatialScene({
         },
       });
 
+      map.addSource(TUTORIAL_PATH_SOURCE_ID, { type: "geojson", data: tutorialPathGeoJsonRef.current });
+      map.addLayer({
+        id: TUTORIAL_PATH_LAYER_ID,
+        type: "line",
+        source: TUTORIAL_PATH_SOURCE_ID,
+        paint: {
+          "line-color": [
+            "match", ["get", "kind"],
+            "demand-signal", "#d6a23a",
+            "capability-match", "#2e5eaa",
+            "teammate-discovery", "#3b7b57",
+            "joint-response", "#d6a23a",
+            "selected-outcome", "#3b7b57",
+            "#2e5eaa",
+          ],
+          "line-opacity": ["case", ["==", ["get", "stage"], "network-effect"], 1, 0.9],
+          "line-width": ["case", ["==", ["get", "stage"], "network-effect"], 5, 4],
+          "line-dasharray": [1.6, 1.1],
+        },
+      });
+
+      map.addSource(TUTORIAL_NODE_SOURCE_ID, { type: "geojson", data: tutorialNodeGeoJsonRef.current });
+      map.addLayer({
+        id: TUTORIAL_NODE_HALO_LAYER_ID,
+        type: "circle",
+        source: TUTORIAL_NODE_SOURCE_ID,
+        paint: { "circle-radius": 17, "circle-color": "rgba(46,94,170,0.16)" },
+      });
+      map.addLayer({
+        id: TUTORIAL_NODE_CORE_LAYER_ID,
+        type: "circle",
+        source: TUTORIAL_NODE_SOURCE_ID,
+        paint: {
+          "circle-radius": 11,
+          "circle-color": ["match", ["get", "role"], "issuer", "#d6a23a", "responder", "#2e5eaa", "teammate", "#3b7b57", "#8f3c32"],
+          "circle-stroke-color": "#f7f3ea",
+          "circle-stroke-width": 2.5,
+        },
+      });
+      map.addLayer({
+        id: TUTORIAL_NODE_GLYPH_LAYER_ID,
+        type: "symbol",
+        source: TUTORIAL_NODE_SOURCE_ID,
+        layout: {
+          "text-field": ["get", "glyph"], "text-size": 11, "text-allow-overlap": true,
+          "text-ignore-placement": true, "text-pitch-alignment": "viewport",
+        },
+        paint: { "text-color": "#f7f3ea" },
+      });
+      map.addLayer({
+        id: TUTORIAL_NODE_LABEL_LAYER_ID,
+        type: "symbol",
+        source: TUTORIAL_NODE_SOURCE_ID,
+        minzoom: 12.5,
+        layout: {
+          "text-field": ["get", "label"], "text-size": 12, "text-offset": [0, 1.8],
+          "text-anchor": "top", "text-allow-overlap": true, "text-ignore-placement": true,
+          "text-pitch-alignment": "viewport",
+        },
+        paint: {
+          "text-color": "#0b0b0d", "text-halo-color": "rgba(247,243,234,0.96)",
+          "text-halo-width": 2,
+        },
+      });
+
       map.addSource(HOME_MARKER_SOURCE_ID, { type: "geojson", data: homeMarkerGeoJsonRef.current });
       map.addLayer({
         id: HOME_MARKER_HALO_LAYER_ID,
@@ -849,8 +973,12 @@ export function ExchangeSpatialScene({
     maskSource?.setData(homeMaskGeoJson);
     const markerSource = map.getSource(HOME_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     markerSource?.setData(homeMarkerGeoJson);
+    const tutorialNodeSource = map.getSource(TUTORIAL_NODE_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    tutorialNodeSource?.setData(tutorialNodes);
+    const tutorialPathSource = map.getSource(TUTORIAL_PATH_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    tutorialPathSource?.setData(tutorialPaths);
     applyScene();
-  }, [applyScene, homeGeoJson, homeMaskGeoJson, homeMarkerGeoJson, mode, activationOverlay]);
+  }, [applyScene, homeGeoJson, homeMaskGeoJson, homeMarkerGeoJson, tutorialNodes, tutorialPaths, mode, activationOverlay, workspaceOverlay]);
 
   if (!token.startsWith("pk.")) {
     return (
@@ -865,13 +993,14 @@ export function ExchangeSpatialScene({
       className={`${styles.scene} ${className ?? ""}`}
       data-scene={mode}
       data-interactive={interactive}
+      data-workspace-overlay={workspaceOverlay ?? "none"}
       aria-label={`RFxchange ${mode} spatial scene`}
     >
       <div ref={containerRef} className={styles.map} />
 
       {interactive ? (
         <>
-          <section className={styles.searchPanel} aria-label="Search the Exchange map">
+          {showSearch ? <section className={styles.searchPanel} aria-label="Search the Exchange map">
             <form className={styles.searchForm} role="search" onSubmit={submitMapSearch}>
               <label>
                 <span aria-hidden="true" className={styles.searchGlyph}>⌕</span>
@@ -922,7 +1051,7 @@ export function ExchangeSpatialScene({
             <p className={styles.searchHint}>
               Search moves the camera only and never changes your home locality.
             </p>
-          </section>
+          </section> : null}
 
           <div className={styles.viewModeControl} role="group" aria-label="Map view mode">
             {VIEW_MODE_OPTIONS.map((option) => (
@@ -936,6 +1065,7 @@ export function ExchangeSpatialScene({
                 {option.label}
               </button>
             ))}
+            <button type="button" onClick={fitHomeLocality}>Fit home</button>
           </div>
         </>
       ) : null}
@@ -944,6 +1074,7 @@ export function ExchangeSpatialScene({
         Edge-to-edge RFxchange map. Ambient rotation uses a 225-second orbit. Locality scenes use a
         60-degree pitch and fit the authoritative locality bounds. Organization scenes use a
         75-degree pitch at zoom 16 and orbit the persistent organization marker.
+        {tutorialOverlay ? ` ${tutorialOverlay.accessibleSummary} All tutorial entities are synthetic and are not live Exchange activity.` : ""}
       </figcaption>
     </figure>
   );

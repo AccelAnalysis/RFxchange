@@ -1,10 +1,10 @@
 # Wave 2 — Activation Roadmap
 
-**Status: ACTIVE SEQUENTIAL IMPLEMENTATION — SLICES 2.1–2.8 + RUNTIME CONVERGENCE MERGED; 2.9 NEXT FEATURE SLICE**
+**Status: COMPLETE — 43/43 ACTIVATION FEATURES; WAVE 2 EXIT VERIFIED ON MERGED `main`**
 
-Current merged feature state remains **31/43 Activation features complete**. Slices 2.1–2.8 are complete; the Runtime Convergence Gate merged in PR #92 on 2026-07-31; 12 Activation Feature IDs remain across Slices 2.9–2.12.
+Current feature state is **43/43 Activation features complete**. PR #104 merged at `d599901d7ff35a4ee67eb2363dcf3334a2303dbc`, and production CI run `30715058244` passed on that exact merged `main`. The post-merge dependency recalculation identifies Slice 3.1 (`COMMS-003`, `COMMS-004`, `COMMS-005`) as the earliest eligible Wave 3 candidate. Wave 3 remains on hold until a later task explicitly authorizes that slice.
 
-Slice 2.9 received implementation authorization on 2026-07-30 after dependency recalculation. The subsequent runtime audit paused that authorization while cross-slice authentication/session, route-boundary, fixture-surface and source-convergence defects were repaired. PR #92 completed that repository-level gate and production CI passed. The Registration Convergence Correction in PR #98 then removed optional organization type, descriptive role and business-objective questions from required activation, corrected Profile Complete, and moved first-value intent selection to the post-orientation stage. Slice 2.9 remains the next authorized feature slice, subject to the normal configured-development/browser acceptance boundary and dependency check before implementation. These convergence gates carry no Feature IDs and change no tracker completion counts.
+PR #99 merged the narrow no-Feature-ID website carry-forward repair after both configured-browser paths and cleanup passed. Slice 2.9 implemented bounded public acquisition and server-bound continuity in PR #101. Slices 2.10 and 2.11 implemented one stable protected eight-step orientation in PRs #102 and #103. Slice 2.12 closes Activation in PR #104 with explicit semantic first-value selection and the complete server-authoritative OPEN gate. Its configured-browser acceptance ran both direct and preserved-opportunity journeys against real Firebase, Census/TIGERweb, Census geocoding and Mapbox, proved neutral/recommended choice behavior, explicit OPEN, re-entry, responsive layout and later restriction enforcement, then removed 79 disposable Firestore records and both Auth identities with a zero-residual rescan.
 
 | Slice / Gate | Features | Purpose / exit |
 | --- | --- | --- |
@@ -17,15 +17,16 @@ Slice 2.9 received implementation authorization on 2026-07-30 after dependency r
 | **2.7 — Essential Organization Profile** | `ORG-007`, `ORG-008`, `ORG-010`, `ORG-011`, `ORG-012` | Establish minimum identity/contact, categorized capability and Profile Complete; retain organization type, descriptive roles and objectives only as optional enrichment. |
 | **2.8 — Marker Activation & Admin 360** | `GEO-011`, `ADM-063`, `ADM-064` | Produce the real marker success moment and scoped Organization 360 foundation. |
 | **Runtime Convergence Gate — MERGED PR #92** | **No Feature IDs** | Enforce account-only participant runtime; centralize lifecycle/membership/restriction route access; protect admin routes with explicit scoped authority; remove production fixture leakage; align onboarding metadata boundaries; add positive/negative runtime guardrails. Repository CI passed on the merged tree. |
-| **Registration Convergence Correction — PR #98** | **No Feature IDs** | Remove optional organization classification, role and objective questions from activation; correct Profile Complete; retain optional enrichment; preserve Official Resource Provider as a separate Wave 3.6 application/review; establish post-orientation first-value selection. |
-| **2.9 — Acquisition-to-Activation Continuity** | `ACQ-002`, `ACQ-003` | Preserve meaningful acquisition context through registration into the first authenticated experience. Next authorized feature slice after convergence. |
-| **2.10 — Orientation: Discovery & Team Formation** | `EDU-001`, `EDU-002`, `EDU-003`, `EDU-004` | Synthetic three-organization map tutorial: issuer creates opportunity → responder match → capability gap → teammate discovery. |
-| **2.11 — Orientation: Response to Outcome** | `EDU-005`, `EDU-006`, `EDU-007`, `EDU-008` | Teammate invite/accept → joint response → issuer evaluation/selection → network-effect visualization. |
-| **2.12 — First Value & OPEN Gate** | `EDU-009`, `EDU-010` | Ask the participant to select a post-orientation first-value intent, then release OPEN only after all account, organization, geography, marker, education, legal and first-value gates are satisfied. |
+| **Registration Convergence Correction — MERGED PR #98** | **No Feature IDs** | Remove optional organization classification, role and objective questions from activation; correct Profile Complete; retain optional enrichment; preserve Official Resource Provider as a separate Wave 3.6 application/review; establish post-orientation first-value selection. |
+| **Activation Profile Website Carry-Forward Repair — MERGED PR #99** | **No Feature IDs** | Preserved omitted website fields and proved both configured-browser website paths plus cleanup before Slice 2.9. |
+| **2.9 — Acquisition-to-Activation Continuity — PR #101** | `ACQ-002`, `ACQ-003` | Privacy-safe public opportunity entry and server-bound semantic context persist through activation and first authenticated continuation. |
+| **2.10 — Orientation: Discovery & Team Formation — PR #102** | `EDU-001`, `EDU-002`, `EDU-003`, `EDU-004` | Protected, synthetic three-organization map tutorial: issuer creates opportunity → responder match → capability gap → teammate discovery. |
+| **2.11 — Orientation: Response to Outcome — PR #103** | `EDU-005`, `EDU-006`, `EDU-007`, `EDU-008` | Teammate invite/accept → joint response → issuer evaluation/selection → network-effect visualization. |
+| **2.12 — First Value & OPEN Gate — PR #104** | `EDU-009`, `EDU-010` | Seven semantic choices are presented after orientation; OPEN persists only after every fresh canonical prerequisite passes, with explicit remediation otherwise. |
 
 ## Runtime convergence authority
 
-The merged Runtime Convergence Gate, Registration Convergence Correction and `docs/architecture/ACTIVATION_JOURNEY_INTEGRATION_GATE.md` are authoritative for the boundary Slices 2.9–2.12 inherit.
+The merged Runtime Convergence Gate, Registration Convergence Correction, PR #99 repair gate and `docs/architecture/ACTIVATION_JOURNEY_INTEGRATION_GATE.md` are authoritative for the boundary Slices 2.9–2.12 inherit.
 
 Public visitors receive the marketing/authentication surface only. A valid RFxchange account/session is required for participant application routes. Free accounts are valid participant accounts; paid plans later add entitlements rather than creating the basic workspace-access boundary.
 
@@ -54,13 +55,17 @@ These requirements do not alter Feature-ID scope or completion status.
 2.1–2.8 merged
 → Runtime Convergence Gate merged + repository CI passed
 → Registration Convergence Correction merged + repository CI passed
-→ configured-development/browser acceptance
+→ PR #99 website carry-forward repair + repository gates
+→ configured-browser available-website and no-public-website acceptance
 → dependency check
 → 2.9
 → 2.10
 → 2.11
 → 2.12
-→ verify Wave 2 exit
+→ Wave 2 exit verified
+→ PR #104 merged
+→ Wave 2 exit verified on merged main
+→ Slice 3.1 dependency-eligible; Wave 3 implementation held for explicit authorization
 ```
 
 No production implementation for a later slice begins before the current authorized slice/gate is complete and dependency eligibility is recalculated.
@@ -73,7 +78,7 @@ Controlled geography
 → organization authority
 → real location/service geography
 → minimum identity/contact + categorized capability
-→ Profile Complete
+→ Profile Complete with carried website disposition preserved
 → marker activation
 → runtime and registration convergence
 → acquisition continuity
@@ -86,7 +91,13 @@ Organization type, descriptive participation roles and business objectives remai
 
 ## Wave 2 exit condition
 
-A new legitimate organization can arrive from a meaningful acquisition context, create/authenticate its RFxchange account, establish its organization relationship in an allowed geography, confirm location, complete the minimum essential profile, see its real marker, enter the authenticated controlled Exchange, understand the Exchange through orientation, select an appropriate first-value path, and enter OPEN only after the complete release gate is satisfied.
+A new legitimate organization can arrive from a meaningful acquisition context, create/authenticate its RFxchange account, establish its organization relationship in an allowed geography, confirm location, complete the minimum essential profile without losing previously confirmed website identity, see its real marker, enter the authenticated controlled Exchange, understand the Exchange through orientation, select an appropriate first-value path, and enter OPEN only after the complete release gate is satisfied.
+
+## Final Wave 2 exit reconciliation
+
+The exit condition was verified from merged `main` after PR #104. All twelve Slice 2.9–2.12 Feature IDs retain their own acceptance evidence, and the tracker derives **118 Done / 320 Not Started** from 438 Feature IDs with **43/43 Activation** complete. Anonymous access remains limited to public marketing and acquisition surfaces; protected routes re-evaluate current lifecycle, membership, organization authority and restriction state; acquisition context can recommend but cannot authorize; orientation data remains synthetic and isolated; and OPEN remains an explainable server-authoritative transition.
+
+No new Wave 3 or Wave 4 Feature ID was implemented or marked Done. All 34 remaining Wave 3 Feature IDs remain Not Started. The actual dependency graph makes Slice 3.1 — Transactional Communications Reliability — the earliest eligible candidate, but this reconciliation does not authorize or begin it.
 
 ## Canonical dependency corrections relevant to Wave 2
 

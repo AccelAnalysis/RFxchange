@@ -1,6 +1,6 @@
 # Slice 2.11 — Orientation: Response to Outcome
 
-**Status: PLANNING BRIEF ONLY — DO NOT IMPLEMENT UNTIL EXPLICITLY AUTHORIZED**
+**Status: COMPLETE VIA PR #103 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008`; SLICE 2.12 REQUIRES POST-MERGE RECALCULATION**
 
 ## Feature IDs
 
@@ -30,6 +30,18 @@ Complete the synthetic Exchange journey begun in Slice 2.10: teammate invitation
 ## Prerequisite state
 
 `EDU-005` follows `EDU-004`, then the tutorial progresses sequentially through `EDU-008`.
+
+### Authorization checkpoint — 2026-08-01
+
+Eligibility was recalculated from merged `main` after PR #102 merged at `c35d7a1bea8c52f7d82fa9a462ed39a7264b2d95`.
+
+- canonical tracker: **37/43 Activation features Done**;
+- `EDU-004` and the protected, resumable first half of the shared orientation were Done;
+- the real organization marker, controlled map, membership, lifecycle and restriction boundaries remained green;
+- the configured Firebase/Census/Mapbox preflight and Slice 2.10 production acceptance had passed;
+- no unsatisfied canonical dependency blocked `EDU-005` through `EDU-008`.
+
+Slice 2.11 was therefore authorized. This authorization did not extend to Slice 2.12 before Slice 2.11 merge and dependency recalculation.
 
 ## Product rules
 

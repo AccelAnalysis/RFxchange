@@ -229,10 +229,11 @@ function stableHash(value: string): number {
  * Candidate points are bounded around the canonical locality camera center and checked
  * against the authoritative locality geometry.
  */
-export function localityPresenceCoordinate(
-  organizationId: OrganizationId,
+export function localityDerivedCoordinate(
+  stableSeed: string,
   geography: GeographyDefinition,
   geometry: AuthoritativeGeoJsonGeometry,
+  options: Readonly<{ radiusScale?: number; phaseDegrees?: number }> = {},
 ): GeographicPosition {
   const center = geographicPosition([
     geography.defaultCamera.center.longitude,
@@ -240,11 +241,19 @@ export function localityPresenceCoordinate(
   ]);
   const longitudeRadius = (geography.bounds.east - geography.bounds.west) * 0.12;
   const latitudeRadius = (geography.bounds.north - geography.bounds.south) * 0.12;
-  const hash = stableHash(`${organizationId}:${geography.id}:locality-presence`);
+  const hash = stableHash(`${stableSeed}:${geography.id}:locality-presence`);
+  const radiusScale = options.radiusScale ?? 1;
+  if (!Number.isFinite(radiusScale) || radiusScale <= 0 || radiusScale > 4) {
+    throw new Error("Locality-derived coordinate radius scale is invalid.");
+  }
+  const initialPhaseDegrees = options.phaseDegrees ?? (hash % 360);
+  if (!Number.isFinite(initialPhaseDegrees) || initialPhaseDegrees < 0 || initialPhaseDegrees >= 360) {
+    throw new Error("Locality-derived coordinate phase is invalid.");
+  }
 
   for (let attempt = 0; attempt < 24; attempt += 1) {
-    const phase = ((hash % 360) + attempt * 137.508) * (Math.PI / 180);
-    const radius = 0.2 + (attempt % 6) * 0.11;
+    const phase = (initialPhaseDegrees + attempt * 137.508) * (Math.PI / 180);
+    const radius = (0.2 + (attempt % 6) * 0.11) * radiusScale;
     const candidate = geographicPosition([
       center[0] + Math.cos(phase) * longitudeRadius * radius,
       center[1] + Math.sin(phase) * latitudeRadius * radius,
@@ -255,6 +264,14 @@ export function localityPresenceCoordinate(
     throw new Error("Canonical locality camera center must fall within its authoritative boundary.");
   }
   return center;
+}
+
+export function localityPresenceCoordinate(
+  organizationId: OrganizationId,
+  geography: GeographyDefinition,
+  geometry: AuthoritativeGeoJsonGeometry,
+): GeographicPosition {
+  return localityDerivedCoordinate(String(organizationId), geography, geometry);
 }
 
 export function projectPublicOrganizationMarker(input: Readonly<{

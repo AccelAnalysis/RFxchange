@@ -50,6 +50,12 @@ test("defines schema version and canonical collection names", () => {
     adminPermissionGrants: "adminPermissionGrants",
     backgroundJobs: "backgroundJobs",
     backgroundJobEvents: "backgroundJobEvents",
+    acquisitionContexts: "acquisitionContexts",
+    acquisitionContextEvents: "acquisitionContextEvents",
+    orientationJourneys: "orientationJourneys",
+    orientationJourneyEvents: "orientationJourneyEvents",
+    firstValueSelections: "firstValueSelections",
+    activationReleaseEvents: "activationReleaseEvents",
   });
 });
 
@@ -87,6 +93,10 @@ test("organization-scoped collections explicitly require organizationId", () => 
     "organizationAuditEvents",
     "legalAcknowledgements",
     "organizationAuthorityRepresentations",
+    "orientationJourneys",
+    "orientationJourneyEvents",
+    "firstValueSelections",
+    "activationReleaseEvents",
   ]) {
     assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, true);
     assert.throws(
@@ -96,7 +106,13 @@ test("organization-scoped collections explicitly require organizationId", () => 
     assert.doesNotThrow(() => assertOrganizationScopedFirestoreRecord(key, "org-alpha"));
   }
 
-  for (const key of ["users", "backgroundJobs", "backgroundJobEvents"]) {
+  for (const key of [
+    "users",
+    "backgroundJobs",
+    "backgroundJobEvents",
+    "acquisitionContexts",
+    "acquisitionContextEvents",
+  ]) {
     assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, false);
     assert.doesNotThrow(() => assertOrganizationScopedFirestoreRecord(key, undefined));
   }
@@ -120,6 +136,9 @@ test("append-only domain and operational history remains non-mutable", () => {
     "retentionAssignments",
     "adminPermissionGrants",
     "backgroundJobEvents",
+    "acquisitionContextEvents",
+    "orientationJourneyEvents",
+    "activationReleaseEvents",
   ]) {
     const convention = FIRESTORE_COLLECTION_CONVENTIONS[key];
     assert.equal(convention.appendOnly, true, `${key} must be append-only`);

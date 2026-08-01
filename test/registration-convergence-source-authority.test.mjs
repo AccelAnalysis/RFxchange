@@ -10,6 +10,7 @@ test("registration convergence remains aligned across runtime and canonical auth
     model,
     client,
     route,
+    requestBoundary,
     slice27,
     dependencyMap,
     roadmap,
@@ -21,6 +22,7 @@ test("registration convergence remains aligned across runtime and canonical auth
     read("src/domain/organization-profile/model.ts"),
     read("src/components/onboarding/ActivationJourneyClient.tsx"),
     read("app/api/onboarding/activation/route.ts"),
+    read("app/api/onboarding/activation/request-boundary.ts"),
     read("docs/slices/SLICE_2_7_ESSENTIAL_ORGANIZATION_PROFILE.md"),
     read("docs/tracking/RFxchange_DEPENDENCY_MAP.md"),
     read("docs/slices/WAVE_2_ROADMAP.md"),
@@ -37,9 +39,25 @@ test("registration convergence remains aligned across runtime and canonical auth
   assert.equal(client.includes("Organization type<select"), false);
   assert.equal(route.includes("participationRoles"), false);
   assert.equal(route.includes("businessObjectives"), false);
+  assert.equal(
+    route.includes("websiteNotApplicable: body.websiteNotApplicable === true"),
+    false,
+  );
+  assert.ok(route.includes("parseSaveProfileBody(body)"));
+  assert.ok(requestBoundary.includes("Object.prototype.hasOwnProperty.call"));
+  assert.ok(
+    requestBoundary.includes(
+      "websiteNotApplicable must be a boolean when supplied.",
+    ),
+  );
 
   assert.ok(slice27.includes("business objectives are not collected during activation"));
-  assert.ok(slice27.includes("Resource Provider\” is not a registration checkbox"));
+  assert.ok(slice27.includes("Resource Provider” is not a registration checkbox"));
+  assert.ok(
+    slice27.includes(
+      "omitting previously confirmed website fields during Profile Complete must preserve the persisted website disposition and URL",
+    ),
+  );
   assert.ok(dependencyMap.includes("`ORG-007`, `ORG-008`, `ORG-009`, `GEO-010`"));
   assert.ok(
     dependencyMap.includes("`EDU-009` First-value pathway selection | none | `EDU-008`"),
@@ -52,8 +70,19 @@ test("registration convergence remains aligned across runtime and canonical auth
   );
   assert.ok(roadmap.includes("post-orientation first-value selection"));
   assert.ok(
-    tracker.includes("Registration Convergence Correction — PR #98; no Feature IDs"),
+    roadmap.includes("Activation Profile Website Carry-Forward Repair — MERGED PR #99"),
   );
+  assert.ok(
+    tracker.includes(
+      "Registration Convergence Correction — MERGED PR #98; no Feature IDs",
+    ),
+  );
+  assert.ok(
+    tracker.includes(
+      "Activation Profile Website Carry-Forward Repair — MERGED PR #99; no Feature IDs",
+    ),
+  );
+  assert.ok(tracker.includes("43/43 Activation"));
   assert.ok(tracker.includes("PR #75 + PR #98 correction"));
   assert.ok(slice212.includes("It does not depend on `ORG-011`"));
   assert.ok(

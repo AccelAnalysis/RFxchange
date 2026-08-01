@@ -11,6 +11,7 @@ const [
   signInPage,
   signInClient,
   geographyRoute,
+  participantMapRuntime,
   participantRuntime,
   client,
   sessionRoute,
@@ -29,6 +30,7 @@ const [
   read("app/signin/page.tsx"),
   read("src/components/auth/SignInClient.tsx"),
   read("app/geography/canvas/page.tsx"),
+  read("src/infrastructure/geography/participant-map-runtime.ts"),
   read("src/infrastructure/auth/participant-route-runtime.ts"),
   read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("app/api/auth/session/route.ts"),
@@ -71,6 +73,7 @@ assert.equal(
   "Sign in must not ask for organization name.",
 );
 
+const authenticatedMapSurface = `${geographyRoute}\n${participantMapRuntime}`;
 for (const requirement of [
   "registerWithEmailAndPassword",
   "signInWithEmailAndPassword",
@@ -220,8 +223,8 @@ for (const authority of [
 assert.ok(
   coordinator.includes('"organization-activated"') &&
     coordinator.includes('"controlled-platform"') &&
-    !coordinator.includes('"open-platform"'),
-  "Integration gate must stop at controlled-platform and never manufacture OPEN.",
+    !coordinator.match(/advanceAccessLifecycle\([\s\S]{0,120}"open-platform"/),
+  "Activation coordinator must stop at controlled-platform; it may route an already-OPEN participant but cannot manufacture OPEN.",
 );
 assert.ok(
   coordinator.includes("orientationBridgeAcknowledgedAt") &&
@@ -322,7 +325,7 @@ for (const requirement of [
   "marker={authenticated.homeMarker}",
   'markerActivation?.status !== "active"',
 ]) {
-  assert.ok(geographyRoute.includes(requirement), `Exchange map is missing ${requirement}.`);
+  assert.ok(authenticatedMapSurface.includes(requirement), `Exchange map is missing ${requirement}.`);
 }
 assert.equal(
   geographyRoute.includes("map remains usable as a preview"),
@@ -330,7 +333,7 @@ assert.equal(
   "Anonymous preview fallback must not return to the protected map route.",
 );
 assert.equal(
-  geographyRoute.includes("createControlledLocalityPreview"),
+  authenticatedMapSurface.includes("createControlledLocalityPreview"),
   false,
   "Protected Exchange map must never substitute the Portsmouth preview for another persisted locality.",
 );

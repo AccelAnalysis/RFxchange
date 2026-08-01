@@ -44,6 +44,12 @@ const requiredCollections = [
   "adminPermissionGrants",
   "backgroundJobs",
   "backgroundJobEvents",
+  "acquisitionContexts",
+  "acquisitionContextEvents",
+  "orientationJourneys",
+  "orientationJourneyEvents",
+  "firstValueSelections",
+  "activationReleaseEvents",
 ];
 
 for (const collection of requiredCollections) {
@@ -84,6 +90,9 @@ for (const appendOnlyCollection of [
   "retentionAssignments",
   "adminPermissionGrants",
   "backgroundJobEvents",
+  "acquisitionContextEvents",
+  "orientationJourneyEvents",
+  "activationReleaseEvents",
 ]) {
   const start = schema.indexOf(`${appendOnlyCollection}: Object.freeze({`);
   assert.ok(start >= 0, `Missing collection convention for ${appendOnlyCollection}.`);

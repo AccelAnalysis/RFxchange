@@ -62,6 +62,8 @@ The following canonical collections are append-only under INF-003 and INF-002:
 - `retentionPolicies`
 - `retentionAssignments`
 - `adminPermissionGrants`
+- `orientationJourneyEvents`
+- `activationReleaseEvents`
 
 The rules file explicitly denies client `update` and `delete` for these paths. INF-002 independently enforces append-only server persistence with Firestore `create()` semantics.
 

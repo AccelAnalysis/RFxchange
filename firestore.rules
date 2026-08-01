@@ -231,6 +231,39 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ACQ-003 contexts begin as anonymous server-issued bearer envelopes and become bound to one
+    // RFxchange user/access journey. Browser clients never read or mutate either state or evidence.
+    match /acquisitionContexts/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /acquisitionContextEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    // EDU-001-004 orientation progress is a participant-bound server aggregate. Tutorial events
+    // are immutable evidence, and neither collection is directly available to browser clients.
+    match /orientationJourneys/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /orientationJourneyEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    // EDU-009/010 first-value intent and OPEN release are server-authoritative. The selection is
+    // participant-bound mutable state; release events are immutable evidence.
+    match /firstValueSelections/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /activationReleaseEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /storedAssets/{documentId} {
       allow read, write: if serverManagedOnly();
     }

@@ -5,13 +5,14 @@ async function source(path) {
   return readFile(new URL(`../${path}`, import.meta.url), "utf8");
 }
 
-const [client, route, directory, boundaries, join, map, terms, rules, privacy] = await Promise.all([
+const [client, route, directory, boundaries, join, map, mapRuntime, terms, rules, privacy] = await Promise.all([
   source("src/components/onboarding/ActivationJourneyClient.tsx"),
   source("app/api/onboarding/activation/route.ts"),
   source("src/infrastructure/geography/census-tiger-locality-directory.ts"),
   source("src/infrastructure/geography/tigerweb-boundary-snapshot.ts"),
   source("app/join/page.tsx"),
   source("app/geography/canvas/page.tsx"),
+  source("src/infrastructure/geography/participant-map-runtime.ts"),
   source("app/terms/page.tsx"),
   source("app/platform-rules/page.tsx"),
   source("app/privacy/page.tsx"),
@@ -32,8 +33,8 @@ assert.match(directory, /tigerweb\.geo\.census\.gov/);
 assert.match(directory, /releaseState: "released"/);
 assert.match(boundaries, /dynamicBoundary/);
 assert.match(join, /ControlledLocalityMapService/);
-assert.match(map, /\.create\(selection\)/);
-assert.doesNotMatch(map, /createControlledLocalityPreview/);
+assert.match(`${map}\n${mapRuntime}`, /\.create\(selection\)/);
+assert.doesNotMatch(`${map}\n${mapRuntime}`, /createControlledLocalityPreview/);
 
 assert.match(client, /Verification email sent/);
 assert.match(client, /reloadCurrentPrincipal/);

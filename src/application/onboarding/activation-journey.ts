@@ -1,4 +1,8 @@
 import type { AuthenticationAccountSecurityReader } from "../auth/authorize-organization-operation.ts";
+import type {
+  AcquisitionIntentKind,
+  AcquisitionSourceChannel,
+} from "../../domain/acquisition/model.ts";
 import type { AuthenticatedServerContext } from "../auth/server-session.ts";
 import type { PrimaryOperatingGeographyService } from "../geography/primary-operating-geography.ts";
 import type { OrganizationMarkerActivationService } from "../geography/organization-marker-activation.ts";
@@ -23,6 +27,7 @@ import type { AccessLifecycleRepository } from "../../domain/lifecycle/repositor
 import {
   createActivationJourneyContext,
   createActivationLegalAcceptance,
+  isCurrentActivationLegalAcceptance,
   updateActivationJourneyContext,
   type ActivationJourneyContext,
 } from "../../domain/onboarding/model.ts";
@@ -111,6 +116,13 @@ export interface ActivationJourneyState {
   }> | null;
   readonly controlledPlatformUrl: string | null;
   readonly orientationImplementationPending: boolean;
+  readonly acquisitionContext: Readonly<{
+    readonly id: string;
+    readonly kind: AcquisitionIntentKind;
+    readonly subjectReference: string | null;
+    readonly sourceChannel: AcquisitionSourceChannel;
+    readonly status: "preserved";
+  }> | null;
 }
 
 export interface ActivationJourneyDependencies {
@@ -275,7 +287,7 @@ export class ActivationJourneyService {
     geographyId: string,
   ): Promise<ActivationJourneyState> {
     const activation = await this.contextFor(context);
-    if (!activation.legalAcceptance) {
+    if (!isCurrentActivationLegalAcceptance(activation.legalAcceptance)) {
       throw new ActivationJourneyError(
         "legal-acceptance-required",
         "The legal acceptance step must be completed before selecting a home locality.",
@@ -752,7 +764,7 @@ export class ActivationJourneyService {
       lifecycleState: lifecycle.state,
       nextStep,
       provisionalOrganizationName: activation.provisionalOrganizationName,
-      legalAccepted: Boolean(activation.legalAcceptance),
+      legalAccepted: isCurrentActivationLegalAcceptance(activation.legalAcceptance),
       orientationBridgeAcknowledged: Boolean(activation.orientationBridgeAcknowledgedAt),
       emailVerified: account.emailVerified,
       releasedGeographies: publicGeographies(this.dependencies.releasedGeographies),
@@ -783,10 +795,23 @@ export class ActivationJourneyService {
         ? Object.freeze({ status: marker.status, geographyId: String(marker.geographyId) })
         : null,
       controlledPlatformUrl:
-        lifecycle.state === "controlled-platform" && resolvedOrganizationId
-          ? `/geography/canvas?organizationId=${encodeURIComponent(String(resolvedOrganizationId))}`
-          : null,
-      orientationImplementationPending: true,
+        lifecycle.state === "open-platform" && resolvedOrganizationId
+          ? "/exchange"
+          : lifecycle.state === "controlled-platform" && resolvedOrganizationId
+            ? activation.acquisitionContext && activation.acquisitionContext.intent.kind !== "direct"
+              ? "/acquisition/continue"
+              : "/orientation"
+            : null,
+      orientationImplementationPending: false,
+      acquisitionContext: activation.acquisitionContext
+        ? Object.freeze({
+            id: activation.acquisitionContext.id,
+            kind: activation.acquisitionContext.intent.kind,
+            subjectReference: activation.acquisitionContext.intent.subjectReference,
+            sourceChannel: activation.acquisitionContext.source.channel,
+            status: "preserved" as const,
+          })
+        : null,
     });
   }
 
@@ -801,7 +826,7 @@ export class ActivationJourneyService {
     completion: OrganizationProfileCompletion | null;
     marker: OrganizationMarkerActivation | null;
   }>): ActivationJourneyStep {
-    if (!input.activation.legalAcceptance) return "legal";
+    if (!isCurrentActivationLegalAcceptance(input.activation.legalAcceptance)) return "legal";
     if (!input.selection) return "geography";
     if (!input.activation.orientationBridgeAcknowledgedAt) return "orientation";
     if (!input.resolutionExists) return "organization";
@@ -811,6 +836,8 @@ export class ActivationJourneyService {
     if (!input.location) return "location";
     if (!input.completion || input.completion.status !== "active") return "profile";
     if (!input.marker || input.marker.status !== "active") return "marker";
-    return input.lifecycle.state === "controlled-platform" ? "complete" : "marker";
+    return input.lifecycle.state === "controlled-platform" || input.lifecycle.state === "open-platform"
+      ? "complete"
+      : "marker";
   }
 }

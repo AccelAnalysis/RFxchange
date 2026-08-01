@@ -1,6 +1,6 @@
 # Slice 2.10 — Orientation: Discovery & Team Formation
 
-**Status: PLANNING BRIEF ONLY — DO NOT IMPLEMENT UNTIL EXPLICITLY AUTHORIZED**
+**Status: COMPLETE VIA PR #102 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004`; SLICE 2.11 REQUIRES POST-MERGE RECALCULATION**
 
 ## Feature IDs
 
@@ -33,6 +33,18 @@ At slice exit, the participant understands the first half of the Exchange journe
 ## Prerequisite state
 
 The user has an authoritative selected geography and the real controlled map foundation exists. `EDU-001` follows `GEO-005`; later orientation steps form a strict sequence through `EDU-004`.
+
+### Authorization checkpoint — 2026-08-01
+
+Eligibility was recalculated from merged `main` after PR #101 merged at `c7c99d96de53fec82a5dfb6301caea72689fc908`.
+
+- canonical tracker: **33/43 Activation features Done**;
+- Slice 2.9 and its `ACQ-002`/`ACQ-003` acquisition-continuity prerequisites are Done;
+- `GEO-005`, the selected-geography authority, active membership, controlled lifecycle and real marker foundation are Done;
+- configured-development preflight against the selected Firebase project and actual Census/Mapbox integrations was green;
+- no unsatisfied canonical dependency blocks `EDU-001` through `EDU-004`.
+
+Slice 2.10 was therefore explicitly authorized. This authorization did not extend to Slice 2.11 before Slice 2.10 merge and dependency recalculation.
 
 ## Product rules
 

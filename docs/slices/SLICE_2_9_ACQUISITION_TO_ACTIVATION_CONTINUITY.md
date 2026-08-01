@@ -1,6 +1,6 @@
 # Slice 2.9 — Acquisition-to-Activation Continuity
 
-**Status: AUTHORIZED 2026-07-30 — IMPLEMENT ONLY `ACQ-002` + `ACQ-003`; DO NOT BEGIN SLICE 2.10**
+**Status: COMPLETE VIA PR #101 — `ACQ-002` + `ACQ-003`; SLICE 2.10 REQUIRES POST-MERGE RECALCULATION**
 
 ## Feature IDs
 
@@ -104,6 +104,18 @@ Do **not** implement in Slice 2.9:
 ## Exit checkpoint
 
 The platform remembers **why the participant came** while preserving every existing authorization boundary.
+
+### Completion evidence — 2026-08-01
+
+PR #101 implements the versioned server-bound acquisition envelope, fail-closed
+public opportunity projection port, resumable activation attachment, protected first
+authenticated continuation, append-only Firestore evidence, responsive public UI,
+and focused architecture/emulator coverage. Configured-browser acceptance proved the
+public-opportunity path through a fresh real activation and context recovery after
+history, reload, sign-out, and sign-in. All disposable Firebase records were removed.
+
+See `docs/architecture/WAVE_2_SLICE_2_9.md` for the detailed security, persistence,
+browser, and cleanup evidence.
 
 ## Completion discipline
 

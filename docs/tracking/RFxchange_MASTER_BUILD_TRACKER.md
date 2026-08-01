@@ -12,27 +12,28 @@
 
 ## Progress
 
-**438 total · 106 Done · 332 Not Started**
+**438 total · 118 Done · 320 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **31/43**
+- 2 - Activation: **43/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
 - 7 - Institutional & Scale: **1/47**
 
-## Active build sequence — Wave 2 Activation roadmap — current 2026-07-31
+## Completed build sequence — Wave 2 Activation roadmap — reconciled 2026-08-01
 
 - **Slices 2.1–2.8 — MERGED**: geography authority/rendering, organization resolution/authority, transactional email, organization geography/location, essential profile, marker activation and scoped Organization 360 are complete at their Feature-ID acceptance boundaries.
 - **Wave 2 Runtime Convergence Gate — MERGED PR #92; no Feature IDs**: account-only participant runtime, trusted auth/session composition, lifecycle/membership/restriction routing, scoped admin boundaries, production fixture removal, canonical onboarding metadata and convergence guardrails. Production CI passed on the merged tree.
-- **Registration Convergence Correction — PR #98; no Feature IDs**: removes organization type, descriptive participation roles and business objectives from required registration; corrects Profile Complete; preserves optional enrichment; establishes post-orientation first-value selection; and keeps Official Resource Provider status in the separate Wave 3.6 application/review process.
-- **Slice 2.9 — `ACQ-002` + `ACQ-003` — Acquisition-to-Activation Continuity — NEXT FEATURE SLICE**: preserve opportunity/claim/referral/team/provider/buyer acquisition context through registration and the first authenticated experience. Begin after configured-development/browser acceptance of the convergence boundary and the normal dependency check.
-- **Slice 2.10 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004` — Orientation: Discovery & Team Formation**: synthetic three-organization map tutorial from opportunity issuance through capability gap and teammate discovery.
-- **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
-- **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: post-orientation first-value intent selection followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
+- **Registration Convergence Correction — MERGED PR #98; no Feature IDs**: removes organization type, descriptive participation roles and business objectives from required registration; corrects Profile Complete; preserves optional enrichment; establishes post-orientation first-value selection; and keeps Official Resource Provider status in the separate Wave 3.6 application/review process.
+- **Activation Profile Website Carry-Forward Repair — MERGED PR #99; no Feature IDs**: preserved genuine omission of previously confirmed website fields at the activation API boundary, retained explicit `true` and `false`, rejected malformed supplied values, and passed both configured-browser website paths plus disposable-data cleanup.
+- **Slice 2.9 — MERGED VIA PR #101 — `ACQ-002` + `ACQ-003`**: privacy-safe public opportunity entry and server-bound acquisition context now survive authentication, activation, first authenticated continuation, browser history, reload, and sign-in re-entry without granting domain authority.
+- **Slice 2.10 — MERGED VIA PR #102 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004`**: one protected, resumable and restartable synthetic eight-step orientation model implements its first four ordered map steps through teammate discovery.
+- **Slice 2.11 — MERGED VIA PR #103 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008`**: the same protected aggregate now completes teammate invitation/acceptance, structured joint response, evaluation/human selection and the complete network-effect visualization.
+- **Slice 2.12 — MERGED VIA PR #104 — `EDU-009` + `EDU-010`**: seven semantic post-orientation first-value choices and the complete server-authoritative OPEN gate close Wave 2 Activation.
 
-Current Feature-ID completion is **31/43 Activation**. The Runtime Convergence Gate and Registration Convergence Correction are integration/repair gates and do not alter that count. Repository acceptance is complete only when the PR #98 production gate passes; configured-development acceptance against the selected real Firebase project and actual browser remains an environment check and must not be inferred from emulator CI. Recalculate dependency eligibility from merged `main` before starting each feature slice and mark an item Done only after its acceptance check and CI evidence pass.
+Current Feature-ID completion is **43/43 Activation**. The Runtime Convergence Gate, Registration Convergence Correction, and Activation Profile Website Carry-Forward Repair remain no-Feature-ID integration/repair gates. Slice 2.12 configured-browser acceptance used two fresh disposable identities against the selected real Firebase project and actual Census/Mapbox integrations. Direct entry remained neutral; preserved opportunity context visibly recommended but did not authorize or complete a choice. Both journeys completed all eight orientation steps, presented seven truthful intents, made one explicit selection, persisted one auditable OPEN transition, survived reload/re-entry, and honored a later suspension. Cleanup removed all 79 exact Firestore records and both Auth identities; the residual scan returned zero. Full emulator and repository gates passed, including production CI run `30715058244` on PR #104's merge SHA `d599901d7ff35a4ee67eb2363dcf3334a2303dbc`. Post-merge recalculation makes Slice 3.1 (`COMMS-003`, `COMMS-004`, `COMMS-005`) the earliest dependency-eligible Wave 3 candidate. All 34 remaining Wave 3 Feature IDs remain Not Started, and no Wave 3 implementation began.
 
 ## Feature-ID checklist
 
@@ -122,8 +123,8 @@ Current Feature-ID completion is **31/43 Activation**. The Runtime Convergence G
 
 ### 2 - Activation
 
-- [ ] `ACQ-002`
-- [ ] `ACQ-003`
+- [x] `ACQ-002` — PR #101; fail-closed public opportunity projection, anonymous browser acceptance, responsive QA, and `npm run check`
+- [x] `ACQ-003` — PR #101; all supported context kinds, server-bound activation continuity, history/re-entry browser acceptance, Firestore emulator acceptance, cleanup, and `npm run check`
 - [x] `ACQ-004` — PR #70; seeded public-projection tests, desktop/mobile browser QA, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-001` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-002` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
@@ -136,16 +137,16 @@ Current Feature-ID completion is **31/43 Activation**. The Runtime Convergence G
 - [x] `GEO-009` — PR #74
 - [x] `GEO-010` — PR #74
 - [x] `GEO-011` — PR #77; canonical gate/privacy/idempotency/anchoring tests, Firestore emulator acceptance, desktop/mobile browser QA, and `npm run check`
-- [ ] `EDU-001`
-- [ ] `EDU-002`
-- [ ] `EDU-003`
-- [ ] `EDU-004`
-- [ ] `EDU-005`
-- [ ] `EDU-006`
-- [ ] `EDU-007`
-- [ ] `EDU-008`
-- [ ] `EDU-009`
-- [ ] `EDU-010`
+- [x] `EDU-001` — PR #102; protected real-map synthetic three-organization scenario, responsive configured-browser acceptance, emulator acceptance, and `npm run check`
+- [x] `EDU-002` — PR #102; ordered synthetic opportunity issuance with no live record writes, configured-browser acceptance, emulator acceptance, and `npm run check`
+- [x] `EDU-003` — PR #102; explainable potential-fit demonstration without qualification claims, configured-browser acceptance, and deterministic tests
+- [x] `EDU-004` — PR #102; bounded gap and teammate discovery without invitation/legal-team creation, resume/restart browser acceptance, emulator acceptance, and cleanup
+- [x] `EDU-005` — PR #103; defined-capacity invitation/review/acceptance, nonbinding boundary, configured-browser acceptance, emulator acceptance, and `npm run check`
+- [x] `EDU-006` — PR #103; structured requirement ownership/completion, synthetic-submit isolation, configured-browser acceptance, emulator acceptance, and `npm run check`
+- [x] `EDU-007` — PR #103; stated evaluation criteria, accessible comparison, human selection authority, configured-browser acceptance, and deterministic tests
+- [x] `EDU-008` — PR #103; complete connected network-effect map, step-8-only persisted completion, restart/re-entry acceptance, cleanup, and `npm run check`
+- [x] `EDU-009` — PR #104; seven semantic destination contracts, direct/acquisition configured-browser acceptance, explicit participant choice, truthful unavailable states, persistence, and `npm run check`
+- [x] `EDU-010` — PR #104; complete fresh server gate, exact remediation, auditable idempotent OPEN transition, later-restriction enforcement, emulator/configured-browser acceptance, and cleanup
 - [x] `ORG-001` — PR #70; explainable entity-match tests, desktop/mobile browser QA, Firestore emulator acceptance, and `npm run check`
 - [x] `ORG-002` — PR #70; select/create lifecycle tests, Firestore emulator acceptance, and `npm run check`
 - [x] `ORG-003` — PR #70; duplicate/conflict and atomic entity-key tests, Firestore emulator acceptance, and `npm run check`

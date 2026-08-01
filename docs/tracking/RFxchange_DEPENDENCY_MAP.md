@@ -119,7 +119,7 @@ Orientation and release
 
 The critical path expresses prerequisite authority only. The adopted slice roadmap below may intentionally merge already-eligible work in an order that minimizes rework and produces coherent vertical increments.
 
-## Adopted Wave 2 Activation slice roadmap — implementation hold
+## Adopted Wave 2 Activation slice roadmap — complete via PR #104
 
 Wave 2 begins from the merged tracker state **2/43 complete** (`INF-007`, `INF-008`). The roadmap below covers the **41 remaining Activation features**.
 
@@ -131,10 +131,10 @@ Wave 2 begins from the merged tracker state **2/43 complete** (`INF-007`, `INF-0
 6. **Slice 2.6 — `GEO-009` + `GEO-010` + `ORG-005` + `ORG-006` + `ORG-009` — Organization Geography & Location**: home-versus-service geography, address capture, geocoding/map confirmation, privacy and service-area capture.
 7. **Slice 2.7 — `ORG-007` + `ORG-008` + `ORG-010` + `ORG-011` + `ORG-012` — Essential Organization Profile**: minimum identity/contact and meaningful capability establish Profile Complete with the existing geography/location gates; organization type, descriptive roles and objectives remain optional post-activation enrichment.
 8. **Slice 2.8 — `GEO-011` + `ADM-063` + `ADM-064` — Marker Activation & Admin 360**: activate the real organization marker and provide complete scoped administrative organization context/status.
-9. **Slice 2.9 — `ACQ-002` + `ACQ-003` — Acquisition-to-Activation Continuity**: public opportunity entry and preservation of opportunity/claim/referral/team/provider/buyer context through registration and first authenticated experience.
-10. **Slice 2.10 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004` — Orientation: Discovery & Team Formation**: synthetic three-organization map tutorial from opportunity issuance through capability gap and teammate discovery.
-11. **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
-12. **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: post-orientation first-value intent selection followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
+9. **Slice 2.9 — `ACQ-002` + `ACQ-003` — Acquisition-to-Activation Continuity — COMPLETE VIA PR #101**: public opportunity entry and preservation of opportunity/claim/referral/team/provider/buyer context through registration and first authenticated experience.
+10. **Slice 2.10 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004` — Orientation: Discovery & Team Formation — COMPLETE VIA PR #102**: protected, deterministic synthetic three-organization map tutorial from opportunity issuance through capability gap and teammate discovery.
+11. **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome — COMPLETE VIA PR #103**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
+12. **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate — COMPLETE VIA PR #104**: post-orientation semantic first-value selection followed by OPEN only after the complete fresh server gate passes.
 
 The sequence above is planning order, not a completion claim. Recalculate dependency eligibility from merged `main` after every slice and mark an item Done only after its acceptance checks and CI evidence pass.
 
@@ -154,7 +154,7 @@ Wave 2 OPEN/marker
 
 The already-complete Wave 3 foundations `ORG-021`, `ORG-022`, `ADM-055` and `ADM-056` remain inherited prerequisites and are not rebuilt.
 
-## Adopted Wave 3 Network slice roadmap — implementation hold until Wave 2 exit
+## Adopted Wave 3 Network slice roadmap — Wave 2 exit verified; implementation authorization pending
 
 Wave 3 contains **38 Network features**. Four are already complete from Wave 1, leaving **34 features** across eight slices:
 
@@ -167,6 +167,8 @@ Wave 3 contains **38 Network features**. Four are already complete from Wave 1, 
 7. **Slice 3.7 — `RES-004` + `RES-005` + `DSC-011` + `REF-006` + `RES-007` + `RES-008` + `ACQ-008` — Resource Discovery, Routing & Provider Distribution**.
 8. **Slice 3.8 — `EDU-016` + `EDU-017` — Persistent Network Education**.
 
-**Implementation hold:** no Wave 3 implementation begins until the Wave 2 exit condition is verified from merged `main` and an explicit task authorizes Slice 3.1.
+**Dependency result:** Wave 2 exit was verified from merged `main` at `d599901d7ff35a4ee67eb2363dcf3334a2303dbc`. Slice 3.1 (`COMMS-003`, `COMMS-004`, `COMMS-005`) is the earliest dependency-eligible candidate.
+
+**Implementation hold:** no Wave 3 implementation begins until an explicit task authorizes Slice 3.1.
 
 See `docs/slices/WAVE_3_ROADMAP.md` and the applicable canonical slice brief for detailed boundaries and acceptance intent.
