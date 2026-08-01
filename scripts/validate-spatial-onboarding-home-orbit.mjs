@@ -11,7 +11,8 @@ const files = {
   spatialModelRoute: await readFile("app/api/onboarding/spatial-model/route.ts", "utf8"),
   homeSceneRoute: await readFile("app/api/onboarding/home-scene/route.ts", "utf8"),
   join: await readFile("app/join/page.tsx", "utf8"),
-  workspace: await readFile("app/geography/canvas/page.tsx", "utf8"),
+  workspaceRoute: await readFile("app/geography/canvas/page.tsx", "utf8"),
+  workspace: await readFile("src/components/participant/ExistingWorkspaceFoundation.tsx", "utf8"),
   account: await readFile("app/organization-profile/page.tsx", "utf8"),
   architecture: await readFile("docs/architecture/SPATIAL_ONBOARDING_HOME_ORBIT.md", "utf8"),
 };
@@ -72,8 +73,11 @@ for (const required of [
 }
 
 assert.match(files.join, /SpatialActivationExperience/);
+assert.match(files.workspaceRoute, /ExistingWorkspaceFoundation/);
+assert.match(files.workspaceRoute, /homeMarker=\{authenticated\.homeMarker\}/);
 assert.match(files.workspace, /mode="organization"/);
-assert.match(files.workspace, /marker=\{authenticated\.homeMarker\}/);
+assert.match(files.workspace, /marker=\{homeMarker\}/);
+assert.match(files.workspace, /workspaceOverlay=\{panelOpen \? "right" : null\}/);
 
 assert.match(files.architecture, /225 seconds/);
 assert.match(files.architecture, /60 degrees/);
@@ -83,4 +87,4 @@ assert.match(files.architecture, /edge-to-edge/);
 assert.match(files.architecture, /Account/);
 assert.match(files.architecture, /without a page reload/);
 
-console.log("Spatial onboarding and home-orbit regression contract validated.");
+console.log("Spatial onboarding and B6a home-orbit regression contract validated.");
