@@ -71,7 +71,7 @@ function variableDefinition(
   if (!["string", "number", "boolean"].includes(input.type)) {
     throw new Error(`Unsupported transactional email template variable type: ${String(input.type)}.`);
   }
-  let maximumLength: number | null = input.maximumLength ?? null;
+  const maximumLength: number | null = input.maximumLength ?? null;
   if (input.type !== "string" && maximumLength !== null) {
     throw new Error(`Transactional email template variable ${key} can limit length only for strings.`);
   }
