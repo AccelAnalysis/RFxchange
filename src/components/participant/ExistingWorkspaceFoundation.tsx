@@ -16,16 +16,16 @@ import {
   type ExchangeHomeMarker,
 } from "../map/ExchangeSpatialScene";
 import {
-  ParticipantShell,
-  ResponsiveEdgeSheet,
-  SpatialWorkspace,
-} from "./ParticipantWorkspace";
-import {
   AlertBanner,
   ObjectCard,
   StatePanel,
   StatusPill,
 } from "../ui";
+import {
+  ParticipantShell,
+  ResponsiveEdgeSheet,
+  SpatialWorkspace,
+} from "./ParticipantWorkspace";
 
 import styles from "./ExistingWorkspaceFoundation.module.css";
 
@@ -118,12 +118,17 @@ export function ExistingWorkspaceFoundation({
   const [stateHydrated, setStateHydrated] = useState(false);
 
   useEffect(() => {
-    const key = existingWorkspaceStorageKey(organizationId);
-    const restored = parseExistingWorkspaceState(window.localStorage.getItem(key), organizationId);
-    if (restored && restored.selectedObjectId === homeMarker.id) {
-      setWorkspaceState(restored);
+    try {
+      const key = existingWorkspaceStorageKey(organizationId);
+      const restored = parseExistingWorkspaceState(window.localStorage.getItem(key), organizationId);
+      if (restored && restored.selectedObjectId === homeMarker.id) {
+        setWorkspaceState(restored);
+      }
+    } catch {
+      // Browser UI-state storage may be unavailable. Authority and domain state do not depend on it.
+    } finally {
+      setStateHydrated(true);
     }
-    setStateHydrated(true);
   }, [homeMarker.id, organizationId]);
 
   useEffect(() => {
