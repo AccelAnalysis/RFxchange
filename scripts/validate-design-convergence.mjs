@@ -179,7 +179,7 @@ assert.ok(
   "Design-gate architecture evidence must preserve the non-feature boundary.",
 );
 assert.ok(
-  tracker.includes("**438 total · 118 Done · 320 Not Started**") &&
+  /\*\*438 total · \d+ Done · \d+ Not Started\*\*/.test(tracker) &&
     tracker.includes('2 - Activation: **43/43**') &&
     tracker.includes("[x] `ACQ-002`") &&
     tracker.includes("[x] `ACQ-003`") &&

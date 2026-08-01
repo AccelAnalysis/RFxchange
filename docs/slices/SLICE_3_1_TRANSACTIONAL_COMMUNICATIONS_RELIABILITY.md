@@ -1,6 +1,6 @@
 # Slice 3.1 — Transactional Communications Reliability
 
-**Status: PLANNING BRIEF ONLY — DEPENDENCY-ELIGIBLE AFTER BRAND GATE B0 MERGES; DO NOT IMPLEMENT UNTIL EXPLICITLY AUTHORIZED**
+**Status: COMPLETE VIA PR #107 — `COMMS-003`, `COMMS-004`, `COMMS-005`**
 
 ## Feature IDs
 
@@ -69,6 +69,12 @@ Do not implement referral/provider/RFx workflow logic, marketing campaigns, bulk
 
 Network workflows can safely emit truthful transactional communications through a versioned, auditable and idempotent delivery pipeline.
 
+## Acceptance result
+
+PR #107 implemented explicit event/template versions, strict reviewed variable rendering, provider-neutral delivery correlation, server-managed delivery aggregates, append-only delivery events, accepted-delivery replay suppression, interrupted-success healing, deterministic retry classification and a bounded terminal-failure health projection. Direct anonymous and authenticated Firestore clients remain denied, and the audit ledger retains recipient hashes/domains and routing evidence without rendered content, template variables, credentials, raw provider bodies or raw recipient addresses.
+
+Production CI run `30719532985` passed on implementation head `eba071e54e3a9cc88ec7fd353e943922917d6484` with repository guardrails, 19 Functions tests, the complete Firebase Auth/Firestore/Functions/Storage emulator suite, 353 architecture tests, TypeScript, lint and production build. PR #107 merged to `main` at `368fdb5e0179ca7933eb33ffb6cbf12a2afe2bf1`.
+
 ## Completion discipline
 
-Recalculate dependencies after merge before authorizing Slice 3.2. Slice 3.2 also remains blocked until Brand Gates B1, B2, B3 and B6a are complete.
+Slice 3.2 was not begun. Dependency eligibility must be recalculated from merged `main`; regardless of Feature-ID eligibility, Slice 3.2 remains on implementation hold until Brand Gates B1, B2, B3 and B6a are complete and Slice 3.2 is explicitly authorized.
