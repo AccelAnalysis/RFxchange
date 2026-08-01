@@ -32,9 +32,10 @@ export function MarketingFooter() {
         <div className={styles.footerBrand}>
           <BrandWordmark compact onDark />
           <p>
-            A local business growth network built to make capabilities, opportunities,
-            resources, and business connections easier to discover and act on.
+            A local business growth network beginning with real organization,
+            capability, geography, and activation—then extending through governed releases.
           </p>
+          <p><strong>By Accel Analysis</strong></p>
         </div>
         <div className={styles.footerCol}>
           <h3>Explore</h3>
@@ -60,7 +61,7 @@ export function MarketingFooter() {
         </div>
       </div>
       <div className={styles.footerBottom}>
-        <span>© 2026 The RFxchange. A Hi-Coworking initiative.</span>
+        <span>© 2026 The RFxchange. By Accel Analysis.</span>
         <span>Visible · Connected · Actionable</span>
       </div>
     </footer>
