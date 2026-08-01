@@ -12,10 +12,12 @@ export interface BackgroundTransactionalEmailDeliveryReceipt {
   readonly diagnosticCode: string | null;
 }
 
-interface ClassifiedProviderFailure {
+export interface TransactionalEmailProviderFailureClassification {
   readonly code: string;
   readonly retryable: boolean;
   readonly providerKey: string;
+  readonly externalReference: string | null;
+  readonly retryAfterSeconds: number | null;
 }
 
 function bounded(value: string | null, maximumLength = 256): string | null {
@@ -24,12 +26,16 @@ function bounded(value: string | null, maximumLength = 256): string | null {
   return normalized ? normalized.slice(0, maximumLength) : null;
 }
 
-function providerFailure(error: unknown): ClassifiedProviderFailure | null {
+export function classifyTransactionalEmailProviderFailure(
+  error: unknown,
+): TransactionalEmailProviderFailureClassification | null {
   if (!error || typeof error !== "object") return null;
   const candidate = error as {
     readonly code?: unknown;
     readonly retryable?: unknown;
     readonly providerKey?: unknown;
+    readonly externalReference?: unknown;
+    readonly retryAfterSeconds?: unknown;
   };
   if (
     typeof candidate.code !== "string" ||
@@ -40,9 +46,35 @@ function providerFailure(error: unknown): ClassifiedProviderFailure | null {
   }
   const code = bounded(candidate.code, 120);
   const providerKey = bounded(candidate.providerKey, 64);
-  return code && providerKey
-    ? Object.freeze({ code, retryable: candidate.retryable, providerKey })
+  const externalReference = typeof candidate.externalReference === "string"
+    ? bounded(candidate.externalReference)
     : null;
+  const retryAfterSeconds = typeof candidate.retryAfterSeconds === "number" &&
+      Number.isInteger(candidate.retryAfterSeconds) &&
+      candidate.retryAfterSeconds >= 0 &&
+      candidate.retryAfterSeconds <= 86_400
+    ? candidate.retryAfterSeconds
+    : null;
+  return code && providerKey
+    ? Object.freeze({
+        code,
+        retryable: candidate.retryable,
+        providerKey,
+        externalReference,
+        retryAfterSeconds,
+      })
+    : null;
+}
+
+export function transactionalEmailDeliveryMetadata(
+  receipt: BackgroundTransactionalEmailDeliveryReceipt,
+): BackgroundJobMetadata {
+  return Object.freeze({
+    deliveryStatus: receipt.status,
+    providerKey: bounded(receipt.providerKey, 64),
+    providerReference: bounded(receipt.externalReference),
+    diagnosticCode: bounded(receipt.diagnosticCode, 120),
+  });
 }
 
 /**
@@ -58,7 +90,7 @@ export function transactionalEmailBackgroundJobHandler(
     try {
       receipt = await deliver();
     } catch (error) {
-      const failure = providerFailure(error);
+      const failure = classifyTransactionalEmailProviderFailure(error);
       if (!failure) {
         throw retryableBackgroundJobError(
           "transactional-email-provider-unhandled",
@@ -77,11 +109,6 @@ export function transactionalEmailBackgroundJobHandler(
         "Transactional email provider rejected the delivery.",
       );
     }
-    return Object.freeze({
-      deliveryStatus: receipt.status,
-      providerKey: bounded(receipt.providerKey, 64),
-      providerReference: bounded(receipt.externalReference),
-      diagnosticCode: bounded(receipt.diagnosticCode, 120),
-    });
+    return transactionalEmailDeliveryMetadata(receipt);
   };
 }

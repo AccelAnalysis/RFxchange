@@ -231,6 +231,17 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // COMMS-003/004/005 delivery state and events are operational server records. Recipient routing
+    // is hashed/minimized; direct clients cannot inspect status, provider references, or failures.
+    match /transactionalEmailDeliveries/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /transactionalEmailDeliveryEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     // ACQ-003 contexts begin as anonymous server-issued bearer envelopes and become bound to one
     // RFxchange user/access journey. Browser clients never read or mutate either state or evidence.
     match /acquisitionContexts/{documentId} {

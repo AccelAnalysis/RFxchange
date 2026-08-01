@@ -32,7 +32,9 @@ export interface TransactionalEmailRequest {
   readonly purpose: TransactionalEmailPurpose;
   readonly recipient: TransactionalEmailRecipient;
   readonly eventKey: TransactionalEmailEventKey;
+  readonly eventVersion: number;
   readonly templateKey: TransactionalEmailTemplateKey;
+  readonly templateVersion: number;
   readonly variables: Readonly<Record<string, TransactionalEmailVariable>>;
   readonly metadata: TransactionalEmailDeliveryMetadata;
 }
@@ -58,6 +60,14 @@ function stableKey(value: string, field: string): string {
   const normalized = required(value, field, 128).toLowerCase();
   if (!/^[a-z0-9][a-z0-9._:-]{0,127}$/.test(normalized)) {
     throw new Error(`${field} must be a stable lowercase identifier.`);
+  }
+  return normalized;
+}
+
+function positiveVersion(value: number | undefined, field: string): number {
+  const normalized = value ?? 1;
+  if (!Number.isInteger(normalized) || normalized < 1 || normalized > 10_000) {
+    throw new Error(`${field} must be an integer between 1 and 10000.`);
   }
   return normalized;
 }
@@ -130,7 +140,9 @@ export function createTransactionalEmailRequest(input: Readonly<{
   recipientEmail: string;
   recipientDisplayName?: string | null;
   eventKey: string;
+  eventVersion?: number;
   templateKey: string;
+  templateVersion?: number;
   variables?: Readonly<Record<string, TransactionalEmailVariable>>;
   correlationId: string;
   idempotencyKey: string;
@@ -157,7 +169,9 @@ export function createTransactionalEmailRequest(input: Readonly<{
       displayName: optionalReference(input.recipientDisplayName, "Transactional email recipient display name", 160),
     }),
     eventKey: transactionalEmailEventKey(input.eventKey),
+    eventVersion: positiveVersion(input.eventVersion, "Transactional email event version"),
     templateKey: transactionalEmailTemplateKey(input.templateKey),
+    templateVersion: positiveVersion(input.templateVersion, "Transactional email template version"),
     variables: normalizedVariables(input.variables),
     metadata: Object.freeze({
       correlationId: transactionalEmailCorrelationId(input.correlationId),
