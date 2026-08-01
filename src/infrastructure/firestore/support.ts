@@ -63,6 +63,8 @@ const DOMAIN_TIMESTAMP_EXPOSURE: Readonly<Record<FirestoreCollectionKey, DomainT
     backgroundJobEvents: Object.freeze({ createdAt: false, updatedAt: false }),
     acquisitionContexts: Object.freeze({ createdAt: false, updatedAt: false }),
     acquisitionContextEvents: Object.freeze({ createdAt: false, updatedAt: false }),
+    orientationJourneys: Object.freeze({ createdAt: false, updatedAt: false }),
+    orientationJourneyEvents: Object.freeze({ createdAt: false, updatedAt: false }),
   });
 
 function asDocumentData(record: object): DocumentData {

@@ -179,10 +179,12 @@ assert.ok(
   "Design-gate architecture evidence must preserve the non-feature boundary.",
 );
 assert.ok(
-  tracker.includes("**438 total · 108 Done · 330 Not Started**") &&
-    tracker.includes('2 - Activation: **33/43**') &&
+  tracker.includes("**438 total · 112 Done · 326 Not Started**") &&
+    tracker.includes('2 - Activation: **37/43**') &&
     tracker.includes("[x] `ACQ-002`") &&
-    tracker.includes("[x] `ACQ-003`"),
+    tracker.includes("[x] `ACQ-003`") &&
+    tracker.includes("[x] `EDU-001`") &&
+    tracker.includes("[x] `EDU-004`"),
   "Design convergence must remain intact while later slices advance canonical Feature-ID counts.",
 );
 

@@ -797,7 +797,7 @@ export class ActivationJourneyService {
         lifecycle.state === "controlled-platform" && resolvedOrganizationId
           ? activation.acquisitionContext && activation.acquisitionContext.intent.kind !== "direct"
             ? "/acquisition/continue"
-            : `/geography/canvas?organizationId=${encodeURIComponent(String(resolvedOrganizationId))}`
+            : "/orientation"
           : null,
       orientationImplementationPending: true,
       acquisitionContext: activation.acquisitionContext

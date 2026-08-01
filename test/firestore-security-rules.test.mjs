@@ -42,6 +42,8 @@ const canonicalCollections = [
   "retentionAssignments",
   "adminAuthorityContexts",
   "adminPermissionGrants",
+  "orientationJourneys",
+  "orientationJourneyEvents",
 ];
 
 const appendOnlyCollections = [
@@ -60,6 +62,7 @@ const appendOnlyCollections = [
   "retentionPolicies",
   "retentionAssignments",
   "adminPermissionGrants",
+  "orientationJourneyEvents",
 ];
 
 test("INF-004 binds the Firebase project to the source-controlled Firestore ruleset", () => {

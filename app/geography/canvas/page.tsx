@@ -1,36 +1,21 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { ControlledLocalityMapService, type ControlledLocalityMapModel } from "@/src/application/geography/controlled-locality-map";
 import {
   ExchangeSpatialScene,
-  type ExchangeHomeMarker,
 } from "@/src/components/map/ExchangeSpatialScene";
 import {
   ParticipantShell,
   SpatialWorkspace,
 } from "@/src/components/participant/ParticipantWorkspace";
-import { projectPublicOrganizationMarker } from "@/src/domain/organization-markers/model";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
-import { createFirestoreGeographyRepositories } from "@/src/infrastructure/firestore/geography-repositories";
-import { createFirestoreOrganizationLocationRepositories } from "@/src/infrastructure/firestore/organization-location";
-import { createFirestoreOrganizationMarkerRepositories } from "@/src/infrastructure/firestore/organization-marker";
-import {
-  createServerFirestoreFoundationRepositories,
-  getServerFirestore,
-} from "@/src/infrastructure/firestore/runtime";
-import { TigerWebBoundarySnapshotRepository } from "@/src/infrastructure/geography/tigerweb-boundary-snapshot";
+import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
 
 interface GeographyCanvasPageProps {
   readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
-}
-
-interface AuthenticatedMapProjection {
-  readonly model: ControlledLocalityMapModel;
-  readonly homeMarker: ExchangeHomeMarker;
 }
 
 function firstSearchParam(value: string | string[] | undefined): string | null {
@@ -48,9 +33,7 @@ function signInUrl(requestedOrganizationId: string | null): string {
   return `/signin?returnTo=${encodeURIComponent(returnTo)}`;
 }
 
-async function resolveAuthenticatedMapProjection(
-  requestedOrganizationId: string | null,
-): Promise<AuthenticatedMapProjection> {
+async function resolveAuthenticatedMapProjection(requestedOrganizationId: string | null) {
   const cookieStore = await cookies();
   const access = await resolveParticipantRoute({
     sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
@@ -66,51 +49,7 @@ async function resolveAuthenticatedMapProjection(
     redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   }
 
-  const db = getServerFirestore();
-  const foundation = createServerFirestoreFoundationRepositories(db);
-  const geographyRepositories = createFirestoreGeographyRepositories(db);
-  const locationRepositories = createFirestoreOrganizationLocationRepositories(db);
-  const location = await locationRepositories.locations.getByOrganizationId(
-    access.membership.organizationId,
-  );
-  if (!location) redirect("/join");
-
-  const [geography, markerActivation, profile, selection] = await Promise.all([
-    geographyRepositories.definitions.getById(location.geographyId),
-    createFirestoreOrganizationMarkerRepositories(db).activations.getByOrganizationId(
-      access.membership.organizationId,
-    ),
-    foundation.organizations.profiles.getByOrganizationId(access.membership.organizationId),
-    geographyRepositories.selections.getByUserId(access.context.user.id),
-  ]);
-  if (!geography || !selection || selection.geographyId !== geography.id || markerActivation?.status !== "active") {
-    redirect("/join");
-  }
-
-  const boundaries = new TigerWebBoundarySnapshotRepository(geographyRepositories.definitions);
-  const boundary = await boundaries.getByGeographyId(geography.id);
-  if (!boundary) redirect("/join");
-  const model = await new ControlledLocalityMapService(
-    geographyRepositories.definitions,
-    boundaries,
-  ).create(selection);
-
-  const marker = projectPublicOrganizationMarker({
-    activation: markerActivation,
-    location,
-    geography,
-    geographyGeometry: boundary.geometry,
-  });
-
-  return Object.freeze({
-    model,
-    homeMarker: Object.freeze({
-      id: marker.id,
-      coordinate: marker.coordinate,
-      label: profile?.displayName ?? "Your organization",
-      accessibleLocationLabel: marker.accessibleLocationLabel,
-    }),
-  });
+  return await loadAuthorizedParticipantMapProjection(access) ?? redirect("/join");
 }
 
 export default async function GeographyCanvasPage({
