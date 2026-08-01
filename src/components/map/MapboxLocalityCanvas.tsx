@@ -64,7 +64,7 @@ const WEB_MERCATOR_MAX_LATITUDE = 85.05112878;
 const EMPTY_POINT_OVERLAYS: readonly ControlledLocalityPointOverlay[] = Object.freeze([]);
 const EMPTY_FEATURE_COLLECTION = Object.freeze({
   type: "FeatureCollection" as const,
-  features: Object.freeze([]) as readonly never[],
+  features: [] as never[],
 });
 
 const VIEW_MODE_OPTIONS: readonly Readonly<{

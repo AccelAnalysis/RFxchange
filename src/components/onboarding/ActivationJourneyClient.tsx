@@ -352,6 +352,16 @@ export function ActivationJourneyClient({
           </ol>
         ) : null}
 
+        {state?.acquisitionContext ? (
+          <aside className={styles.acquisitionNotice} aria-label="Saved arrival context">
+            <strong>We saved what brought you here.</strong>
+            <span>
+              Your {state.acquisitionContext.kind.replaceAll("-", " ")} context will be waiting
+              after activation. It does not change any participation or authority requirement.
+            </span>
+          </aside>
+        ) : null}
+
         {error ? <div className={styles.error} role="alert">{error}</div> : null}
 
         {!state && needsActivationSetup ? (
@@ -791,7 +801,13 @@ export function ActivationJourneyClient({
             <p className={styles.stepLabel}>Organization activated</p>
             <h2>Your organization is ready.</h2>
             <p>{state.organization?.displayName} now has an active marker in {state.selectedGeography?.name}. Welcome to the RFxchange.</p>
-            {state.controlledPlatformUrl ? <Link className={styles.primaryLink} href={state.controlledPlatformUrl}>Enter the Exchange</Link> : null}
+            {state.controlledPlatformUrl ? (
+              state.acquisitionContext ? (
+                <Link className={styles.primaryLink} href={state.controlledPlatformUrl}>Continue where you left off</Link>
+              ) : (
+                <Link className={styles.primaryLink} href={state.controlledPlatformUrl}>Enter the Exchange</Link>
+              )
+            ) : null}
           </section>
         ) : null}
       </section>

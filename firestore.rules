@@ -231,6 +231,17 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ACQ-003 contexts begin as anonymous server-issued bearer envelopes and become bound to one
+    // RFxchange user/access journey. Browser clients never read or mutate either state or evidence.
+    match /acquisitionContexts/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /acquisitionContextEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /storedAssets/{documentId} {
       allow read, write: if serverManagedOnly();
     }

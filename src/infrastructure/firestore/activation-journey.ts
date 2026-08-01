@@ -35,6 +35,16 @@ export class FirestoreActivationJourneyContextRepository
         websiteUrl: data.organizationIdentitySeed?.websiteUrl ?? null,
         phone: data.organizationIdentitySeed?.phone ?? null,
       }),
+      acquisitionContext: data.acquisitionContext
+        ? Object.freeze({
+            ...data.acquisitionContext,
+            intent: Object.freeze({ ...data.acquisitionContext.intent }),
+            source: Object.freeze({ ...data.acquisitionContext.source }),
+            issuedAt: isoTimestamp(data.acquisitionContext.issuedAt),
+            expiresAt: isoTimestamp(data.acquisitionContext.expiresAt),
+            boundAt: isoTimestamp(data.acquisitionContext.boundAt),
+          })
+        : null,
       createdAt: isoTimestamp(data.createdAt),
       updatedAt: isoTimestamp(data.updatedAt),
     }) as ActivationJourneyContext;

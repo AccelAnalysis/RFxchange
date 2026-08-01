@@ -12,10 +12,10 @@
 
 ## Progress
 
-**438 total · 106 Done · 332 Not Started**
+**438 total · 108 Done · 330 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
-- 2 - Activation: **31/43**
+- 2 - Activation: **33/43**
 - 3 - Network: **4/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
@@ -27,13 +27,13 @@
 - **Slices 2.1–2.8 — MERGED**: geography authority/rendering, organization resolution/authority, transactional email, organization geography/location, essential profile, marker activation and scoped Organization 360 are complete at their Feature-ID acceptance boundaries.
 - **Wave 2 Runtime Convergence Gate — MERGED PR #92; no Feature IDs**: account-only participant runtime, trusted auth/session composition, lifecycle/membership/restriction routing, scoped admin boundaries, production fixture removal, canonical onboarding metadata and convergence guardrails. Production CI passed on the merged tree.
 - **Registration Convergence Correction — MERGED PR #98; no Feature IDs**: removes organization type, descriptive participation roles and business objectives from required registration; corrects Profile Complete; preserves optional enrichment; establishes post-orientation first-value selection; and keeps Official Resource Provider status in the separate Wave 3.6 application/review process.
-- **Activation Profile Website Carry-Forward Repair — PR #99; no Feature IDs**: preserves genuine omission of previously confirmed website fields at the activation API boundary, retains explicit `true` and `false`, rejects malformed supplied values, and adds executable carried-website regression coverage through Profile Complete and marker recalculation. Repository gates and both configured-browser website paths must pass before merge.
-- **Slice 2.9 — `ACQ-002` + `ACQ-003` — Acquisition-to-Activation Continuity — NEXT FEATURE SLICE AFTER PR #99 ACCEPTANCE**: preserve opportunity/claim/referral/team/provider/buyer acquisition context through registration and the first authenticated experience. Begin only after PR #99 is merged, configured-development/browser acceptance passes, and dependency eligibility is recalculated.
+- **Activation Profile Website Carry-Forward Repair — MERGED PR #99; no Feature IDs**: preserved genuine omission of previously confirmed website fields at the activation API boundary, retained explicit `true` and `false`, rejected malformed supplied values, and passed both configured-browser website paths plus disposable-data cleanup.
+- **Slice 2.9 — MERGED VIA PR #101 — `ACQ-002` + `ACQ-003`**: privacy-safe public opportunity entry and server-bound acquisition context now survive authentication, activation, first authenticated continuation, browser history, reload, and sign-in re-entry without granting domain authority.
 - **Slice 2.10 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004` — Orientation: Discovery & Team Formation**: synthetic three-organization map tutorial from opportunity issuance through capability gap and teammate discovery.
 - **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
 - **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: post-orientation first-value intent selection followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
 
-Current Feature-ID completion is **31/43 Activation**. The Runtime Convergence Gate, Registration Convergence Correction, and Activation Profile Website Carry-Forward Repair are integration/repair gates and do not alter that count. Repository acceptance for PR #99 requires the complete production gate; configured-development acceptance against the selected real Firebase project and actual browser remains a separate environment check and must not be inferred from emulator CI. Recalculate dependency eligibility from merged `main` before starting each feature slice and mark an item Done only after its acceptance check and CI evidence pass.
+Current Feature-ID completion is **33/43 Activation**. The Runtime Convergence Gate, Registration Convergence Correction, and Activation Profile Website Carry-Forward Repair remain no-Feature-ID integration/repair gates. Slice 2.9 configured-browser acceptance used the selected real Firebase project and actual Census/Mapbox integrations; emulator CI remains separate evidence. Recalculate dependency eligibility from merged `main` before starting Slice 2.10 and every later feature slice.
 
 ## Feature-ID checklist
 
@@ -123,8 +123,8 @@ Current Feature-ID completion is **31/43 Activation**. The Runtime Convergence G
 
 ### 2 - Activation
 
-- [ ] `ACQ-002`
-- [ ] `ACQ-003`
+- [x] `ACQ-002` — PR #101; fail-closed public opportunity projection, anonymous browser acceptance, responsive QA, and `npm run check`
+- [x] `ACQ-003` — PR #101; all supported context kinds, server-bound activation continuity, history/re-entry browser acceptance, Firestore emulator acceptance, cleanup, and `npm run check`
 - [x] `ACQ-004` — PR #70; seeded public-projection tests, desktop/mobile browser QA, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-001` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
 - [x] `GEO-002` — PR #68; geography authority tests, Firestore emulator acceptance, and `npm run check`
