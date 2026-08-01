@@ -102,7 +102,7 @@ export const CONTROLLED_LOCALITY_LAYER_STYLES: Readonly<
 > = Object.freeze({
   "surrounding-fill": Object.freeze({
     fill: exchangeLightCartography.nonFocusMask,
-    fillOpacity: 0.12,
+    fillOpacity: 0.24,
     stroke: "none",
     strokeOpacity: 0,
     strokeWidth: 0,
