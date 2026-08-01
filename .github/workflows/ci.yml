@@ -6,74 +6,10 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  patch-locality-effect-lint:
-    if: github.event_name == 'pull_request' && github.head_ref == 'codex/registration-activation-convergence' && github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
-      - name: Move invalid-query reset out of the effect
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          path = Path("src/components/onboarding/ActivationJourneyClient.tsx")
-          source = path.read_text()
-
-          old_effect = '''    if (query.length < 2 || stateCode.length !== 2) {
-      setGeographyCandidates([]);
-      setActiveGeographyIndex(-1);
-      setGeographySearching(false);
-      return;
-    }'''
-          new_effect = '''    if (query.length < 2 || stateCode.length !== 2) return;'''
-
-          old_query = '''                    onChange={(event) => setLocalityQuery(event.target.value)}'''
-          new_query = '''                    onChange={(event) => {
-                      const nextQuery = event.target.value;
-                      setLocalityQuery(nextQuery);
-                      if (nextQuery.trim().length < 2) {
-                        setGeographyCandidates([]);
-                        setActiveGeographyIndex(-1);
-                        setGeographySearching(false);
-                      }
-                    }}'''
-
-          old_state = '''<label>State <small>Two-letter code</small><input value={localityStateCode} onChange={(event) => setLocalityStateCode(event.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2))} minLength={2} maxLength={2} placeholder="VA" required /></label>'''
-          new_state = '''<label>State <small>Two-letter code</small><input value={localityStateCode} onChange={(event) => {
-                  const nextStateCode = event.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2);
-                  setLocalityStateCode(nextStateCode);
-                  if (nextStateCode.length !== 2) {
-                    setGeographyCandidates([]);
-                    setActiveGeographyIndex(-1);
-                    setGeographySearching(false);
-                  }
-                }} minLength={2} maxLength={2} placeholder="VA" required /></label>'''
-
-          for before, after in [(old_effect, new_effect), (old_query, new_query), (old_state, new_state)]:
-              count = source.count(before)
-              if count != 1:
-                  raise SystemExit(f"Expected exactly one occurrence, found {count}: {before[:120]!r}")
-              source = source.replace(before, after, 1)
-
-          path.write_text(source)
-          PY
-          git checkout origin/main -- .github/workflows/ci.yml
-          rm -f .github/workflows/fix-locality-effect-lint.yml
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Move locality reset out of debounced search effect"
-          git push origin HEAD:${{ github.head_ref }}
-
   verify:
-    if: github.event_name != 'pull_request' || github.head_ref != 'codex/registration-activation-convergence' || github.actor == 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
