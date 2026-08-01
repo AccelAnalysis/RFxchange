@@ -12,11 +12,11 @@
 
 ## Progress
 
-**438 total · 118 Done · 320 Not Started**
+**438 total · 121 Done · 317 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
-- 3 - Network: **4/38**
+- 3 - Network: **7/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
@@ -33,7 +33,14 @@
 - **Slice 2.11 — MERGED VIA PR #103 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008`**: the same protected aggregate now completes teammate invitation/acceptance, structured joint response, evaluation/human selection and the complete network-effect visualization.
 - **Slice 2.12 — MERGED VIA PR #104 — `EDU-009` + `EDU-010`**: seven semantic post-orientation first-value choices and the complete server-authoritative OPEN gate close Wave 2 Activation.
 
-Current Feature-ID completion is **43/43 Activation**. The Runtime Convergence Gate, Registration Convergence Correction, and Activation Profile Website Carry-Forward Repair remain no-Feature-ID integration/repair gates. Slice 2.12 configured-browser acceptance used two fresh disposable identities against the selected real Firebase project and actual Census/Mapbox integrations. Direct entry remained neutral; preserved opportunity context visibly recommended but did not authorize or complete a choice. Both journeys completed all eight orientation steps, presented seven truthful intents, made one explicit selection, persisted one auditable OPEN transition, survived reload/re-entry, and honored a later suspension. Cleanup removed all 79 exact Firestore records and both Auth identities; the residual scan returned zero. Full emulator and repository gates passed, including production CI run `30715058244` on PR #104's merge SHA `d599901d7ff35a4ee67eb2363dcf3334a2303dbc`. Post-merge recalculation makes Slice 3.1 (`COMMS-003`, `COMMS-004`, `COMMS-005`) the earliest dependency-eligible Wave 3 candidate. All 34 remaining Wave 3 Feature IDs remain Not Started, and no Wave 3 implementation began.
+Wave 2 remains complete at **43/43 Activation**. The Runtime Convergence Gate, Registration Convergence Correction, and Activation Profile Website Carry-Forward Repair remain no-Feature-ID integration/repair gates. Slice 2.12 configured-browser acceptance used two fresh disposable identities against the selected real Firebase project and actual Census/Mapbox integrations. Direct entry remained neutral; preserved opportunity context visibly recommended but did not authorize or complete a choice. Both journeys completed all eight orientation steps, presented seven truthful intents, made one explicit selection, persisted one auditable OPEN transition, survived reload/re-entry, and honored a later suspension. Cleanup removed all 79 exact Firestore records and both Auth identities; the residual scan returned zero. Full emulator and repository gates passed, including production CI run `30715058244` on PR #104's merge SHA `d599901d7ff35a4ee67eb2363dcf3334a2303dbc`.
+
+## Wave 3 Network build sequence — current 2026-08-01
+
+- **Brand Gate B0 — MERGED PR #100; no Feature IDs**: reconciled the target Brand Experience System against completed Wave 2 and established the brand/design precedence and domain-availability rules used by Wave 3.
+- **Slice 3.1 — MERGED VIA PR #107 — `COMMS-003` + `COMMS-004` + `COMMS-005`**: established versioned transactional event/template mapping, minimized delivery audit, append-only evidence, deterministic retry, accepted-delivery replay suppression, interrupted-success healing, direct-client denial and terminal-failure operations visibility. Production CI run `30719532985` passed on head `eba071e54e3a9cc88ec7fd353e943922917d6484`; PR #107 merged at `368fdb5e0179ca7933eb33ffb6cbf12a2afe2bf1`.
+
+Network completion is now **7/38**: four inherited Wave 1 foundations plus the three Slice 3.1 communications features. Slice 3.2 Feature IDs are dependency-eligible from the Network graph, but implementation remains blocked until Brand Gates B1, B2, B3 and B6a are complete and Slice 3.2 is explicitly authorized. No Slice 3.2 implementation began in PR #107 or this reconciliation.
 
 ## Feature-ID checklist
 
@@ -162,7 +169,7 @@ Current Feature-ID completion is **43/43 Activation**. The Runtime Convergence G
 - [x] `ADM-063` — PR #77; 14-context scope/permission/minimum-data tests, desktop/mobile browser QA, and `npm run check`
 - [x] `ADM-064` — PR #77; independent-state/restriction/case-link tests, desktop/mobile browser QA, and `npm run check`
 - [x] `ADM-065` — PR #73; category/geography/scope tests, desktop/mobile browser QA, and `npm run check`
-- [x] `ADM-066` — PR #73; evidence-review, case-scope, atomic adjudication/audit tests, Firestore emulator acceptance, and `npm run check`
+- [x] `ADM-066` — PR #73; evidence-review, case-scope, atomic adjudication/audit tests, Firestore emulator acceptance, desktop/mobile browser QA, and `npm run check`
 - [x] `INF-007` — PR #29
 - [x] `INF-008` — PR #30
 - [x] `COMMS-002` — PR #72; Microsoft Graph adapter/INF-007 integration tests and `npm run check`
@@ -204,9 +211,9 @@ Current Feature-ID completion is **43/43 Activation**. The Runtime Convergence G
 - [x] `ADM-055` — PR #43
 - [x] `ADM-056` — PR #43
 - [ ] `ADM-070`
-- [ ] `COMMS-003`
-- [ ] `COMMS-004`
-- [ ] `COMMS-005`
+- [x] `COMMS-003` — PR #107; explicit event/template versions, strict reviewed variable rendering, brand/message compliance, architecture tests, and `npm run check`
+- [x] `COMMS-004` — PR #107; minimized server-only delivery aggregate, append-only evidence, operations-health projection, direct-client denial, emulator acceptance, and `npm run check`
+- [x] `COMMS-005` — PR #107; INF-007 retry integration, accepted-delivery replay suppression, interrupted-success healing, transient/permanent/exhausted failure tests, and `npm run check`
 
 ### 4 - RFx Core
 
