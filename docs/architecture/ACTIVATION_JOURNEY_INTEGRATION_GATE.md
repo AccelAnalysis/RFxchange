@@ -49,6 +49,10 @@ The browser exchanges a Firebase ID token for an HTTP-only RFxchange session coo
 
 This context carries information forward but cannot grant geography authority, organization authority, Profile Complete, marker activation or application access.
 
+## Spatial activation background
+
+After account creation, the existing spatial activation background remains an edge-to-edge Mapbox scene beneath the activation overlays. It preserves the approved locality and organization-home camera/orbit contracts, reduced-motion behavior, rotation preference, authoritative geography boundaries and privacy-safe real marker behavior. Camera or viewport state remains presentation only and never grants activation authority.
+
 ## Locality typeahead
 
 The home-locality field is an accessible combobox:
@@ -65,6 +69,8 @@ The home-locality field is an accessible combobox:
 Organization resolution persists website disposition, normalized website URL and optional phone before search/create/claim. Domain matching derives from the normalized URL.
 
 Essential registration consumes this persisted seed and the authenticated user's name/email. It does not ask the participant to recreate previously supplied organization information.
+
+A participant-created organization establishes the verified creator as the audited primary administrator only through the canonical atomic authority/membership transition. Selecting an existing organization instead creates the applicable pending claim and never auto-grants control.
 
 ## Authority and Verification remain separate
 
