@@ -8,6 +8,7 @@ import {
   ExchangeSpatialScene,
   type ExchangeHomeMarker,
 } from "../map/ExchangeSpatialScene";
+import { StatusPill } from "../ui";
 import { ActivationJourneyClient } from "./ActivationJourneyClient";
 
 import styles from "./SpatialActivationExperience.module.css";
@@ -28,10 +29,19 @@ export function SpatialActivationExperience({
   const [sceneModel, setSceneModel] = useState(mapModel);
   const [homeMarker, setHomeMarker] = useState<ExchangeHomeMarker | null>(null);
   const [workspaceUrl, setWorkspaceUrl] = useState("/geography/canvas");
+  const [reducedMotion, setReducedMotion] = useState(false);
   const selectedGeographyId = activationState?.selectedGeography?.id ?? null;
   const markerActive = activationState?.marker?.status === "active";
   const sceneModelMatchesSelection = selectedGeographyId !== null &&
     String(sceneModel.selectedGeography.id) === selectedGeographyId;
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReducedMotion(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     if (!selectedGeographyId || sceneModelMatchesSelection) return;
@@ -78,9 +88,9 @@ export function SpatialActivationExperience({
     if (!homeMarker) return;
     const timer = window.setTimeout(() => {
       window.location.assign(workspaceUrl);
-    }, 3_400);
+    }, reducedMotion ? 200 : 3_400);
     return () => window.clearTimeout(timer);
-  }, [homeMarker, workspaceUrl]);
+  }, [homeMarker, reducedMotion, workspaceUrl]);
 
   const mapVisible = activationState !== null;
   const sceneMode = homeMarker
@@ -88,12 +98,19 @@ export function SpatialActivationExperience({
     : selectedGeographyId && sceneModelMatchesSelection
       ? "locality"
       : "regional";
+  const localityName = activationState?.selectedGeography?.name ?? sceneModel.selectedGeography.name;
+  const statusText = homeMarker
+    ? "Your organization is now visible. Entering The RFxchange."
+    : activationState
+      ? `Activation progress is preserved. Current step: ${activationState.nextStep.replaceAll("-", " ")}.`
+      : "Create or sign in to an account to begin organization activation.";
 
   return (
     <div
       className={styles.experience}
       data-map-visible={mapVisible}
       data-entering-workspace={homeMarker !== null}
+      data-reduced-motion={reducedMotion}
     >
       {mapVisible ? (
         <div className={styles.mapLayer}>
@@ -103,6 +120,14 @@ export function SpatialActivationExperience({
             marker={homeMarker}
             activationOverlay={!homeMarker}
           />
+        </div>
+      ) : null}
+      {mapVisible ? (
+        <div className={styles.continuityStatus} role="status" aria-live="polite">
+          <StatusPill tone={homeMarker ? "positive" : "connection"}>
+            {homeMarker ? "Organization visible" : localityName}
+          </StatusPill>
+          <span>{statusText}</span>
         </div>
       ) : null}
       <div className={styles.content}>
