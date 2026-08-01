@@ -512,13 +512,19 @@ export function ActivationJourneyClient({
                     className={styles.resultCard}
                     role="option"
                     aria-selected={index === activeGeographyIndex}
+                    aria-disabled={busy}
                     data-active={index === activeGeographyIndex}
+                    onMouseEnter={() => setActiveGeographyIndex(index)}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      if (!busy) void run(() => chooseGeography(geography));
+                    }}
                   >
                     <div>
                       <strong>{geography.name}, {geography.stateName}</strong>
                       <span>{geographyTypeLabel(geography.type)} · FIPS {geography.fipsCode}</span>
                     </div>
-                    <button className={styles.primary} type="button" disabled={busy} onMouseEnter={() => setActiveGeographyIndex(index)} onClick={() => run(() => chooseGeography(geography))}>Use this locality</button>
+                    <span className={styles.secondary} aria-hidden="true">Use this locality</span>
                   </article>
                 ))}
               </div>
