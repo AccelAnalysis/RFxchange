@@ -6,6 +6,10 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const rules = readFileSync(resolve(root, "firestore.rules"), "utf8");
 const schema = readFileSync(resolve(root, "src/infrastructure/firestore/schema.ts"), "utf8");
+const communicationsSchema = readFileSync(
+  resolve(root, "src/infrastructure/firestore/communications-schema.ts"),
+  "utf8",
+);
 const documentation = readFileSync(
   resolve(root, "docs/architecture/INF-004-firestore-security-rules-foundation.md"),
   "utf8",
@@ -26,14 +30,20 @@ assert.match(
   "INF-004 server-managed deny helper is missing or no longer deny-by-default.",
 );
 
-const collectionBlock = schema.match(
-  /export const FIRESTORE_COLLECTIONS = \{([\s\S]*?)\} as const;/,
-)?.[1];
-assert.ok(collectionBlock, "Unable to read FIRESTORE_COLLECTIONS from schema.ts.");
+function collectionNames(source, declaration) {
+  const block = source.match(
+    new RegExp(`export const ${declaration} = \\{([\\s\\S]*?)\\} as const;`),
+  )?.[1];
+  assert.ok(block, `Unable to read ${declaration}.`);
+  return [...block.matchAll(/^\s+[A-Za-z0-9_]+:\s*"([^"]+)"/gm)].map(
+    (match) => match[1],
+  );
+}
 
-const canonicalCollections = [...collectionBlock.matchAll(/^\s+[A-Za-z0-9_]+:\s*"([^"]+)"/gm)].map(
-  (match) => match[1],
-);
+const canonicalCollections = [
+  ...collectionNames(schema, "FIRESTORE_COLLECTIONS"),
+  ...collectionNames(communicationsSchema, "COMMUNICATIONS_FIRESTORE_COLLECTIONS"),
+];
 assert.ok(canonicalCollections.length > 0, "No canonical Firestore collections were discovered.");
 
 for (const collection of canonicalCollections) {
@@ -61,6 +71,7 @@ const appendOnlyCollections = [
   "retentionAssignments",
   "adminPermissionGrants",
   "backgroundJobEvents",
+  "transactionalEmailDeliveryEvents",
   "acquisitionContextEvents",
   "orientationJourneyEvents",
   "activationReleaseEvents",
