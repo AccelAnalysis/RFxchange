@@ -37,8 +37,10 @@ for (const expected of [
   );
 }
 assert.ok(
-  catalog.includes("htmlEscape") && catalog.includes("not a reviewed event-template mapping"),
-  "COMMS-003 must escape HTML variables and reject unreviewed mappings.",
+  catalog.includes("htmlEscape") &&
+    catalog.includes("event and template versions do not map to one definition") &&
+    catalog.includes("No transactional email template is mapped"),
+  "COMMS-003 must escape HTML variables and reject unreviewed or mismatched mappings.",
 );
 
 for (const expected of [
