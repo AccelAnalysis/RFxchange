@@ -1,3 +1,4 @@
+# Applies the reviewed registration-convergence archive to this feature branch.
 name: Apply registration convergence
 
 on:
