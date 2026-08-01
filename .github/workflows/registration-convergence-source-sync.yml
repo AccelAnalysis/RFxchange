@@ -1,0 +1,299 @@
+name: Apply registration convergence source sync
+
+on:
+  push:
+    branches:
+      - codex/registration-activation-convergence
+    paths:
+      - .github/workflows/registration-convergence-source-sync.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-source-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/registration-activation-convergence
+          fetch-depth: 0
+      - name: Reconcile canonical registration sources
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_exact(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f"Expected text not found in {path}: {old[:100]!r}")
+              p.write_text(text.replace(old, new))
+
+          # Canonical dependency authority.
+          dep = "docs/tracking/RFxchange_DEPENDENCY_MAP.md"
+          replace_exact(
+              dep,
+              "## Wave 2 Activation dependency corrections — 2026-07-30",
+              "## Wave 2 Activation dependency corrections — reviewed 2026-07-30; amended 2026-07-31",
+          )
+          replace_exact(
+              dep,
+              "| `ORG-012` Profile Complete trigger | `ORG-007` | `ORG-007`, `ORG-008`, `ORG-009`, `ORG-010`, `GEO-010` | The acceptance condition requires identity/contact, capability, geography, visibility and role fields. Minimum identity alone cannot legitimately produce Profile Complete. |",
+              "| `ORG-012` Profile Complete trigger | `ORG-007` | `ORG-007`, `ORG-008`, `ORG-009`, `GEO-010` | Profile Complete requires minimum organization identity/contact, a meaningful capability, service geography, confirmed location and location visibility. Organization type, descriptive participation roles and business objectives are optional enrichment and cannot block activation. |",
+          )
+          replace_exact(
+              dep,
+              "| `EDU-009` Objective-based first-value pathway | none | `ORG-011` | The first-value pathway is explicitly driven by the organization's selected business objectives, so the objective preferences must exist first. |",
+              "| `EDU-009` First-value pathway selection | none | `EDU-008` | First value is selected after the participant completes orientation. Optional profile objectives are not collected during registration and are not a prerequisite; valid acquisition context may recommend a path without completing it or granting authority. |",
+          )
+          replace_exact(
+              dep,
+              "| `RES-001` Official Resource Provider application | `ORG-019` | `ORG-012`, `ORG-010` | Additional locations are optional enrichment and cannot be a prerequisite for applying as a provider. A legitimate Profile Complete organization with the applicable role is sufficient to enter provider review. |",
+              "| `RES-001` Official Resource Provider application | `ORG-019` | `ORG-012` | Additional locations and descriptive organization roles are optional enrichment. A legitimate Profile Complete organization enters the separate provider application and administrator-review process without self-selecting Official Resource Provider status during registration. |",
+          )
+          replace_exact(
+              dep,
+              "  ORG-007 → ORG-008\n          ├→ ORG-010\n          └→ ORG-011 → EDU-009\n  ORG-007 + ORG-008 + ORG-009 + ORG-010 + GEO-010 → ORG-012",
+              "  ORG-007 → ORG-008\n  ORG-010 optional post-activation classification enrichment\n  ORG-011 optional post-activation personalization enrichment\n  ORG-007 + ORG-008 + ORG-009 + GEO-010 → ORG-012",
+          )
+          replace_exact(
+              dep,
+              "  EDU-001 → EDU-002 → EDU-003 → EDU-004 → EDU-005 → EDU-006 → EDU-007 → EDU-008\n  ARC-003 + ARC-008 + AUTH-004 + GOV-001 + GOV-002 + GOV-003",
+              "  EDU-001 → EDU-002 → EDU-003 → EDU-004 → EDU-005 → EDU-006 → EDU-007 → EDU-008 → EDU-009\n  ARC-003 + ARC-008 + AUTH-004 + GOV-001 + GOV-002 + GOV-003",
+          )
+          replace_exact(
+              dep,
+              "7. **Slice 2.7 — `ORG-007` + `ORG-008` + `ORG-010` + `ORG-011` + `ORG-012` — Essential Organization Profile**: minimum identity, meaningful capability, multi-role classification, business objectives and legitimate Profile Complete state.",
+              "7. **Slice 2.7 — `ORG-007` + `ORG-008` + `ORG-010` + `ORG-011` + `ORG-012` — Essential Organization Profile**: minimum identity/contact and meaningful capability establish Profile Complete with the existing geography/location gates; organization type, descriptive roles and objectives remain optional post-activation enrichment.",
+          )
+          replace_exact(
+              dep,
+              "12. **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: objective-driven first action followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.",
+              "12. **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: post-orientation first-value intent selection followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.",
+          )
+
+          # Active Wave 2 roadmap.
+          roadmap = "docs/slices/WAVE_2_ROADMAP.md"
+          replace_exact(
+              roadmap,
+              "| **2.7 — Essential Organization Profile** | `ORG-007`, `ORG-008`, `ORG-010`, `ORG-011`, `ORG-012` | Establish minimum identity, capability, multi-role classification, objectives and Profile Complete. |",
+              "| **2.7 — Essential Organization Profile** | `ORG-007`, `ORG-008`, `ORG-010`, `ORG-011`, `ORG-012` | Establish minimum identity/contact, categorized capability and Profile Complete; retain organization type, descriptive roles and objectives only as optional enrichment. |",
+          )
+          replace_exact(
+              roadmap,
+              "| **2.12 — First Value & OPEN Gate** | `EDU-009`, `EDU-010` | Route according to goals and release OPEN only after all account, organization, geography, marker, education, legal and first-value gates are satisfied. |",
+              "| **2.12 — First Value & OPEN Gate** | `EDU-009`, `EDU-010` | Ask the participant to select a post-orientation first-value intent, then release OPEN only after all account, organization, geography, marker, education, legal and first-value gates are satisfied. |",
+          )
+          replace_exact(
+              roadmap,
+              "- first-value routing selects the correct shared workspace for the chosen objective;",
+              "- first-value routing selects the correct shared workspace for the participant's post-orientation first-value intent;",
+          )
+          replace_exact(
+              roadmap,
+              "→ objective-based first value\n→ OPEN",
+              "→ post-orientation first-value selection\n→ OPEN",
+          )
+          replace_exact(
+              roadmap,
+              "reach an appropriate first-value path, and enter OPEN",
+              "select an appropriate first-value path, and enter OPEN",
+          )
+          replace_exact(
+              roadmap,
+              "- `ORG-012` depends on the fields its completion state actually requires;\n- `GEO-011` depends on controlled map/release state, confirmed location and legitimate Profile Complete;\n- `EDU-009` depends on organization objectives;",
+              "- `ORG-012` depends on minimum identity/contact, meaningful capability, service geography, confirmed location and location visibility—not optional organization type, descriptive roles or objectives;\n- `GEO-011` depends on controlled map/release state, confirmed location and legitimate Profile Complete;\n- `EDU-009` follows completed orientation and records a first-value selection; it does not depend on registration-time business objectives;",
+          )
+
+          # Tracker remains at the same feature counts, but records the corrected meanings.
+          tracker = "docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md"
+          replace_exact(
+              tracker,
+              "- **Wave 2 Runtime Convergence Gate — MERGED PR #92; no Feature IDs**: account-only participant runtime, trusted auth/session composition, lifecycle/membership/restriction routing, scoped admin boundaries, production fixture removal, canonical onboarding vocabularies and convergence guardrails. Production CI passed on the merged tree.\n- **Slice 2.9",
+              "- **Wave 2 Runtime Convergence Gate — MERGED PR #92; no Feature IDs**: account-only participant runtime, trusted auth/session composition, lifecycle/membership/restriction routing, scoped admin boundaries, production fixture removal, canonical onboarding vocabularies and convergence guardrails. Production CI passed on the merged tree.\n- **Registration Convergence Correction — PR #98; no Feature IDs**: removes organization type, descriptive participation roles and business objectives from required registration; corrects Profile Complete; preserves optional enrichment; establishes post-orientation first-value selection; and keeps Official Resource Provider status in the separate Wave 3.6 application/review process.\n- **Slice 2.9",
+          )
+          replace_exact(
+              tracker,
+              "- **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: objective-driven first action followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.",
+              "- **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: post-orientation first-value intent selection followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.",
+          )
+          replace_exact(
+              tracker,
+              "Current Feature-ID completion is **31/43 Activation**. The Runtime Convergence Gate is an integration/repair gate and does not alter that count.",
+              "Current Feature-ID completion is **31/43 Activation**. The Runtime Convergence Gate and Registration Convergence Correction are integration/repair gates and do not alter that count.",
+          )
+          replace_exact(
+              tracker,
+              "- [x] `ORG-010` — PR #75\n- [x] `ORG-011` — PR #75\n- [x] `ORG-012` — PR #75",
+              "- [x] `ORG-010` — PR #75; optional descriptive classification retained for later enrichment and never used as organization authority or a Profile Complete gate\n- [x] `ORG-011` — PR #75; optional personalization vocabulary retained for later use and removed from required activation/EDU-009 dependency\n- [x] `ORG-012` — PR #75 + PR #98 correction; derived from minimum identity/contact, meaningful capability, service geography, confirmed location and location visibility",
+          )
+
+          # Replace Slice 2.12 with the amended first-value contract.
+          Path("docs/slices/SLICE_2_12_FIRST_VALUE_AND_OPEN_GATE.md").write_text('''# Slice 2.12 — First Value & OPEN Gate
+
+**Status: PLANNING BRIEF ONLY — DO NOT IMPLEMENT UNTIL EXPLICITLY AUTHORIZED**
+
+## Feature IDs
+
+- `EDU-009` — First-value pathway selection
+- `EDU-010` — Open-platform release gating
+
+## Objective
+
+Close Activation by asking the participant—after completing the Exchange orientation—what they want to do first, preserving that first-value intent, and setting the user to OPEN only after every required identity, policy, organization, geography, marker and education gate is satisfied.
+
+The first-value step is not a registration questionnaire. Organization type, descriptive participation roles and business objectives are optional enrichment and are not prerequisites for `EDU-009` or OPEN.
+
+## Must read
+
+- `/AGENTS.md`
+- `docs/context/USER_JOURNEY.md`
+- `docs/context/ORGANIZATION_MODEL.md`
+- `docs/context/MAP_AND_GEOGRAPHY.md`
+- `docs/context/ACQUISITION_AND_RETENTION.md`
+- `docs/context/PRODUCT_PRINCIPLES.md`
+- `docs/design/README.md`
+- `docs/design/RFxchange_DESIGN_SYSTEM.md`
+- canonical tracker/dependency map
+- merged Slices 2.9–2.11
+- `docs/slices/WAVE_2_ROADMAP.md`
+
+## Prerequisite state
+
+`EDU-009` follows completed orientation through `EDU-008`. It does not depend on `ORG-011` and must not reintroduce business-objective questions into registration.
+
+The canonical OPEN gate for `EDU-010` requires `ARC-003`, `ARC-008`, `AUTH-004`, `GOV-001`, `GOV-002`, `GOV-003`, `ORG-004`, `ORG-012`, `GEO-011`, `EDU-008` and `EDU-009`.
+
+No client route, UI completion flag, acquisition link, payment state or commercial status may substitute for those server-authoritative conditions.
+
+## Product rules
+
+### `EDU-009`
+
+After the complete synthetic orientation, present a concise first-value choice such as:
+
+- find an opportunity;
+- issue an opportunity;
+- find customers or suppliers;
+- find a teammate;
+- send or receive a referral;
+- find resources/support;
+- explore the network.
+
+Persist the participant's selected first-value intent and evidence that the pathway was actually presented. Store semantic destination intent rather than treating a raw URL as authority.
+
+Valid acquisition context from Slice 2.9 may recommend or preselect a compatible pathway, but it cannot complete `EDU-009`, grant destination access, or bypass the user's informed first-value step.
+
+The routing contract must remain durable as later waves activate richer destination functionality. At Wave 2 exit, destination behavior must be truthful about what is currently available and must not manufacture live Network or RFx functionality merely to make every choice look complete.
+
+### `EDU-010`
+
+OPEN is a persisted server-authoritative lifecycle transition. Before transition, re-read all required gates from canonical state.
+
+At minimum verify:
+
+- usable attached user and active organization membership;
+- no blocking restriction, suspension, integrity or termination state;
+- authentication lifecycle requirements satisfied;
+- required Terms, Rules and Privacy acknowledgments current;
+- legitimate organization authority established;
+- corrected Profile Complete active;
+- real organization marker active in an allowed geography;
+- orientation through `EDU-008` complete;
+- first-value pathway selected and presented through `EDU-009`.
+
+If any gate fails, remain controlled/not-open and route to the exact remediation path rather than silently repairing or bypassing it.
+
+## Acceptance intent
+
+- `EDU-009`: each approved first-value intent maps to a defined semantic destination/action contract after orientation.
+- direct entry works without acquisition context; valid acquisition context can recommend but cannot authorize or auto-complete the choice.
+- optional organization type, role and objective metadata do not gate the first-value step.
+- `EDU-010`: OPEN is set only when every canonical prerequisite is satisfied at transition time.
+- a later revoked prerequisite causes access/orientation logic to honor current restriction/authority policy rather than trusting stale OPEN browser state.
+- missing gates produce explicit remediation.
+
+## Expected implementation qualities
+
+- typed first-value intent and destination contract;
+- server-side gate evaluator with explainable failed conditions;
+- idempotent OPEN transition and auditable lifecycle evidence;
+- no dependency on paid membership, Founding status, provider status, optional profile classification or future credibility;
+- mobile/desktop first-value surfaces follow canonical design;
+- tests cover every intent, acquisition-context recommendation, direct entry, unavailable destination truthfulness, complete success, each missing/blocked gate, stale client state, cross-user access and re-entry.
+
+## Explicit non-scope
+
+Do **not** implement in Slice 2.12:
+
+- Wave 3 Network features merely because a first-value path points toward them;
+- Wave 4 RFx workflows;
+- Founding membership/payments;
+- Official Resource Provider application or approval;
+- Organization Verification or Trust badges;
+- automatic qualification or recommendation engines;
+- a new registration-time objectives questionnaire.
+
+## Exit checkpoint
+
+A legitimate new organization can complete the full activation journey, see its real marker, understand the Exchange, select a relevant first-value path after orientation and enter OPEN only after the complete release gate passes.
+
+## Completion discipline
+
+After merge, reconcile the tracker against evidence and verify the **entire Wave 2 exit condition** before authorizing any Wave 3 implementation.
+''')
+
+          # Regression guard across runtime and canonical source authority.
+          Path("test/registration-convergence-source-authority.test.mjs").write_text('''import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+
+test("registration convergence remains aligned across runtime and canonical authorities", async () => {
+  const [model, client, route, slice27, dependencyMap, roadmap, tracker, slice212, providerBrief] = await Promise.all([
+    read("src/domain/organization-profile/model.ts"),
+    read("src/components/onboarding/ActivationJourneyClient.tsx"),
+    read("app/api/onboarding/activation/route.ts"),
+    read("docs/slices/SLICE_2_7_ESSENTIAL_ORGANIZATION_PROFILE.md"),
+    read("docs/tracking/RFxchange_DEPENDENCY_MAP.md"),
+    read("docs/slices/WAVE_2_ROADMAP.md"),
+    read("docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md"),
+    read("docs/slices/SLICE_2_12_FIRST_VALUE_AND_OPEN_GATE.md"),
+    read("docs/slices/SLICE_3_6_OFFICIAL_RESOURCE_PROVIDER_FOUNDATION.md"),
+  ]);
+
+  assert.equal(model.includes('missing.push("organization-type")'), false);
+  assert.equal(model.includes('missing.push("participation-role")'), false);
+  assert.equal(client.includes("ORGANIZATION_PARTICIPATION_ROLES.map"), false);
+  assert.equal(client.includes("ORGANIZATION_BUSINESS_OBJECTIVES.map"), false);
+  assert.equal(client.includes("Organization type<select"), false);
+  assert.equal(route.includes("participationRoles"), false);
+  assert.equal(route.includes("businessObjectives"), false);
+
+  assert.ok(slice27.includes("not collected during activation"));
+  assert.ok(slice27.includes("separate application"));
+  assert.ok(dependencyMap.includes("`ORG-007`, `ORG-008`, `ORG-009`, `GEO-010`"));
+  assert.ok(dependencyMap.includes("`EDU-009` First-value pathway selection | none | `EDU-008`"));
+  assert.equal(dependencyMap.includes("`EDU-009` Objective-based first-value pathway | none | `ORG-011`"), false);
+  assert.ok(roadmap.includes("post-orientation first-value selection"));
+  assert.ok(tracker.includes("Registration Convergence Correction — PR #98; no Feature IDs"));
+  assert.ok(tracker.includes("PR #75 + PR #98 correction"));
+  assert.ok(slice212.includes("It does not depend on `ORG-011`"));
+  assert.ok(slice212.includes("must not reintroduce business-objective questions into registration"));
+  assert.ok(providerBrief.includes("separate application"));
+  assert.ok(providerBrief.includes("cannot be self-selected during registration"));
+});
+''')
+          PY
+      - name: Commit source convergence
+        shell: bash
+        run: |
+          rm .github/workflows/registration-convergence-source-sync.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Reconcile registration convergence source authority"
+          git push origin HEAD:codex/registration-activation-convergence
