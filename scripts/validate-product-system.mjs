@@ -105,5 +105,6 @@ if (!network.includes("#D6A23A")) throw new Error("Golden connection path langua
 await import("./validate-brand-semantic-foundation.mjs");
 await import("./validate-brand-shared-primitives.mjs");
 await import("./validate-brand-cartographic-convergence.mjs");
+await import("./validate-brand-public-marketing.mjs");
 
 console.log("Wave 0 product-system validation passed, including ACQ-001 and core brand foundation BRD-001/003/005/014.");
