@@ -608,7 +608,15 @@ export class ActivationJourneyService {
     if (activation.organizationIdentitySeed.websiteDisposition === null) {
       throw new Error("Confirm the organization website or indicate that no public website applies.");
     }
-    const location = await this.dependencies.locations.getByOrganizationId(activation.organizationId);
+    const organizationId = activation.organizationId;
+    const membershipId = activation.membershipId;
+    if (!organizationId || !membershipId) {
+      throw new ActivationJourneyError(
+        "organization-authority-required",
+        "Organization authority changed before essential profile completion.",
+      );
+    }
+    const location = await this.dependencies.locations.getByOrganizationId(organizationId);
     if (!location) {
       throw new ActivationJourneyError(
         "location-required",
@@ -616,7 +624,7 @@ export class ActivationJourneyService {
       );
     }
     const durableProfile = await this.dependencies.profiles.getByOrganizationId(
-      activation.organizationId,
+      organizationId,
     );
     if (!durableProfile) {
       throw new ActivationJourneyError(
@@ -634,8 +642,8 @@ export class ActivationJourneyService {
     });
     const saved = await this.dependencies.profile.update({
       context,
-      organizationId: String(activation.organizationId),
-      membershipId: String(activation.membershipId),
+      organizationId: String(organizationId),
+      membershipId: String(membershipId),
       profile: {
         displayName: durableProfile.displayName,
         website: activation.organizationIdentitySeed.websiteDisposition === "not-applicable"
@@ -662,8 +670,8 @@ export class ActivationJourneyService {
 
     const marker = await this.dependencies.marker.recalculate({
       context,
-      organizationId: activation.organizationId,
-      membershipId: activation.membershipId,
+      organizationId,
+      membershipId,
       eventId: this.dependencies.ids.markerEvent(),
       auditEventId: this.dependencies.ids.markerAudit(),
       reason: "Essential profile completed during activation; recalculate real marker.",
