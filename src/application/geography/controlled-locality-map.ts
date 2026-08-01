@@ -10,6 +10,7 @@ import type {
 } from "../../domain/geography/model.ts";
 import { resolveGeographyCameraPlan } from "../../domain/geography/model.ts";
 import type { GeographyDefinitionRepository } from "../../domain/geography/repository.ts";
+import { exchangeLightCartography } from "../../design/cartography.ts";
 
 export type LocalityLayerId =
   | "surrounding-fill"
@@ -100,15 +101,15 @@ export const CONTROLLED_LOCALITY_LAYER_STYLES: Readonly<
   Record<LocalityLayerId, LocalityLayerStyle>
 > = Object.freeze({
   "surrounding-fill": Object.freeze({
-    fill: "#6d737d",
-    fillOpacity: 0.24,
+    fill: exchangeLightCartography.nonFocusMask,
+    fillOpacity: 0.12,
     stroke: "none",
     strokeOpacity: 0,
     strokeWidth: 0,
   }),
   "selected-fill": Object.freeze({
-    fill: "#5d8b70",
-    fillOpacity: 0.9,
+    fill: exchangeLightCartography.selectedLocalityFill,
+    fillOpacity: exchangeLightCartography.selectedLocalityFillOpacity,
     stroke: "none",
     strokeOpacity: 0,
     strokeWidth: 0,
@@ -116,23 +117,23 @@ export const CONTROLLED_LOCALITY_LAYER_STYLES: Readonly<
   "surrounding-outline": Object.freeze({
     fill: "none",
     fillOpacity: 0,
-    stroke: "#5d626c",
-    strokeOpacity: 0.74,
-    strokeWidth: 1.35,
+    stroke: exchangeLightCartography.nonFocusMask,
+    strokeOpacity: 0.42,
+    strokeWidth: 1.1,
   }),
   "selected-outline-contrast": Object.freeze({
     fill: "none",
     fillOpacity: 0,
-    stroke: "#0b0b0d",
-    strokeOpacity: 0.92,
-    strokeWidth: 6,
+    stroke: exchangeLightCartography.selectedLocalityContrast,
+    strokeOpacity: exchangeLightCartography.selectedLocalityContrastOpacity,
+    strokeWidth: exchangeLightCartography.selectedLocalityContrastWidth,
   }),
   "selected-outline-accent": Object.freeze({
     fill: "none",
     fillOpacity: 0,
-    stroke: "#d6a23a",
-    strokeOpacity: 1,
-    strokeWidth: 3.25,
+    stroke: exchangeLightCartography.selectedLocalityAccent,
+    strokeOpacity: exchangeLightCartography.selectedLocalityAccentOpacity,
+    strokeWidth: exchangeLightCartography.selectedLocalityAccentWidth,
   }),
 });
 
