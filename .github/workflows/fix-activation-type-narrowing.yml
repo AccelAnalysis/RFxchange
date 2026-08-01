@@ -1,0 +1,70 @@
+name: Fix activation type narrowing
+
+on:
+  push:
+    branches:
+      - codex/registration-activation-convergence
+    paths:
+      - .github/workflows/fix-activation-type-narrowing.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/registration-activation-convergence
+          fetch-depth: 0
+      - name: Preserve authoritative organization identity narrowing
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("src/application/onboarding/activation-journey.ts")
+          source = path.read_text()
+          old = '''    if (activation.organizationIdentitySeed.websiteDisposition === null) {
+      throw new Error("Confirm the organization website or indicate that no public website applies.");
+    }
+    const location = await this.dependencies.locations.getByOrganizationId(activation.organizationId);'''
+          new = '''    if (activation.organizationIdentitySeed.websiteDisposition === null) {
+      throw new Error("Confirm the organization website or indicate that no public website applies.");
+    }
+    const organizationId = activation.organizationId;
+    const membershipId = activation.membershipId;
+    if (!organizationId || !membershipId) {
+      throw new ActivationJourneyError(
+        "organization-authority-required",
+        "Organization authority changed before essential profile completion.",
+      );
+    }
+    const location = await this.dependencies.locations.getByOrganizationId(organizationId);'''
+          replacements = {
+            old: new,
+            '''      activation.organizationId,
+    );''': '''      organizationId,
+    );''',
+            '''      organizationId: String(activation.organizationId),
+      membershipId: String(activation.membershipId),''': '''      organizationId: String(organizationId),
+      membershipId: String(membershipId),''',
+            '''      organizationId: activation.organizationId,
+      membershipId: activation.membershipId,''': '''      organizationId,
+      membershipId,''',
+          }
+          for before, after in replacements.items():
+              count = source.count(before)
+              if count != 1:
+                  raise SystemExit(f"Expected exactly one occurrence, found {count}: {before[:80]!r}")
+              source = source.replace(before, after, 1)
+          path.write_text(source)
+          PY
+          rm .github/workflows/fix-activation-type-narrowing.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Narrow activation organization identity after seed persistence"
+          git push origin HEAD:codex/registration-activation-convergence
