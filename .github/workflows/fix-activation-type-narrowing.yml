@@ -1,3 +1,4 @@
+# One-shot branch correction; removes itself after applying.
 name: Fix activation type narrowing
 
 on:
