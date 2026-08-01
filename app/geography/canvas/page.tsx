@@ -1,13 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import {
-  ExchangeSpatialScene,
-} from "@/src/components/map/ExchangeSpatialScene";
-import {
-  ParticipantShell,
-  SpatialWorkspace,
-} from "@/src/components/participant/ParticipantWorkspace";
+import { ExistingWorkspaceFoundation } from "@/src/components/participant/ExistingWorkspaceFoundation";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
@@ -60,15 +54,10 @@ export default async function GeographyCanvasPage({
   const authenticated = await resolveAuthenticatedMapProjection(requestedOrganizationId);
 
   return (
-    <ParticipantShell activeItem="Intelligence">
-      <SpatialWorkspace ariaLabel="RFxchange Intelligence geographic workspace">
-        <ExchangeSpatialScene
-          model={authenticated.model}
-          mode="organization"
-          marker={authenticated.homeMarker}
-          interactive
-        />
-      </SpatialWorkspace>
-    </ParticipantShell>
+    <ExistingWorkspaceFoundation
+      model={authenticated.model}
+      homeMarker={authenticated.homeMarker}
+      organizationId={authenticated.organizationId}
+    />
   );
 }
