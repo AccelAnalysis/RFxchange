@@ -15,6 +15,7 @@ test("registration convergence remains aligned across runtime and canonical auth
     tracker,
     slice212,
     providerBrief,
+    integrationGate,
   ] = await Promise.all([
     read("src/domain/organization-profile/model.ts"),
     read("src/components/onboarding/ActivationJourneyClient.tsx"),
@@ -25,6 +26,7 @@ test("registration convergence remains aligned across runtime and canonical auth
     read("docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md"),
     read("docs/slices/SLICE_2_12_FIRST_VALUE_AND_OPEN_GATE.md"),
     read("docs/slices/SLICE_3_6_OFFICIAL_RESOURCE_PROVIDER_FOUNDATION.md"),
+    read("docs/architecture/ACTIVATION_JOURNEY_INTEGRATION_GATE.md"),
   ]);
 
   assert.equal(model.includes('missing.push("organization-type")'), false);
@@ -64,4 +66,9 @@ test("registration convergence remains aligned across runtime and canonical auth
     ),
   );
   assert.ok(providerBrief.includes("registration contains no Resource Provider checkbox"));
+  assert.ok(
+    integrationGate.includes(
+      "Every activated organization can both issue and respond to opportunities",
+    ),
+  );
 });
