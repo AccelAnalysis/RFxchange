@@ -31,46 +31,38 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path("src/components/onboarding/ActivationJourneyClient.tsx")
           source = path.read_text()
-          old = '''                  <article
-                    key={geography.reference}
-                    id={`locality-${geography.fipsCode}`}
-                    className={styles.resultCard}
-                    role="option"
-                    aria-selected={index === activeGeographyIndex}
-                    data-active={index === activeGeographyIndex}
-                  >
-                    <div>
-                      <strong>{geography.name}, {geography.stateName}</strong>
-                      <span>{geographyTypeLabel(geography.type)} · FIPS {geography.fipsCode}</span>
-                    </div>
-                    <button className={styles.primary} type="button" disabled={busy} onMouseEnter={() => setActiveGeographyIndex(index)} onClick={() => run(() => chooseGeography(geography))}>Use this locality</button>
-                  </article>'''
-          new = '''                  <article
-                    key={geography.reference}
-                    id={`locality-${geography.fipsCode}`}
-                    className={styles.resultCard}
-                    role="option"
-                    aria-selected={index === activeGeographyIndex}
-                    aria-disabled={busy}
-                    data-active={index === activeGeographyIndex}
-                    onMouseEnter={() => setActiveGeographyIndex(index)}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => {
-                      if (!busy) void run(() => chooseGeography(geography));
-                    }}
-                  >
-                    <div>
-                      <strong>{geography.name}, {geography.stateName}</strong>
-                      <span>{geographyTypeLabel(geography.type)} · FIPS {geography.fipsCode}</span>
-                    </div>
-                    <span className={styles.secondary} aria-hidden="true">Use this locality</span>
-                  </article>'''
-          if source.count(old) != 1:
-              raise SystemExit(f"Expected one locality option block, found {source.count(old)}")
-          path.write_text(source.replace(old, new))
+          pattern = re.compile(
+              r'''\s*<article\n\s+key=\{geography\.reference\}\n\s+id=\{`locality-\$\{geography\.fipsCode\}`\}\n\s+className=\{styles\.resultCard\}\n\s+role="option"\n\s+aria-selected=\{index === activeGeographyIndex\}\n\s+data-active=\{index === activeGeographyIndex\}\n\s*>\n\s+<div>\n\s+<strong>\{geography\.name\}, \{geography\.stateName\}</strong>\n\s+<span>\{geographyTypeLabel\(geography\.type\)\} · FIPS \{geography\.fipsCode\}</span>\n\s+</div>\n\s+<button className=\{styles\.primary\} type="button" disabled=\{busy\} onMouseEnter=\{\(\) => setActiveGeographyIndex\(index\)\} onClick=\{\(\) => run\(\(\) => chooseGeography\(geography\)\)\}>Use this locality</button>\n\s+</article>'''
+          )
+          indent = " " * 18
+          replacement = f'''\n{indent}<article
+{indent}  key={{geography.reference}}
+{indent}  id={{`locality-${{geography.fipsCode}}`}}
+{indent}  className={{styles.resultCard}}
+{indent}  role="option"
+{indent}  aria-selected={{index === activeGeographyIndex}}
+{indent}  aria-disabled={{busy}}
+{indent}  data-active={{index === activeGeographyIndex}}
+{indent}  onMouseEnter={{() => setActiveGeographyIndex(index)}}
+{indent}  onMouseDown={{(event) => event.preventDefault()}}
+{indent}  onClick={{() => {{
+{indent}    if (!busy) void run(() => chooseGeography(geography));
+{indent}  }}}}
+{indent}>
+{indent}  <div>
+{indent}    <strong>{{geography.name}}, {{geography.stateName}}</strong>
+{indent}    <span>{{geographyTypeLabel(geography.type)}} · FIPS {{geography.fipsCode}}</span>
+{indent}  </div>
+{indent}  <span className={{styles.secondary}} aria-hidden="true">Use this locality</span>
+{indent}</article>'''
+          updated, count = pattern.subn(replacement, source, count=1)
+          if count != 1:
+              raise SystemExit(f"Expected one locality option block, found {count}")
+          path.write_text(updated)
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
