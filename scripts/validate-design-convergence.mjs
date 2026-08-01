@@ -114,8 +114,14 @@ for (const [path, route] of [
 assert.ok(
   activationClient.includes("MapboxLocalityCanvas") &&
     activationClient.includes("Confirm this map position") &&
-    activationClient.includes("Enter the controlled Exchange"),
-  "Integrated activation must preserve geographic confirmation and controlled-workspace handoff without recreating stacked participant shells.",
+    activationClient.includes("Enter the Exchange") &&
+    activationClient.includes("Your organization is ready"),
+  "Integrated activation must preserve geographic confirmation and customer-facing Exchange handoff without recreating stacked participant shells.",
+);
+assert.equal(
+  activationClient.toLowerCase().includes("controlled exchange"),
+  false,
+  "Customer-facing activation copy must not expose internal controlled-platform terminology.",
 );
 
 assert.ok(

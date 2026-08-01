@@ -4,7 +4,7 @@
 
 Current merged feature state remains **31/43 Activation features complete**. Slices 2.1–2.8 are complete; the Runtime Convergence Gate merged in PR #92 on 2026-07-31; 12 Activation Feature IDs remain across Slices 2.9–2.12.
 
-Slice 2.9 received implementation authorization on 2026-07-30 after dependency recalculation. The subsequent runtime audit paused that authorization while cross-slice authentication/session, route-boundary, fixture-surface and source-convergence defects were repaired. PR #92 completed that repository-level gate and production CI passed. Slice 2.9 is therefore again the next authorized feature slice, subject to the normal configured-development/browser acceptance boundary and dependency check before implementation. The Runtime Convergence Gate carries no Feature IDs and changes no tracker completion counts.
+Slice 2.9 received implementation authorization on 2026-07-30 after dependency recalculation. The subsequent runtime audit paused that authorization while cross-slice authentication/session, route-boundary, fixture-surface and source-convergence defects were repaired. PR #92 completed that repository-level gate and production CI passed. The Registration Convergence Correction in PR #98 then removed optional organization type, descriptive role and business-objective questions from required activation, corrected Profile Complete, and moved first-value intent selection to the post-orientation stage. Slice 2.9 remains the next authorized feature slice, subject to the normal configured-development/browser acceptance boundary and dependency check before implementation. These convergence gates carry no Feature IDs and change no tracker completion counts.
 
 | Slice / Gate | Features | Purpose / exit |
 | --- | --- | --- |
@@ -14,17 +14,18 @@ Slice 2.9 received implementation authorization on 2026-07-30 after dependency r
 | **2.4 — Microsoft Transactional Email** | `COMMS-002` | Activate the Microsoft production email adapter on the completed event/job foundation. |
 | **2.5 — Organization Authority & Claims** | `ORG-004`, `ADM-065`, `ADM-066` | Establish organization authority and admin claim/adjudication foundations. |
 | **2.6 — Organization Geography & Location** | `GEO-009`, `GEO-010`, `ORG-005`, `ORG-006`, `ORG-009` | Separate home location from service area, capture/geocode/confirm location and privacy, and establish service geography. |
-| **2.7 — Essential Organization Profile** | `ORG-007`, `ORG-008`, `ORG-010`, `ORG-011`, `ORG-012` | Establish minimum identity, capability, multi-role classification, objectives and Profile Complete. |
+| **2.7 — Essential Organization Profile** | `ORG-007`, `ORG-008`, `ORG-010`, `ORG-011`, `ORG-012` | Establish minimum identity/contact, categorized capability and Profile Complete; retain organization type, descriptive roles and objectives only as optional enrichment. |
 | **2.8 — Marker Activation & Admin 360** | `GEO-011`, `ADM-063`, `ADM-064` | Produce the real marker success moment and scoped Organization 360 foundation. |
-| **Runtime Convergence Gate — MERGED PR #92** | **No Feature IDs** | Enforce account-only participant runtime; centralize lifecycle/membership/restriction route access; protect admin routes with explicit scoped authority; remove production fixture leakage; align onboarding role/objective/relationship semantics; add positive/negative runtime guardrails. Repository CI passed on the merged tree. |
+| **Runtime Convergence Gate — MERGED PR #92** | **No Feature IDs** | Enforce account-only participant runtime; centralize lifecycle/membership/restriction route access; protect admin routes with explicit scoped authority; remove production fixture leakage; align onboarding metadata boundaries; add positive/negative runtime guardrails. Repository CI passed on the merged tree. |
+| **Registration Convergence Correction — PR #98** | **No Feature IDs** | Remove optional organization classification, role and objective questions from activation; correct Profile Complete; retain optional enrichment; preserve Official Resource Provider as a separate Wave 3.6 application/review; establish post-orientation first-value selection. |
 | **2.9 — Acquisition-to-Activation Continuity** | `ACQ-002`, `ACQ-003` | Preserve meaningful acquisition context through registration into the first authenticated experience. Next authorized feature slice after convergence. |
 | **2.10 — Orientation: Discovery & Team Formation** | `EDU-001`, `EDU-002`, `EDU-003`, `EDU-004` | Synthetic three-organization map tutorial: issuer creates opportunity → responder match → capability gap → teammate discovery. |
 | **2.11 — Orientation: Response to Outcome** | `EDU-005`, `EDU-006`, `EDU-007`, `EDU-008` | Teammate invite/accept → joint response → issuer evaluation/selection → network-effect visualization. |
-| **2.12 — First Value & OPEN Gate** | `EDU-009`, `EDU-010` | Route according to goals and release OPEN only after all account, organization, geography, marker, education, legal and first-value gates are satisfied. |
+| **2.12 — First Value & OPEN Gate** | `EDU-009`, `EDU-010` | Ask the participant to select a post-orientation first-value intent, then release OPEN only after all account, organization, geography, marker, education, legal and first-value gates are satisfied. |
 
 ## Runtime convergence authority
 
-The merged Runtime Convergence Gate and `docs/architecture/ACTIVATION_JOURNEY_INTEGRATION_GATE.md` are authoritative for the boundary Slices 2.9–2.12 inherit.
+The merged Runtime Convergence Gate, Registration Convergence Correction and `docs/architecture/ACTIVATION_JOURNEY_INTEGRATION_GATE.md` are authoritative for the boundary Slices 2.9–2.12 inherit.
 
 Public visitors receive the marketing/authentication surface only. A valid RFxchange account/session is required for participant application routes. Free accounts are valid participant accounts; paid plans later add entitlements rather than creating the basic workspace-access boundary.
 
@@ -40,7 +41,7 @@ The Design Convergence Gate completed after Slice 2.8 establishes the shared par
 
 - acquisition continuity enters the appropriate shared Spatial or Operational Workspace;
 - the three-organization orientation uses the Spatial Workspace where geographic discovery and teaming are integral;
-- first-value routing selects the correct shared workspace for the chosen objective;
+- first-value routing selects the correct shared workspace for the participant's post-orientation first-value intent;
 - OPEN returns to the shared Exchange environment rather than a new dashboard shell;
 - spatial steps preserve one participant top navigation, an edge-to-edge map filling the remaining viewport, Ivory overlays and responsive edge drawer/mobile sheet behavior;
 - no future slice adds a permanent participant left rail or interprets Exchange Black as the default participant canvas.
@@ -52,6 +53,7 @@ These requirements do not alter Feature-ID scope or completion status.
 ```text
 2.1–2.8 merged
 → Runtime Convergence Gate merged + repository CI passed
+→ Registration Convergence Correction merged + repository CI passed
 → configured-development/browser acceptance
 → dependency check
 → 2.9
@@ -70,25 +72,28 @@ Controlled geography
 → organization resolution
 → organization authority
 → real location/service geography
-→ essential profile
+→ minimum identity/contact + categorized capability
+→ Profile Complete
 → marker activation
-→ runtime convergence
+→ runtime and registration convergence
 → acquisition continuity
 → orientation
-→ objective-based first value
+→ post-orientation first-value selection
 → OPEN
 ```
 
+Organization type, descriptive participation roles and business objectives remain optional profile enrichment. They do not block Profile Complete, marker activation, controlled Exchange access, first-value selection or OPEN. Official Resource Provider status is established only through the separate Wave 3.6 application and administrator-review process.
+
 ## Wave 2 exit condition
 
-A new legitimate organization can arrive from a meaningful acquisition context, create/authenticate its RFxchange account, establish its organization relationship in an allowed geography, confirm location, complete the essential profile, see its real marker, enter the authenticated controlled Exchange, understand the Exchange through orientation, reach an appropriate first-value path, and enter OPEN only after the complete release gate is satisfied.
+A new legitimate organization can arrive from a meaningful acquisition context, create/authenticate its RFxchange account, establish its organization relationship in an allowed geography, confirm location, complete the minimum essential profile, see its real marker, enter the authenticated controlled Exchange, understand the Exchange through orientation, select an appropriate first-value path, and enter OPEN only after the complete release gate is satisfied.
 
 ## Canonical dependency corrections relevant to Wave 2
 
 The dependency map—not this roadmap—is the live Feature-ID dependency authority. In particular:
 
-- `ORG-012` depends on the fields its completion state actually requires;
+- `ORG-012` depends on minimum identity/contact, meaningful capability, service geography, confirmed location and location visibility—not optional organization type, descriptive roles or objectives;
 - `GEO-011` depends on controlled map/release state, confirmed location and legitimate Profile Complete;
-- `EDU-009` depends on organization objectives;
+- `EDU-009` follows completed orientation and records a first-value selection; it does not depend on registration-time business objectives;
 - `EDU-010` is the terminal OPEN gate;
 - completed `INF-008` remains independent of the later `ORG-004` workflow that consumes its storage foundation.

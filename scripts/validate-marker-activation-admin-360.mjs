@@ -143,10 +143,16 @@ assert.ok(
 );
 assert.equal(markerPage.includes("createPortsmouthActivatedOrganizationPreview"), false);
 assert.ok(
-  activationUi.includes("Your real marker is active") &&
+  activationUi.includes("now has an active marker") &&
     activationUi.includes("Organization activated") &&
-    activationUi.includes("Enter the controlled Exchange"),
+    activationUi.includes("Your organization is ready") &&
+    activationUi.includes("Enter the Exchange"),
   "Integrated activation must expose the real marker success state without implying OPEN.",
+);
+assert.equal(
+  activationUi.includes("open-platform"),
+  false,
+  "Marker success must not silently assert the future OPEN lifecycle state.",
 );
 for (const required of [
   "resolveAdminRoute",

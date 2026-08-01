@@ -20,27 +20,27 @@
 | `ADM-084` Versioned configuration change records | `ADM-081` | `ADM-083`, `ADM-085` | Versioned configuration history belongs to the Policy & Configuration Center and canonical audit system; the communications center is not an architectural prerequisite. |
 | `ADM-086` Audit corrections without history deletion | `ADM-083` | `ADM-085` | Additive corrections operate on immutable administrative audit events. Governed configuration is not required to append a correction referencing an existing audit event. |
 
-## Wave 2 Activation dependency corrections — 2026-07-30
+## Wave 2 Activation dependency corrections — reviewed 2026-07-30; amended 2026-07-31
 
 | Feature | Seeded dependency | Canonical dependency | Reason for correction |
 | --- | --- | --- | --- |
 | `INF-008` Firebase Storage document/media foundation | `INF-001`, `INF-003`, `ORG-004` | `INF-001`, `INF-003`, `ARC-005`, `ARC-009`, `AUTH-003` | Storage is infrastructure used by later organization-authority workflows, including sensitive authority evidence. Its prerequisite is the established tenant, permission, asset-ownership and authenticated-access contracts; it cannot depend on the later `ORG-004` workflow that consumes it. This also reconciles the already-merged `INF-008` implementation with the live dependency graph. |
-| `ORG-012` Profile Complete trigger | `ORG-007` | `ORG-007`, `ORG-008`, `ORG-009`, `ORG-010`, `GEO-010` | The acceptance condition requires identity/contact, capability, geography, visibility and role fields. Minimum identity alone cannot legitimately produce Profile Complete. |
+| `ORG-012` Profile Complete trigger | `ORG-007` | `ORG-007`, `ORG-008`, `ORG-009`, `GEO-010` | Profile Complete requires minimum organization identity/contact, a meaningful capability, service geography, confirmed location and location visibility. Organization type, descriptive participation roles and business objectives are optional enrichment and cannot block activation. |
 | `GEO-011` Organization marker activation | none | `GEO-005`, `GEO-007`, `ORG-006`, `ORG-012` | Marker activation is the culmination of activation: the locality must be rendered and governed by a release state, the organization location must be geocoded/confirmed, and the minimum profile must actually be complete before the marker appears. |
-| `EDU-009` Objective-based first-value pathway | none | `ORG-011` | The first-value pathway is explicitly driven by the organization's selected business objectives, so the objective preferences must exist first. |
+| `EDU-009` First-value pathway selection | none | `EDU-008` | First value is selected after the participant completes orientation. Optional profile objectives are not collected during registration and are not a prerequisite; valid acquisition context may recommend a path without completing it or granting authority. |
 | `EDU-010` Open-platform release gating | `ARC-007` | `ARC-003`, `ARC-008`, `AUTH-004`, `GOV-001`, `GOV-002`, `GOV-003`, `ORG-004`, `ORG-012`, `GEO-011`, `EDU-008`, `EDU-009` | OPEN is a terminal activation gate, not merely a lifecycle-state capability. It requires a usable attached user with no blocking restriction, completed authentication/policy obligations, an established organization relationship, minimum profile completion, real marker activation, orientation completion and presentation of the first-value pathway. |
 
-## Wave 3 Network dependency corrections — 2026-07-30
+## Wave 3 Network dependency corrections — reviewed 2026-07-30; amended 2026-07-31
 
 | Feature | Seeded dependency | Canonical dependency | Reason for correction |
 | --- | --- | --- | --- |
-| `RES-001` Official Resource Provider application | `ORG-019` | `ORG-012`, `ORG-010` | Additional locations are optional enrichment and cannot be a prerequisite for applying as a provider. A legitimate Profile Complete organization with the applicable role is sufficient to enter provider review. |
+| `RES-001` Official Resource Provider application | `ORG-019` | `ORG-012` | Additional locations and descriptive organization roles are optional enrichment. A legitimate Profile Complete organization enters the separate provider application and administrator-review process without self-selecting Official Resource Provider status during registration. |
 | `DSC-011` Contextual official resource search | none | `RES-003` | Resource discovery needs the structured provider service profile that defines services, territory, eligibility, intake and related search fields. |
 | `REF-006` Provider referral/request connection | none | `REF-005`, `RES-003` | Provider routing must reuse the consent/minimum-necessary referral boundary and target a provider with a structured service profile. |
 | `ACQ-006` Invite non-member to receive referral | none | `ACQ-003`, `REF-001`, `COMMS-003` | Referral acquisition requires a real referral, preserved acquisition context through activation and a versioned transactional invitation event/template. |
 | `ACQ-008` Provider-shared opportunity/profile invitations | none | `ACQ-003`, `RES-002`, `COMMS-003` | Provider-driven acquisition requires preserved context, approved Official Resource Provider state and versioned transactional communications. |
 
-Official Resource Provider approval in Wave 3 is a controlled provider-role/status decision. It must remain separate from the later substantive Credibility `Organization Verified` and `Verified Resource Provider` badges; commercial status cannot satisfy either concept.
+Official Resource Provider approval in Wave 3 is a controlled provider application/status decision. It must remain separate from descriptive profile metadata and from the later substantive Credibility `Organization Verified` and `Verified Resource Provider` badges; commercial status cannot satisfy either concept.
 
 ## Wave 1 high-leverage dependency chain — closed historical reference
 
@@ -104,15 +104,15 @@ Location and essential profile
   ORG-004 → ORG-005 → ORG-006
   GEO-009 → GEO-010
   ORG-007 → ORG-008
-          ├→ ORG-010
-          └→ ORG-011 → EDU-009
-  ORG-007 + ORG-008 + ORG-009 + ORG-010 + GEO-010 → ORG-012
+  ORG-010 optional post-activation classification enrichment
+  ORG-011 optional post-activation personalization enrichment
+  ORG-007 + ORG-008 + ORG-009 + GEO-010 → ORG-012
 
 Primary activation moment
   GEO-005 + GEO-007 + ORG-006 + ORG-012 → GEO-011
 
 Orientation and release
-  EDU-001 → EDU-002 → EDU-003 → EDU-004 → EDU-005 → EDU-006 → EDU-007 → EDU-008
+  EDU-001 → EDU-002 → EDU-003 → EDU-004 → EDU-005 → EDU-006 → EDU-007 → EDU-008 → EDU-009
   ARC-003 + ARC-008 + AUTH-004 + GOV-001 + GOV-002 + GOV-003
       + ORG-004 + ORG-012 + GEO-011 + EDU-008 + EDU-009 → EDU-010 OPEN
 ```
@@ -129,12 +129,12 @@ Wave 2 begins from the merged tracker state **2/43 complete** (`INF-007`, `INF-0
 4. **Slice 2.4 — `COMMS-002` — Microsoft Transactional Email**: production Microsoft delivery adapter behind the provider-neutral communication boundary.
 5. **Slice 2.5 — `ORG-004` + `ADM-065` + `ADM-066` — Organization Authority & Claims**: establish organizational authority plus administrative claims discovery and auditable conflict adjudication.
 6. **Slice 2.6 — `GEO-009` + `GEO-010` + `ORG-005` + `ORG-006` + `ORG-009` — Organization Geography & Location**: home-versus-service geography, address capture, geocoding/map confirmation, privacy and service-area capture.
-7. **Slice 2.7 — `ORG-007` + `ORG-008` + `ORG-010` + `ORG-011` + `ORG-012` — Essential Organization Profile**: minimum identity, meaningful capability, multi-role classification, business objectives and legitimate Profile Complete state.
+7. **Slice 2.7 — `ORG-007` + `ORG-008` + `ORG-010` + `ORG-011` + `ORG-012` — Essential Organization Profile**: minimum identity/contact and meaningful capability establish Profile Complete with the existing geography/location gates; organization type, descriptive roles and objectives remain optional post-activation enrichment.
 8. **Slice 2.8 — `GEO-011` + `ADM-063` + `ADM-064` — Marker Activation & Admin 360**: activate the real organization marker and provide complete scoped administrative organization context/status.
 9. **Slice 2.9 — `ACQ-002` + `ACQ-003` — Acquisition-to-Activation Continuity**: public opportunity entry and preservation of opportunity/claim/referral/team/provider/buyer context through registration and first authenticated experience.
 10. **Slice 2.10 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004` — Orientation: Discovery & Team Formation**: synthetic three-organization map tutorial from opportunity issuance through capability gap and teammate discovery.
 11. **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
-12. **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: objective-driven first action followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
+12. **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: post-orientation first-value intent selection followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
 
 The sequence above is planning order, not a completion claim. Recalculate dependency eligibility from merged `main` after every slice and mark an item Done only after its acceptance checks and CI evidence pass.
 

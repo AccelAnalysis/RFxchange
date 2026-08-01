@@ -53,7 +53,8 @@ export interface EssentialOrganizationProfileServiceDependencies {
 
 export interface EssentialOrganizationProfileUpdate {
   readonly displayName: string;
-  readonly organizationType: string;
+  /** Optional legacy enrichment; never required for Profile Complete. */
+  readonly organizationType?: string | null;
   readonly website: Readonly<{
     disposition: "available" | "not-applicable";
     url?: string | null;
@@ -67,8 +68,10 @@ export interface EssentialOrganizationProfileUpdate {
     publiclyVisible: boolean;
   }>;
   readonly capabilities: readonly OrganizationCapability[];
-  readonly participationRoles: readonly string[];
-  readonly businessObjectives: readonly string[];
+  /** Optional legacy metadata; activation no longer collects or requires it. */
+  readonly participationRoles?: readonly string[];
+  /** Optional legacy metadata; activation no longer collects it. */
+  readonly businessObjectives?: readonly string[];
 }
 
 export class EssentialOrganizationProfileError extends Error {

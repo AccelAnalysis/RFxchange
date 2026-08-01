@@ -52,15 +52,23 @@ assert.ok(
     spatialActivation.includes("ActivationJourneyClient"),
   "The /join route must compose the real activation client through the canonical spatial activation runtime.",
 );
-assert.ok(signInPage.includes("SignInClient") && signInPage.includes("safeReturnTo"), "The /signin route must render returning-user sign-in and constrain return targets.");
+assert.ok(
+  signInPage.includes("SignInClient") && signInPage.includes("safeReturnTo"),
+  "The /signin route must render returning-user sign-in and constrain return targets.",
+);
 assert.ok(
   signInClient.includes("signInWithEmailAndPassword") &&
-    signInClient.includes('window.location.assign("/join")') &&
+    signInClient.includes('window.location.assign("/join?begin=1")') &&
     signInClient.includes("participantWorkspaceEligible") &&
     signInClient.includes("isAdministrativeReturnTarget") &&
     signInClient.includes("returnTo ?? workspaceUrl") &&
     signInClient.includes("resume exactly where you left"),
-  "Returning-user sign in must establish the trusted session, resume incomplete activation, keep admin routing independent, and return lifecycle-eligible participants to the protected target/Exchange.",
+  "Returning-user sign in must establish the trusted session, resume incomplete activation, keep admin routing independent, route new accounts to setup, and return lifecycle-eligible participants to the protected target/Exchange.",
+);
+assert.equal(
+  signInClient.includes("Organization name"),
+  false,
+  "Sign in must not ask for organization name.",
 );
 
 for (const requirement of [
@@ -76,10 +84,14 @@ for (const requirement of [
   "save-profile",
   "MapboxLocalityCanvas",
   "Confirm this map position",
-  "Your real marker is active",
-  "ORGANIZATION_PARTICIPATION_ROLES.map",
-  "ORGANIZATION_BUSINESS_OBJECTIVES.map",
+  "real marker can be active",
   "ORGANIZATION_RELATIONSHIPS.map",
+  "ORGANIZATION_CAPABILITY_CATEGORIES.map",
+  'role="combobox"',
+  'role="listbox"',
+  "AbortController",
+  "Your organization is ready",
+  "Enter the Exchange",
 ]) {
   assert.ok(client.includes(requirement), `Activation client is missing ${requirement}.`);
 }
@@ -91,7 +103,7 @@ assert.ok(
 );
 assert.ok(
   client.includes("reloadCurrentPrincipal") &&
-    client.includes("await exchangeSession(state.provisionalOrganizationName)") &&
+    client.includes("await exchangeSession()") &&
     client.includes("Firebase still reports this email as unverified"),
   "Email verification must be observable and refresh the trusted RFxchange session after Firebase verification.",
 );
@@ -100,10 +112,30 @@ assert.ok(
   "Activation header must not wrap the already-linked BrandWordmark in another anchor.",
 );
 assert.ok(
-  client.includes('>Register</button>') && client.includes('>Sign in</button>') && client.includes('setAuthMode("signin")'),
+  client.includes('>Register</button>') &&
+    client.includes('>Sign in</button>') &&
+    client.includes('setAuthMode("signin")'),
   "Activation entry must preserve an in-context sign-in fallback and return to it after registration/sign-out recovery.",
 );
-assert.ok(!client.includes("Harborlight") && !client.includes("200 High St"), "Production activation must not depend on deterministic preview identities.");
+assert.ok(
+  !client.includes("Harborlight") && !client.includes("200 High St"),
+  "Production activation must not depend on deterministic preview identities.",
+);
+assert.equal(
+  client.includes("ORGANIZATION_PARTICIPATION_ROLES.map"),
+  false,
+  "Activation must not collect permanent participant roles.",
+);
+assert.equal(
+  client.includes("ORGANIZATION_BUSINESS_OBJECTIVES.map"),
+  false,
+  "Activation must not collect business objectives.",
+);
+assert.equal(
+  client.toLowerCase().includes("controlled exchange"),
+  false,
+  "Participant-facing activation copy must not expose internal terminology.",
+);
 
 for (const requirement of [
   "ExchangeSpatialScene",
@@ -124,11 +156,16 @@ for (const requirement of [
   "httpOnly: true",
   "createServerActivationJourneyService",
   "organizationRelationship",
-  "FirestorePlatformAdministratorLifecycleRepository",
   "existingContext || provisionalOrganizationName",
+  "let state = null",
 ]) {
   assert.ok(sessionRoute.includes(requirement), `Trusted session exchange is missing ${requirement}.`);
 }
+assert.equal(
+  sessionRoute.includes("Organization name is required to begin participant activation"),
+  false,
+  "Session establishment must not require organization context.",
+);
 
 for (const action of [
   "accept-legal",
@@ -154,6 +191,21 @@ assert.ok(
     activationRoute.includes("definitions.save(geography)"),
   "Home locality selection must resolve and persist Census authority server-side before lifecycle selection.",
 );
+assert.ok(
+  activationRoute.includes("LOCALITY_CACHE_TTL_MS") &&
+    activationRoute.includes("localitySuggestionCache"),
+  "Locality typeahead must use the bounded server-side suggestion cache.",
+);
+assert.equal(
+  activationRoute.includes("participationRoles"),
+  false,
+  "Activation API must not accept participant roles.",
+);
+assert.equal(
+  activationRoute.includes("businessObjectives"),
+  false,
+  "Activation API must not accept business objectives.",
+);
 
 for (const authority of [
   "PrimaryOperatingGeographyService",
@@ -166,12 +218,35 @@ for (const authority of [
   assert.ok(coordinator.includes(authority), `Activation coordinator must consume ${authority}.`);
 }
 assert.ok(
-  coordinator.includes('"organization-activated"') && coordinator.includes('"controlled-platform"') && !coordinator.includes('"open-platform"'),
+  coordinator.includes('"organization-activated"') &&
+    coordinator.includes('"controlled-platform"') &&
+    !coordinator.includes('"open-platform"'),
   "Integration gate must stop at controlled-platform and never manufacture OPEN.",
 );
 assert.ok(
-  coordinator.includes("orientationBridgeAcknowledgedAt") && !coordinator.includes("EDU-001") && !coordinator.includes("EDU-008"),
+  coordinator.includes("orientationBridgeAcknowledgedAt") &&
+    !coordinator.includes("EDU-001") &&
+    !coordinator.includes("EDU-008"),
   "Orientation bridge must preserve runtime position without writing EDU completion.",
+);
+assert.ok(
+  coordinator.includes("organizationIdentitySeed") &&
+    coordinator.includes("profileSeed") &&
+    coordinator.includes("context.user.name") &&
+    coordinator.includes("context.user.primaryEmail") &&
+    coordinator.includes("normalizedWebsiteUrl") &&
+    coordinator.includes("https://${normalized}"),
+  "Activation must carry, normalize, and reuse authoritative organization identity and contact data.",
+);
+assert.equal(
+  coordinator.includes("participationRoles:"),
+  false,
+  "Activation coordinator must not persist participant-role selections.",
+);
+assert.equal(
+  coordinator.includes("businessObjectives:"),
+  false,
+  "Activation coordinator must not persist objective selections.",
 );
 
 assert.ok(
@@ -183,7 +258,9 @@ assert.ok(
   "Activation runtime must compose real server authorities, Census geocoding and authoritative boundaries.",
 );
 assert.ok(
-  authClient.includes("configuredAuthEmulatorUrl") && authClient.includes("NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL") && !authClient.includes('return "http://127.0.0.1:9099"'),
+  authClient.includes("configuredAuthEmulatorUrl") &&
+    authClient.includes("NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL") &&
+    !authClient.includes('return "http://127.0.0.1:9099"'),
   "Local Firebase Auth must use the emulator only when explicitly configured.",
 );
 
@@ -206,6 +283,7 @@ for (const requirement of [
   "legalAcceptance",
   "activeLocationDraftId",
   "organizationRelationship",
+  "organizationIdentitySeed",
   "Descriptive onboarding metadata only",
   "durable control continues to require membership + authorization establishment",
 ]) {
@@ -225,7 +303,11 @@ for (const requirement of [
 ]) {
   assert.ok(participantRuntime.includes(requirement), `Participant route runtime is missing ${requirement}.`);
 }
-assert.equal(participantRuntime.includes('state.nextStep !== "complete"'), false, "UI next-step labels must not become participant authorization criteria.");
+assert.equal(
+  participantRuntime.includes('state.nextStep !== "complete"'),
+  false,
+  "UI next-step labels must not become participant authorization criteria.",
+);
 
 for (const requirement of [
   "resolveParticipantRoute",
@@ -240,28 +322,40 @@ for (const requirement of [
   "marker={authenticated.homeMarker}",
   'markerActivation?.status !== "active"',
 ]) {
-  assert.ok(geographyRoute.includes(requirement), `Controlled Exchange map is missing ${requirement}.`);
+  assert.ok(geographyRoute.includes(requirement), `Exchange map is missing ${requirement}.`);
 }
-assert.equal(geographyRoute.includes("map remains usable as a preview"), false, "Anonymous preview fallback must not return to the protected map route.");
-assert.equal(geographyRoute.includes("createControlledLocalityPreview"), false, "Protected Exchange map must never substitute the Portsmouth preview for another persisted locality.");
+assert.equal(
+  geographyRoute.includes("map remains usable as a preview"),
+  false,
+  "Anonymous preview fallback must not return to the protected map route.",
+);
+assert.equal(
+  geographyRoute.includes("createControlledLocalityPreview"),
+  false,
+  "Protected Exchange map must never substitute the Portsmouth preview for another persisted locality.",
+);
 
 const architectureLower = architecture.toLowerCase();
 for (const phrase of [
   "no feature-id completion change",
-  "does not complete `edu-001`–`edu-008`",
-  "participant-created organization",
-  "real active marker",
-  "public visitors receive the marketing/authentication surface only",
+  "selecting or creating an organization",
+  "real marker activation",
+  "public visitors receive marketing, authentication and required legal documents only",
   "free account is a real rfxchange account",
   "spatial activation background",
+  "every activated organization can both issue and respond",
+  "official resource provider boundary",
+  "customer-facing terminology",
 ]) {
   assert.ok(architectureLower.includes(phrase), `Activation/convergence architecture authority is missing: ${phrase}`);
 }
 assert.ok(
-  architecture.includes("Organization Activated") && architecture.includes("Controlled Exchange") && architecture.includes("OPEN"),
-  "Architecture must distinguish marker activation, controlled workspace access and future OPEN.",
+  architecture.includes("Organization Activated") &&
+    architecture.includes("controlled-platform") &&
+    architecture.includes("OPEN"),
+  "Architecture must distinguish marker activation, authenticated workspace access and future OPEN.",
 );
 
 console.log(
-  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, spatial onboarding progression, Census-authoritative locality selection, lifecycle-authoritative account-only participant routing, real persistent marker rendering, canonical roles/objectives/relationship metadata, and controlled-platform stop.",
+  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, spatial onboarding progression, cached Census-authoritative locality selection, lifecycle-authoritative account-only participant routing, real persistent marker rendering, categorized capabilities, universal opportunity participation, carried identity, and controlled-platform stop.",
 );

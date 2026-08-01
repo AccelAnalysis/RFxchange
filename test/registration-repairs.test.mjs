@@ -84,9 +84,22 @@ test("home-locality registration uses Census TIGERweb search rather than a Ports
   const route = await source("app/api/onboarding/activation/route.ts");
   assert.match(client, /search-geographies/);
   assert.match(client, /select-census-geography/);
-  assert.match(client, /Search Census localities/);
+  assert.match(client, /placeholder="Portsmouth, Richmond, Fairfax…"/);
+  assert.match(client, /role="combobox"/);
+  assert.match(client, /role="listbox"/);
   assert.doesNotMatch(client, /state\.releasedGeographies\.map/);
   assert.match(route, /CensusTigerLocalityDirectory/);
+});
+
+test("locality input handlers clear stale suggestions without synchronous effect resets", async () => {
+  const client = await source("src/components/onboarding/ActivationJourneyClient.tsx");
+  assert.match(client, /if \(query\.length < 2 \|\| stateCode\.length !== 2\) return;/);
+  assert.match(client, /nextQuery\.trim\(\)\.length < 2/);
+  assert.match(client, /nextStateCode\.length !== 2/);
+  assert.doesNotMatch(
+    client,
+    /if \(query\.length < 2 \|\| stateCode\.length !== 2\) \{[\s\S]{0,250}setGeographyCandidates/,
+  );
 });
 
 test("Census TIGERweb directory searches and resolves a canonical released locality server-side", async () => {
@@ -134,6 +147,16 @@ test("email verification gives visible feedback and refreshes the RFxchange sess
   assert.match(client, /setVerificationNotice/);
   assert.match(client, /reloadCurrentPrincipal/);
   assert.match(client, /if \(!principal\.emailVerified\)/);
-  assert.match(client, /await exchangeSession\(state\.provisionalOrganizationName\)/);
+  assert.match(client, /const refreshedSession = await exchangeSession\(\)/);
+  assert.match(client, /getIdToken\(true\)/);
   assert.match(client, /Firebase still reports this email as unverified/);
+});
+
+test("profile completion snapshots revalidated organization authority before asynchronous persistence", async () => {
+  const coordinator = await source("src/application/onboarding/activation-journey.ts");
+  assert.match(coordinator, /const organizationId = activation\.organizationId/);
+  assert.match(coordinator, /const membershipId = activation\.membershipId/);
+  assert.match(coordinator, /Organization authority changed before essential profile completion/);
+  assert.match(coordinator, /organizationId: String\(organizationId\)/);
+  assert.match(coordinator, /membershipId: String\(membershipId\)/);
 });

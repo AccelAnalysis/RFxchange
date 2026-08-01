@@ -25,13 +25,14 @@
 ## Active build sequence — Wave 2 Activation roadmap — current 2026-07-31
 
 - **Slices 2.1–2.8 — MERGED**: geography authority/rendering, organization resolution/authority, transactional email, organization geography/location, essential profile, marker activation and scoped Organization 360 are complete at their Feature-ID acceptance boundaries.
-- **Wave 2 Runtime Convergence Gate — MERGED PR #92; no Feature IDs**: account-only participant runtime, trusted auth/session composition, lifecycle/membership/restriction routing, scoped admin boundaries, production fixture removal, canonical onboarding vocabularies and convergence guardrails. Production CI passed on the merged tree.
+- **Wave 2 Runtime Convergence Gate — MERGED PR #92; no Feature IDs**: account-only participant runtime, trusted auth/session composition, lifecycle/membership/restriction routing, scoped admin boundaries, production fixture removal, canonical onboarding metadata and convergence guardrails. Production CI passed on the merged tree.
+- **Registration Convergence Correction — PR #98; no Feature IDs**: removes organization type, descriptive participation roles and business objectives from required registration; corrects Profile Complete; preserves optional enrichment; establishes post-orientation first-value selection; and keeps Official Resource Provider status in the separate Wave 3.6 application/review process.
 - **Slice 2.9 — `ACQ-002` + `ACQ-003` — Acquisition-to-Activation Continuity — NEXT FEATURE SLICE**: preserve opportunity/claim/referral/team/provider/buyer acquisition context through registration and the first authenticated experience. Begin after configured-development/browser acceptance of the convergence boundary and the normal dependency check.
 - **Slice 2.10 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004` — Orientation: Discovery & Team Formation**: synthetic three-organization map tutorial from opportunity issuance through capability gap and teammate discovery.
 - **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
-- **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: objective-driven first action followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
+- **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: post-orientation first-value intent selection followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
 
-Current Feature-ID completion is **31/43 Activation**. The Runtime Convergence Gate is an integration/repair gate and does not alter that count. Repository acceptance is complete; configured-development acceptance against the selected real Firebase project and actual browser remains an environment check and must not be inferred from emulator CI. Recalculate dependency eligibility from merged `main` before starting each feature slice and mark an item Done only after its acceptance check and CI evidence pass.
+Current Feature-ID completion is **31/43 Activation**. The Runtime Convergence Gate and Registration Convergence Correction are integration/repair gates and do not alter that count. Repository acceptance is complete only when the PR #98 production gate passes; configured-development acceptance against the selected real Firebase project and actual browser remains an environment check and must not be inferred from emulator CI. Recalculate dependency eligibility from merged `main` before starting each feature slice and mark an item Done only after its acceptance check and CI evidence pass.
 
 ## Feature-ID checklist
 
@@ -154,9 +155,9 @@ Current Feature-ID completion is **31/43 Activation**. The Runtime Convergence G
 - [x] `ORG-007` — PR #75
 - [x] `ORG-008` — PR #75
 - [x] `ORG-009` — PR #74
-- [x] `ORG-010` — PR #75
-- [x] `ORG-011` — PR #75
-- [x] `ORG-012` — PR #75
+- [x] `ORG-010` — PR #75; optional descriptive classification retained for later enrichment and never used as organization authority or a Profile Complete gate
+- [x] `ORG-011` — PR #75; optional personalization vocabulary retained for later use and removed from required activation/`EDU-009` dependency
+- [x] `ORG-012` — PR #75 + PR #98 correction; derived from minimum identity/contact, meaningful capability, service geography, confirmed location and location visibility
 - [x] `ADM-063` — PR #77; 14-context scope/permission/minimum-data tests, desktop/mobile browser QA, and `npm run check`
 - [x] `ADM-064` — PR #77; independent-state/restriction/case-link tests, desktop/mobile browser QA, and `npm run check`
 - [x] `ADM-065` — PR #73; category/geography/scope tests, desktop/mobile browser QA, and `npm run check`

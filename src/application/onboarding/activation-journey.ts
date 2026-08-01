@@ -89,6 +89,13 @@ export interface ActivationJourneyState {
     id: string;
     displayName: string;
   }> | null;
+  readonly profileSeed: Readonly<{
+    websiteDisposition: "available" | "not-applicable" | null;
+    websiteUrl: string | null;
+    phone: string | null;
+    contactName: string;
+    contactEmail: string;
+  }>;
   readonly membershipId: string | null;
   readonly location: Readonly<{
     geographyId: string;
@@ -167,6 +174,25 @@ function publicGeographies(definitions: readonly GeographyDefinition[]) {
         }),
       ),
   );
+}
+
+function normalizedWebsiteUrl(value: string): string {
+  const normalized = value.trim();
+  const candidate = /^[a-z][a-z0-9+.-]*:/i.test(normalized)
+    ? normalized
+    : `https://${normalized}`;
+  const parsed = new URL(candidate);
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new Error("Organization website must use HTTP or HTTPS.");
+  }
+  parsed.hash = "";
+  return parsed.toString();
+}
+
+function domainFromWebsite(websiteUrl: string | null): string | null {
+  if (!websiteUrl) return null;
+  const hostname = new URL(websiteUrl).hostname.toLowerCase().replace(/^www\./, "");
+  return hostname || null;
 }
 
 export class ActivationJourneyService {
@@ -280,11 +306,40 @@ export class ActivationJourneyService {
     return this.state(context);
   }
 
+  private async persistIdentitySeed(
+    activation: ActivationJourneyContext,
+    input: Readonly<{
+      website?: string;
+      websiteNotApplicable?: boolean;
+      phone?: string;
+    }>,
+  ): Promise<ActivationJourneyContext> {
+    const website = input.website?.trim() ?? "";
+    const websiteUrl = input.websiteNotApplicable || !website
+      ? null
+      : normalizedWebsiteUrl(website);
+    const updated = updateActivationJourneyContext(activation, {
+      organizationIdentitySeed: {
+        websiteDisposition: input.websiteNotApplicable
+          ? "not-applicable"
+          : websiteUrl
+            ? "available"
+            : null,
+        websiteUrl,
+        phone: input.phone?.trim() || null,
+      },
+      now: this.dependencies.now(),
+    });
+    await this.dependencies.contexts.save(updated);
+    return updated;
+  }
+
   async searchOrganizations(
     context: AuthenticatedServerContext,
     input: Readonly<{
       displayName: string;
-      domain?: string;
+      website?: string;
+      websiteNotApplicable?: boolean;
       phone?: string;
       address?: Readonly<{
         line1: string;
@@ -302,13 +357,17 @@ export class ActivationJourneyService {
         "The canonical orientation position must be acknowledged before organization resolution.",
       );
     }
+    const seeded = await this.persistIdentitySeed(activation, input);
+    const domain = domainFromWebsite(seeded.organizationIdentitySeed.websiteUrl);
     return this.dependencies.resolution.search({
       context,
       accessJourneyId: activation.accessJourneyId,
       provisionalIdentity: {
         displayName: input.displayName,
-        ...(input.domain ? { domain: input.domain } : {}),
-        ...(input.phone ? { phone: input.phone } : {}),
+        ...(domain ? { domain } : {}),
+        ...(seeded.organizationIdentitySeed.phone
+          ? { phone: seeded.organizationIdentitySeed.phone }
+          : {}),
         ...(input.address
           ? {
               address: {
@@ -326,24 +385,35 @@ export class ActivationJourneyService {
     input: Readonly<{
       displayName: string;
       reviewedCandidateOrganizationIds?: readonly string[];
-      domain?: string;
+      website?: string;
+      websiteNotApplicable?: boolean;
       phone?: string;
     }>,
   ): Promise<ActivationJourneyState> {
-    const activation = await this.contextFor(context);
+    let activation = await this.contextFor(context);
     if (!activation.orientationBridgeAcknowledgedAt) {
       throw new ActivationJourneyError(
         "orientation-position-required",
         "The canonical orientation position must be acknowledged before organization resolution.",
       );
     }
+    if (
+      input.website !== undefined ||
+      input.websiteNotApplicable !== undefined ||
+      input.phone !== undefined
+    ) {
+      activation = await this.persistIdentitySeed(activation, input);
+    }
+    const domain = domainFromWebsite(activation.organizationIdentitySeed.websiteUrl);
     const result = await this.dependencies.resolution.createNew({
       context,
       accessJourneyId: activation.accessJourneyId,
       provisionalIdentity: {
         displayName: input.displayName,
-        ...(input.domain ? { domain: input.domain } : {}),
-        ...(input.phone ? { phone: input.phone } : {}),
+        ...(domain ? { domain } : {}),
+        ...(activation.organizationIdentitySeed.phone
+          ? { phone: activation.organizationIdentitySeed.phone }
+          : {}),
       },
       reviewedCandidateOrganizationIds: input.reviewedCandidateOrganizationIds ?? [],
       decisionReason: "Participant confirmed that none of the reviewed matches is this organization.",
@@ -506,65 +576,93 @@ export class ActivationJourneyService {
   async saveProfile(
     context: AuthenticatedServerContext,
     input: Readonly<{
-      displayName: string;
-      organizationType: string;
       website?: string;
       websiteNotApplicable?: boolean;
-      contactName: string;
       contactRole: string;
-      contactEmail: string;
-      contactPhone?: string;
       contactPubliclyVisible: boolean;
       capabilityKind: string;
+      capabilityCategory: string;
+      capabilityOtherCategory?: string;
       capabilityName: string;
       capabilityDescription: string;
-      participationRoles: readonly string[];
-      businessObjectives: readonly string[];
     }>,
   ): Promise<ActivationJourneyState> {
-    const activation = await this.contextFor(context);
+    let activation = await this.contextFor(context);
     if (!activation.organizationId || !activation.membershipId) {
       throw new ActivationJourneyError(
         "organization-authority-required",
         "Organization authority is required before essential profile completion.",
       );
     }
-    const location = await this.dependencies.locations.getByOrganizationId(activation.organizationId);
+    if (
+      activation.organizationIdentitySeed.websiteDisposition === null ||
+      input.website !== undefined ||
+      input.websiteNotApplicable !== undefined
+    ) {
+      activation = await this.persistIdentitySeed(activation, {
+        website: input.website,
+        websiteNotApplicable: input.websiteNotApplicable,
+        phone: activation.organizationIdentitySeed.phone ?? undefined,
+      });
+    }
+    if (activation.organizationIdentitySeed.websiteDisposition === null) {
+      throw new Error("Confirm the organization website or indicate that no public website applies.");
+    }
+    const organizationId = activation.organizationId;
+    const membershipId = activation.membershipId;
+    if (!organizationId || !membershipId) {
+      throw new ActivationJourneyError(
+        "organization-authority-required",
+        "Organization authority changed before essential profile completion.",
+      );
+    }
+    const location = await this.dependencies.locations.getByOrganizationId(organizationId);
     if (!location) {
       throw new ActivationJourneyError(
         "location-required",
         "Confirmed organization location is required before essential profile completion.",
       );
     }
+    const durableProfile = await this.dependencies.profiles.getByOrganizationId(
+      organizationId,
+    );
+    if (!durableProfile) {
+      throw new ActivationJourneyError(
+        "organization-required",
+        "The durable organization profile is unavailable.",
+      );
+    }
     const capability = createOrganizationCapability({
       id: `capability-${crypto.randomUUID()}`,
       kind: input.capabilityKind,
+      category: input.capabilityCategory,
+      otherCategory: input.capabilityOtherCategory,
       name: input.capabilityName,
       description: input.capabilityDescription,
     });
     const saved = await this.dependencies.profile.update({
       context,
-      organizationId: String(activation.organizationId),
-      membershipId: String(activation.membershipId),
+      organizationId: String(organizationId),
+      membershipId: String(membershipId),
       profile: {
-        displayName: input.displayName,
-        organizationType: input.organizationType,
-        website: input.websiteNotApplicable
+        displayName: durableProfile.displayName,
+        website: activation.organizationIdentitySeed.websiteDisposition === "not-applicable"
           ? {
               disposition: "not-applicable",
               explanation: "Participant indicated that the organization does not use a public website.",
             }
-          : { disposition: "available", url: input.website ?? "" },
+          : {
+              disposition: "available",
+              url: activation.organizationIdentitySeed.websiteUrl ?? "",
+            },
         mainContact: {
-          displayName: input.contactName,
+          displayName: context.user.name,
           roleTitle: input.contactRole,
-          email: input.contactEmail,
-          phone: input.contactPhone,
+          email: context.user.primaryEmail,
+          phone: activation.organizationIdentitySeed.phone,
           publiclyVisible: input.contactPubliclyVisible,
         },
         capabilities: [capability],
-        participationRoles: input.participationRoles,
-        businessObjectives: input.businessObjectives,
       },
       reason: "Participant completed the essential organization profile during activation.",
     });
@@ -572,8 +670,8 @@ export class ActivationJourneyService {
 
     const marker = await this.dependencies.marker.recalculate({
       context,
-      organizationId: activation.organizationId,
-      membershipId: activation.membershipId,
+      organizationId,
+      membershipId,
       eventId: this.dependencies.ids.markerEvent(),
       auditEventId: this.dependencies.ids.markerAudit(),
       reason: "Essential profile completed during activation; recalculate real marker.",
@@ -664,6 +762,13 @@ export class ActivationJourneyService {
       organization: organization && profile
         ? Object.freeze({ id: String(organization.id), displayName: profile.displayName })
         : null,
+      profileSeed: Object.freeze({
+        websiteDisposition: activation.organizationIdentitySeed.websiteDisposition,
+        websiteUrl: activation.organizationIdentitySeed.websiteUrl,
+        phone: activation.organizationIdentitySeed.phone,
+        contactName: context.user.name,
+        contactEmail: context.user.primaryEmail,
+      }),
       membershipId: membership ? String(membership.id) : null,
       location: location
         ? Object.freeze({ geographyId: String(location.geographyId), visibility: location.visibility })

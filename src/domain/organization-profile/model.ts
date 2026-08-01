@@ -15,6 +15,11 @@ export type OrganizationProfileCompletionId =
   Brand<string, "OrganizationProfileCompletionId">;
 export type OrganizationProfileEventId = Brand<string, "OrganizationProfileEventId">;
 
+/**
+ * Legacy descriptive metadata retained for previously persisted profiles and later enrichment.
+ * Organization type is not collected during essential registration and is not a Profile Complete
+ * requirement.
+ */
 export const ORGANIZATION_TYPES = [
   "for-profit-business",
   "government-entity",
@@ -24,6 +29,10 @@ export const ORGANIZATION_TYPES = [
 ] as const;
 export type OrganizationType = (typeof ORGANIZATION_TYPES)[number];
 
+/**
+ * Legacy descriptive metadata retained for compatibility. All activated organizations can both
+ * issue and respond to opportunities. Official Resource Provider status is governed separately.
+ */
 export const ORGANIZATION_PARTICIPATION_ROLES = [
   "business",
   "supplier",
@@ -41,6 +50,7 @@ export const ORGANIZATION_PARTICIPATION_ROLES = [
 export type OrganizationParticipationRole =
   (typeof ORGANIZATION_PARTICIPATION_ROLES)[number];
 
+/** Legacy personalization metadata; no longer collected or required during activation. */
 export const ORGANIZATION_BUSINESS_OBJECTIVES = [
   "find-opportunities",
   "issue-opportunities",
@@ -64,6 +74,22 @@ export const ORGANIZATION_CAPABILITY_KINDS = [
 export type OrganizationCapabilityKind =
   (typeof ORGANIZATION_CAPABILITY_KINDS)[number];
 
+export const ORGANIZATION_CAPABILITY_CATEGORIES = [
+  "professional-business-services",
+  "construction-skilled-trades",
+  "manufacturing-fabrication",
+  "technology-data-cybersecurity",
+  "transportation-logistics",
+  "marketing-creative-services",
+  "facilities-real-estate",
+  "education-workforce-training",
+  "health-safety-security",
+  "food-hospitality-events",
+  "other",
+] as const;
+export type OrganizationCapabilityCategory =
+  (typeof ORGANIZATION_CAPABILITY_CATEGORIES)[number];
+
 export interface OrganizationWebsite {
   readonly disposition: "available" | "not-applicable";
   readonly url: string | null;
@@ -81,6 +107,8 @@ export interface OrganizationMainContact {
 export interface OrganizationCapability {
   readonly id: OrganizationCapabilityId;
   readonly kind: OrganizationCapabilityKind;
+  readonly category: OrganizationCapabilityCategory;
+  readonly otherCategory: string | null;
   readonly name: string;
   readonly description: string;
 }
@@ -100,12 +128,10 @@ export interface EssentialOrganizationProfile extends OrganizationProfile {
 
 export const PROFILE_COMPLETION_REQUIREMENTS = [
   "minimum-identity",
-  "organization-type",
   "website-disposition",
   "main-contact",
   "meaningful-capability",
   "service-geography",
-  "participation-role",
   "location-visibility",
   "confirmed-primary-location",
 ] as const;
@@ -149,7 +175,7 @@ export interface PublicEssentialOrganizationProfile {
   readonly organizationId: OrganizationId;
   readonly profileId: OrganizationProfileId;
   readonly displayName: string;
-  readonly organizationType: OrganizationType;
+  readonly organizationType: OrganizationType | null;
   readonly website: string | null;
   readonly mainContact: OrganizationMainContact | null;
   readonly capabilities: readonly OrganizationCapability[];
@@ -210,7 +236,10 @@ function uniqueValues<T extends string>(
 
 function boundedUrl(value: string): string {
   const normalized = required(value, "Organization website", 320);
-  const parsed = new URL(normalized);
+  const candidate = /^[a-z][a-z0-9+.-]*:/i.test(normalized)
+    ? normalized
+    : `https://${normalized}`;
+  const parsed = new URL(candidate);
   if (!["http:", "https:"].includes(parsed.protocol)) {
     throw new Error("Organization website must use HTTP or HTTPS.");
   }
@@ -289,6 +318,8 @@ export function organizationProfileEventId(value: string): OrganizationProfileEv
 export function createOrganizationCapability(input: Readonly<{
   id: string;
   kind: string;
+  category?: string;
+  otherCategory?: string | null;
   name: string;
   description: string;
 }>): OrganizationCapability {
@@ -300,11 +331,52 @@ export function createOrganizationCapability(input: Readonly<{
   if (description.length < 20) {
     throw new Error("Organization capability description must contain at least 20 characters.");
   }
+  const category = input.category === undefined
+    ? "other" as const
+    : oneOf(
+        input.category,
+        ORGANIZATION_CAPABILITY_CATEGORIES,
+        "capability category",
+      );
+  const otherCategory = category === "other"
+    ? input.category === undefined
+      ? optional(input.otherCategory, "Other capability category", 120) ?? "Uncategorized legacy capability"
+      : required(input.otherCategory ?? "", "Other capability category", 120)
+    : null;
   return Object.freeze({
     id: organizationCapabilityId(input.id),
     kind: oneOf(input.kind, ORGANIZATION_CAPABILITY_KINDS, "capability kind"),
+    category,
+    otherCategory,
     name,
     description,
+  });
+}
+
+function hydrateCapability(
+  capability: Partial<OrganizationCapability>,
+  index: number,
+): OrganizationCapability {
+  const category = capability.category &&
+    ORGANIZATION_CAPABILITY_CATEGORIES.includes(capability.category)
+    ? capability.category
+    : "other";
+  const name = required(capability.name ?? "", "Organization capability name", 120);
+  return Object.freeze({
+    id: organizationCapabilityId(String(capability.id ?? `legacy-capability-${index + 1}`)),
+    kind: capability.kind && ORGANIZATION_CAPABILITY_KINDS.includes(capability.kind)
+      ? capability.kind
+      : "function",
+    category,
+    otherCategory: category === "other"
+      ? optional(capability.otherCategory ?? name, "Other capability category", 120)
+      : null,
+    name,
+    description: required(
+      capability.description ?? "Legacy organization capability requiring profile review.",
+      "Organization capability description",
+      600,
+    ),
   });
 }
 
@@ -323,7 +395,11 @@ export function hydrateEssentialOrganizationProfile(
         : null,
     website: existing.website ?? null,
     mainContact: existing.mainContact ?? null,
-    capabilities: Object.freeze([...(existing.capabilities ?? [])]),
+    capabilities: Object.freeze(
+      [...(existing.capabilities ?? [])].map((capability, index) =>
+        hydrateCapability(capability, index),
+      ),
+    ),
     participationRoles: Object.freeze([...(existing.participationRoles ?? [])]),
     businessObjectives: Object.freeze([...(existing.businessObjectives ?? [])]),
   });
@@ -333,7 +409,7 @@ export function updateEssentialOrganizationProfile(
   profile: OrganizationProfile,
   input: Readonly<{
     displayName: string;
-    organizationType: string;
+    organizationType?: string | null;
     website: Readonly<{
       disposition: "available" | "not-applicable";
       url?: string | null;
@@ -347,8 +423,8 @@ export function updateEssentialOrganizationProfile(
       publiclyVisible: boolean;
     }>;
     capabilities: readonly OrganizationCapability[];
-    participationRoles: readonly string[];
-    businessObjectives: readonly string[];
+    participationRoles?: readonly string[];
+    businessObjectives?: readonly string[];
     now: string;
   }>,
 ): EssentialOrganizationProfile {
@@ -359,24 +435,30 @@ export function updateEssentialOrganizationProfile(
   if (capabilityIds.size !== input.capabilities.length) {
     throw new Error("Organization capability identities must be unique.");
   }
-  const participationRoles = uniqueValues(
-    input.participationRoles,
-    ORGANIZATION_PARTICIPATION_ROLES,
-    "organization participation role",
-  );
-  const businessObjectives = uniqueValues(
-    input.businessObjectives,
-    ORGANIZATION_BUSINESS_OBJECTIVES,
-    "organization business objective",
-  );
+  const current = hydrateEssentialOrganizationProfile(profile);
+  const organizationType = input.organizationType === undefined
+    ? current.organizationType
+    : input.organizationType === null
+      ? null
+      : oneOf(input.organizationType, ORGANIZATION_TYPES, "organization type");
+  const participationRoles = input.participationRoles === undefined
+    ? current.participationRoles
+    : uniqueValues(
+        input.participationRoles,
+        ORGANIZATION_PARTICIPATION_ROLES,
+        "organization participation role",
+      );
+  const businessObjectives = input.businessObjectives === undefined
+    ? current.businessObjectives
+    : uniqueValues(
+        input.businessObjectives,
+        ORGANIZATION_BUSINESS_OBJECTIVES,
+        "organization business objective",
+      );
   return Object.freeze({
-    ...hydrateEssentialOrganizationProfile(profile),
+    ...current,
     displayName: required(input.displayName, "Organization display name", 180),
-    organizationType: oneOf(
-      input.organizationType,
-      ORGANIZATION_TYPES,
-      "organization type",
-    ),
+    organizationType,
     website: organizationWebsite(input.website),
     mainContact: organizationMainContact(input.mainContact),
     capabilities: Object.freeze([...input.capabilities]),
@@ -401,14 +483,12 @@ export function evaluateOrganizationProfileCompletion(input: Readonly<{
 }>): OrganizationProfileCompletion {
   const missing: ProfileCompletionRequirement[] = [];
   if (!input.profile.displayName.trim()) missing.push("minimum-identity");
-  if (!input.profile.organizationType) missing.push("organization-type");
   if (!input.profile.website) missing.push("website-disposition");
   if (!input.profile.mainContact) missing.push("main-contact");
   if (input.profile.capabilities.length === 0) missing.push("meaningful-capability");
   if (!input.serviceGeographies?.serviceGeographyIds.length) {
     missing.push("service-geography");
   }
-  if (input.profile.participationRoles.length === 0) missing.push("participation-role");
   if (
     !input.location ||
     !["exact", "approximate", "locality-only"].includes(input.location.visibility)
@@ -477,9 +557,6 @@ export function projectPublicEssentialOrganizationProfile(input: Readonly<{
     input.profile.organizationId !== input.location.organizationId
   ) {
     throw new Error("Public profile inputs belong to different organizations.");
-  }
-  if (!input.profile.organizationType) {
-    throw new Error("Public essential profile requires an organization type.");
   }
   return Object.freeze({
     organizationId: input.profile.organizationId,
