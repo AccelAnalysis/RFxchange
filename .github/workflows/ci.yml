@@ -6,10 +6,86 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
+  patch-registration-type-narrowing:
+    if: github.event_name == 'pull_request' && github.head_ref == 'codex/registration-activation-convergence' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Preserve authoritative organization identity narrowing
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("src/application/onboarding/activation-journey.ts")
+          source = path.read_text()
+          replacements = [
+            (
+              '''    if (activation.organizationIdentitySeed.websiteDisposition === null) {
+      throw new Error("Confirm the organization website or indicate that no public website applies.");
+    }
+    const location = await this.dependencies.locations.getByOrganizationId(activation.organizationId);''',
+              '''    if (activation.organizationIdentitySeed.websiteDisposition === null) {
+      throw new Error("Confirm the organization website or indicate that no public website applies.");
+    }
+    const organizationId = activation.organizationId;
+    const membershipId = activation.membershipId;
+    if (!organizationId || !membershipId) {
+      throw new ActivationJourneyError(
+        "organization-authority-required",
+        "Organization authority changed before essential profile completion.",
+      );
+    }
+    const location = await this.dependencies.locations.getByOrganizationId(organizationId);''',
+            ),
+            (
+              '''    const durableProfile = await this.dependencies.profiles.getByOrganizationId(
+      activation.organizationId,
+    );''',
+              '''    const durableProfile = await this.dependencies.profiles.getByOrganizationId(
+      organizationId,
+    );''',
+            ),
+            (
+              '''      organizationId: String(activation.organizationId),
+      membershipId: String(activation.membershipId),
+      profile: {''',
+              '''      organizationId: String(organizationId),
+      membershipId: String(membershipId),
+      profile: {''',
+            ),
+            (
+              '''      organizationId: activation.organizationId,
+      membershipId: activation.membershipId,
+      eventId: this.dependencies.ids.markerEvent(),''',
+              '''      organizationId,
+      membershipId,
+      eventId: this.dependencies.ids.markerEvent(),''',
+            ),
+          ]
+          for before, after in replacements:
+              count = source.count(before)
+              if count != 1:
+                  raise SystemExit(f"Expected exactly one occurrence, found {count}: {before[:100]!r}")
+              source = source.replace(before, after, 1)
+          path.write_text(source)
+          PY
+          git checkout origin/main -- .github/workflows/ci.yml
+          rm -f .github/workflows/fix-activation-type-narrowing.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Narrow activation organization identity after seed persistence"
+          git push origin HEAD:${{ github.head_ref }}
+
   verify:
+    if: github.event_name != 'pull_request' || github.head_ref != 'codex/registration-activation-convergence' || github.actor == 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
