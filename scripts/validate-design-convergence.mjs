@@ -184,5 +184,5 @@ assert.ok(
 );
 
 console.log(
-  "Participant design convergence validated: shared light controlled workspaces, integrated activation, full-viewport spatial map, responsive surfaces, renderer separation, marker anchoring, customer-facing Exchange copy, and unchanged feature counts.",
+  "Participant design convergence validated: shared light controlled workspaces, integrated activation, full-viewport spatial map, responsive surfaces, renderer separation, marker anchoring, and unchanged feature counts.",
 );
