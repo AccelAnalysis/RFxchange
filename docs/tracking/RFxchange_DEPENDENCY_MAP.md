@@ -133,7 +133,7 @@ Wave 2 begins from the merged tracker state **2/43 complete** (`INF-007`, `INF-0
 8. **Slice 2.8 — `GEO-011` + `ADM-063` + `ADM-064` — Marker Activation & Admin 360**: activate the real organization marker and provide complete scoped administrative organization context/status.
 9. **Slice 2.9 — `ACQ-002` + `ACQ-003` — Acquisition-to-Activation Continuity — COMPLETE VIA PR #101**: public opportunity entry and preservation of opportunity/claim/referral/team/provider/buyer context through registration and first authenticated experience.
 10. **Slice 2.10 — `EDU-001` + `EDU-002` + `EDU-003` + `EDU-004` — Orientation: Discovery & Team Formation — COMPLETE VIA PR #102**: protected, deterministic synthetic three-organization map tutorial from opportunity issuance through capability gap and teammate discovery.
-11. **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
+11. **Slice 2.11 — `EDU-005` + `EDU-006` + `EDU-007` + `EDU-008` — Orientation: Response to Outcome — COMPLETE VIA PR #103**: teammate invitation/acceptance, structured joint response, evaluation/selection and complete network-effect visualization.
 12. **Slice 2.12 — `EDU-009` + `EDU-010` — First Value & OPEN Gate**: post-orientation first-value intent selection followed by OPEN only after the complete user, organization, geography, marker and education gates are satisfied.
 
 The sequence above is planning order, not a completion claim. Recalculate dependency eligibility from merged `main` after every slice and mark an item Done only after its acceptance checks and CI evidence pass.

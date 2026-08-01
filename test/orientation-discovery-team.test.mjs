@@ -14,6 +14,7 @@ import { accessJourneyId } from "../src/domain/lifecycle/model.ts";
 import {
   ORIENTATION_STEP_SEQUENCE,
   SLICE_2_10_MAX_ORIENTATION_STEP,
+  SLICE_2_11_MAX_ORIENTATION_STEP,
 } from "../src/domain/orientation/model.ts";
 import { organizationId } from "../src/domain/organizations/model.ts";
 import { userId } from "../src/domain/users/model.ts";
@@ -60,6 +61,7 @@ test("EDU-001-004 define one stable eight-step scenario while Slice 2.10 exposes
     "network-effect",
   ]);
   assert.equal(SLICE_2_10_MAX_ORIENTATION_STEP, 4);
+  assert.equal(SLICE_2_11_MAX_ORIENTATION_STEP, 8);
 });
 
 test("EDU-001-004 persist resumable, ordered, idempotent and restartable progress", async () => {
@@ -81,10 +83,16 @@ test("EDU-001-004 persist resumable, ordered, idempotent and restartable progres
   const repeated = await subject.service.completeStep(subject.scope, "capability-match");
   assert.equal(repeated.completedThroughStep, 4);
   assert.equal(subject.events.length, 5, "idempotent replay must not duplicate evidence");
-  await assert.rejects(
-    subject.service.completeStep(subject.scope, "teammate-invitation"),
-    /not enabled/,
-  );
+  for (const [index, step] of ORIENTATION_STEP_SEQUENCE.slice(4).entries()) {
+    subject.setNow(`2026-08-01T12:0${index + 5}:00.000Z`);
+    const journey = await subject.service.completeStep(subject.scope, step.key);
+    assert.equal(journey.completedThroughStep, index + 5);
+  }
+  const completed = await subject.service.get(subject.scope);
+  assert.equal(completed.status, "completed");
+  assert.equal(completed.completedThroughStep, 8);
+  assert.equal(subject.events.at(-1).kind, "completed");
+  assert.equal(subject.events.length, 9);
 
   const restarted = await subject.service.restart(subject.scope);
   assert.equal(restarted.completedThroughStep, 0);
@@ -126,7 +134,7 @@ test("EDU-001-004 synthetic scenario stays deterministic, locality-bounded and c
     startedAt: START, updatedAt: START, completedAt: null,
   });
   assert.equal(complete.nodes.length, 4);
-  assert.deepEqual(complete.paths.map((path) => path.kind), ["capability-match", "teammate-discovery"]);
+  assert.deepEqual(complete.paths.map((path) => path.kind), ["demand-signal", "capability-match", "teammate-discovery"]);
 });
 
 test("EDU-001-004 route and map integration preserve server authority and synthetic isolation", async () => {

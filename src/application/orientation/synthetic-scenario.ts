@@ -17,9 +17,16 @@ export interface SyntheticOrientationNode {
   readonly provenance: typeof SYNTHETIC_ORIENTATION_PROVENANCE;
 }
 
+export type SyntheticOrientationPathKind =
+  | "demand-signal"
+  | "capability-match"
+  | "teammate-discovery"
+  | "joint-response"
+  | "selected-outcome";
+
 export interface SyntheticOrientationPath {
   readonly id: string;
-  readonly kind: "capability-match" | "teammate-discovery";
+  readonly kind: SyntheticOrientationPathKind;
   readonly fromNodeId: string;
   readonly toNodeId: string;
   readonly coordinates: readonly [GeographicPosition, GeographicPosition];
@@ -49,14 +56,62 @@ export interface SyntheticOrientationScenario {
     readonly explanation: string;
     readonly discoveryBoundary: string;
   }>;
+  readonly teammateInvitation: Readonly<{
+    readonly capacity: string;
+    readonly context: string;
+    readonly reviewState: "reviewed";
+    readonly acceptanceState: "accepted";
+    readonly nonbindingBoundary: string;
+  }>;
+  readonly jointResponse: Readonly<{
+    readonly title: string;
+    readonly sections: readonly Readonly<{
+      readonly id: string;
+      readonly requirement: string;
+      readonly assignedTo: "Tutorial Responder" | "Tutorial Teammate" | "Joint";
+      readonly state: "complete";
+    }>[];
+    readonly submissionBoundary: string;
+  }>;
+  readonly evaluation: Readonly<{
+    readonly criteria: readonly Readonly<{ readonly id: string; readonly label: string; readonly weight: string }>[];
+    readonly responses: readonly Readonly<{
+      readonly id: string;
+      readonly label: string;
+      readonly findings: readonly string[];
+    }>[];
+    readonly selectedResponseId: string;
+    readonly authorityBoundary: string;
+  }>;
+  readonly networkEffect: Readonly<{
+    readonly summary: string;
+    readonly outcomeBoundary: string;
+  }>;
   readonly allPaths: readonly SyntheticOrientationPath[];
 }
 
 export interface SyntheticOrientationMapOverlay {
   readonly provenance: typeof SYNTHETIC_ORIENTATION_PROVENANCE;
+  readonly stage: "discovery" | "invitation" | "response" | "selection" | "network-effect";
   readonly nodes: readonly SyntheticOrientationNode[];
   readonly paths: readonly SyntheticOrientationPath[];
   readonly accessibleSummary: string;
+}
+
+function path(
+  id: string,
+  kind: SyntheticOrientationPathKind,
+  from: SyntheticOrientationNode,
+  to: SyntheticOrientationNode,
+): SyntheticOrientationPath {
+  return Object.freeze({
+    id,
+    kind,
+    fromNodeId: from.id,
+    toNodeId: to.id,
+    coordinates: Object.freeze([from.coordinate, to.coordinate]) as readonly [GeographicPosition, GeographicPosition],
+    provenance: SYNTHETIC_ORIENTATION_PROVENANCE,
+  });
 }
 
 export function createSyntheticOrientationScenario(
@@ -99,22 +154,6 @@ export function createSyntheticOrientationScenario(
     coordinate: coordinate("opportunity", 210),
     provenance: SYNTHETIC_ORIENTATION_PROVENANCE,
   });
-  const matchPath = Object.freeze({
-    id: "tutorial-path-match",
-    kind: "capability-match" as const,
-    fromNodeId: opportunityNode.id,
-    toNodeId: responder.id,
-    coordinates: Object.freeze([opportunityNode.coordinate, responder.coordinate]) as readonly [GeographicPosition, GeographicPosition],
-    provenance: SYNTHETIC_ORIENTATION_PROVENANCE,
-  });
-  const teammatePath = Object.freeze({
-    id: "tutorial-path-teammate",
-    kind: "teammate-discovery" as const,
-    fromNodeId: responder.id,
-    toNodeId: teammate.id,
-    coordinates: Object.freeze([responder.coordinate, teammate.coordinate]) as readonly [GeographicPosition, GeographicPosition],
-    provenance: SYNTHETIC_ORIENTATION_PROVENANCE,
-  });
 
   return Object.freeze({
     id: ORIENTATION_SCENARIO_ID,
@@ -146,33 +185,105 @@ export function createSyntheticOrientationScenario(
       explanation: "The responder does not cover one required capability, so the tutorial searches for a complementary organization.",
       discoveryBoundary: "Discovery identifies a possible teammate; it does not create a team, contract, or authority.",
     }),
-    allPaths: Object.freeze([matchPath, teammatePath]),
+    teammateInvitation: Object.freeze({
+      capacity: "Building automation controls specialist",
+      context: "Contribute controls integration approach, implementation assumptions, and schedule dependencies to the synthetic joint response.",
+      reviewState: "reviewed" as const,
+      acceptanceState: "accepted" as const,
+      nonbindingBoundary: "Accepting an Exchange invitation is not a subcontract, joint venture, teaming agreement, or other binding relationship.",
+    }),
+    jointResponse: Object.freeze({
+      title: "Synthetic coordinated response",
+      sections: Object.freeze([
+        Object.freeze({ id: "approach", requirement: "Project approach", assignedTo: "Tutorial Responder" as const, state: "complete" as const }),
+        Object.freeze({ id: "mechanical", requirement: "Mechanical modernization", assignedTo: "Tutorial Responder" as const, state: "complete" as const }),
+        Object.freeze({ id: "controls", requirement: "Controls integration", assignedTo: "Tutorial Teammate" as const, state: "complete" as const }),
+        Object.freeze({ id: "schedule", requirement: "Schedule and dependencies", assignedTo: "Joint" as const, state: "complete" as const }),
+      ]),
+      submissionBoundary: "This tutorial submit action creates no live RFx response, receipt, commitment, or external-system submission.",
+    }),
+    evaluation: Object.freeze({
+      criteria: Object.freeze([
+        Object.freeze({ id: "coverage", label: "Requirement coverage", weight: "40%" }),
+        Object.freeze({ id: "approach", label: "Implementation approach", weight: "35%" }),
+        Object.freeze({ id: "schedule", label: "Schedule confidence", weight: "25%" }),
+      ]),
+      responses: Object.freeze([
+        Object.freeze({
+          id: "tutorial-response-joint",
+          label: "Coordinated responder + teammate",
+          findings: Object.freeze(["Complete coverage", "Integrated approach", "Dependencies stated"]),
+        }),
+        Object.freeze({
+          id: "tutorial-response-alternate",
+          label: "Alternate synthetic response",
+          findings: Object.freeze(["Partial controls coverage", "Sound core approach", "Clarification needed"]),
+        }),
+      ]),
+      selectedResponseId: "tutorial-response-joint",
+      authorityBoundary: "The issuer makes the tutorial selection. RFxchange organizes stated criteria and comparison; it does not automatically choose a winner.",
+    }),
+    networkEffect: Object.freeze({
+      summary: "Capability became discoverable, demand became visible, a gap produced a teammate connection, the team responded, and the issuer selected an outcome.",
+      outcomeBoundary: "This is a synthetic learning outcome, not an award, contract, verified economic outcome, or credibility event.",
+    }),
+    allPaths: Object.freeze([
+      path("tutorial-path-demand", "demand-signal", issuer, opportunityNode),
+      path("tutorial-path-match", "capability-match", opportunityNode, responder),
+      path("tutorial-path-teammate", "teammate-discovery", responder, teammate),
+      path("tutorial-path-response", "joint-response", teammate, opportunityNode),
+      path("tutorial-path-outcome", "selected-outcome", opportunityNode, issuer),
+    ]),
   });
 }
 
-export function phaseOneOrientationOverlay(
+export function orientationMapOverlay(
   scenario: SyntheticOrientationScenario,
   journey: OrientationJourney | null,
 ): SyntheticOrientationMapOverlay {
-  const visibleStep = Math.min((journey?.completedThroughStep ?? 0) + 1, 4);
+  const visibleStep = Math.min((journey?.completedThroughStep ?? 0) + 1, 8);
   const nodes = visibleStep >= 2
     ? Object.freeze([...scenario.organizations, scenario.opportunity.node])
     : scenario.organizations;
   const paths = Object.freeze([
-    ...(visibleStep >= 3 ? [scenario.allPaths[0]] : []),
-    ...(visibleStep >= 4 ? [scenario.allPaths[1]] : []),
+    ...(visibleStep >= 2 ? [scenario.allPaths[0]] : []),
+    ...(visibleStep >= 3 ? [scenario.allPaths[1]] : []),
+    ...(visibleStep >= 4 ? [scenario.allPaths[2]] : []),
+    ...(visibleStep >= 6 ? [scenario.allPaths[3]] : []),
+    ...(visibleStep >= 7 ? [scenario.allPaths[4]] : []),
   ]);
+  const stage = visibleStep >= 8
+    ? "network-effect" as const
+    : visibleStep >= 7
+      ? "selection" as const
+      : visibleStep >= 6
+        ? "response" as const
+        : visibleStep >= 5
+          ? "invitation" as const
+          : "discovery" as const;
   return Object.freeze({
     provenance: SYNTHETIC_ORIENTATION_PROVENANCE,
+    stage,
     nodes,
     paths,
     accessibleSummary:
-      visibleStep >= 4
-        ? "Synthetic issuer, opportunity, responder, capability match, gap, and teammate discovery are visible."
-        : visibleStep >= 3
-          ? "Synthetic opportunity-to-responder capability alignment is visible."
-          : visibleStep >= 2
-            ? "A synthetic issuer opportunity is visible with three tutorial organizations."
-            : "Three synthetic tutorial organizations are visible inside the selected locality.",
+      stage === "network-effect"
+        ? "The complete synthetic network path connects issuer demand, responder capability, teammate contribution, joint response, and human-selected outcome."
+        : stage === "selection"
+          ? "The synthetic issuer, opportunity, responder, teammate, joint response, and human selection path are visible."
+          : stage === "response"
+            ? "The synthetic responder and teammate contributions connect to the joint response."
+            : stage === "invitation"
+              ? "The synthetic responder-to-teammate discovery path is now an explicitly reviewed nonbinding invitation."
+              : visibleStep >= 4
+                ? "Synthetic issuer, opportunity, responder, capability match, gap, and teammate discovery are visible."
+                : visibleStep >= 3
+                  ? "Synthetic opportunity-to-responder capability alignment is visible."
+                  : visibleStep >= 2
+                    ? "A synthetic issuer opportunity is visible with three tutorial organizations."
+                    : "Three synthetic tutorial organizations are visible inside the selected locality.",
   });
 }
+
+/** @deprecated Use the complete eight-step overlay. */
+export const phaseOneOrientationOverlay = orientationMapOverlay;

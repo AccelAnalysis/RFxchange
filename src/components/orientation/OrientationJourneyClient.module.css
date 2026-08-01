@@ -82,7 +82,8 @@
 .legend li[data-role="teammate"] span { background: #3b7b57; }
 
 .fact,
-.boundary {
+.boundary,
+.workflowCard {
   width: 100%;
   margin-top: 18px;
   padding: 15px 16px;
@@ -96,6 +97,41 @@
 .fact span { color: var(--signal-blue); font-size: 0.65rem; font-weight: 820; letter-spacing: 0.08em; text-transform: uppercase; }
 .fact strong { margin-top: 6px; font-size: 0.88rem; }
 .fact small, .boundary { margin-top: 7px; color: var(--muted-ink); font-size: 0.72rem; line-height: 1.48; }
+
+.workflowCard > span {
+  color: var(--signal-blue);
+  font-size: .65rem;
+  font-weight: 820;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.workflowCard h3 { margin: 7px 0 0; font-size: .96rem; line-height: 1.2; }
+.workflowCard p { margin: 8px 0 0; color: var(--muted-ink); font-size: .75rem; line-height: 1.48; }
+.workflowCard > small { display: block; margin-top: 11px; color: var(--muted-ink); font-size: .68rem; line-height: 1.45; }
+
+.statusPair { width: 100%; margin: 12px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.statusPair div { padding: 9px 10px; border-radius: 10px; background: rgba(59,123,87,.09); }
+.statusPair dt { color: var(--muted-ink); font-size: .62rem; }
+.statusPair dd { margin: 3px 0 0; color: var(--growth-green); font-size: .72rem; font-weight: 780; }
+
+.requirements { margin: 12px 0 0; padding: 0; display: grid; gap: 7px; list-style: none; }
+.requirements li { padding: 8px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(37,41,50,.09); }
+.requirements li:last-child { border-bottom: 0; }
+.requirements strong, .requirements small { display: block; }
+.requirements strong { font-size: .74rem; }
+.requirements small { margin-top: 2px; color: var(--muted-ink); font-size: .63rem; }
+.requirements b { color: var(--growth-green); font-size: .65rem; }
+
+.comparison { margin-top: 12px; display: grid; gap: 1px; overflow-x: auto; border-radius: 10px; background: rgba(37,41,50,.08); }
+.comparisonHeader, .comparisonRow { min-width: 390px; display: grid; grid-template-columns: .9fr 1.25fr 1.25fr; gap: 1px; }
+.comparisonHeader > *, .comparisonRow > * { padding: 8px; background: rgba(255,255,255,.86); font-size: .62rem; line-height: 1.35; }
+.comparisonHeader > * { color: var(--signal-blue); font-size: .59rem; }
+.comparisonRow small { display: block; margin-top: 2px; color: var(--muted-ink); }
+
+.networkSequence { margin: 12px 0 0; padding-left: 20px; display: grid; gap: 6px; color: var(--muted-ink); font-size: .72rem; }
+.networkSequence li::marker { color: var(--rf-gold); font-weight: 800; }
+.nextStep { margin: 14px 0 0; color: var(--signal-blue); font-size: .75rem; line-height: 1.45; }
 
 .primary,
 .secondary,
