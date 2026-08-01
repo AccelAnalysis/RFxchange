@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import {
@@ -45,6 +45,9 @@ interface ExistingWorkspaceFoundationProps {
   readonly status?: ExistingWorkspaceStatus;
 }
 
+const WORKSPACE_STATE_EVENT = "rfxchange:existing-workspace-state";
+const workspaceMemoryStore = new Map<string, string>();
+
 const statusCopy: Readonly<Record<Exclude<ExistingWorkspaceStatus, "ready">, Readonly<{
   title: string;
   body: string;
@@ -87,6 +90,31 @@ const statusCopy: Readonly<Record<Exclude<ExistingWorkspaceStatus, "ready">, Rea
   }),
 });
 
+function readWorkspaceSnapshot(storageKey: string, fallback: string): string {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const stored = window.localStorage.getItem(storageKey);
+    if (stored !== null) {
+      workspaceMemoryStore.set(storageKey, stored);
+      return stored;
+    }
+  } catch {
+    // Browser UI-state storage may be unavailable. Authority and domain state do not depend on it.
+  }
+  return workspaceMemoryStore.get(storageKey) ?? fallback;
+}
+
+function persistWorkspaceSnapshot(storageKey: string, state: ExistingWorkspaceState): void {
+  const snapshot = serializeExistingWorkspaceState(state);
+  workspaceMemoryStore.set(storageKey, snapshot);
+  try {
+    window.localStorage.setItem(storageKey, snapshot);
+  } catch {
+    // UI state persistence is optional and never affects authority or domain state.
+  }
+  window.dispatchEvent(new CustomEvent(WORKSPACE_STATE_EVENT, { detail: storageKey }));
+}
+
 function WorkspaceBoundary({ status }: Readonly<{ status: Exclude<ExistingWorkspaceStatus, "ready"> }>) {
   const copy = statusCopy[status];
   return (
@@ -112,36 +140,47 @@ export function ExistingWorkspaceFoundation({
   organizationId,
   status = "ready",
 }: ExistingWorkspaceFoundationProps) {
-  const [workspaceState, setWorkspaceState] = useState<ExistingWorkspaceState>(() =>
-    createExistingWorkspaceState({ organizationId, selectedObjectId: homeMarker.id }),
+  const storageKey = useMemo(
+    () => existingWorkspaceStorageKey(organizationId),
+    [organizationId],
   );
-  const [stateHydrated, setStateHydrated] = useState(false);
+  const fallbackState = useMemo(
+    () => createExistingWorkspaceState({ organizationId, selectedObjectId: homeMarker.id }),
+    [homeMarker.id, organizationId],
+  );
+  const fallbackSnapshot = useMemo(
+    () => serializeExistingWorkspaceState(fallbackState),
+    [fallbackState],
+  );
 
-  useEffect(() => {
-    try {
-      const key = existingWorkspaceStorageKey(organizationId);
-      const restored = parseExistingWorkspaceState(window.localStorage.getItem(key), organizationId);
-      if (restored && restored.selectedObjectId === homeMarker.id) {
-        setWorkspaceState(restored);
-      }
-    } catch {
-      // Browser UI-state storage may be unavailable. Authority and domain state do not depend on it.
-    } finally {
-      setStateHydrated(true);
-    }
-  }, [homeMarker.id, organizationId]);
+  const subscribe = useCallback((onStoreChange: () => void) => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === storageKey) onStoreChange();
+    };
+    const handleWorkspaceState = (event: Event) => {
+      if ((event as CustomEvent<string>).detail === storageKey) onStoreChange();
+    };
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener(WORKSPACE_STATE_EVENT, handleWorkspaceState);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener(WORKSPACE_STATE_EVENT, handleWorkspaceState);
+    };
+  }, [storageKey]);
 
-  useEffect(() => {
-    if (!stateHydrated) return;
-    try {
-      window.localStorage.setItem(
-        existingWorkspaceStorageKey(organizationId),
-        serializeExistingWorkspaceState(workspaceState),
-      );
-    } catch {
-      // UI state persistence is optional and never affects authority or domain state.
-    }
-  }, [organizationId, stateHydrated, workspaceState]);
+  const getSnapshot = useCallback(
+    () => readWorkspaceSnapshot(storageKey, fallbackSnapshot),
+    [fallbackSnapshot, storageKey],
+  );
+  const snapshot = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    () => fallbackSnapshot,
+  );
+  const workspaceState = useMemo(() => {
+    const restored = parseExistingWorkspaceState(snapshot, organizationId);
+    return restored?.selectedObjectId === homeMarker.id ? restored : fallbackState;
+  }, [fallbackState, homeMarker.id, organizationId, snapshot]);
 
   if (status !== "ready") return <WorkspaceBoundary status={status} />;
 
@@ -150,19 +189,11 @@ export function ExistingWorkspaceFoundation({
   const locality = model.selectedGeography.name;
   const locationLabel = homeMarker.accessibleLocationLabel ?? `${locality} organization location`;
 
-  const openOrganizationHome = () => {
-    setWorkspaceState(createExistingWorkspaceState({
+  const updatePanel = (panelOpenValue: boolean) => {
+    persistWorkspaceSnapshot(storageKey, createExistingWorkspaceState({
       organizationId,
       selectedObjectId: homeMarker.id,
-      panelOpen: true,
-    }));
-  };
-
-  const closeOrganizationHome = () => {
-    setWorkspaceState(createExistingWorkspaceState({
-      organizationId,
-      selectedObjectId: homeMarker.id,
-      panelOpen: false,
+      panelOpen: panelOpenValue,
     }));
   };
 
@@ -182,7 +213,7 @@ export function ExistingWorkspaceFoundation({
           <button
             type="button"
             className={styles.organizationHomeButton}
-            onClick={openOrganizationHome}
+            onClick={() => updatePanel(true)}
             aria-expanded={panelOpen}
             aria-controls="organization-home-panel"
           >
@@ -202,7 +233,7 @@ export function ExistingWorkspaceFoundation({
                   <p className={styles.eyebrow}>Organization home</p>
                   <h1 id="organization-home-title">{homeMarker.label}</h1>
                 </div>
-                <button type="button" className={styles.closeButton} onClick={closeOrganizationHome}>
+                <button type="button" className={styles.closeButton} onClick={() => updatePanel(false)}>
                   <span aria-hidden="true">×</span>
                   <span className={styles.srOnly}>Close organization home</span>
                 </button>
