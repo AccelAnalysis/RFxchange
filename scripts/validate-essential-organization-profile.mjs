@@ -31,9 +31,7 @@ const [
 
 for (const required of [
   "EssentialOrganizationProfile extends OrganizationProfile",
-  "ORGANIZATION_TYPES",
-  "ORGANIZATION_PARTICIPATION_ROLES",
-  "ORGANIZATION_BUSINESS_OBJECTIVES",
+  "ORGANIZATION_CAPABILITY_CATEGORIES",
   "ORGANIZATION_CAPABILITY_KINDS",
   "PROFILE_COMPLETION_REQUIREMENTS",
   'credentialFamily: "active"',
@@ -43,20 +41,24 @@ for (const required of [
 ]) {
   assert.ok(model.includes(required), `Essential-profile domain is missing ${required}.`);
 }
-for (const role of [
-  "business", "supplier", "buyer", "issuer", "government", "edo",
-  "resource-provider", "chamber", "lender", "university", "nonprofit", "other",
+for (const category of [
+  "professional-business-services",
+  "construction-skilled-trades",
+  "manufacturing-fabrication",
+  "technology-data-cybersecurity",
+  "transportation-logistics",
+  "marketing-creative-services",
+  "facilities-real-estate",
+  "education-workforce-training",
+  "health-safety-security",
+  "food-hospitality-events",
+  "other",
 ]) {
-  assert.ok(model.includes(`"${role}"`), `Participation role is missing ${role}.`);
-}
-for (const objective of [
-  "find-opportunities", "issue-opportunities", "find-customers", "find-suppliers",
-  "find-teammates", "send-receive-referrals", "find-resources-support",
-  "explore-local-network",
-]) {
-  assert.ok(model.includes(`"${objective}"`), `Business objective is missing ${objective}.`);
+  assert.ok(model.includes(`"${category}"`), `Capability category is missing ${category}.`);
 }
 assert.ok(model.includes("GENERIC_CAPABILITY_NAMES"));
+assert.equal(model.includes('missing.push("organization-type")'), false);
+assert.equal(model.includes('missing.push("participation-role")'), false);
 assert.equal(model.includes("commercialStatus"), false);
 assert.equal(model.includes("verificationStatus"), false);
 
@@ -81,46 +83,50 @@ for (const collection of [
 }
 assert.ok(persistence.includes("runTransaction"));
 assert.ok(persistence.includes("expectedProfileUpdatedAt"));
-for (const collection of [
-  "organizationProfileCompletions",
-  "organizationProfileEvents",
-]) {
+for (const collection of ["organizationProfileCompletions", "organizationProfileEvents"]) {
   assert.ok(schema.includes(collection), `Firestore schema is missing ${collection}.`);
   assert.ok(rules.includes(`/${collection}/{documentId}`), `Firestore rules are missing ${collection}.`);
 }
 
 for (const required of [
-  "Minimum organization identity",
+  "Carried-forward organization information",
   "One meaningful capability",
-  "Participation roles",
-  "Business objectives",
+  "Capability category",
+  "Other category",
   "Active credential · automatically derived",
   "Profile Complete is not Organization Verified",
   "not an activated network marker",
 ]) {
   assert.ok(panel.includes(required), `Reference essential-profile component is missing ${required}.`);
 }
+assert.equal(panel.includes("Participation roles"), false);
+assert.equal(panel.includes("Business objectives"), false);
 
 for (const required of [
   "resolveParticipantRoute",
   "hydrateEssentialOrganizationProfile",
   "getByOrganizationId",
   "Profile Complete",
-  "Participation roles",
-  "Business objectives",
+  "Capabilities",
+  "Opportunity participation",
+  "Resource Provider status",
 ]) {
   assert.ok(route.includes(required), `Authenticated Account profile route is missing ${required}.`);
 }
 assert.equal(route.includes("EssentialProfilePanel"), false);
 assert.equal(route.includes("Harborlight"), false);
+assert.equal(route.includes("Controlled Exchange"), false);
+
 for (const required of [
-  "ORGANIZATION_PARTICIPATION_ROLES.map",
-  "ORGANIZATION_BUSINESS_OBJECTIVES.map",
+  "ORGANIZATION_CAPABILITY_CATEGORIES.map",
   '"save-profile"',
   "Complete profile and activate marker",
+  "profileSeed",
 ]) {
   assert.ok(activationUi.includes(required), `Integrated essential-profile activation UI is missing ${required}.`);
 }
+assert.equal(activationUi.includes("ORGANIZATION_PARTICIPATION_ROLES.map"), false);
+assert.equal(activationUi.includes("ORGANIZATION_BUSINESS_OBJECTIVES.map"), false);
 
 for (const phrase of [
   "cannot bypass completion",
@@ -130,16 +136,12 @@ for (const phrase of [
 ]) {
   assert.ok(tests.includes(phrase), `Essential-profile tests are missing ${phrase}.`);
 }
-assert.ok(
-  architecture.includes("ORG-007") &&
-    architecture.includes("ORG-008") &&
-    architecture.includes("ORG-010") &&
-    architecture.includes("ORG-011") &&
-    architecture.includes("ORG-012"),
-);
+assert.ok(architecture.includes("categorized capability"));
+assert.ok(architecture.includes("not collected during activation"));
+assert.ok(architecture.includes("separate application"));
 assert.ok(
   ci.includes("smoke-essential-organization-profile-emulator.mjs"),
   "CI must run the Slice 2.7 Firestore emulator acceptance.",
 );
 
-console.log("Slice 2.7 essential organization profile, Profile Complete, and authenticated Account runtime validated.");
+console.log("Amended Slice 2.7 essential organization profile and Profile Complete gate validated.");

@@ -18,6 +18,12 @@ export interface ActivationLegalAcceptance {
   readonly capturedAt: string;
 }
 
+export interface ActivationOrganizationIdentitySeed {
+  readonly websiteDisposition: "available" | "not-applicable" | null;
+  readonly websiteUrl: string | null;
+  readonly phone: string | null;
+}
+
 export interface ActivationJourneyContext {
   /** One current Wave 2 activation context per RFxchange user. */
   readonly id: string;
@@ -29,6 +35,12 @@ export interface ActivationJourneyContext {
    * permission; durable control continues to require membership + authorization establishment.
    */
   readonly organizationRelationship: OrganizationRelationship | null;
+  /**
+   * Reusable provisional identity captured during resolution. It is copied into the durable
+   * organization profile after authority/location are established so registration never asks for
+   * the same website or phone twice.
+   */
+  readonly organizationIdentitySeed: ActivationOrganizationIdentitySeed;
   readonly legalAcceptance: ActivationLegalAcceptance | null;
   /**
    * Temporary bridge only. It proves the user saw the canonical orientation position in the
@@ -49,10 +61,56 @@ function required(value: string, label: string, maximum = 240): string {
   return normalized;
 }
 
+function optional(value: string | null | undefined, label: string, maximum = 240): string | null {
+  if (value == null || !value.trim()) return null;
+  return required(value, label, maximum);
+}
+
 function timestamp(value: string): string {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.valueOf())) throw new Error("Activation timestamp must be valid.");
   return parsed.toISOString();
+}
+
+function normalizedWebsite(value: string | null | undefined): string | null {
+  const raw = optional(value, "Organization website", 320);
+  if (!raw) return null;
+  const candidate = /^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : `https://${raw}`;
+  const parsed = new URL(candidate);
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new Error("Organization website must use HTTP or HTTPS.");
+  }
+  parsed.hash = "";
+  return parsed.toString();
+}
+
+function normalizedPhone(value: string | null | undefined): string | null {
+  const phone = optional(value, "Organization phone", 40);
+  if (phone && !/^[+0-9().\-\s]{7,40}$/.test(phone)) {
+    throw new Error("Organization phone is malformed.");
+  }
+  return phone;
+}
+
+function identitySeed(
+  input: Readonly<{
+    websiteDisposition?: "available" | "not-applicable" | null;
+    websiteUrl?: string | null;
+    phone?: string | null;
+  }> = {},
+): ActivationOrganizationIdentitySeed {
+  const websiteDisposition = input.websiteDisposition ?? null;
+  const websiteUrl = websiteDisposition === "available"
+    ? normalizedWebsite(input.websiteUrl)
+    : null;
+  if (websiteDisposition === "available" && !websiteUrl) {
+    throw new Error("Organization website is required when website disposition is available.");
+  }
+  return Object.freeze({
+    websiteDisposition,
+    websiteUrl,
+    phone: normalizedPhone(input.phone),
+  });
 }
 
 export function organizationRelationship(value: string): OrganizationRelationship {
@@ -71,6 +129,11 @@ export function createActivationJourneyContext(input: Readonly<{
   userId: UserId;
   provisionalOrganizationName: string;
   organizationRelationship?: string | null;
+  organizationIdentitySeed?: Readonly<{
+    websiteDisposition?: "available" | "not-applicable" | null;
+    websiteUrl?: string | null;
+    phone?: string | null;
+  }>;
   now: string;
 }>): ActivationJourneyContext {
   const now = timestamp(input.now);
@@ -87,6 +150,7 @@ export function createActivationJourneyContext(input: Readonly<{
     organizationRelationship: input.organizationRelationship
       ? organizationRelationship(input.organizationRelationship)
       : null,
+    organizationIdentitySeed: identitySeed(input.organizationIdentitySeed),
     legalAcceptance: null,
     orientationBridgeAcknowledgedAt: null,
     organizationId: null,
@@ -102,6 +166,11 @@ export function updateActivationJourneyContext(
   input: Readonly<{
     provisionalOrganizationName?: string;
     organizationRelationship?: string | null;
+    organizationIdentitySeed?: Readonly<{
+      websiteDisposition?: "available" | "not-applicable" | null;
+      websiteUrl?: string | null;
+      phone?: string | null;
+    }>;
     legalAcceptance?: ActivationLegalAcceptance | null;
     orientationBridgeAcknowledgedAt?: string | null;
     organizationId?: OrganizationId | null;
@@ -128,6 +197,9 @@ export function updateActivationJourneyContext(
             ? organizationRelationship(input.organizationRelationship)
             : null,
         }
+      : {}),
+    ...(input.organizationIdentitySeed !== undefined
+      ? { organizationIdentitySeed: identitySeed(input.organizationIdentitySeed) }
       : {}),
     ...(input.legalAcceptance !== undefined
       ? { legalAcceptance: input.legalAcceptance }

@@ -52,9 +52,7 @@ export default async function OrganizationProfilePage() {
   if (!profileRecord) redirect("/join");
 
   const profile = hydrateEssentialOrganizationProfile(profileRecord);
-  const controlledStatus = access.state.lifecycleState === "open-platform"
-    ? "Open Exchange"
-    : "Controlled Exchange";
+  const workspaceStatus = access.state.lifecycleState === "open-platform" ? "Open" : "Active";
 
   return (
     <ParticipantShell activeItem="Account">
@@ -62,7 +60,7 @@ export default async function OrganizationProfilePage() {
         <section className={styles.page}>
           <header className={styles.header}>
             <div>
-              <p className={styles.eyebrow}>Account · {controlledStatus}</p>
+              <p className={styles.eyebrow}>Account · RFxchange</p>
               <h1>{profile.displayName}</h1>
               <p>
                 This workspace reflects your authenticated RFxchange organization context. Later
@@ -80,11 +78,11 @@ export default async function OrganizationProfilePage() {
                 <dt>Organization ID</dt>
                 <dd>{String(access.membership.organizationId)}</dd>
                 <dt>Organization type</dt>
-                <dd>{profile.organizationType ? readable(profile.organizationType) : "Not recorded"}</dd>
+                <dd>{profile.organizationType ? readable(profile.organizationType) : "Optional enrichment not recorded"}</dd>
                 <dt>Profile status</dt>
                 <dd>{access.state.profileCompletion?.status === "active" ? "Profile Complete" : "Incomplete"}</dd>
                 <dt>Workspace state</dt>
-                <dd><span className={styles.status}>{controlledStatus}</span></dd>
+                <dd><span className={styles.status}>{workspaceStatus}</span></dd>
               </dl>
             </article>
 
@@ -108,26 +106,32 @@ export default async function OrganizationProfilePage() {
             </article>
 
             <article className={styles.card}>
+              <h2>Capabilities</h2>
+              {profile.capabilities.length ? (
+                <ul className={styles.tags}>
+                  {profile.capabilities.map((capability) => (
+                    <li key={String(capability.id)}>
+                      {capability.name} · {capability.category === "other"
+                        ? capability.otherCategory
+                        : readable(capability.category)}
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className={styles.empty}>No capability has been recorded.</p>}
+            </article>
+
+            <article className={styles.card}>
+              <h2>Opportunity participation</h2>
+              <p className={styles.empty}>
+                Every RFxchange organization can discover and respond to opportunities and can also
+                create and issue opportunities. These transaction roles do not require a permanent
+                buyer or supplier classification.
+              </p>
+            </article>
+
+            <article className={styles.card}>
               <h2>Map settings</h2>
               <MapMotionPreferenceToggle />
-            </article>
-
-            <article className={styles.card}>
-              <h2>Participation roles</h2>
-              {profile.participationRoles.length ? (
-                <ul className={styles.tags}>
-                  {profile.participationRoles.map((role) => <li key={role}>{readable(role)}</li>)}
-                </ul>
-              ) : <p className={styles.empty}>No participation role has been recorded.</p>}
-            </article>
-
-            <article className={styles.card}>
-              <h2>Business objectives</h2>
-              {profile.businessObjectives.length ? (
-                <ul className={styles.tags}>
-                  {profile.businessObjectives.map((objective) => <li key={objective}>{readable(objective)}</li>)}
-                </ul>
-              ) : <p className={styles.empty}>No business objective has been recorded.</p>}
             </article>
 
             <article className={styles.card}>
@@ -140,6 +144,14 @@ export default async function OrganizationProfilePage() {
                 <dt>Granted capabilities</dt>
                 <dd>{authorization?.permissions.length ?? 0}</dd>
               </dl>
+            </article>
+
+            <article className={styles.card}>
+              <h2>Resource Provider status</h2>
+              <p className={styles.empty}>
+                Official Resource Provider status is a separate application and administrator-review
+                process. It is not selected during registration and is not implied by Profile Complete.
+              </p>
             </article>
 
             <article className={styles.card}>

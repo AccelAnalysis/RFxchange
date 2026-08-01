@@ -13,8 +13,7 @@ import {
   structuredPostalAddress,
 } from "../src/domain/organization-location/model.ts";
 import {
-  ORGANIZATION_BUSINESS_OBJECTIVES,
-  ORGANIZATION_PARTICIPATION_ROLES,
+  ORGANIZATION_CAPABILITY_CATEGORIES,
   createOrganizationCapability,
   evaluateOrganizationProfileCompletion,
   hydrateEssentialOrganizationProfile,
@@ -50,6 +49,8 @@ function capability(overrides = {}) {
   return createOrganizationCapability({
     id: overrides.id ?? "capability-metal-fabrication",
     kind: overrides.kind ?? "service",
+    category: overrides.category ?? "manufacturing-fabrication",
+    otherCategory: overrides.otherCategory,
     name: overrides.name ?? "Precision marine metal fabrication",
     description:
       overrides.description ??
@@ -73,10 +74,9 @@ function profileFixture() {
 function updateProfile(profile, overrides = {}) {
   return updateEssentialOrganizationProfile(profile, {
     displayName: overrides.displayName ?? "Harborlight Fabrication",
-    organizationType: overrides.organizationType ?? "for-profit-business",
     website: overrides.website ?? {
       disposition: "available",
-      url: "https://harborlight.example/about#team",
+      url: "harborlight.example/about#team",
     },
     mainContact: overrides.mainContact ?? {
       displayName: "Morgan Lee",
@@ -86,11 +86,6 @@ function updateProfile(profile, overrides = {}) {
       publiclyVisible: false,
     },
     capabilities: overrides.capabilities ?? [capability()],
-    participationRoles: overrides.participationRoles ?? ["business", "supplier"],
-    businessObjectives: overrides.businessObjectives ?? [
-      "find-opportunities",
-      "find-teammates",
-    ],
     now: overrides.now ?? NOW,
   });
 }
@@ -132,22 +127,27 @@ function serviceGeographies(organizationId) {
   });
 }
 
-test("ORG-007/008/010/011 captures bounded identity, capability, roles, and objectives", () => {
+test("essential profile captures carried identity and a categorized capability", () => {
   const { profile } = profileFixture();
-  const updated = updateProfile(profile, {
-    participationRoles: ["business", "supplier", "supplier"],
-    businessObjectives: ["find-opportunities", "find-teammates", "find-teammates"],
-  });
+  const updated = updateProfile(profile);
   assert.equal(updated.id, profile.id, "The durable profile identity must be reused.");
-  assert.equal(updated.organizationType, "for-profit-business");
+  assert.equal(updated.organizationType, null, "Organization type is not required at activation.");
   assert.equal(updated.website.url, "https://harborlight.example/about");
   assert.equal(updated.mainContact.email, "operations@harborlight.example");
-  assert.deepEqual(updated.participationRoles, ["business", "supplier"]);
-  assert.deepEqual(updated.businessObjectives, ["find-opportunities", "find-teammates"]);
   assert.equal(updated.capabilities[0].kind, "service");
-  assert.equal(ORGANIZATION_PARTICIPATION_ROLES.length, 12);
-  assert.equal(ORGANIZATION_BUSINESS_OBJECTIVES.length, 8);
+  assert.equal(updated.capabilities[0].category, "manufacturing-fabrication");
+  assert.ok(ORGANIZATION_CAPABILITY_CATEGORIES.includes("other"));
 
+  const other = capability({
+    id: "capability-other",
+    category: "other",
+    otherCategory: "Maritime compliance support",
+  });
+  assert.equal(other.otherCategory, "Maritime compliance support");
+  assert.throws(
+    () => capability({ id: "capability-other-missing", category: "other" }),
+    /Other capability category is required/,
+  );
   assert.throws(
     () => capability({ name: "Business services" }),
     /specific and meaningful/,
@@ -156,13 +156,9 @@ test("ORG-007/008/010/011 captures bounded identity, capability, roles, and obje
     () => capability({ description: "Too generic" }),
     /at least 20 characters/,
   );
-  assert.throws(
-    () => updateProfile(profile, { participationRoles: ["platform-administrator"] }),
-    /Unsupported organization participation role/,
-  );
 });
 
-test("ORG-012 derives Active Profile Complete only from every canonical requirement", () => {
+test("Profile Complete does not require organization type or participant roles", () => {
   const { organization, profile } = profileFixture();
   const incomplete = evaluateOrganizationProfileCompletion({
     profile: hydrateEssentialOrganizationProfile(profile),
@@ -172,18 +168,22 @@ test("ORG-012 derives Active Profile Complete only from every canonical requirem
   });
   assert.equal(incomplete.status, "inactive");
   assert.deepEqual(incomplete.missingRequirements, [
-    "organization-type",
     "website-disposition",
     "main-contact",
     "meaningful-capability",
     "service-geography",
-    "participation-role",
     "location-visibility",
     "confirmed-primary-location",
   ]);
+  assert.equal(incomplete.missingRequirements.includes("organization-type"), false);
+  assert.equal(incomplete.missingRequirements.includes("participation-role"), false);
 
+  const completeProfile = updateProfile(profile);
+  assert.equal(completeProfile.organizationType, null);
+  assert.deepEqual(completeProfile.participationRoles, []);
+  assert.deepEqual(completeProfile.businessObjectives, []);
   const complete = evaluateOrganizationProfileCompletion({
-    profile: updateProfile(profile),
+    profile: completeProfile,
     location: confirmedLocation(organization.id),
     serviceGeographies: serviceGeographies(organization.id),
     prior: incomplete,
@@ -196,7 +196,7 @@ test("ORG-012 derives Active Profile Complete only from every canonical requirem
   assert.equal(complete.firstActivatedAt, LATER);
 });
 
-test("ORG-012 commercial, founder, provider, and Verification claims cannot bypass completion", () => {
+test("commercial, founder, provider, and Verification claims cannot bypass completion", () => {
   const { organization, profile } = profileFixture();
   const withoutCapability = updateProfile(profile, { capabilities: [] });
   const decorated = {
@@ -216,7 +216,7 @@ test("ORG-012 commercial, founder, provider, and Verification claims cannot bypa
   assert.deepEqual(completion.missingRequirements, ["meaningful-capability"]);
 });
 
-test("ORG-012 recalculation deactivates stale completion while preserving activation history", () => {
+test("recalculation deactivates stale completion while preserving activation history", () => {
   const { organization, profile } = profileFixture();
   const completeProfile = updateProfile(profile);
   const active = evaluateOrganizationProfileCompletion({
@@ -242,7 +242,7 @@ test("ORG-012 recalculation deactivates stale completion while preserving activa
   assert.equal(inactive.lastTransitionAt, LATER);
 });
 
-test("public essential profile honors Slice 2.6 location and contact privacy", () => {
+test("public essential profile honors location and contact privacy", () => {
   const { organization, profile } = profileFixture();
   const essential = updateProfile(profile);
   const location = confirmedLocation(organization.id, "locality-only");
@@ -255,12 +255,10 @@ test("public essential profile honors Slice 2.6 location and contact privacy", (
   const projected = projectPublicEssentialOrganizationProfile({
     profile: essential,
     completion,
-    location: projectPublicOrganizationLocation(
-      location,
-      PORTSMOUTH_CONTROLLED_LOCALITY,
-    ),
+    location: projectPublicOrganizationLocation(location, PORTSMOUTH_CONTROLLED_LOCALITY),
   });
   assert.equal(projected.profileComplete, true);
+  assert.equal(projected.organizationType, null);
   assert.equal(projected.location.visibility, "locality-only");
   assert.equal(projected.mainContact, null);
   assert.equal("coordinate" in projected.location, false);
@@ -285,15 +283,11 @@ function serviceFixture() {
     now: NOW,
   });
   const preset = standardOrganizationRolePreset("primary-administrator");
-  const authorization = createOrganizationUserAuthorization(
-    membership,
-    organization,
-    {
-      roleKey: preset.key,
-      permissions: preset.permissions,
-      now: NOW,
-    },
-  );
+  const authorization = createOrganizationUserAuthorization(membership, organization, {
+    roleKey: preset.key,
+    permissions: preset.permissions,
+    now: NOW,
+  });
   const context = authenticatedServerContext({
     user,
     claims: {
@@ -342,9 +336,7 @@ function serviceFixture() {
         async create() {},
       },
       authorizations: {
-        async getByMembershipId(value) {
-          return value === membership.id ? authorization : null;
-        },
+        async getByMembershipId(value) { return value === membership.id ? authorization : null; },
         async listByUserId() { return [authorization]; },
         async listByOrganizationId() { return [authorization]; },
         async save() {},
@@ -358,9 +350,7 @@ function serviceFixture() {
     },
     profiles: {
       async getById(value) { return value === storedProfile.id ? storedProfile : null; },
-      async getByOrganizationId(value) {
-        return value === organization.id ? storedProfile : null;
-      },
+      async getByOrganizationId(value) { return value === organization.id ? storedProfile : null; },
       async create() {},
     },
     locations: {
@@ -383,9 +373,7 @@ function serviceFixture() {
     },
     repositories: {
       completions: {
-        async getByOrganizationId(value) {
-          return value === organization.id ? completion : null;
-        },
+        async getByOrganizationId(value) { return value === organization.id ? completion : null; },
       },
       unitOfWork: {
         async save(input) {
@@ -404,15 +392,12 @@ function serviceFixture() {
   });
   return {
     organization,
-    user,
     membership,
     authorization,
     context,
     events,
     audits,
     service,
-    get profile() { return storedProfile; },
-    get completion() { return completion; },
   };
 }
 
@@ -424,8 +409,7 @@ test("authorized application service updates the durable profile and derives com
     membershipId: fixture.membership.id,
     profile: {
       displayName: "Harborlight Fabrication",
-      organizationType: "for-profit-business",
-      website: { disposition: "available", url: "https://harborlight.example" },
+      website: { disposition: "available", url: "harborlight.example" },
       mainContact: {
         displayName: "Morgan Lee",
         roleTitle: "Operations Director",
@@ -433,22 +417,20 @@ test("authorized application service updates the durable profile and derives com
         publiclyVisible: false,
       },
       capabilities: [capability()],
-      participationRoles: ["business", "supplier"],
-      businessObjectives: ["find-opportunities", "find-teammates"],
     },
     reason: "Complete the essential organization profile.",
   });
   assert.equal(result.profile.id, "profile-essential-profile");
+  assert.equal(result.profile.organizationType, null);
+  assert.deepEqual(result.profile.participationRoles, []);
+  assert.deepEqual(result.profile.businessObjectives, []);
   assert.equal(result.completion.status, "active");
   assert.equal(fixture.events[0].kind, "essential-profile-updated");
   assert.equal(fixture.audits[0].action, "organization.profile.essential-updated");
-  assert.ok(
-    fixture.authorization.permissions.includes("organization.profile.manage"),
-  );
+  assert.ok(fixture.authorization.permissions.includes("organization.profile.manage"));
   assert.equal(
     fixture.authorization.permissions.includes("credibility.organization.verify"),
     false,
-    "Descriptive profile roles must not create administrative credibility permission.",
   );
 
   const publicProfile = await fixture.service.publicProfile(fixture.organization.id);
@@ -462,7 +444,6 @@ test("authorized application service updates the durable profile and derives com
       membershipId: fixture.membership.id,
       profile: {
         displayName: "Wrong tenant",
-        organizationType: "for-profit-business",
         website: { disposition: "not-applicable", explanation: "No public website." },
         mainContact: {
           displayName: "Wrong Tenant",
@@ -471,8 +452,6 @@ test("authorized application service updates the durable profile and derives com
           publiclyVisible: false,
         },
         capabilities: [capability()],
-        participationRoles: ["business"],
-        businessObjectives: ["explore-local-network"],
       },
       reason: "Attempt a cross-organization update.",
     }),

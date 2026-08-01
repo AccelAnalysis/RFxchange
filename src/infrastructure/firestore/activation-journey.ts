@@ -30,6 +30,11 @@ export class FirestoreActivationJourneyContextRepository
     return Object.freeze({
       ...data,
       organizationRelationship: data.organizationRelationship ?? null,
+      organizationIdentitySeed: Object.freeze({
+        websiteDisposition: data.organizationIdentitySeed?.websiteDisposition ?? null,
+        websiteUrl: data.organizationIdentitySeed?.websiteUrl ?? null,
+        phone: data.organizationIdentitySeed?.phone ?? null,
+      }),
       createdAt: isoTimestamp(data.createdAt),
       updatedAt: isoTimestamp(data.updatedAt),
     }) as ActivationJourneyContext;

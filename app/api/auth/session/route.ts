@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { ServerSessionError } from "@/src/application/auth/server-session";
 import { updateActivationJourneyContext } from "@/src/domain/onboarding/model";
-import { FirestorePlatformAdministratorLifecycleRepository } from "@/src/infrastructure/firestore/admin-lifecycle-repository";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
 import { FirestoreActivationJourneyContextRepository } from "@/src/infrastructure/firestore/activation-journey";
@@ -62,10 +61,9 @@ export async function POST(request: NextRequest) {
       now: new Date().toISOString(),
     });
 
-    // Authentication/session establishment is independent of participant activation. A legitimate
-    // platform administrator may have no participant organization context. Existing participant
-    // journeys resume automatically; /join creates a new activation journey only when it supplies
-    // organization context.
+    // Authentication/session establishment is independent from participant activation. Returning
+    // users sign in with email and password only. An authenticated account without an activation
+    // context receives state=null and begins organization setup on /join.
     const db = getServerFirestore();
     const contexts = new FirestoreActivationJourneyContextRepository(db);
     const existingContext = await contexts.getByUserId(issued.context.user.id);
@@ -86,18 +84,6 @@ export async function POST(request: NextRequest) {
         }
       }
       state = await activation.state(issued.context);
-    } else {
-      const administrator = await new FirestorePlatformAdministratorLifecycleRepository(db)
-        .getBySubject(issued.context.authentication.subject);
-      if (!administrator) {
-        return NextResponse.json(
-          {
-            error:
-              "Organization name is required to begin participant activation for this account.",
-          },
-          { status: 400 },
-        );
-      }
     }
 
     const response = NextResponse.json({ state });

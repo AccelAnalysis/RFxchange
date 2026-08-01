@@ -8,9 +8,33 @@ import {
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
 import { createFirestoreGeographyRepositories } from "@/src/infrastructure/firestore/geography-repositories";
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
-import { CensusTigerLocalityDirectory } from "@/src/infrastructure/geography/census-tiger-locality-directory";
+import {
+  CensusTigerLocalityDirectory,
+  type CensusLocalityCandidate,
+} from "@/src/infrastructure/geography/census-tiger-locality-directory";
 import { synchronizeActivationContextFromAuthority } from "@/src/infrastructure/onboarding/activation-context-sync";
 import { createServerActivationJourneyService } from "@/src/infrastructure/onboarding/runtime";
+
+const localityDirectory = new CensusTigerLocalityDirectory();
+const localitySuggestionCache = new Map<string, Readonly<{ expiresAt: number; candidates: readonly CensusLocalityCandidate[] }>>();
+const LOCALITY_CACHE_TTL_MS = 5 * 60 * 1000;
+const LOCALITY_CACHE_MAX_ENTRIES = 250;
+
+async function cachedLocalitySuggestions(query: string, stateCode: string) {
+  const key = `${stateCode.trim().toUpperCase()}:${query.trim().toLocaleLowerCase()}`;
+  const cached = localitySuggestionCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.candidates;
+  const candidates = await localityDirectory.search({ query, stateCode });
+  if (localitySuggestionCache.size >= LOCALITY_CACHE_MAX_ENTRIES) {
+    const oldestKey = localitySuggestionCache.keys().next().value as string | undefined;
+    if (oldestKey) localitySuggestionCache.delete(oldestKey);
+  }
+  localitySuggestionCache.set(key, Object.freeze({
+    expiresAt: Date.now() + LOCALITY_CACHE_TTL_MS,
+    candidates,
+  }));
+  return candidates;
+}
 
 async function authenticatedContext(request: NextRequest): Promise<AuthenticatedServerContext> {
   const sessionCookie = request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
@@ -73,7 +97,7 @@ export async function POST(request: NextRequest) {
         }
         const query = typeof body.query === "string" ? body.query : "";
         const stateCode = typeof body.stateCode === "string" ? body.stateCode : "";
-        const candidates = await new CensusTigerLocalityDirectory().search({ query, stateCode });
+        const candidates = await cachedLocalitySuggestions(query, stateCode);
         return NextResponse.json({ candidates });
       }
       case "select-census-geography": {
@@ -85,7 +109,7 @@ export async function POST(request: NextRequest) {
           );
         }
         const reference = typeof body.reference === "string" ? body.reference : "";
-        const geography = await new CensusTigerLocalityDirectory().resolve(reference);
+        const geography = await localityDirectory.resolve(reference);
         await createFirestoreGeographyRepositories(getServerFirestore()).definitions.save(geography);
         return NextResponse.json({ state: await service.selectGeography(context, String(geography.id)) });
       }
@@ -100,7 +124,8 @@ export async function POST(request: NextRequest) {
         const displayName = typeof body.displayName === "string" ? body.displayName : "";
         const result = await service.searchOrganizations(context, {
           displayName,
-          ...(typeof body.domain === "string" && body.domain.trim() ? { domain: body.domain } : {}),
+          ...(typeof body.website === "string" ? { website: body.website } : {}),
+          websiteNotApplicable: body.websiteNotApplicable === true,
           ...(typeof body.phone === "string" && body.phone.trim() ? { phone: body.phone } : {}),
         });
         return NextResponse.json({
@@ -124,7 +149,8 @@ export async function POST(request: NextRequest) {
         const state = await service.createOrganization(context, {
           displayName,
           reviewedCandidateOrganizationIds,
-          ...(typeof body.domain === "string" && body.domain.trim() ? { domain: body.domain } : {}),
+          ...(typeof body.website === "string" ? { website: body.website } : {}),
+          websiteNotApplicable: body.websiteNotApplicable === true,
           ...(typeof body.phone === "string" && body.phone.trim() ? { phone: body.phone } : {}),
         });
         return NextResponse.json({ state });
@@ -182,30 +208,20 @@ export async function POST(request: NextRequest) {
       }
       case "save-profile": {
         await synchronizedState(service, context);
-        const participationRoles = Array.isArray(body.participationRoles)
-          ? body.participationRoles.filter((value): value is string => typeof value === "string")
-          : [];
-        const businessObjectives = Array.isArray(body.businessObjectives)
-          ? body.businessObjectives.filter((value): value is string => typeof value === "string")
-          : [];
         const state = await service.saveProfile(context, {
-          displayName: typeof body.displayName === "string" ? body.displayName : "",
-          organizationType: typeof body.organizationType === "string" ? body.organizationType : "",
-          ...(typeof body.website === "string" && body.website.trim() ? { website: body.website } : {}),
+          ...(typeof body.website === "string" ? { website: body.website } : {}),
           websiteNotApplicable: body.websiteNotApplicable === true,
-          contactName: typeof body.contactName === "string" ? body.contactName : "",
           contactRole: typeof body.contactRole === "string" ? body.contactRole : "",
-          contactEmail: typeof body.contactEmail === "string" ? body.contactEmail : "",
-          ...(typeof body.contactPhone === "string" && body.contactPhone.trim()
-            ? { contactPhone: body.contactPhone }
-            : {}),
           contactPubliclyVisible: body.contactPubliclyVisible === true,
           capabilityKind: typeof body.capabilityKind === "string" ? body.capabilityKind : "service",
+          capabilityCategory:
+            typeof body.capabilityCategory === "string" ? body.capabilityCategory : "",
+          ...(typeof body.capabilityOtherCategory === "string" && body.capabilityOtherCategory.trim()
+            ? { capabilityOtherCategory: body.capabilityOtherCategory }
+            : {}),
           capabilityName: typeof body.capabilityName === "string" ? body.capabilityName : "",
           capabilityDescription:
             typeof body.capabilityDescription === "string" ? body.capabilityDescription : "",
-          participationRoles,
-          businessObjectives,
         });
         return NextResponse.json({ state });
       }

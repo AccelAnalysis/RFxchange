@@ -31,7 +31,6 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [recoveryOrganizationName, setRecoveryOrganizationName] = useState("");
 
   return (
     <main className={styles.page}>
@@ -46,7 +45,7 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
           <h1>Sign in to RFxchange.</h1>
           <p>
             If your organization activation is incomplete, we will resume exactly where you left
-            off. If activation is complete, you will enter the controlled Exchange.
+            off. If activation is complete, you will enter the Exchange.
           </p>
         </div>
 
@@ -75,21 +74,19 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
                       body: JSON.stringify({
                         idToken,
                         csrfToken: csrf.csrfToken,
-                        provisionalOrganizationName: recoveryOrganizationName.trim() || undefined,
                       }),
                     },
                   );
 
                   // Administration is an independent authority plane. Once authentication succeeds,
-                  // an explicit admin return target is always evaluated by the protected admin route
-                  // itself; participant activation state cannot block or grant administrative access.
+                  // an explicit admin return target is evaluated by the protected admin route itself.
                   if (isAdministrativeReturnTarget(returnTo)) {
                     window.location.assign(returnTo);
                     return;
                   }
 
                   if (!result.state) {
-                    window.location.assign("/join");
+                    window.location.assign("/join?begin=1");
                     return;
                   }
 
@@ -130,17 +127,6 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 required
-              />
-            </label>
-            <label>
-              Organization name
-              <small>
-                Optional. Use this only if your Firebase account was created but organization
-                activation never started.
-              </small>
-              <input
-                value={recoveryOrganizationName}
-                onChange={(event) => setRecoveryOrganizationName(event.target.value)}
               />
             </label>
             <button className={styles.primary} type="submit" disabled={busy}>

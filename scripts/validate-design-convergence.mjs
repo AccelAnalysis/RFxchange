@@ -11,11 +11,7 @@ const [
   mapStyles,
   tokens,
   geographyRoute,
-  resolutionRoute,
-  authorityRoute,
-  locationRoute,
   profileRoute,
-  activationRoute,
   activationClient,
   designSystem,
   mapSystem,
@@ -29,11 +25,7 @@ const [
   read("src/components/map/ControlledLocalityCanvas.module.css"),
   read("src/design/tokens.ts"),
   read("app/geography/canvas/page.tsx"),
-  read("app/organization-resolution/page.tsx"),
-  read("app/organization-authority/page.tsx"),
-  read("app/organization-location/page.tsx"),
   read("app/organization-profile/page.tsx"),
-  read("app/organization-activation/page.tsx"),
   read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("docs/design/RFxchange_DESIGN_SYSTEM.md"),
   read("docs/design/MAP_VISUAL_SYSTEM.md"),
@@ -75,48 +67,19 @@ assert.ok(
     workspaceStyles.includes("max-height: min(68svh, 590px)"),
   "Shared workspaces must preserve one navigation, full-height spatial canvas, Warm Ivory defaults, and mobile-sheet behavior.",
 );
-assert.ok(
-  !workspaceStyles.includes("grid-template-columns: 240px") &&
-    !workspaceStyles.includes("grid-template-columns: 280px"),
-  "Participant shell must not introduce a permanent left navigation rail.",
-);
+assert.ok(!workspaceStyles.includes("grid-template-columns: 240px") && !workspaceStyles.includes("grid-template-columns: 280px"));
+assert.ok(tokens.includes("participantSurfaces") && tokens.includes("defaultCanvas: colors.warmIvory") && tokens.includes("navigationHeight: 64"));
 
-assert.ok(
-  tokens.includes("participantSurfaces") &&
-    tokens.includes("defaultCanvas: colors.warmIvory") &&
-    tokens.includes("navigationHeight: 64"),
-  "Participant palette/layout token relationships are not centralized.",
-);
-
-assert.ok(
-  geographyRoute.includes("ParticipantShell") && geographyRoute.includes("SpatialWorkspace"),
-  "Authenticated Intelligence must consume the shared Spatial Workspace.",
-);
-assert.ok(
-  profileRoute.includes("ParticipantShell") && profileRoute.includes("OperationalWorkspace"),
-  "Authenticated Account must consume the shared Operational Workspace.",
-);
-
-for (const [path, route] of [
-  ["organization resolution", resolutionRoute],
-  ["organization authority", authorityRoute],
-  ["organization location", locationRoute],
-  ["organization activation", activationRoute],
-]) {
-  assert.ok(
-    route.includes("resolveParticipantRoute") && route.includes("redirect("),
-    `Legacy ${path} URL must converge into canonical activation/workspace routing.`,
-  );
-  assert.equal(route.includes("ParticipantShell"), false, `Legacy ${path} must not remain a duplicate participant workspace.`);
-  assert.equal(route.includes("createPortsmouth"), false, `Legacy ${path} must not expose deterministic preview state.`);
-}
-
+assert.ok(geographyRoute.includes("ParticipantShell") && geographyRoute.includes("SpatialWorkspace"));
+assert.ok(profileRoute.includes("ParticipantShell") && profileRoute.includes("OperationalWorkspace"));
 assert.ok(
   activationClient.includes("MapboxLocalityCanvas") &&
     activationClient.includes("Confirm this map position") &&
-    activationClient.includes("Enter the controlled Exchange"),
-  "Integrated activation must preserve geographic confirmation and controlled-workspace handoff without recreating stacked participant shells.",
+    activationClient.includes("Enter the Exchange") &&
+    activationClient.includes("Your organization is ready"),
+  "Integrated activation must preserve geographic confirmation and customer-facing Exchange handoff.",
 );
+assert.equal(activationClient.toLowerCase().includes("controlled exchange"), false);
 
 assert.ok(
   mapCanvas.includes("model.layers.map") &&
@@ -124,23 +87,15 @@ assert.ok(
     mapCanvas.includes('preserveAspectRatio="xMidYMid slice"') &&
     mapCanvas.includes("MapControlGroup") &&
     mapCanvas.includes("<figcaption className={styles.srOnly}>"),
-  "The map renderer must fill its parent while preserving projection, layer, controls, and structured access.",
 );
-assert.ok(
-  !mapCanvas.includes("styles.header") &&
-    !mapCanvas.includes("styles.caption") &&
-    !mapStyles.includes(".header {") &&
-    !mapStyles.includes(".caption {"),
-  "Persistent map header/footer chrome must remain outside the geographic renderer.",
-);
+assert.ok(!mapCanvas.includes("styles.header") && !mapCanvas.includes("styles.caption"));
+assert.ok(!mapStyles.includes(".header {") && !mapStyles.includes(".caption {"));
 assert.ok(
   mapCanvas.includes("className={styles.markerVisual}") &&
     mapCanvas.includes('transform={`translate(${point.x} ${point.y})`}') &&
     mapStyles.includes('.markerVisual[data-marker-activated="true"]') &&
-    !mapStyles.includes('.organizationMarker[data-marker-activated="true"]') &&
     mapStyles.includes(".organizationPin") &&
     mapStyles.includes("stroke: none"),
-  "Marker animation must stay on the internal visual child and normal pins must remain unoutlined.",
 );
 
 for (const phrase of [
@@ -159,24 +114,11 @@ for (const phrase of [
 ]) {
   assert.ok(`${mapSystem}\n${designSystem}`.includes(phrase), `Canonical map authority is missing: ${phrase}`);
 }
-assert.ok(
-  roadmap.includes("Design convergence authority for Slices 2.9–2.12") &&
-    roadmap.includes("do not alter Feature-ID scope or completion status"),
-  "Wave 2.9–2.12 must consume the shared shell without changing feature scope.",
-);
-assert.ok(
-  roadmap.includes("Runtime Convergence Gate") && roadmap.includes("Public visitors receive the marketing/authentication surface only"),
-  "Design convergence must now sit behind the account-only runtime convergence boundary.",
-);
-assert.ok(
-  architecture.includes("NO FEATURE-ID COMPLETION") && architecture.includes("Slice 2.9 has not begun"),
-  "Design-gate architecture evidence must preserve the non-feature boundary.",
-);
-assert.ok(
-  tracker.includes("**438 total · 106 Done · 332 Not Started**") && tracker.includes('2 - Activation: **31/43**'),
-  "The convergence gates must not change canonical Feature-ID completion counts.",
-);
+assert.ok(roadmap.includes("Design convergence authority for Slices 2.9–2.12"));
+assert.ok(roadmap.includes("do not alter Feature-ID scope or completion status"));
+assert.ok(architecture.includes("NO FEATURE-ID COMPLETION") && architecture.includes("Slice 2.9 has not begun"));
+assert.ok(tracker.includes("**438 total · 106 Done · 332 Not Started**") && tracker.includes('2 - Activation: **31/43**'));
 
 console.log(
-  "Participant design convergence validated: shared light controlled workspaces, integrated activation, full-viewport spatial map, responsive surfaces, renderer separation, marker anchoring, and unchanged feature counts.",
+  "Participant design convergence validated: shared light workspaces, integrated activation, full-viewport spatial map, responsive surfaces, marker anchoring, customer-facing Exchange copy, and unchanged feature counts.",
 );

@@ -4,43 +4,21 @@
 
 ## Purpose
 
-Turn the already-built Wave 2.1–2.8 domain and persistence capabilities into one authoritative runtime before Slices 2.9–2.12 add acquisition continuity, orientation, first value and OPEN.
-
-This gate does not add or mark complete any tracker Feature ID. It repairs composition, routing, authentication/session behavior, surface truthfulness and source-description drift so existing account, geography, organization, location, profile, marker and administrator authorities govern the live application.
+Compose the Wave 2 account, geography, organization, location, profile, marker and administrator authorities into one resumable runtime before later acquisition, orientation, first-value and OPEN work.
 
 ## Public versus account boundary
 
-RFxchange is free to join, but the RFxchange application is not public browsing infrastructure. **Public visitors receive the marketing/authentication surface only.**
+Public visitors receive marketing, authentication and required legal documents only. Participant and administrative surfaces require a trusted RFxchange session and the appropriate persisted lifecycle, membership, permissions and restrictions.
 
-Canonical rule:
-
-```text
-PUBLIC
-/         marketing
-/join     create an RFxchange account / begin activation
-/signin   authenticate an existing account
-+ public legal/marketing documents as required
-
-AUTHENTICATED APPLICATION
-participant activation and workspaces
-
-AUTHORIZED ADMINISTRATION
-authenticated platform administrator + explicit permission + active scoped grant
-```
-
-A visitor without an account/session must never receive the participant shell, functional Exchange map, Account workspace, organization workspace, operational tools or administrative UI by typing a URL. Protected participant routes redirect to Sign In; after authentication the persisted lifecycle decides whether the user resumes activation or enters the controlled Exchange.
-
-There is no anonymous functional `/explore` or map-preview exception. Marketing may show static screenshots/illustrations, but those are not application surfaces.
-
-A Free account is a real RFxchange account. Payment is not the base application-access gate; future commercial plans add entitlements to an authenticated participant account.
+A Free account is a real RFxchange account. Payment is not the base application-access gate.
 
 ## Canonical runtime order
 
 ```text
 Public Join
 → Firebase account + first RFxchange user
-→ required policy acceptance position
-→ home locality selection
+→ policy acceptance
+→ Census-authoritative home locality typeahead
 → orientation position
 → find / claim / create organization
 → organization authority
@@ -49,209 +27,96 @@ Public Join
 → Profile Complete
 → real marker activation
 → Organization Activated
-→ controlled Exchange
+→ Exchange entry
 → future orientation/first-value completion
 → future OPEN
 ```
 
-The runtime order is independent of the order in which Wave 2 slices were engineered.
+## Authentication and organization setup
 
-## Firebase and RFxchange session boundary
+Registration is organization-centered, but authentication and organization setup are distinct concerns.
 
-The browser uses Firebase Authentication to register/sign in and obtain a Firebase ID token. The server verifies that credential and exchanges it for the HTTP-only RFxchange session cookie. Protected activation mutations and participant/admin routes resolve the RFxchange session rather than trusting browser state.
+- Registration collects organization name, first-user name, relationship, email and password.
+- Returning sign-in collects email and password only.
+- An authenticated account with no activation context is routed to a separate **Begin organization setup** state.
+- Organization name is never requested as a sign-in credential or recovery field.
 
-The ID-token → session-cookie exchange requires a short-lived same-site CSRF nonce. The browser never receives Firebase Admin credentials, Firestore write authority, organization authority, geography authority, marker authority or administrator authority.
-
-Local Next.js development uses the configured real Firebase project by default. The Firebase Auth emulator is used only when `NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL` is explicitly configured.
-
-## Canonical participant route resolution
-
-A valid session is necessary but not sufficient to render a participant workspace. Protected runtime resolution must verify, server-side:
-
-1. valid RFxchange session;
-2. persisted activation/lifecycle state;
-3. active organization membership;
-4. requested organization matches the authorized organization context;
-5. no active organization or membership restriction.
-
-Anonymous requests return to Sign In. Authenticated users who have not reached `controlled-platform` resume `/join`. Restricted/suspended/terminated states override otherwise eligible lifecycle progression without deleting the underlying lifecycle state.
-
-Direct URL navigation can never grant access or skip activation.
+The browser exchanges a Firebase ID token for an HTTP-only RFxchange session cookie through the CSRF-protected server boundary.
 
 ## Resumable activation state
 
-`ActivationJourneyContext` is server-managed orchestration state keyed to the trusted RFxchange user. It preserves only information needed to resume activation, including provisional organization identity, descriptive organization relationship, early policy-acceptance position, organization/membership references and an in-progress location draft.
+`ActivationJourneyContext` is server-managed orchestration state keyed to the trusted RFxchange user. It preserves provisional organization identity, descriptive organization relationship, website disposition/URL, phone, policy position, organization/membership references and any in-progress location draft.
 
-The organization relationship (`owner`, `executive-officer`, `employee`, `authorized-representative`, `advisor-contractor`, `other`) is descriptive onboarding metadata only. It never grants membership, account control or permissions.
+This context carries information forward but cannot grant geography authority, organization authority, Profile Complete, marker activation or application access.
 
-Canonical records remain authoritative. Activation context cannot grant access and is never substituted for the `AccessLifecycleRecord`, geography selection, organization resolution, membership/permission authorization, confirmed location, Profile Complete or marker activation.
+## Locality typeahead
 
-## Organization-centered signup and durable tenant timing
+The home-locality field is an accessible combobox:
 
-The participant joins on behalf of an organization from the first registration screen; RFxchange does not create a usable detached individual participant account.
+- suggestions begin after at least two characters;
+- requests are debounced and stale requests are cancelled;
+- keyboard navigation supports Arrow Up/Down, Enter and Escape;
+- results expose locality name, state, geography type and FIPS identity;
+- short-lived server caching reduces repeated Census directory work; and
+- the selected Census reference is resolved again server-side before persistence.
 
-The phrase “create organization account” describes the user intent, not premature durable tenant creation. The runtime first records provisional organization context, then resolves/searches the entity. A durable new organization tenant is created only after duplicate/entity-resolution safeguards and identity-security requirements pass. Existing organizations enter the authority-claim path instead.
+## Organization resolution and identity carry-forward
 
-This reconciles the original organization-first journey with the safer current identity architecture.
+Organization resolution persists website disposition, normalized website URL and optional phone before search/create/claim. Domain matching derives from the normalized URL.
 
-## Policy acceptance position
+Essential registration consumes this persisted seed and the authenticated user's name/email. It does not ask the participant to recreate previously supplied organization information.
 
-The canonical User Journey places Terms / Privacy / Conduct acceptance before geography and before organization membership exists. The existing canonical legal acknowledgement model is organization/membership-scoped. This gate therefore captures the early acceptance position in resumable activation context without fabricating a versioned legal-document record.
+## Essential registration
 
-The future OPEN gate must re-read and require current canonical Terms, Platform Rules and Privacy acknowledgements. The early integration acceptance cannot satisfy `EDU-010` by itself.
+Essential registration collects only:
 
-## Orientation position
+- missing website disposition for legacy/incomplete journeys;
+- contact organization title and public-contact choice;
+- service/product/function kind;
+- controlled capability category;
+- required Other category when applicable;
+- specific capability; and
+- capability description.
 
-Slices 2.10 and 2.11 own the full three-organization interactive orientation. Until those slices are implemented, activation provides a clearly labeled bridge at the correct runtime position after home-locality selection and before organization resolution.
+It does not collect organization type, participation roles or business objectives.
 
-Acknowledging the bridge does not complete `EDU-001`–`EDU-008`, persist tutorial completion, or satisfy OPEN. When 2.10/2.11 merge, the real orientation replaces the bridge without reordering onboarding.
+Every activated organization can both issue and respond to opportunities. Resource-provider status is separately applied for and administratively approved.
 
-## Organization resolution and authority
+## Profile Complete and marker
 
-Organization identity is searched/resolved before a new tenant is created.
+Profile Complete requires durable identity, website disposition, main contact, meaningful categorized capability, service geography, valid visibility and confirmed location.
 
-For an existing organization, selection creates/continues the authority workflow and never grants management access. Activation pauses until legitimate evidence or administrative review establishes the relationship.
+It does not require organization type, participation role, business objective, paid status, Verification or provider status.
 
-For a participant-created organization, the organization is created only after safeguards pass; the authenticated, email-verified creator is established as the initial primary administrator through the canonical membership/authorization path. This is not Organization Verification and awards no credibility state.
+When Profile Complete is active, marker eligibility is recalculated through the existing authority, geography, location, restriction and marker contracts.
 
-Email verification is required before the organization is actually created/claimed so identity-security failure cannot leave a half-created authority relationship.
+## Customer-facing terminology
 
-## Location and service geography
-
-Home-locality selection calls the server-authorized geography service; browser/map state cannot grant geography authority.
-
-Location capture uses the authorized primary geography, geocoding and authoritative boundary validation. The participant confirms the candidate map position.
-
-Physical location, public precision and service geography remain separate concepts. For minimum low-friction activation, the confirmed home locality initializes the first service geography. The UI must disclose that assumption. Later profile enrichment can expand/refine service territory without changing the organization's home location.
-
-## Spatial activation background and camera progression
-
-The first account-creation screen remains map-free. Once Firebase account creation and RFxchange session exchange produce a server-recognized activation journey, the Exchange map becomes the edge-to-edge background beneath the activation overlays.
-
-The visual sequence is:
-
-```text
-Regional Ambient
-→ Locality Ambient after authoritative home-locality selection
-→ Organization Home after active marker + controlled-platform authorization
-```
-
-Regional and locality scenes use a 225-second orbit and 60-degree pitch. Locality zoom is calculated by fitting the authoritative locality bounds to the available viewport after overlay-aware padding.
-
-The Organization Home scene uses a 225-second orbit, 75-degree pitch and zoom 16 centered on the privacy-safe projected organization marker.
-
-Activation forms use semi-transparent glass overlays. The map must remain edge-to-edge beneath those overlays rather than being embedded inside the location card.
-
-The participant may disable ambient rotation from Account. The browser motion preference changes camera behavior only and cannot alter any activation or authorization state. `prefers-reduced-motion: reduce` suppresses animation regardless of the account preference.
-
-When active marker and controlled-platform authorization are confirmed, the activation overlays fade, the camera flies to the organization marker, and the runtime hands off to the authenticated workspace. The authorized home-scene endpoint must re-resolve organization membership, location, geography, marker activation, boundary and privacy projection rather than trusting browser state.
-
-The complete camera, marker, and regression contract is in `docs/architecture/SPATIAL_ONBOARDING_HOME_ORBIT.md`.
-
-## Canonical participation roles and objectives
-
-Activation must consume the domain vocabularies rather than maintain UI-local subsets.
-
-Participation roles are: Business, Supplier, Buyer, Opportunity/RFx Issuer, Government, EDO, Resource Provider, Chamber/Association, Lender, University/Educational Institution, Nonprofit and Other.
-
-Business objectives include finding/issuing opportunities, finding customers/suppliers/teammates, **sending and receiving referrals**, finding resources/support and exploring the local network.
-
-The current domain intentionally represents referral intent as one `send-receive-referrals` objective. Future workflow behavior may distinguish send versus receive actions, but activation must not omit referral intent.
-
-## Essential profile and marker
-
-Essential registration calls the canonical profile service. A meaningful capability, organization identity/contact, participation roles, business objectives, confirmed location/visibility and service geography drive the derived Profile Complete state.
-
-When Profile Complete is active, the server recalculates marker eligibility. The marker activates only if authority, location, geography participation, completion and restriction policies allow it.
-
-After a real active marker exists, lifecycle advances only through:
+Internal lifecycle terminology remains:
 
 ```text
 organization-registered
 → organization-activated
 → controlled-platform
+→ open-platform
 ```
 
-Terminology is deliberate:
+Customer-facing surfaces do not say “controlled Exchange.” Activation success says the organization is ready, welcomes the participant to RFxchange, and offers **Enter the Exchange**.
 
-- **Organization Activated**: the real marker/activation gate passed.
-- **Controlled Exchange**: the authenticated participant may enter the currently released workspace.
-- **OPEN**: later education/first-value/legal requirements have been satisfied; Slice 2.12 owns this release.
+## Official Resource Provider boundary
 
-Internal `nextStep: "complete"` means registration-to-marker activation is complete; it does not mean OPEN.
+Official Resource Provider is governed by Slice 3.6. The application occurs after activation, collects provider-specific information/evidence, and requires an auditable administrator decision. Registration cannot self-award provider status.
 
-## Account workspace
+## Acceptance
 
-The participant Account destination must resolve the authenticated organization and display only real persisted state currently implemented. A production navigation item may be real, clearly disabled as later work, or omitted; it may never lead to a fixture/prototype masquerading as live data.
+The integration gate must prove:
 
-The Account workspace owns the participant-facing Ambient map rotation preference. This preference defaults on, may be toggled without changing organization state, and applies to activation, locality and organization-home ambient scenes.
-
-Later Network, RFx, Trust, Commercial and expanded administration capabilities remain governed by their approved slices.
-
-## Administrative boundary
-
-Every `/admin/*` runtime surface requires:
-
-```text
-valid RFxchange session
-+ persisted PlatformAdministratorAccount bound to the authenticated provider subject
-+ passing privileged administrator security state
-+ explicit catalogued permission
-+ active matching GLOBAL / GEOGRAPHY / ORGANIZATION / CASE scoped grant
-+ satisfied grant conditions where applicable
-```
-
-A role label or boolean `isAdmin` is never sufficient. Organization 360 is organization-scoped; geography-scoped claim views may only return records inside the authorized geography. Private evidence and sensitive fields require their own minimum-necessary permissions.
-
-## Reference and preview surfaces
-
-Deterministic preview data/components may remain in source code for automated tests, design evidence and explicitly development-only tooling. They must not be reachable as production participant/admin runtime pages.
-
-Legacy `/organization-resolution`, `/organization-authority`, `/organization-location` and `/organization-activation` URLs are compatibility redirects into the canonical activation/account/workspace state rather than independent preview experiences.
-
-Production runtime must not depend on Harborlight, `200 High St`, Portsmouth preview organizations or equivalent fixture identity.
-
-## Runtime convergence acceptance
-
-The gate must prove both positive and negative paths.
-
-Positive path:
-
-```text
-marketing
-→ Join
-→ Firebase registration
-→ RFxchange session
-→ regional spatial background
-→ policies
-→ geography
-→ locality camera fit/orbit
-→ organization resolution/authority
-→ confirmed location
-→ essential profile
-→ real persistent marker active
-→ activation overlays fade
-→ organization-home camera flight/orbit
-→ controlled Exchange
-→ logout
-→ returning Sign In
-→ same RFxchange identity / organization / lifecycle
-```
-
-Negative paths include:
-
-- anonymous participant URL → Sign In, never participant UI;
-- account-creation form before session → no operational map;
-- incomplete authenticated account → exact activation continuation, never workspace bypass;
-- wrong organization identifier → canonical authorized organization context;
-- normal participant → admin URL denied;
-- scoped administrator → out-of-scope organization/geography denied;
-- restricted participant → normal workspace access denied;
-- legacy/reference route → canonical runtime redirect or unavailable production surface;
-- map viewport, orbit target or marker popup → never geography/organization authority.
-
-## Wave 2 consequence
-
-Passing this gate does not complete Wave 2. Slices 2.9–2.12 still own acquisition continuity, full orientation, first value and OPEN. No ACQ/EDU, Network, RFx Core, Trust or Commercial feature is marked Done by runtime convergence work.
-
-The gate is the prerequisite that makes those remaining slices safe to build on one coherent application instead of disconnected feature surfaces.
+- returning sign-in contains only email/password;
+- an authenticated user without activation can begin organization setup separately;
+- locality suggestions debounce, cache and remain server-authoritative;
+- organization website/phone survive refresh and carry into the profile;
+- activation renders/submits no participation roles or business objectives;
+- Profile Complete excludes organization-type and participation-role requirements;
+- Other capability category requires custom text;
+- participant copy contains no “controlled Exchange”; and
+- existing marker activation and protected Exchange routing remain intact.
