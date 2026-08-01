@@ -2,7 +2,20 @@ import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { ServerSessionError } from "@/src/application/auth/server-session";
-import { updateActivationJourneyContext } from "@/src/domain/onboarding/model";
+import {
+  parseAcquisitionContextToken,
+} from "@/src/application/acquisition/acquisition-context";
+import { accessJourneyId } from "@/src/domain/lifecycle/model";
+import type { BoundAcquisitionContext } from "@/src/domain/acquisition/model";
+import {
+  activationJourneyIdForUser,
+  updateActivationJourneyContext,
+} from "@/src/domain/onboarding/model";
+import {
+  acquisitionCookieOptions,
+  createServerAcquisitionContextService,
+  RFXCHANGE_ACQUISITION_COOKIE_NAME,
+} from "@/src/infrastructure/acquisition/runtime";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
 import { FirestoreActivationJourneyContextRepository } from "@/src/infrastructure/firestore/activation-journey";
@@ -69,6 +82,28 @@ export async function POST(request: NextRequest) {
     const existingContext = await contexts.getByUserId(issued.context.user.id);
     const provisionalOrganizationName = body.provisionalOrganizationName?.trim() || "";
     let state = null;
+    let acquisitionStatus: "none" | "bound" | "rejected" = "none";
+    let boundAcquisition: BoundAcquisitionContext | null = null;
+    let acquisitionAttached = false;
+    const acquisitionCookie = request.cookies.get(RFXCHANGE_ACQUISITION_COOKIE_NAME)?.value;
+    if (acquisitionCookie) {
+      const token = parseAcquisitionContextToken(acquisitionCookie);
+      if (!token) {
+        acquisitionStatus = "rejected";
+      } else {
+        try {
+          boundAcquisition = await createServerAcquisitionContextService().bind({
+            token,
+            userId: issued.context.user.id,
+            accessJourneyId: accessJourneyId(activationJourneyIdForUser(issued.context.user.id)),
+          });
+          acquisitionStatus = "bound";
+        } catch {
+          // Acquisition context is navigation metadata, never a reason to deny legitimate sign-in.
+          acquisitionStatus = "rejected";
+        }
+      }
+    }
 
     if (existingContext || provisionalOrganizationName) {
       const activation = createServerActivationJourneyService();
@@ -83,10 +118,20 @@ export async function POST(request: NextRequest) {
           }));
         }
       }
+      if (boundAcquisition) {
+        const current = await contexts.getByUserId(issued.context.user.id);
+        if (current) {
+          await contexts.save(updateActivationJourneyContext(current, {
+            acquisitionContext: boundAcquisition,
+            now: new Date().toISOString(),
+          }));
+          acquisitionAttached = true;
+        }
+      }
       state = await activation.state(issued.context);
     }
 
-    const response = NextResponse.json({ state });
+    const response = NextResponse.json({ state, acquisitionStatus });
     response.cookies.set(RFXCHANGE_SESSION_COOKIE_NAME, issued.cookie.value, {
       httpOnly: issued.cookie.httpOnly,
       secure: issued.cookie.secure,
@@ -98,6 +143,12 @@ export async function POST(request: NextRequest) {
       ...csrfCookieOptions(),
       maxAge: 0,
     });
+    if (acquisitionCookie && (acquisitionAttached || acquisitionStatus === "rejected")) {
+      response.cookies.set(RFXCHANGE_ACQUISITION_COOKIE_NAME, "", {
+        ...acquisitionCookieOptions(),
+        maxAge: 0,
+      });
+    }
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Session exchange failed.";
@@ -112,6 +163,10 @@ export async function DELETE() {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
+    maxAge: 0,
+  });
+  response.cookies.set(RFXCHANGE_ACQUISITION_COOKIE_NAME, "", {
+    ...acquisitionCookieOptions(),
     maxAge: 0,
   });
   return response;

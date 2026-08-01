@@ -37,6 +37,8 @@ export const FIRESTORE_COLLECTIONS = {
   adminPermissionGrants: "adminPermissionGrants",
   backgroundJobs: "backgroundJobs",
   backgroundJobEvents: "backgroundJobEvents",
+  acquisitionContexts: "acquisitionContexts",
+  acquisitionContextEvents: "acquisitionContextEvents",
 } as const;
 
 export type FirestoreCollectionKey = keyof typeof FIRESTORE_COLLECTIONS;
@@ -352,6 +354,22 @@ export const FIRESTORE_COLLECTION_CONVENTIONS: Readonly<
     collection: FIRESTORE_COLLECTIONS.backgroundJobEvents,
     documentIdSource: "id",
     scope: "platform-scoped",
+    organizationIdRequired: false,
+    appendOnly: true,
+    mutable: false,
+  }),
+  acquisitionContexts: Object.freeze({
+    collection: FIRESTORE_COLLECTIONS.acquisitionContexts,
+    documentIdSource: "id",
+    scope: "mixed-scope",
+    organizationIdRequired: false,
+    appendOnly: false,
+    mutable: true,
+  }),
+  acquisitionContextEvents: Object.freeze({
+    collection: FIRESTORE_COLLECTIONS.acquisitionContextEvents,
+    documentIdSource: "id",
+    scope: "mixed-scope",
     organizationIdRequired: false,
     appendOnly: true,
     mutable: false,

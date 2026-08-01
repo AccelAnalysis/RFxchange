@@ -1,4 +1,8 @@
 import type { AuthenticationAccountSecurityReader } from "../auth/authorize-organization-operation.ts";
+import type {
+  AcquisitionIntentKind,
+  AcquisitionSourceChannel,
+} from "../../domain/acquisition/model.ts";
 import type { AuthenticatedServerContext } from "../auth/server-session.ts";
 import type { PrimaryOperatingGeographyService } from "../geography/primary-operating-geography.ts";
 import type { OrganizationMarkerActivationService } from "../geography/organization-marker-activation.ts";
@@ -111,6 +115,13 @@ export interface ActivationJourneyState {
   }> | null;
   readonly controlledPlatformUrl: string | null;
   readonly orientationImplementationPending: boolean;
+  readonly acquisitionContext: Readonly<{
+    readonly id: string;
+    readonly kind: AcquisitionIntentKind;
+    readonly subjectReference: string | null;
+    readonly sourceChannel: AcquisitionSourceChannel;
+    readonly status: "preserved";
+  }> | null;
 }
 
 export interface ActivationJourneyDependencies {
@@ -784,9 +795,20 @@ export class ActivationJourneyService {
         : null,
       controlledPlatformUrl:
         lifecycle.state === "controlled-platform" && resolvedOrganizationId
-          ? `/geography/canvas?organizationId=${encodeURIComponent(String(resolvedOrganizationId))}`
+          ? activation.acquisitionContext && activation.acquisitionContext.intent.kind !== "direct"
+            ? "/acquisition/continue"
+            : `/geography/canvas?organizationId=${encodeURIComponent(String(resolvedOrganizationId))}`
           : null,
       orientationImplementationPending: true,
+      acquisitionContext: activation.acquisitionContext
+        ? Object.freeze({
+            id: activation.acquisitionContext.id,
+            kind: activation.acquisitionContext.intent.kind,
+            subjectReference: activation.acquisitionContext.intent.subjectReference,
+            sourceChannel: activation.acquisitionContext.source.channel,
+            status: "preserved" as const,
+          })
+        : null,
     });
   }
 

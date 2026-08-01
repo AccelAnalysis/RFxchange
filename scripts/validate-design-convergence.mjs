@@ -179,10 +179,13 @@ assert.ok(
   "Design-gate architecture evidence must preserve the non-feature boundary.",
 );
 assert.ok(
-  tracker.includes("**438 total · 106 Done · 332 Not Started**") && tracker.includes('2 - Activation: **31/43**'),
-  "The convergence gates must not change canonical Feature-ID completion counts.",
+  tracker.includes("**438 total · 108 Done · 330 Not Started**") &&
+    tracker.includes('2 - Activation: **33/43**') &&
+    tracker.includes("[x] `ACQ-002`") &&
+    tracker.includes("[x] `ACQ-003`"),
+  "Design convergence must remain intact while later slices advance canonical Feature-ID counts.",
 );
 
 console.log(
-  "Participant design convergence validated: shared light controlled workspaces, integrated activation, full-viewport spatial map, responsive surfaces, renderer separation, marker anchoring, and unchanged feature counts.",
+  "Participant design convergence validated: shared light controlled workspaces, integrated activation, full-viewport spatial map, responsive surfaces, renderer separation, marker anchoring, and current canonical feature counts.",
 );

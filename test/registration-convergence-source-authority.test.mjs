@@ -70,7 +70,7 @@ test("registration convergence remains aligned across runtime and canonical auth
   );
   assert.ok(roadmap.includes("post-orientation first-value selection"));
   assert.ok(
-    roadmap.includes("Activation Profile Website Carry-Forward Repair — PR #99"),
+    roadmap.includes("Activation Profile Website Carry-Forward Repair — MERGED PR #99"),
   );
   assert.ok(
     tracker.includes(
@@ -79,10 +79,10 @@ test("registration convergence remains aligned across runtime and canonical auth
   );
   assert.ok(
     tracker.includes(
-      "Activation Profile Website Carry-Forward Repair — PR #99; no Feature IDs",
+      "Activation Profile Website Carry-Forward Repair — MERGED PR #99; no Feature IDs",
     ),
   );
-  assert.ok(tracker.includes("31/43 Activation"));
+  assert.ok(tracker.includes("33/43 Activation"));
   assert.ok(tracker.includes("PR #75 + PR #98 correction"));
   assert.ok(slice212.includes("It does not depend on `ORG-011`"));
   assert.ok(

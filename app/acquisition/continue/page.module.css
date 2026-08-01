@@ -1,0 +1,129 @@
+.wrap {
+  width: min(74rem, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 7rem) 0;
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  color: #3f7655;
+  font-size: 0.76rem;
+  font-weight: 780;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.wrap h1 {
+  max-width: 15ch;
+  margin: 0;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(2.7rem, 7vw, 6rem);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.lede {
+  max-width: 48rem;
+  margin: 1.5rem 0 2.5rem;
+  color: #566057;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.card {
+  max-width: 54rem;
+  padding: clamp(1.5rem, 4vw, 2.8rem);
+  border: 1px solid rgb(39 61 46 / 15%);
+  border-radius: 1.2rem;
+  background: rgb(255 253 247 / 78%);
+  box-shadow: 0 1.3rem 4rem rgb(31 43 34 / 10%);
+}
+
+.card > span {
+  color: #8d6d20;
+  font-size: 0.72rem;
+  font-weight: 780;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.card h2 {
+  margin: 0.65rem 0 1rem;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 500;
+}
+
+.card p {
+  color: #4f5850;
+  line-height: 1.65;
+}
+
+.card dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.8rem 0;
+}
+
+.card dl div {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.card dt,
+.card small {
+  color: #7b827b;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.card small {
+  display: block;
+  margin-top: 0.45rem;
+}
+
+.card dd {
+  margin: 0;
+  font-weight: 680;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.6rem;
+}
+
+.actions a {
+  border-radius: 999px;
+  padding: 0.85rem 1.2rem;
+  font-weight: 720;
+  text-decoration: none;
+}
+
+.primary {
+  background: #284c37;
+  color: #fffaf0;
+}
+
+.secondary {
+  border: 1px solid #284c37;
+  color: #284c37;
+}
+
+@media (max-width: 620px) {
+  .card dl {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    display: grid;
+  }
+
+  .actions a {
+    text-align: center;
+  }
+}

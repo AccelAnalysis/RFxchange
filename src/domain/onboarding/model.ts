@@ -1,5 +1,6 @@
 import type { OrganizationId } from "../organizations/model.ts";
 import type { OrganizationMembershipId, UserId } from "../users/model.ts";
+import type { BoundAcquisitionContext } from "../acquisition/model.ts";
 
 export const ORGANIZATION_RELATIONSHIPS = [
   "owner",
@@ -41,6 +42,8 @@ export interface ActivationJourneyContext {
    * the same website or phone twice.
    */
   readonly organizationIdentitySeed: ActivationOrganizationIdentitySeed;
+  /** Server-issued navigation intent, bound to this user and access journey. Never authority. */
+  readonly acquisitionContext: BoundAcquisitionContext | null;
   readonly legalAcceptance: ActivationLegalAcceptance | null;
   /**
    * Temporary bridge only. It proves the user saw the canonical orientation position in the
@@ -151,6 +154,7 @@ export function createActivationJourneyContext(input: Readonly<{
       ? organizationRelationship(input.organizationRelationship)
       : null,
     organizationIdentitySeed: identitySeed(input.organizationIdentitySeed),
+    acquisitionContext: null,
     legalAcceptance: null,
     orientationBridgeAcknowledgedAt: null,
     organizationId: null,
@@ -171,6 +175,7 @@ export function updateActivationJourneyContext(
       websiteUrl?: string | null;
       phone?: string | null;
     }>;
+    acquisitionContext?: BoundAcquisitionContext | null;
     legalAcceptance?: ActivationLegalAcceptance | null;
     orientationBridgeAcknowledgedAt?: string | null;
     organizationId?: OrganizationId | null;
@@ -180,6 +185,15 @@ export function updateActivationJourneyContext(
   }>,
 ): ActivationJourneyContext {
   const now = timestamp(input.now);
+  if (
+    input.acquisitionContext &&
+    (
+      input.acquisitionContext.boundUserId !== current.userId ||
+      String(input.acquisitionContext.boundAccessJourneyId) !== current.accessJourneyId
+    )
+  ) {
+    throw new Error("Acquisition context belongs to another participant journey.");
+  }
   return Object.freeze({
     ...current,
     ...(input.provisionalOrganizationName !== undefined
@@ -200,6 +214,17 @@ export function updateActivationJourneyContext(
       : {}),
     ...(input.organizationIdentitySeed !== undefined
       ? { organizationIdentitySeed: identitySeed(input.organizationIdentitySeed) }
+      : {}),
+    ...(input.acquisitionContext !== undefined
+      ? {
+          acquisitionContext: input.acquisitionContext
+            ? Object.freeze({
+                ...input.acquisitionContext,
+                intent: Object.freeze({ ...input.acquisitionContext.intent }),
+                source: Object.freeze({ ...input.acquisitionContext.source }),
+              })
+            : null,
+        }
       : {}),
     ...(input.legalAcceptance !== undefined
       ? { legalAcceptance: input.legalAcceptance }

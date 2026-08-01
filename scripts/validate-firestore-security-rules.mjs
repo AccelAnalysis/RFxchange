@@ -61,6 +61,7 @@ const appendOnlyCollections = [
   "retentionAssignments",
   "adminPermissionGrants",
   "backgroundJobEvents",
+  "acquisitionContextEvents",
 ];
 
 for (const collection of appendOnlyCollections) {

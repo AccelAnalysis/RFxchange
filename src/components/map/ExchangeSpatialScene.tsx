@@ -89,7 +89,7 @@ const VIEW_MODE_OPTIONS: readonly Readonly<{
 
 const EMPTY_FEATURE_COLLECTION = Object.freeze({
   type: "FeatureCollection" as const,
-  features: Object.freeze([]) as readonly never[],
+  features: [] as never[],
 });
 
 function copyRing(ring: readonly (readonly [number, number])[]): number[][] {
