@@ -137,6 +137,7 @@ These product abilities do not depend on a self-declared organization role.
 - organization type, participation roles, and business objectives do not block Profile Complete;
 - activation does not submit role/objective arrays;
 - organization website and phone entered during resolution survive refresh and populate the durable profile;
+- omitting previously confirmed website fields during Profile Complete must preserve the persisted website disposition and URL;
 - authenticated user name/email populate the default organization contact;
 - a controlled capability category is required;
 - Other requires a custom category;

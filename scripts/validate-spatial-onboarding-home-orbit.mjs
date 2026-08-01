@@ -31,6 +31,16 @@ assert.match(files.scene, /VIEW_MODE_OPTIONS/);
 
 assert.match(files.sceneCss, /position: fixed/);
 assert.match(files.sceneCss, /inset: 0/);
+assert.match(
+  files.sceneCss,
+  /width: min\(520px, calc\(50vw - 72px\)\)/,
+  "The desktop search panel must not cover the viewport-centered organization marker.",
+);
+assert.match(
+  files.sceneCss,
+  /max-height: min\(calc\(50vh - 112px\), calc\(100vh - 104px\)\)/,
+  "The mobile search panel must preserve a visible center lane for the organization marker.",
+);
 
 assert.match(files.preference, /rfxchange:map-rotation-enabled/);
 assert.match(files.preference, /MAP_ROTATION_PREFERENCE_EVENT/);

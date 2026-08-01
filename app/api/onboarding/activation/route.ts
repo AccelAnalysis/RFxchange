@@ -15,6 +15,11 @@ import {
 import { synchronizeActivationContextFromAuthority } from "@/src/infrastructure/onboarding/activation-context-sync";
 import { createServerActivationJourneyService } from "@/src/infrastructure/onboarding/runtime";
 
+import {
+  parseSaveProfileBody,
+  parseWebsiteIdentityFields,
+} from "./request-boundary";
+
 const localityDirectory = new CensusTigerLocalityDirectory();
 const localitySuggestionCache = new Map<string, Readonly<{ expiresAt: number; candidates: readonly CensusLocalityCandidate[] }>>();
 const LOCALITY_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -124,8 +129,7 @@ export async function POST(request: NextRequest) {
         const displayName = typeof body.displayName === "string" ? body.displayName : "";
         const result = await service.searchOrganizations(context, {
           displayName,
-          ...(typeof body.website === "string" ? { website: body.website } : {}),
-          websiteNotApplicable: body.websiteNotApplicable === true,
+          ...parseWebsiteIdentityFields(body),
           ...(typeof body.phone === "string" && body.phone.trim() ? { phone: body.phone } : {}),
         });
         return NextResponse.json({
@@ -149,8 +153,7 @@ export async function POST(request: NextRequest) {
         const state = await service.createOrganization(context, {
           displayName,
           reviewedCandidateOrganizationIds,
-          ...(typeof body.website === "string" ? { website: body.website } : {}),
-          websiteNotApplicable: body.websiteNotApplicable === true,
+          ...parseWebsiteIdentityFields(body),
           ...(typeof body.phone === "string" && body.phone.trim() ? { phone: body.phone } : {}),
         });
         return NextResponse.json({ state });
@@ -208,21 +211,7 @@ export async function POST(request: NextRequest) {
       }
       case "save-profile": {
         await synchronizedState(service, context);
-        const state = await service.saveProfile(context, {
-          ...(typeof body.website === "string" ? { website: body.website } : {}),
-          websiteNotApplicable: body.websiteNotApplicable === true,
-          contactRole: typeof body.contactRole === "string" ? body.contactRole : "",
-          contactPubliclyVisible: body.contactPubliclyVisible === true,
-          capabilityKind: typeof body.capabilityKind === "string" ? body.capabilityKind : "service",
-          capabilityCategory:
-            typeof body.capabilityCategory === "string" ? body.capabilityCategory : "",
-          ...(typeof body.capabilityOtherCategory === "string" && body.capabilityOtherCategory.trim()
-            ? { capabilityOtherCategory: body.capabilityOtherCategory }
-            : {}),
-          capabilityName: typeof body.capabilityName === "string" ? body.capabilityName : "",
-          capabilityDescription:
-            typeof body.capabilityDescription === "string" ? body.capabilityDescription : "",
-        });
+        const state = await service.saveProfile(context, parseSaveProfileBody(body));
         return NextResponse.json({ state });
       }
       case "refresh": {
