@@ -46,7 +46,8 @@
   z-index: 20;
   top: 88px;
   left: 18px;
-  width: min(520px, calc(100vw - 36px));
+  /* Keep the viewport center and its organization marker outside this persistent panel. */
+  width: min(520px, calc(50vw - 72px));
   max-height: min(calc(100vh - 116px), 650px);
   padding: 12px;
   overflow: auto;
@@ -261,7 +262,8 @@
     top: 76px;
     left: 10px;
     width: calc(100vw - 20px);
-    max-height: min(46vh, calc(100vh - 104px));
+    /* Preserve a clear center lane for the marker while retaining a scrollable search surface. */
+    max-height: min(calc(50vh - 112px), calc(100vh - 104px));
     border-radius: 16px;
   }
 
