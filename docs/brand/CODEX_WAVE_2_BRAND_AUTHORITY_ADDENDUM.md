@@ -1,179 +1,128 @@
 # Codex Wave 2 Brand Authority Addendum
 
-**Status: HOLD UNTIL PR #99 MERGES — THEN APPLY AS A NARROW CONSTRAINT TO SLICES 2.9–2.12**
+**Status: HISTORICAL — APPLIED TO COMPLETED SLICES 2.9–2.12; NO LONGER AN ACTIVE IMPLEMENTATION HOLD**
 
-## 1. Purpose
+## 1. Purpose and result
 
-This addendum constrains active Wave 2 implementation so the public acquisition, orientation, first-value, and OPEN surfaces do not introduce a new visual or messaging system before the post-Wave-2 Brand Experience Convergence Gate.
+This addendum constrained Wave 2 Slices 2.9–2.12 so public acquisition, synthetic orientation, first-value and OPEN surfaces did not introduce a competing visual or messaging system before Brand Gate B0.
 
-It does not authorize branding implementation, widen Feature-ID scope, alter dependencies, change tracker status, or permit work beyond the currently authorized slice.
+The governed slices are complete:
 
-## 2. Hard boundary
+- PR #101 — Slice 2.9 — acquisition continuity;
+- PR #102 — Slice 2.10 — orientation discovery and team formation;
+- PR #103 — Slice 2.11 — orientation response to outcome;
+- PR #104 — Slice 2.12 — first value and OPEN;
+- PR #105 — Wave 2 exit reconciliation.
 
-Do not apply this addendum to PR #99 while its configured-browser acceptance is active.
+Final Wave 2 `main` is `097b574ccce8865d4127cfe381fb0bd6199de0a5`, with **43/43 Activation** complete.
 
-PR #99 must finish against its exact accepted head without unrelated UI, CSS, map-style, marker, motion, sound, or panel-composition changes.
+This file remains as provenance and regression context. It does not authorize or constrain future work beyond the durable principles restated below. Current brand authority is `docs/brand/README.md`, `BRAND_GATE_B0_RECONCILIATION.md`, the applicable Brand Gate, and the current product slice.
 
-After PR #99 merges and dependencies are recalculated, use this addendum when beginning Slice 2.9. Continue to apply it to 2.10–2.12 one slice at a time.
+## 2. Brand direction preserved during Wave 2
 
-## 3. Canonical brand direction
+Wave 2 surfaces remained compatible with:
 
-New Wave 2 participant surfaces must remain compatible with:
-
-- **The RFxchange**
-- **A Local Business Growth Network**
-- **By Accel Analysis** as a secondary parent endorsement in governed contexts
-- **Be found. Find opportunity. Build the connection.**
-- **Visible. Connected. Actionable.**
+- **The RFxchange**;
+- **A Local Business Growth Network**;
+- **By Accel Analysis** as the secondary parent endorsement in governed contexts;
+- **Be found. Find opportunity. Build the connection.**;
+- **Visible. Connected. Actionable.**;
 - **A local market becoming visible and useful around every participating organization.**
 
-The platform should feel like a living market, not a conventional dashboard.
+The platform was required to feel like a living market rather than a conventional dashboard, without widening Wave 2 Feature-ID scope.
 
-## 4. Required implementation discipline
+## 3. Durable implementation principles
 
-For every authorized Wave 2 slice:
+The completed Wave 2 work established or preserved these principles:
 
-- consume the existing shared Participant Shell, Spatial Workspace, Operational Workspace, and responsive overlay/sheet primitives;
+- use the shared Participant Shell, Spatial Workspace, Operational Workspace and responsive overlay/sheet architecture;
 - retain Warm Ivory/light participant defaults with Exchange Black/Graphite structure;
-- use RF Gold for focus/connection, Signal Blue for intelligence/opportunity, and Growth Green only for genuine outcome/positive-resolution meaning;
-- keep typography in sentence case except short controlled eyebrows/statuses;
+- use RF Gold for focus/connection, Signal Blue for intelligence/opportunity and Growth Green only for an appropriate outcome/positive-resolution meaning;
 - use one focal task per view;
 - preserve map context where geography is relevant;
-- avoid one-off cards, navigation systems, marker styles, colors, status terms, or animation timings;
+- avoid one-off navigation systems, marker styles, colors, status terms or animation patterns;
 - preserve authoritative server/domain state over client presentation;
-- provide explicit loading, empty, success, error, permission, expired, and recovery states where the authorized slice introduces them;
-- respect reduced motion and keyboard/focus behavior;
-- preserve desktop, intermediate, and mobile composition;
-- keep future extension seams semantic rather than hard-coding raw destination URLs or arbitrary visual meaning.
+- provide explicit loading, empty, success, error, permission, expired and recovery behavior where the slice introduced the corresponding state;
+- respect reduced motion, keyboard focus and desktop/intermediate/mobile composition;
+- keep future extension seams semantic rather than fabricating later-wave destinations.
 
-## 5. Evidence integrity
+These principles now live under the canonical Brand Experience System and implemented design baseline.
 
-Do not advertise or display as live:
+## 4. Evidence integrity preserved
 
-- invented organizations;
-- invented opportunities;
-- invented maps or locations;
-- invented statistics;
-- invented outcomes;
-- invented testimonials;
-- invented provider availability;
-- invented buyer or network activity.
+Wave 2 prohibited invented live:
 
-A bounded synthetic tutorial is allowed only in Slices 2.10–2.11 because those slices explicitly require educational simulation.
+- organizations;
+- opportunities;
+- maps or locations;
+- statistics;
+- outcomes;
+- testimonials;
+- provider availability;
+- buyer or network activity.
 
-Synthetic tutorial objects must:
+Synthetic tutorial objects were allowed only because Slices 2.10–2.11 explicitly required educational simulation. They were required to remain visibly labeled, deterministic and isolated from live organization, opportunity, referral, team, RFx, credibility, notification, analytics and outcome records.
 
-- be visibly identified as tutorial/example content;
-- remain in isolated fixtures/state;
-- never enter live organization, opportunity, referral, team, RFx, credibility, notification, analytics, or outcome records;
-- never appear in live search;
-- never be represented in public marketing as live local activity;
-- remain deterministic for tests.
+PRs #102 and #103 accepted that isolation and verified zero live-domain tutorial records.
 
-## 6. Messaging discipline
+## 5. Messaging discipline preserved
 
-Use direct, calm, specific language that explains what happened, why it matters, and the next action.
+Wave 2 customer-facing language was required to be direct, calm and specific, explaining what happened, why it mattered and the next action.
 
-Avoid:
+The addendum prohibited unsupported language such as:
 
-- `Controlled Exchange` in customer-facing language;
-- `Something went wrong` where a narrower safe explanation exists;
+- `Controlled Exchange` in customer-facing copy;
+- generic `Something went wrong` where a narrower explanation existed;
 - `No data` without context and action;
-- `Guaranteed leads`;
-- `Unlock limitless opportunities`;
+- guaranteed leads or growth;
 - generic AI positioning;
-- claims of qualification, endorsement, verification, trust, or award likelihood not supported by authoritative state;
-- routine `Congratulations!` language.
+- qualification, endorsement, verification, trust or award claims unsupported by authoritative state;
+- routine over-celebration.
 
-Potential match must remain distinct from qualification, eligibility, endorsement, recommendation, and selection.
+Potential match remained distinct from qualification, eligibility, endorsement, recommendation and selection.
 
-## 7. Slice 2.9 constraints
+## 6. Slice-specific historical boundaries
 
-Slice 2.9 must:
+### Slice 2.9
 
-- use the public opportunity/acquisition projection truthfully;
-- maintain the current approved product identity and shared shell;
-- preserve acquisition context without granting authority;
-- avoid inventing the Wave 4 RFx experience;
-- avoid mock dashboard statistics or fake market density;
-- provide truthful unavailable-future-destination language;
-- preserve anonymous/protected route boundaries;
-- keep public media lightweight and free of autoplay audio.
+- public opportunity/acquisition projection remained truthful;
+- acquisition context preserved intent without granting authority;
+- no full Wave 4 RFx experience or fake market density was introduced;
+- anonymous/protected route boundaries remained intact.
 
-Slice 2.9 must not implement the full marketing-page Brand Gate, production opportunity beacons, Presentation Mode, dark mode, sound, or new map styling.
+### Slice 2.10
 
-## 8. Slice 2.10 constraints
+- synthetic issuer, responder, teammate and opportunity objects were clearly tutorial content;
+- potential capability alignment did not imply qualification;
+- gap and teammate discovery created no legal or live team record;
+- resume/restart and reduced-motion behavior remained supported.
 
-Slice 2.10 must:
+### Slice 2.11
 
-- use clearly synthetic issuer, responder, teammate, and opportunity tutorial objects;
-- label the experience as tutorial/example;
-- use the conceptual grammar: participant nodes, Signal Blue demand beacon, RF Gold explanatory path, locality field;
-- explain potential capability alignment without qualification claims;
-- show gap detection and teammate discovery without creating a legal/team record;
-- support resume/restart and reduced-motion behavior;
-- remain isolated from live data and analytics.
+- invitation/acceptance did not imply a contract, joint venture, subcontract or binding teaming agreement;
+- the structured response remained synthetic;
+- human evaluation/selection authority was explicit;
+- the explanatory path remained isolated from live records and credibility/outcome effects.
 
-Do not implement real discovery, team invitations, provider routing, RFx persistence, or credibility.
+### Slice 2.12
 
-## 9. Slice 2.11 constraints
+- first-value choices were semantic actions;
+- acquisition context could recommend but not authorize or auto-complete;
+- optional organization type, role and objective metadata stayed outside the OPEN gate;
+- OPEN remained server-authoritative with explicit remediation;
+- no dark mode, sound settings, Presentation Mode, provider status, credibility, membership or later-wave workflow was pulled forward.
 
-Slice 2.11 must:
+## 7. Motion and sensory boundary preserved
 
-- continue the same synthetic state machine and visual grammar;
-- show invitation/acceptance without implying a contract, joint venture, subcontract, or binding teaming agreement;
-- show a simplified structured response without creating a live response;
-- preserve human evaluation/selection authority;
-- use a complete gold path to explain the synthetic journey;
-- not turn the path Growth Green merely because a selection occurred unless the tutorial explicitly explains a synthetic outcome stage;
-- remain clearly educational and excluded from live records.
+Wave 2 preserved camera authority and the accepted orbit/pitch/zoom contracts. It did not introduce a new motion library solely for branding, production sound or haptics.
 
-Do not implement live response, evaluation, award, legal artifacts, outcomes, or credibility events.
+Longer spatial movement was required to respect smooth start/stop and reduced-motion behavior where supported. Marker anchors could not drift, and decorative particles, bouncing controls or continuous marker pulsing were prohibited.
 
-## 10. Slice 2.12 constraints
+## 8. Current forward authority
 
-Slice 2.12 must:
+For post-Wave-2 work:
 
-- present first-value choices as clear actions;
-- preserve semantic destination intent;
-- truthfully distinguish available from future workflows;
-- allow acquisition context to recommend but never authorize or auto-complete;
-- keep optional organization type, role, and objective metadata out of the OPEN gate;
-- treat OPEN as server-authoritative;
-- route failed gates to explicit remediation;
-- use one clear completion/next-action composition rather than a generic dashboard;
-- not implement dark mode, sound settings, Presentation Mode, provider status, credibility, membership, or later-wave workflows.
-
-## 11. Motion boundary
-
-Wave 2 may use only the motion necessary for its authorized acceptance.
-
-- preserve existing camera authority and current orbit/pitch/zoom contracts;
-- do not introduce a new motion library solely for branding;
-- longer spatial movement should start and stop smoothly where existing implementation allows;
-- reduced-motion alternatives are mandatory;
-- do not continuously pulse markers, use decorative particles, bounce controls, or animate routine notifications;
-- do not add production sound or haptics.
-
-## 12. Code and documentation boundary
-
-During Slices 2.9–2.12:
-
-- do not modify this brand package except to correct a direct contradiction discovered during authorized implementation;
-- do not begin the Brand Experience Convergence Gate;
-- do not refactor all design tokens;
-- do not restyle the full Mapbox environment;
-- do not redesign previously accepted activation surfaces;
-- do not mark brand-related future capabilities complete;
-- record any necessary future brand seam or conflict in the slice PR without expanding scope.
-
-## 13. Acceptance statement
-
-Each Wave 2 slice PR should include a brief statement confirming:
-
-- it consumed the canonical shared participant architecture;
-- it introduced no competing visual system;
-- it used no invented live market evidence;
-- synthetic tutorial objects, if applicable, remain isolated;
-- customer-facing copy preserves qualification, credibility, and outcome boundaries;
-- it did not begin the post-Wave-2 Brand Experience Convergence Gate.
+- use `BRAND_GATE_B0_RECONCILIATION.md` for the final Wave 2 reconciliation;
+- use `BRAND_IMPLEMENTATION_ROADMAP.md` for sequential gates;
+- use the applicable Wave 3/4 slice and domain authority;
+- do not treat this historical addendum as authorization to modify production branding.
