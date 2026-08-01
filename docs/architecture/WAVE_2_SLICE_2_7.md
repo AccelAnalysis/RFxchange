@@ -1,10 +1,22 @@
 # Wave 2 Slice 2.7 — Essential organization profile
 
+## Feature-ID lineage
+
+This architecture evidence retains the complete Slice 2.7 lineage:
+
+- `ORG-007` — Minimum organization identity
+- `ORG-008` — Meaningful capability requirement
+- `ORG-010` — Multi-role organization classification
+- `ORG-011` — Business objective preferences
+- `ORG-012` — Profile Complete trigger
+
+The registration-convergence correction changes where optional metadata is collected and what can gate activation; it does not delete, rename, reopen, or silently reassign any Feature ID.
+
 ## Amended scope
 
 This slice enriches the durable organization profile with the minimum identity/contact, explicit website disposition, meaningful categorized capability, confirmed location, location visibility, and service geography required for useful participation.
 
-Organization type, participation roles, and business objectives are retained only as optional legacy/enrichment metadata. They are not collected during activation and are not Profile Complete dependencies.
+Organization type, participation roles, and business objectives are retained only as optional enrichment metadata. They are not collected during activation, and each is not a Profile Complete requirement.
 
 ## One durable profile identity
 
