@@ -176,6 +176,19 @@ function publicGeographies(definitions: readonly GeographyDefinition[]) {
   );
 }
 
+function normalizedWebsiteUrl(value: string): string {
+  const normalized = value.trim();
+  const candidate = /^[a-z][a-z0-9+.-]*:/i.test(normalized)
+    ? normalized
+    : `https://${normalized}`;
+  const parsed = new URL(candidate);
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new Error("Organization website must use HTTP or HTTPS.");
+  }
+  parsed.hash = "";
+  return parsed.toString();
+}
+
 function domainFromWebsite(websiteUrl: string | null): string | null {
   if (!websiteUrl) return null;
   const hostname = new URL(websiteUrl).hostname.toLowerCase().replace(/^www\./, "");
@@ -302,14 +315,17 @@ export class ActivationJourneyService {
     }>,
   ): Promise<ActivationJourneyContext> {
     const website = input.website?.trim() ?? "";
+    const websiteUrl = input.websiteNotApplicable || !website
+      ? null
+      : normalizedWebsiteUrl(website);
     const updated = updateActivationJourneyContext(activation, {
       organizationIdentitySeed: {
         websiteDisposition: input.websiteNotApplicable
           ? "not-applicable"
-          : website
+          : websiteUrl
             ? "available"
             : null,
-        websiteUrl: website || null,
+        websiteUrl,
         phone: input.phone?.trim() || null,
       },
       now: this.dependencies.now(),
