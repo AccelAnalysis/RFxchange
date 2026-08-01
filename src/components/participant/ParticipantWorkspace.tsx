@@ -13,6 +13,7 @@ import {
 } from "../ui";
 
 import styles from "./ParticipantWorkspace.module.css";
+import b2Styles from "./ParticipantWorkspaceB2.module.css";
 
 type ParticipantNavigationItem =
   | "Intelligence"
@@ -90,7 +91,7 @@ export function ParticipantTopNavigation({
 }: Readonly<{ activeItem?: ParticipantNavigationItem }>) {
   return (
     <NavigationFrame
-      className={styles.navigationCompatibility}
+      className={b2Styles.navigation}
       brand={<BrandWordmark compact />}
       desktopNavigation={<NavigationItems activeItem={activeItem} />}
       mobileNavigation={<NavigationItems activeItem={activeItem} />}
@@ -150,11 +151,7 @@ export function MapOverlaySurface({
   children,
   position = "top-left",
 }: MapOverlaySurfaceProps) {
-  return (
-    <OverlayPanel position={position}>
-      {children}
-    </OverlayPanel>
-  );
+  return <OverlayPanel position={position}>{children}</OverlayPanel>;
 }
 
 export function ResponsiveEdgeSheet({
@@ -201,7 +198,7 @@ export function SearchFilterOverlay() {
     <SearchFilterFrame
       label="Search the Exchange map"
       search={(
-        <label className={styles.sharedSearchField}>
+        <label className={b2Styles.searchField}>
           <VisuallyHidden>Search the Exchange map</VisuallyHidden>
           <span aria-hidden="true" className={styles.searchGlyph}>⌕</span>
           <input
@@ -214,7 +211,7 @@ export function SearchFilterOverlay() {
       )}
       filters={(
         <details className={styles.filterDisclosure}>
-          <summary>Filters</summary>
+          <summary className={b2Styles.filterSummary}>Filters</summary>
           <div className={styles.filterSurface}>
             <span>Visible layer</span>
             <strong>Organizations</strong>
