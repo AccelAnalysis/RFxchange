@@ -5,6 +5,10 @@ const schema = await readFile(
   new URL("../src/infrastructure/firestore/schema.ts", import.meta.url),
   "utf8",
 );
+const communicationsSchema = await readFile(
+  new URL("../src/infrastructure/firestore/communications-schema.ts", import.meta.url),
+  "utf8",
+);
 const documentation = await readFile(
   new URL("../docs/architecture/INF-003-firestore-schema-conventions.md", import.meta.url),
   "utf8",
@@ -54,6 +58,15 @@ const requiredCollections = [
 
 for (const collection of requiredCollections) {
   assert.ok(schema.includes(`\"${collection}\"`), `Missing canonical Firestore collection: ${collection}`);
+}
+for (const collection of [
+  "transactionalEmailDeliveries",
+  "transactionalEmailDeliveryEvents",
+]) {
+  assert.ok(
+    communicationsSchema.includes(`\"${collection}\"`),
+    `Missing communications Firestore collection: ${collection}`,
+  );
 }
 
 assert.ok(
@@ -120,11 +133,38 @@ assert.ok(invitationBlock.includes("organizationIdRequired: true"));
 assert.ok(invitationBlock.includes("appendOnly: false"));
 assert.ok(invitationBlock.includes("mutable: true"));
 
+const deliveryStart = communicationsSchema.indexOf(
+  "transactionalEmailDeliveries: Object.freeze({",
+);
+assert.ok(deliveryStart >= 0, "Missing transactional email delivery aggregate convention.");
+const deliveryBlock = communicationsSchema.slice(
+  deliveryStart,
+  communicationsSchema.indexOf("}),", deliveryStart) + 3,
+);
+assert.ok(deliveryBlock.includes('scope: "platform-scoped"'));
+assert.ok(deliveryBlock.includes("appendOnly: false"));
+assert.ok(deliveryBlock.includes("mutable: true"));
+
+const deliveryEventStart = communicationsSchema.indexOf(
+  "transactionalEmailDeliveryEvents: Object.freeze({",
+);
+assert.ok(deliveryEventStart >= 0, "Missing transactional email delivery event convention.");
+const deliveryEventBlock = communicationsSchema.slice(
+  deliveryEventStart,
+  communicationsSchema.indexOf("}),", deliveryEventStart) + 3,
+);
+assert.ok(deliveryEventBlock.includes('scope: "platform-scoped"'));
+assert.ok(deliveryEventBlock.includes("appendOnly: true"));
+assert.ok(deliveryEventBlock.includes("mutable: false"));
+
 assert.ok(
   !schema.includes('from "firebase') &&
     !schema.includes("from 'firebase") &&
-    !schema.includes("firebase-admin"),
-  "INF-003 must not introduce Firebase SDK or Admin SDK dependencies.",
+    !schema.includes("firebase-admin") &&
+    !communicationsSchema.includes('from "firebase') &&
+    !communicationsSchema.includes("from 'firebase") &&
+    !communicationsSchema.includes("firebase-admin"),
+  "INF-003 schema contracts must not introduce Firebase SDK or Admin SDK dependencies.",
 );
 
 const normalizedDocumentation = documentation.toLowerCase();
@@ -152,4 +192,6 @@ assert.ok(
   "Firestore schema documentation must preserve the secret-storage boundary.",
 );
 
-console.log("Canonical Firestore schema conventions validated.");
+console.log(
+  `Canonical Firestore schema conventions validated across ${requiredCollections.length + 2} collections.`,
+);
