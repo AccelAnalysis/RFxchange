@@ -38,6 +38,7 @@ export default async function AcquisitionContinuationPage() {
   if (access.kind === "activation-required") redirect("/join");
   if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
+  if (access.state.lifecycleState === "open-platform") redirect("/exchange");
 
   const acquisition = access.state.acquisitionContext;
   if (!acquisition || acquisition.kind === "direct") {

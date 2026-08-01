@@ -54,6 +54,8 @@ test("defines schema version and canonical collection names", () => {
     acquisitionContextEvents: "acquisitionContextEvents",
     orientationJourneys: "orientationJourneys",
     orientationJourneyEvents: "orientationJourneyEvents",
+    firstValueSelections: "firstValueSelections",
+    activationReleaseEvents: "activationReleaseEvents",
   });
 });
 
@@ -93,6 +95,8 @@ test("organization-scoped collections explicitly require organizationId", () => 
     "organizationAuthorityRepresentations",
     "orientationJourneys",
     "orientationJourneyEvents",
+    "firstValueSelections",
+    "activationReleaseEvents",
   ]) {
     assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, true);
     assert.throws(
@@ -134,6 +138,7 @@ test("append-only domain and operational history remains non-mutable", () => {
     "backgroundJobEvents",
     "acquisitionContextEvents",
     "orientationJourneyEvents",
+    "activationReleaseEvents",
   ]) {
     const convention = FIRESTORE_COLLECTION_CONVENTIONS[key];
     assert.equal(convention.appendOnly, true, `${key} must be append-only`);

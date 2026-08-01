@@ -253,6 +253,17 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // EDU-009/010 first-value intent and OPEN release are server-authoritative. The selection is
+    // participant-bound mutable state; release events are immutable evidence.
+    match /firstValueSelections/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /activationReleaseEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /storedAssets/{documentId} {
       allow read, write: if serverManagedOnly();
     }

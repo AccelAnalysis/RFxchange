@@ -1,0 +1,24 @@
+.workspace { min-height: calc(100vh - 64px); }
+.wrap { width: min(840px, calc(100% - 40px)); margin: 0 auto; padding: 72px 0 84px; }
+.eyebrow { margin: 0; color: var(--growth-green); font-size: .76rem; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+.wrap h1 { margin: 10px 0 0; color: var(--exchange-black); font-size: clamp(2.4rem, 6vw, 4.6rem); line-height: .96; }
+.lede { max-width: 720px; margin: 22px 0 0; color: var(--muted-ink); font-size: 1.05rem; line-height: 1.65; }
+.destination { margin-top: 38px; padding: 28px; border-radius: 18px; background: rgba(255,255,255,.72); box-shadow: 0 18px 48px rgba(37,41,50,.08); }
+.destination > span { color: var(--signal-blue); font-size: .7rem; font-weight: 820; letter-spacing: .08em; text-transform: uppercase; }
+.destination h2 { margin: 8px 0 0; font-size: 1.7rem; }
+.destination p { margin: 10px 0 0; color: var(--muted-ink); line-height: 1.55; }
+.destination div { width: fit-content; margin-top: 18px; padding: 6px 10px; border-radius: 999px; color: var(--growth-green); background: rgba(59,123,87,.1); font-size: .7rem; font-weight: 800; }
+.destination div[data-availability="upcoming"] { color: var(--signal-blue); background: rgba(46,94,170,.08); }
+.destination small { display: block; margin-top: 12px; color: var(--muted-ink); font-size: .76rem; line-height: 1.5; }
+.actions { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 10px; }
+.primary, .secondary { min-height: 46px; padding: 0 18px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 800; text-decoration: none; }
+.primary { color: #fff; background: var(--exchange-black); }
+.secondary { color: var(--exchange-black); border: 1px solid rgba(37,41,50,.18); background: rgba(255,255,255,.62); }
+.primary:focus-visible, .secondary:focus-visible { outline: 3px solid var(--rf-gold); outline-offset: 3px; }
+.boundary { margin-top: 28px; padding-top: 18px; max-width: 720px; border-top: 1px solid rgba(37,41,50,.1); color: var(--muted-ink); font-size: .76rem; line-height: 1.55; }
+@media (max-width: 620px) {
+  .workspace { min-height: calc(100vh - 56px); }
+  .wrap { width: min(100% - 28px, 840px); padding: 42px 0 60px; }
+  .destination { padding: 20px; }
+  .actions { display: grid; }
+}

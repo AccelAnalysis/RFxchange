@@ -63,6 +63,7 @@ const appendOnlyCollections = [
   "backgroundJobEvents",
   "acquisitionContextEvents",
   "orientationJourneyEvents",
+  "activationReleaseEvents",
 ];
 
 for (const collection of appendOnlyCollections) {

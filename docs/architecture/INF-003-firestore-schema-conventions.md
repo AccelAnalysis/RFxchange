@@ -53,6 +53,8 @@ The current foundation maps to these collections:
 | `adminPermissionGrants` | grant `id` | platform | append-only |
 | `orientationJourneys` | access-journey-derived orientation `id` | organization | mutable |
 | `orientationJourneyEvents` | orientation event `id` | organization | append-only |
+| `firstValueSelections` | access-journey-derived selection `id` | organization | mutable before OPEN |
+| `activationReleaseEvents` | activation release event `id` | organization | append-only |
 
 Future feature domains may add collections, but they must follow the same stable-ID, tenant-attribution, timestamp, schema-version, and migration conventions before an adapter is merged.
 
@@ -106,7 +108,8 @@ Collections marked append-only preserve the existing architecture invariant that
 Append-only includes current organization resolution decisions and entity-key
 reservations, legal acknowledgement evidence, organization audit events,
 organization authority representations, platform change directives, retention
-policies/assignments, admin permission grants, and orientation journey events.
+policies/assignments, admin permission grants, orientation journey events, and
+activation release events.
 
 Corrections or later state changes must be modeled as additional records/events where the owning domain requires that behavior. A Firestore adapter must not quietly introduce `update` or `delete` behavior for an append-only repository port.
 

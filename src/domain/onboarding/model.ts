@@ -1,6 +1,7 @@
 import type { OrganizationId } from "../organizations/model.ts";
 import type { OrganizationMembershipId, UserId } from "../users/model.ts";
 import type { BoundAcquisitionContext } from "../acquisition/model.ts";
+import { CURRENT_PLATFORM_POLICY_VERSION } from "../legal/model.ts";
 
 export const ORGANIZATION_RELATIONSHIPS = [
   "owner",
@@ -13,6 +14,7 @@ export const ORGANIZATION_RELATIONSHIPS = [
 export type OrganizationRelationship = (typeof ORGANIZATION_RELATIONSHIPS)[number];
 
 export interface ActivationLegalAcceptance {
+  readonly policyVersion: typeof CURRENT_PLATFORM_POLICY_VERSION;
   readonly acceptedTerms: true;
   readonly acceptedPlatformRules: true;
   readonly acknowledgedPrivacy: true;
@@ -247,9 +249,22 @@ export function updateActivationJourneyContext(
 
 export function createActivationLegalAcceptance(now: string): ActivationLegalAcceptance {
   return Object.freeze({
+    policyVersion: CURRENT_PLATFORM_POLICY_VERSION,
     acceptedTerms: true as const,
     acceptedPlatformRules: true as const,
     acknowledgedPrivacy: true as const,
     capturedAt: timestamp(now),
   });
+}
+
+export function isCurrentActivationLegalAcceptance(
+  acceptance: ActivationLegalAcceptance | null,
+): acceptance is ActivationLegalAcceptance {
+  return Boolean(
+    acceptance &&
+    acceptance.policyVersion === CURRENT_PLATFORM_POLICY_VERSION &&
+    acceptance.acceptedTerms === true &&
+    acceptance.acceptedPlatformRules === true &&
+    acceptance.acknowledgedPrivacy === true,
+  );
 }

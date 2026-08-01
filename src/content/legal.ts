@@ -1,4 +1,6 @@
-export const PUBLIC_POLICY_VERSION = "2026.07.31";
+import { CURRENT_PLATFORM_POLICY_VERSION } from "../domain/legal/model";
+
+export const PUBLIC_POLICY_VERSION = CURRENT_PLATFORM_POLICY_VERSION;
 export const PUBLIC_POLICY_EFFECTIVE_DATE = "July 31, 2026";
 
 export interface PublicPolicySection {

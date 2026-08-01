@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import {
@@ -161,6 +162,7 @@ export function OrientationJourneyClient({
                 <p className={styles.lede}>{scenario.networkEffect.summary}</p>
                 <div className={styles.boundary}>{scenario.networkEffect.outcomeBoundary}</div>
                 <p className={styles.nextStep}>Your completion is saved. First-value selection follows in the next approved activation step.</p>
+                <Link className={styles.primary} href="/first-value">Choose what to do first</Link>
                 <button className={styles.secondary} type="button" disabled={pending} onClick={() => mutate({ action: "restart" })}>
                   {pending ? "Restarting…" : "Restart orientation"}
                 </button>

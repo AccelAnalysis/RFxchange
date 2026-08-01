@@ -20,6 +20,9 @@ export async function POST(request: NextRequest) {
   });
   if (access.kind === "unauthenticated") return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   if (access.kind !== "authorized") return NextResponse.json({ error: "Controlled-platform access required." }, { status: 403 });
+  if (access.state.lifecycleState !== "controlled-platform") {
+    return NextResponse.json({ error: "Completed OPEN orientation cannot be mutated." }, { status: 409 });
+  }
   const scope = await resolveAuthorizedOrientationScope(access);
   if (!scope) return NextResponse.json({ error: "An active controlled-locality marker is required." }, { status: 409 });
 
