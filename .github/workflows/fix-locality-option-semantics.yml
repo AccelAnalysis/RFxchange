@@ -1,0 +1,72 @@
+name: Fix locality option semantics
+
+on:
+  push:
+    branches:
+      - codex/registration-activation-convergence
+    paths:
+      - ".github/workflows/fix-locality-option-semantics.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/registration-activation-convergence
+          fetch-depth: 0
+      - name: Remove interactive descendants from listbox options
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("src/components/onboarding/ActivationJourneyClient.tsx")
+          source = path.read_text()
+          old = '''                  <article
+                    key={geography.reference}
+                    id={`locality-${geography.fipsCode}`}
+                    className={styles.resultCard}
+                    role="option"
+                    aria-selected={index === activeGeographyIndex}
+                    data-active={index === activeGeographyIndex}
+                  >
+                    <div>
+                      <strong>{geography.name}, {geography.stateName}</strong>
+                      <span>{geographyTypeLabel(geography.type)} · FIPS {geography.fipsCode}</span>
+                    </div>
+                    <button className={styles.primary} type="button" disabled={busy} onMouseEnter={() => setActiveGeographyIndex(index)} onClick={() => run(() => chooseGeography(geography))}>Use this locality</button>
+                  </article>'''
+          new = '''                  <article
+                    key={geography.reference}
+                    id={`locality-${geography.fipsCode}`}
+                    className={styles.resultCard}
+                    role="option"
+                    aria-selected={index === activeGeographyIndex}
+                    aria-disabled={busy}
+                    data-active={index === activeGeographyIndex}
+                    onMouseEnter={() => setActiveGeographyIndex(index)}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      if (!busy) void run(() => chooseGeography(geography));
+                    }}
+                  >
+                    <div>
+                      <strong>{geography.name}, {geography.stateName}</strong>
+                      <span>{geographyTypeLabel(geography.type)} · FIPS {geography.fipsCode}</span>
+                    </div>
+                    <span className={styles.secondary} aria-hidden="true">Use this locality</span>
+                  </article>'''
+          if source.count(old) != 1:
+              raise SystemExit(f"Expected one locality option block, found {source.count(old)}")
+          path.write_text(source.replace(old, new))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/components/onboarding/ActivationJourneyClient.tsx
+          git commit -m "Fix locality combobox option semantics"
+          git push origin HEAD:codex/registration-activation-convergence
