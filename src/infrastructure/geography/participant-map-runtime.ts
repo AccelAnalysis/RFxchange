@@ -11,6 +11,7 @@ import { TigerWebBoundarySnapshotRepository } from "./tigerweb-boundary-snapshot
 type AuthorizedParticipant = Extract<ParticipantRouteResolution, { readonly kind: "authorized" }>;
 
 export interface AuthenticatedMapProjection {
+  readonly organizationId: string;
   readonly model: ControlledLocalityMapModel;
   readonly homeMarker: ExchangeHomeMarker;
 }
@@ -22,13 +23,14 @@ export async function loadAuthorizedParticipantMapProjection(
   const foundation = createServerFirestoreFoundationRepositories(db);
   const geographyRepositories = createFirestoreGeographyRepositories(db);
   const locationRepositories = createFirestoreOrganizationLocationRepositories(db);
-  const location = await locationRepositories.locations.getByOrganizationId(access.membership.organizationId);
+  const organizationId = access.membership.organizationId;
+  const location = await locationRepositories.locations.getByOrganizationId(organizationId);
   if (!location) return null;
 
   const [geography, markerActivation, profile, selection] = await Promise.all([
     geographyRepositories.definitions.getById(location.geographyId),
-    createFirestoreOrganizationMarkerRepositories(db).activations.getByOrganizationId(access.membership.organizationId),
-    foundation.organizations.profiles.getByOrganizationId(access.membership.organizationId),
+    createFirestoreOrganizationMarkerRepositories(db).activations.getByOrganizationId(organizationId),
+    foundation.organizations.profiles.getByOrganizationId(organizationId),
     geographyRepositories.selections.getByUserId(access.context.user.id),
   ]);
   if (!geography || !selection || selection.geographyId !== geography.id || markerActivation?.status !== "active") {
@@ -50,6 +52,7 @@ export async function loadAuthorizedParticipantMapProjection(
   });
 
   return Object.freeze({
+    organizationId,
     model,
     homeMarker: Object.freeze({
       id: marker.id,
