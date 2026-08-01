@@ -6,7 +6,9 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 
 const [
   workspace,
+  sharedPrimitives,
   workspaceStyles,
+  sharedPrimitiveStyles,
   mapCanvas,
   mapStyles,
   tokens,
@@ -24,7 +26,9 @@ const [
   tracker,
 ] = await Promise.all([
   read("src/components/participant/ParticipantWorkspace.tsx"),
+  read("src/components/ui/Primitives.tsx"),
   read("src/components/participant/ParticipantWorkspace.module.css"),
+  read("src/components/ui/Primitives.module.css"),
   read("src/components/map/ControlledLocalityCanvas.tsx"),
   read("src/components/map/ControlledLocalityCanvas.module.css"),
   read("src/design/tokens.ts"),
@@ -56,6 +60,7 @@ for (const primitive of [
   assert.ok(workspace.includes(`function ${primitive}`), `Shared primitive is missing: ${primitive}`);
 }
 
+const participantContractSource = `${workspace}\n${sharedPrimitives}`;
 for (const contract of [
   "data-participant-navigation",
   'data-participant-default="warm-ivory"',
@@ -63,21 +68,22 @@ for (const contract of [
   'data-participant-workspace="operational"',
   'data-mobile-surface="sheet"',
 ]) {
-  assert.ok(workspace.includes(contract), `Participant shell contract is missing: ${contract}`);
+  assert.ok(participantContractSource.includes(contract), `Participant shell contract is missing: ${contract}`);
 }
 
+const participantStyleSource = `${workspaceStyles}\n${sharedPrimitiveStyles}`;
 assert.ok(
-  workspaceStyles.includes("height: calc(100dvh - var(--participant-nav-height))") &&
-    workspaceStyles.includes("height: var(--participant-nav-height)") &&
-    workspaceStyles.includes("background: var(--participant-canvas)") &&
-    workspaceStyles.includes("background: var(--ivory-glass-strong)") &&
-    workspaceStyles.includes('@media (max-width: 760px)') &&
-    workspaceStyles.includes("max-height: min(68svh, 590px)"),
+  participantStyleSource.includes("height: calc(100dvh - var(--participant-nav-height))") &&
+    participantStyleSource.includes("height: var(--participant-nav-height)") &&
+    participantStyleSource.includes("background: var(--participant-canvas)") &&
+    participantStyleSource.includes("background: var(--semantic-surface-glass-strong)") &&
+    participantStyleSource.includes('@media (max-width: 760px)') &&
+    participantStyleSource.includes("max-height: min(68svh, 590px)"),
   "Shared workspaces must preserve one navigation, full-height spatial canvas, Warm Ivory defaults, and mobile-sheet behavior.",
 );
 assert.ok(
-  !workspaceStyles.includes("grid-template-columns: 240px") &&
-    !workspaceStyles.includes("grid-template-columns: 280px"),
+  !participantStyleSource.includes("grid-template-columns: 240px") &&
+    !participantStyleSource.includes("grid-template-columns: 280px"),
   "Participant shell must not introduce a permanent left navigation rail.",
 );
 

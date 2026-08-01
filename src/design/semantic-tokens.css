@@ -12,7 +12,7 @@
   --brand-white: #ffffff;
   --brand-muted-ink: #62656d;
 
-  /* Exchange Light semantic color roles. B7 dark mode is not authorized by B1. */
+  /* Exchange Light semantic color roles. B7 dark mode is not authorized by B1/B2. */
   --semantic-canvas: var(--brand-warm-ivory);
   --semantic-canvas-elevated: var(--brand-white);
   --semantic-canvas-dense: var(--brand-graphite);
@@ -25,6 +25,11 @@
   --semantic-surface-intelligence-subtle: rgba(46, 94, 170, 0.08);
   --semantic-surface-connection-subtle: rgba(214, 162, 58, 0.16);
   --semantic-surface-outcome-subtle: rgba(59, 123, 87, 0.08);
+  --semantic-surface-elevated: var(--semantic-canvas-elevated);
+  --semantic-surface-subtle: rgba(37, 41, 50, 0.04);
+  --semantic-surface-information: var(--semantic-surface-intelligence-subtle);
+  --semantic-surface-connection: var(--semantic-surface-connection-subtle);
+  --semantic-surface-outcome: var(--semantic-surface-outcome-subtle);
 
   --semantic-text-primary: var(--brand-exchange-black);
   --semantic-text-secondary: var(--brand-graphite);
@@ -38,6 +43,7 @@
   --semantic-border-strong: rgba(37, 41, 50, 0.28);
   --semantic-border-inverse: rgba(255, 255, 255, 0.16);
   --semantic-border-glass: rgba(247, 243, 234, 0.66);
+  --semantic-border-focus: var(--brand-rf-gold);
 
   --semantic-action-primary-background: var(--brand-exchange-black);
   --semantic-action-primary-foreground: var(--brand-white);
@@ -50,6 +56,7 @@
   --semantic-state-positive-resolution: var(--brand-growth-green);
   --semantic-state-connection-focus: var(--brand-rf-gold);
   --semantic-state-connection-text: var(--brand-accessible-dark-gold);
+  --semantic-state-connection: var(--semantic-state-connection-focus);
   --semantic-state-neutral: var(--brand-graphite);
   --semantic-state-disabled: rgba(37, 41, 50, 0.48);
   --semantic-state-restricted: var(--brand-graphite);
@@ -66,14 +73,18 @@
   --space-xxl: 48px;
   --space-section: 80px;
   --space-immersive: 128px;
+  --space-2xl: var(--space-xxl);
+  --space-3xl: var(--space-section);
 
   /* Radius, elevation, border, and focus roles. */
   --radius-compact: 10px;
   --radius-control: 14px;
   --radius-panel: 18px;
   --radius-immersive: 24px;
+  --radius-panel-large: var(--radius-immersive);
   --radius-pill: 999px;
   --elevation-soft: 0 24px 70px rgba(11, 11, 13, 0.08);
+  --elevation-card: var(--elevation-soft);
   --elevation-control: 0 12px 34px rgba(11, 11, 13, 0.12);
   --elevation-overlay: 0 24px 72px rgba(11, 11, 13, 0.2);
   --elevation-focus: 0 0 0 4px rgba(214, 162, 58, 0.18);
@@ -83,7 +94,7 @@
   --focus-outline-offset: 3px;
   --focus-outline-offset-high: 4px;
 
-  /* Aptos/system-safe roles only. No font assets are bundled by B1. */
+  /* Aptos/system-safe roles only. No font assets are bundled by B1/B2. */
   --type-display-family: "Aptos Display", "Aptos", "Segoe UI", Helvetica, Arial, sans-serif;
   --type-interface-family: "Aptos", "Segoe UI", Helvetica, Arial, sans-serif;
   --type-display-hero-weight: 750;
@@ -94,6 +105,13 @@
   --type-eyebrow-weight: 750;
   --type-status-weight: 750;
   --type-data-weight: 600;
+  --type-eyebrow-size: 0.67rem;
+  --type-caption-size: 0.72rem;
+  --type-label-size: 0.78rem;
+  --type-body-size: 0.9rem;
+  --type-title-size: 1.22rem;
+  --type-heading-size: 1.45rem;
+  --type-eyebrow-tracking: 0.12em;
 
   /* Motion roles. Reduced-motion behavior remains a consumer responsibility. */
   --motion-instant: 0ms;
@@ -104,6 +122,7 @@
   --motion-spatial-fast: 600ms;
   --motion-spatial: 1200ms;
   --motion-milestone: 3000ms;
+  --motion-feedback: var(--motion-micro);
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);

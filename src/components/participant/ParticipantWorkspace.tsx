@@ -2,8 +2,18 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { BrandWordmark } from "../brand/BrandWordmark";
+import {
+  ControlGroup,
+  NavigationFrame,
+  OverlayPanel,
+  ResponsiveSheet,
+  SearchFilterFrame,
+  StatusSummary,
+  VisuallyHidden,
+} from "../ui";
 
 import styles from "./ParticipantWorkspace.module.css";
+import b2Styles from "./ParticipantWorkspaceB2.module.css";
 
 type ParticipantNavigationItem =
   | "Intelligence"
@@ -80,18 +90,12 @@ export function ParticipantTopNavigation({
   activeItem,
 }: Readonly<{ activeItem?: ParticipantNavigationItem }>) {
   return (
-    <header className={styles.navigation} data-participant-navigation>
-      <BrandWordmark compact />
-      <nav className={styles.desktopNavigation} aria-label="Primary participant navigation">
-        <NavigationItems activeItem={activeItem} />
-      </nav>
-      <details className={styles.mobileNavigation}>
-        <summary>Menu</summary>
-        <nav aria-label="Primary participant navigation">
-          <NavigationItems activeItem={activeItem} />
-        </nav>
-      </details>
-    </header>
+    <NavigationFrame
+      className={b2Styles.navigation}
+      brand={<BrandWordmark compact />}
+      desktopNavigation={<NavigationItems activeItem={activeItem} />}
+      mobileNavigation={<NavigationItems activeItem={activeItem} />}
+    />
   );
 }
 
@@ -147,15 +151,7 @@ export function MapOverlaySurface({
   children,
   position = "top-left",
 }: MapOverlaySurfaceProps) {
-  return (
-    <section
-      className={styles.mapOverlay}
-      data-map-overlay
-      data-position={position}
-    >
-      {children}
-    </section>
-  );
+  return <OverlayPanel position={position}>{children}</OverlayPanel>;
 }
 
 export function ResponsiveEdgeSheet({
@@ -165,15 +161,9 @@ export function ResponsiveEdgeSheet({
   width = "standard",
 }: ResponsiveEdgeSheetProps) {
   return (
-    <aside
-      className={styles.edgeSheet}
-      data-edge={side}
-      data-mobile-surface="sheet"
-      data-width={width}
-      aria-labelledby={ariaLabelledBy}
-    >
+    <ResponsiveSheet labelledBy={ariaLabelledBy} side={side} width={width}>
       {children}
-    </aside>
+    </ResponsiveSheet>
   );
 }
 
@@ -181,11 +171,7 @@ export function MapControlGroup({
   children,
   label,
 }: Readonly<{ children: ReactNode; label: string }>) {
-  return (
-    <div className={styles.mapControlGroup} aria-label={label}>
-      {children}
-    </div>
-  );
+  return <ControlGroup label={label}>{children}</ControlGroup>;
 }
 
 export function LocalityStatusOverlay({
@@ -198,38 +184,44 @@ export function LocalityStatusOverlay({
   supportingText?: string;
 }>) {
   return (
-    <div className={styles.localityStatus}>
-      <span>{state}</span>
-      <strong>{locality}</strong>
-      {supportingText ? <small>{supportingText}</small> : null}
-    </div>
+    <StatusSummary
+      eyebrow={state}
+      title={locality}
+      supportingText={supportingText}
+      tone="positive"
+    />
   );
 }
 
 export function SearchFilterOverlay() {
   return (
-    <div className={styles.searchFilter} role="search" aria-label="Search the Exchange map">
-      <label>
-        <span className={styles.srOnly}>Search the Exchange map</span>
-        <span aria-hidden="true" className={styles.searchGlyph}>⌕</span>
-        <input
-          type="search"
-          name="map-search"
-          placeholder="Search organizations and capabilities"
-          autoComplete="off"
-        />
-      </label>
-      <details className={styles.filterDisclosure}>
-        <summary>Filters</summary>
-        <div className={styles.filterSurface}>
-          <span>Visible layer</span>
-          <strong>Organizations</strong>
-          <p>
-            Opportunity and resource layers remain unavailable until their approved
-            product slices are complete.
-          </p>
-        </div>
-      </details>
-    </div>
+    <SearchFilterFrame
+      label="Search the Exchange map"
+      search={(
+        <label className={b2Styles.searchField}>
+          <VisuallyHidden>Search the Exchange map</VisuallyHidden>
+          <span aria-hidden="true" className={styles.searchGlyph}>⌕</span>
+          <input
+            type="search"
+            name="map-search"
+            placeholder="Search organizations and capabilities"
+            autoComplete="off"
+          />
+        </label>
+      )}
+      filters={(
+        <details className={styles.filterDisclosure}>
+          <summary className={b2Styles.filterSummary}>Filters</summary>
+          <div className={styles.filterSurface}>
+            <span>Visible layer</span>
+            <strong>Organizations</strong>
+            <p>
+              Opportunity and resource layers remain unavailable until their approved
+              product slices are complete.
+            </p>
+          </div>
+        </details>
+      )}
+    />
   );
 }

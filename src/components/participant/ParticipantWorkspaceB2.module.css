@@ -1,0 +1,104 @@
+.navigation :global(.brand-wordmark) {
+  flex: 0 0 auto;
+  font-size: 1.18rem;
+}
+
+.navigation :global(nav[aria-label="Primary participant navigation"] > a),
+.navigation :global(nav[aria-label="Primary participant navigation"] > span) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--semantic-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 690;
+  text-decoration: none;
+}
+
+.navigation :global(nav[aria-label="Primary participant navigation"] > a:not(:first-child)),
+.navigation :global(nav[aria-label="Primary participant navigation"] > span:not(:first-child)) {
+  margin-left: clamp(var(--space-lg), 2.3vw, var(--space-2xl));
+}
+
+.navigation :global(nav[aria-label="Primary participant navigation"] > span[aria-disabled="true"]) {
+  color: color-mix(in srgb, var(--semantic-text-secondary) 48%, transparent);
+  cursor: default;
+}
+
+.navigation :global(nav[aria-label="Primary participant navigation"] > a[aria-current="page"]::after) {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--semantic-action-selected-background);
+}
+
+.navigation :global(nav[aria-label="Primary participant navigation"] > a:focus-visible) {
+  outline: var(--focus-outline-width) solid var(--semantic-border-focus);
+  outline-offset: var(--focus-outline-offset);
+}
+
+.searchField,
+.filterSummary {
+  min-height: 48px;
+  border: var(--border-hairline) solid var(--semantic-border-glass);
+  border-radius: var(--radius-control);
+  background: var(--semantic-surface-glass);
+  box-shadow: var(--elevation-control);
+  backdrop-filter: blur(22px) saturate(120%);
+}
+
+.searchField {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchField input {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  padding: 0 var(--space-md) 0 0;
+  border: 0;
+  outline: 0;
+  color: var(--semantic-text-primary);
+  background: transparent;
+  font: 680 0.83rem/1 var(--type-interface-family);
+}
+
+.searchField input::placeholder {
+  color: var(--semantic-text-muted);
+}
+
+.searchField:focus-within,
+.filterSummary:focus-visible {
+  outline: var(--focus-outline-width) solid var(--semantic-border-focus);
+  outline-offset: var(--focus-outline-offset);
+}
+
+@media (max-width: 760px) {
+  .navigation :global(nav[aria-label="Primary participant navigation"] > a),
+  .navigation :global(nav[aria-label="Primary participant navigation"] > span) {
+    min-height: 44px;
+    padding: 0 var(--space-md);
+    border-radius: var(--radius-control);
+  }
+
+  .navigation :global(nav[aria-label="Primary participant navigation"] > a:not(:first-child)),
+  .navigation :global(nav[aria-label="Primary participant navigation"] > span:not(:first-child)) {
+    margin-left: 0;
+  }
+
+  .navigation :global(nav[aria-label="Primary participant navigation"] > a[aria-current="page"]) {
+    background: var(--semantic-surface-connection);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .searchField,
+  .filterSummary {
+    background: var(--semantic-canvas);
+    backdrop-filter: none;
+  }
+}
