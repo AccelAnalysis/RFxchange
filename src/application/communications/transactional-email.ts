@@ -57,7 +57,9 @@ export class TransactionalEmailService {
     recipientEmail: string;
     recipientDisplayName?: string | null;
     eventKey: string;
+    eventVersion?: number;
     templateKey: string;
+    templateVersion?: number;
     variables?: Readonly<Record<string, TransactionalEmailVariable>>;
     correlationId: string;
     idempotencyKey: string;
