@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+// Guard the runtime and every canonical planning authority against reintroducing the superseded registration model.
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("registration convergence remains aligned across runtime and canonical authorities", async () => {
