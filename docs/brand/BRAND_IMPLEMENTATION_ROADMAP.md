@@ -1,14 +1,14 @@
 # RFxchange Brand Experience Implementation Roadmap
 
-**Status: PLANNING ONLY — BEGIN CODE AFTER PR #99, SLICES 2.9–2.12, AND THE COMPLETE WAVE 2 EXIT ARE MERGED AND ACCEPTED**
+**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATE B0 RECONCILED; LATER GATES REQUIRE EXPLICIT AUTHORIZATION**
 
 ## 1. Purpose
 
-This roadmap sequences the premium brand experience without destabilizing active activation work or fabricating later-wave domain functionality.
+This roadmap sequences the premium Brand Experience System without destabilizing completed product behavior or fabricating later-wave domain functionality.
 
-The brand implementation is a convergence program, not a single restyling PR.
+Brand convergence is a program of small, reviewable gates—not one broad restyling PR.
 
-It must preserve:
+Every gate must preserve:
 
 - authorization and organization isolation;
 - activation and OPEN lifecycle authority;
@@ -16,64 +16,121 @@ It must preserve:
 - marker visibility and renderer ownership;
 - acquisition-context integrity;
 - synthetic/live tutorial isolation;
-- RFx, referral, provider, credibility, and commercial domain boundaries;
-- tracker evidence and Feature-ID discipline.
+- RFx, referral, provider, credibility and commercial domain boundaries;
+- tracker evidence and Feature-ID discipline;
+- responsive, accessibility, recovery and performance requirements.
 
-## 2. Current hold boundary
+## 2. Brand Gate B0 reconciliation result
 
-While PR #99 and Wave 2 Slices 2.9–2.12 are active, this roadmap authorizes documentation and architectural planning only.
+B0 reconciled this package against final Wave 2 `main`:
 
-Do not modify for brand purposes:
+- final Wave 2 SHA: `097b574ccce8865d4127cfe381fb0bd6199de0a5`;
+- tracker: **438 total · 118 Done · 320 Not Started**;
+- Activation: **43/43**;
+- all PR #99 marker-visibility and website-disposition boundaries remain authoritative;
+- Slices 2.9–2.12 are complete and their acquisition, tutorial-isolation, first-value and OPEN contracts remain intact;
+- Wave 3 Slice 3.1 is the earliest dependency-eligible candidate, but remains subject to explicit authorization.
+
+B0 changed documentation and repository authority only. It did not modify production code, CSS, Mapbox styling, markers, motion, sound, settings, tracker totals, dependency edges or Feature-ID state.
+
+See `BRAND_GATE_B0_RECONCILIATION.md` for authority order, requirement classification, code ownership, testing boundaries and Wave 3/4 integration.
+
+## 3. Current implementation hold
+
+The target Brand Experience System is canonical planning/acceptance authority, but it does not authorize production implementation by itself.
+
+Until a specific Brand Gate is explicitly authorized, do not modify for brand purposes:
 
 - activation APIs or lifecycle semantics;
-- participant/map CSS;
-- map panel dimensions;
-- marker geometry, anchoring, visibility, projection, orbit, pitch, or zoom;
-- registration/onboarding composition outside authorized slice scope;
+- participant/map composition outside an active gate;
+- marker geometry, anchoring, visibility, projection, orbit, pitch or zoom;
 - Mapbox production style;
 - theme persistence;
 - audio/haptic runtime;
-- tracker totals, dependencies, or Feature-ID completion.
+- tracker totals, dependencies or Feature-ID completion;
+- domain-dependent visuals whose source domains do not yet exist.
 
-The active Codex implementation receives only the narrow addendum in `CODEX_WAVE_2_BRAND_AUTHORITY_ADDENDUM.md` after the PR #99 hard boundary is cleared.
+## 4. Authority and classification
 
-## 3. Entry criteria for Brand Experience Convergence
+### 4.1 Authority order
 
-The convergence gate may begin only after:
+After current task, security/domain, tracker/dependency and slice/gate authority:
 
-1. PR #99 configured-browser cases pass and the repair is merged.
-2. Slice 2.9 is merged and acquisition context is verified.
-3. Slice 2.10 is merged with synthetic/live isolation verified.
-4. Slice 2.11 is merged with human-selection and nonbinding-team boundaries verified.
-5. Slice 2.12 is merged with first-value intent and server-authoritative OPEN verified.
-6. The complete Wave 2 exit is reconciled against the canonical tracker.
-7. Main is green for production CI and configured-browser acceptance.
-8. The final surface inventory and changed-domain seams are recalculated.
+- `docs/brand/` defines the target experience and acceptance;
+- `docs/design/` defines the currently implemented baseline;
+- runtime is implementation evidence and compatibility context.
 
-## 4. Program structure
+### 4.2 Requirement classes
 
-The Brand Experience Convergence Gate should be implemented as small sequential slices with explicit acceptance. Do not authorize all code at once.
+**Cross-cutting standards** may govern authorized work without claiming a new domain feature:
 
-### Brand Gate B0 — Reconciliation and canonical authority
+- naming and parent endorsement;
+- semantic color and typography;
+- messaging and evidence integrity;
+- loading, empty, success, error, permission, expired and recovery states;
+- accessibility, reduced motion, state preservation and performance.
 
-**Objective:** adopt this package against the final merged Wave 2 implementation.
+**Domain-dependent expressions** cannot appear as live state before the owning domain exists:
 
-Work:
+- opportunity beacons;
+- service fields;
+- referral/team/RFx paths;
+- credibility seals;
+- outcome paths.
 
-- rebase/reconcile these documents against merged main;
-- identify any Wave 2 divergence;
-- update `docs/design/RFxchange_DESIGN_SYSTEM.md` to reference this package;
-- update design/context indexes;
-- classify each requirement as cross-cutting, net-new capability, or domain-dependent expression;
-- map any new product capabilities to tracker governance before implementation;
-- define code ownership and test boundaries.
+**Net-new product capabilities** require explicit product/tracker governance:
+
+- Intelligence Dark;
+- Presentation Mode;
+- production sound preferences/runtime;
+- haptics;
+- new modes, settings or safe projections.
+
+## 5. Program sequence
+
+Use one active gate at a time unless the current task explicitly authorizes another arrangement.
+
+```text
+B0 reconciliation — complete in PR #100
+→ B1 semantic foundation
+→ B2 shared component primitives
+→ B3 cartographic convergence
+→ B4 public marketing and acquisition
+→ B5 onboarding and activation
+→ B6a existing workspace foundation
+→ Wave 3 live Network slices
+→ B6b Network lenses
+→ Wave 4 RFx Core slices
+→ B6c RFx lens
+→ B10 credibility/outcome expression when domains exist
+```
+
+B7 Intelligence Dark, B8 Sonic/Sensory and B9 Presentation Mode are separately governed net-new capabilities and are not automatically inserted into the critical path.
+
+## 6. Brand Gate definitions
+
+### Brand Gate B0 — Reconciliation and canonical authority — COMPLETE IN PR #100
+
+**Objective:** adopt the target Brand Experience System against final Wave 2 `main`.
+
+Completed documentation work:
+
+- incorporated final Wave 2 history into the branch;
+- removed the stale repository-wide Wave 2 hold;
+- established target-brand versus implemented-design authority;
+- classified cross-cutting, domain-dependent and net-new requirements;
+- defined code ownership and test boundaries;
+- staged B6 by domain availability;
+- connected Wave 3/4 planning to the Brand Experience System;
+- retained documentation-only scope.
 
 Acceptance:
 
 - no runtime changes;
 - no Feature IDs marked Done;
-- no conflicts with security/lifecycle/geography contracts;
-- explicit implementation slice list approved.
+- no tracker or dependency changes;
+- no conflict with security, lifecycle, geography, acquisition, marker or OPEN contracts;
+- production CI required on the final reconciled PR head.
 
 ### Brand Gate B1 — Semantic design foundation
 
@@ -82,31 +139,31 @@ Acceptance:
 Work:
 
 - refactor raw palette into mode-aware semantic tokens;
-- preserve existing exact brand colors;
-- add Accessible Dark Gold for small text where required;
-- define spacing, radius, elevation, border, focus, typography-role, motion-duration, and easing tokens;
-- define object-semantic tokens for nodes, beacons, fields, paths, seals, and locality states;
+- preserve exact approved brand colors;
+- add Accessible Dark Gold for small text where needed;
+- define spacing, radius, elevation, border, focus, typography-role, motion-duration and easing tokens;
+- define object-semantic tokens for nodes, beacons, fields, paths, seals and locality states;
 - add static validation against one-off semantic drift;
 - preserve Aptos/system fallback until a licensed display/interface choice is approved.
 
 Acceptance:
 
-- no visible or minimal controlled visual change;
+- no or minimal controlled visual change;
 - all existing routes compile and pass tests;
-- raw-token compatibility layer prevents broad breakage;
+- raw-token compatibility prevents broad breakage;
 - no unlicensed fonts/assets;
-- semantic meaning documented and testable.
+- semantic meaning is documented and testable.
 
 ### Brand Gate B2 — Shared component primitives
 
-**Objective:** make the canonical behavior reusable.
+**Objective:** make canonical behavior reusable.
 
 Work:
 
-- consolidate navigation, map controls, search/filter, drawers, sheets, object cards, timelines, alerts, empty states, tables, and status treatments;
-- add organization-node and opportunity-beacon primitives without inventing live data;
+- consolidate navigation, map controls, search/filter, drawers, sheets, object cards, timelines, alerts, empty states, tables and status treatments;
+- add organization-node and future opportunity-beacon interfaces without inventing runtime data;
 - add service-field/path/seal interfaces gated behind authoritative domain inputs;
-- implement loading/error/permission/expired primitives;
+- implement loading, error, permission, expired and recovery primitives;
 - implement focus and accessible naming contracts;
 - add reduced-motion paths.
 
@@ -119,7 +176,7 @@ Acceptance:
 
 ### Brand Gate B3 — Mapbox/cartographic convergence
 
-**Objective:** establish the proprietary RFxchange map in Exchange Light.
+**Objective:** establish the proprietary RFxchange map in Exchange Light while preserving Wave 2 spatial authority.
 
 Work:
 
@@ -129,6 +186,7 @@ Work:
 - dimmed nonfocus geography;
 - low-contrast 3D buildings;
 - organization-node migration;
+- additional-location satellite treatment without implying separate organizations;
 - opportunity-beacon integration only where a real opportunity projection exists;
 - progressive detail by zoom;
 - proprietary density gradient;
@@ -138,10 +196,11 @@ Work:
 Acceptance:
 
 - PR #99 marker-visibility cases remain passing;
-- real marker remains anchored and visible in default 3D, 2D, Fit home, and manual interaction;
+- real marker remains anchored and visible in default 3D, 2D, Fit home and manual interaction;
 - attribution and authoritative geometry remain intact;
 - representative density performs on desktop/mobile;
-- no rainbow palette or generic outlined pins.
+- no generic outlined pins or rainbow category palette;
+- no false point geography for non-spatial objects.
 
 ### Brand Gate B4 — Public marketing and acquisition
 
@@ -149,12 +208,14 @@ Acceptance:
 
 Work:
 
-- cinematic full-bleed hero using rights-cleared real imagery/video;
-- approved positioning and Accel Analysis endorsement;
+- full-bleed rights-cleared real imagery/video;
+- approved product, category and **By Accel Analysis** parent architecture;
+- correct current footer/provenance language;
 - immersive narrative chapters;
 - dedicated bottom-matter routes;
 - actual RFxchange screenshots only when presentation-ready;
-- public opportunity/acquisition surfaces converge with the same system;
+- truthful public opportunity/acquisition surfaces;
+- explicit planned/conceptual labeling for future credibility or RFx stages;
 - evidence/provenance asset register;
 - image/video performance optimization.
 
@@ -165,11 +226,12 @@ Acceptance:
 - no autoplay audio;
 - reduced-motion media treatment;
 - performance budget and accessibility pass;
-- acquisition context survives the public-to-activation journey.
+- acquisition context survives public-to-activation journeys;
+- future capabilities are not represented as currently live.
 
 ### Brand Gate B5 — Onboarding and activation experience
 
-**Objective:** make onboarding the first branded product demonstration.
+**Objective:** make onboarding the first branded product demonstration without altering Wave 2 authority.
 
 Work:
 
@@ -180,53 +242,97 @@ Work:
 - marker-lock motion;
 - activation language and single next action;
 - state-preserving error/loading/autosave treatment;
-- optional sonic event hook behind disabled/approved preference infrastructure.
+- optional sonic event hook only behind separately approved preference infrastructure.
 
 Acceptance:
 
 - every Wave 2 activation gate remains authoritative;
 - no duplicated information;
 - no participation-role or business-objective reintroduction;
+- no provider-status shortcut;
 - reduced-motion equivalent;
 - sound cannot fire on failed activation;
 - configured-browser acceptance covers no-website and available-website paths.
 
-### Brand Gate B6 — Daily spatial workspace
+### Brand Gate B6a — Existing workspace foundation
 
-**Objective:** make the map the persistent living-market environment.
+**Objective:** converge the daily environment using only domains already present before live Network expansion.
 
 Work:
 
-- unified search/filter placement;
-- preserved viewport and selection across implemented lenses;
 - organization home;
-- opportunity home;
-- contextual gap actions;
+- unified search/filter placement;
+- deterministic map viewport and selected-object preservation;
 - responsive drawers/sheets;
-- object-centered notifications/status;
-- useful empty states;
-- data-provenance treatment.
+- object-centered status placement;
+- loading, empty, success, error, permission, expired and recovery states;
+- data-provenance treatment;
+- no future opportunity, referral, provider, credibility or RFx behavior.
 
 Acceptance:
 
 - no modal dead ends;
 - map state preservation is deterministic;
-- permission and expired states complete;
 - mobile and keyboard parity;
-- no later-wave workflow fabricated.
+- no later-wave workflow or object fabricated.
+
+### Brand Gate B6b — Network lenses
+
+**Earliest safe point:** after Wave 3 provides the applicable live domains.
+
+**Objective:** express the real Network using authoritative organization, referral and provider state.
+
+Work may include:
+
+- live organization discovery and enriched profile presentation;
+- real referral paths after Slice 3.5;
+- provider service fields and routing after Slice 3.7;
+- preserved context among organization, referral and provider lenses;
+- Network-specific empty, permission and low-density states.
+
+Acceptance:
+
+- paths/fields correspond to real relationships and territories;
+- provider approval, verification, credibility and paid status remain distinct;
+- map/list/detail parity and privacy pass;
+- no RFx or credibility object pulled forward.
+
+### Brand Gate B6c — RFx lens
+
+**Earliest safe point:** during or after Wave 4 RFx Core provides authoritative publication and relationship events.
+
+**Objective:** express live demand and RFx action within the same market environment.
+
+Work may include:
+
+- opportunity beacons after authoritative publication;
+- opportunity home;
+- potential-match explanation without qualification claims;
+- pursuit/gap actions;
+- contextual teammate/resource transitions;
+- RFx paths tied to canonical events;
+- hosted-submission and external-handoff truth treatment.
+
+Acceptance:
+
+- no duplicate RFx shell or bid-board product;
+- private pursuit/response data remains private;
+- beacons/paths use authoritative projections/events;
+- external handoff never claims external receipt;
+- Growth Green is not used for publication, pursuit, invitation or submission alone.
 
 ### Brand Gate B7 — Intelligence Dark
 
 **Objective:** add a true analytical dark mode.
 
-This is a net-new capability and requires approved tracker/product scope.
+This is a net-new capability and requires approved product/tracker scope.
 
 Work:
 
 - semantic dark token set;
 - dark Mapbox style;
 - dark nodes/beacons/fields/paths;
-- charts/tables/forms/overlays;
+- charts, tables, forms and overlays;
 - system/light/dark preference persistence;
 - flash-free fallback;
 - independent contrast/accessibility review.
@@ -247,12 +353,12 @@ This is a net-new capability.
 
 Work:
 
-- professional/rights-cleared sonic assets;
+- professional rights-cleared assets;
 - authoritative event adapters;
 - idempotency and duplicate suppression;
-- master, notification, and milestone controls;
-- quiet hours integration where supported;
-- visual/screen-reader equivalents;
+- master, notification and milestone controls;
+- quiet-hours integration where supported;
+- visible/screen-reader equivalents;
 - optional mobile haptic contracts.
 
 Acceptance:
@@ -275,7 +381,7 @@ Work:
 - sensitive-field suppression;
 - guided frames;
 - larger labels and minimized controls;
-- cinematic, reduced-motion-compatible transitions;
+- cinematic reduced-motion-compatible transitions;
 - provenance/caveat panel;
 - presenter authorization and exit behavior;
 - print/export treatment where approved.
@@ -283,14 +389,14 @@ Work:
 Acceptance:
 
 - no private data leakage;
-- only real authorized or clearly synthetic evidence;
+- only real authorized or clearly labeled synthetic evidence;
 - keyboard operation;
 - large-display performance;
-- audience-facing captures omit private controls/notifications.
+- captures omit private controls and notifications.
 
 ### Brand Gate B10 — Credibility and outcome expression
 
-**Objective:** apply the premium seal and outcome grammar when the authoritative domains exist.
+**Objective:** apply premium seal and outcome grammar when the authoritative domains exist.
 
 Work:
 
@@ -299,74 +405,99 @@ Work:
 - badge explanations and state behavior;
 - outcome-path transition;
 - provenance labels;
-- private/public credibility presentation boundaries.
+- private/public credibility boundaries.
 
 Acceptance:
 
 - no public numerical trust score;
 - membership and Founding status remain separate;
-- green only after appropriate outcome state;
-- suspended/expired/revoked behavior correct;
-- admin/ledger authority preserved.
+- green only after an appropriate outcome state;
+- suspended, expired and revoked behavior correct;
+- admin and ledger authority preserved.
 
-## 5. Domain dependency matrix
+## 7. Domain dependency matrix
 
 | Brand expression | Earliest safe implementation |
 | --- | --- |
-| Exchange Light semantic foundations | Post-Wave-2 Brand Gate B1 |
-| Organization node refinement | Post-PR #99 and B3 |
-| Public opportunity beacon | After Slice 2.9 public projection; full behavior after RFx opportunity domain |
-| Synthetic orientation paths | Slices 2.10–2.11 within strict tutorial isolation |
-| Real capability/team path | After corresponding discovery/team domain exists |
-| Service fields | After official provider/service-territory domain exists |
-| Referral paths | After referral state machine exists |
-| RFx lifecycle trace | After Wave 4 RFx domain exists |
-| Credibility seals | After Credibility domain implementation |
-| Outcome paths | After outcome and provenance states exist |
-| Intelligence Dark | Approved net-new capability after B1/B3 |
-| Presentation Mode | Approved net-new capability with safe projection |
-| Sonic/haptic runtime | Approved net-new capability with event and preference authority |
+| Exchange Light semantic foundations | B1 |
+| Shared organization-node primitive | B2; live migration B3 |
+| Additional-location satellite | B3 plus Wave 3 Slice 3.4 data |
+| Public opportunity beacon | Wave 2 public projection may remain conventional; full live beacon after Wave 4 authoritative publication |
+| Synthetic orientation paths | Completed Wave 2 tutorial only, isolated from live data |
+| Real capability/team path | Corresponding discovery/team relationship domain |
+| Referral paths | Wave 3 Slice 3.5 |
+| Service fields | Wave 3 Slice 3.7 |
+| RFx lifecycle trace | Wave 4 canonical RFx events |
+| Credibility seals | Credibility domain implementation |
+| Outcome paths | Appropriate outcome and provenance state |
+| Intelligence Dark | Approved B7 capability |
+| Presentation Mode | Approved B9 safe-projection capability |
+| Sonic/haptic runtime | Approved B8 event/preference capability |
 
-## 6. Branch and merge discipline
+## 8. Wave 3 integration
+
+- B0 must merge before Wave 3 Slice 3.1 so customer-facing transactional templates read the Content and Messaging System.
+- Complete B1, B2, B3 and B6a before Slice 3.2 to avoid rebuilding the first live Network workspace.
+- Slices 3.3–3.8 consume brand standards without widening their Feature-ID scope.
+- Run B6b only after the relevant live Network domains exist.
+
+## 9. Wave 4 integration
+
+Wave 4 planning lanes remain noncanonical until RFx Core convergence settles:
+
+- lifecycle/state machines;
+- permissions and organization roles;
+- version/publication identity;
+- pursuit ownership;
+- response creation/collaboration;
+- hosted submission sealing and issuer visibility;
+- withdrawal/replacement rules;
+- event/outbox transport;
+- dependency corrections;
+- final implementation slices and acceptance.
+
+B6c consumes those canonical results; it does not define them visually.
+
+## 10. Branch and merge discipline
 
 For each gate:
 
-- branch from current merged main;
+- branch from current merged `main`;
 - implement one authorized scope;
-- name all affected domain contracts;
-- run repository and configured-browser acceptance;
-- keep PR draft until required evidence exists;
-- merge before dependency recalculation;
-- do not stack unrelated brand gates on an unmerged base;
-- do not mark Feature IDs complete unless the authorized tracker evidence is satisfied;
+- name every affected domain contract;
+- run repository and applicable configured-browser acceptance;
+- keep the PR draft until required evidence exists;
+- merge before dependency/gate recalculation;
+- do not stack unrelated gates on an unmerged base;
+- do not mark Feature IDs complete unless authorized tracker evidence is satisfied;
 - do not merge visual simulation as evidence of a domain feature.
 
-## 7. Testing architecture
+## 11. Testing architecture
 
 Add reusable validators/tests for:
 
-- exact palette and semantic role mapping;
+- palette and semantic role mapping;
 - prohibited one-off raw colors in governed participant components;
-- product naming and parent endorsement rules;
-- prohibited unsupported claims;
-- mode-aware contrast tokens;
-- motion duration/easing and reduced-motion presence;
-- focal marker visibility geometry;
-- synthetic/live data isolation;
-- map/list parity contracts;
-- public asset provenance metadata;
-- sound event authority and idempotency;
+- product naming and parent endorsement;
+- unsupported claims;
+- mode-aware contrast;
+- motion/easing and reduced-motion presence;
+- focal marker visibility;
+- synthetic/live isolation;
+- map/list parity;
+- public asset provenance;
+- sound-event authority and idempotency;
 - Presentation Mode safe projection;
 - credibility/membership separation;
 - outcome/green semantic separation.
 
 Tests must verify behavior, not merely inspect strings when runtime evidence is required.
 
-## 8. Performance budgets
+## 12. Performance budgets
 
-Each implementation gate should define budgets for the affected surface, including:
+Each gate defines budgets for affected surfaces, including as applicable:
 
-- public LCP/CLS/INP;
+- public LCP, CLS and INP;
 - map first-interaction readiness;
 - panel open/close responsiveness;
 - supported marker/field/path density;
@@ -376,19 +507,19 @@ Each implementation gate should define budgets for the affected surface, includi
 - mobile memory and battery behavior;
 - reduced-resource fallback.
 
-Premium visual effects must be removed or degraded when they compromise use.
+Premium effects must degrade or be removed when they compromise use.
 
-## 9. Completion definition
+## 13. Completion definition
 
-The Brand Experience Convergence program is complete only when:
+The full Brand Experience Convergence program is complete only when:
 
-- the canonical system is linked from repository design/context authorities;
+- the target system is linked from repository design/context authorities;
 - shared semantic tokens and components are implemented;
-- public, onboarding, spatial, and operational surfaces use the same system;
+- public, onboarding, spatial and operational surfaces use the same system;
 - applicable viewing modes are complete and accessible;
-- motion and sound follow governed controls;
+- motion and any approved sound follow governed controls;
 - real domain objects use the proprietary grammar;
-- loading, empty, success, error, permission, expired, and recovery states are complete;
+- loading, empty, success, error, permission, expired and recovery states are complete;
 - no invented customer-facing evidence appears;
 - configured-browser acceptance passes across representative modes and viewports;
-- tracker and release documentation accurately reflect what was actually built.
+- tracker and release documentation reflect what was actually built.
