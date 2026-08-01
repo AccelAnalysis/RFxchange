@@ -1,8 +1,8 @@
 # The RFxchange Brand Experience System
 
-**Status: CANONICAL TARGET BRAND AUTHORITY — BRAND GATE B0 RECONCILED; PRODUCTION IMPLEMENTATION REQUIRES AN AUTHORIZED BRAND GATE**
+**Status: CANONICAL TARGET BRAND AUTHORITY — B0 COMPLETE; B1 IMPLEMENTED IN PR #109 PENDING FINAL CI/MERGE; B2 NOT YET AUTHORIZED**
 
-This directory defines the approved target brand experience for **The RFxchange** after reconciliation against the completed Wave 2 implementation.
+This directory defines the approved target brand experience for **The RFxchange** and the sequential gates that converge it with production behavior.
 
 The governing product idea is:
 
@@ -10,17 +10,20 @@ The governing product idea is:
 
 The platform should feel like a living market, not a conventional dashboard. Brand is expressed through the complete experience: public positioning, photography, geography, map objects, typography, color meaning, motion, optional sound, messaging, empty states, credibility, accessibility, responsiveness, performance, authorization and recovery.
 
-## Reconciliation baseline
+## Current baseline
 
-Brand Gate B0 reconciled this package against final Wave 2 `main`:
+Brand Gate B1 branches from reconciled `main` after Wave 3 Slice 3.1:
 
-- final Wave 2 SHA: `097b574ccce8865d4127cfe381fb0bd6199de0a5`;
-- tracker: **438 total · 118 Done · 320 Not Started**;
+- baseline SHA: `c059e69e956f1a18983c526a60d87bbfd3930a8b`;
+- tracker: **438 total · 121 Done · 317 Not Started**;
 - Activation: **43/43**;
-- next dependency-eligible candidate: Wave 3 Slice 3.1 — `COMMS-003`, `COMMS-004`, `COMMS-005`;
-- no production brand code, CSS, Mapbox styling, marker behavior, motion, sound, settings, tracker totals, dependency edges or Feature-ID states changed in B0.
+- Network: **7/38**;
+- `COMMS-003`, `COMMS-004` and `COMMS-005` are complete;
+- Brand Gate B0 is complete;
+- Slice 3.2 remains unstarted and blocked behind B1, B2, B3 and B6a;
+- Brand Gate B1 is implemented in PR #109 but is not complete until final CI passes and the PR merges.
 
-See [`BRAND_GATE_B0_RECONCILIATION.md`](BRAND_GATE_B0_RECONCILIATION.md) for the governing authority order, requirement classification, code/test boundaries and Wave 3/4 integration.
+See [`BRAND_GATE_B0_RECONCILIATION.md`](BRAND_GATE_B0_RECONCILIATION.md) for the governing authority order and [`BRAND_GATE_B1_SEMANTIC_FOUNDATION.md`](BRAND_GATE_B1_SEMANTIC_FOUNDATION.md) for the semantic token, compatibility, drift-control and B2 handoff contract.
 
 ## Product architecture
 
@@ -54,7 +57,7 @@ These may govern authorized work without claiming a new domain feature:
 
 ### Domain-dependent expressions
 
-These may be designed now but cannot appear as live state until their owning domains exist:
+These may be designed as semantic contracts but cannot appear as live state until their owning domains exist:
 
 - opportunity beacons;
 - provider/service fields;
@@ -85,27 +88,30 @@ These require explicit product scope, persistence, permissions, testing and trac
 | `BRAND_EXPERIENCE_ACCEPTANCE_MATRIX.md` | Required brand, state, accessibility, performance, provenance and domain-boundary acceptance for participant surfaces |
 | `BRAND_IMPLEMENTATION_ROADMAP.md` | Sequential Brand Gates, domain dependencies, code gates and release checkpoints |
 | `BRAND_GATE_B0_RECONCILIATION.md` | Completed Wave 2 reconciliation, authority order, Wave 3/4 integration and implementation holds |
+| `BRAND_GATE_B1_SEMANTIC_FOUNDATION.md` | Exchange Light semantic tokens, accessibility, compatibility, object semantics, drift controls and B2 handoff |
 | `CODEX_WAVE_2_BRAND_AUTHORITY_ADDENDUM.md` | Historical Wave 2 constraint record applied to Slices 2.9–2.12 |
 
 ## Current implementation boundary
 
-B0 is complete as documentation and authority work. It does **not** authorize broad production convergence.
+B0 is merged. B1 is the only active Brand Gate until PR #109 passes final CI and merges.
 
-Do not begin any later Brand Gate unless the current task explicitly authorizes it. In particular:
+B1 may add semantic foundations but may not:
 
-- do not refactor production tokens/components merely because the target system exists;
-- do not restyle Mapbox or alter marker/camera authority outside an authorized gate;
-- do not implement Intelligence Dark, Presentation Mode, sound or haptics without product/tracker authority;
-- do not display domain-dependent objects before their source domains exist;
-- do not change tracker counts or Feature-ID completion for documentation-only work;
-- do not fabricate organizations, opportunities, maps, statistics, outcomes, testimonials, provider availability or live activity.
+- consolidate or restyle shared components reserved for B2;
+- restyle Mapbox or alter marker/camera authority reserved for B3;
+- implement Intelligence Dark, Presentation Mode, sound or haptics;
+- display domain-dependent objects before their source domains exist;
+- change tracker counts, dependencies or Feature-ID completion;
+- fabricate organizations, opportunities, maps, statistics, outcomes, testimonials, provider availability or live activity.
+
+After B1 merges, B2 becomes ready for explicit authorization. B2 must branch from merged B1 `main`; it must not be stacked on the B1 branch.
 
 ## Wave integration
 
 ### Wave 3
 
-- Slice 3.1 may consume the Content and Messaging System for versioned transactional templates after explicit authorization.
-- Before Slice 3.2 begins, Brand Gates B1, B2, B3 and B6a should establish semantic foundations, shared primitives, cartographic convergence and the existing-domain workspace foundation.
+- Slice 3.1 consumed the Content and Messaging System and is complete.
+- Complete B1, B2, B3 and B6a before Slice 3.2 to avoid rebuilding the first live Network workspace.
 - Referral paths become legitimate with Slice 3.5.
 - Provider service fields become legitimate with Slice 3.7.
 
