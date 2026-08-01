@@ -1,6 +1,6 @@
 # Brand Gate B1 — Semantic Design Foundation
 
-**Status: IMPLEMENTED ON THE AUTHORIZED B1 BRANCH — MERGE AND FINAL CI REQUIRED BEFORE B2**
+**Status: COMPLETE — IMPLEMENTED IN PR #109 AND MERGED TO `main`**
 
 ## 1. Objective
 
@@ -8,19 +8,33 @@ Brand Gate B1 creates reusable, mode-aware semantic foundations for **The RFxcha
 
 The implemented default remains **Exchange Light**. Intelligence Dark, Presentation Mode, sound, haptics, new settings, Mapbox restyling, component consolidation and live Network objects are outside B1.
 
-## 2. Baseline and authority
+## 2. Baseline and completion evidence
 
-B1 branches from reconciled `main` at:
+B1 branched from reconciled `main` at:
 
 `c059e69e956f1a18983c526a60d87bbfd3930a8b`
 
-That baseline includes:
+It was implemented in PR #109 and merged at:
 
-- Wave 3 Slice 3.1 complete and reconciled;
+`c4c18272f46ad3e3120e2dcf6405fda8a274a685`
+
+Production CI run **444** (`30720318973`) passed on the final implementation head `743493799d096040f4482863d699436bc4855c8a`, including:
+
+- product-system and B1 semantic guardrails;
+- Cloud Functions build and tests;
+- complete Firebase Auth, Firestore, Functions and Storage emulator suite;
+- architecture tests, including B1 semantic contracts;
+- TypeScript;
+- lint;
+- production build.
+
+The governing product baseline remains:
+
 - tracker at **438 total · 121 Done · 317 Not Started**;
+- Activation at **43/43**;
 - Network at **7/38**;
-- Brand Gate B0 complete;
-- Slice 3.2 unstarted and blocked behind B1, B2, B3 and B6a.
+- Wave 3 Slice 3.1 complete;
+- Slice 3.2 unstarted and still blocked behind B2, B3 and B6a.
 
 B1 supplements but does not weaken security, organization isolation, lifecycle, geography, privacy, marker, acquisition, tutorial-isolation, communications, tracker or dependency authority.
 
@@ -106,7 +120,7 @@ B2 may migrate shared primitives from legacy aliases and one-off values to these
 - Accessible Dark Gold contrast and correct small-text mapping;
 - Exchange Light mode and the absence of an unauthorized dark-mode implementation;
 - structural, typography, motion and object token families;
-- Aptos/system-safe typography and absence of bundled font declarations;
+- Aptos/system-safe typography and absence of bundled font declarations/assets;
 - legacy raw-token compatibility;
 - semantic CSS loading order;
 - no direct approved raw palette literals in governed brand, participant or future shared-UI primitive directories;
@@ -116,7 +130,7 @@ The validator runs with the existing product-system guardrail. `test/brand-seman
 
 ## 6. Explicit non-scope
 
-B1 does not implement:
+B1 did not implement:
 
 - B2 shared component primitives;
 - B3 Mapbox/cartographic convergence;
@@ -131,8 +145,10 @@ B1 does not implement:
 - any tracker or dependency change;
 - any live organization, opportunity, referral, provider, RFx, credibility or outcome representation.
 
-## 7. Exit condition
+## 7. Exit and next gate
 
-B1 is complete only after the final branch head passes repository guardrails, all tests, TypeScript, lint and production build, and the B1 PR merges into `main`.
+B1 has met its exit condition: the final implementation head passed every required gate and PR #109 merged into `main`.
 
-After that merge, **Brand Gate B2 — Shared Component Primitives** is the next gate ready for explicit authorization. B2 must branch from the merged B1 `main`; it must not be stacked on an unmerged B1 branch.
+**Brand Gate B2 — Shared Component Primitives is now the next gate ready for explicit authorization.**
+
+B2 must branch from merged B1 `main` at or after `c4c18272f46ad3e3120e2dcf6405fda8a274a685`. B2 has not begun in B1 or this reconciliation.
