@@ -11,6 +11,7 @@ const [
   mapboxCanvas,
   spatialScene,
   geographyRoute,
+  existingWorkspace,
   participantMapRuntime,
   activationClient,
   locationPanel,
@@ -24,6 +25,7 @@ const [
   read("src/components/map/MapboxLocalityCanvas.tsx"),
   read("src/components/map/ExchangeSpatialScene.tsx"),
   read("app/geography/canvas/page.tsx"),
+  read("src/components/participant/ExistingWorkspaceFoundation.tsx"),
   read("src/infrastructure/geography/participant-map-runtime.ts"),
   read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("src/components/organization-location/OrganizationLocationPanel.tsx"),
@@ -39,7 +41,6 @@ assert.ok(
   "Mapbox browser token configuration must require a public token and reject secret-token guidance.",
 );
 
-const authenticatedMapSurface = `${geographyRoute}\n${participantMapRuntime}`;
 for (const requirement of [
   "new mapboxgl.Map",
   'style: "mapbox://styles/mapbox/standard"',
@@ -102,18 +103,26 @@ assert.ok(
   "The bundled map model must be generic around home locality rather than Portsmouth-only semantics.",
 );
 
+const authenticatedMapSurface = `${geographyRoute}\n${existingWorkspace}\n${participantMapRuntime}`;
 for (const requirement of [
   "resolveParticipantRoute",
   "createFirestoreOrganizationLocationRepositories",
   "createFirestoreOrganizationMarkerRepositories",
   "projectPublicOrganizationMarker",
+  "ExistingWorkspaceFoundation",
   "ExchangeSpatialScene",
   'mode="organization"',
-  "marker={authenticated.homeMarker}",
+  "marker={homeMarker}",
   "interactive",
 ]) {
   assert.ok(authenticatedMapSurface.includes(requirement), `Authenticated Intelligence map is missing ${requirement}.`);
 }
+assert.ok(
+  geographyRoute.includes("organizationId={authenticated.organizationId}") &&
+    existingWorkspace.includes("showSearch") &&
+    existingWorkspace.includes('workspaceOverlay={panelOpen ? "right" : null}'),
+  "B6a must preserve authorized organization identity, one operational search, and contextual map controls.",
+);
 assert.ok(!geographyRoute.includes("SearchFilterOverlay"), "Intelligence must avoid a decorative duplicate search control.");
 
 assert.ok(
@@ -145,5 +154,5 @@ assert.ok(
 );
 
 console.log(
-  "Mapbox production surfaces validated: account-only Intelligence adoption, operational search/view controls, spatial onboarding/home orbit, authoritative home-locality focus, public-token hygiene, and viewport/authority separation.",
+  "Mapbox production surfaces validated: account-only B6a Intelligence adoption, operational search/view controls, spatial onboarding/home orbit, authoritative home-locality focus, public-token hygiene, and viewport/authority separation.",
 );
