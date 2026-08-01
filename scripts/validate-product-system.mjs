@@ -107,5 +107,6 @@ await import("./validate-brand-shared-primitives.mjs");
 await import("./validate-brand-cartographic-convergence.mjs");
 await import("./validate-brand-public-marketing.mjs");
 await import("./validate-brand-activation-experience.mjs");
+await import("./validate-brand-existing-workspace.mjs");
 
 console.log("Wave 0 product-system validation passed, including ACQ-001 and core brand foundation BRD-001/003/005/014.");
