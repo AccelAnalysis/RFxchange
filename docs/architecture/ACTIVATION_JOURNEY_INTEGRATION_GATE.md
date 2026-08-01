@@ -66,6 +66,12 @@ Organization resolution persists website disposition, normalized website URL and
 
 Essential registration consumes this persisted seed and the authenticated user's name/email. It does not ask the participant to recreate previously supplied organization information.
 
+## Authority and Verification remain separate
+
+Selecting or creating an organization, submitting evidence, or becoming its authorized administrator establishes only the applicable organization relationship and control boundary. **This is not Organization Verification.** Authority determines who may act for the organization; Verification is a later substantive credibility decision with its own evidence and administrator controls.
+
+No activation field, payment state, descriptive role, business objective, Profile Complete state or marker can silently convert Authority into Verification.
+
 ## Essential registration
 
 Essential registration collects only:
@@ -115,6 +121,7 @@ The integration gate must prove:
 - an authenticated user without activation can begin organization setup separately;
 - locality suggestions debounce, cache and remain server-authoritative;
 - organization website/phone survive refresh and carry into the profile;
+- selecting or creating an organization never implies Organization Verification;
 - activation renders/submits no participation roles or business objectives;
 - Profile Complete excludes organization-type and participation-role requirements;
 - Other capability category requires custom text;
