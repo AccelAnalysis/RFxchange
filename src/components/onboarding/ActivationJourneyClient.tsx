@@ -192,12 +192,7 @@ export function ActivationJourneyClient({
     if (step !== "geography") return;
     const query = localityQuery.trim();
     const stateCode = localityStateCode.trim();
-    if (query.length < 2 || stateCode.length !== 2) {
-      setGeographyCandidates([]);
-      setActiveGeographyIndex(-1);
-      setGeographySearching(false);
-      return;
-    }
+    if (query.length < 2 || stateCode.length !== 2) return;
 
     const controller = new AbortController();
     const timeout = window.setTimeout(() => {
@@ -472,7 +467,15 @@ export function ActivationJourneyClient({
                   City, county, or locality
                   <input
                     value={localityQuery}
-                    onChange={(event) => setLocalityQuery(event.target.value)}
+                    onChange={(event) => {
+                      const nextQuery = event.target.value;
+                      setLocalityQuery(nextQuery);
+                      if (nextQuery.trim().length < 2) {
+                        setGeographyCandidates([]);
+                        setActiveGeographyIndex(-1);
+                        setGeographySearching(false);
+                      }
+                    }}
                     onKeyDown={(event) => {
                       if (event.key === "ArrowDown") {
                         event.preventDefault();
@@ -500,7 +503,15 @@ export function ActivationJourneyClient({
                   />
                   <small>{geographySearching ? "Finding Census localities…" : "Suggestions update as you type."}</small>
                 </label>
-                <label>State <small>Two-letter code</small><input value={localityStateCode} onChange={(event) => setLocalityStateCode(event.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2))} minLength={2} maxLength={2} placeholder="VA" required /></label>
+                <label>State <small>Two-letter code</small><input value={localityStateCode} onChange={(event) => {
+                  const nextStateCode = event.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2);
+                  setLocalityStateCode(nextStateCode);
+                  if (nextStateCode.length !== 2) {
+                    setGeographyCandidates([]);
+                    setActiveGeographyIndex(-1);
+                    setGeographySearching(false);
+                  }
+                }} minLength={2} maxLength={2} placeholder="VA" required /></label>
               </div>
             </div>
             {geographyCandidates.length ? (
