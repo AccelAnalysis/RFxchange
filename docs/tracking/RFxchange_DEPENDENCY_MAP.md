@@ -142,7 +142,8 @@ The sequence above is planning order, not a completion claim. Recalculate depend
 
 ```text
 Wave 2 OPEN/marker
-  → COMMS-003/004/005
+  → COMMS-003/004/005 [Done via PR #107]
+  → Brand Gates B1/B2/B3/B6a [non-Feature sequencing boundary]
   → GEO-012 + DSC-001/002/003
   → ORG-013/014/016/017
   → ORG-015/018/019
@@ -154,11 +155,11 @@ Wave 2 OPEN/marker
 
 The already-complete Wave 3 foundations `ORG-021`, `ORG-022`, `ADM-055` and `ADM-056` remain inherited prerequisites and are not rebuilt.
 
-## Adopted Wave 3 Network slice roadmap — Wave 2 exit verified; implementation authorization pending
+## Adopted Wave 3 Network slice roadmap — Slice 3.1 complete; Slice 3.2 held behind Brand Gates
 
-Wave 3 contains **38 Network features**. Four are already complete from Wave 1, leaving **34 features** across eight slices:
+Wave 3 contains **38 Network features**. Seven are complete: four inherited Wave 1 foundations and three Slice 3.1 communications features. The remaining **31 features** stay organized in the adopted sequence:
 
-1. **Slice 3.1 — `COMMS-003` + `COMMS-004` + `COMMS-005` — Transactional Communications Reliability**.
+1. **Slice 3.1 — `COMMS-003` + `COMMS-004` + `COMMS-005` — Transactional Communications Reliability — COMPLETE VIA PR #107**.
 2. **Slice 3.2 — `GEO-012` + `DSC-001` + `DSC-002` + `DSC-003` — Controlled Network Entry & Discovery**.
 3. **Slice 3.3 — `ORG-013` + `ORG-014` + `ORG-016` + `ORG-017` — Market Profile Enrichment**.
 4. **Slice 3.4 — `ORG-015` + `ORG-018` + `ORG-019` — Credential, Media & Location Enrichment**.
@@ -167,8 +168,8 @@ Wave 3 contains **38 Network features**. Four are already complete from Wave 1, 
 7. **Slice 3.7 — `RES-004` + `RES-005` + `DSC-011` + `REF-006` + `RES-007` + `RES-008` + `ACQ-008` — Resource Discovery, Routing & Provider Distribution**.
 8. **Slice 3.8 — `EDU-016` + `EDU-017` — Persistent Network Education**.
 
-**Dependency result:** Wave 2 exit was verified from merged `main` at `d599901d7ff35a4ee67eb2363dcf3334a2303dbc`. Slice 3.1 (`COMMS-003`, `COMMS-004`, `COMMS-005`) is the earliest dependency-eligible candidate.
+**Dependency result:** PR #107 merged at `368fdb5e0179ca7933eb33ffb6cbf12a2afe2bf1`. The Network dependency graph now makes `GEO-012`, `DSC-001`, `DSC-002` and `DSC-003` eligible as the next Feature-ID set.
 
-**Implementation hold:** no Wave 3 implementation begins until an explicit task authorizes Slice 3.1.
+**Implementation sequencing hold:** Slice 3.2 cannot begin until Brand Gates B1, B2, B3 and B6a are complete and a later task explicitly authorizes Slice 3.2. Brand Gates do not satisfy or mark Network Feature IDs; they establish the semantic, component, cartographic and existing-workspace foundations required to implement the first live Network workspace without immediate rework.
 
 See `docs/slices/WAVE_3_ROADMAP.md` and the applicable canonical slice brief for detailed boundaries and acceptance intent.
