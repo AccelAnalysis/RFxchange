@@ -238,7 +238,7 @@ function tutorialPathGeoJson(overlay?: SyntheticOrientationMapOverlay | null) {
     type: "FeatureCollection" as const,
     features: overlay.paths.map((path) => ({
       type: "Feature" as const,
-      properties: { id: path.id, kind: path.kind, provenance: path.provenance },
+      properties: { id: path.id, kind: path.kind, stage: overlay.stage, provenance: path.provenance },
       geometry: {
         type: "LineString" as const,
         coordinates: path.coordinates.map(([longitude, latitude]) => [longitude, latitude]),
@@ -800,9 +800,17 @@ export function ExchangeSpatialScene({
         type: "line",
         source: TUTORIAL_PATH_SOURCE_ID,
         paint: {
-          "line-color": ["match", ["get", "kind"], "teammate-discovery", "#3b7b57", "#2e5eaa"],
-          "line-opacity": 0.9,
-          "line-width": 4,
+          "line-color": [
+            "match", ["get", "kind"],
+            "demand-signal", "#d6a23a",
+            "capability-match", "#2e5eaa",
+            "teammate-discovery", "#3b7b57",
+            "joint-response", "#d6a23a",
+            "selected-outcome", "#3b7b57",
+            "#2e5eaa",
+          ],
+          "line-opacity": ["case", ["==", ["get", "stage"], "network-effect"], 1, 0.9],
+          "line-width": ["case", ["==", ["get", "stage"], "network-effect"], 5, 4],
           "line-dasharray": [1.6, 1.1],
         },
       });
@@ -1057,6 +1065,7 @@ export function ExchangeSpatialScene({
                 {option.label}
               </button>
             ))}
+            <button type="button" onClick={fitHomeLocality}>Fit home</button>
           </div>
         </>
       ) : null}

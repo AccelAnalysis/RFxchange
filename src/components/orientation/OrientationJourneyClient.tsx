@@ -5,11 +5,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import {
   createSyntheticOrientationScenario,
-  phaseOneOrientationOverlay,
+  orientationMapOverlay,
 } from "../../application/orientation/synthetic-scenario";
 import {
   ORIENTATION_STEP_SEQUENCE,
-  SLICE_2_10_MAX_ORIENTATION_STEP,
+  SLICE_2_11_MAX_ORIENTATION_STEP,
   type OrientationJourney,
   type OrientationStepKey,
 } from "../../domain/orientation/model";
@@ -39,7 +39,38 @@ const STEP_COPY = Object.freeze({
     summary: "A capability gap reveals a possible teammate in the local network.",
     detail: "Discovery does not create a team, confer authority, issue an invitation, or create a contractual relationship.",
   }),
-} satisfies Partial<Record<OrientationStepKey, Readonly<{ eyebrow: string; summary: string; detail: string }>>>);
+  "teammate-invitation": Object.freeze({
+    eyebrow: "Step 5 · Review and accept",
+    summary: "The discovered teammate reviews a defined contribution before accepting.",
+    detail: "The invitation carries context and capacity, but acceptance remains a nonbinding Exchange workflow state.",
+  }),
+  "joint-response": Object.freeze({
+    eyebrow: "Step 6 · Structured response",
+    summary: "Requirements become assigned, reviewable response sections.",
+    detail: "The responder and teammate can see who contributes each section and whether the synthetic response is complete.",
+  }),
+  "human-evaluation": Object.freeze({
+    eyebrow: "Step 7 · Human evaluation",
+    summary: "The issuer compares responses against the criteria it stated.",
+    detail: "RFxchange can organize evidence and comparison. The issuer—not an automated winner model—makes the selection.",
+  }),
+  "network-effect": Object.freeze({
+    eyebrow: "Step 8 · Connected outcome",
+    summary: "See the complete Exchange journey as one geographic network.",
+    detail: "Demand, discoverable capability, a gap, a teammate, a joint response, and a human-selected outcome now connect on the map.",
+  }),
+} satisfies Record<OrientationStepKey, Readonly<{ eyebrow: string; summary: string; detail: string }>>);
+
+const ACTION_LABELS: Readonly<Record<OrientationStepKey, string>> = Object.freeze({
+  "three-organization-scenario": "Continue",
+  "opportunity-issuance": "Continue",
+  "capability-match": "Continue",
+  "gap-and-teammate-discovery": "Continue to invitation",
+  "teammate-invitation": "Accept synthetic invitation",
+  "joint-response": "Submit synthetic response",
+  "human-evaluation": "Make human tutorial selection",
+  "network-effect": "Complete orientation",
+});
 
 interface OrientationResponse {
   readonly journey?: OrientationJourney;
@@ -60,10 +91,10 @@ export function OrientationJourneyClient({
   const [error, setError] = useState<string | null>(null);
   const scenario = useMemo(() => createSyntheticOrientationScenario(model), [model]);
   const journeyRef = useRef<HTMLDivElement | null>(null);
-  const overlay = useMemo(() => phaseOneOrientationOverlay(scenario, journey), [scenario, journey]);
+  const overlay = useMemo(() => orientationMapOverlay(scenario, journey), [scenario, journey]);
   const completed = journey?.completedThroughStep ?? 0;
-  const currentStep = ORIENTATION_STEP_SEQUENCE[Math.min(completed, SLICE_2_10_MAX_ORIENTATION_STEP - 1)];
-  const copy = (currentStep ? STEP_COPY[currentStep.key as keyof typeof STEP_COPY] : undefined) ?? STEP_COPY["three-organization-scenario"];
+  const currentStep = ORIENTATION_STEP_SEQUENCE[Math.min(completed, SLICE_2_11_MAX_ORIENTATION_STEP - 1)];
+  const copy = currentStep ? STEP_COPY[currentStep.key] : STEP_COPY["three-organization-scenario"];
 
   useEffect(() => {
     journeyRef.current?.closest("aside")?.scrollTo({ top: 0, behavior: "auto" });
@@ -88,7 +119,8 @@ export function OrientationJourneyClient({
     }
   }
 
-  const phaseComplete = completed >= SLICE_2_10_MAX_ORIENTATION_STEP;
+  const orientationComplete = journey?.status === "completed" && completed === SLICE_2_11_MAX_ORIENTATION_STEP;
+  const part = completed < 4 ? 1 : 2;
 
   return (
     <ParticipantShell activeItem="Intelligence">
@@ -105,7 +137,7 @@ export function OrientationJourneyClient({
         <ResponsiveEdgeSheet ariaLabelledBy="orientation-title" side="right">
           <div ref={journeyRef} className={styles.journey} data-orientation-scenario={scenario.id} data-synthetic-provenance={scenario.provenance}>
             <div className={styles.tutorialFlag}>Synthetic tutorial · not live activity</div>
-            <p className={styles.progress}>Part 1 of 2 · {completed} of 8 steps completed</p>
+            <p className={styles.progress}>Part {part} of 2 · {completed} of 8 steps completed</p>
             <h1 id="orientation-title">See how the Exchange works</h1>
             <ul className={styles.legend} aria-label="Synthetic tutorial map roles">
               <li data-role="issuer"><span aria-hidden="true">I</span> Tutorial Issuer</li>
@@ -116,22 +148,21 @@ export function OrientationJourneyClient({
             {!journey ? (
               <>
                 <p className={styles.lede}>
-                  Walk through one versioned scenario on the real controlled map. Your organization marker stays visible, while every tutorial organization, opportunity, and connection is synthetic.
+                  Walk through one versioned scenario on the real controlled map. Your organization marker stays visible, while every tutorial organization, opportunity, response, and connection is synthetic.
                 </p>
                 <button className={styles.primary} type="button" disabled={pending} onClick={() => mutate({ action: "start" })}>
                   {pending ? "Starting…" : "Start orientation"}
                 </button>
               </>
-            ) : phaseComplete ? (
+            ) : orientationComplete ? (
               <>
-                <p className={styles.eyebrow}>Part one complete</p>
-                <h2>From demand to a possible teammate</h2>
-                <p className={styles.lede}>
-                  You have seen the local network, a synthetic need, a potential capability fit, and complementary teammate discovery. Invitation, response, human evaluation, and the network effect continue in the next approved slice.
-                </p>
-                <div className={styles.boundary}>No live opportunity, response, teammate invitation, ranking, or credibility record was created.</div>
+                <p className={styles.eyebrow}>Orientation complete</p>
+                <h2>A connected network, not isolated tools</h2>
+                <p className={styles.lede}>{scenario.networkEffect.summary}</p>
+                <div className={styles.boundary}>{scenario.networkEffect.outcomeBoundary}</div>
+                <p className={styles.nextStep}>Your completion is saved. First-value selection follows in the next approved activation step.</p>
                 <button className={styles.secondary} type="button" disabled={pending} onClick={() => mutate({ action: "restart" })}>
-                  {pending ? "Restarting…" : "Restart part one"}
+                  {pending ? "Restarting…" : "Restart orientation"}
                 </button>
               </>
             ) : (
@@ -139,6 +170,7 @@ export function OrientationJourneyClient({
                 <p className={styles.eyebrow}>{copy.eyebrow}</p>
                 <h2>{copy.summary}</h2>
                 <p className={styles.lede}>{copy.detail}</p>
+
                 {currentStep?.key === "opportunity-issuance" ? (
                   <div className={styles.fact}><span>Synthetic need</span><strong>{scenario.opportunity.title}</strong><small>{scenario.opportunity.requiredCapabilities.join(" · ")}</small></div>
                 ) : null}
@@ -148,13 +180,64 @@ export function OrientationJourneyClient({
                 {currentStep?.key === "gap-and-teammate-discovery" ? (
                   <div className={styles.fact}><span>Capability gap</span><strong>{scenario.capabilityGap.capability}</strong><small>{scenario.capabilityGap.discoveryBoundary}</small></div>
                 ) : null}
+                {currentStep?.key === "teammate-invitation" ? (
+                  <section className={styles.workflowCard} aria-label="Synthetic teammate invitation">
+                    <span>Defined capacity</span>
+                    <h3>{scenario.teammateInvitation.capacity}</h3>
+                    <p>{scenario.teammateInvitation.context}</p>
+                    <dl className={styles.statusPair}><div><dt>Context</dt><dd>Reviewed</dd></div><div><dt>Decision</dt><dd>Ready to accept</dd></div></dl>
+                    <small>{scenario.teammateInvitation.nonbindingBoundary}</small>
+                  </section>
+                ) : null}
+                {currentStep?.key === "joint-response" ? (
+                  <section className={styles.workflowCard} aria-labelledby="response-title">
+                    <span>Synthetic response workspace</span>
+                    <h3 id="response-title">{scenario.jointResponse.title}</h3>
+                    <ul className={styles.requirements}>
+                      {scenario.jointResponse.sections.map((section) => (
+                        <li key={section.id}><div><strong>{section.requirement}</strong><small>{section.assignedTo}</small></div><b>Complete</b></li>
+                      ))}
+                    </ul>
+                    <small>{scenario.jointResponse.submissionBoundary}</small>
+                  </section>
+                ) : null}
+                {currentStep?.key === "human-evaluation" ? (
+                  <section className={styles.workflowCard} aria-labelledby="evaluation-title">
+                    <span>Issuer comparison</span>
+                    <h3 id="evaluation-title">Stated criteria, human decision</h3>
+                    <div className={styles.comparison} role="table" aria-label="Synthetic response comparison">
+                      <div className={styles.comparisonHeader} role="row">
+                        <b role="columnheader">Criterion</b>
+                        {scenario.evaluation.responses.map((response) => <b role="columnheader" key={response.id}>{response.label}</b>)}
+                      </div>
+                      {scenario.evaluation.criteria.map((criterion, index) => (
+                        <div className={styles.comparisonRow} role="row" key={criterion.id}>
+                          <span role="rowheader">{criterion.label} <small>{criterion.weight}</small></span>
+                          {scenario.evaluation.responses.map((response) => <span role="cell" key={response.id}>{response.findings[index]}</span>)}
+                        </div>
+                      ))}
+                    </div>
+                    <small>{scenario.evaluation.authorityBoundary}</small>
+                  </section>
+                ) : null}
+                {currentStep?.key === "network-effect" ? (
+                  <section className={styles.workflowCard} aria-label="Complete synthetic network effect">
+                    <span>Complete network effect</span>
+                    <h3>Five connected moments on one map</h3>
+                    <ol className={styles.networkSequence}>
+                      <li>Demand became visible</li><li>Capability became discoverable</li><li>A gap revealed a teammate</li><li>The team responded</li><li>The issuer selected an outcome</li>
+                    </ol>
+                    <small>{scenario.networkEffect.outcomeBoundary}</small>
+                  </section>
+                ) : null}
+
                 <button
                   className={styles.primary}
                   type="button"
                   disabled={pending || !currentStep}
                   onClick={() => currentStep && mutate({ action: "complete-step", stepKey: currentStep.key })}
                 >
-                  {pending ? "Saving…" : completed === 3 ? "Complete part one" : "Continue"}
+                  {pending ? "Saving…" : currentStep ? ACTION_LABELS[currentStep.key] : "Continue"}
                 </button>
                 <button className={styles.textButton} type="button" disabled={pending} onClick={() => mutate({ action: "restart" })}>Restart</button>
               </>

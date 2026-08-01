@@ -19,6 +19,7 @@ export const ORIENTATION_STEP_SEQUENCE = Object.freeze([
 
 export type OrientationStepKey = (typeof ORIENTATION_STEP_SEQUENCE)[number]["key"];
 export const SLICE_2_10_MAX_ORIENTATION_STEP = 4 as const;
+export const SLICE_2_11_MAX_ORIENTATION_STEP = 8 as const;
 
 export interface OrientationJourney {
   readonly id: string;

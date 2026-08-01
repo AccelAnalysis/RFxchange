@@ -1,6 +1,6 @@
 import type { AccessJourneyId } from "../../domain/lifecycle/model.ts";
 import {
-  SLICE_2_10_MAX_ORIENTATION_STEP,
+  SLICE_2_11_MAX_ORIENTATION_STEP,
   assertOrientationJourneyBinding,
   completeOrientationStep,
   createOrientationJourney,
@@ -70,7 +70,7 @@ export class OrientationJourneyService {
     const next = completeOrientationStep({
       journey: current,
       stepKey,
-      maximumAllowedStep: SLICE_2_10_MAX_ORIENTATION_STEP,
+      maximumAllowedStep: SLICE_2_11_MAX_ORIENTATION_STEP,
       now,
     });
     if (next === current) return current;
@@ -78,7 +78,11 @@ export class OrientationJourneyService {
       expectedRevision: current.revision,
       journey: next,
       event: createOrientationJourneyEvent({
-        id: this.dependencies.ids.event(), journey: next, kind: "step-completed", stepKey, occurredAt: now,
+        id: this.dependencies.ids.event(),
+        journey: next,
+        kind: next.status === "completed" ? "completed" : "step-completed",
+        stepKey,
+        occurredAt: now,
       }),
     });
     return next;
