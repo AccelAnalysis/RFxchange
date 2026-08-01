@@ -140,3 +140,12 @@ test("email verification gives visible feedback and refreshes the RFxchange sess
   assert.match(client, /getIdToken\(true\)/);
   assert.match(client, /Firebase still reports this email as unverified/);
 });
+
+test("profile completion snapshots revalidated organization authority before asynchronous persistence", async () => {
+  const coordinator = await source("src/application/onboarding/activation-journey.ts");
+  assert.match(coordinator, /const organizationId = activation\.organizationId/);
+  assert.match(coordinator, /const membershipId = activation\.membershipId/);
+  assert.match(coordinator, /Organization authority changed before essential profile completion/);
+  assert.match(coordinator, /organizationId: String\(organizationId\)/);
+  assert.match(coordinator, /membershipId: String\(membershipId\)/);
+});
