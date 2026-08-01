@@ -31,9 +31,13 @@ assert.match(
 );
 
 function collectionNames(source, declaration) {
-  const block = source.match(
+  const plain = source.match(
     new RegExp(`export const ${declaration} = \\{([\\s\\S]*?)\\} as const;`),
   )?.[1];
+  const frozen = source.match(
+    new RegExp(`export const ${declaration} = Object\\.freeze\\(\\{([\\s\\S]*?)\\} as const\\);`),
+  )?.[1];
+  const block = plain ?? frozen;
   assert.ok(block, `Unable to read ${declaration}.`);
   return [...block.matchAll(/^\s+[A-Za-z0-9_]+:\s*"([^"]+)"/gm)].map(
     (match) => match[1],
