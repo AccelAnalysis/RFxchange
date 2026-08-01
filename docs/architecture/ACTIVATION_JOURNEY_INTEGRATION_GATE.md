@@ -92,6 +92,8 @@ Essential registration collects only:
 
 It does not collect organization type, participation roles or business objectives.
 
+Every activated organization is both a potential buyer and a potential supplier: it can issue opportunities and discover or respond to opportunities without selecting permanent participant roles during registration.
+
 Every activated organization can both issue and respond to opportunities. Resource-provider status is separately applied for and administratively approved.
 
 ## Profile Complete and marker
