@@ -1,68 +1,76 @@
 import Link from "next/link";
 
 import { BrandWordmark } from "@/src/components/brand/BrandWordmark";
+import { LanguageSwitcher } from "@/src/components/i18n/LanguageSwitcher";
+import { getRequestDictionary } from "@/src/i18n/server";
 
 import styles from "./MarketingSite.module.css";
 
-export function MarketingHeader() {
+export async function MarketingHeader() {
+  const { dictionary } = await getRequestDictionary();
+
   return (
     <header className={styles.header}>
-      <nav className={styles.nav} aria-label="Primary marketing navigation">
+      <nav className={styles.nav} aria-label={dictionary.marketing.nav.ariaLabel}>
         <BrandWordmark />
         <div className={styles.navLinks}>
-          <Link href="/how-it-works">How It Works</Link>
-          <Link href="/businesses">For Businesses</Link>
-          <Link href="/buyers">For Buyers</Link>
-          <Link href="/resource-providers">For Resource Providers</Link>
-          <Link href="/about">About</Link>
+          <Link href="/how-it-works">{dictionary.marketing.nav.howItWorks}</Link>
+          <Link href="/businesses">{dictionary.marketing.nav.businesses}</Link>
+          <Link href="/buyers">{dictionary.marketing.nav.buyers}</Link>
+          <Link href="/resource-providers">{dictionary.marketing.nav.resourceProviders}</Link>
+          <Link href="/about">{dictionary.marketing.nav.about}</Link>
         </div>
         <div className={styles.navActions}>
-          <Link className={styles.buttonLight} href="/signin">Sign In</Link>
-          <Link className={styles.buttonGold} href="/join">Join Free</Link>
+          <LanguageSwitcher />
+          <Link className={styles.buttonLight} href="/signin">
+            {dictionary.common.actions.signIn}
+          </Link>
+          <Link className={styles.buttonGold} href="/join">
+            {dictionary.common.actions.joinFree}
+          </Link>
         </div>
       </nav>
     </header>
   );
 }
 
-export function MarketingFooter() {
+export async function MarketingFooter() {
+  const { dictionary } = await getRequestDictionary();
+
   return (
     <footer className={styles.footer}>
       <div className={styles.footerGrid}>
         <div className={styles.footerBrand}>
           <BrandWordmark compact onDark />
-          <p>
-            A local business growth network beginning with real organization,
-            capability, geography, and activation—then extending through governed releases.
-          </p>
-          <p><strong>By Accel Analysis</strong></p>
+          <p>{dictionary.marketing.footer.summary}</p>
+          <p><strong>{dictionary.marketing.footer.byline}</strong></p>
         </div>
         <div className={styles.footerCol}>
-          <h3>Explore</h3>
-          <Link href="/how-it-works">How It Works</Link>
-          <Link href="/businesses">For Businesses</Link>
-          <Link href="/buyers">For Buyers</Link>
-          <Link href="/resource-providers">For Resource Providers</Link>
-          <Link href="/founding">Founding Membership</Link>
+          <h3>{dictionary.marketing.footer.explore}</h3>
+          <Link href="/how-it-works">{dictionary.marketing.nav.howItWorks}</Link>
+          <Link href="/businesses">{dictionary.marketing.nav.businesses}</Link>
+          <Link href="/buyers">{dictionary.marketing.nav.buyers}</Link>
+          <Link href="/resource-providers">{dictionary.marketing.nav.resourceProviders}</Link>
+          <Link href="/founding">{dictionary.marketing.footer.foundingMembership}</Link>
         </div>
         <div className={styles.footerCol}>
-          <h3>Organization</h3>
-          <Link href="/about">About RFxchange</Link>
-          <Link href="/join">Join Free</Link>
-          <Link href="/signin">Sign In</Link>
-          <Link href="/image-credits">Image Credits</Link>
+          <h3>{dictionary.marketing.footer.organization}</h3>
+          <Link href="/about">{dictionary.marketing.footer.about}</Link>
+          <Link href="/join">{dictionary.common.actions.joinFree}</Link>
+          <Link href="/signin">{dictionary.common.actions.signIn}</Link>
+          <Link href="/image-credits">{dictionary.marketing.footer.imageCredits}</Link>
         </div>
         <div className={styles.footerCol}>
-          <h3>Bottom Matter</h3>
-          <Link href="/terms">Terms of Service</Link>
-          <Link href="/privacy">Privacy Policy</Link>
-          <Link href="/platform-rules">Platform Rules</Link>
-          <Link href="/accessibility">Accessibility</Link>
+          <h3>{dictionary.marketing.footer.bottomMatter}</h3>
+          <Link href="/terms">{dictionary.marketing.footer.terms}</Link>
+          <Link href="/privacy">{dictionary.marketing.footer.privacy}</Link>
+          <Link href="/platform-rules">{dictionary.marketing.footer.rules}</Link>
+          <Link href="/accessibility">{dictionary.marketing.footer.accessibility}</Link>
         </div>
       </div>
       <div className={styles.footerBottom}>
-        <span>© 2026 The RFxchange. By Accel Analysis.</span>
-        <span>Visible · Connected · Actionable</span>
+        <span>{dictionary.marketing.footer.copyright}</span>
+        <span>{dictionary.marketing.footer.tagline}</span>
       </div>
     </footer>
   );
