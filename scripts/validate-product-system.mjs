@@ -34,13 +34,19 @@ for (const typographyRequirement of [
 }
 
 const home = (await read("app/page.tsx")).toLowerCase();
-for (const cta of [">join the exchange — free<", ">see how it works<"]) {
-  if (!home.includes(cta)) throw new Error(`Public positioning missing required CTA: ${cta}`);
+const englishCatalogText = await read("src/i18n/messages/en-US.json");
+const englishCatalog = JSON.parse(englishCatalogText);
+const canonicalHomeCopy = JSON.stringify(englishCatalog.home).toLowerCase();
+
+for (const cta of ["join the exchange — free", "see how it works"]) {
+  if (!canonicalHomeCopy.includes(cta)) {
+    throw new Error(`Public positioning missing required CTA: ${cta}`);
+  }
 }
 if (!home.includes('href="/join"')) throw new Error("Join CTA must resolve to the production organization-activation surface.");
 if (!home.includes('href="#how-it-works"')) throw new Error("See How It Works CTA must resolve to the public journey surface.");
-if (!home.includes("publicdifferentiation.map")) {
-  throw new Error("ACQ-001 requires the public differentiation model to render on the landing page.");
+if (!home.includes("home.difference.items.map")) {
+  throw new Error("ACQ-001 requires the localized public differentiation model to render on the landing page.");
 }
 
 const marketing = await read("src/content/marketing.ts");
@@ -56,9 +62,21 @@ for (const requirement of [
   }
 }
 
+for (const requirement of [
+  "shared environment to be discovered by capability",
+  "more than a directory",
+  "not a social feed",
+  "broader than a bid portal",
+]) {
+  if (!canonicalHomeCopy.includes(requirement)) {
+    throw new Error(`Localized English source catalog missing public positioning requirement: ${requirement}`);
+  }
+}
+
 const publicCopy = [
   await read("app/page.tsx"),
   marketing,
+  englishCatalogText,
 ].join("\n").toLowerCase();
 
 const prohibited = [
@@ -93,7 +111,7 @@ for (const styleRequirement of [
   }
 }
 
-const trademarkSurfaces = [wordmark, await read("app/page.tsx"), marketing].join("\n");
+const trademarkSurfaces = [wordmark, await read("app/page.tsx"), marketing, englishCatalogText].join("\n");
 if (!wordmark.includes("™")) throw new Error("BRD-014 requires the trademark mark in the primary wordmark.");
 if (trademarkSurfaces.includes("®")) {
   throw new Error("BRD-014 registered mark may not be used in product/public surfaces until counsel approval is recorded.");
