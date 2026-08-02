@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
-const [home, marketing, chrome, assets, credits, styles, roadmap] = await Promise.all([
+const [home, marketing, chrome, assets, credits, styles, roadmap, englishCatalog] = await Promise.all([
   read("app/page.tsx"),
   read("src/content/marketing.ts"),
   read("src/components/marketing/MarketingChrome.tsx"),
@@ -12,7 +12,10 @@ const [home, marketing, chrome, assets, credits, styles, roadmap] = await Promis
   read("app/image-credits/page.tsx"),
   read("app/home-b4.module.css"),
   read("docs/brand/BRAND_IMPLEMENTATION_ROADMAP.md"),
+  read("src/i18n/messages/en-US.json"),
 ]);
+
+const canonicalPublicSurface = `${home}\n${marketing}\n${chrome}\n${englishCatalog}`;
 
 for (const statement of [
   "Available now",
@@ -22,7 +25,7 @@ for (const statement of [
   "Stock photography supplies atmosphere only",
   "Real evidence—or a clear label",
 ]) {
-  assert.ok(`${home}\n${marketing}`.includes(statement), `Brand B4 availability/evidence statement is missing: ${statement}.`);
+  assert.ok(canonicalPublicSurface.includes(statement), `Brand B4 availability/evidence statement is missing: ${statement}.`);
 }
 
 assert.ok(
@@ -35,9 +38,9 @@ assert.ok(
 );
 
 assert.ok(
-  chrome.includes("By Accel Analysis") &&
-    chrome.includes("© 2026 The RFxchange. By Accel Analysis.") &&
-    !chrome.includes("Hi-Coworking initiative"),
+  englishCatalog.includes("By Accel Analysis") &&
+    englishCatalog.includes("© 2026 The RFxchange. By Accel Analysis.") &&
+    !canonicalPublicSurface.includes("Hi-Coworking initiative"),
   "Brand B4 must use the governed parent endorsement and remove the legacy initiative label.",
 );
 
@@ -66,7 +69,7 @@ for (const prohibited of [
   "qualified routing",
   "A Hi-Coworking initiative",
 ]) {
-  assert.equal(`${home}\n${marketing}\n${chrome}`.toLowerCase().includes(prohibited.toLowerCase()), false, `Brand B4 prohibited or unsupported claim remains: ${prohibited}.`);
+  assert.equal(canonicalPublicSurface.toLowerCase().includes(prohibited.toLowerCase()), false, `Brand B4 prohibited or unsupported claim remains: ${prohibited}.`);
 }
 
 assert.equal(home.includes("NetworkField"), false, "Brand B4 cannot present a synthetic network graphic as live product evidence.");
