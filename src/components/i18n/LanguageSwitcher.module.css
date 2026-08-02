@@ -56,3 +56,15 @@
     max-width: 140px;
   }
 }
+
+@media (max-width: 520px) {
+  .field {
+    min-width: 88px;
+  }
+
+  .select {
+    max-width: 88px;
+    padding-inline: 10px 24px;
+    font-size: 0.75rem;
+  }
+}
