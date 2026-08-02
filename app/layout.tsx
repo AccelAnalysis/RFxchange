@@ -1,27 +1,41 @@
 import type { Metadata } from "next";
+
 import "mapbox-gl/dist/mapbox-gl.css";
 import "../src/design/semantic-tokens.css";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: {
-    default: "The RFxchange™",
-    template: "%s | The RFxchange™",
-  },
-  description:
-    "A map-based business growth network for capability discovery, opportunities, referrals, partnerships, resources, and measured activity.",
-  openGraph: {
-    title: "The RFxchange™",
-    description:
-      "Make business capability, opportunity, and connection easier to discover and act on.",
-    type: "website",
-  },
-};
+import { I18nProvider } from "@/src/components/i18n/I18nProvider";
+import { getRequestDictionary } from "@/src/i18n/server";
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export async function generateMetadata(): Promise<Metadata> {
+  const { dictionary } = await getRequestDictionary();
+
+  return {
+    title: {
+      default: dictionary.metadata.title,
+      template: `%s | ${dictionary.metadata.title}`,
+    },
+    description: dictionary.metadata.description,
+    openGraph: {
+      title: dictionary.metadata.title,
+      description: dictionary.metadata.openGraphDescription,
+      type: "website",
+    },
+  };
+}
+
+export default async function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  const { locale, dictionary } = await getRequestDictionary();
+
   return (
-    <html lang="en" data-scroll-behavior="smooth">
-      <body>{children}</body>
+    <html lang={locale} data-scroll-behavior="smooth">
+      <body>
+        <I18nProvider dictionary={dictionary} locale={locale}>
+          {children}
+        </I18nProvider>
+      </body>
     </html>
   );
 }
