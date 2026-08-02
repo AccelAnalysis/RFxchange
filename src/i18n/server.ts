@@ -1,4 +1,5 @@
 import { cookies, headers } from "next/headers";
+import { cache } from "react";
 
 import {
   localeCookieName,
@@ -7,7 +8,7 @@ import {
 } from "./config";
 import { getDictionary, type Dictionary } from "./get-dictionary";
 
-export async function getRequestLocale(): Promise<Locale> {
+export const getRequestLocale = cache(async (): Promise<Locale> => {
   const cookieStore = await cookies();
   const persistedLocale = cookieStore.get(localeCookieName)?.value;
 
@@ -21,16 +22,16 @@ export async function getRequestLocale(): Promise<Locale> {
     ?.split(",", 1)[0];
 
   return resolveLocale(preferredLanguage);
-}
+});
 
-export async function getRequestDictionary(): Promise<{
+export const getRequestDictionary = cache(async (): Promise<{
   locale: Locale;
   dictionary: Dictionary;
-}> {
+}> => {
   const locale = await getRequestLocale();
 
   return {
     locale,
     dictionary: getDictionary(locale),
   };
-}
+});
