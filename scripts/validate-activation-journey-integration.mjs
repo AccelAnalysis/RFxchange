@@ -6,6 +6,7 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 
 const [
   home,
+  englishCatalogText,
   joinPage,
   spatialActivation,
   signInPage,
@@ -26,6 +27,7 @@ const [
   architecture,
 ] = await Promise.all([
   read("app/page.tsx"),
+  read("src/i18n/messages/en-US.json"),
   read("app/join/page.tsx"),
   read("src/components/onboarding/SpatialActivationExperience.tsx"),
   read("app/signin/page.tsx"),
@@ -46,10 +48,14 @@ const [
   read("docs/architecture/ACTIVATION_JOURNEY_INTEGRATION_GATE.md"),
 ]);
 
+const englishCatalog = JSON.parse(englishCatalogText);
+
 assert.ok(home.includes('href="/join"'), "Public Join must enter the activation journey.");
 assert.ok(
-  home.includes('href="/signin"') && home.includes(">Sign in</Link>"),
-  "Public home must expose a direct returning-user Sign in entry alongside Join.",
+  home.includes('href="/signin"') &&
+    home.includes("dictionary.common.actions.signIn") &&
+    englishCatalog.common.actions.signIn === "Sign In",
+  "Public home must expose a direct localized returning-user Sign in entry alongside Join.",
 );
 assert.ok(
   joinPage.includes("SpatialActivationExperience") &&
