@@ -11,11 +11,25 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 - [`MAP_AND_GEOGRAPHY.md`](MAP_AND_GEOGRAPHY.md) — locality, FIPS, release-state, boundary, camera and marker principles.
 - [`ORGANIZATION_MODEL.md`](ORGANIZATION_MODEL.md) — organization/user hierarchy, claim authority, identity resolution, profile and location concepts.
 - [`ADMINISTRATION.md`](ADMINISTRATION.md) — administrative authority model, Organization 360, claims console and adjudication rules.
-- [`RFX_TRANSACTION_CYCLE.md`](RFX_TRANSACTION_CYCLE.md) — end-to-end RFx object and issuer/responder lifecycle.
+- [`RFX_TRANSACTION_CYCLE.md`](RFX_TRANSACTION_CYCLE.md) — end-to-end RFx object, AMACS relationship and issuer/responder lifecycle.
 - [`CREDIBILITY_SYSTEM.md`](CREDIBILITY_SYSTEM.md) — organization-level credibility, badge families, evidence and commercial neutrality.
 - [`COMMERCIAL_MODEL.md`](COMMERCIAL_MODEL.md) — free network access, Founding membership, provider status and monetization boundaries.
 - [`ACQUISITION_AND_RETENTION.md`](ACQUISITION_AND_RETENTION.md) — acquisition objects, preserved entry context, first value and flywheel logic.
 - [`BRAND_AND_UX.md`](BRAND_AND_UX.md) — concise map-first brand/UX principles and pointers to the brand and design authorities.
+
+## RFx Core and AMACS authority
+
+The converged future RFx Core planning package is indexed at [`../rfx/README.md`](../rfx/README.md). It defines:
+
+- the one-RFx aggregate and Wave 4/5 boundary;
+- AMACS release ingestion, runtime projection, search and historical snapshots;
+- all 41 Wave 4 Feature IDs and the adopted planning sequence;
+- issuer/responder/teammate product workspaces;
+- the approved version-2-derived interaction direction;
+- anti-regression and configured-browser acceptance;
+- the real-data-only B6c RFx map lens.
+
+Documentation planning does not authorize Wave 4 implementation or change Feature-ID status.
 
 ## Brand and design authority
 
@@ -39,7 +53,8 @@ Detailed brand authority:
 - `docs/brand/VIEWING_MODES.md` — Exchange Light, future Intelligence Dark, Presentation Mode and High Contrast;
 - `docs/brand/BRAND_EXPERIENCE_ACCEPTANCE_MATRIX.md` — supplemental cross-surface acceptance;
 - `docs/brand/BRAND_IMPLEMENTATION_ROADMAP.md` — sequential Brand Gates;
-- `docs/brand/BRAND_GATE_B0_RECONCILIATION.md` — final Wave 2 reconciliation and Wave 3/4 integration boundaries.
+- `docs/brand/BRAND_GATE_B0_RECONCILIATION.md` — final Wave 2 reconciliation and Wave 3/4 integration boundaries;
+- `docs/brand/BRAND_GATE_B6C_RFX_LENS.md` — future real-data RFx spatial expression; not implemented.
 
 Detailed implemented design authority:
 
@@ -55,7 +70,7 @@ User-facing work must not implement a target brand expression by fabricating a d
 - `docs/tracking/RFxchange_DEPENDENCY_MAP.md` — sequencing/dependency authority.
 - `docs/slices/` — approved implementation boundaries and exit conditions for planned slices.
 
-Wave 2 is complete and reconciled. Wave 3 Slice 3.1 is the earliest dependency-eligible candidate but remains subject to explicit implementation authorization.
+Wave 2 is complete and reconciled. Wave 3 Slice 3.1 and Brand Gates B0–B6a are complete. Follow the current Wave 3 roadmap and explicit authorization discipline before future implementation.
 
 ## Reference artifacts
 
