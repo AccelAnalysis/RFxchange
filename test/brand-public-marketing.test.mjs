@@ -9,13 +9,23 @@ const home = await read("app/page.tsx");
 const marketing = await read("src/content/marketing.ts");
 const chrome = await read("src/components/marketing/MarketingChrome.tsx");
 const assets = await read("src/content/public-assets.ts");
+const englishCatalogText = await read("src/i18n/messages/en-US.json");
+const englishCatalog = JSON.parse(englishCatalogText);
 
 test("Brand B4 clearly distinguishes current and future product state", () => {
   assert.match(marketing, /Available now/);
   assert.match(marketing, /In development/);
   assert.match(marketing, /Planned product pathway/);
-  assert.match(home, /Planned product model · not live market activity/);
-  assert.match(home, /Stock photography supplies atmosphere only/);
+  assert.equal(
+    englishCatalog.home.model.label,
+    "Planned product model · not live market activity",
+  );
+  assert.match(
+    englishCatalog.home.hero.evidenceNote,
+    /Stock photography supplies atmosphere only/,
+  );
+  assert.match(home, /home\.model\.label/);
+  assert.match(home, /home\.hero\.evidenceNote/);
 });
 
 test("Brand B4 preserves public acquisition and dedicated information routes", () => {
@@ -27,8 +37,13 @@ test("Brand B4 preserves public acquisition and dedicated information routes", (
 });
 
 test("Brand B4 applies the governed parent endorsement", () => {
-  assert.match(chrome, /By Accel Analysis/);
-  assert.doesNotMatch(chrome, /Hi-Coworking initiative/);
+  assert.equal(englishCatalog.marketing.footer.byline, "By Accel Analysis");
+  assert.equal(
+    englishCatalog.marketing.footer.copyright,
+    "© 2026 The RFxchange. By Accel Analysis.",
+  );
+  assert.match(chrome, /dictionary\.marketing\.footer\.byline/);
+  assert.doesNotMatch(`${chrome}\n${englishCatalogText}`, /Hi-Coworking initiative/);
 });
 
 test("Brand B4 public assets are provenance-governed and never product evidence", () => {

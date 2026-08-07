@@ -1,35 +1,15 @@
 import Link from "next/link";
 
 import { MarketingFooter, MarketingHeader } from "@/src/components/marketing/MarketingChrome";
-import {
-  audienceEmphasis,
-  publicAvailability,
-  publicDifferentiation,
-  publicPositioning,
-} from "@/src/content/marketing";
 import { publicImageAssets } from "@/src/content/public-assets";
+import { getRequestDictionary } from "@/src/i18n/server";
 
 import styles from "./home-b4.module.css";
 
-const liveJourney = [
-  ["Create the account", "Establish a verified participant identity and accept the governing policies."],
-  ["Select the locality", "Use authoritative geography to establish the organization’s operating context."],
-  ["Resolve the organization", "Find, claim, or create the organization without inventing authority."],
-  ["Confirm the location", "Geocode and confirm a real or privacy-safe location on the map."],
-  ["Describe one capability", "Add the minimum meaningful capability needed for Profile Complete."],
-  ["Activate the organization node", "Complete orientation and enter the authenticated Exchange workspace."],
-] as const;
+export default async function HomePage() {
+  const { dictionary } = await getRequestDictionary();
+  const home = dictionary.home;
 
-const productModel = [
-  ["Visible", "Organization", "A real organization and its capabilities become visible subject to permission."],
-  ["Demand", "Opportunity", "A later RFx publication domain introduces structured business demand."],
-  ["Fit", "Discovery", "Potential fit is explained without claiming qualification or endorsement."],
-  ["Connect", "Relationship", "Referrals, teams, and providers require real governed relationship records."],
-  ["Act", "Workflow", "The participant moves through an authorized operational workflow."],
-  ["Evidence", "Outcome", "Credibility and outcomes appear only when authoritative evidence exists."],
-] as const;
-
-export default function HomePage() {
   return (
     <main className={styles.site}>
       <MarketingHeader />
@@ -38,26 +18,23 @@ export default function HomePage() {
         <div className={styles.heroMedia}>
           <img
             src={publicImageAssets.construction.src}
-            alt={publicImageAssets.construction.alt}
+            alt={home.images.construction}
             fetchPriority="high"
           />
         </div>
         <div className={styles.heroGrid} aria-hidden="true" />
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}>A Local Business Growth Network · By Accel Analysis</p>
+            <p className={styles.eyebrow}>{home.hero.eyebrow}</p>
             <h1 id="hero-title">
-              The local market is already moving. <span className={styles.gold}>Make it visible.</span>
+              {home.hero.titleBefore} <span className={styles.gold}>{home.hero.titleAccent}</span>
             </h1>
-            <p className={styles.heroDeck}>{publicPositioning.summary}</p>
+            <p className={styles.heroDeck}>{home.hero.summary}</p>
             <div className={styles.heroActions}>
-              <Link className={styles.buttonGold} href="/join">Join the Exchange — Free</Link>
-              <a className={styles.buttonLight} href="#how-it-works">See How It Works</a>
+              <Link className={styles.buttonGold} href="/join">{home.hero.join}</Link>
+              <a className={styles.buttonLight} href="#how-it-works">{home.hero.howItWorks}</a>
             </div>
-            <p className={styles.evidenceNote}>
-              Stock photography supplies atmosphere only. It does not depict RFxchange participants,
-              opportunities, outcomes, testimonials, or live platform activity.
-            </p>
+            <p className={styles.evidenceNote}>{home.hero.evidenceNote}</p>
           </div>
         </div>
       </section>
@@ -65,15 +42,12 @@ export default function HomePage() {
       <section className={styles.availabilityBand} aria-labelledby="availability-title">
         <div className={styles.wrap}>
           <div className={styles.availabilityIntro}>
-            <p className={styles.eyebrow}>Product availability</p>
-            <h2 id="availability-title">See what is live—and what is still being built.</h2>
-            <p>
-              The RFxchange does not manufacture market activity for presentation. Current capabilities,
-              active development, and later product pathways are identified separately.
-            </p>
+            <p className={styles.eyebrow}>{home.availability.eyebrow}</p>
+            <h2 id="availability-title">{home.availability.title}</h2>
+            <p>{home.availability.description}</p>
           </div>
           <div className={styles.availabilityGrid}>
-            {publicAvailability.map((item) => (
+            {home.availability.items.map((item) => (
               <article className={styles.availabilityCard} key={item.title}>
                 <span>{item.status}</span>
                 <h3>{item.title}</h3>
@@ -87,28 +61,25 @@ export default function HomePage() {
       <section className={styles.section} aria-labelledby="live-title">
         <div className={styles.wrap}>
           <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>Available now</p>
-            <h2 id="live-title">Your organization comes into focus around real geography.</h2>
-            <p>
-              The current activation journey moves from account establishment to a real organization node
-              without requiring invented opportunity data, provider status, business objectives, or a paid plan.
-            </p>
+            <p className={styles.eyebrow}>{home.live.eyebrow}</p>
+            <h2 id="live-title">{home.live.title}</h2>
+            <p>{home.live.description}</p>
           </div>
           <div className={styles.liveJourney}>
             <figure className={styles.liveMedia}>
               <img
                 src={publicImageAssets.workshop.src}
-                alt={publicImageAssets.workshop.alt}
+                alt={home.images.workshop}
                 loading="lazy"
                 decoding="async"
               />
             </figure>
             <ol className={styles.liveSteps}>
-              {liveJourney.map(([title, detail]) => (
-                <li key={title}>
+              {home.live.steps.map((step) => (
+                <li key={step.title}>
                   <div>
-                    <strong>{title}</strong>
-                    <p>{detail}</p>
+                    <strong>{step.title}</strong>
+                    <p>{step.detail}</p>
                   </div>
                 </li>
               ))}
@@ -120,35 +91,32 @@ export default function HomePage() {
       <section id="how-it-works" className={`${styles.section} ${styles.modelSection}`} aria-labelledby="model-title">
         <div className={styles.wrap}>
           <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>Visible. Connected. Actionable.</p>
-            <h2 id="model-title">One market environment. A governed path from visibility to evidence.</h2>
-            <p>
-              This is the approved product model. Later steps appear in the live product only after their
-              owning domains, permissions, evidence, and acceptance tests are implemented.
-            </p>
-            <span className={styles.modelLabel}>Planned product model · not live market activity</span>
+            <p className={styles.eyebrow}>{home.model.eyebrow}</p>
+            <h2 id="model-title">{home.model.title}</h2>
+            <p>{home.model.description}</p>
+            <span className={styles.modelLabel}>{home.model.label}</span>
           </div>
-          <div className={styles.modelFlow} aria-label="RFxchange product model">
-            {productModel.map(([kicker, title, detail], index) => (
-              <article className={styles.modelStep} key={title}>
-                <span>{String(index + 1).padStart(2, "0")} · {kicker}</span>
-                <strong>{title}</strong>
-                <p>{detail}</p>
+          <div className={styles.modelFlow} aria-label={home.model.ariaLabel}>
+            {home.model.steps.map((step, index) => (
+              <article className={styles.modelStep} key={step.title}>
+                <span>{String(index + 1).padStart(2, "0")} · {step.kicker}</span>
+                <strong>{step.title}</strong>
+                <p>{step.detail}</p>
               </article>
             ))}
           </div>
-          <p><Link className={styles.textLink} href="/how-it-works">Read the complete product pathway →</Link></p>
+          <p><Link className={styles.textLink} href="/how-it-works">{home.model.readMore}</Link></p>
         </div>
       </section>
 
       <section className={styles.sectionTight} aria-labelledby="difference-title">
         <div className={styles.wrap}>
           <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>A living market—not a conventional dashboard</p>
-            <h2 id="difference-title">Built around organizations, geography, and business action.</h2>
+            <p className={styles.eyebrow}>{home.difference.eyebrow}</p>
+            <h2 id="difference-title">{home.difference.title}</h2>
           </div>
           <div className={styles.differentiationGrid}>
-            {publicDifferentiation.map((item) => (
+            {home.difference.items.map((item) => (
               <article className={styles.differentiationCard} key={item.label}>
                 <h3>{item.label}</h3>
                 <p>{item.detail}</p>
@@ -162,36 +130,33 @@ export default function HomePage() {
         <figure className={styles.splitMedia}>
           <img
             src={publicImageAssets.collaboration.src}
-            alt={publicImageAssets.collaboration.alt}
+            alt={home.images.collaboration}
             loading="lazy"
             decoding="async"
           />
         </figure>
         <div className={styles.splitCopy}>
-          <p className={styles.eyebrow}>Build the connection</p>
-          <h2 id="connection-title">Context should travel with the participant.</h2>
-          <p>
-            The product is designed so a capability, need, organization, geography, and next action can
-            remain connected. Referrals, teaming, provider routing, and RFx activity are introduced only
-            through their authorized implementation slices.
-          </p>
-          <p><Link className={styles.buttonDark} href="/about">Why The RFxchange exists</Link></p>
+          <p className={styles.eyebrow}>{home.connection.eyebrow}</p>
+          <h2 id="connection-title">{home.connection.title}</h2>
+          <p>{home.connection.description}</p>
+          <p><Link className={styles.buttonDark} href="/about">{home.connection.link}</Link></p>
         </div>
       </section>
 
       <section className={styles.section} aria-labelledby="audience-title">
         <div className={styles.wrap}>
           <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>One network · different responsibilities</p>
-            <h2 id="audience-title">A practical environment for the people who move local business.</h2>
+            <p className={styles.eyebrow}>{home.audience.eyebrow}</p>
+            <h2 id="audience-title">{home.audience.title}</h2>
           </div>
           <div className={styles.audienceGrid}>
-            {audienceEmphasis.map((audience, index) => {
+            {home.audience.items.map((audience, index) => {
               const image = [
-                publicImageAssets.region,
-                publicImageAssets.manufacturing,
-                publicImageAssets.professional,
+                { ...publicImageAssets.region, alt: home.images.region },
+                { ...publicImageAssets.manufacturing, alt: home.images.manufacturing },
+                { ...publicImageAssets.professional, alt: home.images.professional },
               ][index];
+
               return (
                 <article className={styles.audienceCard} key={audience.name}>
                   <div className={styles.audienceCardMedia}>
@@ -213,22 +178,15 @@ export default function HomePage() {
         <div className={styles.wrap}>
           <div className={styles.evidencePanel}>
             <div>
-              <p className={styles.eyebrow}>Trust what you see</p>
+              <p className={styles.eyebrow}>{home.evidence.eyebrow}</p>
               <div className={styles.sectionHead}>
-                <h2 id="evidence-title">Real evidence—or a clear label.</h2>
-                <p>
-                  Marketing and product surfaces must not imply organizations, opportunities, statistics,
-                  outcomes, testimonials, provider availability, or dashboards that do not exist.
-                </p>
+                <h2 id="evidence-title">{home.evidence.title}</h2>
+                <p>{home.evidence.description}</p>
               </div>
-              <Link className={styles.textLink} href="/image-credits">Review public image provenance →</Link>
+              <Link className={styles.textLink} href="/image-credits">{home.evidence.link}</Link>
             </div>
             <ul className={styles.evidenceRules}>
-              <li>Stock photography is visual atmosphere, never proof of RFxchange activity.</li>
-              <li>Synthetic tutorial content remains labeled and isolated from live records.</li>
-              <li>Future product capabilities are identified as planned or in development.</li>
-              <li>Public opportunity context never grants private access or domain authority.</li>
-              <li>Credibility and outcomes require authoritative evidence before presentation.</li>
+              {home.evidence.rules.map((rule) => <li key={rule}>{rule}</li>)}
             </ul>
           </div>
         </div>
@@ -238,21 +196,22 @@ export default function HomePage() {
         <div className={styles.ctaMedia}>
           <img
             src={publicImageAssets.warehouse.src}
-            alt={publicImageAssets.warehouse.alt}
+            alt={home.images.warehouse}
             loading="lazy"
             decoding="async"
           />
         </div>
         <div className={styles.ctaInner}>
-          <p className={styles.eyebrow}>Enter The RFxchange</p>
-          <h2 id="cta-title">Be found.<br />Find opportunity.<br />Build the connection.</h2>
-          <p>
-            Start with the part that is live: establish your organization, confirm its geography,
-            describe its capability, and become visible in the authenticated Exchange.
-          </p>
+          <p className={styles.eyebrow}>{home.cta.eyebrow}</p>
+          <h2 id="cta-title">
+            {home.cta.line1}<br />
+            {home.cta.line2}<br />
+            {home.cta.line3}
+          </h2>
+          <p>{home.cta.description}</p>
           <div className={styles.ctaActions}>
-            <Link className={styles.buttonGold} href="/join">Join Free</Link>
-            <Link className={styles.buttonLight} href="/signin">Sign in</Link>
+            <Link className={styles.buttonGold} href="/join">{dictionary.common.actions.joinFree}</Link>
+            <Link className={styles.buttonLight} href="/signin">{dictionary.common.actions.signIn}</Link>
           </div>
         </div>
       </section>
