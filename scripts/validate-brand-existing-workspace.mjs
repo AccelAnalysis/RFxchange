@@ -40,11 +40,13 @@ for (const status of ["loading", "empty", "error", "permission", "expired", "rec
     networkCatalog.status?.[status]?.title && networkCatalog.status?.[status]?.body,
     `Brand B6a localized state boundary is missing ${status}.`,
   );
-  assert.ok(
-    component.includes(`networkWorkspace.status.${status}`),
-    `Brand B6a workspace component must resolve the localized ${status} state.`,
-  );
 }
+assert.ok(
+  component.includes('t(`networkWorkspace.status.${status}.title`)') &&
+    component.includes('t(`networkWorkspace.status.${status}.body`)') &&
+    component.includes('t(`networkWorkspace.status.${status}.action`)'),
+  "Brand B6a workspace component must resolve localized status title/body/action from the bounded status state.",
+);
 
 for (const requirement of [
   "ExistingWorkspaceFoundation",
