@@ -1,0 +1,101 @@
+{
+  "ariaLabel": "Espacio geográfico de la Red RFxchange",
+  "status": {
+    "ariaLabel": "Estado del espacio de trabajo de RFxchange",
+    "loading": {
+      "title": "Preparando su espacio de trabajo del Exchange",
+      "body": "Se están cargando la organización autorizada y la proyección de la localidad. Su estado de activación permanece preservado."
+    },
+    "empty": {
+      "title": "No hay una proyección autorizada de la organización disponible",
+      "body": "Vuelva a la activación para completar o corregir los requisitos de organización, geografía, perfil o marcador.",
+      "action": "Revisar activación"
+    },
+    "error": {
+      "title": "No se pudo preparar el espacio de trabajo",
+      "body": "No se modificó ningún estado de organización ni geografía. Vuelva a intentar el espacio autenticado o regrese a la activación para recuperar el acceso.",
+      "action": "Reintentar espacio de trabajo"
+    },
+    "permission": {
+      "title": "Este espacio de trabajo de la organización no está disponible para su cuenta",
+      "body": "El acceso se determina mediante la membresía actual de la organización y sus restricciones. No se muestran detalles privados de la organización.",
+      "action": "Volver a su espacio de trabajo"
+    },
+    "expired": {
+      "title": "Su sesión del espacio de trabajo ha vencido",
+      "body": "Inicie sesión de nuevo para volver a evaluar la autoridad actual de la organización y regresar al espacio permitido.",
+      "action": "Iniciar sesión"
+    },
+    "recovery": {
+      "title": "La recuperación del espacio de trabajo está disponible",
+      "body": "Su organización permanece intacta. Vuelva a abrir la activación para resolver la proyección faltante sin crear una organización duplicada.",
+      "action": "Abrir recuperación"
+    }
+  },
+  "search": {
+    "ariaLabel": "Buscar y filtrar la Red",
+    "capabilityLabel": "Capacidades, servicios, productos u organización",
+    "placeholder": "Buscar capacidades u organizaciones",
+    "basedIn": "Con sede en",
+    "serviceArea": "Área de servicio",
+    "anyServiceArea": "Cualquier área de servicio",
+    "submit": "Buscar",
+    "clear": "Limpiar",
+    "resultCount": "{count} organizaciones permitidas",
+    "lowDensity": "Solo se muestran organizaciones reales autorizadas.",
+    "listLabel": "Resultados de organizaciones de la Red",
+    "noResultsTitle": "Ninguna organización permitida coincide con esta búsqueda",
+    "noResultsBody": "Pruebe una capacidad más amplia o elimine el filtro de área de servicio. El Exchange no inventa resultados.",
+    "paginationLabel": "Páginas de resultados de la Red",
+    "previous": "Anterior",
+    "page": "Página {page} de {pageCount}",
+    "next": "Siguiente"
+  },
+  "match": {
+    "capability": "Coincidencia de capacidad",
+    "organizationName": "Coincidencia por nombre de organización",
+    "browse": "Organización permitida",
+    "disclaimer": "La coincidencia explica la superposición del perfil. No constituye cualificación, respaldo ni garantía de elegibilidad."
+  },
+  "home": {
+    "eyebrow": "Inicio de la organización",
+    "activeNode": "Nodo activo de la organización",
+    "visibleNow": "Visible ahora",
+    "positionTitle": "Su posición establecida en el Exchange",
+    "selected": "Seleccionado",
+    "projectionMetadata": "Proyección observada mediante el espacio autenticado de la organización.",
+    "locality": "Localidad de origen",
+    "visibleLocation": "Ubicación visible",
+    "locationFallback": "Ubicación de la organización en {locality}",
+    "mapSource": "Fuente del mapa",
+    "viewport": "Vista",
+    "viewportBody": "El inicio de la organización se restaura de forma determinista al entrar.",
+    "manageProfile": "Administrar perfil de la organización",
+    "scopeTitle": "Alcance actual del espacio de trabajo",
+    "scopeBody": "Este entorno muestra la organización autorizada, la geografía aprobada, la posición en el mapa, el acceso al perfil y el descubrimiento permitido de organizaciones de la Red. Las oportunidades, referencias, proveedores de recursos, credibilidad y resultados permanecen ausentes hasta que se completen sus implementaciones autorizadas."
+  },
+  "detail": {
+    "eyebrow": "Organización de la Red",
+    "close": "Cerrar detalles de la organización",
+    "baseLocality": "Localidad base",
+    "visibleLocation": "Ubicación visible",
+    "serviceAreas": "Áreas de servicio",
+    "noServiceAreas": "No se muestran áreas de servicio públicas.",
+    "approximateLocation": "ubicación aproximada",
+    "localityOnlyLocation": "solo localidad",
+    "capabilities": "Capacidades",
+    "capabilityEvidence": "Lo que esta organización afirma que puede hacer",
+    "publicContact": "Contacto público",
+    "contactUnavailable": "No se muestra ningún contacto público",
+    "website": "Visitar el sitio web de la organización",
+    "profileEvidenceTitle": "Límite de evidencia del perfil",
+    "profileEvidence": "La información del perfil y las capacidades es proporcionada por la organización salvo que se identifique por separado como verificada. El descubrimiento no certifica capacidad, desempeño ni elegibilidad."
+  },
+  "provenance": {
+    "eyebrow": "Procedencia de los datos",
+    "title": "En qué se basa este mapa",
+    "authority": "Autoridad de límites",
+    "vintage": "Edición de límites",
+    "retrieved": "Recuperado"
+  }
+}
