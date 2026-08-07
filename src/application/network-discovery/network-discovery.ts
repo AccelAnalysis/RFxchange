@@ -1,11 +1,11 @@
 import type { AuthoritativeGeoJsonGeometry } from "../../domain/geography/boundary.ts";
 import type { GeographyDefinition } from "../../domain/geography/model.ts";
 import type { AccessRestrictionRepository } from "../../domain/lifecycle/repository.ts";
-import {
-  projectPublicOrganizationLocation,
-  type ConfirmedOrganizationLocationRepository,
-  type OrganizationServiceGeographyRepository,
-} from "../../domain/organization-location/index.ts";
+import { projectPublicOrganizationLocation } from "../../domain/organization-location/model.ts";
+import type {
+  ConfirmedOrganizationLocationRepository,
+  OrganizationServiceGeographyRepository,
+} from "../../domain/organization-location/repository.ts";
 import {
   projectPublicOrganizationMarker,
   type OrganizationMarkerActivation,
@@ -14,9 +14,11 @@ import {
   hydrateEssentialOrganizationProfile,
   projectPublicEssentialOrganizationProfile,
   type OrganizationCapability,
-  type OrganizationProfileCompletionRepository,
   type PublicEssentialOrganizationProfile,
-} from "../../domain/organization-profile/index.ts";
+} from "../../domain/organization-profile/model.ts";
+import type {
+  OrganizationProfileCompletionRepository,
+} from "../../domain/organization-profile/repository.ts";
 import { organizationId, type OrganizationId } from "../../domain/organizations/model.ts";
 import type { OrganizationProfileRepository } from "../../domain/organizations/repository.ts";
 
