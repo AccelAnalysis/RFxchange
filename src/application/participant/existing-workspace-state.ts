@@ -12,6 +12,10 @@ export interface ExistingWorkspaceState {
 
 export const EXISTING_WORKSPACE_STATE_VERSION = 1 as const;
 
+const DEFAULT_EXISTING_WORKSPACE_STATE = Object.freeze({
+  viewportIntent: "organization-home" as const,
+});
+
 function required(value: string, label: string): string {
   const normalized = value.trim();
   if (!normalized) throw new Error(`${label} is required.`);
@@ -24,7 +28,7 @@ function viewportIntent(
 ): ExistingWorkspaceViewportIntent {
   return value === "selected-object"
     ? "selected-object"
-    : "organization-home";
+    : DEFAULT_EXISTING_WORKSPACE_STATE.viewportIntent;
 }
 
 export function existingWorkspaceStorageKey(organizationId: string): string {
@@ -87,6 +91,6 @@ export const existingWorkspaceStatePolicy = Object.freeze({
   storesAuthorization: false,
   storesPrivateCoordinates: false,
   storesDomainRecords: false,
-  deterministicViewportIntent: "organization-home",
+  deterministicViewportIntent: DEFAULT_EXISTING_WORKSPACE_STATE.viewportIntent,
   selectedObjectMustBeAuthorizedProjection: true,
 } as const);
