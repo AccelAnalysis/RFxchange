@@ -49,9 +49,13 @@ If two sources appear to conflict, do not silently choose the easiest interpreta
 
 Wave 2 is complete and reconciled on merged `main` at `097b574ccce8865d4127cfe381fb0bd6199de0a5` with **43/43 Activation** features complete.
 
-The canonical dependency graph identifies **Wave 3 Slice 3.1 — Transactional Communications Reliability** (`COMMS-003`, `COMMS-004`, `COMMS-005`) as the earliest dependency-eligible candidate. No Wave 3 implementation begins unless the current task explicitly authorizes that slice.
+Wave 3 Slice 3.1 — Transactional Communications Reliability (`COMMS-003`, `COMMS-004`, `COMMS-005`) is complete via PR #107. Brand Gates B0 through B6a are also complete. The current tracker state remains **438 total · 121 Done · 317 Not Started**, with Activation **43/43** and Network **7/38**; this execution-authority correction does not change those totals or the canonical dependency map.
 
-Brand Gate B0 is documentation and authority reconciliation only. Subsequent Brand Gates and net-new capabilities such as Intelligence Dark, Presentation Mode, production sound or haptics require explicit authorization and any necessary tracker governance.
+PR #117 established the cross-cutting internationalization foundation for `en-US`, Spanish, French, Italian and German interface content without changing any Feature-ID status. Participant-authored RFx requirements, responses, contractual terms, private messages, uploaded documents, certifications, licenses and organization-authored legal representations remain outside automatic translation. Configured deployment-browser multilingual acceptance remains a release/migrated-surface gate rather than a Feature-ID completion claim.
+
+**Wave 3 Slice 3.2 — Controlled Network Entry & Discovery (`GEO-012`, `DSC-001`, `DSC-002`, `DSC-003`) is the active authorized implementation slice.** Implement only within the approved Slice 3.2 brief and current tracker/dependency authority. Authorization permits implementation; none of these Feature IDs becomes Done until its own acceptance and evidence requirements pass and the tracker is updated through the normal completion process.
+
+Wave 4 RFx Core remains governed by the canonical planning authority merged through PR #118. That planning authority does not authorize Wave 4 implementation while Slice 3.2 is active. Subsequent Brand Gates and net-new capabilities such as Intelligence Dark, Presentation Mode, production sound or haptics likewise require explicit authorization and any necessary tracker governance.
 
 ## Required reading before a slice or gate
 
