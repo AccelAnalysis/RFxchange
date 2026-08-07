@@ -1,9 +1,13 @@
+export type ExistingWorkspaceViewportIntent =
+  | "organization-home"
+  | "selected-object";
+
 export interface ExistingWorkspaceState {
   readonly version: 1;
   readonly organizationId: string;
   readonly selectedObjectId: string;
   readonly panelOpen: boolean;
-  readonly viewportIntent: "organization-home";
+  readonly viewportIntent: ExistingWorkspaceViewportIntent;
 }
 
 export const EXISTING_WORKSPACE_STATE_VERSION = 1 as const;
@@ -15,6 +19,14 @@ function required(value: string, label: string): string {
   return normalized;
 }
 
+function viewportIntent(
+  value: string | null | undefined,
+): ExistingWorkspaceViewportIntent {
+  return value === "selected-object"
+    ? "selected-object"
+    : "organization-home";
+}
+
 export function existingWorkspaceStorageKey(organizationId: string): string {
   return `rfxchange.workspace.v1.${encodeURIComponent(required(organizationId, "Organization id"))}`;
 }
@@ -23,6 +35,7 @@ export function createExistingWorkspaceState(input: Readonly<{
   organizationId: string;
   selectedObjectId?: string;
   panelOpen?: boolean;
+  viewportIntent?: ExistingWorkspaceViewportIntent;
 }>): ExistingWorkspaceState {
   const organizationId = required(input.organizationId, "Organization id");
   return Object.freeze({
@@ -33,7 +46,7 @@ export function createExistingWorkspaceState(input: Readonly<{
       "Selected object id",
     ),
     panelOpen: input.panelOpen ?? true,
-    viewportIntent: "organization-home" as const,
+    viewportIntent: viewportIntent(input.viewportIntent),
   });
 }
 
@@ -52,7 +65,7 @@ export function parseExistingWorkspaceState(
     if (
       parsed.version !== EXISTING_WORKSPACE_STATE_VERSION ||
       parsed.organizationId !== expectedOrganizationId ||
-      parsed.viewportIntent !== "organization-home" ||
+      !["organization-home", "selected-object"].includes(parsed.viewportIntent ?? "") ||
       typeof parsed.selectedObjectId !== "string" ||
       !parsed.selectedObjectId.trim() ||
       typeof parsed.panelOpen !== "boolean"
@@ -63,6 +76,7 @@ export function parseExistingWorkspaceState(
       organizationId: expectedOrganizationId,
       selectedObjectId: parsed.selectedObjectId,
       panelOpen: parsed.panelOpen,
+      viewportIntent: parsed.viewportIntent,
     });
   } catch {
     return null;
