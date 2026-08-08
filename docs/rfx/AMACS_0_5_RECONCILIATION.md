@@ -17,6 +17,8 @@ Pinned standard:
 
 The AMACS manifest and SHA-256 checksums remain the release authority.
 
+A retained CI release artifact may be consumed when available. Because CI artifacts expire, RFxchange must also support deterministic reconstruction by checking out the exact pinned AMACS commit and running the official release builder with that same commit as `source_commit`. The resulting manifest must name `da7879f2609271b067ae6d02875e9388a02c4fe5`, and RFxchange must preserve its own ingestion lock containing the release identity, source commit, projection version and generated checksums.
+
 ## Why reconciliation precedes the AI foundation
 
 RFxchange must not invent a private need model or AI-specific quasi-taxonomy. AMACS 0.5.0 now defines the provider-neutral contracts that sit between ordinary participant language and authoritative RFxchange records.
@@ -35,7 +37,7 @@ The AI provider, model, prompt, token or cost and retention details remain RFxch
 
 After PR #120 or Slice 3.2 merges, the next implementation gate must:
 
-1. ingest and verify the immutable AMACS 0.5.0 release;
+1. consume a valid artifact or deterministically rebuild and verify the immutable AMACS 0.5.0 release at the exact pinned commit;
 2. preserve historical 0.1.0 records and label snapshots;
 3. replace stale 0.1.0 runtime and count assumptions without hard-coding 0.5.0 counts into participant behavior;
 4. generate or verify TypeScript types and server validators for the 0.5.0 catalog and runtime contracts;
@@ -45,7 +47,7 @@ After PR #120 or Slice 3.2 merges, the next implementation gate must:
 8. preserve the AMACS contracts and application seams needed for later manual browse, search and provisional-term workflows without implementing the participant picker here;
 9. preserve requirement-type and team-coverage metadata without implementing the Wave 4 RFx requirement engine;
 10. preserve entity scope, market roles, evidence references and verification separation; and
-11. add CI guardrails for checksums, counts, references, schema validity, generated projection, history and browser-source isolation.
+11. add CI guardrails for source commit, checksums, counts, references, schema validity, generated projection, history and browser-source isolation.
 
 ## Completion boundary
 
