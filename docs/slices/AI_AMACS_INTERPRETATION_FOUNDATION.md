@@ -1,6 +1,6 @@
 # Cross-cutting AI/AMACS Interpretation Foundation
 
-**Status: CANONICAL PLANNING FOUNDATION — IMPLEMENT AFTER SLICE 3.2 MERGES AND BEFORE SLICE 3.3. NO FEATURE-ID COMPLETION CLAIMS.**
+**Status: CANONICAL PLANNING FOUNDATION — IMPLEMENT AFTER SLICE 3.2 AND THE AMACS 0.5.0 RECONCILIATION MERGE, AND BEFORE SLICE 3.3. NO FEATURE-ID COMPLETION CLAIMS.**
 
 ## Purpose
 
@@ -12,331 +12,200 @@ The operating principle is:
 
 > **AI interprets and assists. AMACS defines and constrains. The participant confirms. RFxchange stores and operates the authoritative market record.**
 
-This foundation is cross-cutting. Its first product consumer is Slice 3.3 seller/responder capability enrichment. Wave 4 reuses the same foundation for issuer/buyer need interpretation and AMACS-backed RFx drafting.
+AMACS 0.5.0 supplies the provider-neutral semantic contracts. RFxchange supplies the server-side AI implementation, authorization, provenance, privacy, cost control and authoritative commands.
 
 ## Sequencing authority
 
-This foundation is inserted into the Wave 3 execution sequence as a no-Feature-ID gate:
-
 ```text
 Slice 3.2 — Controlled Network Entry & Discovery
+→ configured-browser acceptance, tracker evidence and merge
 → recalculate from merged main
-→ AI/AMACS Interpretation Foundation
+→ reconcile RFxchange to AMACS 0.5.0
 → validate and merge
 → recalculate
-→ Slice 3.3 — Market Profile Enrichment
+→ implement this AI/AMACS Interpretation Foundation
+→ validate and merge
+→ recalculate
+→ authorize Slice 3.3 — Market Profile Enrichment
 ```
 
-Planning this foundation does not interrupt or widen active Slice 3.2. Production implementation must not begin until Slice 3.2 is merged and the next-step authority is recalculated.
+Planning or implementation of this foundation must not widen active Slice 3.2. Completion of either cross-cutting gate changes no Feature-ID status by itself.
 
-Completion of this foundation does not mark any tracker Feature ID Done. Product-facing behavior introduced by later slices remains accountable to those slices' Feature IDs and acceptance checks.
+## Pinned semantic contracts
+
+The foundation must consume the immutable AMACS 0.5.0 release at commit `da7879f2609271b067ae6d02875e9388a02c4fe5` through `docs/rfx/AMACS_INTEGRATION_CONTRACT.md`.
+
+Required AMACS contracts are:
+
+- `market-need.schema.json`;
+- `interpretation-record.schema.json`;
+- `interpretation-candidate.schema.json`;
+- `concept-interpretation-guidance.schema.json`;
+- `organization-capability.schema.json`;
+- `rfx-requirement.schema.json`; and
+- the existing evidence, request, response, decision, readiness, role and outcome contracts used by the applicable workflow.
+
+### Authority boundary
+
+An AMACS interpretation record has `humanConfirmationRequired: true` and `authoritativeEffect: "none"`.
+
+An interpretation candidate remains non-authoritative even when its disposition becomes accepted. A separate server-authorized RFxchange command must create or change the market need, organization capability assertion, RFx requirement or other domain record.
+
+Rejected, unresolved, withdrawn or merely suggested candidates cannot influence authoritative matching, qualification, verification, credibility, publication or outcome reporting.
 
 ## Product boundary
 
-### The participant may begin in ordinary language
+Participants may begin in ordinary language, manually browse AMACS, or use both.
 
 Examples:
 
-- seller/responder: "We install and maintain commercial HVAC systems, troubleshoot controls, and replace rooftop units."
-- buyer/issuer: "Our parking lot floods during heavy rain and we need safe access before hurricane season."
+- seller/responder: “We install and maintain commercial HVAC systems, troubleshoot controls, and replace rooftop units.”
+- buyer/issuer: “Our parking lot floods during heavy rain and we need safe access before hurricane season.”
 
-The system may use AI to interpret that language, identify ambiguity, retrieve candidate AMACS concepts, and propose a structured representation.
-
-### The AI is never semantic authority
-
-The model must not:
-
-- invent AMACS identifiers;
-- assert that an organization possesses a capability merely because language suggests it;
-- silently add RFx requirements;
-- decide that a credential, license, certification or legal condition is required without authoritative support;
-- convert a candidate match into qualification, verification, endorsement or award likelihood;
-- publish an RFx, submit a response, make a selection or create a binding relationship;
-- rewrite AMACS automatically from usage patterns;
-- make the manual workflow unavailable when the AI provider is unavailable or disabled.
-
-### AMACS remains authoritative
-
-The interpretation service may return only concepts and relationships that validate against the pinned/active AMACS release projection consumed by RFxchange.
-
-If no adequate canonical concept exists, the service must permit a provisional-term path rather than forcing an inaccurate mapping.
+The system may interpret language, identify ambiguity, retrieve candidate AMACS concepts and propose structure. It must not invent identifiers, silently create claims/requirements, make legal determinations, publish, submit, select, award or rewrite AMACS.
 
 ## Architecture
 
 ```text
-Participant-authored language or approved source material
+participant-authored language or approved source material
                          ↓
                  RFxchange UI/API
                          ↓
-                AI Gateway service
+          authenticated server-side AI gateway
                          ↓
-          context minimization/redaction
+          authorization + minimization/redaction
                          ↓
-            AMACS retrieval / candidate set
+       AMACS 0.5.0 retrieval / bounded candidate set
                          ↓
-          provider-agnostic model adapter
+             provider-neutral model adapter
                          ↓
-             strict structured output
+               strict structured output
                          ↓
-              schema/catalog validation
+      AMACS schema + catalog + relationship validation
                          ↓
-        reviewable interpretation proposal
+       persisted non-authoritative interpretation record
                          ↓
-         accept / edit / reject / add
+       accept / edit / reject / none / clarify / manual
                          ↓
-       authoritative RFxchange domain record
+        separate authorized domain command and write
 ```
 
-The AI provider is an implementation dependency behind an RFxchange application boundary. Provider-specific request/response types must not leak into organization, RFx, capability, requirement, evidence, matching or outcome domain models.
+Provider-specific request/response types cannot leak into organization, capability, RFx, requirement, evidence, matching, referral, credibility or outcome domain models.
 
-## Required foundation components
+## Required components
 
 ### 1. Server-side AI gateway
 
-Create one authenticated server-side gateway for model-assisted operations.
+Create one authenticated server-side gateway that owns:
 
-The gateway must own:
-
-- user/session and organization-authority checks;
-- tenant and feature-policy checks;
+- current user/session and organization authority;
+- tenant and feature policy;
 - provider/model routing;
-- request-size and token limits;
-- rate limits and abuse controls;
-- retries and bounded failure handling;
-- usage/cost measurement;
-- prompt-template versioning;
-- privacy/minimization policy;
+- secrets;
+- request/token limits and abuse controls;
+- retries, timeouts and bounded failure handling;
 - structured-output validation;
-- observability without exposing private participant content unnecessarily.
+- usage and cost metering;
+- prompt/retrieval versioning;
+- privacy/minimization rules; and
+- content-safe observability.
 
-Browser/client code must never contain provider API secrets or call the model provider as an authoritative RFxchange backend.
+The participant browser never contains provider secrets or calls the provider as an RFxchange authority.
 
 ### 2. Provider abstraction and model router
 
-Define a provider-neutral interface so RFxchange can change models/providers without rewriting domain behavior.
-
-Routing policy should prefer the least-expensive model that meets the evaluated quality threshold and permit bounded escalation for ambiguous or higher-complexity cases.
-
-A provider/model choice is operational metadata, not part of AMACS semantics.
+Use a provider-neutral application interface. Prefer the least-expensive model that meets the evaluated quality threshold; allow bounded escalation for ambiguity or complexity. Provider/model choice remains RFxchange operational metadata.
 
 ### 3. AMACS release-aware retrieval
 
-The foundation must query a reduced, immutable AMACS runtime projection rather than relying on model memory.
+Retrieve from the verified 0.5.0 runtime projection rather than model memory. Candidate retrieval considers stable ID, label, definition, aliases, domain/family hierarchy, relationships, optional interpretation guidance, properties, market roles and release provenance.
 
-Candidate retrieval should consider at least:
+Lexical/vector scores are retrieval signals, not proof. Do not send the entire release when a bounded candidate set is sufficient.
 
-- stable AMACS identifier;
-- canonical name;
-- definition;
-- aliases/synonyms;
-- domain and family hierarchy;
-- relevant relationships;
-- applicable entity/market-role constraints where present;
-- release/version provenance.
+### 4. Strict contracts and validation
 
-Retrieval may combine lexical and semantic/vector search, but retrieval scores are not proof of capability or fit.
+Persist AMACS-conforming InterpretationRecord and InterpretationCandidate objects separately from authoritative domain records.
 
-Do not send an entire AMACS release on every model call when a bounded candidate set is sufficient.
+RFxchange-owned provenance stores provider/model, prompt template, retrieval/index version, token/usage, cost, latency, provider request ID and retention-relevant metadata. That provenance is referenced opaquely from the AMACS interpretation record.
 
-### 4. Strict interpretation contracts
+Validate every returned canonical ID, relationship and controlled value against the pinned release before presentation. Invalid/model-invented IDs are rejected, logged safely and never shown as AMACS suggestions.
 
-Model outputs must conform to versioned RFxchange schemas rather than free-form prose.
+### 5. Human confirmation
 
-A candidate interpretation record should support, as applicable:
+The product provides explicit controls to accept, edit, reject, add, choose none-of-these, answer focused clarification questions and continue manually.
 
-- interpretation mode (`organization_capability`, `market_need`, later approved modes);
-- source references or bounded source excerpts;
-- candidate AMACS identifiers;
-- candidate relationship/type;
-- rationale/explanation;
-- confidence or uncertainty signal;
-- unresolved questions;
-- warnings/constraints;
-- prompt-template version;
-- model/provider identifier;
-- AMACS release identifier/checksum;
-- creation time;
-- user disposition (`accepted`, `edited`, `rejected`, `unresolved`);
-- link to the resulting authoritative record only after confirmation.
+Acceptance of a suggestion does not bypass server authority. The resulting domain command revalidates current user, organization, release, catalog record and any workflow-specific rules.
 
-The application must validate every returned AMACS identifier and relationship against the active release projection before presenting it as an AMACS suggestion.
+### 6. Privacy and minimum necessary data
 
-### 5. Human confirmation and provenance
+Define prohibited/sensitive fields, attachment opt-in, extraction boundaries, field-level redaction, RFxchange/provider retention expectations, minimized logs, authorization before source inclusion, tenant controls and outage/disable behavior.
 
-AI output is always a proposal until an authorized participant accepts or edits it.
-
-The product must provide explicit controls to:
-
-- accept;
-- edit;
-- reject;
-- add a missing concept;
-- indicate that none of the suggestions fit;
-- request/answer a focused clarification;
-- continue manually without AI.
-
-Rejected or unconfirmed AI suggestions are not authoritative market demand, capability assertions, evidence, qualifications or outcomes.
-
-The audit/provenance record must preserve enough metadata to explain which model/prompt/AMACS release produced a suggestion and how the participant disposed of it, while minimizing retained private content.
-
-### 6. Privacy and data minimization
-
-Only send the minimum content required for the requested interpretation.
-
-The foundation must define:
-
-- prohibited/sensitive fields that are never sent unless a later approved workflow explicitly requires them;
-- attachment/document opt-in and extraction boundaries;
-- field-level redaction/minimization rules;
-- retention expectations for RFxchange and the configured AI provider;
-- logs that preserve operational evidence without copying full private prompts/responses by default;
-- authorization checks before any organization/RFx source material is included;
-- tenant/user controls for AI-assisted features;
-- safe handling of provider outages or disabled AI.
-
-Participant-authored content remains participant-authored content. AI interpretation does not convert it into RFxchange-controlled marketing/interface text for localization purposes.
+Participant-authored text remains participant-authored and remains outside the existing automatic-translation scope.
 
 ### 7. Usage and cost controls
 
-Meter AI usage from the first implementation.
+Capture organization/user, purpose, provider/model, input/output usage, estimated/actual cost, latency, outcome/failure class and cache/retrieval use where material.
 
-At minimum capture:
+Enforce configurable request, user, organization and tenant limits. Quota exhaustion degrades to the manual AMACS route rather than blocking core participation.
 
-- organization and user scope;
-- interpretation mode;
-- provider/model;
-- input/output token or provider-equivalent usage;
-- estimated/actual provider cost where available;
-- request outcome and failure class;
-- cache/retrieval use where material.
-
-Add configurable per-request, per-user and per-organization limits. The product must fail into the manual AMACS browse/search workflow rather than blocking core participation because an AI quota is exhausted.
-
-Deterministic AMACS matching, filtering and eligibility rules must not invoke an LLM merely to compare already-structured records.
+Deterministic search/matching of already-structured records does not call an LLM.
 
 ### 8. Evaluation and regression harness
 
-Create an RFxchange-owned interpretation benchmark before the first participant-facing AI interpretation flow is considered complete.
+Create reviewed seller- and buyer-side cases. Track identifier validity, precision, recall, over-classification, unsupported assertion, clarification quality, provisional-term correctness, schema-valid output, downstream deterministic validation, cost and latency.
 
-Benchmark cases should contain ordinary-language inputs and reviewed expected AMACS/structure outcomes for both straightforward and ambiguous examples.
+Prompt/model/retrieval changes that materially degrade agreed thresholds fail the gate.
 
-Track at least:
+## First product consumer: Slice 3.3
 
-- AMACS identifier validity;
-- precision of proposed concepts;
-- recall of material concepts;
-- over-classification rate;
-- unsupported-assertion rate;
-- clarification quality;
-- provisional-term correctness;
-- schema-valid-output rate;
-- deterministic behavior of downstream validation;
-- cost/latency by evaluated model.
-
-Prompt or model changes that materially degrade the agreed benchmark must fail the interpretation acceptance gate.
-
-## First consumer: Slice 3.3 seller/responder capability interpretation
-
-Slice 3.3 should permit an authorized organization manager to begin with ordinary-language descriptions of products/services/capabilities and receive reviewable AMACS capability candidates.
-
-The flow must preserve these distinctions:
+An authorized organization manager may describe products/services/capabilities in ordinary language and receive reviewable candidates.
 
 ```text
 AMACS capability exists
         ≠
-organization declares capability
+interpretation candidate suggested
         ≠
-organization supplies supporting evidence
+organization confirms capability assertion
         ≠
-capability/evidence is independently verified
+organization supplies evidence
+        ≠
+evidence/capability is independently verified
 ```
 
-Seller-side AI may assist with:
+No website, capability statement, uploaded document, external classification or past response automatically creates a capability assertion. A possible evidence-to-capability relationship is also a reviewable suggestion.
 
-- extracting candidate activities/capabilities from organization-authored descriptions;
-- retrieving relevant AMACS candidates;
-- asking focused clarification questions;
-- suggesting specialties or qualifiers for structured review;
-- connecting later entered past-performance evidence to already-confirmed capability assertions for review.
+## Reuse in Wave 4
 
-It must not automatically add capabilities to an organization profile or infer verification.
+The same gateway, retrieval, contracts, provenance, cost/privacy controls and evaluation harness later support issuer need interpretation. Buyer-side product scope remains Wave 4.
 
-## Reuse in Wave 4 buyer/issuer interpretation
+MarketNeed must separate observed condition, desired outcome, success measures, constraints, solution posture, known facts, assumptions and unresolved questions. The issuer confirms material structure before it becomes an RFx requirement.
 
-Wave 4 should reuse this same gateway, retrieval, schema, provenance, metering, privacy and evaluation architecture for buyer/issuer need interpretation.
+## Manual and provisional paths
 
-The buyer-side mode should help distinguish:
+Every assisted workflow retains a complete manual route using controlled fields and AMACS browse/search. When no concept fits accurately, the participant may create a provisional-term proposal rather than force a false canonical mapping.
 
-- observed condition/problem;
-- desired outcome;
-- known constraints;
-- solution openness;
-- known location/value/term/timing;
-- unresolved questions;
-- candidate request family;
-- candidate AMACS capabilities/requirements.
+## Acceptance gate
 
-The issuer must confirm material interpretations before they become authoritative RFx requirements.
+The foundation is complete only when evidence shows:
 
-The foundation does not itself implement Wave 4 RFx records, publication or opportunity objects.
-
-## Manual fallback
-
-Every participant-facing AI-assisted workflow must retain a fully functional non-AI route using controlled forms, AMACS hierarchy/search, contextual help and validation.
-
-AI provider failure, rate limiting, disabled tenant policy or budget limits must degrade gracefully to manual operation.
-
-## Acceptance gate for foundation implementation
-
-Before this cross-cutting foundation is considered complete, evidence must show:
-
-1. one server-side provider-neutral AI gateway exists with secret isolation and authorization boundaries;
-2. AMACS candidates are retrieved from a pinned/validated runtime projection rather than model memory alone;
-3. returned AMACS IDs/relationships are schema/catalog validated;
-4. AI proposals remain non-authoritative until explicit participant confirmation;
-5. provider/model/prompt/AMACS-release provenance is captured;
-6. usage and cost metering is present with bounded limits;
-7. private-content minimization and logging rules are enforced and tested;
-8. a manual non-AI fallback works when the provider is unavailable/disabled;
-9. an interpretation benchmark/evaluation harness gates model/prompt changes;
-10. deterministic matching/search remains independent of LLM calls;
-11. no capability, requirement, verification, qualification, RFx, response, award or outcome Feature ID is marked Done solely by this foundation.
+1. the server-side provider-neutral gateway and secret isolation work;
+2. AMACS 0.5.0 was reconciled and candidates come from its verified projection;
+3. the four 0.5.0 semantic-entry schemas and applicable downstream schemas validate;
+4. interpretation records/candidates remain separate and non-authoritative;
+5. accepted candidates require a separate authorized domain write;
+6. rejected/unresolved candidates cannot influence matching;
+7. RFxchange provenance records provider/model/prompt/retrieval/release metadata;
+8. privacy/minimization and logging rules are tested;
+9. usage/cost metering and bounded limits exist;
+10. manual operation works with AI unavailable, disabled or exhausted;
+11. evaluation gates model/prompt/retrieval changes;
+12. deterministic search/matching remains LLM-independent; and
+13. no capability, RFx, verification, qualification, referral, credibility or outcome Feature ID is marked Done solely by the foundation.
 
 ## Explicit non-scope
 
-This foundation does not implement:
-
-- Slice 3.3 organization capability enrichment itself;
-- Wave 4 RFx need/requirement records;
-- RFx publication;
-- opportunity matching or qualification;
-- autonomous proposal writing/submission;
-- evaluator scoring or selection;
-- autonomous teaming/contracting;
-- organization verification;
-- automatic legal/compliance determinations;
-- generalized web research;
-- fine-tuning or self-hosted foundation models;
-- automatic AMACS taxonomy mutation;
-- participant-authored content translation.
-
-## Handoff to Slice 3.3
-
-After this foundation merges and dependencies are recalculated, Slice 3.3 may consume:
-
-- the server-side AI gateway;
-- AMACS retrieval interfaces;
-- structured interpretation schemas;
-- suggestion/provenance records;
-- usage/cost controls;
-- evaluation harness;
-- manual fallback contract.
-
-Slice 3.3 remains responsible for the actual organization-owned capability declaration UX, persistence, privacy and public projection required by its Feature IDs.
+The foundation does not implement Slice 3.3 profile enrichment, Wave 4 RFx records/publication, opportunity qualification, autonomous proposal writing/submission, evaluator scoring/selection, autonomous teaming/contracting, organization verification, credibility, generalized web research, fine-tuning/self-hosting, automatic taxonomy mutation or participant-authored content translation.
 
 ## Completion discipline
 
-- Recalculate from merged `main` after Slice 3.2 before authorizing implementation of this foundation.
-- Recalculate again after the foundation merges before authorizing Slice 3.3.
-- Do not change master-tracker totals merely because this no-Feature-ID foundation exists or is completed.
-- Do not allow provider convenience to weaken AMACS governance, human confirmation, authorization, privacy or historical provenance.
+Recalculate after Slice 3.2, after AMACS reconciliation and after this foundation. Do not update tracker totals for these no-Feature-ID gates. Do not trade governance, authorization, privacy, historical meaning or manual fallback for provider convenience.
