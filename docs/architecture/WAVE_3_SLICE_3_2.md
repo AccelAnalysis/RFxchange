@@ -2,7 +2,7 @@
 
 ## Status
 
-**IMPLEMENTED ON THE AUTHORIZED SLICE BRANCH — PRODUCTION CI AND CONFIGURED-BROWSER ACCEPTANCE REQUIRED BEFORE FEATURE COMPLETION.**
+**IMPLEMENTED AND CONFIGURED-BROWSER ACCEPTED ON PR #120 — FINAL-HEAD PRODUCTION CI REQUIRED BEFORE FEATURE COMPLETION.**
 
 Feature IDs in scope:
 
@@ -95,20 +95,30 @@ Slice 3.2 does not create or display:
 
 Those objects remain absent until their owning slices provide authoritative records.
 
+## Configured-browser acceptance evidence
+
+Configured-browser acceptance completed on 2026-08-08 against the selected real Firebase project and configured Mapbox environment with one disposable authorized manager, one disposable user without organization authority, and four permitted or restricted counterparty projections.
+
+The browser pass proved:
+
+- an OPEN manager entered the authoritative Portsmouth Network workspace with the real home node, current boundary/camera, and three permitted organization projections;
+- a user without an active organization membership failed closed to activation, an organization suspension applied after load redirected to suspended remediation, and changing the lifecycle from OPEN to controlled removed Network search while preserving only the controlled home map;
+- capability search returned the two authored cybersecurity profiles, and the canonical Norfolk service-area filter narrowed the result to the one organization that declared Norfolk service coverage while keeping Portsmouth as its base locality;
+- exact public location rendered its full address, while approximate and locality-only results exposed only their permitted public labels and privacy-projected map coordinates rather than their retained private coordinates;
+- list selection, map focus, detail identity and the server-projected marker ID stayed synchronized; after the selected result became unavailable, reload rejected the stale saved selection and recovered to organization home;
+- the truthful no-results state appeared for an unmatched capability query and did not fabricate market density;
+- the 1440×900 desktop, 900×760 intermediate and 390×844 mobile compositions retained map/search/detail usability with no horizontal overflow; the browser-found mobile legibility correction gives search and results a restrained glass surface above the map and a non-transparent reduced-transparency fallback;
+- search, service-area and result controls retained named screen-reader semantics and visible focus treatment, while the existing reduced-motion contracts remained intact;
+- `en-US`, Spanish, French, Italian and German loaded the localized Network workspace and preserved participant-authored organization names and capability content verbatim;
+- future opportunity, referral, provider, credibility and outcome objects remained absent; and
+- the browser console contained zero warnings or errors.
+
+Cleanup removed 42 exact Firestore records and both disposable Firebase Auth identities. A follow-up residual scan returned zero.
+
+Focused validation for the browser-found correction and the full canonical `npm run check` passed locally on Node.js 24.18.0. The full gate included 385 architecture tests, 19 Functions tests, TypeScript, lint with no errors, and a successful production build.
+
 ## Acceptance remaining before Done
 
-Repository validation, Firebase/emulator tests, architecture tests, TypeScript, lint and production build must pass on the final branch head.
-
-Configured-browser acceptance must then prove, with authorized real/disposable organization records as applicable:
-
-- correct OPEN entry, geography, boundary, camera and home node;
-- capability search and service-area filtering;
-- permitted organization projection and privacy behavior;
-- map/list/detail synchronization and selection focus;
-- desktop, intermediate and mobile composition;
-- keyboard/focus and screen-reader list/detail behavior;
-- stale browser-state denial after result/access changes;
-- no fabricated opportunity, provider, referral, credibility or outcome objects;
-- no browser console errors.
+Production CI must pass on the synchronized final PR head. PR #120 remains draft and the four Feature IDs remain Not Started until that final-head evidence exists.
 
 Only after that evidence exists may `GEO-012`, `DSC-001`, `DSC-002` and `DSC-003` be marked Done and the Wave 3 dependency state recalculated.
