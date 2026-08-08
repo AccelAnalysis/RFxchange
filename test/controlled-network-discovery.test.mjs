@@ -9,6 +9,7 @@ const service = await read("src/application/network-discovery/network-discovery.
 const runtime = await read("src/infrastructure/network-discovery/runtime.ts");
 const route = await read("app/geography/canvas/page.tsx");
 const workspace = await read("src/components/participant/ExistingWorkspaceFoundation.tsx");
+const workspaceStyles = await read("src/components/participant/ExistingWorkspaceFoundation.module.css");
 const map = await read("src/components/map/ExchangeSpatialScene.tsx");
 const state = await read("src/application/participant/existing-workspace-state.ts");
 
@@ -57,6 +58,12 @@ test("Slice 3.2 browser persistence remains UI-only and fails closed for stale s
   assert.match(state, /storesDomainRecords: false/);
   assert.match(state, /selectedObjectMustBeAuthorizedProjection: true/);
   assert.match(workspace, /authorizedObjectIds/);
+});
+
+test("Slice 3.2 keeps the mobile search and result surface legible over the map", () => {
+  assert.match(workspaceStyles, /@media \(max-width: 520px\)[\s\S]*\.networkSearch[\s\S]*semantic-surface-glass-strong/);
+  assert.match(workspaceStyles, /\.networkSearch[\s\S]*elevation-overlay/);
+  assert.match(workspaceStyles, /prefers-reduced-transparency[\s\S]*\.networkSearch[\s\S]*backdrop-filter: none/);
 });
 
 test("Slice 3.2 does not fabricate later Network or RFx domain objects", () => {
