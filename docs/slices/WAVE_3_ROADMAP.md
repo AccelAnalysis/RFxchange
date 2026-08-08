@@ -1,20 +1,20 @@
 # Wave 3 — Network Roadmap
 
-**Status: SLICE 3.1 COMPLETE; BRAND GATES B0–B6a COMPLETE; SLICE 3.2 ACTIVE; AI/AMACS INTERPRETATION FOUNDATION PLANNED IMMEDIATELY AFTER 3.2**
+**Status: SLICE 3.1 COMPLETE; BRAND GATES B0–B6a COMPLETE; SLICE 3.2 ACTIVE; AMACS 0.5.0 RELEASED; 0.5.0 RECONCILIATION AND AI/AMACS FOUNDATION ARE THE NEXT TWO CROSS-CUTTING GATES BEFORE SLICE 3.3.**
 
-Wave 2 is complete, Brand Gates B0 through B6a are merged, Wave 3 Slice 3.1 is complete, and Slice 3.2 is the active authorized implementation slice.
+Wave 2 is complete, Brand Gates B0 through B6a are merged, Wave 3 Slice 3.1 is complete, and Slice 3.2 remains the only active authorized implementation slice.
 
-Current feature state remains:
+Current Feature-ID state remains:
 
 - **438 total · 121 Done · 317 Not Started**
 - Activation: **43/43**
 - Network: **7/38**
 
-Brand Gates and the AI/AMACS Interpretation Foundation are no-Feature-ID cross-cutting work. Their completion does not by itself mark any Network feature Done.
+AMACS 0.5.0, Brand Gates, the RFxchange AMACS reconciliation and the AI/AMACS Interpretation Foundation are no-Feature-ID cross-cutting work. They do not mark any Network feature Done.
 
-## Completed entry foundations
+## Completed foundations
 
-### Inherited Wave 1 Network foundations
+### Inherited organization and network foundations
 
 - `ORG-021` — invite additional organizational users
 - `ORG-022` — standard user role presets
@@ -23,193 +23,198 @@ Brand Gates and the AI/AMACS Interpretation Foundation are no-Feature-ID cross-c
 
 ### Slice 3.1 — Transactional Communications Reliability — COMPLETE
 
-PR #107 completed:
-
-- `COMMS-003` — versioned transactional event/template architecture;
-- `COMMS-004` — minimized delivery aggregate, append-only audit evidence, and operations visibility;
-- `COMMS-005` — deterministic retry, replay suppression, interrupted-success healing, and terminal-failure handling.
-
-Implementation merge:
-
-`368fdb5e0179ca7933eb33ffb6cbf12a2afe2bf1`
-
-Production CI run `30719532985` passed on the final implementation head.
+PR #107 completed `COMMS-003`, `COMMS-004` and `COMMS-005` at merge `368fdb5e0179ca7933eb33ffb6cbf12a2afe2bf1`.
 
 ### Brand convergence through B6a — COMPLETE
 
-- B0 — authority reconciliation: PR #100
-- B1 — semantic design foundation: PR #109
-- B2 — shared component primitives: PR #111
-- B3 — cartographic convergence: PR #112
-- B4 — public marketing/acquisition: PR #113
-- B5 — activation experience: PR #114
-- B6a — existing workspace foundation: PR #115
+B0 through B6a are merged. The final B6a implementation merged at `bf59f1d18fa6db3f43660c42777b494b505be545`.
 
-The final B6a implementation merged at:
+### AMACS 0.5.0 — RELEASED IN THE INDEPENDENT STANDARD REPOSITORY
 
-`bf59f1d18fa6db3f43660c42777b494b505be545`
+AMACS 0.5.0 merged in `AccelAnalysis/amacs` at `da7879f2609271b067ae6d02875e9388a02c4fe5`.
 
-See:
+It preserves the 16-domain, 120-family, 615-capability and 185-alias catalog while adding provider-neutral contracts for:
 
-- `docs/brand/BRAND_GATES_B2_B6A_RECONCILIATION.md`;
-- `docs/tracking/RFxchange_BRAND_GATE_TRACKER.md`.
+- structured market needs;
+- bounded interpretation records;
+- non-authoritative interpretation candidates; and
+- concept-interpretation guidance.
 
-## Current execution result
+The standard release does not itself implement AI in RFxchange and changes no RFxchange Feature-ID status.
 
-The Network dependency graph made the Slice 3.2 Feature IDs eligible after Slice 3.1, and the required non-Feature sequencing boundaries B2, B3 and B6a are complete. PR #119 explicitly authorized Slice 3.2 as the active implementation slice while preserving tracker totals and dependency authority.
+## Current execution authority
 
-**Slice 3.2 is active.** Its Feature IDs remain Not Done until their own repository/configured-browser acceptance and evidence requirements pass.
+**Slice 3.2 — Controlled Network Entry & Discovery remains active.** PR #120 has passed production CI but still requires configured-browser acceptance and the completion evidence defined by the Slice 3.2 brief. No later implementation may begin until it merges and authority is recalculated from merged `main`.
 
-The newly adopted AI/AMACS Interpretation Foundation is the next no-Feature-ID gate after Slice 3.2. It must not begin production implementation until Slice 3.2 merges and dependencies are recalculated from merged `main`.
+After Slice 3.2, execute two cross-cutting gates in order:
 
-## Wave 3 slices and cross-cutting gate
+1. **RFxchange reconciliation to AMACS 0.5.0** — consume or deterministically reconstruct and verify the immutable release, preserve historical 0.1.0 records, generate or validate 0.5.0 catalog and runtime contracts, and expose release-aware application ports without implementing participant features.
+2. **AI/AMACS Interpretation Foundation** — implement the server-side provider-neutral gateway, one concrete provider adapter, 0.5.0-grounded retrieval and validation, non-authoritative interpretation persistence, disposition or authoritative-command separation, provenance, privacy, cost controls, future manual-service fallback and evaluation without completing Slice 3.3 or Wave 4 product flows.
 
-| Slice / gate | Features | Status / purpose |
+Only after both gates merge and dependencies are recalculated may Slice 3.3 be explicitly authorized.
+
+## Wave 3 slices and gates
+
+| Slice or gate | Features | Status or purpose |
 | --- | --- | --- |
-| **3.1 — Transactional Communications Reliability** | `COMMS-003`, `COMMS-004`, `COMMS-005` | **Complete via PR #107.** Versioned templates/events, delivery audit, retry, idempotency, and terminal-failure visibility. |
-| **3.2 — Controlled Network Entry & Discovery** | `GEO-012`, `DSC-001`, `DSC-002`, `DSC-003` | **Active authorized implementation slice.** Add the first live Network workspace with permitted organization discovery, capability search, geographic/service-area filters, and synchronized map/list/detail behavior. |
-| **AI/AMACS Interpretation Foundation** | **No Feature IDs** | **Planned immediately after 3.2 and before 3.3.** Establish provider-neutral AI gateway, AMACS retrieval/validation, strict interpretation contracts, human confirmation/provenance, privacy, metering, manual fallback and evaluation. First product consumer is Slice 3.3; Wave 4 reuses the same foundation for buyer/issuer need interpretation. |
-| **3.3 — Market Profile Enrichment** | `ORG-013`, `ORG-014`, `ORG-016`, `ORG-017` | Add structured AMACS-backed capabilities, products/services, industry/NAICS context, past performance, and teaming/referral/resource preferences. Ordinary-language capability declaration may receive AI-assisted AMACS suggestions, but confirmed organization assertions remain distinct from AI suggestions, evidence and verification. |
-| **3.4 — Credential, Media & Location Enrichment** | `ORG-015`, `ORG-018`, `ORG-019` | Add credentials with provenance, media/documents/portfolio, and additional locations using private-by-default storage and subordinate-location visual treatment. |
-| **3.5 — Referral Network & Referral Acquisition** | `REF-001`, `REF-002`, `REF-003`, `REF-004`, `REF-005`, `EDU-014`, `ACQ-006` | Establish legitimate referrals with context, consent, lifecycle, first-use education, and external acquisition continuity. First legitimate source for live referral paths. |
-| **3.6 — Official Resource Provider Foundation** | `RES-001`, `RES-002`, `RES-003`, `ADM-070` | Establish application, controlled review/approval, Official Resource Provider status, and structured service profile while keeping approval separate from credibility and payment. |
-| **3.7 — Resource Discovery, Routing & Provider Distribution** | `RES-004`, `RES-005`, `DSC-011`, `REF-006`, `RES-007`, `RES-008`, `ACQ-008` | Add service-territory discovery, contextual routing, consented provider connection, scoped communications, resource publishing, and provider acquisition. First legitimate source for live service fields. |
-| **3.8 — Persistent Network Education** | `EDU-016`, `EDU-017` | Add reusable Quick Start/role paths and contextual explainers over live Network behavior. |
+| **3.1 — Transactional Communications Reliability** | `COMMS-003`, `COMMS-004`, `COMMS-005` | **Complete via PR #107.** |
+| **3.2 — Controlled Network Entry & Discovery** | `GEO-012`, `DSC-001`, `DSC-002`, `DSC-003` | **Active.** Controlled Network entry; permitted organization discovery; capability, geography and service-area search; synchronized map, list and detail. |
+| **AMACS 0.5.0 reconciliation** | **No Feature IDs** | **Next after 3.2.** Pin, ingest or deterministically rebuild, validate and migrate RFxchange from its stale 0.1.0 integration baseline to immutable 0.5.0 without silently changing historical records or creating participant features. |
+| **AI/AMACS Interpretation Foundation** | **No Feature IDs** | **After 0.5.0 reconciliation.** Provider-neutral server gateway and concrete adapter; release-aware retrieval; AMACS schema and catalog validation; non-authoritative candidates; disposition and authoritative-command separation; provenance; privacy; metering; future manual-service path; evaluation. |
+| **3.3 — Market Profile Enrichment** | `ORG-013`, `ORG-014`, `ORG-016`, `ORG-017` | Structured AMACS-backed capability assertions, products and services, industry and NAICS context, past performance and teaming, referral or resource preferences. Ordinary-language assistance uses 0.5.0 InterpretationRecord or Candidate contracts; confirmed assertions remain separate from suggestions, evidence and verification. |
+| **3.4 — Credential, Media & Location Enrichment** | `ORG-015`, `ORG-018`, `ORG-019` | Credentials with provenance; private-by-default media, documents and portfolio; subordinate additional locations with geography and privacy authority. |
+| **3.5 — Referral Network & Referral Acquisition** | `REF-001`, `REF-002`, `REF-003`, `REF-004`, `REF-005`, `EDU-014`, `ACQ-006` | Legitimate organization-owned referrals with structured context, consent and minimum necessary data, lifecycle, first-use education and external acquisition continuity. |
+| **3.6 — Official Resource Provider Foundation** | `RES-001`, `RES-002`, `RES-003`, `ADM-070` | Controlled provider application, review and approval; official-provider state; structured service profile with authority, evidence and lifecycle. |
+| **3.7 — Resource Discovery, Routing & Provider Distribution** | `RES-004`, `RES-005`, `DSC-011`, `REF-006`, `RES-007`, `RES-008`, `ACQ-008` | Service-territory discovery; eligibility and capacity-aware contextual routing; consented provider connection; resource objects; provider acquisition and distribution. |
+| **3.8 — Persistent Network Education** | `EDU-016`, `EDU-017` | Reusable Quick Start and role paths plus contextual explainers over live organization, referral and resource behavior. |
 
 ## Operating sequence
 
-Use one active slice or gate unless a later task explicitly authorizes another arrangement.
+Use one active slice or gate at a time unless an explicit later task changes that authority.
 
 ```text
-Wave 2 complete
-→ B0–B6a complete
-→ Slice 3.1 complete
-→ Slice 3.2 active implementation and merge
-→ recalculate from merged main
+Slice 3.2 configured-browser acceptance
+→ Slice 3.2 evidence and tracker update and PR #120 merge
+→ production CI and authority recalculation from merged main
+→ AMACS 0.5.0 reconciliation implementation and merge
+→ recalculate
 → AI/AMACS Interpretation Foundation implementation and merge
-→ recalculate
-→ Slice 3.3 merge
-→ recalculate
-→ Slice 3.4 merge
-→ recalculate
-→ Slice 3.5 merge
-→ recalculate
-→ Slice 3.6 merge
-→ recalculate
-→ Slice 3.7 merge
-→ B6b Network-lens convergence when authorized
-→ Slice 3.8 merge
-→ verify Wave 3 exit
+→ recalculate and explicitly authorize Slice 3.3
+→ Slice 3.3 implementation, acceptance and merge
+→ recalculate and explicitly authorize Slice 3.4
+→ Slice 3.4 implementation, acceptance and merge
+→ recalculate and explicitly authorize Slice 3.5
+→ Slice 3.5 implementation, acceptance and merge
+→ recalculate and explicitly authorize Slice 3.6
+→ Slice 3.6 implementation, acceptance and merge
+→ recalculate and explicitly authorize Slice 3.7
+→ Slice 3.7 implementation, acceptance and merge
+→ recalculate and explicitly authorize Slice 3.8
+→ Slice 3.8 implementation, acceptance and merge
+→ Wave 3 closeout only after Network is 38/38 and all exit evidence passes
 ```
 
-Preparation/read-only inspection may occur ahead of the active slice. Documentation-only planning may define the next gate. Production implementation of the AI/AMACS foundation or any later slice must not begin merely because adjacent abstractions make it convenient.
+The current Codex execution assignment intentionally stops after Slice 3.5, recalculates, and identifies Slice 3.6 as the next candidate. That task boundary is not a Wave 3 exit or completion claim.
+
+Preparation or read-only inspection may occur ahead of the active slice. Production code for a later gate or slice cannot begin merely because an adjacent abstraction makes it convenient.
 
 ## Critical path
 
 ```text
-Wave 2 OPEN + real marker
+real OPEN organization and real map marker
 → reliable communications [complete]
-→ semantic/component/cartographic/public/activation/workspace convergence [complete]
-→ controlled Network map/search [active]
-→ governed human-language ↔ AMACS interpretation foundation
-→ richer AMACS-backed market profiles
-→ referrals
-→ Official Resource Provider foundation
-→ contextual resource discovery/routing
-→ persistent education
+→ brand and workspace convergence [complete]
+→ controlled Network discovery [active]
+→ immutable AMACS 0.5.0 integration
+→ governed human-language ↔ AMACS interpretation
+→ confirmed AMACS-backed market profiles
+→ credential, media and location enrichment
+→ consented referral lifecycle and referral acquisition
+→ official resource-provider foundation
+→ service-territory discovery, contextual routing and provider distribution
+→ persistent Network education over real behavior
+→ Wave 3 exit at Network 38/38
 ```
 
-Parallel domain branches:
+## AMACS and AI authority
 
-```text
-ORG-012 → AI/AMACS foundation → ORG-013/014/016/017 → ORG-015/018/019
-GEO-011 → GEO-012 → DSC-003
-REF-001 + REF-005 → referral lifecycle → ACQ-006
-RES-001 → RES-002 → RES-003 → RES-004/005/008
-RES-003 + REF-005 → REF-006 → RES-007
-RES-003 → DSC-011
-RES-002 + COMMS-003 + ACQ-003 → ACQ-008
-```
+Governing documents:
 
-The AI/AMACS foundation is a sequencing prerequisite for Slice 3.3 product-facing capability interpretation, not a replacement dependency edge for the individual Feature IDs in the canonical dependency map. Any dependency-map mutation still requires its own reviewed reconciliation.
-
-## AI/AMACS interpretation authority
-
-The governing planning brief is:
-
+- `docs/rfx/AMACS_INTEGRATION_CONTRACT.md`;
+- `docs/rfx/AMACS_0_5_RECONCILIATION.md`;
 - `docs/slices/AI_AMACS_INTERPRETATION_FOUNDATION.md`.
 
 Core rules:
 
-- AI interprets participant language; AMACS supplies governed concepts/relationships; participants confirm; RFxchange stores authoritative records.
-- The provider/model is replaceable infrastructure behind a server-side RFxchange gateway.
-- Model output is a proposal, never a capability assertion, RFx requirement, evidence claim, verification, qualification or outcome by itself.
-- Every AMACS identifier returned by the AI path must validate against the pinned/validated runtime projection.
-- Manual AMACS browse/search remains available when AI is disabled, unavailable, rate-limited or exhausted.
-- Deterministic matching/search of already-structured records does not require an LLM.
-- Usage/cost, prompt/model/AMACS-release provenance, privacy/minimization and evaluation/regression controls are foundation requirements.
+- participants may begin in ordinary language or manually browse or search AMACS in the applicable authorized consumer;
+- AMACS 0.5.0 supplies the standard contracts; RFxchange supplies the implementation;
+- interpretation records and candidates have no authoritative effect;
+- accepted candidates require a separate server-authorized domain write;
+- the AI or model may not invent AMACS identifiers or silently create claims or requirements;
+- every ID and controlled relationship validates against the pinned release;
+- rejected or unresolved candidates cannot affect matching;
+- manual operation remains available in participant consumers when assistance is declined, unavailable, disabled or exhausted;
+- already-structured matching remains deterministic and LLM-independent; and
+- commercial status cannot alter semantic truth, matching, verification or credibility.
 
-## Brand authority for Wave 3
+The two cross-cutting gates are sequencing prerequisites, not replacement dependency edges for individual Feature IDs. Any canonical dependency-map mutation requires a separate reviewed reconciliation.
 
-Every participant-facing Wave 3 slice must read:
+## Slice handoffs
 
-- `docs/brand/README.md`;
-- `docs/brand/BRAND_GATES_B2_B6A_RECONCILIATION.md`;
-- `docs/brand/BRAND_EXPERIENCE_ACCEPTANCE_MATRIX.md`;
-- `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md`;
-- `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md` for spatial objects;
-- the applicable completed Brand Gate document;
-- the applicable current `docs/design/` baseline.
+### Slice 3.2
 
-Rules:
+Must remain within `GEO-012` and `DSC-001`–`003`; it cannot absorb AMACS 0.5.0 ingestion, AI interpretation or profile enrichment.
 
-- cross-cutting brand standards never widen Feature-ID scope;
-- organization nodes require authorized organization projections;
-- opportunity beacons remain absent until authoritative Wave 4 RFx publication;
-- referral paths require real Slice 3.5 referral state;
-- service fields require real Slice 3.7 provider-territory state;
-- credibility seals and outcome paths remain later-domain expressions;
-- Growth Green cannot imply an outcome merely because a connection, referral, publication, pursuit, invitation, submission or AI suggestion exists;
-- invented organizations, opportunities, statistics, provider availability, testimonials and network activity are prohibited.
+### AMACS 0.5.0 reconciliation
 
-## Reviewed dependency clarifications
+May implement only release ingestion or deterministic reconstruction, generated contracts and projections, history or migration safeguards and application ports. It cannot mark `ORG-013` or another product feature complete.
 
-The dependency map remains the scheduling authority.
+### AI/AMACS foundation
 
-- `RES-001`: Profile Complete (`ORG-012`), not optional additional locations, is the provider-application prerequisite.
-- `DSC-011`: contextual resource discovery requires the structured provider service profile (`RES-003`).
-- `REF-006`: provider connection requires the referral consent/minimum-necessary boundary (`REF-005`) plus `RES-003`.
-- `ACQ-006`: external referral acquisition requires `ACQ-003`, a real `REF-001`, and `COMMS-003`.
-- `ACQ-008`: provider-driven acquisition requires `ACQ-003`, approved `RES-002`, and `COMMS-003`.
-- Official Resource Provider approval is separate from Organization Verified, Verified Resource Provider credibility, and commercial status.
+May implement only the cross-cutting server gateway and provider adapter, retrieval, validation, interpretation and provenance persistence, disposition boundary, cost and privacy controls, future manual-service seams and evaluation. It cannot create final Slice 3.3 or Wave 4 product completion claims.
 
-## Slice 3.2 handoff
+### Slice 3.3
 
-Slice 3.2 may consume:
+Consumes the verified 0.5.0 catalog and foundation to create organization-owned, participant-confirmed capability assertions. It cannot infer verification.
 
-- B1 semantic tokens;
-- B2 shared primitives and authority-gated organization-node interfaces;
-- B3 Exchange Light cartography and marker/camera authority;
-- B6a organization home, deterministic UI-only workspace state, provenance, and recovery boundaries;
-- Slice 3.1 transactional communications where later discovery actions require messages.
+### Slice 3.4
 
-Slice 3.2 must not reinterpret B4 marketing copy or B5 activation visuals as Network feature completion and must not absorb the future AI/AMACS foundation or Slice 3.3 enrichment merely because capability search exists.
+Consumes merged profile assertions and preserves credential or evidence, media, storage and location privacy boundaries.
 
-## AI/AMACS foundation handoff
+### Slice 3.5
 
-After Slice 3.2 merges and dependencies are recalculated, the foundation may establish only the cross-cutting interpretation infrastructure and contracts defined in its brief. It must not mark `ORG-013` or other profile/RFx features complete.
+Consumes real organizations and profiles plus reliable communications. It creates the first legitimate live referral path and must preserve consent, minimum necessary sharing and the distinction between connection and outcome.
 
-After the foundation merges and dependencies are recalculated, Slice 3.3 may consume its gateway, retrieval, structured-output, provenance, metering, privacy, manual-fallback and evaluation contracts for organization capability declaration.
+### Slice 3.6
+
+Consumes real organizations and enriched profiles to establish controlled provider application, administrative review, approval and official-provider service-profile authority. It cannot self-award verification or credibility.
+
+### Slice 3.7
+
+Consumes approved providers, real service territories and referral authority to implement provider discovery, eligibility and capacity-aware routing, consented connections, resource visibility and acquisition continuity. It must not convert a provider recommendation into service acceptance or outcome.
+
+### Slice 3.8
+
+Consumes the merged live Network behavior from earlier slices and adds persistent Quick Start, role paths and contextual education. It cannot simulate missing domain state or replace the underlying workflows.
+
+## Brand, evidence and credibility rules
+
+- Use completed brand and design authorities without widening domain scope.
+- Organization nodes require authorized real projections.
+- Opportunity beacons remain absent until Wave 4 publication.
+- Referral paths require real Slice 3.5 records or events.
+- Service fields require real Slice 3.7 provider territory.
+- Credibility seals require later authoritative credibility events.
+- AI suggestion, profile claim, referral sent or accepted, publication, pursuit or submission is not a verified outcome.
+- Growth Green cannot imply an outcome without authoritative outcome state.
+- Invented organizations, opportunities, providers, statistics, testimonials, evidence and market activity are prohibited.
+- Paid, Founding or sponsored status cannot alter capability truth or neutral discovery.
 
 ## Wave 3 exit condition
 
-An OPEN organization can enter its controlled Network geography, discover permitted organizations by capability/geography, enrich its market profile with governed AMACS-backed capability declarations, send/receive legitimate referrals, and find/connect with approved resource providers. Approved providers can maintain service profiles, territories, and published resources; Network communications are reliable; and participants have persistent/contextual education.
+Wave 3 may close only after all 38 Network Feature IDs are accepted and evidenced.
 
-Wave 3 does not require the Wave 4 RFx engine, Wave 5 credibility system, Wave 6 paid entitlements, B7 Intelligence Dark, B8 Sonic/Sensory, B9 Presentation Mode, or Wave 7 institutional scale features. The cross-cutting AI/AMACS foundation may exist in Wave 3 because its first authorized consumer is capability enrichment; buyer/issuer RFx interpretation remains Wave 4 product scope.
+At exit:
+
+- an OPEN organization enters its controlled Network geography;
+- permitted organizations are discoverable by confirmed capability, geography and service area;
+- the same organization identity supports participant-confirmed AMACS-backed market enrichment;
+- credentials, private or public media and additional locations preserve provenance and privacy;
+- organizations send and receive legitimate consented referrals with acquisition continuity;
+- organizations can apply for resource-provider status and authorized administrators can review and approve or deny it;
+- approved providers expose structured services, territories, eligibility, intake and truthful capacity or availability state where authorized;
+- businesses discover and connect to appropriate providers in context without treating a recommendation as acceptance;
+- provider and resource acquisition pathways preserve bounded intent;
+- Quick Start, role paths and contextual explainers remain available over real Network behavior; and
+- evidence, authority, commercial neutrality, credibility, connection and outcome boundaries remain truthful throughout.
+
+Completion of Slice 3.5 alone is expected to leave Network at 25/38 absent unrelated drift. It is a milestone, not the Wave 3 exit.
 
 ## Completion discipline
 
-- Brand Gate or AI/AMACS foundation completion does not change Feature-ID completion by itself.
-- Mark a Network feature Done only after its own acceptance and CI evidence passes.
-- Recalculate from merged `main` after every product slice or cross-cutting implementation gate.
-- Slice 3.2 remains the only active implementation slice until it is merged and the next authority is explicitly recalculated/authorized.
+- Mark a Feature ID Done only after its own acceptance and evidence pass.
+- Cross-cutting gate completion does not change tracker totals.
+- Recalculate from merged `main` after every slice or gate.
+- Update execution authority before beginning the next production phase.
+- Slice 3.2 remains the sole active implementation slice until PR #120 is accepted and merged.
+- Do not describe the current assignment's stop after Slice 3.5 as Wave 3 completion.

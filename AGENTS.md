@@ -55,7 +55,11 @@ PR #117 established the cross-cutting internationalization foundation for `en-US
 
 **Wave 3 Slice 3.2 — Controlled Network Entry & Discovery (`GEO-012`, `DSC-001`, `DSC-002`, `DSC-003`) is the active authorized implementation slice.** Implement only within the approved Slice 3.2 brief and current tracker/dependency authority. Authorization permits implementation; none of these Feature IDs becomes Done until its own acceptance and evidence requirements pass and the tracker is updated through the normal completion process.
 
-Wave 4 RFx Core remains governed by the canonical planning authority merged through PR #118. That planning authority does not authorize Wave 4 implementation while Slice 3.2 is active. Subsequent Brand Gates and net-new capabilities such as Intelligence Dark, Presentation Mode, production sound or haptics likewise require explicit authorization and any necessary tracker governance.
+AMACS 0.5.0 is merged in the independent `AccelAnalysis/amacs` repository at `da7879f2609271b067ae6d02875e9388a02c4fe5`. It preserves the 615-capability catalog and adds provider-neutral MarketNeed, InterpretationRecord, InterpretationCandidate and ConceptInterpretationGuidance contracts. This independent standard release changes no RFxchange Feature-ID state.
+
+After Slice 3.2 merges and authority is recalculated, the next two no-Feature-ID gates are, in order: (1) reconcile RFxchange's stale AMACS 0.1.0 integration baseline to immutable 0.5.0; and (2) implement the cross-cutting AI/AMACS Interpretation Foundation. Only after both merge and authority is recalculated may Slice 3.3 be implemented. See `docs/rfx/AMACS_0_5_RECONCILIATION.md`, `docs/rfx/AMACS_INTEGRATION_CONTRACT.md`, `docs/slices/AI_AMACS_INTERPRETATION_FOUNDATION.md` and `docs/slices/WAVE_3_ROADMAP.md`.
+
+Wave 4 RFx Core remains governed by the canonical planning authority merged through PR #118 and the later AMACS 0.5.0 reconciliation authority. That planning authority does not authorize Wave 4 implementation while the Wave 3 sequence remains active. Subsequent Brand Gates and net-new capabilities such as Intelligence Dark, Presentation Mode, production sound or haptics likewise require explicit authorization and any necessary tracker governance.
 
 ## Required reading before a slice or gate
 
@@ -72,6 +76,7 @@ Before implementing any slice or Brand Gate:
 9. If the work creates or materially changes map/geography UI, also read `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md` and `docs/design/MAP_VISUAL_SYSTEM.md`.
 10. If the work creates customer-facing copy or communications, read `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md`.
 11. If the work introduces motion, sound, haptics or a viewing mode, read the corresponding brand authority and confirm that the capability is explicitly authorized.
+12. If the work consumes AMACS or AI interpretation, read the current AMACS integration/reconciliation contracts and keep AMACS semantics separate from RFxchange provider/model implementation provenance.
 
 ## Brand requirement classes
 
@@ -86,7 +91,8 @@ Before implementing any slice or Brand Gate:
 - Preserve immutable/auditable history for sensitive administrative, access, claim, credibility and policy decisions.
 - Do not expose sensitive evidence or private organization data through public projections.
 - Prefer explicit state machines and typed domain contracts over UI-only state.
-- Provider adapters remain behind domain/application boundaries; do not leak Firebase, Microsoft or payment-provider implementation details into domain models.
+- Provider adapters remain behind domain/application boundaries; do not leak Firebase, Microsoft, payment-provider or AI-provider implementation details into domain models.
+- An AI interpretation is non-authoritative. Accepted suggestions require a separate server-authorized domain write; rejected/unresolved suggestions cannot affect authoritative matching or public projection.
 - Do not weaken existing security rules or architecture tests to make new work pass.
 - Motion, sound and visual success states consume authoritative application/domain facts; button clicks and optimistic UI are not authority.
 - Do not fabricate organizations, opportunities, maps, statistics, outcomes, testimonials, provider availability or live network activity.
@@ -128,7 +134,7 @@ Brand acceptance supplements and never replaces domain, security, lifecycle, geo
 
 At the end of implementation or reconciliation work, report:
 
-- Feature IDs or Brand Gate addressed.
+- Feature IDs or Brand Gate/cross-cutting gate addressed.
 - Acceptance evidence and tests run.
 - Any architecture/dependency discoveries that affect later slices or gates.
 - Tracker changes made or intentionally not made.

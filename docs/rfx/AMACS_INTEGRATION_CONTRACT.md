@@ -1,19 +1,28 @@
 # AMACS integration contract for The RFxchange
 
-**Status: CANONICAL INTEGRATION AUTHORITY — IMPLEMENTATION REQUIRES AN AUTHORIZED SLICE.**
+**Status: CANONICAL INTEGRATION AUTHORITY — IMPLEMENTATION REQUIRES THE AUTHORIZED RECONCILIATION GATE OR SLICE.**
 
-AMACS release baseline for this convergence:
+AMACS release baseline:
 
-- version: `0.1.0`;
+- version: `0.5.0`;
 - repository: `AccelAnalysis/amacs`;
-- merged source commit: `d6f322b3f262fa8c06c70e99ebfa1d5349ee4fe1`;
-- expected release shape: 15 domains, 92 families, 492 matchable capabilities and 185 English aliases.
+- merged source commit: `da7879f2609271b067ae6d02875e9388a02c4fe5`;
+- release date: `2026-08-08`;
+- expected catalog shape: 16 domains, 120 families, 615 matchable capabilities and 185 English aliases;
+- additional governed registries: 18 market roles, 35 properties, 27 units, 17 credential/evidence types, 10 requirement types, 8 requirement bundles, 10 request families, 7 governance profiles, 30 readiness rules, 29 response sections, 7 response templates, 22 decision factors, 7 decision templates and 12 outcome types;
+- interpretation contracts: `market-need.schema.json`, `interpretation-record.schema.json`, `interpretation-candidate.schema.json`, and `concept-interpretation-guidance.schema.json`.
 
-Counts are release acceptance evidence, not application constants. The manifest and checksums remain authoritative.
+Counts are release-acceptance evidence, not application constants. The AMACS manifest, source commit and SHA-256 checksums remain authoritative.
 
-## 1. Boundary
+## 1. Governing boundary
 
-RFxchange consumes AMACS through an application port. AMACS remains an independently versioned standard and source repository.
+RFxchange consumes AMACS through application ports and generated runtime contracts. AMACS remains an independently versioned standard and source repository.
+
+The governing interpretation rule is:
+
+> **AI or other assistance interprets and proposes. AMACS defines and constrains. The participant confirms. RFxchange stores and operates the authoritative market record.**
+
+An AMACS concept is not an organization capability claim. An interpretation record or candidate is not an organization capability assertion, RFx requirement, verification, qualification, selection, outcome or taxonomy change.
 
 ```ts
 export interface AmacsCatalogPort {
@@ -23,33 +32,40 @@ export interface AmacsCatalogPort {
   listFamilies(domainId: string): Promise<AmacsFamily[]>;
   listCapabilities(familyId: string): Promise<AmacsCapability[]>;
   getCapability(capabilityId: string): Promise<AmacsCapability | null>;
+  listMarketRoles(): Promise<AmacsMarketRole[]>;
   getRequestFamily(requestFamilyId: string): Promise<AmacsRequestFamily | null>;
+  getRequirementType(requirementTypeId: string): Promise<AmacsRequirementType | null>;
   getResponseTemplate(responseTemplateId: string): Promise<AmacsResponseTemplate | null>;
   getDecisionTemplate(decisionTemplateId: string): Promise<AmacsDecisionTemplate | null>;
   getReadinessRules(requestFamilyId: string): Promise<AmacsReadinessRule[]>;
+  getConceptInterpretationGuidance(capabilityId: string): Promise<AmacsConceptGuidance | null>;
 }
 ```
 
-Domain/application code depends on the port, not JSON file paths, GitHub APIs or UI components.
+Domain/application code depends on the port and generated validators, not AMACS file paths, GitHub APIs, model-provider response types or participant UI components.
 
-## 2. Release ingestion
+## 2. Release ingestion and reconciliation
 
 A build/release ingestion command must:
 
-1. read the pinned AMACS release manifest;
-2. verify manifest source commit and SHA-256 checksums;
-3. reject mutable/replaced content under the same version;
-4. validate schemas and referential integrity;
-5. generate the reduced RFxchange runtime projection;
-6. generate deterministic search indexes;
-7. generate TypeScript types/constants needed by adapters;
-8. write an ingestion manifest containing AMACS version, source commit, projection version and generated-file checksums;
-9. fail CI on count/reference/checksum drift;
-10. make no network request from the participant browser.
+1. read the pinned AMACS 0.5.0 release manifest;
+2. verify the source commit and every SHA-256 checksum;
+3. reject mutable or replaced content under the same version;
+4. validate all canonical registries, runtime schemas and referential integrity;
+5. reconcile the documented release counts without turning counts into runtime constants;
+6. generate the reduced RFxchange catalog projection and deterministic search indexes;
+7. generate or verify TypeScript types and server-side validators for AMACS runtime contracts;
+8. include the 0.5.0 market-need and interpretation contracts;
+9. write an RFxchange ingestion manifest containing AMACS version, source commit, projection version, schema set and generated-file checksums;
+10. fail CI on checksum, reference, schema or count drift;
+11. make no network request from the participant browser; and
+12. preserve prior release projections needed to interpret historical RFxchange records.
 
-The generated runtime projection may be packaged with RFxchange or loaded into a governed server-side catalog store. Either approach must preserve the immutable release identity.
+The reduced runtime projection may be packaged with RFxchange or loaded into a governed server-side catalog store. Either approach must preserve immutable release identity.
 
-## 3. Runtime projection
+This reconciliation gate establishes data, validation, projection, history and application-port foundations only. It does not implement a participant capability picker, organization capability assertions, RFx capability requirements, team-coverage workflow or any Feature ID.
+
+## 3. Catalog projection
 
 The minimum capability projection contains:
 
@@ -63,17 +79,68 @@ type AmacsCapability = {
   familyId: string;
   familyLabel: string;
   aliases: string[];
+  inclusionNotes?: string;
+  exclusionNotes?: string;
   status: "active" | "deprecated";
   replacementConceptIds: string[];
   releaseVersion: string;
 };
 ```
 
-The request-family, response-template, decision-template, requirement-type and readiness projections retain enough information to produce valid RFx configuration without importing AMACS implementation details into participant components.
+Concept-interpretation guidance is optional by concept because AMACS 0.5.0 defines its governed contract without claiming complete guidance coverage for all 615 capabilities. Absence of guidance must not make a capability unavailable.
 
-## 4. Historical snapshots
+Request-family, requirement-type, response, decision, readiness, market-role, property, unit, credential/evidence and outcome projections retain enough information to validate RFxchange structures without importing AMACS implementation mechanics into participant components.
 
-Every published RFx reference to AMACS stores:
+## 4. AMACS 0.5.0 need and interpretation contracts
+
+RFxchange must implement the AMACS contracts without weakening their authority boundaries.
+
+### `MarketNeed`
+
+A runtime market need separates:
+
+- participant source statement;
+- observed condition;
+- desired outcome or target state;
+- affected context and success measures;
+- geography, timing and commercial context;
+- constraints, known facts, assumptions and unresolved questions;
+- solution posture, proposed/prohibited approaches and required outputs;
+- interpretation references; and
+- later confirmed RFx requirement references.
+
+A market need is not a universal canonical code for every problem. RFxchange owns the runtime record; AMACS defines its interoperable structure.
+
+### `InterpretationRecord`
+
+An interpretation record groups one bounded assisted, algorithmic, imported or human mapping exercise. It references source material, candidate records, the AMACS release and an opaque RFxchange implementation-provenance record.
+
+It must preserve:
+
+```ts
+humanConfirmationRequired: true;
+authoritativeEffect: "none";
+```
+
+### `InterpretationCandidate`
+
+A candidate may propose a market-need dimension, organization capability assertion, RFx capability requirement, request family, property value, credential requirement, response section, decision factor, market role or provisional term.
+
+Every candidate preserves bounded source evidence, proposed value, rationale, uncertainty or ambiguity, mapping method and participant disposition.
+
+Candidate disposition is not the authoritative write. Even an accepted candidate requires a separate authorized command to create or update the applicable RFxchange domain record.
+
+### `ConceptInterpretationGuidance`
+
+Guidance may provide inclusion notes, exclusion notes, example activities, example outputs, commonly confused concepts and clarification questions. It aids retrieval and participant understanding; it does not prove capability or qualification.
+
+### RFxchange implementation provenance
+
+Provider, model, prompt-template, retrieval/index version, token/usage, cost, latency, retention and provider-request identifiers belong in an RFxchange-owned provenance record. They do not become AMACS semantics or leak into organization capability and RFx domain models.
+
+## 5. Historical snapshots
+
+Every published RFx or confirmed organization capability reference stores the AMACS release and applicable label or definition snapshots used at that time.
 
 ```ts
 type PublishedAmacsReference = {
@@ -87,147 +154,181 @@ type PublishedAmacsReference = {
     | "response-template"
     | "decision-factor"
     | "decision-template"
-    | "readiness-rule";
+    | "readiness-rule"
+    | "market-role";
   labelSnapshot: string;
   definitionSnapshot?: string;
 };
 ```
 
-Stable IDs support joins and migrations. Snapshots preserve what the issuer/responders saw when the RFx was published. Later AMACS renames or hierarchy moves do not silently rewrite historical transactions.
+Market needs, interpretation records or candidates and their provenance also retain the AMACS release used. A later AMACS rename, hierarchy move, split, merge, deprecation or guidance change cannot silently reinterpret historical activity.
 
-## 5. Search and browse
+## 6. Search, browse and retrieval
 
-The shared capability picker supports:
+The shared catalog contract supports later authorized consumers through:
 
-- Domain → Family → Capability browsing;
-- global search over preferred labels, aliases, definitions, family labels and domain labels;
-- normalized punctuation/case matching;
-- result grouping by family/domain;
-- deterministic pagination or virtualization;
-- accessible keyboard/listbox/tree navigation;
-- selected-capability chips and breadcrumbs;
-- definitions and inclusion/exclusion details;
-- recently used capabilities where user-scoped state is appropriate;
-- suggested capabilities derived from user-entered need text only as suggestions, never as silently asserted requirements.
+- Domain → Family → Capability traversal;
+- search over preferred labels, aliases, definitions, family labels and domain labels;
+- optional concept-guidance fields where available;
+- normalized punctuation and case matching;
+- result grouping by family and domain;
+- deterministic pagination or virtualization data;
+- selected-capability identifiers and breadcrumbs; and
+- recently used capabilities where user-scoped state is appropriate.
 
-The primary interface shows human labels and breadcrumbs. Raw AMACS IDs are secondary technical details.
+The 0.5.0 reconciliation implements and tests the release-aware catalog/search application port and deterministic indexes, not a participant-facing picker. Keyboard, listbox/tree, selected-chip and responsive picker acceptance belongs to the first authorized participant consumer, principally Slice 3.3.
 
-## 6. Provisional terms
+The primary participant interface, when authorized, shows human labels, definitions and breadcrumbs. Raw AMACS IDs remain secondary technical detail.
 
-`None of these describe it` creates a governed proposal, not a canonical capability.
+Retrieval scores, embeddings and model confidence are not evidence of capability, qualification or fit.
 
-A provisional record includes:
+## 7. Provisional terms
 
-- user-proposed label;
-- plain-language definition;
-- example work/product/service;
-- proposed domain/family;
-- submitting organization and user authority;
-- source RFx/profile context;
-- status and editorial history.
+`None of these describe it` creates or references a governed proposal, not a canonical capability.
 
-A provisional term may support keyword discovery and editorial review. It cannot satisfy a mandatory canonical capability requirement until AMACS maps or approves it.
+A provisional record includes the proposed label and definition, example work, product or service, suggested placement, submitting organization or user authority, source RFx or profile context, status and editorial history.
 
-AMACS editorial outcomes include:
+A provisional term may support keyword discovery and editorial review. It cannot satisfy a mandatory canonical capability requirement until a governed AMACS release maps or approves it.
 
-- mapped as alias;
-- mapped to existing concept;
-- approved new capability;
-- converted to property/credential/requirement type;
-- split;
-- rejected;
-- merged/deprecated.
+The reconciliation gate must preserve the AMACS proposal contracts and application seams needed for this later behavior. The participant-facing `None of these describe it` path is accepted in Slice 3.3 or the applicable RFx slice, not during reconciliation.
 
-## 7. Organization capability claims
+## 8. Organization capability assertions
 
-Organization capability claims remain RFxchange records referencing AMACS:
+RFxchange organization capability records conform to the AMACS 0.5.0 organization-capability contract and add only RFxchange-owned operational fields that do not conflict with AMACS semantics.
 
 ```ts
 type OrganizationCapabilityClaim = {
   organizationId: string;
+  organizationIdentityId?: string;
+  entityScope?: "reporting_entity" | "legal_entity" | "operating_segment" | "subsidiary" | "brand" | "unknown";
   capabilityId: string;
   amacsReleaseVersion: string;
+  labelSnapshot: string;
+  marketRoleIds: string[];
   serviceGeographies: string[];
-  deliveryRoles: string[];
+  deliveryRoles: Array<"prime" | "subcontractor" | "supplier" | "referral_partner">;
   specialties: string[];
   capacity?: StructuredCapacity;
-  evidenceState: "self-asserted" | "evidence-supplied" | "verified";
+  assertionStatus: "self_reported" | "evidence_submitted" | "verified" | "suspended";
+  evidenceIds: string[];
   visibility: "private" | "network" | "public";
   updatedAt: string;
 };
 ```
 
-An AMACS concept does not make the claim verified. Credibility/evidence status remains separate.
+The write path is:
 
-## 8. RFx capability requirements
+```text
+participant language or manual selection
+→ non-authoritative candidates
+→ participant accept, edit or reject
+→ authorized confirmed write
+→ organization capability assertion
+→ evidence and verification remain separate
+```
 
-RFx requirements reference capabilities and separate qualifiers:
+No website, document, external classification, AI suggestion or prior response automatically creates or verifies a capability assertion.
+
+This section defines the downstream contract. Slice 3.3 owns its participant workflow and authoritative write implementation.
+
+## 9. RFx capability requirements
+
+RFx requirements reference AMACS capabilities and retain separate requirement types, qualifiers, evidence rules, response links and decision links.
 
 ```ts
 type CapabilityRequirement = {
   requirementId: string;
+  requirementTypeId: string;
   capabilityId: string;
   amacsReleaseVersion: string;
   level: "required" | "preferred" | "informational";
-  decisionTreatment: "gate" | "scored" | "gate-and-scored" | "informational";
-  satisfactionScope: "lead" | "any-accepted-team-member" | "combined-team";
+  decisionTreatment: "gate_only" | "scored_only" | "gate_and_scored_depth" | "informational_only";
+  teamCoverageAllowed: boolean;
   qualifiers: RequirementQualifier[];
-  evidenceRequirements: EvidenceRequirement[];
+  evidenceRequirementIds: string[];
   linkedResponseSectionIds: string[];
   linkedDecisionFactorIds: string[];
 };
 ```
 
-`satisfactionScope` is constrained by the referenced AMACS requirement type. The UI cannot enable team satisfaction for a type that forbids it.
+Team coverage is constrained by the referenced AMACS requirement type. The UI and AI path cannot relax a lead-organization credential or evidence rule that AMACS forbids teammates from satisfying.
 
-## 9. Matching semantics
+This section defines the downstream RFx contract. The reconciliation gate preserves requirement-type metadata and generated validators; the authorized Wave 4 slice owns server-side RFx requirement and team-coverage behavior.
 
-Capability matching distinguishes:
+## 10. Matching semantics
+
+Deterministic matching distinguishes:
 
 - exact concept match;
-- child capability satisfying a broader parent where the rule permits;
+- child capability satisfying a broader parent only where an approved rule permits;
 - parent not automatically satisfying a narrower child;
-- approved equivalent/crosswalk;
+- approved equivalent or crosswalk;
+- entity scope and market role;
 - accepted-team coverage;
-- missing evidence;
-- unknown/unconfirmed profile data;
+- qualifier or property fit;
+- missing or insufficient evidence;
+- unknown or unconfirmed profile data; and
 - provisional keyword relationship that cannot satisfy a mandatory canonical requirement.
 
-Matching produces explanations, not universal qualification or award likelihood.
+Rejected, unresolved and unconfirmed interpretation candidates do not affect authoritative matching. An LLM is not invoked merely to compare already-structured records.
 
-## 10. Upgrade/migration
+Matching produces explanations, not universal qualification, endorsement, credibility or award likelihood.
 
-An AMACS upgrade requires:
+This section defines downstream semantics. The reconciliation gate creates deterministic catalog data and validation seams only; authorized discovery and RFx slices own participant matching behavior.
 
-- explicit version change;
-- ingestion and checksum validation;
-- migration preview;
-- handling for deprecated/merged/split concepts;
-- no silent reassignment of organization claims or published requirements;
-- migration evidence and reversible mapping where practical;
-- historical RFxs remaining bound to their publication snapshot.
+## 11. Upgrade and migration
 
-Draft RFxs may be offered an explicit upgrade review. Published RFxs retain their original AMACS release unless an authorized addendum/version workflow intentionally migrates them.
+The 0.1.0 → 0.5.0 reconciliation is an explicit release migration, not a silent catalog replacement.
 
-## 11. Security and privacy
+It requires:
 
-- Browser users cannot mutate the canonical catalog.
-- Editorial proposals do not expose private RFx/profile content beyond minimum necessary review data.
-- Search indexes contain no private organization data.
-- AMACS ingestion credentials/tokens, if ever required, remain server-side.
-- RFxchange never infers verified capability solely from taxonomy selection.
+- immutable 0.5.0 ingestion and checksum validation;
+- migration preview from currently persisted AMACS references;
+- preservation of 0.1.0 historical snapshots;
+- explicit handling for deprecated, merged or split records;
+- no automatic conversion of free-text organization descriptions into capability assertions;
+- no silent reassignment of published RFx requirements;
+- reversible mapping evidence where practical; and
+- regression tests proving old records remain interpretable.
 
-## 12. Acceptance
+Draft records may be offered an explicit review or upgrade in the applicable authorized product slice. Published records remain bound to their original release unless an authorized version or addendum workflow intentionally migrates them.
 
-AMACS integration is acceptable only when:
+## 12. Security, privacy and commercial neutrality
 
-- the release manifest/checksums are verified;
-- the complete release projection is available server-side;
-- 15 domains, 92 families, 492 matchable capabilities and 185 aliases reconcile for 0.1.0;
-- no participant component imports the source JSON directly;
-- search finds alias-driven results;
-- hierarchy browse/search/selection are keyboard accessible;
-- historical snapshots survive catalog updates;
-- provisional terms cannot satisfy mandatory matches;
-- team-coverage restrictions are enforced server-side;
-- participant copy avoids raw AMACS implementation vocabulary.
+- Participant browsers cannot mutate the canonical catalog or call an AI provider with RFxchange secrets.
+- AI gateway calls require current user, organization, tenant and feature authority.
+- Only minimum necessary participant content is sent for interpretation.
+- Provider or model operational metadata remains server-side and separate from AMACS semantics.
+- Editorial proposals exclude private content beyond minimum necessary review data.
+- Search indexes contain no private organization or RFx content.
+- RFxchange never infers verified capability solely from taxonomy selection or interpretation.
+- Paid, Founding, sponsored or commercial status cannot alter legitimate interpretation, capability truth, matching or qualification.
+- When a participant-facing consumer is authorized, manual AMACS browse and search must remain functional if AI is declined, disabled, unavailable, rate-limited or over budget.
+
+## 13. Reconciliation-gate acceptance
+
+The no-Feature-ID AMACS 0.5.0 reconciliation gate is acceptable only when:
+
+- the pinned manifest, commit and checksums are verified;
+- 16 domains, 120 families, 615 capabilities and 185 aliases reconcile;
+- the additional registries reconcile to the 0.5.0 manifest;
+- the four need and interpretation schemas are packaged, generated and validated;
+- deterministic release-aware catalog traversal and search application ports work without participant UI;
+- generated or verified TypeScript contracts and server validators cover the required 0.5.0 structures;
+- no participant component imports AMACS source JSON or provider-specific AI types;
+- historical 0.1.0 references survive the upgrade;
+- migration preview or evidence identifies deprecated, merged or split records without silently changing them;
+- legacy free text, documents, websites, NAICS and model output cannot be converted automatically into capability assertions;
+- invalid or model-invented AMACS identifiers are rejected by catalog validation;
+- prior release projections needed for historical meaning remain available;
+- CI fails on checksum, schema, reference, generated-projection or count drift; and
+- no organization capability, RFx requirement, participant picker, team-coverage workflow or Feature-ID completion is claimed by reconciliation.
+
+## 14. Downstream-consumer acceptance
+
+The following requirements remain part of the integration contract but are accepted only in their authorized product foundations or slices:
+
+- the AI/AMACS Foundation proves non-authoritative interpretation persistence, separate confirmed writes, provenance, invalid-ID rejection, privacy/cost controls and manual application-service fallback;
+- Slice 3.3 proves keyboard-accessible participant browse/search, manual capability selection, provisional terms, authoritative organization capability writes and rejection or unresolved-candidate isolation;
+- Wave 4 proves MarketNeed and RFx requirement workflows, team-coverage enforcement, participant copy and publication or matching behavior; and
+- every downstream consumer preserves historical release snapshots, server authority and commercial neutrality.
