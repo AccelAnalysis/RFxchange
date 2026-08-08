@@ -1,0 +1,185 @@
+{"alias_id":"AMACS-ALS-000030","concept_id":"AMACS-CAP-000002","alias":"general contractor","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000031","concept_id":"AMACS-CAP-000003","alias":"commercial remodeling","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000032","concept_id":"AMACS-CAP-000004","alias":"TI construction","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000033","concept_id":"AMACS-CAP-000005","alias":"design build","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000034","concept_id":"AMACS-CAP-000006","alias":"construction management","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000035","concept_id":"AMACS-CAP-000009","alias":"commercial electrical contracting","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000036","concept_id":"AMACS-CAP-000010","alias":"electrical testing","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000037","concept_id":"AMACS-CAP-000011","alias":"commercial lighting installation","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000001","concept_id":"AMACS-CAP-000012","alias":"BAS integration","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000002","concept_id":"AMACS-CAP-000012","alias":"building automation integration","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000038","concept_id":"AMACS-CAP-000012","alias":"BMS integration","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000039","concept_id":"AMACS-CAP-000013","alias":"generator and UPS systems","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000006","concept_id":"AMACS-CAP-000014","alias":"low voltage cabling","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000040","concept_id":"AMACS-CAP-000014","alias":"structured cabling","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000003","concept_id":"AMACS-CAP-000016","alias":"heating and cooling installation","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000041","concept_id":"AMACS-CAP-000016","alias":"mechanical systems installation","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000004","concept_id":"AMACS-CAP-000017","alias":"HVAC PM","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000042","concept_id":"AMACS-CAP-000017","alias":"HVAC preventative maintenance","alias_type":"common_misspelling","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000043","concept_id":"AMACS-CAP-000018","alias":"BAS commissioning","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000044","concept_id":"AMACS-CAP-000019","alias":"central plant service","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000045","concept_id":"AMACS-CAP-000021","alias":"IAQ assessment","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000046","concept_id":"AMACS-CAP-000023","alias":"commercial plumbing contractor","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000005","concept_id":"AMACS-CAP-000029","alias":"IFM","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000047","concept_id":"AMACS-CAP-000031","alias":"custodial services","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000048","concept_id":"AMACS-CAP-000032","alias":"landscaping maintenance","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000049","concept_id":"AMACS-CAP-000034","alias":"CMMS work-order management","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000050","concept_id":"AMACS-CAP-000056","alias":"CNC machining","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000051","concept_id":"AMACS-CAP-000057","alias":"sheet metal work","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000052","concept_id":"AMACS-CAP-000059","alias":"welding services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000053","concept_id":"AMACS-CAP-000063","alias":"injection molding","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000007","concept_id":"AMACS-CAP-000069","alias":"PCBA","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000054","concept_id":"AMACS-CAP-000069","alias":"electronics manufacturing services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000055","concept_id":"AMACS-CAP-000069","alias":"EMS assembly","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000056","concept_id":"AMACS-CAP-000070","alias":"wire harness manufacturing","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000057","concept_id":"AMACS-CAP-000072","alias":"electrical control panel fabrication","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000058","concept_id":"AMACS-CAP-000075","alias":"machine building","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000008","concept_id":"AMACS-CAP-000087","alias":"QMS implementation","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000059","concept_id":"AMACS-CAP-000087","alias":"quality system implementation","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000060","concept_id":"AMACS-CAP-000091","alias":"lean manufacturing consulting","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000061","concept_id":"AMACS-CAP-000097","alias":"temperature-controlled packaging","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000062","concept_id":"AMACS-CAP-000099","alias":"bespoke software development","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000063","concept_id":"AMACS-CAP-000100","alias":"web software development","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000064","concept_id":"AMACS-CAP-000103","alias":"system integration services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000065","concept_id":"AMACS-CAP-000106","alias":"cloud solution architecture","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000066","concept_id":"AMACS-CAP-000108","alias":"managed cloud infrastructure","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000067","concept_id":"AMACS-CAP-000110","alias":"network design and implementation","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000068","concept_id":"AMACS-CAP-000113","alias":"cyber risk assessment","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000069","concept_id":"AMACS-CAP-000114","alias":"security operations center monitoring","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000070","concept_id":"AMACS-CAP-000114","alias":"SOC monitoring","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000071","concept_id":"AMACS-CAP-000115","alias":"vulnerability scanning","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000072","concept_id":"AMACS-CAP-000116","alias":"pen testing","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000073","concept_id":"AMACS-CAP-000117","alias":"cyber incident response","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000011","concept_id":"AMACS-CAP-000118","alias":"IAM","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000074","concept_id":"AMACS-CAP-000120","alias":"data pipeline development","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000009","concept_id":"AMACS-CAP-000121","alias":"BI development","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000075","concept_id":"AMACS-CAP-000121","alias":"analytics dashboard development","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000076","concept_id":"AMACS-CAP-000123","alias":"forecasting analytics","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000077","concept_id":"AMACS-CAP-000125","alias":"spatial data analysis","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000078","concept_id":"AMACS-CAP-000127","alias":"IT service desk","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000079","concept_id":"AMACS-CAP-000128","alias":"device management","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000012","concept_id":"AMACS-CAP-000129","alias":"MSP services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000080","concept_id":"AMACS-CAP-000129","alias":"IT managed services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000081","concept_id":"AMACS-CAP-000131","alias":"backup and disaster recovery management","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000082","concept_id":"AMACS-CAP-000133","alias":"UX design","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000083","concept_id":"AMACS-CAP-000134","alias":"UI design","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000084","concept_id":"AMACS-CAP-000135","alias":"accessibility audit","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000085","concept_id":"AMACS-CAP-000136","alias":"WCAG remediation","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000086","concept_id":"AMACS-CAP-000137","alias":"CMS implementation","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000013","concept_id":"AMACS-CAP-000139","alias":"AI solution development","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000087","concept_id":"AMACS-CAP-000140","alias":"ML model implementation","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000014","concept_id":"AMACS-CAP-000141","alias":"RPA","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000088","concept_id":"AMACS-CAP-000142","alias":"IoT integration","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000089","concept_id":"AMACS-CAP-000145","alias":"strategy development","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000090","concept_id":"AMACS-CAP-000146","alias":"process optimization","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000091","concept_id":"AMACS-CAP-000147","alias":"organizational diagnostic","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000092","concept_id":"AMACS-CAP-000148","alias":"target operating model design","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000093","concept_id":"AMACS-CAP-000149","alias":"KPI management","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000094","concept_id":"AMACS-CAP-000150","alias":"organizational change management","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000095","concept_id":"AMACS-CAP-000153","alias":"financial reporting","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000096","concept_id":"AMACS-CAP-000156","alias":"cash flow projection","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000097","concept_id":"AMACS-CAP-000160","alias":"contract review services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000098","concept_id":"AMACS-CAP-000161","alias":"compliance advisory","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000016","concept_id":"AMACS-CAP-000166","alias":"HR consulting","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000099","concept_id":"AMACS-CAP-000171","alias":"HRIS implementation","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000015","concept_id":"AMACS-CAP-000173","alias":"PM services","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000100","concept_id":"AMACS-CAP-000174","alias":"PMO support","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000101","concept_id":"AMACS-CAP-000180","alias":"virtual assistant services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000102","concept_id":"AMACS-CAP-000184","alias":"contact center services","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000103","concept_id":"AMACS-CAP-000187","alias":"purchasing consulting","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000104","concept_id":"AMACS-CAP-000188","alias":"sourcing strategy","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000105","concept_id":"AMACS-CAP-000194","alias":"full truckload freight","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000106","concept_id":"AMACS-CAP-000194","alias":"FTL freight","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000017","concept_id":"AMACS-CAP-000195","alias":"LTL freight","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000107","concept_id":"AMACS-CAP-000200","alias":"warehouse operations","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000108","concept_id":"AMACS-CAP-000202","alias":"pick pack and ship","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000109","concept_id":"AMACS-CAP-000203","alias":"cross docking","alias_type":"common_misspelling","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000110","concept_id":"AMACS-CAP-000208","alias":"last mile delivery","alias_type":"common_misspelling","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000111","concept_id":"AMACS-CAP-000214","alias":"TMS management","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000112","concept_id":"AMACS-CAP-000216","alias":"freight broker services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000018","concept_id":"AMACS-CAP-000217","alias":"3PL management","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000113","concept_id":"AMACS-CAP-000219","alias":"charter bus service","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000114","concept_id":"AMACS-CAP-000221","alias":"NEMT","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000115","concept_id":"AMACS-CAP-000225","alias":"vehicle fleet maintenance","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000116","concept_id":"AMACS-CAP-000227","alias":"fleet vehicle upfitting","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000117","concept_id":"AMACS-CAP-000231","alias":"building energy audit","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000118","concept_id":"AMACS-CAP-000232","alias":"energy conservation consulting","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000019","concept_id":"AMACS-CAP-000237","alias":"solar PV installation","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000119","concept_id":"AMACS-CAP-000237","alias":"solar panel installation","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000120","concept_id":"AMACS-CAP-000238","alias":"BESS integration","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000020","concept_id":"AMACS-CAP-000239","alias":"EV charging installation","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000121","concept_id":"AMACS-CAP-000239","alias":"EVSE installation","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000122","concept_id":"AMACS-CAP-000243","alias":"water utility operations","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000123","concept_id":"AMACS-CAP-000244","alias":"wastewater utility operations","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000124","concept_id":"AMACS-CAP-000255","alias":"Phase I ESA","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000021","concept_id":"AMACS-CAP-000264","alias":"GHG inventory","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000125","concept_id":"AMACS-CAP-000264","alias":"carbon inventory","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000126","concept_id":"AMACS-CAP-000266","alias":"continuity planning","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000127","concept_id":"AMACS-CAP-000272","alias":"mental health counseling","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000128","concept_id":"AMACS-CAP-000275","alias":"in-home health care","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000129","concept_id":"AMACS-CAP-000277","alias":"elder care services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000130","concept_id":"AMACS-CAP-000299","alias":"disability accessibility consulting","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000022","concept_id":"AMACS-CAP-000300","alias":"ASL interpretation","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000131","concept_id":"AMACS-CAP-000305","alias":"management training","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000132","concept_id":"AMACS-CAP-000310","alias":"digital literacy training","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000023","concept_id":"AMACS-CAP-000318","alias":"business services for employers","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000133","concept_id":"AMACS-CAP-000321","alias":"registered apprenticeship development","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000134","concept_id":"AMACS-CAP-000325","alias":"learning experience design","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000135","concept_id":"AMACS-CAP-000326","alias":"online course development","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000136","concept_id":"AMACS-CAP-000340","alias":"exam proctoring","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000137","concept_id":"AMACS-CAP-000342","alias":"working capital loan","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000138","concept_id":"AMACS-CAP-000346","alias":"microloan","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000139","concept_id":"AMACS-CAP-000349","alias":"loan readiness assistance","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000140","concept_id":"AMACS-CAP-000367","alias":"payment processing","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000141","concept_id":"AMACS-CAP-000373","alias":"grant prospect research","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000142","concept_id":"AMACS-CAP-000374","alias":"grant writing","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000143","concept_id":"AMACS-CAP-000375","alias":"economic development incentive analysis","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000144","concept_id":"AMACS-CAP-000379","alias":"branding strategy","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000145","concept_id":"AMACS-CAP-000384","alias":"marketing performance analytics","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000146","concept_id":"AMACS-CAP-000386","alias":"visual design services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000147","concept_id":"AMACS-CAP-000388","alias":"pitch deck design","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000024","concept_id":"AMACS-CAP-000393","alias":"SEO","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000148","concept_id":"AMACS-CAP-000393","alias":"organic search optimization","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000149","concept_id":"AMACS-CAP-000394","alias":"PPC advertising","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000150","concept_id":"AMACS-CAP-000394","alias":"digital advertising management","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000151","concept_id":"AMACS-CAP-000395","alias":"email campaign management","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000152","concept_id":"AMACS-CAP-000396","alias":"social media marketing","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000153","concept_id":"AMACS-CAP-000398","alias":"CRO","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000154","concept_id":"AMACS-CAP-000400","alias":"marketing copywriting","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000025","concept_id":"AMACS-CAP-000402","alias":"PR services","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000155","concept_id":"AMACS-CAP-000408","alias":"videography","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000156","concept_id":"AMACS-CAP-000411","alias":"drone photography","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000157","concept_id":"AMACS-CAP-000419","alias":"food catering","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000158","concept_id":"AMACS-CAP-000420","alias":"contract food service","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000159","concept_id":"AMACS-CAP-000428","alias":"hotel housekeeping","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000160","concept_id":"AMACS-CAP-000434","alias":"inventory counting","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000161","concept_id":"AMACS-CAP-000461","alias":"boat repair","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000162","concept_id":"AMACS-CAP-000463","alias":"underwater services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000163","concept_id":"AMACS-CAP-000467","alias":"fish farming","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000164","concept_id":"AMACS-CAP-000474","alias":"landscaping","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000165","concept_id":"AMACS-CAP-000485","alias":"community engagement facilitation","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000166","concept_id":"AMACS-CAP-000486","alias":"stakeholder outreach","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000167","concept_id":"AMACS-CAP-000493","alias":"disaster logistics","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000168","concept_id":"AMACS-CAP-000516","alias":"architecture services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000169","concept_id":"AMACS-CAP-000522","alias":"lab testing","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000170","concept_id":"AMACS-CAP-000523","alias":"construction materials testing","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000171","concept_id":"AMACS-CAP-000528","alias":"market analysis","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000172","concept_id":"AMACS-CAP-000529","alias":"economic analysis","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000010","concept_id":"AMACS-CAP-000536","alias":"GIS mapping","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000173","concept_id":"AMACS-CAP-000536","alias":"geographic information systems services","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000174","concept_id":"AMACS-CAP-000538","alias":"UAS mapping","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000026","concept_id":"AMACS-CAP-000543","alias":"NDT","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000175","concept_id":"AMACS-CAP-000544","alias":"building commissioning","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000176","concept_id":"AMACS-CAP-000547","alias":"commercial real estate brokerage","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000177","concept_id":"AMACS-CAP-000554","alias":"location advisory","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000028","concept_id":"AMACS-CAP-000555","alias":"site search","alias_type":"synonym","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000178","concept_id":"AMACS-CAP-000555","alias":"site screening","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000179","concept_id":"AMACS-CAP-000567","alias":"economic development recruitment","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000027","concept_id":"AMACS-CAP-000568","alias":"BRE support","alias_type":"abbreviation","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000180","concept_id":"AMACS-CAP-000568","alias":"business retention and expansion","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000181","concept_id":"AMACS-CAP-000570","alias":"cluster analysis","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000182","concept_id":"AMACS-CAP-000574","alias":"economic development incentive negotiation","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000029","concept_id":"AMACS-CAP-000580","alias":"workforce market analysis","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000183","concept_id":"AMACS-CAP-000580","alias":"workforce analytics","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000184","concept_id":"AMACS-CAP-000582","alias":"commute shed analysis","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}
+{"alias_id":"AMACS-ALS-000185","concept_id":"AMACS-CAP-000583","alias":"demographic research","alias_type":"search_term","language":"en","region":"US","status":"active","version_introduced":"0.1.0"}

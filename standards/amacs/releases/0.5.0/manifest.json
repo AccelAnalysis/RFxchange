@@ -1,0 +1,28 @@
+{
+  "name": "Accel Market Activity and Capability Standard",
+  "version": "0.5.0",
+  "status": "development",
+  "released_at": "2026-08-08",
+  "source_commit": "da7879f2609271b067ae6d02875e9388a02c4fe5",
+  "record_counts": {
+    "concepts": 751,
+    "relationships": 30,
+    "aliases": 185,
+    "properties": 35,
+    "property-values": 19,
+    "concept-properties": 215,
+    "credentials": 17,
+    "units": 27,
+    "requirement-types": 10,
+    "requirement-bundles": 8,
+    "governance-profiles": 7,
+    "readiness-rules": 30,
+    "request-families": 10,
+    "response-sections": 29,
+    "response-templates": 7,
+    "decision-factors": 22,
+    "decision-templates": 7,
+    "market-roles": 18,
+    "outcome-types": 12
+  }
+}

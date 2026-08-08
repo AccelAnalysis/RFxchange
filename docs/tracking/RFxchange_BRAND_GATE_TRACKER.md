@@ -11,12 +11,12 @@
 
 ## Current feature totals
 
-Brand Gate work through B6a changes no Feature-ID status:
+Brand Gate work through B6a and the later no-Feature-ID AMACS reconciliation change no Feature-ID status. Current merged product work through Slice 3.2 establishes:
 
-**438 total · 121 Done · 317 Not Started**
+**438 total · 125 Done · 313 Not Started**
 
 - Activation: **43/43**
-- Network: **7/38**
+- Network: **11/38**
 
 ## Gate ledger
 
@@ -38,8 +38,8 @@ Brand Gate work through B6a changes no Feature-ID status:
 
 ## Current release boundary
 
-B2, B3, and B6a have satisfied the non-Feature prerequisites identified for Wave 3 Slice 3.2. B4 and B5 are also complete under the adopted numerical execution sequence.
+B2, B3, and B6a satisfied the non-Feature prerequisites for Wave 3 Slice 3.2. B4 and B5 are also complete under the adopted numerical execution sequence. Slice 3.2 is complete via PR #120, and the no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123.
 
-**Next product implementation candidate:** Wave 3 Slice 3.2 — `GEO-012`, `DSC-001`, `DSC-002`, `DSC-003`.
+**Next active cross-cutting gate:** AI/AMACS Interpretation Foundation.
 
-Slice 3.2 remains unstarted until explicitly authorized.
+Slice 3.3 remains blocked until that foundation merges and dependency authority is recalculated. B6b remains later in the authorized Wave 3 sequence, after its live referral and provider domains exist.

@@ -1,0 +1,23 @@
+{
+  "generatedFrom": {
+    "historicalRelease": "0.1.0",
+    "currentRelease": "0.5.0"
+  },
+  "summary": {
+    "historicalCapabilities": 500,
+    "retainedHistoricalIds": 500,
+    "newCurrentCapabilities": 115,
+    "changedHistoricalCapabilities": 0,
+    "replacementSplitMergeRelationships": 0
+  },
+  "historicalChanges": [],
+  "replacementSplitMergeRelationships": [],
+  "rfxchangePersistenceInventory": {
+    "canonicalAmacsReferencesFoundInCurrentRuntime": 0,
+    "legacyCapabilityField": "organizationProfiles.capabilities",
+    "legacyCapabilitySemantics": "activation-era participant-authored categorized free text",
+    "transitionalDiscoveryBehavior": "preserve existing Slice 3.2 free-text search until Slice 3.3 confirms structured assertions",
+    "migrationRule": "never convert legacy text, websites, documents, NAICS, or model output into authoritative capability assertions",
+    "deployedDataRequirement": "run an environment-scoped read-only preview before any later persisted-record migration"
+  }
+}

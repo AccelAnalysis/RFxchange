@@ -1,0 +1,75 @@
+{
+  "standard": "AMACS",
+  "release": {
+    "version": "0.5.0",
+    "releasedAt": "2026-08-08",
+    "sourceCommit": "da7879f2609271b067ae6d02875e9388a02c4fe5",
+    "manifestSha256": "d03f94239801f989180b7b993429952162e3f7ef269089db3119c515eda9f954",
+    "checksumFileSha256": "900b505346568023eb5bb7135c4aed39435279632976160c59426558293d0b0c",
+    "checkedFileCount": 87
+  },
+  "historicalReleases": [
+    {
+      "version": "0.1.0",
+      "releasedAt": "2026-08-03",
+      "sourceCommit": "7e4b6c88e91c2df6f1d596af1dec7701df0290d2",
+      "manifestSha256": "b155b57c35c8c2eb9aed2f6f02d8a4071f08812eead547fb8c0f19b2a1404faf",
+      "checksumFileSha256": "162ea59fd000822f692a4e601b0baa29c6055d90f131f5f2ac351a88cdbb342b",
+      "checkedFileCount": 59
+    }
+  ],
+  "projectionVersion": "1",
+  "schemaSet": [
+    "alias-seed.schema.json",
+    "alias.schema.json",
+    "capability-evidence.schema.json",
+    "concept-interpretation-guidance.schema.json",
+    "concept-property.schema.json",
+    "concept.schema.json",
+    "credential.schema.json",
+    "crosswalk.schema.json",
+    "decision-factor.schema.json",
+    "decision-template.schema.json",
+    "domain-extension.schema.json",
+    "domain-seed.schema.json",
+    "external-classification-crosswalk.schema.json",
+    "governance-profile.schema.json",
+    "interpretation-candidate.schema.json",
+    "interpretation-record.schema.json",
+    "market-need.schema.json",
+    "market-role.schema.json",
+    "organization-capability.schema.json",
+    "organization-evidence-review.schema.json",
+    "organization-identity.schema.json",
+    "organization-market-architecture-review.schema.json",
+    "organization-taxonomy-observation.schema.json",
+    "outcome-observation.schema.json",
+    "outcome-type.schema.json",
+    "property-value.schema.json",
+    "property.schema.json",
+    "proposal.schema.json",
+    "readiness-rule.schema.json",
+    "relationship.schema.json",
+    "release-manifest.schema.json",
+    "request-family.schema.json",
+    "requirement-bundle.schema.json",
+    "requirement-type.schema.json",
+    "response-section.schema.json",
+    "response-template.schema.json",
+    "rfx-requirement.schema.json",
+    "unit.schema.json"
+  ],
+  "requiredSemanticSchemas": [
+    "market-need.schema.json",
+    "interpretation-record.schema.json",
+    "interpretation-candidate.schema.json",
+    "concept-interpretation-guidance.schema.json"
+  ],
+  "generatedChecksums": {
+    "catalog.json": "42ba66205f51c2d0a049bd912ef0fcfd7f641cc8241aaa0715fd3f95fdc5dd57",
+    "search-index.json": "19909a15fc3e36f2eda0e53241eb904dbe2c5ec64bfc7893988029eb5ffe333c",
+    "registries.json": "6bd649add6f447d2c702b71d1ddec60cee056c915a28ed18c702371c125bdc4a",
+    "historical/0.1.0/catalog.json": "d64247eb3a0e3297dd251b899f1b86bd55bc479943994b537d17d4c15032c040",
+    "migration-preview.json": "69840c21d0cf1299211e3f97ba86a4000b5b89881eabdd73ddcf86ae05c0f103"
+  }
+}

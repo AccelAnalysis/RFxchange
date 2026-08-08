@@ -1,6 +1,6 @@
 # Wave 3 — Network Roadmap
 
-**Status: SLICES 3.1–3.2 COMPLETE; BRAND GATES B0–B6a COMPLETE; AMACS 0.5.0 RECONCILIATION IS ACTIVE; AI/AMACS FOUNDATION FOLLOWS BEFORE SLICE 3.3.**
+**Status: SLICES 3.1–3.2 COMPLETE; BRAND GATES B0–B6a COMPLETE; AMACS 0.5.0 RECONCILIATION COMPLETE; AI/AMACS FOUNDATION IS THE ACTIVE GATE BEFORE SLICE 3.3.**
 
 Wave 2 is complete, Brand Gates B0 through B6a are merged, and Wave 3 Slices 3.1 and 3.2 are complete.
 
@@ -48,8 +48,8 @@ The standard release does not itself implement AI in RFxchange and changes no RF
 
 After Slice 3.2, execute two cross-cutting gates in order:
 
-1. **RFxchange reconciliation to AMACS 0.5.0** — consume or deterministically reconstruct and verify the immutable release, preserve historical 0.1.0 records, generate or validate 0.5.0 catalog and runtime contracts, and expose release-aware application ports without implementing participant features.
-2. **AI/AMACS Interpretation Foundation** — implement the server-side provider-neutral gateway, one concrete provider adapter, 0.5.0-grounded retrieval and validation, non-authoritative interpretation persistence, disposition or authoritative-command separation, provenance, privacy, cost controls, future manual-service fallback and evaluation without completing Slice 3.3 or Wave 4 product flows.
+1. **RFxchange reconciliation to AMACS 0.5.0 — complete via PR #123** — consumed and verified the immutable release, preserved historical 0.1.0 records, generated 0.5.0 catalog and runtime contracts, and exposed release-aware application ports without implementing participant features.
+2. **AI/AMACS Interpretation Foundation — active next gate** — implement the server-side provider-neutral gateway, one concrete provider adapter, 0.5.0-grounded retrieval and validation, non-authoritative interpretation persistence, disposition or authoritative-command separation, provenance, privacy, cost controls, future manual-service fallback and evaluation without completing Slice 3.3 or Wave 4 product flows.
 
 Only after both gates merge and dependencies are recalculated may Slice 3.3 be explicitly authorized.
 
@@ -59,8 +59,8 @@ Only after both gates merge and dependencies are recalculated may Slice 3.3 be e
 | --- | --- | --- |
 | **3.1 — Transactional Communications Reliability** | `COMMS-003`, `COMMS-004`, `COMMS-005` | **Complete via PR #107.** |
 | **3.2 — Controlled Network Entry & Discovery** | `GEO-012`, `DSC-001`, `DSC-002`, `DSC-003` | **Complete via PR #120.** Controlled Network entry; permitted organization discovery; capability, geography and service-area search; synchronized map, list and detail. |
-| **AMACS 0.5.0 reconciliation** | **No Feature IDs** | **Active next gate.** Pin, ingest or deterministically rebuild, validate and migrate RFxchange from its stale 0.1.0 integration baseline to immutable 0.5.0 without silently changing historical records or creating participant features. |
-| **AI/AMACS Interpretation Foundation** | **No Feature IDs** | **After 0.5.0 reconciliation.** Provider-neutral server gateway and concrete adapter; release-aware retrieval; AMACS schema and catalog validation; non-authoritative candidates; disposition and authoritative-command separation; provenance; privacy; metering; future manual-service path; evaluation. |
+| **AMACS 0.5.0 reconciliation** | **No Feature IDs** | **Complete via PR #123.** Pinned, deterministically rebuilt, validated and reconciled RFxchange from its historical 0.1.0 baseline to immutable 0.5.0 without silently changing historical records or creating participant features. |
+| **AI/AMACS Interpretation Foundation** | **No Feature IDs** | **Active next gate.** Provider-neutral server gateway and concrete adapter; release-aware retrieval; AMACS schema and catalog validation; non-authoritative candidates; disposition and authoritative-command separation; provenance; privacy; metering; future manual-service path; evaluation. |
 | **3.3 — Market Profile Enrichment** | `ORG-013`, `ORG-014`, `ORG-016`, `ORG-017` | Structured AMACS-backed capability assertions, products and services, industry and NAICS context, past performance and teaming, referral or resource preferences. Ordinary-language assistance uses 0.5.0 InterpretationRecord or Candidate contracts; confirmed assertions remain separate from suggestions, evidence and verification. |
 | **3.4 — Credential, Media & Location Enrichment** | `ORG-015`, `ORG-018`, `ORG-019` | Credentials with provenance; private-by-default media, documents and portfolio; subordinate additional locations with geography and privacy authority. |
 | **3.5 — Referral Network & Referral Acquisition** | `REF-001`, `REF-002`, `REF-003`, `REF-004`, `REF-005`, `EDU-014`, `ACQ-006` | Legitimate organization-owned referrals with structured context, consent and minimum necessary data, lifecycle, first-use education and external acquisition continuity. |
@@ -75,9 +75,9 @@ Use one active slice or gate at a time unless an explicit later task changes tha
 ```text
 Slice 3.2 evidence, tracker update and PR #120 merge [complete]
 → production CI and authority recalculation from merged main
-→ AMACS 0.5.0 reconciliation implementation and merge [active next gate]
-→ recalculate
-→ AI/AMACS Interpretation Foundation implementation and merge
+→ AMACS 0.5.0 reconciliation implementation and PR #123 merge [complete]
+→ production CI and authority recalculation from merged main
+→ AI/AMACS Interpretation Foundation implementation and merge [active next gate]
 → recalculate and explicitly authorize Slice 3.3
 → Slice 3.3 implementation, acceptance and merge
 → recalculate and explicitly authorize Slice 3.4
@@ -104,8 +104,8 @@ real OPEN organization and real map marker
 → reliable communications [complete]
 → brand and workspace convergence [complete]
 → controlled Network discovery [complete]
-→ immutable AMACS 0.5.0 integration
-→ governed human-language ↔ AMACS interpretation
+→ immutable AMACS 0.5.0 integration [complete]
+→ governed human-language ↔ AMACS interpretation [active next gate]
 → confirmed AMACS-backed market profiles
 → credential, media and location enrichment
 → consented referral lifecycle and referral acquisition
@@ -215,5 +215,5 @@ Completion of Slice 3.5 alone is expected to leave Network at 25/38 absent unrel
 - Cross-cutting gate completion does not change tracker totals.
 - Recalculate from merged `main` after every slice or gate.
 - Update execution authority before beginning the next production phase.
-- AMACS 0.5.0 reconciliation is the active no-Feature-ID gate after PR #120 merges.
+- AMACS 0.5.0 reconciliation is complete via PR #123; the AI/AMACS Interpretation Foundation is the active no-Feature-ID gate after that PR merges.
 - Do not describe the current assignment's stop after Slice 3.5 as Wave 3 completion.

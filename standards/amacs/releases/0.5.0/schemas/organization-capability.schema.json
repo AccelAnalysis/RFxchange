@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amacs.accelanalysis.com/schemas/organization-capability.schema.json",
+  "title": "Organization Capability Assertion",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "organization_id",
+    "concept_id",
+    "amacs_release",
+    "assertion_status",
+    "delivery_roles",
+    "property_values"
+  ],
+  "properties": {
+    "organization_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "organization_identity_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional resolved identity reference for the entity that possesses the capability."
+    },
+    "entity_scope": {
+      "type": "string",
+      "enum": [
+        "reporting_entity",
+        "legal_entity",
+        "operating_segment",
+        "subsidiary",
+        "brand",
+        "unknown"
+      ],
+      "description": "The entity scope to which this capability assertion applies."
+    },
+    "concept_id": {
+      "type": "string",
+      "pattern": "^AMACS-CAP-\\d{6}$"
+    },
+    "amacs_release": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "label_snapshot": {
+      "type": "string"
+    },
+    "assertion_status": {
+      "type": "string",
+      "enum": [
+        "self_reported",
+        "evidence_submitted",
+        "verified",
+        "suspended"
+      ]
+    },
+    "market_role_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^AMACS-MROLE-\\d{6}$"
+      },
+      "description": "How the organization participates in the market relative to this capability; distinct from RFx team-delivery role."
+    },
+    "delivery_roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "prime",
+          "subcontractor",
+          "supplier",
+          "referral_partner"
+        ]
+      }
+    },
+    "evidence_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 240
+      },
+      "description": "References to evidence records supporting, qualifying, or contradicting the capability assertion."
+    },
+    "property_values": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "property_id",
+          "value",
+          "verification_status",
+          "unit_id"
+        ],
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "pattern": "^AMACS-PROP-\\d{6}$"
+          },
+          "value": {},
+          "verification_status": {
+            "type": "string",
+            "enum": [
+              "self_reported",
+              "platform_observed",
+              "counterparty_confirmed",
+              "independently_verified"
+            ]
+          },
+          "unit_id": {
+            "oneOf": [
+              {
+                "type": "string",
+                "pattern": "^AMACS-UNIT-\\d{6}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
