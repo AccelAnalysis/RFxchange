@@ -118,12 +118,19 @@ for (const requirement of [
   assert.ok(authenticatedMapSurface.includes(requirement), `Authenticated Intelligence map is missing ${requirement}.`);
 }
 assert.ok(
-  geographyRoute.includes("organizationId={authenticated.organizationId}") &&
-    existingWorkspace.includes("showSearch") &&
-    existingWorkspace.includes('workspaceOverlay={panelOpen ? "right" : null}'),
-  "B6a must preserve authorized organization identity, one operational search, and contextual map controls.",
+  geographyRoute.includes("organizationId={authenticated.mapProjection.organizationId}") &&
+    geographyRoute.includes("loadAuthorizedNetworkDiscovery") &&
+    existingWorkspace.includes("role=\"search\"") &&
+    existingWorkspace.includes("showSearch={false}") &&
+    existingWorkspace.includes('workspaceOverlay={panelOpen ? "right" : "left"}'),
+  "Slice 3.2 must preserve authorized organization identity, exactly one operational Network search, and contextual map controls.",
 );
 assert.ok(!geographyRoute.includes("SearchFilterOverlay"), "Intelligence must avoid a decorative duplicate search control.");
+assert.ok(
+  !existingWorkspace.includes("SearchFilterOverlay") &&
+    existingWorkspace.match(/role="search"/g)?.length === 1,
+  "The authenticated Spatial Workspace must expose one operational search/filter surface rather than duplicate controls.",
+);
 
 assert.ok(
   activationClient.includes("MapboxLocalityCanvas") &&
@@ -154,5 +161,5 @@ assert.ok(
 );
 
 console.log(
-  "Mapbox production surfaces validated: account-only B6a Intelligence adoption, operational search/view controls, spatial onboarding/home orbit, authoritative home-locality focus, public-token hygiene, and viewport/authority separation.",
+  "Mapbox production surfaces validated: Slice 3.2 authorized Network search/list/detail on the existing spatial shell, home organization continuity, map/view controls, authoritative home-locality focus, public-token hygiene, and viewport/authority separation.",
 );

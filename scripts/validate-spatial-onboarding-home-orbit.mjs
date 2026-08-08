@@ -27,6 +27,7 @@ assert.match(files.scene, /text-allow-overlap/);
 assert.match(files.scene, /text-ignore-placement/);
 assert.match(files.scene, /text-pitch-alignment": "viewport"/);
 assert.match(files.scene, /HOME_MARKER_LABEL_LAYER_ID/);
+assert.match(files.scene, /NETWORK_MARKER_SOURCE_ID/);
 assert.match(files.scene, /search\/searchbox\/v1\/forward/);
 assert.match(files.scene, /VIEW_MODE_OPTIONS/);
 
@@ -35,12 +36,12 @@ assert.match(files.sceneCss, /inset: 0/);
 assert.match(
   files.sceneCss,
   /width: min\(520px, calc\(50vw - 72px\)\)/,
-  "The desktop search panel must not cover the viewport-centered organization marker.",
+  "The reusable desktop map-search panel must not cover the viewport-centered organization marker when enabled.",
 );
 assert.match(
   files.sceneCss,
   /max-height: min\(calc\(50vh - 112px\), calc\(100vh - 104px\)\)/,
-  "The mobile search panel must preserve a visible center lane for the organization marker.",
+  "The reusable mobile map-search panel must preserve a visible center lane when enabled.",
 );
 
 assert.match(files.preference, /rfxchange:map-rotation-enabled/);
@@ -74,10 +75,14 @@ for (const required of [
 
 assert.match(files.join, /SpatialActivationExperience/);
 assert.match(files.workspaceRoute, /ExistingWorkspaceFoundation/);
-assert.match(files.workspaceRoute, /homeMarker=\{authenticated\.homeMarker\}/);
+assert.match(files.workspaceRoute, /homeMarker=\{authenticated\.mapProjection\.homeMarker\}/);
+assert.match(files.workspaceRoute, /organizationId=\{authenticated\.mapProjection\.organizationId\}/);
+assert.match(files.workspaceRoute, /loadAuthorizedNetworkDiscovery/);
 assert.match(files.workspace, /mode="organization"/);
 assert.match(files.workspace, /marker=\{homeMarker\}/);
-assert.match(files.workspace, /workspaceOverlay=\{panelOpen \? "right" : null\}/);
+assert.match(files.workspace, /organizationMarkers=\{networkMarkers\}/);
+assert.match(files.workspace, /workspaceOverlay=\{panelOpen \? "right" : "left"\}/);
+assert.match(files.workspace, /authorizedObjectIds\.has\(restored\.selectedObjectId\)/);
 
 assert.match(files.architecture, /225 seconds/);
 assert.match(files.architecture, /60 degrees/);
@@ -87,4 +92,4 @@ assert.match(files.architecture, /edge-to-edge/);
 assert.match(files.architecture, /Account/);
 assert.match(files.architecture, /without a page reload/);
 
-console.log("Spatial onboarding and B6a home-orbit regression contract validated.");
+console.log("Spatial onboarding, B6a home orbit, and Slice 3.2 authorized organization-selection regression contract validated.");

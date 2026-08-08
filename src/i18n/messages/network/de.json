@@ -1,0 +1,101 @@
+{
+  "ariaLabel": "Geografischer RFxchange-Netzwerk-Arbeitsbereich",
+  "status": {
+    "ariaLabel": "Status des RFxchange-Arbeitsbereichs",
+    "loading": {
+      "title": "Ihr Exchange-Arbeitsbereich wird vorbereitet",
+      "body": "Die autorisierte Organisation und die Ortsprojektion werden geladen. Ihr Aktivierungsstatus bleibt erhalten."
+    },
+    "empty": {
+      "title": "Es ist keine autorisierte Organisationsprojektion verfügbar",
+      "body": "Kehren Sie zur Aktivierung zurück, um die Anforderungen an Organisation, Geografie, Profil oder Markierung abzuschließen oder zu korrigieren.",
+      "action": "Aktivierung prüfen"
+    },
+    "error": {
+      "title": "Der Arbeitsbereich konnte nicht vorbereitet werden",
+      "body": "Es wurde kein Organisations- oder Geografiestatus geändert. Versuchen Sie den authentifizierten Arbeitsbereich erneut oder kehren Sie zur Wiederherstellung zur Aktivierung zurück.",
+      "action": "Arbeitsbereich erneut versuchen"
+    },
+    "permission": {
+      "title": "Dieser Organisationsarbeitsbereich ist für Ihr Konto nicht verfügbar",
+      "body": "Der Zugriff wird anhand der aktuellen Organisationsmitgliedschaft und Einschränkungen ermittelt. Private Organisationsdetails werden nicht angezeigt.",
+      "action": "Zu Ihrem Arbeitsbereich zurückkehren"
+    },
+    "expired": {
+      "title": "Ihre Arbeitsbereichssitzung ist abgelaufen",
+      "body": "Melden Sie sich erneut an, damit die aktuelle Organisationsberechtigung neu geprüft wird und Sie zum zulässigen Arbeitsbereich zurückkehren können.",
+      "action": "Anmelden"
+    },
+    "recovery": {
+      "title": "Arbeitsbereichswiederherstellung ist verfügbar",
+      "body": "Ihre Organisation bleibt unverändert. Öffnen Sie die Aktivierung erneut, um die fehlende Projektion zu beheben, ohne eine doppelte Organisation anzulegen.",
+      "action": "Wiederherstellung öffnen"
+    }
+  },
+  "search": {
+    "ariaLabel": "Netzwerk durchsuchen und filtern",
+    "capabilityLabel": "Fähigkeiten, Leistungen, Produkte oder Organisation",
+    "placeholder": "Fähigkeiten oder Organisationen suchen",
+    "basedIn": "Ansässig in",
+    "serviceArea": "Servicegebiet",
+    "anyServiceArea": "Beliebiges Servicegebiet",
+    "submit": "Suchen",
+    "clear": "Löschen",
+    "resultCount": "{count} zulässige Organisationen",
+    "lowDensity": "Es werden nur autorisierte reale Organisationen angezeigt.",
+    "listLabel": "Ergebnisse der Netzwerkorganisationen",
+    "noResultsTitle": "Keine zulässige Organisation entspricht dieser Suche",
+    "noResultsBody": "Versuchen Sie eine breitere Fähigkeit oder entfernen Sie den Servicegebietsfilter. Der Exchange erfindet keine Ergebnisse.",
+    "paginationLabel": "Seiten der Netzwerkergebnisse",
+    "previous": "Zurück",
+    "page": "Seite {page} von {pageCount}",
+    "next": "Weiter"
+  },
+  "match": {
+    "capability": "Fähigkeitsübereinstimmung",
+    "organizationName": "Übereinstimmung mit Organisationsname",
+    "browse": "Zulässige Organisation",
+    "disclaimer": "Die Übereinstimmung erklärt Profilüberschneidungen. Sie ist keine Qualifikation, Empfehlung oder Garantie der Eignung."
+  },
+  "home": {
+    "eyebrow": "Organisationsstart",
+    "activeNode": "Aktiver Organisationsknoten",
+    "visibleNow": "Jetzt sichtbar",
+    "positionTitle": "Ihre etablierte Exchange-Position",
+    "selected": "Ausgewählt",
+    "projectionMetadata": "Projektion aus dem authentifizierten Organisationsarbeitsbereich.",
+    "locality": "Heimatort",
+    "visibleLocation": "Sichtbarer Standort",
+    "locationFallback": "Organisationsstandort in {locality}",
+    "mapSource": "Kartenquelle",
+    "viewport": "Ansicht",
+    "viewportBody": "Der Organisationsstart wird beim Eintritt deterministisch wiederhergestellt.",
+    "manageProfile": "Organisationsprofil verwalten",
+    "scopeTitle": "Aktueller Umfang des Arbeitsbereichs",
+    "scopeBody": "Diese Umgebung zeigt die maßgebliche Organisation, die genehmigte Geografie, die Kartenposition, den Profilzugriff und die zulässige Entdeckung von Netzwerkorganisationen. Chancen, Empfehlungen, Ressourcenanbieter, Glaubwürdigkeit und Ergebnisse bleiben bis zum Abschluss ihrer autorisierten Implementierungen ausgeblendet."
+  },
+  "detail": {
+    "eyebrow": "Netzwerkorganisation",
+    "close": "Organisationsdetails schließen",
+    "baseLocality": "Basisort",
+    "visibleLocation": "Sichtbarer Standort",
+    "serviceAreas": "Servicegebiete",
+    "noServiceAreas": "Es sind keine öffentlichen Servicegebiete angegeben.",
+    "approximateLocation": "ungefährer Standort",
+    "localityOnlyLocation": "nur Ort",
+    "capabilities": "Fähigkeiten",
+    "capabilityEvidence": "Was diese Organisation nach eigener Angabe leisten kann",
+    "publicContact": "Öffentlicher Kontakt",
+    "contactUnavailable": "Es ist kein öffentlicher Kontakt angegeben",
+    "website": "Website der Organisation besuchen",
+    "profileEvidenceTitle": "Nachweisgrenze des Profils",
+    "profileEvidence": "Profil- und Fähigkeitsinformationen werden von der Organisation bereitgestellt, sofern sie nicht gesondert als verifiziert gekennzeichnet sind. Die Entdeckung bestätigt weder Fähigkeit noch Leistung oder Eignung."
+  },
+  "provenance": {
+    "eyebrow": "Datenherkunft",
+    "title": "Worauf diese Karte basiert",
+    "authority": "Grenzautorität",
+    "vintage": "Grenzstand",
+    "retrieved": "Abgerufen"
+  }
+}

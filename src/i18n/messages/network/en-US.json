@@ -1,0 +1,101 @@
+{
+  "ariaLabel": "RFxchange Network geographic workspace",
+  "status": {
+    "ariaLabel": "RFxchange workspace status",
+    "loading": {
+      "title": "Preparing your Exchange workspace",
+      "body": "The authorized organization and locality projection are loading. Your activation state remains preserved."
+    },
+    "empty": {
+      "title": "No authorized organization projection is available",
+      "body": "Return to activation to complete or repair the organization, geography, profile, or marker requirements.",
+      "action": "Review activation"
+    },
+    "error": {
+      "title": "The workspace could not be prepared",
+      "body": "No organization or geography state was changed. Retry the authenticated workspace or return to activation for recovery.",
+      "action": "Retry workspace"
+    },
+    "permission": {
+      "title": "This organization workspace is not available to your account",
+      "body": "Access is resolved from current organization membership and restrictions. Private organization details are not displayed.",
+      "action": "Return to your workspace"
+    },
+    "expired": {
+      "title": "Your workspace session has expired",
+      "body": "Sign in again to re-evaluate current organization authority and return to the permitted workspace.",
+      "action": "Sign in"
+    },
+    "recovery": {
+      "title": "Workspace recovery is available",
+      "body": "Your organization remains intact. Re-open activation to resolve the missing workspace projection without creating a duplicate organization.",
+      "action": "Open recovery"
+    }
+  },
+  "search": {
+    "ariaLabel": "Search and filter the Network",
+    "capabilityLabel": "Capabilities, services, products, or organization",
+    "placeholder": "Search capabilities or organizations",
+    "basedIn": "Based in",
+    "serviceArea": "Service area",
+    "anyServiceArea": "Any service area",
+    "submit": "Search",
+    "clear": "Clear",
+    "resultCount": "{count} permitted organizations",
+    "lowDensity": "Only authorized real organizations are shown.",
+    "listLabel": "Network organization results",
+    "noResultsTitle": "No permitted organizations match this search",
+    "noResultsBody": "Try a broader capability or remove the service-area filter. The Exchange does not fabricate results.",
+    "paginationLabel": "Network result pages",
+    "previous": "Previous",
+    "page": "Page {page} of {pageCount}",
+    "next": "Next"
+  },
+  "match": {
+    "capability": "Capability match",
+    "organizationName": "Organization name match",
+    "browse": "Permitted organization",
+    "disclaimer": "Matching explains profile overlap. It is not qualification, endorsement, or guaranteed eligibility."
+  },
+  "home": {
+    "eyebrow": "Organization home",
+    "activeNode": "Active organization node",
+    "visibleNow": "Visible now",
+    "positionTitle": "Your established Exchange position",
+    "selected": "Selected",
+    "projectionMetadata": "Projection observed through the authenticated organization workspace.",
+    "locality": "Home locality",
+    "visibleLocation": "Visible location",
+    "locationFallback": "{locality} organization location",
+    "mapSource": "Map source",
+    "viewport": "Viewport",
+    "viewportBody": "Organization home is restored deterministically on entry.",
+    "manageProfile": "Manage organization profile",
+    "scopeTitle": "Current workspace scope",
+    "scopeBody": "This environment shows authoritative organization, approved geography, map position, profile access, and permitted Network organization discovery. Opportunities, referrals, resource providers, credibility, and outcomes remain absent until their authorized slices are complete."
+  },
+  "detail": {
+    "eyebrow": "Network organization",
+    "close": "Close organization details",
+    "baseLocality": "Base locality",
+    "visibleLocation": "Visible location",
+    "serviceAreas": "Service areas",
+    "noServiceAreas": "No public service areas are listed.",
+    "approximateLocation": "approximate location",
+    "localityOnlyLocation": "locality only",
+    "capabilities": "Capabilities",
+    "capabilityEvidence": "What this organization says it can do",
+    "publicContact": "Public contact",
+    "contactUnavailable": "No public contact is listed",
+    "website": "Visit organization website",
+    "profileEvidenceTitle": "Profile evidence boundary",
+    "profileEvidence": "Organization profile and capability information is organization-provided unless separately identified as verified. Discovery does not certify capability, performance, or eligibility."
+  },
+  "provenance": {
+    "eyebrow": "Data provenance",
+    "title": "What this map is based on",
+    "authority": "Boundary authority",
+    "vintage": "Boundary vintage",
+    "retrieved": "Retrieved"
+  }
+}

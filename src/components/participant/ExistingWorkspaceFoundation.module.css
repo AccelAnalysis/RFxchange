@@ -11,24 +11,39 @@
 }
 
 .stateAction,
-.primaryAction {
+.primaryAction,
+.secondaryAction {
   min-height: 44px;
   padding: 0 var(--space-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-control);
-  color: var(--semantic-action-primary-foreground);
-  background: var(--semantic-action-primary-background);
-  box-shadow: inset 0 3px 0 var(--semantic-action-selected-background);
   font-weight: 780;
   text-decoration: none;
 }
 
+.stateAction,
+.primaryAction {
+  color: var(--semantic-action-primary-foreground);
+  background: var(--semantic-action-primary-background);
+  box-shadow: inset 0 3px 0 var(--semantic-action-selected-background);
+}
+
+.secondaryAction {
+  border: var(--border-hairline) solid var(--semantic-border-subtle);
+  color: var(--semantic-text-secondary);
+  background: var(--semantic-surface-subtle);
+}
+
 .stateAction:focus-visible,
 .primaryAction:focus-visible,
+.secondaryAction:focus-visible,
 .organizationHomeButton:focus-visible,
-.closeButton:focus-visible {
+.closeButton:focus-visible,
+.networkResultButton:focus-visible,
+.networkForm input:focus-visible,
+.networkForm select:focus-visible {
   outline: var(--focus-outline-width) solid var(--semantic-border-focus);
   outline-offset: var(--focus-outline-offset-high);
 }
@@ -107,7 +122,9 @@
 }
 
 .sheetHeader h1,
-.provenance h2 {
+.provenance h2,
+.capabilitySection h2,
+.publicContact h2 {
   margin: var(--space-xs) 0 0;
   font-family: var(--type-display-family);
   letter-spacing: -0.04em;
@@ -119,7 +136,9 @@
   line-height: 1;
 }
 
-.provenance h2 {
+.provenance h2,
+.capabilitySection h2,
+.publicContact h2 {
   font-size: 1.35rem;
 }
 
@@ -147,7 +166,8 @@
 }
 
 .statusRow,
-.cardActions {
+.cardActions,
+.networkSearchActions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs);
@@ -189,7 +209,9 @@
   margin-top: var(--space-lg);
 }
 
-.provenance {
+.provenance,
+.capabilitySection,
+.publicContact {
   padding: var(--space-lg);
   border: var(--border-hairline) solid var(--semantic-border-subtle);
   border-radius: var(--radius-panel);
@@ -198,6 +220,194 @@
 
 .provenance dl {
   margin-top: var(--space-md);
+}
+
+.networkSearch {
+  width: min(430px, calc(100vw - 32px));
+  max-height: min(76dvh, 760px);
+  display: grid;
+  gap: var(--space-md);
+  overflow: auto;
+  color: var(--semantic-text-primary);
+}
+
+.networkForm {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.networkField {
+  display: grid;
+  gap: var(--space-xxs);
+  color: var(--semantic-text-muted);
+  font: 720 var(--type-caption-size)/1.35 var(--type-interface-family);
+}
+
+.networkField > span {
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.networkField input,
+.networkField select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-sm);
+  border: var(--border-hairline) solid var(--semantic-border-subtle);
+  border-radius: var(--radius-control);
+  color: var(--semantic-text-primary);
+  background: var(--semantic-canvas-elevated);
+  font: 600 0.92rem/1.2 var(--type-interface-family);
+}
+
+.networkField strong {
+  min-height: 44px;
+  padding: 0 var(--space-sm);
+  display: flex;
+  align-items: center;
+  border: var(--border-hairline) solid var(--semantic-border-subtle);
+  border-radius: var(--radius-control);
+  color: var(--semantic-text-secondary);
+  background: var(--semantic-surface-subtle);
+  font-size: 0.9rem;
+}
+
+.networkFilterGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-xs);
+}
+
+.networkResultSummary {
+  padding-top: var(--space-sm);
+  display: grid;
+  gap: var(--space-xxs);
+  border-top: var(--border-hairline) solid var(--semantic-border-subtle);
+}
+
+.networkResultSummary strong {
+  font-size: 0.92rem;
+}
+
+.networkResultSummary span,
+.matchDisclaimer {
+  color: var(--semantic-text-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.networkResults,
+.capabilityList {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  list-style: none;
+}
+
+.networkResults {
+  border-top: var(--border-hairline) solid var(--semantic-border-subtle);
+}
+
+.networkResults > li {
+  border-bottom: var(--border-hairline) solid var(--semantic-border-subtle);
+}
+
+.networkResultButton {
+  width: 100%;
+  padding: var(--space-sm) 0;
+  display: grid;
+  gap: var(--space-xs);
+  border: 0;
+  color: var(--semantic-text-primary);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.networkResultButton[data-selected="true"] {
+  padding-inline: var(--space-sm);
+  background: var(--semantic-surface-connection);
+  box-shadow: inset 3px 0 0 var(--object-node-selected-ring);
+}
+
+.resultHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.resultHeading strong {
+  font-size: 0.94rem;
+}
+
+.resultHeading small {
+  flex: 0 0 auto;
+  color: var(--semantic-text-connection-small);
+  font: 760 0.68rem/1 var(--type-interface-family);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.resultCapabilities {
+  overflow: hidden;
+  color: var(--semantic-text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.networkPagination {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.78rem;
+}
+
+.networkPagination a:last-child {
+  justify-self: end;
+}
+
+.networkPagination a {
+  color: var(--semantic-text-link);
+  font-weight: 720;
+  text-decoration: none;
+}
+
+.matchDisclaimer {
+  margin: 0;
+}
+
+.capabilityList {
+  margin-top: var(--space-md);
+  gap: var(--space-sm);
+}
+
+.capabilityList li {
+  padding-top: var(--space-sm);
+  display: grid;
+  gap: var(--space-xxs);
+  border-top: var(--border-hairline) solid var(--semantic-border-subtle);
+}
+
+.capabilityList strong {
+  color: var(--semantic-text-primary);
+  font-size: 0.9rem;
+}
+
+.capabilityList span,
+.publicContact p {
+  margin: 0;
+  color: var(--semantic-text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.publicContact a {
+  color: var(--semantic-text-link);
+  font-weight: 720;
 }
 
 .srOnly {
@@ -216,12 +426,28 @@
   .workspaceActions {
     top: var(--space-sm);
     right: var(--space-sm);
-    left: var(--space-sm);
+    left: auto;
+    max-width: min(45vw, 210px);
   }
 
   .organizationHomeButton {
     width: 100%;
     min-width: 0;
+    padding-right: var(--space-xs);
+  }
+
+  .organizationHomeButton small,
+  .organizationHomeButton strong {
+    max-width: 116px;
+  }
+
+  .networkSearch {
+    width: min(54vw, 330px);
+    max-height: 48dvh;
+  }
+
+  .networkFilterGrid {
+    grid-template-columns: 1fr;
   }
 
   .organizationFacts > div,
@@ -231,14 +457,27 @@
   }
 
   .primaryAction,
+  .secondaryAction,
   .stateAction {
     width: 100%;
   }
 }
 
+@media (max-width: 520px) {
+  .networkSearch {
+    width: calc(100vw - 32px);
+    max-height: 42dvh;
+  }
+
+  .workspaceActions {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .organizationHomeButton,
-  .closeButton {
+  .closeButton,
+  .networkResultButton {
     transition: none;
   }
 }
