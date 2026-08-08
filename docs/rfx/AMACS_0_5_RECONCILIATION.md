@@ -4,7 +4,7 @@
 
 ## Authority
 
-This document supersedes only the AMACS version, release-shape and semantic-entry assumptions in earlier RFx Core convergence documents that referenced AMACS 0.1.0. Their adopted RFx aggregate, spatial/operational workspace, structured location/value/term, response/evaluation, readiness and wave-boundary decisions remain in force unless expressly changed here.
+This document supersedes only the AMACS version, release-shape and semantic-entry assumptions in earlier RFx Core convergence documents that referenced AMACS 0.1.0. Their adopted RFx aggregate, spatial or operational workspace, structured location, value and term, response or evaluation, readiness and wave-boundary decisions remain in force unless expressly changed here.
 
 Pinned standard:
 
@@ -23,31 +23,43 @@ RFxchange must not invent a private need model or AI-specific quasi-taxonomy. AM
 
 ```text
 participant language or approved source material
-→ non-authoritative interpretation record/candidates
-→ participant accept/edit/reject/unresolved disposition
+→ non-authoritative interpretation record or candidates
+→ participant accept, edit, reject or unresolved disposition
 → separately authorized RFxchange command
 → authoritative market need, organization capability assertion or RFx requirement
 ```
 
-The AI provider, model, prompt, token/cost and retention details remain RFxchange implementation provenance rather than AMACS semantics.
+The AI provider, model, prompt, token or cost and retention details remain RFxchange implementation provenance rather than AMACS semantics.
 
 ## Reconciliation work
 
-After PR #120 / Slice 3.2 merges, the next implementation gate must:
+After PR #120 or Slice 3.2 merges, the next implementation gate must:
 
 1. ingest and verify the immutable AMACS 0.5.0 release;
 2. preserve historical 0.1.0 records and label snapshots;
-3. replace stale 0.1.0 runtime/count assumptions without hard-coding 0.5.0 counts into participant behavior;
-4. generate or verify TypeScript types and validators for the 0.5.0 catalog and runtime contracts;
-5. expose release-aware catalog/search ports for the AI foundation and Slice 3.3;
+3. replace stale 0.1.0 runtime and count assumptions without hard-coding 0.5.0 counts into participant behavior;
+4. generate or verify TypeScript types and server validators for the 0.5.0 catalog and runtime contracts;
+5. expose release-aware catalog traversal and deterministic search application ports for the later AI foundation and Slice 3.3 consumer;
 6. add migration preview and explicit handling for existing free-text organization capability data;
-7. forbid automatic conversion of free text, websites, documents or model output into capability assertions;
-8. retain manual Domain → Family → Capability browse/search and provisional-term pathways;
-9. preserve entity scope, market roles, evidence references and verification separation; and
-10. add CI guardrails for checksums, counts, references, schema validity, history and browser-source isolation.
+7. forbid automatic conversion of free text, websites, documents, NAICS or model output into capability assertions;
+8. preserve the AMACS contracts and application seams needed for later manual browse, search and provisional-term workflows without implementing the participant picker here;
+9. preserve requirement-type and team-coverage metadata without implementing the Wave 4 RFx requirement engine;
+10. preserve entity scope, market roles, evidence references and verification separation; and
+11. add CI guardrails for checksums, counts, references, schema validity, generated projection, history and browser-source isolation.
 
 ## Completion boundary
 
-This reconciliation is a no-Feature-ID cross-cutting gate. It does not complete `ORG-013`, any RFx Feature ID, organization verification, credibility, referrals, provider routing or matching.
+This reconciliation is a no-Feature-ID release-integration gate. It does not implement or complete:
 
-After it merges and dependencies are recalculated, the AI/AMACS Interpretation Foundation may be implemented against the pinned 0.5.0 contracts. Slice 3.3 may be authorized only after that foundation itself merges and the next authority is recalculated.
+- `ORG-013` or another organization feature;
+- a participant-facing AMACS picker;
+- organization capability assertion commands;
+- MarketNeed or RFx requirement product workflows;
+- team-coverage enforcement behavior;
+- matching, qualification or verification;
+- credibility, referrals or provider routing; or
+- any RFx Feature ID.
+
+Participant manual browse or provisional-term acceptance belongs to Slice 3.3 or the applicable RFx slice. Server-side RFx requirement and team-coverage behavior belongs to Wave 4.
+
+After reconciliation merges and authority is recalculated, the AI/AMACS Interpretation Foundation may be implemented against the pinned 0.5.0 contracts. Slice 3.3 may be authorized only after that foundation itself merges and the next authority is recalculated.
