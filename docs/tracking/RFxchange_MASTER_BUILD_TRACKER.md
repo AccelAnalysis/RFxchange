@@ -12,11 +12,11 @@
 
 ## Progress
 
-**438 total · 121 Done · 317 Not Started**
+**438 total · 125 Done · 313 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
-- 3 - Network: **7/38**
+- 3 - Network: **11/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
@@ -35,13 +35,15 @@
 
 Wave 2 remains complete at **43/43 Activation**. The Runtime Convergence Gate, Registration Convergence Correction, and Activation Profile Website Carry-Forward Repair remain no-Feature-ID integration/repair gates. Slice 2.12 configured-browser acceptance used two fresh disposable identities against the selected real Firebase project and actual Census/Mapbox integrations. Direct entry remained neutral; preserved opportunity context visibly recommended but did not authorize or complete a choice. Both journeys completed all eight orientation steps, presented seven truthful intents, made one explicit selection, persisted one auditable OPEN transition, survived reload/re-entry, and honored a later suspension. Cleanup removed all 79 exact Firestore records and both Auth identities; the residual scan returned zero. Full emulator and repository gates passed, including production CI run `30715058244` on PR #104's merge SHA `d599901d7ff35a4ee67eb2363dcf3334a2303dbc`.
 
-## Wave 3 Network and required Brand Gate sequence — current 2026-08-01
+## Wave 3 Network and required Brand Gate sequence — current 2026-08-08
 
 - **Brand Gate B0 — MERGED PR #100; no Feature IDs**: reconciled the target Brand Experience System against completed Wave 2 and established the brand/design precedence and domain-availability rules used by Wave 3.
 - **Slice 3.1 — MERGED VIA PR #107 — `COMMS-003` + `COMMS-004` + `COMMS-005`**: established versioned transactional event/template mapping, minimized delivery audit, append-only evidence, deterministic retry, accepted-delivery replay suppression, interrupted-success healing, direct-client denial and terminal-failure operations visibility. Production CI run `30719532985` passed on head `eba071e54e3a9cc88ec7fd353e943922917d6484`; PR #107 merged at `368fdb5e0179ca7933eb33ffb6cbf12a2afe2bf1`.
 - **Brand Gate B1 — MERGED VIA PR #109; no Feature IDs**: established the exact Exchange Light semantic palette, Accessible Dark Gold, spacing/radius/elevation/border/focus/type/motion roles, proprietary object-semantic contracts, compatibility aliases and static semantic-drift controls. Production CI run `30720318973` passed on head `743493799d096040f4482863d699436bc4855c8a`; PR #109 merged at `c4c18272f46ad3e3120e2dcf6405fda8a274a685`.
+- **Brand Gates B2 through B6a — MERGED VIA PRs #111–#115; no Feature IDs**: completed shared primitives, cartographic convergence, public marketing/acquisition, activation experience and the existing authenticated workspace foundation without fabricating later domain objects.
+- **Slice 3.2 — COMPLETE VIA PR #120 — `GEO-012` + `DSC-001` + `DSC-002` + `DSC-003`**: implemented server-authorized OPEN Network entry, capability-first permitted organization discovery, canonical base/service geography filtering, privacy-safe exact/approximate/locality-only projections and synchronized map/list/detail state. Configured-browser acceptance covered current and missing authority, restriction and lifecycle changes after load, stale selection recovery, truthful empty state, desktop/intermediate/mobile composition, keyboard/screen-reader semantics, all five locales, clean console and future-domain absence. Cleanup removed 42 scoped Firestore records and two Auth identities; the residual scan returned zero. Full local `npm run check` passed with 385 architecture tests and 19 Functions tests, and production CI run `31283391560` passed on synchronized head `5d1796e2255fab582025636a102d369ef65e4029`.
 
-Network completion remains **7/38**: four inherited Wave 1 foundations plus the three Slice 3.1 communications features. Brand Gate B1 changed no Feature-ID state. Slice 3.2 Feature IDs are dependency-eligible from the Network graph, but implementation remains blocked until Brand Gates B2, B3 and B6a are complete and Slice 3.2 is explicitly authorized. **Brand Gate B2 — Shared Component Primitives is the next gate ready for explicit authorization.** No Slice 3.2 or B2 implementation began in PR #109 or this reconciliation.
+Network completion is **11/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features and the four Slice 3.2 discovery features. The next active phase is the no-Feature-ID RFxchange reconciliation to immutable AMACS 0.5.0, followed by the AI/AMACS Interpretation Foundation. Slice 3.3 remains blocked until both gates merge and authority is recalculated.
 
 ## Feature-ID checklist
 
@@ -179,7 +181,7 @@ Network completion remains **7/38**: four inherited Wave 1 foundations plus the 
 
 - [ ] `ACQ-006`
 - [ ] `ACQ-008`
-- [ ] `GEO-012`
+- [x] `GEO-012` — PR #120; current OPEN/geography/marker authority, after-load restriction/lifecycle denial, configured-browser responsive acceptance, cleanup, and `npm run check`
 - [ ] `EDU-014`
 - [ ] `EDU-016`
 - [ ] `EDU-017`
@@ -192,9 +194,9 @@ Network completion remains **7/38**: four inherited Wave 1 foundations plus the 
 - [ ] `ORG-019`
 - [x] `ORG-021` — PR #42
 - [x] `ORG-022` — PR #42
-- [ ] `DSC-001`
-- [ ] `DSC-002`
-- [ ] `DSC-003`
+- [x] `DSC-001` — PR #120; capability-first permitted organization search, explainable match boundary, configured-browser acceptance, emulator acceptance, and `npm run check`
+- [x] `DSC-002` — PR #120; canonical base/service geography filtering with base-versus-service separation, configured-browser acceptance, emulator acceptance, and `npm run check`
+- [x] `DSC-003` — PR #120; privacy-safe exact/approximate/locality-only map/list/detail synchronization, stale selection recovery, accessibility/responsive acceptance, cleanup, and `npm run check`
 - [ ] `DSC-011`
 - [ ] `REF-001`
 - [ ] `REF-002`

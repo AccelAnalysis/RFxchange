@@ -29,10 +29,15 @@ export interface ExchangeHomeMarker {
   readonly accessibleLocationLabel?: string;
 }
 
+export type ExchangeOrganizationMarker = ExchangeHomeMarker;
+
 export interface ExchangeSpatialSceneProps {
   readonly model: ControlledLocalityMapModel;
   readonly mode: ExchangeSpatialSceneMode;
   readonly marker?: ExchangeHomeMarker | null;
+  readonly organizationMarkers?: readonly ExchangeOrganizationMarker[];
+  readonly focusedMarkerId?: string | null;
+  readonly onOrganizationMarkerSelect?: (markerId: string) => void;
   readonly interactive?: boolean;
   readonly activationOverlay?: boolean;
   readonly workspaceOverlay?: "left" | "right" | null;
@@ -60,6 +65,11 @@ const LOCALITY_MASK_LAYER_ID = "rfx-spatial-scene-locality-mask-fill";
 const LOCALITY_FILL_LAYER_ID = "rfx-spatial-scene-locality-fill";
 const LOCALITY_OUTLINE_CONTRAST_LAYER_ID = "rfx-spatial-scene-locality-outline-contrast";
 const LOCALITY_OUTLINE_LAYER_ID = "rfx-spatial-scene-locality-outline";
+const NETWORK_MARKER_SOURCE_ID = "rfx-spatial-scene-network-organizations";
+const NETWORK_MARKER_HALO_LAYER_ID = "rfx-spatial-scene-network-organization-halo";
+const NETWORK_MARKER_CORE_LAYER_ID = "rfx-spatial-scene-network-organization-core";
+const NETWORK_MARKER_RF_LAYER_ID = "rfx-spatial-scene-network-organization-rf";
+const NETWORK_MARKER_LABEL_LAYER_ID = "rfx-spatial-scene-network-organization-label";
 const HOME_MARKER_SOURCE_ID = "rfx-spatial-scene-home-marker";
 const HOME_MARKER_HALO_LAYER_ID = "rfx-spatial-scene-home-marker-halo";
 const HOME_MARKER_CORE_LAYER_ID = "rfx-spatial-scene-home-marker-core";
@@ -211,6 +221,27 @@ function markerGeoJson(marker?: ExchangeHomeMarker | null) {
         },
       },
     ],
+  };
+}
+
+function organizationMarkerGeoJson(
+  markers: readonly ExchangeOrganizationMarker[],
+  focusedMarkerId: string | null,
+) {
+  return {
+    type: "FeatureCollection" as const,
+    features: markers.map((marker) => ({
+      type: "Feature" as const,
+      properties: {
+        id: marker.id,
+        label: marker.label,
+        selected: marker.id === focusedMarkerId ? 1 : 0,
+      },
+      geometry: {
+        type: "Point" as const,
+        coordinates: [marker.coordinate[0], marker.coordinate[1]],
+      },
+    })),
   };
 }
 
@@ -395,6 +426,9 @@ export function ExchangeSpatialScene({
   model,
   mode,
   marker = null,
+  organizationMarkers = [],
+  focusedMarkerId = null,
+  onOrganizationMarkerSelect,
   interactive = false,
   activationOverlay = false,
   workspaceOverlay = null,
@@ -415,11 +449,15 @@ export function ExchangeSpatialScene({
   const modeRef = useRef(mode);
   const modelRef = useRef(model);
   const markerRef = useRef(marker);
+  const organizationMarkersRef = useRef(organizationMarkers);
+  const focusedMarkerIdRef = useRef(focusedMarkerId);
+  const onOrganizationMarkerSelectRef = useRef(onOrganizationMarkerSelect);
   const activationOverlayRef = useRef(activationOverlay);
   const workspaceOverlayRef = useRef(workspaceOverlay);
   const homeGeoJsonRef = useRef(localityGeoJson(model));
   const homeMaskGeoJsonRef = useRef(localityMaskGeoJson(model));
   const homeMarkerGeoJsonRef = useRef(markerGeoJson(marker));
+  const networkMarkerGeoJsonRef = useRef(organizationMarkerGeoJson(organizationMarkers, focusedMarkerId));
   const tutorialNodeGeoJsonRef = useRef(tutorialNodeGeoJson(tutorialOverlay));
   const tutorialPathGeoJsonRef = useRef(tutorialPathGeoJson(tutorialOverlay));
   const searchMarkerRef = useRef<mapboxgl.Marker | null>(null);
@@ -434,17 +472,25 @@ export function ExchangeSpatialScene({
   const homeGeoJson = useMemo(() => localityGeoJson(model), [model]);
   const homeMaskGeoJson = useMemo(() => localityMaskGeoJson(model), [model]);
   const homeMarkerGeoJson = useMemo(() => markerGeoJson(marker), [marker]);
+  const networkMarkersGeoJson = useMemo(
+    () => organizationMarkerGeoJson(organizationMarkers, focusedMarkerId),
+    [focusedMarkerId, organizationMarkers],
+  );
   const tutorialNodes = useMemo(() => tutorialNodeGeoJson(tutorialOverlay), [tutorialOverlay]);
   const tutorialPaths = useMemo(() => tutorialPathGeoJson(tutorialOverlay), [tutorialOverlay]);
 
   modeRef.current = mode;
   modelRef.current = model;
   markerRef.current = marker;
+  organizationMarkersRef.current = organizationMarkers;
+  focusedMarkerIdRef.current = focusedMarkerId;
+  onOrganizationMarkerSelectRef.current = onOrganizationMarkerSelect;
   activationOverlayRef.current = activationOverlay;
   workspaceOverlayRef.current = workspaceOverlay;
   homeGeoJsonRef.current = homeGeoJson;
   homeMaskGeoJsonRef.current = homeMaskGeoJson;
   homeMarkerGeoJsonRef.current = homeMarkerGeoJson;
+  networkMarkerGeoJsonRef.current = networkMarkersGeoJson;
   tutorialNodeGeoJsonRef.current = tutorialNodes;
   tutorialPathGeoJsonRef.current = tutorialPaths;
 
@@ -521,7 +567,14 @@ export function ExchangeSpatialScene({
     manuallyPausedRef.current = false;
     const padding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current);
     const activeMode = modeRef.current;
-    const activeMarker = markerRef.current;
+    const focusedMarker = focusedMarkerIdRef.current
+      ? markerRef.current?.id === focusedMarkerIdRef.current
+        ? markerRef.current
+        : organizationMarkersRef.current.find(
+            (candidate) => candidate.id === focusedMarkerIdRef.current,
+          ) ?? null
+      : null;
+    const activeMarker = focusedMarker ?? markerRef.current;
     setLocalityLayerVisibility(activeMode !== "regional");
 
     if (activeMode === "organization" && activeMarker) {
@@ -859,6 +912,64 @@ export function ExchangeSpatialScene({
         },
       });
 
+      map.addSource(NETWORK_MARKER_SOURCE_ID, { type: "geojson", data: networkMarkerGeoJsonRef.current });
+      map.addLayer({
+        id: NETWORK_MARKER_HALO_LAYER_ID,
+        type: "circle",
+        source: NETWORK_MARKER_SOURCE_ID,
+        paint: {
+          "circle-radius": ["case", ["==", ["get", "selected"], 1], 18, 0],
+          "circle-color": "rgba(214,162,58,0.18)",
+          "circle-stroke-color": "rgba(214,162,58,0.5)",
+          "circle-stroke-width": ["case", ["==", ["get", "selected"], 1], 2, 0],
+        },
+      });
+      map.addLayer({
+        id: NETWORK_MARKER_CORE_LAYER_ID,
+        type: "circle",
+        source: NETWORK_MARKER_SOURCE_ID,
+        paint: {
+          "circle-radius": ["case", ["==", ["get", "selected"], 1], 12, 10],
+          "circle-color": "#252932",
+          "circle-stroke-color": "#d6a23a",
+          "circle-stroke-width": ["case", ["==", ["get", "selected"], 1], 3, 2],
+        },
+      });
+      map.addLayer({
+        id: NETWORK_MARKER_RF_LAYER_ID,
+        type: "symbol",
+        source: NETWORK_MARKER_SOURCE_ID,
+        layout: {
+          "text-field": "RF",
+          "text-size": 10,
+          "text-allow-overlap": true,
+          "text-ignore-placement": true,
+          "text-pitch-alignment": "viewport",
+          "text-rotation-alignment": "viewport",
+        },
+        paint: { "text-color": "#f7f3ea" },
+      });
+      map.addLayer({
+        id: NETWORK_MARKER_LABEL_LAYER_ID,
+        type: "symbol",
+        source: NETWORK_MARKER_SOURCE_ID,
+        minzoom: 10,
+        layout: {
+          "text-field": ["get", "label"],
+          "text-size": 12,
+          "text-offset": [0, 1.9],
+          "text-anchor": "top",
+          "text-allow-overlap": false,
+          "text-pitch-alignment": "viewport",
+          "text-rotation-alignment": "viewport",
+        },
+        paint: {
+          "text-color": "#0b0b0d",
+          "text-halo-color": "rgba(247,243,234,0.96)",
+          "text-halo-width": 2,
+        },
+      });
+
       map.addSource(HOME_MARKER_SOURCE_ID, { type: "geojson", data: homeMarkerGeoJsonRef.current });
       map.addLayer({
         id: HOME_MARKER_HALO_LAYER_ID,
@@ -927,6 +1038,21 @@ export function ExchangeSpatialScene({
         map.on("mouseleave", HOME_MARKER_CORE_LAYER_ID, () => {
           map.getCanvas().style.cursor = "";
         });
+        map.on("mouseenter", NETWORK_MARKER_CORE_LAYER_ID, () => {
+          map.getCanvas().style.cursor = "pointer";
+        });
+        map.on("mouseleave", NETWORK_MARKER_CORE_LAYER_ID, () => {
+          map.getCanvas().style.cursor = "";
+        });
+        map.on("click", NETWORK_MARKER_CORE_LAYER_ID, (event) => {
+          const feature = event.features?.[0] as unknown as
+            | { readonly properties?: Readonly<Record<string, unknown>> }
+            | undefined;
+          const markerId = feature?.properties?.id;
+          if (typeof markerId === "string") {
+            onOrganizationMarkerSelectRef.current?.(markerId);
+          }
+        });
         map.on("click", HOME_MARKER_CORE_LAYER_ID, (event) => {
           const feature = event.features?.[0] as unknown as
             | { readonly properties?: Readonly<Record<string, unknown>> }
@@ -973,12 +1099,26 @@ export function ExchangeSpatialScene({
     maskSource?.setData(homeMaskGeoJson);
     const markerSource = map.getSource(HOME_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     markerSource?.setData(homeMarkerGeoJson);
+    const networkMarkerSource = map.getSource(NETWORK_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    networkMarkerSource?.setData(networkMarkersGeoJson);
     const tutorialNodeSource = map.getSource(TUTORIAL_NODE_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     tutorialNodeSource?.setData(tutorialNodes);
     const tutorialPathSource = map.getSource(TUTORIAL_PATH_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     tutorialPathSource?.setData(tutorialPaths);
     applyScene();
-  }, [applyScene, homeGeoJson, homeMaskGeoJson, homeMarkerGeoJson, tutorialNodes, tutorialPaths, mode, activationOverlay, workspaceOverlay]);
+  }, [
+    applyScene,
+    homeGeoJson,
+    homeMaskGeoJson,
+    homeMarkerGeoJson,
+    networkMarkersGeoJson,
+    tutorialNodes,
+    tutorialPaths,
+    mode,
+    activationOverlay,
+    workspaceOverlay,
+    focusedMarkerId,
+  ]);
 
   if (!token.startsWith("pk.")) {
     return (

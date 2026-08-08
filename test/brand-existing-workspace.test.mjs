@@ -10,39 +10,57 @@ const component = await read("src/components/participant/ExistingWorkspaceFounda
 const styles = await read("src/components/participant/ExistingWorkspaceFoundation.module.css");
 const page = await read("app/geography/canvas/page.tsx");
 const runtime = await read("src/infrastructure/geography/participant-map-runtime.ts");
+const networkRuntime = await read("src/infrastructure/network-discovery/runtime.ts");
+const networkCatalog = JSON.parse(
+  await read("src/i18n/messages/network/en-US.json"),
+);
 
 test("Brand B6a browser state is deterministic and stores no authority or coordinates", () => {
   assert.match(state, /viewportIntent: "organization-home"/);
+  assert.match(state, /"selected-object"/);
   assert.match(state, /storesAuthorization: false/);
   assert.match(state, /storesPrivateCoordinates: false/);
   assert.match(state, /storesDomainRecords: false/);
   assert.match(state, /selectedObjectMustBeAuthorizedProjection: true/);
   assert.doesNotMatch(state, /longitude|latitude|permission|membership|sessionCookie/);
+  assert.match(component, /authorizedObjectIds\.has\(restored\.selectedObjectId\)/);
 });
 
-test("Brand B6a supports truthful loading and recovery boundaries", () => {
+test("Brand B6a supports truthful localized loading and recovery boundaries", () => {
   for (const status of ["loading", "empty", "error", "permission", "expired", "recovery"]) {
-    assert.match(component, new RegExp(`${status}: Object\\.freeze`));
+    assert.ok(networkCatalog.status?.[status]?.title);
+    assert.ok(networkCatalog.status?.[status]?.body);
   }
   assert.match(component, /StatePanel/);
-  assert.match(component, /No organization or geography state was changed/);
-  assert.match(component, /without creating a duplicate organization/);
+  assert.match(component, /networkWorkspace\.status\.\$\{status\}\.title/);
+  assert.equal(
+    networkCatalog.status.error.body,
+    "No organization or geography state was changed. Retry the authenticated workspace or return to activation for recovery.",
+  );
+  assert.match(networkCatalog.status.recovery.body, /without creating a duplicate organization/);
 });
 
-test("Brand B6a exposes only current organization, geography, profile and provenance", () => {
-  assert.match(component, /Organization home/);
-  assert.match(component, /Active organization node/);
-  assert.match(component, /Manage organization profile/);
-  assert.match(component, /Data provenance/);
-  assert.match(component, /Network discovery is not live yet/);
-  assert.match(component, /remain absent until their authorized Wave 3 and Wave 4 slices are complete/);
+test("Brand B6a organization home evolves to bounded Network discovery without later domains", () => {
+  assert.equal(networkCatalog.home.eyebrow, "Organization home");
+  assert.equal(networkCatalog.home.activeNode, "Active organization node");
+  assert.equal(networkCatalog.home.manageProfile, "Manage organization profile");
+  assert.equal(networkCatalog.provenance.eyebrow, "Data provenance");
+  assert.match(networkCatalog.home.scopeBody, /permitted Network organization discovery/);
+  assert.match(
+    networkCatalog.home.scopeBody,
+    /Opportunities, referrals, resource providers, credibility, and outcomes remain absent/,
+  );
+  assert.match(component, /networkWorkspace\.home\.scopeBody/);
 });
 
-test("Brand B6a authenticated route receives server-authorized organization identity", () => {
+test("Brand B6a authenticated route receives server-authorized organization identity and Network projection", () => {
   assert.match(runtime, /readonly organizationId: string/);
   assert.match(runtime, /const organizationId = access\.membership\.organizationId/);
   assert.match(page, /ExistingWorkspaceFoundation/);
-  assert.match(page, /organizationId=\{authenticated\.organizationId\}/);
+  assert.match(page, /organizationId=\{authenticated\.mapProjection\.organizationId\}/);
+  assert.match(page, /loadAuthorizedNetworkDiscovery/);
+  assert.match(networkRuntime, /evaluateGeographyParticipation/);
+  assert.match(networkRuntime, /network-participation/);
   assert.doesNotMatch(page, /<ExchangeSpatialScene/);
 });
 

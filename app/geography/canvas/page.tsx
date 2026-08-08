@@ -7,6 +7,7 @@ import {
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
+import { loadAuthorizedNetworkDiscovery } from "@/src/infrastructure/network-discovery/runtime";
 
 interface GeographyCanvasPageProps {
   readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
@@ -43,7 +44,8 @@ async function resolveAuthenticatedMapProjection(requestedOrganizationId: string
     redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   }
 
-  return await loadAuthorizedParticipantMapProjection(access) ?? redirect("/join");
+  const mapProjection = await loadAuthorizedParticipantMapProjection(access) ?? redirect("/join");
+  return Object.freeze({ access, mapProjection });
 }
 
 export default async function GeographyCanvasPage({
@@ -51,13 +53,25 @@ export default async function GeographyCanvasPage({
 }: GeographyCanvasPageProps) {
   const params = searchParams ? await searchParams : {};
   const requestedOrganizationId = firstSearchParam(params.organizationId);
+  const capability = firstSearchParam(params.q);
+  const serviceGeographyId = firstSearchParam(params.serviceArea);
+  const page = firstSearchParam(params.page);
   const authenticated = await resolveAuthenticatedMapProjection(requestedOrganizationId);
+  const discovery = await loadAuthorizedNetworkDiscovery({
+    access: authenticated.access,
+    mapProjection: authenticated.mapProjection,
+    capability,
+    serviceGeographyId,
+    page,
+  });
 
   return (
     <ExistingWorkspaceFoundation
-      model={authenticated.model}
-      homeMarker={authenticated.homeMarker}
-      organizationId={authenticated.organizationId}
+      model={authenticated.mapProjection.model}
+      homeMarker={authenticated.mapProjection.homeMarker}
+      organizationId={authenticated.mapProjection.organizationId}
+      discovery={discovery.available ? discovery.projection : null}
+      serviceAreaOptions={discovery.available ? discovery.serviceAreaOptions : []}
     />
   );
 }

@@ -337,9 +337,10 @@ for (const requirement of [
   assert.ok(authenticatedMapSurface.includes(requirement), `Exchange map is missing ${requirement}.`);
 }
 assert.ok(
-  geographyRoute.includes("organizationId={authenticated.organizationId}") &&
-    existingWorkspace.includes("Network discovery is not live yet"),
-  "B6a must receive server-authorized organization identity and preserve truthful future-domain absence.",
+  geographyRoute.includes("organizationId={authenticated.mapProjection.organizationId}") &&
+    geographyRoute.includes("loadAuthorizedNetworkDiscovery") &&
+    existingWorkspace.includes("networkWorkspace.home.scopeBody"),
+  "B6a/Slice 3.2 must receive server-authorized organization identity, add bounded Network discovery, and preserve truthful localized scope messaging.",
 );
 assert.equal(
   geographyRoute.includes("map remains usable as a preview"),
@@ -374,5 +375,5 @@ assert.ok(
 );
 
 console.log(
-  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, spatial onboarding progression, cached Census-authoritative locality selection, lifecycle-authoritative account-only B6a participant routing, real persistent marker rendering, categorized capabilities, universal opportunity participation, carried identity, and controlled-platform stop.",
+  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, spatial onboarding progression, cached Census-authoritative locality selection, lifecycle-authoritative participant routing, real persistent marker rendering, categorized capabilities, Slice 3.2 bounded Network entry, carried identity, and controlled-platform stop.",
 );
