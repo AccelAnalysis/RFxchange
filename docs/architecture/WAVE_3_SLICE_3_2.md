@@ -2,7 +2,7 @@
 
 ## Status
 
-**IMPLEMENTED AND CONFIGURED-BROWSER ACCEPTED ON PR #120 — FINAL-HEAD PRODUCTION CI REQUIRED BEFORE FEATURE COMPLETION.**
+**COMPLETE VIA PR #120 — CONFIGURED-BROWSER ACCEPTED AND PRODUCTION CI PASSED.**
 
 Feature IDs in scope:
 
@@ -11,7 +11,7 @@ Feature IDs in scope:
 - `DSC-002` — geographic/service-area filters;
 - `DSC-003` — map-based permitted organization discovery.
 
-No Feature ID is marked Done by this document.
+The canonical tracker marks only these four Feature IDs Done.
 
 ## Runtime architecture
 
@@ -117,8 +117,8 @@ Cleanup removed 42 exact Firestore records and both disposable Firebase Auth ide
 
 Focused validation for the browser-found correction and the full canonical `npm run check` passed locally on Node.js 24.18.0. The full gate included 385 architecture tests, 19 Functions tests, TypeScript, lint with no errors, and a successful production build.
 
-## Acceptance remaining before Done
+## Completion evidence
 
-Production CI must pass on the synchronized final PR head. PR #120 remains draft and the four Feature IDs remain Not Started until that final-head evidence exists.
+Production CI run `31283391560` passed on the synchronized substantive and browser-evidence head `5d1796e2255fab582025636a102d369ef65e4029`. The final closeout-only head must also pass before merge.
 
-Only after that evidence exists may `GEO-012`, `DSC-001`, `DSC-002` and `DSC-003` be marked Done and the Wave 3 dependency state recalculated.
+With the documented implementation, emulator, full repository, configured-browser, cleanup and production CI evidence complete, `GEO-012`, `DSC-001`, `DSC-002` and `DSC-003` are Done. Network is 11/38 absent unrelated drift. The next active no-Feature-ID gate is RFxchange reconciliation to immutable AMACS 0.5.0; Slice 3.3 remains blocked behind that reconciliation and the later AI/AMACS Interpretation Foundation.

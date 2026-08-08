@@ -1,6 +1,6 @@
 # Slice 3.2 — Controlled Network Entry & Discovery
 
-**Status: CANONICAL IMPLEMENTATION BRIEF — SLICE 3.1 AND BRAND GATES B0–B6a ARE COMPLETE; READY FOR EXPLICIT AUTHORIZATION; DO NOT IMPLEMENT UNTIL AUTHORIZED**
+**Status: COMPLETE VIA PR #120 — CONFIGURED-BROWSER, CLEANUP, FULL REPOSITORY AND PRODUCTION CI EVIDENCE PASSED**
 
 ## Feature IDs
 
@@ -112,7 +112,9 @@ The OPEN platform becomes a real, controlled, capability-first Network discovery
 
 ## Completion discipline
 
-- Explicit authorization is still required before implementation begins.
-- Mark only `GEO-012`, `DSC-001`, `DSC-002`, and `DSC-003` when their own acceptance evidence passes.
+- Explicit authorization was provided before implementation began.
+- Only `GEO-012`, `DSC-001`, `DSC-002`, and `DSC-003` are marked Done by this slice.
 - Brand Gate completion does not satisfy these Feature IDs.
-- Recalculate dependencies after the Slice 3.2 implementation and reconciliation merge before authorizing Slice 3.3.
+- Configured-browser acceptance used two disposable Auth identities and 42 scoped Firestore records, proved authority/privacy/search/filter/map-list-detail/responsive/accessibility/five-locale behavior, and removed the full footprint with a zero-residual scan.
+- Production CI run `31283391560` passed on the synchronized substantive and browser-evidence head. The final closeout-only head must also pass before merge.
+- Recalculation makes AMACS 0.5.0 reconciliation the next no-Feature-ID gate; Slice 3.3 remains blocked behind that reconciliation and the AI/AMACS Interpretation Foundation.

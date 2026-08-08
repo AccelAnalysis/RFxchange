@@ -1,14 +1,14 @@
 # Wave 3 — Network Roadmap
 
-**Status: SLICE 3.1 COMPLETE; BRAND GATES B0–B6a COMPLETE; SLICE 3.2 ACTIVE; AMACS 0.5.0 RELEASED; 0.5.0 RECONCILIATION AND AI/AMACS FOUNDATION ARE THE NEXT TWO CROSS-CUTTING GATES BEFORE SLICE 3.3.**
+**Status: SLICES 3.1–3.2 COMPLETE; BRAND GATES B0–B6a COMPLETE; AMACS 0.5.0 RECONCILIATION IS ACTIVE; AI/AMACS FOUNDATION FOLLOWS BEFORE SLICE 3.3.**
 
-Wave 2 is complete, Brand Gates B0 through B6a are merged, Wave 3 Slice 3.1 is complete, and Slice 3.2 remains the only active authorized implementation slice.
+Wave 2 is complete, Brand Gates B0 through B6a are merged, and Wave 3 Slices 3.1 and 3.2 are complete.
 
 Current Feature-ID state remains:
 
-- **438 total · 121 Done · 317 Not Started**
+- **438 total · 125 Done · 313 Not Started**
 - Activation: **43/43**
-- Network: **7/38**
+- Network: **11/38**
 
 AMACS 0.5.0, Brand Gates, the RFxchange AMACS reconciliation and the AI/AMACS Interpretation Foundation are no-Feature-ID cross-cutting work. They do not mark any Network feature Done.
 
@@ -44,7 +44,7 @@ The standard release does not itself implement AI in RFxchange and changes no RF
 
 ## Current execution authority
 
-**Slice 3.2 — Controlled Network Entry & Discovery remains active.** PR #120 has passed production CI but still requires configured-browser acceptance and the completion evidence defined by the Slice 3.2 brief. No later implementation may begin until it merges and authority is recalculated from merged `main`.
+**Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120.** Configured-browser acceptance, cleanup, focused validation, the full local repository gate and synchronized-head production CI passed. No later Feature-ID slice began.
 
 After Slice 3.2, execute two cross-cutting gates in order:
 
@@ -58,8 +58,8 @@ Only after both gates merge and dependencies are recalculated may Slice 3.3 be e
 | Slice or gate | Features | Status or purpose |
 | --- | --- | --- |
 | **3.1 — Transactional Communications Reliability** | `COMMS-003`, `COMMS-004`, `COMMS-005` | **Complete via PR #107.** |
-| **3.2 — Controlled Network Entry & Discovery** | `GEO-012`, `DSC-001`, `DSC-002`, `DSC-003` | **Active.** Controlled Network entry; permitted organization discovery; capability, geography and service-area search; synchronized map, list and detail. |
-| **AMACS 0.5.0 reconciliation** | **No Feature IDs** | **Next after 3.2.** Pin, ingest or deterministically rebuild, validate and migrate RFxchange from its stale 0.1.0 integration baseline to immutable 0.5.0 without silently changing historical records or creating participant features. |
+| **3.2 — Controlled Network Entry & Discovery** | `GEO-012`, `DSC-001`, `DSC-002`, `DSC-003` | **Complete via PR #120.** Controlled Network entry; permitted organization discovery; capability, geography and service-area search; synchronized map, list and detail. |
+| **AMACS 0.5.0 reconciliation** | **No Feature IDs** | **Active next gate.** Pin, ingest or deterministically rebuild, validate and migrate RFxchange from its stale 0.1.0 integration baseline to immutable 0.5.0 without silently changing historical records or creating participant features. |
 | **AI/AMACS Interpretation Foundation** | **No Feature IDs** | **After 0.5.0 reconciliation.** Provider-neutral server gateway and concrete adapter; release-aware retrieval; AMACS schema and catalog validation; non-authoritative candidates; disposition and authoritative-command separation; provenance; privacy; metering; future manual-service path; evaluation. |
 | **3.3 — Market Profile Enrichment** | `ORG-013`, `ORG-014`, `ORG-016`, `ORG-017` | Structured AMACS-backed capability assertions, products and services, industry and NAICS context, past performance and teaming, referral or resource preferences. Ordinary-language assistance uses 0.5.0 InterpretationRecord or Candidate contracts; confirmed assertions remain separate from suggestions, evidence and verification. |
 | **3.4 — Credential, Media & Location Enrichment** | `ORG-015`, `ORG-018`, `ORG-019` | Credentials with provenance; private-by-default media, documents and portfolio; subordinate additional locations with geography and privacy authority. |
@@ -73,10 +73,9 @@ Only after both gates merge and dependencies are recalculated may Slice 3.3 be e
 Use one active slice or gate at a time unless an explicit later task changes that authority.
 
 ```text
-Slice 3.2 configured-browser acceptance
-→ Slice 3.2 evidence and tracker update and PR #120 merge
+Slice 3.2 evidence, tracker update and PR #120 merge [complete]
 → production CI and authority recalculation from merged main
-→ AMACS 0.5.0 reconciliation implementation and merge
+→ AMACS 0.5.0 reconciliation implementation and merge [active next gate]
 → recalculate
 → AI/AMACS Interpretation Foundation implementation and merge
 → recalculate and explicitly authorize Slice 3.3
@@ -104,7 +103,7 @@ Preparation or read-only inspection may occur ahead of the active slice. Product
 real OPEN organization and real map marker
 → reliable communications [complete]
 → brand and workspace convergence [complete]
-→ controlled Network discovery [active]
+→ controlled Network discovery [complete]
 → immutable AMACS 0.5.0 integration
 → governed human-language ↔ AMACS interpretation
 → confirmed AMACS-backed market profiles
@@ -216,5 +215,5 @@ Completion of Slice 3.5 alone is expected to leave Network at 25/38 absent unrel
 - Cross-cutting gate completion does not change tracker totals.
 - Recalculate from merged `main` after every slice or gate.
 - Update execution authority before beginning the next production phase.
-- Slice 3.2 remains the sole active implementation slice until PR #120 is accepted and merged.
+- AMACS 0.5.0 reconciliation is the active no-Feature-ID gate after PR #120 merges.
 - Do not describe the current assignment's stop after Slice 3.5 as Wave 3 completion.
