@@ -1,6 +1,6 @@
 # RFxchange Brand Experience Implementation Roadmap
 
-**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a COMPLETE; SLICE 3.2 IS THE NEXT PRODUCT BOUNDARY**
+**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a COMPLETE; SLICE 3.2 AND AMACS 0.5.0 RECONCILIATION COMPLETE; AI/AMACS FOUNDATION IS NEXT**
 
 ## 1. Purpose
 
@@ -32,11 +32,11 @@ Brand Gates B0 through B6a are complete.
 | B5 — Onboarding and activation experience | Complete | PR #114 | `c9b1469cf258a6a9af9b456585af7f3524a5c7b6` |
 | B6a — Existing workspace foundation | Complete | PR #115 | `bf59f1d18fa6db3f43660c42777b494b505be545` |
 
-The gates above are no-Feature-ID convergence work. Feature totals remain:
+The gates above and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Slice 3.2 are:
 
-- **438 total · 121 Done · 317 Not Started**
+- **438 total · 125 Done · 313 Not Started**
 - Activation: **43/43**
-- Network: **7/38**
+- Network: **11/38**
 
 The consolidated evidence is recorded in:
 
@@ -45,7 +45,7 @@ The consolidated evidence is recorded in:
 
 ## 3. Current product handoff
 
-The non-Feature prerequisites identified for Wave 3 Slice 3.2 are satisfied:
+The non-Feature prerequisites identified for Wave 3 Slice 3.2 were satisfied:
 
 - B2 shared primitives — complete;
 - B3 cartographic convergence — complete;
@@ -53,9 +53,9 @@ The non-Feature prerequisites identified for Wave 3 Slice 3.2 are satisfied:
 
 B4 and B5 are also complete under the adopted numerical execution sequence.
 
-**Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is ready for explicit authorization but remains unstarted.**
+**Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123.**
 
-The next task must not infer completion of `GEO-012`, `DSC-001`, `DSC-002`, or `DSC-003` from Brand Gate completion.
+The AI/AMACS Interpretation Foundation is the active next cross-cutting gate. Slice 3.3 remains blocked until that foundation merges and authority is recalculated. B6b remains later in the authorized Wave 3 sequence after its live referral and provider domains exist.
 
 ## 4. Completed gates
 
@@ -266,10 +266,10 @@ For every remaining gate or product slice:
 
 ## 9. Current next action
 
-The Brand Gate sequence requested through B6a is complete and reconciled.
+The Brand Gate sequence requested through B6a is complete and reconciled. Slice 3.2 and the AMACS 0.5.0 reconciliation are also complete.
 
-The next product candidate is:
+The next active cross-cutting gate is:
 
-> **Wave 3 Slice 3.2 — Controlled Network Entry & Discovery (`GEO-012`, `DSC-001`, `DSC-002`, `DSC-003`)**
+> **AI/AMACS Interpretation Foundation — no Feature IDs**
 
-It remains unstarted until explicitly authorized.
+Slice 3.3 remains blocked until that foundation merges and dependency authority is recalculated.

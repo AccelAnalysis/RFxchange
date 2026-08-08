@@ -1,6 +1,6 @@
 # The RFxchange Brand Experience System
 
-**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a COMPLETE; SLICE 3.2 IS THE NEXT PRODUCT BOUNDARY**
+**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a COMPLETE; SLICE 3.2 AND AMACS 0.5.0 RECONCILIATION COMPLETE; AI/AMACS FOUNDATION IS NEXT**
 
 This directory defines the approved target brand experience for **The RFxchange** and the sequential convergence gates that apply it without weakening product, security, privacy, geography, lifecycle, or evidence authority.
 
@@ -34,11 +34,11 @@ The final B6a implementation merged at:
 
 `bf59f1d18fa6db3f43660c42777b494b505be545`
 
-The Brand Gates are no-Feature-ID convergence work. Canonical feature totals remain:
+The Brand Gates and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Slice 3.2 are:
 
-- **438 total · 121 Done · 317 Not Started**
+- **438 total · 125 Done · 313 Not Started**
 - Activation: **43/43**
-- Network: **7/38**
+- Network: **11/38**
 
 See:
 
@@ -116,7 +116,7 @@ These remain unstarted unless explicitly authorized with product/tracker governa
 
 ## Current product boundary
 
-The non-Feature prerequisites identified before Wave 3 Slice 3.2 are now satisfied:
+The non-Feature prerequisites identified before Wave 3 Slice 3.2 were satisfied:
 
 - B2 shared primitives — complete;
 - B3 cartographic convergence — complete;
@@ -124,14 +124,16 @@ The non-Feature prerequisites identified before Wave 3 Slice 3.2 are now satisfi
 
 B4 and B5 are also complete under the adopted numerical execution sequence.
 
-**Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is ready for explicit authorization but remains unstarted.**
+**Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123. The AI/AMACS Interpretation Foundation is the active next gate.**
 
-The completed Brand Gates do not implement or mark Done:
+Slice 3.2 completed:
 
 - `GEO-012`;
 - `DSC-001`;
 - `DSC-002`;
 - `DSC-003`.
+
+Neither the Brand Gates nor AMACS reconciliation complete any additional Feature ID. Slice 3.3 remains blocked until the AI/AMACS foundation merges and authority is recalculated.
 
 ## Remaining Brand Gates
 
@@ -182,4 +184,4 @@ Do not:
 - invent organizations, opportunities, maps, statistics, outcomes, testimonials, provider availability, or market activity;
 - use Growth Green for publication, pursuit, invitation, referral acceptance, or submission alone;
 - treat membership, payment, recognition, provider approval, verification, credibility, or outcome as interchangeable;
-- implement B6b, B6c, B7, B8, B9, B10, or Slice 3.2 without explicit authorization.
+- implement B6b, B6c, B7, B8, B9, B10, or a later product slice without explicit authorization.
