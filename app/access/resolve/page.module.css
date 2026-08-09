@@ -1,0 +1,91 @@
+.page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background: var(--warm-ivory);
+}
+
+.card {
+  width: min(100%, 760px);
+  padding: clamp(28px, 5vw, 52px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: var(--shadow-soft);
+}
+
+.eyebrow {
+  margin: 0 0 14px;
+  color: #8a6418;
+  font-size: 0.76rem;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.card h1 {
+  max-width: 650px;
+  margin-bottom: 20px;
+  font-size: clamp(2.2rem, 6vw, 4.4rem);
+  line-height: 1;
+}
+
+.lede,
+.supporting {
+  max-width: 650px;
+  line-height: 1.65;
+}
+
+.lede { color: var(--graphite); font-size: 1.08rem; }
+.supporting { margin-top: 10px; color: var(--muted-ink); }
+
+.memberships { margin-top: 30px; }
+.memberships h2 { margin-bottom: 12px; font-size: 1rem; }
+.memberships ul { display: grid; gap: 10px; list-style: none; }
+.memberships li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.54);
+}
+.memberships li[data-selected="true"] { border-color: #8a6418; }
+.memberships strong,
+.memberships small { display: block; }
+.memberships small { margin-top: 4px; color: var(--muted-ink); }
+
+.select,
+.selected { font-size: 0.86rem; font-weight: 720; }
+.select { color: var(--exchange-black); }
+.selected { color: #8a6418; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.primary,
+.secondary {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 22px;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 720;
+  text-decoration: none;
+}
+.primary { border: 1px solid var(--exchange-black); background: var(--exchange-black); color: var(--white); }
+.secondary { border: 1px solid var(--line); background: transparent; color: var(--exchange-black); cursor: pointer; }
+.primary:focus-visible,
+.secondary:focus-visible,
+.select:focus-visible { outline: var(--focus-ring); outline-offset: 3px; }
+
+@media (max-width: 600px) {
+  .page { padding: 18px 14px; }
+  .card { padding: 28px 22px; }
+  .memberships li { align-items: flex-start; flex-direction: column; }
+  .actions { display: grid; }
+  .primary, .secondary { width: 100%; }
+}
