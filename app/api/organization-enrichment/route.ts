@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,7 +8,7 @@ import {
 import {
   assertProfileAssetFileSignature,
   OrganizationAssetUploadBoundaryError,
-  requireBoundedMultipartContentLength,
+  readBoundedProfileAssetMultipartBody,
   validateProfileAssetFileMetadata,
 } from "@/src/application/storage/organization-asset-upload-boundary";
 import { storeOrganizationAsset, StoredAssetAccessError } from "@/src/application/storage/store-organization-asset";
@@ -59,8 +60,26 @@ function scope(access: Extract<Awaited<ReturnType<typeof authorized>>, { kind: "
   return { context: access.context, organizationId, membershipId: String(access.membership.id), commandId } as const;
 }
 
+async function boundedMultipartForm(request: NextRequest): Promise<FormData> {
+  const contentType = request.headers.get("content-type");
+  if (!contentType?.startsWith("multipart/form-data")) {
+    throw new OrganizationAssetUploadBoundaryError(
+      "unsupported-content-type",
+      415,
+      "Profile asset upload must use multipart/form-data.",
+    );
+  }
+  const boundedBody = await readBoundedProfileAssetMultipartBody(
+    request.body,
+    request.headers.get("content-length"),
+  );
+  return new Response(Buffer.from(boundedBody), {
+    headers: { "content-type": contentType },
+  }).formData();
+}
+
 async function upload(request: NextRequest) {
-  const form = await request.formData();
+  const form = await boundedMultipartForm(request);
   const organizationId = String(form.get("organizationId") ?? "");
   const commandId = String(form.get("commandId") ?? "");
   const kind = String(form.get("kind") ?? "");
@@ -76,7 +95,7 @@ async function upload(request: NextRequest) {
   if (access.kind !== "authorized") return NextResponse.json({ error: "Current participant authority is required." }, { status: 403 });
 
   // Validate category, exact file size, and declared MIME before allocating the second in-memory
-  // copy created by File.arrayBuffer(). The request envelope was bounded before formData parsing.
+  // copy created by File.arrayBuffer(). The complete multipart stream was bounded before parsing.
   const uploadPolicy = validateProfileAssetFileMetadata({
     kind,
     sizeBytes: file.size,
@@ -139,7 +158,6 @@ export async function POST(request: NextRequest) {
   if (!origin || origin !== request.nextUrl.origin) return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
   try {
     if (request.headers.get("content-type")?.startsWith("multipart/form-data")) {
-      requireBoundedMultipartContentLength(request.headers.get("content-length"));
       return await upload(request);
     }
     if (Number(request.headers.get("content-length") ?? 0) > 262_144) return NextResponse.json({ error: "Enrichment request is too large." }, { status: 413 });
