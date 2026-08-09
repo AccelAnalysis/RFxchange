@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { MapMotionPreferenceToggle } from "@/src/components/account/MapMotionPreferenceToggle";
 import { SignOutButton } from "@/src/components/auth/SignOutButton";
+import { MarketProfilePanel } from "@/src/components/market-profile/MarketProfilePanel";
 import {
   OperationalWorkspace,
   ParticipantShell,
@@ -16,6 +17,7 @@ import {
   createServerFirestoreFoundationRepositories,
   getServerFirestore,
 } from "@/src/infrastructure/firestore/runtime";
+import { loadAuthorizedMarketProfile } from "@/src/infrastructure/market-profile/runtime";
 
 import styles from "./page.module.css";
 
@@ -45,14 +47,16 @@ export default async function OrganizationProfilePage() {
   }
 
   const foundation = createServerFirestoreFoundationRepositories(getServerFirestore());
-  const [profileRecord, authorization] = await Promise.all([
+  const [profileRecord, authorization, marketProfile] = await Promise.all([
     foundation.organizations.profiles.getByOrganizationId(access.membership.organizationId),
     foundation.organizationAuthorization.getByMembershipId(access.membership.id),
+    loadAuthorizedMarketProfile(access),
   ]);
   if (!profileRecord) redirect("/join");
 
   const profile = hydrateEssentialOrganizationProfile(profileRecord);
   const workspaceStatus = access.state.lifecycleState === "open-platform" ? "Open" : "Active";
+  const selectedGeography = access.state.selectedGeography;
 
   return (
     <ParticipantShell activeItem="Account">
@@ -63,9 +67,8 @@ export default async function OrganizationProfilePage() {
               <p className={styles.eyebrow}>Account · RFxchange</p>
               <h1>{profile.displayName}</h1>
               <p>
-                This workspace reflects your authenticated RFxchange organization context. Later
-                profile, trust, commercial, and user-administration capabilities remain governed by
-                their approved product slices.
+                Manage the organization identity and market information that permitted participants
+                can use to discover what your organization says it does.
               </p>
             </div>
             <SignOutButton className={styles.signOut} />
@@ -157,12 +160,26 @@ export default async function OrganizationProfilePage() {
             <article className={styles.card}>
               <h2>Current release boundary</h2>
               <p className={styles.empty}>
-                Referrals, Opportunities, Resources, advanced profile enrichment, credibility,
-                commercial benefits, and additional user administration remain unavailable until
-                their approved slices are complete.
+                Market profile enrichment is available. Referrals, provider routing, credibility,
+                commercial benefits, and RFx workflows remain unavailable until their approved
+                slices are complete.
               </p>
             </article>
           </section>
+
+          <MarketProfilePanel
+            organizationId={String(access.membership.organizationId)}
+            organizationName={profile.displayName}
+            snapshot={marketProfile.snapshot}
+            catalog={marketProfile.catalog}
+            marketRoles={marketProfile.marketRoles}
+            serviceGeographies={marketProfile.serviceGeographyIds.map((id) => ({
+              id,
+              label: id === String(selectedGeography?.id)
+                ? selectedGeography?.name ?? id
+                : id,
+            }))}
+          />
         </section>
       </OperationalWorkspace>
     </ParticipantShell>

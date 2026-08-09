@@ -81,6 +81,39 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ORG-013/014/016/017 market enrichment is organization-scoped and server-authorized.
+    // Claims/context remain distinct from append-only participant actions and idempotency evidence.
+    match /organizationCapabilityClaims/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationIndustryProfiles/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationPastPerformance/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationMarketPreferences/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationProvisionalTerms/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /organizationMarketProfileEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /organizationMarketProfileCommands/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     // GEO-011 marker activation is a server-derived lifecycle aggregate. Transition
     // events are immutable; direct clients cannot create a marker from browser state.
     match /organizationMarkerActivations/{documentId} {

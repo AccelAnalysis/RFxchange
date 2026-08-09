@@ -328,7 +328,9 @@ export function ExistingWorkspaceFoundation({
                           <span className={styles.resultCapabilities}>
                             {(organization.match.matchedCapabilityNames.length > 0
                               ? organization.match.matchedCapabilityNames
-                              : organization.profile.capabilities.map((item) => item.name)
+                              : organization.capabilities.length > 0
+                                ? organization.capabilities.map((item) => item.label)
+                                : organization.profile.capabilities.map((item) => item.name)
                             ).slice(0, 3).join(" · ")}
                           </span>
                         </button>
@@ -440,14 +442,27 @@ export function ExistingWorkspaceFoundation({
 
                   <section className={styles.capabilitySection} aria-labelledby="capability-list-title">
                     <p className={styles.eyebrow}>{t("networkWorkspace.detail.capabilities")}</p>
-                    <h2 id="capability-list-title">{t("networkWorkspace.detail.capabilityEvidence")}</h2>
+                    <h2 id="capability-list-title">
+                      {selectedOrganization.capabilities.length > 0
+                        ? "Confirmed organization capability claims"
+                        : t("networkWorkspace.detail.capabilityEvidence")}
+                    </h2>
                     <ul className={styles.capabilityList}>
-                      {selectedOrganization.profile.capabilities.map((capabilityItem) => (
-                        <li key={capabilityItem.id}>
-                          <strong>{capabilityItem.name}</strong>
-                          <span>{capabilityItem.description}</span>
-                        </li>
-                      ))}
+                      {selectedOrganization.capabilities.length > 0
+                        ? selectedOrganization.capabilities.map((capabilityItem) => (
+                            <li key={capabilityItem.id}>
+                              <strong>{capabilityItem.label}</strong>
+                              <span>{capabilityItem.domainLabel} → {capabilityItem.familyLabel}</span>
+                              <small>{capabilityItem.provenanceLabel} · {capabilityItem.assertionStatus.replaceAll("_", " ")} · not independently verified</small>
+                            </li>
+                          ))
+                        : selectedOrganization.profile.capabilities.map((capabilityItem) => (
+                            <li key={capabilityItem.id}>
+                              <strong>{capabilityItem.name}</strong>
+                              <span>{capabilityItem.description}</span>
+                              <small>Legacy activation profile capability</small>
+                            </li>
+                          ))}
                     </ul>
                   </section>
 

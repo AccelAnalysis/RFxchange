@@ -17,8 +17,8 @@ export async function POST(request: NextRequest) {
   if (access.kind === "unauthenticated") return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   if (access.kind !== "authorized") return NextResponse.json({ error: "Current participant authority is required." }, { status: 403 });
   try {
-    const record = await (await createServerAiAmacsInterpretationGateway()).disposition({ context: access.context, organizationId: body.organizationId, membershipId: String(access.membership.id), recordId: body.recordId, ...(typeof body.candidateId === "string" ? { candidateId: body.candidateId } : {}), ...(typeof body.expectedUpdatedAt === "string" ? { expectedUpdatedAt: body.expectedUpdatedAt } : {}), decision: body.decision as InterpretationDispositionInput });
-    return NextResponse.json({ record, authoritativeEffect: "none" }, { headers: { "cache-control": "no-store" } });
+    const result = await (await createServerAiAmacsInterpretationGateway()).disposition({ context: access.context, organizationId: body.organizationId, membershipId: String(access.membership.id), recordId: body.recordId, ...(typeof body.candidateId === "string" ? { candidateId: body.candidateId } : {}), ...(typeof body.expectedUpdatedAt === "string" ? { expectedUpdatedAt: body.expectedUpdatedAt } : {}), decision: body.decision as InterpretationDispositionInput });
+    return NextResponse.json(result, { headers: { "cache-control": "no-store" } });
   } catch (error) {
     if (error instanceof InterpretationGatewayError) {
       const status = error.code === "forbidden" ? 403 : error.code === "not-found" ? 404 : 409;
