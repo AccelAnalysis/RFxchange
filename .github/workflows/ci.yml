@@ -40,4 +40,10 @@ jobs:
       - name: Lint
         run: npm run lint
       - name: Production build
+        env:
+          RFXCHANGE_BUILD_SHA: ${{ github.sha }}
         run: npm run build
+      - name: Verify compiled build identity
+        env:
+          RFXCHANGE_EXPECTED_BUILD_SHA: ${{ github.sha }}
+        run: test "$(cat .next/BUILD_ID)" = "$RFXCHANGE_EXPECTED_BUILD_SHA"
