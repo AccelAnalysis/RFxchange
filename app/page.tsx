@@ -299,7 +299,7 @@ export default async function HomePage() {
           <p>{home.cta.description}</p>
           <div className={styles.ctaActions}>
             <Link className={styles.buttonGold} href="/join">{home.cta.primary}</Link>
-            <Link className={styles.buttonLight} href="/signin">{home.cta.secondary}</Link>
+            <Link className={styles.buttonLight} href="/signin">{dictionary.common.actions.signIn}</Link>
           </div>
           <strong>{home.cta.promise}</strong>
         </div>
