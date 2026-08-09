@@ -8,15 +8,17 @@
 
 Protected participant routes previously collapsed materially different failures into the same navigation outcomes. In particular, any authentication exception became `unauthenticated`, while an unavailable or inconsistent participant workspace projection could become `activation-required` and redirect a returning participant to `/join`.
 
-That behavior can falsely imply that an existing account, organization, or activation journey disappeared when Firebase Admin, Firestore, or a minimum persisted-state dependency is temporarily unavailable.
+The Firebase server-session adapter also defaulted unrecognized verification failures to `credential-invalid`. A transient provider or network error could therefore be interpreted as proof that an otherwise valid participant session was bad.
+
+These behaviors can falsely imply that an existing account, organization, or activation journey disappeared when Firebase Admin, Firestore, or another minimum persisted-state dependency is temporarily unavailable.
 
 ## Classification contract
 
 Stabilization 3A establishes the following protected-route meanings:
 
 - **No session cookie:** `unauthenticated`.
-- **Invalid, revoked, or disabled credential:** `unauthenticated`.
-- **Firebase Admin/authentication backend failure or unexpected authentication dependency failure:** throw `ParticipantRouteDependencyUnavailableError` with stage `authentication`.
+- **Recognized malformed, expired, revoked, or disabled credential:** `unauthenticated`.
+- **Firebase Admin/authentication backend failure, unknown provider verification failure, or unexpected authentication dependency failure:** throw `ParticipantRouteDependencyUnavailableError` with stage `authentication`.
 - **No activation context for the authenticated user:** `activation-required` with `state: null`.
 - **Existing activation context with a pre-workspace lifecycle:** `activation-required` with the persisted state so onboarding can continue.
 - **Existing activation context whose required lifecycle cannot be loaded or belongs to another user:** retryable workspace-state failure; never a fresh activation journey.
@@ -27,6 +29,18 @@ Stabilization 3A establishes the following protected-route meanings:
 - **Healthy identity, lifecycle, membership, organization, and restrictions:** `authorized`.
 
 The classification policy is isolated from Firebase/Firestore production wiring so it can be tested directly. `ParticipantRouteDependencyUnavailableError` preserves the original failure as a server-only `cause` while participant UI never renders raw exception details. Existing structured server timing remains available for diagnosis.
+
+## Firebase verification invariant
+
+`FirebaseServerSessionBoundary` now distinguishes affirmative credential rejection from ambiguous provider failure before the protected-route classifier runs:
+
+- recognized invalid or expired ID-token/session-cookie errors map to `credential-invalid`;
+- recognized revocation maps to `credential-revoked`;
+- recognized disabled-user state maps to `account-disabled`;
+- Firebase Admin configuration/runtime failures map to `authentication-backend-unavailable`; and
+- unrecognized provider, transport, or operational verification failures also map to `authentication-backend-unavailable` rather than invalidating the participant session.
+
+This is intentionally conservative. A participant is routed to sign-in only when the authentication layer has affirmative evidence that the credential is unusable. An ambiguous verification failure reaches retryable recovery instead.
 
 ## Projection invariant
 
@@ -54,7 +68,9 @@ The boundary is responsive and keyboard-focus visible. It does not change author
 Architecture tests cover:
 
 - missing session;
-- invalid/revoked/disabled session;
+- recognized invalid/revoked/disabled session;
+- recognized Firebase Admin configuration failure;
+- unknown provider/network verification failure;
 - authentication backend and unexpected authentication failures;
 - genuinely absent activation context;
 - incomplete pre-workspace activation;
