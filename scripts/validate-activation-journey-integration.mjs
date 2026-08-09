@@ -68,12 +68,13 @@ assert.ok(
 );
 assert.ok(
   signInClient.includes("signInWithEmailAndPassword") &&
-    signInClient.includes('window.location.assign("/join?begin=1")') &&
+    signInClient.includes('router.replace("/join?begin=1")') &&
     signInClient.includes("participantWorkspaceEligible") &&
     signInClient.includes("isAdministrativeReturnTarget") &&
-    signInClient.includes("returnTo ?? workspaceUrl") &&
+    signInClient.includes("internalReturnTarget(returnTo) ?? workspaceUrl") &&
+    !signInClient.includes("window.location.assign(") &&
     signInClient.includes("resume exactly where you left"),
-  "Returning-user sign in must establish the trusted session, resume incomplete activation, keep admin routing independent, route new accounts to setup, and return lifecycle-eligible participants to the protected target/Exchange.",
+  "Returning-user sign in must establish the trusted session, resume incomplete activation, keep admin routing independent, route new accounts to setup, and return lifecycle-eligible participants to the protected target/Exchange without a full browser reload.",
 );
 assert.equal(
   signInClient.includes("Organization name"),
@@ -305,7 +306,7 @@ for (const requirement of [
   "authenticateSessionCookie",
   "controlled-platform",
   "open-platform",
-  "memberships.getById",
+  "loadParticipantWorkspaceProjection",
   "getForOrganization",
   "getForMembership",
   "wrong-organization",
@@ -314,6 +315,11 @@ for (const requirement of [
 ]) {
   assert.ok(participantRuntime.includes(requirement), `Participant route runtime is missing ${requirement}.`);
 }
+assert.equal(
+  participantRuntime.includes("createServerActivationJourneyService"),
+  false,
+  "Ordinary participant route authorization must not rebuild the full activation journey graph.",
+);
 assert.equal(
   participantRuntime.includes('state.nextStep !== "complete"'),
   false,
@@ -375,5 +381,5 @@ assert.ok(
 );
 
 console.log(
-  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, spatial onboarding progression, cached Census-authoritative locality selection, lifecycle-authoritative participant routing, real persistent marker rendering, categorized capabilities, Slice 3.2 bounded Network entry, carried identity, and controlled-platform stop.",
+  "Activation + Runtime Convergence Gate validated: public marketing/auth entry, safe returning-user routing, trusted Firebase session, canonical activation orchestration, spatial onboarding progression, cached Census-authoritative locality selection, lifecycle-authoritative lightweight participant routing, real persistent marker rendering, categorized capabilities, Slice 3.2 bounded Network entry, carried identity, and controlled-platform stop.",
 );

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
@@ -25,6 +27,7 @@ interface SpatialModelResponse {
 export function SpatialActivationExperience({
   mapModel,
 }: Readonly<{ mapModel: ControlledLocalityMapModel }>) {
+  const router = useRouter();
   const [activationState, setActivationState] = useState<ActivationJourneyState | null>(null);
   const [sceneModel, setSceneModel] = useState(mapModel);
   const [homeMarker, setHomeMarker] = useState<ExchangeHomeMarker | null>(null);
@@ -86,11 +89,14 @@ export function SpatialActivationExperience({
 
   useEffect(() => {
     if (!homeMarker) return;
+    router.prefetch(workspaceUrl);
+    // The organization-visible animation can still play, but it no longer blocks the participant.
+    // Auto-entry is brief and an immediate Enter link is rendered at the same time.
     const timer = window.setTimeout(() => {
-      window.location.assign(workspaceUrl);
-    }, reducedMotion ? 200 : 3_400);
+      router.replace(workspaceUrl);
+    }, reducedMotion ? 50 : 900);
     return () => window.clearTimeout(timer);
-  }, [homeMarker, reducedMotion, workspaceUrl]);
+  }, [homeMarker, reducedMotion, router, workspaceUrl]);
 
   const mapVisible = activationState !== null;
   const sceneMode = homeMarker
@@ -128,6 +134,7 @@ export function SpatialActivationExperience({
             {homeMarker ? "Organization visible" : localityName}
           </StatusPill>
           <span>{statusText}</span>
+          {homeMarker ? <Link href={workspaceUrl}>Enter now</Link> : null}
         </div>
       ) : null}
       <div className={styles.content}>

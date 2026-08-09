@@ -14,6 +14,8 @@ import {
   type BrowserAuthenticationProvider,
 } from "./provider.ts";
 
+const freshlyAuthenticated = new WeakSet<Auth>();
+
 function toPrincipal(user: User): AuthenticationPrincipal {
   return Object.freeze({
     provider: FIREBASE_AUTH_PROVIDER,
@@ -51,6 +53,7 @@ export class FirebaseBrowserAuthenticationProvider implements BrowserAuthenticat
     password: string,
   ): Promise<AuthenticationPrincipal> {
     const credential = await createUserWithEmailAndPassword(this.auth, email, password);
+    freshlyAuthenticated.add(this.auth);
     return toPrincipal(credential.user);
   }
 
@@ -59,14 +62,22 @@ export class FirebaseBrowserAuthenticationProvider implements BrowserAuthenticat
     password: string,
   ): Promise<AuthenticationPrincipal> {
     const credential = await firebaseSignInWithEmailAndPassword(this.auth, email, password);
+    freshlyAuthenticated.add(this.auth);
     return toPrincipal(credential.user);
   }
 
   signOut(): Promise<void> {
+    freshlyAuthenticated.delete(this.auth);
     return firebaseSignOut(this.auth);
   }
 
   async getIdToken(forceRefresh = false): Promise<string | null> {
-    return this.auth.currentUser ? this.auth.currentUser.getIdToken(forceRefresh) : null;
+    if (!this.auth.currentUser) return null;
+
+    // Firebase has already minted/currently resolved a token as part of successful registration or
+    // sign-in. Do not immediately make a second network refresh merely because an existing caller
+    // asks for forceRefresh=true. Subsequent explicit force-refresh requests retain their semantics.
+    const justAuthenticated = freshlyAuthenticated.delete(this.auth);
+    return this.auth.currentUser.getIdToken(forceRefresh && !justAuthenticated);
   }
 }

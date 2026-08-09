@@ -238,13 +238,17 @@ export class ActivationJourneyService {
     context: AuthenticatedServerContext,
     provisionalOrganizationName: string,
   ): Promise<ActivationJourneyState> {
-    for (const geography of this.dependencies.releasedGeographies) {
-      const existing = await this.dependencies.definitions.getById(geography.id);
-      if (!existing) await this.dependencies.definitions.save(geography);
-    }
-
     let activation = await this.dependencies.contexts.getByUserId(context.user.id);
     if (!activation) {
+      // Released-geography initialization is creation work, not returning-user authentication work.
+      // First-time setup may ensure the released definitions exist, in parallel; resume/login skips it.
+      await Promise.all(
+        this.dependencies.releasedGeographies.map(async (geography) => {
+          const existing = await this.dependencies.definitions.getById(geography.id);
+          if (!existing) await this.dependencies.definitions.save(geography);
+        }),
+      );
+
       activation = createActivationJourneyContext({
         userId: context.user.id,
         provisionalOrganizationName,
@@ -269,7 +273,7 @@ export class ActivationJourneyService {
       });
       await this.dependencies.contexts.save(activation);
     }
-    return this.state(context);
+    return this.stateFor(context, activation);
   }
 
   async acceptLegal(context: AuthenticatedServerContext): Promise<ActivationJourneyState> {
@@ -279,7 +283,7 @@ export class ActivationJourneyService {
       now: this.dependencies.now(),
     });
     await this.dependencies.contexts.save(updated);
-    return this.state(context);
+    return this.stateFor(context, updated);
   }
 
   async selectGeography(
@@ -298,7 +302,7 @@ export class ActivationJourneyService {
       accessJourneyId: activation.accessJourneyId,
       geographyId,
     });
-    return this.state(context);
+    return this.stateFor(context, activation);
   }
 
   async acknowledgeOrientationPosition(
@@ -315,7 +319,7 @@ export class ActivationJourneyService {
       now,
     });
     await this.dependencies.contexts.save(updated);
-    return this.state(context);
+    return this.stateFor(context, updated);
   }
 
   private async persistIdentitySeed(
@@ -442,7 +446,7 @@ export class ActivationJourneyService {
       now: this.dependencies.now(),
     });
     await this.dependencies.contexts.save(updated);
-    return this.state(context);
+    return this.stateFor(context, updated);
   }
 
   async selectExistingOrganization(
@@ -502,7 +506,7 @@ export class ActivationJourneyService {
       now,
     });
     await this.dependencies.contexts.save(updated);
-    return this.state(context);
+    return this.stateFor(context, updated);
   }
 
   async beginLocation(
@@ -548,7 +552,7 @@ export class ActivationJourneyService {
       now: this.dependencies.now(),
     });
     await this.dependencies.contexts.save(updated);
-    return Object.freeze({ state: await this.state(context), draft });
+    return Object.freeze({ state: await this.stateFor(context, updated), draft });
   }
 
   async confirmLocation(
@@ -582,7 +586,7 @@ export class ActivationJourneyService {
       now: this.dependencies.now(),
     });
     await this.dependencies.contexts.save(updated);
-    return this.state(context);
+    return this.stateFor(context, updated);
   }
 
   async saveProfile(
@@ -678,7 +682,7 @@ export class ActivationJourneyService {
       },
       reason: "Participant completed the essential organization profile during activation.",
     });
-    if (saved.completion.status !== "active") return this.state(context);
+    if (saved.completion.status !== "active") return this.stateFor(context, activation);
 
     const marker = await this.dependencies.marker.recalculate({
       context,
@@ -692,7 +696,7 @@ export class ActivationJourneyService {
     if (marker.status === "active") {
       await this.advanceToControlledPlatform(activation);
     }
-    return this.state(context);
+    return this.stateFor(context, activation);
   }
 
   private async advanceToControlledPlatform(activation: ActivationJourneyContext): Promise<void> {
@@ -715,37 +719,51 @@ export class ActivationJourneyService {
     }
   }
 
-  async state(context: AuthenticatedServerContext): Promise<ActivationJourneyState> {
-    const activation = await this.contextFor(context);
-    const lifecycle = await this.journeyFor(activation);
-    const [selection, account] = await Promise.all([
+  private async stateFor(
+    context: AuthenticatedServerContext,
+    activation: ActivationJourneyContext,
+  ): Promise<ActivationJourneyState> {
+    const journeyId = accessJourneyId(activation.accessJourneyId);
+    const [lifecycle, selection, account, resolution, memberships] = await Promise.all([
+      this.dependencies.lifecycle.getById(journeyId),
       this.dependencies.selections.getByUserId(context.user.id),
       this.dependencies.accountSecurity.inspect(context.authentication.subject),
+      this.dependencies.resolutions.getByAccessJourneyId(journeyId),
+      this.dependencies.memberships.listActiveByUserId(context.user.id),
     ]);
-    const selectedDefinition = selection
-      ? await this.dependencies.definitions.getById(selection.geographyId)
-      : null;
-    const resolution = await this.dependencies.resolutions.getByAccessJourneyId(lifecycle.id);
+    if (!lifecycle || lifecycle.userId !== activation.userId) {
+      throw new ActivationJourneyError(
+        "activation-context-required",
+        "The activation lifecycle record is unavailable or belongs to another user.",
+      );
+    }
+
     const resolvedOrganizationId = activation.organizationId ?? resolution?.organizationId ?? null;
-    const organization = resolvedOrganizationId
-      ? await this.dependencies.accounts.getById(resolvedOrganizationId)
-      : null;
-    const profile = resolvedOrganizationId
-      ? await this.dependencies.profiles.getByOrganizationId(resolvedOrganizationId)
-      : null;
-    const memberships = await this.dependencies.memberships.listActiveByUserId(context.user.id);
+    const [selectedDefinition, organization, profile, location, completion, marker] = await Promise.all([
+      selection
+        ? this.dependencies.definitions.getById(selection.geographyId)
+        : Promise.resolve(null),
+      resolvedOrganizationId
+        ? this.dependencies.accounts.getById(resolvedOrganizationId)
+        : Promise.resolve(null),
+      resolvedOrganizationId
+        ? this.dependencies.profiles.getByOrganizationId(resolvedOrganizationId)
+        : Promise.resolve(null),
+      resolvedOrganizationId
+        ? this.dependencies.locations.getByOrganizationId(resolvedOrganizationId)
+        : Promise.resolve(null),
+      resolvedOrganizationId
+        ? this.dependencies.completions.getByOrganizationId(resolvedOrganizationId)
+        : Promise.resolve(null),
+      resolvedOrganizationId
+        ? this.dependencies.markerActivations.getByOrganizationId(resolvedOrganizationId)
+        : Promise.resolve(null),
+    ]);
     const membership = activation.membershipId
       ? memberships.find((candidate) => candidate.id === activation.membershipId) ?? null
       : resolvedOrganizationId
         ? memberships.find((candidate) => candidate.organizationId === resolvedOrganizationId) ?? null
         : null;
-    const [location, completion, marker] = resolvedOrganizationId
-      ? await Promise.all([
-          this.dependencies.locations.getByOrganizationId(resolvedOrganizationId),
-          this.dependencies.completions.getByOrganizationId(resolvedOrganizationId),
-          this.dependencies.markerActivations.getByOrganizationId(resolvedOrganizationId),
-        ])
-      : [null, null, null];
 
     const nextStep = this.nextStep({
       activation,
@@ -813,6 +831,11 @@ export class ActivationJourneyService {
           })
         : null,
     });
+  }
+
+  async state(context: AuthenticatedServerContext): Promise<ActivationJourneyState> {
+    const activation = await this.contextFor(context);
+    return this.stateFor(context, activation);
   }
 
   private nextStep(input: Readonly<{

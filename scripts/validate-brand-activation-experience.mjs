@@ -49,11 +49,13 @@ assert.ok(
 
 assert.ok(
   spatial.includes('window.matchMedia("(prefers-reduced-motion: reduce)")') &&
-    spatial.includes("reducedMotion ? 200 : 3_400") &&
+    spatial.includes("reducedMotion ? 50 : 900") &&
+    spatial.includes(">Enter now</") &&
+    !spatial.includes("3_400") &&
     spatial.includes("Activation progress is preserved") &&
     spatial.includes("Your organization is now visible. Entering The RFxchange.") &&
     spatial.includes("StatusPill"),
-  "Brand B5 must provide state-preserving activation continuity and a reduced-motion handoff.",
+  "Brand B5 must provide state-preserving activation continuity and a non-blocking reduced-motion handoff.",
 );
 assert.ok(
   spatial.includes("ExchangeSpatialScene") &&
@@ -88,5 +90,5 @@ assert.ok(
 );
 
 console.log(
-  "Brand Gate B5 activation validated: semantic calm UI, preserved account/locality/organization/location/profile/marker/OPEN authority, state continuity, reduced-motion handoff, website paths and no provider/role/objective/sound regression.",
+  "Brand Gate B5 activation validated: semantic calm UI, preserved account/locality/organization/location/profile/marker/OPEN authority, state continuity, non-blocking reduced-motion handoff, website paths and no provider/role/objective/sound regression.",
 );

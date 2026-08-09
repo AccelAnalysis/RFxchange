@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { ServerSessionError } from "@/src/application/auth/server-session";
+import type { ActivationJourneyState } from "@/src/application/onboarding/activation-journey";
 import {
   parseAcquisitionContextToken,
 } from "@/src/application/acquisition/acquisition-context";
@@ -21,6 +22,7 @@ import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/fi
 import { FirestoreActivationJourneyContextRepository } from "@/src/infrastructure/firestore/activation-journey";
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 import { createServerActivationJourneyService } from "@/src/infrastructure/onboarding/runtime";
+import { ServerTimingCollector } from "@/src/infrastructure/observability/server-timing";
 
 const ACTIVATION_CSRF_COOKIE = "rfx_activation_csrf";
 
@@ -42,6 +44,32 @@ function sessionErrorStatus(error: unknown): number {
   return 401;
 }
 
+function acquisitionState(context: BoundAcquisitionContext): NonNullable<ActivationJourneyState["acquisitionContext"]> {
+  return Object.freeze({
+    id: context.id,
+    kind: context.intent.kind,
+    subjectReference: context.intent.subjectReference,
+    sourceChannel: context.source.channel,
+    status: "preserved" as const,
+  });
+}
+
+function withBoundAcquisition(
+  state: ActivationJourneyState,
+  context: BoundAcquisitionContext,
+): ActivationJourneyState {
+  return Object.freeze({
+    ...state,
+    acquisitionContext: acquisitionState(context),
+    controlledPlatformUrl:
+      state.lifecycleState === "controlled-platform" &&
+      state.organization &&
+      context.intent.kind !== "direct"
+        ? "/acquisition/continue"
+        : state.controlledPlatformUrl,
+  });
+}
+
 export async function GET() {
   const csrfToken = randomUUID();
   const response = NextResponse.json({ csrfToken });
@@ -50,36 +78,48 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const timing = new ServerTimingCollector();
   try {
-    const body = (await request.json()) as Readonly<{
-      idToken?: string;
-      csrfToken?: string;
-      requestedName?: string;
-      provisionalOrganizationName?: string;
-      organizationRelationship?: string;
-    }>;
+    const body = await timing.measure(
+      "request-json",
+      () => request.json() as Promise<Readonly<{
+        idToken?: string;
+        csrfToken?: string;
+        requestedName?: string;
+        provisionalOrganizationName?: string;
+        organizationRelationship?: string;
+      }>>,
+    );
     const expectedCsrf = request.cookies.get(ACTIVATION_CSRF_COOKIE)?.value ?? "";
     if (!body.csrfToken || !expectedCsrf || body.csrfToken !== expectedCsrf) {
-      return NextResponse.json({ error: "CSRF verification failed." }, { status: 403 });
+      return timing.apply(NextResponse.json({ error: "CSRF verification failed." }, { status: 403 }));
     }
     const idToken = body.idToken?.trim() ?? "";
     if (!idToken) {
-      return NextResponse.json({ error: "Firebase ID token is required." }, { status: 400 });
+      return timing.apply(NextResponse.json({ error: "Firebase ID token is required." }, { status: 400 }));
     }
 
-    const issued = await createServerAuthenticationBoundary().issueSessionCookie({
-      idToken,
-      csrfVerified: true,
-      requestedName: body.requestedName?.trim() || undefined,
-      now: new Date().toISOString(),
-    });
+    const issued = await timing.measure(
+      "session-cookie",
+      () => createServerAuthenticationBoundary().issueSessionCookie({
+        idToken,
+        csrfVerified: true,
+        requestedName: body.requestedName?.trim() || undefined,
+        now: new Date().toISOString(),
+      }),
+      "verify Firebase token + issue RFxchange session",
+    );
 
     // Authentication/session establishment is independent from participant activation. Returning
     // users sign in with email and password only. An authenticated account without an activation
     // context receives state=null and begins organization setup on /join.
     const db = getServerFirestore();
     const contexts = new FirestoreActivationJourneyContextRepository(db);
-    const existingContext = await contexts.getByUserId(issued.context.user.id);
+    const existingContext = await timing.measure(
+      "firestore-context",
+      () => contexts.getByUserId(issued.context.user.id),
+      "activation context lookup",
+    );
     const provisionalOrganizationName = body.provisionalOrganizationName?.trim() || "";
     let state = null;
     let acquisitionStatus: "none" | "bound" | "rejected" = "none";
@@ -92,11 +132,14 @@ export async function POST(request: NextRequest) {
         acquisitionStatus = "rejected";
       } else {
         try {
-          boundAcquisition = await createServerAcquisitionContextService().bind({
-            token,
-            userId: issued.context.user.id,
-            accessJourneyId: accessJourneyId(activationJourneyIdForUser(issued.context.user.id)),
-          });
+          boundAcquisition = await timing.measure(
+            "acquisition-bind",
+            () => createServerAcquisitionContextService().bind({
+              token,
+              userId: issued.context.user.id,
+              accessJourneyId: accessJourneyId(activationJourneyIdForUser(issued.context.user.id)),
+            }),
+          );
           acquisitionStatus = "bound";
         } catch {
           // Acquisition context is navigation metadata, never a reason to deny legitimate sign-in.
@@ -107,7 +150,13 @@ export async function POST(request: NextRequest) {
 
     if (existingContext || provisionalOrganizationName) {
       const activation = createServerActivationJourneyService();
-      await activation.bootstrap(issued.context, provisionalOrganizationName);
+      // bootstrap() already returns the canonical activation state. Reuse it instead of hydrating
+      // the same graph a second time during the same sign-in request.
+      state = await timing.measure(
+        "activation-state",
+        () => activation.bootstrap(issued.context, provisionalOrganizationName),
+        "bootstrap/resume activation once",
+      );
 
       if (body.organizationRelationship?.trim()) {
         const current = await contexts.getByUserId(issued.context.user.id);
@@ -126,9 +175,9 @@ export async function POST(request: NextRequest) {
             now: new Date().toISOString(),
           }));
           acquisitionAttached = true;
+          state = withBoundAcquisition(state, boundAcquisition);
         }
       }
-      state = await activation.state(issued.context);
     }
 
     const response = NextResponse.json({ state, acquisitionStatus });
@@ -149,10 +198,10 @@ export async function POST(request: NextRequest) {
         maxAge: 0,
       });
     }
-    return response;
+    return timing.apply(response);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Session exchange failed.";
-    return NextResponse.json({ error: message }, { status: sessionErrorStatus(error) });
+    return timing.apply(NextResponse.json({ error: message }, { status: sessionErrorStatus(error) }));
   }
 }
 

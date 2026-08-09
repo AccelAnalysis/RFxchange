@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { createClientAuthenticationProvider } from "../../infrastructure/auth/firebase-client";
 
 export function SignOutButton({ className }: Readonly<{ className?: string }>) {
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
 
   return (
@@ -19,7 +21,7 @@ export function SignOutButton({ className }: Readonly<{ className?: string }>) {
             await createClientAuthenticationProvider().signOut().catch(() => undefined);
             await fetch("/api/auth/session", { method: "DELETE" });
           } finally {
-            window.location.assign("/");
+            router.replace("/");
           }
         })();
       }}
