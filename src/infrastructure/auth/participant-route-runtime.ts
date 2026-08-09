@@ -22,14 +22,20 @@ export type {
 
 function createParticipantRouteRuntimeDependencies(): ParticipantRouteRuntimeDependencies {
   return Object.freeze({
-    authenticateSessionCookie: (input) =>
+    authenticateSessionCookie: (
+      input: Parameters<ParticipantRouteRuntimeDependencies["authenticateSessionCookie"]>[0],
+    ) =>
       measureServerOperation(
         "participant-route.auth",
         () => createServerAuthenticationBoundary().authenticateSessionCookie(input),
         "verify RFxchange session cookie",
       ),
-    loadWorkspaceProjection: (context) => loadParticipantWorkspaceProjection(context),
-    async loadRestrictions(membership) {
+    loadWorkspaceProjection: (
+      context: Parameters<ParticipantRouteRuntimeDependencies["loadWorkspaceProjection"]>[0],
+    ) => loadParticipantWorkspaceProjection(context),
+    async loadRestrictions(
+      membership: Parameters<ParticipantRouteRuntimeDependencies["loadRestrictions"]>[0],
+    ) {
       const foundation = createServerFirestoreFoundationRepositories(getServerFirestore());
       const [organizationRestriction, membershipRestriction] = await measureServerOperation(
         "participant-route.firestore-restrictions",
