@@ -40,6 +40,6 @@ Brand Gate work through B6a and the later no-Feature-ID AMACS reconciliation cha
 
 B2, B3, and B6a satisfied the non-Feature prerequisites for Wave 3 Slice 3.2. B4 and B5 are also complete under the adopted numerical execution sequence. Slice 3.2 is complete via PR #120, the no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, and the no-Feature-ID AI/AMACS Interpretation Foundation is complete via PR #124.
 
-**Accepted product slice awaiting merge and post-merge CI:** Slice 3.3 — Market Profile Enrichment (`ORG-013`, `ORG-014`, `ORG-016`, `ORG-017`).
+**Current product boundary:** Slice 3.3 — Market Profile Enrichment (`ORG-013`, `ORG-014`, `ORG-016`, `ORG-017`) is complete via PR #126. Exact-head and post-merge production CI passed.
 
-Slice 3.4 and every later slice remain unstarted until Slice 3.3 merges, post-merge CI passes, and dependency authority is recalculated. B6b remains later in the Wave 3 sequence, after its live referral and provider domains exist.
+Slice 3.4 is the single active authorized product slice. Slice 3.5 and every later slice remain unstarted. B6b remains later in the Wave 3 sequence, after its live referral and provider domains exist.

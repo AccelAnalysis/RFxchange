@@ -1,6 +1,6 @@
 # Slice 3.3 — Market Profile Enrichment
 
-**Status: IMPLEMENTED AND ACCEPTED — MERGE AND POST-MERGE PRODUCTION CI PENDING.**
+**Status: COMPLETE VIA PR #126.**
 
 ## Feature IDs
 
@@ -201,4 +201,4 @@ Mark only `ORG-013`, `ORG-014`, `ORG-016` and `ORG-017` when each acceptance con
 
 The implementation and acceptance evidence are recorded in `docs/architecture/WAVE_3_SLICE_3_3.md`. Focused domain/application tests, Firestore emulator security/persistence acceptance, the full local repository gate, five-locale validation, and configured-browser acceptance passed. The configured disposable organization and Auth identity were removed and the residual inspection returned zero.
 
-Only `ORG-013`, `ORG-014`, `ORG-016`, and `ORG-017` are completed. Slice 3.4 and every later slice remain unstarted pending this slice's merge, post-merge production CI, and a separate authority recalculation from merged `main`.
+Only `ORG-013`, `ORG-014`, `ORG-016`, and `ORG-017` were completed. PR #126 passed exact-head production CI run `31289352499`, merged at `0f5e8d56af8484bbd6e72716d4149a21e92db029`, and post-merge `main` CI run `31289477113` passed. Slice 3.4 was separately recalculated and authorized; this slice granted no later authority.

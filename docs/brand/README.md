@@ -1,6 +1,6 @@
 # The RFxchange Brand Experience System
 
-**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a COMPLETE; SLICE 3.3 IMPLEMENTED AND ACCEPTED; MERGE AND POST-MERGE CI PENDING**
+**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a AND SLICE 3.3 COMPLETE; SLICE 3.4 AUTHORIZED**
 
 This directory defines the approved target brand experience for **The RFxchange** and the sequential convergence gates that apply it without weakening product, security, privacy, geography, lifecycle, or evidence authority.
 
@@ -124,7 +124,7 @@ The non-Feature prerequisites identified before Wave 3 Slice 3.2 were satisfied:
 
 B4 and B5 are also complete under the adopted numerical execution sequence.
 
-**Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, and the AI/AMACS Interpretation Foundation is complete via PR #124. Slice 3.3 is implemented and accepted with merge and post-merge CI pending.**
+**Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, the AI/AMACS Interpretation Foundation is complete via PR #124, and Slice 3.3 is complete via PR #126. Slice 3.4 is the single active authorized slice.**
 
 Slice 3.2 completed:
 
