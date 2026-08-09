@@ -12,11 +12,11 @@
 
 ## Progress
 
-**438 total · 132 Done · 306 Not Started**
+**438 total · 139 Done · 299 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
-- 3 - Network: **18/38**
+- 3 - Network: **25/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
@@ -46,7 +46,7 @@ Wave 2 remains complete at **43/43 Activation**. The Runtime Convergence Gate, R
 - **AMACS 0.5.0 reconciliation — COMPLETE VIA PR #123; no Feature IDs**: deterministically reconstructed and verified the immutable 0.5.0 release at `da7879f2609271b067ae6d02875e9388a02c4fe5`, preserved the historical 0.1.0 release, generated release-aware catalog/search/registry/runtime projections, proved the 500 historical capabilities remained with 115 additive capabilities and no inferred historical mutation, and isolated all artifacts and infrastructure from participant surfaces. Local `npm run check`, the official upstream validator and 44 upstream tests, seven focused RFxchange tests and production CI run `31284501027` passed on substantive head `c2d6695cdea2f3d3386dab354e37e1bba9440e87`.
 - **AI/AMACS Interpretation Foundation — COMPLETE VIA PR #124; no Feature IDs**: established the authenticated provider-neutral gateway, concrete OpenAI adapter with truthful disabled state, bounded AMACS 0.5.0 retrieval, strict schema/catalog validation, non-authoritative record/candidate and disposition contracts, minimized provenance, metering, transactional quotas, independent manual catalog path and deterministic regression evaluation. Local `npm run check` passed with 400 architecture tests and 19 Functions tests; focused Firestore emulator acceptance proved direct-client denial, atomic persistence, disposition and quota behavior. No live provider smoke was claimed without configured credentials.
 
-Network completion is **18/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, and three Slice 3.4 organization-enrichment features. Slice 3.4 adds provenance-preserving organization-reported credentials, private-by-default media/documents with explicit minimized publication, and confirmed privacy-safe subordinate locations inside the currently authorized primary locality. Focused tests, Firestore emulator acceptance, all five locales, responsive/keyboard/axe acceptance, real Census/Mapbox/Firebase browser acceptance, permission revocation after load, controlled delivery/unpublication, the full local repository gate, and zero-residual disposable Auth/Firestore/Storage cleanup passed. PR #128 passed exact-head production CI run `31291992746`, merged at `7f57cabf029edb0a0045b53d9f3339f170dc530c`, and post-merge `main` CI run `31292086252` passed. Dependency authority was recalculated from that merged tree; Slice 3.5 is authorized without changing Feature-ID status or totals.
+Network completion is **25/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, and seven accepted Slice 3.5 referral/acquisition features. Slice 3.5 adds an organization-owned referral aggregate, explicit consent and exact-data education, sender/recipient projections, versioned communications, legitimate external acquisition/attachment, and real privacy-safe map paths without implying endorsement, sale, credibility, or verified outcome. Focused tests, Firestore emulator acceptance, all five locales, desktop/intermediate/mobile configured-browser acceptance, existing/external recipient journeys, exact cleanup of 64 Firestore records and two Auth identities, and the canonical repository gate passed. Production PR and merged-main CI evidence remain required before Slice 3.6 can be authorized.
 
 ## Feature-ID checklist
 
@@ -182,10 +182,10 @@ Network completion is **18/38**: four inherited Wave 1 foundations, three Slice 
 
 ### 3 - Network
 
-- [ ] `ACQ-006`
+- [x] `ACQ-006` — Slice 3.5; real external referral, signed acquisition continuity, legitimate OPEN recipient binding, explicit exact-referral attachment, mismatch/replay/expiry gates, configured-browser acceptance, and zero-residual cleanup
 - [ ] `ACQ-008`
 - [x] `GEO-012` — PR #120; current OPEN/geography/marker authority, after-load restriction/lifecycle denial, configured-browser responsive acceptance, cleanup, and `npm run check`
-- [ ] `EDU-014`
+- [x] `EDU-014` — Slice 3.5; append-only first-use education acknowledgement for the named recipient and exact shared fields before send, continued availability, all five locales, and browser acceptance
 - [ ] `EDU-016`
 - [ ] `EDU-017`
 - [x] `ORG-013` — Slice 3.3; AMACS 0.5.0 manual/assisted entry, non-authoritative candidate disposition, separate confirmed claim command, structured discovery migration, emulator/browser acceptance, cleanup, and `npm run check`
@@ -201,11 +201,11 @@ Network completion is **18/38**: four inherited Wave 1 foundations, three Slice 
 - [x] `DSC-002` — PR #120; canonical base/service geography filtering with base-versus-service separation, configured-browser acceptance, emulator acceptance, and `npm run check`
 - [x] `DSC-003` — PR #120; privacy-safe exact/approximate/locality-only map/list/detail synchronization, stale selection recovery, accessibility/responsive acceptance, cleanup, and `npm run check`
 - [ ] `DSC-011`
-- [ ] `REF-001`
-- [ ] `REF-002`
-- [ ] `REF-003`
-- [ ] `REF-004`
-- [ ] `REF-005`
+- [x] `REF-001` — Slice 3.5; current-authority organization sender, idempotent draft/send, versioned communication correlation, focused/emulator/configured-browser acceptance, and cleanup
+- [x] `REF-002` — Slice 3.5; exact attached recipient authority, explicit accept/decline, sender/recipient isolation, external-recipient browser acceptance, and focused/emulator denial coverage
+- [x] `REF-003` — Slice 3.5; typed draft/sent/accepted/declined/contacted/closed/expired lifecycle, expected-version conflicts, append-only events/audits, retry recovery, and real browser progression through close
+- [x] `REF-004` — Slice 3.5; structured need, summary, urgency, contact method, purpose and optional opportunity context with minimized role-specific projections
+- [x] `REF-005` — Slice 3.5; explicit named-recipient consent, approved minimum sharing, private-field suppression, no public leakage, real-path privacy, and direct-client denial
 - [ ] `REF-006`
 - [ ] `RES-001`
 - [ ] `RES-002`

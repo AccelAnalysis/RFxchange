@@ -314,6 +314,31 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // REF-001-005 / EDU-014 / ACQ-006 referral state, exact-sharing evidence, command
+    // receipts, acquisition correlation, and communications routing remain server-managed.
+    match /businessReferrals/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /businessReferralEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /businessReferralCommands/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /referralEducationAcknowledgements/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /referralCommunicationIntents/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
     // EDU-001-004 orientation progress is a participant-bound server aggregate. Tutorial events
     // are immutable evidence, and neither collection is directly available to browser clients.
     match /orientationJourneys/{documentId} {

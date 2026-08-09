@@ -47,7 +47,7 @@ interface ResponsiveEdgeSheetProps {
 
 const primaryNavigation = [
   { label: "Intelligence", href: "/geography/canvas", available: true },
-  { label: "Referrals", available: false },
+  { label: "Referrals", href: "/referrals", available: true },
   { label: "Opportunities", available: false },
   { label: "Resources", available: false },
 ] as const;

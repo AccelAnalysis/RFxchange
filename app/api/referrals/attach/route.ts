@@ -1,0 +1,37 @@
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+
+import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
+import { FirestoreReferralRepository } from "@/src/infrastructure/firestore/referrals";
+import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
+import { createServerReferralNetworkService } from "@/src/infrastructure/referrals/runtime";
+
+export async function POST(request: NextRequest) {
+  const cookieStore = await cookies();
+  const access = await resolveParticipantRoute({ sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value });
+  if (access.kind !== "authorized" || access.state.lifecycleState !== "open-platform") {
+    return NextResponse.redirect(new URL("/join?entry=referral&status=activation-required", request.url), 303);
+  }
+  const acquisition = access.state.acquisitionContext;
+  if (!acquisition || acquisition.kind !== "referral" || !acquisition.subjectReference) {
+    return NextResponse.redirect(new URL("/referrals?status=invitation-unavailable", request.url), 303);
+  }
+  try {
+    const repository = new FirestoreReferralRepository(getServerFirestore());
+    const referral = await repository.getById(acquisition.subjectReference);
+    if (!referral) throw new Error("Referral is unavailable.");
+    await createServerReferralNetworkService().attachExternalRecipient({
+      context: access.context,
+      organizationId: String(access.membership.organizationId),
+      membershipId: String(access.membership.id),
+      commandId: `attach-${acquisition.id}-${access.membership.organizationId}`,
+    }, {
+      referralId: referral.id,
+      acquisitionContextId: acquisition.id,
+      expectedVersion: referral.version,
+    });
+    return NextResponse.redirect(new URL(`/referrals?referral=${encodeURIComponent(referral.id)}&status=attached`, request.url), 303);
+  } catch {
+    return NextResponse.redirect(new URL("/acquisition/continue?status=attachment-failed", request.url), 303);
+  }
+}

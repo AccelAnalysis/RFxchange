@@ -87,6 +87,9 @@ export const FIRESTORE_QUERY_CONTRACTS: readonly FirestoreQueryContract[] = Obje
   contract("retention-assignments-by-record", "retentionAssignments", ["record.recordId"], "many"),
   contract("admin-grants-by-administrator", "adminPermissionGrants", ["administratorId"], "many"),
   contract("background-job-events-by-job", "backgroundJobEvents", ["jobId"], "many"),
+  contract("referrals-by-sending-organization", "businessReferrals", ["senderOrganizationId"], "many"),
+  contract("referrals-by-recipient-organization", "businessReferrals", ["attachedRecipientOrganizationId"], "many"),
+  contract("referral-education-by-organization-actor", "referralEducationAcknowledgements", ["organizationId", "actorUserId"], "many"),
 ]);
 
 export const FIRESTORE_AUTOMATIC_INDEX_CONTRACTS = Object.freeze(

@@ -55,6 +55,11 @@ The current foundation maps to these collections:
 | `orientationJourneyEvents` | orientation event `id` | organization | append-only |
 | `firstValueSelections` | access-journey-derived selection `id` | organization | mutable before OPEN |
 | `activationReleaseEvents` | activation release event `id` | organization | append-only |
+| `businessReferrals` | referral `id` | sending and attached recipient organizations | mutable aggregate |
+| `businessReferralEvents` | referral event `id` | involved organizations | append-only |
+| `businessReferralCommands` | idempotency command `id` | acting organization | append-only |
+| `referralEducationAcknowledgements` | acknowledgement `id` | organization | append-only versioned acknowledgement |
+| `referralCommunicationIntents` | transactional message `id` | private involved workflow | mutable delivery state |
 
 Future feature domains may add collections, but they must follow the same stable-ID, tenant-attribution, timestamp, schema-version, and migration conventions before an adapter is merged.
 
@@ -109,7 +114,9 @@ Append-only includes current organization resolution decisions and entity-key
 reservations, legal acknowledgement evidence, organization audit events,
 organization authority representations, platform change directives, retention
 policies/assignments, admin permission grants, orientation journey events, and
-activation release events.
+activation release events. Referral lifecycle events and command receipts are also append-only;
+the current referral aggregate and its minimized communication status remain mutable only through
+the trusted referral application boundary.
 
 Corrections or later state changes must be modeled as additional records/events where the owning domain requires that behavior. A Firestore adapter must not quietly introduce `update` or `delete` behavior for an append-only repository port.
 

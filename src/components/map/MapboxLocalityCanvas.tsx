@@ -17,12 +17,21 @@ export interface ControlledLocalityPointOverlay {
   readonly activated?: boolean;
 }
 
+export interface ControlledLocalityRelationshipPath {
+  readonly id: string;
+  readonly from: readonly [longitude: number, latitude: number];
+  readonly to: readonly [longitude: number, latitude: number];
+  readonly label: string;
+  readonly status: "sent" | "accepted" | "contacted" | "closed";
+}
+
 export interface MapboxLocalityCanvasProps {
   readonly model: ControlledLocalityMapModel;
   readonly initialZoom?: ControlledLocalityZoomLevel;
   readonly mobileControlPosition?: "top" | "bottom";
   readonly overlaySide?: "left" | "right" | "split";
   readonly pointOverlays?: readonly ControlledLocalityPointOverlay[];
+  readonly relationshipPaths?: readonly ControlledLocalityRelationshipPath[];
 }
 
 type LocalityGeometry =
@@ -58,10 +67,13 @@ const HOME_OUTLINE_ACCENT_LAYER_ID = "rfx-home-locality-outline-accent";
 const SEARCH_AREA_SOURCE_ID = "rfx-search-result-area";
 const SEARCH_AREA_FILL_LAYER_ID = "rfx-search-result-area-fill";
 const SEARCH_AREA_LINE_LAYER_ID = "rfx-search-result-area-line";
+const RELATIONSHIP_PATH_SOURCE_ID = "rfx-relationship-paths";
+const RELATIONSHIP_PATH_LAYER_ID = "rfx-relationship-paths-line";
 const VIEWPORT_STORAGE_PREFIX = "rfxchange:map-camera:";
 const MAPBOX_MAX_ZOOM = 24;
 const WEB_MERCATOR_MAX_LATITUDE = 85.05112878;
 const EMPTY_POINT_OVERLAYS: readonly ControlledLocalityPointOverlay[] = Object.freeze([]);
+const EMPTY_RELATIONSHIP_PATHS: readonly ControlledLocalityRelationshipPath[] = Object.freeze([]);
 const EMPTY_FEATURE_COLLECTION = Object.freeze({
   type: "FeatureCollection" as const,
   features: [] as never[],
@@ -362,6 +374,7 @@ export function MapboxLocalityCanvas({
   mobileControlPosition = "top",
   overlaySide = "split",
   pointOverlays = EMPTY_POINT_OVERLAYS,
+  relationshipPaths = EMPTY_RELATIONSHIP_PATHS,
 }: MapboxLocalityCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -403,6 +416,15 @@ export function MapboxLocalityCanvas({
       : EMPTY_FEATURE_COLLECTION,
     [homeFeature],
   );
+
+  const relationshipPathGeoJson = useMemo(() => ({
+    type: "FeatureCollection" as const,
+    features: relationshipPaths.map((path) => ({
+      type: "Feature" as const,
+      properties: { id: path.id, label: path.label, status: path.status },
+      geometry: { type: "LineString" as const, coordinates: [[path.from[0], path.from[1]], [path.to[0], path.to[1]]] },
+    })),
+  }), [relationshipPaths]);
 
   const selectedStyles = useMemo(() => {
     const fill = model.layers.find((layer) => layer.id === "selected-fill")?.style;
@@ -633,6 +655,22 @@ export function MapboxLocalityCanvas({
         },
       });
 
+      map.addSource(RELATIONSHIP_PATH_SOURCE_ID, {
+        type: "geojson",
+        data: relationshipPathGeoJson,
+      });
+      map.addLayer({
+        id: RELATIONSHIP_PATH_LAYER_ID,
+        type: "line",
+        source: RELATIONSHIP_PATH_SOURCE_ID,
+        paint: {
+          "line-color": "#b98727",
+          "line-opacity": 0.9,
+          "line-width": 3,
+          "line-dasharray": [2, 1.4],
+        },
+      });
+
       for (const overlay of pointOverlays) {
         const element = document.createElement("button");
         element.type = "button";
@@ -736,6 +774,8 @@ export function MapboxLocalityCanvas({
     mobileControlPosition,
     model,
     pointOverlays,
+    relationshipPathGeoJson,
+    relationshipPaths,
     selectedStyles,
     storageKey,
     token,

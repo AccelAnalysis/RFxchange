@@ -23,7 +23,7 @@ export interface FirstValueDestinationContract {
   readonly summary: string;
   readonly workspace: "opportunities" | "network" | "referrals" | "resources" | "intelligence";
   readonly availability: "available" | "upcoming";
-  readonly route: "/geography/canvas" | null;
+  readonly route: "/geography/canvas" | "/referrals" | null;
   readonly availabilityMessage: string;
 }
 
@@ -50,8 +50,8 @@ export const FIRST_VALUE_DESTINATIONS: Readonly<Record<FirstValueIntent, FirstVa
   }),
   "send-receive-referral": Object.freeze({
     intent: "send-receive-referral", label: "Send or receive a referral", summary: "Connect a trusted business need to an appropriate organization.",
-    workspace: "referrals", availability: "upcoming", route: null,
-    availabilityMessage: "Your intent is saved. Live referral workflows follow in their approved Network slice.",
+    workspace: "referrals", availability: "available", route: "/referrals",
+    availabilityMessage: "Open the referral workspace to send or respond to an organization-owned referral.",
   }),
   "find-resources-support": Object.freeze({
     intent: "find-resources-support", label: "Find resources or support", summary: "Locate relevant programs and approved support providers.",

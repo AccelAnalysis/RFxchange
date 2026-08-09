@@ -38,12 +38,11 @@ export default async function AcquisitionContinuationPage() {
   if (access.kind === "activation-required") redirect("/join");
   if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
-  if (access.state.lifecycleState === "open-platform") redirect("/exchange");
-
   const acquisition = access.state.acquisitionContext;
   if (!acquisition || acquisition.kind === "direct") {
     redirect(access.state.controlledPlatformUrl ?? "/geography/canvas");
   }
+  if (access.state.lifecycleState === "open-platform" && acquisition.kind !== "referral") redirect("/exchange");
   let resumeStatus: "resumed" | "pending" = "pending";
   try {
     const resumed = await createServerAcquisitionContextService().resume({
@@ -58,10 +57,10 @@ export default async function AcquisitionContinuationPage() {
   const opportunity = acquisition.kind === "opportunity" && acquisition.subjectReference
     ? await resolvePublicOpportunityProjection(acquisition.subjectReference)
     : null;
-  const mapUrl = "/orientation";
+  const mapUrl = access.state.lifecycleState === "open-platform" ? "/referrals" : "/orientation";
 
   return (
-    <ParticipantShell activeItem={acquisition.kind === "opportunity" ? "Opportunities" : "Intelligence"}>
+    <ParticipantShell activeItem={acquisition.kind === "opportunity" ? "Opportunities" : acquisition.kind === "referral" ? "Referrals" : "Intelligence"}>
       <OperationalWorkspace ariaLabel="Saved acquisition context">
         <section className={styles.wrap}>
           <p className={styles.eyebrow}>Context recovered</p>
@@ -76,8 +75,9 @@ export default async function AcquisitionContinuationPage() {
             <span>{INTENT_LABELS[acquisition.kind]}</span>
             <h2>{opportunity?.title ?? "Your saved next step"}</h2>
             <p>
-              {opportunity?.summary ??
-                "The originating workflow is scheduled for a later approved product slice. Your context is preserved without claiming that the action was completed or accepted."}
+              {opportunity?.summary ?? (acquisition.kind === "referral"
+                ? "Your invitation points to one real business referral. Attaching it makes the minimum referral context available to your organization; it does not accept the referral."
+                : "Your saved context is preserved without claiming that the originating action was completed or accepted.")}
             </p>
             {opportunity ? (
               <dl>
@@ -91,6 +91,11 @@ export default async function AcquisitionContinuationPage() {
           </article>
 
           <div className={styles.actions}>
+            {acquisition.kind === "referral" && access.state.lifecycleState === "open-platform" ? (
+              <form action="/api/referrals/attach" method="post">
+                <button className={styles.primary} type="submit">Attach and review referral</button>
+              </form>
+            ) : null}
             {opportunity ? (
               <Link className={styles.primary} href={`/opportunities/${encodeURIComponent(opportunity.reference)}`}>
                 Review public opportunity

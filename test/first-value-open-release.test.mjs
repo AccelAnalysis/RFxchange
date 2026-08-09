@@ -63,8 +63,10 @@ test("EDU-009 defines every semantic destination without persisting route author
     const destination = FIRST_VALUE_DESTINATIONS[intent];
     assert.equal(destination.intent, intent);
     assert.ok(destination.label && destination.summary && destination.availabilityMessage);
-    assert.ok(destination.route === null || destination.route === "/geography/canvas");
+    assert.ok(destination.route === null || destination.route === "/geography/canvas" || destination.route === "/referrals");
   }
+  assert.equal(FIRST_VALUE_DESTINATIONS["send-receive-referral"].route, "/referrals");
+  assert.equal(FIRST_VALUE_DESTINATIONS["send-receive-referral"].availability, "available");
   const selection = createFirstValueSelection({ ...scope, selectedIntent: "find-teammate", now: NOW });
   assert.deepEqual(selection.presentedIntents, FIRST_VALUE_INTENTS);
   assert.equal(selection.presentationSource, "post-orientation-first-value");
