@@ -1,0 +1,31 @@
+.explainer {
+  margin: 16px 0;
+  border: 1px solid rgba(46, 94, 170, 0.24);
+  border-radius: 14px;
+  background: rgba(46, 94, 170, 0.06);
+}
+
+.explainer summary {
+  display: grid;
+  gap: 3px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.explainer summary::-webkit-details-marker { display: none; }
+.explainer summary span { color: var(--signal-blue); font-size: 0.67rem; font-weight: 820; letter-spacing: 0.1em; text-transform: uppercase; }
+.explainer summary strong { font-size: 0.92rem; }
+.explainer summary:focus-visible,
+.body button:focus-visible { outline: var(--focus-ring); outline-offset: 3px; }
+
+.body { padding: 0 16px 16px; }
+.body dl { display: grid; gap: 12px; margin: 0; }
+.body dl > div { display: grid; gap: 3px; }
+.body dt { font-size: 0.72rem; font-weight: 820; }
+.body dd { margin: 0; color: var(--muted-ink); font-size: 0.84rem; line-height: 1.48; }
+.body button { margin-top: 14px; min-height: 40px; padding: 8px 12px; border: 1px solid rgba(37, 41, 50, 0.18); border-radius: 10px; background: #fffdf8; color: inherit; font-weight: 720; }
+.body p { color: var(--muted-ink); font-size: 0.78rem; }
+
+@media (min-width: 760px) {
+  .body dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

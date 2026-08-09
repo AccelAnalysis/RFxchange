@@ -12,11 +12,11 @@
 
 ## Progress
 
-**438 total · 150 Done · 288 Not Started**
+**438 total · 152 Done · 286 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
-- 3 - Network: **36/38**
+- 3 - Network: **38/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
@@ -35,7 +35,7 @@
 
 Wave 2 remains complete at **43/43 Activation**. The Runtime Convergence Gate, Registration Convergence Correction, and Activation Profile Website Carry-Forward Repair remain no-Feature-ID integration/repair gates. Slice 2.12 configured-browser acceptance used two fresh disposable identities against the selected real Firebase project and actual Census/Mapbox integrations. Direct entry remained neutral; preserved opportunity context visibly recommended but did not authorize or complete a choice. Both journeys completed all eight orientation steps, presented seven truthful intents, made one explicit selection, persisted one auditable OPEN transition, survived reload/re-entry, and honored a later suspension. Cleanup removed all 79 exact Firestore records and both Auth identities; the residual scan returned zero. Full emulator and repository gates passed, including production CI run `30715058244` on PR #104's merge SHA `d599901d7ff35a4ee67eb2363dcf3334a2303dbc`.
 
-## Wave 3 Network and required Brand Gate sequence — current 2026-08-08
+## Wave 3 Network and required Brand Gate sequence — current 2026-08-09
 
 - **Brand Gate B0 — MERGED PR #100; no Feature IDs**: reconciled the target Brand Experience System against completed Wave 2 and established the brand/design precedence and domain-availability rules used by Wave 3.
 - **Slice 3.1 — MERGED VIA PR #107 — `COMMS-003` + `COMMS-004` + `COMMS-005`**: established versioned transactional event/template mapping, minimized delivery audit, append-only evidence, deterministic retry, accepted-delivery replay suppression, interrupted-success healing, direct-client denial and terminal-failure operations visibility. Production CI run `30719532985` passed on head `eba071e54e3a9cc88ec7fd353e943922917d6484`; PR #107 merged at `368fdb5e0179ca7933eb33ffb6cbf12a2afe2bf1`.
@@ -46,7 +46,7 @@ Wave 2 remains complete at **43/43 Activation**. The Runtime Convergence Gate, R
 - **AMACS 0.5.0 reconciliation — COMPLETE VIA PR #123; no Feature IDs**: deterministically reconstructed and verified the immutable 0.5.0 release at `da7879f2609271b067ae6d02875e9388a02c4fe5`, preserved the historical 0.1.0 release, generated release-aware catalog/search/registry/runtime projections, proved the 500 historical capabilities remained with 115 additive capabilities and no inferred historical mutation, and isolated all artifacts and infrastructure from participant surfaces. Local `npm run check`, the official upstream validator and 44 upstream tests, seven focused RFxchange tests and production CI run `31284501027` passed on substantive head `c2d6695cdea2f3d3386dab354e37e1bba9440e87`.
 - **AI/AMACS Interpretation Foundation — COMPLETE VIA PR #124; no Feature IDs**: established the authenticated provider-neutral gateway, concrete OpenAI adapter with truthful disabled state, bounded AMACS 0.5.0 retrieval, strict schema/catalog validation, non-authoritative record/candidate and disposition contracts, minimized provenance, metering, transactional quotas, independent manual catalog path and deterministic regression evaluation. Local `npm run check` passed with 400 architecture tests and 19 Functions tests; focused Firestore emulator acceptance proved direct-client denial, atomic persistence, disposition and quota behavior. No live provider smoke was claimed without configured credentials.
 
-Network completion is **36/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, seven Slice 3.5 referral/acquisition features, four Slice 3.6 provider-foundation features, and seven Slice 3.7 resource-routing features. Slice 3.7 adds explicit provider discovery publication, service-territory and maintained-availability matching, deterministic explainable contextual routing, exact-recipient provider requests and redirect, request-scoped messages, governed resource publication and bounded provider acquisition invitations without implying qualification, service acceptance, verification, credibility, capacity or outcome. Focused tests, Firestore emulator acceptance, all five locales, desktop/intermediate/mobile configured-browser acceptance, exact cleanup of 74 Firestore records and disposable Auth identities, 432 architecture tests, 19 Functions tests and the canonical repository gate passed. PR #137 passed exact-head production CI run `31300282317`, merged at `25baba600d6e1913a8941570f7348454d2e6941d`, and post-merge production CI run `31300395073` passed. The optional B6b checkpoint left that no-Feature-ID gate intentionally pending and separately authorizes Slice 3.8; this authority update changes no checkbox or total. `RES-006`, `ADM-071`, Wave 3 closeout and later work remain unstarted.
+Network completion is **38/38** at the implementation-and-acceptance checkpoint: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, seven Slice 3.5 referral/acquisition features, four Slice 3.6 provider-foundation features, seven Slice 3.7 resource-routing features, and two Slice 3.8 persistent-education features. Slice 3.8 adds a versioned, membership-bound Quick Start with Business, Issuer and Resource Provider paths plus eleven nonmodal four-question explainers over live Wave 3 actions. Focused tests, Firestore emulator acceptance, five-locale and desktop/intermediate/mobile configured-browser acceptance, reduced-motion/keyboard/screen-reader checks, 438 architecture tests, 19 Functions tests, the canonical repository gate and zero-residual configured cleanup passed. Exact-head production CI, merge and post-merge CI remain required before the separate Wave 3 closeout reconciliation. B6b remains intentionally pending; `RES-006`, `ADM-071`, Wave 3 closeout and all later work remain unstarted.
 
 ## Feature-ID checklist
 
@@ -186,8 +186,8 @@ Network completion is **36/38**: four inherited Wave 1 foundations, three Slice 
 - [x] `ACQ-008` — Slice 3.7; signed provider profile-completion invitation, legitimate activation continuity, no provider-status/authority grant, configured-browser acceptance, and zero-residual cleanup
 - [x] `GEO-012` — PR #120; current OPEN/geography/marker authority, after-load restriction/lifecycle denial, configured-browser responsive acceptance, cleanup, and `npm run check`
 - [x] `EDU-014` — Slice 3.5; append-only first-use education acknowledgement for the named recipient and exact shared fields before send, continued availability, all five locales, and browser acceptance
-- [ ] `EDU-016`
-- [ ] `EDU-017`
+- [x] `EDU-016` — Slice 3.8; reusable versioned Quick Start plus Business, Issuer and Resource Provider paths, membership-bound durable resume/dismiss/reopen/completion, truthful live/planned links, five locales, configured-browser acceptance and zero-residual cleanup
+- [x] `EDU-017` — Slice 3.8; eleven shared nonmodal four-question explainers before consequential Wave 3 actions, independent viewed/dismissed evidence, domain/authority isolation, keyboard/screen-reader acceptance and zero-residual cleanup
 - [x] `ORG-013` — Slice 3.3; AMACS 0.5.0 manual/assisted entry, non-authoritative candidate disposition, separate confirmed claim command, structured discovery migration, emulator/browser acceptance, cleanup, and `npm run check`
 - [x] `ORG-014` — Slice 3.3; descriptive industry and participant-selected NAICS source/version provenance, explicit non-authority boundary, browser acceptance, and focused tests
 - [x] `ORG-015` — Slice 3.4; controlled organization-reported credentials, issuer/source/date/evidence provenance, explicit visibility, immutable audit/history, no automatic verification, focused/emulator/browser acceptance, and cleanup

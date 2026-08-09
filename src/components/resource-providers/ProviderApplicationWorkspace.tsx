@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 
 import { PROVIDER_CATEGORIES, PROVIDER_MODALITIES, type OfficialResourceProviderApplication, type OfficialResourceProviderStatus, type ProviderApplicationEvent, type ProviderServiceProfile } from "../../domain/resource-providers/model";
 import { useI18n } from "../i18n/I18nProvider";
+import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { OperationalWorkspace, ParticipantShell } from "../participant/ParticipantWorkspace";
 
 import styles from "./ProviderApplicationWorkspace.module.css";
@@ -77,6 +78,7 @@ export function ProviderApplicationWorkspace({ initialSnapshot }: Readonly<{ ini
               <div className={styles.readOnly}><strong>{readable(snapshot.application.status)}</strong><p>Your submitted values are preserved while an authorized administrator reviews them.</p></div>
             ) : (
               <form onSubmit={save}>
+                <WorkflowExplainer explainerKey="provider-application" />
                 <fieldset><legend>{t("resourceProviderWorkspace.fields.categories")} <span>Required · choose all that apply</span></legend><div className={styles.checkGrid}>{PROVIDER_CATEGORIES.map((category) => <label key={category}><input type="checkbox" name="categories" value={category} defaultChecked={source?.categories.includes(category)} />{t(`resourceProviderWorkspace.categories.${category}`)}</label>)}</div></fieldset>
                 <label>{t("resourceProviderWorkspace.fields.other")}<textarea name="otherCategoryDescription" defaultValue={snapshot.application?.content.otherCategoryDescription ?? ""} /></label>
                 <div className={styles.two}><label>{t("resourceProviderWorkspace.fields.serviceName")}<input name="serviceName" required defaultValue={firstService?.name ?? ""} /></label><label>Service availability<select name="serviceAvailability" defaultValue={firstService?.availability ?? "unknown"}><option value="unknown">Unknown</option><option value="available">Available</option><option value="limited">Limited</option><option value="unavailable">Unavailable</option></select></label></div>

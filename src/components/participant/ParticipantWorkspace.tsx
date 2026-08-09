@@ -20,6 +20,7 @@ type ParticipantNavigationItem =
   | "Referrals"
   | "Opportunities"
   | "Resources"
+  | "Quick Start"
   | "Account";
 
 interface ParticipantShellProps {
@@ -50,6 +51,7 @@ const primaryNavigation = [
   { label: "Referrals", href: "/referrals", available: true },
   { label: "Opportunities", available: false },
   { label: "Resources", href: "/resources", available: true },
+  { label: "Quick Start", href: "/quick-start", available: true },
 ] as const;
 
 function NavigationItems({

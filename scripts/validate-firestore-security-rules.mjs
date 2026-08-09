@@ -80,6 +80,8 @@ const appendOnlyCollections = [
   "backgroundJobEvents",
   "transactionalEmailDeliveryEvents",
   "acquisitionContextEvents",
+  "networkEducationEvents",
+  "networkEducationCommands",
   "orientationJourneyEvents",
   "activationReleaseEvents",
   "aiInterpretationProvenance",
