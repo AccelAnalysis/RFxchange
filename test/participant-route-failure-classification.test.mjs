@@ -5,7 +5,7 @@ import { ServerSessionError } from "../src/application/auth/server-session.ts";
 import {
   ParticipantRouteDependencyUnavailableError,
   resolveParticipantRouteWithDependencies,
-} from "../src/infrastructure/auth/participant-route-runtime.ts";
+} from "../src/infrastructure/auth/participant-route-classification.ts";
 
 const context = Object.freeze({
   user: Object.freeze({ id: "user-route-3a" }),
@@ -59,7 +59,8 @@ async function expectDependencyFailure(operation, stage) {
     (error) =>
       error instanceof ParticipantRouteDependencyUnavailableError &&
       error.code === "participant-dependency-unavailable" &&
-      error.stage === stage,
+      error.stage === stage &&
+      error.cause instanceof Error,
   );
 }
 
