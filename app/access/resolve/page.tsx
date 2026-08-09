@@ -73,6 +73,7 @@ export default async function AccessResolvePage({ searchParams }: AccessResolveP
   }));
 
   const accountResolution = access.reason === "account-resolution";
+  const resolutionUrl = participantEntryDestination(access);
 
   return (
     <main className={styles.page}>
@@ -115,7 +116,8 @@ export default async function AccessResolvePage({ searchParams }: AccessResolveP
         ) : null}
 
         <div className={styles.actions}>
-          <Link className={styles.primary} href="/">{copy.home}</Link>
+          <Link className={styles.primary} href={resolutionUrl}>{copy.retry}</Link>
+          <Link className={styles.secondary} href="/">{copy.home}</Link>
           <SignOutButton className={styles.secondary} />
         </div>
       </section>
