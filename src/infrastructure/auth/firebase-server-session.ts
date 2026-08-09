@@ -50,6 +50,22 @@ function firebaseErrorMessage(error: unknown): string {
   return "";
 }
 
+/**
+ * Only provider errors that affirmatively describe a bad/expired credential are allowed to make a
+ * participant appear signed out. Unknown Firebase/Admin errors are treated as backend failures so
+ * transient provider/network faults reach the retryable recovery boundary instead.
+ */
+function isCredentialRejection(error: unknown): boolean {
+  const code = firebaseErrorCode(error);
+  return (
+    code === "auth/argument-error" ||
+    code === "auth/invalid-id-token" ||
+    code === "auth/id-token-expired" ||
+    code === "auth/invalid-session-cookie" ||
+    code === "auth/session-cookie-expired"
+  );
+}
+
 function isAdminRuntimeFailure(error: unknown): boolean {
   const code = firebaseErrorCode(error);
   const message = firebaseErrorMessage(error);
@@ -63,6 +79,13 @@ function isAdminRuntimeFailure(error: unknown): boolean {
   );
 }
 
+function authenticationBackendFailure(): ServerSessionError {
+  return new ServerSessionError(
+    "authentication-backend-unavailable",
+    "Firebase Admin authentication could not complete. The participant credential was not classified as invalid.",
+  );
+}
+
 function credentialFailure(error: unknown, label: string): ServerSessionError {
   const code = firebaseErrorCode(error);
   if (code === "auth/user-disabled") {
@@ -71,13 +94,15 @@ function credentialFailure(error: unknown, label: string): ServerSessionError {
   if (code === "auth/id-token-revoked" || code === "auth/session-cookie-revoked") {
     return new ServerSessionError("credential-revoked", `${label} has been revoked.`);
   }
-  if (isAdminRuntimeFailure(error)) {
-    return new ServerSessionError(
-      "authentication-backend-unavailable",
-      "Firebase Admin authentication is not available to the RFxchange server. Verify the server Firebase project binding and Application Default Credentials.",
-    );
+  if (isCredentialRejection(error)) {
+    return new ServerSessionError("credential-invalid", `${label} is invalid.`);
   }
-  return new ServerSessionError("credential-invalid", `${label} is invalid.`);
+  if (isAdminRuntimeFailure(error)) {
+    return authenticationBackendFailure();
+  }
+  // Fail safe for ambiguous provider errors: never invalidate a participant session merely because
+  // Firebase Admin returned an unrecognized operational failure.
+  return authenticationBackendFailure();
 }
 
 function isoFromSeconds(value: number, label: string): string {
