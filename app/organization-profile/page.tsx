@@ -11,6 +11,7 @@ import {
   ParticipantShell,
 } from "@/src/components/participant/ParticipantWorkspace";
 import { hydrateEssentialOrganizationProfile } from "@/src/domain/organization-profile/model";
+import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
@@ -45,7 +46,8 @@ export default async function OrganizationProfilePage() {
   if (access.kind === "unauthenticated") {
     redirect("/signin?returnTo=%2Forganization-profile");
   }
-  if (access.kind === "activation-required") redirect("/join");
+  if (access.kind === "access-resolution-required") redirect(participantEntryDestination(access));
+  if (access.kind === "activation-required") redirect(participantEntryDestination(access));
   if (access.kind === "wrong-organization") {
     redirect(access.state.controlledPlatformUrl ?? "/join");
   }
