@@ -27,16 +27,25 @@ test("trusted lockfile mirrors root and Functions dependency manifests", async (
   assert.deepEqual(lock.packages.functions.dependencies, functionsPackage.dependencies);
   assert.deepEqual(lock.packages.functions.devDependencies, functionsPackage.devDependencies);
   assert.deepEqual(lock.packages.functions.engines, functionsPackage.engines);
+
+  assert.equal(rootPackage.devDependencies?.["firebase-tools"], "15.24.0");
+  assert.equal(lock.packages[""].devDependencies?.["firebase-tools"], "15.24.0");
+  assert.ok(lock.packages?.["node_modules/firebase-tools"], "Firebase CLI must resolve from the committed lockfile");
+  assert.equal(lock.packages["node_modules/firebase-tools"].version, "15.24.0");
 });
 
-test("production CI requires immutable npm installs and read-only repository authority", async () => {
+test("production CI requires immutable npm installs, locked tooling, and read-only repository authority", async () => {
   const workflow = await read(".github/workflows/ci.yml");
 
   assert.match(workflow, /permissions:\n  contents: read\n/);
   assert.match(workflow, /- name: Install dependencies\n        run: npm ci\n/);
+  assert.match(workflow, /run: \.\/node_modules\/\.bin\/firebase emulators:exec/);
   assert.doesNotMatch(workflow, /npm install/);
+  assert.doesNotMatch(workflow, /\bnpx\b[^\n]*firebase-tools/);
+  assert.doesNotMatch(workflow, /firebase-tools@/);
   assert.doesNotMatch(workflow, /contents: write/);
   assert.doesNotMatch(workflow, /actions\/upload-artifact/);
   assert.doesNotMatch(workflow, /Commit trusted dependency lockfile/);
+  assert.doesNotMatch(workflow, /Commit locked Firebase CLI dependency/);
   assert.doesNotMatch(workflow, /github\.head_ref/);
 });
