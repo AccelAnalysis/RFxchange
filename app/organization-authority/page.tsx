@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
@@ -22,6 +23,9 @@ export default async function OrganizationAuthorityPage() {
 
   if (access.kind === "unauthenticated") {
     redirect("/signin?returnTo=%2Forganization-authority");
+  }
+  if (access.kind === "access-resolution-required") {
+    redirect(participantEntryDestination(access));
   }
   if (access.kind === "authorized") redirect("/organization-profile");
   redirect("/join");

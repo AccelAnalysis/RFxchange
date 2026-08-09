@@ -1,0 +1,20 @@
+{
+  "eyebrow": "Interruzione temporanea del servizio",
+  "title": "Questa pagina non è disponibile al momento.",
+  "lede": "Non è stato possibile caricare le informazioni necessarie per questa pagina.",
+  "supporting": "Riprova. Se il problema persiste, torna alla pagina iniziale di RFxchange e riprova più tardi.",
+  "retry": "Riprova",
+  "home": "Home RFxchange",
+  "supportReference": "Riferimento assistenza: {reference}",
+  "accessEyebrow": "Accesso all’organizzazione",
+  "accountTitle": "Il tuo account non dispone attualmente di un accesso attivo a un’organizzazione.",
+  "accountBody": "La precedente appartenenza all’organizzazione non è più attiva. RFxchange non riutilizzerà l’attivazione o lo stato OPEN di quell’organizzazione come se concedessero ancora accesso.",
+  "accountNext": "Usa un invito attuale di un’organizzazione per riottenere l’accesso, oppure esci e torna quando un amministratore avrà ripristinato o invitato il tuo account.",
+  "organizationTitle": "Scegli quale appartenenza attiva a un’organizzazione stai risolvendo.",
+  "organizationBody": "La tua precedente attivazione appartiene a un’altra organizzazione. RFxchange non trasferirà automaticamente il relativo ciclo controllato o OPEN a un’altra organizzazione.",
+  "organizationBoundary": "Selezionare qui un’organizzazione identifica l’appartenenza da risolvere; non le concede l’autorità di attivazione della precedente organizzazione.",
+  "activeMemberships": "Appartenenze attive a organizzazioni",
+  "selectOrganization": "Seleziona organizzazione",
+  "selectedOrganization": "Selezionata per la risoluzione dell’accesso",
+  "organizationFallback": "Organizzazione {id}"
+}

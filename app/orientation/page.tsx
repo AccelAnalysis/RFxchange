@@ -7,6 +7,7 @@ import {
   resolveFoundingAcquisitionIntent,
 } from "@/src/infrastructure/acquisition/founding-intent";
 import { OrientationJourneyClient } from "@/src/components/orientation/OrientationJourneyClient";
+import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
@@ -34,8 +35,14 @@ export default async function OrientationPage({ searchParams }: OrientationPageP
   if (access.kind === "unauthenticated") {
     redirect(`/signin?returnTo=${encodeURIComponent(orientationUrl)}`);
   }
+  if (access.kind === "access-resolution-required") {
+    redirect(participantEntryDestination(access));
+  }
   if (access.kind === "activation-required") {
-    redirect(acquisitionIntent ? "/acquisition/founding" : "/join");
+    redirect(participantEntryDestination(
+      access,
+      acquisitionIntent ? "/acquisition/founding" : "/join",
+    ));
   }
   if (access.kind === "wrong-organization") {
     const destination = access.state.controlledPlatformUrl ?? "/join";

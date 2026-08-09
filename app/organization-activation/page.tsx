@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
@@ -16,8 +17,14 @@ export default async function OrganizationActivationPage() {
   if (access.kind === "unauthenticated") {
     redirect("/signin?returnTo=%2Forganization-activation");
   }
+  if (access.kind === "access-resolution-required") {
+    redirect(participantEntryDestination(access));
+  }
   if (access.kind === "authorized") {
     redirect(access.state.controlledPlatformUrl ?? "/geography/canvas");
+  }
+  if (access.kind === "activation-required") {
+    redirect(participantEntryDestination(access));
   }
   redirect("/join");
 }

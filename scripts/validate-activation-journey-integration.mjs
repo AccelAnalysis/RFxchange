@@ -49,6 +49,10 @@ const [
 ]);
 
 const englishCatalog = JSON.parse(englishCatalogText);
+const participantClassification = await read(
+  "src/infrastructure/auth/participant-route-classification.ts",
+);
+const participantRouteAuthority = `${participantRuntime}\n${participantClassification}`;
 
 assert.ok(home.includes('href="/join"'), "Public Join must enter the activation journey.");
 assert.ok(
@@ -313,15 +317,18 @@ for (const requirement of [
   "restricted",
   "workspaceLifecycleEligible",
 ]) {
-  assert.ok(participantRuntime.includes(requirement), `Participant route runtime is missing ${requirement}.`);
+  assert.ok(
+    participantRouteAuthority.includes(requirement),
+    `Participant route authority is missing ${requirement}.`,
+  );
 }
 assert.equal(
-  participantRuntime.includes("createServerActivationJourneyService"),
+  participantRouteAuthority.includes("createServerActivationJourneyService"),
   false,
   "Ordinary participant route authorization must not rebuild the full activation journey graph.",
 );
 assert.equal(
-  participantRuntime.includes('state.nextStep !== "complete"'),
+  participantRouteAuthority.includes('state.nextStep !== "complete"'),
   false,
   "UI next-step labels must not become participant authorization criteria.",
 );
