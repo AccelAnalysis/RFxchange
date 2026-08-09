@@ -35,5 +35,6 @@ assert.match(map, /RELATIONSHIP_PATH_LAYER_ID/);
 assert.doesNotMatch(model, /credibility|qualification|verifiedOutcome|referralFee/);
 for (const locale of ["EnUS", "Es", "Fr", "It", "De"]) assert.ok(dictionary.includes(`referral${locale}`), `Referral locale missing: ${locale}`);
 assert.match(authority, /REF-001/);
+assert.match(authority, /Slice 3\.6 was then recalculated and separately authorized/);
 assert.match(workflow, /smoke-referral-network-emulator/);
 console.log("Slice 3.5 referral lifecycle, consent, education, acquisition, communications, projection, spatial, localization, and direct-client boundaries validated.");

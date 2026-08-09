@@ -1,6 +1,6 @@
 # Slice 3.6 — Official Resource Provider Foundation
 
-**Status: PLANNING BRIEF ONLY — DO NOT IMPLEMENT UNTIL EXPLICITLY AUTHORIZED**
+**Status: AUTHORIZED BY `SLICE_3_6_EXECUTION_AUTHORITY.md` — SINGLE ACTIVE SLICE**
 
 ## Feature IDs
 
@@ -145,3 +145,7 @@ The Network has a legitimate, administratively governed inventory of Official Re
 ## Completion discipline
 
 Recalculate dependencies after merge before authorizing Slice 3.7.
+
+## Execution authority
+
+`docs/slices/SLICE_3_6_EXECUTION_AUTHORITY.md` records the merged baseline, binding implementation decisions, acceptance matrix and preserved non-scope. This brief alone does not authorize Slice 3.7 or any later work.

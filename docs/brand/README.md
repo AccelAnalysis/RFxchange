@@ -1,6 +1,6 @@
 # The RFxchange Brand Experience System
 
-**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a AND SLICES 3.1–3.4 COMPLETE; SLICE 3.5 AUTHORIZED**
+**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a AND SLICES 3.1–3.5 COMPLETE; SLICE 3.6 AUTHORIZED**
 
 This directory defines the approved target brand experience for **The RFxchange** and the sequential convergence gates that apply it without weakening product, security, privacy, geography, lifecycle, or evidence authority.
 
@@ -34,11 +34,11 @@ The final B6a implementation merged at:
 
 `bf59f1d18fa6db3f43660c42777b494b505be545`
 
-The Brand Gates and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Slice 3.4 are:
+The Brand Gates and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Slice 3.5 are:
 
-- **438 total · 132 Done · 306 Not Started**
+- **438 total · 139 Done · 299 Not Started**
 - Activation: **43/43**
-- Network: **18/38**
+- Network: **25/38**
 
 See:
 
@@ -124,7 +124,7 @@ The non-Feature prerequisites identified before Wave 3 Slice 3.2 were satisfied:
 
 B4 and B5 are also complete under the adopted numerical execution sequence.
 
-**Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, the AI/AMACS Interpretation Foundation is complete via PR #124, Slice 3.3 is complete via PR #126, and Slice 3.4 is complete via PR #128. Slice 3.5 is the single active authorized slice.**
+**Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, the AI/AMACS Interpretation Foundation is complete via PR #124, Slice 3.3 is complete via PR #126, Slice 3.4 is complete via PR #128, and Slice 3.5 is complete via PR #130. Slice 3.6 is the single active authorized slice.**
 
 Slice 3.2 completed:
 
@@ -133,7 +133,7 @@ Slice 3.2 completed:
 - `DSC-002`;
 - `DSC-003`.
 
-Neither the Brand Gates, AMACS reconciliation nor AI/AMACS foundation completed any additional Feature ID. Slice 3.4 acceptance completes only `ORG-015`, `ORG-018`, and `ORG-019`, producing **438 total · 132 Done · 306 Not Started** and Network **18/38**.
+Neither the Brand Gates, AMACS reconciliation nor AI/AMACS foundation completed any additional Feature ID. Slice 3.5 acceptance completes only `REF-001`–`REF-005`, `EDU-014`, and `ACQ-006`, producing **438 total · 139 Done · 299 Not Started** and Network **25/38**.
 
 ## Remaining Brand Gates
 

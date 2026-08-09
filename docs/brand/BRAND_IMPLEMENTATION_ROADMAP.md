@@ -1,6 +1,6 @@
 # RFxchange Brand Experience Implementation Roadmap
 
-**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a AND SLICES 3.1–3.4 COMPLETE; SLICE 3.5 AUTHORIZED**
+**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a AND SLICES 3.1–3.5 COMPLETE; SLICE 3.6 AUTHORIZED**
 
 ## 1. Purpose
 
@@ -32,11 +32,11 @@ Brand Gates B0 through B6a are complete.
 | B5 — Onboarding and activation experience | Complete | PR #114 | `c9b1469cf258a6a9af9b456585af7f3524a5c7b6` |
 | B6a — Existing workspace foundation | Complete | PR #115 | `bf59f1d18fa6db3f43660c42777b494b505be545` |
 
-The gates above and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Slice 3.4 are:
+The gates above and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Slice 3.5 are:
 
-- **438 total · 132 Done · 306 Not Started**
+- **438 total · 139 Done · 299 Not Started**
 - Activation: **43/43**
-- Network: **18/38**
+- Network: **25/38**
 
 The consolidated evidence is recorded in:
 
@@ -55,7 +55,7 @@ B4 and B5 are also complete under the adopted numerical execution sequence.
 
 **Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, and the no-Feature-ID AI/AMACS Interpretation Foundation is complete via PR #124.**
 
-Slice 3.4 is complete via PR #128 with its credential/evidence, private-asset/publication, and subordinate-location boundaries preserved. Exact-head production CI run `31291992746` and post-merge `main` CI run `31292086252` passed. Authority was recalculated from merged `main` at `7f57cabf029edb0a0045b53d9f3339f170dc530c`; Slice 3.5 is now the single active authorized slice. B6b remains later in the Wave 3 sequence after its live referral and provider domains exist and receives no authority from this handoff.
+Slice 3.5 is complete via PR #130 with its organization-owned referral, consent, minimum-necessary sharing, acquisition continuity and real-path boundaries preserved. Exact-head production CI run `31294774153` and post-merge `main` CI run `31294884142` passed. Authority was recalculated from merged `main` at `516c49627aeff637b02982218f0682c1eea436ad`; Slice 3.6 is now the single active authorized slice. B6b remains later in the Wave 3 sequence after Slice 3.7 adds authoritative provider service fields/routing and receives no authority from this handoff.
 
 ## 4. Completed gates
 
@@ -270,6 +270,6 @@ The Brand Gate sequence requested through B6a is complete and reconciled. Slice 
 
 The current product handoff is:
 
-> **Slice 3.5 — Referral Network & Referral Acquisition (`REF-001`–`REF-005`, `EDU-014`, `ACQ-006`) — AUTHORIZED**
+> **Slice 3.6 — Official Resource Provider Foundation (`RES-001`, `RES-002`, `RES-003`, `ADM-070`) — AUTHORIZED**
 
-Slice 3.6 and later slices remain unstarted until Slice 3.5 merges, post-merge CI passes, and dependency authority is recalculated. B6b remains separately sequenced behind both the live referral domain from Slice 3.5 and the provider domains from Slices 3.6–3.7.
+Slice 3.7 and later slices remain unstarted until Slice 3.6 merges, post-merge CI passes, and dependency authority is recalculated. B6b remains separately sequenced behind the live referral domain from Slice 3.5 and the provider discovery/routing domain from Slice 3.7.

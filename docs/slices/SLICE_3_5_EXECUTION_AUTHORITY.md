@@ -1,6 +1,6 @@
 # Slice 3.5 — Referral Network & Referral Acquisition execution authority
 
-**Status: AUTHORIZED — SINGLE ACTIVE SLICE**
+**Status: AUTHORITY CONSUMED — SLICE 3.5 COMPLETE VIA PR #130**
 
 ## Recalculated merged baseline
 
@@ -131,4 +131,4 @@ Production CI must pass on the exact PR head and again on merged `main` before d
 
 This authority does not permit managed paid referrals, referral fees or payouts, bulk/mass messaging, public referral feeds, provider routing (`REF-006`), provider application or approval, teaming or RFx workflows, CRM replacement, automatic translation of participant content, verified outcomes, credibility changes or badges, Organization Verification, arbitrary map endpoints, B6b convergence, Wave 4, Intelligence Dark, Presentation Mode, production sound, or haptics.
 
-Slice 3.6 and all later slices/gates remain unstarted. They may be authorized only after Slice 3.5 implementation and acceptance merge, post-merge production CI passes, and dependency eligibility is recalculated again from merged `main`.
+Slice 3.5 implementation and acceptance are recorded in `docs/architecture/WAVE_3_SLICE_3_5.md`. PR #130 passed exact-head production CI run `31294774153` on `17e8e66fc11e29bc125bc739d5fad7141da14244`, merged at `516c49627aeff637b02982218f0682c1eea436ad`, and post-merge `main` CI run `31294884142` passed. Slice 3.6 was then recalculated and separately authorized; no later slice was begun by this authority.
