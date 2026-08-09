@@ -29,6 +29,25 @@ export interface ParticipantWorkspaceProjection {
   readonly membership: OrganizationMembership | null;
 }
 
+export type ParticipantWorkspaceProjectionErrorCode =
+  | "lifecycle-missing"
+  | "lifecycle-owner-mismatch";
+
+/**
+ * A persisted activation context exists, but the minimum lifecycle state needed to interpret it
+ * does not. This is not the same as a participant who has never started activation and therefore
+ * must never be translated into a fresh /join journey.
+ */
+export class ParticipantWorkspaceProjectionError extends Error {
+  readonly code: ParticipantWorkspaceProjectionErrorCode;
+
+  constructor(code: ParticipantWorkspaceProjectionErrorCode) {
+    super("The persisted participant workspace state is temporarily unavailable.");
+    this.name = "ParticipantWorkspaceProjectionError";
+    this.code = code;
+  }
+}
+
 function controlledPlatformUrl(
   lifecycleState: AccessLifecycleRecord["state"],
   organizationId: string | null,
@@ -46,6 +65,10 @@ function controlledPlatformUrl(
  * This intentionally does not hydrate geography, profile, marker, location, capability, account
  * security, or other activation UI state. Those belong to their specific screens. The protected
  * route boundary only needs lifecycle + active membership identity before restriction checks.
+ *
+ * A null result has one meaning only: there is no activation context for this authenticated user.
+ * Once an activation context exists, missing or cross-owned lifecycle state is classified as a
+ * recoverable workspace-state failure rather than being mistaken for a new participant.
  */
 export async function loadParticipantWorkspaceProjection(
   context: AuthenticatedServerContext,
@@ -69,7 +92,12 @@ export async function loadParticipantWorkspaceProjection(
     () => foundation.lifecycle.lifecycle.getById(accessJourneyId(activation.accessJourneyId)),
     "access lifecycle",
   );
-  if (!lifecycle || lifecycle.userId !== context.user.id) return null;
+  if (!lifecycle) {
+    throw new ParticipantWorkspaceProjectionError("lifecycle-missing");
+  }
+  if (lifecycle.userId !== context.user.id) {
+    throw new ParticipantWorkspaceProjectionError("lifecycle-owner-mismatch");
+  }
 
   const organizationId = activation.organizationId ? String(activation.organizationId) : null;
   const membership = activation.membershipId
