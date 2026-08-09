@@ -25,10 +25,7 @@ const membership = Object.freeze({
   organizationId: "org-route-3a",
   status: "active",
 });
-const inactiveBoundMembership = Object.freeze({
-  ...membership,
-  status: "inactive",
-});
+const inactiveBoundMembership = Object.freeze({ ...membership, status: "inactive" });
 const replacementMembership = Object.freeze({
   id: "membership-route-replacement",
   userId: "user-route-3a",
@@ -96,18 +93,17 @@ test("missing session is unauthenticated without touching dependencies", async (
       return context;
     },
   }));
-
   assert.equal(result.kind, "unauthenticated");
   assert.equal(authenticationCalls, 0);
 });
 
-test("invalid or revoked session is unauthenticated rather than a service failure", async () => {
+test("known credential rejection is unauthenticated rather than dependency recovery", async () => {
   for (const code of ["credential-invalid", "credential-revoked", "account-disabled"]) {
     const result = await resolveParticipantRouteWithDependencies(
       { sessionCookie: "session" },
       dependencies({
         authenticateSessionCookie: async () => {
-          throw new ServerSessionError(code, "expected credential rejection");
+          throw new ServerSessionError(code, "known rejection");
         },
       }),
     );
@@ -115,35 +111,22 @@ test("invalid or revoked session is unauthenticated rather than a service failur
   }
 });
 
-test("authentication backend failure reaches the retryable dependency boundary", async () => {
-  await expectDependencyFailure(
-    () => resolveParticipantRouteWithDependencies(
-      { sessionCookie: "session" },
-      dependencies({
-        authenticateSessionCookie: async () => {
-          throw new ServerSessionError(
-            "authentication-backend-unavailable",
-            "Firebase Admin temporarily unavailable",
-          );
-        },
-      }),
+test("authentication backend and unexpected authentication failures are retryable", async () => {
+  for (const error of [
+    new ServerSessionError(
+      "authentication-backend-unavailable",
+      "Firebase Admin temporarily unavailable",
     ),
-    "authentication",
-  );
-});
-
-test("unexpected authentication failure is not misclassified as signed out", async () => {
-  await expectDependencyFailure(
-    () => resolveParticipantRouteWithDependencies(
-      { sessionCookie: "session" },
-      dependencies({
-        authenticateSessionCookie: async () => {
-          throw new Error("identity repository unavailable");
-        },
-      }),
-    ),
-    "authentication",
-  );
+    new Error("identity repository unavailable"),
+  ]) {
+    await expectDependencyFailure(
+      () => resolveParticipantRouteWithDependencies(
+        { sessionCookie: "session" },
+        dependencies({ authenticateSessionCookie: async () => { throw error; } }),
+      ),
+      "authentication",
+    );
+  }
 });
 
 test("only an absent activation context resolves to fresh activation", async () => {
@@ -151,48 +134,44 @@ test("only an absent activation context resolves to fresh activation", async () 
     { sessionCookie: "session" },
     dependencies({ loadWorkspaceProjection: async () => null }),
   );
-
   assert.equal(result.kind, "activation-required");
   assert.equal(result.reason, "activation-context-required");
   assert.equal(result.state, null);
 });
 
-test("an incomplete pre-workspace lifecycle can continue activation", async () => {
-  const incomplete = projection({
-    state: {
-      lifecycleState: "organization-identified",
-      organization: null,
-      membershipId: null,
-      controlledPlatformUrl: null,
-    },
-    membership: null,
-    activeMemberships: [],
-  });
+test("incomplete pre-workspace lifecycle continues activation", async () => {
   const result = await resolveParticipantRouteWithDependencies(
     { sessionCookie: "session" },
-    dependencies({ loadWorkspaceProjection: async () => incomplete }),
+    dependencies({
+      loadWorkspaceProjection: async () => projection({
+        state: {
+          lifecycleState: "organization-identified",
+          organization: null,
+          membershipId: null,
+          controlledPlatformUrl: null,
+        },
+        membership: null,
+        activeMemberships: [],
+      }),
+    }),
   );
-
   assert.equal(result.kind, "activation-required");
   assert.equal(result.reason, "activation-incomplete");
-  assert.equal(result.state.lifecycleState, "organization-identified");
 });
 
-test("workspace projection failure never becomes a new activation journey", async () => {
+test("workspace dependency failure never becomes activation", async () => {
   await expectDependencyFailure(
     () => resolveParticipantRouteWithDependencies(
       { sessionCookie: "session" },
       dependencies({
-        loadWorkspaceProjection: async () => {
-          throw new Error("Firestore unavailable");
-        },
+        loadWorkspaceProjection: async () => { throw new Error("Firestore unavailable"); },
       }),
     ),
     "workspace-state",
   );
 });
 
-test("controlled workspace with structurally missing organization identity remains a recoverable state failure", async () => {
+test("controlled/open workspace requires complete persisted organization identity", async () => {
   await expectDependencyFailure(
     () => resolveParticipantRouteWithDependencies(
       { sessionCookie: "session" },
@@ -200,6 +179,7 @@ test("controlled workspace with structurally missing organization identity remai
         loadWorkspaceProjection: async () => projection({
           state: { organization: null },
           membership: null,
+          boundMembership: null,
           activeMemberships: [],
         }),
       }),
@@ -208,27 +188,12 @@ test("controlled workspace with structurally missing organization identity remai
   );
 });
 
-test("missing persisted activation membership cannot be repaired through another active organization", async () => {
-  await expectDependencyFailure(
-    () => resolveParticipantRouteWithDependencies(
-      { sessionCookie: "session" },
-      dependencies({
-        loadWorkspaceProjection: async () => projection({
-          membership: null,
-          boundMembership: null,
-          activeMemberships: [replacementMembership],
-        }),
-      }),
-    ),
-    "workspace-state",
-  );
-});
-
-test("cross-owned persisted activation membership cannot enter governed repair", async () => {
+test("missing or cross-owned persisted binding cannot enter access resolution", async () => {
   for (const boundMembership of [
+    null,
+    { ...inactiveBoundMembership, id: "another-membership" },
     { ...inactiveBoundMembership, userId: "another-user" },
     { ...inactiveBoundMembership, organizationId: "another-org" },
-    { ...inactiveBoundMembership, id: "another-membership" },
   ]) {
     await expectDependencyFailure(
       () => resolveParticipantRouteWithDependencies(
@@ -246,23 +211,31 @@ test("cross-owned persisted activation membership cannot enter governed repair",
   }
 });
 
-test("active persisted binding missing from active projection remains fail-closed", async () => {
-  await expectDependencyFailure(
-    () => resolveParticipantRouteWithDependencies(
-      { sessionCookie: "session" },
-      dependencies({
-        loadWorkspaceProjection: async () => projection({
-          membership: null,
-          boundMembership: membership,
-          activeMemberships: [replacementMembership],
+test("active persisted binding must agree with active projection", async () => {
+  for (const changedMembership of [
+    null,
+    { ...membership, status: "inactive" },
+    { ...membership, id: "another-membership" },
+    { ...membership, userId: "another-user" },
+    { ...membership, organizationId: "another-org" },
+  ]) {
+    await expectDependencyFailure(
+      () => resolveParticipantRouteWithDependencies(
+        { sessionCookie: "session" },
+        dependencies({
+          loadWorkspaceProjection: async () => projection({
+            membership: changedMembership,
+            boundMembership: membership,
+            activeMemberships: changedMembership ? [changedMembership] : [replacementMembership],
+          }),
         }),
-      }),
-    ),
-    "workspace-state",
-  );
+      ),
+      "workspace-state",
+    );
+  }
 });
 
-test("deactivated activation membership with no active membership routes to account resolution instead of Retry", async () => {
+test("deactivated binding with no active membership enters account resolution, not Retry or activation", async () => {
   const result = await resolveParticipantRouteWithDependencies(
     { sessionCookie: "session" },
     dependencies({
@@ -273,13 +246,14 @@ test("deactivated activation membership with no active membership routes to acco
       }),
     }),
   );
-
-  assert.equal(result.kind, "activation-required");
+  assert.equal(result.kind, "access-resolution-required");
   assert.equal(result.reason, "account-resolution");
+  assert.deepEqual(result.options, []);
+  assert.equal(result.state.organization.id, "org-route-3a");
   assert.equal(result.state.membershipId, "membership-route-3a");
 });
 
-test("deactivated activation membership with one remaining active membership resumes organization access", async () => {
+test("another active organization never inherits the stale controlled lifecycle", async () => {
   const result = await resolveParticipantRouteWithDependencies(
     { sessionCookie: "session" },
     dependencies({
@@ -290,67 +264,63 @@ test("deactivated activation membership with one remaining active membership res
       }),
     }),
   );
-
-  assert.equal(result.kind, "authorized");
-  assert.equal(result.membership.id, replacementMembership.id);
-  assert.equal(result.state.organization.id, replacementMembership.organizationId);
-  assert.equal(result.state.membershipId, replacementMembership.id);
+  assert.equal(result.kind, "access-resolution-required");
+  assert.equal(result.reason, "organization-resolution");
+  assert.deepEqual(result.options, [{
+    organizationId: replacementMembership.organizationId,
+    membershipId: replacementMembership.id,
+  }]);
+  assert.equal(result.selectedOrganizationId, null);
+  assert.equal(result.state.organization.id, "org-route-3a");
+  assert.equal(result.state.accessJourneyId, "journey-route-3a");
 });
 
-test("multiple remaining active memberships require organization resolution until one is requested", async () => {
-  const staleProjection = projection({
+test("another active organization never inherits the stale OPEN lifecycle even when explicitly selected", async () => {
+  const staleOpenProjection = projection({
+    state: {
+      lifecycleState: "open-platform",
+      controlledPlatformUrl: "/exchange",
+    },
     membership: null,
     boundMembership: inactiveBoundMembership,
     activeMemberships: [replacementMembership, secondReplacementMembership],
   });
-  const unresolved = await resolveParticipantRouteWithDependencies(
-    { sessionCookie: "session" },
-    dependencies({ loadWorkspaceProjection: async () => staleProjection }),
-  );
-  assert.equal(unresolved.kind, "activation-required");
-  assert.equal(unresolved.reason, "organization-resolution");
-
-  const selected = await resolveParticipantRouteWithDependencies(
+  const result = await resolveParticipantRouteWithDependencies(
     {
       sessionCookie: "session",
       requestedOrganizationId: replacementMembership.organizationId,
     },
-    dependencies({ loadWorkspaceProjection: async () => staleProjection }),
+    dependencies({ loadWorkspaceProjection: async () => staleOpenProjection }),
   );
-  assert.equal(selected.kind, "authorized");
-  assert.equal(selected.membership.id, replacementMembership.id);
-  assert.equal(selected.state.organization.id, replacementMembership.organizationId);
+  assert.equal(result.kind, "access-resolution-required");
+  assert.equal(result.reason, "organization-resolution");
+  assert.equal(result.selectedOrganizationId, replacementMembership.organizationId);
+  assert.equal(result.state.organization.id, "org-route-3a");
+  assert.equal(result.state.membershipId, "membership-route-3a");
+  assert.equal(result.state.lifecycleState, "open-platform");
+  assert.equal("membership" in result, false);
 });
 
-test("controlled workspace rejects contradictory active membership drift as state failure", async () => {
-  for (const changedMembership of [
-    { ...membership, userId: "another-user" },
-    { ...membership, organizationId: "another-org" },
-    { ...membership, id: "another-membership" },
-    { ...membership, status: "inactive" },
-  ]) {
-    await expectDependencyFailure(
-      () => resolveParticipantRouteWithDependencies(
-        { sessionCookie: "session" },
-        dependencies({
-          loadWorkspaceProjection: async () => projection({
-            membership: changedMembership,
-            boundMembership: membership,
-            activeMemberships: [changedMembership],
-          }),
-        }),
-      ),
-      "workspace-state",
-    );
-  }
+test("invalid requested alternative is not silently selected during access resolution", async () => {
+  const result = await resolveParticipantRouteWithDependencies(
+    { sessionCookie: "session", requestedOrganizationId: "org-not-owned" },
+    dependencies({
+      loadWorkspaceProjection: async () => projection({
+        membership: null,
+        boundMembership: inactiveBoundMembership,
+        activeMemberships: [replacementMembership],
+      }),
+    }),
+  );
+  assert.equal(result.kind, "access-resolution-required");
+  assert.equal(result.selectedOrganizationId, null);
 });
 
-test("wrong requested organization remains a governed routing result", async () => {
+test("wrong requested organization remains governed for a healthy active binding", async () => {
   const result = await resolveParticipantRouteWithDependencies(
     { sessionCookie: "session", requestedOrganizationId: "org-other" },
     dependencies(),
   );
-
   assert.equal(result.kind, "wrong-organization");
   assert.equal(result.state.organization.id, "org-route-3a");
 });
@@ -360,16 +330,14 @@ test("restriction dependency failure reaches retryable recovery", async () => {
     () => resolveParticipantRouteWithDependencies(
       { sessionCookie: "session" },
       dependencies({
-        loadRestrictions: async () => {
-          throw new Error("restriction repository unavailable");
-        },
+        loadRestrictions: async () => { throw new Error("restriction repository unavailable"); },
       }),
     ),
     "restriction-state",
   );
 });
 
-test("active restrictions remain governed restriction results", async () => {
+test("active restriction remains a governed restriction result", async () => {
   const result = await resolveParticipantRouteWithDependencies(
     { sessionCookie: "session" },
     dependencies({
@@ -379,17 +347,15 @@ test("active restrictions remain governed restriction results", async () => {
       }),
     }),
   );
-
   assert.equal(result.kind, "restricted");
   assert.equal(result.restrictionState, "suspended");
 });
 
-test("healthy protected route resolves authorized state", async () => {
+test("healthy protected route resolves only the original authorized binding", async () => {
   const result = await resolveParticipantRouteWithDependencies(
     { sessionCookie: "session" },
     dependencies(),
   );
-
   assert.equal(result.kind, "authorized");
   assert.equal(result.state.organization.id, "org-route-3a");
   assert.equal(result.membership.id, "membership-route-3a");
