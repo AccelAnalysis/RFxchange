@@ -32,6 +32,7 @@ assert.match(dependencyMap, /documentation-only Wave 4 Slice 4\.1 dependency\/au
 assert.match(dependencyMap, /`ISS-001`, `ISS-002` and `ISS-003`/);
 assert.match(brandTracker, /B6b — Network Lenses \| Not Started \/ intentionally pending/);
 assert.match(closeout, /all \*\*27\*\* top-level Firestore collections/);
+assert.match(closeout, /PR #140 production CI run `31306043810`/);
 assert.match(closeout, /zero residual Storage objects/);
 assert.match(closeout, /all 41 RFx Core IDs[\s\S]*remain Not Started/);
 

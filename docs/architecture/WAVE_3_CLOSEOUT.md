@@ -1,12 +1,14 @@
 # Wave 3 Network closeout
 
-**Status:** CLOSEOUT ACCEPTED FROM MERGED `main`; CLOSEOUT PR/PRODUCTION CI PENDING
+**Status:** CLOSEOUT ACCEPTED; PRODUCTION MERGE EVIDENCE IN PR #140
 
 **Feature-ID effect:** none — the accepted state remains **438 total · 152 Done · 286 Not Started**, Activation **43/43**, Network **38/38**
 
 ## Reconciled boundary
 
 This closeout was executed from merged Slice 3.8 `main` at `2727b6111d1582225e8ece409d015b8696a8cce7`. Slice 3.8 passed final-head production CI run `31303588724`, merged through PR #139, and passed post-merge `main` CI run `31303727886` before closeout began.
+
+The canonical local `npm run check` passed with **438/438 architecture tests**, **19/19 Functions tests**, typecheck and production build; lint reported only the 13 inherited warnings. PR #140 production CI run `31306043810` then passed on substantive closeout head `6473e77611b18da5d6c08dec1a1b097a02129a5d`, including repository guardrails, the complete Firebase Auth/Firestore/Functions/Storage emulator chain, architecture tests, typecheck, lint and production build.
 
 All 38 Network Feature IDs are checked and retain evidence against their own acceptance boundaries: four inherited organization/role foundations, three transactional-communications features, four controlled-discovery features, four market-profile features, three organization-enrichment features, seven referral/acquisition features, four provider-foundation features, seven provider discovery/routing/distribution features and two persistent-education features. AMACS 0.5.0 reconciliation, the AI/AMACS Interpretation Foundation and Brand Gates are cross-cutting no-Feature-ID work; none contributed an inferred completion. `RES-006`, `ADM-071`, all 41 RFx Core IDs and every later-wave ID remain Not Started.
 
