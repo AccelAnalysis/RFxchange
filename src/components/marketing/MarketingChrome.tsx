@@ -35,7 +35,7 @@ export async function MarketingHeader() {
             ))}
           </div>
         </details>
-        <div className={styles.navActions}>
+        <div className={`${styles.navActions} ${responsive.mobileActions}`}>
           <LanguageSwitcher />
           <Link className={styles.buttonLight} href="/signin">
             {dictionary.common.actions.signIn}
