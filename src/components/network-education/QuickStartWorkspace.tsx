@@ -75,8 +75,8 @@ export function QuickStartWorkspace({ initialSnapshot }: Readonly<{ initialSnaps
           {["understandable", "discoverable", "connectable", "actionable"].map((step, index) => <li key={step}><span>{index + 1}</span>{t(`networkEducation.valueSpine.${step}`)}</li>)}
         </ol>
 
-        <section className={styles.recommendation} aria-labelledby="education-recommendation">
-          <div><p>{t("networkEducation.recommended")}</p><h2 id="education-recommendation">{recommendation ? t(`networkEducation.${recommendation.messageKey}.title`) : ""}</h2></div>
+        <section className={styles.recommendation} aria-label={t("networkEducation.recommended")}>
+          <div><p>{t("networkEducation.recommended")}</p><h2>{recommendation ? t(`networkEducation.${recommendation.messageKey}.title`) : ""}</h2></div>
           <p>{t("networkEducation.recommendationBoundary")}</p>
         </section>
 

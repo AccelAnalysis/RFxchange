@@ -26,6 +26,8 @@ assert.match(route, /lifecycleState !== "open-platform"/);
 assert.match(page, /createServerNetworkEducationService\(\)\.snapshot/);
 assert.match(workspace, /Understandable|valueSpine/);
 assert.match(workspace, /catalogUpdateAvailable/);
+assert.match(workspace, /className=\{styles\.recommendation\} aria-label=\{t\("networkEducation\.recommended"\)\}/);
+assert.doesNotMatch(workspace, /aria-labelledby="education-recommendation"/);
 for (const question of ["questions.what", "questions.why", "questions.happens", "questions.next"]) assert.ok(explainer.includes(question));
 assert.match(explainer, /<details/);
 assert.doesNotMatch(explainer, /aria-modal|role="dialog"/);

@@ -51,4 +51,4 @@ Cleanup deleted all **16** configured education progress/event/command records a
 
 The Slice 3.7 emulator smoke existed but was absent from the production CI emulator chain; this slice adds it alongside the education smoke so future changes exercise both accepted domains. No dependency edge changed.
 
-Brand Gate B6b remains intentionally pending: no specific brief, prerequisite or bounded convergence defect was established. Wave 3 closeout remains a separate evidence reconciliation after this implementation merges and post-merge production CI passes. Wave 4, B6c, credibility, commercial, Intelligence Dark, Presentation Mode, sound and haptics were not begun.
+Brand Gate B6b remains intentionally pending: no specific brief, prerequisite or bounded convergence defect was established. PR #139 final-head production CI run `31303588724` passed, the slice merged at `2727b6111d1582225e8ece409d015b8696a8cce7`, and post-merge run `31303727886` passed. The later integrated Wave 3 exit is recorded in `docs/architecture/WAVE_3_CLOSEOUT.md`. Wave 4, B6c, credibility, commercial, Intelligence Dark, Presentation Mode, sound and haptics were not begun.

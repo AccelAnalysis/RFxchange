@@ -87,7 +87,7 @@ User-facing work must not implement a target brand expression by fabricating a d
 - `docs/tracking/RFxchange_DEPENDENCY_MAP.md` — sequencing/dependency authority.
 - `docs/slices/` — approved implementation boundaries and exit conditions for planned slices.
 
-Wave 2 is complete and reconciled. Wave 3 Slices 3.1 through 3.7 and Brand Gates B0–B6a are merged. The post-Slice-3.7 B6b checkpoint left that optional convergence gate intentionally pending. Slice 3.8 implementation and acceptance are complete under `../slices/SLICE_3_8_EXECUTION_AUTHORITY.md`, and PR #139 exact-head CI passed; merge, post-merge CI and the separate Wave 3 closeout remain before any later work may be authorized.
+Wave 2 is complete and reconciled. Wave 3 Slices 3.1 through 3.8 and Brand Gates B0–B6a are merged. Slice 3.8 final-head and post-merge CI passed, and the separate configured-browser/zero-residual exit in `../architecture/WAVE_3_CLOSEOUT.md` accepted Network at 38/38. The post-Slice-3.7 and closeout B6b checkpoints left that optional convergence gate intentionally pending. The next planning candidate is documentation-only Wave 4 Slice 4.1 dependency/authority reconciliation; runtime implementation remains unauthorized without a specific approved brief.
 
 ## Reference artifacts
 
