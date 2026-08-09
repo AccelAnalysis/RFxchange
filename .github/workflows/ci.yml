@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
@@ -30,6 +30,18 @@ jobs:
           path: package-lock.json
           if-no-files-found: error
           retention-days: 1
+      - name: Commit trusted dependency lockfile
+        shell: bash
+        run: |
+          if git ls-files --error-unmatch package-lock.json >/dev/null 2>&1; then
+            echo "package-lock.json is already tracked; no generation commit required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "Commit trusted dependency lockfile"
+          git push origin HEAD:${GITHUB_HEAD_REF}
       - name: Repository guardrails
         run: npm run validate
       - name: Cloud Functions build and unit tests
