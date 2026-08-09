@@ -51,9 +51,9 @@ function firebaseErrorMessage(error: unknown): string {
 }
 
 /**
- * Only provider errors that affirmatively describe a bad/expired credential are allowed to make a
- * participant appear signed out. Unknown Firebase/Admin errors are treated as backend failures so
- * transient provider/network faults reach the retryable recovery boundary instead.
+ * Only provider errors that affirmatively describe an unusable credential or deleted provider
+ * identity are allowed to make a participant appear signed out. Unknown Firebase/Admin errors are
+ * treated as backend failures so transient provider/network faults reach retryable recovery.
  */
 function isCredentialRejection(error: unknown): boolean {
   const code = firebaseErrorCode(error);
@@ -62,7 +62,8 @@ function isCredentialRejection(error: unknown): boolean {
     code === "auth/invalid-id-token" ||
     code === "auth/id-token-expired" ||
     code === "auth/invalid-session-cookie" ||
-    code === "auth/session-cookie-expired"
+    code === "auth/session-cookie-expired" ||
+    code === "auth/user-not-found"
   );
 }
 
