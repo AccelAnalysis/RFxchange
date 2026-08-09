@@ -54,6 +54,20 @@ function acquisitionState(context: BoundAcquisitionContext): NonNullable<Activat
   });
 }
 
+function withBoundAcquisition(
+  state: ActivationJourneyState,
+  context: BoundAcquisitionContext,
+): ActivationJourneyState {
+  return Object.freeze({
+    ...state,
+    acquisitionContext: acquisitionState(context),
+    controlledPlatformUrl:
+      state.lifecycleState === "controlled-platform" && state.organization
+        ? "/acquisition/continue"
+        : state.controlledPlatformUrl,
+  });
+}
+
 export async function GET() {
   const csrfToken = randomUUID();
   const response = NextResponse.json({ csrfToken });
@@ -159,7 +173,7 @@ export async function POST(request: NextRequest) {
             now: new Date().toISOString(),
           }));
           acquisitionAttached = true;
-          state = Object.freeze({ ...state, acquisitionContext: acquisitionState(boundAcquisition) });
+          state = withBoundAcquisition(state, boundAcquisition);
         }
       }
     }
