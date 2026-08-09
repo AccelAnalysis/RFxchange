@@ -12,11 +12,11 @@
 
 ## Progress
 
-**438 total · 143 Done · 295 Not Started**
+**438 total · 150 Done · 288 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
-- 3 - Network: **29/38**
+- 3 - Network: **36/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
@@ -46,7 +46,7 @@ Wave 2 remains complete at **43/43 Activation**. The Runtime Convergence Gate, R
 - **AMACS 0.5.0 reconciliation — COMPLETE VIA PR #123; no Feature IDs**: deterministically reconstructed and verified the immutable 0.5.0 release at `da7879f2609271b067ae6d02875e9388a02c4fe5`, preserved the historical 0.1.0 release, generated release-aware catalog/search/registry/runtime projections, proved the 500 historical capabilities remained with 115 additive capabilities and no inferred historical mutation, and isolated all artifacts and infrastructure from participant surfaces. Local `npm run check`, the official upstream validator and 44 upstream tests, seven focused RFxchange tests and production CI run `31284501027` passed on substantive head `c2d6695cdea2f3d3386dab354e37e1bba9440e87`.
 - **AI/AMACS Interpretation Foundation — COMPLETE VIA PR #124; no Feature IDs**: established the authenticated provider-neutral gateway, concrete OpenAI adapter with truthful disabled state, bounded AMACS 0.5.0 retrieval, strict schema/catalog validation, non-authoritative record/candidate and disposition contracts, minimized provenance, metering, transactional quotas, independent manual catalog path and deterministic regression evaluation. Local `npm run check` passed with 400 architecture tests and 19 Functions tests; focused Firestore emulator acceptance proved direct-client denial, atomic persistence, disposition and quota behavior. No live provider smoke was claimed without configured credentials.
 
-Network completion is **29/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, seven Slice 3.5 referral/acquisition features, and four Slice 3.6 provider-foundation features. Slice 3.6 adds a post-activation organization application, exact scoped review, immutable lifecycle/audit history, Official Resource Provider-only status, and a private structured service profile without implying verification, endorsement, payment, capacity or public routing. Focused tests, Firestore emulator acceptance, all five locales, desktop/intermediate/mobile configured-browser acceptance, exact cleanup of 66 Firestore records and disposable Auth identities, and the canonical repository gate passed. PR #132 passed exact-head production CI run `31297388363`, merged at `26412435651a13cc7a6540bbe50bc7b646760d78`, and post-merge production CI run `31297486059` passed. This documentation-only recalculation changes no checkbox or total and separately authorizes Slice 3.7; Slice 3.8 and later work remain unstarted.
+Network completion is **36/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, seven Slice 3.5 referral/acquisition features, four Slice 3.6 provider-foundation features, and seven Slice 3.7 resource-routing features. Slice 3.7 adds explicit provider discovery publication, service-territory and maintained-availability matching, deterministic explainable contextual routing, exact-recipient provider requests and redirect, request-scoped messages, governed resource publication and bounded provider acquisition invitations without implying qualification, service acceptance, verification, credibility, capacity or outcome. Focused tests, Firestore emulator acceptance, all five locales, desktop/intermediate/mobile configured-browser acceptance, exact cleanup of 74 Firestore records and disposable Auth identities, 432 architecture tests, 19 Functions tests and the canonical repository gate passed on the accepted implementation branch. `RES-006`, `ADM-071`, B6b, Slice 3.8 and later work remain unstarted pending merge and a fresh dependency recalculation.
 
 ## Feature-ID checklist
 
@@ -183,7 +183,7 @@ Network completion is **29/38**: four inherited Wave 1 foundations, three Slice 
 ### 3 - Network
 
 - [x] `ACQ-006` — Slice 3.5; real external referral, signed acquisition continuity, legitimate OPEN recipient binding, explicit exact-referral attachment, mismatch/replay/expiry gates, configured-browser acceptance, and zero-residual cleanup
-- [ ] `ACQ-008`
+- [x] `ACQ-008` — Slice 3.7; signed provider profile-completion invitation, legitimate activation continuity, no provider-status/authority grant, configured-browser acceptance, and zero-residual cleanup
 - [x] `GEO-012` — PR #120; current OPEN/geography/marker authority, after-load restriction/lifecycle denial, configured-browser responsive acceptance, cleanup, and `npm run check`
 - [x] `EDU-014` — Slice 3.5; append-only first-use education acknowledgement for the named recipient and exact shared fields before send, continued availability, all five locales, and browser acceptance
 - [ ] `EDU-016`
@@ -200,20 +200,20 @@ Network completion is **29/38**: four inherited Wave 1 foundations, three Slice 
 - [x] `DSC-001` — PR #120; capability-first permitted organization search, explainable match boundary, configured-browser acceptance, emulator acceptance, and `npm run check`
 - [x] `DSC-002` — PR #120; canonical base/service geography filtering with base-versus-service separation, configured-browser acceptance, emulator acceptance, and `npm run check`
 - [x] `DSC-003` — PR #120; privacy-safe exact/approximate/locality-only map/list/detail synchronization, stale selection recovery, accessibility/responsive acceptance, cleanup, and `npm run check`
-- [ ] `DSC-011`
+- [x] `DSC-011` — Slice 3.7; deterministic service/locality/availability contextual routing with explicit match reasons, no model/capacity/commercial ordering, focused and configured-browser acceptance
 - [x] `REF-001` — Slice 3.5; current-authority organization sender, idempotent draft/send, versioned communication correlation, focused/emulator/configured-browser acceptance, and cleanup
 - [x] `REF-002` — Slice 3.5; exact attached recipient authority, explicit accept/decline, sender/recipient isolation, external-recipient browser acceptance, and focused/emulator denial coverage
 - [x] `REF-003` — Slice 3.5; typed draft/sent/accepted/declined/contacted/closed/expired lifecycle, expected-version conflicts, append-only events/audits, retry recovery, and real browser progression through close
 - [x] `REF-004` — Slice 3.5; structured need, summary, urgency, contact method, purpose and optional opportunity context with minimized role-specific projections
 - [x] `REF-005` — Slice 3.5; explicit named-recipient consent, approved minimum sharing, private-field suppression, no public leakage, real-path privacy, and direct-client denial
-- [ ] `REF-006`
+- [x] `REF-006` — Slice 3.7; exact published provider/service/version connection, current eligibility, consented minimum sharing, accept/decline/redirect and request-scoped messages with immutable evidence
 - [x] `RES-001` — Slice 3.6; post-activation Profile Complete application, authoritative organization references, multi-select localized categories, private evidence ownership, focused/emulator/configured-browser acceptance, and cleanup
 - [x] `RES-002` — Slice 3.6; explicit review/information/response/resubmission/approval/denial lifecycle, exact scoped authority, immutable versions/events/audits, denial/reapplication, direct-client denial, and configured-browser acceptance
 - [x] `RES-003` — Slice 3.6; approval-only private structured service profile with maintained services, geography, eligibility, intake, contact, modality, languages, explicit availability/capacity truth, and no public projection
-- [ ] `RES-004`
-- [ ] `RES-005`
-- [ ] `RES-007`
-- [ ] `RES-008`
+- [x] `RES-004` — Slice 3.7; explicit versioned provider publication over current approved service profile and selected maintained services, reversible withdrawal, focused/emulator/browser acceptance
+- [x] `RES-005` — Slice 3.7; server-authorized service-territory discovery, separately rendered territory and office marker, explicit maintained availability and privacy-safe projection
+- [x] `RES-007` — Slice 3.7; provider-owned resource draft/publish/withdraw/expire lifecycle, moderation boundary, safe URLs, minimized public projection and fresh-load browser acceptance
+- [x] `RES-008` — Slice 3.7; provider/requester-scoped append-only communications and bounded provider resource distribution without acceptance, qualification or outcome claims
 - [x] `ADM-055` — PR #43
 - [x] `ADM-056` — PR #43
 - [x] `ADM-070` — Slice 3.6; exact-permission/scope provider queue and minimum-necessary review console with authoritative organization references, evidence metadata boundary, request/response/decision history, focused and configured-browser acceptance

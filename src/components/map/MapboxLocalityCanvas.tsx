@@ -25,6 +25,13 @@ export interface ControlledLocalityRelationshipPath {
   readonly status: "sent" | "accepted" | "contacted" | "closed";
 }
 
+export interface ControlledLocalityServiceField {
+  readonly id: string;
+  readonly label: string;
+  readonly geometry: LocalityGeometry;
+  readonly selected?: boolean;
+}
+
 export interface MapboxLocalityCanvasProps {
   readonly model: ControlledLocalityMapModel;
   readonly initialZoom?: ControlledLocalityZoomLevel;
@@ -32,9 +39,10 @@ export interface MapboxLocalityCanvasProps {
   readonly overlaySide?: "left" | "right" | "split";
   readonly pointOverlays?: readonly ControlledLocalityPointOverlay[];
   readonly relationshipPaths?: readonly ControlledLocalityRelationshipPath[];
+  readonly serviceFields?: readonly ControlledLocalityServiceField[];
 }
 
-type LocalityGeometry =
+export type LocalityGeometry =
   | { readonly type: "Polygon"; readonly coordinates: number[][][] }
   | { readonly type: "MultiPolygon"; readonly coordinates: number[][][][] };
 
@@ -69,11 +77,15 @@ const SEARCH_AREA_FILL_LAYER_ID = "rfx-search-result-area-fill";
 const SEARCH_AREA_LINE_LAYER_ID = "rfx-search-result-area-line";
 const RELATIONSHIP_PATH_SOURCE_ID = "rfx-relationship-paths";
 const RELATIONSHIP_PATH_LAYER_ID = "rfx-relationship-paths-line";
+const SERVICE_FIELD_SOURCE_ID = "rfx-provider-service-fields";
+const SERVICE_FIELD_FILL_LAYER_ID = "rfx-provider-service-fields-fill";
+const SERVICE_FIELD_LINE_LAYER_ID = "rfx-provider-service-fields-line";
 const VIEWPORT_STORAGE_PREFIX = "rfxchange:map-camera:";
 const MAPBOX_MAX_ZOOM = 24;
 const WEB_MERCATOR_MAX_LATITUDE = 85.05112878;
 const EMPTY_POINT_OVERLAYS: readonly ControlledLocalityPointOverlay[] = Object.freeze([]);
 const EMPTY_RELATIONSHIP_PATHS: readonly ControlledLocalityRelationshipPath[] = Object.freeze([]);
+const EMPTY_SERVICE_FIELDS: readonly ControlledLocalityServiceField[] = Object.freeze([]);
 const EMPTY_FEATURE_COLLECTION = Object.freeze({
   type: "FeatureCollection" as const,
   features: [] as never[],
@@ -375,6 +387,7 @@ export function MapboxLocalityCanvas({
   overlaySide = "split",
   pointOverlays = EMPTY_POINT_OVERLAYS,
   relationshipPaths = EMPTY_RELATIONSHIP_PATHS,
+  serviceFields = EMPTY_SERVICE_FIELDS,
 }: MapboxLocalityCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -425,6 +438,11 @@ export function MapboxLocalityCanvas({
       geometry: { type: "LineString" as const, coordinates: [[path.from[0], path.from[1]], [path.to[0], path.to[1]]] },
     })),
   }), [relationshipPaths]);
+
+  const serviceFieldGeoJson = useMemo(() => ({
+    type: "FeatureCollection" as const,
+    features: serviceFields.map((field) => ({ type: "Feature" as const, properties: { id: field.id, label: field.label, selected: field.selected === true }, geometry: field.geometry })),
+  }), [serviceFields]);
 
   const selectedStyles = useMemo(() => {
     const fill = model.layers.find((layer) => layer.id === "selected-fill")?.style;
@@ -659,6 +677,10 @@ export function MapboxLocalityCanvas({
         type: "geojson",
         data: relationshipPathGeoJson,
       });
+
+      map.addSource(SERVICE_FIELD_SOURCE_ID, { type: "geojson", data: serviceFieldGeoJson });
+      map.addLayer({ id: SERVICE_FIELD_FILL_LAYER_ID, type: "fill", source: SERVICE_FIELD_SOURCE_ID, paint: { "fill-color": ["case", ["==", ["get", "selected"], true], "#2e5eaa", "#4f718f"], "fill-opacity": ["case", ["==", ["get", "selected"], true], 0.16, 0.07] } });
+      map.addLayer({ id: SERVICE_FIELD_LINE_LAYER_ID, type: "line", source: SERVICE_FIELD_SOURCE_ID, paint: { "line-color": ["case", ["==", ["get", "selected"], true], "#2e5eaa", "#4f718f"], "line-opacity": 0.75, "line-width": ["case", ["==", ["get", "selected"], true], 2.5, 1.25], "line-dasharray": [2, 1.5] } });
       map.addLayer({
         id: RELATIONSHIP_PATH_LAYER_ID,
         type: "line",
@@ -776,6 +798,8 @@ export function MapboxLocalityCanvas({
     pointOverlays,
     relationshipPathGeoJson,
     relationshipPaths,
+    serviceFieldGeoJson,
+    serviceFields,
     selectedStyles,
     storageKey,
     token,

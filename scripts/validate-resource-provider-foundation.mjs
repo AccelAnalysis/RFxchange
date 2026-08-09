@@ -21,3 +21,4 @@ assert.match(participant, /not Organization Verified|resourceProviderWorkspace\.
 assert.match(admin, /Minimum-necessary application/);
 for (const locale of ["en-US", "es", "fr", "it", "de"]) assert.ok(fs.existsSync(path.join(root, `src/i18n/messages/resource-providers/${locale}.json`)));
 console.log("Resource Provider foundation validation passed: governed lifecycle, scoped authority, private profile, and non-public boundary are present.");
+await import("./validate-resource-network.mjs");

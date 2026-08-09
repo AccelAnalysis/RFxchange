@@ -1,0 +1,31 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+
+const root = process.cwd();
+const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
+const model = read("src/domain/resource-network/model.ts");
+const service = read("src/application/resource-network/resource-network.ts");
+const repository = read("src/infrastructure/firestore/resource-network.ts");
+const rules = read("firestore.rules");
+const ui = read("src/components/resource-network/ResourceNetworkWorkspace.tsx");
+const map = read("src/components/map/MapboxLocalityCanvas.tsx");
+const referral = read("src/domain/referrals/model.ts") + read("src/application/referrals/referral-network.ts");
+const configuredAcceptance = read("scripts/acceptance-resource-network-configured.mjs");
+
+for (const collection of ["providerDiscoveryPublications", "providerResources", "providerNetworkEvents", "providerNetworkCommands", "providerRequestMessages", "providerAcquisitionInvitations"]) assert.match(rules, new RegExp(`match /${collection}`));
+for (const lifecycle of ["draft", "published", "withdrawn", "expired"]) assert.match(model, new RegExp(`"${lifecycle}"`));
+for (const capability of ["inspectProviderEligibility", "discover", "mutatePublication", "createResource", "addMessage", "invite"]) assert.match(service, new RegExp(capability));
+for (const evidence of ["runTransaction", "transaction.create", "expectedVersion"]) assert.match(repository, new RegExp(evidence.replace(".", "\\.")));
+assert.match(service, /sourceProfileVersion === source\.profile\.version/);
+assert.match(service, /serviceGeographyIds/);
+assert.doesNotMatch(service, /OpenAI|Anthropic|generateText|capacityScore|inferredCapacity/);
+assert.match(referral, /provider-connection/);
+assert.match(referral, /suggestedProviderOrganizationId/);
+assert.match(ui, /consent/is);
+assert.match(map, /rfx-provider-service-fields/);
+assert.match(configuredAcceptance, /RFXCHANGE_EXPECTED_PROJECT_ID/);
+assert.match(configuredAcceptance, /assert\.deepEqual\(residualRecords, \[\]\)/);
+assert.match(configuredAcceptance, /residualAuthUsers: 0/);
+for (const locale of ["en-US", "es", "fr", "it", "de"]) assert.ok(fs.existsSync(path.join(root, `src/i18n/messages/resource-network/${locale}.json`)));
+console.log("Resource Network validation passed: explicit publication, service-territory discovery, governed resources, requests, messages, redirects, and acquisition invitations are present.");

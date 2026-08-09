@@ -369,6 +369,36 @@ service cloud.firestore {
       allow read, write: if serverManagedOnly();
     }
 
+    // RES-004/005/007/008, DSC-011, REF-006 and ACQ-008 remain server projected.
+    // Provider profiles and invitation recipients stay private; events, commands and
+    // request messages are append-only evidence and cannot be rewritten by clients.
+    match /providerDiscoveryPublications/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /providerResources/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /providerNetworkEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /providerNetworkCommands/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /providerRequestMessages/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /providerAcquisitionInvitations/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
     // EDU-001-004 orientation progress is a participant-bound server aggregate. Tutorial events
     // are immutable evidence, and neither collection is directly available to browser clients.
     match /orientationJourneys/{documentId} {

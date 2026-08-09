@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { ReferralNetworkError, type ReferralCommandScope } from "@/src/application/referrals/referral-network";
 import { organizationId } from "@/src/domain/organizations/model";
-import type { ReferralRecipient, ReferralSharedField } from "@/src/domain/referrals/model";
+import type { ProviderReferralContext, ReferralRecipient, ReferralSharedField } from "@/src/domain/referrals/model";
 import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
 import { attemptReferralCommunication, createServerReferralNetworkService } from "@/src/infrastructure/referrals/runtime";
 import { FirestoreReferralRepository } from "@/src/infrastructure/firestore/referrals";
@@ -42,6 +42,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const contentLength = Number(request.headers.get("content-length") ?? "0");
+    if (contentLength > 32_768) return NextResponse.json({ error: "Referral request body is too large." }, { status: 413 });
     const body = await request.json() as Record<string, unknown>;
     const action = String(body.action ?? "");
     const scope = await accessScope(String(body.commandId ?? ""));
@@ -60,6 +62,9 @@ export async function POST(request: NextRequest) {
       const recipient: ReferralRecipient = recipientKind === "external"
         ? Object.freeze({ kind: "external", displayName: String(body.recipientLabel ?? ""), email: String(body.recipientEmail ?? "") })
         : Object.freeze({ kind: "organization", organizationId: organizationId(String(body.recipientOrganizationId ?? "")), displayName: String(body.recipientLabel ?? ""), notificationEmail: null });
+      const providerContext: ProviderReferralContext | null = body.purpose === "provider-connection"
+        ? Object.freeze({ providerOrganizationId: organizationId(String(body.providerOrganizationId ?? body.recipientOrganizationId ?? "")), serviceId: String(body.serviceId ?? ""), publicationVersion: Number(body.publicationVersion) })
+        : null;
       const result = await service.createDraft(scope, {
         recipient,
         need: String(body.need ?? "") as "capability",
@@ -67,6 +72,7 @@ export async function POST(request: NextRequest) {
         urgency: String(body.urgency ?? "") as "standard",
         preferredContactMethod: String(body.preferredContactMethod ?? "") as "email",
         purpose: String(body.purpose ?? "") as "business-introduction",
+        providerContext,
         opportunityReference: typeof body.opportunityReference === "string" ? body.opportunityReference : null,
         sharedFields: Array.isArray(body.sharedFields) ? body.sharedFields.map(String) as ReferralSharedField[] : [],
         consentAcknowledged: body.consentAcknowledged === true,
@@ -88,8 +94,8 @@ export async function POST(request: NextRequest) {
       if (!intent) return NextResponse.json({ error: "Communication recovery is unavailable." }, { status: 404 });
       return NextResponse.json({ communication: await attemptReferralCommunication(intent) });
     }
-    if (["accepted", "declined", "contacted", "closed", "expired"].includes(action)) {
-      const result = await service.transition(scope, { referralId: String(body.referralId ?? ""), expectedVersion: Number(body.expectedVersion), action: action as "accepted", outcome: typeof body.outcome === "string" ? body.outcome as "other" : null });
+    if (["accepted", "declined", "redirected", "contacted", "closed", "expired"].includes(action)) {
+      const result = await service.transition(scope, { referralId: String(body.referralId ?? ""), expectedVersion: Number(body.expectedVersion), action: action as "accepted", outcome: typeof body.outcome === "string" ? body.outcome as "other" : null, suggestedProviderOrganizationId: typeof body.suggestedProviderOrganizationId === "string" ? body.suggestedProviderOrganizationId : null, redirectReason: typeof body.redirectReason === "string" ? body.redirectReason : null });
       return NextResponse.json(result);
     }
     return NextResponse.json({ error: "Referral action is unsupported." }, { status: 400 });

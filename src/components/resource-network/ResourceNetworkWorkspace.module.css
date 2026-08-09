@@ -1,0 +1,38 @@
+.workspace { position: relative; min-height: calc(100vh - 4.4rem); background: #ede9df; }
+.panel { position: absolute; z-index: 5; top: 1rem; right: 1rem; bottom: 1rem; width: min(46rem, calc(100vw - 2rem)); overflow: auto; padding: 1.25rem; border: 1px solid rgba(34,39,45,.16); border-radius: 1.25rem; background: rgba(255,252,245,.94); box-shadow: 0 1.25rem 3rem rgba(24,29,35,.18); backdrop-filter: blur(18px); }
+.panel header h1 { margin: .2rem 0; font-size: clamp(1.6rem,3vw,2.35rem); line-height: 1; }
+.panel h2 { font-size: 1rem; }
+.eyebrow, .status { margin: 0; color: #866315; font-size: .76rem; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+.filters, .columns { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; margin-top: 1rem; }
+.filters label, .form label { display: grid; gap: .35rem; font-size: .8rem; font-weight: 700; }
+.filters input, .filters select, .form input, .form select, .form textarea { width: 100%; box-sizing: border-box; padding: .7rem; border: 1px solid #b8b3a9; border-radius: .6rem; background: #fffdf8; font: inherit; }
+.list, .resources ul, .requests ul { list-style: none; padding: 0; margin: .5rem 0; }
+.list button { display: grid; width: 100%; gap: .25rem; text-align: left; padding: .8rem; border: 0; border-bottom: 1px solid #d9d3c8; background: transparent; }
+.list button:hover, .list button[aria-current="true"] { background: #f4ead0; }
+.list span, .list small, .resources span, .requests span { color: #5d6064; }
+.detail { padding: .9rem; border-radius: .8rem; background: #f7f3e9; }
+.detail dl div { margin: .6rem 0; }
+.detail dt { font-size: .72rem; font-weight: 750; text-transform: uppercase; }
+.detail dd { margin: .15rem 0; }
+.form { display: grid; gap: .65rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #d9d3c8; }
+.form textarea { min-height: 5rem; resize: vertical; }
+.check { grid-template-columns: auto 1fr !important; align-items: start; }
+.check input { width: auto; }
+.panel button { padding: .62rem .85rem; border: 1px solid #252a2f; border-radius: 999px; background: #252a2f; color: white; font-weight: 700; cursor: pointer; }
+.panel button:disabled { opacity: .5; }
+.notice { padding: .7rem; border-radius: .5rem; background: #fff0be; }
+.empty { padding: 1rem; border: 1px dashed #aaa49a; border-radius: .7rem; }
+.fieldAlternative { margin-top: 1rem; padding: .75rem; border-left: 3px solid #2e5eaa; background: #eef3f7; }
+.fieldAlternative ul { margin: 0; padding-left: 1.2rem; }
+.fieldAlternative li { margin: .35rem 0; }
+.fieldAlternative span { display: block; color: #4d565e; }
+.resources, .requests, .manage { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #cfc9be; }
+.resources li, .requests li { padding: .75rem 0; border-bottom: 1px solid #ddd7cc; }
+.resources li > * { display: block; }
+.manage summary { font-weight: 800; cursor: pointer; }
+.serviceChecks { display: grid; gap: .4rem; margin: .7rem 0; }
+.serviceChecks label { display: flex; gap: .5rem; }
+.inlineForm { display: grid; gap: .5rem; margin-top: .7rem; padding: .7rem; border-left: 2px solid #b98727; }
+.inlineForm label { display: grid; gap: .3rem; font-size: .8rem; font-weight: 700; }
+.inlineForm input, .inlineForm select, .inlineForm textarea { padding: .55rem; border: 1px solid #b8b3a9; border-radius: .5rem; background: #fffdf8; }
+@media (max-width: 760px) { .panel { position: relative; inset: auto; width: auto; margin: 45vh .5rem .5rem; } .columns, .filters { grid-template-columns: 1fr; } .workspace { min-height: 100vh; } }

@@ -12,11 +12,11 @@ import {
   type BusinessReferral, type ReferralCommandReceipt, type ReferralCommunicationIntent,
   type ReferralEducationAcknowledgement, type ReferralEvent, type ReferralEventKind,
   type ReferralNeed, type ReferralUrgency, type ReferralContactMethod, type ReferralPurpose,
-  type ReferralOutcome, type ReferralRecipient, type ReferralSharedField,
+  type ReferralOutcome, type ReferralRecipient, type ReferralSharedField, type ProviderReferralContext,
 } from "../../domain/referrals/model.ts";
 import type { ReferralRepository } from "../../domain/referrals/repository.ts";
 import { organizationMembershipId } from "../../domain/users/model.ts";
-import { REFERRAL_INVITATION_EVENT, referralTransactionalEmailCatalog } from "./referral-templates.ts";
+import { PROVIDER_REQUEST_EVENT, REFERRAL_INVITATION_EVENT, referralTransactionalEmailCatalog } from "./referral-templates.ts";
 
 const REFERRAL_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -36,6 +36,9 @@ export interface ReferralNetworkDependencies {
   readonly repository: ReferralRepository;
   readonly profiles: OrganizationProfileRepository;
   readonly acquisition: ReferralAcquisitionIssuer;
+  readonly providerEligibility?: Readonly<{
+    inspect(input: Readonly<{ organizationId: OrganizationId; serviceId?: string | null; publicationVersion?: number | null }>): Promise<Readonly<{ eligible: boolean; displayName: string | null }>>;
+  }>;
   readonly publicOrigin: string;
   readonly now?: () => string;
   readonly id?: () => string;
@@ -121,7 +124,7 @@ export class ReferralNetworkService {
     return Object.freeze({ replayed: false as const, receipt, acknowledgement });
   }
 
-  async createDraft(scope: ReferralCommandScope, input: Readonly<{ referralId?: string; recipient: ReferralRecipient; need: ReferralNeed; summary: string; urgency: ReferralUrgency; preferredContactMethod: ReferralContactMethod; purpose: ReferralPurpose; opportunityReference?: string | null; sharedFields: readonly ReferralSharedField[]; consentAcknowledged: boolean }>) {
+  async createDraft(scope: ReferralCommandScope, input: Readonly<{ referralId?: string; recipient: ReferralRecipient; need: ReferralNeed; summary: string; urgency: ReferralUrgency; preferredContactMethod: ReferralContactMethod; purpose: ReferralPurpose; opportunityReference?: string | null; providerContext?: ProviderReferralContext | null; sharedFields: readonly ReferralSharedField[]; consentAcknowledged: boolean }>) {
     const requestFingerprint = fingerprint(input);
     const authorization = await this.authorize(scope);
     const prior = await this.replay(scope, "created", requestFingerprint);
@@ -145,6 +148,12 @@ export class ReferralNetworkService {
           : null,
       });
     }
+    if (input.purpose === "provider-connection") {
+      if (recipient.kind !== "organization" || !input.providerContext || input.providerContext.providerOrganizationId !== recipient.organizationId) throw new ReferralNetworkError("invalid", "Provider request must target the exact selected provider organization.");
+      if (!this.dependencies.providerEligibility) throw new ReferralNetworkError("forbidden", "Provider routing authority is unavailable.");
+      const eligibility = await this.dependencies.providerEligibility.inspect({ organizationId: recipient.organizationId, serviceId: input.providerContext.serviceId, publicationVersion: input.providerContext.publicationVersion });
+      if (!eligibility.eligible) throw new ReferralNetworkError("not-found", "The selected provider service is no longer available for requests.");
+    }
     let referral: BusinessReferral;
     try {
       referral = createReferral({ ...input, recipient, id: input.referralId ?? `ref_${fingerprint(scope.commandId).slice(0, 40)}`, senderOrganizationId: authorization.organization.id, senderOrganizationName: senderProfile.displayName, correlationId: `referral:${scope.commandId}`, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, now, expiresAt: expiry(now) });
@@ -163,6 +172,12 @@ export class ReferralNetworkService {
     if (prior) return prior;
     const current = await this.dependencies.repository.getById(input.referralId);
     if (!current || current.senderOrganizationId !== authorization.organization.id) throw new ReferralNetworkError("not-found", "Referral draft is unavailable to this organization.");
+    if (current.purpose === "provider-connection") {
+      const context = current.providerContext;
+      if (!context || !this.dependencies.providerEligibility) throw new ReferralNetworkError("forbidden", "Provider routing authority is unavailable.");
+      const eligibility = await this.dependencies.providerEligibility.inspect({ organizationId: context.providerOrganizationId, serviceId: context.serviceId, publicationVersion: context.publicationVersion });
+      if (!eligibility.eligible) throw new ReferralNetworkError("conflict", "This provider service changed or is no longer accepting new requests; choose another provider.");
+    }
     const education = await this.dependencies.repository.getEducation(authorization.organization.id, authorization.context.user.id);
     if (!education || education.version !== 1 || education.recipientLabel !== current.recipient.displayName || JSON.stringify(education.sharedFields) !== JSON.stringify(current.sharedFields)) throw new ReferralNetworkError("education-required", "Review and acknowledge the referral education for this recipient and exact data before sending.");
     const now = this.now();
@@ -185,7 +200,7 @@ export class ReferralNetworkService {
     catch (error) { throw new ReferralNetworkError("conflict", error instanceof Error ? error.message : "Referral could not be sent."); }
     let communication: ReferralCommunicationIntent | null = null;
     if (recipientEmail && messageId) {
-      const reference = referralTransactionalEmailCatalog.referenceForEvent(REFERRAL_INVITATION_EVENT, 1);
+      const reference = referralTransactionalEmailCatalog.referenceForEvent(current.purpose === "provider-connection" ? PROVIDER_REQUEST_EVENT : REFERRAL_INVITATION_EVENT, 1);
       const continueUrl = serializedToken
         ? `${this.dependencies.publicOrigin}/api/acquisition/referral?token=${encodeURIComponent(serializedToken)}`
         : `${this.dependencies.publicOrigin}/referrals?referral=${encodeURIComponent(updated.id)}`;
@@ -197,7 +212,7 @@ export class ReferralNetworkService {
     return Object.freeze({ replayed: false as const, receipt, referral: updated, communication });
   }
 
-  async transition(scope: ReferralCommandScope, input: Readonly<{ referralId: string; expectedVersion: number; action: "accepted" | "declined" | "contacted" | "closed" | "expired"; outcome?: ReferralOutcome | null }>) {
+  async transition(scope: ReferralCommandScope, input: Readonly<{ referralId: string; expectedVersion: number; action: "accepted" | "declined" | "redirected" | "contacted" | "closed" | "expired"; outcome?: ReferralOutcome | null; suggestedProviderOrganizationId?: string | null; redirectReason?: string | null }>) {
     const requestFingerprint = fingerprint(input);
     const authorization = await this.authorize(scope);
     const prior = await this.replay(scope, input.action, requestFingerprint);
@@ -207,11 +222,22 @@ export class ReferralNetworkService {
     const isSender = current.senderOrganizationId === authorization.organization.id;
     const isRecipient = current.attachedRecipientOrganizationId === authorization.organization.id;
     if (!isSender && !isRecipient) throw new ReferralNetworkError("not-found", "Referral is unavailable.");
-    if (["accepted", "declined"].includes(input.action) && !isRecipient) throw new ReferralNetworkError("forbidden", "Only the recipient organization may respond to this referral.");
+    if (["accepted", "declined", "redirected"].includes(input.action) && !isRecipient) throw new ReferralNetworkError("forbidden", "Only the recipient organization may respond to this referral.");
     if (input.action === "closed" && !isSender) throw new ReferralNetworkError("forbidden", "Only the sending organization may close this referral.");
+    let providerRedirect: Parameters<typeof transitionReferral>[0]["providerRedirect"] = null;
+    if (input.action === "redirected") {
+      if (current.purpose !== "provider-connection" || !this.dependencies.providerEligibility) throw new ReferralNetworkError("invalid", "Only an eligible provider request can be redirected.");
+      let suggestedId: OrganizationId;
+      try { suggestedId = organizationId(input.suggestedProviderOrganizationId ?? ""); }
+      catch { throw new ReferralNetworkError("invalid", "Choose an eligible provider for redirect."); }
+      if (suggestedId === current.attachedRecipientOrganizationId || suggestedId === current.senderOrganizationId) throw new ReferralNetworkError("invalid", "Choose a different eligible provider for redirect.");
+      const eligibility = await this.dependencies.providerEligibility.inspect({ organizationId: suggestedId });
+      if (!eligibility.eligible || !eligibility.displayName) throw new ReferralNetworkError("not-found", "The suggested provider is unavailable.");
+      providerRedirect = Object.freeze({ suggestedProviderOrganizationId: suggestedId, suggestedProviderDisplayName: eligibility.displayName, reason: input.redirectReason ?? "" });
+    }
     const now = this.now();
     let updated: BusinessReferral;
-    try { updated = transitionReferral({ referral: current, expectedVersion: input.expectedVersion, to: input.action, actorUserId: authorization.context.user.id, now, outcome: input.outcome }); }
+    try { updated = transitionReferral({ referral: current, expectedVersion: input.expectedVersion, to: input.action, actorUserId: authorization.context.user.id, now, outcome: input.outcome, providerRedirect }); }
     catch (error) { throw new ReferralNetworkError("conflict", error instanceof Error ? error.message : "Referral transition failed."); }
     const receipt = command({ id: scope.commandId, referralId: updated.id, organizationId: authorization.organization.id, action: input.action, requestFingerprint, version: updated.version, now });
     await this.dependencies.repository.save({ referral: updated, event: event({ id: `refevent_${this.id()}`, referral: updated, kind: input.action, from: current.status, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, commandId: scope.commandId, now }), command: receipt, audits: [createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: `referral.${input.action}`, occurredAt: now })], communication: null });

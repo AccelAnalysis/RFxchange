@@ -1,6 +1,6 @@
 # The RFxchange Brand Experience System
 
-**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a AND SLICES 3.1–3.6 COMPLETE; SLICE 3.7 AUTHORIZED**
+**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a AND SLICES 3.1–3.6 MERGED; SLICE 3.7 IMPLEMENTATION ACCEPTED**
 
 This directory defines the approved target brand experience for **The RFxchange** and the sequential convergence gates that apply it without weakening product, security, privacy, geography, lifecycle, or evidence authority.
 
@@ -34,11 +34,11 @@ The final B6a implementation merged at:
 
 `bf59f1d18fa6db3f43660c42777b494b505be545`
 
-The Brand Gates and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Slice 3.6 acceptance are:
+The Brand Gates and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Slice 3.7 acceptance are:
 
-- **438 total · 143 Done · 295 Not Started**
+- **438 total · 150 Done · 288 Not Started**
 - Activation: **43/43**
-- Network: **29/38**
+- Network: **36/38**
 
 See:
 
@@ -124,7 +124,7 @@ The non-Feature prerequisites identified before Wave 3 Slice 3.2 were satisfied:
 
 B4 and B5 are also complete under the adopted numerical execution sequence.
 
-**Wave 3 Slice 3.2 is complete via PR #120, the no-Feature-ID AMACS and AI foundations are complete via PRs #123–#124, Slices 3.3–3.6 are complete via PRs #126, #128, #130 and #132, and Slice 3.7 is separately authorized from merged `main`.**
+**Wave 3 Slice 3.2 is complete via PR #120, the no-Feature-ID AMACS and AI foundations are complete via PRs #123–#124, Slices 3.3–3.6 are complete via PRs #126, #128, #130 and #132, and Slice 3.7 implementation and acceptance are complete with production merge pending.**
 
 Slice 3.2 completed:
 
@@ -133,7 +133,7 @@ Slice 3.2 completed:
 - `DSC-002`;
 - `DSC-003`.
 
-Neither the Brand Gates, AMACS reconciliation nor AI/AMACS foundation completed any additional Feature ID. Slice 3.6 completed only `RES-001`, `RES-002`, `RES-003`, and `ADM-070`, producing **438 total · 143 Done · 295 Not Started** and Network **29/38**. The Slice 3.7 authority update is documentation-only and changes no total.
+Neither the Brand Gates, AMACS reconciliation nor AI/AMACS foundation completed any additional Feature ID. Slice 3.7 accepted only `RES-004`, `RES-005`, `DSC-011`, `REF-006`, `RES-007`, `RES-008`, and `ACQ-008`, producing **438 total · 150 Done · 288 Not Started** and Network **36/38**. B6b and Slice 3.8 remain unstarted pending Slice 3.7 merge and fresh authority recalculation.
 
 ## Remaining Brand Gates
 
