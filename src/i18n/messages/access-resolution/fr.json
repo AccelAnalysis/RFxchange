@@ -1,0 +1,17 @@
+{
+  "eyebrow": "Résolution de l’accès",
+  "title": "L’accès à votre organisation a changé.",
+  "accountTitle": "Aucune adhésion active à une organisation",
+  "accountBody": "Vous êtes toujours connecté, mais RFxchange ne peut pas ouvrir un espace participant tant qu’une adhésion active à une organisation n’est pas rétablie ou créée. Demandez à un administrateur de l’organisation de rétablir votre adhésion ou utilisez une invitation valide, puis vérifiez de nouveau l’accès.",
+  "organizationTitle": "D’autres adhésions actives sont disponibles",
+  "organizationBody": "RFxchange ne transférera pas l’activation ni le statut OPEN de l’organisation précédente vers une autre organisation. Consultez les adhésions actives ci-dessous. L’accès à l’espace de travail reste bloqué jusqu’à ce qu’un parcours d’accès propre à l’organisation et régi par les règles de la plateforme soit établi.",
+  "optionFallback": "Organisation active {number}",
+  "activeMembership": "Adhésion active",
+  "selected": "Sélectionnée pour examen",
+  "selectedTitle": "Cette adhésion est active, mais l’activation précédente n’est pas transférée.",
+  "selectedBody": "Par sécurité, RFxchange maintient le cycle de vie de l’organisation précédente lié à cette organisation. Vérifiez de nouveau lorsque l’accès approprié à l’organisation aura été établi.",
+  "review": "Examiner cette organisation",
+  "recheck": "Vérifier de nouveau l’accès",
+  "home": "Accueil RFxchange",
+  "boundary": "Cette page ne modifie aucune adhésion, autorité d’organisation, étape du cycle de vie ni restriction."
+}
