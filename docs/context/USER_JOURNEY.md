@@ -51,7 +51,9 @@ Locality selection uses an accessible typeahead. Suggestions appear as the user 
 
 ## Orientation
 
-Orientation is not a generic product tour. It is a synthetic, three-organization Exchange journey showing how an issuer, responder and teammate interact across an RFx lifecycle.
+Orientation is not a generic product tour. The merged Wave 2 orientation uses a synthetic, three-organization Exchange journey showing how an issuer, responder and teammate interact across an RFx lifecycle.
+
+Persistent education is not required to repeat that tutorial structure. As live Network behavior expands, reusable Quick Start and contextual education should teach the customer-value progression around real available behavior: make the organization understandable, become discoverable for relevant reasons, carry useful context into connections and take the next appropriate released action. Future RFx behavior remains clearly identified as future until authorized and released.
 
 ## Organization resolution
 
@@ -92,9 +94,11 @@ Do not ask for organization type, participation roles, or business objectives du
 
 A broad value such as “Services” is not a meaningful capability. Selecting Other requires a custom category.
 
+The customer meaning of this minimum capability should remain clear: the organization is beginning a reusable market position, not merely satisfying an onboarding field.
+
 ## Universal buyer and supplier behavior
 
-Every activated organization may both find/respond to opportunities and create/issue opportunities, subject to organization authority, user permissions, integrity controls, and workflow rules.
+Every activated organization may both find/respond to opportunities and create/issue opportunities, subject to organization authority, user permissions, integrity controls, release state and workflow rules.
 
 Buyer, Supplier, and Issuer are contextual transaction positions rather than permanent registration classifications.
 
@@ -108,6 +112,8 @@ An organization does not self-declare Resource Provider during registration. Aft
 
 Organization type, participation roles, business objectives, paid status, Verification, and provider status are not completion requirements.
 
+`Profile Complete` is not the end of market representation. Post-activation enrichment should progressively make the organization more understandable and useful in authorized discovery and connection contexts without turning optional enrichment into a new activation gate.
+
 ## Marker activation
 
 Once the minimum activation requirements are satisfied, the organization's real marker appears in the selected locality. This is a deliberate success moment.
@@ -118,7 +124,20 @@ After marker activation, the user enters the real application from the organizat
 
 ## First value
 
-The Exchange exposes both opportunity-discovery and opportunity-issuance pathways without requiring a business-objective declaration. First-value guidance may use observed actions, explicit post-activation choices, or contextual prompts.
+First value is broader than account creation or exposure to a future RFx pathway. It should arise from the participant's real organization and the currently released product.
+
+A Wave 3 first-value experience may include:
+
+- seeing the organization's real or privacy-safe marker in the authorized geography;
+- understanding and improving the organization's confirmed capability position;
+- becoming discoverable by meaningful capability/geography context;
+- finding a relevant participating organization;
+- using a live referral or resource pathway when authorized; or
+- another contextual action supported by the current release.
+
+Later releases may add opportunity discovery, opportunity issuance, teaming and RFx actions as first-value pathways. Do not simulate a future domain merely to provide a first-value moment.
+
+First-value guidance may use observed actions, explicit post-activation choices, preserved acquisition context or contextual prompts without requiring a permanent buyer/supplier role declaration.
 
 ## OPEN gate
 
@@ -128,4 +147,12 @@ OPEN does not require Organization Verified or Official Resource Provider status
 
 ## Progressive enrichment
 
-Organization type, advanced certifications, richer capability detail, verification evidence, optional preferences, additional users, credibility and commercial choices occur after the minimum activation path unless a specific governed workflow genuinely requires them earlier.
+Organization type, advanced certifications, richer capability detail, products/services, past performance, verification evidence, optional preferences, additional users, credibility and commercial choices occur after the minimum activation path unless a specific governed workflow genuinely requires them earlier.
+
+Progressive enrichment should reinforce the customer-value progression:
+
+```text
+Understandable → Discoverable → Connectable → Actionable
+```
+
+Where interpretation assistance is authorized, participants may begin in ordinary business language; AMACS supplies the governed structure, AI/other assistance may propose non-authoritative interpretations and the authorized participant confirms what becomes organization-owned market state.
