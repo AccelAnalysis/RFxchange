@@ -145,6 +145,7 @@ test("only an absent activation context resolves to fresh activation", async () 
   );
 
   assert.equal(result.kind, "activation-required");
+  assert.equal(result.reason, "activation-context-required");
   assert.equal(result.state, null);
 });
 
@@ -165,6 +166,7 @@ test("an incomplete pre-workspace lifecycle can continue activation", async () =
   );
 
   assert.equal(result.kind, "activation-required");
+  assert.equal(result.reason, "activation-incomplete");
   assert.equal(result.state.lifecycleState, "organization-identified");
 });
 
@@ -210,6 +212,7 @@ test("deactivated activation membership with no active membership routes to acco
   );
 
   assert.equal(result.kind, "activation-required");
+  assert.equal(result.reason, "account-resolution");
   assert.equal(result.state.membershipId, "membership-route-3a");
 });
 
@@ -240,6 +243,7 @@ test("multiple remaining active memberships require organization resolution unti
     dependencies({ loadWorkspaceProjection: async () => staleProjection }),
   );
   assert.equal(unresolved.kind, "activation-required");
+  assert.equal(unresolved.reason, "organization-resolution");
 
   const selected = await resolveParticipantRouteWithDependencies(
     {
@@ -307,7 +311,7 @@ test("active restrictions remain governed restriction results", async () => {
         organizationState: null,
         membershipState: "suspended",
       }),
-    }),
+    ),
   );
 
   assert.equal(result.kind, "restricted");
