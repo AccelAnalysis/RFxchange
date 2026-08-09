@@ -36,6 +36,9 @@ export default async function ExchangePage({ searchParams }: ExchangePageProps) 
   if (access.kind === "unauthenticated") {
     redirect(`/signin?returnTo=${encodeURIComponent(exchangeUrl)}`);
   }
+  if (access.kind === "access-resolution-required") {
+    redirect("/access-resolution");
+  }
   if (access.kind === "activation-required") {
     redirect(acquisitionIntent ? "/acquisition/founding" : "/join");
   }
