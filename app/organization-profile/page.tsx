@@ -16,6 +16,7 @@ import {
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
 import { createFirestoreOrganizationLocationRepositories } from "@/src/infrastructure/firestore/organization-location";
+import { createFirestoreOrganizationMarkerRepositories } from "@/src/infrastructure/firestore/organization-marker";
 import { createFirestoreEssentialOrganizationProfileRepositories } from "@/src/infrastructure/firestore/organization-profile";
 import {
   createServerFirestoreFoundationRepositories,
@@ -55,6 +56,7 @@ export default async function OrganizationProfilePage() {
   const db = getServerFirestore();
   const foundation = createServerFirestoreFoundationRepositories(db);
   const locations = createFirestoreOrganizationLocationRepositories(db);
+  const markerRepositories = createFirestoreOrganizationMarkerRepositories(db);
   const profileRepositories = createFirestoreEssentialOrganizationProfileRepositories(db);
   const organizationId = access.membership.organizationId;
   const [
@@ -63,6 +65,7 @@ export default async function OrganizationProfilePage() {
     marketProfile,
     enrichment,
     mapProjection,
+    markerActivation,
     profileCompletion,
     location,
   ] = await Promise.all([
@@ -71,6 +74,7 @@ export default async function OrganizationProfilePage() {
     loadAuthorizedMarketProfile(access),
     loadAuthorizedOrganizationEnrichment(access),
     loadAuthorizedParticipantMapProjection(access),
+    markerRepositories.activations.getByOrganizationId(organizationId),
     profileRepositories.completions.getByOrganizationId(organizationId),
     locations.locations.getByOrganizationId(organizationId),
   ]);
@@ -119,7 +123,7 @@ export default async function OrganizationProfilePage() {
                 <dt>Location visibility</dt>
                 <dd>{location ? readable(location.visibility) : "Not recorded"}</dd>
                 <dt>Marker</dt>
-                <dd>{mapProjection ? "Active" : "Not active"}</dd>
+                <dd>{markerActivation?.status === "active" ? "Active" : "Not active"}</dd>
                 <dt>Initial service geography</dt>
                 <dd>{selectedGeography?.name ?? "Not recorded"}</dd>
               </dl>
