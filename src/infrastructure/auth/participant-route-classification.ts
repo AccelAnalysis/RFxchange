@@ -252,12 +252,19 @@ export async function resolveParticipantRouteWithDependencies(
   }
 
   if (boundMembership.status === "active") {
+    const activeBinding = activeMemberships.find(
+      (candidate) => candidate.id === boundMembership.id,
+    ) ?? null;
     if (
       !membership ||
+      membership.status !== "active" ||
       membership.id !== boundMembership.id ||
       membership.userId !== boundMembership.userId ||
       String(membership.organizationId) !== String(boundMembership.organizationId) ||
-      !activeMemberships.some((candidate) => candidate.id === boundMembership.id)
+      !activeBinding ||
+      activeBinding.status !== "active" ||
+      activeBinding.userId !== boundMembership.userId ||
+      String(activeBinding.organizationId) !== String(boundMembership.organizationId)
     ) {
       return dependencyUnavailable(
         "workspace-state",
