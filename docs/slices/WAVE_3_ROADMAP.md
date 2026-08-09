@@ -93,7 +93,7 @@ Slice 3.2 evidence, tracker update and PR #120 merge [complete]
 → Wave 3 closeout only after Network is 38/38 and all exit evidence passes
 ```
 
-The current Codex execution assignment authorizes the sequential Wave 3 program through Slice 3.8 and closeout. Each later slice still requires its own fresh post-merge authority recalculation and focused authority update before implementation.
+Current explicit task instructions define the outer execution boundary. Regardless of that boundary, each later slice requires its own fresh post-merge authority recalculation and focused authority update before implementation; this roadmap alone grants no implementation authority.
 
 Preparation or read-only inspection may occur ahead of the active slice. Production code for a later gate or slice cannot begin merely because an adjacent abstraction makes it convenient.
 
