@@ -3,7 +3,10 @@ import {
   type AuthenticatedServerContext,
 } from "../../application/auth/server-session.ts";
 import type { AccessRestrictionState } from "../../domain/lifecycle/model.ts";
-import type { OrganizationMembership } from "../../domain/users/model.ts";
+import {
+  resolveUserOrganizationAccess,
+  type OrganizationMembership,
+} from "../../domain/users/model.ts";
 import type {
   ParticipantWorkspaceProjection,
   ParticipantWorkspaceState,
@@ -97,13 +100,89 @@ function dependencyUnavailable(
   throw new ParticipantRouteDependencyUnavailableError(stage, cause);
 }
 
+function stateForMembership(
+  state: ParticipantWorkspaceState,
+  membership: OrganizationMembership,
+): ParticipantWorkspaceState {
+  return Object.freeze({
+    ...state,
+    organization: Object.freeze({ id: String(membership.organizationId) }),
+    membershipId: String(membership.id),
+    controlledPlatformUrl: state.lifecycleState === "open-platform"
+      ? "/exchange"
+      : state.acquisitionContext && state.acquisitionContext.kind !== "direct"
+        ? "/acquisition/continue"
+        : "/orientation",
+  });
+}
+
+function governedMembershipRepair(input: Readonly<{
+  context: AuthenticatedServerContext;
+  state: ParticipantWorkspaceState;
+  activeMemberships: readonly OrganizationMembership[];
+  requestedOrganizationId?: string | null;
+}>): Readonly<{
+  state: ParticipantWorkspaceState;
+  membership: OrganizationMembership;
+}> | Readonly<{
+  kind: "activation-required";
+  context: AuthenticatedServerContext;
+  state: ParticipantWorkspaceState;
+}> | Readonly<{
+  kind: "wrong-organization";
+  context: AuthenticatedServerContext;
+  state: ParticipantWorkspaceState;
+}> {
+  const access = resolveUserOrganizationAccess(input.context.user, input.activeMemberships);
+  if (access.kind === "account-resolution") {
+    // /join is the current account-resolution surface. This is a governed membership state, not a
+    // dependency outage, so Retry must not be presented as the only remediation.
+    return Object.freeze({
+      kind: "activation-required" as const,
+      context: input.context,
+      state: input.state,
+    });
+  }
+
+  const requestedOrganizationId = input.requestedOrganizationId?.trim();
+  const selected = requestedOrganizationId
+    ? access.activeMemberships.find(
+        (candidate) => String(candidate.organizationId) === requestedOrganizationId,
+      ) ?? null
+    : access.activeMemberships.length === 1
+      ? access.activeMemberships[0]
+      : null;
+
+  if (!selected) {
+    if (requestedOrganizationId) {
+      return Object.freeze({
+        kind: "wrong-organization" as const,
+        context: input.context,
+        state: input.state,
+      });
+    }
+    // Multiple active memberships require organization resolution. The current participant entry
+    // flow is the governed resolution surface until persistent organization switching is introduced.
+    return Object.freeze({
+      kind: "activation-required" as const,
+      context: input.context,
+      state: input.state,
+    });
+  }
+
+  return Object.freeze({
+    state: stateForMembership(input.state, selected),
+    membership: selected,
+  });
+}
+
 /**
  * Pure protected-route classification policy. Production dependencies are injected by
  * participant-route-runtime.ts; architecture tests use deterministic in-memory dependencies.
  *
  * This separation is deliberate: dependency/provider implementation details cannot influence the
- * semantic distinction between signed out, activation required, wrong organization, restricted,
- * authorized, and a retryable service failure.
+ * semantic distinction between signed out, activation/account resolution, wrong organization,
+ * restricted, authorized, and a retryable service failure.
  */
 export async function resolveParticipantRouteWithDependencies(
   input: Readonly<{
@@ -144,7 +223,9 @@ export async function resolveParticipantRouteWithDependencies(
     });
   }
 
-  const { state, membership } = projection;
+  const { state, activeMemberships } = projection;
+  let membership = projection.membership;
+  let resolvedState = state;
   const workspaceLifecycleEligible =
     state.lifecycleState === "controlled-platform" || state.lifecycleState === "open-platform";
   if (!workspaceLifecycleEligible) {
@@ -155,15 +236,27 @@ export async function resolveParticipantRouteWithDependencies(
     });
   }
 
-  // Once the lifecycle says the participant reached a workspace, these identities must exist and
-  // agree. Treating their absence as a fresh /join journey would falsely imply lost registration.
-  if (!state.organization || !membership || !state.membershipId) {
+  if (!state.organization || !state.membershipId) {
     return dependencyUnavailable(
       "workspace-state",
       new Error("Controlled/open participant workspace identity is incomplete."),
     );
   }
-  if (
+
+  if (!membership) {
+    // A persisted binding can legitimately stop being active through governed membership repair.
+    // Resolve the user's remaining active memberships through ARC-003 instead of calling that state
+    // a transient backend outage.
+    const repaired = governedMembershipRepair({
+      context,
+      state,
+      activeMemberships,
+      requestedOrganizationId: input.requestedOrganizationId,
+    });
+    if ("kind" in repaired) return repaired;
+    membership = repaired.membership;
+    resolvedState = repaired.state;
+  } else if (
     membership.status !== "active" ||
     membership.userId !== context.user.id ||
     String(membership.organizationId) !== state.organization.id ||
@@ -176,11 +269,11 @@ export async function resolveParticipantRouteWithDependencies(
   }
 
   const requestedOrganizationId = input.requestedOrganizationId?.trim();
-  if (requestedOrganizationId && requestedOrganizationId !== state.organization.id) {
+  if (requestedOrganizationId && requestedOrganizationId !== resolvedState.organization?.id) {
     return Object.freeze({
       kind: "wrong-organization" as const,
       context,
-      state,
+      state: resolvedState,
     });
   }
 
@@ -198,7 +291,7 @@ export async function resolveParticipantRouteWithDependencies(
     return Object.freeze({
       kind: "restricted" as const,
       context,
-      state,
+      state: resolvedState,
       membership,
       restrictionState,
     });
@@ -207,7 +300,7 @@ export async function resolveParticipantRouteWithDependencies(
   return Object.freeze({
     kind: "authorized" as const,
     context,
-    state,
+    state: resolvedState,
     membership,
   });
 }
