@@ -4,23 +4,37 @@ import { BrandWordmark } from "@/src/components/brand/BrandWordmark";
 import { LanguageSwitcher } from "@/src/components/i18n/LanguageSwitcher";
 import { getRequestDictionary } from "@/src/i18n/server";
 
+import responsive from "./MarketingChromeResponsive.module.css";
 import styles from "./MarketingSite.module.css";
 
 export async function MarketingHeader() {
   const { dictionary } = await getRequestDictionary();
+  const navigation = [
+    { href: "/how-it-works", label: dictionary.marketing.nav.howItWorks },
+    { href: "/businesses", label: dictionary.marketing.nav.businesses },
+    { href: "/buyers", label: dictionary.marketing.nav.buyers },
+    { href: "/resource-providers", label: dictionary.marketing.nav.resourceProviders },
+    { href: "/founding", label: dictionary.marketing.footer.foundingMembership },
+    { href: "/about", label: dictionary.marketing.nav.about },
+  ] as const;
 
   return (
     <header className={styles.header}>
-      <nav className={styles.nav} aria-label={dictionary.marketing.nav.ariaLabel}>
+      <nav className={`${styles.nav} ${responsive.nav}`} aria-label={dictionary.marketing.nav.ariaLabel}>
         <BrandWordmark />
-        <div className={styles.navLinks}>
-          <Link href="/how-it-works">{dictionary.marketing.nav.howItWorks}</Link>
-          <Link href="/businesses">{dictionary.marketing.nav.businesses}</Link>
-          <Link href="/buyers">{dictionary.marketing.nav.buyers}</Link>
-          <Link href="/resource-providers">{dictionary.marketing.nav.resourceProviders}</Link>
-          <Link href="/founding">{dictionary.marketing.footer.foundingMembership}</Link>
-          <Link href="/about">{dictionary.marketing.nav.about}</Link>
+        <div className={`${styles.navLinks} ${responsive.desktopLinks}`}>
+          {navigation.map((item) => (
+            <Link href={item.href} key={item.href}>{item.label}</Link>
+          ))}
         </div>
+        <details className={responsive.navMenu}>
+          <summary>{dictionary.marketing.footer.explore}</summary>
+          <div className={responsive.navMenuLinks}>
+            {navigation.map((item) => (
+              <Link href={item.href} key={item.href}>{item.label}</Link>
+            ))}
+          </div>
+        </details>
         <div className={styles.navActions}>
           <LanguageSwitcher />
           <Link className={styles.buttonLight} href="/signin">

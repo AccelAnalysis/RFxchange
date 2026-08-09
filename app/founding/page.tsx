@@ -8,6 +8,8 @@ import { getRequestDictionary } from "@/src/i18n/server";
 
 import styles from "./founding.module.css";
 
+const foundingActivationHref = "/acquisition/founding";
+
 export async function generateMetadata(): Promise<Metadata> {
   const { dictionary } = await getRequestDictionary();
   const metadata = dictionary.marketingPages.founding.metadata;
@@ -46,7 +48,7 @@ export default async function FoundingPage() {
             <h1 id="founding-hero-title">{founding.hero.title}</h1>
             <p className={styles.heroDeck}>{founding.hero.description}</p>
             <div className={styles.heroActions}>
-              <Link className={styles.buttonGold} href="/join">{founding.hero.primary}</Link>
+              <Link className={styles.buttonGold} href={foundingActivationHref}>{founding.hero.primary}</Link>
               <a className={styles.buttonLight} href="#availability">{founding.hero.secondary}</a>
             </div>
             <div className={styles.pricePanel}>
@@ -145,7 +147,7 @@ export default async function FoundingPage() {
               <ul>
                 {founding.comparison.free.items.map((item) => <li key={item}>{item}</li>)}
               </ul>
-              <Link className={styles.buttonDark} href="/join">{founding.comparison.free.cta}</Link>
+              <Link className={styles.buttonDark} href={foundingActivationHref}>{founding.comparison.free.cta}</Link>
             </article>
             <article className={`${styles.planCard} ${styles.foundingPlan}`}>
               <span>{founding.comparison.founding.subtitle}</span>
@@ -155,7 +157,7 @@ export default async function FoundingPage() {
               <ul>
                 {founding.comparison.founding.items.map((item) => <li key={item}>{item}</li>)}
               </ul>
-              <Link className={styles.buttonGold} href="/join">{founding.comparison.founding.cta}</Link>
+              <Link className={styles.buttonGold} href={foundingActivationHref}>{founding.comparison.founding.cta}</Link>
             </article>
           </div>
           <p className={styles.footnote}>{founding.comparison.footnote}</p>
@@ -220,8 +222,8 @@ export default async function FoundingPage() {
           <h2 id="founding-cta-title">{founding.cta.title}</h2>
           <p>{founding.cta.description}</p>
           <div className={styles.ctaActions}>
-            <Link className={styles.buttonGold} href="/join">{founding.cta.primary}</Link>
-            <Link className={styles.buttonLight} href="/join">{founding.cta.secondary}</Link>
+            <Link className={styles.buttonGold} href={foundingActivationHref}>{founding.cta.primary}</Link>
+            <Link className={styles.buttonLight} href={foundingActivationHref}>{founding.cta.secondary}</Link>
           </div>
           <span>{founding.cta.note}</span>
         </div>
