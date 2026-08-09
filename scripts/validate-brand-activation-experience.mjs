@@ -50,7 +50,7 @@ assert.ok(
 assert.ok(
   spatial.includes('window.matchMedia("(prefers-reduced-motion: reduce)")') &&
     spatial.includes("reducedMotion ? 50 : 900") &&
-    spatial.includes(">Enter now</) &&
+    spatial.includes(">Enter now</") &&
     !spatial.includes("3_400") &&
     spatial.includes("Activation progress is preserved") &&
     spatial.includes("Your organization is now visible. Entering The RFxchange.") &&
