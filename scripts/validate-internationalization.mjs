@@ -14,7 +14,6 @@ const catalogNamespaces = [
   Object.freeze({ name: "market-profile", directory: path.join(messageDirectory, "market-profile") }),
   Object.freeze({ name: "network-education", directory: path.join(messageDirectory, "network-education") }),
   Object.freeze({ name: "recovery", directory: path.join(messageDirectory, "recovery") }),
-  Object.freeze({ name: "access-resolution", directory: path.join(messageDirectory, "access-resolution") }),
 ];
 
 function readJson(filePath) {
@@ -71,8 +70,7 @@ assert.match(dictionary, /marketingPages/, "Resolved dictionaries must include t
 assert.match(dictionary, /networkWorkspace/, "Resolved dictionaries must include the Network workspace namespace");
 assert.match(dictionary, /marketProfile/, "Resolved dictionaries must include the market-profile namespace");
 assert.match(dictionary, /networkEducation/, "Resolved dictionaries must include the persistent Network education namespace");
-assert.match(dictionary, /recovery/, "Resolved dictionaries must include the shared recovery-boundary namespace");
-assert.match(dictionary, /accessResolution/, "Resolved dictionaries must include the access-resolution namespace");
+assert.match(dictionary, /recovery/, "Resolved dictionaries must include the shared recovery and access-resolution namespace");
 
 const layout = fs.readFileSync(path.join(root, "app", "layout.tsx"), "utf8");
 assert.match(layout, /<html lang=\{locale\}/, "Root layout must set the resolved locale on html");
