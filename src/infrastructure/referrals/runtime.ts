@@ -14,6 +14,7 @@ import {
 import { createFirestoreFoundationRepositories } from "../firestore/repositories.ts";
 import { FirestoreReferralRepository } from "../firestore/referrals.ts";
 import { getServerFirestore } from "../firestore/runtime.ts";
+import { createServerProviderEligibilityReader } from "../resource-network/runtime.ts";
 
 function publicOrigin(): string {
   const value = process.env.RFXCHANGE_PUBLIC_ORIGIN?.trim() || "http://localhost:3000";
@@ -42,6 +43,7 @@ export function createServerReferralNetworkService(db: Firestore = getServerFire
       },
     },
     publicOrigin: publicOrigin(),
+    providerEligibility: createServerProviderEligibilityReader(db),
   });
 }
 

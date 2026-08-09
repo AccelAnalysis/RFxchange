@@ -7,13 +7,13 @@ export const REFERRAL_AGGREGATE_VERSION = 1 as const;
 export const REFERRAL_EDUCATION_VERSION = 1 as const;
 
 export const REFERRAL_STATUSES = [
-  "draft", "sent", "accepted", "declined", "contacted", "closed", "expired",
+  "draft", "sent", "accepted", "declined", "redirected", "contacted", "closed", "expired",
 ] as const;
 export type ReferralStatus = (typeof REFERRAL_STATUSES)[number];
 export type ReferralNeed = "capability" | "capacity" | "introduction" | "local-knowledge" | "other";
 export type ReferralUrgency = "standard" | "soon" | "urgent";
 export type ReferralContactMethod = "email" | "phone" | "platform";
-export type ReferralPurpose = "business-introduction" | "opportunity-context" | "capability-connection";
+export type ReferralPurpose = "business-introduction" | "opportunity-context" | "capability-connection" | "provider-connection";
 export type ReferralOutcome = "connected" | "not-a-fit" | "no-response" | "other";
 export type ReferralSharedField =
   | "sender-organization"
@@ -35,6 +35,19 @@ export interface ReferralConsentEvidence {
   readonly acknowledgedAt: string;
 }
 
+export interface ProviderReferralContext {
+  readonly providerOrganizationId: OrganizationId;
+  readonly serviceId: string;
+  readonly publicationVersion: number;
+}
+
+export interface ProviderReferralRedirect {
+  readonly suggestedProviderOrganizationId: OrganizationId;
+  readonly suggestedProviderDisplayName: string;
+  readonly reason: string;
+  readonly suggestedAt: string;
+}
+
 export interface BusinessReferral {
   readonly id: string;
   readonly schemaVersion: typeof REFERRAL_AGGREGATE_VERSION;
@@ -49,6 +62,8 @@ export interface BusinessReferral {
   readonly preferredContactMethod: ReferralContactMethod;
   readonly purpose: ReferralPurpose;
   readonly opportunityReference: string | null;
+  readonly providerContext: ProviderReferralContext | null;
+  readonly providerRedirect: ProviderReferralRedirect | null;
   readonly sharedFields: readonly ReferralSharedField[];
   readonly consent: ReferralConsentEvidence;
   readonly status: ReferralStatus;
@@ -66,7 +81,7 @@ export interface BusinessReferral {
 }
 
 export type ReferralEventKind =
-  | "created" | "sent" | "accepted" | "declined" | "contacted" | "closed" | "expired" | "recipient-attached";
+  | "created" | "sent" | "accepted" | "declined" | "redirected" | "contacted" | "closed" | "expired" | "recipient-attached";
 
 export interface ReferralEvent {
   readonly id: string;
@@ -135,6 +150,8 @@ export interface SenderReferralProjection {
   readonly preferredContactMethod: ReferralContactMethod;
   readonly purpose: ReferralPurpose;
   readonly opportunityReference: string | null;
+  readonly providerContext: ProviderReferralContext | null;
+  readonly providerRedirect: ProviderReferralRedirect | null;
   readonly sharedFields: readonly ReferralSharedField[];
   readonly status: ReferralStatus;
   readonly outcome: ReferralOutcome | null;
@@ -187,6 +204,7 @@ export function createReferral(input: Readonly<{
   id: string; senderOrganizationId: OrganizationId; senderOrganizationName: string;
   recipient: ReferralRecipient; need: ReferralNeed; summary: string; urgency: ReferralUrgency;
   preferredContactMethod: ReferralContactMethod; purpose: ReferralPurpose; opportunityReference?: string | null;
+  providerContext?: ProviderReferralContext | null;
   sharedFields: readonly ReferralSharedField[]; consentAcknowledged: boolean;
   correlationId: string; actorUserId: UserId; actorMembershipId: OrganizationMembershipId;
   now: string; expiresAt: string;
@@ -203,6 +221,7 @@ export function createReferral(input: Readonly<{
     throw new Error("Referral sharing must include only the approved minimum fields.");
   }
   if (!input.consentAcknowledged) throw new Error("Confirm the exact referral data before continuing.");
+  if (input.purpose === "provider-connection" && (recipient.kind !== "organization" || input.providerContext?.providerOrganizationId !== recipient.organizationId)) throw new Error("Provider connection must match the exact recipient organization.");
   const opportunityReference = input.opportunityReference?.trim() ? stable(input.opportunityReference, "Opportunity reference") : null;
   if (sharedFields.includes("opportunity-reference") !== Boolean(opportunityReference)) throw new Error("Opportunity sharing must match the referenced context.");
   return Object.freeze({
@@ -213,8 +232,15 @@ export function createReferral(input: Readonly<{
     summary: required(input.summary, "Referral summary", 1200),
     urgency: controlled(input.urgency, ["standard", "soon", "urgent"], "Referral urgency"),
     preferredContactMethod: controlled(input.preferredContactMethod, ["email", "phone", "platform"], "Preferred contact method"),
-    purpose: controlled(input.purpose, ["business-introduction", "opportunity-context", "capability-connection"], "Referral purpose"),
-    opportunityReference, sharedFields,
+    purpose: controlled(input.purpose, ["business-introduction", "opportunity-context", "capability-connection", "provider-connection"], "Referral purpose"),
+    opportunityReference,
+    providerContext: input.purpose === "provider-connection" ? Object.freeze({
+      providerOrganizationId: input.providerContext?.providerOrganizationId ?? (() => { throw new Error("Provider connection requires a provider organization."); })(),
+      serviceId: stable(input.providerContext?.serviceId ?? "", "Provider service id"),
+      publicationVersion: Number.isInteger(input.providerContext?.publicationVersion) && Number(input.providerContext?.publicationVersion) > 0 ? Number(input.providerContext?.publicationVersion) : (() => { throw new Error("Provider publication version is invalid."); })(),
+    }) : null,
+    providerRedirect: null,
+    sharedFields,
     consent: Object.freeze({ version: 1 as const, acknowledged: true, recipientLabel: recipient.displayName, sharedFields, actorUserId: input.actorUserId, acknowledgedAt: now }),
     status: "draft" as const, outcome: null, correlationId: stable(input.correlationId, "Referral correlation id"),
     acquisitionContextId: null, communicationMessageId: null, createdByUserId: input.actorUserId,
@@ -224,13 +250,14 @@ export function createReferral(input: Readonly<{
 }
 
 const TRANSITIONS: Readonly<Record<ReferralStatus, readonly ReferralStatus[]>> = Object.freeze({
-  draft: ["sent"], sent: ["accepted", "declined", "expired"], accepted: ["contacted", "expired"],
-  declined: [], contacted: ["closed", "expired"], closed: [], expired: [],
+  draft: ["sent"], sent: ["accepted", "declined", "redirected", "expired"], accepted: ["contacted", "redirected", "expired"],
+  declined: [], redirected: [], contacted: ["closed", "expired"], closed: [], expired: [],
 });
 
 export function transitionReferral(input: Readonly<{
   referral: BusinessReferral; expectedVersion: number; to: ReferralStatus; actorUserId: UserId;
   now: string; outcome?: ReferralOutcome | null; acquisitionContextId?: string | null; communicationMessageId?: string | null;
+  providerRedirect?: Readonly<{ suggestedProviderOrganizationId: OrganizationId; suggestedProviderDisplayName: string; reason: string }> | null;
 }>): BusinessReferral {
   if (input.expectedVersion !== input.referral.version) throw new Error(`Referral changed; current version is ${input.referral.version}.`);
   const now = iso(input.now, "Referral transition time");
@@ -239,12 +266,20 @@ export function transitionReferral(input: Readonly<{
   const outcome = input.to === "closed"
     ? controlled(input.outcome ?? "other", ["connected", "not-a-fit", "no-response", "other"], "Referral outcome")
     : null;
+  if (input.to === "redirected" && input.referral.purpose !== "provider-connection") throw new Error("Only a provider connection can be redirected.");
+  const providerRedirect = input.to === "redirected" ? Object.freeze({
+    suggestedProviderOrganizationId: input.providerRedirect?.suggestedProviderOrganizationId ?? (() => { throw new Error("Redirected provider request requires a suggested provider."); })(),
+    suggestedProviderDisplayName: required(input.providerRedirect?.suggestedProviderDisplayName ?? "", "Suggested provider name", 160),
+    reason: required(input.providerRedirect?.reason ?? "", "Provider redirect reason", 1200),
+    suggestedAt: now,
+  }) : input.referral.providerRedirect ?? null;
   return Object.freeze({
     ...input.referral, version: input.referral.version + 1, status: input.to, outcome,
     sentAt: input.to === "sent" ? now : input.referral.sentAt,
     acquisitionContextId: input.acquisitionContextId ?? input.referral.acquisitionContextId,
     communicationMessageId: input.communicationMessageId ?? input.referral.communicationMessageId,
-    recipientActorUserId: ["accepted", "declined"].includes(input.to) ? input.actorUserId : input.referral.recipientActorUserId,
+    recipientActorUserId: ["accepted", "declined", "redirected"].includes(input.to) ? input.actorUserId : input.referral.recipientActorUserId,
+    providerRedirect,
     updatedAt: now,
   });
 }
@@ -264,7 +299,7 @@ export function attachReferralRecipient(input: Readonly<{
 }
 
 export function projectReferral(referral: BusinessReferral, organizationId: OrganizationId): SenderReferralProjection | RecipientReferralProjection | null {
-  const base = Object.freeze({ id: referral.id, version: referral.version, recipientLabel: referral.recipient.displayName, need: referral.need, summary: referral.summary, urgency: referral.urgency, preferredContactMethod: referral.preferredContactMethod, purpose: referral.purpose, opportunityReference: referral.opportunityReference, sharedFields: referral.sharedFields, status: referral.status, outcome: referral.outcome, correlationId: referral.correlationId, notificationStatus: referral.communicationMessageId ? "queued" as const : "unavailable" as const, createdAt: referral.createdAt, sentAt: referral.sentAt, expiresAt: referral.expiresAt, updatedAt: referral.updatedAt });
+  const base = Object.freeze({ id: referral.id, version: referral.version, recipientLabel: referral.recipient.displayName, need: referral.need, summary: referral.summary, urgency: referral.urgency, preferredContactMethod: referral.preferredContactMethod, purpose: referral.purpose, opportunityReference: referral.opportunityReference, providerContext: referral.providerContext ?? null, providerRedirect: referral.providerRedirect ?? null, sharedFields: referral.sharedFields, status: referral.status, outcome: referral.outcome, correlationId: referral.correlationId, notificationStatus: referral.communicationMessageId ? "queued" as const : "unavailable" as const, createdAt: referral.createdAt, sentAt: referral.sentAt, expiresAt: referral.expiresAt, updatedAt: referral.updatedAt });
   if (organizationId === referral.senderOrganizationId) return Object.freeze({ ...base, role: "sender" as const, recipientKind: referral.recipient.kind, recipientOrganizationId: referral.attachedRecipientOrganizationId });
   if (referral.status !== "draft" && organizationId === referral.attachedRecipientOrganizationId) return Object.freeze({ ...base, role: "recipient" as const, senderOrganizationName: referral.senderOrganizationName });
   return null;

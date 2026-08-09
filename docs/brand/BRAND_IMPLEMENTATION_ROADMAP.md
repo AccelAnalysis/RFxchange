@@ -1,6 +1,6 @@
 # RFxchange Brand Experience Implementation Roadmap
 
-**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a AND SLICES 3.1–3.6 COMPLETE; SLICE 3.7 AUTHORIZED**
+**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a AND SLICES 3.1–3.6 MERGED; SLICE 3.7 IMPLEMENTATION ACCEPTED**
 
 ## 1. Purpose
 
@@ -32,11 +32,11 @@ Brand Gates B0 through B6a are complete.
 | B5 — Onboarding and activation experience | Complete | PR #114 | `c9b1469cf258a6a9af9b456585af7f3524a5c7b6` |
 | B6a — Existing workspace foundation | Complete | PR #115 | `bf59f1d18fa6db3f43660c42777b494b505be545` |
 
-The gates above and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Slice 3.6 acceptance are:
+The gates above and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Slice 3.7 acceptance are:
 
-- **438 total · 143 Done · 295 Not Started**
+- **438 total · 150 Done · 288 Not Started**
 - Activation: **43/43**
-- Network: **29/38**
+- Network: **36/38**
 
 The consolidated evidence is recorded in:
 
@@ -55,7 +55,7 @@ B4 and B5 are also complete under the adopted numerical execution sequence.
 
 **Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, and the no-Feature-ID AI/AMACS Interpretation Foundation is complete via PR #124.**
 
-Slice 3.5 is complete via PR #130. Slice 3.6 is complete via PR #132 and establishes the governed provider application/status and private service profile without creating public provider service fields or routing. Slice 3.7 is separately authorized to add its live provider discovery/routing domain. B6b remains unstarted and receives no authority from the product-slice handoff.
+Slice 3.5 is complete via PR #130. Slice 3.6 is complete via PR #132 and establishes the governed provider application/status and private service profile. Slice 3.7 implementation and acceptance are complete and add the live provider discovery/routing domain; production merge remains pending. B6b remains unstarted and receives no authority from the product-slice handoff.
 
 ## 4. Completed gates
 

@@ -11,12 +11,12 @@
 
 ## Current feature totals
 
-Brand Gate work through B6a, the later no-Feature-ID AMACS reconciliation and the Slice 3.7 authority update change no Feature-ID status. Completed product work through Slice 3.6 establishes:
+Brand Gate work through B6a and the later no-Feature-ID AMACS reconciliation change no Feature-ID status. Accepted product work through Slice 3.7 establishes:
 
-**438 total · 143 Done · 295 Not Started**
+**438 total · 150 Done · 288 Not Started**
 
 - Activation: **43/43**
-- Network: **29/38**
+- Network: **36/38**
 
 ## Gate ledger
 
@@ -40,6 +40,6 @@ Brand Gate work through B6a, the later no-Feature-ID AMACS reconciliation and th
 
 B2, B3, and B6a satisfied the non-Feature prerequisites for Wave 3 Slice 3.2. B4 and B5 are also complete under the adopted numerical execution sequence. Slice 3.2 is complete via PR #120, the no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, and the no-Feature-ID AI/AMACS Interpretation Foundation is complete via PR #124.
 
-**Current product boundary:** Slice 3.6 — Official Resource Provider Foundation (`RES-001`, `RES-002`, `RES-003`, `ADM-070`) is complete via PR #132. Exact-head production CI run `31297388363` and post-merge run `31297486059` passed.
+**Current merged product boundary:** Slice 3.6 — Official Resource Provider Foundation (`RES-001`, `RES-002`, `RES-003`, `ADM-070`) is complete via PR #132. Exact-head production CI run `31297388363` and post-merge run `31297486059` passed. Slice 3.7 implementation and acceptance are complete with production merge pending.
 
-Slice 3.7 is the single active authorized product slice; Slice 3.8 and every later slice remain unstarted. B6b remains later in the Wave 3 sequence, after Slice 3.7 adds its live provider discovery/routing domain.
+Slice 3.7 remains the single active authorized product slice until it merges; Slice 3.8 and every later slice remain unstarted. B6b remains later in the Wave 3 sequence and requires a fresh post-merge authority evaluation.

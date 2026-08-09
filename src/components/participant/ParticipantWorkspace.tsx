@@ -49,7 +49,7 @@ const primaryNavigation = [
   { label: "Intelligence", href: "/geography/canvas", available: true },
   { label: "Referrals", href: "/referrals", available: true },
   { label: "Opportunities", available: false },
-  { label: "Resources", available: false },
+  { label: "Resources", href: "/resources", available: true },
 ] as const;
 
 function NavigationItems({

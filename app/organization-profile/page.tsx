@@ -167,9 +167,9 @@ export default async function OrganizationProfilePage() {
             <article className={styles.card}>
               <h2>Current release boundary</h2>
               <p className={styles.empty}>
-                Market profile, credential, media, and additional-location enrichment are available. Referrals, provider routing, credibility,
-                commercial benefits, and RFx workflows remain unavailable until their approved
-                slices are complete.
+                Market profile, credential, media, additional-location enrichment, referrals, and
+                published provider/resource routing are available. Credibility, commercial benefits,
+                and RFx workflows remain unavailable until their approved slices are complete.
               </p>
             </article>
           </section>
