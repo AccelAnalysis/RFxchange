@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import type { ActivationJourneyState } from "../../application/onboarding/activation-journey";
@@ -26,7 +27,13 @@ function isAdministrativeReturnTarget(returnTo: string | null | undefined): retu
   return Boolean(returnTo && (returnTo === "/admin" || returnTo.startsWith("/admin/")));
 }
 
+function internalReturnTarget(returnTo: string | null | undefined): string | null {
+  if (!returnTo || !returnTo.startsWith("/") || returnTo.startsWith("//")) return null;
+  return returnTo;
+}
+
 export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }>) {
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -81,12 +88,12 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
                   // Administration is an independent authority plane. Once authentication succeeds,
                   // an explicit admin return target is evaluated by the protected admin route itself.
                   if (isAdministrativeReturnTarget(returnTo)) {
-                    window.location.assign(returnTo);
+                    router.replace(returnTo);
                     return;
                   }
 
                   if (!result.state) {
-                    window.location.assign("/join?begin=1");
+                    router.replace("/join?begin=1");
                     return;
                   }
 
@@ -97,10 +104,10 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
                     const workspaceUrl =
                       result.state.controlledPlatformUrl ??
                       `/geography/canvas?organizationId=${encodeURIComponent(result.state.organization.id)}`;
-                    window.location.assign(returnTo ?? workspaceUrl);
+                    router.replace(internalReturnTarget(returnTo) ?? workspaceUrl);
                     return;
                   }
-                  window.location.assign("/join");
+                  router.replace("/join");
                 } catch (caught) {
                   setError(caught instanceof Error ? caught.message : "Sign-in failed.");
                   setBusy(false);
