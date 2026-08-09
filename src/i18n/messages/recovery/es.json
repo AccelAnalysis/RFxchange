@@ -5,5 +5,16 @@
   "supporting": "Vuelve a intentarlo. Si el problema continúa, regresa a la página de inicio de RFxchange e inténtalo de nuevo más tarde.",
   "retry": "Reintentar",
   "home": "Inicio de RFxchange",
-  "supportReference": "Referencia de soporte: {reference}"
+  "supportReference": "Referencia de soporte: {reference}",
+  "accessEyebrow": "Acceso a la organización",
+  "accountTitle": "Tu cuenta no tiene actualmente acceso activo a una organización.",
+  "accountBody": "Tu membresía anterior ya no está activa. RFxchange no reutilizará la activación ni el estado OPEN de esa organización como si todavía concedieran acceso.",
+  "accountNext": "Utiliza una invitación vigente de una organización para recuperar el acceso, o cierra sesión y vuelve cuando un administrador haya restaurado o invitado tu cuenta.",
+  "organizationTitle": "Elige qué membresía activa de organización estás resolviendo.",
+  "organizationBody": "Tu activación anterior pertenece a otra organización. RFxchange no transferirá automáticamente su ciclo controlado u OPEN a otra organización.",
+  "organizationBoundary": "Seleccionar una organización aquí identifica la membresía que se está resolviendo; no le concede la autoridad de activación de la organización anterior.",
+  "activeMemberships": "Membresías activas de organización",
+  "selectOrganization": "Seleccionar organización",
+  "selectedOrganization": "Seleccionada para resolver el acceso",
+  "organizationFallback": "Organización {id}"
 }
