@@ -62,7 +62,9 @@ function withBoundAcquisition(
     ...state,
     acquisitionContext: acquisitionState(context),
     controlledPlatformUrl:
-      state.lifecycleState === "controlled-platform" && state.organization
+      state.lifecycleState === "controlled-platform" &&
+      state.organization &&
+      context.intent.kind !== "direct"
         ? "/acquisition/continue"
         : state.controlledPlatformUrl,
   });
