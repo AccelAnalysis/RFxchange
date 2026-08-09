@@ -1,8 +1,8 @@
 # Wave 3 — Network Roadmap
 
-**Status: SLICES 3.1–3.6 AND BRAND GATES B0–B6a MERGED; SLICE 3.7 IMPLEMENTATION ACCEPTED, MERGE PENDING.**
+**Status: SLICES 3.1–3.7 AND BRAND GATES B0–B6a COMPLETE; B6b PENDING; SLICE 3.8 AUTHORIZED.**
 
-Wave 2 is complete, Brand Gates B0 through B6a and Wave 3 Slices 3.1 through 3.6 are merged, and Slice 3.7 is the single active authorized product slice. Its implementation and acceptance are complete on the implementation branch; production merge and post-merge authority recalculation remain required.
+Wave 2 is complete, Brand Gates B0 through B6a and Wave 3 Slices 3.1 through 3.7 are merged, the optional B6b checkpoint is intentionally pending, and Slice 3.8 is the single active authorized product slice.
 
 Current Feature-ID state remains:
 
@@ -51,7 +51,7 @@ After Slice 3.2, execute two cross-cutting gates in order:
 1. **RFxchange reconciliation to AMACS 0.5.0 — complete via PR #123** — consumed and verified the immutable release, preserved historical 0.1.0 records, generated 0.5.0 catalog and runtime contracts, and exposed release-aware application ports without implementing participant features.
 2. **AI/AMACS Interpretation Foundation — complete via PR #124** — implemented the server-side provider-neutral gateway, concrete OpenAI adapter, 0.5.0-grounded retrieval and validation, non-authoritative interpretation persistence, disposition or authoritative-command separation, provenance, privacy, cost controls, manual-service fallback and evaluation without completing Slice 3.3 or Wave 4 product flows.
 
-Both gates are merged, post-merge production CI passed, and Slice 3.3 was explicitly authorized by `docs/slices/SLICE_3_3_EXECUTION_AUTHORITY.md`. Slice 3.3 then passed exact-head production CI run `31289352499`, merged via PR #126 at `0f5e8d56af8484bbd6e72716d4149a21e92db029`, and passed post-merge `main` CI run `31289477113`. Slice 3.4 passed exact-head production CI run `31291992746`, merged via PR #128 at `7f57cabf029edb0a0045b53d9f3339f170dc530c`, and passed post-merge `main` CI run `31292086252`. Slice 3.5 passed exact-head production CI run `31294774153`, merged via PR #130 at `516c49627aeff637b02982218f0682c1eea436ad`, and passed post-merge `main` CI run `31294884142`. Slice 3.6 passed exact-head production CI run `31297388363`, merged via PR #132 at `26412435651a13cc7a6540bbe50bc7b646760d78`, and passed post-merge `main` CI run `31297486059`. Its implementation and acceptance evidence are recorded in `docs/architecture/WAVE_3_SLICE_3_6.md`. Dependency authority was recalculated from that merged tree and Slice 3.7 is explicitly authorized by `docs/slices/SLICE_3_7_EXECUTION_AUTHORITY.md`.
+Both gates are merged, post-merge production CI passed, and Slice 3.3 was explicitly authorized by `docs/slices/SLICE_3_3_EXECUTION_AUTHORITY.md`. Slice 3.3 then passed exact-head production CI run `31289352499`, merged via PR #126 at `0f5e8d56af8484bbd6e72716d4149a21e92db029`, and passed post-merge `main` CI run `31289477113`. Slice 3.4 passed exact-head production CI run `31291992746`, merged via PR #128 at `7f57cabf029edb0a0045b53d9f3339f170dc530c`, and passed post-merge `main` CI run `31292086252`. Slice 3.5 passed exact-head production CI run `31294774153`, merged via PR #130 at `516c49627aeff637b02982218f0682c1eea436ad`, and passed post-merge `main` CI run `31294884142`. Slice 3.6 passed exact-head production CI run `31297388363`, merged via PR #132 at `26412435651a13cc7a6540bbe50bc7b646760d78`, and passed post-merge `main` CI run `31297486059`. Slice 3.7 passed exact-head production CI run `31300282317`, merged via PR #137 at `25baba600d6e1913a8941570f7348454d2e6941d`, and passed post-merge `main` CI run `31300395073`. Its implementation and acceptance evidence are recorded in `docs/architecture/WAVE_3_SLICE_3_7.md`. The conditional B6b checkpoint left that optional gate pending, and Slice 3.8 is explicitly authorized by `docs/slices/SLICE_3_8_EXECUTION_AUTHORITY.md`.
 
 ## Wave 3 slices and gates
 
@@ -65,8 +65,9 @@ Both gates are merged, post-merge production CI passed, and Slice 3.3 was explic
 | **3.4 — Credential, Media & Location Enrichment** | `ORG-015`, `ORG-018`, `ORG-019` | **Complete via PR #128.** Credentials with provenance; private-by-default media, documents and portfolio; subordinate additional locations with geography and privacy authority. |
 | **3.5 — Referral Network & Referral Acquisition** | `REF-001`, `REF-002`, `REF-003`, `REF-004`, `REF-005`, `EDU-014`, `ACQ-006` | **Complete via PR #130.** Legitimate organization-owned referrals with structured context, consent and minimum necessary data, lifecycle, first-use education and external acquisition continuity. |
 | **3.6 — Official Resource Provider Foundation** | `RES-001`, `RES-002`, `RES-003`, `ADM-070` | **Complete via PR #132.** Controlled provider application, review and approval; official-provider state; private structured service profile with authority, evidence and lifecycle. |
-| **3.7 — Resource Discovery, Routing & Provider Distribution** | `RES-004`, `RES-005`, `DSC-011`, `REF-006`, `RES-007`, `RES-008`, `ACQ-008` | **Implementation accepted; merge pending.** Service-territory discovery; deterministic explainable contextual routing without `RES-006`; consented provider connection; request-scoped communications; resource publishing; bounded provider acquisition and distribution. |
-| **3.8 — Persistent Network Education** | `EDU-016`, `EDU-017` | Reusable Quick Start and role paths plus contextual explainers over live organization, referral and resource behavior. |
+| **3.7 — Resource Discovery, Routing & Provider Distribution** | `RES-004`, `RES-005`, `DSC-011`, `REF-006`, `RES-007`, `RES-008`, `ACQ-008` | **Complete via PR #137.** Service-territory discovery; deterministic explainable contextual routing without `RES-006`; consented provider connection; request-scoped communications; resource publishing; bounded provider acquisition and distribution. |
+| **B6b — Network lens convergence** | **No Feature IDs** | **Not Started / intentionally pending.** No specific brief, mandatory prerequisite or concrete bounded convergence defect; Slice 3.8 proceeds against the completed Network baseline. |
+| **3.8 — Persistent Network Education** | `EDU-016`, `EDU-017` | **Authorized.** Reusable Quick Start and role paths plus contextual four-question explainers over live organization, referral and resource behavior. |
 
 ## Operating sequence
 
@@ -90,8 +91,9 @@ Slice 3.2 evidence, tracker update and PR #120 merge [complete]
 → Slice 3.6 production PR, merge and post-main CI [complete]
 → recalculate and explicitly authorize Slice 3.7 [complete]
 → Slice 3.7 implementation and acceptance [complete]
-→ Slice 3.7 production PR, merge and post-main CI
-→ recalculate and explicitly authorize Slice 3.8
+→ Slice 3.7 production PR, merge and post-main CI [complete]
+→ evaluate B6b [pending by explicit decision]
+→ recalculate and explicitly authorize Slice 3.8 [complete]
 → Slice 3.8 implementation, acceptance and merge
 → Wave 3 closeout only after Network is 38/38 and all exit evidence passes
 ```
@@ -113,8 +115,9 @@ real OPEN organization and real map marker
 → credential, media and location enrichment [complete]
 → consented referral lifecycle and referral acquisition [complete]
 → official resource-provider foundation [complete]
-→ service-territory discovery, contextual routing and provider distribution [accepted; merge pending]
-→ persistent Network education over real behavior
+→ service-territory discovery, contextual routing and provider distribution [complete]
+→ B6b convergence [intentionally pending]
+→ persistent Network education over real behavior [active]
 → Wave 3 exit at Network 38/38
 ```
 
@@ -219,5 +222,5 @@ Completion of Slice 3.5 alone is expected to leave Network at 25/38 absent unrel
 - Recalculate from merged `main` after every slice or gate.
 - Update execution authority before beginning the next production phase.
 - AMACS 0.5.0 reconciliation is complete via PR #123, the AI/AMACS Interpretation Foundation is complete via PR #124, and Slice 3.3 is complete via PR #126 with exact-head and post-merge CI passed.
-- Slice 3.4 is complete via PR #128, Slice 3.5 is complete via PR #130, and Slice 3.6 is complete via PR #132 with exact-head and post-merge CI passed. Slice 3.7 implementation and acceptance are complete on its authorized implementation branch; production merge and post-merge authority recalculation remain required. Slice 3.8 and later work remain unstarted.
+- Slice 3.4 is complete via PR #128, Slice 3.5 is complete via PR #130, Slice 3.6 is complete via PR #132, and Slice 3.7 is complete via PR #137 with exact-head and post-merge CI passed. B6b remains intentionally pending under the Slice 3.8 allowance. Slice 3.8 is separately authorized; closeout and later work remain unstarted.
 - Do not describe Wave 3 as complete before Slice 3.8 and the explicit Network 38/38 closeout evidence pass.
