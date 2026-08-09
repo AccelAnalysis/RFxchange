@@ -1,0 +1,9 @@
+{
+  "eyebrow": "Interruption temporaire du service",
+  "title": "Cette page n’est pas disponible pour le moment.",
+  "lede": "Nous n’avons pas pu charger les informations nécessaires à cette page.",
+  "supporting": "Réessayez. Si le problème persiste, revenez à la page d’accueil de RFxchange et réessayez plus tard.",
+  "retry": "Réessayer",
+  "home": "Accueil RFxchange",
+  "supportReference": "Référence d’assistance : {reference}"
+}
