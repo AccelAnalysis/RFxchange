@@ -2,18 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 
 import type { AuthenticatedServerContext } from "@/src/application/auth/server-session";
 import { ActivationJourneyError } from "@/src/application/onboarding/activation-journey";
+import { isCurrentActivationLegalAcceptance } from "@/src/domain/onboarding/model";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
 } from "@/src/infrastructure/auth/firebase-server-session";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
+import { FirebaseAccountSecurityService } from "@/src/infrastructure/auth/firebase-account-security";
+import { getServerFirebaseAuth } from "@/src/infrastructure/auth/firebase-server";
+import { FirestoreActivationJourneyContextRepository } from "@/src/infrastructure/firestore/activation-journey";
 import { createFirestoreGeographyRepositories } from "@/src/infrastructure/firestore/geography-repositories";
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 import {
   CensusTigerLocalityDirectory,
   type CensusLocalityCandidate,
 } from "@/src/infrastructure/geography/census-tiger-locality-directory";
-import { synchronizeActivationContextFromAuthority } from "@/src/infrastructure/onboarding/activation-context-sync";
+import {
+  synchronizeActivationContextFromActiveMembership,
+  synchronizeActivationContextFromAuthority,
+} from "@/src/infrastructure/onboarding/activation-context-sync";
 import { createServerActivationJourneyService } from "@/src/infrastructure/onboarding/runtime";
+import { ServerTimingCollector } from "@/src/infrastructure/observability/server-timing";
 
 import {
   parseSaveProfileBody,
@@ -41,22 +49,58 @@ async function cachedLocalitySuggestions(query: string, stateCode: string) {
   return candidates;
 }
 
-async function authenticatedContext(request: NextRequest): Promise<AuthenticatedServerContext> {
+async function authenticatedContext(
+  request: NextRequest,
+  timing: ServerTimingCollector,
+): Promise<AuthenticatedServerContext> {
   const sessionCookie = request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
   if (!sessionCookie) throw new Error("RFxchange session is required.");
-  return createServerAuthenticationBoundary().authenticateSessionCookie({
-    sessionCookie,
-    now: new Date().toISOString(),
-  });
+  return timing.measure(
+    "auth",
+    () => createServerAuthenticationBoundary().authenticateSessionCookie({
+      sessionCookie,
+      now: new Date().toISOString(),
+    }),
+    "verify RFxchange session",
+  );
 }
 
 async function synchronizedState(
   service: ReturnType<typeof createServerActivationJourneyService>,
   context: AuthenticatedServerContext,
+  timing: ServerTimingCollector,
 ) {
-  const state = await service.state(context);
+  const state = await timing.measure(
+    "activation-state",
+    () => service.state(context),
+    "full activation state for explicit refresh",
+  );
   await synchronizeActivationContextFromAuthority(context, state);
   return state;
+}
+
+async function legalAccepted(
+  context: AuthenticatedServerContext,
+  timing: ServerTimingCollector,
+): Promise<boolean> {
+  const activation = await timing.measure(
+    "firestore-precondition",
+    () => new FirestoreActivationJourneyContextRepository(getServerFirestore()).getByUserId(context.user.id),
+    "legal acceptance context",
+  );
+  return Boolean(activation && isCurrentActivationLegalAcceptance(activation.legalAcceptance));
+}
+
+async function verifiedEmail(
+  context: AuthenticatedServerContext,
+  timing: ServerTimingCollector,
+): Promise<boolean> {
+  const account = await timing.measure(
+    "account-security",
+    () => new FirebaseAccountSecurityService(getServerFirebaseAuth()).inspect(context.authentication.subject),
+    "email verification precondition",
+  );
+  return account.emailVerified;
 }
 
 function errorResponse(error: unknown) {
@@ -71,126 +115,168 @@ function errorResponse(error: unknown) {
 }
 
 export async function GET(request: NextRequest) {
+  const timing = new ServerTimingCollector();
   try {
-    const context = await authenticatedContext(request);
+    const context = await authenticatedContext(request, timing);
     const service = createServerActivationJourneyService();
-    const state = await synchronizedState(service, context);
-    return NextResponse.json({ state });
+    const state = await synchronizedState(service, context, timing);
+    return timing.apply(NextResponse.json({ state }));
   } catch (error) {
-    return errorResponse(error);
+    return timing.apply(errorResponse(error));
   }
 }
 
 export async function POST(request: NextRequest) {
+  const timing = new ServerTimingCollector();
   try {
-    const context = await authenticatedContext(request);
+    const context = await authenticatedContext(request, timing);
     const service = createServerActivationJourneyService();
     const body = (await request.json()) as Readonly<Record<string, unknown>>;
     const action = typeof body.action === "string" ? body.action : "";
 
     switch (action) {
       case "accept-legal": {
-        return NextResponse.json({ state: await service.acceptLegal(context) });
+        const state = await timing.measure("activation-action", () => service.acceptLegal(context), action);
+        return timing.apply(NextResponse.json({ state }));
       }
       case "search-geographies": {
-        const current = await synchronizedState(service, context);
-        if (!current.legalAccepted) {
-          return NextResponse.json(
+        if (!await legalAccepted(context, timing)) {
+          return timing.apply(NextResponse.json(
             { error: "Accept the current participation policies before selecting a home locality." },
             { status: 409 },
-          );
+          ));
         }
         const query = typeof body.query === "string" ? body.query : "";
         const stateCode = typeof body.stateCode === "string" ? body.stateCode : "";
-        const candidates = await cachedLocalitySuggestions(query, stateCode);
-        return NextResponse.json({ candidates });
+        const candidates = await timing.measure(
+          "geography-directory",
+          () => cachedLocalitySuggestions(query, stateCode),
+          "Census locality suggestions",
+        );
+        return timing.apply(NextResponse.json({ candidates }));
       }
       case "select-census-geography": {
-        const current = await synchronizedState(service, context);
-        if (!current.legalAccepted) {
-          return NextResponse.json(
+        if (!await legalAccepted(context, timing)) {
+          return timing.apply(NextResponse.json(
             { error: "Accept the current participation policies before selecting a home locality." },
             { status: 409 },
-          );
+          ));
         }
         const reference = typeof body.reference === "string" ? body.reference : "";
-        const geography = await localityDirectory.resolve(reference);
-        await createFirestoreGeographyRepositories(getServerFirestore()).definitions.save(geography);
-        return NextResponse.json({ state: await service.selectGeography(context, String(geography.id)) });
+        const geography = await timing.measure(
+          "geography-resolve",
+          () => localityDirectory.resolve(reference),
+          "resolve selected Census geography",
+        );
+        await timing.measure(
+          "firestore-geography",
+          () => createFirestoreGeographyRepositories(getServerFirestore()).definitions.save(geography),
+          "persist selected geography definition",
+        );
+        const state = await timing.measure(
+          "activation-action",
+          () => service.selectGeography(context, String(geography.id)),
+          action,
+        );
+        return timing.apply(NextResponse.json({ state }));
       }
       case "select-geography": {
         const geographyId = typeof body.geographyId === "string" ? body.geographyId : "";
-        return NextResponse.json({ state: await service.selectGeography(context, geographyId) });
+        const state = await timing.measure(
+          "activation-action",
+          () => service.selectGeography(context, geographyId),
+          action,
+        );
+        return timing.apply(NextResponse.json({ state }));
       }
       case "acknowledge-orientation-position": {
-        return NextResponse.json({ state: await service.acknowledgeOrientationPosition(context) });
+        const state = await timing.measure(
+          "activation-action",
+          () => service.acknowledgeOrientationPosition(context),
+          action,
+        );
+        return timing.apply(NextResponse.json({ state }));
       }
       case "search-organizations": {
         const displayName = typeof body.displayName === "string" ? body.displayName : "";
-        const result = await service.searchOrganizations(context, {
-          displayName,
-          ...parseWebsiteIdentityFields(body),
-          ...(typeof body.phone === "string" && body.phone.trim() ? { phone: body.phone } : {}),
-        });
-        return NextResponse.json({
+        const result = await timing.measure(
+          "organization-search",
+          () => service.searchOrganizations(context, {
+            displayName,
+            ...parseWebsiteIdentityFields(body),
+            ...(typeof body.phone === "string" && body.phone.trim() ? { phone: body.phone } : {}),
+          }),
+          action,
+        );
+        return timing.apply(NextResponse.json({
           provisionalIdentity: result.provisionalIdentity,
           candidates: result.candidates,
           creationSafety: result.creationSafety,
-        });
+        }));
       }
       case "create-organization": {
-        const current = await synchronizedState(service, context);
-        if (!current.emailVerified) {
-          return NextResponse.json(
+        if (!await verifiedEmail(context, timing)) {
+          return timing.apply(NextResponse.json(
             { error: "Verify your email before creating or claiming an organization.", code: "email-verification-required" },
             { status: 409 },
-          );
+          ));
         }
         const displayName = typeof body.displayName === "string" ? body.displayName : "";
         const reviewedCandidateOrganizationIds = Array.isArray(body.reviewedCandidateOrganizationIds)
           ? body.reviewedCandidateOrganizationIds.filter((value): value is string => typeof value === "string")
           : [];
-        const state = await service.createOrganization(context, {
-          displayName,
-          reviewedCandidateOrganizationIds,
-          ...parseWebsiteIdentityFields(body),
-          ...(typeof body.phone === "string" && body.phone.trim() ? { phone: body.phone } : {}),
-        });
-        return NextResponse.json({ state });
+        const state = await timing.measure(
+          "activation-action",
+          () => service.createOrganization(context, {
+            displayName,
+            reviewedCandidateOrganizationIds,
+            ...parseWebsiteIdentityFields(body),
+            ...(typeof body.phone === "string" && body.phone.trim() ? { phone: body.phone } : {}),
+          }),
+          action,
+        );
+        return timing.apply(NextResponse.json({ state }));
       }
       case "select-existing-organization": {
-        const current = await synchronizedState(service, context);
-        if (!current.emailVerified) {
-          return NextResponse.json(
+        if (!await verifiedEmail(context, timing)) {
+          return timing.apply(NextResponse.json(
             { error: "Verify your email before creating or claiming an organization.", code: "email-verification-required" },
             { status: 409 },
-          );
+          ));
         }
         const displayName = typeof body.displayName === "string" ? body.displayName : "";
         const organizationId = typeof body.organizationId === "string" ? body.organizationId : "";
-        const state = await service.selectExistingOrganization(context, {
-          displayName,
-          organizationId,
-          ...(typeof body.domainEmailReference === "string" && body.domainEmailReference.trim()
-            ? { domainEmailReference: body.domainEmailReference }
-            : {}),
-        });
-        return NextResponse.json({ state });
+        const state = await timing.measure(
+          "activation-action",
+          () => service.selectExistingOrganization(context, {
+            displayName,
+            organizationId,
+            ...(typeof body.domainEmailReference === "string" && body.domainEmailReference.trim()
+              ? { domainEmailReference: body.domainEmailReference }
+              : {}),
+          }),
+          action,
+        );
+        return timing.apply(NextResponse.json({ state }));
       }
       case "begin-location": {
-        await synchronizedState(service, context);
-        const result = await service.beginLocation(context, {
-          addressLine1: typeof body.addressLine1 === "string" ? body.addressLine1 : "",
-          ...(typeof body.addressLine2 === "string" && body.addressLine2.trim()
-            ? { addressLine2: body.addressLine2 }
-            : {}),
-          locality: typeof body.locality === "string" ? body.locality : "",
-          regionCode: typeof body.regionCode === "string" ? body.regionCode : "",
-          postalCode: typeof body.postalCode === "string" ? body.postalCode : "",
-          isHomeOrPrivate: body.isHomeOrPrivate === true,
-          visibility: typeof body.visibility === "string" ? body.visibility : "locality-only",
-        });
-        return NextResponse.json({
+        await synchronizeActivationContextFromActiveMembership(context);
+        const result = await timing.measure(
+          "geocoder",
+          () => service.beginLocation(context, {
+            addressLine1: typeof body.addressLine1 === "string" ? body.addressLine1 : "",
+            ...(typeof body.addressLine2 === "string" && body.addressLine2.trim()
+              ? { addressLine2: body.addressLine2 }
+              : {}),
+            locality: typeof body.locality === "string" ? body.locality : "",
+            regionCode: typeof body.regionCode === "string" ? body.regionCode : "",
+            postalCode: typeof body.postalCode === "string" ? body.postalCode : "",
+            isHomeOrPrivate: body.isHomeOrPrivate === true,
+            visibility: typeof body.visibility === "string" ? body.visibility : "locality-only",
+          }),
+          "location geocode + draft persistence",
+        );
+        return timing.apply(NextResponse.json({
           state: result.state,
           draft: {
             id: String(result.draft.id),
@@ -202,25 +288,35 @@ export async function POST(request: NextRequest) {
               provider: candidate.provenance.provider,
             })),
           },
-        });
+        }));
       }
       case "confirm-location": {
-        await synchronizedState(service, context);
+        await synchronizeActivationContextFromActiveMembership(context);
         const candidateId = typeof body.candidateId === "string" ? body.candidateId : "";
-        return NextResponse.json({ state: await service.confirmLocation(context, candidateId) });
+        const state = await timing.measure(
+          "activation-action",
+          () => service.confirmLocation(context, candidateId),
+          action,
+        );
+        return timing.apply(NextResponse.json({ state }));
       }
       case "save-profile": {
-        await synchronizedState(service, context);
-        const state = await service.saveProfile(context, parseSaveProfileBody(body));
-        return NextResponse.json({ state });
+        await synchronizeActivationContextFromActiveMembership(context);
+        const state = await timing.measure(
+          "activation-action",
+          () => service.saveProfile(context, parseSaveProfileBody(body)),
+          action,
+        );
+        return timing.apply(NextResponse.json({ state }));
       }
       case "refresh": {
-        return NextResponse.json({ state: await synchronizedState(service, context) });
+        const state = await synchronizedState(service, context, timing);
+        return timing.apply(NextResponse.json({ state }));
       }
       default:
-        return NextResponse.json({ error: "Unsupported activation action." }, { status: 400 });
+        return timing.apply(NextResponse.json({ error: "Unsupported activation action." }, { status: 400 }));
     }
   } catch (error) {
-    return errorResponse(error);
+    return timing.apply(errorResponse(error));
   }
 }
