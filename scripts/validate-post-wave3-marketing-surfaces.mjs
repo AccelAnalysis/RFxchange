@@ -15,6 +15,8 @@ const responsiveChrome = read("src/components/marketing/MarketingChromeResponsiv
 const foundingEntry = read("app/acquisition/founding/route.ts");
 const homeScene = read("app/api/onboarding/home-scene/route.ts");
 const geographyCanvas = read("app/geography/canvas/page.tsx");
+const orientation = read("app/orientation/page.tsx");
+const exchange = read("app/exchange/page.tsx");
 const continuation = read("src/components/acquisition/FoundingAcquisitionContinuation.tsx");
 const english = JSON.parse(read("src/i18n/messages/marketing-pages/en-US.json"));
 
@@ -26,11 +28,17 @@ assert.match(foundersRedirect, /permanentRedirect\("\/founding"\)/, "/founders m
 assert.match(founding, /foundingActivationHref = "\/acquisition\/founding"/, "Founding conversion actions must enter the persisted acquisition path");
 assert.match(foundingEntry, /httpOnly: true/, "Founding campaign intent must be persisted server-side");
 assert.match(homeScene, /appendFoundingAcquisitionIntent/, "Activation completion must carry Founding intent into first value");
-assert.match(geographyCanvas, /FoundingAcquisitionContinuation/, "The first-value workspace must expose the preserved Founding next action");
+for (const [name, surface] of Object.entries({ geographyCanvas, orientation, exchange })) {
+  assert.match(surface, /FoundingAcquisitionContinuation/, `${name} must consume preserved Founding intent on a canonical participant destination`);
+  assert.match(surface, /acquisitionIntent/, `${name} must parse the bounded Founding acquisition query`);
+}
 assert.match(continuation, /href="\/founding"/, "Preserved Founding intent must return to the campaign offer");
 assert.match(chrome, /MarketingChromeResponsive/, "Marketing navigation must consume the responsive collapse contract");
 assert.match(chrome, /<details className=\{responsive\.navMenu\}/, "Long localized marketing navigation must have an accessible collapsed menu");
+assert.match(chrome, /responsive\.mobileActions/, "Marketing actions must participate in the mobile layout contract");
 assert.match(responsiveChrome, /max-width: 1320px/, "Marketing navigation must collapse before intermediate-width overflow");
+assert.match(responsiveChrome, /grid-template-areas:[\s\S]*"brand menu"[\s\S]*"actions actions"/, "Mobile marketing navigation must use a two-row layout");
+assert.match(responsiveChrome, /max-width: 520px/, "Narrow mobile controls must stack the language selector above actions");
 assert.match(availability, /item\.kind === "live"/, "Availability must distinguish live from later pathways");
 assert.match(marketing, /publicValueProgression/, "Public content must retain the customer-value progression");
 assert.equal(english.home.value.items.length, 4, "Home value progression must contain four stages");
