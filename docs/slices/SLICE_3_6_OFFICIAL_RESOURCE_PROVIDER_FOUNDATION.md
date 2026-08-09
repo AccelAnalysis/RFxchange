@@ -1,6 +1,6 @@
 # Slice 3.6 — Official Resource Provider Foundation
 
-**Status: IMPLEMENTED AND ACCEPTED — MERGE/POST-MERGE CI PENDING**
+**Status: COMPLETE VIA PR #132**
 
 ## Feature IDs
 
@@ -148,8 +148,8 @@ Recalculate dependencies after merge before authorizing Slice 3.7.
 
 ## Implementation evidence
 
-Implementation and acceptance are recorded in `docs/architecture/WAVE_3_SLICE_3_6.md`. Focused lifecycle/authority/privacy tests, Firestore emulator persistence and direct-client denial, all five locales, configured real-environment participant/admin browser journeys, desktop/intermediate/mobile reflow, clean-console verification, exact cleanup and the canonical repository gate pass. Only `RES-001`, `RES-002`, `RES-003`, and `ADM-070` are marked complete. Slice 3.7 and later work remain unstarted pending merge, post-merge production CI and a merged-tree dependency recalculation.
+Implementation and acceptance are recorded in `docs/architecture/WAVE_3_SLICE_3_6.md`. Focused lifecycle/authority/privacy tests, Firestore emulator persistence and direct-client denial, all five locales, configured real-environment participant/admin browser journeys, desktop/intermediate/mobile reflow, clean-console verification, exact cleanup and the canonical repository gate pass. Only `RES-001`, `RES-002`, `RES-003`, and `ADM-070` are marked complete. PR #132 passed exact-head production CI run `31297388363`, merged at `26412435651a13cc7a6540bbe50bc7b646760d78`, and post-merge run `31297486059` passed. Slice 3.7 was then recalculated and separately authorized.
 
 ## Execution authority
 
-`docs/slices/SLICE_3_6_EXECUTION_AUTHORITY.md` records the merged baseline, binding implementation decisions, acceptance matrix and preserved non-scope. This brief alone does not authorize Slice 3.7 or any later work.
+`docs/slices/SLICE_3_6_EXECUTION_AUTHORITY.md` records the original merged baseline, binding implementation decisions, acceptance matrix and preserved non-scope. Current Slice 3.7 authority is separate in `docs/slices/SLICE_3_7_EXECUTION_AUTHORITY.md`.

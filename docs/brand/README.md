@@ -1,6 +1,6 @@
 # The RFxchange Brand Experience System
 
-**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a AND SLICES 3.1–3.5 COMPLETE; SLICE 3.6 ACCEPTED WITH MERGE PENDING**
+**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a AND SLICES 3.1–3.6 COMPLETE; SLICE 3.7 AUTHORIZED**
 
 This directory defines the approved target brand experience for **The RFxchange** and the sequential convergence gates that apply it without weakening product, security, privacy, geography, lifecycle, or evidence authority.
 
@@ -124,7 +124,7 @@ The non-Feature prerequisites identified before Wave 3 Slice 3.2 were satisfied:
 
 B4 and B5 are also complete under the adopted numerical execution sequence.
 
-**Wave 3 Slice 3.2 is complete via PR #120, the no-Feature-ID AMACS and AI foundations are complete via PRs #123–#124, Slices 3.3–3.5 are complete via PRs #126, #128 and #130, and Slice 3.6 is implemented and accepted with merge/post-merge CI pending.**
+**Wave 3 Slice 3.2 is complete via PR #120, the no-Feature-ID AMACS and AI foundations are complete via PRs #123–#124, Slices 3.3–3.6 are complete via PRs #126, #128, #130 and #132, and Slice 3.7 is separately authorized from merged `main`.**
 
 Slice 3.2 completed:
 
@@ -133,7 +133,7 @@ Slice 3.2 completed:
 - `DSC-002`;
 - `DSC-003`.
 
-Neither the Brand Gates, AMACS reconciliation nor AI/AMACS foundation completed any additional Feature ID. Slice 3.6 acceptance completes only `RES-001`, `RES-002`, `RES-003`, and `ADM-070`, producing **438 total · 143 Done · 295 Not Started** and Network **29/38**.
+Neither the Brand Gates, AMACS reconciliation nor AI/AMACS foundation completed any additional Feature ID. Slice 3.6 completed only `RES-001`, `RES-002`, `RES-003`, and `ADM-070`, producing **438 total · 143 Done · 295 Not Started** and Network **29/38**. The Slice 3.7 authority update is documentation-only and changes no total.
 
 ## Remaining Brand Gates
 

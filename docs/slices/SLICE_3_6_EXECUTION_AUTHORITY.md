@@ -1,6 +1,6 @@
 # Slice 3.6 — Official Resource Provider Foundation execution authority
 
-**Status: IMPLEMENTED AND ACCEPTED — MERGE/POST-MERGE CI PENDING**
+**Status: AUTHORITY CONSUMED — SLICE 3.6 COMPLETE VIA PR #132**
 
 ## Recalculated merged baseline
 
@@ -123,8 +123,8 @@ Production CI must pass on the exact PR head and again on merged `main` before d
 
 This authority does not permit annual revalidation or provider lifecycle `ADM-071`, Verified Resource Provider or any credibility badge/seal, Organization Verification, public provider search or recommendation, public service fields, contextual routing, provider referral/request connections, request-scoped messaging, provider resource publishing, provider-driven acquisition, performance ranking/analytics/API, advanced capacity-aware routing `RES-006`, paid placement, B6b convergence, Wave 4, Intelligence Dark, Presentation Mode, production sound or haptics.
 
-Slice 3.7 and all later slices/gates remain unstarted. They may be authorized only after Slice 3.6 implementation and acceptance merge, post-merge production CI passes, and dependency eligibility is recalculated again from merged `main`.
+This authority did not itself begin Slice 3.7 or any later slice/gate. Slice 3.7 was authorized only after Slice 3.6 implementation and acceptance merged, post-merge production CI passed, and dependency eligibility was recalculated again from merged `main`.
 
 ## Acceptance result
 
-The bounded implementation and evidence are recorded in `docs/architecture/WAVE_3_SLICE_3_6.md`. Focused tests, Firestore emulator acceptance, configured participant/administrator browser acceptance, five-locale and responsive/accessibility checks, exact cleanup and the canonical repository gate pass. This authority does not authorize Slice 3.7; merge and post-merge CI must complete before recalculation.
+The bounded implementation and evidence are recorded in `docs/architecture/WAVE_3_SLICE_3_6.md`. Focused tests, Firestore emulator acceptance, configured participant/administrator browser acceptance, five-locale and responsive/accessibility checks, exact cleanup and the canonical repository gate passed. PR #132 passed exact-head production CI run `31297388363` on `81dd94f7e655b1854660e33c0a703dd37bb39a06`, merged at `26412435651a13cc7a6540bbe50bc7b646760d78`, and post-merge `main` CI run `31297486059` passed. Slice 3.7 was then recalculated and separately authorized; no later slice was begun by this authority.

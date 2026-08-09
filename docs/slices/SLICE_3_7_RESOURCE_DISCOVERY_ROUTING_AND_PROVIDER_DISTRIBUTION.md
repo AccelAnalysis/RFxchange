@@ -1,6 +1,6 @@
 # Slice 3.7 — Resource Discovery, Routing & Provider Distribution
 
-**Status: PLANNING BRIEF ONLY — DO NOT IMPLEMENT UNTIL EXPLICITLY AUTHORIZED**
+**Status: AUTHORIZED BY `SLICE_3_7_EXECUTION_AUTHORITY.md` FROM MERGED `main`**
 
 ## Feature IDs
 
@@ -84,4 +84,4 @@ A business can find the right **door** in context, authorize a connection and in
 
 ## Completion discipline
 
-Recalculate dependencies after merge before authorizing Slice 3.8. Brand Gate B6b may then be authorized to converge the completed live Network lenses without changing Feature-ID state.
+Recalculate dependencies after merge before authorizing Slice 3.8. Brand Gate B6b may then be evaluated and, only through a separate authority update, authorized to converge the completed live Network lenses without changing Feature-ID state.
