@@ -114,6 +114,34 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ORG-015/018/019 credential, media and subordinate-location enrichment is
+    // organization-scoped and server-authorized. Events/commands are immutable.
+    match /organizationCredentials/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationProfileAssets/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationAdditionalLocationDrafts/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationAdditionalLocations/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /organizationEnrichmentEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /organizationEnrichmentCommands/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     // GEO-011 marker activation is a server-derived lifecycle aggregate. Transition
     // events are immutable; direct clients cannot create a marker from browser state.
     match /organizationMarkerActivations/{documentId} {

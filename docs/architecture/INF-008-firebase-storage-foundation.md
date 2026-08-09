@@ -57,6 +57,7 @@ Storage Rules remain server-managed and deny anonymous and authenticated direct 
 | --- | --- | --- | --- | ---: |
 | `organization-logo` | Logo source object | Standard/private | `organization.profile.manage` | 5 MiB |
 | `organization-media` | Organization profile media | Standard/private | `organization.profile.manage` | 15 MiB |
+| `organization-document` | Organization profile and portfolio documents | Standard/private | `document.manage` | 25 MiB |
 | `authority-evidence` | Organization authority evidence | Sensitive evidence | `document.manage` | 25 MiB |
 | `verification-evidence` | Verification-review evidence | Sensitive evidence | `credibility.manage` | 25 MiB |
 | `rfx-document` | Later RFx document integration | Standard/private | `document.manage` | 50 MiB |

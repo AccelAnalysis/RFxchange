@@ -6,9 +6,9 @@ Wave 2 is complete, Brand Gates B0 through B6a are merged, and Wave 3 Slices 3.1
 
 Current Feature-ID state remains:
 
-- **438 total · 129 Done · 309 Not Started**
+- **438 total · 132 Done · 306 Not Started**
 - Activation: **43/43**
-- Network: **15/38**
+- Network: **18/38**
 
 AMACS 0.5.0, Brand Gates, the RFxchange AMACS reconciliation and the AI/AMACS Interpretation Foundation are no-Feature-ID cross-cutting work. They do not mark any Network feature Done.
 
@@ -62,7 +62,7 @@ Both gates are merged, post-merge production CI passed, and Slice 3.3 was explic
 | **AMACS 0.5.0 reconciliation** | **No Feature IDs** | **Complete via PR #123.** Pinned, deterministically rebuilt, validated and reconciled RFxchange from its historical 0.1.0 baseline to immutable 0.5.0 without silently changing historical records or creating participant features. |
 | **AI/AMACS Interpretation Foundation** | **No Feature IDs** | **Complete via PR #124.** Provider-neutral server gateway and concrete adapter; release-aware retrieval; AMACS schema and catalog validation; non-authoritative candidates; disposition and authoritative-command separation; provenance; privacy; metering; manual-service path; evaluation. |
 | **3.3 — Market Profile Enrichment** | `ORG-013`, `ORG-014`, `ORG-016`, `ORG-017` | **Complete via PR #126.** Structured AMACS-backed capability assertions, products and services, industry and NAICS context, past performance and teaming, referral or resource preferences. Ordinary-language assistance uses 0.5.0 InterpretationRecord or Candidate contracts; confirmed assertions remain separate from suggestions, evidence and verification. |
-| **3.4 — Credential, Media & Location Enrichment** | `ORG-015`, `ORG-018`, `ORG-019` | **Authorized; single active slice.** Credentials with provenance; private-by-default media, documents and portfolio; subordinate additional locations with geography and privacy authority. |
+| **3.4 — Credential, Media & Location Enrichment** | `ORG-015`, `ORG-018`, `ORG-019` | **Implemented and accepted; merge/post-merge CI pending.** Credentials with provenance; private-by-default media, documents and portfolio; subordinate additional locations with geography and privacy authority. |
 | **3.5 — Referral Network & Referral Acquisition** | `REF-001`, `REF-002`, `REF-003`, `REF-004`, `REF-005`, `EDU-014`, `ACQ-006` | Legitimate organization-owned referrals with structured context, consent and minimum necessary data, lifecycle, first-use education and external acquisition continuity. |
 | **3.6 — Official Resource Provider Foundation** | `RES-001`, `RES-002`, `RES-003`, `ADM-070` | Controlled provider application, review and approval; official-provider state; structured service profile with authority, evidence and lifecycle. |
 | **3.7 — Resource Discovery, Routing & Provider Distribution** | `RES-004`, `RES-005`, `DSC-011`, `REF-006`, `RES-007`, `RES-008`, `ACQ-008` | Service-territory discovery; eligibility and capacity-aware contextual routing; consented provider connection; resource objects; provider acquisition and distribution. |
@@ -81,7 +81,7 @@ Slice 3.2 evidence, tracker update and PR #120 merge [complete]
 → recalculate and explicitly authorize Slice 3.3 [complete]
 → Slice 3.3 implementation, acceptance, PR #126 merge and post-merge CI [complete]
 → recalculate and explicitly authorize Slice 3.4 [complete]
-→ Slice 3.4 implementation, acceptance and merge
+→ Slice 3.4 implementation and acceptance [complete; merge/post-merge CI pending]
 → recalculate and explicitly authorize Slice 3.5
 → Slice 3.5 implementation, acceptance and merge
 → recalculate and explicitly authorize Slice 3.6
@@ -216,5 +216,5 @@ Completion of Slice 3.5 alone is expected to leave Network at 25/38 absent unrel
 - Recalculate from merged `main` after every slice or gate.
 - Update execution authority before beginning the next production phase.
 - AMACS 0.5.0 reconciliation is complete via PR #123, the AI/AMACS Interpretation Foundation is complete via PR #124, and Slice 3.3 is complete via PR #126 with exact-head and post-merge CI passed.
-- Slice 3.4 is the single active authorized slice; Slice 3.5 and later work remain unstarted.
+- Slice 3.4 implementation and acceptance are complete; merge and post-merge CI are pending. Slice 3.5 and later work remain unstarted and unauthorized.
 - Do not describe Wave 3 as complete before Slice 3.8 and the explicit Network 38/38 closeout evidence pass.

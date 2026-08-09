@@ -1,6 +1,6 @@
 # Slice 3.4 — Credential, Media & Location Enrichment execution authority
 
-**Status: AUTHORIZED — SINGLE ACTIVE SLICE**
+**Status: CONSUMED BY ACCEPTED IMPLEMENTATION — MERGE/POST-MERGE CI PENDING**
 
 ## Recalculated merged baseline
 
@@ -98,4 +98,4 @@ Production CI must pass on the exact PR head and again on merged `main` before d
 
 This authority does not permit `ORG-020` Organization Verification, credibility badges/seals, issuer-verification administration, paid quotas, direct browser object access, public object buckets, signed/bearer download URLs, malware-provider implementation, arbitrary GIS editing, new cross-locality expansion policy, changing the primary geography/location, provider application or approval, referrals, RFx, Intelligence Dark, Presentation Mode, production sound, or haptics.
 
-Slice 3.5 and all later slices/gates remain unstarted. They may be authorized only after Slice 3.4 implementation and acceptance merge, post-merge production CI passes, and dependency eligibility is recalculated again from merged `main`.
+Slice 3.4 implementation and acceptance are recorded in `docs/architecture/WAVE_3_SLICE_3_4.md`. Slice 3.5 and all later slices/gates remain unstarted. They may be authorized only after Slice 3.4 merges, post-merge production CI passes, and dependency eligibility is recalculated again from merged `main`.

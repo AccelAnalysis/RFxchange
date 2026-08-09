@@ -12,11 +12,11 @@
 
 ## Progress
 
-**438 total · 129 Done · 309 Not Started**
+**438 total · 132 Done · 306 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
-- 3 - Network: **15/38**
+- 3 - Network: **18/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
@@ -46,7 +46,7 @@ Wave 2 remains complete at **43/43 Activation**. The Runtime Convergence Gate, R
 - **AMACS 0.5.0 reconciliation — COMPLETE VIA PR #123; no Feature IDs**: deterministically reconstructed and verified the immutable 0.5.0 release at `da7879f2609271b067ae6d02875e9388a02c4fe5`, preserved the historical 0.1.0 release, generated release-aware catalog/search/registry/runtime projections, proved the 500 historical capabilities remained with 115 additive capabilities and no inferred historical mutation, and isolated all artifacts and infrastructure from participant surfaces. Local `npm run check`, the official upstream validator and 44 upstream tests, seven focused RFxchange tests and production CI run `31284501027` passed on substantive head `c2d6695cdea2f3d3386dab354e37e1bba9440e87`.
 - **AI/AMACS Interpretation Foundation — COMPLETE VIA PR #124; no Feature IDs**: established the authenticated provider-neutral gateway, concrete OpenAI adapter with truthful disabled state, bounded AMACS 0.5.0 retrieval, strict schema/catalog validation, non-authoritative record/candidate and disposition contracts, minimized provenance, metering, transactional quotas, independent manual catalog path and deterministic regression evaluation. Local `npm run check` passed with 400 architecture tests and 19 Functions tests; focused Firestore emulator acceptance proved direct-client denial, atomic persistence, disposition and quota behavior. No live provider smoke was claimed without configured credentials.
 
-Network completion is **15/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, and four Slice 3.3 market-profile features. Slice 3.3 added AMACS 0.5.0-backed organization claims, descriptive industry/NAICS context, bounded self-reported past performance, and non-authoritative market preferences while preserving interpretation/assertion/evidence/verification separation. Focused tests, Firestore emulator acceptance, five-locale validation, the full local repository gate, configured-browser acceptance, and zero-residual disposable cleanup passed. PR #126 passed exact-head production CI run `31289352499`, merged at `0f5e8d56af8484bbd6e72716d4149a21e92db029`, and post-merge `main` CI run `31289477113` passed. Dependency authority was recalculated from that merged tree; Slice 3.4 is authorized without changing Feature-ID status or totals.
+Network completion is **18/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, and three accepted Slice 3.4 organization-enrichment features. Slice 3.4 adds provenance-preserving organization-reported credentials, private-by-default media/documents with explicit minimized publication, and confirmed privacy-safe subordinate locations inside the currently authorized primary locality. Focused tests, Firestore emulator acceptance, all five locales, responsive/keyboard/axe acceptance, real Census/Mapbox/Firebase browser acceptance, permission revocation after load, controlled delivery/unpublication, the full local repository gate, and zero-residual disposable Auth/Firestore/Storage cleanup passed. Merge, exact-head production CI, and post-merge `main` CI remain pending; Slice 3.5 and later work are unstarted.
 
 ## Feature-ID checklist
 
@@ -190,11 +190,11 @@ Network completion is **15/38**: four inherited Wave 1 foundations, three Slice 
 - [ ] `EDU-017`
 - [x] `ORG-013` — Slice 3.3; AMACS 0.5.0 manual/assisted entry, non-authoritative candidate disposition, separate confirmed claim command, structured discovery migration, emulator/browser acceptance, cleanup, and `npm run check`
 - [x] `ORG-014` — Slice 3.3; descriptive industry and participant-selected NAICS source/version provenance, explicit non-authority boundary, browser acceptance, and focused tests
-- [ ] `ORG-015`
+- [x] `ORG-015` — Slice 3.4; controlled organization-reported credentials, issuer/source/date/evidence provenance, explicit visibility, immutable audit/history, no automatic verification, focused/emulator/browser acceptance, and cleanup
 - [x] `ORG-016` — Slice 3.3; bounded self-reported past performance/project value, privacy/visibility, capability-link review boundary, browser acceptance, and focused tests
 - [x] `ORG-017` — Slice 3.3; prime/subcontractor/supplier/referral/resource preferences with explicit non-authority/commitment boundary, browser acceptance, and focused tests
-- [ ] `ORG-018`
-- [ ] `ORG-019`
+- [x] `ORG-018` — Slice 3.4; INF-008 private source objects, validated media/documents, explicit reversible publication, minimized controlled delivery, sensitive-evidence exclusion, focused/emulator/browser acceptance, and cleanup
+- [x] `ORG-019` — Slice 3.4; in-locality authoritative geocode/review/confirm, primary-location immutability, exact/approximate/locality-only privacy, subordinate map semantics, focused/emulator/browser acceptance, and cleanup
 - [x] `ORG-021` — PR #42
 - [x] `ORG-022` — PR #42
 - [x] `DSC-001` — PR #120; capability-first permitted organization search, explainable match boundary, configured-browser acceptance, emulator acceptance, and `npm run check`

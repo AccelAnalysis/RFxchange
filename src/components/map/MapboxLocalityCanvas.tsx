@@ -12,7 +12,7 @@ export interface ControlledLocalityPointOverlay {
   readonly id: string;
   readonly position: readonly [longitude: number, latitude: number];
   readonly label: string;
-  readonly kind: "location-candidate" | "confirmed-location" | "organization-marker";
+  readonly kind: "location-candidate" | "confirmed-location" | "organization-marker" | "subordinate-location";
   readonly privacyLabel?: string;
   readonly activated?: boolean;
 }
