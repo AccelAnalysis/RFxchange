@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
@@ -14,8 +14,6 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24.18.0
@@ -23,20 +21,8 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-      - name: Lock Firebase CLI dependency
-        run: npm install --save-dev --save-exact firebase-tools@15.24.0
-      - name: Commit locked Firebase CLI dependency
-        shell: bash
-        run: |
-          if git diff --quiet -- package.json package-lock.json; then
-            echo "Firebase CLI dependency is already locked."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json
-          git commit -m "Lock Firebase CLI dependency"
-          git push origin HEAD:${GITHUB_HEAD_REF}
+      - name: Install dependencies
+        run: npm ci
       - name: Repository guardrails
         run: npm run validate
       - name: Cloud Functions build and unit tests
