@@ -27,6 +27,14 @@ test("login reuses one activation hydration and returning users skip geography s
   );
 });
 
+test("optimized login preserves an acquisition-aware controlled-platform destination", async () => {
+  const session = await source("app/api/auth/session/route.ts");
+  assert.match(session, /function withBoundAcquisition/);
+  assert.match(session, /state\.lifecycleState === "controlled-platform" && state\.organization/);
+  assert.match(session, /"\/acquisition\/continue"/);
+  assert.match(session, /state = withBoundAcquisition\(state, boundAcquisition\)/);
+});
+
 test("successful Firebase authentication does not immediately force a second token refresh", async () => {
   const browserAuth = await source("src/infrastructure/auth/firebase-browser.ts");
   assert.match(browserAuth, /const freshlyAuthenticated = new WeakSet<Auth>\(\)/);
@@ -79,6 +87,14 @@ test("protected participant routes use a lightweight workspace projection", asyn
   ]) {
     assert.equal(projection.includes(heavyDependency), false, `Workspace route projection must not hydrate ${heavyDependency}.`);
   }
+});
+
+test("account marker status remains authoritative even when map projection is unavailable", async () => {
+  const profilePage = await source("app/organization-profile/page.tsx");
+  assert.match(profilePage, /createFirestoreOrganizationMarkerRepositories/);
+  assert.match(profilePage, /markerRepositories\.activations\.getByOrganizationId\(organizationId\)/);
+  assert.match(profilePage, /markerActivation\?\.status === "active"/);
+  assert.doesNotMatch(profilePage, /mapProjection \? "Active" : "Not active"/);
 });
 
 test("client transitions avoid full browser reloads and activation entry is immediately available", async () => {
