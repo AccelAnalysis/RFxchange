@@ -50,12 +50,6 @@ export type ParticipantRouteDependencyStage =
   | "workspace-state"
   | "restriction-state";
 
-/**
- * Protected-route dependencies can fail after a participant has already created durable state.
- * Such failures must surface through a retryable error boundary rather than being converted into
- * sign-up, organization activation, or restriction state. The cause remains server-only diagnostic
- * evidence; participant UI renders neither this message nor the cause.
- */
 export class ParticipantRouteDependencyUnavailableError extends Error {
   readonly code = "participant-dependency-unavailable" as const;
   readonly stage: ParticipantRouteDependencyStage;
@@ -143,8 +137,6 @@ function governedMembershipRepair(input: Readonly<{
 }> {
   const access = resolveUserOrganizationAccess(input.context.user, input.activeMemberships);
   if (access.kind === "account-resolution") {
-    // /join is the current account-resolution surface. This is a governed membership state, not a
-    // dependency outage, so Retry must not be presented as the only remediation.
     return Object.freeze({
       kind: "activation-required" as const,
       reason: "account-resolution" as const,
@@ -170,8 +162,6 @@ function governedMembershipRepair(input: Readonly<{
         state: input.state,
       });
     }
-    // Multiple active memberships require organization resolution. The current participant entry
-    // flow is the governed resolution surface until persistent organization switching is introduced.
     return Object.freeze({
       kind: "activation-required" as const,
       reason: "organization-resolution" as const,
@@ -186,14 +176,6 @@ function governedMembershipRepair(input: Readonly<{
   });
 }
 
-/**
- * Pure protected-route classification policy. Production dependencies are injected by
- * participant-route-runtime.ts; architecture tests use deterministic in-memory dependencies.
- *
- * This separation is deliberate: dependency/provider implementation details cannot influence the
- * semantic distinction between signed out, activation/account resolution, wrong organization,
- * restricted, authorized, and a retryable service failure.
- */
 export async function resolveParticipantRouteWithDependencies(
   input: Readonly<{
     sessionCookie?: string | null;
@@ -224,7 +206,6 @@ export async function resolveParticipantRouteWithDependencies(
     return dependencyUnavailable("workspace-state", error);
   }
 
-  // This null has one intentionally narrow meaning: no activation context exists for this user.
   if (!projection) {
     return Object.freeze({
       kind: "activation-required" as const,
@@ -234,7 +215,7 @@ export async function resolveParticipantRouteWithDependencies(
     });
   }
 
-  const { state, activeMemberships } = projection;
+  const { state, activeMemberships, boundMembership } = projection;
   let membership = projection.membership;
   let resolvedState = state;
   const workspaceLifecycleEligible =
@@ -255,10 +236,41 @@ export async function resolveParticipantRouteWithDependencies(
     );
   }
 
-  if (!membership) {
-    // A persisted binding can legitimately stop being active through governed membership repair.
-    // Resolve the user's remaining active memberships through ARC-003 instead of calling that state
-    // a transient backend outage.
+  // A controlled/open activation binding is repairable only when the exact persisted membership
+  // still exists and is proven to belong to the same user and organization. A missing/cross-owned
+  // binding is corruption or unavailable state, not evidence that a different membership may be used.
+  if (
+    !boundMembership ||
+    boundMembership.id !== state.membershipId ||
+    boundMembership.userId !== context.user.id ||
+    String(boundMembership.organizationId) !== state.organization.id
+  ) {
+    return dependencyUnavailable(
+      "workspace-state",
+      new Error("Persisted participant membership binding is unavailable or cross-owned."),
+    );
+  }
+
+  if (boundMembership.status === "active") {
+    if (
+      !membership ||
+      membership.id !== boundMembership.id ||
+      membership.userId !== boundMembership.userId ||
+      String(membership.organizationId) !== String(boundMembership.organizationId) ||
+      !activeMemberships.some((candidate) => candidate.id === boundMembership.id)
+    ) {
+      return dependencyUnavailable(
+        "workspace-state",
+        new Error("Active participant membership binding is inconsistent."),
+      );
+    }
+  } else {
+    if (membership) {
+      return dependencyUnavailable(
+        "workspace-state",
+        new Error("Inactive participant membership unexpectedly resolved as active."),
+      );
+    }
     const repaired = governedMembershipRepair({
       context,
       state,
@@ -268,16 +280,6 @@ export async function resolveParticipantRouteWithDependencies(
     if ("kind" in repaired) return repaired;
     membership = repaired.membership;
     resolvedState = repaired.state;
-  } else if (
-    membership.status !== "active" ||
-    membership.userId !== context.user.id ||
-    String(membership.organizationId) !== state.organization.id ||
-    membership.id !== state.membershipId
-  ) {
-    return dependencyUnavailable(
-      "workspace-state",
-      new Error("Controlled/open participant workspace identity is inconsistent."),
-    );
   }
 
   const requestedOrganizationId = input.requestedOrganizationId?.trim();
