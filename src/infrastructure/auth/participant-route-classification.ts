@@ -12,10 +12,17 @@ import type {
   ParticipantWorkspaceState,
 } from "./participant-workspace-state.ts";
 
+export type ParticipantActivationResolutionReason =
+  | "activation-context-required"
+  | "activation-incomplete"
+  | "account-resolution"
+  | "organization-resolution";
+
 export type ParticipantRouteResolution =
   | Readonly<{ readonly kind: "unauthenticated" }>
   | Readonly<{
       readonly kind: "activation-required";
+      readonly reason: ParticipantActivationResolutionReason;
       readonly context: AuthenticatedServerContext;
       readonly state: ParticipantWorkspaceState | null;
     }>
@@ -126,6 +133,7 @@ function governedMembershipRepair(input: Readonly<{
   membership: OrganizationMembership;
 }> | Readonly<{
   kind: "activation-required";
+  reason: "account-resolution" | "organization-resolution";
   context: AuthenticatedServerContext;
   state: ParticipantWorkspaceState;
 }> | Readonly<{
@@ -139,6 +147,7 @@ function governedMembershipRepair(input: Readonly<{
     // dependency outage, so Retry must not be presented as the only remediation.
     return Object.freeze({
       kind: "activation-required" as const,
+      reason: "account-resolution" as const,
       context: input.context,
       state: input.state,
     });
@@ -165,6 +174,7 @@ function governedMembershipRepair(input: Readonly<{
     // flow is the governed resolution surface until persistent organization switching is introduced.
     return Object.freeze({
       kind: "activation-required" as const,
+      reason: "organization-resolution" as const,
       context: input.context,
       state: input.state,
     });
@@ -218,6 +228,7 @@ export async function resolveParticipantRouteWithDependencies(
   if (!projection) {
     return Object.freeze({
       kind: "activation-required" as const,
+      reason: "activation-context-required" as const,
       context,
       state: null,
     });
@@ -231,6 +242,7 @@ export async function resolveParticipantRouteWithDependencies(
   if (!workspaceLifecycleEligible) {
     return Object.freeze({
       kind: "activation-required" as const,
+      reason: "activation-incomplete" as const,
       context,
       state,
     });
