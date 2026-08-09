@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       "activation context lookup",
     );
     const provisionalOrganizationName = body.provisionalOrganizationName?.trim() || "";
-    let state: ActivationJourneyState | null = null;
+    let state = null;
     let acquisitionStatus: "none" | "bound" | "rejected" = "none";
     let boundAcquisition: BoundAcquisitionContext | null = null;
     let acquisitionAttached = false;
