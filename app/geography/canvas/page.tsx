@@ -7,6 +7,7 @@ import {
   RFXCHANGE_FOUNDING_ACQUISITION_INTENT,
   type FoundingAcquisitionIntent,
 } from "@/src/infrastructure/acquisition/founding-intent";
+import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
@@ -63,8 +64,14 @@ async function resolveAuthenticatedMapProjection(
   if (access.kind === "unauthenticated") {
     redirect(signInUrl(requestedOrganizationId, acquisitionIntent));
   }
+  if (access.kind === "access-resolution-required") {
+    redirect(participantEntryDestination(access));
+  }
   if (access.kind === "activation-required") {
-    redirect(acquisitionIntent ? "/acquisition/founding" : "/join");
+    redirect(participantEntryDestination(
+      access,
+      acquisitionIntent ? "/acquisition/founding" : "/join",
+    ));
   }
   if (access.kind === "wrong-organization") {
     redirect(access.state.controlledPlatformUrl ?? "/join");
