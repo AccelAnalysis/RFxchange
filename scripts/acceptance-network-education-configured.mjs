@@ -70,7 +70,10 @@ async function inspect() {
     ]);
   assert.equal(providerStatus.data()?.status, "official-resource-provider");
   assert.equal(businessStatus.exists, false);
-  assert.equal(providerApplication.exists, false);
+  if (providerApplication.exists) {
+    assert.equal(providerApplication.data()?.organizationId, providerOrganizationId);
+    assert.equal(providerApplication.data()?.status, "approved");
+  }
   assert.equal(businessApplication.exists, false);
 
   console.log(
@@ -83,7 +86,8 @@ async function inspect() {
       businessRecommendation: businessProgress.recommendedPath,
       providerAuthorityUnchanged: true,
       businessAuthorityUnchanged: true,
-      domainApplicationsCreated: 0,
+      preservedProviderApplication: providerApplication.exists,
+      educationCreatedApplications: 0,
     }),
   );
 }

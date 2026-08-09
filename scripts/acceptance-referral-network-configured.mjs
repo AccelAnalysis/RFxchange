@@ -387,11 +387,18 @@ async function cleanup() {
 
   const referrals = await documentsFor(db.collection("businessReferrals").where("senderOrganizationId", "==", state.senderOrganizationId));
   const referralIds = referrals.map((document) => document.id);
+  const fixtureOrganizationIds = [...new Set([
+    state.senderOrganizationId,
+    state.recipientOrganizationId,
+    state.externalActor?.organizationId,
+  ].filter(Boolean))];
   referrals.forEach(schedule);
   for (const document of await documentsFor(db.collection("businessReferralEvents").where("senderOrganizationId", "==", state.senderOrganizationId))) schedule(document);
-  for (const document of await documentsFor(db.collection("businessReferralCommands").where("actorOrganizationId", "==", state.senderOrganizationId))) schedule(document);
   for (const document of await documentsFor(db.collection("referralEducationAcknowledgements").where("organizationId", "==", state.senderOrganizationId))) schedule(document);
-  for (const document of await documentsFor(db.collection("organizationAuditEvents").where("organizationId", "==", state.senderOrganizationId))) schedule(document);
+  for (const organizationId of fixtureOrganizationIds) {
+    for (const document of await documentsFor(db.collection("businessReferralCommands").where("actorOrganizationId", "==", organizationId))) schedule(document);
+    for (const document of await documentsFor(db.collection("organizationAuditEvents").where("organizationId", "==", organizationId))) schedule(document);
+  }
   const acquisitionContextIds = [];
   for (const referralId of referralIds) {
     for (const document of await documentsFor(db.collection("referralCommunicationIntents").where("referralId", "==", referralId))) schedule(document);
@@ -424,7 +431,10 @@ async function cleanup() {
     if ((await db.collection(collection).doc(id).get()).exists) residual.push(`${collection}/${id}`);
   }
   for (const document of await documentsFor(db.collection("businessReferrals").where("senderOrganizationId", "==", state.senderOrganizationId))) residual.push(document.ref.path);
-  for (const document of await documentsFor(db.collection("organizationAuditEvents").where("organizationId", "==", state.senderOrganizationId))) residual.push(document.ref.path);
+  for (const organizationId of fixtureOrganizationIds) {
+    for (const document of await documentsFor(db.collection("businessReferralCommands").where("actorOrganizationId", "==", organizationId))) residual.push(document.ref.path);
+    for (const document of await documentsFor(db.collection("organizationAuditEvents").where("organizationId", "==", organizationId))) residual.push(document.ref.path);
+  }
   assert.deepEqual(residual, [], "Configured acceptance cleanup left residual records.");
   await auth.getUser(state.firebaseUid).then(
     () => assert.fail("Configured acceptance cleanup left the Firebase Auth user."),

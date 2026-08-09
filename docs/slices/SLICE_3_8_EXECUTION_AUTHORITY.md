@@ -1,6 +1,6 @@
 # Slice 3.8 — Persistent Network Education execution authority
 
-**Status: IMPLEMENTED, ACCEPTED, EXACT-HEAD CI PASSED — MERGE/POST-MERGE CI REQUIRED BEFORE CLOSEOUT**
+**Status: COMPLETE VIA PR #139 — FINAL-HEAD AND POST-MERGE CI PASSED; SEPARATE WAVE 3 CLOSEOUT ACCEPTED**
 
 ## Recalculated merged baseline
 
@@ -113,10 +113,10 @@ The bounded implementation now satisfies `EDU-016` and `EDU-017`. The versioned 
 
 The configured pass used approved-provider and non-provider business contexts, all four paths, persistence/re-entry, live workflow explainers, desktop/intermediate/mobile layouts, keyboard/screen-reader structure, reduced motion and all five locales. Cleanup removed 16 education records and the complete supporting Firestore/Auth fixture footprint with zero residuals. Education created no provider application or other domain record and changed no organization, provider, issuer or administrative authority.
 
-The canonical tracker advances only `EDU-016` and `EDU-017` to Done: **438 total · 152 Done · 286 Not Started**, Activation **43/43**, Network **38/38**. PR #139 production CI run `31303300038` passed on substantive head `a5c15238c175ce6010e7942d6ed2f3ecafb11fe3`. Wave 3 is not declared closed by that arithmetic; merge, post-merge production CI and the separately authorized closeout reconciliation remain required.
+The canonical tracker advances only `EDU-016` and `EDU-017` to Done: **438 total · 152 Done · 286 Not Started**, Activation **43/43**, Network **38/38**. PR #139 final-head production CI run `31303588724` passed, the slice merged at `2727b6111d1582225e8ece409d015b8696a8cce7`, and post-merge `main` run `31303727886` passed. The separately executed integrated exit is recorded in `docs/architecture/WAVE_3_CLOSEOUT.md`.
 
 ## Explicit non-scope
 
 This authority does not permit B6b implementation, Wave 4 first-RFx education (`EDU-011`–`EDU-013`), endorsement education (`EDU-015`), opportunity/RFx creation or beacons, teaming, verification, credibility, paid training or certification, commercial entitlement, B6c, Intelligence Dark, Presentation Mode, production sound or haptics.
 
-Wave 3 closeout remains a separate evidence reconciliation after Slice 3.8 merges and post-merge production CI passes. No Wave 4 or later production work may begin under this authority.
+Wave 3 closeout remained a separate evidence reconciliation and has now passed. No Wave 4 or later production work begins under this authority; a future Slice 4.1 brief must be separately approved.

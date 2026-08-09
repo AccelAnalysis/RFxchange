@@ -1,6 +1,6 @@
 # The RFxchange Brand Experience System
 
-**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a AND SLICES 3.1–3.7 COMPLETE; B6b INTENTIONALLY PENDING; SLICE 3.8 ACCEPTED, EXACT-HEAD CI PASSED, MERGE/POST-MERGE CI PENDING**
+**Status: CANONICAL TARGET BRAND AUTHORITY — B0 THROUGH B6a AND WAVE 3 NETWORK COMPLETE; B6b INTENTIONALLY PENDING**
 
 This directory defines the approved target brand experience for **The RFxchange** and the sequential convergence gates that apply it without weakening product, security, privacy, geography, lifecycle, or evidence authority.
 
@@ -124,7 +124,7 @@ The non-Feature prerequisites identified before Wave 3 Slice 3.2 were satisfied:
 
 B4 and B5 are also complete under the adopted numerical execution sequence.
 
-**Wave 3 Slice 3.2 is complete via PR #120, the no-Feature-ID AMACS and AI foundations are complete via PRs #123–#124, Slices 3.3–3.6 are complete via PRs #126, #128, #130 and #132, Slice 3.7 is complete via PR #137, and Slice 3.8 is implemented and accepted with exact-head CI passed. B6b is intentionally pending; Slice 3.8 merge/post-merge CI and the separate closeout remain.**
+**Wave 3 Slice 3.2 is complete via PR #120, the no-Feature-ID AMACS and AI foundations are complete via PRs #123–#124, Slices 3.3–3.6 are complete via PRs #126, #128, #130 and #132, Slice 3.7 is complete via PR #137, and Slice 3.8 is complete via PR #139. Final-head/post-merge CI and the separate integrated exit passed. B6b remains intentionally pending.**
 
 Slice 3.2 completed:
 
@@ -133,7 +133,7 @@ Slice 3.2 completed:
 - `DSC-002`;
 - `DSC-003`.
 
-Neither the Brand Gates, AMACS reconciliation nor AI/AMACS foundation completed any additional Feature ID. Slice 3.8 accepts only `EDU-016` and `EDU-017`, producing **438 total · 152 Done · 286 Not Started** and Network **38/38**. The post-Slice-3.7 B6b checkpoint found no mandatory prerequisite or bounded convergence defect and left the gate Not Started; the education implementation introduced no reason to widen that gate.
+Neither the Brand Gates, AMACS reconciliation nor AI/AMACS foundation completed any additional Feature ID. Slice 3.8 accepts only `EDU-016` and `EDU-017`, producing **438 total · 152 Done · 286 Not Started** and Network **38/38**. The post-Slice-3.7 and final Wave 3 closeout checkpoints found no mandatory prerequisite or bounded convergence defect and left B6b Not Started. See `docs/architecture/WAVE_3_CLOSEOUT.md` for the integrated brand/accessibility/browser evidence.
 
 ## Remaining Brand Gates
 
