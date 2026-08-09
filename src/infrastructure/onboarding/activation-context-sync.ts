@@ -6,7 +6,8 @@ import { updateActivationJourneyContext } from "../../domain/onboarding/model.ts
 import { organizationId } from "../../domain/organizations/model.ts";
 import { organizationMembershipId } from "../../domain/users/model.ts";
 import { FirestoreActivationJourneyContextRepository } from "../firestore/activation-journey.ts";
-import { getServerFirestore } from "../firestore/runtime.ts";
+import { createServerFirestoreFoundationRepositories, getServerFirestore } from "../firestore/runtime.ts";
+import { measureServerOperation } from "../observability/server-timing.ts";
 
 /**
  * Activation context is resumable UX state, never authority. When canonical membership authority
@@ -37,6 +38,43 @@ export async function synchronizeActivationContextFromAuthority(
     updateActivationJourneyContext(current, {
       organizationId: resolvedOrganizationId,
       membershipId: resolvedMembershipId,
+      now: new Date().toISOString(),
+    }),
+  );
+}
+
+/**
+ * Narrow pre-action synchronization. It repairs a resumable activation context from an already
+ * authoritative active membership without hydrating the full activation state graph first.
+ */
+export async function synchronizeActivationContextFromActiveMembership(
+  context: AuthenticatedServerContext,
+  db: Firestore = getServerFirestore(),
+): Promise<void> {
+  const repository = new FirestoreActivationJourneyContextRepository(db);
+  const current = await measureServerOperation(
+    "activation-sync.firestore-context",
+    () => repository.getByUserId(context.user.id),
+  );
+  if (!current || (current.organizationId && current.membershipId)) return;
+
+  const foundation = createServerFirestoreFoundationRepositories(db);
+  const memberships = await measureServerOperation(
+    "activation-sync.firestore-membership",
+    () => foundation.users.memberships.listActiveByUserId(context.user.id),
+  );
+  const membership = current.membershipId
+    ? memberships.find((candidate) => candidate.id === current.membershipId) ?? null
+    : current.organizationId
+      ? memberships.find((candidate) => candidate.organizationId === current.organizationId) ?? null
+      : null;
+  if (!membership) return;
+  if (current.organizationId && membership.organizationId !== current.organizationId) return;
+
+  await repository.save(
+    updateActivationJourneyContext(current, {
+      organizationId: current.organizationId ?? membership.organizationId,
+      membershipId: membership.id,
       now: new Date().toISOString(),
     }),
   );
