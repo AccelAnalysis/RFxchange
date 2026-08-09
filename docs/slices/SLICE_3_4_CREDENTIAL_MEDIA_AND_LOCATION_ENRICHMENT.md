@@ -1,6 +1,6 @@
 # Slice 3.4 — Credential, Media & Location Enrichment
 
-**Status: IMPLEMENTED AND ACCEPTED — MERGE/POST-MERGE CI PENDING**
+**Status: COMPLETE VIA PR #128**
 
 ## Feature IDs
 
@@ -83,4 +83,4 @@ Recalculate dependencies after merge before authorizing Slice 3.5.
 
 ## Execution authority
 
-`docs/slices/SLICE_3_4_EXECUTION_AUTHORITY.md` records the merged baseline, implementation decisions, acceptance matrix, and preserved non-scope. This brief alone does not authorize Slice 3.5 or any later work.
+`docs/slices/SLICE_3_4_EXECUTION_AUTHORITY.md` records the merged baseline, implementation decisions, acceptance matrix, and preserved non-scope. Slice 3.5 was separately authorized only after PR #128 merged and post-merge CI passed.
