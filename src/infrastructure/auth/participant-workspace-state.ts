@@ -28,6 +28,8 @@ export interface ParticipantWorkspaceProjection {
   readonly state: ParticipantWorkspaceState;
   /** Active memberships are required to distinguish governed account repair from dependency loss. */
   readonly activeMemberships: readonly OrganizationMembership[];
+  /** The exact persisted activation membership, including inactive records, when one was bound. */
+  readonly boundMembership: OrganizationMembership | null;
   /** Active membership currently bound to the activation organization, when that binding is valid. */
   readonly membership: OrganizationMembership | null;
 }
@@ -67,8 +69,9 @@ function controlledPlatformUrl(
  *
  * This intentionally does not hydrate geography, profile, marker, location, capability, account
  * security, or other activation UI state. Those belong to their specific screens. The protected
- * route boundary needs lifecycle plus the complete active-membership set so it can distinguish a
- * deliberate membership repair from unavailable persisted state.
+ * route boundary needs lifecycle, the exact persisted activation membership (including inactive
+ * records), and the complete active-membership set so it can distinguish a deliberate membership
+ * repair from a missing/cross-owned binding or unavailable persisted state.
  *
  * A null result has one meaning only: there is no activation context for this authenticated user.
  * Once an activation context exists, missing or cross-owned lifecycle state is classified as a
@@ -91,10 +94,15 @@ export async function loadParticipantWorkspaceProjection(
   );
   if (!activation) return null;
 
-  const lifecycle = await measureServerOperation(
-    "workspace-state.firestore-lifecycle",
-    () => foundation.lifecycle.lifecycle.getById(accessJourneyId(activation.accessJourneyId)),
-    "access lifecycle",
+  const [lifecycle, boundMembership] = await measureServerOperation(
+    "workspace-state.firestore-lifecycle-binding",
+    () => Promise.all([
+      foundation.lifecycle.lifecycle.getById(accessJourneyId(activation.accessJourneyId)),
+      activation.membershipId
+        ? foundation.users.memberships.getById(activation.membershipId)
+        : Promise.resolve(null),
+    ]),
+    "access lifecycle + persisted activation membership",
   );
   if (!lifecycle) {
     throw new ParticipantWorkspaceProjectionError("lifecycle-missing");
@@ -111,7 +119,7 @@ export async function loadParticipantWorkspaceProjection(
       : null;
   const resolvedOrganizationId = organizationId ?? (membership ? String(membership.organizationId) : null);
   // Preserve the persisted binding identity even when it is no longer active. The classifier uses
-  // the active-membership set to decide whether this is account repair or dependency inconsistency.
+  // boundMembership + the active-membership set to prove whether repair is governed or inconsistent.
   const resolvedMembershipId = activation.membershipId
     ? String(activation.membershipId)
     : membership
@@ -142,6 +150,7 @@ export async function loadParticipantWorkspaceProjection(
       acquisitionContext,
     }),
     activeMemberships: Object.freeze([...memberships]),
+    boundMembership,
     membership,
   });
 }
