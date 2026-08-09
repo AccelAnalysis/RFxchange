@@ -35,4 +35,4 @@ The final configured record contained approved status, nine immutable events, ni
 
 ## Completion and handoff
 
-Acceptance supports marking only `RES-001`, `RES-002`, `RES-003`, and `ADM-070` Done. The checkpoint is **438 total · 143 Done · 295 Not Started**, Activation **43/43**, and Network **29/38**. Slice 3.7 and all later slices/gates remain unstarted until this implementation merges, post-merge production CI passes, and dependency authority is recalculated from merged `main`.
+Acceptance supports marking only `RES-001`, `RES-002`, `RES-003`, and `ADM-070` Done. The checkpoint is **438 total · 143 Done · 295 Not Started**, Activation **43/43**, and Network **29/38**. PR #132 passed exact-head production CI run `31297388363` on `81dd94f7e655b1854660e33c0a703dd37bb39a06`, merged at `26412435651a13cc7a6540bbe50bc7b646760d78`, and post-merge `main` CI run `31297486059` passed. Dependency authority was then recalculated from that merged tree and Slice 3.7 was separately authorized; no later slice or gate began in Slice 3.6.

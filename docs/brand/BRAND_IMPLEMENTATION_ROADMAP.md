@@ -1,6 +1,6 @@
 # RFxchange Brand Experience Implementation Roadmap
 
-**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a AND SLICES 3.1–3.5 COMPLETE; SLICE 3.6 ACCEPTED WITH MERGE PENDING**
+**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a AND SLICES 3.1–3.6 COMPLETE; SLICE 3.7 AUTHORIZED**
 
 ## 1. Purpose
 
@@ -55,7 +55,7 @@ B4 and B5 are also complete under the adopted numerical execution sequence.
 
 **Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, and the no-Feature-ID AI/AMACS Interpretation Foundation is complete via PR #124.**
 
-Slice 3.5 is complete via PR #130. Slice 3.6 implementation and acceptance now establish the governed provider application/status and private service profile without creating public provider service fields or routing. Merge and post-merge CI remain pending; Slice 3.7 and B6b receive no authority from this handoff.
+Slice 3.5 is complete via PR #130. Slice 3.6 is complete via PR #132 and establishes the governed provider application/status and private service profile without creating public provider service fields or routing. Slice 3.7 is separately authorized to add its live provider discovery/routing domain. B6b remains unstarted and receives no authority from the product-slice handoff.
 
 ## 4. Completed gates
 
@@ -270,6 +270,6 @@ The Brand Gate sequence requested through B6a is complete and reconciled. Slice 
 
 The current product handoff is:
 
-> **Slice 3.6 — Official Resource Provider Foundation (`RES-001`, `RES-002`, `RES-003`, `ADM-070`) — IMPLEMENTED AND ACCEPTED; MERGE PENDING**
+> **Slice 3.7 — Resource Discovery, Routing & Provider Distribution (`RES-004`, `RES-005`, `DSC-011`, `REF-006`, `RES-007`, `RES-008`, `ACQ-008`) — AUTHORIZED**
 
-Slice 3.7 and later slices remain unstarted until Slice 3.6 merges, post-merge CI passes, and dependency authority is recalculated. B6b remains separately sequenced behind the live referral domain from Slice 3.5 and the provider discovery/routing domain from Slice 3.7.
+Slice 3.6 passed exact-head CI, merged via PR #132 and passed post-merge CI before Slice 3.7 authority was recalculated. Slice 3.8 and later slices remain unstarted. B6b remains separately sequenced behind the completed live referral domain from Slice 3.5 and the provider discovery/routing domain from Slice 3.7.
