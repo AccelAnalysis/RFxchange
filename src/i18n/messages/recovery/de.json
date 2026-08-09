@@ -5,5 +5,16 @@
   "supporting": "Versuchen Sie es erneut. Wenn das Problem weiterhin besteht, kehren Sie zur RFxchange-Startseite zurück und versuchen Sie es später noch einmal.",
   "retry": "Erneut versuchen",
   "home": "RFxchange-Startseite",
-  "supportReference": "Support-Referenz: {reference}"
+  "supportReference": "Support-Referenz: {reference}",
+  "accessEyebrow": "Organisationszugriff",
+  "accountTitle": "Ihr Konto hat derzeit keinen aktiven Organisationszugriff.",
+  "accountBody": "Ihre frühere Organisationsmitgliedschaft ist nicht mehr aktiv. RFxchange verwendet die Aktivierung oder den OPEN-Status dieser Organisation nicht weiter, als würden sie noch Zugriff gewähren.",
+  "accountNext": "Verwenden Sie eine aktuelle Einladung einer Organisation, um den Zugriff wiederzuerlangen, oder melden Sie sich ab und kehren Sie zurück, nachdem ein Administrator Ihr Konto wiederhergestellt oder eingeladen hat.",
+  "organizationTitle": "Wählen Sie die aktive Organisationsmitgliedschaft aus, deren Zugriff Sie klären möchten.",
+  "organizationBody": "Ihre frühere Aktivierung gehört zu einer anderen Organisation. RFxchange überträgt deren kontrollierten oder OPEN-Lebenszyklus nicht automatisch auf eine andere Organisation.",
+  "organizationBoundary": "Die Auswahl einer Organisation hier kennzeichnet die zu klärende Mitgliedschaft; sie überträgt nicht die Aktivierungsbefugnis der vorherigen Organisation.",
+  "activeMemberships": "Aktive Organisationsmitgliedschaften",
+  "selectOrganization": "Organisation auswählen",
+  "selectedOrganization": "Für die Zugriffsklärung ausgewählt",
+  "organizationFallback": "Organisation {id}"
 }
