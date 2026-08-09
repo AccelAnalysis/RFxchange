@@ -33,13 +33,14 @@ async function expectSessionCode(operation, expectedCode) {
   );
 }
 
-test("recognized malformed or expired Firebase credentials remain signed-out failures", async () => {
+test("recognized malformed, expired, or deleted Firebase credentials remain signed-out failures", async () => {
   for (const code of [
     "auth/argument-error",
     "auth/invalid-id-token",
     "auth/id-token-expired",
     "auth/invalid-session-cookie",
     "auth/session-cookie-expired",
+    "auth/user-not-found",
   ]) {
     const boundary = boundaryForVerificationError(firebaseError(code));
     await expectSessionCode(
