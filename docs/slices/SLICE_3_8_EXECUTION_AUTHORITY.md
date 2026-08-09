@@ -1,6 +1,6 @@
 # Slice 3.8 — Persistent Network Education execution authority
 
-**Status: IMPLEMENTED AND ACCEPTED — MERGE/POST-MERGE CI REQUIRED BEFORE CLOSEOUT**
+**Status: IMPLEMENTED, ACCEPTED, EXACT-HEAD CI PASSED — MERGE/POST-MERGE CI REQUIRED BEFORE CLOSEOUT**
 
 ## Recalculated merged baseline
 
@@ -113,7 +113,7 @@ The bounded implementation now satisfies `EDU-016` and `EDU-017`. The versioned 
 
 The configured pass used approved-provider and non-provider business contexts, all four paths, persistence/re-entry, live workflow explainers, desktop/intermediate/mobile layouts, keyboard/screen-reader structure, reduced motion and all five locales. Cleanup removed 16 education records and the complete supporting Firestore/Auth fixture footprint with zero residuals. Education created no provider application or other domain record and changed no organization, provider, issuer or administrative authority.
 
-The canonical tracker advances only `EDU-016` and `EDU-017` to Done: **438 total · 152 Done · 286 Not Started**, Activation **43/43**, Network **38/38**. Wave 3 is not declared closed by that arithmetic; exact-head production CI, merge, post-merge production CI and the separately authorized closeout reconciliation remain required.
+The canonical tracker advances only `EDU-016` and `EDU-017` to Done: **438 total · 152 Done · 286 Not Started**, Activation **43/43**, Network **38/38**. PR #139 production CI run `31303300038` passed on substantive head `a5c15238c175ce6010e7942d6ed2f3ecafb11fe3`. Wave 3 is not declared closed by that arithmetic; merge, post-merge production CI and the separately authorized closeout reconciliation remain required.
 
 ## Explicit non-scope
 

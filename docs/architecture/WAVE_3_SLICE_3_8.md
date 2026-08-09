@@ -29,7 +29,7 @@ The eleven explainers cover capability suggestion and confirmation, credential e
 
 ## Acceptance evidence
 
-Focused architecture tests cover stable path ordering, exact current/future links, provider-only recommendation, membership-separated durable state, dismiss/reopen/version behavior, idempotent replay, stale rejection, all eleven four-question explainers, nonmodal placement and domain-repository isolation. The canonical local gate passed with **438/438 architecture tests**, **19/19 Functions tests**, typecheck and production build; lint reported only the 13 inherited warnings.
+Focused architecture tests cover stable path ordering, exact current/future links, provider-only recommendation, membership-separated durable state, dismiss/reopen/version behavior, idempotent replay, stale rejection, all eleven four-question explainers, nonmodal placement and domain-repository isolation. The canonical local gate passed with **438/438 architecture tests**, **19/19 Functions tests**, typecheck and production build; lint reported only the 13 inherited warnings. PR #139 production CI run `31303300038` passed on substantive head `a5c15238c175ce6010e7942d6ed2f3ecafb11fe3`, including the complete emulator chain and production build.
 
 Firestore emulator acceptance proved atomic progress/event/command persistence, durable resume, idempotent replay, stale-version rejection, direct-client denial for all three collections and zero residual emulator records. CI now runs both the previously omitted Slice 3.7 resource-network smoke and the Slice 3.8 education smoke.
 

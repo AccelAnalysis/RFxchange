@@ -1,6 +1,6 @@
 # RFxchange Brand Experience Implementation Roadmap
 
-**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a AND SLICES 3.1–3.7 COMPLETE; B6b INTENTIONALLY PENDING; SLICE 3.8 ACCEPTED WITH MERGE/POST-MERGE CI PENDING**
+**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a AND SLICES 3.1–3.7 COMPLETE; B6b INTENTIONALLY PENDING; SLICE 3.8 ACCEPTED, EXACT-HEAD CI PASSED, MERGE/POST-MERGE CI PENDING**
 
 ## 1. Purpose
 
@@ -55,7 +55,7 @@ B4 and B5 are also complete under the adopted numerical execution sequence.
 
 **Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, and the no-Feature-ID AI/AMACS Interpretation Foundation is complete via PR #124.**
 
-Slice 3.5 is complete via PR #130. Slice 3.6 is complete via PR #132 and establishes the governed provider application/status and private service profile. Slice 3.7 is complete via PR #137 and adds the live provider discovery/routing domain. The post-merge checkpoint found no specific B6b brief, mandatory prerequisite or concrete bounded convergence defect, so B6b remains intentionally pending and receives no implementation authority from the product-slice handoff. Slice 3.8 is implemented and accepted against that baseline; exact-head CI, merge, post-merge CI and separate Wave 3 closeout remain.
+Slice 3.5 is complete via PR #130. Slice 3.6 is complete via PR #132 and establishes the governed provider application/status and private service profile. Slice 3.7 is complete via PR #137 and adds the live provider discovery/routing domain. The post-merge checkpoint found no specific B6b brief, mandatory prerequisite or concrete bounded convergence defect, so B6b remains intentionally pending and receives no implementation authority from the product-slice handoff. Slice 3.8 is implemented and accepted against that baseline and PR #139 exact-head CI passed; merge, post-merge CI and separate Wave 3 closeout remain.
 
 ## 4. Completed gates
 
@@ -272,6 +272,6 @@ The Brand Gate sequence requested through B6a is complete and reconciled. Slice 
 
 The current product handoff is:
 
-> **Slice 3.8 — Persistent Network Education (`EDU-016`, `EDU-017`) — IMPLEMENTED AND ACCEPTED; MERGE/POST-MERGE CI PENDING**
+> **Slice 3.8 — Persistent Network Education (`EDU-016`, `EDU-017`) — IMPLEMENTED AND ACCEPTED; EXACT-HEAD CI PASSED; MERGE/POST-MERGE CI PENDING**
 
-Slice 3.7 passed exact-head CI run `31300282317`, merged via PR #137 at `25baba600d6e1913a8941570f7348454d2e6941d` and passed post-merge CI run `31300395073` before Slice 3.8 authority was recalculated. Slice 3.8 now has local, emulator and configured-browser acceptance with zero-residual cleanup. B6b remains intentionally pending under the Slice 3.8 allowance. Wave 3 closeout and later slices remain unstarted.
+Slice 3.7 passed exact-head CI run `31300282317`, merged via PR #137 at `25baba600d6e1913a8941570f7348454d2e6941d` and passed post-merge CI run `31300395073` before Slice 3.8 authority was recalculated. Slice 3.8 now has local, emulator and configured-browser acceptance with zero-residual cleanup, and PR #139 exact-head CI run `31303300038` passed. B6b remains intentionally pending under the Slice 3.8 allowance. Wave 3 closeout and later slices remain unstarted.

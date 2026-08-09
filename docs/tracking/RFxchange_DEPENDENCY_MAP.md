@@ -156,7 +156,7 @@ Wave 2 OPEN/marker
 
 The already-complete Wave 3 foundations `ORG-021`, `ORG-022`, `ADM-055` and `ADM-056` remain inherited prerequisites and are not rebuilt.
 
-## Adopted Wave 3 Network slice roadmap — Slices 3.1–3.8 accepted; Slice 3.8 merge/post-merge CI pending
+## Adopted Wave 3 Network slice roadmap — Slices 3.1–3.8 accepted; Slice 3.8 exact-head CI passed, merge/post-merge CI pending
 
 Wave 3 contains **38 Network features**. All 38 have implementation and acceptance evidence: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, seven Slice 3.5 referral/acquisition features, four Slice 3.6 provider-foundation features, seven Slice 3.7 resource-routing features, and two Slice 3.8 persistent-education features. The adopted sequence is:
 
@@ -167,10 +167,10 @@ Wave 3 contains **38 Network features**. All 38 have implementation and acceptan
 5. **Slice 3.5 — `REF-001` + `REF-002` + `REF-003` + `REF-004` + `REF-005` + `EDU-014` + `ACQ-006` — Referral Network & Referral Acquisition — COMPLETE VIA PR #130**.
 6. **Slice 3.6 — `RES-001` + `RES-002` + `RES-003` + `ADM-070` — Official Resource Provider Foundation — COMPLETE VIA PR #132**.
 7. **Slice 3.7 — `RES-004` + `RES-005` + `DSC-011` + `REF-006` + `RES-007` + `RES-008` + `ACQ-008` — Resource Discovery, Routing & Provider Distribution — COMPLETE VIA PR #137**.
-8. **Slice 3.8 — `EDU-016` + `EDU-017` — Persistent Network Education — IMPLEMENTED AND ACCEPTED; MERGE/POST-MERGE CI PENDING**.
+8. **Slice 3.8 — `EDU-016` + `EDU-017` — Persistent Network Education — IMPLEMENTED AND ACCEPTED; EXACT-HEAD CI PASSED; MERGE/POST-MERGE CI PENDING**.
 
 **Dependency result:** PR #120 completes the dependency-eligible `GEO-012`, `DSC-001`, `DSC-002` and `DSC-003` set after Slice 3.1 and Brand Gates B0–B6a. No dependency edge changed in this reconciliation.
 
-**Implementation sequencing result:** Slice 3.7 passed exact-head production CI run `31300282317`, merged via PR #137 at `25baba600d6e1913a8941570f7348454d2e6941d`, and passed post-merge production CI run `31300395073`. The conditional B6b checkpoint found no explicit prerequisite or concrete bounded convergence need, so B6b remains Not Started under the Slice 3.8 allowance. Slice 3.8 now has implementation, local/emulator/configured-browser acceptance and zero-residual cleanup evidence. Exact-head production CI, merge and post-merge CI must pass before the separate Wave 3 closeout recalculates the next candidate; later work remains unstarted.
+**Implementation sequencing result:** Slice 3.7 passed exact-head production CI run `31300282317`, merged via PR #137 at `25baba600d6e1913a8941570f7348454d2e6941d`, and passed post-merge production CI run `31300395073`. The conditional B6b checkpoint found no explicit prerequisite or concrete bounded convergence need, so B6b remains Not Started under the Slice 3.8 allowance. Slice 3.8 now has implementation, local/emulator/configured-browser acceptance and zero-residual cleanup evidence, and PR #139 exact-head production CI run `31303300038` passed on substantive head `a5c15238c175ce6010e7942d6ed2f3ecafb11fe3`. Merge and post-merge CI must pass before the separate Wave 3 closeout recalculates the next candidate; later work remains unstarted.
 
 See `docs/slices/WAVE_3_ROADMAP.md`, `docs/brand/BRAND_GATE_B1_SEMANTIC_FOUNDATION.md` and the applicable canonical slice brief for detailed boundaries and acceptance intent.
