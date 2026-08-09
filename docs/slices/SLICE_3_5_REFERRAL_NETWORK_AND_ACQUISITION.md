@@ -1,6 +1,6 @@
 # Slice 3.5 — Referral Network & Referral Acquisition
 
-**Status: PLANNING BRIEF ONLY — DO NOT IMPLEMENT UNTIL EXPLICITLY AUTHORIZED**
+**Status: AUTHORIZED — SINGLE ACTIVE SLICE**
 
 ## Feature IDs
 
@@ -86,3 +86,7 @@ Organizations can make and receive useful, consented and auditable referrals—a
 ## Completion discipline
 
 Recalculate dependencies after merge before authorizing Slice 3.6.
+
+## Execution authority
+
+`docs/slices/SLICE_3_5_EXECUTION_AUTHORITY.md` records the merged baseline, binding lifecycle/privacy/acquisition decisions, acceptance matrix, and preserved non-scope. This brief alone does not authorize Slice 3.6 or any later work.

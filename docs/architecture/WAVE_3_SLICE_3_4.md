@@ -47,4 +47,4 @@ The focused TypeScript/unit gates, Firebase emulator smoke, architecture validat
 
 Acceptance supports marking only `ORG-015`, `ORG-018`, and `ORG-019` Done. The resulting checkpoint is **438 total · 132 Done · 306 Not Started**, Activation **43/43**, and Network **18/38**.
 
-Merge, exact-head production CI, and post-merge `main` CI remain required before dependency authority may authorize Slice 3.5. Slice 3.5 and all later slices/gates remain unstarted.
+PR #128 passed exact-head production CI run `31291992746`, merged at `7f57cabf029edb0a0045b53d9f3339f170dc530c`, and post-merge `main` CI run `31292086252` passed. Dependency authority was recalculated from that merged tree and Slice 3.5 was separately authorized without changing Feature-ID totals.
