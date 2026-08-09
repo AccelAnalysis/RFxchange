@@ -13,6 +13,7 @@ import {
   createServerFirstValueAndOpenReleaseService,
   openReleaseScopeFromAccess,
 } from "@/src/infrastructure/activation-release/runtime";
+import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
@@ -37,10 +38,13 @@ export default async function ExchangePage({ searchParams }: ExchangePageProps) 
     redirect(`/signin?returnTo=${encodeURIComponent(exchangeUrl)}`);
   }
   if (access.kind === "access-resolution-required") {
-    redirect("/access-resolution");
+    redirect(participantEntryDestination(access));
   }
   if (access.kind === "activation-required") {
-    redirect(acquisitionIntent ? "/acquisition/founding" : "/join");
+    redirect(participantEntryDestination(
+      access,
+      acquisitionIntent ? "/acquisition/founding" : "/join",
+    ));
   }
   if (access.kind === "wrong-organization") {
     const destination = access.state.controlledPlatformUrl ?? "/join";
