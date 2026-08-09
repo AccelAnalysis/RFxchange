@@ -1,9 +1,34 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
+
+async function collectParticipantPages(directoryUrl) {
+  const entries = await readdir(directoryUrl, { withFileTypes: true });
+  const pages = [];
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      pages.push(...await collectParticipantPages(new URL(`${entry.name}/`, directoryUrl)));
+      continue;
+    }
+    if (entry.isFile() && entry.name === "page.tsx") {
+      pages.push(new URL(entry.name, directoryUrl));
+    }
+  }
+
+  return pages;
+}
+
+function firstAuthorityRead(source, startIndex) {
+  const indexes = [
+    source.indexOf("access.state", startIndex),
+    source.indexOf("access.membership", startIndex),
+  ].filter((index) => index >= 0);
+  return indexes.length > 0 ? Math.min(...indexes) : -1;
+}
 
 test("membership changes route to one non-authorizing localized access-resolution surface", async () => {
   const [classifier, destination, page, exchange, acquisitionContinuation, dictionary] = await Promise.all([
@@ -42,4 +67,36 @@ test("membership changes route to one non-authorizing localized access-resolutio
     "Acquisition continuation must resolve membership changes before any lifecycle-dependent rendering",
   );
   assert.match(dictionary, /recoveryEnUS/);
+});
+
+test("every participant page handles access resolution before consuming organization authority", async () => {
+  const pages = await collectParticipantPages(new URL("../app/", import.meta.url));
+  const canonicalResolutionPage = "/app/access/resolve/page.tsx";
+  let participantPageCount = 0;
+
+  for (const pageUrl of pages) {
+    const source = await readFile(pageUrl, "utf8");
+    if (!source.includes("resolveParticipantRoute")) continue;
+    participantPageCount += 1;
+
+    if (pageUrl.pathname.endsWith(canonicalResolutionPage)) continue;
+
+    const resolverIndex = source.indexOf("resolveParticipantRoute");
+    const resolutionIndex = source.indexOf('access.kind === "access-resolution-required"', resolverIndex);
+    assert.notEqual(
+      resolutionIndex,
+      -1,
+      `${pageUrl.pathname} must explicitly handle access-resolution-required`,
+    );
+
+    const authorityReadIndex = firstAuthorityRead(source, resolverIndex);
+    if (authorityReadIndex >= 0) {
+      assert.ok(
+        resolutionIndex < authorityReadIndex,
+        `${pageUrl.pathname} must resolve membership changes before reading access.state or access.membership`,
+      );
+    }
+  }
+
+  assert.ok(participantPageCount > 1, "Expected multiple participant route consumers to be guarded");
 });
