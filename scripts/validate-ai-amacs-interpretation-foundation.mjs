@@ -19,6 +19,7 @@ assert.match(provider, /OPENAI_API_KEY/);
 assert.doesNotMatch(interpretRoute + dispositionRoute, /OPENAI_API_KEY|api\.openai\.com/);
 for (const collection of ["aiInterpretationRecords", "aiInterpretationCandidates", "aiInterpretationProvenance", "aiInterpretationUsageEvents", "aiInterpretationEvents", "aiInterpretationQuotaBuckets"]) assert.match(rules, new RegExp(`match /${collection}`));
 assert.match(repository, /Daily \$\{entry\.dimension\.kind\} AI interpretation quota is exhausted/);
-assert.match(tracker, /next active phase is the no-Feature-ID AI\/AMACS Interpretation Foundation/);
+assert.match(tracker, /AI\/AMACS Interpretation Foundation — COMPLETE VIA PR #124; no Feature IDs/);
+assert.match(tracker, /Network completion remains \*\*11\/38\*\*/);
 
 console.log("AI/AMACS interpretation foundation validation passed: non-authoritative, release-bound, private, metered, and tracker-neutral.");
