@@ -1,0 +1,9 @@
+{
+  "eyebrow": "Temporary service interruption",
+  "title": "This page isn’t available right now.",
+  "lede": "We couldn’t load the information needed for this page.",
+  "supporting": "Retry the request. If the problem continues, return to the RFxchange homepage and try again later.",
+  "retry": "Retry",
+  "home": "RFxchange home",
+  "supportReference": "Support reference: {reference}"
+}
