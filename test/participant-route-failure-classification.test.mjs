@@ -25,6 +25,10 @@ const membership = Object.freeze({
   organizationId: "org-route-3a",
   status: "active",
 });
+const inactiveBoundMembership = Object.freeze({
+  ...membership,
+  status: "inactive",
+});
 const replacementMembership = Object.freeze({
   id: "membership-route-replacement",
   userId: "user-route-3a",
@@ -40,6 +44,9 @@ const secondReplacementMembership = Object.freeze({
 
 function projection(overrides = {}) {
   const projectedMembership = overrides.membership === undefined ? membership : overrides.membership;
+  const projectedBoundMembership = overrides.boundMembership === undefined
+    ? membership
+    : overrides.boundMembership;
   return Object.freeze({
     state: Object.freeze({
       accessJourneyId: "journey-route-3a",
@@ -53,6 +60,7 @@ function projection(overrides = {}) {
     activeMemberships: Object.freeze(
       overrides.activeMemberships ?? (projectedMembership ? [projectedMembership] : []),
     ),
+    boundMembership: projectedBoundMembership,
     membership: projectedMembership,
   });
 }
@@ -200,12 +208,67 @@ test("controlled workspace with structurally missing organization identity remai
   );
 });
 
+test("missing persisted activation membership cannot be repaired through another active organization", async () => {
+  await expectDependencyFailure(
+    () => resolveParticipantRouteWithDependencies(
+      { sessionCookie: "session" },
+      dependencies({
+        loadWorkspaceProjection: async () => projection({
+          membership: null,
+          boundMembership: null,
+          activeMemberships: [replacementMembership],
+        }),
+      }),
+    ),
+    "workspace-state",
+  );
+});
+
+test("cross-owned persisted activation membership cannot enter governed repair", async () => {
+  for (const boundMembership of [
+    { ...inactiveBoundMembership, userId: "another-user" },
+    { ...inactiveBoundMembership, organizationId: "another-org" },
+    { ...inactiveBoundMembership, id: "another-membership" },
+  ]) {
+    await expectDependencyFailure(
+      () => resolveParticipantRouteWithDependencies(
+        { sessionCookie: "session" },
+        dependencies({
+          loadWorkspaceProjection: async () => projection({
+            membership: null,
+            boundMembership,
+            activeMemberships: [replacementMembership],
+          }),
+        }),
+      ),
+      "workspace-state",
+    );
+  }
+});
+
+test("active persisted binding missing from active projection remains fail-closed", async () => {
+  await expectDependencyFailure(
+    () => resolveParticipantRouteWithDependencies(
+      { sessionCookie: "session" },
+      dependencies({
+        loadWorkspaceProjection: async () => projection({
+          membership: null,
+          boundMembership: membership,
+          activeMemberships: [replacementMembership],
+        }),
+      }),
+    ),
+    "workspace-state",
+  );
+});
+
 test("deactivated activation membership with no active membership routes to account resolution instead of Retry", async () => {
   const result = await resolveParticipantRouteWithDependencies(
     { sessionCookie: "session" },
     dependencies({
       loadWorkspaceProjection: async () => projection({
         membership: null,
+        boundMembership: inactiveBoundMembership,
         activeMemberships: [],
       }),
     }),
@@ -222,6 +285,7 @@ test("deactivated activation membership with one remaining active membership res
     dependencies({
       loadWorkspaceProjection: async () => projection({
         membership: null,
+        boundMembership: inactiveBoundMembership,
         activeMemberships: [replacementMembership],
       }),
     }),
@@ -236,6 +300,7 @@ test("deactivated activation membership with one remaining active membership res
 test("multiple remaining active memberships require organization resolution until one is requested", async () => {
   const staleProjection = projection({
     membership: null,
+    boundMembership: inactiveBoundMembership,
     activeMemberships: [replacementMembership, secondReplacementMembership],
   });
   const unresolved = await resolveParticipantRouteWithDependencies(
@@ -257,7 +322,7 @@ test("multiple remaining active memberships require organization resolution unti
   assert.equal(selected.state.organization.id, replacementMembership.organizationId);
 });
 
-test("controlled workspace rejects cross-user or cross-tenant persisted membership drift as state failure", async () => {
+test("controlled workspace rejects contradictory active membership drift as state failure", async () => {
   for (const changedMembership of [
     { ...membership, userId: "another-user" },
     { ...membership, organizationId: "another-org" },
@@ -270,6 +335,7 @@ test("controlled workspace rejects cross-user or cross-tenant persisted membersh
         dependencies({
           loadWorkspaceProjection: async () => projection({
             membership: changedMembership,
+            boundMembership: membership,
             activeMemberships: [changedMembership],
           }),
         }),
