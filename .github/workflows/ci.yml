@@ -14,6 +14,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24.18.0
@@ -41,9 +43,24 @@ jobs:
         run: npm run lint
       - name: Production build
         env:
-          RFXCHANGE_BUILD_SHA: ${{ github.sha }}
+          RFXCHANGE_BUILD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: npm run build
-      - name: Verify compiled build identity
+      - name: Verify compiled and visible build identity
         env:
-          RFXCHANGE_EXPECTED_BUILD_SHA: ${{ github.sha }}
-        run: test "$(cat .next/BUILD_ID)" = "$RFXCHANGE_EXPECTED_BUILD_SHA"
+          RFXCHANGE_EXPECTED_BUILD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        shell: bash
+        run: |
+          test "$(cat .next/BUILD_ID)" = "$RFXCHANGE_EXPECTED_BUILD_SHA"
+          npm run start -- -H 127.0.0.1 -p 3100 > /tmp/rfxchange-next.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          html=""
+          for attempt in $(seq 1 30); do
+            if html=$(curl --fail --silent http://127.0.0.1:3100/); then
+              break
+            fi
+            sleep 1
+          done
+          test -n "$html"
+          printf '%s' "$html" | grep -F "title=\"$RFXCHANGE_EXPECTED_BUILD_SHA\""
+          printf '%s' "$html" | grep -F "SHA ${RFXCHANGE_EXPECTED_BUILD_SHA:0:12}"
