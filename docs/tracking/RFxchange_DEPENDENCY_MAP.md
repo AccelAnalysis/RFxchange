@@ -171,6 +171,6 @@ Wave 3 contains **38 Network features**. Eleven are complete: four inherited Wav
 
 **Dependency result:** PR #120 completes the dependency-eligible `GEO-012`, `DSC-001`, `DSC-002` and `DSC-003` set after Slice 3.1 and Brand Gates B0–B6a. No dependency edge changed in this reconciliation.
 
-**Implementation sequencing result:** the next active phase is the no-Feature-ID RFxchange reconciliation to immutable AMACS 0.5.0, followed by the no-Feature-ID AI/AMACS Interpretation Foundation. Only after both merge and authority is recalculated may Slice 3.3 implementation begin. These cross-cutting gates preserve the canonical Feature-ID dependency edges and do not change tracker totals themselves.
+**Implementation sequencing result:** the no-Feature-ID RFxchange reconciliation to immutable AMACS 0.5.0 merged via PR #123 and the no-Feature-ID AI/AMACS Interpretation Foundation merged via PR #124. Authority was recalculated from merged `main` at `b8020a9da06060a639276db18a6be4b4ea6ccf03`; Slice 3.3 is the earliest eligible slice and is now authorized. The cross-cutting gates preserve the canonical Feature-ID dependency edges and change no tracker totals themselves.
 
 See `docs/slices/WAVE_3_ROADMAP.md`, `docs/brand/BRAND_GATE_B1_SEMANTIC_FOUNDATION.md` and the applicable canonical slice brief for detailed boundaries and acceptance intent.
