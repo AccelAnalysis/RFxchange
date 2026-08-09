@@ -1,6 +1,6 @@
 # Slice 3.5 — Referral Network & Referral Acquisition
 
-**Status: IMPLEMENTED AND ACCEPTED — PRODUCTION PR/MERGE EVIDENCE PENDING**
+**Status: COMPLETE VIA PR #130**
 
 ## Feature IDs
 
@@ -89,8 +89,8 @@ Recalculate dependencies after merge before authorizing Slice 3.6.
 
 ## Acceptance evidence
 
-The implementation and evidence are recorded in `docs/architecture/WAVE_3_SLICE_3_5.md`. Focused domain/application tests, Firestore emulator persistence and direct-client denial, the canonical repository gate, all five locales, and configured real-environment browser acceptance pass. The browser covered an existing organization referral with a real privacy-safe path, an external referral with truthful no-path state, signed acquisition continuity, legitimate OPEN recipient binding, explicit attachment, accept, contact and sender close across desktop/intermediate/mobile layouts. Cleanup removed 64 exact Firestore documents and both disposable Auth identities; the residual scan returned zero. Slice 3.6 remains unstarted and unauthorized until this implementation merges, post-merge production CI passes, and dependency authority is recalculated.
+The implementation and evidence are recorded in `docs/architecture/WAVE_3_SLICE_3_5.md`. Focused domain/application tests, Firestore emulator persistence and direct-client denial, the canonical repository gate, all five locales, and configured real-environment browser acceptance pass. The browser covered an existing organization referral with a real privacy-safe path, an external referral with truthful no-path state, signed acquisition continuity, legitimate OPEN recipient binding, explicit attachment, accept, contact and sender close across desktop/intermediate/mobile layouts. Cleanup removed 64 exact Firestore documents and both disposable Auth identities; the residual scan returned zero. PR #130 passed exact-head and post-merge production CI. Slice 3.6 was separately authorized only after the merged-tree dependency recalculation.
 
 ## Execution authority
 
-`docs/slices/SLICE_3_5_EXECUTION_AUTHORITY.md` records the merged baseline, binding lifecycle/privacy/acquisition decisions, acceptance matrix, and preserved non-scope. This brief alone does not authorize Slice 3.6 or any later work.
+`docs/slices/SLICE_3_5_EXECUTION_AUTHORITY.md` records the merged baseline, binding lifecycle/privacy/acquisition decisions, acceptance matrix, and preserved non-scope. Slice 3.6 is governed separately by `docs/slices/SLICE_3_6_EXECUTION_AUTHORITY.md`; this brief authorizes no later work.

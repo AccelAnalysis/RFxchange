@@ -87,7 +87,7 @@ User-facing work must not implement a target brand expression by fabricating a d
 - `docs/tracking/RFxchange_DEPENDENCY_MAP.md` — sequencing/dependency authority.
 - `docs/slices/` — approved implementation boundaries and exit conditions for planned slices.
 
-Wave 2 is complete and reconciled. Wave 3 Slices 3.1 through 3.4 and Brand Gates B0–B6a are merged. Slice 3.5 implementation and acceptance are complete with production merge evidence pending. Slice 3.6 and later work remain unstarted and unauthorized until Slice 3.5 merges, post-main CI passes, and dependency authority is recalculated.
+Wave 2 is complete and reconciled. Wave 3 Slices 3.1 through 3.5 and Brand Gates B0–B6a are merged. Slice 3.6 is the single active authorized slice. Follow its execution authority and the explicit single-gate/slice discipline before later implementation.
 
 ## Reference artifacts
 

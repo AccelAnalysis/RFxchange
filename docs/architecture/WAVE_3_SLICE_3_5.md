@@ -39,4 +39,4 @@ The focused validators, Firebase emulator smoke, TypeScript/lint/build gates, an
 
 ## Completion and handoff
 
-Acceptance supports marking only `REF-001`, `REF-002`, `REF-003`, `REF-004`, `REF-005`, `EDU-014`, and `ACQ-006` Done. The checkpoint is **438 total · 139 Done · 299 Not Started**, Activation **43/43**, and Network **25/38**. Production PR exact-head CI, merge, and post-merge `main` CI remain required before dependency eligibility is recalculated. Slice 3.6 and later work were not begun.
+Acceptance supports marking only `REF-001`, `REF-002`, `REF-003`, `REF-004`, `REF-005`, `EDU-014`, and `ACQ-006` Done. The checkpoint is **438 total · 139 Done · 299 Not Started**, Activation **43/43**, and Network **25/38**. PR #130 passed exact-head production CI run `31294774153` on `17e8e66fc11e29bc125bc739d5fad7141da14244`, merged at `516c49627aeff637b02982218f0682c1eea436ad`, and post-merge `main` CI run `31294884142` passed. Dependency authority was recalculated from that merged tree and Slice 3.6 was separately authorized without changing Feature-ID totals.

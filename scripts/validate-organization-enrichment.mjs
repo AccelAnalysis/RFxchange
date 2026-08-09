@@ -48,5 +48,5 @@ assert.match(slice, /COMPLETE VIA PR #128/);
 assert.match(tracker, /438 total · 139 Done · 299 Not Started/);
 assert.match(tracker, /Network completion is \*\*25\/38\*\*/);
 assert.match(dependency, /Slice 3\.4[^\n]+COMPLETE/);
-assert.match(dependency, /Slice 3\.5[^\n]+IMPLEMENTED AND ACCEPTED/);
+assert.match(dependency, /Slice 3\.5[^\n]+COMPLETE VIA PR #130/);
 console.log("Slice 3.4 credential, media, publication, private storage, additional-location privacy, subordinate-map, localization, and sequencing architecture validated.");
