@@ -399,6 +399,22 @@ service cloud.firestore {
       allow read, write: if serverManagedOnly();
     }
 
+    // EDU-016/017 progress is separate from domain and authorization state. Mutable progress and
+    // append-only evidence remain behind the trusted OPEN-participant command boundary.
+    match /networkEducationProgress/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /networkEducationEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /networkEducationCommands/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     // EDU-001-004 orientation progress is a participant-bound server aggregate. Tutorial events
     // are immutable evidence, and neither collection is directly available to browser clients.
     match /orientationJourneys/{documentId} {

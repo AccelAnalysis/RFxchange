@@ -1,6 +1,6 @@
 # Slice 3.8 — Persistent Network Education execution authority
 
-**Status: AUTHORIZED FROM MERGED `main` — SINGLE ACTIVE PRODUCT SLICE**
+**Status: IMPLEMENTED, ACCEPTED, EXACT-HEAD CI PASSED — MERGE/POST-MERGE CI REQUIRED BEFORE CLOSEOUT**
 
 ## Recalculated merged baseline
 
@@ -106,6 +106,14 @@ npm run check
 ```
 
 Production CI must pass on the exact PR head and again on merged `main` before Wave 3 closeout is recalculated.
+
+## Implementation and acceptance result
+
+The bounded implementation now satisfies `EDU-016` and `EDU-017`. The versioned catalog, membership-bound aggregate, immutable events and commands, direct-client denial, Quick Start destination, four role paths, allow-listed live links, truthful future stops, eleven shared explainers and five localized namespaces are present. Focused tests, Firestore emulator acceptance, the canonical local repository gate and configured-browser acceptance passed; detailed evidence is recorded in `docs/architecture/WAVE_3_SLICE_3_8.md`.
+
+The configured pass used approved-provider and non-provider business contexts, all four paths, persistence/re-entry, live workflow explainers, desktop/intermediate/mobile layouts, keyboard/screen-reader structure, reduced motion and all five locales. Cleanup removed 16 education records and the complete supporting Firestore/Auth fixture footprint with zero residuals. Education created no provider application or other domain record and changed no organization, provider, issuer or administrative authority.
+
+The canonical tracker advances only `EDU-016` and `EDU-017` to Done: **438 total · 152 Done · 286 Not Started**, Activation **43/43**, Network **38/38**. PR #139 production CI run `31303300038` passed on substantive head `a5c15238c175ce6010e7942d6ed2f3ecafb11fe3`. Wave 3 is not declared closed by that arithmetic; merge, post-merge production CI and the separately authorized closeout reconciliation remain required.
 
 ## Explicit non-scope
 

@@ -7,6 +7,7 @@ import type { SenderReferralProjection, RecipientReferralProjection, ReferralSta
 import type { ExchangeHomeMarker } from "../map/ExchangeSpatialScene";
 import { MapboxLocalityCanvas, type ControlledLocalityPointOverlay, type ControlledLocalityRelationshipPath } from "../map/MapboxLocalityCanvas";
 import { useI18n } from "../i18n/I18nProvider";
+import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
 
 import styles from "./ReferralWorkspace.module.css";
@@ -163,6 +164,7 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
               <dl><div><dt>{t("referralWorkspace.fields.purpose")}</dt><dd>{readable(selected.purpose)}</dd></div><div><dt>{t("referralWorkspace.fields.urgency")}</dt><dd>{readable(selected.urgency)}</dd></div><div><dt>{t("referralWorkspace.fields.contact")}</dt><dd>{readable(selected.preferredContactMethod)}</dd></div><div><dt>{t("referralWorkspace.fields.notification")}</dt><dd>{readable(selected.notificationStatus)}</dd></div><div><dt>{t("referralWorkspace.fields.expires")}</dt><dd>{new Date(selected.expiresAt).toLocaleDateString()}</dd></div></dl>
               <p className={styles.boundary}>{t("referralWorkspace.detail.boundary")}</p>
               {hasPath ? <p className={styles.pathText}>{t("referralWorkspace.path.visible", { status: readable(selected.status) })}</p> : <p className={styles.pathText}>{t("referralWorkspace.path.unavailable")}</p>}
+              {nextActions(selected).length ? <WorkflowExplainer explainerKey="referral-response" /> : null}
               <div className={styles.actions}>{nextActions(selected).map((action) => <button key={action} type="button" disabled={busy} onClick={() => transition(action)}>{t(`referralWorkspace.actions.${action}`)}</button>)}{selected.role === "sender" && selected.notificationStatus === "retryable-failure" ? <button type="button" disabled={busy} onClick={retryCommunication}>{t("referralWorkspace.actions.retry")}</button> : null}</div>
             </article>
           ) : null}
@@ -174,6 +176,7 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
             <fieldset><legend>{t("referralWorkspace.composer.recipientType")}</legend><label><input type="radio" checked={recipientKind === "organization"} onChange={() => setRecipientKind("organization")} />{t("referralWorkspace.composer.existing")}</label><label><input type="radio" checked={recipientKind === "external"} onChange={() => setRecipientKind("external")} />{t("referralWorkspace.composer.external")}</label></fieldset>
             {recipientKind === "organization" ? <label>{t("referralWorkspace.composer.organization")}<select required value={recipientOrganizationId} onChange={(event) => setRecipientOrganizationId(event.target.value)}><option value="">{t("referralWorkspace.composer.choose")}</option>{organizations.map((organization) => <option key={organization.organizationId} value={organization.organizationId}>{organization.displayName}</option>)}</select></label> : <><label>{t("referralWorkspace.composer.name")}<input required value={recipientLabel} onChange={(event) => setRecipientLabel(event.target.value)} maxLength={160} /></label><label>{t("referralWorkspace.composer.email")}<input required type="email" value={recipientEmail} onChange={(event) => setRecipientEmail(event.target.value)} /></label></>}
             <label>{t("referralWorkspace.composer.summary")}<textarea required value={summary} onChange={(event) => setSummary(event.target.value)} maxLength={1200} /></label>
+            <WorkflowExplainer explainerKey="referral-consent" />
             <label className={styles.checkbox}><input required type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} />{t("referralWorkspace.composer.consent")}</label>
             <button className={styles.primary} type="submit">{t("referralWorkspace.composer.review")}</button>
           </form> : <div className={styles.education}>

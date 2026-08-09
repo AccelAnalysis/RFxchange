@@ -13,6 +13,7 @@ import type {
   OrganizationProvisionalTerm,
 } from "../../domain/market-profile/model";
 import { useI18n } from "../i18n/I18nProvider";
+import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { AlertBanner, StatePanel, StatusPill } from "../ui";
 
 import styles from "./MarketProfilePanel.module.css";
@@ -305,6 +306,7 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
             <label>{t("marketProfile.assistance.input")}
               <textarea value={plainLanguage} onChange={(event) => setPlainLanguage(event.target.value)} minLength={10} maxLength={12000} placeholder={t("marketProfile.assistance.placeholder")} />
             </label>
+            <WorkflowExplainer explainerKey="capability-suggestion" />
             <button className={styles.primaryButton} type="button" disabled={assistanceBusy || plainLanguage.trim().length < 10} onClick={requestAssistance}>{assistanceBusy ? t("marketProfile.assistance.busy") : t("marketProfile.assistance.button")}</button>
             <p className={styles.help}>{t("marketProfile.assistance.help")}</p>
             {candidates.length ? (
@@ -340,6 +342,7 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
 
           {selectedCapability ? (
             <form className={styles.fullWidthSection} onSubmit={saveClaim}>
+              <WorkflowExplainer explainerKey="profile-confirmation" />
               <p className={styles.eyebrow}>{t("marketProfile.claim.eyebrow")}</p>
               <h3>{t("marketProfile.claim.title")}</h3>
               <div className={styles.selectionSummary}><strong>{selectedCapability.preferredLabel}</strong><span>{selectedCapability.domainLabel} → {selectedCapability.familyLabel}</span><p>{selectedCapability.definition}</p><StatusPill tone="neutral">{claimSource.kind === "interpretation" ? t("marketProfile.claim.confirmedSuggestion") : t("marketProfile.claim.manualSelection")}</StatusPill></div>

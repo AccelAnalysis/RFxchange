@@ -13,6 +13,7 @@ import type {
   PublicOrganizationAdditionalLocation,
 } from "../../domain/organization-enrichment/model";
 import { useI18n } from "../i18n/I18nProvider";
+import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 
 import styles from "./OrganizationEnrichmentPanel.module.css";
 
@@ -193,6 +194,7 @@ export function OrganizationEnrichmentPanel(props: Readonly<{
           <form className={styles.form} onSubmit={saveCredential}>
             <h3>{t("organizationEnrichment.credentials.add")}</h3>
             <p>{t("organizationEnrichment.credentials.boundary")}</p>
+            <WorkflowExplainer explainerKey="credential-evidence" />
             <label>{t("organizationEnrichment.credentials.kind")}<select name="kind" defaultValue="certification">
               <option value="certification">{valueLabel("certification")}</option><option value="license">{valueLabel("license")}</option>
               <option value="uei">{valueLabel("uei")}</option><option value="cage">{valueLabel("cage")}</option>
@@ -230,6 +232,7 @@ export function OrganizationEnrichmentPanel(props: Readonly<{
           <form className={styles.form} onSubmit={uploadAsset}>
             <h3>{t("organizationEnrichment.media.add")}</h3>
             <p>{t("organizationEnrichment.media.boundary")}</p>
+            <WorkflowExplainer explainerKey="media-visibility" />
             <label>{t("organizationEnrichment.media.kind")}<select name="kind" defaultValue="image"><option value="logo">{valueLabel("logo")}</option><option value="image">{valueLabel("image")}</option><option value="portfolio">{valueLabel("portfolio")}</option><option value="document">{valueLabel("document")}</option></select></label>
             <label>{t("organizationEnrichment.media.title")}<input name="title" required maxLength={240} /></label>
             <label>{t("organizationEnrichment.media.description")}<textarea name="description" rows={3} maxLength={2000} /></label>
@@ -259,6 +262,7 @@ export function OrganizationEnrichmentPanel(props: Readonly<{
           <div className={styles.sectionGrid}>
             <form className={styles.form} onSubmit={beginLocation}>
               <h3>{t("organizationEnrichment.locations.add")}</h3>
+              <WorkflowExplainer explainerKey="additional-location" />
               <p>{t("organizationEnrichment.locations.boundary")}</p>
               <label>{t("organizationEnrichment.locations.label")}<input name="label" required maxLength={160} /></label>
               <label>{t("organizationEnrichment.locations.address1")}<input name="addressLine1" required /></label>

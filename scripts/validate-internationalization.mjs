@@ -11,6 +11,7 @@ const catalogNamespaces = [
   Object.freeze({ name: "base", directory: messageDirectory }),
   Object.freeze({ name: "network", directory: path.join(messageDirectory, "network") }),
   Object.freeze({ name: "market-profile", directory: path.join(messageDirectory, "market-profile") }),
+  Object.freeze({ name: "network-education", directory: path.join(messageDirectory, "network-education") }),
 ];
 
 function readJson(filePath) {
@@ -84,6 +85,11 @@ assert.match(
   dictionary,
   /marketProfile/,
   "Resolved dictionaries must include the market-profile namespace",
+);
+assert.match(
+  dictionary,
+  /networkEducation/,
+  "Resolved dictionaries must include the persistent Network education namespace",
 );
 
 const layout = fs.readFileSync(path.join(root, "app", "layout.tsx"), "utf8");
