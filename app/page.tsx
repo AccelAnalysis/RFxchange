@@ -26,6 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const { dictionary } = await getRequestDictionary();
   const home = dictionary.marketingPages.home;
+  const differentiation = dictionary.home.difference;
 
   return (
     <main className={styles.site}>
@@ -190,6 +191,26 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="difference-title">
+        <div className={styles.wrap}>
+          <div className={styles.sectionHead}>
+            <p className={styles.eyebrow}>{differentiation.eyebrow}</p>
+            <h2 id="difference-title">{differentiation.title}</h2>
+          </div>
+          <div className={styles.differenceGrid}>
+            {differentiation.items.map((item) => (
+              <article className={styles.differenceCard} key={item.label}>
+                <h3>{item.label}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))}
+          </div>
+          <p className={styles.provenanceLink}>
+            <Link href="/image-credits">{dictionary.home.evidence.link}</Link>
+          </p>
         </div>
       </section>
 
