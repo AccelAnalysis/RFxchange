@@ -225,7 +225,18 @@ export async function resolveParticipantRouteWithDependencies(
     );
   }
 
-  if (boundMembership.status !== "active") {
+  // Firestore hydration is a runtime boundary: legacy/corrupt records can carry values outside the
+  // TypeScript union. Only an explicit inactive status proves a governed membership change. Any
+  // missing or unknown status is inconsistent workspace state and must never expose repair options.
+  const boundMembershipStatus = (boundMembership as unknown as { readonly status?: unknown }).status;
+  if (boundMembershipStatus !== "active" && boundMembershipStatus !== "inactive") {
+    return dependencyUnavailable(
+      "workspace-state",
+      new Error("Persisted participant membership binding has an unsupported status."),
+    );
+  }
+
+  if (boundMembershipStatus === "inactive") {
     if (membership) {
       return dependencyUnavailable(
         "workspace-state",
