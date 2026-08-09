@@ -142,7 +142,7 @@ Resource Provider education should explain official-provider approval, service c
 
 ### `EDU-017`
 
-Major workflows answer three practical questions at the point of action:
+Major workflows answer four practical questions at the point of action:
 
 1. What is this?
 2. Why does it matter here?
