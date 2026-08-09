@@ -1,6 +1,6 @@
 # Slice 3.3 — Market Profile Enrichment
 
-**Status: PLANNING BRIEF ONLY — AUTHORIZE ONLY AFTER SLICE 3.2, AMACS 0.5.0 RECONCILIATION AND THE AI/AMACS INTERPRETATION FOUNDATION HAVE MERGED AND AUTHORITY HAS BEEN RECALCULATED.**
+**Status: IMPLEMENTED AND ACCEPTED — MERGE AND POST-MERGE PRODUCTION CI PENDING.**
 
 ## Feature IDs
 
@@ -196,3 +196,9 @@ Organizations can describe what they do in ordinary language or manually, review
 ## Completion discipline
 
 Mark only `ORG-013`, `ORG-014`, `ORG-016` and `ORG-017` when each acceptance condition and evidence passes. Merge, run production CI, recalculate from merged `main`, update execution authority, and only then authorize Slice 3.4.
+
+## Acceptance record
+
+The implementation and acceptance evidence are recorded in `docs/architecture/WAVE_3_SLICE_3_3.md`. Focused domain/application tests, Firestore emulator security/persistence acceptance, the full local repository gate, five-locale validation, and configured-browser acceptance passed. The configured disposable organization and Auth identity were removed and the residual inspection returned zero.
+
+Only `ORG-013`, `ORG-014`, `ORG-016`, and `ORG-017` are completed. Slice 3.4 and every later slice remain unstarted pending this slice's merge, post-merge production CI, and a separate authority recalculation from merged `main`.

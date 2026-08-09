@@ -12,6 +12,7 @@ import type { ParticipantRouteResolution } from "../auth/participant-route-runti
 import { createFirestoreGeographyRepositories } from "../firestore/geography-repositories.ts";
 import { createFirestoreOrganizationLocationRepositories } from "../firestore/organization-location.ts";
 import { createFirestoreEssentialOrganizationProfileRepositories } from "../firestore/organization-profile.ts";
+import { FirestoreOrganizationMarketProfileRepository } from "../firestore/market-profile.ts";
 import {
   createServerFirestoreFoundationRepositories,
   getServerFirestore,
@@ -124,6 +125,7 @@ export async function loadAuthorizedNetworkDiscovery(input: Readonly<{
   const foundation = createServerFirestoreFoundationRepositories(db);
   const locations = createFirestoreOrganizationLocationRepositories(db);
   const profiles = createFirestoreEssentialOrganizationProfileRepositories(db);
+  const marketProfiles = new FirestoreOrganizationMarketProfileRepository(db);
   const service = new NetworkDiscoveryService({
     candidates: new FirestoreNetworkDiscoveryCandidateSource(db),
     profiles: foundation.organizations.profiles,
@@ -131,6 +133,7 @@ export async function loadAuthorizedNetworkDiscovery(input: Readonly<{
     locations: locations.locations,
     serviceGeographies: locations.serviceGeographies,
     restrictions: foundation.lifecycle.restrictions,
+    capabilityClaims: marketProfiles.claims,
   });
   const projection = await service.search({
     viewerOrganizationId: input.mapProjection.organizationId,

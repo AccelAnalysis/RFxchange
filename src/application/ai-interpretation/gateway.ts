@@ -236,12 +236,16 @@ export class AiAmacsInterpretationGateway {
     if (!authorization.allowed) throw new InterpretationGatewayError("forbidden", `Interpretation authorization denied: ${authorization.reason}.`);
     const now = this.now();
     if (input.decision.disposition === "none-of-these") {
-      return this.dependencies.repository.applyNoneOfThese({ scope: authorization.scope, recordId: record.id, now, event: Object.freeze({ id: `aievent_${this.id()}`, organizationId: input.organizationId, interpretationRecordId: record.id, candidateId: null, actorUserId: authorization.scope.userId, kind: "none-of-these-recorded", priorDisposition: null, newDisposition: null, authoritativeEffect: "none", occurredAt: now }) });
+      const updatedRecord = await this.dependencies.repository.applyNoneOfThese({ scope: authorization.scope, recordId: record.id, now, event: Object.freeze({ id: `aievent_${this.id()}`, organizationId: input.organizationId, interpretationRecordId: record.id, candidateId: null, actorUserId: authorization.scope.userId, kind: "none-of-these-recorded", priorDisposition: null, newDisposition: null, authoritativeEffect: "none", occurredAt: now }) });
+      return Object.freeze({ record: updatedRecord, candidate: null, authoritativeEffect: "none" as const });
     }
     if (!input.candidateId || !input.expectedUpdatedAt) throw new InterpretationGatewayError("invalid", "Candidate and expected version are required.");
     const candidate = await this.dependencies.repository.getCandidate(input.candidateId);
     if (!candidate || candidate.organizationId !== input.organizationId || candidate.interpretationRecordId !== record.id) throw new InterpretationGatewayError("not-found", "Interpretation candidate was not found.");
     const editedTextValue = input.decision.disposition === "edited" ? boundedText(input.decision.editedTextValue ?? "", "Edited value", 4_000) : null;
-    return this.dependencies.repository.applyCandidateDisposition({ scope: authorization.scope, candidate, expectedUpdatedAt: input.expectedUpdatedAt, disposition: input.decision.disposition, editedTextValue, now, event: Object.freeze({ id: `aievent_${this.id()}`, organizationId: input.organizationId, interpretationRecordId: record.id, candidateId: candidate.id, actorUserId: authorization.scope.userId, kind: "disposition-recorded", priorDisposition: candidate.candidate.disposition, newDisposition: input.decision.disposition, authoritativeEffect: "none", occurredAt: now }) });
+    const updatedRecord = await this.dependencies.repository.applyCandidateDisposition({ scope: authorization.scope, candidate, expectedUpdatedAt: input.expectedUpdatedAt, disposition: input.decision.disposition, editedTextValue, now, event: Object.freeze({ id: `aievent_${this.id()}`, organizationId: input.organizationId, interpretationRecordId: record.id, candidateId: candidate.id, actorUserId: authorization.scope.userId, kind: "disposition-recorded", priorDisposition: candidate.candidate.disposition, newDisposition: input.decision.disposition, authoritativeEffect: "none", occurredAt: now }) });
+    const updatedCandidate = await this.dependencies.repository.getCandidate(candidate.id);
+    if (!updatedCandidate) throw new InterpretationGatewayError("not-found", "Updated interpretation candidate was unavailable.");
+    return Object.freeze({ record: updatedRecord, candidate: updatedCandidate, authoritativeEffect: "none" as const });
   }
 }

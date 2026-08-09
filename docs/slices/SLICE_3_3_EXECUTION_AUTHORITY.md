@@ -1,6 +1,6 @@
 # Slice 3.3 — Market Profile Enrichment execution authority
 
-**Status: AUTHORIZED AND ACTIVE — NO FEATURE COMPLETION CLAIM**
+**Status: AUTHORITY CONSUMED — SLICE 3.3 IMPLEMENTED AND ACCEPTED; MERGE AND POST-MERGE CI PENDING**
 
 ## Recalculated merged baseline
 
@@ -29,4 +29,4 @@ This authority update changes no Feature-ID status:
 - Activation: **43/43**; and
 - Network: **11/38**.
 
-Only Slice 3.3 acceptance evidence may mark `ORG-013`, `ORG-014`, `ORG-016`, or `ORG-017` complete. Slice 3.4 and all later slices/gates remain unstarted until Slice 3.3 merges, post-merge CI passes, and authority is recalculated again from merged `main`.
+Slice 3.3 acceptance is recorded in `docs/architecture/WAVE_3_SLICE_3_3.md`; only `ORG-013`, `ORG-014`, `ORG-016`, and `ORG-017` are completed, producing **438 total · 129 Done · 309 Not Started** and Network **15/38**. Slice 3.4 and all later slices/gates remain unstarted until Slice 3.3 merges, post-merge CI passes, and authority is recalculated again from merged `main`.

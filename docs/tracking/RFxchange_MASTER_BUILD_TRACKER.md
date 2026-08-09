@@ -12,11 +12,11 @@
 
 ## Progress
 
-**438 total · 125 Done · 313 Not Started**
+**438 total · 129 Done · 309 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
-- 3 - Network: **11/38**
+- 3 - Network: **15/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
@@ -46,7 +46,7 @@ Wave 2 remains complete at **43/43 Activation**. The Runtime Convergence Gate, R
 - **AMACS 0.5.0 reconciliation — COMPLETE VIA PR #123; no Feature IDs**: deterministically reconstructed and verified the immutable 0.5.0 release at `da7879f2609271b067ae6d02875e9388a02c4fe5`, preserved the historical 0.1.0 release, generated release-aware catalog/search/registry/runtime projections, proved the 500 historical capabilities remained with 115 additive capabilities and no inferred historical mutation, and isolated all artifacts and infrastructure from participant surfaces. Local `npm run check`, the official upstream validator and 44 upstream tests, seven focused RFxchange tests and production CI run `31284501027` passed on substantive head `c2d6695cdea2f3d3386dab354e37e1bba9440e87`.
 - **AI/AMACS Interpretation Foundation — COMPLETE VIA PR #124; no Feature IDs**: established the authenticated provider-neutral gateway, concrete OpenAI adapter with truthful disabled state, bounded AMACS 0.5.0 retrieval, strict schema/catalog validation, non-authoritative record/candidate and disposition contracts, minimized provenance, metering, transactional quotas, independent manual catalog path and deterministic regression evaluation. Local `npm run check` passed with 400 architecture tests and 19 Functions tests; focused Firestore emulator acceptance proved direct-client denial, atomic persistence, disposition and quota behavior. No live provider smoke was claimed without configured credentials.
 
-Network completion remains **11/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features and the four Slice 3.2 discovery features. PR #124 merged at `b8020a9da06060a639276db18a6be4b4ea6ccf03`, post-merge production CI passed, and dependency authority was recalculated from that merged tree. Slice 3.3 (`ORG-013`, `ORG-014`, `ORG-016`, `ORG-017`) is authorized and active; this authority update makes no completion claim and preserves all totals.
+Network completion is **15/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, and the four accepted Slice 3.3 market-profile features. Slice 3.3 added AMACS 0.5.0-backed organization claims, descriptive industry/NAICS context, bounded self-reported past performance, and non-authoritative market preferences while preserving interpretation/assertion/evidence/verification separation. Focused tests, Firestore emulator acceptance, five-locale validation, the full local repository gate, configured-browser acceptance, and zero-residual disposable cleanup passed. Slice 3.4 remains unstarted until Slice 3.3 merges, post-merge production CI passes, and a separate authority recalculation is merged.
 
 ## Feature-ID checklist
 
@@ -188,11 +188,11 @@ Network completion remains **11/38**: four inherited Wave 1 foundations, three S
 - [ ] `EDU-014`
 - [ ] `EDU-016`
 - [ ] `EDU-017`
-- [ ] `ORG-013`
-- [ ] `ORG-014`
+- [x] `ORG-013` — Slice 3.3; AMACS 0.5.0 manual/assisted entry, non-authoritative candidate disposition, separate confirmed claim command, structured discovery migration, emulator/browser acceptance, cleanup, and `npm run check`
+- [x] `ORG-014` — Slice 3.3; descriptive industry and participant-selected NAICS source/version provenance, explicit non-authority boundary, browser acceptance, and focused tests
 - [ ] `ORG-015`
-- [ ] `ORG-016`
-- [ ] `ORG-017`
+- [x] `ORG-016` — Slice 3.3; bounded self-reported past performance/project value, privacy/visibility, capability-link review boundary, browser acceptance, and focused tests
+- [x] `ORG-017` — Slice 3.3; prime/subcontractor/supplier/referral/resource preferences with explicit non-authority/commitment boundary, browser acceptance, and focused tests
 - [ ] `ORG-018`
 - [ ] `ORG-019`
 - [x] `ORG-021` — PR #42

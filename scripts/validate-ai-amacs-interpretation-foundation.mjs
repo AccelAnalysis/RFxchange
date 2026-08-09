@@ -20,6 +20,9 @@ assert.doesNotMatch(interpretRoute + dispositionRoute, /OPENAI_API_KEY|api\.open
 for (const collection of ["aiInterpretationRecords", "aiInterpretationCandidates", "aiInterpretationProvenance", "aiInterpretationUsageEvents", "aiInterpretationEvents", "aiInterpretationQuotaBuckets"]) assert.match(rules, new RegExp(`match /${collection}`));
 assert.match(repository, /Daily \$\{entry\.dimension\.kind\} AI interpretation quota is exhausted/);
 assert.match(tracker, /AI\/AMACS Interpretation Foundation — COMPLETE VIA PR #124; no Feature IDs/);
-assert.match(tracker, /Network completion remains \*\*11\/38\*\*/);
+assert.match(tracker, /Network completion is \*\*15\/38\*\*/);
+for (const featureId of ["ORG-013", "ORG-014", "ORG-016", "ORG-017"]) {
+  assert.match(tracker, new RegExp("- \\[x\\] `" + featureId + "` — Slice 3\\.3"));
+}
 
 console.log("AI/AMACS interpretation foundation validation passed: non-authoritative, release-bound, private, metered, and tracker-neutral.");

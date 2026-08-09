@@ -19,6 +19,11 @@ import {
 import type {
   OrganizationProfileCompletionRepository,
 } from "../../domain/organization-profile/repository.ts";
+import {
+  projectOrganizationCapabilityClaim,
+  type PublicOrganizationCapabilityClaim,
+} from "../../domain/market-profile/model.ts";
+import type { OrganizationCapabilityClaimRepository } from "../../domain/market-profile/repository.ts";
 import { organizationId, type OrganizationId } from "../../domain/organizations/model.ts";
 import type { OrganizationProfileRepository } from "../../domain/organizations/repository.ts";
 
@@ -50,11 +55,13 @@ export interface NetworkDiscoveryOrganization {
   readonly baseGeographyId: string;
   readonly serviceGeographyIds: readonly string[];
   readonly marker: NetworkDiscoveryMarker;
+  readonly capabilities: readonly PublicOrganizationCapabilityClaim[];
   readonly match: Readonly<{
     readonly kind: NetworkDiscoveryMatchKind;
     readonly score: number;
     readonly matchedCapabilityIds: readonly string[];
     readonly matchedCapabilityNames: readonly string[];
+    readonly source: "confirmed-structured" | "legacy-essential" | "organization-name" | "browse";
   }>;
 }
 
@@ -82,6 +89,7 @@ export interface NetworkDiscoveryDependencies {
   readonly locations: ConfirmedOrganizationLocationRepository;
   readonly serviceGeographies: OrganizationServiceGeographyRepository;
   readonly restrictions: AccessRestrictionRepository;
+  readonly capabilityClaims: OrganizationCapabilityClaimRepository;
 }
 
 function normalizeSearchText(value: string | null | undefined, maximum = 120): string {
@@ -131,25 +139,32 @@ function normalizedTerms(value: string): readonly string[] {
   ]);
 }
 
-function capabilityCorpus(capability: OrganizationCapability): string {
+type SearchableCapability = Readonly<{
+  id: string;
+  name: string;
+  description: string;
+  context: string;
+}>;
+
+function capabilityCorpus(capability: SearchableCapability): string {
   return [
     capability.name,
     capability.description,
-    capability.category.replaceAll("-", " "),
-    capability.otherCategory ?? "",
-    capability.kind.replaceAll("-", " "),
+    capability.context,
   ].join(" ").toLocaleLowerCase("en-US");
 }
 
 function scoreProfile(
   displayName: string,
-  capabilities: readonly OrganizationCapability[],
+  capabilities: readonly SearchableCapability[],
   capabilityQuery: string,
+  source: "confirmed-structured" | "legacy-essential",
 ): Readonly<{
   kind: NetworkDiscoveryMatchKind;
   score: number;
   matchedCapabilityIds: readonly string[];
   matchedCapabilityNames: readonly string[];
+  source: "confirmed-structured" | "legacy-essential" | "organization-name" | "browse";
 }> {
   const terms = normalizedTerms(capabilityQuery);
   if (terms.length === 0) {
@@ -158,11 +173,12 @@ function scoreProfile(
       score: 0,
       matchedCapabilityIds: Object.freeze([]),
       matchedCapabilityNames: Object.freeze([]),
+      source: "browse" as const,
     });
   }
 
   const query = capabilityQuery.toLocaleLowerCase("en-US");
-  const matched: Array<{ capability: OrganizationCapability; score: number }> = [];
+  const matched: Array<{ capability: SearchableCapability; score: number }> = [];
   for (const capability of capabilities) {
     const name = capability.name.toLocaleLowerCase("en-US");
     const corpus = capabilityCorpus(capability);
@@ -183,6 +199,7 @@ function scoreProfile(
       score: matched[0]?.score ?? 0,
       matchedCapabilityIds: Object.freeze(matched.map(({ capability }) => String(capability.id))),
       matchedCapabilityNames: Object.freeze(matched.map(({ capability }) => capability.name)),
+      source,
     });
   }
 
@@ -193,6 +210,7 @@ function scoreProfile(
       score: 10,
       matchedCapabilityIds: Object.freeze([]),
       matchedCapabilityNames: Object.freeze([]),
+      source: "organization-name" as const,
     });
   }
 
@@ -201,6 +219,7 @@ function scoreProfile(
     score: -1,
     matchedCapabilityIds: Object.freeze([]),
     matchedCapabilityNames: Object.freeze([]),
+    source: "browse" as const,
   });
 }
 
@@ -229,12 +248,13 @@ export class NetworkDiscoveryService {
         .filter((activation) => activation.organizationId !== viewerOrganizationId)
         .map(async (activation): Promise<NetworkDiscoveryOrganization | null> => {
           const organizationIdValue = activation.organizationId;
-          const [rawProfile, completion, location, serviceGeographies, restriction] = await Promise.all([
+          const [rawProfile, completion, location, serviceGeographies, restriction, claims] = await Promise.all([
             this.dependencies.profiles.getByOrganizationId(organizationIdValue),
             this.dependencies.completions.getByOrganizationId(organizationIdValue),
             this.dependencies.locations.getByOrganizationId(organizationIdValue),
             this.dependencies.serviceGeographies.getByOrganizationId(organizationIdValue),
             this.dependencies.restrictions.getForOrganization(organizationIdValue),
+            this.dependencies.capabilityClaims.listByOrganizationId(organizationIdValue),
           ]);
 
           if (!rawProfile || !location || completion?.status !== "active") return null;
@@ -257,10 +277,27 @@ export class NetworkDiscoveryService {
           }
 
           const profile = hydrateEssentialOrganizationProfile(rawProfile);
+          const structuredCapabilities = Object.freeze(
+            claims.flatMap((claim) => projectOrganizationCapabilityClaim(claim, "network") ?? []),
+          );
+          const searchableCapabilities: readonly SearchableCapability[] = structuredCapabilities.length
+            ? structuredCapabilities.map((claim) => Object.freeze({
+                id: claim.id,
+                name: claim.label,
+                description: claim.definition,
+                context: `${claim.domainLabel} ${claim.familyLabel} ${claim.specialties.join(" ")}`,
+              }))
+            : profile.capabilities.map((capability: OrganizationCapability) => Object.freeze({
+                id: String(capability.id),
+                name: capability.name,
+                description: capability.description,
+                context: `${capability.category.replaceAll("-", " ")} ${capability.otherCategory ?? ""} ${capability.kind.replaceAll("-", " ")}`,
+              }));
           const match = scoreProfile(
             profile.displayName,
-            profile.capabilities,
+            searchableCapabilities,
             input.query.capability,
+            structuredCapabilities.length ? "confirmed-structured" : "legacy-essential",
           );
           if (input.query.capability && match.score < 0) return null;
 
@@ -291,6 +328,7 @@ export class NetworkDiscoveryService {
               label: publicProfile.displayName,
               accessibleLocationLabel: marker.accessibleLocationLabel,
             }),
+            capabilities: structuredCapabilities,
             match,
           });
         }),

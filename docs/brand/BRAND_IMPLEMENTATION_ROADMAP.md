@@ -1,6 +1,6 @@
 # RFxchange Brand Experience Implementation Roadmap
 
-**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a COMPLETE; SLICE 3.2, AMACS 0.5.0 RECONCILIATION AND AI/AMACS FOUNDATION COMPLETE; SLICE 3.3 ACTIVE**
+**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a COMPLETE; SLICE 3.3 IMPLEMENTED AND ACCEPTED; MERGE AND POST-MERGE CI PENDING**
 
 ## 1. Purpose
 
@@ -32,11 +32,11 @@ Brand Gates B0 through B6a are complete.
 | B5 — Onboarding and activation experience | Complete | PR #114 | `c9b1469cf258a6a9af9b456585af7f3524a5c7b6` |
 | B6a — Existing workspace foundation | Complete | PR #115 | `bf59f1d18fa6db3f43660c42777b494b505be545` |
 
-The gates above and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Slice 3.2 are:
+The gates above and AMACS reconciliation are no-Feature-ID convergence work. Current accepted product totals after Slice 3.3 are:
 
-- **438 total · 125 Done · 313 Not Started**
+- **438 total · 129 Done · 309 Not Started**
 - Activation: **43/43**
-- Network: **11/38**
+- Network: **15/38**
 
 The consolidated evidence is recorded in:
 
@@ -55,9 +55,7 @@ B4 and B5 are also complete under the adopted numerical execution sequence.
 
 **Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, and the no-Feature-ID AI/AMACS Interpretation Foundation is complete via PR #124.**
 
-Authority was recalculated from merged `main`, and Slice 3.3 is the active authorized product slice. Its implementation must preserve the foundation's non-authoritative suggestion boundary. B6b remains later in the Wave 3 sequence after its live referral and provider domains exist and receives no authority from this handoff.
-
-The former handoff statement, “AI/AMACS Interpretation Foundation is the active next cross-cutting gate,” is retained here only as historical context for the existing validation guardrail; PR #124 and the Slice 3.3 execution authority supersede it.
+Authority was recalculated from merged `main`, and Slice 3.3 is implemented and accepted with its non-authoritative suggestion boundary preserved. Slice 3.4 remains unstarted until Slice 3.3 merges, post-merge CI passes, and a separate authority recalculation is merged. B6b remains later in the Wave 3 sequence after its live referral and provider domains exist and receives no authority from this handoff.
 
 ## 4. Completed gates
 
@@ -270,8 +268,8 @@ For every remaining gate or product slice:
 
 The Brand Gate sequence requested through B6a is complete and reconciled. Slice 3.2, the AMACS 0.5.0 reconciliation and the AI/AMACS Interpretation Foundation are also complete.
 
-The active authorized product slice is:
+The accepted product slice awaiting merge and post-merge CI is:
 
-> **Slice 3.3 — Market Profile Enrichment (`ORG-013`, `ORG-014`, `ORG-016`, `ORG-017`)**
+> **Slice 3.3 — Market Profile Enrichment (`ORG-013`, `ORG-014`, `ORG-016`, `ORG-017`) — IMPLEMENTED AND ACCEPTED**
 
 Slice 3.4 and later slices remain unstarted until Slice 3.3 merges, post-merge CI passes, and dependency authority is recalculated. B6b remains separately sequenced behind live referral and provider domains.

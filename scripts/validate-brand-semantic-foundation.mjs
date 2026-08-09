@@ -171,8 +171,9 @@ assert.ok(
     roadmap.includes("Brand Gate B6a — Existing workspace foundation — COMPLETE IN PR #115") &&
     roadmap.includes("Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120") &&
     roadmap.includes("AMACS 0.5.0 reconciliation is complete via PR #123") &&
-    roadmap.includes("AI/AMACS Interpretation Foundation is the active next cross-cutting gate"),
-  "Brand B1 semantic authority must remain intact through completed B2–B6a, Slice 3.2 and the current AI/AMACS handoff.",
+    roadmap.includes("AI/AMACS Interpretation Foundation is complete via PR #124") &&
+    roadmap.includes("Slice 3.3 is implemented and accepted"),
+  "Brand B1 semantic authority must remain intact through completed B2–B6a, the AMACS/AI foundations, and accepted Slice 3.3.",
 );
 
 const governedPrimitiveDirectories = [
@@ -227,5 +228,5 @@ for (const directory of ["app", "src", "public"]) {
 }
 
 console.log(
-  "Brand Gate B1 semantic foundation validated through B6a: exact palette, accessible gold text, Exchange Light roles, compatibility aliases, object semantics, motion/type/layout tokens, drift controls, and the current AI/AMACS handoff.",
+  "Brand Gate B1 semantic foundation validated through B6a and accepted Slice 3.3: exact palette, accessible gold text, Exchange Light roles, compatibility aliases, object semantics, motion/type/layout tokens, and drift controls.",
 );

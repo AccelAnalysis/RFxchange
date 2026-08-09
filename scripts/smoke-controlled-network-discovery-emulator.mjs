@@ -43,6 +43,7 @@ import {
 import {
   createFirestoreEssentialOrganizationProfileRepositories,
 } from "../src/infrastructure/firestore/organization-profile.ts";
+import { FirestoreOrganizationMarketProfileRepository } from "../src/infrastructure/firestore/market-profile.ts";
 import {
   FirestoreAccessRestrictionRepository,
   FirestoreOrganizationProfileRepository,
@@ -239,6 +240,32 @@ const exactRecords = await persistDiscoverable(exact, {
   visibility: "exact",
   serviceGeographyIds: [baseGeographyId, norfolkGeographyId],
 });
+await persist("organizationCapabilityClaims", `structured_${exact.organization.id}`, {
+  id: `structured_${exact.organization.id}`,
+  organizationId: exact.organization.id,
+  capabilityId: "AMACS-CAP-000113",
+  amacsReleaseVersion: "0.5.0",
+  labelSnapshot: "Cybersecurity risk assessment",
+  definitionSnapshot: "The organizational ability to provide or perform cybersecurity risk assessment.",
+  domainId: "AMACS-DOM-000004",
+  domainLabelSnapshot: "Digital, Data, and Technology",
+  familyId: "AMACS-FAM-000021",
+  familyLabelSnapshot: "Cybersecurity and Information Assurance",
+  entityScope: "reporting_entity",
+  marketRoleIds: ["AMACS-MROLE-000003"],
+  deliveryRoles: ["prime"],
+  serviceGeographyIds: [baseGeographyId, norfolkGeographyId],
+  specialties: ["Security-control reviews"],
+  capacity: null,
+  evidenceIds: [],
+  assertionStatus: "self_reported",
+  visibility: "network",
+  source: { kind: "manual" },
+  assertedByUserId: exact.user.id,
+  assertedByMembershipId: exact.membership.id,
+  createdAt: now,
+  updatedAt: now,
+});
 const approximateRecords = await persistDiscoverable(approximate, {
   displayName: "Tidewater Security Advisory",
   slug: "tidewater-security",
@@ -298,6 +325,7 @@ const service = new NetworkDiscoveryService({
   locations: locationRepositories.locations,
   serviceGeographies: locationRepositories.serviceGeographies,
   restrictions: new FirestoreAccessRestrictionRepository(adminDb),
+  capabilityClaims: new FirestoreOrganizationMarketProfileRepository(adminDb).claims,
 });
 
 try {
@@ -340,6 +368,10 @@ try {
   );
   assert.ok(cybersecurity.organizations.every((entry) => entry.match.kind === "capability"));
   assert.ok(cybersecurity.organizations.every((entry) => entry.match.matchedCapabilityNames.length === 1));
+  const structuredCybersecurity = cybersecurity.organizations.find((entry) => entry.organizationId === exact.organization.id);
+  assert.equal(structuredCybersecurity?.match.source, "confirmed-structured");
+  assert.equal(structuredCybersecurity?.capabilities[0]?.provenanceLabel, "Organization claimed");
+  assert.equal(cybersecurity.organizations.find((entry) => entry.organizationId === approximate.organization.id)?.match.source, "legacy-essential");
 
   const norfolkService = await service.search({
     viewerOrganizationId: viewer.organization.id,
