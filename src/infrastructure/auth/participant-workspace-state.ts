@@ -1,4 +1,8 @@
 import type { AuthenticatedServerContext } from "../../application/auth/server-session.ts";
+import type {
+  AcquisitionIntentKind,
+  AcquisitionSourceChannel,
+} from "../../domain/acquisition/model.ts";
 import { accessJourneyId, type AccessLifecycleRecord } from "../../domain/lifecycle/model.ts";
 import type { OrganizationMembership } from "../../domain/users/model.ts";
 import { FirestoreActivationJourneyContextRepository } from "../firestore/activation-journey.ts";
@@ -11,6 +15,13 @@ export interface ParticipantWorkspaceState {
   readonly organization: Readonly<{ readonly id: string }> | null;
   readonly membershipId: string | null;
   readonly controlledPlatformUrl: string | null;
+  readonly acquisitionContext: Readonly<{
+    readonly id: string;
+    readonly kind: AcquisitionIntentKind;
+    readonly subjectReference: string | null;
+    readonly sourceChannel: AcquisitionSourceChannel;
+    readonly status: "preserved";
+  }> | null;
 }
 
 export interface ParticipantWorkspaceProjection {
@@ -68,9 +79,16 @@ export async function loadParticipantWorkspaceProjection(
       : null;
   const resolvedOrganizationId = organizationId ?? (membership ? String(membership.organizationId) : null);
   const resolvedMembershipId = membership ? String(membership.id) : null;
-  const hasAcquisitionContinuation = Boolean(
-    activation.acquisitionContext && activation.acquisitionContext.intent.kind !== "direct",
-  );
+  const acquisitionContext = activation.acquisitionContext
+    ? Object.freeze({
+        id: activation.acquisitionContext.id,
+        kind: activation.acquisitionContext.intent.kind,
+        subjectReference: activation.acquisitionContext.intent.subjectReference,
+        sourceChannel: activation.acquisitionContext.source.channel,
+        status: "preserved" as const,
+      })
+    : null;
+  const hasAcquisitionContinuation = Boolean(acquisitionContext && acquisitionContext.kind !== "direct");
 
   return Object.freeze({
     state: Object.freeze({
@@ -83,6 +101,7 @@ export async function loadParticipantWorkspaceProjection(
         resolvedOrganizationId,
         hasAcquisitionContinuation,
       ),
+      acquisitionContext,
     }),
     membership,
   });
