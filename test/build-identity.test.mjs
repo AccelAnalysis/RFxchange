@@ -8,6 +8,7 @@ const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
 const COMMIT_SHA = "A72FEF782B349E94DF3DD229DBD7BB766BAA1081";
+const EXACT_SOURCE_SHA_EXPRESSION = "${{ github.event.pull_request.head.sha || github.sha }}";
 
 test("build identity accepts only a complete Git commit SHA and normalizes it", () => {
   const identity = resolveBuildIdentity(`  ${COMMIT_SHA}  `);
@@ -21,7 +22,7 @@ test("build identity accepts only a complete Git commit SHA and normalizes it", 
   }
 });
 
-test("Next artifact identity and production CI are bound to the same GitHub commit", async () => {
+test("Next artifact identity and production CI are bound to the checked-out exact source commit", async () => {
   const [config, workflow, source] = await Promise.all([
     read("next.config.ts"),
     read(".github/workflows/ci.yml"),
@@ -33,10 +34,16 @@ test("Next artifact identity and production CI are bound to the same GitHub comm
   assert.match(config, /FULL_GIT_SHA/);
   assert.match(config, /generateBuildId: async \(\) => buildSha\.toLowerCase\(\)/);
   assert.match(source, /process\.env\.RFXCHANGE_BUILD_SHA/);
-  assert.match(workflow, /- name: Production build\n        env:\n          RFXCHANGE_BUILD_SHA: \$\{\{ github\.sha \}\}\n        run: npm run build/);
-  assert.match(workflow, /- name: Verify compiled build identity/);
+
+  assert.ok(workflow.includes(`ref: ${EXACT_SOURCE_SHA_EXPRESSION}`));
+  assert.ok(workflow.includes(`RFXCHANGE_BUILD_SHA: ${EXACT_SOURCE_SHA_EXPRESSION}`));
+  assert.ok(workflow.includes(`RFXCHANGE_EXPECTED_BUILD_SHA: ${EXACT_SOURCE_SHA_EXPRESSION}`));
+  assert.match(workflow, /- name: Verify compiled and visible build identity/);
   assert.match(workflow, /cat \.next\/BUILD_ID/);
-  assert.match(workflow, /RFXCHANGE_EXPECTED_BUILD_SHA: \$\{\{ github\.sha \}\}/);
+  assert.match(workflow, /npm run start -- -H 127\.0\.0\.1 -p 3100/);
+  assert.match(workflow, /curl --fail --silent http:\/\/127\.0\.0\.1:3100\//);
+  assert.match(workflow, /title=\\"\$RFXCHANGE_EXPECTED_BUILD_SHA\\"/);
+  assert.match(workflow, /SHA \$\{RFXCHANGE_EXPECTED_BUILD_SHA:0:12\}/);
 });
 
 test("the compiled build SHA is visibly projected on public and authenticated surfaces", async () => {
