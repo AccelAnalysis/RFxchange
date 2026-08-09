@@ -3,10 +3,7 @@ import {
   type AuthenticatedServerContext,
 } from "../../application/auth/server-session.ts";
 import type { AccessRestrictionState } from "../../domain/lifecycle/model.ts";
-import {
-  resolveUserOrganizationAccess,
-  type OrganizationMembership,
-} from "../../domain/users/model.ts";
+import type { OrganizationMembership } from "../../domain/users/model.ts";
 import type {
   ParticipantWorkspaceProjection,
   ParticipantWorkspaceState,
@@ -14,9 +11,16 @@ import type {
 
 export type ParticipantActivationResolutionReason =
   | "activation-context-required"
-  | "activation-incomplete"
+  | "activation-incomplete";
+
+export type ParticipantAccessResolutionReason =
   | "account-resolution"
   | "organization-resolution";
+
+export interface ParticipantAccessResolutionOption {
+  readonly organizationId: string;
+  readonly membershipId: string;
+}
 
 export type ParticipantRouteResolution =
   | Readonly<{ readonly kind: "unauthenticated" }>
@@ -25,6 +29,14 @@ export type ParticipantRouteResolution =
       readonly reason: ParticipantActivationResolutionReason;
       readonly context: AuthenticatedServerContext;
       readonly state: ParticipantWorkspaceState | null;
+    }>
+  | Readonly<{
+      readonly kind: "access-resolution-required";
+      readonly reason: ParticipantAccessResolutionReason;
+      readonly context: AuthenticatedServerContext;
+      readonly state: ParticipantWorkspaceState;
+      readonly options: readonly ParticipantAccessResolutionOption[];
+      readonly selectedOrganizationId: string | null;
     }>
   | Readonly<{
       readonly kind: "wrong-organization";
@@ -101,78 +113,44 @@ function dependencyUnavailable(
   throw new ParticipantRouteDependencyUnavailableError(stage, cause);
 }
 
-function stateForMembership(
-  state: ParticipantWorkspaceState,
-  membership: OrganizationMembership,
-): ParticipantWorkspaceState {
-  return Object.freeze({
-    ...state,
-    organization: Object.freeze({ id: String(membership.organizationId) }),
-    membershipId: String(membership.id),
-    controlledPlatformUrl: state.lifecycleState === "open-platform"
-      ? "/exchange"
-      : state.acquisitionContext && state.acquisitionContext.kind !== "direct"
-        ? "/acquisition/continue"
-        : "/orientation",
-  });
-}
-
-function governedMembershipRepair(input: Readonly<{
+function resolveChangedMembershipAccess(input: Readonly<{
   context: AuthenticatedServerContext;
   state: ParticipantWorkspaceState;
   activeMemberships: readonly OrganizationMembership[];
   requestedOrganizationId?: string | null;
-}>): Readonly<{
-  state: ParticipantWorkspaceState;
-  membership: OrganizationMembership;
-}> | Readonly<{
-  kind: "activation-required";
-  reason: "account-resolution" | "organization-resolution";
-  context: AuthenticatedServerContext;
-  state: ParticipantWorkspaceState;
-}> | Readonly<{
-  kind: "wrong-organization";
-  context: AuthenticatedServerContext;
-  state: ParticipantWorkspaceState;
-}> {
-  const access = resolveUserOrganizationAccess(input.context.user, input.activeMemberships);
-  if (access.kind === "account-resolution") {
-    return Object.freeze({
-      kind: "activation-required" as const,
-      reason: "account-resolution" as const,
-      context: input.context,
-      state: input.state,
-    });
-  }
-
-  const requestedOrganizationId = input.requestedOrganizationId?.trim();
-  const selected = requestedOrganizationId
-    ? access.activeMemberships.find(
-        (candidate) => String(candidate.organizationId) === requestedOrganizationId,
-      ) ?? null
-    : access.activeMemberships.length === 1
-      ? access.activeMemberships[0]
-      : null;
-
-  if (!selected) {
-    if (requestedOrganizationId) {
-      return Object.freeze({
-        kind: "wrong-organization" as const,
-        context: input.context,
-        state: input.state,
-      });
+}>): Extract<ParticipantRouteResolution, { readonly kind: "access-resolution-required" }> {
+  for (const membership of input.activeMemberships) {
+    if (membership.status !== "active" || membership.userId !== input.context.user.id) {
+      return dependencyUnavailable(
+        "workspace-state",
+        new Error("Active membership projection contains inconsistent participant state."),
+      );
     }
-    return Object.freeze({
-      kind: "activation-required" as const,
-      reason: "organization-resolution" as const,
-      context: input.context,
-      state: input.state,
-    });
   }
+
+  const options = Object.freeze(
+    input.activeMemberships.map((membership) =>
+      Object.freeze({
+        organizationId: String(membership.organizationId),
+        membershipId: String(membership.id),
+      }),
+    ),
+  );
+  const requestedOrganizationId = input.requestedOrganizationId?.trim() || null;
+  const selectedOrganizationId = requestedOrganizationId &&
+    options.some((option) => option.organizationId === requestedOrganizationId)
+    ? requestedOrganizationId
+    : null;
 
   return Object.freeze({
-    state: stateForMembership(input.state, selected),
-    membership: selected,
+    kind: "access-resolution-required" as const,
+    reason: options.length === 0
+      ? "account-resolution" as const
+      : "organization-resolution" as const,
+    context: input.context,
+    state: input.state,
+    options,
+    selectedOrganizationId,
   });
 }
 
@@ -216,8 +194,7 @@ export async function resolveParticipantRouteWithDependencies(
   }
 
   const { state, activeMemberships, boundMembership } = projection;
-  let membership = projection.membership;
-  let resolvedState = state;
+  const membership = projection.membership;
   const workspaceLifecycleEligible =
     state.lifecycleState === "controlled-platform" || state.lifecycleState === "open-platform";
   if (!workspaceLifecycleEligible) {
@@ -236,9 +213,6 @@ export async function resolveParticipantRouteWithDependencies(
     );
   }
 
-  // A controlled/open activation binding is repairable only when the exact persisted membership
-  // still exists and is proven to belong to the same user and organization. A missing/cross-owned
-  // binding is corruption or unavailable state, not evidence that a different membership may be used.
   if (
     !boundMembership ||
     boundMembership.id !== state.membershipId ||
@@ -251,50 +225,52 @@ export async function resolveParticipantRouteWithDependencies(
     );
   }
 
-  if (boundMembership.status === "active") {
-    const activeBinding = activeMemberships.find(
-      (candidate) => candidate.id === boundMembership.id,
-    ) ?? null;
-    if (
-      !membership ||
-      membership.status !== "active" ||
-      membership.id !== boundMembership.id ||
-      membership.userId !== boundMembership.userId ||
-      String(membership.organizationId) !== String(boundMembership.organizationId) ||
-      !activeBinding ||
-      activeBinding.status !== "active" ||
-      activeBinding.userId !== boundMembership.userId ||
-      String(activeBinding.organizationId) !== String(boundMembership.organizationId)
-    ) {
-      return dependencyUnavailable(
-        "workspace-state",
-        new Error("Active participant membership binding is inconsistent."),
-      );
-    }
-  } else {
+  if (boundMembership.status !== "active") {
     if (membership) {
       return dependencyUnavailable(
         "workspace-state",
         new Error("Inactive participant membership unexpectedly resolved as active."),
       );
     }
-    const repaired = governedMembershipRepair({
+
+    // A deliberate membership change is not a dependency outage and is not fresh activation.
+    // Crucially, the old organization's controlled/OPEN lifecycle is never copied onto another
+    // active membership. The dedicated resolution surface may describe current memberships, but it
+    // cannot authorize them under this stale activation journey.
+    return resolveChangedMembershipAccess({
       context,
       state,
       activeMemberships,
       requestedOrganizationId: input.requestedOrganizationId,
     });
-    if ("kind" in repaired) return repaired;
-    membership = repaired.membership;
-    resolvedState = repaired.state;
+  }
+
+  const activeBinding = activeMemberships.find(
+    (candidate) => candidate.id === boundMembership.id,
+  ) ?? null;
+  if (
+    !membership ||
+    membership.status !== "active" ||
+    membership.id !== boundMembership.id ||
+    membership.userId !== boundMembership.userId ||
+    String(membership.organizationId) !== String(boundMembership.organizationId) ||
+    !activeBinding ||
+    activeBinding.status !== "active" ||
+    activeBinding.userId !== boundMembership.userId ||
+    String(activeBinding.organizationId) !== String(boundMembership.organizationId)
+  ) {
+    return dependencyUnavailable(
+      "workspace-state",
+      new Error("Active participant membership binding is inconsistent."),
+    );
   }
 
   const requestedOrganizationId = input.requestedOrganizationId?.trim();
-  if (requestedOrganizationId && requestedOrganizationId !== resolvedState.organization?.id) {
+  if (requestedOrganizationId && requestedOrganizationId !== state.organization.id) {
     return Object.freeze({
       kind: "wrong-organization" as const,
       context,
-      state: resolvedState,
+      state,
     });
   }
 
@@ -312,7 +288,7 @@ export async function resolveParticipantRouteWithDependencies(
     return Object.freeze({
       kind: "restricted" as const,
       context,
-      state: resolvedState,
+      state,
       membership,
       restrictionState,
     });
@@ -321,7 +297,7 @@ export async function resolveParticipantRouteWithDependencies(
   return Object.freeze({
     kind: "authorized" as const,
     context,
-    state: resolvedState,
+    state,
     membership,
   });
 }
