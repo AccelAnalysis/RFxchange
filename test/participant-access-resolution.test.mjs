@@ -57,17 +57,19 @@ test("protected participant routes consume access resolution instead of collapsi
 });
 
 test("Join and the dedicated resolution page cannot transfer old organization lifecycle authority", async () => {
-  const [join, resolution, classifier] = await Promise.all([
+  const [join, resolution, classifier, englishRecovery] = await Promise.all([
     read("app/join/page.tsx"),
     read("app/access/resolve/page.tsx"),
     read("src/infrastructure/auth/participant-route-classification.ts"),
+    read("src/i18n/messages/recovery/en-US.json"),
   ]);
 
   assert.match(join, /access\.kind === "access-resolution-required"/);
   assert.match(join, /participantEntryDestination\(access\)/);
   assert.match(resolution, /access\.options\.map/);
   assert.match(resolution, /selectedOrganizationId/);
-  assert.match(resolution, /does not grant|does not grant/i);
+  assert.match(resolution, /copy\.organizationBoundary/);
+  assert.match(englishRecovery, /does not grant that organization the previous organization’s activation authority/);
   assert.doesNotMatch(resolution, /access\.membership/);
   assert.doesNotMatch(classifier, /stateForMembership/);
   assert.doesNotMatch(classifier, /kind: "authorized"[\s\S]{0,500}governedMembershipRepair/);
