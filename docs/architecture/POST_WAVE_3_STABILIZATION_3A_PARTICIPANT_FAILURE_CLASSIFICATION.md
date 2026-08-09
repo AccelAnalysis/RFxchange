@@ -19,20 +19,20 @@ Stabilization 3A establishes the following protected-route meanings:
 - **No session cookie:** `unauthenticated`.
 - **Recognized malformed, expired, deleted-user, revoked, or disabled credential:** `unauthenticated`.
 - **Firebase Admin/authentication backend failure, unknown provider verification failure, or unexpected authentication dependency failure:** throw `ParticipantRouteDependencyUnavailableError` with stage `authentication`.
-- **No activation context for the authenticated user:** `activation-required` with `state: null`.
-- **Existing activation context with a pre-workspace lifecycle:** `activation-required` with the persisted state so onboarding can continue.
+- **No activation context for the authenticated user:** `activation-required` with reason `activation-context-required` and `state: null`.
+- **Existing activation context with a pre-workspace lifecycle:** `activation-required` with reason `activation-incomplete` and the persisted state so onboarding can continue.
 - **Existing activation context whose required lifecycle cannot be loaded or belongs to another user:** retryable workspace-state failure; never a fresh activation journey.
 - **Controlled/open lifecycle with structurally missing identity or contradictory active identity:** retryable workspace-state failure.
 - **Controlled/open lifecycle whose previously bound membership was deliberately deactivated:** resolve the current active membership set through the existing ARC-003 access contract rather than treating it as a dependency failure.
-- **No active memberships after governed repair:** `activation-required`, entering the existing account-resolution path rather than Retry.
+- **No active memberships after governed repair:** `activation-required` with reason `account-resolution`, entering the existing account-resolution path rather than Retry.
 - **Exactly one remaining active membership after governed repair:** rebind the request-local workspace projection to that active organization and continue normal organization access.
-- **Multiple remaining active memberships:** require organization resolution; an explicitly requested active organization can be selected for the request, otherwise the current resolution surface is used.
+- **Multiple remaining active memberships:** `activation-required` with reason `organization-resolution`; an explicitly requested active organization can be selected for the request.
 - **Requested organization differs from the authoritative/resolved active organization:** `wrong-organization`.
 - **Restriction dependency failure:** retryable restriction-state failure.
 - **Persisted active restriction:** `restricted`.
 - **Healthy identity, lifecycle, membership, organization, and restrictions:** `authorized`.
 
-The classification policy is isolated from Firebase/Firestore production wiring so it can be tested directly. `ParticipantRouteDependencyUnavailableError` preserves the original failure as a server-only `cause` while participant UI never renders raw exception details. Existing structured server timing remains available for diagnosis.
+The explicit resolution reason prevents downstream routes from having to infer why the common participant-entry surface is being used. The classification policy is isolated from Firebase/Firestore production wiring so it can be tested directly. `ParticipantRouteDependencyUnavailableError` preserves the original failure as a server-only `cause` while participant UI never renders raw exception details. Existing structured server timing remains available for diagnosis.
 
 ## Firebase verification invariant
 
@@ -84,13 +84,13 @@ Architecture tests cover:
 - recognized Firebase Admin configuration failure;
 - unknown provider/network verification failure;
 - authentication backend and unexpected authentication failures;
-- genuinely absent activation context;
-- incomplete pre-workspace activation;
+- genuinely absent activation context with explicit reason;
+- incomplete pre-workspace activation with explicit reason;
 - workspace projection dependency failure;
 - structurally missing controlled-workspace identity;
-- governed deactivation with no remaining active membership;
+- governed deactivation with no remaining active membership and `account-resolution` reason;
 - governed deactivation with one remaining active organization;
-- governed deactivation with multiple active organizations plus explicit selection;
+- governed deactivation with multiple active organizations, `organization-resolution` reason, and explicit selection;
 - contradictory cross-user/cross-tenant membership drift;
 - wrong-organization routing;
 - restriction dependency failure;
