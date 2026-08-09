@@ -26,7 +26,7 @@ Stabilization 3A establishes the following protected-route meanings:
 - **Persisted active restriction:** `restricted`.
 - **Healthy identity, lifecycle, membership, organization, and restrictions:** `authorized`.
 
-The `ParticipantRouteDependencyUnavailableError` intentionally does not carry participant-facing provider details. Existing structured server timing remains available for diagnosis.
+The classification policy is isolated from Firebase/Firestore production wiring so it can be tested directly. `ParticipantRouteDependencyUnavailableError` preserves the original failure as a server-only `cause` while participant UI never renders raw exception details. Existing structured server timing remains available for diagnosis.
 
 ## Projection invariant
 
@@ -36,15 +36,18 @@ Once an activation context exists, a missing lifecycle or lifecycle owner mismat
 
 ## Recovery experience
 
-`app/error.tsx` supplies the retryable recovery boundary for unexpected page-render failures, including participant dependency failures. The boundary:
+`app/error.tsx` supplies the shared retryable recovery boundary for unexpected page-render failures, including participant dependency failures. Because the root boundary can also render for public visitors, its copy is deliberately generic and makes no claim that an account or organization exists.
 
-- tells the participant that account, organization, profile, and activation progress are not reset by the error;
+The boundary:
+
+- resolves all customer-facing copy through the existing `I18nProvider`;
+- provides parity catalogs for English, Spanish, French, Italian, and German;
 - provides a **Retry** action using the Next.js error-boundary reset contract;
 - provides an RFxchange homepage escape path;
 - exposes only the opaque Next.js support digest when present; and
-- never displays the raw server exception message.
+- never displays the raw server exception message or invents durable participant state.
 
-The boundary is responsive and keyboard-focus visible. It does not change authority, state, or navigation policy itself.
+The boundary is responsive and keyboard-focus visible. It does not change authority, state, or navigation policy itself. For a protected participant dependency failure, the important guarantee is routing semantics: the exception reaches this recovery boundary instead of being converted into `/join` or sign-in.
 
 ## Regression evidence
 
@@ -63,7 +66,12 @@ Architecture tests cover:
 - persisted active restriction; and
 - successful authorized resolution.
 
-Source guardrails additionally verify that the recovery boundary does not render raw error messages and that activation-context absence remains the only null workspace projection.
+Source and internationalization guardrails additionally verify that:
+
+- the recovery boundary does not render raw error messages or participant-state assurances;
+- all five recovery catalogs have the same non-empty message shape;
+- the resolved dictionary contains the recovery namespace; and
+- activation-context absence remains the only null workspace projection.
 
 ## Scope boundary
 
