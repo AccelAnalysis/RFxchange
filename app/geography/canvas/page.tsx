@@ -1,7 +1,12 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { FoundingAcquisitionContinuation } from "@/src/components/acquisition/FoundingAcquisitionContinuation";
 import { ExistingWorkspaceFoundation } from "@/src/components/participant/ExistingWorkspaceFoundation";
+import {
+  RFXCHANGE_FOUNDING_ACQUISITION_INTENT,
+  type FoundingAcquisitionIntent,
+} from "@/src/infrastructure/acquisition/founding-intent";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
@@ -21,22 +26,46 @@ function firstSearchParam(value: string | string[] | undefined): string | null {
   return null;
 }
 
-function signInUrl(requestedOrganizationId: string | null): string {
-  const returnTo = requestedOrganizationId
-    ? `/geography/canvas?organizationId=${encodeURIComponent(requestedOrganizationId)}`
-    : "/geography/canvas";
-  return `/signin?returnTo=${encodeURIComponent(returnTo)}`;
+function resolveAcquisitionIntent(value: string | null): FoundingAcquisitionIntent | null {
+  return value === RFXCHANGE_FOUNDING_ACQUISITION_INTENT
+    ? RFXCHANGE_FOUNDING_ACQUISITION_INTENT
+    : null;
 }
 
-async function resolveAuthenticatedMapProjection(requestedOrganizationId: string | null) {
+function canvasUrl(
+  requestedOrganizationId: string | null,
+  acquisitionIntent: FoundingAcquisitionIntent | null,
+): string {
+  const params = new URLSearchParams();
+  if (requestedOrganizationId) params.set("organizationId", requestedOrganizationId);
+  if (acquisitionIntent) params.set("acquisition", acquisitionIntent);
+  const query = params.toString();
+  return query ? `/geography/canvas?${query}` : "/geography/canvas";
+}
+
+function signInUrl(
+  requestedOrganizationId: string | null,
+  acquisitionIntent: FoundingAcquisitionIntent | null,
+): string {
+  return `/signin?returnTo=${encodeURIComponent(canvasUrl(requestedOrganizationId, acquisitionIntent))}`;
+}
+
+async function resolveAuthenticatedMapProjection(
+  requestedOrganizationId: string | null,
+  acquisitionIntent: FoundingAcquisitionIntent | null,
+) {
   const cookieStore = await cookies();
   const access = await resolveParticipantRoute({
     sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
     requestedOrganizationId,
   });
 
-  if (access.kind === "unauthenticated") redirect(signInUrl(requestedOrganizationId));
-  if (access.kind === "activation-required") redirect("/join");
+  if (access.kind === "unauthenticated") {
+    redirect(signInUrl(requestedOrganizationId, acquisitionIntent));
+  }
+  if (access.kind === "activation-required") {
+    redirect(acquisitionIntent ? "/acquisition/founding" : "/join");
+  }
   if (access.kind === "wrong-organization") {
     redirect(access.state.controlledPlatformUrl ?? "/join");
   }
@@ -56,7 +85,11 @@ export default async function GeographyCanvasPage({
   const capability = firstSearchParam(params.q);
   const serviceGeographyId = firstSearchParam(params.serviceArea);
   const page = firstSearchParam(params.page);
-  const authenticated = await resolveAuthenticatedMapProjection(requestedOrganizationId);
+  const acquisitionIntent = resolveAcquisitionIntent(firstSearchParam(params.acquisition));
+  const authenticated = await resolveAuthenticatedMapProjection(
+    requestedOrganizationId,
+    acquisitionIntent,
+  );
   const discovery = await loadAuthorizedNetworkDiscovery({
     access: authenticated.access,
     mapProjection: authenticated.mapProjection,
@@ -66,12 +99,15 @@ export default async function GeographyCanvasPage({
   });
 
   return (
-    <ExistingWorkspaceFoundation
-      model={authenticated.mapProjection.model}
-      homeMarker={authenticated.mapProjection.homeMarker}
-      organizationId={authenticated.mapProjection.organizationId}
-      discovery={discovery.available ? discovery.projection : null}
-      serviceAreaOptions={discovery.available ? discovery.serviceAreaOptions : []}
-    />
+    <>
+      {acquisitionIntent ? <FoundingAcquisitionContinuation /> : null}
+      <ExistingWorkspaceFoundation
+        model={authenticated.mapProjection.model}
+        homeMarker={authenticated.mapProjection.homeMarker}
+        organizationId={authenticated.mapProjection.organizationId}
+        discovery={discovery.available ? discovery.projection : null}
+        serviceAreaOptions={discovery.available ? discovery.serviceAreaOptions : []}
+      />
+    </>
   );
 }

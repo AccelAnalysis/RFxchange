@@ -3,6 +3,11 @@ import { NextResponse } from "next/server";
 
 import { projectPublicOrganizationMarker } from "@/src/domain/organization-markers/model";
 import {
+  appendFoundingAcquisitionIntent,
+  RFXCHANGE_FOUNDING_ACQUISITION_COOKIE_NAME,
+  RFXCHANGE_FOUNDING_ACQUISITION_INTENT,
+} from "@/src/infrastructure/acquisition/founding-intent";
+import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
@@ -75,14 +80,24 @@ export async function GET() {
     geography,
     geographyGeometry: boundary.geometry,
   });
-
-  return timing.apply(NextResponse.json({
+  const hasFoundingIntent = cookieStore.get(
+    RFXCHANGE_FOUNDING_ACQUISITION_COOKIE_NAME,
+  )?.value === RFXCHANGE_FOUNDING_ACQUISITION_INTENT;
+  const controlledPlatformUrl = access.state.controlledPlatformUrl ?? "/geography/canvas";
+  const response = NextResponse.json({
     marker: {
       id: marker.id,
       coordinate: marker.coordinate,
       label: profile?.displayName ?? "Your organization",
       accessibleLocationLabel: marker.accessibleLocationLabel,
     },
-    controlledPlatformUrl: access.state.controlledPlatformUrl ?? "/geography/canvas",
-  }));
+    controlledPlatformUrl: hasFoundingIntent
+      ? appendFoundingAcquisitionIntent(controlledPlatformUrl)
+      : controlledPlatformUrl,
+  });
+
+  if (hasFoundingIntent) {
+    response.cookies.delete(RFXCHANGE_FOUNDING_ACQUISITION_COOKIE_NAME);
+  }
+  return timing.apply(response);
 }

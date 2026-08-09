@@ -1,0 +1,135 @@
+.navMenu {
+  display: none;
+  position: relative;
+  justify-self: end;
+}
+
+.navMenu summary {
+  min-height: 42px;
+  padding-inline: 16px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(37, 41, 50, 0.18);
+  border-radius: 999px;
+  color: var(--graphite);
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+
+.navMenu summary::-webkit-details-marker {
+  display: none;
+}
+
+.navMenuLinks {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(310px, calc(100vw - 32px));
+  padding: 12px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(37, 41, 50, 0.12);
+  border-radius: 18px;
+  background: rgba(247, 243, 234, 0.98);
+  box-shadow: 0 22px 54px rgba(11, 11, 13, 0.18);
+  backdrop-filter: blur(20px);
+}
+
+.navMenuLinks a {
+  padding: 11px 12px;
+  border-radius: 12px;
+  color: var(--graphite);
+  font-weight: 700;
+}
+
+.navMenuLinks a:hover {
+  background: rgba(214, 162, 58, 0.12);
+}
+
+.navMenu summary:focus-visible,
+.navMenuLinks a:focus-visible {
+  outline: var(--focus-outline-width) solid var(--semantic-border-focus);
+  outline-offset: var(--focus-outline-offset-high);
+}
+
+@media (max-width: 1320px) {
+  .nav {
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    gap: 14px !important;
+  }
+
+  .desktopLinks {
+    display: none !important;
+  }
+
+  .navMenu {
+    display: block;
+  }
+}
+
+@media (max-width: 760px) {
+  .nav {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      "brand menu"
+      "actions actions";
+    row-gap: 10px !important;
+  }
+
+  .nav > :first-child {
+    grid-area: brand;
+    min-width: 0;
+  }
+
+  .navMenu {
+    grid-area: menu;
+  }
+
+  .navMenu summary {
+    min-height: 40px;
+    padding-inline: 13px;
+  }
+
+  .mobileActions {
+    grid-area: actions;
+    width: 100%;
+    min-width: 0;
+    display: grid !important;
+    grid-template-columns: minmax(88px, 1fr) auto auto;
+    gap: 8px !important;
+    justify-self: stretch !important;
+  }
+
+  .mobileActions > * {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .mobileActions {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .mobileActions > :first-child {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .mobileActions a {
+    width: 100%;
+    padding-inline: 10px;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .navMenuLinks {
+    background: var(--warm-ivory);
+    backdrop-filter: none;
+  }
+}
