@@ -1,9 +1,14 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { ControlledLocalityMapService } from "@/src/application/geography/controlled-locality-map";
 import { SpatialActivationExperience } from "@/src/components/onboarding/SpatialActivationExperience";
 import { createControlledLocalityPreview } from "@/src/data/geography/portsmouth-controlled-locality-preview";
-import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
+import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
+import {
+  RFXCHANGE_SESSION_COOKIE_NAME,
+  resolveParticipantRoute,
+} from "@/src/infrastructure/auth/participant-route-runtime";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
 import { createFirestoreGeographyRepositories } from "@/src/infrastructure/firestore/geography-repositories";
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
@@ -35,6 +40,15 @@ async function activationMapModel() {
 }
 
 export default async function JoinPage() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
+  if (sessionCookie) {
+    const access = await resolveParticipantRoute({ sessionCookie });
+    if (access.kind === "access-resolution-required") {
+      redirect(participantEntryDestination(access));
+    }
+  }
+
   const mapModel = await activationMapModel();
   return <SpatialActivationExperience mapModel={mapModel} />;
 }
