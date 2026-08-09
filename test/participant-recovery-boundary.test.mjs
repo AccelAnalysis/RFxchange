@@ -5,6 +5,30 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
+const requiredRecoveryKeys = [
+  "eyebrow",
+  "title",
+  "lede",
+  "supporting",
+  "retry",
+  "home",
+  "supportReference",
+];
+
+const requiredAccessResolutionKeys = [
+  "accessEyebrow",
+  "accountTitle",
+  "accountBody",
+  "accountNext",
+  "organizationTitle",
+  "organizationBody",
+  "organizationBoundary",
+  "activeMemberships",
+  "selectOrganization",
+  "selectedOrganization",
+  "organizationFallback",
+];
+
 test("application recovery boundary is localized, retryable, and does not invent participant state", async () => {
   const [
     boundary,
@@ -29,16 +53,8 @@ test("application recovery boundary is localized, retryable, and does not invent
   ]);
 
   assert.match(boundary, /useI18n/);
-  for (const key of [
-    "recovery.eyebrow",
-    "recovery.title",
-    "recovery.lede",
-    "recovery.supporting",
-    "recovery.retry",
-    "recovery.home",
-    "recovery.supportReference",
-  ]) {
-    assert.match(boundary, new RegExp(key.replace(".", "\\.")));
+  for (const key of requiredRecoveryKeys) {
+    assert.match(boundary, new RegExp(`recovery\\.${key}`));
   }
   assert.match(boundary, /onClick=\{reset\}/);
   assert.match(boundary, /error\.digest/);
@@ -50,15 +66,9 @@ test("application recovery boundary is localized, retryable, and does not invent
 
   const catalogs = recoveryCatalogTexts.map((text) => JSON.parse(text));
   const referenceKeys = Object.keys(catalogs[0]);
-  assert.deepEqual(referenceKeys, [
-    "eyebrow",
-    "title",
-    "lede",
-    "supporting",
-    "retry",
-    "home",
-    "supportReference",
-  ]);
+  for (const key of [...requiredRecoveryKeys, ...requiredAccessResolutionKeys]) {
+    assert.ok(referenceKeys.includes(key), `Recovery catalog must include ${key}`);
+  }
   for (const catalog of catalogs) {
     assert.deepEqual(Object.keys(catalog), referenceKeys);
     assert.ok(Object.values(catalog).every((value) => typeof value === "string" && value.trim()));
