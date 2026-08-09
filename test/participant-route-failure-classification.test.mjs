@@ -311,7 +311,7 @@ test("active restrictions remain governed restriction results", async () => {
         organizationState: null,
         membershipState: "suspended",
       }),
-    ),
+    }),
   );
 
   assert.equal(result.kind, "restricted");
