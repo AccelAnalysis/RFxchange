@@ -32,13 +32,15 @@ export type OrganizationAssetUploadBoundaryErrorCode =
   | "unsupported-content-type"
   | "content-type-mismatch";
 
+export type OrganizationAssetUploadBoundaryStatus = 400 | 411 | 413 | 415;
+
 export class OrganizationAssetUploadBoundaryError extends Error {
   readonly code: OrganizationAssetUploadBoundaryErrorCode;
-  readonly status: 400 | 411 | 413 | 415;
+  readonly status: OrganizationAssetUploadBoundaryStatus;
 
   constructor(
     code: OrganizationAssetUploadBoundaryErrorCode,
-    status: OrganizationAssetUploadBoundaryError["status"],
+    status: OrganizationAssetUploadBoundaryStatus,
     message: string,
   ) {
     super(message);
