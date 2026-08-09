@@ -26,6 +26,7 @@ import {
 import { loadAuthorizedMarketProfile } from "@/src/infrastructure/market-profile/runtime";
 import { loadAuthorizedOrganizationEnrichment } from "@/src/infrastructure/organization-enrichment/runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
+import { currentBuildIdentity } from "@/src/infrastructure/system/build-identity";
 
 import styles from "./page.module.css";
 
@@ -85,6 +86,7 @@ export default async function OrganizationProfilePage() {
   const profile = hydrateEssentialOrganizationProfile(profileRecord);
   const workspaceStatus = access.state.lifecycleState === "open-platform" ? "Open" : "Active";
   const selectedGeography = mapProjection?.model.selectedGeography ?? null;
+  const buildIdentity = currentBuildIdentity();
 
   return (
     <ParticipantShell activeItem="Account">
@@ -188,6 +190,10 @@ export default async function OrganizationProfilePage() {
 
             <article className={styles.card}>
               <h2>Current release boundary</h2>
+              <dl className={styles.definitionList}>
+                <dt>Build SHA</dt>
+                <dd><code>{buildIdentity?.commitSha ?? "Not embedded in this build"}</code></dd>
+              </dl>
               <p className={styles.empty}>
                 Market profile, credential, media, additional-location enrichment, referrals, and
                 published provider/resource routing are available. Credibility, commercial benefits,
