@@ -6,117 +6,85 @@
 
 ## Defect
 
-Protected participant routes previously collapsed materially different failures into the same navigation outcomes. In particular, any authentication exception became `unauthenticated`, while an unavailable or inconsistent participant workspace projection could become `activation-required` and redirect a returning participant to `/join`.
+Protected participant routes previously collapsed materially different failures into sign-in or activation navigation. A Firebase Admin, Firestore, projection, or restriction dependency failure could therefore make a returning participant appear signed out or send them to `/join`, falsely implying that durable state was lost.
 
-The Firebase server-session adapter also defaulted unrecognized verification failures to `credential-invalid`. A transient provider or network error could therefore be interpreted as proof that an otherwise valid participant session was bad.
-
-The inverse edge also matters: a deliberately deactivated organization membership is governed account state, not a dependency outage. Retry-only recovery must not trap a user whose membership was changed by an authorized repair. At the same time, a missing or cross-owned persisted membership binding must never be mistaken for a legitimate deactivation and repaired through another organization.
+The inverse case is also important: an authorized membership change is persisted account/access state, not a dependency outage. It must not create an endless Retry screen, but it also must not let another organization inherit the previous organization’s controlled/OPEN lifecycle.
 
 ## Classification contract
 
-Stabilization 3A establishes the following protected-route meanings:
+Stabilization 3A establishes these meanings:
 
-- **No session cookie:** `unauthenticated`.
-- **Recognized malformed, expired, deleted-user, revoked, or disabled credential:** `unauthenticated`.
-- **Firebase Admin/authentication backend failure, unknown provider verification failure, or unexpected authentication dependency failure:** throw `ParticipantRouteDependencyUnavailableError` with stage `authentication`.
-- **No activation context for the authenticated user:** `activation-required` with reason `activation-context-required` and `state: null`.
-- **Existing activation context with a pre-workspace lifecycle:** `activation-required` with reason `activation-incomplete` and the persisted state so onboarding can continue.
-- **Existing activation context whose required lifecycle cannot be loaded or belongs to another user:** retryable workspace-state failure; never a fresh activation journey.
-- **Controlled/open lifecycle with structurally missing identity or contradictory active identity:** retryable workspace-state failure.
-- **Controlled/open lifecycle with a missing, wrong-ID, cross-user, or cross-organization persisted membership record:** retryable workspace-state failure; it cannot enter repair.
-- **Controlled/open lifecycle whose proven same-user/same-organization bound membership was deliberately deactivated:** resolve the current active membership set through the existing ARC-003 access contract rather than treating it as a dependency failure.
-- **No active memberships after governed repair:** `activation-required` with reason `account-resolution`, entering the existing account-resolution path rather than Retry.
-- **Exactly one remaining active membership after governed repair:** rebind the request-local workspace projection to that active organization and continue normal organization access.
-- **Multiple remaining active memberships:** `activation-required` with reason `organization-resolution`; an explicitly requested active organization can be selected for the request.
-- **Requested organization differs from the authoritative/resolved active organization:** `wrong-organization`.
-- **Restriction dependency failure:** retryable restriction-state failure.
-- **Persisted active restriction:** `restricted`.
-- **Healthy identity, lifecycle, membership, organization, and restrictions:** `authorized`.
+- no session cookie, or an affirmatively invalid/expired/deleted/revoked/disabled credential: `unauthenticated`;
+- ambiguous Firebase Admin/provider/network verification failure: retryable `authentication` dependency failure;
+- no activation context: `activation-required` with `activation-context-required`;
+- pre-workspace lifecycle: `activation-required` with `activation-incomplete`;
+- unavailable/cross-owned lifecycle or persisted workspace identity: retryable `workspace-state` dependency failure;
+- valid active bound membership with current restrictions: governed `restricted` or `authorized` result;
+- restriction-provider failure: retryable `restriction-state` dependency failure;
+- a proven same-user/same-organization persisted membership that has become inactive: `access-resolution-required`, never fresh activation and never Retry-only recovery.
 
-The explicit resolution reason prevents downstream routes from having to infer why the common participant-entry surface is being used. The classification policy is isolated from Firebase/Firestore production wiring so it can be tested directly. `ParticipantRouteDependencyUnavailableError` preserves the original failure as a server-only `cause` while participant UI never renders raw exception details. Existing structured server timing remains available for diagnosis.
+`ParticipantRouteDependencyUnavailableError` preserves the original exception only as a server-side `cause`. Participant UI receives a bounded failure stage and never raw provider details.
+
+## Persisted membership integrity
+
+The lightweight workspace projection separately loads the complete active-membership set for the authenticated user and the exact persisted `activation.membershipId`, including an inactive record.
+
+Controlled/OPEN routing requires the exact bound record to exist and match the persisted membership ID, authenticated user, and persisted organization. Missing, wrong-ID, cross-user, or cross-organization bindings fail through retryable workspace-state recovery.
+
+If the bound membership remains active, the active projection must contain the same active membership with matching user and organization identity. Contradictory status or identity also fails closed. Only a proven same-user/same-organization inactive bound membership may enter access resolution.
+
+## Access resolution is not lifecycle transfer
+
+A deactivated binding does **not** authorize another active organization.
+
+The classifier returns `access-resolution-required` with:
+
+- `account-resolution` when no active memberships remain; or
+- `organization-resolution` when one or more other active memberships exist.
+
+The result may expose minimized organization/membership identifiers as resolution options and may record which active organization was selected for review. It deliberately does **not** return an authorized membership for that organization and does not modify `state.organization`, `state.membershipId`, `state.accessJourneyId`, or `state.lifecycleState`.
+
+This prevents a controlled or OPEN journey earned under organization A from being copied to organization B. A selected alternative membership is a resolution input only, never authority.
+
+## Resolution surface
+
+`/access-resolution` is the dedicated participant-facing surface for governed membership changes. Protected routes send `access-resolution-required` there instead of `/join`.
+
+The page re-runs the authoritative participant resolver on every request. If the original valid membership is restored, normal routing resumes automatically. Otherwise the page:
+
+- distinguishes no-active-membership from alternative-active-membership state;
+- lists current active organization memberships for review;
+- allows an active organization to be selected only as a resolution option;
+- explicitly states that previous activation/OPEN state does not transfer;
+- provides a recheck action and homepage escape path; and
+- performs no membership, authority, lifecycle, restriction, or activation mutation.
+
+The current product does not invent a second-organization activation mechanism in this stabilization pass. Until a governed organization-specific access path exists, alternative memberships remain visible resolution options rather than borrowed workspace authority.
+
+The surface is localized in English, Spanish, French, Italian, and German and follows the existing responsive, keyboard-visible Exchange Light recovery grammar.
 
 ## Firebase verification invariant
 
-`FirebaseServerSessionBoundary` distinguishes affirmative credential rejection from ambiguous provider failure before the protected-route classifier runs:
+`FirebaseServerSessionBoundary` distinguishes affirmative credential rejection from ambiguous provider failure:
 
-- recognized invalid or expired ID-token/session-cookie errors map to `credential-invalid`;
-- `auth/user-not-found` also maps to `credential-invalid` because a deleted provider identity is affirmative evidence that the credential can no longer establish a participant session;
-- recognized revocation maps to `credential-revoked`;
-- recognized disabled-user state maps to `account-disabled`;
-- Firebase Admin configuration/runtime failures map to `authentication-backend-unavailable`; and
-- unrecognized provider, transport, or operational verification failures map to `authentication-backend-unavailable` rather than invalidating the participant session.
+- known malformed/expired credentials and `auth/user-not-found` map to `credential-invalid`;
+- revocation maps to `credential-revoked`;
+- disabled user maps to `account-disabled`;
+- known Admin configuration/runtime failures map to `authentication-backend-unavailable`; and
+- unrecognized provider, transport, or operational verification failures also map to `authentication-backend-unavailable` rather than invalidating the participant session.
 
-This is intentionally conservative. A participant is routed to sign-in only when the authentication layer has affirmative evidence that the credential is unusable. An ambiguous verification failure reaches retryable recovery instead.
-
-## Projection and access-resolution invariants
-
-`loadParticipantWorkspaceProjection()` returns `null` for exactly one condition: the authenticated user has no activation context.
-
-Once an activation context exists, a missing lifecycle or lifecycle owner mismatch throws `ParticipantWorkspaceProjectionError`. For a persisted activation membership ID, the projection loads the exact membership record through `getById()` even when that record is inactive, while separately carrying the complete active-membership set.
-
-Before any repair can occur, the classifier proves that the bound membership:
-
-- exists;
-- has the exact persisted membership ID;
-- belongs to the authenticated RFxchange user; and
-- belongs to the persisted activation organization.
-
-If any of those checks fail, the route fails through the retryable workspace-state boundary. Only a proven same-user/same-organization membership whose status is no longer active may enter ARC-003 account/organization resolution. If the bound membership is still active, it must also appear coherently in the active-membership projection; otherwise the route fails closed.
-
-That distinction allows the classifier to tell apart:
-
-- **unavailable/corrupt/cross-owned persisted state**, which is retryable; and
-- **governed membership deactivation**, which is evaluated with `resolveUserOrganizationAccess()` and follows account/organization resolution.
-
-This prevents an administrative membership repair from becoming an endless temporary-outage screen without allowing missing or cross-owned bindings to authorize another organization.
+A participant is sent to sign-in only when authentication has affirmative evidence that the credential is unusable.
 
 ## Recovery experience
 
-`app/error.tsx` supplies the shared retryable recovery boundary for unexpected page-render failures, including participant dependency failures. Because the root boundary can also render for public visitors, its copy is deliberately generic and makes no claim that an account or organization exists.
-
-The boundary:
-
-- resolves all customer-facing copy through the existing `I18nProvider`;
-- provides parity catalogs for English, Spanish, French, Italian, and German;
-- provides a **Retry** action using the Next.js error-boundary reset contract;
-- provides an RFxchange homepage escape path;
-- exposes only the opaque Next.js support digest when present; and
-- never displays the raw server exception message or invents durable participant state.
-
-The boundary is responsive and keyboard-focus visible. It does not change authority, state, or navigation policy itself. For a protected participant dependency failure, the important guarantee is routing semantics: the exception reaches this recovery boundary instead of being converted into `/join` or sign-in.
+`app/error.tsx` remains the shared retryable error boundary for unexpected render/dependency failures. Because it is root-scoped, its copy is generic and never claims that participant state exists. It is localized across all five supported locales, provides Retry and homepage actions, and shows only the opaque Next.js support digest when present.
 
 ## Regression evidence
 
-Architecture tests cover:
+Architecture tests cover signed-out versus retryable authentication, absent versus incomplete activation, workspace and restriction dependency failures, missing/cross-owned persisted lifecycle and membership identity, active-binding projection contradictions, valid inactive bindings with zero/one/multiple alternative active memberships, explicit alternative selection remaining non-authorizing, OPEN remaining bound to the original organization even when another organization is selected, wrong-organization/restriction outcomes, and healthy authorization for only the original valid active binding.
 
-- missing session;
-- recognized invalid/expired/deleted/revoked/disabled session;
-- recognized Firebase Admin configuration failure;
-- unknown provider/network verification failure;
-- authentication backend and unexpected authentication failures;
-- genuinely absent activation context with explicit reason;
-- incomplete pre-workspace activation with explicit reason;
-- workspace projection dependency failure;
-- structurally missing controlled-workspace identity;
-- missing persisted membership with another active organization;
-- cross-user, cross-organization, and wrong-ID persisted membership bindings;
-- an active persisted binding missing from the active projection;
-- governed deactivation with no remaining active membership and `account-resolution` reason;
-- governed deactivation with one remaining active organization;
-- governed deactivation with multiple active organizations, `organization-resolution` reason, and explicit selection;
-- contradictory active membership drift;
-- wrong-organization routing;
-- restriction dependency failure;
-- persisted active restriction; and
-- successful authorized resolution.
-
-Source and internationalization guardrails additionally verify that:
-
-- the recovery boundary does not render raw error messages or participant-state assurances;
-- all five recovery catalogs have the same non-empty message shape;
-- the resolved dictionary contains the recovery namespace; and
-- activation-context absence remains the only null workspace projection.
+Source guardrails verify that the resolution page consumes the new semantic result, uses localized dictionaries, performs no activation mutation, and that Exchange routes access changes to `/access-resolution` rather than `/join`.
 
 ## Scope boundary
 
-This pass does not change RFx Core, Network feature counts, membership entitlement, organization authority, restriction semantics, Firebase security rules, or tracker totals. It does not claim that external dependencies cannot fail; it ensures those failures are classified truthfully, distinguishes them from legitimate account/membership changes, and requires proof of the persisted binding before any governed repair can select another organization.
+This pass changes no Feature IDs or tracker totals. It does not implement RFx Core, Wave 4, new multi-organization activation semantics, membership entitlement, organization authority changes, Firebase security-rule changes, or restriction-policy changes. It classifies dependency failure truthfully, preserves existing durable state, and provides a governed non-authorizing resolution path when membership state has legitimately changed.
