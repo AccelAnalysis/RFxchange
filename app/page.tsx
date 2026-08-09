@@ -1,24 +1,47 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
+import { MarketingAvailability } from "@/src/components/marketing/MarketingAvailability";
 import { MarketingFooter, MarketingHeader } from "@/src/components/marketing/MarketingChrome";
 import { publicImageAssets } from "@/src/content/public-assets";
 import { getRequestDictionary } from "@/src/i18n/server";
 
 import styles from "./home-b4.module.css";
 
+export async function generateMetadata(): Promise<Metadata> {
+  const { dictionary } = await getRequestDictionary();
+  const metadata = dictionary.marketingPages.home.metadata;
+
+  return {
+    title: metadata.title,
+    description: metadata.description,
+    openGraph: {
+      title: metadata.title,
+      description: metadata.description,
+      type: "website",
+    },
+  };
+}
+
 export default async function HomePage() {
   const { dictionary } = await getRequestDictionary();
-  const home = dictionary.home;
+  const home = dictionary.marketingPages.home;
+  const differentiation = dictionary.home.difference;
 
   return (
     <main className={styles.site}>
+      <aside className={styles.campaignBar} aria-label={home.campaign.ariaLabel}>
+        <span>{home.campaign.text}</span>
+        <Link href="/founding">{home.campaign.link} <span aria-hidden="true">→</span></Link>
+      </aside>
+
       <MarketingHeader />
 
       <section className={styles.hero} aria-labelledby="hero-title">
         <div className={styles.heroMedia}>
           <img
-            src={publicImageAssets.construction.src}
-            alt={home.images.construction}
+            src={publicImageAssets.region.src}
+            alt={home.images.hero}
             fetchPriority="high"
           />
         </div>
@@ -31,115 +54,181 @@ export default async function HomePage() {
             </h1>
             <p className={styles.heroDeck}>{home.hero.summary}</p>
             <div className={styles.heroActions}>
-              <Link className={styles.buttonGold} href="/join">{home.hero.join}</Link>
-              <a className={styles.buttonLight} href="#how-it-works">{home.hero.howItWorks}</a>
+              <Link className={styles.buttonGold} href="/join">{home.hero.primary}</Link>
+              <a className={styles.buttonLight} href="#how-it-works">{home.hero.secondary}</a>
             </div>
-            <p className={styles.evidenceNote}>{home.hero.evidenceNote}</p>
+            <p className={styles.heroNote}>{home.hero.note}</p>
+            <p className={styles.evidenceNote}>{home.hero.stockNote}</p>
           </div>
         </div>
       </section>
 
-      <section className={styles.availabilityBand} aria-labelledby="availability-title">
+      <section className={styles.valueBand} aria-label={home.value.ariaLabel}>
         <div className={styles.wrap}>
-          <div className={styles.availabilityIntro}>
-            <p className={styles.eyebrow}>{home.availability.eyebrow}</p>
-            <h2 id="availability-title">{home.availability.title}</h2>
-            <p>{home.availability.description}</p>
-          </div>
-          <div className={styles.availabilityGrid}>
-            {home.availability.items.map((item) => (
-              <article className={styles.availabilityCard} key={item.title}>
-                <span>{item.status}</span>
-                <h3>{item.title}</h3>
+          <div className={styles.valueGrid}>
+            {home.value.items.map((item, index) => (
+              <article className={styles.valueItem} key={item.kicker}>
+                <span>{String(index + 1).padStart(2, "0")} · {item.kicker}</span>
+                <h2>{item.title}</h2>
                 <p>{item.detail}</p>
               </article>
             ))}
           </div>
+          <p className={styles.promise}>{home.value.promise}</p>
         </div>
       </section>
 
-      <section className={styles.section} aria-labelledby="live-title">
-        <div className={styles.wrap}>
-          <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>{home.live.eyebrow}</p>
-            <h2 id="live-title">{home.live.title}</h2>
-            <p>{home.live.description}</p>
-          </div>
-          <div className={styles.liveJourney}>
-            <figure className={styles.liveMedia}>
-              <img
-                src={publicImageAssets.workshop.src}
-                alt={home.images.workshop}
-                loading="lazy"
-                decoding="async"
-              />
-            </figure>
-            <ol className={styles.liveSteps}>
-              {home.live.steps.map((step) => (
-                <li key={step.title}>
-                  <div>
-                    <strong>{step.title}</strong>
-                    <p>{step.detail}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </section>
-
-      <section id="how-it-works" className={`${styles.section} ${styles.modelSection}`} aria-labelledby="model-title">
-        <div className={styles.wrap}>
-          <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>{home.model.eyebrow}</p>
-            <h2 id="model-title">{home.model.title}</h2>
-            <p>{home.model.description}</p>
-            <span className={styles.modelLabel}>{home.model.label}</span>
-          </div>
-          <div className={styles.modelFlow} aria-label={home.model.ariaLabel}>
-            {home.model.steps.map((step, index) => (
-              <article className={styles.modelStep} key={step.title}>
-                <span>{String(index + 1).padStart(2, "0")} · {step.kicker}</span>
-                <strong>{step.title}</strong>
-                <p>{step.detail}</p>
-              </article>
-            ))}
-          </div>
-          <p><Link className={styles.textLink} href="/how-it-works">{home.model.readMore}</Link></p>
-        </div>
-      </section>
-
-      <section className={styles.sectionTight} aria-labelledby="difference-title">
-        <div className={styles.wrap}>
-          <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>{home.difference.eyebrow}</p>
-            <h2 id="difference-title">{home.difference.title}</h2>
-          </div>
-          <div className={styles.differentiationGrid}>
-            {home.difference.items.map((item) => (
-              <article className={styles.differentiationCard} key={item.label}>
-                <h3>{item.label}</h3>
-                <p>{item.detail}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.split} aria-labelledby="connection-title">
+      <section className={styles.splitSection} aria-labelledby="problem-title">
         <figure className={styles.splitMedia}>
           <img
-            src={publicImageAssets.collaboration.src}
-            alt={home.images.collaboration}
+            src={publicImageAssets.professional.src}
+            alt={home.images.problem}
             loading="lazy"
             decoding="async"
           />
         </figure>
         <div className={styles.splitCopy}>
-          <p className={styles.eyebrow}>{home.connection.eyebrow}</p>
-          <h2 id="connection-title">{home.connection.title}</h2>
-          <p>{home.connection.description}</p>
-          <p><Link className={styles.buttonDark} href="/about">{home.connection.link}</Link></p>
+          <p className={styles.eyebrow}>{home.problem.eyebrow}</p>
+          <h2 id="problem-title">{home.problem.title}</h2>
+          <p className={styles.lede}>{home.problem.description}</p>
+          <div className={styles.problemList}>
+            {home.problem.items.map((item) => (
+              <article key={item.title}>
+                <h3>{item.title}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))}
+          </div>
+          <p className={styles.closingStatement}>{home.problem.closing}</p>
+        </div>
+      </section>
+
+      <section id="how-it-works" className={styles.section} aria-labelledby="how-title">
+        <div className={styles.wrap}>
+          <div className={styles.sectionHead}>
+            <p className={styles.eyebrow}>{home.how.eyebrow}</p>
+            <h2 id="how-title">{home.how.title}</h2>
+            <p>{home.how.description}</p>
+          </div>
+          <ol className={styles.stepGrid} aria-label={home.how.ariaLabel}>
+            {home.how.steps.map((step, index) => (
+              <li key={step.title}>
+                <span>{String(index + 1).padStart(2, "0")} · {step.kicker}</span>
+                <h3>{step.title}</h3>
+                <p>{step.detail}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section id="amacs" className={styles.amacsSection} aria-labelledby="amacs-title">
+        <div className={styles.wrap}>
+          <div className={styles.amacsIntro}>
+            <p className={styles.eyebrow}>{home.amacs.eyebrow}</p>
+            <h2 id="amacs-title">{home.amacs.title}</h2>
+            <p>{home.amacs.description}</p>
+            <strong>{home.amacs.support}</strong>
+          </div>
+          <div className={styles.amacsFlow}>
+            {home.amacs.nodes.map((node, index) => (
+              <article key={node.title}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <h3>{node.title}</h3>
+                <p>{node.detail}</p>
+              </article>
+            ))}
+          </div>
+          <p className={styles.amacsNote}>{home.amacs.futureNote}</p>
+        </div>
+      </section>
+
+      <section className={`${styles.splitSection} ${styles.aiSection}`} aria-labelledby="ai-title">
+        <div className={styles.splitCopy}>
+          <p className={styles.eyebrow}>{home.ai.eyebrow}</p>
+          <h2 id="ai-title">{home.ai.title}</h2>
+          <p className={styles.lede}>{home.ai.description}</p>
+          <p className={styles.highlight}>{home.ai.highlight}</p>
+          <ul className={styles.ruleList}>
+            {home.ai.principles.map((principle) => <li key={principle}>{principle}</li>)}
+          </ul>
+        </div>
+        <figure className={styles.splitMedia}>
+          <img
+            src={publicImageAssets.collaboration.src}
+            alt={home.images.ai}
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+      </section>
+
+      <section className={styles.section} aria-labelledby="network-title">
+        <div className={styles.wrap}>
+          <div className={styles.networkGrid}>
+            <figure className={styles.networkMedia}>
+              <img
+                src={publicImageAssets.workshop.src}
+                alt={home.images.network}
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>{home.network.imageNote}</figcaption>
+            </figure>
+            <div>
+              <div className={styles.sectionHead}>
+                <p className={styles.eyebrow}>{home.network.eyebrow}</p>
+                <h2 id="network-title">{home.network.title}</h2>
+                <p>{home.network.description}</p>
+              </div>
+              <div className={styles.networkList}>
+                {home.network.items.map((item) => (
+                  <article key={item.title}>
+                    <h3>{item.title}</h3>
+                    <p>{item.detail}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="difference-title">
+        <div className={styles.wrap}>
+          <div className={styles.sectionHead}>
+            <p className={styles.eyebrow}>{differentiation.eyebrow}</p>
+            <h2 id="difference-title">{differentiation.title}</h2>
+          </div>
+          <div className={styles.differenceGrid}>
+            {differentiation.items.map((item) => (
+              <article className={styles.differenceCard} key={item.label}>
+                <h3>{item.label}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))}
+          </div>
+          <p className={styles.provenanceLink}>
+            <Link href="/image-credits">{dictionary.home.evidence.link}</Link>
+          </p>
+        </div>
+      </section>
+
+      <MarketingAvailability content={dictionary.marketingPages.availability} />
+
+      <section className={styles.trustSection} aria-labelledby="trust-title">
+        <div className={styles.wrap}>
+          <div className={styles.trustGrid}>
+            <div className={styles.sectionHead}>
+              <p className={styles.eyebrow}>{home.trust.eyebrow}</p>
+              <h2 id="trust-title">{home.trust.title}</h2>
+              <p>{home.trust.description}</p>
+              <strong className={styles.highlight}>{home.trust.highlight}</strong>
+            </div>
+            <ul className={styles.ruleList}>
+              {home.trust.rules.map((rule) => <li key={rule}>{rule}</li>)}
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -152,17 +241,17 @@ export default async function HomePage() {
           <div className={styles.audienceGrid}>
             {home.audience.items.map((audience, index) => {
               const image = [
-                { ...publicImageAssets.region, alt: home.images.region },
-                { ...publicImageAssets.manufacturing, alt: home.images.manufacturing },
-                { ...publicImageAssets.professional, alt: home.images.professional },
+                { ...publicImageAssets.manufacturing, alt: home.images.audienceBusiness },
+                { ...publicImageAssets.construction, alt: home.images.audienceProvider },
+                { ...publicImageAssets.region, alt: home.images.audienceLeader },
               ][index];
 
               return (
                 <article className={styles.audienceCard} key={audience.name}>
-                  <div className={styles.audienceCardMedia}>
+                  <div className={styles.audienceMedia}>
                     <img src={image.src} alt={image.alt} loading="lazy" decoding="async" />
                   </div>
-                  <div className={styles.audienceCardBody}>
+                  <div className={styles.audienceBody}>
                     <span>{audience.name}</span>
                     <h3>{audience.promise}</h3>
                     <p>{audience.detail}</p>
@@ -174,21 +263,24 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className={styles.sectionTight} aria-labelledby="evidence-title">
-        <div className={styles.wrap}>
-          <div className={styles.evidencePanel}>
-            <div>
-              <p className={styles.eyebrow}>{home.evidence.eyebrow}</p>
-              <div className={styles.sectionHead}>
-                <h2 id="evidence-title">{home.evidence.title}</h2>
-                <p>{home.evidence.description}</p>
-              </div>
-              <Link className={styles.textLink} href="/image-credits">{home.evidence.link}</Link>
-            </div>
-            <ul className={styles.evidenceRules}>
-              {home.evidence.rules.map((rule) => <li key={rule}>{rule}</li>)}
-            </ul>
+      <section className={styles.foundingSection} aria-labelledby="founding-title">
+        <div className={styles.foundingMedia}>
+          <img
+            src={publicImageAssets.collaboration.src}
+            alt={home.images.founding}
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+        <div className={styles.foundingCopy}>
+          <p className={styles.eyebrow}>{home.founding.eyebrow}</p>
+          <h2 id="founding-title">{home.founding.title}</h2>
+          <p>{home.founding.description}</p>
+          <div className={styles.heroActions}>
+            <Link className={styles.buttonGold} href="/founding">{home.founding.primary}</Link>
+            <Link className={styles.buttonDark} href="/join">{home.founding.secondary}</Link>
           </div>
+          <p className={styles.foundingNote}>{home.founding.note}</p>
         </div>
       </section>
 
@@ -196,23 +288,20 @@ export default async function HomePage() {
         <div className={styles.ctaMedia}>
           <img
             src={publicImageAssets.warehouse.src}
-            alt={home.images.warehouse}
+            alt={home.images.cta}
             loading="lazy"
             decoding="async"
           />
         </div>
         <div className={styles.ctaInner}>
           <p className={styles.eyebrow}>{home.cta.eyebrow}</p>
-          <h2 id="cta-title">
-            {home.cta.line1}<br />
-            {home.cta.line2}<br />
-            {home.cta.line3}
-          </h2>
+          <h2 id="cta-title">{home.cta.title}</h2>
           <p>{home.cta.description}</p>
           <div className={styles.ctaActions}>
-            <Link className={styles.buttonGold} href="/join">{dictionary.common.actions.joinFree}</Link>
+            <Link className={styles.buttonGold} href="/join">{home.cta.primary}</Link>
             <Link className={styles.buttonLight} href="/signin">{dictionary.common.actions.signIn}</Link>
           </div>
+          <strong>{home.cta.promise}</strong>
         </div>
       </section>
 

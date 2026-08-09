@@ -18,6 +18,7 @@ export async function MarketingHeader() {
           <Link href="/businesses">{dictionary.marketing.nav.businesses}</Link>
           <Link href="/buyers">{dictionary.marketing.nav.buyers}</Link>
           <Link href="/resource-providers">{dictionary.marketing.nav.resourceProviders}</Link>
+          <Link href="/founding">{dictionary.marketing.footer.foundingMembership}</Link>
           <Link href="/about">{dictionary.marketing.nav.about}</Link>
         </div>
         <div className={styles.navActions}>

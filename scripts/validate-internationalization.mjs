@@ -9,6 +9,7 @@ const expectedLocales = ["en-US", "es", "fr", "it", "de"];
 const referenceLocale = "en-US";
 const catalogNamespaces = [
   Object.freeze({ name: "base", directory: messageDirectory }),
+  Object.freeze({ name: "marketing-pages", directory: path.join(messageDirectory, "marketing-pages") }),
   Object.freeze({ name: "network", directory: path.join(messageDirectory, "network") }),
   Object.freeze({ name: "market-profile", directory: path.join(messageDirectory, "market-profile") }),
   Object.freeze({ name: "network-education", directory: path.join(messageDirectory, "network-education") }),
@@ -72,10 +73,15 @@ for (const namespace of catalogNamespaces) {
 
 const config = fs.readFileSync(path.join(root, "src", "i18n", "config.ts"), "utf8");
 for (const locale of expectedLocales) {
-  assert.match(config, new RegExp(`[\"']${locale}[\"']`), `Config must include ${locale}`);
+  assert.match(config, new RegExp(`[\\\"']${locale}[\\\"']`), `Config must include ${locale}`);
 }
 
 const dictionary = fs.readFileSync(path.join(root, "src", "i18n", "get-dictionary.ts"), "utf8");
+assert.match(
+  dictionary,
+  /marketingPages/,
+  "Resolved dictionaries must include the public marketing-pages namespace",
+);
 assert.match(
   dictionary,
   /networkWorkspace/,
