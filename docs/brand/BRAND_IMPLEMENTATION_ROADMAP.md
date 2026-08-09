@@ -1,6 +1,6 @@
 # RFxchange Brand Experience Implementation Roadmap
 
-**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a COMPLETE; SLICE 3.3 IMPLEMENTED AND ACCEPTED; MERGE AND POST-MERGE CI PENDING**
+**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a AND SLICE 3.3 COMPLETE; SLICE 3.4 AUTHORIZED**
 
 ## 1. Purpose
 
@@ -55,7 +55,7 @@ B4 and B5 are also complete under the adopted numerical execution sequence.
 
 **Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, and the no-Feature-ID AI/AMACS Interpretation Foundation is complete via PR #124.**
 
-Authority was recalculated from merged `main`, and Slice 3.3 is implemented and accepted with its non-authoritative suggestion boundary preserved. Slice 3.4 remains unstarted until Slice 3.3 merges, post-merge CI passes, and a separate authority recalculation is merged. B6b remains later in the Wave 3 sequence after its live referral and provider domains exist and receives no authority from this handoff.
+Slice 3.3 is complete via PR #126 with its non-authoritative suggestion boundary preserved. Exact-head production CI run `31289352499` and post-merge `main` CI run `31289477113` passed. Authority was recalculated from merged `main` at `0f5e8d56af8484bbd6e72716d4149a21e92db029`; Slice 3.4 is now the single active authorized slice. B6b remains later in the Wave 3 sequence after its live referral and provider domains exist and receives no authority from this handoff.
 
 ## 4. Completed gates
 
@@ -268,8 +268,8 @@ For every remaining gate or product slice:
 
 The Brand Gate sequence requested through B6a is complete and reconciled. Slice 3.2, the AMACS 0.5.0 reconciliation and the AI/AMACS Interpretation Foundation are also complete.
 
-The accepted product slice awaiting merge and post-merge CI is:
+The current product handoff is:
 
-> **Slice 3.3 — Market Profile Enrichment (`ORG-013`, `ORG-014`, `ORG-016`, `ORG-017`) — IMPLEMENTED AND ACCEPTED**
+> **Slice 3.4 — Credential, Media & Location Enrichment (`ORG-015`, `ORG-018`, `ORG-019`) — AUTHORIZED**
 
-Slice 3.4 and later slices remain unstarted until Slice 3.3 merges, post-merge CI passes, and dependency authority is recalculated. B6b remains separately sequenced behind live referral and provider domains.
+Slice 3.5 and later slices remain unstarted until Slice 3.4 merges, post-merge CI passes, and dependency authority is recalculated. B6b remains separately sequenced behind live referral and provider domains.

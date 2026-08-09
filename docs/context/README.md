@@ -87,7 +87,7 @@ User-facing work must not implement a target brand expression by fabricating a d
 - `docs/tracking/RFxchange_DEPENDENCY_MAP.md` — sequencing/dependency authority.
 - `docs/slices/` — approved implementation boundaries and exit conditions for planned slices.
 
-Wave 2 is complete and reconciled. Wave 3 Slice 3.1 and Brand Gates B0–B6a are complete. Slice 3.2 remains active. Follow the current Wave 3 roadmap and explicit single-gate/slice authorization discipline before later implementation.
+Wave 2 is complete and reconciled. Wave 3 Slices 3.1 through 3.3 and Brand Gates B0–B6a are complete. Slice 3.4 is the single active authorized slice. Follow its execution authority and the explicit single-gate/slice discipline before later implementation.
 
 ## Reference artifacts
 

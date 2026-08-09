@@ -49,4 +49,4 @@ The configured provider intentionally remained disabled, so no live model-qualit
 
 Acceptance supports marking only `ORG-013`, `ORG-014`, `ORG-016`, and `ORG-017` Done. The resulting checkpoint is **438 total · 129 Done · 309 Not Started**, Activation **43/43**, and Network **15/38**.
 
-Slice 3.4 remains unstarted. It may be authorized only in a separate authority update after this implementation merges, post-merge production CI passes, and dependency eligibility is recalculated from merged `main`.
+PR #126 passed exact-head production CI run `31289352499`, merged at `0f5e8d56af8484bbd6e72716d4149a21e92db029`, and post-merge `main` CI run `31289477113` passed. Dependency eligibility was then recalculated in a separate authority update. No Slice 3.4 implementation was begun by this slice.

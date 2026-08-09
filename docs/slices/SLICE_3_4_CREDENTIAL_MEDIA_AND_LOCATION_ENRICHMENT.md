@@ -1,6 +1,6 @@
 # Slice 3.4 — Credential, Media & Location Enrichment
 
-**Status: PLANNING BRIEF ONLY — DO NOT IMPLEMENT UNTIL EXPLICITLY AUTHORIZED**
+**Status: AUTHORIZED — EXECUTE ONLY WITH `SLICE_3_4_EXECUTION_AUTHORITY.md`**
 
 ## Feature IDs
 
@@ -80,3 +80,7 @@ The organization profile can carry richer credentials, assets and location footp
 ## Completion discipline
 
 Recalculate dependencies after merge before authorizing Slice 3.5.
+
+## Execution authority
+
+`docs/slices/SLICE_3_4_EXECUTION_AUTHORITY.md` records the merged baseline, implementation decisions, acceptance matrix, and preserved non-scope. This brief alone does not authorize Slice 3.5 or any later work.
