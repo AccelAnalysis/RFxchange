@@ -1,6 +1,6 @@
 # Slice 3.5 — Referral Network & Referral Acquisition
 
-**Status: AUTHORIZED — SINGLE ACTIVE SLICE**
+**Status: IMPLEMENTED AND ACCEPTED — PRODUCTION PR/MERGE EVIDENCE PENDING**
 
 ## Feature IDs
 
@@ -86,6 +86,10 @@ Organizations can make and receive useful, consented and auditable referrals—a
 ## Completion discipline
 
 Recalculate dependencies after merge before authorizing Slice 3.6.
+
+## Acceptance evidence
+
+The implementation and evidence are recorded in `docs/architecture/WAVE_3_SLICE_3_5.md`. Focused domain/application tests, Firestore emulator persistence and direct-client denial, the canonical repository gate, all five locales, and configured real-environment browser acceptance pass. The browser covered an existing organization referral with a real privacy-safe path, an external referral with truthful no-path state, signed acquisition continuity, legitimate OPEN recipient binding, explicit attachment, accept, contact and sender close across desktop/intermediate/mobile layouts. Cleanup removed 64 exact Firestore documents and both disposable Auth identities; the residual scan returned zero. Slice 3.6 remains unstarted and unauthorized until this implementation merges, post-merge production CI passes, and dependency authority is recalculated.
 
 ## Execution authority
 

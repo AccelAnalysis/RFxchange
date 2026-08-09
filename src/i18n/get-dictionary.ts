@@ -18,6 +18,11 @@ import organizationEnrichmentEnUS from "./messages/organization-enrichment/en-US
 import organizationEnrichmentEs from "./messages/organization-enrichment/es.json";
 import organizationEnrichmentFr from "./messages/organization-enrichment/fr.json";
 import organizationEnrichmentIt from "./messages/organization-enrichment/it.json";
+import referralDe from "./messages/referrals/de.json";
+import referralEnUS from "./messages/referrals/en-US.json";
+import referralEs from "./messages/referrals/es.json";
+import referralFr from "./messages/referrals/fr.json";
+import referralIt from "./messages/referrals/it.json";
 
 import type { Locale } from "./config";
 
@@ -25,6 +30,7 @@ export type Dictionary = typeof enUS & Readonly<{
   networkWorkspace: typeof networkEnUS;
   marketProfile: typeof marketProfileEnUS;
   organizationEnrichment: typeof organizationEnrichmentEnUS;
+  referralWorkspace: typeof referralEnUS;
 }>;
 
 function dictionary(
@@ -32,21 +38,23 @@ function dictionary(
   networkWorkspace: typeof networkEnUS,
   marketProfile: typeof marketProfileEnUS,
   organizationEnrichment: typeof organizationEnrichmentEnUS,
+  referralWorkspace: typeof referralEnUS,
 ): Dictionary {
   return Object.freeze({
     ...base,
     networkWorkspace,
     marketProfile,
     organizationEnrichment,
+    referralWorkspace,
   });
 }
 
 const dictionaries: Readonly<Record<Locale, Dictionary>> = Object.freeze({
-  "en-US": dictionary(enUS, networkEnUS, marketProfileEnUS, organizationEnrichmentEnUS),
-  es: dictionary(es as typeof enUS, networkEs as typeof networkEnUS, marketProfileEs as typeof marketProfileEnUS, organizationEnrichmentEs as typeof organizationEnrichmentEnUS),
-  fr: dictionary(fr as typeof enUS, networkFr as typeof networkEnUS, marketProfileFr as typeof marketProfileEnUS, organizationEnrichmentFr as typeof organizationEnrichmentEnUS),
-  it: dictionary(it as typeof enUS, networkIt as typeof networkEnUS, marketProfileIt as typeof marketProfileEnUS, organizationEnrichmentIt as typeof organizationEnrichmentEnUS),
-  de: dictionary(de as typeof enUS, networkDe as typeof networkEnUS, marketProfileDe as typeof marketProfileEnUS, organizationEnrichmentDe as typeof organizationEnrichmentEnUS),
+  "en-US": dictionary(enUS, networkEnUS, marketProfileEnUS, organizationEnrichmentEnUS, referralEnUS),
+  es: dictionary(es as typeof enUS, networkEs as typeof networkEnUS, marketProfileEs as typeof marketProfileEnUS, organizationEnrichmentEs as typeof organizationEnrichmentEnUS, referralEs as typeof referralEnUS),
+  fr: dictionary(fr as typeof enUS, networkFr as typeof networkEnUS, marketProfileFr as typeof marketProfileEnUS, organizationEnrichmentFr as typeof organizationEnrichmentEnUS, referralFr as typeof referralEnUS),
+  it: dictionary(it as typeof enUS, networkIt as typeof networkEnUS, marketProfileIt as typeof marketProfileEnUS, organizationEnrichmentIt as typeof organizationEnrichmentEnUS, referralIt as typeof referralEnUS),
+  de: dictionary(de as typeof enUS, networkDe as typeof networkEnUS, marketProfileDe as typeof marketProfileEnUS, organizationEnrichmentDe as typeof organizationEnrichmentEnUS, referralDe as typeof referralEnUS),
 });
 
 export function getDictionary(locale: Locale): Dictionary {
