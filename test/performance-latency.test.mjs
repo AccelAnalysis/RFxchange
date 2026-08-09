@@ -30,7 +30,10 @@ test("login reuses one activation hydration and returning users skip geography s
 test("optimized login preserves an acquisition-aware controlled-platform destination", async () => {
   const session = await source("app/api/auth/session/route.ts");
   assert.match(session, /function withBoundAcquisition/);
-  assert.match(session, /state\.lifecycleState === "controlled-platform" && state\.organization/);
+  assert.match(
+    session,
+    /state\.lifecycleState === "controlled-platform"[\s\S]{0,80}state\.organization[\s\S]{0,80}context\.intent\.kind !== "direct"/,
+  );
   assert.match(session, /"\/acquisition\/continue"/);
   assert.match(session, /state = withBoundAcquisition\(state, boundAcquisition\)/);
 });
