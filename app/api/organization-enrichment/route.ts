@@ -1,9 +1,16 @@
+import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import {
   OrganizationEnrichmentError,
 } from "@/src/application/organization-enrichment/organization-enrichment";
+import {
+  assertProfileAssetFileSignature,
+  OrganizationAssetUploadBoundaryError,
+  readBoundedProfileAssetMultipartBody,
+  validateProfileAssetFileMetadata,
+} from "@/src/application/storage/organization-asset-upload-boundary";
 import { storeOrganizationAsset, StoredAssetAccessError } from "@/src/application/storage/store-organization-asset";
 import { createOrganizationProfileAsset } from "@/src/domain/organization-enrichment/model";
 import { storedAssetId } from "@/src/domain/storage/model";
@@ -22,6 +29,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function responseFor(error: unknown) {
+  if (error instanceof OrganizationAssetUploadBoundaryError) {
+    return NextResponse.json(
+      { error: error.message, code: error.code },
+      { status: error.status },
+    );
+  }
   if (error instanceof OrganizationEnrichmentError) {
     const status = error.code === "forbidden" ? 403 : error.code === "not-found" ? 404 : error.code === "invalid" ? 400 : 409;
     return NextResponse.json({ error: error.message, code: error.code }, { status });
@@ -47,8 +60,26 @@ function scope(access: Extract<Awaited<ReturnType<typeof authorized>>, { kind: "
   return { context: access.context, organizationId, membershipId: String(access.membership.id), commandId } as const;
 }
 
+async function boundedMultipartForm(request: NextRequest): Promise<FormData> {
+  const contentType = request.headers.get("content-type");
+  if (!contentType?.startsWith("multipart/form-data")) {
+    throw new OrganizationAssetUploadBoundaryError(
+      "unsupported-content-type",
+      415,
+      "Profile asset upload must use multipart/form-data.",
+    );
+  }
+  const boundedBody = await readBoundedProfileAssetMultipartBody(
+    request.body,
+    request.headers.get("content-length"),
+  );
+  return new Response(Buffer.from(boundedBody), {
+    headers: { "content-type": contentType },
+  }).formData();
+}
+
 async function upload(request: NextRequest) {
-  const form = await request.formData();
+  const form = await boundedMultipartForm(request);
   const organizationId = String(form.get("organizationId") ?? "");
   const commandId = String(form.get("commandId") ?? "");
   const kind = String(form.get("kind") ?? "");
@@ -63,11 +94,15 @@ async function upload(request: NextRequest) {
   if (access.kind === "unauthenticated") return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   if (access.kind !== "authorized") return NextResponse.json({ error: "Current participant authority is required." }, { status: 403 });
 
-  if (!["logo", "image", "document", "portfolio"].includes(kind)) {
-    return NextResponse.json({ error: "Unsupported organization profile asset kind." }, { status: 400 });
-  }
+  // Validate category, exact file size, and declared MIME before allocating the second in-memory
+  // copy created by File.arrayBuffer(). The complete multipart stream was bounded before parsing.
+  const uploadPolicy = validateProfileAssetFileMetadata({
+    kind,
+    sizeBytes: file.size,
+    contentType: file.type,
+  });
+  const { category, contentType } = uploadPolicy;
 
-  const category = kind === "logo" ? "organization-logo" : kind === "document" ? "organization-document" : "organization-media";
   const storedId = storedAssetId(`stored_${createHash("sha256").update(`${organizationId}:${commandId}`).digest("hex").slice(0, 48)}`);
   const profileId = `profile_asset_${createHash("sha256").update(commandId).digest("hex").slice(0, 48)}`;
   try {
@@ -87,6 +122,7 @@ async function upload(request: NextRequest) {
     throw new OrganizationEnrichmentError("invalid", error instanceof Error ? error.message : "Profile asset metadata is invalid.");
   }
   const bytes = new Uint8Array(await file.arrayBuffer());
+  assertProfileAssetFileSignature(contentType, bytes);
   const digest = createHash("sha256").update(bytes).digest("hex");
   const db = getServerFirestore();
   const assets = new FirestoreStoredAssetRepository(db);
@@ -98,14 +134,14 @@ async function upload(request: NextRequest) {
   let stored = await assets.getById(storedId);
   if (stored) {
     if (stored.organizationId !== access.membership.organizationId || stored.category !== category || stored.status !== "active" ||
-      stored.contentType !== file.type || stored.sizeBytes !== bytes.byteLength || stored.sha256 !== digest) {
+      stored.contentType !== contentType || stored.sizeBytes !== bytes.byteLength || stored.sha256 !== digest) {
       throw new OrganizationEnrichmentError("conflict", "Upload command identity already refers to different asset bytes or metadata.");
     }
   } else {
     stored = await storeOrganizationAsset({
       actor: { kind: "organization-member", organizationId: access.membership.organizationId, permissions: authorization.permissions },
       id: storedId, organizationId: access.membership.organizationId, category,
-      originalFilename: file.name, contentType: file.type, bytes,
+      originalFilename: file.name, contentType, bytes,
       createdByUserId: access.context.user.id, now: new Date().toISOString(),
     }, { assets, objects });
   }
@@ -121,7 +157,9 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
   if (!origin || origin !== request.nextUrl.origin) return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
   try {
-    if (request.headers.get("content-type")?.startsWith("multipart/form-data")) return await upload(request);
+    if (request.headers.get("content-type")?.startsWith("multipart/form-data")) {
+      return await upload(request);
+    }
     if (Number(request.headers.get("content-length") ?? 0) > 262_144) return NextResponse.json({ error: "Enrichment request is too large." }, { status: 413 });
     const body = await request.json().catch(() => null) as Record<string, unknown> | null;
     if (!body || typeof body.organizationId !== "string" || !validCommand(body.commandId) || typeof body.action !== "string" || !isRecord(body.input)) {
