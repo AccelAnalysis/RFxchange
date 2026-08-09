@@ -54,6 +54,12 @@ const requiredCollections = [
   "orientationJourneyEvents",
   "firstValueSelections",
   "activationReleaseEvents",
+  "aiInterpretationRecords",
+  "aiInterpretationCandidates",
+  "aiInterpretationProvenance",
+  "aiInterpretationUsageEvents",
+  "aiInterpretationEvents",
+  "aiInterpretationQuotaBuckets",
 ];
 
 for (const collection of requiredCollections) {
@@ -106,6 +112,9 @@ for (const appendOnlyCollection of [
   "acquisitionContextEvents",
   "orientationJourneyEvents",
   "activationReleaseEvents",
+  "aiInterpretationProvenance",
+  "aiInterpretationUsageEvents",
+  "aiInterpretationEvents",
 ]) {
   const start = schema.indexOf(`${appendOnlyCollection}: Object.freeze({`);
   assert.ok(start >= 0, `Missing collection convention for ${appendOnlyCollection}.`);
