@@ -211,6 +211,28 @@ test("missing or cross-owned persisted binding cannot enter access resolution", 
   }
 });
 
+test("unsupported or missing persisted membership status cannot enter access resolution", async () => {
+  const { status: _ignoredStatus, ...withoutStatus } = inactiveBoundMembership;
+  for (const boundMembership of [
+    { ...inactiveBoundMembership, status: "legacy-unknown" },
+    withoutStatus,
+  ]) {
+    await expectDependencyFailure(
+      () => resolveParticipantRouteWithDependencies(
+        { sessionCookie: "session" },
+        dependencies({
+          loadWorkspaceProjection: async () => projection({
+            membership: null,
+            boundMembership,
+            activeMemberships: [replacementMembership],
+          }),
+        }),
+      ),
+      "workspace-state",
+    );
+  }
+});
+
 test("active persisted binding must agree with active projection", async () => {
   for (const changedMembership of [
     null,
