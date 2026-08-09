@@ -1,6 +1,6 @@
 # RFxchange Brand Experience Implementation Roadmap
 
-**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a AND SLICES 3.1–3.6 MERGED; SLICE 3.7 IMPLEMENTATION ACCEPTED**
+**Status: CANONICAL SEQUENTIAL ROADMAP — BRAND GATES B0 THROUGH B6a AND SLICES 3.1–3.7 COMPLETE; B6b INTENTIONALLY PENDING; SLICE 3.8 AUTHORIZED**
 
 ## 1. Purpose
 
@@ -55,7 +55,7 @@ B4 and B5 are also complete under the adopted numerical execution sequence.
 
 **Wave 3 Slice 3.2 — Controlled Network Entry & Discovery is complete via PR #120. The no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, and the no-Feature-ID AI/AMACS Interpretation Foundation is complete via PR #124.**
 
-Slice 3.5 is complete via PR #130. Slice 3.6 is complete via PR #132 and establishes the governed provider application/status and private service profile. Slice 3.7 implementation and acceptance are complete and add the live provider discovery/routing domain; production merge remains pending. B6b remains unstarted and receives no authority from the product-slice handoff.
+Slice 3.5 is complete via PR #130. Slice 3.6 is complete via PR #132 and establishes the governed provider application/status and private service profile. Slice 3.7 is complete via PR #137 and adds the live provider discovery/routing domain. The post-merge checkpoint found no specific B6b brief, mandatory prerequisite or concrete bounded convergence defect, so B6b remains intentionally pending and receives no implementation authority from the product-slice handoff. Slice 3.8 is separately authorized against the current completed Network baseline.
 
 ## 4. Completed gates
 
@@ -187,7 +187,7 @@ Acceptance result:
 
 ## 5. Remaining domain-dependent gates
 
-### Brand Gate B6b — Network lenses — NOT STARTED
+### Brand Gate B6b — Network lenses — NOT STARTED / INTENTIONALLY PENDING
 
 **Earliest safe point:** after the applicable live Wave 3 domains exist.
 
@@ -200,6 +200,8 @@ May include:
 - preserved context among organization, referral, and provider lenses.
 
 Must preserve provider approval, verification, credibility, recognition, and payment as separate concepts.
+
+**Post-Slice-3.7 decision:** no current authority makes this gate a Slice 3.8 prerequisite, no specific execution brief exists and inspection found no concrete bounded convergence defect. The current organization, referral and provider routes already use shared shells and real authoritative state. B6b therefore remains pending until a later explicit brief establishes a necessary convergence scope.
 
 ### Brand Gate B6c — RFx lens — NOT STARTED
 
@@ -270,6 +272,6 @@ The Brand Gate sequence requested through B6a is complete and reconciled. Slice 
 
 The current product handoff is:
 
-> **Slice 3.7 — Resource Discovery, Routing & Provider Distribution (`RES-004`, `RES-005`, `DSC-011`, `REF-006`, `RES-007`, `RES-008`, `ACQ-008`) — AUTHORIZED**
+> **Slice 3.8 — Persistent Network Education (`EDU-016`, `EDU-017`) — AUTHORIZED**
 
-Slice 3.6 passed exact-head CI, merged via PR #132 and passed post-merge CI before Slice 3.7 authority was recalculated. Slice 3.8 and later slices remain unstarted. B6b remains separately sequenced behind the completed live referral domain from Slice 3.5 and the provider discovery/routing domain from Slice 3.7.
+Slice 3.7 passed exact-head CI run `31300282317`, merged via PR #137 at `25baba600d6e1913a8941570f7348454d2e6941d` and passed post-merge CI run `31300395073` before Slice 3.8 authority was recalculated. B6b remains intentionally pending under the Slice 3.8 allowance. Wave 3 closeout and later slices remain unstarted.

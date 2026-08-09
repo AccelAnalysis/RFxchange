@@ -38,4 +38,4 @@ The Firestore emulator smoke, focused validation, TypeScript, lint with 13 inher
 
 ## Completion and handoff
 
-Acceptance supports marking only `RES-004`, `RES-005`, `DSC-011`, `REF-006`, `RES-007`, `RES-008`, and `ACQ-008` Done. The checkpoint is **438 total · 150 Done · 288 Not Started**, Activation **43/43**, and Network **36/38**. `RES-006`, `ADM-071`, B6b, Slice 3.8, Wave 4 and later work were not begun. Dependency authority must be recalculated from the merged Slice 3.7 tree before any subsequent gate or product slice begins.
+Acceptance supports marking only `RES-004`, `RES-005`, `DSC-011`, `REF-006`, `RES-007`, `RES-008`, and `ACQ-008` Done. The checkpoint is **438 total · 150 Done · 288 Not Started**, Activation **43/43**, and Network **36/38**. PR #137 passed exact-head production CI run `31300282317` on `0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe`, merged at `25baba600d6e1913a8941570f7348454d2e6941d`, and post-merge `main` CI run `31300395073` passed. `RES-006`, `ADM-071`, B6b, Slice 3.8, Wave 4 and later work were not begun in Slice 3.7. Dependency authority was then recalculated from the merged tree in the separate Slice 3.8 authority update.

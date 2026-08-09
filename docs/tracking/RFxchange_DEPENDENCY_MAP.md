@@ -150,15 +150,15 @@ Wave 2 OPEN/marker
   → ORG-015/018/019 [Done via PR #128]
   → REF-001/002/003/004/005 + EDU-014 + ACQ-006 [Done via PR #130]
   → RES-001/002/003 + ADM-070 [Done via PR #132]
-  → RES-004/005 + DSC-011 + REF-006 + RES-007/008 + ACQ-008 [Authorized]
-  → EDU-016/017
+  → RES-004/005 + DSC-011 + REF-006 + RES-007/008 + ACQ-008 [Done via PR #137]
+  → EDU-016/017 [Authorized]
 ```
 
 The already-complete Wave 3 foundations `ORG-021`, `ORG-022`, `ADM-055` and `ADM-056` remain inherited prerequisites and are not rebuilt.
 
-## Adopted Wave 3 Network slice roadmap — Slices 3.1–3.6 and Brand Gates B0–B6a complete; Slice 3.7 authorized
+## Adopted Wave 3 Network slice roadmap — Slices 3.1–3.7 and Brand Gates B0–B6a complete; Slice 3.8 authorized
 
-Wave 3 contains **38 Network features**. Twenty-nine are complete: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, seven Slice 3.5 referral/acquisition features, and four Slice 3.6 provider-foundation features. The remaining **9 features** stay organized in the adopted sequence:
+Wave 3 contains **38 Network features**. Thirty-six are complete: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, seven Slice 3.5 referral/acquisition features, four Slice 3.6 provider-foundation features, and seven Slice 3.7 resource-routing features. The remaining **2 features** stay organized in the adopted sequence:
 
 1. **Slice 3.1 — `COMMS-003` + `COMMS-004` + `COMMS-005` — Transactional Communications Reliability — COMPLETE VIA PR #107**.
 2. **Slice 3.2 — `GEO-012` + `DSC-001` + `DSC-002` + `DSC-003` — Controlled Network Entry & Discovery — COMPLETE VIA PR #120**.
@@ -166,11 +166,11 @@ Wave 3 contains **38 Network features**. Twenty-nine are complete: four inherite
 4. **Slice 3.4 — `ORG-015` + `ORG-018` + `ORG-019` — Credential, Media & Location Enrichment — COMPLETE VIA PR #128**.
 5. **Slice 3.5 — `REF-001` + `REF-002` + `REF-003` + `REF-004` + `REF-005` + `EDU-014` + `ACQ-006` — Referral Network & Referral Acquisition — COMPLETE VIA PR #130**.
 6. **Slice 3.6 — `RES-001` + `RES-002` + `RES-003` + `ADM-070` — Official Resource Provider Foundation — COMPLETE VIA PR #132**.
-7. **Slice 3.7 — `RES-004` + `RES-005` + `DSC-011` + `REF-006` + `RES-007` + `RES-008` + `ACQ-008` — Resource Discovery, Routing & Provider Distribution — AUTHORIZED**.
-8. **Slice 3.8 — `EDU-016` + `EDU-017` — Persistent Network Education**.
+7. **Slice 3.7 — `RES-004` + `RES-005` + `DSC-011` + `REF-006` + `RES-007` + `RES-008` + `ACQ-008` — Resource Discovery, Routing & Provider Distribution — COMPLETE VIA PR #137**.
+8. **Slice 3.8 — `EDU-016` + `EDU-017` — Persistent Network Education — AUTHORIZED**.
 
 **Dependency result:** PR #120 completes the dependency-eligible `GEO-012`, `DSC-001`, `DSC-002` and `DSC-003` set after Slice 3.1 and Brand Gates B0–B6a. No dependency edge changed in this reconciliation.
 
-**Implementation sequencing result:** Slice 3.6 passed exact-head production CI run `31297388363`, merged via PR #132 at `26412435651a13cc7a6540bbe50bc7b646760d78`, and passed post-merge production CI run `31297486059`. Recalculation from that merged tree makes Slice 3.7 the earliest eligible product slice, explicitly authorized by `docs/slices/SLICE_3_7_EXECUTION_AUTHORITY.md`. Slice 3.8 and later work remain unstarted.
+**Implementation sequencing result:** Slice 3.7 passed exact-head production CI run `31300282317`, merged via PR #137 at `25baba600d6e1913a8941570f7348454d2e6941d`, and passed post-merge production CI run `31300395073`. The conditional B6b checkpoint found no explicit prerequisite or concrete bounded convergence need, so B6b remains Not Started under the Slice 3.8 allowance. Recalculation from that merged tree makes Slice 3.8 the earliest eligible product slice, explicitly authorized by `docs/slices/SLICE_3_8_EXECUTION_AUTHORITY.md`. Wave 3 closeout and later work remain unstarted.
 
 See `docs/slices/WAVE_3_ROADMAP.md`, `docs/brand/BRAND_GATE_B1_SEMANTIC_FOUNDATION.md` and the applicable canonical slice brief for detailed boundaries and acceptance intent.
