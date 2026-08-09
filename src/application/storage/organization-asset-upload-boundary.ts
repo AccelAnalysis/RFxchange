@@ -16,23 +16,25 @@ const MAX_PROFILE_ASSET_BYTES = Math.max(
 );
 
 /**
- * The multipart request is bounded before `request.formData()` is called. The allowance covers
- * form fields and multipart framing; the selected file is still checked against its exact category
- * limit before `File.arrayBuffer()` allocates a second in-memory copy.
+ * The multipart stream is bounded before it is handed to `formData()`. The allowance covers form
+ * fields and multipart framing; the selected file is then checked against its exact category limit
+ * before `File.arrayBuffer()` allocates another in-memory copy.
  */
 export const MAX_PROFILE_ASSET_MULTIPART_BYTES =
   MAX_PROFILE_ASSET_BYTES + MULTIPART_ENVELOPE_ALLOWANCE_BYTES;
 
 export type OrganizationAssetUploadBoundaryErrorCode =
-  | "length-required"
+  | "invalid-content-length"
+  | "request-body-required"
   | "request-too-large"
+  | "content-length-mismatch"
   | "unsupported-kind"
   | "empty-file"
   | "file-too-large"
   | "unsupported-content-type"
   | "content-type-mismatch";
 
-export type OrganizationAssetUploadBoundaryStatus = 400 | 411 | 413 | 415;
+export type OrganizationAssetUploadBoundaryStatus = 400 | 413 | 415;
 
 export class OrganizationAssetUploadBoundaryError extends Error {
   readonly code: OrganizationAssetUploadBoundaryErrorCode;
@@ -50,31 +52,81 @@ export class OrganizationAssetUploadBoundaryError extends Error {
   }
 }
 
-export function requireBoundedMultipartContentLength(value: string | null): number {
-  if (!value?.trim()) {
-    throw new OrganizationAssetUploadBoundaryError(
-      "length-required",
-      411,
-      "A bounded Content-Length header is required for profile asset uploads.",
-    );
-  }
-
+function declaredContentLength(value: string | null): number | null {
+  if (!value?.trim()) return null;
   const parsed = Number(value);
   if (!Number.isSafeInteger(parsed) || parsed <= 0) {
     throw new OrganizationAssetUploadBoundaryError(
-      "length-required",
-      411,
+      "invalid-content-length",
+      400,
       "Profile asset upload Content-Length is invalid.",
     );
   }
-  if (parsed > MAX_PROFILE_ASSET_MULTIPART_BYTES) {
+  return parsed;
+}
+
+/**
+ * Reads an HTTP request body incrementally and stops as soon as the multipart envelope crosses the
+ * approved upper bound. A missing Content-Length remains safe because the stream itself is counted.
+ */
+export async function readBoundedProfileAssetMultipartBody(
+  body: ReadableStream<Uint8Array> | null,
+  declaredLengthHeader: string | null,
+): Promise<Uint8Array> {
+  const declaredLength = declaredContentLength(declaredLengthHeader);
+  if (declaredLength !== null && declaredLength > MAX_PROFILE_ASSET_MULTIPART_BYTES) {
     throw new OrganizationAssetUploadBoundaryError(
       "request-too-large",
       413,
       `Profile asset upload exceeds the ${MAX_PROFILE_ASSET_MULTIPART_BYTES}-byte request limit.`,
     );
   }
-  return parsed;
+  if (!body) {
+    throw new OrganizationAssetUploadBoundaryError(
+      "request-body-required",
+      400,
+      "Profile asset upload body is required.",
+    );
+  }
+
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const result = await reader.read();
+      if (result.done) break;
+      if (!result.value?.byteLength) continue;
+      total += result.value.byteLength;
+      if (total > MAX_PROFILE_ASSET_MULTIPART_BYTES) {
+        await reader.cancel("Profile asset multipart limit exceeded.").catch(() => undefined);
+        throw new OrganizationAssetUploadBoundaryError(
+          "request-too-large",
+          413,
+          `Profile asset upload exceeds the ${MAX_PROFILE_ASSET_MULTIPART_BYTES}-byte request limit.`,
+        );
+      }
+      chunks.push(result.value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  if (declaredLength !== null && declaredLength !== total) {
+    throw new OrganizationAssetUploadBoundaryError(
+      "content-length-mismatch",
+      400,
+      "Profile asset upload length does not match the declared Content-Length.",
+    );
+  }
+
+  const bounded = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bounded.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bounded;
 }
 
 export function profileAssetCategory(kind: string): StoredAssetCategory {
