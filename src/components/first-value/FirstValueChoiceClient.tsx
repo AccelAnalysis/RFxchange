@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import type { FirstValueDestinationContract, FirstValueIntent } from "../../domain/first-value/model";
 import { OperationalWorkspace, ParticipantShell } from "../participant/ParticipantWorkspace";
@@ -25,6 +26,7 @@ export function FirstValueChoiceClient({
   initialSelection: FirstValueIntent | null;
   acquisitionContextLabel: string | null;
 }>) {
+  const router = useRouter();
   const [selected, setSelected] = useState<FirstValueIntent | null>(initialSelection);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +46,7 @@ export function FirstValueChoiceClient({
       const result = await response.json() as FirstValueResponse;
       if (!response.ok) throw new Error(result.error ?? "First value could not be saved.");
       if (result.lifecycleState === "open-platform" && result.nextUrl) {
-        window.location.assign(result.nextUrl);
+        router.replace(result.nextUrl);
         return;
       }
       setBlocked(result.gate ?? null);
