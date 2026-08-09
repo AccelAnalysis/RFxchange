@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
@@ -14,8 +14,6 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24.18.0
@@ -24,26 +22,7 @@ jobs:
           distribution: temurin
           java-version: "21"
       - name: Install dependencies
-        run: npm install
-      - name: Upload generated dependency lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: stabilization-2a-package-lock
-          path: package-lock.json
-          if-no-files-found: error
-          retention-days: 1
-      - name: Commit trusted dependency lockfile
-        shell: bash
-        run: |
-          if git ls-files --error-unmatch package-lock.json >/dev/null 2>&1; then
-            echo "package-lock.json is already tracked; no generation commit required."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          git commit -m "Commit trusted dependency lockfile"
-          git push origin HEAD:${GITHUB_HEAD_REF}
+        run: npm ci
       - name: Repository guardrails
         run: npm run validate
       - name: Cloud Functions build and unit tests
@@ -53,7 +32,7 @@ jobs:
           RFXCHANGE_ENV: development
           RFXCHANGE_EXPECTED_PROJECT_ID: demo-rfxchange
           RFXCHANGE_FIREBASE_STORAGE_BUCKET: demo-rfxchange.appspot.com
-        run: npx --yes firebase-tools@15.24.0 emulators:exec --only auth,firestore,functions,storage --project demo-rfxchange "node scripts/smoke-firebase-auth-emulator.mjs && node scripts/smoke-firebase-user-resolution-emulator.mjs && node scripts/smoke-firebase-server-session-emulator.mjs && node scripts/smoke-firebase-authentication-lifecycle-emulator.mjs && node scripts/smoke-firebase-auth-firestore-security-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-first-persisted-authenticated-vertical-slice-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-geography-authority-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-organization-resolution-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-organization-authority-claims-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-organization-location-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-essential-organization-profile-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-marker-activation-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-controlled-network-discovery-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-acquisition-continuity-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-orientation-discovery-team-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-first-value-open-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-ai-amacs-interpretation-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-market-profile-enrichment-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-organization-enrichment-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-referral-network-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-resource-provider-foundation-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-resource-network-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-network-education-emulator.mjs && node scripts/smoke-firebase-functions-runtime-emulator.mjs && node scripts/smoke-firebase-background-jobs-emulator.mjs && node scripts/smoke-transactional-email-reliability-emulator.mjs && node scripts/smoke-firebase-storage-emulator.mjs"
+        run: npx --yes firebase-tools@15.24.0 emulators:exec --only auth,firestore,functions,storage --project demo-rfxchange "node scripts/smoke-firebase-auth-emulator.mjs && node scripts/smoke-firebase-user-resolution-emulator.mjs && node scripts/smoke-firebase-server-session-emulator.mjs && node scripts/smoke-firebase-authentication-lifecycle-emulator.mjs && node scripts/smoke-firebase-auth-firestore-security-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-first-persisted-authenticated-vertical-slice-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-geography-authority-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-organization-authority-claims-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-organization-location-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-essential-organization-profile-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-marker-activation-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-controlled-network-discovery-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-acquisition-continuity-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-orientation-discovery-team-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-first-value-open-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-ai-amacs-interpretation-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-market-profile-enrichment-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-organization-enrichment-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-referral-network-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-resource-provider-foundation-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-resource-network-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-network-education-emulator.mjs && node scripts/smoke-firebase-functions-runtime-emulator.mjs && node scripts/smoke-firebase-background-jobs-emulator.mjs && node scripts/smoke-transactional-email-reliability-emulator.mjs && node scripts/smoke-firebase-storage-emulator.mjs"
       - name: Architecture tests
         run: npm run test:architecture
       - name: Typecheck
