@@ -6,6 +6,7 @@ import { createFirestoreGeographyRepositories } from "../firestore/geography-rep
 import { createFirestoreOrganizationLocationRepositories } from "../firestore/organization-location.ts";
 import { createFirestoreOrganizationMarkerRepositories } from "../firestore/organization-marker.ts";
 import { createServerFirestoreFoundationRepositories, getServerFirestore } from "../firestore/runtime.ts";
+import { measureServerOperation } from "../observability/server-timing.ts";
 import { TigerWebBoundarySnapshotRepository } from "./tigerweb-boundary-snapshot.ts";
 
 type AuthorizedParticipant = Extract<ParticipantRouteResolution, { readonly kind: "authorized" }>;
@@ -24,26 +25,42 @@ export async function loadAuthorizedParticipantMapProjection(
   const geographyRepositories = createFirestoreGeographyRepositories(db);
   const locationRepositories = createFirestoreOrganizationLocationRepositories(db);
   const organizationId = access.membership.organizationId;
-  const location = await locationRepositories.locations.getByOrganizationId(organizationId);
+  const location = await measureServerOperation(
+    "map-model.firestore-location",
+    () => locationRepositories.locations.getByOrganizationId(organizationId),
+    "participant home location",
+  );
   if (!location) return null;
 
-  const [geography, markerActivation, profile, selection] = await Promise.all([
-    geographyRepositories.definitions.getById(location.geographyId),
-    createFirestoreOrganizationMarkerRepositories(db).activations.getByOrganizationId(organizationId),
-    foundation.organizations.profiles.getByOrganizationId(organizationId),
-    geographyRepositories.selections.getByUserId(access.context.user.id),
-  ]);
+  const [geography, markerActivation, profile, selection] = await measureServerOperation(
+    "map-model.firestore-projection",
+    () => Promise.all([
+      geographyRepositories.definitions.getById(location.geographyId),
+      createFirestoreOrganizationMarkerRepositories(db).activations.getByOrganizationId(organizationId),
+      foundation.organizations.profiles.getByOrganizationId(organizationId),
+      geographyRepositories.selections.getByUserId(access.context.user.id),
+    ]),
+    "geography + marker + profile + selection",
+  );
   if (!geography || !selection || selection.geographyId !== geography.id || markerActivation?.status !== "active") {
     return null;
   }
 
   const boundaries = new TigerWebBoundarySnapshotRepository(geographyRepositories.definitions);
-  const boundary = await boundaries.getByGeographyId(geography.id);
+  const boundary = await measureServerOperation(
+    "map-model.boundary",
+    () => boundaries.getByGeographyId(geography.id),
+    "authoritative locality boundary",
+  );
   if (!boundary) return null;
-  const model = await new ControlledLocalityMapService(
-    geographyRepositories.definitions,
-    boundaries,
-  ).create(selection);
+  const model = await measureServerOperation(
+    "map-model",
+    () => new ControlledLocalityMapService(
+      geographyRepositories.definitions,
+      boundaries,
+    ).create(selection),
+    "participant controlled locality projection",
+  );
   const marker = projectPublicOrganizationMarker({
     activation: markerActivation,
     location,
