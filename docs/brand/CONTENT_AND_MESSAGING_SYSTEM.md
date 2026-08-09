@@ -42,6 +42,90 @@ The product should sound like a capable guide that understands business activity
 
 **A local market becoming visible and useful around every participating organization.**
 
+## 2A. Customer value proposition architecture
+
+The permanent customer proposition begins with a market-language problem, not with a feature inventory.
+
+Businesses often understand the outcome they want without knowing the exact procurement term, classification, provider category or capability language that describes it. Capable providers can be missed for the same reason in reverse: the market may describe the need differently than the organization describes what it can do.
+
+The RFxchange is designed to reduce that translation gap by helping organizations turn ordinary business meaning into governed, reusable market structure and then use that structure in authorized discovery and workflow contexts.
+
+### Primary customer outcome
+
+Preferred permanent-homepage territory:
+
+> **Make your business easier to understand—and easier to do business with.**
+
+This is an outcome statement, not a guarantee of leads, contracts or growth.
+
+### Customer value progression
+
+Use this progression across public marketing and persistent education where appropriate:
+
+```text
+Understandable → Discoverable → Connectable → Actionable
+```
+
+- **Understandable** — help an organization express what it does, where it operates and what market context matters in terms the Exchange can structure and reuse.
+- **Discoverable** — confirmed capability, geography, service-area and other authorized information make the organization easier to find for relevant reasons.
+- **Connectable** — useful context can travel into referrals, provider relationships and later teaming/RFx activity instead of collapsing into a business name and contact record.
+- **Actionable** — released workflows turn relevant context into an appropriate next action while preserving the distinction between potential fit, connection, decision and outcome.
+
+This progression complements rather than replaces **Visible. Connected. Actionable.** The latter remains the concise experience framework; the former explains the customer-value logic beneath it.
+
+### AMACS customer explanation
+
+Introduce AMACS by customer purpose before technical taxonomy structure.
+
+Preferred concise explanation:
+
+> **AMACS gives the Exchange a common way to connect what the market needs with what organizations can actually do.**
+
+When deeper explanation is useful, AMACS may be described as the governed structure connecting:
+
+```text
+Need → Capability → Evidence → Response → Decision → Outcome
+```
+
+Do not require participants to understand AMACS codes, Domains, Families or internal schema terms before they can understand the customer benefit or begin an authorized workflow.
+
+### AI + human confirmation
+
+Where interpretation assistance is implemented, the preferred concise principle is:
+
+> **AI can suggest. People confirm.**
+
+A fuller participant-facing explanation may say:
+
+> **Start with what you know. The RFxchange can help organize it. You confirm what is true.**
+
+Customer-facing language must preserve the governing boundary:
+
+- ordinary business language is an acceptable starting point;
+- assistance may propose relevant AMACS concepts or structure;
+- suggestions are non-authoritative;
+- an authorized participant decides whether the suggestion accurately represents the organization or market need;
+- authoritative state requires the applicable separate authorized write;
+- AI does not create verification, qualification, credibility, provider approval or outcome truth; and
+- deterministic comparison of already-structured records does not become “AI matching” merely because AI helped with earlier interpretation.
+
+Avoid generic positioning such as `AI-powered marketplace` when the actual function is interpretation assistance.
+
+### Message hierarchy
+
+For broad prospect-facing surfaces, prefer this order:
+
+1. the business problem or desired outcome;
+2. why the problem persists across ordinary market language;
+3. how RFxchange makes the organization/need understandable;
+4. how AMACS supplies common structure;
+5. how AI may reduce the translation burden while people retain authority;
+6. how confirmed structure supports discovery and connection;
+7. which released workflows are available now;
+8. future pathways clearly labeled as future.
+
+Do not lead broad audiences with RFP administration, procurement modules, taxonomy codes or a long list of product features. RFx, referrals, resources, teaming, location intelligence and later outcome/intelligence workflows are manifestations of the larger market model, not independent definitions of the product.
+
 ## 3. Copy pattern
 
 Whenever practical, customer-facing copy should answer:
@@ -57,13 +141,17 @@ Example:
 
 Avoid messages that merely announce success or failure without meaning or recovery.
 
+For persistent education around a consequential action, also answer **Why does this matter here?** when that context helps the participant understand the economic purpose rather than merely the interface mechanics.
+
 ## 4. Terminology
 
 ### Preferred
 
 - organization;
 - business;
+- market need;
 - capability;
+- confirmed capability;
 - opportunity;
 - RFx;
 - issuer;
@@ -75,6 +163,7 @@ Avoid messages that merely announce success or failure without meaning or recove
 - service territory;
 - locality;
 - potential match;
+- interpretation suggestion or candidate where the distinction matters;
 - verified;
 - confirmed;
 - reported outcome;
@@ -91,12 +180,15 @@ Avoid messages that merely announce success or failure without meaning or recove
 - available: requires current authoritative availability or a clear qualification;
 - local: specify locality/region/service area when ambiguity matters;
 - real-time: use only when the data and delivery actually meet that standard;
-- AI: name a real implemented function and its limits rather than using it as generic positioning.
+- AI: name a real implemented function and its limits rather than using it as generic positioning;
+- match: distinguish potential alignment from qualification, selection or award likelihood;
+- AMACS: explain customer purpose before codes/schema when speaking to ordinary participants.
 
 ### Avoid in customer-facing product copy
 
 - controlled Exchange;
 - leverage our AI-powered ecosystem;
+- AI-powered marketplace;
 - unlock limitless opportunities;
 - guaranteed leads;
 - guaranteed growth;
@@ -111,7 +203,9 @@ Avoid messages that merely announce success or failure without meaning or recove
 
 ## 5. Public marketing copy
 
-### Hero
+Public marketing should explain **why The RFxchange should exist** before explaining everything the product can do.
+
+### Permanent homepage hero
 
 Eyebrow:
 
@@ -119,47 +213,115 @@ Eyebrow:
 
 Headline:
 
-`The local market is already moving. Make it visible.`
+`Make your business easier to understand—and easier to do business with.`
 
 Supporting line:
 
-`Discover capabilities, circulate opportunities, build teams, route referrals, and turn local activity into actionable intelligence.`
+`Describe what you need. Define what you can do. The RFxchange uses shared market structure to make relevant organizations and next actions easier to discover as each governed workflow is released.`
 
 Primary action:
 
-`Explore The RFxchange`
+`Put Your Business on the Map`
 
 Secondary action:
 
-`Sign in`
+`See How It Works`
+
+Sign-in remains available in the marketing header.
+
+Do not make the permanent hero a campaign-specific Founding message. A temporary campaign announcement or module may point to the dedicated Founding page without changing the permanent product definition.
 
 ### Narrative chapters
 
-#### The market is fragmented
+#### Business opportunity is often lost in translation
 
-Explain that organizations, buyers, opportunities, and providers exist across separate systems and relationships. Do not claim that no infrastructure exists or that RFxchange replaces every system.
+Explain that organizations may know the outcome they want without knowing the exact solution label, capability term, provider category or procurement language. Explain the reciprocal provider problem without claiming that classifications, directories or search have no value.
+
+#### Start with what you know
+
+Explain that participants may begin with ordinary business language or manually browse/search the applicable structured concepts. Do not make taxonomy expertise a prerequisite for value.
+
+#### A common language beneath the Exchange
+
+Introduce AMACS by its customer purpose: connecting market need to capability and, where the live/future workflow makes it relevant, evidence, response, decision and outcome. Avoid turning this chapter into a taxonomy lecture.
+
+#### AI can suggest. People confirm.
+
+Explain real interpretation assistance and its limits. Do not imply autonomous market truth, silent claims, qualification or award decisions.
 
 #### See the network
 
-Describe real implemented visibility. Do not display invented companies, opportunities, statistics, or activity represented as live evidence.
+Describe real implemented organization, capability and geography visibility. Do not display invented companies, opportunities, statistics or activity represented as live evidence.
 
-#### Follow one complete journey
+#### Move from discovery into the right connection
 
-Use a clearly labeled conceptual or synthetic journey until real, permissioned product evidence is available.
-
-#### Choose your entry point
-
-- Business: be found and act on useful demand.
-- Resource provider: become discoverable in the context of a business need.
-- Economic/community leader: understand how organizations, opportunities, providers, and localities connect.
+Describe only released referrals, provider/resource connections or other live Network workflows as current. Describe teaming, RFx and later domains as future pathways until released.
 
 #### Trust what you see
 
-Explain provenance, organization control, permissions, credibility, and outcome distinctions without implying universal verification.
+Explain provenance, organization control, permissions, credibility and outcome distinctions without implying universal verification. State plainly where commercial recognition is separate from substantive credibility.
 
 #### Enter the Exchange
 
-Use clear join/sign-in language and truthful launch status. Do not exaggerate scarcity, network density, or commercial benefits.
+Use clear join/sign-in language and truthful launch status. Do not exaggerate scarcity, network density or commercial benefits.
+
+### Founding campaign surface
+
+The dedicated Founding page has a different job from the permanent homepage: convert appropriate early organizations into deeper launch participation without redefining the product around the temporary campaign.
+
+Campaign messaging may emphasize:
+
+- establishing the organization and capability position early;
+- structured participation in launch feedback;
+- helping reveal practical language/workflow gaps that may inform governed RFxchange and AMACS improvement;
+- Founding Organization recognition;
+- active, approved commercial benefits only; and
+- the real cohort limit when commercially approved.
+
+It must also state that useful free participation remains an intentional entry point and that Founding status does not buy verification, qualification, credibility, preferred ranking, better match results or guaranteed business outcomes.
+
+Do not advertise unimplemented Founding entitlements merely because they are planned.
+
+## 5A. Persistent education narrative
+
+Persistent education should make the product thesis understandable inside the product rather than teaching only navigation.
+
+The education system should progressively reinforce:
+
+- **Make the organization understandable** — explain why confirmed capabilities and market context create a reusable business-development position.
+- **Become discoverable for relevant reasons** — explain that capability/geography/service context improves discovery beyond business name or broad category.
+- **Carry useful context into the connection** — explain why a referral, provider connection or later teammate/RFx pathway should retain the reason for the connection.
+- **Take the next appropriate action** — explain what the released workflow does while distinguishing connection from decision and outcome.
+
+Representative patterns:
+
+### Capability/profile
+
+> **Capabilities describe what your organization can actually do.**
+> Confirmed capability information helps other participants discover your organization for relevant market needs.
+
+### Interpretation assistance
+
+> **Describe it in your own words.**
+> The RFxchange can suggest relevant AMACS concepts. You decide which ones accurately represent your organization.
+
+### Discovery
+
+> **Search by what you need—not only by business name or industry.**
+> A potential match is not qualification or endorsement.
+
+### Referral
+
+> **A useful referral carries the reason for the connection, not just contact information.**
+
+### Resource provider
+
+> **Resources appear in the context of the need they may help address.**
+> Official provider status does not guarantee fit, capacity, availability, acceptance or outcome.
+
+These are semantic patterns, not mandatory verbatim strings. Final copy must reflect the exact live domain state, action consequence, privacy boundary and localization path.
+
+Reusable Quick Start and role-path education should prefer progressive disclosure over a long product tour. Participants should be able to skip or resume education without education state granting product authority.
 
 ## 6. Onboarding copy
 
@@ -212,21 +374,22 @@ Contextual version:
 > **Your business is now visible in Norfolk.**
 > Add your primary capabilities to improve discovery.
 
-Do not say that the business is verified, qualified, endorsed, procurement-ready, or preferred merely because the marker is active.
+Do not say that the business is verified, qualified, endorsed, procurement-ready or preferred merely because the marker is active.
 
 ### First value
 
-Use action-oriented choices:
+Use action-oriented choices that are truthful to the currently released product. Examples may include:
 
-- Find an opportunity.
-- Issue an opportunity.
-- Find customers or suppliers.
-- Find a teammate.
+- Explore the network.
+- Find businesses by capability.
+- Update your market profile.
 - Send or receive a referral.
 - Find resources and support.
-- Explore the network.
+- Find an opportunity.
+- Issue an opportunity.
+- Find a teammate.
 
-If a destination is not live, say so clearly and preserve the participant’s intent without fabricating functionality.
+If a destination is not live, say so clearly and preserve the participant’s intent only when the product actually persists that intent.
 
 ## 7. Match and opportunity copy
 
@@ -239,7 +402,7 @@ Preferred:
 
 Required boundary:
 
-A match is not qualification, endorsement, eligibility, profitability, or award likelihood.
+A match is not qualification, endorsement, eligibility, profitability or award likelihood.
 
 ### Incomplete match
 
@@ -469,7 +632,7 @@ Example:
 
 Avoid undifferentiated messages such as `You have 3 new notifications.` when the object and urgency can be stated.
 
-Notifications must not use artificial urgency, fear, or engagement pressure.
+Notifications must not use artificial urgency, fear or engagement pressure.
 
 ## 16. Commercial and membership language
 
@@ -481,13 +644,15 @@ Do not say:
 - Founding members are preferred suppliers;
 - membership improves legitimate match scoring;
 - one referral will pay for membership;
-- joining guarantees leads, contracts, financing, or growth.
+- joining guarantees leads, contracts, financing or growth.
 
 Use:
 
 > `Founding Organization is a recognition of participation in the launch cohort. It is not a verification, qualification, endorsement, or guarantee of business results.`
 
-Commercial benefits must be active, approved, and described exactly.
+Commercial benefits must be active, approved and described exactly.
+
+Founding campaign content should distinguish free core participation from the deeper paid launch-participation layer. The existence of a paid Founding offer must not turn the minimum activation journey into a mandatory checkout funnel unless a separately approved entitlement genuinely requires payment.
 
 ## 17. Claims discipline
 
@@ -503,6 +668,8 @@ The product may claim implemented capabilities such as:
 - saved searches and alerts;
 - governed credibility evidence.
 
+Only claim an item as implemented when the current released domain actually supports it. Planned or in-development functionality must be labeled accordingly.
+
 ### Causal propositions
 
 Use measured language:
@@ -516,7 +683,7 @@ Use measured language:
 
 ### Hypotheses and outcomes
 
-Do not claim fixed increases in revenue, jobs, contracts, provider efficiency, procurement participation, or economic resilience without appropriate evidence.
+Do not claim fixed increases in revenue, jobs, contracts, provider efficiency, procurement participation or economic resilience without appropriate evidence.
 
 Use pilot and measurement language where causality is not established.
 
@@ -541,7 +708,7 @@ Avoid fictional organization names that resemble real local firms unless clearly
 - use status labels rather than color alone;
 - avoid all-caps paragraphs;
 - keep time/date language localizable and unambiguous;
-- distinguish error, warning, information, and success semantically.
+- distinguish error, warning, information and success semantically.
 
 ## 20. Review checklist
 
@@ -549,11 +716,15 @@ Before customer-facing copy ships, confirm:
 
 - it names the product consistently;
 - it is truthful to the current domain state;
+- it leads broad audiences with the customer problem/value rather than a disconnected feature inventory;
+- it makes the difference between ordinary-language input, non-authoritative interpretation and authoritative participant-confirmed state understandable where relevant;
+- it explains AMACS by customer purpose before technical structure where relevant;
 - it does not invent activity or evidence;
 - it distinguishes potential match from qualification;
-- it distinguishes activation, credibility, recognition, membership, and outcome;
-- it says what happened, why it matters, and the next action;
+- it distinguishes activation, credibility, recognition, membership and outcome;
+- it says what happened, why it matters and the next action;
+- consequential education explains why the action matters in context when useful;
 - it preserves institutional and legal boundaries;
 - it is understandable to a business owner without internal terminology;
 - it has an accessible label and localization path;
-- it avoids exaggerated, addictive, or manipulative language.
+- it avoids exaggerated, addictive or manipulative language.
