@@ -6,10 +6,11 @@ const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
 test("application recovery boundary offers retry without exposing server details", async () => {
-  const [boundary, styles, routeRuntime, workspaceState] = await Promise.all([
+  const [boundary, styles, routeRuntime, classification, workspaceState] = await Promise.all([
     read("app/error.tsx"),
     read("app/error.module.css"),
     read("src/infrastructure/auth/participant-route-runtime.ts"),
+    read("src/infrastructure/auth/participant-route-classification.ts"),
     read("src/infrastructure/auth/participant-workspace-state.ts"),
   ]);
 
@@ -22,12 +23,15 @@ test("application recovery boundary offers retry without exposing server details
   assert.match(styles, /:focus-visible/);
   assert.match(styles, /@media \(max-width: 520px\)/);
 
-  assert.match(routeRuntime, /ParticipantRouteDependencyUnavailableError/);
-  assert.match(routeRuntime, /isExpectedSessionRejection/);
-  assert.match(routeRuntime, /dependencyUnavailable\("authentication"\)/);
-  assert.match(routeRuntime, /dependencyUnavailable\("workspace-state"\)/);
-  assert.match(routeRuntime, /dependencyUnavailable\("restriction-state"\)/);
-  assert.match(routeRuntime, /if \(!projection\)/);
+  assert.match(routeRuntime, /resolveParticipantRouteWithDependencies/);
+  assert.match(routeRuntime, /measureServerOperation/);
+  assert.match(routeRuntime, /participant-route\.auth/);
+  assert.match(classification, /ParticipantRouteDependencyUnavailableError/);
+  assert.match(classification, /isExpectedSessionRejection/);
+  assert.match(classification, /dependencyUnavailable\(\s*"authentication"/);
+  assert.match(classification, /dependencyUnavailable\(\s*"workspace-state"/);
+  assert.match(classification, /dependencyUnavailable\("restriction-state"/);
+  assert.match(classification, /if \(!projection\)/);
   assert.match(workspaceState, /if \(!activation\) return null;/);
   assert.match(workspaceState, /ParticipantWorkspaceProjectionError\("lifecycle-missing"\)/);
   assert.match(workspaceState, /ParticipantWorkspaceProjectionError\("lifecycle-owner-mismatch"\)/);
