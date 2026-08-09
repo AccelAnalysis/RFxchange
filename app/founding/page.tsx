@@ -221,7 +221,7 @@ export default async function FoundingPage() {
           <p>{founding.cta.description}</p>
           <div className={styles.ctaActions}>
             <Link className={styles.buttonGold} href="/join">{founding.cta.primary}</Link>
-            <Link className={styles.buttonLight} href="/">{founding.cta.secondary}</Link>
+            <Link className={styles.buttonLight} href="/join">{founding.cta.secondary}</Link>
           </div>
           <span>{founding.cta.note}</span>
         </div>
