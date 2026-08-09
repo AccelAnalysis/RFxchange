@@ -79,6 +79,9 @@ const appendOnlyCollections = [
   "acquisitionContextEvents",
   "orientationJourneyEvents",
   "activationReleaseEvents",
+  "aiInterpretationProvenance",
+  "aiInterpretationUsageEvents",
+  "aiInterpretationEvents",
 ];
 
 for (const collection of appendOnlyCollections) {

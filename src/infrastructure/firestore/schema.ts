@@ -43,6 +43,12 @@ export const FIRESTORE_COLLECTIONS = {
   orientationJourneyEvents: "orientationJourneyEvents",
   firstValueSelections: "firstValueSelections",
   activationReleaseEvents: "activationReleaseEvents",
+  aiInterpretationRecords: "aiInterpretationRecords",
+  aiInterpretationCandidates: "aiInterpretationCandidates",
+  aiInterpretationProvenance: "aiInterpretationProvenance",
+  aiInterpretationUsageEvents: "aiInterpretationUsageEvents",
+  aiInterpretationEvents: "aiInterpretationEvents",
+  aiInterpretationQuotaBuckets: "aiInterpretationQuotaBuckets",
 } as const;
 
 export type FirestoreCollectionKey = keyof typeof FIRESTORE_COLLECTIONS;
@@ -410,6 +416,12 @@ export const FIRESTORE_COLLECTION_CONVENTIONS: Readonly<
     appendOnly: true,
     mutable: false,
   }),
+  aiInterpretationRecords: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationRecords, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
+  aiInterpretationCandidates: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationCandidates, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
+  aiInterpretationProvenance: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationProvenance, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  aiInterpretationUsageEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationUsageEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  aiInterpretationEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  aiInterpretationQuotaBuckets: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationQuotaBuckets, documentIdSource: "id", scope: "mixed-scope", organizationIdRequired: false, appendOnly: false, mutable: true }),
 });
 
 export const FIRESTORE_SYSTEM_FIELDS = Object.freeze({

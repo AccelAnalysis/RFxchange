@@ -56,6 +56,12 @@ test("defines schema version and canonical collection names", () => {
     orientationJourneyEvents: "orientationJourneyEvents",
     firstValueSelections: "firstValueSelections",
     activationReleaseEvents: "activationReleaseEvents",
+    aiInterpretationRecords: "aiInterpretationRecords",
+    aiInterpretationCandidates: "aiInterpretationCandidates",
+    aiInterpretationProvenance: "aiInterpretationProvenance",
+    aiInterpretationUsageEvents: "aiInterpretationUsageEvents",
+    aiInterpretationEvents: "aiInterpretationEvents",
+    aiInterpretationQuotaBuckets: "aiInterpretationQuotaBuckets",
   });
 });
 
@@ -97,6 +103,11 @@ test("organization-scoped collections explicitly require organizationId", () => 
     "orientationJourneyEvents",
     "firstValueSelections",
     "activationReleaseEvents",
+    "aiInterpretationRecords",
+    "aiInterpretationCandidates",
+    "aiInterpretationProvenance",
+    "aiInterpretationUsageEvents",
+    "aiInterpretationEvents",
   ]) {
     assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, true);
     assert.throws(
@@ -112,6 +123,7 @@ test("organization-scoped collections explicitly require organizationId", () => 
     "backgroundJobEvents",
     "acquisitionContexts",
     "acquisitionContextEvents",
+    "aiInterpretationQuotaBuckets",
   ]) {
     assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, false);
     assert.doesNotThrow(() => assertOrganizationScopedFirestoreRecord(key, undefined));
@@ -139,6 +151,9 @@ test("append-only domain and operational history remains non-mutable", () => {
     "acquisitionContextEvents",
     "orientationJourneyEvents",
     "activationReleaseEvents",
+    "aiInterpretationProvenance",
+    "aiInterpretationUsageEvents",
+    "aiInterpretationEvents",
   ]) {
     const convention = FIRESTORE_COLLECTION_CONVENTIONS[key];
     assert.equal(convention.appendOnly, true, `${key} must be append-only`);

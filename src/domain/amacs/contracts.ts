@@ -35,12 +35,11 @@ export interface AmacsInterpretationRecord {
   readonly candidate_ids: readonly string[];
   readonly record_status:
     | "draft"
-    | "processing"
     | "awaiting_confirmation"
     | "partially_confirmed"
     | "confirmed"
-    | "failed"
-    | "withdrawn";
+    | "closed"
+    | "superseded";
   readonly human_confirmation_required: true;
   readonly authoritative_effect: "none";
   readonly implementation_provenance_ref?: string;

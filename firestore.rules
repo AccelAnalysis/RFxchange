@@ -275,6 +275,35 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // AI/AMACS interpretation is a server-only, non-authoritative workflow. Mutable suggestion
+    // state is separated from immutable provenance, usage, and participant disposition evidence.
+    match /aiInterpretationRecords/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /aiInterpretationCandidates/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /aiInterpretationProvenance/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /aiInterpretationUsageEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /aiInterpretationEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /aiInterpretationQuotaBuckets/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
     match /storedAssets/{documentId} {
       allow read, write: if serverManagedOnly();
     }
