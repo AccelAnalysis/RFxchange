@@ -22,11 +22,13 @@ test("Brand B5 preserves the authoritative activation journey", () => {
   }
 });
 
-test("Brand B5 provides state continuity and reduced-motion workspace entry", () => {
+test("Brand B5 provides state continuity and non-blocking reduced-motion workspace entry", () => {
   assert.match(spatial, /Activation progress is preserved/);
   assert.match(spatial, /Your organization is now visible\. Entering The RFxchange\./);
   assert.match(spatial, /prefers-reduced-motion: reduce/);
-  assert.match(spatial, /reducedMotion \? 200 : 3_400/);
+  assert.match(spatial, /reducedMotion \? 50 : 900/);
+  assert.match(spatial, />Enter now</);
+  assert.doesNotMatch(spatial, /3_400/);
   assert.match(spatial, /StatusPill/);
 });
 
