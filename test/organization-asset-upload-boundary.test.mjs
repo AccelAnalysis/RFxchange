@@ -5,7 +5,7 @@ import {
   assertProfileAssetFileSignature,
   MAX_PROFILE_ASSET_MULTIPART_BYTES,
   OrganizationAssetUploadBoundaryError,
-  requireBoundedMultipartContentLength,
+  readBoundedProfileAssetMultipartBody,
   validateProfileAssetFileMetadata,
 } from "../src/application/storage/organization-asset-upload-boundary.ts";
 
@@ -17,6 +17,15 @@ function ascii(value) {
   return new Uint8Array([...value].map((character) => character.charCodeAt(0)));
 }
 
+function stream(...chunks) {
+  return new ReadableStream({
+    start(controller) {
+      for (const chunk of chunks) controller.enqueue(chunk);
+      controller.close();
+    },
+  });
+}
+
 function expectBoundaryError(fn, code, status) {
   assert.throws(fn, (error) =>
     error instanceof OrganizationAssetUploadBoundaryError &&
@@ -25,25 +34,57 @@ function expectBoundaryError(fn, code, status) {
   );
 }
 
-test("profile uploads require a bounded request envelope before multipart parsing", () => {
-  expectBoundaryError(
-    () => requireBoundedMultipartContentLength(null),
-    "length-required",
-    411,
+async function expectAsyncBoundaryError(fn, code, status) {
+  await assert.rejects(fn, (error) =>
+    error instanceof OrganizationAssetUploadBoundaryError &&
+    error.code === code &&
+    error.status === status,
   );
-  expectBoundaryError(
-    () => requireBoundedMultipartContentLength("chunked"),
-    "length-required",
-    411,
+}
+
+test("profile uploads are stream-counted before multipart parsing", async () => {
+  const withoutDeclaredLength = await readBoundedProfileAssetMultipartBody(
+    stream(ascii("abc")),
+    null,
   );
-  expectBoundaryError(
-    () => requireBoundedMultipartContentLength(String(MAX_PROFILE_ASSET_MULTIPART_BYTES + 1)),
+  assert.equal(new TextDecoder().decode(withoutDeclaredLength), "abc");
+
+  const withMatchingLength = await readBoundedProfileAssetMultipartBody(
+    stream(ascii("abc")),
+    "3",
+  );
+  assert.equal(withMatchingLength.byteLength, 3);
+
+  await expectAsyncBoundaryError(
+    () => readBoundedProfileAssetMultipartBody(stream(ascii("abc")), "chunked"),
+    "invalid-content-length",
+    400,
+  );
+  await expectAsyncBoundaryError(
+    () => readBoundedProfileAssetMultipartBody(
+      stream(ascii("unused")),
+      String(MAX_PROFILE_ASSET_MULTIPART_BYTES + 1),
+    ),
     "request-too-large",
     413,
   );
-  assert.equal(
-    requireBoundedMultipartContentLength(String(MAX_PROFILE_ASSET_MULTIPART_BYTES)),
-    MAX_PROFILE_ASSET_MULTIPART_BYTES,
+  await expectAsyncBoundaryError(
+    () => readBoundedProfileAssetMultipartBody(stream(ascii("abc")), "4"),
+    "content-length-mismatch",
+    400,
+  );
+  await expectAsyncBoundaryError(
+    () => readBoundedProfileAssetMultipartBody(
+      stream(new Uint8Array(MAX_PROFILE_ASSET_MULTIPART_BYTES), bytes(1)),
+      null,
+    ),
+    "request-too-large",
+    413,
+  );
+  await expectAsyncBoundaryError(
+    () => readBoundedProfileAssetMultipartBody(null, null),
+    "request-body-required",
+    400,
   );
 });
 
