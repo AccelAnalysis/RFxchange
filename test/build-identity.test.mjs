@@ -36,14 +36,18 @@ test("Next artifact identity and production CI are bound to the checked-out exac
   assert.match(source, /process\.env\.RFXCHANGE_BUILD_SHA/);
 
   assert.ok(workflow.includes(`ref: ${EXACT_SOURCE_SHA_EXPRESSION}`));
+  assert.ok(!workflow.includes("ref: ${{ github.sha }}"));
+  assert.ok(!workflow.includes("github.event.pull_request.merge_commit_sha"));
+  assert.ok(!workflow.includes("refs/pull/"));
   assert.ok(workflow.includes(`RFXCHANGE_BUILD_SHA: ${EXACT_SOURCE_SHA_EXPRESSION}`));
   assert.ok(workflow.includes(`RFXCHANGE_EXPECTED_BUILD_SHA: ${EXACT_SOURCE_SHA_EXPRESSION}`));
   assert.match(workflow, /- name: Verify compiled and visible build identity/);
-  assert.match(workflow, /cat \.next\/BUILD_ID/);
+  assert.ok(workflow.includes('test "$(cat .next/BUILD_ID)" = "$RFXCHANGE_EXPECTED_BUILD_SHA"'));
   assert.match(workflow, /npm run start -- -H 127\.0\.0\.1 -p 3100/);
-  assert.match(workflow, /curl --fail --silent http:\/\/127\.0\.0\.1:3100\//);
-  assert.match(workflow, /title=\\"\$RFXCHANGE_EXPECTED_BUILD_SHA\\"/);
-  assert.match(workflow, /SHA \$\{RFXCHANGE_EXPECTED_BUILD_SHA:0:12\}/);
+  assert.ok(workflow.includes("curl --fail --silent http://127.0.0.1:3100/ --output /tmp/rfxchange-home.html"));
+  assert.ok(workflow.includes('grep -Fq "title=\\"$RFXCHANGE_EXPECTED_BUILD_SHA\\"" /tmp/rfxchange-home.html'));
+  assert.ok(workflow.includes("sed 's/<!-- -->//g' /tmp/rfxchange-home.html > /tmp/rfxchange-home-normalized.html"));
+  assert.ok(workflow.includes('grep -Fq ">SHA ${RFXCHANGE_EXPECTED_BUILD_SHA:0:12}</span>" /tmp/rfxchange-home-normalized.html'));
 });
 
 test("the compiled build SHA is visibly projected on public and authenticated surfaces", async () => {
