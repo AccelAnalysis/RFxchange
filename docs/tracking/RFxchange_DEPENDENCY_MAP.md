@@ -147,7 +147,7 @@ Wave 2 OPEN/marker
   → Brand Gates B2/B3/B6a [Done via PRs #111/#112/#115]
   → GEO-012 + DSC-001/002/003 [Done via PR #120]
   → ORG-013/014/016/017 [Done in accepted Slice 3.3 implementation]
-  → ORG-015/018/019
+  → ORG-015/018/019 [Complete in accepted Slice 3.4 implementation; merge/post-merge CI pending]
   → REF-001/002/003/004/005 + EDU-014 + ACQ-006
   → RES-001/002/003 + ADM-070
   → RES-004/005 + DSC-011 + REF-006 + RES-007/008 + ACQ-008
@@ -156,14 +156,14 @@ Wave 2 OPEN/marker
 
 The already-complete Wave 3 foundations `ORG-021`, `ORG-022`, `ADM-055` and `ADM-056` remain inherited prerequisites and are not rebuilt.
 
-## Adopted Wave 3 Network slice roadmap — Slices 3.1–3.3 and Brand Gates B0–B6a complete; Slice 3.4 authorized
+## Adopted Wave 3 Network slice roadmap — Slices 3.1–3.4 and Brand Gates B0–B6a complete or accepted; Slice 3.4 merge pending
 
-Wave 3 contains **38 Network features**. Fifteen are complete: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, and four Slice 3.3 market-profile features. The remaining **23 features** stay organized in the adopted sequence:
+Wave 3 contains **38 Network features**. Eighteen are complete or accepted: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, and three Slice 3.4 organization-enrichment features. The remaining **20 features** stay organized in the adopted sequence:
 
 1. **Slice 3.1 — `COMMS-003` + `COMMS-004` + `COMMS-005` — Transactional Communications Reliability — COMPLETE VIA PR #107**.
 2. **Slice 3.2 — `GEO-012` + `DSC-001` + `DSC-002` + `DSC-003` — Controlled Network Entry & Discovery — COMPLETE VIA PR #120**.
 3. **Slice 3.3 — `ORG-013` + `ORG-014` + `ORG-016` + `ORG-017` — Market Profile Enrichment — COMPLETE VIA PR #126**.
-4. **Slice 3.4 — `ORG-015` + `ORG-018` + `ORG-019` — Credential, Media & Location Enrichment — AUTHORIZED; SINGLE ACTIVE SLICE**.
+4. **Slice 3.4 — `ORG-015` + `ORG-018` + `ORG-019` — Credential, Media & Location Enrichment — COMPLETE IN ACCEPTED IMPLEMENTATION; MERGE/POST-MERGE CI PENDING**.
 5. **Slice 3.5 — `REF-001` + `REF-002` + `REF-003` + `REF-004` + `REF-005` + `EDU-014` + `ACQ-006` — Referral Network & Referral Acquisition**.
 6. **Slice 3.6 — `RES-001` + `RES-002` + `RES-003` + `ADM-070` — Official Resource Provider Foundation**.
 7. **Slice 3.7 — `RES-004` + `RES-005` + `DSC-011` + `REF-006` + `RES-007` + `RES-008` + `ACQ-008` — Resource Discovery, Routing & Provider Distribution**.
@@ -171,6 +171,6 @@ Wave 3 contains **38 Network features**. Fifteen are complete: four inherited Wa
 
 **Dependency result:** PR #120 completes the dependency-eligible `GEO-012`, `DSC-001`, `DSC-002` and `DSC-003` set after Slice 3.1 and Brand Gates B0–B6a. No dependency edge changed in this reconciliation.
 
-**Implementation sequencing result:** the no-Feature-ID RFxchange reconciliation to immutable AMACS 0.5.0 merged via PR #123 and the no-Feature-ID AI/AMACS Interpretation Foundation merged via PR #124. Slice 3.3 completed via PR #126 at merge `0f5e8d56af8484bbd6e72716d4149a21e92db029`; exact-head CI run `31289352499` and post-merge `main` CI run `31289477113` passed. The graph was recalculated from that merged tree with no dependency-edge correction required. Slice 3.4 is now the earliest dependency-eligible and single active authorized slice. Slice 3.5 and later work remain unstarted.
+**Implementation sequencing result:** Slice 3.4 implementation and acceptance are complete on its isolated branch with no dependency-edge correction required. Merge, exact-head production CI, and post-merge `main` CI remain mandatory before recalculation from merged `main`; Slice 3.5 and later work remain unstarted and unauthorized.
 
 See `docs/slices/WAVE_3_ROADMAP.md`, `docs/brand/BRAND_GATE_B1_SEMANTIC_FOUNDATION.md` and the applicable canonical slice brief for detailed boundaries and acceptance intent.

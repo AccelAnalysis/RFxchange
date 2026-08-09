@@ -33,6 +33,7 @@ assert.match(firestoreRules, /match\s+\/storedAssets\/\{documentId\}/);
 for (const category of [
   "organization-logo",
   "organization-media",
+  "organization-document",
   "authority-evidence",
   "verification-evidence",
   "rfx-document",

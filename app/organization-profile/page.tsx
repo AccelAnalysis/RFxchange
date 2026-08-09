@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { MapMotionPreferenceToggle } from "@/src/components/account/MapMotionPreferenceToggle";
 import { SignOutButton } from "@/src/components/auth/SignOutButton";
 import { MarketProfilePanel } from "@/src/components/market-profile/MarketProfilePanel";
+import { OrganizationEnrichmentPanel } from "@/src/components/organization-enrichment/OrganizationEnrichmentPanel";
 import {
   OperationalWorkspace,
   ParticipantShell,
@@ -18,6 +19,8 @@ import {
   getServerFirestore,
 } from "@/src/infrastructure/firestore/runtime";
 import { loadAuthorizedMarketProfile } from "@/src/infrastructure/market-profile/runtime";
+import { loadAuthorizedOrganizationEnrichment } from "@/src/infrastructure/organization-enrichment/runtime";
+import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
 
 import styles from "./page.module.css";
 
@@ -47,10 +50,12 @@ export default async function OrganizationProfilePage() {
   }
 
   const foundation = createServerFirestoreFoundationRepositories(getServerFirestore());
-  const [profileRecord, authorization, marketProfile] = await Promise.all([
+  const [profileRecord, authorization, marketProfile, enrichment, mapProjection] = await Promise.all([
     foundation.organizations.profiles.getByOrganizationId(access.membership.organizationId),
     foundation.organizationAuthorization.getByMembershipId(access.membership.id),
     loadAuthorizedMarketProfile(access),
+    loadAuthorizedOrganizationEnrichment(access),
+    loadAuthorizedParticipantMapProjection(access),
   ]);
   if (!profileRecord) redirect("/join");
 
@@ -160,7 +165,7 @@ export default async function OrganizationProfilePage() {
             <article className={styles.card}>
               <h2>Current release boundary</h2>
               <p className={styles.empty}>
-                Market profile enrichment is available. Referrals, provider routing, credibility,
+                Market profile, credential, media, and additional-location enrichment are available. Referrals, provider routing, credibility,
                 commercial benefits, and RFx workflows remain unavailable until their approved
                 slices are complete.
               </p>
@@ -179,6 +184,12 @@ export default async function OrganizationProfilePage() {
                 ? selectedGeography?.name ?? id
                 : id,
             }))}
+          />
+          <OrganizationEnrichmentPanel
+            organizationId={String(access.membership.organizationId)}
+            snapshot={enrichment.snapshot}
+            mapModel={mapProjection?.model ?? null}
+            homeMarker={mapProjection?.homeMarker ?? null}
           />
         </section>
       </OperationalWorkspace>

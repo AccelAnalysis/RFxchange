@@ -11,6 +11,7 @@ export type StoredAssetTimestamp = Brand<string, "StoredAssetTimestamp">;
 export const STORED_ASSET_CATEGORIES = [
   "organization-logo",
   "organization-media",
+  "organization-document",
   "authority-evidence",
   "verification-evidence",
   "rfx-document",
@@ -46,6 +47,17 @@ export const STORED_ASSET_POLICIES: Readonly<Record<StoredAssetCategory, StoredA
       maximumBytes: 15 * MEBIBYTE,
       permittedContentTypes: Object.freeze(["image/jpeg", "image/png", "image/webp"]),
       organizationPermission: "organization.profile.manage" as const,
+    }),
+    "organization-document": Object.freeze({
+      category: "organization-document" as const,
+      sensitivity: "standard" as const,
+      maximumBytes: 25 * MEBIBYTE,
+      permittedContentTypes: Object.freeze([
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ]),
+      organizationPermission: "document.manage" as const,
     }),
     "authority-evidence": Object.freeze({
       category: "authority-evidence" as const,

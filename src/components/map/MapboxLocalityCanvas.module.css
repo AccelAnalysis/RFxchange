@@ -118,6 +118,7 @@
 .markerButton::after { content: none; }
 .markerButton[data-kind="location-candidate"]::before { content: "•"; border-color: var(--semantic-state-information); background: var(--semantic-state-information); color: var(--semantic-text-inverse); box-shadow: 0 0 0 6px var(--semantic-surface-information); font-size: 1rem; }
 .markerButton[data-kind="confirmed-location"]::before { content: "✓"; border-color: var(--semantic-state-positive-resolution); background: var(--semantic-state-positive-resolution); color: var(--semantic-text-inverse); box-shadow: 0 0 0 6px var(--semantic-surface-outcome); font-size: 0.75rem; }
+.markerButton[data-kind="subordinate-location"]::before { content: "•"; width: 1rem; height: 1rem; border-color: var(--semantic-text-connection-small); background: var(--semantic-surface-elevated); color: var(--semantic-text-connection-small); box-shadow: 0 0 0 4px color-mix(in srgb, var(--semantic-text-connection-small) 18%, transparent); font-size: 0.8rem; }
 .markerButton[data-kind="organization-location"]::before { content: ""; width: 16px; height: 16px; border-width: 2px; border-color: var(--object-node-additional-location-ring); background: var(--semantic-canvas); box-shadow: 0 0 0 4px var(--semantic-surface-connection); }
 .markerButton[data-activated="true"] { animation: node-arrival var(--motion-spatial-fast) var(--ease-enter) both; }
 .markerButton:focus-visible { outline: var(--focus-outline-width) solid var(--semantic-border-focus); outline-offset: var(--focus-outline-offset-high); }
