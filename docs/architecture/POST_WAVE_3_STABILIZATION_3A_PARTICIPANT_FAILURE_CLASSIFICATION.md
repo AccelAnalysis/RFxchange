@@ -48,7 +48,7 @@ This prevents a controlled or OPEN journey earned under organization A from bein
 
 ## Resolution surface
 
-`/access/resolve` is the dedicated participant-facing surface for governed membership changes. Protected Exchange, map, orientation, first-value, referral, Resource Network, provider-application, and organization-profile routes send `access-resolution-required` there instead of `/join`.
+`/access/resolve` is the dedicated participant-facing surface for governed membership changes. Protected Exchange, map, orientation, first-value, Quick Start, referral, Resource Network, provider-application, and organization-profile routes send `access-resolution-required` there instead of `/join`.
 
 `/join` also re-runs participant route classification for an existing session and redirects access-resolution state to `/access/resolve`, preventing a participant from manually re-entering a stale completed activation context.
 
@@ -85,7 +85,11 @@ A participant is sent to sign-in only when authentication has affirmative eviden
 
 Architecture tests cover signed-out versus retryable authentication, absent versus incomplete activation, workspace and restriction dependency failures, missing/cross-owned persisted lifecycle and membership identity, active-binding projection contradictions, valid inactive bindings with zero/one/multiple alternative active memberships, explicit alternative selection remaining non-authorizing, OPEN remaining bound to the original organization even when another organization is selected, wrong-organization/restriction outcomes, and healthy authorization for only the original valid active binding.
 
-Source guardrails verify that the dedicated resolution page consumes the semantic result, uses localized dictionaries, performs no activation mutation, that protected participant routes send access changes to `/access/resolve` instead of `/join`, and that `/join` itself cannot bypass access resolution.
+Source guardrails verify that the dedicated resolution page consumes the semantic result, uses localized dictionaries, performs no activation mutation, that protected participant routes send access changes to `/access/resolve` instead of `/join`, and that `/join` itself cannot bypass access resolution. Server API boundaries continue to require the strict `authorized` result before deriving organization command scope.
+
+## Validation
+
+Exact-head production CI run **#670** passed on `330cb147a92e0e570c9aeaebff515835204386de`: repository guardrails, Cloud Functions build/tests, Firebase Auth/Firestore/Functions/Storage emulator smoke tests, **477 architecture tests**, TypeScript, lint, and production build.
 
 ## Scope boundary
 
