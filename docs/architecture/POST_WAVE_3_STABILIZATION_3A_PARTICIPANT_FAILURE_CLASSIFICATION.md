@@ -48,15 +48,17 @@ This prevents a controlled or OPEN journey earned under organization A from bein
 
 ## Resolution surface
 
-`/access-resolution` is the dedicated participant-facing surface for governed membership changes. Protected routes send `access-resolution-required` there instead of `/join`.
+`/access/resolve` is the dedicated participant-facing surface for governed membership changes. Protected Exchange, map, orientation, first-value, referral, Resource Network, provider-application, and organization-profile routes send `access-resolution-required` there instead of `/join`.
 
-The page re-runs the authoritative participant resolver on every request. If the original valid membership is restored, normal routing resumes automatically. Otherwise the page:
+`/join` also re-runs participant route classification for an existing session and redirects access-resolution state to `/access/resolve`, preventing a participant from manually re-entering a stale completed activation context.
+
+The resolution page re-runs the authoritative participant resolver on every request. If the original valid membership is restored, normal routing resumes automatically. Otherwise the page:
 
 - distinguishes no-active-membership from alternative-active-membership state;
 - lists current active organization memberships for review;
 - allows an active organization to be selected only as a resolution option;
 - explicitly states that previous activation/OPEN state does not transfer;
-- provides a recheck action and homepage escape path; and
+- provides an authoritative recheck action, homepage escape path, and sign-out action; and
 - performs no membership, authority, lifecycle, restriction, or activation mutation.
 
 The current product does not invent a second-organization activation mechanism in this stabilization pass. Until a governed organization-specific access path exists, alternative memberships remain visible resolution options rather than borrowed workspace authority.
@@ -83,7 +85,7 @@ A participant is sent to sign-in only when authentication has affirmative eviden
 
 Architecture tests cover signed-out versus retryable authentication, absent versus incomplete activation, workspace and restriction dependency failures, missing/cross-owned persisted lifecycle and membership identity, active-binding projection contradictions, valid inactive bindings with zero/one/multiple alternative active memberships, explicit alternative selection remaining non-authorizing, OPEN remaining bound to the original organization even when another organization is selected, wrong-organization/restriction outcomes, and healthy authorization for only the original valid active binding.
 
-Source guardrails verify that the resolution page consumes the new semantic result, uses localized dictionaries, performs no activation mutation, and that Exchange routes access changes to `/access-resolution` rather than `/join`.
+Source guardrails verify that the dedicated resolution page consumes the semantic result, uses localized dictionaries, performs no activation mutation, that protected participant routes send access changes to `/access/resolve` instead of `/join`, and that `/join` itself cannot bypass access resolution.
 
 ## Scope boundary
 
