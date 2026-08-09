@@ -1,6 +1,6 @@
 # Slice 3.6 — Official Resource Provider Foundation
 
-**Status: AUTHORIZED BY `SLICE_3_6_EXECUTION_AUTHORITY.md` — SINGLE ACTIVE SLICE**
+**Status: IMPLEMENTED AND ACCEPTED — MERGE/POST-MERGE CI PENDING**
 
 ## Feature IDs
 
@@ -145,6 +145,10 @@ The Network has a legitimate, administratively governed inventory of Official Re
 ## Completion discipline
 
 Recalculate dependencies after merge before authorizing Slice 3.7.
+
+## Implementation evidence
+
+Implementation and acceptance are recorded in `docs/architecture/WAVE_3_SLICE_3_6.md`. Focused lifecycle/authority/privacy tests, Firestore emulator persistence and direct-client denial, all five locales, configured real-environment participant/admin browser journeys, desktop/intermediate/mobile reflow, clean-console verification, exact cleanup and the canonical repository gate pass. Only `RES-001`, `RES-002`, `RES-003`, and `ADM-070` are marked complete. Slice 3.7 and later work remain unstarted pending merge, post-merge production CI and a merged-tree dependency recalculation.
 
 ## Execution authority
 

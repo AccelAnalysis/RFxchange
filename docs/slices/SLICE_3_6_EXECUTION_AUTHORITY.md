@@ -1,6 +1,6 @@
 # Slice 3.6 — Official Resource Provider Foundation execution authority
 
-**Status: AUTHORIZED — SINGLE ACTIVE SLICE**
+**Status: IMPLEMENTED AND ACCEPTED — MERGE/POST-MERGE CI PENDING**
 
 ## Recalculated merged baseline
 
@@ -124,3 +124,7 @@ Production CI must pass on the exact PR head and again on merged `main` before d
 This authority does not permit annual revalidation or provider lifecycle `ADM-071`, Verified Resource Provider or any credibility badge/seal, Organization Verification, public provider search or recommendation, public service fields, contextual routing, provider referral/request connections, request-scoped messaging, provider resource publishing, provider-driven acquisition, performance ranking/analytics/API, advanced capacity-aware routing `RES-006`, paid placement, B6b convergence, Wave 4, Intelligence Dark, Presentation Mode, production sound or haptics.
 
 Slice 3.7 and all later slices/gates remain unstarted. They may be authorized only after Slice 3.6 implementation and acceptance merge, post-merge production CI passes, and dependency eligibility is recalculated again from merged `main`.
+
+## Acceptance result
+
+The bounded implementation and evidence are recorded in `docs/architecture/WAVE_3_SLICE_3_6.md`. Focused tests, Firestore emulator acceptance, configured participant/administrator browser acceptance, five-locale and responsive/accessibility checks, exact cleanup and the canonical repository gate pass. This authority does not authorize Slice 3.7; merge and post-merge CI must complete before recalculation.

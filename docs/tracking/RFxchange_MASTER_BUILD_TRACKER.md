@@ -12,11 +12,11 @@
 
 ## Progress
 
-**438 total · 139 Done · 299 Not Started**
+**438 total · 143 Done · 295 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
-- 3 - Network: **25/38**
+- 3 - Network: **29/38**
 - 4 - RFx Core: **0/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
@@ -46,7 +46,7 @@ Wave 2 remains complete at **43/43 Activation**. The Runtime Convergence Gate, R
 - **AMACS 0.5.0 reconciliation — COMPLETE VIA PR #123; no Feature IDs**: deterministically reconstructed and verified the immutable 0.5.0 release at `da7879f2609271b067ae6d02875e9388a02c4fe5`, preserved the historical 0.1.0 release, generated release-aware catalog/search/registry/runtime projections, proved the 500 historical capabilities remained with 115 additive capabilities and no inferred historical mutation, and isolated all artifacts and infrastructure from participant surfaces. Local `npm run check`, the official upstream validator and 44 upstream tests, seven focused RFxchange tests and production CI run `31284501027` passed on substantive head `c2d6695cdea2f3d3386dab354e37e1bba9440e87`.
 - **AI/AMACS Interpretation Foundation — COMPLETE VIA PR #124; no Feature IDs**: established the authenticated provider-neutral gateway, concrete OpenAI adapter with truthful disabled state, bounded AMACS 0.5.0 retrieval, strict schema/catalog validation, non-authoritative record/candidate and disposition contracts, minimized provenance, metering, transactional quotas, independent manual catalog path and deterministic regression evaluation. Local `npm run check` passed with 400 architecture tests and 19 Functions tests; focused Firestore emulator acceptance proved direct-client denial, atomic persistence, disposition and quota behavior. No live provider smoke was claimed without configured credentials.
 
-Network completion is **25/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, and seven Slice 3.5 referral/acquisition features. Slice 3.5 adds an organization-owned referral aggregate, explicit consent and exact-data education, sender/recipient projections, versioned communications, legitimate external acquisition/attachment, and real privacy-safe map paths without implying endorsement, sale, credibility, or verified outcome. Focused tests, Firestore emulator acceptance, all five locales, desktop/intermediate/mobile configured-browser acceptance, existing/external recipient journeys, exact cleanup of 64 Firestore records and two Auth identities, and the canonical repository gate passed. PR #130 passed exact-head production CI run `31294774153` on `17e8e66fc11e29bc125bc739d5fad7141da14244`, merged at `516c49627aeff637b02982218f0682c1eea436ad`, and post-merge `main` CI run `31294884142` passed. Dependency authority was recalculated from that merged tree; Slice 3.6 is authorized without changing Feature-ID status or totals.
+Network completion is **29/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, seven Slice 3.5 referral/acquisition features, and four Slice 3.6 provider-foundation features. Slice 3.6 adds a post-activation organization application, exact scoped review, immutable lifecycle/audit history, Official Resource Provider-only status, and a private structured service profile without implying verification, endorsement, payment, capacity or public routing. Focused tests, Firestore emulator acceptance, all five locales, desktop/intermediate/mobile configured-browser acceptance, exact cleanup of 66 Firestore records and disposable Auth identities, and the canonical repository gate passed. Merge and post-merge CI evidence remain pending; Slice 3.7 and later work remain unstarted.
 
 ## Feature-ID checklist
 
@@ -207,16 +207,16 @@ Network completion is **25/38**: four inherited Wave 1 foundations, three Slice 
 - [x] `REF-004` — Slice 3.5; structured need, summary, urgency, contact method, purpose and optional opportunity context with minimized role-specific projections
 - [x] `REF-005` — Slice 3.5; explicit named-recipient consent, approved minimum sharing, private-field suppression, no public leakage, real-path privacy, and direct-client denial
 - [ ] `REF-006`
-- [ ] `RES-001`
-- [ ] `RES-002`
-- [ ] `RES-003`
+- [x] `RES-001` — Slice 3.6; post-activation Profile Complete application, authoritative organization references, multi-select localized categories, private evidence ownership, focused/emulator/configured-browser acceptance, and cleanup
+- [x] `RES-002` — Slice 3.6; explicit review/information/response/resubmission/approval/denial lifecycle, exact scoped authority, immutable versions/events/audits, denial/reapplication, direct-client denial, and configured-browser acceptance
+- [x] `RES-003` — Slice 3.6; approval-only private structured service profile with maintained services, geography, eligibility, intake, contact, modality, languages, explicit availability/capacity truth, and no public projection
 - [ ] `RES-004`
 - [ ] `RES-005`
 - [ ] `RES-007`
 - [ ] `RES-008`
 - [x] `ADM-055` — PR #43
 - [x] `ADM-056` — PR #43
-- [ ] `ADM-070`
+- [x] `ADM-070` — Slice 3.6; exact-permission/scope provider queue and minimum-necessary review console with authoritative organization references, evidence metadata boundary, request/response/decision history, focused and configured-browser acceptance
 - [x] `COMMS-003` — PR #107; explicit event/template versions, strict reviewed variable rendering, brand/message compliance, architecture tests, and `npm run check`
 - [x] `COMMS-004` — PR #107; minimized server-only delivery aggregate, append-only evidence, operations-health projection, direct-client denial, emulator acceptance, and `npm run check`
 - [x] `COMMS-005` — PR #107; INF-007 retry integration, accepted-delivery replay suppression, interrupted-success healing, transient/permanent/exhausted failure tests, and `npm run check`

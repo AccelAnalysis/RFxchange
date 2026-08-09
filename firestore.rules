@@ -339,6 +339,36 @@ service cloud.firestore {
       allow read, write: if serverManagedOnly();
     }
 
+    // RES-001/002/003 and ADM-070 keep provider applications, decisions, status and service
+    // profiles behind trusted participant/admin authorization. Versions, events and commands are
+    // immutable evidence; direct clients cannot self-approve or expose private provider data.
+    match /providerApplications/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /providerApplicationVersions/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /providerApplicationEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /providerApplicationCommands/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /officialResourceProviderStatuses/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /providerServiceProfiles/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
     // EDU-001-004 orientation progress is a participant-bound server aggregate. Tutorial events
     // are immutable evidence, and neither collection is directly available to browser clients.
     match /orientationJourneys/{documentId} {

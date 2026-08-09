@@ -34,7 +34,8 @@ export default function ResourceProvidersPage() {
       ]}
       ctaTitle={null}
       ctaBody={null}
-      ctaLabel="Join as a Resource Provider"
+      ctaHref="/provider-application"
+      ctaLabel="Request Resource Provider Status"
     />
   );
 }

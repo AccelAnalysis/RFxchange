@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { MapMotionPreferenceToggle } from "@/src/components/account/MapMotionPreferenceToggle";
@@ -160,6 +161,7 @@ export default async function OrganizationProfilePage() {
                 Official Resource Provider status is a separate application and administrator-review
                 process. It is not selected during registration and is not implied by Profile Complete.
               </p>
+              <Link href="/provider-application">Request Resource Provider Status</Link>
             </article>
 
             <article className={styles.card}>
