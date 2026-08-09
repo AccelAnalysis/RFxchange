@@ -26,6 +26,9 @@ export interface ParticipantWorkspaceState {
 
 export interface ParticipantWorkspaceProjection {
   readonly state: ParticipantWorkspaceState;
+  /** Active memberships are required to distinguish governed account repair from dependency loss. */
+  readonly activeMemberships: readonly OrganizationMembership[];
+  /** Active membership currently bound to the activation organization, when that binding is valid. */
   readonly membership: OrganizationMembership | null;
 }
 
@@ -64,7 +67,8 @@ function controlledPlatformUrl(
  *
  * This intentionally does not hydrate geography, profile, marker, location, capability, account
  * security, or other activation UI state. Those belong to their specific screens. The protected
- * route boundary only needs lifecycle + active membership identity before restriction checks.
+ * route boundary needs lifecycle plus the complete active-membership set so it can distinguish a
+ * deliberate membership repair from unavailable persisted state.
  *
  * A null result has one meaning only: there is no activation context for this authenticated user.
  * Once an activation context exists, missing or cross-owned lifecycle state is classified as a
@@ -106,7 +110,13 @@ export async function loadParticipantWorkspaceProjection(
       ? memberships.find((candidate) => String(candidate.organizationId) === organizationId) ?? null
       : null;
   const resolvedOrganizationId = organizationId ?? (membership ? String(membership.organizationId) : null);
-  const resolvedMembershipId = membership ? String(membership.id) : null;
+  // Preserve the persisted binding identity even when it is no longer active. The classifier uses
+  // the active-membership set to decide whether this is account repair or dependency inconsistency.
+  const resolvedMembershipId = activation.membershipId
+    ? String(activation.membershipId)
+    : membership
+      ? String(membership.id)
+      : null;
   const acquisitionContext = activation.acquisitionContext
     ? Object.freeze({
         id: activation.acquisitionContext.id,
@@ -131,6 +141,7 @@ export async function loadParticipantWorkspaceProjection(
       ),
       acquisitionContext,
     }),
+    activeMemberships: Object.freeze([...memberships]),
     membership,
   });
 }
