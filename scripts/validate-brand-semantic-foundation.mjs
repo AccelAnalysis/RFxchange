@@ -173,8 +173,8 @@ assert.ok(
     roadmap.includes("AMACS 0.5.0 reconciliation is complete via PR #123") &&
     roadmap.includes("AI/AMACS Interpretation Foundation is complete via PR #124") &&
     roadmap.includes("Slice 3.5 is complete via PR #130") &&
-    roadmap.includes("Slice 3.6 is now the single active authorized slice"),
-  "Brand B1 semantic authority must remain intact through completed B2–B6a and Slice 3.5, the AMACS/AI foundations, and the Slice 3.6 handoff.",
+    roadmap.includes("Slice 3.6 implementation and acceptance now establish"),
+  "Brand B1 semantic authority must remain intact through completed B2–B6a and Slice 3.5, the AMACS/AI foundations, and accepted Slice 3.6.",
 );
 
 const governedPrimitiveDirectories = [
@@ -229,5 +229,5 @@ for (const directory of ["app", "src", "public"]) {
 }
 
 console.log(
-  "Brand Gate B1 semantic foundation validated through B6a and completed Slice 3.5 with the Slice 3.6 handoff: exact palette, accessible gold text, Exchange Light roles, compatibility aliases, object semantics, motion/type/layout tokens, and drift controls.",
+  "Brand Gate B1 semantic foundation validated through B6a and accepted Slice 3.6: exact palette, accessible gold text, Exchange Light roles, compatibility aliases, object semantics, motion/type/layout tokens, and drift controls.",
 );
