@@ -1,0 +1,9 @@
+{
+  "eyebrow": "Interrupción temporal del servicio",
+  "title": "Esta página no está disponible en este momento.",
+  "lede": "No pudimos cargar la información necesaria para esta página.",
+  "supporting": "Vuelve a intentarlo. Si el problema continúa, regresa a la página de inicio de RFxchange e inténtalo de nuevo más tarde.",
+  "retry": "Reintentar",
+  "home": "Inicio de RFxchange",
+  "supportReference": "Referencia de soporte: {reference}"
+}
