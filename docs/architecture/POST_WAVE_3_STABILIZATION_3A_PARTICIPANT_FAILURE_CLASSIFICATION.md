@@ -10,7 +10,7 @@ Protected participant routes previously collapsed materially different failures 
 
 The Firebase server-session adapter also defaulted unrecognized verification failures to `credential-invalid`. A transient provider or network error could therefore be interpreted as proof that an otherwise valid participant session was bad.
 
-The inverse edge also matters: a deliberately deactivated organization membership is governed account state, not a dependency outage. Retry-only recovery must not trap a user whose membership was changed by an authorized repair.
+The inverse edge also matters: a deliberately deactivated organization membership is governed account state, not a dependency outage. Retry-only recovery must not trap a user whose membership was changed by an authorized repair. At the same time, a missing or cross-owned persisted membership binding must never be mistaken for a legitimate deactivation and repaired through another organization.
 
 ## Classification contract
 
@@ -23,7 +23,8 @@ Stabilization 3A establishes the following protected-route meanings:
 - **Existing activation context with a pre-workspace lifecycle:** `activation-required` with reason `activation-incomplete` and the persisted state so onboarding can continue.
 - **Existing activation context whose required lifecycle cannot be loaded or belongs to another user:** retryable workspace-state failure; never a fresh activation journey.
 - **Controlled/open lifecycle with structurally missing identity or contradictory active identity:** retryable workspace-state failure.
-- **Controlled/open lifecycle whose previously bound membership was deliberately deactivated:** resolve the current active membership set through the existing ARC-003 access contract rather than treating it as a dependency failure.
+- **Controlled/open lifecycle with a missing, wrong-ID, cross-user, or cross-organization persisted membership record:** retryable workspace-state failure; it cannot enter repair.
+- **Controlled/open lifecycle whose proven same-user/same-organization bound membership was deliberately deactivated:** resolve the current active membership set through the existing ARC-003 access contract rather than treating it as a dependency failure.
 - **No active memberships after governed repair:** `activation-required` with reason `account-resolution`, entering the existing account-resolution path rather than Retry.
 - **Exactly one remaining active membership after governed repair:** rebind the request-local workspace projection to that active organization and continue normal organization access.
 - **Multiple remaining active memberships:** `activation-required` with reason `organization-resolution`; an explicitly requested active organization can be selected for the request.
@@ -51,14 +52,23 @@ This is intentionally conservative. A participant is routed to sign-in only when
 
 `loadParticipantWorkspaceProjection()` returns `null` for exactly one condition: the authenticated user has no activation context.
 
-Once an activation context exists, a missing lifecycle or lifecycle owner mismatch throws `ParticipantWorkspaceProjectionError`. The projection also carries the complete active-membership set while preserving the persisted activation membership identifier even when that membership is no longer active.
+Once an activation context exists, a missing lifecycle or lifecycle owner mismatch throws `ParticipantWorkspaceProjectionError`. For a persisted activation membership ID, the projection loads the exact membership record through `getById()` even when that record is inactive, while separately carrying the complete active-membership set.
+
+Before any repair can occur, the classifier proves that the bound membership:
+
+- exists;
+- has the exact persisted membership ID;
+- belongs to the authenticated RFxchange user; and
+- belongs to the persisted activation organization.
+
+If any of those checks fail, the route fails through the retryable workspace-state boundary. Only a proven same-user/same-organization membership whose status is no longer active may enter ARC-003 account/organization resolution. If the bound membership is still active, it must also appear coherently in the active-membership projection; otherwise the route fails closed.
 
 That distinction allows the classifier to tell apart:
 
-- **unavailable/inconsistent persisted state**, which is retryable; and
-- **governed membership change**, which is evaluated with `resolveUserOrganizationAccess()` and follows account/organization resolution.
+- **unavailable/corrupt/cross-owned persisted state**, which is retryable; and
+- **governed membership deactivation**, which is evaluated with `resolveUserOrganizationAccess()` and follows account/organization resolution.
 
-This prevents an administrative membership repair from becoming an endless temporary-outage screen while preserving fail-closed behavior for actual identity inconsistency.
+This prevents an administrative membership repair from becoming an endless temporary-outage screen without allowing missing or cross-owned bindings to authorize another organization.
 
 ## Recovery experience
 
@@ -88,10 +98,13 @@ Architecture tests cover:
 - incomplete pre-workspace activation with explicit reason;
 - workspace projection dependency failure;
 - structurally missing controlled-workspace identity;
+- missing persisted membership with another active organization;
+- cross-user, cross-organization, and wrong-ID persisted membership bindings;
+- an active persisted binding missing from the active projection;
 - governed deactivation with no remaining active membership and `account-resolution` reason;
 - governed deactivation with one remaining active organization;
 - governed deactivation with multiple active organizations, `organization-resolution` reason, and explicit selection;
-- contradictory cross-user/cross-tenant membership drift;
+- contradictory active membership drift;
 - wrong-organization routing;
 - restriction dependency failure;
 - persisted active restriction; and
@@ -106,4 +119,4 @@ Source and internationalization guardrails additionally verify that:
 
 ## Scope boundary
 
-This pass does not change RFx Core, Network feature counts, membership entitlement, organization authority, restriction semantics, Firebase security rules, or tracker totals. It does not claim that external dependencies cannot fail; it ensures those failures are classified truthfully, and it distinguishes those failures from legitimate account/membership changes that require access resolution rather than Retry.
+This pass does not change RFx Core, Network feature counts, membership entitlement, organization authority, restriction semantics, Firebase security rules, or tracker totals. It does not claim that external dependencies cannot fail; it ensures those failures are classified truthfully, distinguishes them from legitimate account/membership changes, and requires proof of the persisted binding before any governed repair can select another organization.
