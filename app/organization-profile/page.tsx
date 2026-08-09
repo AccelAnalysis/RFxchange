@@ -15,6 +15,8 @@ import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
+import { createFirestoreOrganizationLocationRepositories } from "@/src/infrastructure/firestore/organization-location";
+import { createFirestoreEssentialOrganizationProfileRepositories } from "@/src/infrastructure/firestore/organization-profile";
 import {
   createServerFirestoreFoundationRepositories,
   getServerFirestore,
@@ -50,19 +52,33 @@ export default async function OrganizationProfilePage() {
     redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   }
 
-  const foundation = createServerFirestoreFoundationRepositories(getServerFirestore());
-  const [profileRecord, authorization, marketProfile, enrichment, mapProjection] = await Promise.all([
-    foundation.organizations.profiles.getByOrganizationId(access.membership.organizationId),
+  const db = getServerFirestore();
+  const foundation = createServerFirestoreFoundationRepositories(db);
+  const locations = createFirestoreOrganizationLocationRepositories(db);
+  const profileRepositories = createFirestoreEssentialOrganizationProfileRepositories(db);
+  const organizationId = access.membership.organizationId;
+  const [
+    profileRecord,
+    authorization,
+    marketProfile,
+    enrichment,
+    mapProjection,
+    profileCompletion,
+    location,
+  ] = await Promise.all([
+    foundation.organizations.profiles.getByOrganizationId(organizationId),
     foundation.organizationAuthorization.getByMembershipId(access.membership.id),
     loadAuthorizedMarketProfile(access),
     loadAuthorizedOrganizationEnrichment(access),
     loadAuthorizedParticipantMapProjection(access),
+    profileRepositories.completions.getByOrganizationId(organizationId),
+    locations.locations.getByOrganizationId(organizationId),
   ]);
   if (!profileRecord) redirect("/join");
 
   const profile = hydrateEssentialOrganizationProfile(profileRecord);
   const workspaceStatus = access.state.lifecycleState === "open-platform" ? "Open" : "Active";
-  const selectedGeography = access.state.selectedGeography;
+  const selectedGeography = mapProjection?.model.selectedGeography ?? null;
 
   return (
     <ParticipantShell activeItem="Account">
@@ -89,7 +105,7 @@ export default async function OrganizationProfilePage() {
                 <dt>Organization type</dt>
                 <dd>{profile.organizationType ? readable(profile.organizationType) : "Optional enrichment not recorded"}</dd>
                 <dt>Profile status</dt>
-                <dd>{access.state.profileCompletion?.status === "active" ? "Profile Complete" : "Incomplete"}</dd>
+                <dd>{profileCompletion?.status === "active" ? "Profile Complete" : "Incomplete"}</dd>
                 <dt>Workspace state</dt>
                 <dd><span className={styles.status}>{workspaceStatus}</span></dd>
               </dl>
@@ -99,13 +115,13 @@ export default async function OrganizationProfilePage() {
               <h2>Geography & marker</h2>
               <dl className={styles.definitionList}>
                 <dt>Home locality</dt>
-                <dd>{access.state.selectedGeography?.name ?? "Not recorded"}</dd>
+                <dd>{selectedGeography?.name ?? "Not recorded"}</dd>
                 <dt>Location visibility</dt>
-                <dd>{access.state.location ? readable(access.state.location.visibility) : "Not recorded"}</dd>
+                <dd>{location ? readable(location.visibility) : "Not recorded"}</dd>
                 <dt>Marker</dt>
-                <dd>{access.state.marker?.status === "active" ? "Active" : "Not active"}</dd>
+                <dd>{mapProjection ? "Active" : "Not active"}</dd>
                 <dt>Initial service geography</dt>
-                <dd>{access.state.selectedGeography?.name ?? "Not recorded"}</dd>
+                <dd>{selectedGeography?.name ?? "Not recorded"}</dd>
               </dl>
               <p className={styles.empty}>
                 During minimum activation, RFxchange initializes the confirmed home locality as the
