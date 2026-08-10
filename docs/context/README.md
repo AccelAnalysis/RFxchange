@@ -7,6 +7,7 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 ## Read first
 
 - [`PRODUCT_PRINCIPLES.md`](PRODUCT_PRINCIPLES.md) — cross-cutting product invariants and boundaries.
+- [`EXCHANGE_INTERACTION_ARCHITECTURE.md`](EXCHANGE_INTERACTION_ARCHITECTURE.md) — RFx-first lens hierarchy, persistent spatial context, marker/selection behavior, Intelligence/Locations boundary, provider gating and cross-lens workflow rules.
 - [`USER_JOURNEY.md`](USER_JOURNEY.md) — canonical activation journey from public discovery through OPEN.
 - [`MAP_AND_GEOGRAPHY.md`](MAP_AND_GEOGRAPHY.md) — locality, FIPS, release-state, boundary, camera and marker principles.
 - [`ORGANIZATION_MODEL.md`](ORGANIZATION_MODEL.md) — organization/user hierarchy, claim authority, identity resolution, AMACS-backed capability assertion, profile and location concepts.
@@ -16,6 +17,20 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 - [`COMMERCIAL_MODEL.md`](COMMERCIAL_MODEL.md) — free network access, Founding membership, provider status and monetization boundaries.
 - [`ACQUISITION_AND_RETENTION.md`](ACQUISITION_AND_RETENTION.md) — acquisition objects, preserved entry context, first value and flywheel logic.
 - [`BRAND_AND_UX.md`](BRAND_AND_UX.md) — concise map-first brand/UX principles and pointers to the brand and design authorities.
+
+## Exchange interaction authority
+
+[`EXCHANGE_INTERACTION_ARCHITECTURE.md`](EXCHANGE_INTERACTION_ARCHITECTURE.md) establishes the cross-cutting participant interaction target:
+
+- Opportunities/RFx remains the primary transaction lens and principal public positioning;
+- Resources, Intelligence and Referrals are supporting lenses over the same market rather than separate applications;
+- location and site functionality remains first-class inside Intelligence rather than becoming a peer commercial-real-estate product identity;
+- lens switching preserves authorized map/search/selection context where meaningful;
+- the participant's own organization uses the standing logo marker, while a selected external organization transitions from a compact node to the standing selected marker;
+- Official Resource Provider actions remain gated by the existing application/review/approval authority; and
+- Intelligence is a functional lens, while Light Appearance and Dark Appearance describe presentation only.
+
+This is documentation-only planning. It does not authorize participant-shell convergence, appearance implementation, Intelligence datasets, location/site inventory, RFx Core runtime, Feature-ID changes or tracker changes.
 
 ## AMACS 0.5.0 and interpretation authority
 
@@ -67,7 +82,7 @@ Detailed brand authority:
 - `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md` — organization nodes, opportunity beacons, service fields, paths, seals, locality fields and density treatment;
 - `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md` — customer-facing terminology, claims, evidence, empty/error/success language and commercial/credibility boundaries;
 - `docs/brand/MOTION_SYSTEM.md` and `docs/brand/SONIC_EXPERIENCE_SYSTEM.md` — governed movement and optional sensory-event boundaries;
-- `docs/brand/VIEWING_MODES.md` — Exchange Light, future Intelligence Dark, Presentation Mode and High Contrast;
+- `docs/brand/VIEWING_MODES.md` — appearance/presentation planning authority; interpret its older Exchange Light/Intelligence Dark names as Light Appearance/Dark Appearance under the Exchange interaction authority until a separate terminology sweep updates the legacy references;
 - `docs/brand/BRAND_EXPERIENCE_ACCEPTANCE_MATRIX.md` — supplemental cross-surface acceptance;
 - `docs/brand/BRAND_IMPLEMENTATION_ROADMAP.md` — sequential Brand Gates;
 - `docs/brand/BRAND_GATE_B0_RECONCILIATION.md` — final Wave 2 reconciliation and Wave 3/4 integration boundaries;
