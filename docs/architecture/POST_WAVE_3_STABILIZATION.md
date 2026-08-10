@@ -1,5 +1,7 @@
 # Post-Wave 3 production stabilization
 
+Execution reconciliation and the isolated App Hosting 2C prerequisite are recorded in [POST_WAVE_3_STABILIZATION_CLOSEOUT.md](./POST_WAVE_3_STABILIZATION_CLOSEOUT.md).
+
 **Execution baseline:** `d1bf92dd7d0e9fb32dc26c417067525c4278afc9`
 
 **Feature-ID effect:** none
