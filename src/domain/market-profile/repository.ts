@@ -40,5 +40,8 @@ export interface OrganizationMarketProfileRepository {
       | Readonly<{ kind: "past-performance"; value: OrganizationPastPerformance }>
       | Readonly<{ kind: "preferences"; value: OrganizationMarketPreferences }>
       | Readonly<{ kind: "provisional-term"; value: OrganizationProvisionalTerm }>;
-  }>): Promise<void>;
+  }>): Promise<Readonly<{
+    receipt: OrganizationMarketProfileCommandReceipt;
+    replayed: boolean;
+  }>>;
 }

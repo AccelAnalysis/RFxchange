@@ -150,7 +150,7 @@ export class MarketProfileService {
       recordedAt: input.now,
     });
     try {
-      await this.dependencies.repository.save({
+      return await this.dependencies.repository.save({
         command,
         event: event({
           id: `mpevent_${this.id()}`,
@@ -180,7 +180,6 @@ export class MarketProfileService {
       }
       throw error;
     }
-    return command;
   }
 
   async snapshot(rawOrganizationId: string) {
@@ -272,8 +271,10 @@ export class MarketProfileService {
       membershipId: authorization.membership.id,
       now,
     }), "Capability claim is invalid.");
-    const receipt = await this.persist({ scope, authorization, action: "capability-claimed", subjectId: claim.id, requestFingerprint, record: { kind: "capability", value: claim }, now });
-    return Object.freeze({ replayed: false as const, receipt, claim });
+    const persistence = await this.persist({ scope, authorization, action: "capability-claimed", subjectId: claim.id, requestFingerprint, record: { kind: "capability", value: claim }, now });
+    return persistence.replayed
+      ? Object.freeze({ replayed: true as const, receipt: persistence.receipt })
+      : Object.freeze({ replayed: false as const, receipt: persistence.receipt, claim });
   }
 
   async updateIndustry(scope: MarketProfileCommandScope, input: Readonly<{
@@ -368,8 +369,10 @@ export class MarketProfileService {
       () => createIndustryProfile({ organizationId: authorization.organization.id, revision: input.expectedIndustryRevision + 1, ...canonicalInput, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
       "Industry context is invalid.",
     );
-    const receipt = await this.persist({ scope, authorization, action: "industry-context-updated", subjectId: profile.id, requestFingerprint, record: { kind: "industry", value: profile }, expectedRecordRevision: input.expectedIndustryRevision, now });
-    return Object.freeze({ replayed: false as const, receipt, profile });
+    const persistence = await this.persist({ scope, authorization, action: "industry-context-updated", subjectId: profile.id, requestFingerprint, record: { kind: "industry", value: profile }, expectedRecordRevision: input.expectedIndustryRevision, now });
+    return persistence.replayed
+      ? Object.freeze({ replayed: true as const, receipt: persistence.receipt })
+      : Object.freeze({ replayed: false as const, receipt: persistence.receipt, profile });
   }
 
   async addPastPerformance(scope: MarketProfileCommandScope, input: Omit<Parameters<typeof createPastPerformance>[0], "organizationId" | "userId" | "membershipId" | "now">) {
@@ -387,8 +390,10 @@ export class MarketProfileService {
       () => createPastPerformance({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
       "Past performance is invalid.",
     );
-    const receipt = await this.persist({ scope, authorization, action: "past-performance-added", subjectId: record.id, requestFingerprint, record: { kind: "past-performance", value: record }, now });
-    return Object.freeze({ replayed: false as const, receipt, record });
+    const persistence = await this.persist({ scope, authorization, action: "past-performance-added", subjectId: record.id, requestFingerprint, record: { kind: "past-performance", value: record }, now });
+    return persistence.replayed
+      ? Object.freeze({ replayed: true as const, receipt: persistence.receipt })
+      : Object.freeze({ replayed: false as const, receipt: persistence.receipt, record });
   }
 
   async updatePreferences(scope: MarketProfileCommandScope, input: Omit<Parameters<typeof createMarketPreferences>[0], "organizationId" | "userId" | "membershipId" | "now">) {
@@ -401,8 +406,10 @@ export class MarketProfileService {
       () => createMarketPreferences({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
       "Market preferences are invalid.",
     );
-    const receipt = await this.persist({ scope, authorization, action: "preferences-updated", subjectId: preferences.id, requestFingerprint, record: { kind: "preferences", value: preferences }, now });
-    return Object.freeze({ replayed: false as const, receipt, preferences });
+    const persistence = await this.persist({ scope, authorization, action: "preferences-updated", subjectId: preferences.id, requestFingerprint, record: { kind: "preferences", value: preferences }, now });
+    return persistence.replayed
+      ? Object.freeze({ replayed: true as const, receipt: persistence.receipt })
+      : Object.freeze({ replayed: false as const, receipt: persistence.receipt, preferences });
   }
 
   async submitProvisionalTerm(scope: MarketProfileCommandScope, input: Omit<Parameters<typeof createProvisionalTerm>[0], "organizationId" | "userId" | "membershipId" | "now">) {
@@ -419,7 +426,9 @@ export class MarketProfileService {
       () => createProvisionalTerm({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
       "Provisional term is invalid.",
     );
-    const receipt = await this.persist({ scope, authorization, action: "provisional-term-submitted", subjectId: proposal.id, requestFingerprint, record: { kind: "provisional-term", value: proposal }, now });
-    return Object.freeze({ replayed: false as const, receipt, proposal });
+    const persistence = await this.persist({ scope, authorization, action: "provisional-term-submitted", subjectId: proposal.id, requestFingerprint, record: { kind: "provisional-term", value: proposal }, now });
+    return persistence.replayed
+      ? Object.freeze({ replayed: true as const, receipt: persistence.receipt })
+      : Object.freeze({ replayed: false as const, receipt: persistence.receipt, proposal });
   }
 }

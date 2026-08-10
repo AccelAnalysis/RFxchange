@@ -51,17 +51,27 @@ function fixture(rolePreset = "primary-administrator", options = {}) {
     async save(input) {
       if (options.persistenceError) throw options.persistenceError;
       if (options.beforeSave) await options.beforeSave({ state, input });
+      if (state.commands.has(input.command.id)) {
+        const receipt = state.commands.get(input.command.id);
+        if (
+          receipt.organizationId !== input.command.organizationId ||
+          receipt.action !== input.command.action ||
+          receipt.resultId !== input.command.resultId ||
+          receipt.requestFingerprint !== input.command.requestFingerprint
+        ) throw new MarketProfilePersistenceConflictError("Market profile command identity collision.");
+        return Object.freeze({ receipt, replayed: true });
+      }
       if (
         input.record.kind === "industry" &&
         (state.industry?.revision ?? 0) !== input.expectedRecordRevision
       ) throw new MarketProfilePersistenceConflictError("Industry context changed before persistence.");
-      if (state.commands.has(input.command.id)) return;
       state.commands.set(input.command.id, input.command); state.events.push(input.event); state.audits.push(input.auditEvent);
       if (input.record.kind === "capability") state.claims.push(input.record.value);
       if (input.record.kind === "industry") state.industry = input.record.value;
       if (input.record.kind === "past-performance") state.performance.push(input.record.value);
       if (input.record.kind === "preferences") state.preferences = input.record.value;
       if (input.record.kind === "provisional-term") state.terms.push(input.record.value);
+      return Object.freeze({ receipt: input.command, replayed: false });
     },
   };
   const service = new MarketProfileService({
@@ -117,11 +127,13 @@ test("manual AMACS selection creates a self-reported organization claim and idem
 
 test("concurrent identical capability commands converge on one deterministic claim", async () => {
   const f = fixture();
-  const [first, second] = await Promise.all([
+  const results = await Promise.all([
     f.service.claimCapability(f.scope, f.claimInput),
     f.service.claimCapability(f.scope, f.claimInput),
   ]);
-  assert.equal(first.claim.id, second.claim.id);
+  assert.deepEqual(results.map((result) => result.replayed).sort(), [false, true]);
+  assert.equal(results[0].receipt, results[1].receipt);
+  assert.equal(results.find((result) => !result.replayed).claim.id, f.state.claims[0].id);
   assert.equal(f.state.claims.length, 1);
   assert.equal(f.state.events.length, 1);
   assert.equal(f.state.audits.length, 1);
@@ -232,6 +244,30 @@ test("an in-flight identical industry retry rechecks its receipt after observing
   assert.equal(replay.receipt, receipt);
   assert.equal(commandReads, 2);
   assert.equal(f.state.events.length, 0);
+});
+
+test("transaction-level identical industry retries return the authoritative committed receipt", async () => {
+  const f = fixture();
+  const scope = { ...f.scope, commandId: "command-same-revision-overlap" };
+  const input = {
+    industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }],
+    naics: [{ code: "236220", version: "2022", visibility: "network" }],
+    preserveExistingNaics: false,
+    expectedIndustryRevision: 0,
+  };
+
+  const results = await Promise.all([
+    f.service.updateIndustry(scope, input),
+    f.service.updateIndustry(scope, input),
+  ]);
+
+  assert.deepEqual(results.map((result) => result.replayed).sort(), [false, true]);
+  assert.equal(results[0].receipt, results[1].receipt);
+  assert.equal(results[0].receipt, f.state.commands.get(scope.commandId));
+  assert.equal("profile" in results.find((result) => result.replayed), false);
+  assert.equal(f.state.events.length, 1);
+  assert.equal(f.state.audits.length, 1);
+  assert.equal(f.state.industry.revision, 1);
 });
 
 test("an exact pre-revision industry receipt replays before migrated request validation", async () => {
