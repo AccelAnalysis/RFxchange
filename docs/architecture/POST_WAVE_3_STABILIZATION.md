@@ -39,6 +39,8 @@ PR #142 specifically removed duplicate activation reconstruction, returning-user
 
 ### Stabilization 4 — workspace resilience
 
+Implementation and acceptance authority: [POST_WAVE_3_STABILIZATION_4_WORKSPACE_RESILIENCE.md](./POST_WAVE_3_STABILIZATION_4_WORKSPACE_RESILIENCE.md).
+
 1. Remove Resource Network N+1 message hydration and load only the selected thread.
 2. Replace remaining full-page mutation reloads with local updates or scoped refresh.
 3. Stream optional market-profile, enrichment, and map panels so one subsystem cannot block the account workspace.

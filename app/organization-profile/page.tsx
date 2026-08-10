@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { MapMotionPreferenceToggle } from "@/src/components/account/MapMotionPreferenceToggle";
 import { SignOutButton } from "@/src/components/auth/SignOutButton";
@@ -28,6 +29,11 @@ import { loadAuthorizedMarketProfile } from "@/src/infrastructure/market-profile
 import { loadAuthorizedOrganizationEnrichment } from "@/src/infrastructure/organization-enrichment/runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
 import { currentBuildIdentity } from "@/src/infrastructure/system/build-identity";
+import { getRequestDictionary } from "@/src/i18n/server";
+import {
+  settleOptionalWorkspacePanel,
+  type OptionalWorkspacePanelResult,
+} from "@/src/application/workspace/optional-workspace-panel";
 
 import styles from "./page.module.css";
 
@@ -37,6 +43,95 @@ function readable(value: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+type MarketProfileResult = OptionalWorkspacePanelResult<Awaited<ReturnType<typeof loadAuthorizedMarketProfile>>>;
+type EnrichmentResult = OptionalWorkspacePanelResult<Awaited<ReturnType<typeof loadAuthorizedOrganizationEnrichment>>>;
+type MapProjectionResult = OptionalWorkspacePanelResult<Awaited<ReturnType<typeof loadAuthorizedParticipantMapProjection>>>;
+type WorkspaceResilienceCopy = Awaited<ReturnType<typeof getRequestDictionary>>["dictionary"]["workspaceResilience"];
+
+function OptionalPanelState({ title, message }: Readonly<{ title: string; message: string }>) {
+  return <section className={styles.optionalPanel} role="status"><h2>{title}</h2><p>{message}</p></section>;
+}
+
+async function GeographyCard({
+  pendingMap,
+  markerActive,
+  locationVisibility,
+  copy,
+}: Readonly<{
+  pendingMap: Promise<MapProjectionResult>;
+  markerActive: boolean;
+  locationVisibility: string | null;
+  copy: WorkspaceResilienceCopy;
+}>) {
+  const result = await pendingMap;
+  const selectedGeography = result.available
+    ? result.value?.model.selectedGeography ?? null
+    : null;
+  return <article className={styles.card}>
+    <h2>{copy.geographyTitle}</h2>
+    <dl className={styles.definitionList}>
+      <dt>Home locality</dt>
+      <dd>{result.available ? selectedGeography?.name ?? "Not recorded" : copy.geographyUnavailable}</dd>
+      <dt>Location visibility</dt>
+      <dd>{locationVisibility ? readable(locationVisibility) : "Not recorded"}</dd>
+      <dt>Marker</dt>
+      <dd>{markerActive ? "Active" : "Not active"}</dd>
+      <dt>Initial service geography</dt>
+      <dd>{result.available ? selectedGeography?.name ?? "Not recorded" : copy.geographyUnavailable}</dd>
+    </dl>
+    <p className={styles.empty}>
+      During minimum activation, RFxchange initializes the confirmed home locality as the
+      organization&apos;s initial service geography. Expanded service territories remain a
+      separate profile concept and can be refined in later profile enrichment.
+    </p>
+  </article>;
+}
+
+async function MarketProfileSection({
+  pendingMarketProfile,
+  organizationId,
+  organizationName,
+  copy,
+}: Readonly<{
+  pendingMarketProfile: Promise<MarketProfileResult>;
+  organizationId: string;
+  organizationName: string;
+  copy: WorkspaceResilienceCopy;
+}>) {
+  const result = await pendingMarketProfile;
+  if (!result.available) return <OptionalPanelState title={copy.marketProfileTitle} message={copy.marketProfileUnavailable} />;
+  const marketProfile = result.value;
+  return <MarketProfilePanel
+    organizationId={organizationId}
+    organizationName={organizationName}
+    snapshot={marketProfile.snapshot}
+    catalog={marketProfile.catalog}
+    marketRoles={marketProfile.marketRoles}
+    serviceGeographies={marketProfile.serviceGeographyIds.map((id) => ({ id, label: id }))}
+  />;
+}
+
+async function EnrichmentSection({
+  pendingEnrichment,
+  pendingMap,
+  organizationId,
+  copy,
+}: Readonly<{
+  pendingEnrichment: Promise<EnrichmentResult>;
+  pendingMap: Promise<MapProjectionResult>;
+  organizationId: string;
+  copy: WorkspaceResilienceCopy;
+}>) {
+  const [enrichmentResult, mapResult] = await Promise.all([pendingEnrichment, pendingMap]);
+  if (!enrichmentResult.available) return <OptionalPanelState title={copy.enrichmentTitle} message={copy.enrichmentUnavailable} />;
+  return <OrganizationEnrichmentPanel
+    organizationId={organizationId}
+    snapshot={enrichmentResult.value.snapshot}
+    mapModel={mapResult.available ? mapResult.value?.model ?? null : null}
+    homeMarker={mapResult.available ? mapResult.value?.homeMarker ?? null : null}
+  />;
 }
 
 export default async function OrganizationProfilePage() {
@@ -57,6 +152,21 @@ export default async function OrganizationProfilePage() {
     redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   }
 
+  const pendingMarketProfile = settleOptionalWorkspacePanel(
+    "market-profile",
+    loadAuthorizedMarketProfile(access),
+  );
+  const pendingEnrichment = settleOptionalWorkspacePanel(
+    "organization-enrichment",
+    loadAuthorizedOrganizationEnrichment(access),
+  );
+  const pendingMap = settleOptionalWorkspacePanel(
+    "participant-map",
+    loadAuthorizedParticipantMapProjection(access),
+  );
+  const { dictionary } = await getRequestDictionary();
+  const copy = dictionary.workspaceResilience;
+
   const db = getServerFirestore();
   const foundation = createServerFirestoreFoundationRepositories(db);
   const locations = createFirestoreOrganizationLocationRepositories(db);
@@ -66,18 +176,12 @@ export default async function OrganizationProfilePage() {
   const [
     profileRecord,
     authorization,
-    marketProfile,
-    enrichment,
-    mapProjection,
     markerActivation,
     profileCompletion,
     location,
   ] = await Promise.all([
     foundation.organizations.profiles.getByOrganizationId(organizationId),
     foundation.organizationAuthorization.getByMembershipId(access.membership.id),
-    loadAuthorizedMarketProfile(access),
-    loadAuthorizedOrganizationEnrichment(access),
-    loadAuthorizedParticipantMapProjection(access),
     markerRepositories.activations.getByOrganizationId(organizationId),
     profileRepositories.completions.getByOrganizationId(organizationId),
     locations.locations.getByOrganizationId(organizationId),
@@ -91,7 +195,6 @@ export default async function OrganizationProfilePage() {
 
   const profile = hydrateEssentialOrganizationProfile(profileRecord);
   const workspaceStatus = access.state.lifecycleState === "open-platform" ? "Open" : "Active";
-  const selectedGeography = mapProjection?.model.selectedGeography ?? null;
   const buildIdentity = currentBuildIdentity();
 
   return (
@@ -125,24 +228,9 @@ export default async function OrganizationProfilePage() {
               </dl>
             </article>
 
-            <article className={styles.card}>
-              <h2>Geography & marker</h2>
-              <dl className={styles.definitionList}>
-                <dt>Home locality</dt>
-                <dd>{selectedGeography?.name ?? "Not recorded"}</dd>
-                <dt>Location visibility</dt>
-                <dd>{location ? readable(location.visibility) : "Not recorded"}</dd>
-                <dt>Marker</dt>
-                <dd>{markerActivation?.status === "active" ? "Active" : "Not active"}</dd>
-                <dt>Initial service geography</dt>
-                <dd>{selectedGeography?.name ?? "Not recorded"}</dd>
-              </dl>
-              <p className={styles.empty}>
-                During minimum activation, RFxchange initializes the confirmed home locality as the
-                organization&apos;s initial service geography. Expanded service territories remain a
-                separate profile concept and can be refined in later profile enrichment.
-              </p>
-            </article>
+            <Suspense fallback={<article className={styles.card}><h2>{copy.geographyTitle}</h2><p className={styles.empty}>{copy.geographyLoading}</p></article>}>
+              <GeographyCard pendingMap={pendingMap} markerActive={markerActivation?.status === "active"} locationVisibility={location?.visibility ?? null} copy={copy} />
+            </Suspense>
 
             <article className={styles.card}>
               <h2>Capabilities</h2>
@@ -208,25 +296,12 @@ export default async function OrganizationProfilePage() {
             </article>
           </section>
 
-          <MarketProfilePanel
-            organizationId={String(access.membership.organizationId)}
-            organizationName={profile.displayName}
-            snapshot={marketProfile.snapshot}
-            catalog={marketProfile.catalog}
-            marketRoles={marketProfile.marketRoles}
-            serviceGeographies={marketProfile.serviceGeographyIds.map((id) => ({
-              id,
-              label: id === String(selectedGeography?.id)
-                ? selectedGeography?.name ?? id
-                : id,
-            }))}
-          />
-          <OrganizationEnrichmentPanel
-            organizationId={String(access.membership.organizationId)}
-            snapshot={enrichment.snapshot}
-            mapModel={mapProjection?.model ?? null}
-            homeMarker={mapProjection?.homeMarker ?? null}
-          />
+          <Suspense fallback={<OptionalPanelState title={copy.marketProfileTitle} message={copy.marketProfileLoading} />}>
+            <MarketProfileSection pendingMarketProfile={pendingMarketProfile} organizationId={String(access.membership.organizationId)} organizationName={profile.displayName} copy={copy} />
+          </Suspense>
+          <Suspense fallback={<OptionalPanelState title={copy.enrichmentTitle} message={copy.enrichmentLoading} />}>
+            <EnrichmentSection pendingEnrichment={pendingEnrichment} pendingMap={pendingMap} organizationId={String(access.membership.organizationId)} copy={copy} />
+          </Suspense>
         </section>
       </OperationalWorkspace>
     </ParticipantShell>

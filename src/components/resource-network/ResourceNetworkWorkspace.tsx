@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useRef, useState, useTransition } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
+import type { ResourceNetworkWorkspaceQuery } from "../../application/resource-network/resource-network-workspace";
 import type { ProviderDiscoveryProjection, ProviderRequestMessageProjection, ProviderResourceProjection } from "../../domain/resource-network/model";
 import type { ProviderServiceProfile } from "../../domain/resource-providers/model";
 import type { RecipientReferralProjection, SenderReferralProjection } from "../../domain/referrals/model";
@@ -29,8 +31,8 @@ interface Props {
   readonly referrals: readonly Referral[];
   readonly owner: Owner;
   readonly commandRecoveryScope: string;
-  readonly initialQuery?: string;
-  readonly messageThreads: Readonly<Record<string, readonly ProviderRequestMessageProjection[]>>;
+  readonly queryState: ResourceNetworkWorkspaceQuery;
+  readonly selectedMessages: readonly ProviderRequestMessageProjection[];
 }
 
 const PROVIDER_REQUEST_STORAGE_KEY = "rfxchange:provider-request-create-and-send";
@@ -49,26 +51,39 @@ function browserSessionStorage(): Storage | null {
   }
 }
 
-export function ResourceNetworkWorkspace({ model, homeMarker, providers, resources, referrals, owner, commandRecoveryScope, initialQuery = "", messageThreads }: Props) {
+export function ResourceNetworkWorkspace({ model, homeMarker, providers, resources, referrals, owner, commandRecoveryScope, queryState, selectedMessages }: Props) {
   const { t } = useI18n();
-  const [selectedId, setSelectedId] = useState(providers[0] ? String(providers[0].organizationId) : "");
-  const [query, setQuery] = useState(initialQuery);
-  const [availability, setAvailability] = useState("all");
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [navigationPending, startNavigation] = useTransition();
   const providerRequestCommandRef = useRef<Readonly<{ fingerprint: string; commandId: string }> | null>(null);
   const providerRequestStorageKey = `${PROVIDER_REQUEST_STORAGE_KEY}:${encodeURIComponent(commandRecoveryScope)}`;
-  const selected = providers.find((provider) => String(provider.organizationId) === selectedId) ?? null;
-  const visible = providers.filter((provider) => {
-    const corpus = `${provider.displayName} ${provider.categories.join(" ")} ${provider.services.map((service) => `${service.name} ${service.description}`).join(" ")}`.toLowerCase();
-    return (!query.trim() || corpus.includes(query.trim().toLowerCase())) && (availability === "all" || provider.availability === availability);
-  });
+  const selected = providers.find((provider) => String(provider.organizationId) === queryState.providerId) ?? null;
   const providerReferrals = referrals.filter((referral) => referral.purpose === "provider-connection");
+  const selectedRequest = providerReferrals.find((referral) => referral.id === queryState.requestId) ?? null;
+  const actionBusy = busy || navigationPending;
   const pointOverlays: readonly ControlledLocalityPointOverlay[] = useMemo(() => Object.freeze([
     Object.freeze({ id: homeMarker.id, position: homeMarker.coordinate, label: homeMarker.label, kind: "organization-marker" as const, privacyLabel: homeMarker.accessibleLocationLabel, activated: true }),
     ...providers.flatMap((provider) => provider.marker ? [Object.freeze({ id: provider.marker.id, position: provider.marker.coordinate, label: provider.displayName, kind: "organization-marker" as const, privacyLabel: provider.marker.accessibleLocationLabel, activated: true })] : []),
   ]), [homeMarker, providers]);
-  const serviceFields: readonly ControlledLocalityServiceField[] = useMemo(() => providers.map((provider) => Object.freeze({ id: `service-field-${String(provider.organizationId)}`, label: `${provider.displayName} service territory`, geometry: provider.territory.geometry as ControlledLocalityServiceField["geometry"], selected: String(provider.organizationId) === selectedId })), [providers, selectedId]);
+  const serviceFields: readonly ControlledLocalityServiceField[] = useMemo(() => providers.map((provider) => Object.freeze({ id: `service-field-${String(provider.organizationId)}`, label: `${provider.displayName} service territory`, geometry: provider.territory.geometry as ControlledLocalityServiceField["geometry"], selected: String(provider.organizationId) === queryState.providerId })), [providers, queryState.providerId]);
+
+  function updateWorkspaceQuery(updates: Readonly<Partial<Record<"q" | "availability" | "provider" | "request", string | null | undefined>>>) {
+    const next = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(updates)) {
+      if (!value || (key === "availability" && value === "all")) next.delete(key);
+      else next.set(key, value);
+    }
+    const destination = `${pathname}${next.size ? `?${next.toString()}` : ""}`;
+    startNavigation(() => router.replace(destination, { scroll: false }));
+  }
+
+  function refreshAuthoritativeState() {
+    startNavigation(() => router.refresh());
+  }
 
   async function post(url: string, body: Record<string, unknown>) {
     const response = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -104,7 +119,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, providers, resourc
     setBusy(true); setNotice(null);
     try {
       const sharedFields = ["sender-organization", "summary"];
-      await post("/api/referrals", { action: "create-and-send", commandId, recipientKind: "organization", recipientOrganizationId: String(selected.organizationId), recipientLabel: selected.displayName, need: "introduction", summary, urgency: "standard", preferredContactMethod: "platform", purpose: "provider-connection", providerOrganizationId: String(selected.organizationId), serviceId, publicationVersion: selected.publicationVersion, sharedFields, consentAcknowledged: true });
+      const result = await post("/api/referrals", { action: "create-and-send", commandId, recipientKind: "organization", recipientOrganizationId: String(selected.organizationId), recipientLabel: selected.displayName, need: "introduction", summary, urgency: "standard", preferredContactMethod: "platform", purpose: "provider-connection", providerOrganizationId: String(selected.organizationId), serviceId, publicationVersion: selected.publicationVersion, sharedFields, consentAcknowledged: true });
       clearRetryStableCommand({
         storage: browserSessionStorage(),
         storageKey: providerRequestStorageKey,
@@ -112,7 +127,12 @@ export function ResourceNetworkWorkspace({ model, homeMarker, providers, resourc
       });
       providerRequestCommandRef.current = null;
       setNotice(`Request sent to ${selected.displayName}.`);
-      window.location.reload();
+      const referral = typeof result.referral === "object" && result.referral
+        ? result.referral as Record<string, unknown>
+        : null;
+      const requestId = typeof referral?.id === "string" ? referral.id : null;
+      if (requestId) updateWorkspaceQuery({ request: requestId });
+      else refreshAuthoritativeState();
     } catch (error) {
       // An uncertain response keeps the same command in memory and actor-scoped session storage.
       // Re-entering the same provider, service, publication and summary after reload replays it.
@@ -123,14 +143,14 @@ export function ResourceNetworkWorkspace({ model, homeMarker, providers, resourc
 
   async function resourceAction(body: Record<string, unknown>) {
     setBusy(true); setNotice(null);
-    try { await post("/api/resources", { ...body, commandId: `resource-${crypto.randomUUID()}` }); window.location.reload(); }
+    try { await post("/api/resources", { ...body, commandId: `resource-${crypto.randomUUID()}` }); refreshAuthoritativeState(); }
     catch (error) { setNotice(error instanceof Error ? error.message : "Resource action failed."); }
     finally { setBusy(false); }
   }
 
   async function referralAction(body: Record<string, unknown>) {
     setBusy(true); setNotice(null);
-    try { await post("/api/referrals", { ...body, commandId: `provider-request-${crypto.randomUUID()}` }); window.location.reload(); }
+    try { await post("/api/referrals", { ...body, commandId: `provider-request-${crypto.randomUUID()}` }); refreshAuthoritativeState(); }
     catch (error) { setNotice(error instanceof Error ? error.message : "Provider request action failed."); }
     finally { setBusy(false); }
   }
@@ -140,17 +160,41 @@ export function ResourceNetworkWorkspace({ model, homeMarker, providers, resourc
       <MapboxLocalityCanvas model={model} pointOverlays={pointOverlays} serviceFields={serviceFields} overlaySide="split" />
       <aside className={styles.panel}>
         <header><p className={styles.eyebrow}>{t("resourceNetworkWorkspace.eyebrow")}</p><h1>{t("resourceNetworkWorkspace.title")}</h1><p>{t("resourceNetworkWorkspace.supporting")}</p></header>
-        <div className={styles.filters}><label>{t("resourceNetworkWorkspace.search")}<input value={query} onChange={(event) => setQuery(event.target.value)} type="search" placeholder="Capital, workshops, assistance…" /></label><label>{t("resourceNetworkWorkspace.availability")}<select value={availability} onChange={(event) => setAvailability(event.target.value)}><option value="all">All maintained states</option><option value="available">Available</option><option value="limited">Limited</option><option value="unknown">Unknown</option></select></label></div>
+        <form className={styles.filters} onSubmit={(event) => {
+          event.preventDefault();
+          const data = new FormData(event.currentTarget);
+          updateWorkspaceQuery({
+            q: String(data.get("q") ?? ""),
+            availability: String(data.get("availability") ?? "all"),
+            provider: null,
+          });
+        }}>
+          <label>{t("resourceNetworkWorkspace.search")}<input key={`q:${queryState.query}`} name="q" defaultValue={queryState.query} type="search" maxLength={160} placeholder="Capital, workshops, assistance…" /></label>
+          <label>{t("resourceNetworkWorkspace.availability")}<select key={`availability:${queryState.availability}`} name="availability" defaultValue={queryState.availability}><option value="all">All maintained states</option><option value="available">Available</option><option value="limited">Limited</option><option value="unknown">Unknown</option></select></label>
+          <button disabled={actionBusy} type="submit">{t("resourceNetworkWorkspace.applyFilters")}</button>
+        </form>
         {notice ? <p className={styles.notice} role="status">{notice}</p> : null}
         <div className={styles.columns}>
-          <section aria-label="Provider results"><h2>{visible.length} {t("resourceNetworkWorkspace.providers")}</h2>{visible.length ? <ul className={styles.list}>{visible.map((provider) => <li key={String(provider.organizationId)}><button type="button" aria-current={String(provider.organizationId) === selectedId} onClick={() => setSelectedId(String(provider.organizationId))}><strong>{provider.displayName}</strong><span>{provider.services.map((service) => service.name).join(" · ")}</span><small>{provider.match.reasons.join(" · ")}</small></button></li>)}</ul> : <div className={styles.empty}><strong>{t("resourceNetworkWorkspace.empty")}</strong><p>Try broader terms or another maintained availability state.</p></div>}</section>
-          <section className={styles.detail} aria-live="polite">{selected ? <><p className={styles.status}>{readable(selected.availability)} · {selected.territory.name}</p><h2>{selected.displayName}</h2><p>{selected.populationsServed}</p><dl><div><dt>Eligibility</dt><dd>{selected.eligibility}</dd></div><div><dt>Intake</dt><dd>{selected.intakeMethod}</dd></div><div><dt>Languages</dt><dd>{selected.languages.join(", ")}</dd></div><div><dt>Modalities</dt><dd>{selected.modalities.map(readable).join(", ")}</dd></div></dl><form action={connect} className={styles.form}><label>Service<select name="serviceId" required>{selected.services.map((service) => <option key={service.id} value={service.id}>{service.name} · {readable(service.availability)}</option>)}</select></label><label>What do you need?<textarea name="summary" required maxLength={1200} /></label><WorkflowExplainer explainerKey="provider-connection" /><label className={styles.check}><input name="consent" value="yes" type="checkbox" required />Share my organization name and this summary only with {selected.displayName}.</label><button disabled={busy} type="submit">Send provider request</button></form></> : <p>Select a provider to see its published services and territory.</p>}</section>
+          <section aria-label="Provider results"><h2>{providers.length} {t("resourceNetworkWorkspace.providers")}</h2>{providers.length ? <ul className={styles.list}>{providers.map((provider) => <li key={String(provider.organizationId)}><button type="button" aria-current={String(provider.organizationId) === queryState.providerId} disabled={actionBusy} onClick={() => updateWorkspaceQuery({ provider: String(provider.organizationId) })}><strong>{provider.displayName}</strong><span>{provider.services.map((service) => service.name).join(" · ")}</span><small>{provider.match.reasons.join(" · ")}</small></button></li>)}</ul> : <div className={styles.empty}><strong>{t("resourceNetworkWorkspace.empty")}</strong><p>Try broader terms or another maintained availability state.</p></div>}</section>
+          <section className={styles.detail} aria-live="polite">{selected ? <><p className={styles.status}>{readable(selected.availability)} · {selected.territory.name}</p><h2>{selected.displayName}</h2><p>{selected.populationsServed}</p><dl><div><dt>Eligibility</dt><dd>{selected.eligibility}</dd></div><div><dt>Intake</dt><dd>{selected.intakeMethod}</dd></div><div><dt>Languages</dt><dd>{selected.languages.join(", ")}</dd></div><div><dt>Modalities</dt><dd>{selected.modalities.map(readable).join(", ")}</dd></div></dl><form action={connect} className={styles.form}><label>Service<select name="serviceId" required>{selected.services.map((service) => <option key={service.id} value={service.id}>{service.name} · {readable(service.availability)}</option>)}</select></label><label>What do you need?<textarea name="summary" required maxLength={1200} /></label><WorkflowExplainer explainerKey="provider-connection" /><label className={styles.check}><input name="consent" value="yes" type="checkbox" required />Share my organization name and this summary only with {selected.displayName}.</label><button disabled={actionBusy} type="submit">Send provider request</button></form></> : <p>Select a provider to see its published services and territory.</p>}</section>
         </div>
         <section className={styles.fieldAlternative} aria-label="Accessible service territory descriptions"><h2>Service territories</h2><ul>{providers.map((provider) => <li key={String(provider.organizationId)}><strong>{provider.displayName}</strong><span>Serves {provider.territory.name}; this field is separate from the provider&apos;s office marker.</span></li>)}</ul></section>
         {resources.length ? <section className={styles.resources}><h2>Published resources</h2><ul>{resources.map((resource) => <li key={resource.id}><strong>{resource.title}</strong><span>{resource.providerDisplayName} · {readable(resource.kind)}</span><p>{resource.summary}</p>{resource.intakeUrl ? <a href={resource.intakeUrl}>Open intake information</a> : null}</li>)}</ul></section> : null}
-        <section className={styles.requests}><h2>Provider requests</h2>{providerReferrals.length ? <ul>{providerReferrals.map((referral) => <li key={referral.id}><strong>{referral.role === "sender" ? referral.recipientLabel : referral.senderOrganizationName}</strong><span>{readable(referral.status)}</span>{referral.notificationStatus === "delivery-outcome-unknown" ? <p className={styles.notice} role="status">{t("referralWorkspace.notificationStates.deliveryOutcomeUnknown")}</p> : null}<p>{referral.summary}</p>{referral.role === "recipient" && referral.status === "sent" ? <div><WorkflowExplainer explainerKey="provider-response" /><button disabled={busy} onClick={() => referralAction({ action: "accepted", referralId: referral.id, expectedVersion: referral.version })}>Accept</button><button disabled={busy} onClick={() => referralAction({ action: "declined", referralId: referral.id, expectedVersion: referral.version })}>Decline</button><form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); referralAction({ action: "redirected", referralId: referral.id, expectedVersion: referral.version, suggestedProviderOrganizationId: data.get("provider"), redirectReason: data.get("reason") }); }}><label>Suggest another published provider<select name="provider" required><option value="">Choose provider</option>{providers.filter((provider) => String(provider.organizationId) !== String(referral.providerContext?.providerOrganizationId)).map((provider) => <option key={String(provider.organizationId)} value={String(provider.organizationId)}>{provider.displayName}</option>)}</select></label><label>Reason<input name="reason" required maxLength={600} /></label><button disabled={busy}>Redirect</button></form></div> : null}{["sent", "accepted", "contacted"].includes(referral.status) ? <form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); resourceAction({ action: "message-add", referralId: referral.id, message: data.get("message") }); }}><label>Private request message<textarea name="message" required maxLength={2000} /></label><button disabled={busy}>Add message</button></form> : null}{referral.providerRedirect ? <p>Suggested provider: {referral.providerRedirect.suggestedProviderDisplayName}. {referral.providerRedirect.reason}</p> : null}</li>)}</ul> : <p>No provider requests yet.</p>}</section>
-        {owner?.serviceProfile ? <OwnerManagement owner={Object.freeze({ ...owner, serviceProfile: owner.serviceProfile })} busy={busy} onSubmit={resourceAction} /> : null}
-        {Object.values(messageThreads).some((messages) => messages.length) ? <section className={styles.requests}><h2>Request communication history</h2>{Object.entries(messageThreads).map(([referralId, messages]) => { const referral = providerReferrals.find((candidate) => candidate.id === referralId); return messages.length && referral ? <article key={referralId}><strong>{referral.role === "recipient" ? referral.senderOrganizationName : referral.recipientLabel}</strong><ol>{messages.map((message) => <li key={message.id}><small>{requestPartyLabel(referral, String(message.authorOrganizationId))} · {new Date(message.createdAt).toLocaleString()}</small><p>{message.body}</p></li>)}</ol></article> : null; })}</section> : null}
+        <section className={styles.requests}>
+          <h2>Provider requests</h2>
+          {providerReferrals.length ? <ul>{providerReferrals.map((referral) => <li key={referral.id}>
+            <strong>{referral.role === "sender" ? referral.recipientLabel : referral.senderOrganizationName}</strong>
+            <span>{readable(referral.status)}</span>
+            {referral.notificationStatus === "delivery-outcome-unknown" ? <p className={styles.notice} role="status">{t("referralWorkspace.notificationStates.deliveryOutcomeUnknown")}</p> : null}
+            <p>{referral.summary}</p>
+            <button type="button" aria-current={referral.id === queryState.requestId} disabled={actionBusy} onClick={() => updateWorkspaceQuery({ request: referral.id })}>{t("resourceNetworkWorkspace.viewCommunication")}</button>
+            {referral.role === "recipient" && referral.status === "sent" ? <div><WorkflowExplainer explainerKey="provider-response" /><button disabled={actionBusy} onClick={() => referralAction({ action: "accepted", referralId: referral.id, expectedVersion: referral.version })}>Accept</button><button disabled={actionBusy} onClick={() => referralAction({ action: "declined", referralId: referral.id, expectedVersion: referral.version })}>Decline</button><form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); referralAction({ action: "redirected", referralId: referral.id, expectedVersion: referral.version, suggestedProviderOrganizationId: data.get("provider"), redirectReason: data.get("reason") }); }}><label>Suggest another published provider<select name="provider" required><option value="">Choose provider</option>{providers.filter((provider) => String(provider.organizationId) !== String(referral.providerContext?.providerOrganizationId)).map((provider) => <option key={String(provider.organizationId)} value={String(provider.organizationId)}>{provider.displayName}</option>)}</select></label><label>Reason<input name="reason" required maxLength={600} /></label><button disabled={actionBusy}>Redirect</button></form></div> : null}
+            {["sent", "accepted", "contacted"].includes(referral.status) ? <form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); resourceAction({ action: "message-add", referralId: referral.id, message: data.get("message") }); }}><label>Private request message<textarea name="message" required maxLength={2000} /></label><button disabled={actionBusy}>Add message</button></form> : null}
+            {referral.providerRedirect ? <p>Suggested provider: {referral.providerRedirect.suggestedProviderDisplayName}. {referral.providerRedirect.reason}</p> : null}
+          </li>)}</ul> : <p>No provider requests yet.</p>}
+        </section>
+        {owner?.serviceProfile ? <OwnerManagement owner={Object.freeze({ ...owner, serviceProfile: owner.serviceProfile })} busy={actionBusy} onSubmit={resourceAction} /> : null}
+        {selectedRequest ? <section className={styles.requests}><h2>Request communication history</h2><article><strong>{selectedRequest.role === "recipient" ? selectedRequest.senderOrganizationName : selectedRequest.recipientLabel}</strong>{selectedMessages.length ? <ol>{selectedMessages.map((message) => <li key={message.id}><small>{requestPartyLabel(selectedRequest, String(message.authorOrganizationId))} · {new Date(message.createdAt).toLocaleString()}</small><p>{message.body}</p></li>)}</ol> : <p>{t("resourceNetworkWorkspace.noMessages")}</p>}</article></section> : null}
       </aside>
     </SpatialWorkspace>
   </ParticipantShell>;
