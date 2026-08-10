@@ -322,7 +322,7 @@ export function createIndustryProfile(input: Readonly<{
   now: string;
 }>): OrganizationIndustryProfile {
   if (!Number.isSafeInteger(input.revision) || input.revision < 1) throw new Error("Industry profile revision must be a positive integer.");
-  if (input.industries.length > 20 || input.naics.length > 30) throw new Error("Industry context exceeds supported limits.");
+  if (input.industries.length > 20 || input.naics.length > 60) throw new Error("Industry context exceeds supported limits.");
   return Object.freeze({
     id: String(input.organizationId), organizationId: input.organizationId, revision: input.revision,
     industries: Object.freeze(input.industries.map((item) => Object.freeze({

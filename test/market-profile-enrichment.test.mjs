@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 
 import { authenticatedServerContext } from "../src/application/auth/server-session.ts";
@@ -20,6 +21,13 @@ const CAPABILITY = Object.freeze({
 });
 const MARKET_ROLE = Object.freeze({ market_role_id: "AMACS-MROLE-000003", preferred_label: "Service provider" });
 const NAICS_INDUSTRY = Object.freeze({ code: "236220", title: "Commercial and Institutional Building Construction" });
+const NAICS_INDUSTRIES = Object.freeze([
+  NAICS_INDUSTRY,
+  ...Array.from({ length: 29 }, (_, index) => Object.freeze({
+    code: String(310001 + index),
+    title: `Governed test industry ${index + 1}`,
+  })),
+]);
 
 function fixture(rolePreset = "primary-administrator", options = {}) {
   const organization = createOrganizationAccount({ id: "org-market-profile", now: NOW });
@@ -74,9 +82,9 @@ function fixture(rolePreset = "primary-administrator", options = {}) {
       async getRequestFamily() { return null; }, async getRequirementType() { return null; }, async getResponseTemplate() { return null; }, async getDecisionTemplate() { return null; }, async getReadinessRules() { return []; }, async getConceptInterpretationGuidance() { return null; }, async resolveHistoricalCapability() { return null; },
     },
     naicsCatalog: {
-      async getRelease() { return { version: "2022", sourceName: "U.S. Census Bureau", sourceUrl: "https://www.census.gov/naics/", retrievedAt: "2026-08-10", sourceSha256: "a".repeat(64), level: 6, entryCount: 1 }; },
-      async listIndustries() { return [NAICS_INDUSTRY]; },
-      async getIndustry(code, version) { return code === NAICS_INDUSTRY.code && version === "2022" ? NAICS_INDUSTRY : null; },
+      async getRelease() { return { version: "2022", sourceName: "U.S. Census Bureau", sourceUrl: "https://www.census.gov/naics/", retrievedAt: "2026-08-10", sourceSha256: "a".repeat(64), level: 6, entryCount: NAICS_INDUSTRIES.length }; },
+      async listIndustries() { return NAICS_INDUSTRIES; },
+      async getIndustry(code, version) { return version === "2022" ? NAICS_INDUSTRIES.find((industry) => industry.code === code) ?? null : null; },
       async getProjection() { throw new Error("unused"); },
     },
     interpretations: {
@@ -190,6 +198,29 @@ test("industry command replay remains idempotent after the profile revision adva
   assert.equal(f.state.events.length, 1);
 });
 
+test("an exact pre-revision industry receipt replays before migrated request validation", async () => {
+  const f = fixture();
+  const commandId = "command-pre-revision-industry";
+  const legacyInput = { industries: [], naics: [] };
+  f.state.commands.set(commandId, Object.freeze({
+    id: commandId,
+    organizationId: f.organization.id,
+    action: "industry-context-updated",
+    resultId: f.organization.id,
+    requestFingerprint: createHash("sha256").update(JSON.stringify(legacyInput)).digest("hex"),
+    actorUserId: f.user.id,
+    recordedAt: NOW,
+  }));
+
+  const replay = await f.service.updateIndustry(
+    { ...f.scope, commandId },
+    legacyInput,
+  );
+  assert.equal(replay.replayed, true);
+  assert.equal(f.state.industry, null);
+  assert.equal(f.state.events.length, 0);
+});
+
 test("industry updates independently preserve history and replace the governed NAICS selection", async () => {
   const f = fixture();
   const current = Object.freeze({
@@ -296,6 +327,41 @@ test("industry persistence rejects a concurrent stale historical merge", async (
   assert.equal(f.state.industry.revision, 8);
   assert.deepEqual(f.state.industry.naics, []);
   assert.equal(f.state.commands.size, 0);
+});
+
+test("thirty governed NAICS selections remain independent of preserved history", async () => {
+  const f = fixture();
+  f.state.industry = Object.freeze({
+    id: f.organization.id,
+    organizationId: f.organization.id,
+    revision: 7,
+    industries: Object.freeze([]),
+    naics: Object.freeze([{
+      id: "naics-import-236220",
+      code: "236220",
+      title: "Commercial construction import",
+      version: "2022",
+      source: "authorized_import",
+      provenance: "Authorized migration record",
+      visibility: "network",
+    }]),
+    updatedByUserId: f.user.id,
+    updatedByMembershipId: f.membership.id,
+    updatedAt: NOW,
+  });
+
+  await f.service.updateIndustry(
+    { ...f.scope, commandId: "command-thirty-governed-plus-history" },
+    {
+      industries: [],
+      naics: NAICS_INDUSTRIES.map((industry) => ({ code: industry.code, version: "2022", visibility: "network" })),
+      preserveExistingNaics: true,
+      expectedIndustryRevision: 7,
+    },
+  );
+  assert.equal(f.state.industry.naics.length, 31);
+  assert.equal(f.state.industry.naics.filter((descriptor) => descriptor.source === "participant_selected").length, 30);
+  assert.equal(f.state.industry.naics.filter((descriptor) => descriptor.source === "authorized_import").length, 1);
 });
 
 test("industry updates reject invented or stale NAICS identities before persistence", async () => {

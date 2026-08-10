@@ -71,6 +71,8 @@ assert.match(marketService, /repository\.getIndustryProfile/);
 assert.match(marketService, /preserveExistingNaics/);
 assert.match(marketService, /isCanonicalGovernedDescriptor/);
 assert.match(marketService, /expectedIndustryRevision/);
+assert.match(marketService, /MAX_GOVERNED_NAICS_SELECTIONS/);
+assert.match(marketService, /MAX_PRESERVED_HISTORICAL_NAICS/);
 assert.doesNotMatch(marketService, /selectedIdentities/);
 assert.doesNotMatch(marketRepository, /normalizedTimestamp|toDate\(\)\.toISOString/);
 assert.match(marketRepository, /expectedRecordRevision/);

@@ -66,6 +66,9 @@ export interface MarketProfileCommandScope {
   readonly commandId: string;
 }
 
+const MAX_GOVERNED_NAICS_SELECTIONS = 30;
+const MAX_PRESERVED_HISTORICAL_NAICS = 30;
+
 function fingerprint(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
@@ -280,6 +283,9 @@ export class MarketProfileService {
     expectedIndustryRevision: number;
   }>) {
     const authorization = await this.authorize(scope);
+    const requestFingerprint = fingerprint(input);
+    const prior = await this.replay(scope, "industry-context-updated", requestFingerprint);
+    if (prior) return Object.freeze({ replayed: true as const, receipt: prior });
     if (
       !Array.isArray(input.industries) ||
       !Array.isArray(input.naics) ||
@@ -287,13 +293,10 @@ export class MarketProfileService {
       !Number.isSafeInteger(input.expectedIndustryRevision) ||
       input.expectedIndustryRevision < 0 ||
       input.industries.length > 20 ||
-      input.naics.length > 30
+      input.naics.length > MAX_GOVERNED_NAICS_SELECTIONS
     ) {
       throw new MarketProfileError("invalid", "Industry context exceeds supported limits.");
     }
-    const requestFingerprint = fingerprint(input);
-    const prior = await this.replay(scope, "industry-context-updated", requestFingerprint);
-    if (prior) return Object.freeze({ replayed: true as const, receipt: prior });
     const [release, existingProfile] = await Promise.all([
       this.dependencies.naicsCatalog.getRelease(),
       this.dependencies.repository.getIndustryProfile(authorization.organization.id),
@@ -351,8 +354,8 @@ export class MarketProfileService {
           return !isCanonicalGovernedDescriptor ? descriptor : null;
         }))).filter((descriptor) => descriptor !== null)
       : [];
-    if (preservedNaics.length + naics.length > 30) {
-      throw new MarketProfileError("invalid", "Industry context exceeds supported limits.");
+    if (preservedNaics.length > MAX_PRESERVED_HISTORICAL_NAICS) {
+      throw new MarketProfileError("conflict", "Historical industry context exceeds the migration-safe preservation limit.");
     }
     const canonicalInput = Object.freeze({
       industries: input.industries,
