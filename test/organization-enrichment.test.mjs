@@ -122,6 +122,25 @@ test("credential commands are tenant-authorized, evidence-bound, auditable, and 
   await assert.rejects(viewer.service.upsertCredential(viewer.scope, { ...input, evidenceAssetIds: [] }), (error) => error instanceof OrganizationEnrichmentError && error.code === "forbidden");
 });
 
+test("malformed credential evidence identity remains a typed participant input error", async () => {
+  const fx = fixture();
+  const m = memory(fx);
+  await assert.rejects(
+    m.service.upsertCredential(m.scope, {
+      id: "credential-license",
+      kind: "license",
+      label: "Contractor license",
+      issuer: "Virginia DPOR",
+      sourceLabel: "Organization upload",
+      evidenceAssetIds: ["invalid evidence/id"],
+      visibility: "network",
+    }),
+    (error) => error instanceof OrganizationEnrichmentError && error.code === "invalid",
+  );
+  assert.equal(m.state.commands.size, 0);
+  assert.equal(m.state.credentials.length, 0);
+});
+
 test("ORG-018 publishes only explicit non-sensitive metadata through controlled delivery", async () => {
   const fx = fixture();
   const m = memory(fx);

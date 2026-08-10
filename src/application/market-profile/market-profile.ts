@@ -32,6 +32,18 @@ export class MarketProfileError extends Error {
   }
 }
 
+function marketProfileInput<T>(operation: () => T, fallbackMessage: string): T {
+  try {
+    return operation();
+  } catch (error) {
+    if (error instanceof MarketProfileError) throw error;
+    throw new MarketProfileError(
+      "invalid",
+      error instanceof Error ? error.message : fallbackMessage,
+    );
+  }
+}
+
 export interface MarketProfileServiceDependencies {
   readonly authorization: OrganizationOperationAuthorizationDependencies;
   readonly catalog: AmacsCatalogPort;
@@ -223,7 +235,7 @@ export class MarketProfileService {
     }
 
     const now = this.now();
-    const claim = createOrganizationCapabilityClaim({
+    const claim = marketProfileInput(() => createOrganizationCapabilityClaim({
       id: input.claimId ?? `capclaim_${fingerprint(scope.commandId).slice(0, 40)}`,
       organizationId: authorization.organization.id,
       capability,
@@ -239,7 +251,7 @@ export class MarketProfileService {
       userId: authorization.context.user.id,
       membershipId: authorization.membership.id,
       now,
-    });
+    }), "Capability claim is invalid.");
     const receipt = await this.persist({ scope, authorization, action: "capability-claimed", subjectId: claim.id, requestFingerprint, record: { kind: "capability", value: claim }, now });
     return Object.freeze({ replayed: false as const, receipt, claim });
   }
@@ -253,7 +265,10 @@ export class MarketProfileService {
     const prior = await this.replay(scope, "industry-context-updated", requestFingerprint);
     if (prior) return Object.freeze({ replayed: true as const, receipt: prior });
     const now = this.now();
-    const profile = createIndustryProfile({ organizationId: authorization.organization.id, ...input, userId: authorization.context.user.id, membershipId: authorization.membership.id, now });
+    const profile = marketProfileInput(
+      () => createIndustryProfile({ organizationId: authorization.organization.id, ...input, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
+      "Industry context is invalid.",
+    );
     const receipt = await this.persist({ scope, authorization, action: "industry-context-updated", subjectId: profile.id, requestFingerprint, record: { kind: "industry", value: profile }, now });
     return Object.freeze({ replayed: false as const, receipt, profile });
   }
@@ -269,7 +284,10 @@ export class MarketProfileService {
       throw new MarketProfileError("invalid", "Past performance can reference only this organization’s capability claims.");
     }
     const now = this.now();
-    const record = createPastPerformance({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now });
+    const record = marketProfileInput(
+      () => createPastPerformance({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
+      "Past performance is invalid.",
+    );
     const receipt = await this.persist({ scope, authorization, action: "past-performance-added", subjectId: record.id, requestFingerprint, record: { kind: "past-performance", value: record }, now });
     return Object.freeze({ replayed: false as const, receipt, record });
   }
@@ -280,7 +298,10 @@ export class MarketProfileService {
     const prior = await this.replay(scope, "preferences-updated", requestFingerprint);
     if (prior) return Object.freeze({ replayed: true as const, receipt: prior });
     const now = this.now();
-    const preferences = createMarketPreferences({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now });
+    const preferences = marketProfileInput(
+      () => createMarketPreferences({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
+      "Market preferences are invalid.",
+    );
     const receipt = await this.persist({ scope, authorization, action: "preferences-updated", subjectId: preferences.id, requestFingerprint, record: { kind: "preferences", value: preferences }, now });
     return Object.freeze({ replayed: false as const, receipt, preferences });
   }
@@ -295,7 +316,10 @@ export class MarketProfileService {
       if (!domains.some((domain) => domain.domainId === input.suggestedDomainId)) throw new MarketProfileError("invalid", "Suggested AMACS domain is unavailable.");
     }
     const now = this.now();
-    const proposal = createProvisionalTerm({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now });
+    const proposal = marketProfileInput(
+      () => createProvisionalTerm({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
+      "Provisional term is invalid.",
+    );
     const receipt = await this.persist({ scope, authorization, action: "provisional-term-submitted", subjectId: proposal.id, requestFingerprint, record: { kind: "provisional-term", value: proposal }, now });
     return Object.freeze({ replayed: false as const, receipt, proposal });
   }

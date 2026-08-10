@@ -149,6 +149,24 @@ test("industry, past performance, preferences, and provisional terms preserve th
   assert.equal(f.state.terms[0].status, "submitted");
 });
 
+test("market-profile model validation remains a typed participant input error", async () => {
+  const f = fixture();
+  const industries = Array.from({ length: 21 }, (_, index) => ({
+    id: `industry-${index}`,
+    label: `Industry ${index}`,
+    visibility: "network",
+  }));
+  await assert.rejects(
+    f.service.updateIndustry(
+      { ...f.scope, commandId: "command-invalid-industry" },
+      { industries, naics: [] },
+    ),
+    (error) => error instanceof MarketProfileError && error.code === "invalid",
+  );
+  assert.equal(f.state.commands.size, 0);
+  assert.equal(f.state.industry, null);
+});
+
 test("network/public capability projections enforce visibility without exposing private evidence", async () => {
   const f = fixture();
   const result = await f.service.claimCapability(f.scope, { ...f.claimInput, evidenceIds: ["private-evidence-1"], visibility: "network" });
