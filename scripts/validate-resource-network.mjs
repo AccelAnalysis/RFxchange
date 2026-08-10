@@ -9,6 +9,7 @@ const service = read("src/application/resource-network/resource-network.ts");
 const repository = read("src/infrastructure/firestore/resource-network.ts");
 const rules = read("firestore.rules");
 const ui = read("src/components/resource-network/ResourceNetworkWorkspace.tsx");
+const page = read("app/resources/page.tsx");
 const map = read("src/components/map/MapboxLocalityCanvas.tsx");
 const referral = read("src/domain/referrals/model.ts") + read("src/application/referrals/referral-network.ts");
 const configuredAcceptance = read("scripts/acceptance-resource-network-configured.mjs");
@@ -23,6 +24,10 @@ assert.doesNotMatch(service, /OpenAI|Anthropic|generateText|capacityScore|inferr
 assert.match(referral, /provider-connection/);
 assert.match(referral, /suggestedProviderOrganizationId/);
 assert.match(ui, /consent/is);
+assert.doesNotMatch(ui, /window\.location\.reload/);
+assert.match(ui, /router\.refresh\(\)/);
+assert.match(page, /selectedRequestId\s*\?\s*await service\.messages/);
+assert.doesNotMatch(page, /Promise\.all\(requestReferrals\.map/);
 assert.match(map, /rfx-provider-service-fields/);
 assert.match(configuredAcceptance, /RFXCHANGE_EXPECTED_PROJECT_ID/);
 assert.match(configuredAcceptance, /assert\.deepEqual\(residualRecords, \[\]\)/);

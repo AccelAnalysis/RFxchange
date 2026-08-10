@@ -117,6 +117,25 @@
   font-weight: 700;
 }
 
+.optionalPanel {
+  max-width: 1180px;
+  margin: 18px auto 0;
+  border-radius: 20px;
+  background: rgba(255, 253, 247, 0.88);
+  padding: 22px;
+  color: #5f594e;
+}
+
+.optionalPanel h2 {
+  margin: 0 0 8px;
+  color: #171511;
+  font-size: 1.1rem;
+}
+
+.optionalPanel p {
+  margin: 0;
+}
+
 @media (max-width: 760px) {
   .page {
     padding: 22px 16px 32px;
