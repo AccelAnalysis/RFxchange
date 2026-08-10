@@ -181,6 +181,8 @@
     "industrySavedTitle": "Contesto di settore salvato",
     "industrySavedBody": "Settore e NAICS sono contesto descrittivo. Non provano capacità o preparazione agli appalti.",
     "industryErrorTitle": "Contesto di settore non salvato",
+    "industryConflictTitle": "Contesto di settore aggiornato",
+    "industryConflictBody": "Un altro aggiornamento autorizzato ha modificato questo profilo. È stato ripristinato il contesto di settore e NAICS più recente; controllalo prima di salvare di nuovo.",
     "experienceSavedTitle": "Esperienza passata salvata",
     "experienceSavedBody": "Il progetto è registrato come autodichiarazione dell’organizzazione. Non sono state assegnate conferma, verifica, qualificazione o credibilità.",
     "experienceErrorTitle": "Esperienza passata non salvata",

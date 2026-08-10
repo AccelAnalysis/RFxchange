@@ -181,6 +181,8 @@
     "industrySavedTitle": "Contexto industrial guardado",
     "industrySavedBody": "Industria y NAICS son contexto descriptivo. No prueban capacidad ni preparación para adquisiciones.",
     "industryErrorTitle": "No se guardó el contexto industrial",
+    "industryConflictTitle": "Contexto industrial actualizado",
+    "industryConflictBody": "Otra actualización autorizada cambió este perfil. Se restauró el contexto más reciente de industria y NAICS; revíselo antes de volver a guardar.",
     "experienceSavedTitle": "Experiencia previa guardada",
     "experienceSavedBody": "El proyecto queda registrado como autodeclaración de la organización. No se otorgó confirmación, verificación, calificación ni credibilidad.",
     "experienceErrorTitle": "No se guardó la experiencia previa",

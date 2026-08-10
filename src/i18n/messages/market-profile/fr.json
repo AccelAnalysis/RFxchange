@@ -181,6 +181,8 @@
     "industrySavedTitle": "Contexte sectoriel enregistré",
     "industrySavedBody": "Le secteur et le NAICS sont des éléments descriptifs. Ils ne prouvent ni capacité ni aptitude aux marchés publics.",
     "industryErrorTitle": "Contexte sectoriel non enregistré",
+    "industryConflictTitle": "Contexte sectoriel actualisé",
+    "industryConflictBody": "Une autre mise à jour autorisée a modifié ce profil. Le contexte sectoriel et NAICS le plus récent a été restauré ; vérifiez-le avant de l’enregistrer à nouveau.",
     "experienceSavedTitle": "Expérience passée enregistrée",
     "experienceSavedBody": "Le projet est enregistré comme autodéclaration de l’organisation. Aucune confirmation, vérification, qualification ou crédibilité n’a été accordée.",
     "experienceErrorTitle": "Expérience passée non enregistrée",

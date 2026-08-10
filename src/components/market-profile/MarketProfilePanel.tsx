@@ -45,6 +45,16 @@ interface MarketProfilePanelProps {
 
 const GOVERNED_RESULT_INCREMENT = 30;
 
+class MarketProfileRequestError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "MarketProfileRequestError";
+  }
+}
+
 async function postJson(path: string, body: unknown) {
   const response = await fetch(path, {
     method: "POST",
@@ -52,7 +62,7 @@ async function postJson(path: string, body: unknown) {
     body: JSON.stringify(body),
   });
   const result = await response.json().catch(() => ({})) as Record<string, unknown>;
-  if (!response.ok) throw new Error(typeof result.error === "string" ? result.error : "The update could not be saved.");
+  if (!response.ok) throw new MarketProfileRequestError(response.status, typeof result.error === "string" ? result.error : "The update could not be saved.");
   return result;
 }
 
@@ -261,7 +271,12 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
     try {
       await postJson("/api/organization-market-profile", { organizationId: props.organizationId, commandId: commandId("industry"), action: "update-industry", input: { industries, naics, preserveExistingNaics, expectedIndustryRevision: props.snapshot.industry?.revision ?? 0 } });
       refreshAfter({ tone: "success", title: t("marketProfile.notices.industrySavedTitle"), body: t("marketProfile.notices.industrySavedBody") });
-    } catch {
+    } catch (error) {
+      if (error instanceof MarketProfileRequestError && error.status === 409) {
+        setNotice({ tone: "information", title: t("marketProfile.notices.industryConflictTitle"), body: t("marketProfile.notices.industryConflictBody") });
+        startTransition(() => router.refresh());
+        return;
+      }
       setNotice({ tone: "error", title: t("marketProfile.notices.industryErrorTitle"), body: t("marketProfile.notices.genericSaveError") });
     }
   }

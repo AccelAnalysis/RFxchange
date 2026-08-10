@@ -107,6 +107,7 @@ async function MarketProfileSection({
   if (!result.available) return <OptionalPanelState title={copy.marketProfileTitle} message={copy.marketProfileUnavailable} />;
   const marketProfile = result.value;
   return <MarketProfilePanel
+    key={`${organizationId}:industry:${marketProfile.snapshot.industry?.revision ?? 0}`}
     organizationId={organizationId}
     organizationName={organizationName}
     snapshot={marketProfile.snapshot}

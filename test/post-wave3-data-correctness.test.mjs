@@ -5,6 +5,8 @@ import test from "node:test";
 import { ImmutableNaicsCatalog } from "../src/infrastructure/naics/immutable-catalog.ts";
 
 const generated = new URL("../src/generated/naics/2022/", import.meta.url);
+const marketProfilePanel = await readFile(new URL("../src/components/market-profile/MarketProfilePanel.tsx", import.meta.url), "utf8");
+const organizationProfilePage = await readFile(new URL("../app/organization-profile/page.tsx", import.meta.url), "utf8");
 
 async function catalog() {
   const [release, entries] = await Promise.all([
@@ -32,4 +34,10 @@ test("NAICS catalog rejects duplicate, malformed, or metadata-inconsistent proje
   assert.throws(() => new ImmutableNaicsCatalog(release, [{ code: "236220", title: "One" }, { code: "236220", title: "Two" }]), /duplicate/);
   assert.throws(() => new ImmutableNaicsCatalog({ ...release, entryCount: 1 }, [{ code: "23622", title: "Malformed" }]), /malformed/);
   assert.throws(() => new ImmutableNaicsCatalog({ ...release, version: "2017" }, [{ code: "236220", title: "Construction" }, { code: "541330", title: "Engineering Services" }]), /metadata/);
+});
+
+test("industry revision conflicts refresh and rehydrate the governed selector", () => {
+  assert.match(marketProfilePanel, /error instanceof MarketProfileRequestError && error\.status === 409/);
+  assert.match(marketProfilePanel, /startTransition\(\(\) => router\.refresh\(\)\)/);
+  assert.match(organizationProfilePage, /key=\{`\$\{organizationId\}:industry:\$\{marketProfile\.snapshot\.industry\?\.revision \?\? 0\}`\}/);
 });

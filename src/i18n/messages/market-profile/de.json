@@ -181,6 +181,8 @@
     "industrySavedTitle": "Branchenkontext gespeichert",
     "industrySavedBody": "Branche und NAICS sind beschreibender Kontext. Sie belegen weder Fähigkeit noch Beschaffungsreife.",
     "industryErrorTitle": "Branchenkontext nicht gespeichert",
+    "industryConflictTitle": "Branchenkontext aktualisiert",
+    "industryConflictBody": "Eine andere autorisierte Aktualisierung hat dieses Profil geändert. Der neueste Branchen- und NAICS-Kontext wurde wiederhergestellt; prüfen Sie ihn vor dem erneuten Speichern.",
     "experienceSavedTitle": "Projekterfahrung gespeichert",
     "experienceSavedBody": "Das Projekt ist als Selbstauskunft der Organisation erfasst. Bestätigung, Prüfung, Qualifikation oder Glaubwürdigkeit wurden nicht vergeben.",
     "experienceErrorTitle": "Projekterfahrung nicht gespeichert",

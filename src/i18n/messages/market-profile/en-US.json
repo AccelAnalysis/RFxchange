@@ -181,6 +181,8 @@
     "industrySavedTitle": "Industry context saved",
     "industrySavedBody": "Industry and NAICS are descriptive context. They do not prove capability or procurement readiness.",
     "industryErrorTitle": "Industry context not saved",
+    "industryConflictTitle": "Industry context refreshed",
+    "industryConflictBody": "Another authorized update changed this profile. The latest industry and NAICS context has been restored; review it before saving again.",
     "experienceSavedTitle": "Past performance saved",
     "experienceSavedBody": "The project is recorded as organization self-report. No confirmation, verification, qualification, or credibility was awarded.",
     "experienceErrorTitle": "Past performance not saved",
