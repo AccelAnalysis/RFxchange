@@ -70,6 +70,11 @@ assert.match(referralWorkspace, /recipientLabel: recipientKind === "external" \?
 assert.match(referralWorkspace, /selected\.recipientKind === "external" && selected\.recipientOrganizationId !== null/);
 assert.match(retryCommand, /record\.fingerprint === fingerprint/);
 assert.match(retryCommand, /DEFAULT_MAX_AGE_MS/);
+assert.match(retryCommand, /shouldClearRetryStableCommandOnReviewBack/);
+assert.match(retryCommand, /markRetryStableCommandAttempted/);
+assert.match(retryCommand, /retryStableCommandWasAttempted/);
+assert.match(referralWorkspace, /attemptedCreateAndSendCommandIdRef/);
+assert.match(referralWorkspace, /onClick=\{backFromEducationReview\}/);
 
 assert.match(service, /type AtomicReferralAcquisitionIssuer/);
 assert.match(service, /prepare\(input:/);
@@ -104,6 +109,11 @@ assert.ok(
   runtime.indexOf("claimCommunicationDelivery") < runtime.indexOf("service.request"),
   "Provider delivery must occur only after durable current-state authority is claimed.",
 );
+assert.ok(
+  runtime.indexOf("recordCommunicationResult({ intent: current, claimId, receipt })") >
+    runtime.lastIndexOf("} catch (error) {"),
+  "Accepted-receipt persistence must remain outside provider-error classification.",
+);
 assert.match(acquisition, /prepareTrusted/);
 assert.match(architecture, /one `create-and-send` command/);
 assert.match(architecture, /failed Firestore transaction leaves no referral/);
@@ -112,6 +122,8 @@ assert.match(architecture, /organization and membership/);
 assert.match(architecture, /external recipient has not already attached/);
 assert.match(architecture, /delivery authority boundary atomically claims both/);
 assert.match(architecture, /durable delivery claim/i);
+assert.match(architecture, /failure while persisting that accepted receipt is propagated without rewriting the communication/);
+assert.match(architecture, /after an uncertain attempt, Back retains the matching command/);
 assert.match(architecture, /Retry action is hidden/);
 
 console.log("Referral and provider-request create-and-send transaction integrity validated.");

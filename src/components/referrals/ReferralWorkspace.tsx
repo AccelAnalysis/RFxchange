@@ -11,7 +11,10 @@ import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
 import {
   clearRetryStableCommand,
+  markRetryStableCommandAttempted,
   resolveRetryStableCommand,
+  retryStableCommandWasAttempted,
+  shouldClearRetryStableCommandOnReviewBack,
 } from "./retry-stable-command";
 
 import styles from "./ReferralWorkspace.module.css";
@@ -100,6 +103,7 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const createAndSendCommandRef = useRef<PendingCreateAndSend | null>(null);
+  const attemptedCreateAndSendCommandIdRef = useRef<string | null>(null);
   const commandStorageKey = `${REFERRAL_CREATE_SEND_STORAGE_KEY}:${encodeURIComponent(commandRecoveryScope)}`;
   const selected = referrals.find((referral) => referral.id === selectedId) ?? null;
 
@@ -162,6 +166,7 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
       commandId: pending?.commandId,
     });
     createAndSendCommandRef.current = null;
+    attemptedCreateAndSendCommandIdRef.current = null;
   }
 
   function closeComposer() {
@@ -176,10 +181,34 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
     setEducationOpen(true);
   }
 
+  function backFromEducationReview() {
+    const pending = createAndSendCommandRef.current;
+    const submissionAttempted = Boolean(pending && (
+      attemptedCreateAndSendCommandIdRef.current === pending.commandId ||
+      retryStableCommandWasAttempted({
+        storage: browserSessionStorage(),
+        storageKey: commandStorageKey,
+        commandId: pending.commandId,
+      })
+    ));
+    if (shouldClearRetryStableCommandOnReviewBack({
+      submissionAttempted,
+    })) {
+      clearPendingCommand();
+    }
+    setEducationOpen(false);
+  }
+
   async function acknowledgeCreateAndSend() {
     setBusy(true); setNotice(null);
     const operation = operationInput();
     const commandId = commandForFingerprint(operation.fingerprint);
+    attemptedCreateAndSendCommandIdRef.current = commandId;
+    markRetryStableCommandAttempted({
+      storage: browserSessionStorage(),
+      storageKey: commandStorageKey,
+      commandId,
+    });
     try {
       const result = await api({ action: "create-and-send", commandId, recipientKind, recipientOrganizationId, recipientLabel: operation.label, recipientEmail, need: "introduction", summary, urgency: "standard", preferredContactMethod: "email", purpose: "business-introduction", sharedFields: operation.sharedFields, consentAcknowledged: consent });
       const referral = result.referral as Readonly<{ id: string; version: number }>;
@@ -263,7 +292,7 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
             <h3>{t("referralWorkspace.education.title")}</h3><p>{t("referralWorkspace.education.body")}</p>
             <dl><div><dt>{t("referralWorkspace.education.recipient")}</dt><dd>{recipientKind === "organization" ? markerLookup.get(recipientOrganizationId)?.displayName : recipientLabel}</dd></div><div><dt>{t("referralWorkspace.education.shared")}</dt><dd>{t("referralWorkspace.education.sharedValue")}</dd></div></dl>
             <p>{t("referralWorkspace.education.states")}</p><p>{t("referralWorkspace.education.next")}</p>
-            <div className={styles.actions}><button type="button" onClick={() => { clearPendingCommand(); setEducationOpen(false); }}>{t("referralWorkspace.composer.back")}</button><button className={styles.primary} type="button" disabled={busy} onClick={acknowledgeCreateAndSend}>{busy ? t("referralWorkspace.composer.sending") : t("referralWorkspace.composer.acknowledge")}</button></div>
+            <div className={styles.actions}><button type="button" onClick={backFromEducationReview}>{t("referralWorkspace.composer.back")}</button><button className={styles.primary} type="button" disabled={busy} onClick={acknowledgeCreateAndSend}>{busy ? t("referralWorkspace.composer.sending") : t("referralWorkspace.composer.acknowledge")}</button></div>
           </div>}
         </section></div> : null}
       </SpatialWorkspace>

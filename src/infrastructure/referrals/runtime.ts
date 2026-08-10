@@ -13,6 +13,7 @@ import {
   type ReferralAcquisitionIssuer,
 } from "../../application/referrals/referral-network.ts";
 import { referralTransactionalEmailCatalog } from "../../application/referrals/referral-templates.ts";
+import type { TransactionalEmailDeliveryReceipt } from "../../domain/communications/transactional-email.ts";
 import type { ReferralCommunicationIntent } from "../../domain/referrals/model.ts";
 import { createServerAcquisitionContextService } from "../acquisition/runtime.ts";
 import { createServerFirebaseAccountSecurityService } from "../auth/firebase-account-security-runtime.ts";
@@ -160,12 +161,13 @@ export async function attemptReferralCommunication(
     return Object.freeze({ communication: claim.communication, blocked: true, attempted: false });
   }
   const current = claim.communication;
+  const service = new TransactionalEmailService(new MicrosoftGraphTransactionalEmailProvider(
+    configuration,
+    referralTransactionalEmailCatalog,
+  ));
+  let receipt: TransactionalEmailDeliveryReceipt;
   try {
-    const service = new TransactionalEmailService(new MicrosoftGraphTransactionalEmailProvider(
-      configuration,
-      referralTransactionalEmailCatalog,
-    ));
-    const receipt = await service.request({
+    receipt = await service.request({
       id: String(current.request.id), purpose: current.request.purpose,
       recipientEmail: String(current.request.recipient.email), recipientDisplayName: current.request.recipient.displayName,
       eventKey: String(current.request.eventKey), eventVersion: current.request.eventVersion,
@@ -176,8 +178,6 @@ export async function attemptReferralCommunication(
       relatedObjectType: current.request.metadata.relatedObjectType, relatedObjectId: current.request.metadata.relatedObjectId,
       tags: current.request.metadata.tags,
     });
-    const communication = await repository.recordCommunicationResult({ intent: current, claimId, receipt });
-    return Object.freeze({ communication, blocked: false, attempted: true });
   } catch (error) {
     const providerError = error instanceof TransactionalEmailProviderError ? error : null;
     const communication = await repository.recordCommunicationResult({
@@ -188,4 +188,10 @@ export async function attemptReferralCommunication(
     });
     return Object.freeze({ communication, blocked: false, attempted: true });
   }
+
+  // Receipt persistence is deliberately outside the provider-error catch. A provider may have
+  // accepted the message even when Firestore is temporarily unavailable; downgrading that accepted
+  // delivery to retryable-failure would expose a Retry action and permit a duplicate send.
+  const communication = await repository.recordCommunicationResult({ intent: current, claimId, receipt });
+  return Object.freeze({ communication, blocked: false, attempted: true });
 }

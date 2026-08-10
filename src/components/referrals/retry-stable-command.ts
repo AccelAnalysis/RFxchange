@@ -13,6 +13,7 @@ interface RetryStableCommandRecord {
   readonly fingerprint: string;
   readonly commandId: string;
   readonly createdAt: number;
+  readonly attemptedAt: number | null;
 }
 
 function parsedRecord(value: string | null): RetryStableCommandRecord | null {
@@ -25,7 +26,9 @@ function parsedRecord(value: string | null): RetryStableCommandRecord | null {
       typeof parsed.commandId !== "string" ||
       !COMMAND_PATTERN.test(parsed.commandId) ||
       typeof parsed.createdAt !== "number" ||
-      !Number.isFinite(parsed.createdAt)
+      !Number.isFinite(parsed.createdAt) ||
+      (parsed.attemptedAt !== undefined && parsed.attemptedAt !== null &&
+        (typeof parsed.attemptedAt !== "number" || !Number.isFinite(parsed.attemptedAt)))
     ) {
       return null;
     }
@@ -34,6 +37,7 @@ function parsedRecord(value: string | null): RetryStableCommandRecord | null {
       fingerprint: parsed.fingerprint,
       commandId: parsed.commandId,
       createdAt: parsed.createdAt,
+      attemptedAt: parsed.attemptedAt ?? null,
     });
   } catch {
     return null;
@@ -90,6 +94,7 @@ export function resolveRetryStableCommand(input: Readonly<{
         fingerprint: input.fingerprint,
         commandId,
         createdAt: now,
+        attemptedAt: null,
       } satisfies RetryStableCommandRecord));
     } catch {
       // The active component still retains the returned command identity for in-page retry.
@@ -112,5 +117,44 @@ export function clearRetryStableCommand(input: Readonly<{
     input.storage.removeItem(input.storageKey);
   } catch {
     // Clearing optional retry state must not affect the authoritative operation.
+  }
+}
+
+export function shouldClearRetryStableCommandOnReviewBack(input: Readonly<{
+  submissionAttempted: boolean;
+}>): boolean {
+  return !input.submissionAttempted;
+}
+
+export function markRetryStableCommandAttempted(input: Readonly<{
+  storage: CommandStorage | null;
+  storageKey: string;
+  commandId: string;
+  now?: () => number;
+}>): void {
+  if (!input.storage) return;
+  try {
+    const existing = parsedRecord(input.storage.getItem(input.storageKey));
+    if (!existing || existing.commandId !== input.commandId) return;
+    input.storage.setItem(input.storageKey, JSON.stringify({
+      ...existing,
+      attemptedAt: (input.now ?? Date.now)(),
+    } satisfies RetryStableCommandRecord));
+  } catch {
+    // Attempt metadata improves reload recovery but never grants operation authority.
+  }
+}
+
+export function retryStableCommandWasAttempted(input: Readonly<{
+  storage: CommandStorage | null;
+  storageKey: string;
+  commandId: string;
+}>): boolean {
+  if (!input.storage) return false;
+  try {
+    const existing = parsedRecord(input.storage.getItem(input.storageKey));
+    return existing?.commandId === input.commandId && existing.attemptedAt !== null;
+  } catch {
+    return false;
   }
 }

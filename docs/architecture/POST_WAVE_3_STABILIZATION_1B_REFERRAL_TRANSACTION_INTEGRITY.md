@@ -47,7 +47,7 @@ The participant interface creates the command identity when the user enters the 
 
 The storage namespace is scoped by the server-authorized organization and membership. Another organization or membership using the same browser tab cannot inherit the pending command identity. Session storage remains only a retry aid; authorization and replay authority remain server-side.
 
-An uncertain response can therefore be retried in place or after a same-tab browser reload. Reopening the composer does not clear a recoverable command. Intentional close/back from an active review and successful completion clear the matching recovery record. Storage unavailability degrades to in-page retention rather than blocking the action.
+An uncertain response can therefore be retried in place or after a same-tab browser reload. Reopening the composer does not clear a recoverable command. Back from review clears a command only before its first submission attempt; after an uncertain attempt, Back retains the matching command so returning to the same reviewed input still replays it. Intentional composer close/discard and successful completion clear the matching recovery record. Storage unavailability degrades to in-page retention rather than blocking the action.
 
 ## Replay after lifecycle changes
 
@@ -62,6 +62,8 @@ External delivery remains outside the Firestore transaction. The durable communi
 Automatic invitation delivery is permitted only while the authoritative referral remains `sent`, the communication intent is `queued` or `retryable-failure`, **and an external recipient has not already attached the referral to an organization**. Organization-recipient referrals are not blocked merely because their canonical recipient organization is attached at creation.
 
 The route performs an early policy check for clear HTTP behavior, but that snapshot is not delivery authority. When provider delivery is configured, the delivery authority boundary atomically claims both the durable communication intent and its current referral before invoking the provider and reapplies the same policy in that transaction. The claim is bounded beyond the Microsoft identity-plus-delivery network deadlines. Every referral lifecycle or recipient-attachment transaction inspects the same durable delivery claim and must retry rather than commit while provider delivery is in progress. Only the matching claimant can record the provider result and release the claim. This closes the former check-then-send interval: attachment or lifecycle advancement cannot race successfully with an obsolete provider invocation.
+
+Provider-error classification is limited to the provider request itself. Once Microsoft Graph accepts a message, a later transient failure while persisting that accepted receipt is propagated without rewriting the communication as `retryable-failure`; the interface therefore cannot offer Retry merely because accepted-receipt persistence failed.
 
 If lifecycle state advanced or an external recipient attached before the claim transaction, the provider request is not attempted. A competing retry likewise cannot acquire a second active claim. Explicit retry converts a boundary rejection into a 409 rather than reporting a delivery attempt. An expired claim may be replaced only after the provider adapter's bounded token and send deadlines plus safety margin have elapsed, preserving recovery from interrupted server execution without treating browser state as authority.
 
