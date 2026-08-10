@@ -36,5 +36,6 @@ export default async function ResourcesPage({ searchParams }: Props) {
   let owner = null;
   try { owner = await service.ownerSnapshot({ context: access.context, organizationId: String(access.membership.organizationId), membershipId: String(access.membership.id) }); }
   catch (error) { if (!(error instanceof ResourceNetworkError) || error.code !== "forbidden") throw error; }
-  return <ResourceNetworkWorkspace model={mapProjection.model} homeMarker={mapProjection.homeMarker} providers={resourceProjection.available ? resourceProjection.projection.providers : []} resources={resourceProjection.available ? resourceProjection.projection.resources : []} referrals={referrals} owner={owner} initialQuery={query} messageThreads={messageThreads} />;
+  const commandRecoveryScope = `${String(access.membership.organizationId)}:${String(access.membership.id)}`;
+  return <ResourceNetworkWorkspace model={mapProjection.model} homeMarker={mapProjection.homeMarker} providers={resourceProjection.available ? resourceProjection.projection.providers : []} resources={resourceProjection.available ? resourceProjection.projection.resources : []} referrals={referrals} owner={owner} commandRecoveryScope={commandRecoveryScope} initialQuery={query} messageThreads={messageThreads} />;
 }
