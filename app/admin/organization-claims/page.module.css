@@ -5,6 +5,8 @@
 .wordmark sup { margin-left: 2px; font-size: .38em; }
 .sidebar nav { display: grid; gap: 4px; margin-top: 58px; }
 .sidebar nav a { min-height: 42px; display: flex; align-items: center; padding: 0 12px; color: rgba(247,243,234,.58); border-radius: 9px; font-size: .78rem; text-decoration: none; }
+.sidebar nav a:has(small) { flex-direction: column; align-items: flex-start; justify-content: center; }
+.sidebar nav a small { max-width: 100%; overflow: hidden; color: rgba(247,243,234,.42); font-size: .65rem; text-overflow: ellipsis; }
 .sidebar nav a:hover, .sidebar nav .active { color: var(--warm-ivory); background: rgba(255,255,255,.08); }
 .sidebar nav .active { box-shadow: inset 3px 0 var(--rf-gold); }
 .scope { margin-top: 52px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.1); }
@@ -82,10 +84,11 @@
   .columns { grid-template-columns: 1fr; }
 }
 @media (max-width: 680px) {
+  .sidebar { align-items: stretch; flex-direction: column; gap: 10px; padding: 14px; }
+  .sidebar nav { width: 100%; overflow-x: auto; }
   .workspace { padding-inline: 14px; }
   .header { display: block; }
   .adminIdentity { margin-top: 14px; text-align: left; }
-  .sidebar nav a:not(.active) { display: none; }
   .reviewHeader { display: block; }
   .reviewHeader > span { display: inline-block; margin-top: 12px; }
   .timeline { grid-template-columns: 1fr; }

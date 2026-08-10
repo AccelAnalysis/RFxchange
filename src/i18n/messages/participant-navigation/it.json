@@ -5,5 +5,10 @@
   "referrals": "Segnalazioni",
   "resources": "Risorse",
   "quickStart": "Avvio rapido",
-  "account": "Account"
+  "account": "Account",
+  "administration": "Amministrazione",
+  "adminAriaLabel": "Navigazione del portale di amministrazione",
+  "organizationClaims": "Rivendicazioni delle organizzazioni",
+  "resourceProviders": "Fornitori di risorse",
+  "participantAccount": "Account partecipante"
 }

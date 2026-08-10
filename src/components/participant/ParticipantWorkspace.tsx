@@ -15,6 +15,7 @@ import { ParticipantTopNavigation, type ParticipantNavigationItem } from "./Part
 
 interface ParticipantShellProps {
   readonly activeItem?: ParticipantNavigationItem;
+  readonly administrationHref?: string;
   readonly children: ReactNode;
 }
 
@@ -38,6 +39,7 @@ interface ResponsiveEdgeSheetProps {
 
 export function ParticipantShell({
   activeItem,
+  administrationHref,
   children,
 }: ParticipantShellProps) {
   return (
@@ -46,7 +48,7 @@ export function ParticipantShell({
       data-participant-shell
       data-participant-default="warm-ivory"
     >
-      <ParticipantTopNavigation activeItem={activeItem} />
+      <ParticipantTopNavigation activeItem={activeItem} administrationHref={administrationHref} />
       {children}
     </div>
   );

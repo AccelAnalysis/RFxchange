@@ -5,5 +5,10 @@
   "referrals": "Referrals",
   "resources": "Resources",
   "quickStart": "Quick Start",
-  "account": "Account"
+  "account": "Account",
+  "administration": "Administration",
+  "adminAriaLabel": "Administrative portal navigation",
+  "organizationClaims": "Organization claims",
+  "resourceProviders": "Resource Providers",
+  "participantAccount": "Participant account"
 }

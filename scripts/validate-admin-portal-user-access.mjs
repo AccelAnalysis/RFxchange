@@ -4,8 +4,11 @@ import { readFile } from "node:fs/promises";
 import {
   ADMIN_PORTAL_SECTION_KEYS,
   ADMIN_PORTAL_SECTIONS,
+  IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS,
   visibleAdminPortalSections,
+  visibleImplementedAdminRuntimeDestinations,
 } from "../src/application/admin/portal-navigation.ts";
+import { createAdminPermissionGrant } from "../src/domain/admin-authorization/grants.ts";
 import {
   defaultAdminRolePreset,
   resolveAuthorityContextFromAdminRolePreset,
@@ -21,6 +24,75 @@ const technical = resolveAuthorityContextFromAdminRolePreset("guard-tech", defau
 assert.equal(visibleAdminPortalSections(root).length, 19);
 assert.equal(visibleAdminPortalSections(technical).some((section) => section.key === "commerce"), false);
 assert.equal(visibleAdminPortalSections(technical).some((section) => section.key === "integrations-system"), true);
+
+const implementedGrants = [
+  createAdminPermissionGrant({
+    id: "guard-claims",
+    administratorId: root.administratorId,
+    permission: "organization.claim.read",
+    scope: "GLOBAL",
+    createdAt: "2026-08-10T12:00:00.000Z",
+  }),
+  createAdminPermissionGrant({
+    id: "guard-providers",
+    administratorId: root.administratorId,
+    permission: "provider.application.read",
+    scope: "GLOBAL",
+    createdAt: "2026-08-10T12:00:00.000Z",
+  }),
+];
+assert.deepEqual(IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS, ["organization-claims", "resource-providers"]);
+assert.deepEqual(
+  visibleImplementedAdminRuntimeDestinations(root, implementedGrants, "2026-08-10T12:30:00.000Z")
+    .map((destination) => destination.key),
+  IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS,
+);
+assert.deepEqual(visibleImplementedAdminRuntimeDestinations(root, [], "2026-08-10T12:30:00.000Z"), []);
+const boundedDestinations = visibleImplementedAdminRuntimeDestinations(root, [
+  createAdminPermissionGrant({
+    id: "guard-provider-org-b",
+    administratorId: root.administratorId,
+    permission: "provider.application.read",
+    scope: "ORGANIZATION:org-b",
+    createdAt: "2026-08-10T12:00:00.000Z",
+  }),
+  createAdminPermissionGrant({
+    id: "guard-provider-org-a",
+    administratorId: root.administratorId,
+    permission: "provider.application.read",
+    scope: "ORGANIZATION:org-a",
+    createdAt: "2026-08-10T12:00:00.000Z",
+  }),
+], "2026-08-10T12:30:00.000Z");
+assert.deepEqual(boundedDestinations.map((destination) => destination.scope.value), [
+  "ORGANIZATION:org-a",
+  "ORGANIZATION:org-b",
+]);
+
+const entry = await readFile("app/admin/page.tsx", "utf8");
+assert.match(entry, /resolveAdminPortalAccess/);
+assert.match(entry, /access\.destinations\[0\]\.href/);
+assert.doesNotMatch(entry, /redirect\("\/admin\/overview"\)/);
+assert.doesNotMatch(entry, /buildAdministrativeCommandCenter/);
+
+const account = await readFile("app/organization-profile/page.tsx", "utf8");
+assert.match(account, /resolveAdminPortalAccess/);
+assert.match(account, /accountAdministrationHref/);
+assert.match(account, /dependency[\s\S]*fail the link closed/);
+assert.match(account, /administrationHref=/);
+
+const configuredAcceptance = await readFile(
+  "scripts/acceptance-post-wave3-admin-runtime-configured.mjs",
+  "utf8",
+);
+for (const requirement of [
+  "superAdmin",
+  "narrowAdmin",
+  "participant",
+  "require-reauthentication",
+  "assert-zero",
+  "adminPermissionGrants",
+]) assert.match(configuredAcceptance, new RegExp(requirement));
 
 const user360 = await readFile("src/application/admin/user-access-360.ts", "utf8");
 for (const field of [

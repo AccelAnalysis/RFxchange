@@ -16,6 +16,7 @@ import {
 } from "@/src/components/participant/ParticipantWorkspace";
 import { hydrateEssentialOrganizationProfile } from "@/src/domain/organization-profile/model";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
+import { resolveAdminPortalAccess } from "@/src/infrastructure/auth/admin-route-runtime";
 import {
   ParticipantRouteDependencyUnavailableError,
   RFXCHANGE_SESSION_COOKIE_NAME,
@@ -46,6 +47,17 @@ function readable(value: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+async function accountAdministrationHref(sessionCookie?: string): Promise<"/admin" | null> {
+  try {
+    const access = await resolveAdminPortalAccess({ sessionCookie });
+    return access.kind === "authorized" ? "/admin" : null;
+  } catch {
+    // Administrative entry is an optional, independently authorized affordance. A dependency
+    // outage must fail the link closed without taking down the participant Account workspace.
+    return null;
+  }
 }
 
 type MarketProfileResult = OptionalWorkspacePanelResult<Awaited<ReturnType<typeof loadAuthorizedMarketProfile>>>;
@@ -168,8 +180,9 @@ async function EnrichmentLocationMapSection({
 
 export default async function OrganizationProfilePage() {
   const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
   const access = await resolveParticipantRoute({
-    sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
+    sessionCookie,
   });
 
   if (access.kind === "unauthenticated") {
@@ -211,12 +224,14 @@ export default async function OrganizationProfilePage() {
     markerActivation,
     profileCompletion,
     location,
+    administrationHref,
   ] = await Promise.all([
     foundation.organizations.profiles.getByOrganizationId(organizationId),
     foundation.organizationAuthorization.getByMembershipId(access.membership.id),
     markerRepositories.activations.getByOrganizationId(organizationId),
     profileRepositories.completions.getByOrganizationId(organizationId),
     locations.locations.getByOrganizationId(organizationId),
+    accountAdministrationHref(sessionCookie),
   ]);
   if (!profileRecord) {
     throw new ParticipantRouteDependencyUnavailableError(
@@ -230,7 +245,10 @@ export default async function OrganizationProfilePage() {
   const buildIdentity = currentBuildIdentity();
 
   return (
-    <ParticipantShell activeItem="Account">
+    <ParticipantShell
+      activeItem="Account"
+      administrationHref={administrationHref ?? undefined}
+    >
       <OperationalWorkspace ariaLabel="Organization account workspace">
         <section className={styles.page}>
           <header className={styles.header}>

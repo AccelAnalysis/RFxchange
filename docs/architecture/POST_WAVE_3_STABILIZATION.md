@@ -79,6 +79,31 @@ This is a no-Feature-ID integration gate over already accepted administrative fo
 
 This gate makes the already-approved administrative information architecture operationally reachable and coherent. It does not weaken the strict accepted command-center coverage contract, create new administrative powers, implement future administrative Feature IDs, begin RFx Core, or change tracker totals. Any administrative domain whose underlying runtime or authoritative provider is still future work remains explicitly unavailable or absent rather than being simulated by the portal shell.
 
+### Stabilization 7 implementation result — 2026-08-10
+
+- `/admin` now resolves the authenticated RFxchange session, persisted administrator account,
+  privileged-security state, effective authority and active exact grants before selecting a route.
+- The server-owned implemented-runtime registry contains only the two currently deployable landing
+  surfaces: scoped organization claims and scoped Resource Provider review. GLOBAL grants retain the
+  unfiltered route; geography and organization grants retain their exact deep-link scope. The other
+  specification sections remain absent from production navigation.
+- `/admin/overview` remains intentionally unregistered and returns the ordinary not-found boundary.
+  `buildAdministrativeCommandCenter` is unchanged and is not invoked by runtime entry because the
+  complete ten-queue/seven-health-provider contract is not yet truthfully available.
+- The authenticated Account/Menu surface receives an Administration link only after the same
+  server-side portal resolution produces at least one implemented destination. An ordinary
+  participant receives no link, and direct administrative entry fails closed.
+- Configured acceptance run `s7-1786396839285-dd7422` against Firebase project `rfxchange` covered
+  Super Admin entry, provider-only navigation, direct denial, explicit overview deferral, recent
+  privileged reauthentication and sign-in return, ordinary-participant absence, desktop/mobile
+  layout, keyboard focus, all five interface locales and a clean browser error console. The 390px
+  mobile surfaces had no horizontal document overflow after the responsive correction. Exact
+  cleanup removed all 27 disposable Firestore records and three Auth users; the final residual scan
+  returned zero.
+- This integration gate changes no Feature-ID or Brand-Gate status. Tracker totals remain
+  **438 total · 152 Done · 286 Not Started**, Activation remains **43/43**, Network remains **38/38**
+  and B6b remains intentionally pending.
+
 ## Release discipline
 
 Each stabilization correction is implemented and reviewed separately. A correction may not change tracker totals or mark a future RFx, credibility, outcome, commercial, or administrative Feature ID complete. Production CI and focused regression coverage are required before merge.
