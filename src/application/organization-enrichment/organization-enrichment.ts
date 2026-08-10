@@ -294,6 +294,12 @@ export class OrganizationEnrichmentService {
     if (!existing || existing.organizationId !== authorization.organization.id) {
       throw new OrganizationEnrichmentError("not-found", "Profile asset was not found for this organization.");
     }
+    if (existing.publicationStatus === "retired") {
+      throw new OrganizationEnrichmentError(
+        "conflict",
+        "A retired profile asset cannot change publication state.",
+      );
+    }
     const stored = await this.dependencies.storedAssets.getById(existing.storedAssetId);
     if (!stored || stored.status !== "active" || stored.sensitivity !== "standard") {
       throw new OrganizationEnrichmentError("invalid", "Only an active non-sensitive source object may be published.");
@@ -410,6 +416,12 @@ export class OrganizationEnrichmentService {
     const existing = await this.dependencies.repository.getAdditionalLocation(input.id);
     if (!existing || existing.organizationId !== authorization.organization.id) {
       throw new OrganizationEnrichmentError("not-found", "Additional location was not found for this organization.");
+    }
+    if (existing.lifecycleStatus !== "active") {
+      throw new OrganizationEnrichmentError(
+        "conflict",
+        "A retired additional location cannot change publication state.",
+      );
     }
     const primary = await this.dependencies.primaryLocations.getByOrganizationId(authorization.organization.id);
     if (!primary || String(primary.geographyId) !== existing.geographyId) {

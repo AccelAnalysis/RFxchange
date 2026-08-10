@@ -157,6 +157,53 @@ test("ORG-018 publishes only explicit non-sensitive metadata through controlled 
   assert.deepEqual([...delivered.bytes], [1, 2, 3, 4]);
 });
 
+test("retired enrichment publication races retain typed conflict semantics", async () => {
+  const fx = fixture();
+  const m = memory(fx);
+  const stored = activeStoredAsset(fx);
+  m.state.stored.push(stored);
+  const registered = await m.service.registerProfileAsset(m.scope, {
+    id: "profile-retired",
+    storedAssetId: stored.id,
+    kind: "portfolio",
+    title: "Retired portfolio asset",
+    altText: "Waterfront project before retirement",
+  });
+  await m.service.retireAsset(
+    { ...m.scope, commandId: "command-retire-asset" },
+    { id: registered.record.id },
+  );
+  await assert.rejects(
+    m.service.setAssetPublication(
+      { ...m.scope, commandId: "command-publish-retired-asset" },
+      { id: registered.record.id, publish: true },
+    ),
+    (error) => error instanceof OrganizationEnrichmentError && error.code === "conflict",
+  );
+
+  const begun = await m.service.beginAdditionalLocation(
+    { ...m.scope, commandId: "command-begin-retired-location" },
+    { id: "location-retired", label: "Retired office", physicalAddress: ADDRESS, isHomeOrPrivate: false },
+  );
+  const confirmed = await m.service.confirmAdditionalLocation(
+    { ...m.scope, commandId: "command-confirm-retired-location" },
+    { draftId: begun.draft.id, candidateId: begun.draft.candidates[0].id },
+  );
+  await m.service.retireLocation(
+    { ...m.scope, commandId: "command-retire-location" },
+    { id: confirmed.record.id },
+  );
+  const commandCount = m.state.commands.size;
+  await assert.rejects(
+    m.service.setLocationPublication(
+      { ...m.scope, commandId: "command-publish-retired-location" },
+      { id: confirmed.record.id, publish: true },
+    ),
+    (error) => error instanceof OrganizationEnrichmentError && error.code === "conflict",
+  );
+  assert.equal(m.state.commands.size, commandCount);
+});
+
 test("ORG-019 requires confirmed in-boundary geocoding and preserves the primary location", async () => {
   const fx = fixture();
   const m = memory(fx);
