@@ -61,7 +61,11 @@ External delivery remains outside the Firestore transaction. The durable communi
 
 Automatic invitation delivery is permitted only while the authoritative referral remains `sent`, the communication intent is `queued` or `retryable-failure`, **and an external recipient has not already attached the referral to an organization**. Organization-recipient referrals are not blocked merely because their canonical recipient organization is attached at creation.
 
-A replay after the referral advances to accepted, declined, redirected, contacted, closed, expired, or another non-invitable lifecycle state returns the authoritative result without sending an obsolete invitation. Likewise, once an external invitee consumes the acquisition path and `attachedRecipientOrganizationId` is set, the external acquisition invitation is no longer deliverable even if the aggregate remains `sent`. Explicit communication retry uses the same policy.
+The route performs an early policy check for clear HTTP behavior, but that snapshot is not delivery authority. The delivery authority boundary reloads both the durable communication intent and its current referral immediately before provider delivery and reapplies the same policy. If lifecycle state advanced or an external recipient attached after the route inspected the referral, the provider request is not attempted. Explicit retry converts that boundary rejection into a 409 rather than reporting a delivery attempt.
+
+A replay after the referral advances to accepted, declined, redirected, contacted, closed, expired, or another non-invitable lifecycle state returns the authoritative result without sending an obsolete invitation. Likewise, once an external invitee consumes the acquisition path and `attachedRecipientOrganizationId` is set, the external acquisition invitation is no longer deliverable even if the aggregate remains `sent`. Explicit communication retry uses the same policy and current-state boundary.
+
+The sender projection already carries the recipient kind plus the current attached recipient organization ID. The Retry action is hidden for an external referral once that attachment exists, so the participant is not offered an action that authoritative delivery will reject.
 
 A delivery failure changes only communication status and can be retried while the invitation remains valid without recreating the referral or provider request.
 
