@@ -9,6 +9,7 @@ import {
 } from "@/src/infrastructure/acquisition/founding-intent";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
+  ParticipantRouteDependencyUnavailableError,
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
@@ -80,7 +81,13 @@ async function resolveAuthenticatedMapProjection(
     redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   }
 
-  const mapProjection = await loadAuthorizedParticipantMapProjection(access) ?? redirect("/join");
+  const mapProjection = await loadAuthorizedParticipantMapProjection(access);
+  if (!mapProjection) {
+    throw new ParticipantRouteDependencyUnavailableError(
+      "workspace-state",
+      new Error("Authorized participant map projection is incomplete."),
+    );
+  }
   return Object.freeze({ access, mapProjection });
 }
 

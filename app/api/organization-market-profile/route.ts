@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { MarketProfileError } from "@/src/application/market-profile/market-profile";
 import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
+import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import { createServerMarketProfileService } from "@/src/infrastructure/market-profile/runtime";
 
 export const runtime = "nodejs";
@@ -13,12 +14,24 @@ type RequestBody = Readonly<{
   input?: unknown;
 }>;
 
-function responseFor(error: unknown) {
+function responseFor(request: NextRequest, error: unknown) {
   if (error instanceof MarketProfileError) {
     const status = error.code === "forbidden" ? 403 : error.code === "not-found" ? 404 : error.code === "invalid" ? 400 : 409;
-    return NextResponse.json({ error: error.message, code: error.code }, { status });
+    const participantMessage = status === 403
+      ? "Market profile access is unavailable for this organization."
+      : status === 404
+        ? "The requested market profile record is unavailable."
+        : status === 400
+          ? "The market profile request contains unsupported information."
+          : "The market profile changed before this request could be completed.";
+    return apiProblem(request, { status, participantMessage, code: error.code, cause: error });
   }
-  return NextResponse.json({ error: error instanceof Error ? error.message : "Market profile could not be saved." }, { status: 409 });
+  return apiProblem(request, {
+    status: 500,
+    participantMessage: "Market profile changes are temporarily unavailable. Retry the request.",
+    code: "dependency-unavailable",
+    cause: error,
+  });
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -36,14 +49,14 @@ export async function POST(request: NextRequest) {
   if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{1,190}$/.test(body.commandId)) {
     return NextResponse.json({ error: "Command identity is malformed." }, { status: 400 });
   }
-  const access = await resolveParticipantRoute({
-    sessionCookie: request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
-    requestedOrganizationId: body.organizationId,
-  });
-  if (access.kind === "unauthenticated") return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-  if (access.kind !== "authorized") return NextResponse.json({ error: "Current participant authority is required." }, { status: 403 });
-  const scope = { context: access.context, organizationId: body.organizationId, membershipId: String(access.membership.id), commandId: body.commandId };
   try {
+    const access = await resolveParticipantRoute({
+      sessionCookie: request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
+      requestedOrganizationId: body.organizationId,
+    });
+    if (access.kind === "unauthenticated") return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+    if (access.kind !== "authorized") return NextResponse.json({ error: "Current participant authority is required." }, { status: 403 });
+    const scope = { context: access.context, organizationId: body.organizationId, membershipId: String(access.membership.id), commandId: body.commandId };
     const service = await createServerMarketProfileService();
     const result = body.action === "claim-capability"
       ? await service.claimCapability(scope, body.input as Parameters<typeof service.claimCapability>[1])
@@ -59,6 +72,6 @@ export async function POST(request: NextRequest) {
     if (!result) return NextResponse.json({ error: "Unsupported market profile action." }, { status: 400 });
     return NextResponse.json(result, { status: result.replayed ? 200 : 201, headers: { "cache-control": "no-store" } });
   } catch (error) {
-    return responseFor(error);
+    return responseFor(request, error);
   }
 }

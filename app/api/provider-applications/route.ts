@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ResourceProviderFoundationError, type ProviderParticipantScope } from "@/src/application/resource-providers/provider-foundation";
 import type { ProviderApplicationContent, ProviderAvailability, ProviderCategory, ProviderModality } from "@/src/domain/resource-providers/model";
 import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
+import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import { createServerResourceProviderFoundationService } from "@/src/infrastructure/resource-providers/runtime";
 
 export const runtime = "nodejs";
@@ -27,6 +28,27 @@ function status(error: unknown): number {
   return 400;
 }
 
+function problem(request: NextRequest, error: unknown, operation: "load" | "change") {
+  const responseStatus = status(error);
+  const participantMessage = error instanceof ResourceProviderFoundationError
+    ? responseStatus === 403
+      ? "Resource Provider workspace access is unavailable."
+      : responseStatus === 404
+        ? "The requested Resource Provider record is unavailable."
+        : responseStatus === 428
+          ? "Complete the required provider profile information before continuing."
+          : responseStatus === 409
+            ? "The Resource Provider application changed before this request could be completed."
+            : "The Resource Provider request contains unsupported information."
+    : `The Resource Provider workspace is temporarily unavailable. ${operation === "load" ? "Retry the request." : "Your change was not confirmed; retry the request."}`;
+  return apiProblem(request, {
+    status: responseStatus,
+    participantMessage,
+    code: error instanceof ResourceProviderFoundationError ? error.code : "dependency-unavailable",
+    cause: error,
+  });
+}
+
 function array(value: unknown): readonly string[] { return Array.isArray(value) ? value.map(String) : []; }
 function content(body: Record<string, unknown>): ProviderApplicationContent {
   const services = Array.isArray(body.services) ? body.services.map((value, index) => {
@@ -37,10 +59,11 @@ function content(body: Record<string, unknown>): ProviderApplicationContent {
   return Object.freeze({ categories: array(body.categories) as readonly ProviderCategory[], otherCategoryDescription: typeof body.otherCategoryDescription === "string" ? body.otherCategoryDescription : null, services, populationsServed: String(body.populationsServed ?? ""), eligibility: String(body.eligibility ?? ""), intakeMethod: String(body.intakeMethod ?? ""), modalities: array(body.modalities) as readonly ProviderModality[], languages: array(body.languages), officialContact: Object.freeze({ displayName: String(officialContact.displayName ?? ""), roleTitle: String(officialContact.roleTitle ?? ""), email: String(officialContact.email ?? ""), phone: typeof officialContact.phone === "string" ? officialContact.phone : null }), evidenceAssetIds: array(body.evidenceAssetIds), authorityAttested: body.authorityAttested === true });
 }
 
-export async function GET() {
-  const scope = await participantScope(); if (scope instanceof NextResponse) return scope;
-  try { return NextResponse.json(await createServerResourceProviderFoundationService().participantSnapshot(scope)); }
-  catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Resource Provider workspace failed." }, { status: status(error) }); }
+export async function GET(request: NextRequest) {
+  try {
+    const scope = await participantScope(); if (scope instanceof NextResponse) return scope;
+    return NextResponse.json(await createServerResourceProviderFoundationService().participantSnapshot(scope));
+  } catch (error) { return problem(request, error, "load"); }
 }
 
 export async function POST(request: NextRequest) {
@@ -54,5 +77,5 @@ export async function POST(request: NextRequest) {
     if (action === "submitted" || action === "resubmitted") return NextResponse.json(await service.participantTransition(scope, { action, expectedVersion: Number(body.expectedVersion) }));
     if (action === "update-profile") return NextResponse.json(await service.updateServiceProfile(scope, { expectedVersion: Number(body.expectedVersion), categories: array(body.categories) as readonly ProviderCategory[], otherCategoryDescription: typeof body.otherCategoryDescription === "string" ? body.otherCategoryDescription : null, services: content({ ...body, authorityAttested: true }).services, populationsServed: String(body.populationsServed ?? ""), eligibility: String(body.eligibility ?? ""), intakeMethod: String(body.intakeMethod ?? ""), modalities: array(body.modalities) as readonly ProviderModality[], languages: array(body.languages), officialContact: content({ ...body, authorityAttested: true }).officialContact, availability: String(body.availability ?? "unknown") as ProviderAvailability }));
     return NextResponse.json({ error: "Provider action is unsupported." }, { status: 400 });
-  } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Resource Provider action failed." }, { status: status(error) }); }
+  } catch (error) { return problem(request, error, "change"); }
 }

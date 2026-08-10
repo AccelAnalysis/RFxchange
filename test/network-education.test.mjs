@@ -17,11 +17,12 @@ const NOW = "2026-08-09T18:00:00.000Z";
 function fixture() {
   const user = createUserIdentity({ id: "user-education", name: "Education Manager", primaryEmail: "education@example.test", loginProvider: "firebase", loginSubject: "subject-education", now: NOW });
   const context = authenticatedServerContext({ user, claims: { provider: "firebase", subject: user.login.subject, email: user.primaryEmail, displayName: user.name, emailVerified: true, isAnonymous: false, authenticatedAt: NOW, issuedAt: NOW, expiresAt: "2026-08-10T18:00:00.000Z" }, source: "session-cookie" });
-  const state = { progress: new Map(), commands: new Map(), events: [] };
+  const state = { progress: new Map(), commands: new Map(), events: [], failPersistence: false };
   const repository = {
     async getProgress(id) { return state.progress.get(id) ?? null; },
     async getCommand(id) { return state.commands.get(id) ?? null; },
     async save(input) {
+      if (state.failPersistence) throw new Error("Injected education persistence outage.");
       const current = state.progress.get(input.progress.id) ?? null;
       assert.equal(current?.version ?? null, input.expectedVersion);
       assert.equal(state.commands.has(input.command.id), false);
@@ -47,6 +48,22 @@ test("EDU-016 defines four stable paths with allow-listed live links and truthfu
     }
   }
   assert.equal(NETWORK_EDUCATION_PATHS.find((path) => path.key === "issuer").items.find((item) => item.key === "issuer-rfx").availability, "planned");
+});
+
+test("education persistence outages remain dependency failures rather than domain conflicts", async () => {
+  const f = fixture();
+  f.state.failPersistence = true;
+  await assert.rejects(
+    f.service.mutate(f.scope("persistence-outage"), {
+      action: "path-selected",
+      expectedVersion: null,
+      pathKey: "business",
+    }, false),
+    (error) => error instanceof Error && !(error instanceof NetworkEducationError) && /persistence outage/.test(error.message),
+  );
+  assert.equal(f.state.progress.size, 0);
+  assert.equal(f.state.commands.size, 0);
+  assert.equal(f.state.events.length, 0);
 });
 
 test("provider status changes recommendation only and never grants a path or domain authority", async () => {

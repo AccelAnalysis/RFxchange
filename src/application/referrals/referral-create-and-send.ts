@@ -489,23 +489,15 @@ export class ReferralCreateAndSendService {
       ),
     ]);
 
-    let persistence: "created" | "replayed";
-    try {
-      persistence = await this.dependencies.repository.saveCreateAndSend({
-        referral: sent,
-        events,
-        command: receipt,
-        education,
-        audits,
-        communication,
-        acquisition,
-      });
-    } catch (error) {
-      throw new ReferralNetworkError(
-        "conflict",
-        error instanceof Error ? error.message : "Referral could not be created and sent.",
-      );
-    }
+    const persistence = await this.dependencies.repository.saveCreateAndSend({
+      referral: sent,
+      events,
+      command: receipt,
+      education,
+      audits,
+      communication,
+      acquisition,
+    });
     if (persistence === "replayed") {
       const replayed = await this.replay(scope, requestFingerprint);
       if (!replayed) {

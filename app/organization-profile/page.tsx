@@ -13,6 +13,7 @@ import {
 import { hydrateEssentialOrganizationProfile } from "@/src/domain/organization-profile/model";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
+  ParticipantRouteDependencyUnavailableError,
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
@@ -81,7 +82,12 @@ export default async function OrganizationProfilePage() {
     profileRepositories.completions.getByOrganizationId(organizationId),
     locations.locations.getByOrganizationId(organizationId),
   ]);
-  if (!profileRecord) redirect("/join");
+  if (!profileRecord) {
+    throw new ParticipantRouteDependencyUnavailableError(
+      "workspace-state",
+      new Error("Authorized organization profile identity is incomplete."),
+    );
+  }
 
   const profile = hydrateEssentialOrganizationProfile(profileRecord);
   const workspaceStatus = access.state.lifecycleState === "open-platform" ? "Open" : "Active";

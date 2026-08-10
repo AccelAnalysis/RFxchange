@@ -21,6 +21,7 @@ import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebas
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
 import { FirestoreActivationJourneyContextRepository } from "@/src/infrastructure/firestore/activation-journey";
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
+import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import { createServerActivationJourneyService } from "@/src/infrastructure/onboarding/runtime";
 import { ServerTimingCollector } from "@/src/infrastructure/observability/server-timing";
 
@@ -42,6 +43,18 @@ function sessionErrorStatus(error: unknown): number {
   if (error.code === "csrf-verification-required") return 403;
   if (error.code === "credential-required") return 400;
   return 401;
+}
+
+function sessionErrorMessage(error: unknown): string {
+  if (!(error instanceof ServerSessionError)) {
+    return "Session exchange is temporarily unavailable. Retry the request.";
+  }
+  if (error.code === "authentication-backend-unavailable") {
+    return "Sign-in is temporarily unavailable. Retry the request.";
+  }
+  if (error.code === "csrf-verification-required") return "Session verification could not be completed.";
+  if (error.code === "credential-required") return "Session credentials are required.";
+  return "Session credentials could not be accepted.";
 }
 
 function acquisitionState(context: BoundAcquisitionContext): NonNullable<ActivationJourneyState["acquisitionContext"]> {
@@ -122,7 +135,7 @@ export async function POST(request: NextRequest) {
     );
     const provisionalOrganizationName = body.provisionalOrganizationName?.trim() || "";
     let state = null;
-    let acquisitionStatus: "none" | "bound" | "rejected" = "none";
+    let acquisitionStatus: "none" | "bound" | "rejected" | "unavailable" = "none";
     let boundAcquisition: BoundAcquisitionContext | null = null;
     let acquisitionAttached = false;
     const acquisitionCookie = request.cookies.get(RFXCHANGE_ACQUISITION_COOKIE_NAME)?.value;
@@ -143,7 +156,9 @@ export async function POST(request: NextRequest) {
           acquisitionStatus = "bound";
         } catch {
           // Acquisition context is navigation metadata, never a reason to deny legitimate sign-in.
-          acquisitionStatus = "rejected";
+          // An operational bind failure is not evidence that the context itself was rejected. Keep
+          // the cookie so a later sign-in can retry without losing the participant's entry context.
+          acquisitionStatus = "unavailable";
         }
       }
     }
@@ -200,8 +215,12 @@ export async function POST(request: NextRequest) {
     }
     return timing.apply(response);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Session exchange failed.";
-    return timing.apply(NextResponse.json({ error: message }, { status: sessionErrorStatus(error) }));
+    return timing.apply(apiProblem(request, {
+      status: sessionErrorStatus(error),
+      participantMessage: sessionErrorMessage(error),
+      code: error instanceof ServerSessionError ? "session-unavailable" : "dependency-unavailable",
+      cause: error,
+    }));
   }
 }
 

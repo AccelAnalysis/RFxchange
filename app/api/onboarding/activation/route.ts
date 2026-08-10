@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import type { AuthenticatedServerContext } from "@/src/application/auth/server-session";
+import { ServerSessionError, type AuthenticatedServerContext } from "@/src/application/auth/server-session";
 import { ActivationJourneyError } from "@/src/application/onboarding/activation-journey";
 import { isCurrentActivationLegalAcceptance } from "@/src/domain/onboarding/model";
 import {
@@ -12,6 +12,7 @@ import { getServerFirebaseAuth } from "@/src/infrastructure/auth/firebase-server
 import { FirestoreActivationJourneyContextRepository } from "@/src/infrastructure/firestore/activation-journey";
 import { createFirestoreGeographyRepositories } from "@/src/infrastructure/firestore/geography-repositories";
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
+import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import {
   CensusTigerLocalityDirectory,
   type CensusLocalityCandidate,
@@ -54,7 +55,7 @@ async function authenticatedContext(
   timing: ServerTimingCollector,
 ): Promise<AuthenticatedServerContext> {
   const sessionCookie = request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
-  if (!sessionCookie) throw new Error("RFxchange session is required.");
+  if (!sessionCookie) throw new ServerSessionError("credential-required", "RFxchange session is required.");
   return timing.measure(
     "auth",
     () => createServerAuthenticationBoundary().authenticateSessionCookie({
@@ -103,15 +104,34 @@ async function verifiedEmail(
   return account.emailVerified;
 }
 
-function errorResponse(error: unknown) {
-  const message = error instanceof Error ? error.message : "Activation request failed.";
+function errorResponse(request: NextRequest, error: unknown) {
   if (error instanceof ActivationJourneyError) {
-    return NextResponse.json({ error: message, code: error.code }, { status: 409 });
+    return apiProblem(request, {
+      status: 409,
+      participantMessage: "Activation cannot continue until the current requirement is complete.",
+      code: error.code,
+      cause: error,
+    });
   }
-  if (/session|credential|authentication/i.test(message)) {
-    return NextResponse.json({ error: message }, { status: 401 });
+  if (error instanceof ServerSessionError) {
+    const dependencyUnavailable = error.code === "authentication-backend-unavailable";
+    return apiProblem(request, {
+      status: dependencyUnavailable ? 503 : 401,
+      participantMessage: dependencyUnavailable
+        ? "Activation is temporarily unavailable. Retry the request."
+        : "Authentication is required to continue activation.",
+      code: dependencyUnavailable ? "dependency-unavailable" : "authentication-required",
+      cause: error,
+    });
   }
-  return NextResponse.json({ error: message }, { status: 400 });
+  return apiProblem(request, {
+    status: error instanceof SyntaxError ? 400 : 500,
+    participantMessage: error instanceof SyntaxError
+      ? "The activation request could not be read."
+      : "Activation is temporarily unavailable. Retry the request.",
+    code: error instanceof SyntaxError ? "request-invalid" : "dependency-unavailable",
+    cause: error,
+  });
 }
 
 export async function GET(request: NextRequest) {
@@ -122,7 +142,7 @@ export async function GET(request: NextRequest) {
     const state = await synchronizedState(service, context, timing);
     return timing.apply(NextResponse.json({ state }));
   } catch (error) {
-    return timing.apply(errorResponse(error));
+    return timing.apply(errorResponse(request, error));
   }
 }
 
@@ -317,6 +337,6 @@ export async function POST(request: NextRequest) {
         return timing.apply(NextResponse.json({ error: "Unsupported activation action." }, { status: 400 }));
     }
   } catch (error) {
-    return timing.apply(errorResponse(error));
+    return timing.apply(errorResponse(request, error));
   }
 }

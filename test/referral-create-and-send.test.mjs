@@ -357,12 +357,12 @@ test("reused command with changed stable business input conflicts", async () => 
   assert.equal(f.state.referrals.size, 1);
 });
 
-test("atomic persistence failure leaves no referral, evidence, outbox or acquisition context", async () => {
+test("atomic persistence outage remains a dependency failure and leaves no durable evidence", async () => {
   const f = fixture();
   f.state.failAtomicPersistence = true;
   await assert.rejects(
     f.service.createAndSend(f.scope("atomic-failure-1"), externalInput(f)),
-    (error) => error instanceof ReferralNetworkError && error.code === "conflict" && /Injected/.test(error.message),
+    (error) => error instanceof Error && !(error instanceof ReferralNetworkError) && /Injected/.test(error.message),
   );
   assert.equal(f.state.referrals.size, 0);
   assert.equal(f.state.commands.size, 0);

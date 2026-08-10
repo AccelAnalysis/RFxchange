@@ -9,6 +9,7 @@ import {
 import { OrientationJourneyClient } from "@/src/components/orientation/OrientationJourneyClient";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
+  ParticipantRouteDependencyUnavailableError,
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
@@ -57,7 +58,12 @@ export default async function OrientationPage({ searchParams }: OrientationPageP
     loadAuthorizedParticipantMapProjection(access),
     resolveAuthorizedOrientationScope(access),
   ]);
-  if (!projection || !scope) redirect("/join");
+  if (!projection || !scope) {
+    throw new ParticipantRouteDependencyUnavailableError(
+      "workspace-state",
+      new Error("Authorized orientation workspace prerequisites are incomplete."),
+    );
+  }
   const journey = await createServerOrientationJourneyService().get(scope);
   return (
     <>

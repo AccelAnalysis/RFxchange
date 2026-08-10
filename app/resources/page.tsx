@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ResourceNetworkError } from "@/src/application/resource-network/resource-network";
 import { ResourceNetworkWorkspace } from "@/src/components/resource-network/ResourceNetworkWorkspace";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
-import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
+import { ParticipantRouteDependencyUnavailableError, RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
 import { loadAuthorizedNetworkDiscovery } from "@/src/infrastructure/network-discovery/runtime";
 import { createServerReferralNetworkService } from "@/src/infrastructure/referrals/runtime";
@@ -22,7 +22,8 @@ export default async function ResourcesPage({ searchParams }: Props) {
   if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   if (access.state.lifecycleState !== "open-platform") redirect("/orientation");
-  const mapProjection = await loadAuthorizedParticipantMapProjection(access) ?? redirect("/join");
+  const mapProjection = await loadAuthorizedParticipantMapProjection(access);
+  if (!mapProjection) throw new ParticipantRouteDependencyUnavailableError("workspace-state", new Error("Authorized Resource Network map projection is incomplete."));
   const params = searchParams ? await searchParams : {};
   const query = first(params.q);
   const availability = first(params.availability);
