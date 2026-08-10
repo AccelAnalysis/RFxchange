@@ -9,6 +9,7 @@ const [
   referralWorkspace,
   marketService,
   marketRuntime,
+  marketRepository,
   marketPanel,
   participantWorkspace,
   participantTopNavigation,
@@ -22,6 +23,7 @@ const [
   read("src/components/referrals/ReferralWorkspace.tsx"),
   read("src/application/market-profile/market-profile.ts"),
   read("src/infrastructure/market-profile/runtime.ts"),
+  read("src/infrastructure/firestore/market-profile.ts"),
   read("src/components/market-profile/MarketProfilePanel.tsx"),
   read("src/components/participant/ParticipantWorkspace.tsx"),
   read("src/components/participant/ParticipantTopNavigation.tsx"),
@@ -68,6 +70,11 @@ assert.match(marketService, /Participant selected from \$\{release\.sourceName\}
 assert.match(marketService, /repository\.getIndustryProfile/);
 assert.match(marketService, /preserveExistingNaics/);
 assert.match(marketService, /isCanonicalGovernedDescriptor/);
+assert.match(marketService, /expectedIndustryUpdatedAt/);
+assert.doesNotMatch(marketService, /selectedIdentities/);
+assert.match(marketRepository, /normalizedTimestamp/);
+assert.match(marketRepository, /expectedRecordUpdatedAt/);
+assert.match(marketRepository, /Industry context changed before persistence/);
 assert.match(marketRuntime, /loadImmutableNaicsCatalog/);
 assert.match(marketPanel, /marketProfile\.catalog\.resultCount/);
 assert.match(marketPanel, /setCapabilityResultLimit/);

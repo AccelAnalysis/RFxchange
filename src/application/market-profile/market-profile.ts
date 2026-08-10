@@ -134,6 +134,7 @@ export class MarketProfileService {
     subjectId: string;
     requestFingerprint: string;
     record: Parameters<OrganizationMarketProfileRepository["save"]>[0]["record"];
+    expectedRecordUpdatedAt?: string | null;
     now: string;
   }>) {
     const command: OrganizationMarketProfileCommandReceipt = Object.freeze({
@@ -164,6 +165,7 @@ export class MarketProfileService {
           input.authorization.organization,
           { id: `audit_${this.id()}`, action: `organization.market-profile.${input.action}`, occurredAt: input.now },
         ),
+        expectedRecordUpdatedAt: input.expectedRecordUpdatedAt,
         record: input.record,
       });
     } catch (error) {
@@ -275,23 +277,29 @@ export class MarketProfileService {
     industries: readonly Readonly<{ id: string; label: string; visibility: string }>[];
     naics: readonly Readonly<{ code: string; version: string; visibility: string }>[];
     preserveExistingNaics: boolean;
+    expectedIndustryUpdatedAt: string | null;
   }>) {
     const authorization = await this.authorize(scope);
     if (
       !Array.isArray(input.industries) ||
       !Array.isArray(input.naics) ||
       typeof input.preserveExistingNaics !== "boolean" ||
+      (input.expectedIndustryUpdatedAt !== null && typeof input.expectedIndustryUpdatedAt !== "string") ||
       input.industries.length > 20 ||
       input.naics.length > 30
     ) {
       throw new MarketProfileError("invalid", "Industry context exceeds supported limits.");
     }
+    const requestFingerprint = fingerprint(input);
+    const prior = await this.replay(scope, "industry-context-updated", requestFingerprint);
+    if (prior) return Object.freeze({ replayed: true as const, receipt: prior });
     const [release, existingProfile] = await Promise.all([
       this.dependencies.naicsCatalog.getRelease(),
-      input.preserveExistingNaics
-        ? this.dependencies.repository.getIndustryProfile(authorization.organization.id)
-        : Promise.resolve(null),
+      this.dependencies.repository.getIndustryProfile(authorization.organization.id),
     ]);
+    if ((existingProfile?.updatedAt ?? null) !== input.expectedIndustryUpdatedAt) {
+      throw new MarketProfileError("conflict", "Industry context changed. Refresh before saving again.");
+    }
     const naics = await Promise.all(input.naics.map(async (selection) => {
       if (
         !selection ||
@@ -324,7 +332,6 @@ export class MarketProfileService {
     if (new Set(naics.map((industry) => industry.code)).size !== naics.length) {
       throw new MarketProfileError("invalid", "Select each governed NAICS industry only once.");
     }
-    const selectedIdentities = new Set(naics.map((industry) => `${industry.version}:${industry.code}`));
     const canonicalProvenance = `Participant selected from ${release.sourceName} ${release.version} NAICS`;
     const preservedNaics = input.preserveExistingNaics && existingProfile
       ? (await Promise.all(existingProfile.naics.map(async (descriptor) => {
@@ -340,10 +347,7 @@ export class MarketProfileService {
             descriptor.source === "participant_selected" &&
             descriptor.provenance === canonicalProvenance
           );
-          return !isCanonicalGovernedDescriptor &&
-            !selectedIdentities.has(`${descriptor.version}:${descriptor.code}`)
-            ? descriptor
-            : null;
+          return !isCanonicalGovernedDescriptor ? descriptor : null;
         }))).filter((descriptor) => descriptor !== null)
       : [];
     if (preservedNaics.length + naics.length > 30) {
@@ -353,15 +357,12 @@ export class MarketProfileService {
       industries: input.industries,
       naics: Object.freeze([...preservedNaics, ...naics]),
     });
-    const requestFingerprint = fingerprint(canonicalInput);
-    const prior = await this.replay(scope, "industry-context-updated", requestFingerprint);
-    if (prior) return Object.freeze({ replayed: true as const, receipt: prior });
     const now = this.now();
     const profile = marketProfileInput(
       () => createIndustryProfile({ organizationId: authorization.organization.id, ...canonicalInput, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
       "Industry context is invalid.",
     );
-    const receipt = await this.persist({ scope, authorization, action: "industry-context-updated", subjectId: profile.id, requestFingerprint, record: { kind: "industry", value: profile }, now });
+    const receipt = await this.persist({ scope, authorization, action: "industry-context-updated", subjectId: profile.id, requestFingerprint, record: { kind: "industry", value: profile }, expectedRecordUpdatedAt: input.expectedIndustryUpdatedAt, now });
     return Object.freeze({ replayed: false as const, receipt, profile });
   }
 

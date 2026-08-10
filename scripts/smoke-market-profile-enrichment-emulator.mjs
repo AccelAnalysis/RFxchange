@@ -47,7 +47,7 @@ try {
 
   const industry = { id: organizationId, organizationId, industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }], naics: [{ id: "naics-236220", code: "236220", title: "Commercial and Institutional Building Construction", version: "2022", source: "participant_selected", provenance: "Participant selected", visibility: "network" }], updatedByUserId: `user-${suffix}`, updatedByMembershipId: `membership-${suffix}`, updatedAt: now };
   const industryWrite = persistenceInput(`command-industry-${suffix}`, `event-industry-${suffix}`, `audit-industry-${suffix}`, { kind: "industry", value: industry });
-  await repository.save(industryWrite);
+  await repository.save({ ...industryWrite, expectedRecordUpdatedAt: null });
   created.push(["organizationIndustryProfiles", industry.id], ["organizationMarketProfileCommands", industryWrite.command.id], ["organizationMarketProfileEvents", industryWrite.event.id], ["organizationAuditEvents", industryWrite.auditEvent.id]);
   assert.equal((await repository.getIndustryProfile(organizationId))?.naics[0].code, "236220");
 

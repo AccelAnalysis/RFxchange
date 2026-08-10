@@ -33,6 +33,7 @@ export interface OrganizationMarketProfileRepository {
     command: OrganizationMarketProfileCommandReceipt;
     event: OrganizationMarketProfileEvent;
     auditEvent: OrganizationActionAuditEvent;
+    expectedRecordUpdatedAt?: string | null;
     record:
       | Readonly<{ kind: "capability"; value: OrganizationCapabilityClaim }>
       | Readonly<{ kind: "industry"; value: OrganizationIndustryProfile }>
