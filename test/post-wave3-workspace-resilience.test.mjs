@@ -74,6 +74,7 @@ test("live workspace sources retain bounded hydration, scoped refresh, and strea
   const resourcePage = read("app/resources/page.tsx");
   const resourceWorkspace = read("src/components/resource-network/ResourceNetworkWorkspace.tsx");
   const accountPage = read("app/organization-profile/page.tsx");
+  const marketProfileRuntime = read("src/infrastructure/market-profile/runtime.ts");
 
   assert.match(resourcePage, /selectedRequestId\s*\?\s*await service\.messages/);
   assert.doesNotMatch(resourcePage, /Promise\.all\(requestReferrals\.map/);
@@ -84,4 +85,7 @@ test("live workspace sources retain bounded hydration, scoped refresh, and strea
   }
   assert.match(accountPage, /settleOptionalWorkspacePanel/);
   assert.ok((accountPage.match(/<Suspense/g) ?? []).length >= 3);
+  assert.match(marketProfileRuntime, /geographyDefinitions\.getById\(id\)/);
+  assert.match(accountPage, /serviceGeographies=\{marketProfile\.serviceGeographies\}/);
+  assert.doesNotMatch(accountPage, /label:\s*id/);
 });

@@ -109,7 +109,7 @@ async function MarketProfileSection({
     snapshot={marketProfile.snapshot}
     catalog={marketProfile.catalog}
     marketRoles={marketProfile.marketRoles}
-    serviceGeographies={marketProfile.serviceGeographyIds.map((id) => ({ id, label: id }))}
+    serviceGeographies={marketProfile.serviceGeographies}
   />;
 }
 
