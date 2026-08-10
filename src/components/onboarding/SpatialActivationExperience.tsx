@@ -6,10 +6,12 @@ import { useEffect, useState } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import type { ActivationJourneyState } from "../../application/onboarding/activation-journey";
+import { loadRequiredSceneWithRetry } from "../../application/onboarding/required-scene-recovery";
 import {
   ExchangeSpatialScene,
   type ExchangeHomeMarker,
 } from "../map/ExchangeSpatialScene";
+import { useI18n } from "../i18n/I18nProvider";
 import { StatusPill } from "../ui";
 import { ActivationJourneyClient } from "./ActivationJourneyClient";
 
@@ -24,15 +26,34 @@ interface SpatialModelResponse {
   readonly model: ControlledLocalityMapModel;
 }
 
+async function fetchRequiredScene<T>(
+  url: string,
+  signal: AbortSignal,
+  validate: (payload: unknown) => boolean,
+): Promise<T> {
+  return loadRequiredSceneWithRetry(async (requestSignal) => {
+    const response = await fetch(url, { cache: "no-store", signal: requestSignal });
+    if (!response.ok) throw new Error(`Required scene request failed with HTTP ${response.status}.`);
+    const payload = await response.json() as unknown;
+    if (!validate(payload)) throw new Error("Required scene response was incomplete.");
+    return payload as T;
+  }, signal);
+}
+
 export function SpatialActivationExperience({
   mapModel,
 }: Readonly<{ mapModel: ControlledLocalityMapModel }>) {
+  const { t } = useI18n();
   const router = useRouter();
   const [activationState, setActivationState] = useState<ActivationJourneyState | null>(null);
   const [sceneModel, setSceneModel] = useState(mapModel);
   const [homeMarker, setHomeMarker] = useState<ExchangeHomeMarker | null>(null);
   const [workspaceUrl, setWorkspaceUrl] = useState("/geography/canvas");
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [spatialModelFailed, setSpatialModelFailed] = useState(false);
+  const [homeSceneFailed, setHomeSceneFailed] = useState(false);
+  const [spatialRetryKey, setSpatialRetryKey] = useState(0);
+  const [homeSceneRetryKey, setHomeSceneRetryKey] = useState(0);
   const selectedGeographyId = activationState?.selectedGeography?.id ?? null;
   const markerActive = activationState?.marker?.status === "active";
   const sceneModelMatchesSelection = selectedGeographyId !== null &&
@@ -48,44 +69,54 @@ export function SpatialActivationExperience({
 
   useEffect(() => {
     if (!selectedGeographyId || sceneModelMatchesSelection) return;
-    let cancelled = false;
+    const controller = new AbortController();
 
-    fetch("/api/onboarding/spatial-model", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) return null;
-        return (await response.json()) as SpatialModelResponse;
-      })
+    fetchRequiredScene<SpatialModelResponse>(
+      "/api/onboarding/spatial-model",
+      controller.signal,
+      (payload) => Boolean(payload && typeof payload === "object" && "model" in payload),
+    )
       .then((result) => {
-        if (!cancelled && result?.model) setSceneModel(result.model);
+        if (result?.model) {
+          setSpatialModelFailed(false);
+          setSceneModel(result.model);
+        }
       })
-      .catch(() => undefined);
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setSpatialModelFailed(true);
+      });
 
     return () => {
-      cancelled = true;
+      controller.abort();
     };
-  }, [sceneModelMatchesSelection, selectedGeographyId]);
+  }, [sceneModelMatchesSelection, selectedGeographyId, spatialRetryKey]);
 
   useEffect(() => {
     if (!markerActive || homeMarker) return;
-    let cancelled = false;
+    const controller = new AbortController();
 
-    fetch("/api/onboarding/home-scene", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) return null;
-        return (await response.json()) as HomeSceneResponse;
-      })
+    fetchRequiredScene<HomeSceneResponse>(
+      "/api/onboarding/home-scene",
+      controller.signal,
+      (payload) => Boolean(payload && typeof payload === "object" && "marker" in payload),
+    )
       .then((result) => {
-        if (!cancelled && result) {
+        if (result) {
+          setHomeSceneFailed(false);
           setHomeMarker(result.marker);
           setWorkspaceUrl(result.controlledPlatformUrl || "/geography/canvas");
         }
       })
-      .catch(() => undefined);
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setHomeSceneFailed(true);
+      });
 
     return () => {
-      cancelled = true;
+      controller.abort();
     };
-  }, [homeMarker, markerActive]);
+  }, [homeMarker, homeSceneRetryKey, markerActive]);
 
   useEffect(() => {
     if (!homeMarker) return;
@@ -125,6 +156,7 @@ export function SpatialActivationExperience({
             mode={sceneMode}
             marker={homeMarker}
             activationOverlay={!homeMarker}
+            continuousMotion={homeMarker ? "milestone" : "instructional"}
           />
         </div>
       ) : null}
@@ -135,6 +167,32 @@ export function SpatialActivationExperience({
           </StatusPill>
           <span>{statusText}</span>
           {homeMarker ? <Link href={workspaceUrl}>Enter now</Link> : null}
+        </div>
+      ) : null}
+      {spatialModelFailed || homeSceneFailed ? (
+        <div className={styles.recoveryStack}>
+          {spatialModelFailed ? (
+            <div className={styles.recoveryNotice} role="alert">
+              <span>{t("mapStabilization.spatialModelFailure")}</span>
+              <button type="button" onClick={() => {
+                setSpatialModelFailed(false);
+                setSpatialRetryKey((value) => value + 1);
+              }}>
+                {t("mapStabilization.retry")}
+              </button>
+            </div>
+          ) : null}
+          {homeSceneFailed ? (
+            <div className={styles.recoveryNotice} role="alert">
+              <span>{t("mapStabilization.homeSceneFailure")}</span>
+              <button type="button" onClick={() => {
+                setHomeSceneFailed(false);
+                setHomeSceneRetryKey((value) => value + 1);
+              }}>
+                {t("mapStabilization.retry")}
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : null}
       <div className={styles.content}>

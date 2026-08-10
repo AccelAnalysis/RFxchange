@@ -124,7 +124,7 @@ for (const [path, route] of [
 
 assert.ok(
   activationClient.includes("MapboxLocalityCanvas") &&
-    activationClient.includes("Confirm this map position") &&
+    activationClient.includes("candidateId: selectedLocationCandidateId") &&
     activationClient.includes("Enter the Exchange") &&
     activationClient.includes("Your organization is ready"),
   "Integrated activation must preserve geographic confirmation and customer-facing Exchange handoff without recreating stacked participant shells.",

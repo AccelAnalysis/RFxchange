@@ -14,7 +14,8 @@ test("Brand B5 preserves the authoritative activation journey", () => {
     "search-geographies",
     "select-census-geography",
     "MapboxLocalityCanvas",
-    "Confirm this map position",
+    "mapStabilization.confirmCandidate",
+    "selectedLocationCandidateId",
     "websiteNotApplicable",
     "Enter the Exchange",
   ]) {

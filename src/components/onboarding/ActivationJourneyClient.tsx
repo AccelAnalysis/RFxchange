@@ -17,6 +17,7 @@ import {
   MapboxLocalityCanvas,
   type ControlledLocalityPointOverlay,
 } from "../map/MapboxLocalityCanvas";
+import { useI18n } from "../i18n/I18nProvider";
 import { BrandWordmark } from "../brand/BrandWordmark";
 import {
   createClientAuthenticationLifecycle,
@@ -119,6 +120,7 @@ export function ActivationJourneyClient({
   mapModel: ControlledLocalityMapModel;
   onStateChange?: (state: ActivationJourneyState | null) => void;
 }>) {
+  const { t } = useI18n();
   const [state, setState] = useState<ActivationJourneyState | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,6 +145,7 @@ export function ActivationJourneyClient({
   const [creationAllowed, setCreationAllowed] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [locationCandidates, setLocationCandidates] = useState<readonly LocationCandidate[]>([]);
+  const [selectedLocationCandidateId, setSelectedLocationCandidateId] = useState<string | null>(null);
   const [capabilityCategory, setCapabilityCategory] = useState<OrganizationCapabilityCategory>(
     "professional-business-services",
   );
@@ -229,7 +232,9 @@ export function ActivationJourneyClient({
   }, [localityQuery, localityStateCode, step]);
 
   const locationOverlay = useMemo<readonly ControlledLocalityPointOverlay[]>(() => {
-    const candidate = locationCandidates[0];
+    const candidate = locationCandidates.find(
+      (entry) => entry.id === selectedLocationCandidateId,
+    );
     return candidate
       ? [
           {
@@ -241,7 +246,7 @@ export function ActivationJourneyClient({
           },
         ]
       : [];
-  }, [locationCandidates]);
+  }, [locationCandidates, selectedLocationCandidateId]);
 
   async function run<T>(task: () => Promise<T>): Promise<void> {
     setBusy(true);
@@ -680,13 +685,29 @@ export function ActivationJourneyClient({
                 </div>
                 <div className={styles.results}>
                   {locationCandidates.map((candidate) => (
-                    <article className={styles.resultCard} key={candidate.id}>
+                    <article
+                      className={styles.resultCard}
+                      data-active={selectedLocationCandidateId === candidate.id}
+                      key={candidate.id}
+                    >
                       <div><strong>{candidate.matchedAddress}</strong><span>{candidate.provider} · {candidate.quality}</span></div>
-                      <button className={styles.primary} disabled={busy} onClick={() => run(async () => {
-                        const result = await postAction<{ state: ActivationJourneyState }>("confirm-location", { candidateId: candidate.id });
-                        applyState(result.state);
-                        setLocationCandidates([]);
-                      })}>Confirm this map position</button>
+                      {selectedLocationCandidateId === candidate.id ? (
+                        <button className={styles.primary} disabled={busy} type="button" onClick={() => run(async () => {
+                          const result = await postAction<{ state: ActivationJourneyState }>("confirm-location", { candidateId: selectedLocationCandidateId });
+                          applyState(result.state);
+                          setLocationCandidates([]);
+                          setSelectedLocationCandidateId(null);
+                        })}>{t("mapStabilization.confirmCandidate")}</button>
+                      ) : (
+                        <button
+                          className={styles.secondary}
+                          disabled={busy}
+                          type="button"
+                          onClick={() => setSelectedLocationCandidateId(candidate.id)}
+                        >
+                          {t("mapStabilization.plotCandidate")}
+                        </button>
+                      )}
                     </article>
                   ))}
                 </div>
@@ -707,6 +728,7 @@ export function ActivationJourneyClient({
                   });
                   applyState(result.state);
                   setLocationCandidates(result.draft.candidates);
+                  setSelectedLocationCandidateId(result.draft.candidates[0]?.id ?? null);
                 });
               }}>
                 <label>Street address<input name="addressLine1" required /></label>

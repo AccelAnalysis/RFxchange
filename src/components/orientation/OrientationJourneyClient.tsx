@@ -134,6 +134,7 @@ export function OrientationJourneyClient({
           showSearch={false}
           workspaceOverlay="right"
           tutorialOverlay={overlay}
+          continuousMotion="instructional"
         />
         <ResponsiveEdgeSheet ariaLabelledBy="orientation-title" side="right">
           <div ref={journeyRef} className={styles.journey} data-orientation-scenario={scenario.id} data-synthetic-provenance={scenario.provenance}>

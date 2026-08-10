@@ -135,7 +135,8 @@ assert.ok(
 assert.ok(
   activationClient.includes("MapboxLocalityCanvas") &&
     activationClient.includes('kind: "location-candidate"') &&
-    activationClient.includes("Confirm this map position"),
+    activationClient.includes("selectedLocationCandidateId") &&
+    activationClient.includes("candidateId: selectedLocationCandidateId"),
   "Integrated activation must use the production Mapbox renderer for real location confirmation.",
 );
 for (const referenceSurface of [locationPanel, markerPanel]) {

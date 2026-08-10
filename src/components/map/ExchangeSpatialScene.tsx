@@ -20,6 +20,7 @@ import {
 import styles from "./ExchangeSpatialScene.module.css";
 
 export type ExchangeSpatialSceneMode = "regional" | "locality" | "organization";
+export type ExchangeContinuousMotion = "instructional" | "milestone";
 type MapViewMode = "2d" | "perspective" | "3d";
 
 export interface ExchangeHomeMarker {
@@ -43,6 +44,7 @@ export interface ExchangeSpatialSceneProps {
   readonly workspaceOverlay?: "left" | "right" | null;
   readonly showSearch?: boolean;
   readonly tutorialOverlay?: SyntheticOrientationMapOverlay | null;
+  readonly continuousMotion?: ExchangeContinuousMotion | null;
   readonly className?: string;
 }
 
@@ -434,6 +436,7 @@ export function ExchangeSpatialScene({
   workspaceOverlay = null,
   showSearch = interactive,
   tutorialOverlay = null,
+  continuousMotion = null,
   className,
 }: ExchangeSpatialSceneProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -453,6 +456,7 @@ export function ExchangeSpatialScene({
   const focusedMarkerIdRef = useRef(focusedMarkerId);
   const onOrganizationMarkerSelectRef = useRef(onOrganizationMarkerSelect);
   const activationOverlayRef = useRef(activationOverlay);
+  const continuousMotionRef = useRef(continuousMotion);
   const workspaceOverlayRef = useRef(workspaceOverlay);
   const homeGeoJsonRef = useRef(localityGeoJson(model));
   const homeMaskGeoJsonRef = useRef(localityMaskGeoJson(model));
@@ -486,6 +490,7 @@ export function ExchangeSpatialScene({
   focusedMarkerIdRef.current = focusedMarkerId;
   onOrganizationMarkerSelectRef.current = onOrganizationMarkerSelect;
   activationOverlayRef.current = activationOverlay;
+  continuousMotionRef.current = continuousMotion;
   workspaceOverlayRef.current = workspaceOverlay;
   homeGeoJsonRef.current = homeGeoJson;
   homeMaskGeoJsonRef.current = homeMaskGeoJson;
@@ -513,6 +518,7 @@ export function ExchangeSpatialScene({
     if (
       !map ||
       !target ||
+      !continuousMotionRef.current ||
       !rotationEnabledRef.current ||
       reducedMotionRef.current ||
       manuallyPausedRef.current
@@ -529,6 +535,7 @@ export function ExchangeSpatialScene({
       if (
         !activeMap ||
         !activeTarget ||
+        !continuousMotionRef.current ||
         !rotationEnabledRef.current ||
         reducedMotionRef.current ||
         manuallyPausedRef.current
@@ -589,7 +596,7 @@ export function ExchangeSpatialScene({
         duration: reducedMotionRef.current ? 0 : 2_400,
         essential: true,
       });
-      map.once("moveend", startOrbit);
+      if (continuousMotionRef.current) map.once("moveend", startOrbit);
       return;
     }
 
@@ -604,11 +611,13 @@ export function ExchangeSpatialScene({
       maxZoom: activeMode === "regional" ? 9.3 : 12.2,
       duration: reducedMotionRef.current ? 0 : 2_400,
     });
-    map.once("moveend", () => {
-      const center = map.getCenter();
-      orbitTargetRef.current = [center.lng, center.lat];
-      startOrbit();
-    });
+    if (continuousMotionRef.current) {
+      map.once("moveend", () => {
+        const center = map.getCenter();
+        orbitTargetRef.current = [center.lng, center.lat];
+        startOrbit();
+      });
+    }
   }, [setLocalityLayerVisibility, startOrbit, stopOrbit]);
 
   const fitHomeLocality = useCallback(() => {
@@ -1116,6 +1125,7 @@ export function ExchangeSpatialScene({
     tutorialPaths,
     mode,
     activationOverlay,
+    continuousMotion,
     workspaceOverlay,
     focusedMarkerId,
   ]);
@@ -1211,9 +1221,11 @@ export function ExchangeSpatialScene({
       ) : null}
 
       <figcaption className={styles.srOnly}>
-        Edge-to-edge RFxchange map. Ambient rotation uses a 225-second orbit. Locality scenes use a
+        Edge-to-edge RFxchange map. {continuousMotion
+          ? "This instructional or milestone scene may use a 225-second ambient orbit."
+          : "This daily workspace scene settles into a stable interactive camera."} Locality scenes use a
         60-degree pitch and fit the authoritative locality bounds. Organization scenes use a
-        75-degree pitch at zoom 16 and orbit the persistent organization marker.
+        75-degree pitch at zoom 16 and preserve the persistent organization marker.
         {tutorialOverlay ? ` ${tutorialOverlay.accessibleSummary} All tutorial entities are synthetic and are not live Exchange activity.` : ""}
       </figcaption>
     </figure>
