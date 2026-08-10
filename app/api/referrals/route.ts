@@ -3,15 +3,14 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import type { CreateAndSendReferralInput } from "@/src/application/referrals/referral-create-and-send";
+import { referralInvitationDeliveryPermitted } from "@/src/application/referrals/referral-invitation-delivery";
 import {
   ReferralNetworkError,
   type ReferralCommandScope,
 } from "@/src/application/referrals/referral-network";
 import { organizationId } from "@/src/domain/organizations/model";
 import type {
-  BusinessReferral,
   ProviderReferralContext,
-  ReferralCommunicationIntent,
   ReferralContactMethod,
   ReferralNeed,
   ReferralPurpose,
@@ -123,16 +122,6 @@ function creationInput(body: Record<string, unknown>): CreateAndSendReferralInpu
   });
 }
 
-function invitationDeliveryPermitted(
-  referral: Pick<BusinessReferral, "status">,
-  communication: ReferralCommunicationIntent | null,
-): communication is ReferralCommunicationIntent {
-  return referral.status === "sent" && Boolean(
-    communication &&
-    (communication.status === "queued" || communication.status === "retryable-failure"),
-  );
-}
-
 export async function GET() {
   const scope = await accessScope();
   if (scope instanceof NextResponse) return scope;
@@ -163,7 +152,7 @@ export async function POST(request: NextRequest) {
         scope,
         creationInput(body),
       );
-      const communication = invitationDeliveryPermitted(result.referral, result.communication)
+      const communication = referralInvitationDeliveryPermitted(result.referral, result.communication)
         ? await attemptReferralCommunication(result.communication)
         : result.communication;
       return NextResponse.json(
@@ -194,7 +183,7 @@ export async function POST(request: NextRequest) {
         : await new FirestoreReferralRepository(getServerFirestore()).getCommunication(
           String(result.referral.communicationMessageId ?? ""),
         );
-      const communication = invitationDeliveryPermitted(result.referral, pendingCommunication)
+      const communication = referralInvitationDeliveryPermitted(result.referral, pendingCommunication)
         ? await attemptReferralCommunication(pendingCommunication)
         : pendingCommunication;
       return NextResponse.json({ ...result, communication });
@@ -213,7 +202,7 @@ export async function POST(request: NextRequest) {
         );
       }
       const intent = await repository.getCommunication(referral.communicationMessageId);
-      if (!invitationDeliveryPermitted(referral, intent)) {
+      if (!referralInvitationDeliveryPermitted(referral, intent)) {
         return NextResponse.json(
           { error: "This referral no longer permits invitation delivery." },
           { status: 409 },
