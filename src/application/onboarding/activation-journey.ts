@@ -555,18 +555,26 @@ export class ActivationJourneyService {
         "Organization authority is required before confirming location.",
       );
     }
-    const draft = await this.dependencies.location.beginConfirmation({
-      context,
-      organizationId: String(activation.organizationId),
-      membershipId: String(activation.membershipId),
-      physicalAddress: structuredPostalAddress({
+    let physicalAddress;
+    try {
+      physicalAddress = structuredPostalAddress({
         addressLine1: input.addressLine1,
         addressLine2: input.addressLine2,
         locality: input.locality,
         regionCode: input.regionCode,
         postalCode: input.postalCode,
         countryCode: "US",
-      }),
+      });
+    } catch (error) {
+      throw new ActivationRequestValidationError(
+        error instanceof Error ? error.message : "Organization location is invalid.",
+      );
+    }
+    const draft = await this.dependencies.location.beginConfirmation({
+      context,
+      organizationId: String(activation.organizationId),
+      membershipId: String(activation.membershipId),
+      physicalAddress,
       isHomeOrPrivate: input.isHomeOrPrivate,
       visibility: input.visibility,
       reason: "Participant geocoded organization location during activation.",

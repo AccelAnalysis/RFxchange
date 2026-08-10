@@ -438,3 +438,24 @@ test("profile contact, phone, and capability validation retain typed request sem
       error.code === "request-invalid",
   );
 });
+
+test("activation location address validation retains typed request semantics", async () => {
+  const current = fixture({
+    websiteDisposition: "available",
+    websiteUrl: "https://example.org/",
+    phone: "+1 757 555 0100",
+  });
+
+  await assert.rejects(
+    () => current.service.beginLocation(current.context, {
+      addressLine1: "801 Crawford St",
+      locality: "Portsmouth",
+      regionCode: "VA",
+      postalCode: "23@704",
+      isHomeOrPrivate: false,
+      visibility: "approximate",
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+});

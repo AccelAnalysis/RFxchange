@@ -5,6 +5,7 @@ import {
   ActivationJourneyError,
   ActivationRequestValidationError,
 } from "@/src/application/onboarding/activation-journey";
+import { OrganizationResolutionError } from "@/src/application/organization-resolution/organization-resolution";
 import { isCurrentActivationLegalAcceptance } from "@/src/domain/onboarding/model";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
@@ -17,6 +18,7 @@ import { createFirestoreGeographyRepositories } from "@/src/infrastructure/fires
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import {
+  CensusTigerLocalityError,
   CensusTigerLocalityDirectory,
   type CensusLocalityCandidate,
 } from "@/src/infrastructure/geography/census-tiger-locality-directory";
@@ -120,6 +122,28 @@ function errorResponse(request: NextRequest, error: unknown) {
     return apiProblem(request, {
       status: 409,
       participantMessage: "Activation cannot continue until the current requirement is complete.",
+      code: error.code,
+      cause: error,
+    });
+  }
+  if (error instanceof CensusTigerLocalityError) {
+    const requestInvalid = error.code === "invalid-query" || error.code === "invalid-state";
+    const notFound = error.code === "not-found";
+    return apiProblem(request, {
+      status: requestInvalid ? 400 : notFound ? 404 : 503,
+      participantMessage: requestInvalid
+        ? "The geography search contains an invalid value."
+        : notFound
+          ? "The selected geography is no longer available. Search again."
+          : "Geography search is temporarily unavailable. Retry the request.",
+      code: error.code,
+      cause: error,
+    });
+  }
+  if (error instanceof OrganizationResolutionError) {
+    return apiProblem(request, {
+      status: 409,
+      participantMessage: "Organization resolution cannot continue from the current state. Review the latest candidates and retry.",
       code: error.code,
       cause: error,
     });

@@ -175,3 +175,15 @@ test("transaction repositories type deterministic races without flattening persi
   assert.match(enrichmentApplication, /error instanceof OrganizationEnrichmentPersistenceConflictError/);
   assert.match(enrichmentApplication, /throw error/);
 });
+
+test("activation keeps typed geography and organization-resolution outcomes out of the outage fallback", () => {
+  const route = read("app/api/onboarding/activation/route.ts");
+  const journey = read("src/application/onboarding/activation-journey.ts");
+
+  assert.match(route, /error instanceof CensusTigerLocalityError/);
+  assert.match(route, /error\.code === "invalid-query" \|\| error\.code === "invalid-state"/);
+  assert.match(route, /error instanceof OrganizationResolutionError/);
+  assert.match(route, /code: error\.code/);
+  assert.match(journey, /physicalAddress = structuredPostalAddress/);
+  assert.match(journey, /throw new ActivationRequestValidationError\([\s\S]{0,120}Organization location is invalid/);
+});
