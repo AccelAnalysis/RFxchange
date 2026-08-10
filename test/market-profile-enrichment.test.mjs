@@ -147,7 +147,7 @@ test("wrong organization, invented catalog IDs, and out-of-scope geography fail 
 test("industry, past performance, preferences, and provisional terms preserve their boundaries", async () => {
   const f = fixture();
   const claim = await f.service.claimCapability(f.scope, f.claimInput);
-  await f.service.updateIndustry({ ...f.scope, commandId: "command-industry" }, { industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }], naics: [{ code: "236220", version: "2022", visibility: "network" }] });
+  await f.service.updateIndustry({ ...f.scope, commandId: "command-industry" }, { industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }], naics: [{ code: "236220", version: "2022", visibility: "network" }], preserveExistingNaics: false });
   await f.service.addPastPerformance({ ...f.scope, commandId: "command-performance" }, { id: "project-1", title: "Municipal facilities modernization", summary: "Renovated occupied municipal facilities through a phased construction plan.", role: "Prime contractor", value: { currency: "USD", exactMinorUnits: 125000000, disclosed: false }, outputs: ["Renovated facilities"], outcomesClaimed: ["Work completed on schedule"], supportingCapabilityClaimIds: [claim.claim.id], visibility: "private" });
   await f.service.updatePreferences({ ...f.scope, commandId: "command-preferences" }, { deliveryRoleInterests: ["prime", "subcontractor"], teamPreferences: ["Local specialty trades"], referralPreferences: ["Warm introductions"], resourceNeeds: ["Bonding support"], contactPreference: "structured_intake", intakeNotes: "Review fit before introduction.", visibility: "network" });
   await f.service.submitProvisionalTerm({ ...f.scope, commandId: "command-term" }, { id: "term-1", proposedLabel: "Resilient waterfront retrofit coordination", proposedDefinition: "Coordinates multi-disciplinary retrofit work for occupied waterfront facilities.", exampleWork: "Sequencing marine access, structural, and building systems work.", suggestedDomainId: CAPABILITY.domainId });
@@ -161,26 +161,70 @@ test("industry, past performance, preferences, and provisional terms preserve th
   assert.equal(f.state.terms[0].status, "submitted");
 });
 
+test("industry updates preserve stored legacy NAICS until an explicit replacement", async () => {
+  const f = fixture();
+  const legacy = Object.freeze({
+    id: "naics-import-23622",
+    code: "23622",
+    title: "Commercial construction import",
+    version: "2017",
+    source: "authorized_import",
+    provenance: "Authorized migration record",
+    visibility: "network",
+  });
+  f.state.industry = Object.freeze({
+    id: f.organization.id,
+    organizationId: f.organization.id,
+    industries: Object.freeze([]),
+    naics: Object.freeze([legacy]),
+    updatedByUserId: f.user.id,
+    updatedByMembershipId: f.membership.id,
+    updatedAt: NOW,
+  });
+
+  await f.service.updateIndustry(
+    { ...f.scope, commandId: "command-preserve-legacy-naics" },
+    {
+      industries: [{ id: "industry-renovation", label: "Renovation", visibility: "network" }],
+      naics: [],
+      preserveExistingNaics: true,
+    },
+  );
+  assert.deepEqual(f.state.industry.naics, [legacy]);
+
+  await f.service.updateIndustry(
+    { ...f.scope, commandId: "command-replace-legacy-naics" },
+    {
+      industries: [{ id: "industry-renovation", label: "Renovation", visibility: "network" }],
+      naics: [{ code: "236220", version: "2022", visibility: "network" }],
+      preserveExistingNaics: false,
+    },
+  );
+  assert.equal(f.state.industry.naics.length, 1);
+  assert.equal(f.state.industry.naics[0].code, "236220");
+  assert.equal(f.state.industry.naics[0].source, "participant_selected");
+});
+
 test("industry updates reject invented or stale NAICS identities before persistence", async () => {
   const f = fixture();
   await assert.rejects(
     f.service.updateIndustry(
       { ...f.scope, commandId: "command-invented-naics" },
-      { industries: [], naics: [{ code: "999999", version: "2022", visibility: "network" }] },
+      { industries: [], naics: [{ code: "999999", version: "2022", visibility: "network" }], preserveExistingNaics: false },
     ),
     (error) => error instanceof MarketProfileError && error.code === "invalid",
   );
   await assert.rejects(
     f.service.updateIndustry(
       { ...f.scope, commandId: "command-stale-naics" },
-      { industries: [], naics: [{ code: "236220", version: "2017", visibility: "network" }] },
+      { industries: [], naics: [{ code: "236220", version: "2017", visibility: "network" }], preserveExistingNaics: false },
     ),
     (error) => error instanceof MarketProfileError && error.code === "invalid",
   );
   await assert.rejects(
     f.service.updateIndustry(
       { ...f.scope, commandId: "command-duplicate-naics" },
-      { industries: [], naics: [{ code: "236220", version: "2022", visibility: "network" }, { code: "236220", version: "2022", visibility: "network" }] },
+      { industries: [], naics: [{ code: "236220", version: "2022", visibility: "network" }, { code: "236220", version: "2022", visibility: "network" }], preserveExistingNaics: false },
     ),
     (error) => error instanceof MarketProfileError && error.code === "invalid",
   );
@@ -197,7 +241,7 @@ test("market-profile model validation remains a typed participant input error", 
   await assert.rejects(
     f.service.updateIndustry(
       { ...f.scope, commandId: "command-invalid-industry" },
-      { industries, naics: [] },
+      { industries, naics: [], preserveExistingNaics: false },
     ),
     (error) => error instanceof MarketProfileError && error.code === "invalid",
   );
@@ -212,7 +256,7 @@ test("market-profile persistence races are conflicts while operational failures 
   await assert.rejects(
     conflict.service.updateIndustry(
       { ...conflict.scope, commandId: "command-raced-industry" },
-      { industries: [], naics: [] },
+      { industries: [], naics: [], preserveExistingNaics: false },
     ),
     (error) => error instanceof MarketProfileError && error.code === "conflict",
   );
@@ -222,7 +266,7 @@ test("market-profile persistence races are conflicts while operational failures 
   await assert.rejects(
     unavailable.service.updateIndustry(
       { ...unavailable.scope, commandId: "command-outage-industry" },
-      { industries: [], naics: [] },
+      { industries: [], naics: [], preserveExistingNaics: false },
     ),
     (error) => error === outage,
   );

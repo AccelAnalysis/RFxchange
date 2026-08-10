@@ -65,11 +65,15 @@ assert.doesNotMatch(referralWorkspace, /displayName === selected\.senderOrganiza
 
 assert.match(marketService, /naicsCatalog\.getIndustry/);
 assert.match(marketService, /Participant selected from \$\{release\.sourceName\}/);
+assert.match(marketService, /repository\.getIndustryProfile/);
+assert.match(marketService, /preserveExistingNaics/);
 assert.match(marketRuntime, /loadImmutableNaicsCatalog/);
 assert.match(marketPanel, /marketProfile\.catalog\.resultCount/);
 assert.match(marketPanel, /setCapabilityResultLimit/);
 assert.match(marketPanel, /marketProfile\.industry\.resultCount/);
 assert.match(marketPanel, /selectedNaics\.code/);
+assert.match(marketPanel, /preservedSnapshotNaics/);
+assert.match(marketPanel, /preserveExistingNaics/);
 assert.doesNotMatch(marketPanel, /name="naicsTitle"|name="naicsCode"|name="naicsVersion"/);
 
 for (const route of ["/geography/canvas", "/referrals", "/resources", "/quick-start", "/organization-profile"]) {

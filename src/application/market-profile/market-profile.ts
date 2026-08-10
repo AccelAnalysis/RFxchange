@@ -274,17 +274,24 @@ export class MarketProfileService {
   async updateIndustry(scope: MarketProfileCommandScope, input: Readonly<{
     industries: readonly Readonly<{ id: string; label: string; visibility: string }>[];
     naics: readonly Readonly<{ code: string; version: string; visibility: string }>[];
+    preserveExistingNaics: boolean;
   }>) {
     const authorization = await this.authorize(scope);
     if (
       !Array.isArray(input.industries) ||
       !Array.isArray(input.naics) ||
+      typeof input.preserveExistingNaics !== "boolean" ||
       input.industries.length > 20 ||
       input.naics.length > 30
     ) {
       throw new MarketProfileError("invalid", "Industry context exceeds supported limits.");
     }
-    const release = await this.dependencies.naicsCatalog.getRelease();
+    const [release, existingProfile] = await Promise.all([
+      this.dependencies.naicsCatalog.getRelease(),
+      input.preserveExistingNaics
+        ? this.dependencies.repository.getIndustryProfile(authorization.organization.id)
+        : Promise.resolve(null),
+    ]);
     const naics = await Promise.all(input.naics.map(async (selection) => {
       if (
         !selection ||
@@ -317,7 +324,17 @@ export class MarketProfileService {
     if (new Set(naics.map((industry) => industry.code)).size !== naics.length) {
       throw new MarketProfileError("invalid", "Select each governed NAICS industry only once.");
     }
-    const canonicalInput = Object.freeze({ industries: input.industries, naics });
+    const selectedIdentities = new Set(naics.map((industry) => `${industry.version}:${industry.code}`));
+    const preservedNaics = existingProfile?.naics.filter(
+      (industry) => !selectedIdentities.has(`${industry.version}:${industry.code}`),
+    ) ?? [];
+    if (preservedNaics.length + naics.length > 30) {
+      throw new MarketProfileError("invalid", "Industry context exceeds supported limits.");
+    }
+    const canonicalInput = Object.freeze({
+      industries: input.industries,
+      naics: Object.freeze([...preservedNaics, ...naics]),
+    });
     const requestFingerprint = fingerprint(canonicalInput);
     const prior = await this.replay(scope, "industry-context-updated", requestFingerprint);
     if (prior) return Object.freeze({ replayed: true as const, receipt: prior });
