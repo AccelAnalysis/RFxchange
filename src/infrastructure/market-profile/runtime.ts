@@ -4,6 +4,7 @@ import { MarketProfileService } from "../../application/market-profile/market-pr
 import type { ParticipantRouteResolution } from "../auth/participant-route-runtime.ts";
 import { createServerFirebaseAccountSecurityService } from "../auth/firebase-account-security-runtime.ts";
 import { loadImmutableAmacsCatalog } from "../amacs/runtime.ts";
+import { loadImmutableNaicsCatalog } from "../naics/runtime.ts";
 import { FirestoreAiInterpretationRepository } from "../firestore/ai-interpretation-repository.ts";
 import { createFirestoreOrganizationLocationRepositories } from "../firestore/organization-location.ts";
 import { createFirestoreGeographyRepositories } from "../firestore/geography-repositories.ts";
@@ -14,8 +15,9 @@ import { getServerFirestore } from "../firestore/runtime.ts";
 type AuthorizedParticipant = Extract<ParticipantRouteResolution, { readonly kind: "authorized" }>;
 
 export async function createServerMarketProfileService(db: Firestore = getServerFirestore()) {
-  const [catalog, foundation] = await Promise.all([
+  const [catalog, naicsCatalog, foundation] = await Promise.all([
     loadImmutableAmacsCatalog(),
+    Promise.resolve(loadImmutableNaicsCatalog()),
     Promise.resolve(createFirestoreFoundationRepositories(db)),
   ]);
   const locations = createFirestoreOrganizationLocationRepositories(db);
@@ -28,6 +30,7 @@ export async function createServerMarketProfileService(db: Firestore = getServer
       restrictions: foundation.lifecycle.restrictions,
     },
     catalog,
+    naicsCatalog,
     interpretations: new FirestoreAiInterpretationRepository(db),
     serviceGeographies: locations.serviceGeographies,
     repository: new FirestoreOrganizationMarketProfileRepository(db),
@@ -36,17 +39,19 @@ export async function createServerMarketProfileService(db: Firestore = getServer
 
 export async function loadAuthorizedMarketProfile(access: AuthorizedParticipant) {
   const db = getServerFirestore();
-  const [service, catalog] = await Promise.all([
+  const [service, catalog, naicsCatalog] = await Promise.all([
     createServerMarketProfileService(db),
     loadImmutableAmacsCatalog(),
+    Promise.resolve(loadImmutableNaicsCatalog()),
   ]);
   const organizationId = String(access.membership.organizationId);
-  const [snapshot, release, domains, marketRoles, serviceGeographies] = await Promise.all([
+  const [snapshot, release, domains, marketRoles, serviceGeographies, naics] = await Promise.all([
     service.snapshot(organizationId),
     catalog.getRelease(),
     catalog.listDomains(),
     catalog.listMarketRoles(),
     createFirestoreOrganizationLocationRepositories(db).serviceGeographies.getByOrganizationId(access.membership.organizationId),
+    naicsCatalog.getProjection(),
   ]);
   const families = (await Promise.all(domains.map((domain) => catalog.listFamilies(domain.domainId)))).flat();
   const capabilities = (await Promise.all(families.map((family) => catalog.listCapabilities(family.familyId)))).flat();
@@ -61,6 +66,7 @@ export async function loadAuthorizedMarketProfile(access: AuthorizedParticipant)
   return Object.freeze({
     snapshot,
     catalog: Object.freeze({ release, domains, families, capabilities }),
+    naics,
     marketRoles: Object.freeze(marketRoles.flatMap((record) => {
       const id = typeof record.market_role_id === "string" ? record.market_role_id : null;
       const label = typeof record.preferred_label === "string" ? record.preferred_label : null;

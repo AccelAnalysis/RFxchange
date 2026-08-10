@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 
 import { authenticatedServerContext } from "../src/application/auth/server-session.ts";
@@ -19,6 +20,14 @@ const CAPABILITY = Object.freeze({
   aliases: ["general contractor"], status: "active", replacementConceptIds: [], releaseVersion: "0.5.0",
 });
 const MARKET_ROLE = Object.freeze({ market_role_id: "AMACS-MROLE-000003", preferred_label: "Service provider" });
+const NAICS_INDUSTRY = Object.freeze({ code: "236220", title: "Commercial and Institutional Building Construction" });
+const NAICS_INDUSTRIES = Object.freeze([
+  NAICS_INDUSTRY,
+  ...Array.from({ length: 29 }, (_, index) => Object.freeze({
+    code: String(310001 + index),
+    title: `Governed test industry ${index + 1}`,
+  })),
+]);
 
 function fixture(rolePreset = "primary-administrator", options = {}) {
   const organization = createOrganizationAccount({ id: "org-market-profile", now: NOW });
@@ -41,13 +50,28 @@ function fixture(rolePreset = "primary-administrator", options = {}) {
     async getCommand(id) { return state.commands.get(id) ?? null; },
     async save(input) {
       if (options.persistenceError) throw options.persistenceError;
-      if (state.commands.has(input.command.id)) return;
+      if (options.beforeSave) await options.beforeSave({ state, input });
+      if (state.commands.has(input.command.id)) {
+        const receipt = state.commands.get(input.command.id);
+        if (
+          receipt.organizationId !== input.command.organizationId ||
+          receipt.action !== input.command.action ||
+          receipt.resultId !== input.command.resultId ||
+          receipt.requestFingerprint !== input.command.requestFingerprint
+        ) throw new MarketProfilePersistenceConflictError("Market profile command identity collision.");
+        return Object.freeze({ receipt, replayed: true });
+      }
+      if (
+        input.record.kind === "industry" &&
+        (state.industry?.revision ?? 0) !== input.expectedRecordRevision
+      ) throw new MarketProfilePersistenceConflictError("Industry context changed before persistence.");
       state.commands.set(input.command.id, input.command); state.events.push(input.event); state.audits.push(input.auditEvent);
       if (input.record.kind === "capability") state.claims.push(input.record.value);
       if (input.record.kind === "industry") state.industry = input.record.value;
       if (input.record.kind === "past-performance") state.performance.push(input.record.value);
       if (input.record.kind === "preferences") state.preferences = input.record.value;
       if (input.record.kind === "provisional-term") state.terms.push(input.record.value);
+      return Object.freeze({ receipt: input.command, replayed: false });
     },
   };
   const service = new MarketProfileService({
@@ -67,6 +91,12 @@ function fixture(rolePreset = "primary-administrator", options = {}) {
       async listFamilies() { return []; }, async listCapabilities() { return [CAPABILITY]; }, async searchCapabilities() { throw new Error("unused"); },
       async getRequestFamily() { return null; }, async getRequirementType() { return null; }, async getResponseTemplate() { return null; }, async getDecisionTemplate() { return null; }, async getReadinessRules() { return []; }, async getConceptInterpretationGuidance() { return null; }, async resolveHistoricalCapability() { return null; },
     },
+    naicsCatalog: {
+      async getRelease() { return { version: "2022", sourceName: "U.S. Census Bureau", sourceUrl: "https://www.census.gov/naics/", retrievedAt: "2026-08-10", sourceSha256: "a".repeat(64), level: 6, entryCount: NAICS_INDUSTRIES.length }; },
+      async listIndustries() { return NAICS_INDUSTRIES; },
+      async getIndustry(code, version) { return version === "2022" ? NAICS_INDUSTRIES.find((industry) => industry.code === code) ?? null : null; },
+      async getProjection() { throw new Error("unused"); },
+    },
     interpretations: {
       async getRecord() { return state.interpretationRecord; }, async getCandidate() { return state.interpretationCandidate; },
       async saveCompleted() {}, async saveFailureEvidence() {}, async applyCandidateDisposition() {}, async applyNoneOfThese() {},
@@ -76,7 +106,7 @@ function fixture(rolePreset = "primary-administrator", options = {}) {
   });
   const scope = { context, organizationId: organization.id, membershipId: membership.id, commandId: "command-1" };
   const claimInput = { capabilityId: CAPABILITY.conceptId, entityScope: "reporting_entity", marketRoleIds: [MARKET_ROLE.market_role_id], deliveryRoles: ["prime"], serviceGeographyIds: ["us-va-portsmouth"], specialties: ["Public facilities"], capacity: { value: 4, unitId: "delivery-crew", period: "month", note: "Participant-reported planning capacity" }, visibility: "network", source: { kind: "manual" } };
-  return { organization, user, membership, state, service, scope, claimInput };
+  return { organization, user, membership, state, repository, service, scope, claimInput };
 }
 
 test("manual AMACS selection creates a self-reported organization claim and idempotent evidence", async () => {
@@ -97,11 +127,13 @@ test("manual AMACS selection creates a self-reported organization claim and idem
 
 test("concurrent identical capability commands converge on one deterministic claim", async () => {
   const f = fixture();
-  const [first, second] = await Promise.all([
+  const results = await Promise.all([
     f.service.claimCapability(f.scope, f.claimInput),
     f.service.claimCapability(f.scope, f.claimInput),
   ]);
-  assert.equal(first.claim.id, second.claim.id);
+  assert.deepEqual(results.map((result) => result.replayed).sort(), [false, true]);
+  assert.equal(results[0].receipt, results[1].receipt);
+  assert.equal(results.find((result) => !result.replayed).claim.id, f.state.claims[0].id);
   assert.equal(f.state.claims.length, 1);
   assert.equal(f.state.events.length, 1);
   assert.equal(f.state.audits.length, 1);
@@ -140,15 +172,294 @@ test("wrong organization, invented catalog IDs, and out-of-scope geography fail 
 test("industry, past performance, preferences, and provisional terms preserve their boundaries", async () => {
   const f = fixture();
   const claim = await f.service.claimCapability(f.scope, f.claimInput);
-  await f.service.updateIndustry({ ...f.scope, commandId: "command-industry" }, { industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }], naics: [{ id: "naics-236220", code: "236220", title: "Commercial and Institutional Building Construction", version: "2022", source: "participant_selected", provenance: "Participant selected", visibility: "network" }] });
+  await f.service.updateIndustry({ ...f.scope, commandId: "command-industry" }, { industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }], naics: [{ code: "236220", version: "2022", visibility: "network" }], preserveExistingNaics: false, expectedIndustryRevision: 0 });
   await f.service.addPastPerformance({ ...f.scope, commandId: "command-performance" }, { id: "project-1", title: "Municipal facilities modernization", summary: "Renovated occupied municipal facilities through a phased construction plan.", role: "Prime contractor", value: { currency: "USD", exactMinorUnits: 125000000, disclosed: false }, outputs: ["Renovated facilities"], outcomesClaimed: ["Work completed on schedule"], supportingCapabilityClaimIds: [claim.claim.id], visibility: "private" });
   await f.service.updatePreferences({ ...f.scope, commandId: "command-preferences" }, { deliveryRoleInterests: ["prime", "subcontractor"], teamPreferences: ["Local specialty trades"], referralPreferences: ["Warm introductions"], resourceNeeds: ["Bonding support"], contactPreference: "structured_intake", intakeNotes: "Review fit before introduction.", visibility: "network" });
   await f.service.submitProvisionalTerm({ ...f.scope, commandId: "command-term" }, { id: "term-1", proposedLabel: "Resilient waterfront retrofit coordination", proposedDefinition: "Coordinates multi-disciplinary retrofit work for occupied waterfront facilities.", exampleWork: "Sequencing marine access, structural, and building systems work.", suggestedDomainId: CAPABILITY.domainId });
   assert.equal(f.state.industry.naics[0].code, "236220");
+  assert.equal(f.state.industry.naics[0].title, NAICS_INDUSTRY.title);
+  assert.equal(f.state.industry.naics[0].version, "2022");
+  assert.equal(f.state.industry.naics[0].provenance, "Participant selected from U.S. Census Bureau 2022 NAICS");
+  assert.equal(f.state.industry.revision, 1);
   assert.equal(f.state.performance[0].confirmationState, "self_reported");
   assert.equal(f.state.performance[0].value.disclosed, false);
   assert.deepEqual(f.state.preferences.deliveryRoleInterests, ["prime", "subcontractor"]);
   assert.equal(f.state.terms[0].status, "submitted");
+});
+
+test("industry command replay remains idempotent after the profile revision advances", async () => {
+  const f = fixture();
+  const input = {
+    industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }],
+    naics: [{ code: "236220", version: "2022", visibility: "network" }],
+    preserveExistingNaics: false,
+    expectedIndustryRevision: 0,
+  };
+  const first = await f.service.updateIndustry(
+    { ...f.scope, commandId: "command-idempotent-industry" },
+    input,
+  );
+  const replay = await f.service.updateIndustry(
+    { ...f.scope, commandId: "command-idempotent-industry" },
+    input,
+  );
+  assert.equal(first.replayed, false);
+  assert.equal(replay.replayed, true);
+  assert.equal(f.state.industry.revision, 1);
+  assert.equal(f.state.commands.size, 1);
+  assert.equal(f.state.events.length, 1);
+});
+
+test("an in-flight identical industry retry rechecks its receipt after observing the committed revision", async () => {
+  const f = fixture();
+  const commandId = "command-overlapping-industry-retry";
+  const input = {
+    industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }],
+    naics: [{ code: "236220", version: "2022", visibility: "network" }],
+    preserveExistingNaics: false,
+    expectedIndustryRevision: 0,
+  };
+  const receipt = Object.freeze({
+    id: commandId,
+    organizationId: f.organization.id,
+    action: "industry-context-updated",
+    resultId: f.organization.id,
+    requestFingerprint: createHash("sha256").update(JSON.stringify(input)).digest("hex"),
+    actorUserId: f.user.id,
+    recordedAt: NOW,
+  });
+  let commandReads = 0;
+  f.repository.getCommand = async () => {
+    commandReads += 1;
+    return commandReads === 1 ? null : receipt;
+  };
+  f.state.industry = Object.freeze({ revision: 1 });
+
+  const replay = await f.service.updateIndustry(
+    { ...f.scope, commandId },
+    input,
+  );
+
+  assert.equal(replay.replayed, true);
+  assert.equal(replay.receipt, receipt);
+  assert.equal(commandReads, 2);
+  assert.equal(f.state.events.length, 0);
+});
+
+test("transaction-level identical industry retries return the authoritative committed receipt", async () => {
+  const f = fixture();
+  const scope = { ...f.scope, commandId: "command-same-revision-overlap" };
+  const input = {
+    industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }],
+    naics: [{ code: "236220", version: "2022", visibility: "network" }],
+    preserveExistingNaics: false,
+    expectedIndustryRevision: 0,
+  };
+
+  const results = await Promise.all([
+    f.service.updateIndustry(scope, input),
+    f.service.updateIndustry(scope, input),
+  ]);
+
+  assert.deepEqual(results.map((result) => result.replayed).sort(), [false, true]);
+  assert.equal(results[0].receipt, results[1].receipt);
+  assert.equal(results[0].receipt, f.state.commands.get(scope.commandId));
+  assert.equal("profile" in results.find((result) => result.replayed), false);
+  assert.equal(f.state.events.length, 1);
+  assert.equal(f.state.audits.length, 1);
+  assert.equal(f.state.industry.revision, 1);
+});
+
+test("an exact pre-revision industry receipt replays before migrated request validation", async () => {
+  const f = fixture();
+  const commandId = "command-pre-revision-industry";
+  const legacyInput = { industries: [], naics: [] };
+  f.state.commands.set(commandId, Object.freeze({
+    id: commandId,
+    organizationId: f.organization.id,
+    action: "industry-context-updated",
+    resultId: f.organization.id,
+    requestFingerprint: createHash("sha256").update(JSON.stringify(legacyInput)).digest("hex"),
+    actorUserId: f.user.id,
+    recordedAt: NOW,
+  }));
+
+  const replay = await f.service.updateIndustry(
+    { ...f.scope, commandId },
+    legacyInput,
+  );
+  assert.equal(replay.replayed, true);
+  assert.equal(f.state.industry, null);
+  assert.equal(f.state.events.length, 0);
+});
+
+test("industry updates independently preserve history and replace the governed NAICS selection", async () => {
+  const f = fixture();
+  const current = Object.freeze({
+    id: "naics-236220",
+    code: "236220",
+    title: NAICS_INDUSTRY.title,
+    version: "2022",
+    source: "participant_selected",
+    provenance: "Participant selected from U.S. Census Bureau 2022 NAICS",
+    visibility: "network",
+  });
+  const legacy = Object.freeze({
+    id: "naics-import-236220",
+    code: "236220",
+    title: "Commercial construction import",
+    version: "2022",
+    source: "authorized_import",
+    provenance: "Authorized migration record",
+    visibility: "network",
+  });
+  f.state.industry = Object.freeze({
+    id: f.organization.id,
+    organizationId: f.organization.id,
+    revision: 7,
+    industries: Object.freeze([]),
+    naics: Object.freeze([current, legacy]),
+    updatedByUserId: f.user.id,
+    updatedByMembershipId: f.membership.id,
+    updatedAt: NOW,
+  });
+
+  await f.service.updateIndustry(
+    { ...f.scope, commandId: "command-preserve-legacy-naics" },
+    {
+      industries: [{ id: "industry-renovation", label: "Renovation", visibility: "network" }],
+      naics: [],
+      preserveExistingNaics: true,
+      expectedIndustryRevision: 7,
+    },
+  );
+  assert.deepEqual(f.state.industry.naics, [legacy]);
+
+  await f.service.updateIndustry(
+    { ...f.scope, commandId: "command-replace-governed-naics" },
+    {
+      industries: [{ id: "industry-renovation", label: "Renovation", visibility: "network" }],
+      naics: [{ code: "236220", version: "2022", visibility: "network" }],
+      preserveExistingNaics: true,
+      expectedIndustryRevision: 8,
+    },
+  );
+  assert.deepEqual(f.state.industry.naics.map((descriptor) => descriptor.code), ["236220", "236220"]);
+  assert.equal(f.state.industry.naics[0].source, "authorized_import");
+  assert.equal(f.state.industry.naics[1].source, "participant_selected");
+
+  await f.service.updateIndustry(
+    { ...f.scope, commandId: "command-remove-legacy-naics" },
+    {
+      industries: [{ id: "industry-renovation", label: "Renovation", visibility: "network" }],
+      naics: [{ code: "236220", version: "2022", visibility: "network" }],
+      preserveExistingNaics: false,
+      expectedIndustryRevision: 9,
+    },
+  );
+  assert.deepEqual(f.state.industry.naics.map((descriptor) => descriptor.code), ["236220"]);
+});
+
+test("industry persistence rejects a concurrent stale historical merge", async () => {
+  let injectConcurrentChange = true;
+  const f = fixture("primary-administrator", {
+    async beforeSave({ state, input }) {
+      if (injectConcurrentChange && input.record.kind === "industry") {
+        injectConcurrentChange = false;
+        state.industry = Object.freeze({ ...state.industry, naics: Object.freeze([]), revision: 8 });
+      }
+    },
+  });
+  f.state.industry = Object.freeze({
+    id: f.organization.id,
+    organizationId: f.organization.id,
+    revision: 7,
+    industries: Object.freeze([]),
+    naics: Object.freeze([{
+      id: "naics-import-236220",
+      code: "236220",
+      title: "Commercial construction import",
+      version: "2022",
+      source: "authorized_import",
+      provenance: "Authorized migration record",
+      visibility: "network",
+    }]),
+    updatedByUserId: f.user.id,
+    updatedByMembershipId: f.membership.id,
+    updatedAt: NOW,
+  });
+
+  await assert.rejects(
+    f.service.updateIndustry(
+      { ...f.scope, commandId: "command-stale-history-merge" },
+      { industries: [], naics: [], preserveExistingNaics: true, expectedIndustryRevision: 7 },
+    ),
+    (error) => error instanceof MarketProfileError && error.code === "conflict",
+  );
+  assert.equal(f.state.industry.revision, 8);
+  assert.deepEqual(f.state.industry.naics, []);
+  assert.equal(f.state.commands.size, 0);
+});
+
+test("thirty governed NAICS selections remain independent of preserved history", async () => {
+  const f = fixture();
+  f.state.industry = Object.freeze({
+    id: f.organization.id,
+    organizationId: f.organization.id,
+    revision: 7,
+    industries: Object.freeze([]),
+    naics: Object.freeze([{
+      id: "naics-import-236220",
+      code: "236220",
+      title: "Commercial construction import",
+      version: "2022",
+      source: "authorized_import",
+      provenance: "Authorized migration record",
+      visibility: "network",
+    }]),
+    updatedByUserId: f.user.id,
+    updatedByMembershipId: f.membership.id,
+    updatedAt: NOW,
+  });
+
+  await f.service.updateIndustry(
+    { ...f.scope, commandId: "command-thirty-governed-plus-history" },
+    {
+      industries: [],
+      naics: NAICS_INDUSTRIES.map((industry) => ({ code: industry.code, version: "2022", visibility: "network" })),
+      preserveExistingNaics: true,
+      expectedIndustryRevision: 7,
+    },
+  );
+  assert.equal(f.state.industry.naics.length, 31);
+  assert.equal(f.state.industry.naics.filter((descriptor) => descriptor.source === "participant_selected").length, 30);
+  assert.equal(f.state.industry.naics.filter((descriptor) => descriptor.source === "authorized_import").length, 1);
+});
+
+test("industry updates reject invented or stale NAICS identities before persistence", async () => {
+  const f = fixture();
+  await assert.rejects(
+    f.service.updateIndustry(
+      { ...f.scope, commandId: "command-invented-naics" },
+      { industries: [], naics: [{ code: "999999", version: "2022", visibility: "network" }], preserveExistingNaics: false, expectedIndustryRevision: 0 },
+    ),
+    (error) => error instanceof MarketProfileError && error.code === "invalid",
+  );
+  await assert.rejects(
+    f.service.updateIndustry(
+      { ...f.scope, commandId: "command-stale-naics" },
+      { industries: [], naics: [{ code: "236220", version: "2017", visibility: "network" }], preserveExistingNaics: false, expectedIndustryRevision: 0 },
+    ),
+    (error) => error instanceof MarketProfileError && error.code === "invalid",
+  );
+  await assert.rejects(
+    f.service.updateIndustry(
+      { ...f.scope, commandId: "command-duplicate-naics" },
+      { industries: [], naics: [{ code: "236220", version: "2022", visibility: "network" }, { code: "236220", version: "2022", visibility: "network" }], preserveExistingNaics: false, expectedIndustryRevision: 0 },
+    ),
+    (error) => error instanceof MarketProfileError && error.code === "invalid",
+  );
+  assert.equal(f.state.industry, null);
 });
 
 test("market-profile model validation remains a typed participant input error", async () => {
@@ -161,7 +472,7 @@ test("market-profile model validation remains a typed participant input error", 
   await assert.rejects(
     f.service.updateIndustry(
       { ...f.scope, commandId: "command-invalid-industry" },
-      { industries, naics: [] },
+      { industries, naics: [], preserveExistingNaics: false, expectedIndustryRevision: 0 },
     ),
     (error) => error instanceof MarketProfileError && error.code === "invalid",
   );
@@ -176,7 +487,7 @@ test("market-profile persistence races are conflicts while operational failures 
   await assert.rejects(
     conflict.service.updateIndustry(
       { ...conflict.scope, commandId: "command-raced-industry" },
-      { industries: [], naics: [] },
+      { industries: [], naics: [], preserveExistingNaics: false, expectedIndustryRevision: 0 },
     ),
     (error) => error instanceof MarketProfileError && error.code === "conflict",
   );
@@ -186,7 +497,7 @@ test("market-profile persistence races are conflicts while operational failures 
   await assert.rejects(
     unavailable.service.updateIndustry(
       { ...unavailable.scope, commandId: "command-outage-industry" },
-      { industries: [], naics: [] },
+      { industries: [], naics: [], preserveExistingNaics: false, expectedIndustryRevision: 0 },
     ),
     (error) => error === outage,
   );

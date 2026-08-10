@@ -1,10 +1,7 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { BrandWordmark } from "../brand/BrandWordmark";
 import {
   ControlGroup,
-  NavigationFrame,
   OverlayPanel,
   ResponsiveSheet,
   SearchFilterFrame,
@@ -14,14 +11,7 @@ import {
 
 import styles from "./ParticipantWorkspace.module.css";
 import b2Styles from "./ParticipantWorkspaceB2.module.css";
-
-type ParticipantNavigationItem =
-  | "Intelligence"
-  | "Referrals"
-  | "Opportunities"
-  | "Resources"
-  | "Quick Start"
-  | "Account";
+import { ParticipantTopNavigation, type ParticipantNavigationItem } from "./ParticipantTopNavigation";
 
 interface ParticipantShellProps {
   readonly activeItem?: ParticipantNavigationItem;
@@ -44,61 +34,6 @@ interface ResponsiveEdgeSheetProps {
   readonly children: ReactNode;
   readonly side?: "left" | "right";
   readonly width?: "standard" | "wide";
-}
-
-const primaryNavigation = [
-  { label: "Intelligence", href: "/geography/canvas", available: true },
-  { label: "Referrals", href: "/referrals", available: true },
-  { label: "Opportunities", available: false },
-  { label: "Resources", href: "/resources", available: true },
-  { label: "Quick Start", href: "/quick-start", available: true },
-] as const;
-
-function NavigationItems({
-  activeItem,
-}: Readonly<{ activeItem?: ParticipantNavigationItem }>) {
-  return (
-    <>
-      {primaryNavigation.map((item) =>
-        item.available ? (
-          <Link
-            key={item.label}
-            href={item.href}
-            aria-current={activeItem === item.label ? "page" : undefined}
-          >
-            {item.label}
-          </Link>
-        ) : (
-          <span
-            key={item.label}
-            aria-disabled="true"
-            title="Available in a later approved product slice"
-          >
-            {item.label}
-          </span>
-        ),
-      )}
-      <Link
-        href="/organization-profile"
-        aria-current={activeItem === "Account" ? "page" : undefined}
-      >
-        Account
-      </Link>
-    </>
-  );
-}
-
-export function ParticipantTopNavigation({
-  activeItem,
-}: Readonly<{ activeItem?: ParticipantNavigationItem }>) {
-  return (
-    <NavigationFrame
-      className={b2Styles.navigation}
-      brand={<BrandWordmark compact />}
-      desktopNavigation={<NavigationItems activeItem={activeItem} />}
-      mobileNavigation={<NavigationItems activeItem={activeItem} />}
-    />
-  );
 }
 
 export function ParticipantShell({

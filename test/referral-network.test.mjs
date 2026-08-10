@@ -109,6 +109,8 @@ test("sender and recipient projections minimize private invitation and actor dat
   const sent = await f.prepareAndSend({ kind: "external", displayName: "External Recipient", email: "recipient@example.test" });
   const sender = projectReferral(sent.referral, f.organizations[0].id);
   assert.equal(sender.role, "sender");
+  assert.equal(sender.senderOrganizationId, f.organizations[0].id);
+  assert.equal(sender.recipientOrganizationId, null);
   assert.doesNotMatch(JSON.stringify(sender), /recipient@example\.test|acq-|membership-|user-/);
   assert.equal(projectReferral(sent.referral, f.organizations[1].id), null);
 });
@@ -158,7 +160,10 @@ test("external recipient attachment requires exact acquisition subject, current 
   await assert.rejects(f.service.attachExternalRecipient(f.scope(1, "attach-wrong-context"), { referralId: sent.referral.id, acquisitionContextId: "acq-another", expectedVersion: 2 }), /does not match/);
   const attached = await f.service.attachExternalRecipient(f.scope(1, "attach-correct"), { referralId: sent.referral.id, acquisitionContextId: sent.referral.acquisitionContextId, expectedVersion: 2 });
   assert.equal(attached.referral.attachedRecipientOrganizationId, f.organizations[1].id);
-  assert.equal(projectReferral(attached.referral, f.organizations[1].id).role, "recipient");
+  const recipientProjection = projectReferral(attached.referral, f.organizations[1].id);
+  assert.equal(recipientProjection.role, "recipient");
+  assert.equal(recipientProjection.senderOrganizationId, f.organizations[0].id);
+  assert.equal(recipientProjection.recipientOrganizationId, f.organizations[1].id);
   assert.equal(attached.referral.status, "sent");
 });
 

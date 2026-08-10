@@ -14,12 +14,14 @@ export function NavigationFrame({
   desktopNavigation,
   mobileNavigation,
   mobileLabel = "Menu",
+  navigationLabel = "Primary participant navigation",
   className,
 }: Readonly<{
   brand: ReactNode;
   desktopNavigation: ReactNode;
   mobileNavigation: ReactNode;
   mobileLabel?: string;
+  navigationLabel?: string;
   className?: string;
 }>) {
   return (
@@ -29,12 +31,12 @@ export function NavigationFrame({
       data-participant-navigation
     >
       <div className={styles.navigationBrand}>{brand}</div>
-      <nav className={styles.desktopNavigation} aria-label="Primary participant navigation">
+      <nav className={styles.desktopNavigation} aria-label={navigationLabel}>
         {desktopNavigation}
       </nav>
       <details className={styles.mobileNavigation}>
         <summary>{mobileLabel}</summary>
-        <nav aria-label="Primary participant navigation">{mobileNavigation}</nav>
+        <nav aria-label={navigationLabel}>{mobileNavigation}</nav>
       </details>
     </header>
   );

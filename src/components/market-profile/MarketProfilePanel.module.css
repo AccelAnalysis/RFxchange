@@ -20,6 +20,9 @@
 .twoColumns, .threeColumns { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .threeColumns { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .help { color: var(--semantic-text-secondary); font-size: .9rem; }
+.resultSummary { color: var(--semantic-text-secondary); font-size: .9rem; }
+.governedSelector { display: grid; gap: 14px; }
+.governedSelector > a { width: fit-content; color: var(--semantic-accent-gold-accessible); font-weight: 700; }
 .primaryButton, .quietButton, .inlineActions button { min-height: 44px; width: fit-content; border-radius: var(--semantic-radius-control); padding: 10px 16px; font: inherit; font-weight: 800; cursor: pointer; }
 .primaryButton { border: 1px solid var(--semantic-action-primary-background); background: var(--semantic-action-primary-background); color: var(--semantic-action-primary-foreground); }
 .quietButton, .inlineActions button { border: 1px solid var(--semantic-border-control); background: transparent; color: var(--semantic-text-primary); }

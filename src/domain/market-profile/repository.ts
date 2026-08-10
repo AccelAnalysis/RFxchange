@@ -33,11 +33,15 @@ export interface OrganizationMarketProfileRepository {
     command: OrganizationMarketProfileCommandReceipt;
     event: OrganizationMarketProfileEvent;
     auditEvent: OrganizationActionAuditEvent;
+    expectedRecordRevision?: number;
     record:
       | Readonly<{ kind: "capability"; value: OrganizationCapabilityClaim }>
       | Readonly<{ kind: "industry"; value: OrganizationIndustryProfile }>
       | Readonly<{ kind: "past-performance"; value: OrganizationPastPerformance }>
       | Readonly<{ kind: "preferences"; value: OrganizationMarketPreferences }>
       | Readonly<{ kind: "provisional-term"; value: OrganizationProvisionalTerm }>;
-  }>): Promise<void>;
+  }>): Promise<Readonly<{
+    receipt: OrganizationMarketProfileCommandReceipt;
+    replayed: boolean;
+  }>>;
 }

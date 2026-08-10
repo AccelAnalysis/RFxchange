@@ -64,7 +64,7 @@ export class FirestoreOrganizationMarketProfileRepository implements Organizatio
     return getFirestoreRecordById<OrganizationMarketProfileCommandReceipt>(this.db, "organizationMarketProfileCommands", id);
   }
 
-  async save(input: Parameters<OrganizationMarketProfileRepository["save"]>[0]): Promise<void> {
+  async save(input: Parameters<OrganizationMarketProfileRepository["save"]>[0]): ReturnType<OrganizationMarketProfileRepository["save"]> {
     const commandRef = this.db.doc(firestoreDocumentPath("organizationMarketProfileCommands", input.command.id));
     const eventRef = this.db.doc(firestoreDocumentPath("organizationMarketProfileEvents", input.event.id));
     const auditRef = this.db.doc(firestoreDocumentPath("organizationAuditEvents", input.auditEvent.id));
@@ -79,7 +79,7 @@ export class FirestoreOrganizationMarketProfileRepository implements Organizatio
             : "organizationProvisionalTerms" as const;
     const recordRef = this.db.doc(firestoreDocumentPath(recordCollection, input.record.value.id));
 
-    await this.db.runTransaction(async (transaction) => {
+    return this.db.runTransaction(async (transaction) => {
       const [commandSnapshot, eventSnapshot, auditSnapshot, recordSnapshot] = await transaction.getAll(commandRef, eventRef, auditRef, recordRef);
       if (commandSnapshot.exists) {
         const prior = commandSnapshot.data() as OrganizationMarketProfileCommandReceipt;
@@ -88,7 +88,7 @@ export class FirestoreOrganizationMarketProfileRepository implements Organizatio
           prior.action === input.command.action &&
           prior.resultId === input.command.resultId &&
           prior.requestFingerprint === input.command.requestFingerprint
-        ) return;
+        ) return Object.freeze({ receipt: prior, replayed: true });
         throw new MarketProfilePersistenceConflictError(
           "Market profile command identity collision.",
         );
@@ -103,6 +103,14 @@ export class FirestoreOrganizationMarketProfileRepository implements Organizatio
         input.event.organizationId !== input.command.organizationId ||
         input.auditEvent.organizationId !== input.command.organizationId
       ) throw new Error("Market profile persistence inputs have mismatched organization scope.");
+      if (
+        input.record.kind === "industry" &&
+        Number(recordSnapshot.data()?.revision ?? 0) !== input.expectedRecordRevision
+      ) {
+        throw new MarketProfilePersistenceConflictError(
+          "Industry context changed before persistence.",
+        );
+      }
 
       const recordData = input.record.kind === "provisional-term"
         ? immutable(input.record.value)
@@ -116,6 +124,7 @@ export class FirestoreOrganizationMarketProfileRepository implements Organizatio
       transaction.create(eventRef, immutable(input.event));
       transaction.create(auditRef, immutable(input.auditEvent));
       transaction.create(commandRef, immutable(input.command));
+      return Object.freeze({ receipt: input.command, replayed: false });
     });
   }
 }

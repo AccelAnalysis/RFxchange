@@ -65,7 +65,7 @@ export default async function ExchangePage({ searchParams }: ExchangePageProps) 
   return (
     <>
       {acquisitionIntent ? <FoundingAcquisitionContinuation /> : null}
-      <ParticipantShell activeItem={destination.workspace === "opportunities" ? "Opportunities" : destination.workspace === "referrals" ? "Referrals" : destination.workspace === "resources" ? "Resources" : "Intelligence"}>
+      <ParticipantShell activeItem={destination.workspace === "opportunities" ? undefined : destination.workspace === "referrals" ? "Referrals" : destination.workspace === "resources" ? "Resources" : "Network"}>
         <OperationalWorkspace ariaLabel="Open RFxchange participant workspace" className={styles.workspace}>
           <section className={styles.wrap}>
             <p className={styles.eyebrow}>OPEN · activation complete</p>

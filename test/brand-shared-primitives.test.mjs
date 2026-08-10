@@ -9,6 +9,7 @@ const primitives = await read("src/components/ui/Primitives.tsx");
 const styles = await read("src/components/ui/Primitives.module.css");
 const contracts = await read("src/components/ui/object-contracts.ts");
 const participant = await read("src/components/participant/ParticipantWorkspace.tsx");
+const participantNavigation = await read("src/components/participant/ParticipantTopNavigation.tsx");
 
 test("Brand B2 exposes shared participant and operational primitives", () => {
   for (const name of [
@@ -52,6 +53,7 @@ test("Brand B2 future visual objects fail closed without authoritative provenanc
 });
 
 test("Participant workspace consumes the shared B2 primitives without enabling later domains", () => {
+  const participantComponents = `${participant}\n${participantNavigation}`;
   for (const name of [
     "NavigationFrame",
     "OverlayPanel",
@@ -60,8 +62,8 @@ test("Participant workspace consumes the shared B2 primitives without enabling l
     "SearchFilterFrame",
     "StatusSummary",
   ]) {
-    assert.match(participant, new RegExp(`\\b${name}\\b`));
+    assert.match(participantComponents, new RegExp(`\\b${name}\\b`));
   }
   assert.match(participant, /Opportunity and resource layers remain unavailable/);
-  assert.match(participant, /Available in a later approved product slice/);
+  assert.doesNotMatch(participantNavigation, /Opportunities|available: false/);
 });

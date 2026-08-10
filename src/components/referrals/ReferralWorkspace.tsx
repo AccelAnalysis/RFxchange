@@ -66,7 +66,7 @@ function otherOrganization(selected: ReferralProjection | null, organizations: r
   if (!selected) return null;
   const otherId = selected.role === "sender"
     ? selected.recipientOrganizationId ? String(selected.recipientOrganizationId) : null
-    : organizations.find((organization) => organization.displayName === selected.senderOrganizationName)?.organizationId ?? null;
+    : String(selected.senderOrganizationId);
   return otherId ? organizations.find((organization) => organization.organizationId === otherId) ?? null : null;
 }
 

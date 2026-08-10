@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 
 import type { AmacsCatalogPort } from "../amacs/catalog.ts";
+import type { NaicsCatalogPort } from "../naics/catalog.ts";
 import {
   authorizeOrganizationOperation,
   type OrganizationOperationAuthorizationDependencies,
@@ -50,6 +51,7 @@ function marketProfileInput<T>(operation: () => T, fallbackMessage: string): T {
 export interface MarketProfileServiceDependencies {
   readonly authorization: OrganizationOperationAuthorizationDependencies;
   readonly catalog: AmacsCatalogPort;
+  readonly naicsCatalog: NaicsCatalogPort;
   readonly interpretations: AiInterpretationRepository;
   readonly serviceGeographies: OrganizationServiceGeographyRepository;
   readonly repository: OrganizationMarketProfileRepository;
@@ -63,6 +65,9 @@ export interface MarketProfileCommandScope {
   readonly membershipId: string;
   readonly commandId: string;
 }
+
+const MAX_GOVERNED_NAICS_SELECTIONS = 30;
+const MAX_PRESERVED_HISTORICAL_NAICS = 30;
 
 function fingerprint(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -132,6 +137,7 @@ export class MarketProfileService {
     subjectId: string;
     requestFingerprint: string;
     record: Parameters<OrganizationMarketProfileRepository["save"]>[0]["record"];
+    expectedRecordRevision?: number;
     now: string;
   }>) {
     const command: OrganizationMarketProfileCommandReceipt = Object.freeze({
@@ -144,7 +150,7 @@ export class MarketProfileService {
       recordedAt: input.now,
     });
     try {
-      await this.dependencies.repository.save({
+      return await this.dependencies.repository.save({
         command,
         event: event({
           id: `mpevent_${this.id()}`,
@@ -162,6 +168,7 @@ export class MarketProfileService {
           input.authorization.organization,
           { id: `audit_${this.id()}`, action: `organization.market-profile.${input.action}`, occurredAt: input.now },
         ),
+        expectedRecordRevision: input.expectedRecordRevision,
         record: input.record,
       });
     } catch (error) {
@@ -173,7 +180,6 @@ export class MarketProfileService {
       }
       throw error;
     }
-    return command;
   }
 
   async snapshot(rawOrganizationId: string) {
@@ -265,25 +271,108 @@ export class MarketProfileService {
       membershipId: authorization.membership.id,
       now,
     }), "Capability claim is invalid.");
-    const receipt = await this.persist({ scope, authorization, action: "capability-claimed", subjectId: claim.id, requestFingerprint, record: { kind: "capability", value: claim }, now });
-    return Object.freeze({ replayed: false as const, receipt, claim });
+    const persistence = await this.persist({ scope, authorization, action: "capability-claimed", subjectId: claim.id, requestFingerprint, record: { kind: "capability", value: claim }, now });
+    return persistence.replayed
+      ? Object.freeze({ replayed: true as const, receipt: persistence.receipt })
+      : Object.freeze({ replayed: false as const, receipt: persistence.receipt, claim });
   }
 
   async updateIndustry(scope: MarketProfileCommandScope, input: Readonly<{
     industries: readonly Readonly<{ id: string; label: string; visibility: string }>[];
-    naics: readonly Readonly<{ id: string; code: string; title: string; version: string; source: string; provenance: string; visibility: string }>[];
+    naics: readonly Readonly<{ code: string; version: string; visibility: string }>[];
+    preserveExistingNaics: boolean;
+    expectedIndustryRevision: number;
   }>) {
-    const requestFingerprint = fingerprint(input);
     const authorization = await this.authorize(scope);
+    const requestFingerprint = fingerprint(input);
     const prior = await this.replay(scope, "industry-context-updated", requestFingerprint);
     if (prior) return Object.freeze({ replayed: true as const, receipt: prior });
+    if (
+      !Array.isArray(input.industries) ||
+      !Array.isArray(input.naics) ||
+      typeof input.preserveExistingNaics !== "boolean" ||
+      !Number.isSafeInteger(input.expectedIndustryRevision) ||
+      input.expectedIndustryRevision < 0 ||
+      input.industries.length > 20 ||
+      input.naics.length > MAX_GOVERNED_NAICS_SELECTIONS
+    ) {
+      throw new MarketProfileError("invalid", "Industry context exceeds supported limits.");
+    }
+    const [release, existingProfile] = await Promise.all([
+      this.dependencies.naicsCatalog.getRelease(),
+      this.dependencies.repository.getIndustryProfile(authorization.organization.id),
+    ]);
+    if ((existingProfile?.revision ?? 0) !== input.expectedIndustryRevision) {
+      const concurrentPrior = await this.replay(scope, "industry-context-updated", requestFingerprint);
+      if (concurrentPrior) return Object.freeze({ replayed: true as const, receipt: concurrentPrior });
+      throw new MarketProfileError("conflict", "Industry context changed. Refresh before saving again.");
+    }
+    const naics = await Promise.all(input.naics.map(async (selection) => {
+      if (
+        !selection ||
+        typeof selection.code !== "string" ||
+        typeof selection.version !== "string" ||
+        typeof selection.visibility !== "string"
+      ) {
+        throw new MarketProfileError("invalid", "Select a governed NAICS industry.");
+      }
+      const industry = await this.dependencies.naicsCatalog.getIndustry(
+        selection.code,
+        selection.version,
+      );
+      if (!industry) {
+        throw new MarketProfileError(
+          "invalid",
+          "Select a current industry from the governed NAICS release.",
+        );
+      }
+      return Object.freeze({
+        id: `naics-${industry.code}`,
+        code: industry.code,
+        title: industry.title,
+        version: release.version,
+        source: "participant_selected",
+        provenance: `Participant selected from ${release.sourceName} ${release.version} NAICS`,
+        visibility: selection.visibility,
+      });
+    }));
+    if (new Set(naics.map((industry) => industry.code)).size !== naics.length) {
+      throw new MarketProfileError("invalid", "Select each governed NAICS industry only once.");
+    }
+    const canonicalProvenance = `Participant selected from ${release.sourceName} ${release.version} NAICS`;
+    const preservedNaics = input.preserveExistingNaics && existingProfile
+      ? (await Promise.all(existingProfile.naics.map(async (descriptor) => {
+          const governed = await this.dependencies.naicsCatalog.getIndustry(
+            descriptor.code,
+            descriptor.version,
+          );
+          const isCanonicalGovernedDescriptor = Boolean(
+            governed &&
+            descriptor.id === `naics-${governed.code}` &&
+            descriptor.title === governed.title &&
+            descriptor.version === release.version &&
+            descriptor.source === "participant_selected" &&
+            descriptor.provenance === canonicalProvenance
+          );
+          return !isCanonicalGovernedDescriptor ? descriptor : null;
+        }))).filter((descriptor) => descriptor !== null)
+      : [];
+    if (preservedNaics.length > MAX_PRESERVED_HISTORICAL_NAICS) {
+      throw new MarketProfileError("conflict", "Historical industry context exceeds the migration-safe preservation limit.");
+    }
+    const canonicalInput = Object.freeze({
+      industries: input.industries,
+      naics: Object.freeze([...preservedNaics, ...naics]),
+    });
     const now = this.now();
     const profile = marketProfileInput(
-      () => createIndustryProfile({ organizationId: authorization.organization.id, ...input, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
+      () => createIndustryProfile({ organizationId: authorization.organization.id, revision: input.expectedIndustryRevision + 1, ...canonicalInput, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
       "Industry context is invalid.",
     );
-    const receipt = await this.persist({ scope, authorization, action: "industry-context-updated", subjectId: profile.id, requestFingerprint, record: { kind: "industry", value: profile }, now });
-    return Object.freeze({ replayed: false as const, receipt, profile });
+    const persistence = await this.persist({ scope, authorization, action: "industry-context-updated", subjectId: profile.id, requestFingerprint, record: { kind: "industry", value: profile }, expectedRecordRevision: input.expectedIndustryRevision, now });
+    return persistence.replayed
+      ? Object.freeze({ replayed: true as const, receipt: persistence.receipt })
+      : Object.freeze({ replayed: false as const, receipt: persistence.receipt, profile });
   }
 
   async addPastPerformance(scope: MarketProfileCommandScope, input: Omit<Parameters<typeof createPastPerformance>[0], "organizationId" | "userId" | "membershipId" | "now">) {
@@ -301,8 +390,10 @@ export class MarketProfileService {
       () => createPastPerformance({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
       "Past performance is invalid.",
     );
-    const receipt = await this.persist({ scope, authorization, action: "past-performance-added", subjectId: record.id, requestFingerprint, record: { kind: "past-performance", value: record }, now });
-    return Object.freeze({ replayed: false as const, receipt, record });
+    const persistence = await this.persist({ scope, authorization, action: "past-performance-added", subjectId: record.id, requestFingerprint, record: { kind: "past-performance", value: record }, now });
+    return persistence.replayed
+      ? Object.freeze({ replayed: true as const, receipt: persistence.receipt })
+      : Object.freeze({ replayed: false as const, receipt: persistence.receipt, record });
   }
 
   async updatePreferences(scope: MarketProfileCommandScope, input: Omit<Parameters<typeof createMarketPreferences>[0], "organizationId" | "userId" | "membershipId" | "now">) {
@@ -315,8 +406,10 @@ export class MarketProfileService {
       () => createMarketPreferences({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
       "Market preferences are invalid.",
     );
-    const receipt = await this.persist({ scope, authorization, action: "preferences-updated", subjectId: preferences.id, requestFingerprint, record: { kind: "preferences", value: preferences }, now });
-    return Object.freeze({ replayed: false as const, receipt, preferences });
+    const persistence = await this.persist({ scope, authorization, action: "preferences-updated", subjectId: preferences.id, requestFingerprint, record: { kind: "preferences", value: preferences }, now });
+    return persistence.replayed
+      ? Object.freeze({ replayed: true as const, receipt: persistence.receipt })
+      : Object.freeze({ replayed: false as const, receipt: persistence.receipt, preferences });
   }
 
   async submitProvisionalTerm(scope: MarketProfileCommandScope, input: Omit<Parameters<typeof createProvisionalTerm>[0], "organizationId" | "userId" | "membershipId" | "now">) {
@@ -333,7 +426,9 @@ export class MarketProfileService {
       () => createProvisionalTerm({ ...input, organizationId: authorization.organization.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
       "Provisional term is invalid.",
     );
-    const receipt = await this.persist({ scope, authorization, action: "provisional-term-submitted", subjectId: proposal.id, requestFingerprint, record: { kind: "provisional-term", value: proposal }, now });
-    return Object.freeze({ replayed: false as const, receipt, proposal });
+    const persistence = await this.persist({ scope, authorization, action: "provisional-term-submitted", subjectId: proposal.id, requestFingerprint, record: { kind: "provisional-term", value: proposal }, now });
+    return persistence.replayed
+      ? Object.freeze({ replayed: true as const, receipt: persistence.receipt })
+      : Object.freeze({ replayed: false as const, receipt: persistence.receipt, proposal });
   }
 }
