@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import type { ProviderDiscoveryProjection, ProviderRequestMessageProjection, ProviderResourceProjection } from "../../domain/resource-network/model";
@@ -11,6 +11,10 @@ import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { MapboxLocalityCanvas, type ControlledLocalityPointOverlay, type ControlledLocalityServiceField } from "../map/MapboxLocalityCanvas";
 import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
+import {
+  clearRetryStableCommand,
+  resolveRetryStableCommand,
+} from "../referrals/retry-stable-command";
 
 import styles from "./ResourceNetworkWorkspace.module.css";
 
@@ -24,9 +28,12 @@ interface Props {
   readonly resources: readonly ProviderResourceProjection[];
   readonly referrals: readonly Referral[];
   readonly owner: Owner;
+  readonly commandRecoveryScope: string;
   readonly initialQuery?: string;
   readonly messageThreads: Readonly<Record<string, readonly ProviderRequestMessageProjection[]>>;
 }
+
+const PROVIDER_REQUEST_STORAGE_KEY = "rfxchange:provider-request-create-and-send";
 
 function readable(value: string) { return value.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" "); }
 function requestPartyLabel(referral: Referral, organizationId: string): string {
@@ -34,13 +41,23 @@ function requestPartyLabel(referral: Referral, organizationId: string): string {
   return referral.role === "recipient" ? referral.senderOrganizationName : "Your organization";
 }
 
-export function ResourceNetworkWorkspace({ model, homeMarker, providers, resources, referrals, owner, initialQuery = "", messageThreads }: Props) {
+function browserSessionStorage(): Storage | null {
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+export function ResourceNetworkWorkspace({ model, homeMarker, providers, resources, referrals, owner, commandRecoveryScope, initialQuery = "", messageThreads }: Props) {
   const { t } = useI18n();
   const [selectedId, setSelectedId] = useState(providers[0] ? String(providers[0].organizationId) : "");
   const [query, setQuery] = useState(initialQuery);
   const [availability, setAvailability] = useState("all");
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const providerRequestCommandRef = useRef<Readonly<{ fingerprint: string; commandId: string }> | null>(null);
+  const providerRequestStorageKey = `${PROVIDER_REQUEST_STORAGE_KEY}:${encodeURIComponent(commandRecoveryScope)}`;
   const selected = providers.find((provider) => String(provider.organizationId) === selectedId) ?? null;
   const visible = providers.filter((provider) => {
     const corpus = `${provider.displayName} ${provider.categories.join(" ")} ${provider.services.map((service) => `${service.name} ${service.description}`).join(" ")}`.toLowerCase();
@@ -65,16 +82,42 @@ export function ResourceNetworkWorkspace({ model, homeMarker, providers, resourc
     const serviceId = String(form.get("serviceId") ?? "");
     const summary = String(form.get("summary") ?? "");
     if (form.get("consent") !== "yes") { setNotice("Review and acknowledge the exact recipient and shared information before sending."); return; }
+    const operationFingerprint = JSON.stringify({
+      providerOrganizationId: String(selected.organizationId),
+      serviceId,
+      publicationVersion: selected.publicationVersion,
+      summary,
+    });
+    const priorOperation = providerRequestCommandRef.current;
+    const commandId = priorOperation?.fingerprint === operationFingerprint
+      ? priorOperation.commandId
+      : resolveRetryStableCommand({
+          storage: browserSessionStorage(),
+          storageKey: providerRequestStorageKey,
+          fingerprint: operationFingerprint,
+          prefix: "provider-create-send",
+        });
+    providerRequestCommandRef.current = Object.freeze({
+      fingerprint: operationFingerprint,
+      commandId,
+    });
     setBusy(true); setNotice(null);
     try {
       const sharedFields = ["sender-organization", "summary"];
-      await post("/api/referrals", { action: "education", commandId: `provider-education-${crypto.randomUUID()}`, recipientLabel: selected.displayName, sharedFields });
-      const created = await post("/api/referrals", { action: "create", commandId: `provider-create-${crypto.randomUUID()}`, recipientKind: "organization", recipientOrganizationId: String(selected.organizationId), recipientLabel: selected.displayName, need: "introduction", summary, urgency: "standard", preferredContactMethod: "platform", purpose: "provider-connection", providerOrganizationId: String(selected.organizationId), serviceId, publicationVersion: selected.publicationVersion, sharedFields, consentAcknowledged: true });
-      const referral = created.referral as Referral;
-      await post("/api/referrals", { action: "send", commandId: `provider-send-${crypto.randomUUID()}`, referralId: referral.id, expectedVersion: referral.version });
+      await post("/api/referrals", { action: "create-and-send", commandId, recipientKind: "organization", recipientOrganizationId: String(selected.organizationId), recipientLabel: selected.displayName, need: "introduction", summary, urgency: "standard", preferredContactMethod: "platform", purpose: "provider-connection", providerOrganizationId: String(selected.organizationId), serviceId, publicationVersion: selected.publicationVersion, sharedFields, consentAcknowledged: true });
+      clearRetryStableCommand({
+        storage: browserSessionStorage(),
+        storageKey: providerRequestStorageKey,
+        commandId,
+      });
+      providerRequestCommandRef.current = null;
       setNotice(`Request sent to ${selected.displayName}.`);
       window.location.reload();
-    } catch (error) { setNotice(error instanceof Error ? error.message : "Request failed."); }
+    } catch (error) {
+      // An uncertain response keeps the same command in memory and actor-scoped session storage.
+      // Re-entering the same provider, service, publication and summary after reload replays it.
+      setNotice(error instanceof Error ? error.message : "Request failed.");
+    }
     finally { setBusy(false); }
   }
 
