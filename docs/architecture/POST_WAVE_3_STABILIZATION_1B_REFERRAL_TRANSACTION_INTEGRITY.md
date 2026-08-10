@@ -59,7 +59,9 @@ Replay never rewinds lifecycle state and never requires the aggregate to remain 
 
 External delivery remains outside the Firestore transaction. The durable communication intent is committed with the referral first; delivery then uses its stable idempotency key.
 
-Automatic invitation delivery is permitted only while the authoritative referral remains `sent` and the communication intent is `queued` or `retryable-failure`. A replay after the referral advances to accepted, declined, redirected, contacted, closed, expired, recipient-attached, or another non-invitable lifecycle state returns the authoritative result without sending an obsolete invitation. Explicit communication retry uses the same lifecycle gate.
+Automatic invitation delivery is permitted only while the authoritative referral remains `sent`, the communication intent is `queued` or `retryable-failure`, **and an external recipient has not already attached the referral to an organization**. Organization-recipient referrals are not blocked merely because their canonical recipient organization is attached at creation.
+
+A replay after the referral advances to accepted, declined, redirected, contacted, closed, expired, or another non-invitable lifecycle state returns the authoritative result without sending an obsolete invitation. Likewise, once an external invitee consumes the acquisition path and `attachedRecipientOrganizationId` is set, the external acquisition invitation is no longer deliverable even if the aggregate remains `sent`. Explicit communication retry uses the same policy.
 
 A delivery failure changes only communication status and can be retried while the invitation remains valid without recreating the referral or provider request.
 
