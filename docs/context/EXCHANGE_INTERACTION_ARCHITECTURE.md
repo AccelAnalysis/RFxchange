@@ -239,16 +239,32 @@ A non-provider organization may use Resources to:
 - track its own resource-related requests; and
 - request Official Resource Provider status through the authorized Account/profile path or an approved marketing acquisition path.
 
-The own-organization drawer for a non-provider must not show provider publishing/management actions as though they are already available. It should show the truthful application entry/status appropriate to the organization:
+The own-organization drawer must not show provider publishing or management actions before approval. It must project the current provider aggregate exactly rather than collapse its stages into a generic pending state or introduce states and remedies that the provider domain does not authorize.
+
+The current application lifecycle is:
 
 ```text
-not applied → Request Resource Provider Status
-pending → View application status
-approved → Manage provider profile/services/resources/requests
-rejected/withdrawn/suspended → truthful status and permitted next action
+draft → submitted → under-review → information-requested → resubmitted
+                            ├───────────────────────────────────────→ approved
+                            └───────────────────────────────────────→ denied
 ```
 
-An approved Official Resource Provider may manage only the provider capabilities authorized by the provider domain, including its provider profile, service geography, eligibility/intake, resources/programs, availability, and provider requests.
+The truthful own-organization entry or next action is:
+
+| Current provider state | Permitted drawer treatment |
+| --- | --- |
+| No application | **Request Resource Provider Status**. |
+| `draft` | Continue or edit the current application. |
+| `submitted` | View the submitted application and current status. |
+| `under-review` | View review status and history; do not imply a participant mutation. |
+| `information-requested` | Review the information request, provide the authorized response, and resubmit through the existing workflow. |
+| `resubmitted` | View the resubmitted application and current status. |
+| `approved` | Manage only the currently authorized provider profile, services/resources, service geography, eligibility/intake, availability, and provider requests. |
+| `denied` | View the decision and history. The existing explicit policy permits a later numbered reapplication draft; do not imply an appeal, automatic reapplication, or erased decision history. |
+
+`rejected`, `withdrawn`, `suspended`, and `appealed` are not current provider-application states. A future authority may add a state or remedy, but this interaction architecture does not invent one.
+
+An approved Official Resource Provider may manage only the provider capabilities already authorized by the provider domain. Approval does not authorize any additional provider action merely because it would fit the future lens composition.
 
 When another selected organization is an eligible approved provider, the participant may receive provider/resource actions such as View resources, View provider profile, Contact/Request support, Save, or Share. When the selected organization is not an approved provider or has no published provider projection, Resources must state that truthfully and offer only appropriate cross-lens actions.
 
