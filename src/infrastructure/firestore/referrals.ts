@@ -3,10 +3,17 @@ import { FieldValue, type Firestore } from "firebase-admin/firestore";
 import type { TransactionalEmailDeliveryReceipt } from "../../domain/communications/transactional-email.ts";
 import type { OrganizationId } from "../../domain/organizations/model.ts";
 import type {
-  BusinessReferral, ReferralCommandReceipt, ReferralCommunicationIntent,
-  ReferralEducationAcknowledgement, ReferralPersistenceBundle,
+  BusinessReferral,
+  ReferralCommandReceipt,
+  ReferralCommunicationIntent,
+  ReferralEducationAcknowledgement,
+  ReferralPersistenceBundle,
 } from "../../domain/referrals/model.ts";
-import type { ReferralRepository } from "../../domain/referrals/repository.ts";
+import type {
+  ReferralCreateAndSendBundle,
+  ReferralCreateAndSendPersistenceResult,
+  ReferralRepository,
+} from "../../domain/referrals/repository.ts";
 import { FIRESTORE_SCHEMA_VERSION } from "./schema.ts";
 import { getFirestoreRecordById, listFirestoreRecords } from "./support.ts";
 
@@ -16,6 +23,8 @@ const COMMANDS = "businessReferralCommands";
 const EDUCATION = "referralEducationAcknowledgements";
 const COMMUNICATIONS = "referralCommunicationIntents";
 const AUDITS = "organizationAuditEvents";
+const ACQUISITION_CONTEXTS = "acquisitionContexts";
+const ACQUISITION_EVENTS = "acquisitionContextEvents";
 
 function immutable(value: object) {
   return Object.freeze({ ...value, schemaVersion: FIRESTORE_SCHEMA_VERSION, persistedAt: FieldValue.serverTimestamp() });
@@ -23,6 +32,50 @@ function immutable(value: object) {
 
 function mutable(value: object) {
   return Object.freeze({ ...value, schemaVersion: FIRESTORE_SCHEMA_VERSION, persistedAt: FieldValue.serverTimestamp(), persistenceUpdatedAt: FieldValue.serverTimestamp() });
+}
+
+function acquisitionRecord(value: object) {
+  return Object.freeze({ ...value, schemaVersion: FIRESTORE_SCHEMA_VERSION });
+}
+
+function assertCreateAndSendBundle(bundle: ReferralCreateAndSendBundle): void {
+  const [created, sent] = bundle.events;
+  const external = bundle.referral.recipient.kind === "external";
+  const acquisitionValid = external
+    ? Boolean(
+        bundle.acquisition &&
+        bundle.referral.acquisitionContextId === bundle.acquisition.context.id &&
+        bundle.acquisition.context.intent.kind === "referral" &&
+        bundle.acquisition.context.intent.subjectReference === bundle.referral.id &&
+        bundle.acquisition.context.source.channel === "referral-link" &&
+        bundle.acquisition.event.acquisitionContextId === bundle.acquisition.context.id &&
+        bundle.acquisition.event.kind === "issued",
+      )
+    : bundle.acquisition === null && bundle.referral.acquisitionContextId === null;
+  if (
+    bundle.referral.version !== 2 ||
+    bundle.referral.status !== "sent" ||
+    bundle.command.action !== "sent" ||
+    bundle.command.resultingVersion !== 2 ||
+    bundle.command.referralId !== bundle.referral.id ||
+    created.kind !== "created" ||
+    created.fromStatus !== null ||
+    created.toStatus !== "draft" ||
+    created.aggregateVersion !== 1 ||
+    sent.kind !== "sent" ||
+    sent.fromStatus !== "draft" ||
+    sent.toStatus !== "sent" ||
+    sent.aggregateVersion !== 2 ||
+    created.referralId !== bundle.referral.id ||
+    sent.referralId !== bundle.referral.id ||
+    bundle.education.organizationId !== bundle.referral.senderOrganizationId ||
+    bundle.education.recipientLabel !== bundle.referral.recipient.displayName ||
+    JSON.stringify(bundle.education.sharedFields) !== JSON.stringify(bundle.referral.sharedFields) ||
+    (bundle.communication !== null && bundle.communication.referralId !== bundle.referral.id) ||
+    !acquisitionValid
+  ) {
+    throw new Error("Referral create-and-send persistence bundle is inconsistent.");
+  }
 }
 
 export class FirestoreReferralRepository implements ReferralRepository {
@@ -93,6 +146,61 @@ export class FirestoreReferralRepository implements ReferralRepository {
       transaction.create(commandRef, immutable(bundle.command));
       bundle.audits.forEach((audit, index) => transaction.create(auditRefs[index], immutable(audit)));
       if (communicationRef && bundle.communication) transaction.create(communicationRef, immutable(bundle.communication));
+    });
+  }
+
+  async saveCreateAndSend(bundle: ReferralCreateAndSendBundle): Promise<ReferralCreateAndSendPersistenceResult> {
+    assertCreateAndSendBundle(bundle);
+    const referralRef = this.db.collection(REFERRALS).doc(bundle.referral.id);
+    const commandRef = this.db.collection(COMMANDS).doc(bundle.command.id);
+    const educationRef = this.db.collection(EDUCATION).doc(bundle.education.id);
+    const eventRefs = bundle.events.map((item) => this.db.collection(EVENTS).doc(item.id));
+    const auditRefs = bundle.audits.map((audit) => this.db.collection(AUDITS).doc(audit.id));
+    const communicationRef = bundle.communication ? this.db.collection(COMMUNICATIONS).doc(bundle.communication.id) : null;
+    const acquisitionContextRef = bundle.acquisition
+      ? this.db.collection(ACQUISITION_CONTEXTS).doc(bundle.acquisition.context.id)
+      : null;
+    const acquisitionEventRef = bundle.acquisition
+      ? this.db.collection(ACQUISITION_EVENTS).doc(bundle.acquisition.event.id)
+      : null;
+    return this.db.runTransaction(async (transaction) => {
+      const snapshots = await transaction.getAll(
+        commandRef,
+        referralRef,
+        educationRef,
+        ...eventRefs,
+        ...auditRefs,
+        ...(communicationRef ? [communicationRef] : []),
+        ...(acquisitionContextRef ? [acquisitionContextRef] : []),
+        ...(acquisitionEventRef ? [acquisitionEventRef] : []),
+      );
+      const commandSnapshot = snapshots[0];
+      if (commandSnapshot?.exists) {
+        const prior = commandSnapshot.data() as ReferralCommandReceipt;
+        if (
+          prior.referralId === bundle.command.referralId &&
+          prior.action === bundle.command.action &&
+          prior.requestFingerprint === bundle.command.requestFingerprint &&
+          prior.resultingVersion === bundle.command.resultingVersion
+        ) {
+          return "replayed" as const;
+        }
+        throw new Error("Referral command identity collision.");
+      }
+      if (snapshots.slice(1).some((snapshot) => snapshot.exists)) {
+        throw new Error("Referral create-and-send identity collision.");
+      }
+      transaction.create(referralRef, mutable(bundle.referral));
+      transaction.create(commandRef, immutable(bundle.command));
+      transaction.create(educationRef, immutable(bundle.education));
+      bundle.events.forEach((item, index) => transaction.create(eventRefs[index], immutable(item)));
+      bundle.audits.forEach((audit, index) => transaction.create(auditRefs[index], immutable(audit)));
+      if (communicationRef && bundle.communication) transaction.create(communicationRef, immutable(bundle.communication));
+      if (acquisitionContextRef && acquisitionEventRef && bundle.acquisition) {
+        transaction.create(acquisitionContextRef, acquisitionRecord(bundle.acquisition.context));
+        transaction.create(acquisitionEventRef, acquisitionRecord(bundle.acquisition.event));
+      }
+      return "created" as const;
     });
   }
 
