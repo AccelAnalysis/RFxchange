@@ -2,6 +2,7 @@ import type { AcquisitionIntentKind } from "../../domain/acquisition/model.ts";
 import {
   createActivationReleaseEvent,
   createFirstValueSelection,
+  FirstValueStateError,
   recommendFirstValueIntent,
   updateFirstValueSelection,
   type FirstValueIntent,
@@ -157,13 +158,24 @@ export class FirstValueAndOpenReleaseService {
     lifecycleState: AccessLifecycleRecord["state"];
   }>> {
     const before = await this.dependencies.snapshots.read(input.scope);
-    if (!before.orientationComplete) throw new Error("Complete orientation before selecting first value.");
+    if (!before.orientationComplete) {
+      throw new FirstValueStateError(
+        "conflict",
+        "Complete orientation before selecting first value.",
+      );
+    }
     if (before.lifecycle.state !== "controlled-platform" && before.lifecycle.state !== "open-platform") {
-      throw new Error("Controlled-platform access is required before selecting first value.");
+      throw new FirstValueStateError(
+        "conflict",
+        "Controlled-platform access is required before selecting first value.",
+      );
     }
     if (before.lifecycle.state === "open-platform") {
       if (!before.selection || before.selection.selectedIntent !== input.selectedIntent) {
-        throw new Error("The OPEN first-value selection cannot be changed through activation.");
+        throw new FirstValueStateError(
+          "conflict",
+          "The OPEN first-value selection cannot be changed through activation.",
+        );
       }
       const gate = evaluateOpenReleaseGate(before);
       return Object.freeze({ selection: before.selection, gate, lifecycleState: "open-platform" as const });
@@ -183,7 +195,12 @@ export class FirstValueAndOpenReleaseService {
       selection.userId !== input.scope.userId ||
       selection.organizationId !== input.scope.organizationId ||
       selection.accessJourneyId !== input.scope.accessJourneyId
-    ) throw new Error("First-value selection belongs to another participant journey.");
+    ) {
+      throw new FirstValueStateError(
+        "forbidden",
+        "First-value selection belongs to another participant journey.",
+      );
+    }
     await this.dependencies.selections.saveSelection({
       expectedUpdatedAt: before.selection?.updatedAt ?? null,
       selection,

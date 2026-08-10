@@ -29,6 +29,7 @@ import {
 } from "@/src/infrastructure/referrals/runtime";
 import { FirestoreReferralRepository } from "@/src/infrastructure/firestore/referrals";
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
+import { apiProblem } from "@/src/infrastructure/http/api-problem";
 
 export const runtime = "nodejs";
 
@@ -61,6 +62,27 @@ function responseStatus(error: unknown): number {
   if (error.code === "conflict") return 409;
   if (error.code === "education-required") return 428;
   return 400;
+}
+
+function problem(request: NextRequest, error: unknown, operation: "load" | "change") {
+  const status = responseStatus(error);
+  const participantMessage = error instanceof ReferralNetworkError
+    ? status === 403
+      ? "Referral workspace access is unavailable for this organization."
+      : status === 404
+        ? "The requested referral is unavailable."
+        : status === 428
+          ? "Complete the required referral education before continuing."
+          : status === 409
+            ? "The referral changed before this request could be completed."
+            : "The referral request contains unsupported information."
+    : `The referral workspace is temporarily unavailable. ${operation === "load" ? "Retry the request." : "Your change was not confirmed; retry the request."}`;
+  return apiProblem(request, {
+    status,
+    participantMessage,
+    code: error instanceof ReferralNetworkError ? error.code : "dependency-unavailable",
+    cause: error,
+  });
 }
 
 function sharedFields(body: Record<string, unknown>): readonly ReferralSharedField[] {
@@ -122,17 +144,14 @@ function creationInput(body: Record<string, unknown>): CreateAndSendReferralInpu
   });
 }
 
-export async function GET() {
-  const scope = await accessScope();
-  if (scope instanceof NextResponse) return scope;
+export async function GET(request: NextRequest) {
   try {
+    const scope = await accessScope();
+    if (scope instanceof NextResponse) return scope;
     const referrals = await createServerReferralNetworkService().snapshot(scope);
     return NextResponse.json({ referrals });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Referral workspace failed." },
-      { status: responseStatus(error) },
-    );
+    return problem(request, error, "load");
   }
 }
 
@@ -235,9 +254,6 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ error: "Referral action is unsupported." }, { status: 400 });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Referral action failed." },
-      { status: responseStatus(error) },
-    );
+    return problem(request, error, "change");
   }
 }

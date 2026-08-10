@@ -1,6 +1,7 @@
 import { Timestamp, type Firestore } from "firebase-admin/firestore";
 
 import {
+  AcquisitionContextBindingError,
   bindAcquisitionContext,
   createAcquisitionContextEvent,
   resumeAcquisitionContext,
@@ -67,7 +68,9 @@ export class FirestoreAcquisitionContextRepository implements AcquisitionContext
     return this.db.runTransaction(async (transaction) => {
       const reference = this.db.collection(CONTEXTS).doc(input.id);
       const snapshot = await transaction.get(reference);
-      if (!snapshot.exists) throw new Error("Acquisition context is unavailable.");
+      if (!snapshot.exists) {
+        throw new AcquisitionContextBindingError("Acquisition context is unavailable.");
+      }
       const current = hydrate(snapshot.data());
       const bound = bindAcquisitionContext({
         context: current,

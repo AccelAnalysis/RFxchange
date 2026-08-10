@@ -9,9 +9,10 @@ import type {
   OrganizationPastPerformance,
   OrganizationProvisionalTerm,
 } from "../../domain/market-profile/model.ts";
-import type {
-  OrganizationCapabilityClaimRepository,
-  OrganizationMarketProfileRepository,
+import {
+  MarketProfilePersistenceConflictError,
+  type OrganizationCapabilityClaimRepository,
+  type OrganizationMarketProfileRepository,
 } from "../../domain/market-profile/repository.ts";
 import { FIRESTORE_SCHEMA_VERSION, firestoreDocumentPath } from "./schema.ts";
 import { getFirestoreRecordById, listFirestoreRecords } from "./support.ts";
@@ -88,9 +89,15 @@ export class FirestoreOrganizationMarketProfileRepository implements Organizatio
           prior.resultId === input.command.resultId &&
           prior.requestFingerprint === input.command.requestFingerprint
         ) return;
-        throw new Error("Market profile command identity collision.");
+        throw new MarketProfilePersistenceConflictError(
+          "Market profile command identity collision.",
+        );
       }
-      if (eventSnapshot.exists || auditSnapshot.exists) throw new Error("Market profile event identity collision.");
+      if (eventSnapshot.exists || auditSnapshot.exists) {
+        throw new MarketProfilePersistenceConflictError(
+          "Market profile event identity collision.",
+        );
+      }
       if (
         input.record.value.organizationId !== input.command.organizationId ||
         input.event.organizationId !== input.command.organizationId ||
@@ -100,7 +107,11 @@ export class FirestoreOrganizationMarketProfileRepository implements Organizatio
       const recordData = input.record.kind === "provisional-term"
         ? immutable(input.record.value)
         : mutable(input.record.value, recordSnapshot.data()?.createdAt ?? FieldValue.serverTimestamp());
-      if (input.record.kind === "provisional-term" && recordSnapshot.exists) throw new Error("Provisional term identity already exists.");
+      if (input.record.kind === "provisional-term" && recordSnapshot.exists) {
+        throw new MarketProfilePersistenceConflictError(
+          "Provisional term identity already exists.",
+        );
+      }
       transaction.set(recordRef, recordData);
       transaction.create(eventRef, immutable(input.event));
       transaction.create(auditRef, immutable(input.auditEvent));

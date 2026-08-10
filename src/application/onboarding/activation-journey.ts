@@ -174,6 +174,15 @@ export class ActivationJourneyError extends Error {
   }
 }
 
+export class ActivationRequestValidationError extends Error {
+  readonly code = "request-invalid" as const;
+
+  constructor(message: string) {
+    super(message);
+    this.name = "ActivationRequestValidationError";
+  }
+}
+
 function publicGeographies(definitions: readonly GeographyDefinition[]) {
   return Object.freeze(
     definitions
@@ -193,9 +202,18 @@ function normalizedWebsiteUrl(value: string): string {
   const candidate = /^[a-z][a-z0-9+.-]*:/i.test(normalized)
     ? normalized
     : `https://${normalized}`;
-  const parsed = new URL(candidate);
+  let parsed: URL;
+  try {
+    parsed = new URL(candidate);
+  } catch {
+    throw new ActivationRequestValidationError(
+      "Organization website must be a valid URL.",
+    );
+  }
   if (!["http:", "https:"].includes(parsed.protocol)) {
-    throw new Error("Organization website must use HTTP or HTTPS.");
+    throw new ActivationRequestValidationError(
+      "Organization website must use HTTP or HTTPS.",
+    );
   }
   parsed.hash = "";
   return parsed.toString();
@@ -334,6 +352,12 @@ export class ActivationJourneyService {
     const websiteUrl = input.websiteNotApplicable || !website
       ? null
       : normalizedWebsiteUrl(website);
+    const phone = input.phone?.trim() || null;
+    if (phone && !/^[+0-9().\-\s]{7,40}$/.test(phone)) {
+      throw new ActivationRequestValidationError(
+        "Organization contact phone is malformed.",
+      );
+    }
     const updated = updateActivationJourneyContext(activation, {
       organizationIdentitySeed: {
         websiteDisposition: input.websiteNotApplicable
@@ -342,7 +366,7 @@ export class ActivationJourneyService {
             ? "available"
             : null,
         websiteUrl,
-        phone: input.phone?.trim() || null,
+        phone,
       },
       now: this.dependencies.now(),
     });
@@ -531,18 +555,26 @@ export class ActivationJourneyService {
         "Organization authority is required before confirming location.",
       );
     }
-    const draft = await this.dependencies.location.beginConfirmation({
-      context,
-      organizationId: String(activation.organizationId),
-      membershipId: String(activation.membershipId),
-      physicalAddress: structuredPostalAddress({
+    let physicalAddress;
+    try {
+      physicalAddress = structuredPostalAddress({
         addressLine1: input.addressLine1,
         addressLine2: input.addressLine2,
         locality: input.locality,
         regionCode: input.regionCode,
         postalCode: input.postalCode,
         countryCode: "US",
-      }),
+      });
+    } catch (error) {
+      throw new ActivationRequestValidationError(
+        error instanceof Error ? error.message : "Organization location is invalid.",
+      );
+    }
+    const draft = await this.dependencies.location.beginConfirmation({
+      context,
+      organizationId: String(activation.organizationId),
+      membershipId: String(activation.membershipId),
+      physicalAddress,
       isHomeOrPrivate: input.isHomeOrPrivate,
       visibility: input.visibility,
       reason: "Participant geocoded organization location during activation.",
@@ -622,7 +654,9 @@ export class ActivationJourneyService {
       });
     }
     if (activation.organizationIdentitySeed.websiteDisposition === null) {
-      throw new Error("Confirm the organization website or indicate that no public website applies.");
+      throw new ActivationRequestValidationError(
+        "Confirm the organization website or indicate that no public website applies.",
+      );
     }
     const organizationId = activation.organizationId;
     const membershipId = activation.membershipId;
@@ -648,14 +682,21 @@ export class ActivationJourneyService {
         "The durable organization profile is unavailable.",
       );
     }
-    const capability = createOrganizationCapability({
-      id: `capability-${crypto.randomUUID()}`,
-      kind: input.capabilityKind,
-      category: input.capabilityCategory,
-      otherCategory: input.capabilityOtherCategory,
-      name: input.capabilityName,
-      description: input.capabilityDescription,
-    });
+    let capability;
+    try {
+      capability = createOrganizationCapability({
+        id: `capability-${crypto.randomUUID()}`,
+        kind: input.capabilityKind,
+        category: input.capabilityCategory,
+        otherCategory: input.capabilityOtherCategory,
+        name: input.capabilityName,
+        description: input.capabilityDescription,
+      });
+    } catch (error) {
+      throw new ActivationRequestValidationError(
+        error instanceof Error ? error.message : "Organization capability is invalid.",
+      );
+    }
     const saved = await this.dependencies.profile.update({
       context,
       organizationId: String(organizationId),

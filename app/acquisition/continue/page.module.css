@@ -31,6 +31,24 @@
   line-height: 1.7;
 }
 
+.recovery {
+  max-width: 54rem;
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.2rem;
+  border-left: 0.25rem solid var(--semantic-status-danger, #9f3b32);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--semantic-status-danger, #9f3b32) 9%, white);
+  color: var(--semantic-text-primary, #202820);
+}
+
+.recovery p {
+  margin: 0.35rem 0;
+}
+
+.recovery small {
+  color: var(--semantic-text-secondary, #566057);
+}
+
 .card {
   max-width: 54rem;
   padding: clamp(1.5rem, 4vw, 2.8rem);

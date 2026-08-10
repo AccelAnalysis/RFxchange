@@ -3,6 +3,15 @@ import type { UserId } from "../users/model.ts";
 
 export const ACQUISITION_CONTEXT_VERSION = 1 as const;
 
+export class AcquisitionContextBindingError extends Error {
+  readonly code = "invalid-context" as const;
+
+  constructor(message: string) {
+    super(message);
+    this.name = "AcquisitionContextBindingError";
+  }
+}
+
 export const ACQUISITION_INTENT_KINDS = [
   "opportunity",
   "organization-claim",
@@ -210,15 +219,19 @@ export function bindAcquisitionContext(input: Readonly<{
       (input.browserSecretDigest.charCodeAt(index) || 0);
   }
   if (digestDifference !== 0) {
-    throw new Error("Acquisition context browser binding is invalid.");
+    throw new AcquisitionContextBindingError("Acquisition context browser binding is invalid.");
   }
-  if (now >= input.context.expiresAt) throw new Error("Acquisition context has expired.");
+  if (now >= input.context.expiresAt) {
+    throw new AcquisitionContextBindingError("Acquisition context has expired.");
+  }
   if (input.context.status === "bound" || input.context.status === "resumed") {
     if (
       input.context.boundUserId !== input.userId ||
       input.context.boundAccessJourneyId !== input.accessJourneyId
     ) {
-      throw new Error("Acquisition context is already bound to another participant journey.");
+      throw new AcquisitionContextBindingError(
+        "Acquisition context is already bound to another participant journey.",
+      );
     }
     return input.context;
   }

@@ -5,6 +5,16 @@ import type { UserId } from "../users/model.ts";
 
 export const FIRST_VALUE_CATALOG_VERSION = 1 as const;
 
+export class FirstValueStateError extends Error {
+  readonly code: "conflict" | "forbidden";
+
+  constructor(code: FirstValueStateError["code"], message: string) {
+    super(message);
+    this.name = "FirstValueStateError";
+    this.code = code;
+  }
+}
+
 export const FIRST_VALUE_INTENTS = [
   "find-opportunities",
   "issue-opportunity",

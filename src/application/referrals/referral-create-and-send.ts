@@ -25,7 +25,10 @@ import {
   type ReferralSharedField,
   type ReferralUrgency,
 } from "../../domain/referrals/model.ts";
-import type { ReferralCreateAndSendBundle } from "../../domain/referrals/repository.ts";
+import {
+  ReferralPersistenceConflictError,
+  type ReferralCreateAndSendBundle,
+} from "../../domain/referrals/repository.ts";
 import { organizationMembershipId } from "../../domain/users/model.ts";
 import {
   PROVIDER_REQUEST_EVENT,
@@ -489,7 +492,7 @@ export class ReferralCreateAndSendService {
       ),
     ]);
 
-    let persistence: "created" | "replayed";
+    let persistence;
     try {
       persistence = await this.dependencies.repository.saveCreateAndSend({
         referral: sent,
@@ -501,10 +504,13 @@ export class ReferralCreateAndSendService {
         acquisition,
       });
     } catch (error) {
-      throw new ReferralNetworkError(
-        "conflict",
-        error instanceof Error ? error.message : "Referral could not be created and sent.",
-      );
+      if (error instanceof ReferralPersistenceConflictError) {
+        throw new ReferralNetworkError(
+          "conflict",
+          "The referral command or transaction evidence changed before persistence.",
+        );
+      }
+      throw error;
     }
     if (persistence === "replayed") {
       const replayed = await this.replay(scope, requestFingerprint);

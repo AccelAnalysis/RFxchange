@@ -17,6 +17,7 @@ import { storedAssetId } from "@/src/domain/storage/model";
 import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
 import { getFirebaseAdminApp } from "@/src/infrastructure/firebase/admin";
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
+import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import { createFirestoreFoundationRepositories } from "@/src/infrastructure/firestore/repositories";
 import { createServerOrganizationEnrichmentService } from "@/src/infrastructure/organization-enrichment/runtime";
 import { FirebasePrivateObjectStore, firebaseStorageBucketFromEnvironment } from "@/src/infrastructure/storage/firebase-private-object-store";
@@ -28,21 +29,45 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function responseFor(error: unknown) {
+function responseFor(request: NextRequest, error: unknown) {
   if (error instanceof OrganizationAssetUploadBoundaryError) {
-    return NextResponse.json(
-      { error: error.message, code: error.code },
-      { status: error.status },
-    );
+    const participantMessage = error.status === 413
+      ? "The profile asset upload is too large."
+      : error.status === 415
+        ? "The profile asset file type is not supported."
+        : "The profile asset upload could not be read."
+    return apiProblem(request, {
+      status: error.status,
+      participantMessage,
+      code: error.code,
+      cause: error,
+    });
   }
   if (error instanceof OrganizationEnrichmentError) {
     const status = error.code === "forbidden" ? 403 : error.code === "not-found" ? 404 : error.code === "invalid" ? 400 : 409;
-    return NextResponse.json({ error: error.message, code: error.code }, { status });
+    const participantMessage = status === 403
+      ? "Organization enrichment access is unavailable for this organization."
+      : status === 404
+        ? "The requested organization enrichment record is unavailable."
+        : status === 400
+          ? "The organization enrichment request contains unsupported information."
+          : "Organization enrichment changed before this request could be completed.";
+    return apiProblem(request, { status, participantMessage, code: error.code, cause: error });
   }
   if (error instanceof StoredAssetAccessError) {
-    return NextResponse.json({ error: "You do not have permission to store this organization asset.", code: error.code }, { status: 403 });
+    return apiProblem(request, {
+      status: 403,
+      participantMessage: "Organization asset storage access is unavailable.",
+      code: error.code,
+      cause: error,
+    });
   }
-  return NextResponse.json({ error: error instanceof Error ? error.message : "Organization enrichment could not be saved." }, { status: 409 });
+  return apiProblem(request, {
+    status: 500,
+    participantMessage: "Organization enrichment is temporarily unavailable. Retry the request.",
+    code: "dependency-unavailable",
+    cause: error,
+  });
 }
 
 function validCommand(value: unknown): value is string {
@@ -190,7 +215,7 @@ export async function POST(request: NextRequest) {
     if (!result) return NextResponse.json({ error: "Unsupported organization enrichment action." }, { status: 400 });
     return NextResponse.json(result, { status: result.replayed ? 200 : 201, headers: { "cache-control": "no-store" } });
   } catch (error) {
-    return responseFor(error);
+    return responseFor(request, error);
   }
 }
 
@@ -207,7 +232,12 @@ export async function GET(request: NextRequest) {
       assets: snapshot.publicAssets,
       additionalLocations: snapshot.publicAdditionalLocations,
     }, { headers: { "cache-control": "public, max-age=60, must-revalidate" } });
-  } catch {
-    return NextResponse.json({ error: "Published organization enrichment is unavailable." }, { status: 409 });
+  } catch (error) {
+    return apiProblem(request, {
+      status: 500,
+      participantMessage: "Published organization enrichment is temporarily unavailable. Retry the request.",
+      code: "dependency-unavailable",
+      cause: error,
+    });
   }
 }

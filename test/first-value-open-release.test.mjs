@@ -11,6 +11,7 @@ import {
 import {
   FIRST_VALUE_DESTINATIONS,
   FIRST_VALUE_INTENTS,
+  FirstValueStateError,
   createFirstValueSelection,
   recommendFirstValueIntent,
 } from "../src/domain/first-value/model.ts";
@@ -151,6 +152,11 @@ test("selection plus OPEN transition is durable, idempotent and cross-scope fail
   const repeated = await service.selectAndRelease({ scope, selectedIntent: "find-opportunities", acquisitionIntentKind: "opportunity" });
   assert.equal(repeated.lifecycleState, "open-platform");
   assert.equal(events.length, 2);
+  await assert.rejects(
+    service.selectAndRelease({ scope, selectedIntent: "find-resources-support", acquisitionIntentKind: null }),
+    (error) => error instanceof FirstValueStateError && error.code === "conflict" &&
+      /cannot be changed/.test(error.message),
+  );
   await assert.rejects(
     service.selectAndRelease({ scope: { ...scope, userId: userId("usr-other") }, selectedIntent: "find-opportunities", acquisitionIntentKind: null }),
     /another participant/,

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { ResourceNetworkError, type ResourceNetworkScope } from "@/src/application/resource-network/resource-network";
 import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
+import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import { attemptProviderInvitation, createServerResourceNetworkService } from "@/src/infrastructure/resource-network/runtime";
 
 export const runtime = "nodejs";
@@ -20,16 +21,35 @@ function status(error: unknown): number {
   return error.code === "forbidden" ? 403 : error.code === "not-found" ? 404 : error.code === "conflict" ? 409 : 400;
 }
 
+function problem(request: NextRequest, error: unknown, operation: "load" | "change") {
+  const responseStatus = status(error);
+  const participantMessage = error instanceof ResourceNetworkError
+    ? responseStatus === 403
+      ? "Resource Network access is unavailable for this organization."
+      : responseStatus === 404
+        ? "The requested Resource Network record is unavailable."
+        : responseStatus === 409
+          ? "The Resource Network record changed before this request could be completed."
+          : "The Resource Network request contains unsupported information."
+    : `The Resource Network is temporarily unavailable. ${operation === "load" ? "Retry the request." : "Your change was not confirmed; retry the request."}`;
+  return apiProblem(request, {
+    status: responseStatus,
+    participantMessage,
+    code: error instanceof ResourceNetworkError ? error.code : "dependency-unavailable",
+    cause: error,
+  });
+}
+
 export async function GET(request: NextRequest) {
-  const access = await scope();
-  if (access instanceof NextResponse) return access;
   try {
+    const access = await scope();
+    if (access instanceof NextResponse) return access;
     const referralId = request.nextUrl.searchParams.get("referralId");
     const service = createServerResourceNetworkService();
     if (referralId) return NextResponse.json({ messages: await service.messages(access, referralId) });
     return NextResponse.json({ owner: await service.ownerSnapshot(access) });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Resource Network failed." }, { status: status(error) });
+    return problem(request, error, "load");
   }
 }
 
@@ -58,6 +78,6 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ error: "Resource Network action is unsupported." }, { status: 400 });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Resource Network action failed." }, { status: status(error) });
+    return problem(request, error, "change");
   }
 }

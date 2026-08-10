@@ -10,10 +10,11 @@ import {
   type ReferralEducationAcknowledgement,
   type ReferralPersistenceBundle,
 } from "../../domain/referrals/model.ts";
-import type {
-  ReferralCreateAndSendBundle,
-  ReferralCreateAndSendPersistenceResult,
-  ReferralRepository,
+import {
+  ReferralPersistenceConflictError,
+  type ReferralCreateAndSendBundle,
+  type ReferralCreateAndSendPersistenceResult,
+  type ReferralRepository,
 } from "../../domain/referrals/repository.ts";
 import { FIRESTORE_SCHEMA_VERSION } from "./schema.ts";
 import { getFirestoreRecordById, listFirestoreRecords } from "./support.ts";
@@ -114,7 +115,9 @@ export class FirestoreReferralRepository implements ReferralRepository {
     await this.db.runTransaction(async (transaction) => {
       const [commandSnapshot, auditSnapshot] = await transaction.getAll(commandRef, auditRef);
       if (commandSnapshot.exists) return;
-      if (auditSnapshot.exists) throw new Error("Referral education audit identity collision.");
+      if (auditSnapshot.exists) {
+        throw new ReferralPersistenceConflictError("Referral education audit identity collision.");
+      }
       transaction.create(educationRef, immutable(input.acknowledgement));
       transaction.create(commandRef, immutable(input.command));
       transaction.create(auditRef, immutable(input.audit));
@@ -133,13 +136,19 @@ export class FirestoreReferralRepository implements ReferralRepository {
       if (snapshots[0]?.exists) {
         const prior = snapshots[0].data() as ReferralCommandReceipt;
         if (prior.referralId === bundle.command.referralId && prior.action === bundle.command.action && prior.requestFingerprint === bundle.command.requestFingerprint) return;
-        throw new Error("Referral command identity collision.");
+        throw new ReferralPersistenceConflictError("Referral command identity collision.");
       }
-      if (snapshots.slice(1).some((snapshot) => snapshot.exists)) throw new Error("Referral persistence identity collision.");
+      if (snapshots.slice(1).some((snapshot) => snapshot.exists)) {
+        throw new ReferralPersistenceConflictError("Referral persistence identity collision.");
+      }
       const currentSnapshot = await transaction.get(referralRef);
       if (currentSnapshot.exists) {
         const current = currentSnapshot.data() as BusinessReferral;
-        if (current.version + 1 !== bundle.referral.version || current.id !== bundle.referral.id) throw new Error(`Referral changed; current version is ${current.version}.`);
+        if (current.version + 1 !== bundle.referral.version || current.id !== bundle.referral.id) {
+          throw new ReferralPersistenceConflictError(
+            `Referral changed; current version is ${current.version}.`,
+          );
+        }
         if (current.communicationMessageId) {
           const currentCommunicationSnapshot = await transaction.get(
             this.db.collection(COMMUNICATIONS).doc(current.communicationMessageId),
@@ -148,11 +157,15 @@ export class FirestoreReferralRepository implements ReferralRepository {
             ? (currentCommunicationSnapshot.data() as ReferralCommunicationIntent).deliveryClaim
             : null;
           if (claim && claim.expiresAt > persistenceAttemptedAt) {
-            throw new Error("Referral invitation delivery is in progress; retry this action shortly.");
+            throw new ReferralPersistenceConflictError(
+              "Referral invitation delivery is in progress; retry this action shortly.",
+            );
           }
         }
       } else if (bundle.referral.version !== 1 || bundle.event.kind !== "created") {
-        throw new Error("Referral aggregate is unavailable for this transition.");
+        throw new ReferralPersistenceConflictError(
+          "Referral aggregate is unavailable for this transition.",
+        );
       }
       transaction.set(referralRef, mutable(bundle.referral));
       transaction.create(eventRef, immutable(bundle.event));
@@ -198,10 +211,12 @@ export class FirestoreReferralRepository implements ReferralRepository {
         ) {
           return "replayed" as const;
         }
-        throw new Error("Referral command identity collision.");
+        throw new ReferralPersistenceConflictError("Referral command identity collision.");
       }
       if (snapshots.slice(1).some((snapshot) => snapshot.exists)) {
-        throw new Error("Referral create-and-send identity collision.");
+        throw new ReferralPersistenceConflictError(
+          "Referral create-and-send identity collision.",
+        );
       }
       transaction.create(referralRef, mutable(bundle.referral));
       transaction.create(commandRef, immutable(bundle.command));

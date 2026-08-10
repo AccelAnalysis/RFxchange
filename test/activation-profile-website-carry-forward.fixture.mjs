@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { authenticatedServerContext } from "../src/application/auth/server-session.ts";
-import { ActivationJourneyService } from "../src/application/onboarding/activation-journey.ts";
+import {
+  ActivationJourneyService,
+  ActivationRequestValidationError,
+} from "../src/application/onboarding/activation-journey.ts";
 import {
   createAccessLifecycle,
   advanceAccessLifecycle,
@@ -377,7 +380,82 @@ test("malformed supplied websiteNotApplicable values are rejected", () => {
   for (const value of [null, "false", 0, {}]) {
     assert.throws(
       () => parseSaveProfileBody(validProfileBody({ websiteNotApplicable: value })),
-      /websiteNotApplicable must be a boolean when supplied/,
+      (error) => error instanceof ActivationRequestValidationError &&
+        /websiteNotApplicable must be a boolean when supplied/.test(error.message),
     );
   }
+});
+
+test("invalid activation websites retain typed request-validation semantics", async () => {
+  for (const website of ["not a valid URL", "ftp://example.org"]) {
+    await assert.rejects(
+      () => saveProfile(
+        {
+          websiteDisposition: null,
+          websiteUrl: null,
+          phone: "+1 757 555 0100",
+        },
+        validProfileBody({ website, websiteNotApplicable: false }),
+      ),
+      (error) => error instanceof ActivationRequestValidationError &&
+        error.code === "request-invalid",
+    );
+  }
+});
+
+test("profile contact, phone, and capability validation retain typed request semantics", async () => {
+  assert.throws(
+    () => parseSaveProfileBody(validProfileBody({ contactRole: "" })),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+
+  const phoneFixture = fixture({
+    websiteDisposition: "available",
+    websiteUrl: "https://example.org/",
+    phone: "+1 757 555 0100",
+  });
+  await assert.rejects(
+    () => phoneFixture.service.searchOrganizations(phoneFixture.context, {
+      displayName: "Harborlight Fabrication",
+      website: "example.org",
+      phone: "not-a-phone",
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+
+  await assert.rejects(
+    () => saveProfile(
+      {
+        websiteDisposition: "available",
+        websiteUrl: "https://example.org/",
+        phone: "+1 757 555 0100",
+      },
+      validProfileBody({ capabilityName: "services" }),
+    ),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+});
+
+test("activation location address validation retains typed request semantics", async () => {
+  const current = fixture({
+    websiteDisposition: "available",
+    websiteUrl: "https://example.org/",
+    phone: "+1 757 555 0100",
+  });
+
+  await assert.rejects(
+    () => current.service.beginLocation(current.context, {
+      addressLine1: "801 Crawford St",
+      locality: "Portsmouth",
+      regionCode: "VA",
+      postalCode: "23@704",
+      isHomeOrPrivate: false,
+      visibility: "approximate",
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
 });

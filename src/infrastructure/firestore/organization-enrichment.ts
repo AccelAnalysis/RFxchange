@@ -7,7 +7,10 @@ import type {
   OrganizationEnrichmentCommandReceipt,
   OrganizationProfileAsset,
 } from "../../domain/organization-enrichment/model.ts";
-import type { OrganizationEnrichmentRepository } from "../../domain/organization-enrichment/repository.ts";
+import {
+  OrganizationEnrichmentPersistenceConflictError,
+  type OrganizationEnrichmentRepository,
+} from "../../domain/organization-enrichment/repository.ts";
 import type { OrganizationId } from "../../domain/organizations/model.ts";
 import { FIRESTORE_SCHEMA_VERSION, firestoreDocumentPath, type FirestoreCollectionKey } from "./schema.ts";
 import { getFirestoreRecordById, listFirestoreRecords } from "./support.ts";
@@ -73,16 +76,26 @@ export class FirestoreOrganizationEnrichmentRepository implements OrganizationEn
         const prior = commandSnapshot.data() as OrganizationEnrichmentCommandReceipt;
         if (prior.organizationId === input.command.organizationId && prior.action === input.command.action &&
           prior.resultId === input.command.resultId && prior.requestFingerprint === input.command.requestFingerprint) return;
-        throw new Error("Organization enrichment command identity collision.");
+        throw new OrganizationEnrichmentPersistenceConflictError(
+          "Organization enrichment command identity collision.",
+        );
       }
-      if (eventSnapshot.exists || auditSnapshot.exists) throw new Error("Organization enrichment event identity collision.");
+      if (eventSnapshot.exists || auditSnapshot.exists) {
+        throw new OrganizationEnrichmentPersistenceConflictError(
+          "Organization enrichment event identity collision.",
+        );
+      }
       if (value.organizationId !== input.command.organizationId || input.event.organizationId !== input.command.organizationId ||
         input.auditEvent.organizationId !== input.command.organizationId) {
         throw new Error("Organization enrichment persistence inputs have mismatched organization scope.");
       }
       transaction.set(recordRef, mutable(value, recordSnapshot.data()?.createdAt ?? FieldValue.serverTimestamp()));
       if (draftRef && input.record.kind === "location-confirmation") {
-        if (!draftSnapshot?.exists) throw new Error("Additional-location draft disappeared before confirmation.");
+        if (!draftSnapshot?.exists) {
+          throw new OrganizationEnrichmentPersistenceConflictError(
+            "Additional-location draft disappeared before confirmation.",
+          );
+        }
         transaction.set(draftRef, mutable(input.record.draft, draftSnapshot.data()?.createdAt ?? FieldValue.serverTimestamp()));
       }
       transaction.create(eventRef, immutable(input.event));

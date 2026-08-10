@@ -5,6 +5,7 @@ import { FirstValueChoiceClient } from "@/src/components/first-value/FirstValueC
 import { FIRST_VALUE_DESTINATIONS, FIRST_VALUE_INTENTS } from "@/src/domain/first-value/model";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
+  ParticipantRouteDependencyUnavailableError,
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
@@ -28,7 +29,12 @@ export default async function FirstValuePage() {
 
   const scope = openReleaseScopeFromAccess(access);
   const orientationScope = await resolveAuthorizedOrientationScope(access);
-  if (!orientationScope) redirect("/join");
+  if (!orientationScope) {
+    throw new ParticipantRouteDependencyUnavailableError(
+      "workspace-state",
+      new Error("Authorized first-value orientation scope is incomplete."),
+    );
+  }
   const orientation = await createServerOrientationJourneyService().get(orientationScope);
   if (!orientation || orientation.status !== "completed" || orientation.completedThroughStep !== 8) redirect("/orientation");
 

@@ -1,4 +1,7 @@
-import type { ActivationJourneyService } from "../../../../src/application/onboarding/activation-journey.ts";
+import {
+  ActivationRequestValidationError,
+  type ActivationJourneyService,
+} from "../../../../src/application/onboarding/activation-journey.ts";
 
 type ActivationRequestBody = Readonly<Record<string, unknown>>;
 type SaveProfileInput = Parameters<ActivationJourneyService["saveProfile"]>[1];
@@ -18,7 +21,7 @@ export function parseWebsiteIdentityFields(
     hasWebsiteNotApplicable &&
     typeof body.websiteNotApplicable !== "boolean"
   ) {
-    throw new Error(
+    throw new ActivationRequestValidationError(
       "websiteNotApplicable must be a boolean when supplied.",
     );
   }
@@ -36,12 +39,18 @@ export function parseWebsiteIdentityFields(
 export function parseSaveProfileBody(
   body: ActivationRequestBody,
 ): SaveProfileInput {
+  const contactRole =
+    typeof body.contactRole === "string"
+      ? body.contactRole.trim().replace(/\s+/g, " ")
+      : "";
+  if (!contactRole || contactRole.length > 120) {
+    throw new ActivationRequestValidationError(
+      "Organization contact role is required and cannot exceed 120 characters.",
+    );
+  }
   return Object.freeze({
     ...parseWebsiteIdentityFields(body),
-    contactRole:
-      typeof body.contactRole === "string"
-        ? body.contactRole
-        : "",
+    contactRole,
     contactPubliclyVisible:
       body.contactPubliclyVisible === true,
     capabilityKind:

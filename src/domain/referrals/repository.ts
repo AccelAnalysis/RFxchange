@@ -14,6 +14,15 @@ import type {
   ReferralPersistenceBundle,
 } from "./model.ts";
 
+export class ReferralPersistenceConflictError extends Error {
+  readonly code = "persistence-conflict" as const;
+
+  constructor(message: string) {
+    super(message);
+    this.name = "ReferralPersistenceConflictError";
+  }
+}
+
 export interface ReferralCreateAndSendBundle {
   readonly referral: BusinessReferral;
   readonly events: readonly [ReferralEvent, ReferralEvent];

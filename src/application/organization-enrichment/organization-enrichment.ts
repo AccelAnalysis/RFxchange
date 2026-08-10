@@ -22,7 +22,10 @@ import {
   type OrganizationEnrichmentEvent,
   type OrganizationEnrichmentEventKind,
 } from "../../domain/organization-enrichment/model.ts";
-import type { OrganizationEnrichmentRepository } from "../../domain/organization-enrichment/repository.ts";
+import {
+  OrganizationEnrichmentPersistenceConflictError,
+  type OrganizationEnrichmentRepository,
+} from "../../domain/organization-enrichment/repository.ts";
 import {
   createOrganizationGeocodeCandidate,
   geographicPositionWithinBoundary,
@@ -52,6 +55,18 @@ export class OrganizationEnrichmentError extends Error {
     super(message);
     this.name = "OrganizationEnrichmentError";
     this.code = code;
+  }
+}
+
+function enrichmentInput<T>(operation: () => T, fallbackMessage: string): T {
+  try {
+    return operation();
+  } catch (error) {
+    if (error instanceof OrganizationEnrichmentError) throw error;
+    throw new OrganizationEnrichmentError(
+      "invalid",
+      error instanceof Error ? error.message : fallbackMessage,
+    );
   }
 }
 
@@ -139,14 +154,24 @@ export class OrganizationEnrichmentService {
       kind: input.action, subjectId: input.resultId, commandId: input.scope.commandId,
       priorState: input.priorState ? state(input.priorState) : null, newState: state(input.newState), occurredAt: input.now,
     });
-    await this.dependencies.repository.save({
-      command, event,
-      auditEvent: createOrganizationActionAuditEvent(
-        input.authorization.context.user, input.authorization.membership, input.authorization.organization,
-        { id: `audit_${this.id()}`, action: `organization.enrichment.${input.action}`, occurredAt: input.now },
-      ),
-      record: input.record,
-    });
+    try {
+      await this.dependencies.repository.save({
+        command, event,
+        auditEvent: createOrganizationActionAuditEvent(
+          input.authorization.context.user, input.authorization.membership, input.authorization.organization,
+          { id: `audit_${this.id()}`, action: `organization.enrichment.${input.action}`, occurredAt: input.now },
+        ),
+        record: input.record,
+      });
+    } catch (error) {
+      if (error instanceof OrganizationEnrichmentPersistenceConflictError) {
+        throw new OrganizationEnrichmentError(
+          "conflict",
+          "Organization enrichment changed before persistence.",
+        );
+      }
+      throw error;
+    }
     return command;
   }
 
@@ -203,20 +228,21 @@ export class OrganizationEnrichmentService {
     if (existing && existing.organizationId !== authorization.organization.id) {
       throw new OrganizationEnrichmentError("forbidden", "Credential belongs to another organization.");
     }
-    const evidenceAssetIds = Object.freeze((input.evidenceAssetIds ?? []).map(storedAssetId));
+    const evidenceAssetIds = enrichmentInput(
+      () => Object.freeze((input.evidenceAssetIds ?? []).map(storedAssetId)),
+      "Credential evidence identity is invalid.",
+    );
     const evidence = await Promise.all(evidenceAssetIds.map((id) => this.dependencies.storedAssets.getById(id)));
     if (evidence.some((asset) => !asset || asset.organizationId !== authorization.organization.id || asset.status !== "active")) {
       throw new OrganizationEnrichmentError("invalid", "Every credential evidence asset must be active and owned by this organization.");
     }
     const now = this.now();
-    let record;
-    try {
-      record = createOrganizationCredential({ ...input, organizationId: authorization.organization.id,
+    const record = enrichmentInput(
+      () => createOrganizationCredential({ ...input, organizationId: authorization.organization.id,
         evidenceAssetIds, userId: authorization.context.user.id, membershipId: authorization.membership.id,
-        now, existing });
-    } catch (error) {
-      throw new OrganizationEnrichmentError("invalid", error instanceof Error ? error.message : "Credential is invalid.");
-    }
+        now, existing }),
+      "Credential is invalid.",
+    );
     await this.persist({ scope, authorization, action: "credential-upserted", resultId: record.id,
       requestFingerprint, priorState: existing, newState: record,
       record: { kind: "credential", value: record }, now });
@@ -246,7 +272,11 @@ export class OrganizationEnrichmentService {
     const authorization = await this.authorize(scope);
     const replay = await this.replay(scope, "asset-registered", requestFingerprint);
     if (replay) return Object.freeze({ id: replay.resultId, replayed: true });
-    const stored = await this.dependencies.storedAssets.getById(storedAssetId(input.storedAssetId));
+    const storedId = enrichmentInput(
+      () => storedAssetId(input.storedAssetId),
+      "Profile asset storage identity is invalid.",
+    );
+    const stored = await this.dependencies.storedAssets.getById(storedId);
     if (!stored || stored.organizationId !== authorization.organization.id || stored.status !== "active" || stored.sensitivity !== "standard") {
       throw new OrganizationEnrichmentError("invalid", "Profile asset must reference an active non-sensitive object owned by this organization.");
     }
@@ -258,13 +288,11 @@ export class OrganizationEnrichmentService {
     const existing = await this.dependencies.repository.getProfileAsset(input.id);
     if (existing) throw new OrganizationEnrichmentError("conflict", "Profile asset identity already exists.");
     const now = this.now();
-    let record;
-    try {
-      record = createOrganizationProfileAsset({ ...input, organizationId: authorization.organization.id,
-        storedAssetId: stored.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now });
-    } catch (error) {
-      throw new OrganizationEnrichmentError("invalid", error instanceof Error ? error.message : "Profile asset is invalid.");
-    }
+    const record = enrichmentInput(
+      () => createOrganizationProfileAsset({ ...input, organizationId: authorization.organization.id,
+        storedAssetId: stored.id, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
+      "Profile asset is invalid.",
+    );
     await this.persist({ scope, authorization, action: "asset-registered", resultId: record.id,
       requestFingerprint, newState: record, record: { kind: "profile-asset", value: record }, now });
     return Object.freeze({ record, replayed: false });
@@ -278,6 +306,12 @@ export class OrganizationEnrichmentService {
     const existing = await this.dependencies.repository.getProfileAsset(input.id);
     if (!existing || existing.organizationId !== authorization.organization.id) {
       throw new OrganizationEnrichmentError("not-found", "Profile asset was not found for this organization.");
+    }
+    if (existing.publicationStatus === "retired") {
+      throw new OrganizationEnrichmentError(
+        "conflict",
+        "A retired profile asset cannot change publication state.",
+      );
     }
     const stored = await this.dependencies.storedAssets.getById(existing.storedAssetId);
     if (!stored || stored.status !== "active" || stored.sensitivity !== "standard") {
@@ -395,6 +429,12 @@ export class OrganizationEnrichmentService {
     const existing = await this.dependencies.repository.getAdditionalLocation(input.id);
     if (!existing || existing.organizationId !== authorization.organization.id) {
       throw new OrganizationEnrichmentError("not-found", "Additional location was not found for this organization.");
+    }
+    if (existing.lifecycleStatus !== "active") {
+      throw new OrganizationEnrichmentError(
+        "conflict",
+        "A retired additional location cannot change publication state.",
+      );
     }
     const primary = await this.dependencies.primaryLocations.getByOrganizationId(authorization.organization.id);
     if (!primary || String(primary.geographyId) !== existing.geographyId) {

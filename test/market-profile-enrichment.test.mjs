@@ -6,6 +6,7 @@ import { MarketProfileError, MarketProfileService } from "../src/application/mar
 import { createOrganizationUserAuthorization } from "../src/domain/authorization/model.ts";
 import { standardOrganizationRolePreset } from "../src/domain/authorization/organization-role-presets.ts";
 import { projectOrganizationCapabilityClaim } from "../src/domain/market-profile/model.ts";
+import { MarketProfilePersistenceConflictError } from "../src/domain/market-profile/repository.ts";
 import { createOrganizationAccount } from "../src/domain/organizations/model.ts";
 import { createOrganizationMembership, createUserIdentity } from "../src/domain/users/model.ts";
 
@@ -19,7 +20,7 @@ const CAPABILITY = Object.freeze({
 });
 const MARKET_ROLE = Object.freeze({ market_role_id: "AMACS-MROLE-000003", preferred_label: "Service provider" });
 
-function fixture(rolePreset = "primary-administrator") {
+function fixture(rolePreset = "primary-administrator", options = {}) {
   const organization = createOrganizationAccount({ id: "org-market-profile", now: NOW });
   const user = createUserIdentity({ id: "user-market-profile", name: "Market Profile Manager", primaryEmail: "manager@example.test", loginProvider: "firebase", loginSubject: "subject-market-profile", now: NOW });
   const membership = createOrganizationMembership(user, organization, { id: "membership-market-profile", now: NOW });
@@ -39,6 +40,7 @@ function fixture(rolePreset = "primary-administrator") {
     async listProvisionalTerms() { return state.terms; },
     async getCommand(id) { return state.commands.get(id) ?? null; },
     async save(input) {
+      if (options.persistenceError) throw options.persistenceError;
       if (state.commands.has(input.command.id)) return;
       state.commands.set(input.command.id, input.command); state.events.push(input.event); state.audits.push(input.auditEvent);
       if (input.record.kind === "capability") state.claims.push(input.record.value);
@@ -147,6 +149,47 @@ test("industry, past performance, preferences, and provisional terms preserve th
   assert.equal(f.state.performance[0].value.disclosed, false);
   assert.deepEqual(f.state.preferences.deliveryRoleInterests, ["prime", "subcontractor"]);
   assert.equal(f.state.terms[0].status, "submitted");
+});
+
+test("market-profile model validation remains a typed participant input error", async () => {
+  const f = fixture();
+  const industries = Array.from({ length: 21 }, (_, index) => ({
+    id: `industry-${index}`,
+    label: `Industry ${index}`,
+    visibility: "network",
+  }));
+  await assert.rejects(
+    f.service.updateIndustry(
+      { ...f.scope, commandId: "command-invalid-industry" },
+      { industries, naics: [] },
+    ),
+    (error) => error instanceof MarketProfileError && error.code === "invalid",
+  );
+  assert.equal(f.state.commands.size, 0);
+  assert.equal(f.state.industry, null);
+});
+
+test("market-profile persistence races are conflicts while operational failures propagate", async () => {
+  const conflict = fixture("primary-administrator", {
+    persistenceError: new MarketProfilePersistenceConflictError("Injected command collision."),
+  });
+  await assert.rejects(
+    conflict.service.updateIndustry(
+      { ...conflict.scope, commandId: "command-raced-industry" },
+      { industries: [], naics: [] },
+    ),
+    (error) => error instanceof MarketProfileError && error.code === "conflict",
+  );
+
+  const outage = new Error("Injected market-profile storage outage.");
+  const unavailable = fixture("primary-administrator", { persistenceError: outage });
+  await assert.rejects(
+    unavailable.service.updateIndustry(
+      { ...unavailable.scope, commandId: "command-outage-industry" },
+      { industries: [], naics: [] },
+    ),
+    (error) => error === outage,
+  );
 });
 
 test("network/public capability projections enforce visibility without exposing private evidence", async () => {

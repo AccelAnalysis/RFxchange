@@ -13,6 +13,7 @@ import {
 import { createOrganizationUserAuthorization } from "../src/domain/authorization/model.ts";
 import { standardOrganizationRolePreset } from "../src/domain/authorization/organization-role-presets.ts";
 import { createOrganizationAccount, createOrganizationProfile } from "../src/domain/organizations/model.ts";
+import { ReferralPersistenceConflictError } from "../src/domain/referrals/repository.ts";
 import { createOrganizationMembership, createUserIdentity } from "../src/domain/users/model.ts";
 
 const NOW = "2026-08-09T12:00:00.000Z";
@@ -86,6 +87,7 @@ function fixture() {
     acquisitionCalls: [],
     providerInspections: [],
     failAtomicPersistence: false,
+    failAtomicConflict: false,
   };
 
   const repository = {
@@ -99,6 +101,9 @@ function fixture() {
       return state.communications.get(id) ?? null;
     },
     async saveCreateAndSend(bundle) {
+      if (state.failAtomicConflict) {
+        throw new ReferralPersistenceConflictError("Injected referral transaction collision.");
+      }
       const prior = state.commands.get(bundle.command.id);
       if (prior) {
         if (
@@ -357,12 +362,12 @@ test("reused command with changed stable business input conflicts", async () => 
   assert.equal(f.state.referrals.size, 1);
 });
 
-test("atomic persistence failure leaves no referral, evidence, outbox or acquisition context", async () => {
+test("atomic persistence outage remains a dependency failure and leaves no durable evidence", async () => {
   const f = fixture();
   f.state.failAtomicPersistence = true;
   await assert.rejects(
     f.service.createAndSend(f.scope("atomic-failure-1"), externalInput(f)),
-    (error) => error instanceof ReferralNetworkError && error.code === "conflict" && /Injected/.test(error.message),
+    (error) => error instanceof Error && !(error instanceof ReferralNetworkError) && /Injected/.test(error.message),
   );
   assert.equal(f.state.referrals.size, 0);
   assert.equal(f.state.commands.size, 0);
@@ -372,6 +377,19 @@ test("atomic persistence failure leaves no referral, evidence, outbox or acquisi
   assert.equal(f.state.communications.size, 0);
   assert.equal(f.state.acquisitionContexts.size, 0);
   assert.equal(f.state.acquisitionEvents.size, 0);
+  assert.equal(f.state.acquisitionCalls.length, 1);
+});
+
+test("atomic transaction command collisions remain domain conflicts and leave no partial evidence", async () => {
+  const f = fixture();
+  f.state.failAtomicConflict = true;
+  await assert.rejects(
+    f.service.createAndSend(f.scope("atomic-race-1"), externalInput(f)),
+    (error) => error instanceof ReferralNetworkError && error.code === "conflict",
+  );
+  assert.equal(f.state.referrals.size, 0);
+  assert.equal(f.state.commands.size, 0);
+  assert.equal(f.state.events.size, 0);
   assert.equal(f.state.acquisitionCalls.length, 1);
 });
 

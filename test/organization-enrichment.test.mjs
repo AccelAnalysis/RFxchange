@@ -10,6 +10,7 @@ import {
   projectPublicCredential,
   projectPublicProfileAsset,
 } from "../src/domain/organization-enrichment/model.ts";
+import { OrganizationEnrichmentPersistenceConflictError } from "../src/domain/organization-enrichment/repository.ts";
 import { structuredPostalAddress } from "../src/domain/organization-location/model.ts";
 import { createOrganizationAccount } from "../src/domain/organizations/model.ts";
 import { createStoredAssetDraft, activateStoredAsset } from "../src/domain/storage/model.ts";
@@ -56,6 +57,7 @@ function memory(fx, options = {}) {
     async getAdditionalLocationDraft(id) { return state.drafts.find((entry) => entry.id === id) ?? null; },
     async getCommand(id) { return state.commands.get(id) ?? null; },
     async save(input) {
+      if (options.persistenceError) throw options.persistenceError;
       if (state.commands.has(input.command.id)) return;
       state.commands.set(input.command.id, input.command); state.events.push(input.event); state.audits.push(input.auditEvent);
       const replace = (collection, value) => { const index = collection.findIndex((entry) => entry.id === value.id); if (index >= 0) collection.splice(index, 1, value); else collection.push(value); };
@@ -122,6 +124,52 @@ test("credential commands are tenant-authorized, evidence-bound, auditable, and 
   await assert.rejects(viewer.service.upsertCredential(viewer.scope, { ...input, evidenceAssetIds: [] }), (error) => error instanceof OrganizationEnrichmentError && error.code === "forbidden");
 });
 
+test("malformed credential evidence identity remains a typed participant input error", async () => {
+  const fx = fixture();
+  const m = memory(fx);
+  await assert.rejects(
+    m.service.upsertCredential(m.scope, {
+      id: "credential-license",
+      kind: "license",
+      label: "Contractor license",
+      issuer: "Virginia DPOR",
+      sourceLabel: "Organization upload",
+      evidenceAssetIds: ["invalid evidence/id"],
+      visibility: "network",
+    }),
+    (error) => error instanceof OrganizationEnrichmentError && error.code === "invalid",
+  );
+  assert.equal(m.state.commands.size, 0);
+  assert.equal(m.state.credentials.length, 0);
+});
+
+test("enrichment persistence races are conflicts while operational failures propagate", async () => {
+  const fx = fixture();
+  const input = {
+    id: "credential-race",
+    kind: "license",
+    label: "Contractor license",
+    issuer: "Virginia DPOR",
+    sourceLabel: "Organization record",
+    evidenceAssetIds: [],
+    visibility: "network",
+  };
+  const conflict = memory(fx, {
+    persistenceError: new OrganizationEnrichmentPersistenceConflictError("Injected command collision."),
+  });
+  await assert.rejects(
+    conflict.service.upsertCredential(conflict.scope, input),
+    (error) => error instanceof OrganizationEnrichmentError && error.code === "conflict",
+  );
+
+  const outage = new Error("Injected organization-enrichment storage outage.");
+  const unavailable = memory(fx, { persistenceError: outage });
+  await assert.rejects(
+    unavailable.service.upsertCredential(unavailable.scope, input),
+    (error) => error === outage,
+  );
+});
+
 test("ORG-018 publishes only explicit non-sensitive metadata through controlled delivery", async () => {
   const fx = fixture();
   const m = memory(fx);
@@ -136,6 +184,53 @@ test("ORG-018 publishes only explicit non-sensitive metadata through controlled 
   assert.doesNotMatch(JSON.stringify(projection), /objectPath|sha256|createdBy|stored-profile-image/);
   const delivered = await m.service.readPublishedAsset("profile-portfolio");
   assert.deepEqual([...delivered.bytes], [1, 2, 3, 4]);
+});
+
+test("retired enrichment publication races retain typed conflict semantics", async () => {
+  const fx = fixture();
+  const m = memory(fx);
+  const stored = activeStoredAsset(fx);
+  m.state.stored.push(stored);
+  const registered = await m.service.registerProfileAsset(m.scope, {
+    id: "profile-retired",
+    storedAssetId: stored.id,
+    kind: "portfolio",
+    title: "Retired portfolio asset",
+    altText: "Waterfront project before retirement",
+  });
+  await m.service.retireAsset(
+    { ...m.scope, commandId: "command-retire-asset" },
+    { id: registered.record.id },
+  );
+  await assert.rejects(
+    m.service.setAssetPublication(
+      { ...m.scope, commandId: "command-publish-retired-asset" },
+      { id: registered.record.id, publish: true },
+    ),
+    (error) => error instanceof OrganizationEnrichmentError && error.code === "conflict",
+  );
+
+  const begun = await m.service.beginAdditionalLocation(
+    { ...m.scope, commandId: "command-begin-retired-location" },
+    { id: "location-retired", label: "Retired office", physicalAddress: ADDRESS, isHomeOrPrivate: false },
+  );
+  const confirmed = await m.service.confirmAdditionalLocation(
+    { ...m.scope, commandId: "command-confirm-retired-location" },
+    { draftId: begun.draft.id, candidateId: begun.draft.candidates[0].id },
+  );
+  await m.service.retireLocation(
+    { ...m.scope, commandId: "command-retire-location" },
+    { id: confirmed.record.id },
+  );
+  const commandCount = m.state.commands.size;
+  await assert.rejects(
+    m.service.setLocationPublication(
+      { ...m.scope, commandId: "command-publish-retired-location" },
+      { id: confirmed.record.id, publish: true },
+    ),
+    (error) => error instanceof OrganizationEnrichmentError && error.code === "conflict",
+  );
+  assert.equal(m.state.commands.size, commandCount);
 });
 
 test("ORG-019 requires confirmed in-boundary geocoding and preserves the primary location", async () => {
