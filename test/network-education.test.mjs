@@ -10,6 +10,7 @@ import {
   recommendedEducationPath,
 } from "../src/application/network-education/catalog.ts";
 import { NetworkEducationError, NetworkEducationService } from "../src/application/network-education/network-education.ts";
+import { NetworkEducationPersistenceConflictError } from "../src/domain/network-education/repository.ts";
 import { createUserIdentity } from "../src/domain/users/model.ts";
 
 const NOW = "2026-08-09T18:00:00.000Z";
@@ -17,11 +18,14 @@ const NOW = "2026-08-09T18:00:00.000Z";
 function fixture() {
   const user = createUserIdentity({ id: "user-education", name: "Education Manager", primaryEmail: "education@example.test", loginProvider: "firebase", loginSubject: "subject-education", now: NOW });
   const context = authenticatedServerContext({ user, claims: { provider: "firebase", subject: user.login.subject, email: user.primaryEmail, displayName: user.name, emailVerified: true, isAnonymous: false, authenticatedAt: NOW, issuedAt: NOW, expiresAt: "2026-08-10T18:00:00.000Z" }, source: "session-cookie" });
-  const state = { progress: new Map(), commands: new Map(), events: [], failPersistence: false };
+  const state = { progress: new Map(), commands: new Map(), events: [], failPersistence: false, failConflict: false };
   const repository = {
     async getProgress(id) { return state.progress.get(id) ?? null; },
     async getCommand(id) { return state.commands.get(id) ?? null; },
     async save(input) {
+      if (state.failConflict) {
+        throw new NetworkEducationPersistenceConflictError("Injected education version conflict.");
+      }
       if (state.failPersistence) throw new Error("Injected education persistence outage.");
       const current = state.progress.get(input.progress.id) ?? null;
       assert.equal(current?.version ?? null, input.expectedVersion);
@@ -64,6 +68,20 @@ test("education persistence outages remain dependency failures rather than domai
   assert.equal(f.state.progress.size, 0);
   assert.equal(f.state.commands.size, 0);
   assert.equal(f.state.events.length, 0);
+});
+
+test("education persistence version races remain domain conflicts", async () => {
+  const f = fixture();
+  f.state.failConflict = true;
+  await assert.rejects(
+    f.service.mutate(f.scope("persistence-conflict"), {
+      action: "path-selected",
+      expectedVersion: null,
+      pathKey: "business",
+    }, false),
+    (error) => error instanceof NetworkEducationError && error.code === "conflict",
+  );
+  assert.equal(f.state.progress.size, 0);
 });
 
 test("provider status changes recommendation only and never grants a path or domain authority", async () => {

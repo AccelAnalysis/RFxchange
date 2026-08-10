@@ -18,7 +18,10 @@ import {
   type NetworkEducationEvent,
   type NetworkEducationProgress,
 } from "../../domain/network-education/model.ts";
-import type { NetworkEducationRepository } from "../../domain/network-education/repository.ts";
+import {
+  NetworkEducationPersistenceConflictError,
+  type NetworkEducationRepository,
+} from "../../domain/network-education/repository.ts";
 import { organizationId } from "../../domain/organizations/model.ts";
 import { organizationMembershipId } from "../../domain/users/model.ts";
 
@@ -192,7 +195,17 @@ export class NetworkEducationService {
       resultingVersion: progress.version,
       recordedAt: progress.updatedAt,
     });
-    await this.repository.save({ progress, expectedVersion: expected, event, command: receipt });
+    try {
+      await this.repository.save({ progress, expectedVersion: expected, event, command: receipt });
+    } catch (error) {
+      if (error instanceof NetworkEducationPersistenceConflictError) {
+        throw new NetworkEducationError(
+          "conflict",
+          "Education progress or command evidence changed before persistence.",
+        );
+      }
+      throw error;
+    }
     return Object.freeze({ replayed: false as const, progress, receipt });
   }
 }

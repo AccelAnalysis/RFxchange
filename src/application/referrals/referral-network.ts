@@ -14,7 +14,10 @@ import {
   type ReferralNeed, type ReferralUrgency, type ReferralContactMethod, type ReferralPurpose,
   type ReferralOutcome, type ReferralRecipient, type ReferralSharedField, type ProviderReferralContext,
 } from "../../domain/referrals/model.ts";
-import type { ReferralRepository } from "../../domain/referrals/repository.ts";
+import {
+  ReferralPersistenceConflictError,
+  type ReferralRepository,
+} from "../../domain/referrals/repository.ts";
 import { organizationMembershipId } from "../../domain/users/model.ts";
 import { PROVIDER_REQUEST_EVENT, REFERRAL_INVITATION_EVENT, referralTransactionalEmailCatalog } from "./referral-templates.ts";
 
@@ -24,6 +27,20 @@ export class ReferralNetworkError extends Error {
   readonly code: "forbidden" | "invalid" | "not-found" | "conflict" | "education-required";
   constructor(code: ReferralNetworkError["code"], message: string) {
     super(message); this.name = "ReferralNetworkError"; this.code = code;
+  }
+}
+
+async function persistReferral(operation: () => Promise<void>): Promise<void> {
+  try {
+    await operation();
+  } catch (error) {
+    if (error instanceof ReferralPersistenceConflictError) {
+      throw new ReferralNetworkError(
+        "conflict",
+        "Referral state or transaction evidence changed before persistence.",
+      );
+    }
+    throw error;
   }
 }
 
@@ -125,7 +142,7 @@ export class ReferralNetworkService {
     const acknowledgement: ReferralEducationAcknowledgement = Object.freeze({ id: `refedu_${scope.commandId}`, version: 1 as const, organizationId: authorization.organization.id, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, recipientLabel: input.recipientLabel.trim(), sharedFields: Object.freeze([...new Set(input.sharedFields)]), acknowledgedAt: now });
     if (!acknowledgement.recipientLabel || acknowledgement.sharedFields.length === 0) throw new ReferralNetworkError("invalid", "Education acknowledgement requires the named recipient and shared-data preview.");
     const receipt = command({ id: scope.commandId, referralId: acknowledgement.id, organizationId: authorization.organization.id, action: "education-acknowledged", requestFingerprint, version: acknowledgement.version, now });
-    await this.dependencies.repository.acknowledgeEducation({ acknowledgement, command: receipt, audit: createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: "referral.education.acknowledged", occurredAt: now }) });
+    await persistReferral(() => this.dependencies.repository.acknowledgeEducation({ acknowledgement, command: receipt, audit: createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: "referral.education.acknowledged", occurredAt: now }) }));
     return Object.freeze({ replayed: false as const, receipt, acknowledgement });
   }
 
@@ -166,7 +183,7 @@ export class ReferralNetworkService {
       throw new ReferralNetworkError("invalid", error instanceof Error ? error.message : "Referral draft is invalid.");
     }
     const receipt = command({ id: scope.commandId, referralId: referral.id, organizationId: authorization.organization.id, action: "created", requestFingerprint, version: referral.version, now });
-    await this.dependencies.repository.save({ referral, event: event({ id: `refevent_${this.id()}`, referral, kind: "created", from: null, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, commandId: scope.commandId, now }), command: receipt, audits: [createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: "referral.created", occurredAt: now })], communication: null });
+    await persistReferral(() => this.dependencies.repository.save({ referral, event: event({ id: `refevent_${this.id()}`, referral, kind: "created", from: null, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, commandId: scope.commandId, now }), command: receipt, audits: [createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: "referral.created", occurredAt: now })], communication: null }));
     return Object.freeze({ replayed: false as const, receipt, referral });
   }
 
@@ -213,7 +230,7 @@ export class ReferralNetworkService {
       communication = Object.freeze({ id: messageId, referralId: current.id, request, status: "queued" as const, attemptCount: 0, lastErrorCode: null, deliveryClaim: null, updatedAt: now });
     }
     const receipt = command({ id: scope.commandId, referralId: updated.id, organizationId: authorization.organization.id, action: "sent", requestFingerprint, version: updated.version, now });
-    await this.dependencies.repository.save({ referral: updated, event: event({ id: `refevent_${this.id()}`, referral: updated, kind: "sent", from: current.status, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, commandId: scope.commandId, now }), command: receipt, audits: [createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: "referral.sent", occurredAt: now })], communication });
+    await persistReferral(() => this.dependencies.repository.save({ referral: updated, event: event({ id: `refevent_${this.id()}`, referral: updated, kind: "sent", from: current.status, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, commandId: scope.commandId, now }), command: receipt, audits: [createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: "referral.sent", occurredAt: now })], communication }));
     return Object.freeze({ replayed: false as const, receipt, referral: updated, communication });
   }
 
@@ -245,7 +262,7 @@ export class ReferralNetworkService {
     try { updated = transitionReferral({ referral: current, expectedVersion: input.expectedVersion, to: input.action, actorUserId: authorization.context.user.id, now, outcome: input.outcome, providerRedirect }); }
     catch (error) { throw new ReferralNetworkError("conflict", error instanceof Error ? error.message : "Referral transition failed."); }
     const receipt = command({ id: scope.commandId, referralId: updated.id, organizationId: authorization.organization.id, action: input.action, requestFingerprint, version: updated.version, now });
-    await this.dependencies.repository.save({ referral: updated, event: event({ id: `refevent_${this.id()}`, referral: updated, kind: input.action, from: current.status, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, commandId: scope.commandId, now }), command: receipt, audits: [createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: `referral.${input.action}`, occurredAt: now })], communication: null });
+    await persistReferral(() => this.dependencies.repository.save({ referral: updated, event: event({ id: `refevent_${this.id()}`, referral: updated, kind: input.action, from: current.status, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, commandId: scope.commandId, now }), command: receipt, audits: [createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: `referral.${input.action}`, occurredAt: now })], communication: null }));
     return Object.freeze({ replayed: false as const, receipt, referral: updated });
   }
 
@@ -264,7 +281,7 @@ export class ReferralNetworkService {
     try { updated = attachReferralRecipient({ referral: current, organizationId: authorization.organization.id, actorUserId: authorization.context.user.id, expectedVersion: input.expectedVersion, now }); }
     catch (error) { throw new ReferralNetworkError("conflict", error instanceof Error ? error.message : "Referral recipient could not be attached."); }
     const receipt = command({ id: scope.commandId, referralId: updated.id, organizationId: authorization.organization.id, action: "recipient-attached", requestFingerprint, version: updated.version, now });
-    await this.dependencies.repository.attachInvitation({ referral: updated, event: event({ id: `refevent_${this.id()}`, referral: updated, kind: "recipient-attached", from: current.status, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, commandId: scope.commandId, now }), command: receipt, audit: createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: "referral.recipient-attached", occurredAt: now }) });
+    await persistReferral(() => this.dependencies.repository.attachInvitation({ referral: updated, event: event({ id: `refevent_${this.id()}`, referral: updated, kind: "recipient-attached", from: current.status, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, commandId: scope.commandId, now }), command: receipt, audit: createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: "referral.recipient-attached", occurredAt: now }) }));
     return Object.freeze({ replayed: false as const, receipt, referral: updated });
   }
 }

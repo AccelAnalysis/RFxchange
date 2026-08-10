@@ -151,3 +151,17 @@ test("first-value release preserves stale lifecycle conflicts while dependency f
   assert.match(service, /new FirstValueStateError\([\s\S]{0,40}"conflict"/);
   assert.match(repository, /First-value selection changed; reload before continuing/);
 });
+
+test("transaction repositories type deterministic races without flattening persistence outages", () => {
+  const educationApplication = read("src/application/network-education/network-education.ts");
+  const educationRepository = read("src/infrastructure/firestore/network-education.ts");
+  const referralApplication = read("src/application/referrals/referral-create-and-send.ts");
+  const referralRepository = read("src/infrastructure/firestore/referrals.ts");
+
+  assert.match(educationRepository, /NetworkEducationPersistenceConflictError/);
+  assert.match(educationApplication, /error instanceof NetworkEducationPersistenceConflictError/);
+  assert.match(educationApplication, /throw error/);
+  assert.match(referralRepository, /ReferralPersistenceConflictError/);
+  assert.match(referralApplication, /error instanceof ReferralPersistenceConflictError/);
+  assert.match(referralApplication, /throw error/);
+});

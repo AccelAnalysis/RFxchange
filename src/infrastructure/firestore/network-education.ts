@@ -1,7 +1,10 @@
 import { FieldValue, type DocumentData, type Firestore } from "firebase-admin/firestore";
 
 import type { NetworkEducationCommandReceipt, NetworkEducationProgress } from "../../domain/network-education/model.ts";
-import type { NetworkEducationRepository } from "../../domain/network-education/repository.ts";
+import {
+  NetworkEducationPersistenceConflictError,
+  type NetworkEducationRepository,
+} from "../../domain/network-education/repository.ts";
 import { FIRESTORE_SCHEMA_VERSION } from "./schema.ts";
 
 const PROGRESS = "networkEducationProgress";
@@ -54,9 +57,13 @@ export class FirestoreNetworkEducationRepository implements NetworkEducationRepo
       const [current, existingEvent, existingCommand] = await transaction.getAll(progress, event, command);
       const currentVersion = current.exists ? Number(current.data()?.version) : null;
       if (currentVersion !== input.expectedVersion) {
-        throw new Error(`Education progress changed; current version is ${String(currentVersion)}.`);
+        throw new NetworkEducationPersistenceConflictError(
+          `Education progress changed; current version is ${String(currentVersion)}.`,
+        );
       }
-      if (existingEvent.exists || existingCommand.exists) throw new Error("Education evidence identity collision.");
+      if (existingEvent.exists || existingCommand.exists) {
+        throw new NetworkEducationPersistenceConflictError("Education evidence identity collision.");
+      }
       transaction.set(progress, persisted(input.progress, current.data()?.persistenceCreatedAt));
       transaction.create(event, immutable(input.event));
       transaction.create(command, immutable(input.command));

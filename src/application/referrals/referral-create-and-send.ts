@@ -25,7 +25,10 @@ import {
   type ReferralSharedField,
   type ReferralUrgency,
 } from "../../domain/referrals/model.ts";
-import type { ReferralCreateAndSendBundle } from "../../domain/referrals/repository.ts";
+import {
+  ReferralPersistenceConflictError,
+  type ReferralCreateAndSendBundle,
+} from "../../domain/referrals/repository.ts";
 import { organizationMembershipId } from "../../domain/users/model.ts";
 import {
   PROVIDER_REQUEST_EVENT,
@@ -489,15 +492,26 @@ export class ReferralCreateAndSendService {
       ),
     ]);
 
-    const persistence = await this.dependencies.repository.saveCreateAndSend({
-      referral: sent,
-      events,
-      command: receipt,
-      education,
-      audits,
-      communication,
-      acquisition,
-    });
+    let persistence;
+    try {
+      persistence = await this.dependencies.repository.saveCreateAndSend({
+        referral: sent,
+        events,
+        command: receipt,
+        education,
+        audits,
+        communication,
+        acquisition,
+      });
+    } catch (error) {
+      if (error instanceof ReferralPersistenceConflictError) {
+        throw new ReferralNetworkError(
+          "conflict",
+          "The referral command or transaction evidence changed before persistence.",
+        );
+      }
+      throw error;
+    }
     if (persistence === "replayed") {
       const replayed = await this.replay(scope, requestFingerprint);
       if (!replayed) {
