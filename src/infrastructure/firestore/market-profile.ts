@@ -25,17 +25,6 @@ function immutable(record: object): DocumentData {
   return { ...record, schemaVersion: FIRESTORE_SCHEMA_VERSION, createdAt: FieldValue.serverTimestamp() };
 }
 
-function normalizedTimestamp(value: unknown): string | null {
-  if (typeof value === "string") return value;
-  if (
-    value &&
-    typeof value === "object" &&
-    "toDate" in value &&
-    typeof value.toDate === "function"
-  ) return value.toDate().toISOString();
-  return null;
-}
-
 function scopedList<T extends object>(db: Firestore, collection: Parameters<typeof firestoreDocumentPath>[0], organizationId: OrganizationId): Promise<readonly T[]> {
   return listFirestoreRecords<T>(
     db.collection(collection).where("organizationId", "==", organizationId),
@@ -116,7 +105,7 @@ export class FirestoreOrganizationMarketProfileRepository implements Organizatio
       ) throw new Error("Market profile persistence inputs have mismatched organization scope.");
       if (
         input.record.kind === "industry" &&
-        normalizedTimestamp(recordSnapshot.data()?.updatedAt) !== input.expectedRecordUpdatedAt
+        Number(recordSnapshot.data()?.revision ?? 0) !== input.expectedRecordRevision
       ) {
         throw new MarketProfilePersistenceConflictError(
           "Industry context changed before persistence.",

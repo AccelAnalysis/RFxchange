@@ -92,6 +92,7 @@ export interface NaicsDescriptor {
 export interface OrganizationIndustryProfile {
   readonly id: string;
   readonly organizationId: OrganizationId;
+  readonly revision: number;
   readonly industries: readonly IndustryDescriptor[];
   readonly naics: readonly NaicsDescriptor[];
   readonly updatedByUserId: UserId;
@@ -313,15 +314,17 @@ export function projectOrganizationCapabilityClaim(
 
 export function createIndustryProfile(input: Readonly<{
   organizationId: OrganizationId;
+  revision: number;
   industries: readonly Readonly<{ id: string; label: string; visibility: string }>[];
   naics: readonly Readonly<{ id: string; code: string; title: string; version: string; source: string; provenance: string; visibility: string }>[];
   userId: UserId;
   membershipId: OrganizationMembershipId;
   now: string;
 }>): OrganizationIndustryProfile {
+  if (!Number.isSafeInteger(input.revision) || input.revision < 1) throw new Error("Industry profile revision must be a positive integer.");
   if (input.industries.length > 20 || input.naics.length > 30) throw new Error("Industry context exceeds supported limits.");
   return Object.freeze({
-    id: String(input.organizationId), organizationId: input.organizationId,
+    id: String(input.organizationId), organizationId: input.organizationId, revision: input.revision,
     industries: Object.freeze(input.industries.map((item) => Object.freeze({
       id: stableId(item.id, "Industry id"), label: text(item.label, "Industry label", 160),
       visibility: oneOf(item.visibility, MARKET_PROFILE_VISIBILITIES, "industry visibility"),

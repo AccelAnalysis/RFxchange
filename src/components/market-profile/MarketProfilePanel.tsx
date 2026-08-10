@@ -109,8 +109,12 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
   const [naicsQuery, setNaicsQuery] = useState("");
   const deferredNaicsQuery = useDeferredValue(naicsQuery);
   const [naicsResultLimit, setNaicsResultLimit] = useState(GOVERNED_RESULT_INCREMENT);
-  const canonicalSnapshotNaics = useMemo(() => props.snapshot.industry?.naics.find((descriptor) => {
-    const industry = props.naicsCatalog.entries.find((entry) => entry.code === descriptor.code);
+  const naicsByCode = useMemo(
+    () => new Map(props.naicsCatalog.entries.map((industry) => [industry.code, industry])),
+    [props.naicsCatalog.entries],
+  );
+  const canonicalSnapshotNaics = useMemo(() => props.snapshot.industry?.naics.filter((descriptor) => {
+    const industry = naicsByCode.get(descriptor.code);
     return Boolean(
       industry &&
       descriptor.id === `naics-${industry.code}` &&
@@ -119,13 +123,13 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
       descriptor.source === "participant_selected" &&
       descriptor.provenance === `Participant selected from ${props.naicsCatalog.release.sourceName} ${props.naicsCatalog.release.version} NAICS`
     );
-  }) ?? null, [props.naicsCatalog, props.snapshot.industry?.naics]);
+  }) ?? [], [naicsByCode, props.naicsCatalog.release, props.snapshot.industry?.naics]);
   const preservedSnapshotNaics = useMemo(
-    () => props.snapshot.industry?.naics.filter((descriptor) => descriptor !== canonicalSnapshotNaics) ?? [],
+    () => props.snapshot.industry?.naics.filter((descriptor) => !canonicalSnapshotNaics.includes(descriptor)) ?? [],
     [canonicalSnapshotNaics, props.snapshot.industry?.naics],
   );
-  const [selectedNaicsCode, setSelectedNaicsCode] = useState(
-    canonicalSnapshotNaics?.code ?? "",
+  const [selectedNaicsCodes, setSelectedNaicsCodes] = useState<readonly string[]>(
+    () => Object.freeze([...new Set(canonicalSnapshotNaics.map((descriptor) => descriptor.code))]),
   );
   const [preserveExistingNaics, setPreserveExistingNaics] = useState(
     preservedSnapshotNaics.length > 0,
@@ -139,9 +143,9 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
     });
   }, [deferredNaicsQuery, props.naicsCatalog.entries]);
   const visibleNaics = matchingNaics.slice(0, naicsResultLimit);
-  const selectedNaics = props.naicsCatalog.entries.find(
-    (industry) => industry.code === selectedNaicsCode,
-  ) ?? null;
+  const selectedNaics = props.naicsCatalog.entries.filter(
+    (industry) => selectedNaicsCodes.includes(industry.code),
+  );
 
   const refreshAfter = (message: Notice) => {
     setNotice(message);
@@ -253,9 +257,9 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const industries = splitLines(String(data.get("industries") ?? "")).map((label, index) => ({ id: `industry-${index + 1}-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 60)}`, label, visibility: String(data.get("visibility") ?? "network") }));
-    const naics = selectedNaics ? [{ code: selectedNaics.code, version: props.naicsCatalog.release.version, visibility: String(data.get("visibility") ?? "network") }] : [];
+    const naics = selectedNaics.map((industry) => ({ code: industry.code, version: props.naicsCatalog.release.version, visibility: String(data.get("visibility") ?? "network") }));
     try {
-      await postJson("/api/organization-market-profile", { organizationId: props.organizationId, commandId: commandId("industry"), action: "update-industry", input: { industries, naics, preserveExistingNaics, expectedIndustryUpdatedAt: props.snapshot.industry?.updatedAt ?? null } });
+      await postJson("/api/organization-market-profile", { organizationId: props.organizationId, commandId: commandId("industry"), action: "update-industry", input: { industries, naics, preserveExistingNaics, expectedIndustryRevision: props.snapshot.industry?.revision ?? 0 } });
       refreshAfter({ tone: "success", title: t("marketProfile.notices.industrySavedTitle"), body: t("marketProfile.notices.industrySavedBody") });
     } catch {
       setNotice({ tone: "error", title: t("marketProfile.notices.industryErrorTitle"), body: t("marketProfile.notices.genericSaveError") });
@@ -428,10 +432,13 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
             </div>
             <p className={styles.resultSummary} role="status">{t("marketProfile.industry.resultCount", { visible: numberFormat.format(visibleNaics.length), total: numberFormat.format(matchingNaics.length) })}</p>
             <div className={styles.catalogResults} role="group" aria-label={t("marketProfile.industry.resultsLabel")}>
-              {visibleNaics.map((industry) => <button key={industry.code} type="button" aria-pressed={selectedNaicsCode === industry.code} onClick={() => setSelectedNaicsCode(industry.code)}><strong>{industry.code}</strong><span>{industry.title}</span></button>)}
+              {visibleNaics.map((industry) => {
+                const selected = selectedNaicsCodes.includes(industry.code);
+                return <button key={industry.code} type="button" aria-pressed={selected} disabled={!selected && selectedNaicsCodes.length >= 30} onClick={() => setSelectedNaicsCodes((current) => selected ? current.filter((code) => code !== industry.code) : Object.freeze([...current, industry.code]))}><strong>{industry.code}</strong><span>{industry.title}</span></button>;
+              })}
             </div>
             {visibleNaics.length < matchingNaics.length ? <button className={styles.quietButton} type="button" onClick={() => setNaicsResultLimit((current) => current + GOVERNED_RESULT_INCREMENT)}>{t("marketProfile.industry.showMore", { count: numberFormat.format(Math.min(GOVERNED_RESULT_INCREMENT, matchingNaics.length - visibleNaics.length)) })}</button> : null}
-            {selectedNaics ? <div className={styles.selectionSummary}><strong>{selectedNaics.code} · {selectedNaics.title}</strong><span>{props.naicsCatalog.release.sourceName} · {t("marketProfile.industry.release", { version: props.naicsCatalog.release.version })}</span><button className={styles.quietButton} type="button" onClick={() => setSelectedNaicsCode("")}>{t("marketProfile.industry.clear")}</button></div> : <p className={styles.help}>{t("marketProfile.industry.noneSelected")}</p>}
+            {selectedNaics.length ? <div className={styles.selectionSummary}>{selectedNaics.map((industry) => <strong key={industry.code}>{industry.code} · {industry.title}</strong>)}<span>{props.naicsCatalog.release.sourceName} · {t("marketProfile.industry.release", { version: props.naicsCatalog.release.version })}</span><button className={styles.quietButton} type="button" onClick={() => setSelectedNaicsCodes(Object.freeze([]))}>{t("marketProfile.industry.clear")}</button></div> : <p className={styles.help}>{t("marketProfile.industry.noneSelected")}</p>}
             {preservedSnapshotNaics.length ? <div className={styles.selectionSummary}><strong>{t("marketProfile.industry.existingTitle")}</strong><span>{t("marketProfile.industry.existingBody")}</span>{preservedSnapshotNaics.map((descriptor, index) => <span key={`${descriptor.id}:${descriptor.version}:${descriptor.code}:${index}`}>{descriptor.code} · {descriptor.title} · {descriptor.version}</span>)}<label><input type="checkbox" checked={preserveExistingNaics} onChange={(event) => setPreserveExistingNaics(event.target.checked)} />{t("marketProfile.industry.preserveExisting")}</label></div> : null}
             <a href={props.naicsCatalog.release.sourceUrl} target="_blank" rel="noreferrer">{t("marketProfile.industry.sourceLink", { source: props.naicsCatalog.release.sourceName })}</a>
           </fieldset>
