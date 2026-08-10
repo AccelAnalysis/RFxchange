@@ -1,8 +1,16 @@
+import { createHash } from "node:crypto";
 import type { Firestore } from "firebase-admin/firestore";
 
 import { serializeAcquisitionContextToken } from "../../application/acquisition/acquisition-context.ts";
 import { TransactionalEmailProviderError, TransactionalEmailService } from "../../application/communications/transactional-email.ts";
-import { ReferralNetworkService } from "../../application/referrals/referral-network.ts";
+import {
+  ReferralCreateAndSendService,
+  type ReferralCreateAndSendDependencies,
+} from "../../application/referrals/referral-create-and-send.ts";
+import {
+  ReferralNetworkService,
+  type ReferralAcquisitionIssuer,
+} from "../../application/referrals/referral-network.ts";
 import { referralTransactionalEmailCatalog } from "../../application/referrals/referral-templates.ts";
 import type { ReferralCommunicationIntent } from "../../domain/referrals/model.ts";
 import { createServerAcquisitionContextService } from "../acquisition/runtime.ts";
@@ -23,10 +31,23 @@ function publicOrigin(): string {
   return url.origin;
 }
 
-export function createServerReferralNetworkService(db: Firestore = getServerFirestore()) {
+function referralAcquisitionIdentity(referralId: string, commandId: string) {
+  const digest = createHash("sha256")
+    .update(`${commandId}:${referralId}`, "utf8")
+    .digest("hex")
+    .slice(0, 48);
+  return Object.freeze({
+    contextId: `acq-referral-${digest}`,
+    eventId: `acq-event-referral-${digest}`,
+  });
+}
+
+function createServerReferralDependencies(
+  db: Firestore,
+): ReferralCreateAndSendDependencies {
   const foundation = createFirestoreFoundationRepositories(db);
   const acquisition = createServerAcquisitionContextService();
-  return new ReferralNetworkService({
+  return Object.freeze({
     authorization: {
       accountSecurity: createServerFirebaseAccountSecurityService(),
       organizations: foundation.organizations.accounts,
@@ -37,14 +58,49 @@ export function createServerReferralNetworkService(db: Firestore = getServerFire
     profiles: foundation.organizations.profiles,
     repository: new FirestoreReferralRepository(db),
     acquisition: {
-      async issue(input) {
-        const token = await acquisition.issueTrusted({ kind: "referral", subjectReference: input.referralId, channel: "referral-link", sourceReference: input.referralId });
-        return Object.freeze({ contextId: token.contextId, serializedToken: serializeAcquisitionContextToken(token) });
+      async issue(input: Parameters<ReferralAcquisitionIssuer["issue"]>[0]) {
+        const token = await acquisition.issueTrusted({
+          kind: "referral",
+          subjectReference: input.referralId,
+          channel: "referral-link",
+          sourceReference: input.referralId,
+        });
+        return Object.freeze({
+          contextId: token.contextId,
+          serializedToken: serializeAcquisitionContextToken(token),
+        });
+      },
+      prepare(input: Parameters<ReferralCreateAndSendDependencies["acquisition"]["prepare"]>[0]) {
+        const identity = referralAcquisitionIdentity(input.referralId, input.commandId);
+        const prepared = acquisition.prepareTrusted({
+          kind: "referral",
+          subjectReference: input.referralId,
+          channel: "referral-link",
+          sourceReference: input.referralId,
+          contextId: identity.contextId,
+          eventId: identity.eventId,
+          issuedAt: input.issuedAt,
+        });
+        return Object.freeze({
+          context: prepared.context,
+          event: prepared.event,
+          serializedToken: serializeAcquisitionContextToken(prepared.token),
+        });
       },
     },
     publicOrigin: publicOrigin(),
     providerEligibility: createServerProviderEligibilityReader(db),
   });
+}
+
+export function createServerReferralNetworkService(db: Firestore = getServerFirestore()) {
+  return new ReferralNetworkService(createServerReferralDependencies(db));
+}
+
+export function createServerReferralCreateAndSendService(
+  db: Firestore = getServerFirestore(),
+) {
+  return new ReferralCreateAndSendService(createServerReferralDependencies(db));
 }
 
 function microsoftConfigured(): boolean {
