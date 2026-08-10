@@ -188,5 +188,6 @@ test("activation keeps typed geography and organization-resolution outcomes out 
   assert.match(journey, /throw new ActivationRequestValidationError\([\s\S]{0,120}Organization location is invalid/);
   assert.match(journey, /function validatedOrganizationIdentity/);
   assert.match(journey, /function validatedOrganizationIds/);
+  assert.match(journey, /function validatedAuthorityEvidence/);
   assert.match(journey, /provisionalIdentity = validatedOrganizationIdentity/);
 });

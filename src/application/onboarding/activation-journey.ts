@@ -209,6 +209,18 @@ function validatedOrganizationIds(values: readonly string[]): readonly string[] 
   }
 }
 
+function validatedAuthorityEvidence(
+  input: Parameters<typeof createOrganizationAuthorityEvidence>[0],
+) {
+  try {
+    return createOrganizationAuthorityEvidence(input);
+  } catch (error) {
+    throw new ActivationRequestValidationError(
+      error instanceof Error ? error.message : "Organization authority evidence is invalid.",
+    );
+  }
+}
+
 function publicGeographies(definitions: readonly GeographyDefinition[]) {
   return Object.freeze(
     definitions
@@ -525,6 +537,26 @@ export class ActivationJourneyService {
       displayName: input.displayName,
     });
     const selectedOrganizationId = validatedOrganizationIds([input.organizationId])[0];
+    const now = this.dependencies.now();
+    const evidence = input.domainEmailReference?.trim()
+      ? [
+          validatedAuthorityEvidence({
+            id: `authority-evidence-${crypto.randomUUID()}`,
+            kind: "domain-email",
+            reference: input.domainEmailReference.trim(),
+            status: "pending",
+            submittedAt: now,
+          }),
+        ]
+      : [
+          validatedAuthorityEvidence({
+            id: `authority-evidence-${crypto.randomUUID()}`,
+            kind: "administrative-review",
+            reference: "Participant requested authority review during onboarding.",
+            status: "pending",
+            submittedAt: now,
+          }),
+        ];
     const result = await this.dependencies.resolution.selectExisting({
       context,
       accessJourneyId: activation.accessJourneyId,
@@ -534,26 +566,6 @@ export class ActivationJourneyService {
     });
     const selection = await this.dependencies.selections.getByUserId(context.user.id);
     if (!selection) throw new Error("Primary geography selection disappeared during organization claim.");
-    const now = this.dependencies.now();
-    const evidence = input.domainEmailReference?.trim()
-      ? [
-          createOrganizationAuthorityEvidence({
-            id: `authority-evidence-${crypto.randomUUID()}`,
-            kind: "domain-email",
-            reference: input.domainEmailReference.trim(),
-            status: "pending",
-            submittedAt: now,
-          }),
-        ]
-      : [
-          createOrganizationAuthorityEvidence({
-            id: `authority-evidence-${crypto.randomUUID()}`,
-            kind: "administrative-review",
-            reference: "Participant requested authority review during onboarding.",
-            status: "pending",
-            submittedAt: now,
-          }),
-        ];
     await this.dependencies.claims.submit({
       context,
       accessJourneyId: activation.accessJourneyId,

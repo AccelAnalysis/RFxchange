@@ -169,6 +169,11 @@ function fixture(seed) {
           : null;
       },
     },
+    resolution: {
+      async selectExisting() {
+        throw new Error("Organization resolution must not run for invalid request input.");
+      },
+    },
     locations: {
       async getByOrganizationId(value) {
         return value === organization.id ? location : null;
@@ -486,6 +491,15 @@ test("activation organization identity and identifier validation retain typed re
     () => current.service.selectExistingOrganization(current.context, {
       displayName: "Harborlight Fabrication",
       organizationId: "   ",
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+  await assert.rejects(
+    () => current.service.selectExistingOrganization(current.context, {
+      displayName: "Harborlight Fabrication",
+      organizationId: "organization-existing",
+      domainEmailReference: `${"a".repeat(501)}@example.org`,
     }),
     (error) => error instanceof ActivationRequestValidationError &&
       error.code === "request-invalid",
