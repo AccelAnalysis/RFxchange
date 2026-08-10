@@ -60,6 +60,8 @@ assert.match(referralWorkspace, /resolveRetryStableCommand/);
 assert.match(resourceWorkspace, /resolveRetryStableCommand/);
 assert.match(referralWorkspace, /commandStorageKey/);
 assert.match(resourceWorkspace, /providerRequestStorageKey/);
+assert.match(resourceWorkspace, /referral\.notificationStatus === "delivery-outcome-unknown"/);
+assert.match(resourceWorkspace, /referralWorkspace\.notificationStates\.deliveryOutcomeUnknown/);
 assert.match(referralWorkspace, /encodeURIComponent\(commandRecoveryScope\)/);
 assert.match(resourceWorkspace, /encodeURIComponent\(commandRecoveryScope\)/);
 assert.match(referralPage, /organizationId\)}:\$\{String\(access\.membership\.id\)/);
@@ -130,6 +132,7 @@ assert.match(architecture, /never becomes automatically reclaimable/);
 assert.match(architecture, /failure while persisting that accepted receipt is propagated without rewriting the communication/);
 assert.match(architecture, /transport failure after Graph dispatch[\s\S]*preserves that same claim/);
 assert.match(architecture, /Delivery outcome unknown/);
+assert.match(architecture, /Referral and Resource Network workspaces/);
 assert.match(architecture, /after an uncertain attempt, Back retains the matching command/);
 assert.match(architecture, /Retry action is hidden/);
 
