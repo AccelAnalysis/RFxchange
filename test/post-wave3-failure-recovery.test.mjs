@@ -74,11 +74,17 @@ test("participant and administrative catch paths use the shared API problem boun
 
 test("referral attachment preserves governed access resolution instead of restarting activation", () => {
   const source = read("app/api/referrals/attach/route.ts");
+  const continuation = read("app/acquisition/continue/page.tsx");
   const resolutionBranch = source.indexOf('access.kind === "access-resolution-required"');
   const activationBranch = source.indexOf('access.kind === "unauthenticated"');
   assert.ok(resolutionBranch >= 0);
   assert.ok(activationBranch > resolutionBranch);
   assert.match(source.slice(resolutionBranch, activationBranch), /\/access\/resolve/);
+  assert.match(source, /apiProblem/);
+  assert.match(source, /status", "attachment-failed"/);
+  assert.match(source, /NextResponse\.redirect\(destination, 303\)/);
+  assert.match(continuation, /attachmentFailed/);
+  assert.match(continuation, /role="alert"/);
 });
 
 test("authorized workspace projection gaps reach retryable recovery instead of Join", () => {
@@ -111,13 +117,25 @@ test("the API problem boundary never projects raw causes or stacks", () => {
   assert.match(source, /cache-control/);
 });
 
-test("optional acquisition binding and durable writes do not reclassify outages as rejection or conflict", () => {
+test("optional acquisition binding distinguishes invalid contexts from outages without reclassifying durable writes", () => {
   const session = read("app/api/auth/session/route.ts");
   const education = read("src/application/network-education/network-education.ts");
   const referral = read("src/application/referrals/referral-create-and-send.ts");
 
-  assert.match(session, /acquisitionStatus = "unavailable"/);
-  assert.doesNotMatch(session, /catch\s*\{[\s\S]{0,220}acquisitionStatus = "rejected"/);
+  assert.match(session, /error instanceof AcquisitionContextBindingError/);
+  assert.match(session, /\? "rejected"[\s\S]{0,80}: "unavailable"/);
   assert.doesNotMatch(education, /repository\.save[\s\S]{0,180}NetworkEducationError\("conflict"/);
   assert.doesNotMatch(referral, /saveCreateAndSend[\s\S]{0,240}ReferralNetworkError\(\s*"conflict"/);
+});
+
+test("orientation preserves expected state conflicts while dependency failures remain retryable", () => {
+  const route = read("app/api/orientation/route.ts");
+  const model = read("src/domain/orientation/model.ts");
+  const repository = read("src/infrastructure/firestore/orientation-journey.ts");
+
+  assert.match(route, /cause instanceof OrientationJourneyStateError/);
+  assert.match(route, /stateError\?\.code === "conflict"[\s\S]{0,80}\? 409/);
+  assert.match(route, /: 500/);
+  assert.match(model, /class OrientationJourneyStateError/);
+  assert.match(repository, /Orientation journey changed; reload before continuing/);
 });

@@ -5,6 +5,7 @@ import test from "node:test";
 
 import { AcquisitionContextService } from "../src/application/acquisition/acquisition-context.ts";
 import {
+  AcquisitionContextBindingError,
   acquisitionIntent,
   bindAcquisitionContext,
   resumeAcquisitionContext,
@@ -248,7 +249,8 @@ test("ACQ-003 denies tampering, expiry, cross-user replay, and cross-journey att
       userId: secondUser.id,
       accessJourneyId: accessJourneyId("activation-usr-second"),
     }),
-    /another participant journey/i,
+    (error) => error instanceof AcquisitionContextBindingError &&
+      /another participant journey/i.test(error.message),
   );
   await assert.rejects(
     subject.service.resume({
@@ -298,7 +300,7 @@ test("ACQ-003 denies tampering, expiry, cross-user replay, and cross-journey att
       userId: firstUser.id,
       accessJourneyId: firstJourney,
     }),
-    /expired/i,
+    (error) => error instanceof AcquisitionContextBindingError && /expired/i.test(error.message),
   );
 
   const staleResumeSubject = fixture();

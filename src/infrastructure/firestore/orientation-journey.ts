@@ -1,6 +1,10 @@
 import { Timestamp, type Firestore } from "firebase-admin/firestore";
 
-import type { OrientationJourney, OrientationJourneyEvent } from "../../domain/orientation/model.ts";
+import {
+  OrientationJourneyStateError,
+  type OrientationJourney,
+  type OrientationJourneyEvent,
+} from "../../domain/orientation/model.ts";
 import type { OrientationJourneyRepository } from "../../domain/orientation/repository.ts";
 import { FIRESTORE_SCHEMA_VERSION } from "./schema.ts";
 
@@ -60,11 +64,16 @@ export class FirestoreOrientationJourneyRepository implements OrientationJourney
       const eventRef = this.db.collection(EVENTS).doc(input.event.id);
       const current = await transaction.get(journeyRef);
       if (input.expectedRevision === null) {
-        if (current.exists) throw new Error("Orientation journey already exists.");
+        if (current.exists) {
+          throw new OrientationJourneyStateError("conflict", "Orientation journey already exists.");
+        }
         transaction.create(journeyRef, persisted(input.journey));
       } else {
         if (!current.exists || hydrate(current.data()).revision !== input.expectedRevision) {
-          throw new Error("Orientation journey changed; reload before continuing.");
+          throw new OrientationJourneyStateError(
+            "conflict",
+            "Orientation journey changed; reload before continuing.",
+          );
         }
         transaction.set(journeyRef, persisted(input.journey));
       }

@@ -6,6 +6,7 @@ import {
   createOrientationJourney,
   createOrientationJourneyEvent,
   orientationJourneyIdForAccessJourney,
+  OrientationJourneyStateError,
   restartOrientationJourney,
   type OrientationJourney,
   type OrientationStepKey,
@@ -65,7 +66,12 @@ export class OrientationJourneyService {
     stepKey: OrientationStepKey,
   ): Promise<OrientationJourney> {
     const current = await this.get(scope);
-    if (!current) throw new Error("Orientation must be started before a step can be completed.");
+    if (!current) {
+      throw new OrientationJourneyStateError(
+        "conflict",
+        "Orientation must be started before a step can be completed.",
+      );
+    }
     const now = this.dependencies.now();
     const next = completeOrientationStep({
       journey: current,

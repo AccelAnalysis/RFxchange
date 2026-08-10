@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { ORIENTATION_STEP_SEQUENCE, type OrientationStepKey } from "@/src/domain/orientation/model";
+import {
+  ORIENTATION_STEP_SEQUENCE,
+  OrientationJourneyStateError,
+  type OrientationStepKey,
+} from "@/src/domain/orientation/model";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
@@ -39,12 +43,30 @@ export async function POST(request: NextRequest) {
     if (!journey) return NextResponse.json({ error: "Invalid orientation action." }, { status: 400 });
     return NextResponse.json({ journey });
   } catch (cause) {
+    const stateError = cause instanceof OrientationJourneyStateError ? cause : null;
+    const status = cause instanceof SyntaxError
+      ? 400
+      : stateError?.code === "forbidden"
+        ? 403
+        : stateError?.code === "conflict"
+          ? 409
+          : 500;
     return apiProblem(request, {
-      status: cause instanceof SyntaxError ? 400 : 500,
+      status,
       participantMessage: cause instanceof SyntaxError
         ? "The orientation request could not be read."
+        : stateError?.code === "forbidden"
+          ? "Orientation is unavailable for this participant context."
+          : stateError?.code === "conflict"
+            ? "Orientation changed before this step could be completed. Refresh and try again."
         : "Orientation is temporarily unavailable. Retry the request.",
-      code: cause instanceof SyntaxError ? "request-invalid" : "dependency-unavailable",
+      code: cause instanceof SyntaxError
+        ? "request-invalid"
+        : stateError?.code === "forbidden"
+          ? "orientation-unavailable"
+          : stateError?.code === "conflict"
+            ? "orientation-conflict"
+            : "dependency-unavailable",
       cause,
     });
   }

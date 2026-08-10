@@ -21,6 +21,16 @@ export type OrientationStepKey = (typeof ORIENTATION_STEP_SEQUENCE)[number]["key
 export const SLICE_2_10_MAX_ORIENTATION_STEP = 4 as const;
 export const SLICE_2_11_MAX_ORIENTATION_STEP = 8 as const;
 
+export class OrientationJourneyStateError extends Error {
+  readonly code: "conflict" | "forbidden";
+
+  constructor(code: OrientationJourneyStateError["code"], message: string) {
+    super(message);
+    this.name = "OrientationJourneyStateError";
+    this.code = code;
+  }
+}
+
 export interface OrientationJourney {
   readonly id: string;
   readonly version: 1;
@@ -142,7 +152,10 @@ export function assertOrientationJourneyBinding(
     journey.organizationId !== expected.organizationId ||
     journey.geographyId !== expected.geographyId
   ) {
-    throw new Error("Orientation journey belongs to another participant scope.");
+    throw new OrientationJourneyStateError(
+      "forbidden",
+      "Orientation journey belongs to another participant scope.",
+    );
   }
 }
 
@@ -157,11 +170,17 @@ export function completeOrientationStep(input: Readonly<{
     throw new Error("Orientation phase limit is invalid.");
   }
   if (step.order > input.maximumAllowedStep) {
-    throw new Error("This orientation step is not enabled in the current approved slice.");
+    throw new OrientationJourneyStateError(
+      "conflict",
+      "This orientation step is not enabled in the current approved slice.",
+    );
   }
   if (step.order <= input.journey.completedThroughStep) return input.journey;
   if (step.order !== input.journey.completedThroughStep + 1) {
-    throw new Error("Orientation steps must be completed in canonical order.");
+    throw new OrientationJourneyStateError(
+      "conflict",
+      "Orientation steps must be completed in canonical order.",
+    );
   }
   const now = timestamp(input.now, "Orientation step completion time");
   const completesJourney = step.order === ORIENTATION_STEP_SEQUENCE.length;

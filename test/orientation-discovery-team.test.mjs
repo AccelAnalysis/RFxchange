@@ -13,6 +13,7 @@ import { geographicPositionWithinBoundary } from "../src/domain/organization-loc
 import { accessJourneyId } from "../src/domain/lifecycle/model.ts";
 import {
   ORIENTATION_STEP_SEQUENCE,
+  OrientationJourneyStateError,
   SLICE_2_10_MAX_ORIENTATION_STEP,
   SLICE_2_11_MAX_ORIENTATION_STEP,
 } from "../src/domain/orientation/model.ts";
@@ -73,7 +74,8 @@ test("EDU-001-004 persist resumable, ordered, idempotent and restartable progres
 
   await assert.rejects(
     subject.service.completeStep(subject.scope, "opportunity-issuance"),
-    /canonical order/,
+    (error) => error instanceof OrientationJourneyStateError &&
+      error.code === "conflict" && /canonical order/.test(error.message),
   );
   for (const [index, step] of ORIENTATION_STEP_SEQUENCE.slice(0, 4).entries()) {
     subject.setNow(`2026-08-01T12:0${index + 1}:00.000Z`);

@@ -30,7 +30,24 @@ const INTENT_LABELS = Object.freeze({
   direct: "Direct entry",
 } satisfies Record<AcquisitionIntentKind, string>);
 
-export default async function AcquisitionContinuationPage() {
+interface Props {
+  readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
+}
+
+function first(value: string | string[] | undefined): string {
+  return typeof value === "string" ? value : Array.isArray(value) ? value[0] ?? "" : "";
+}
+
+function opaqueSupportReference(value: string): string | null {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+    ? value.toLowerCase()
+    : null;
+}
+
+export default async function AcquisitionContinuationPage({ searchParams }: Props) {
+  const params = searchParams ? await searchParams : {};
+  const attachmentFailed = first(params.status) === "attachment-failed";
+  const supportReference = opaqueSupportReference(first(params.support));
   const cookieStore = await cookies();
   const access = await resolveParticipantRoute({
     sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
@@ -72,6 +89,14 @@ export default async function AcquisitionContinuationPage() {
             activation journey. It did not grant organization authority, change geography, or skip
             any activation gate.
           </p>
+
+          {attachmentFailed ? (
+            <div className={styles.recovery} role="alert">
+              <strong>The referral could not be attached.</strong>
+              <p>Your saved context is still available. Retry the attachment below.</p>
+              {supportReference ? <small>Support reference: {supportReference}</small> : null}
+            </div>
+          ) : null}
 
           <article className={styles.card}>
             <span>{INTENT_LABELS[acquisition.kind]}</span>

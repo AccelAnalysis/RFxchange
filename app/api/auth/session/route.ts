@@ -7,7 +7,10 @@ import {
   parseAcquisitionContextToken,
 } from "@/src/application/acquisition/acquisition-context";
 import { accessJourneyId } from "@/src/domain/lifecycle/model";
-import type { BoundAcquisitionContext } from "@/src/domain/acquisition/model";
+import {
+  AcquisitionContextBindingError,
+  type BoundAcquisitionContext,
+} from "@/src/domain/acquisition/model";
 import {
   activationJourneyIdForUser,
   updateActivationJourneyContext,
@@ -154,11 +157,13 @@ export async function POST(request: NextRequest) {
             }),
           );
           acquisitionStatus = "bound";
-        } catch {
+        } catch (error) {
           // Acquisition context is navigation metadata, never a reason to deny legitimate sign-in.
-          // An operational bind failure is not evidence that the context itself was rejected. Keep
-          // the cookie so a later sign-in can retry without losing the participant's entry context.
-          acquisitionStatus = "unavailable";
+          // Permanently invalid contexts are rejected and removed. Only an unclassified dependency
+          // failure keeps the cookie so a later sign-in can retry without losing valid entry context.
+          acquisitionStatus = error instanceof AcquisitionContextBindingError
+            ? "rejected"
+            : "unavailable";
         }
       }
     }

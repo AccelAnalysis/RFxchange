@@ -39,11 +39,21 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.redirect(new URL(`/referrals?referral=${encodeURIComponent(referral.id)}&status=attached`, request.url), 303);
   } catch (error) {
-    return apiProblem(request, {
+    const problem = apiProblem(request, {
       status: 500,
       participantMessage: "Referral attachment is temporarily unavailable. Retry the request.",
       code: "dependency-unavailable",
       cause: error,
     });
+    const destination = new URL("/acquisition/continue", request.url);
+    destination.searchParams.set("status", "attachment-failed");
+    const supportId = problem.headers.get("x-rfxchange-support-id");
+    if (supportId) destination.searchParams.set("support", supportId);
+    const response = NextResponse.redirect(destination, 303);
+    response.headers.set("cache-control", "no-store");
+    const correlationId = problem.headers.get("x-rfxchange-correlation-id");
+    if (correlationId) response.headers.set("x-rfxchange-correlation-id", correlationId);
+    if (supportId) response.headers.set("x-rfxchange-support-id", supportId);
+    return response;
   }
 }
