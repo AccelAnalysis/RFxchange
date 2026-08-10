@@ -22,6 +22,7 @@ export interface TransactionalEmailProvider {
 export class TransactionalEmailProviderError extends Error {
   readonly code: string;
   readonly retryable: boolean;
+  readonly deliveryOutcome: "known-failure" | "unknown";
   readonly providerKey: string;
   readonly externalReference: string | null;
   readonly retryAfterSeconds: number | null;
@@ -30,6 +31,7 @@ export class TransactionalEmailProviderError extends Error {
     code: string;
     message: string;
     retryable: boolean;
+    deliveryOutcome: "known-failure" | "unknown";
     providerKey: string;
     externalReference?: string | null;
     retryAfterSeconds?: number | null;
@@ -38,6 +40,7 @@ export class TransactionalEmailProviderError extends Error {
     this.name = "TransactionalEmailProviderError";
     this.code = input.code;
     this.retryable = input.retryable;
+    this.deliveryOutcome = input.deliveryOutcome;
     this.providerKey = input.providerKey;
     this.externalReference = input.externalReference ?? null;
     this.retryAfterSeconds = input.retryAfterSeconds ?? null;
@@ -73,9 +76,14 @@ export class TransactionalEmailService {
     const request = createTransactionalEmailRequest(input);
     const receipt = await this.provider.deliver(request);
     if (receipt.messageId !== request.id) {
-      throw new Error(
-        `Transactional email provider returned receipt for ${receipt.messageId}; expected ${request.id}.`,
-      );
+      throw new TransactionalEmailProviderError({
+        code: "transactional-email-receipt-identity-mismatch",
+        message: `Transactional email provider returned receipt for ${receipt.messageId}; expected ${request.id}.`,
+        retryable: false,
+        deliveryOutcome: "unknown",
+        providerKey: receipt.providerKey,
+        externalReference: receipt.externalReference,
+      });
     }
     return receipt;
   }

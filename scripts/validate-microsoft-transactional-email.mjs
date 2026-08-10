@@ -24,7 +24,8 @@ assert.ok(
 );
 assert.ok(
   application.includes("class TransactionalEmailProviderError") &&
-    application.includes("readonly retryable: boolean"),
+    application.includes("readonly retryable: boolean") &&
+    application.includes('readonly deliveryOutcome: "known-failure" | "unknown"'),
   "COMMS-002 failures must expose provider-neutral retry classification.",
 );
 for (const expected of [
@@ -39,6 +40,7 @@ for (const expected of [
 ]) {
   assert.ok(adapter.includes(expected), `COMMS-002 adapter is missing ${expected}.`);
 }
+assert.match(adapter, /code: "microsoft-graph-unavailable"[\s\S]*?deliveryOutcome: "unknown"/);
 for (const expected of [
   "transactionalEmailBackgroundJobHandler",
   "retryableBackgroundJobError",

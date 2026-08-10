@@ -2,6 +2,7 @@
   "ariaLabel":"Espace de recommandations RFxchange","eyebrow":"Recommandations de l’organisation","title":"Réseau de recommandations","create":"Nouvelle recommandation",
   "list":{"label":"Recommandations commerciales"},"empty":{"title":"Aucune recommandation","body":"Envoyez une recommandation intentionnelle à un destinataire nommé. La plateforme n’invente jamais d’activité."},
   "roles":{"sender":"Organisation émettrice","recipient":"Organisation destinataire"},"fields":{"purpose":"Objet","urgency":"Urgence","contact":"Contact préféré","notification":"Notification","expires":"Expire"},
+  "notificationStates":{"deliveryOutcomeUnknown":"Résultat de livraison inconnu : une vérification par l’assistance est requise avant toute nouvelle tentative."},
   "detail":{"boundary":"Ce contexte est déclaré par un participant. Ce n’est ni une approbation, ni un résultat vérifié, ni un contrat, ni une vente."},
   "path":{"label":"Parcours de recommandation","visible":"Un parcours réel autorisé est affiché pour la recommandation {status}.","unavailable":"Aucun parcours n’est tracé faute de point autorisé respectant la confidentialité ou parce que l’état ne le permet pas."},
   "actions":{"accepted":"Accepter","declined":"Refuser","contacted":"Noter le contact","closed":"Clore","retry":"Réessayer la notification"},

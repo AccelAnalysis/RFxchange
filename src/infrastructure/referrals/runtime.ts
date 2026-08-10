@@ -180,6 +180,12 @@ export async function attemptReferralCommunication(
     });
   } catch (error) {
     const providerError = error instanceof TransactionalEmailProviderError ? error : null;
+    // A dispatch timeout, transport failure, malformed accepted receipt, or unclassified
+    // provider exception may have occurred after the provider accepted the message. Retain the
+    // durable unknown-outcome claim for governed reconciliation; never expose automatic Retry.
+    if (!providerError || providerError.deliveryOutcome === "unknown") {
+      return Object.freeze({ communication: current, blocked: false, attempted: true });
+    }
     const communication = await repository.recordCommunicationResult({
       intent: current,
       claimId,

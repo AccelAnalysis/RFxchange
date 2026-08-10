@@ -2,6 +2,7 @@
   "ariaLabel":"RFxchange-Empfehlungsbereich","eyebrow":"Organisationsempfehlungen","title":"Empfehlungsnetzwerk","create":"Neue Empfehlung",
   "list":{"label":"Geschäftsempfehlungen"},"empty":{"title":"Noch keine Empfehlungen","body":"Senden Sie eine gezielte Empfehlung an einen benannten Empfänger. Die Plattform erfindet keine Aktivität."},
   "roles":{"sender":"Sendende Organisation","recipient":"Empfängerorganisation"},"fields":{"purpose":"Zweck","urgency":"Dringlichkeit","contact":"Bevorzugter Kontakt","notification":"Benachrichtigung","expires":"Läuft ab"},
+  "notificationStates":{"deliveryOutcomeUnknown":"Zustellergebnis unbekannt – vor einem weiteren Versuch ist eine Klärung durch den Support erforderlich."},
   "detail":{"boundary":"Dieser Kontext wurde von einem Teilnehmer angegeben. Er ist keine Bestätigung, kein verifiziertes Ergebnis, kein Vertrag und kein Verkauf."},
   "path":{"label":"Empfehlungspfad","visible":"Für die Empfehlung im Status {status} wird ein echter zulässiger Pfad angezeigt.","unavailable":"Es wird kein Pfad gezeichnet, da ein zulässiger datenschutzsicherer Endpunkt fehlt oder der Status dies nicht erlaubt."},
   "actions":{"accepted":"Empfehlung annehmen","declined":"Empfehlung ablehnen","contacted":"Kontakt erfassen","closed":"Empfehlung schließen","retry":"Benachrichtigung erneut senden"},

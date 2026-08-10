@@ -107,6 +107,8 @@ assert.match(runtime, /resolveReferralCommunicationDeliveryAuthority/);
 assert.match(runtime, /claimCommunicationDelivery/);
 assert.match(runtime, /if \(!claim\.claimed\)/);
 assert.match(runtime, /service\.request/);
+assert.match(runtime, /providerError\.deliveryOutcome === "unknown"/);
+assert.match(runtime, /return Object\.freeze\(\{ communication: current, blocked: false, attempted: true \}\)/);
 assert.ok(
   runtime.indexOf("claimCommunicationDelivery") < runtime.indexOf("service.request"),
   "Provider delivery must occur only after durable current-state authority is claimed.",
@@ -126,6 +128,8 @@ assert.match(architecture, /delivery authority boundary atomically claims both/)
 assert.match(architecture, /durable delivery claim/i);
 assert.match(architecture, /never becomes automatically reclaimable/);
 assert.match(architecture, /failure while persisting that accepted receipt is propagated without rewriting the communication/);
+assert.match(architecture, /transport failure after Graph dispatch[\s\S]*preserves that same claim/);
+assert.match(architecture, /Delivery outcome unknown/);
 assert.match(architecture, /after an uncertain attempt, Back retains the matching command/);
 assert.match(architecture, /Retry action is hidden/);
 

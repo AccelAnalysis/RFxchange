@@ -2,6 +2,7 @@
   "ariaLabel":"Espacio de referencias de RFxchange","eyebrow":"Referencias de la organización","title":"Red de referencias","create":"Nueva referencia",
   "list":{"label":"Referencias comerciales"},"empty":{"title":"Aún no hay referencias","body":"Envía una referencia intencional a un destinatario identificado. La plataforma nunca inventa actividad."},
   "roles":{"sender":"Organización remitente","recipient":"Organización destinataria"},"fields":{"purpose":"Propósito","urgency":"Urgencia","contact":"Contacto preferido","notification":"Notificación","expires":"Vence"},
+  "notificationStates":{"deliveryOutcomeUnknown":"Resultado de entrega desconocido: se requiere conciliación de soporte antes de otro intento."},
   "detail":{"boundary":"Este contexto lo informa un participante. No es recomendación, resultado verificado, contrato ni venta."},
   "path":{"label":"Ruta de referencia","visible":"Se muestra una ruta real autorizada para la referencia {status}.","unavailable":"No se dibuja una ruta porque falta un extremo autorizado y seguro o el estado no lo permite."},
   "actions":{"accepted":"Aceptar referencia","declined":"Rechazar referencia","contacted":"Registrar contacto","closed":"Cerrar referencia","retry":"Reintentar notificación"},

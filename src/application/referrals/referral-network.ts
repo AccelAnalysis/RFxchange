@@ -8,7 +8,7 @@ import { organizationId, type OrganizationId } from "../../domain/organizations/
 import type { OrganizationProfileRepository } from "../../domain/organizations/repository.ts";
 import { hydrateEssentialOrganizationProfile } from "../../domain/organization-profile/model.ts";
 import {
-  attachReferralRecipient, createReferral, projectReferral, transitionReferral,
+  attachReferralRecipient, createReferral, projectReferral, projectReferralNotificationStatus, transitionReferral,
   type BusinessReferral, type ReferralCommandReceipt, type ReferralCommunicationIntent,
   type ReferralEducationAcknowledgement, type ReferralEvent, type ReferralEventKind,
   type ReferralNeed, type ReferralUrgency, type ReferralContactMethod, type ReferralPurpose,
@@ -101,7 +101,12 @@ export class ReferralNetworkService {
       const communication = record.communicationMessageId
         ? await this.dependencies.repository.getCommunication(record.communicationMessageId)
         : null;
-      return Object.freeze({ ...projection, notificationStatus: communication?.status ?? projection.notificationStatus });
+      return Object.freeze({
+        ...projection,
+        notificationStatus: communication
+          ? projectReferralNotificationStatus(communication)
+          : projection.notificationStatus,
+      });
     }));
     return Object.freeze(projected.flatMap((projection) => projection ? [projection] : []));
   }

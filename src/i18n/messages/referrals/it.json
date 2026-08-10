@@ -2,6 +2,7 @@
   "ariaLabel":"Area segnalazioni RFxchange","eyebrow":"Segnalazioni dell’organizzazione","title":"Rete di segnalazioni","create":"Nuova segnalazione",
   "list":{"label":"Segnalazioni commerciali"},"empty":{"title":"Nessuna segnalazione","body":"Invia una segnalazione intenzionale a un destinatario nominato. La piattaforma non inventa attività."},
   "roles":{"sender":"Organizzazione mittente","recipient":"Organizzazione destinataria"},"fields":{"purpose":"Scopo","urgency":"Urgenza","contact":"Contatto preferito","notification":"Notifica","expires":"Scade"},
+  "notificationStates":{"deliveryOutcomeUnknown":"Esito della consegna sconosciuto: è necessaria la riconciliazione dell’assistenza prima di un altro tentativo."},
   "detail":{"boundary":"Questo contesto è dichiarato da un partecipante. Non è approvazione, risultato verificato, contratto o vendita."},
   "path":{"label":"Percorso della segnalazione","visible":"È mostrato un percorso reale autorizzato per la segnalazione {status}.","unavailable":"Non viene tracciato alcun percorso perché manca un punto autorizzato e sicuro o lo stato non lo consente."},
   "actions":{"accepted":"Accetta","declined":"Rifiuta","contacted":"Registra contatto","closed":"Chiudi","retry":"Riprova notifica"},

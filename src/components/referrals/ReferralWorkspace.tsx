@@ -46,6 +46,15 @@ function readable(value: string): string {
   return value.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
 }
 
+function notificationLabel(
+  value: ReferralProjection["notificationStatus"],
+  translate: (key: string) => string,
+): string {
+  return value === "delivery-outcome-unknown"
+    ? translate("referralWorkspace.notificationStates.deliveryOutcomeUnknown")
+    : readable(value);
+}
+
 function nextActions(referral: ReferralProjection): readonly ReferralStatus[] {
   if (referral.role === "recipient" && referral.status === "sent") return ["accepted", "declined"];
   if (["sender", "recipient"].includes(referral.role) && referral.status === "accepted") return ["contacted"];
@@ -270,7 +279,7 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
               <p className={styles.status}>{readable(selected.status)} · {selected.role === "sender" ? t("referralWorkspace.roles.sender") : t("referralWorkspace.roles.recipient")}</p>
               <h2>{selected.role === "sender" ? selected.recipientLabel : selected.senderOrganizationName}</h2>
               <p>{selected.summary}</p>
-              <dl><div><dt>{t("referralWorkspace.fields.purpose")}</dt><dd>{readable(selected.purpose)}</dd></div><div><dt>{t("referralWorkspace.fields.urgency")}</dt><dd>{readable(selected.urgency)}</dd></div><div><dt>{t("referralWorkspace.fields.contact")}</dt><dd>{readable(selected.preferredContactMethod)}</dd></div><div><dt>{t("referralWorkspace.fields.notification")}</dt><dd>{readable(selected.notificationStatus)}</dd></div><div><dt>{t("referralWorkspace.fields.expires")}</dt><dd>{new Date(selected.expiresAt).toLocaleDateString()}</dd></div></dl>
+              <dl><div><dt>{t("referralWorkspace.fields.purpose")}</dt><dd>{readable(selected.purpose)}</dd></div><div><dt>{t("referralWorkspace.fields.urgency")}</dt><dd>{readable(selected.urgency)}</dd></div><div><dt>{t("referralWorkspace.fields.contact")}</dt><dd>{readable(selected.preferredContactMethod)}</dd></div><div><dt>{t("referralWorkspace.fields.notification")}</dt><dd>{notificationLabel(selected.notificationStatus, t)}</dd></div><div><dt>{t("referralWorkspace.fields.expires")}</dt><dd>{new Date(selected.expiresAt).toLocaleDateString()}</dd></div></dl>
               <p className={styles.boundary}>{t("referralWorkspace.detail.boundary")}</p>
               {hasPath ? <p className={styles.pathText}>{t("referralWorkspace.path.visible", { status: readable(selected.status) })}</p> : <p className={styles.pathText}>{t("referralWorkspace.path.unavailable")}</p>}
               {nextActions(selected).length ? <WorkflowExplainer explainerKey="referral-response" /> : null}
