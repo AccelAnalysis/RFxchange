@@ -6,7 +6,10 @@ import { Suspense } from "react";
 import { MapMotionPreferenceToggle } from "@/src/components/account/MapMotionPreferenceToggle";
 import { SignOutButton } from "@/src/components/auth/SignOutButton";
 import { MarketProfilePanel } from "@/src/components/market-profile/MarketProfilePanel";
-import { OrganizationEnrichmentPanel } from "@/src/components/organization-enrichment/OrganizationEnrichmentPanel";
+import {
+  OrganizationEnrichmentLocationMap,
+  OrganizationEnrichmentPanel,
+} from "@/src/components/organization-enrichment/OrganizationEnrichmentPanel";
 import {
   OperationalWorkspace,
   ParticipantShell,
@@ -124,13 +127,40 @@ async function EnrichmentSection({
   organizationId: string;
   copy: WorkspaceResilienceCopy;
 }>) {
-  const [enrichmentResult, mapResult] = await Promise.all([pendingEnrichment, pendingMap]);
+  const enrichmentResult = await pendingEnrichment;
   if (!enrichmentResult.available) return <OptionalPanelState title={copy.enrichmentTitle} message={copy.enrichmentUnavailable} />;
   return <OrganizationEnrichmentPanel
     organizationId={organizationId}
     snapshot={enrichmentResult.value.snapshot}
-    mapModel={mapResult.available ? mapResult.value?.model ?? null : null}
-    homeMarker={mapResult.available ? mapResult.value?.homeMarker ?? null : null}
+    locationMap={
+      <Suspense fallback={<p className={styles.empty} role="status">{copy.geographyLoading}</p>}>
+        <EnrichmentLocationMapSection
+          pendingMap={pendingMap}
+          snapshot={enrichmentResult.value.snapshot}
+          unavailableMessage={copy.geographyUnavailable}
+        />
+      </Suspense>
+    }
+  />;
+}
+
+async function EnrichmentLocationMapSection({
+  pendingMap,
+  snapshot,
+  unavailableMessage,
+}: Readonly<{
+  pendingMap: Promise<MapProjectionResult>;
+  snapshot: Awaited<ReturnType<typeof loadAuthorizedOrganizationEnrichment>>["snapshot"];
+  unavailableMessage: string;
+}>) {
+  const mapResult = await pendingMap;
+  if (!mapResult.available || !mapResult.value) {
+    return <p className={styles.empty} role="status">{unavailableMessage}</p>;
+  }
+  return <OrganizationEnrichmentLocationMap
+    snapshot={snapshot}
+    mapModel={mapResult.value.model}
+    homeMarker={mapResult.value.homeMarker}
   />;
 }
 

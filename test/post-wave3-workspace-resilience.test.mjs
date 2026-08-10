@@ -85,6 +85,9 @@ test("live workspace sources retain bounded hydration, scoped refresh, and strea
   }
   assert.match(accountPage, /settleOptionalWorkspacePanel/);
   assert.ok((accountPage.match(/<Suspense/g) ?? []).length >= 3);
+  assert.doesNotMatch(accountPage, /Promise\.all\(\[pendingEnrichment, pendingMap\]\)/);
+  assert.match(accountPage, /const enrichmentResult = await pendingEnrichment/);
+  assert.match(accountPage, /<EnrichmentLocationMapSection/);
   assert.match(marketProfileRuntime, /geographyDefinitions\.getById\(id\)/);
   assert.match(accountPage, /serviceGeographies=\{marketProfile\.serviceGeographies\}/);
   assert.doesNotMatch(accountPage, /label:\s*id/);

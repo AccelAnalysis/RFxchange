@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useMemo,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
@@ -51,8 +58,7 @@ async function postJson(body: Readonly<Record<string, unknown>>) {
 export function OrganizationEnrichmentPanel(props: Readonly<{
   organizationId: string;
   snapshot: Snapshot;
-  mapModel: ControlledLocalityMapModel | null;
-  homeMarker: ExchangeHomeMarker | null;
+  locationMap: ReactNode;
 }>) {
   const { t } = useI18n();
   const router = useRouter();
@@ -73,25 +79,6 @@ export function OrganizationEnrichmentPanel(props: Readonly<{
     setTab(next);
     document.getElementById(`organization-enrichment-tab-${next}`)?.focus();
   }
-
-  const overlays = useMemo<readonly ControlledLocalityPointOverlay[]>(() => {
-    const primary = props.homeMarker ? [{
-      id: props.homeMarker.id,
-      position: props.homeMarker.coordinate,
-      label: props.homeMarker.label,
-      kind: "organization-marker" as const,
-      privacyLabel: props.homeMarker.accessibleLocationLabel,
-      activated: true,
-    }] : [];
-    const satellites = props.snapshot.mapAdditionalLocations.map((location) => ({
-      id: location.id,
-      position: location.coordinate,
-      label: `${location.label} · ${t("organizationEnrichment.locations.satellite")}`,
-      kind: "subordinate-location" as const,
-      privacyLabel: `${valueLabel(location.visibility)} · ${location.localityName}`,
-    }));
-    return Object.freeze([...primary, ...satellites]);
-  }, [props.homeMarker, props.snapshot.mapAdditionalLocations, t, valueLabel]);
 
   async function mutate(action: string, input: Record<string, unknown>, prefix: string) {
     setBusy(true);
@@ -287,9 +274,41 @@ export function OrganizationEnrichmentPanel(props: Readonly<{
             </div>
           </div>
           {draft ? <section className={styles.candidates} aria-labelledby="additional-location-candidates"><h3 id="additional-location-candidates">{t("organizationEnrichment.locations.confirm")}</h3>{draft.candidates.map((candidate) => <button type="button" key={candidate.id} disabled={busy} onClick={() => void mutate("confirm-additional-location", { draftId: draft.id, candidateId: candidate.id }, "location_confirm").then((result) => { if (result) setDraft(null); })}><strong>{candidate.matchedAddress}</strong><span>{valueLabel(candidate.quality)}</span></button>)}</section> : null}
-          {props.mapModel ? <div className={styles.map}><MapboxLocalityCanvas model={props.mapModel} initialZoom="focus" pointOverlays={overlays} /><p>{t("organizationEnrichment.locations.mapHelp")}</p></div> : null}
+          {props.locationMap}
         </div>
       ) : null}
     </section>
   );
+}
+
+export function OrganizationEnrichmentLocationMap(props: Readonly<{
+  snapshot: Pick<Snapshot, "mapAdditionalLocations">;
+  mapModel: ControlledLocalityMapModel;
+  homeMarker: ExchangeHomeMarker | null;
+}>) {
+  const { t } = useI18n();
+  const valueLabel = useCallback((value: string) => t(`organizationEnrichment.values.${value}`), [t]);
+  const overlays = useMemo<readonly ControlledLocalityPointOverlay[]>(() => {
+    const primary = props.homeMarker ? [{
+      id: props.homeMarker.id,
+      position: props.homeMarker.coordinate,
+      label: props.homeMarker.label,
+      kind: "organization-marker" as const,
+      privacyLabel: props.homeMarker.accessibleLocationLabel,
+      activated: true,
+    }] : [];
+    const satellites = props.snapshot.mapAdditionalLocations.map((location) => ({
+      id: location.id,
+      position: location.coordinate,
+      label: `${location.label} · ${t("organizationEnrichment.locations.satellite")}`,
+      kind: "subordinate-location" as const,
+      privacyLabel: `${valueLabel(location.visibility)} · ${location.localityName}`,
+    }));
+    return Object.freeze([...primary, ...satellites]);
+  }, [props.homeMarker, props.snapshot.mapAdditionalLocations, t, valueLabel]);
+
+  return <div className={styles.map}>
+    <MapboxLocalityCanvas model={props.mapModel} initialZoom="focus" pointOverlays={overlays} />
+    <p>{t("organizationEnrichment.locations.mapHelp")}</p>
+  </div>;
 }
