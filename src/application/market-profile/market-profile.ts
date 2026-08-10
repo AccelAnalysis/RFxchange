@@ -19,7 +19,10 @@ import {
   type OrganizationMarketProfileCommandReceipt,
   type OrganizationMarketProfileEvent,
 } from "../../domain/market-profile/model.ts";
-import type { OrganizationMarketProfileRepository } from "../../domain/market-profile/repository.ts";
+import {
+  MarketProfilePersistenceConflictError,
+  type OrganizationMarketProfileRepository,
+} from "../../domain/market-profile/repository.ts";
 import { organizationId, type OrganizationId } from "../../domain/organizations/model.ts";
 import { organizationMembershipId } from "../../domain/users/model.ts";
 
@@ -140,26 +143,36 @@ export class MarketProfileService {
       actorUserId: input.authorization.context.user.id,
       recordedAt: input.now,
     });
-    await this.dependencies.repository.save({
-      command,
-      event: event({
-        id: `mpevent_${this.id()}`,
-        organizationId: input.authorization.organization.id,
-        userId: input.authorization.context.user.id,
-        membershipId: input.authorization.membership.id,
-        kind: input.action,
-        subjectId: input.subjectId,
-        commandId: input.scope.commandId,
-        now: input.now,
-      }),
-      auditEvent: createOrganizationActionAuditEvent(
-        input.authorization.context.user,
-        input.authorization.membership,
-        input.authorization.organization,
-        { id: `audit_${this.id()}`, action: `organization.market-profile.${input.action}`, occurredAt: input.now },
-      ),
-      record: input.record,
-    });
+    try {
+      await this.dependencies.repository.save({
+        command,
+        event: event({
+          id: `mpevent_${this.id()}`,
+          organizationId: input.authorization.organization.id,
+          userId: input.authorization.context.user.id,
+          membershipId: input.authorization.membership.id,
+          kind: input.action,
+          subjectId: input.subjectId,
+          commandId: input.scope.commandId,
+          now: input.now,
+        }),
+        auditEvent: createOrganizationActionAuditEvent(
+          input.authorization.context.user,
+          input.authorization.membership,
+          input.authorization.organization,
+          { id: `audit_${this.id()}`, action: `organization.market-profile.${input.action}`, occurredAt: input.now },
+        ),
+        record: input.record,
+      });
+    } catch (error) {
+      if (error instanceof MarketProfilePersistenceConflictError) {
+        throw new MarketProfileError(
+          "conflict",
+          "Market profile changed before persistence.",
+        );
+      }
+      throw error;
+    }
     return command;
   }
 

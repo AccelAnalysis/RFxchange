@@ -402,3 +402,39 @@ test("invalid activation websites retain typed request-validation semantics", as
     );
   }
 });
+
+test("profile contact, phone, and capability validation retain typed request semantics", async () => {
+  assert.throws(
+    () => parseSaveProfileBody(validProfileBody({ contactRole: "" })),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+
+  const phoneFixture = fixture({
+    websiteDisposition: "available",
+    websiteUrl: "https://example.org/",
+    phone: "+1 757 555 0100",
+  });
+  await assert.rejects(
+    () => phoneFixture.service.searchOrganizations(phoneFixture.context, {
+      displayName: "Harborlight Fabrication",
+      website: "example.org",
+      phone: "not-a-phone",
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+
+  await assert.rejects(
+    () => saveProfile(
+      {
+        websiteDisposition: "available",
+        websiteUrl: "https://example.org/",
+        phone: "+1 757 555 0100",
+      },
+      validProfileBody({ capabilityName: "services" }),
+    ),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+});

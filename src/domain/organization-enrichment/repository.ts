@@ -9,6 +9,13 @@ import type {
   OrganizationProfileAsset,
 } from "./model.ts";
 
+export class OrganizationEnrichmentPersistenceConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "OrganizationEnrichmentPersistenceConflictError";
+  }
+}
+
 export interface OrganizationEnrichmentRepository {
   listCredentials(organizationId: OrganizationId): Promise<readonly OrganizationCredential[]>;
   getCredential(id: string): Promise<OrganizationCredential | null>;

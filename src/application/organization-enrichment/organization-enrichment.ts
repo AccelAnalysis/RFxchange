@@ -22,7 +22,10 @@ import {
   type OrganizationEnrichmentEvent,
   type OrganizationEnrichmentEventKind,
 } from "../../domain/organization-enrichment/model.ts";
-import type { OrganizationEnrichmentRepository } from "../../domain/organization-enrichment/repository.ts";
+import {
+  OrganizationEnrichmentPersistenceConflictError,
+  type OrganizationEnrichmentRepository,
+} from "../../domain/organization-enrichment/repository.ts";
 import {
   createOrganizationGeocodeCandidate,
   geographicPositionWithinBoundary,
@@ -151,14 +154,24 @@ export class OrganizationEnrichmentService {
       kind: input.action, subjectId: input.resultId, commandId: input.scope.commandId,
       priorState: input.priorState ? state(input.priorState) : null, newState: state(input.newState), occurredAt: input.now,
     });
-    await this.dependencies.repository.save({
-      command, event,
-      auditEvent: createOrganizationActionAuditEvent(
-        input.authorization.context.user, input.authorization.membership, input.authorization.organization,
-        { id: `audit_${this.id()}`, action: `organization.enrichment.${input.action}`, occurredAt: input.now },
-      ),
-      record: input.record,
-    });
+    try {
+      await this.dependencies.repository.save({
+        command, event,
+        auditEvent: createOrganizationActionAuditEvent(
+          input.authorization.context.user, input.authorization.membership, input.authorization.organization,
+          { id: `audit_${this.id()}`, action: `organization.enrichment.${input.action}`, occurredAt: input.now },
+        ),
+        record: input.record,
+      });
+    } catch (error) {
+      if (error instanceof OrganizationEnrichmentPersistenceConflictError) {
+        throw new OrganizationEnrichmentError(
+          "conflict",
+          "Organization enrichment changed before persistence.",
+        );
+      }
+      throw error;
+    }
     return command;
   }
 

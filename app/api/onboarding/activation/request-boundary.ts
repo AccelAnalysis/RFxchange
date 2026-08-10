@@ -39,12 +39,18 @@ export function parseWebsiteIdentityFields(
 export function parseSaveProfileBody(
   body: ActivationRequestBody,
 ): SaveProfileInput {
+  const contactRole =
+    typeof body.contactRole === "string"
+      ? body.contactRole.trim().replace(/\s+/g, " ")
+      : "";
+  if (!contactRole || contactRole.length > 120) {
+    throw new ActivationRequestValidationError(
+      "Organization contact role is required and cannot exceed 120 characters.",
+    );
+  }
   return Object.freeze({
     ...parseWebsiteIdentityFields(body),
-    contactRole:
-      typeof body.contactRole === "string"
-        ? body.contactRole
-        : "",
+    contactRole,
     contactPubliclyVisible:
       body.contactPubliclyVisible === true,
     capabilityKind:

@@ -352,6 +352,12 @@ export class ActivationJourneyService {
     const websiteUrl = input.websiteNotApplicable || !website
       ? null
       : normalizedWebsiteUrl(website);
+    const phone = input.phone?.trim() || null;
+    if (phone && !/^[+0-9().\-\s]{7,40}$/.test(phone)) {
+      throw new ActivationRequestValidationError(
+        "Organization contact phone is malformed.",
+      );
+    }
     const updated = updateActivationJourneyContext(activation, {
       organizationIdentitySeed: {
         websiteDisposition: input.websiteNotApplicable
@@ -360,7 +366,7 @@ export class ActivationJourneyService {
             ? "available"
             : null,
         websiteUrl,
-        phone: input.phone?.trim() || null,
+        phone,
       },
       now: this.dependencies.now(),
     });
@@ -668,14 +674,21 @@ export class ActivationJourneyService {
         "The durable organization profile is unavailable.",
       );
     }
-    const capability = createOrganizationCapability({
-      id: `capability-${crypto.randomUUID()}`,
-      kind: input.capabilityKind,
-      category: input.capabilityCategory,
-      otherCategory: input.capabilityOtherCategory,
-      name: input.capabilityName,
-      description: input.capabilityDescription,
-    });
+    let capability;
+    try {
+      capability = createOrganizationCapability({
+        id: `capability-${crypto.randomUUID()}`,
+        kind: input.capabilityKind,
+        category: input.capabilityCategory,
+        otherCategory: input.capabilityOtherCategory,
+        name: input.capabilityName,
+        description: input.capabilityDescription,
+      });
+    } catch (error) {
+      throw new ActivationRequestValidationError(
+        error instanceof Error ? error.message : "Organization capability is invalid.",
+      );
+    }
     const saved = await this.dependencies.profile.update({
       context,
       organizationId: String(organizationId),

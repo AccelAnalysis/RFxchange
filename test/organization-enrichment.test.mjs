@@ -10,6 +10,7 @@ import {
   projectPublicCredential,
   projectPublicProfileAsset,
 } from "../src/domain/organization-enrichment/model.ts";
+import { OrganizationEnrichmentPersistenceConflictError } from "../src/domain/organization-enrichment/repository.ts";
 import { structuredPostalAddress } from "../src/domain/organization-location/model.ts";
 import { createOrganizationAccount } from "../src/domain/organizations/model.ts";
 import { createStoredAssetDraft, activateStoredAsset } from "../src/domain/storage/model.ts";
@@ -56,6 +57,7 @@ function memory(fx, options = {}) {
     async getAdditionalLocationDraft(id) { return state.drafts.find((entry) => entry.id === id) ?? null; },
     async getCommand(id) { return state.commands.get(id) ?? null; },
     async save(input) {
+      if (options.persistenceError) throw options.persistenceError;
       if (state.commands.has(input.command.id)) return;
       state.commands.set(input.command.id, input.command); state.events.push(input.event); state.audits.push(input.auditEvent);
       const replace = (collection, value) => { const index = collection.findIndex((entry) => entry.id === value.id); if (index >= 0) collection.splice(index, 1, value); else collection.push(value); };
@@ -139,6 +141,33 @@ test("malformed credential evidence identity remains a typed participant input e
   );
   assert.equal(m.state.commands.size, 0);
   assert.equal(m.state.credentials.length, 0);
+});
+
+test("enrichment persistence races are conflicts while operational failures propagate", async () => {
+  const fx = fixture();
+  const input = {
+    id: "credential-race",
+    kind: "license",
+    label: "Contractor license",
+    issuer: "Virginia DPOR",
+    sourceLabel: "Organization record",
+    evidenceAssetIds: [],
+    visibility: "network",
+  };
+  const conflict = memory(fx, {
+    persistenceError: new OrganizationEnrichmentPersistenceConflictError("Injected command collision."),
+  });
+  await assert.rejects(
+    conflict.service.upsertCredential(conflict.scope, input),
+    (error) => error instanceof OrganizationEnrichmentError && error.code === "conflict",
+  );
+
+  const outage = new Error("Injected organization-enrichment storage outage.");
+  const unavailable = memory(fx, { persistenceError: outage });
+  await assert.rejects(
+    unavailable.service.upsertCredential(unavailable.scope, input),
+    (error) => error === outage,
+  );
 });
 
 test("ORG-018 publishes only explicit non-sensitive metadata through controlled delivery", async () => {

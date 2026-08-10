@@ -157,6 +157,10 @@ test("transaction repositories type deterministic races without flattening persi
   const educationRepository = read("src/infrastructure/firestore/network-education.ts");
   const referralApplication = read("src/application/referrals/referral-create-and-send.ts");
   const referralRepository = read("src/infrastructure/firestore/referrals.ts");
+  const marketApplication = read("src/application/market-profile/market-profile.ts");
+  const marketRepository = read("src/infrastructure/firestore/market-profile.ts");
+  const enrichmentApplication = read("src/application/organization-enrichment/organization-enrichment.ts");
+  const enrichmentRepository = read("src/infrastructure/firestore/organization-enrichment.ts");
 
   assert.match(educationRepository, /NetworkEducationPersistenceConflictError/);
   assert.match(educationApplication, /error instanceof NetworkEducationPersistenceConflictError/);
@@ -164,4 +168,10 @@ test("transaction repositories type deterministic races without flattening persi
   assert.match(referralRepository, /ReferralPersistenceConflictError/);
   assert.match(referralApplication, /error instanceof ReferralPersistenceConflictError/);
   assert.match(referralApplication, /throw error/);
+  assert.match(marketRepository, /MarketProfilePersistenceConflictError/);
+  assert.match(marketApplication, /error instanceof MarketProfilePersistenceConflictError/);
+  assert.match(marketApplication, /throw error/);
+  assert.match(enrichmentRepository, /OrganizationEnrichmentPersistenceConflictError/);
+  assert.match(enrichmentApplication, /error instanceof OrganizationEnrichmentPersistenceConflictError/);
+  assert.match(enrichmentApplication, /throw error/);
 });

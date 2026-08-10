@@ -10,6 +10,13 @@ import type {
   OrganizationProvisionalTerm,
 } from "./model.ts";
 
+export class MarketProfilePersistenceConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "MarketProfilePersistenceConflictError";
+  }
+}
+
 export interface OrganizationCapabilityClaimRepository {
   getById(id: string): Promise<OrganizationCapabilityClaim | null>;
   listByOrganizationId(organizationId: OrganizationId): Promise<readonly OrganizationCapabilityClaim[]>;
