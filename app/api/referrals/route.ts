@@ -152,11 +152,11 @@ export async function POST(request: NextRequest) {
         scope,
         creationInput(body),
       );
-      const communication = referralInvitationDeliveryPermitted(result.referral, result.communication)
+      const delivery = referralInvitationDeliveryPermitted(result.referral, result.communication)
         ? await attemptReferralCommunication(result.communication)
-        : result.communication;
+        : null;
       return NextResponse.json(
-        { ...result, communication },
+        { ...result, communication: delivery?.communication ?? result.communication },
         { status: result.replayed ? 200 : 201 },
       );
     }
@@ -183,10 +183,13 @@ export async function POST(request: NextRequest) {
         : await new FirestoreReferralRepository(getServerFirestore()).getCommunication(
           String(result.referral.communicationMessageId ?? ""),
         );
-      const communication = referralInvitationDeliveryPermitted(result.referral, pendingCommunication)
+      const delivery = referralInvitationDeliveryPermitted(result.referral, pendingCommunication)
         ? await attemptReferralCommunication(pendingCommunication)
-        : pendingCommunication;
-      return NextResponse.json({ ...result, communication });
+        : null;
+      return NextResponse.json({
+        ...result,
+        communication: delivery?.communication ?? pendingCommunication,
+      });
     }
     if (action === "retry-communication") {
       const repository = new FirestoreReferralRepository(getServerFirestore());
@@ -208,7 +211,14 @@ export async function POST(request: NextRequest) {
           { status: 409 },
         );
       }
-      return NextResponse.json({ communication: await attemptReferralCommunication(intent) });
+      const delivery = await attemptReferralCommunication(intent);
+      if (delivery.blocked) {
+        return NextResponse.json(
+          { error: "This referral no longer permits invitation delivery." },
+          { status: 409 },
+        );
+      }
+      return NextResponse.json({ communication: delivery.communication });
     }
     if (["accepted", "declined", "redirected", "contacted", "closed", "expired"].includes(action)) {
       const result = await service.transition(scope, {
