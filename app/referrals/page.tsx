@@ -34,5 +34,6 @@ export default async function ReferralsPage({ searchParams }: ReferralPageProps)
         marker: Object.freeze({ id: organization.marker.id, coordinate: organization.marker.coordinate, accessibleLocationLabel: organization.marker.accessibleLocationLabel }),
       }))
     : [];
-  return <ReferralWorkspace model={mapProjection.model} homeMarker={mapProjection.homeMarker} initialReferrals={referrals} organizations={organizations} requestedReferralId={requestedReferralId} />;
+  const commandRecoveryScope = `${String(access.membership.organizationId)}:${String(access.membership.id)}`;
+  return <ReferralWorkspace model={mapProjection.model} homeMarker={mapProjection.homeMarker} initialReferrals={referrals} organizations={organizations} commandRecoveryScope={commandRecoveryScope} requestedReferralId={requestedReferralId} />;
 }
