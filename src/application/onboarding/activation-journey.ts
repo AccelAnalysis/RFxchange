@@ -44,6 +44,10 @@ import {
 import type { OrganizationProfileCompletionRepository } from "../../domain/organization-profile/repository.ts";
 import type { OrganizationResolutionRepository } from "../../domain/organization-resolution/repository.ts";
 import {
+  normalizeOrganizationIdentity,
+  type OrganizationIdentityInput,
+} from "../../domain/organization-resolution/model.ts";
+import {
   structuredPostalAddress,
   type ConfirmedOrganizationLocation,
   type OrganizationLocationDraft,
@@ -180,6 +184,28 @@ export class ActivationRequestValidationError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "ActivationRequestValidationError";
+  }
+}
+
+function validatedOrganizationIdentity(
+  input: OrganizationIdentityInput,
+): OrganizationIdentityInput {
+  try {
+    return normalizeOrganizationIdentity(input);
+  } catch (error) {
+    throw new ActivationRequestValidationError(
+      error instanceof Error ? error.message : "Organization identity is invalid.",
+    );
+  }
+}
+
+function validatedOrganizationIds(values: readonly string[]): readonly string[] {
+  try {
+    return Object.freeze(values.map((value) => String(organizationId(value))));
+  } catch (error) {
+    throw new ActivationRequestValidationError(
+      error instanceof Error ? error.message : "Organization identifier is invalid.",
+    );
   }
 }
 
@@ -397,26 +423,28 @@ export class ActivationJourneyService {
         "The canonical orientation position must be acknowledged before organization resolution.",
       );
     }
+    validatedOrganizationIdentity({ displayName: input.displayName });
     const seeded = await this.persistIdentitySeed(activation, input);
     const domain = domainFromWebsite(seeded.organizationIdentitySeed.websiteUrl);
+    const provisionalIdentity = validatedOrganizationIdentity({
+      displayName: input.displayName,
+      ...(domain ? { domain } : {}),
+      ...(seeded.organizationIdentitySeed.phone
+        ? { phone: seeded.organizationIdentitySeed.phone }
+        : {}),
+      ...(input.address
+        ? {
+            address: {
+              ...input.address,
+              countryCode: input.address.countryCode ?? "US",
+            },
+          }
+        : {}),
+    });
     return this.dependencies.resolution.search({
       context,
       accessJourneyId: activation.accessJourneyId,
-      provisionalIdentity: {
-        displayName: input.displayName,
-        ...(domain ? { domain } : {}),
-        ...(seeded.organizationIdentitySeed.phone
-          ? { phone: seeded.organizationIdentitySeed.phone }
-          : {}),
-        ...(input.address
-          ? {
-              address: {
-                ...input.address,
-                countryCode: input.address.countryCode ?? "US",
-              },
-            }
-          : {}),
-      },
+      provisionalIdentity,
     });
   }
 
@@ -437,6 +465,10 @@ export class ActivationJourneyService {
         "The canonical orientation position must be acknowledged before organization resolution.",
       );
     }
+    const reviewedCandidateOrganizationIds = validatedOrganizationIds(
+      input.reviewedCandidateOrganizationIds ?? [],
+    );
+    validatedOrganizationIdentity({ displayName: input.displayName });
     if (
       input.website !== undefined ||
       input.websiteNotApplicable !== undefined ||
@@ -445,17 +477,18 @@ export class ActivationJourneyService {
       activation = await this.persistIdentitySeed(activation, input);
     }
     const domain = domainFromWebsite(activation.organizationIdentitySeed.websiteUrl);
+    const provisionalIdentity = validatedOrganizationIdentity({
+      displayName: input.displayName,
+      ...(domain ? { domain } : {}),
+      ...(activation.organizationIdentitySeed.phone
+        ? { phone: activation.organizationIdentitySeed.phone }
+        : {}),
+    });
     const result = await this.dependencies.resolution.createNew({
       context,
       accessJourneyId: activation.accessJourneyId,
-      provisionalIdentity: {
-        displayName: input.displayName,
-        ...(domain ? { domain } : {}),
-        ...(activation.organizationIdentitySeed.phone
-          ? { phone: activation.organizationIdentitySeed.phone }
-          : {}),
-      },
-      reviewedCandidateOrganizationIds: input.reviewedCandidateOrganizationIds ?? [],
+      provisionalIdentity,
+      reviewedCandidateOrganizationIds,
       decisionReason: "Participant confirmed that none of the reviewed matches is this organization.",
     });
     const authority = await this.dependencies.participantCreatedAuthority.establish({
@@ -488,11 +521,15 @@ export class ActivationJourneyService {
         "The canonical orientation position must be acknowledged before organization resolution.",
       );
     }
+    const provisionalIdentity = validatedOrganizationIdentity({
+      displayName: input.displayName,
+    });
+    const selectedOrganizationId = validatedOrganizationIds([input.organizationId])[0];
     const result = await this.dependencies.resolution.selectExisting({
       context,
       accessJourneyId: activation.accessJourneyId,
-      provisionalIdentity: { displayName: input.displayName },
-      organizationId: input.organizationId,
+      provisionalIdentity,
+      organizationId: selectedOrganizationId,
       decisionReason: "Participant selected this current match as their organization.",
     });
     const selection = await this.dependencies.selections.getByUserId(context.user.id);

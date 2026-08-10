@@ -459,3 +459,35 @@ test("activation location address validation retains typed request semantics", a
       error.code === "request-invalid",
   );
 });
+
+test("activation organization identity and identifier validation retain typed request semantics", async () => {
+  const current = fixture({
+    websiteDisposition: "available",
+    websiteUrl: "https://example.org/",
+    phone: "+1 757 555 0100",
+  });
+
+  await assert.rejects(
+    () => current.service.searchOrganizations(current.context, {
+      displayName: "   ",
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+  await assert.rejects(
+    () => current.service.createOrganization(current.context, {
+      displayName: "Harborlight Fabrication",
+      reviewedCandidateOrganizationIds: ["   "],
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+  await assert.rejects(
+    () => current.service.selectExistingOrganization(current.context, {
+      displayName: "Harborlight Fabrication",
+      organizationId: "   ",
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+});

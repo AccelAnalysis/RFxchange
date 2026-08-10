@@ -31,7 +31,7 @@ test("website carry-forward executes through the activation service", () => {
     0,
     [result.stdout, result.stderr].filter(Boolean).join("\n"),
   );
-  assert.match(result.stdout, /tests 9/);
-  assert.match(result.stdout, /pass 9/);
+  assert.match(result.stdout, /tests 10/);
+  assert.match(result.stdout, /pass 10/);
   assert.match(result.stdout, /fail 0/);
 });
