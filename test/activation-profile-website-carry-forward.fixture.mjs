@@ -169,6 +169,11 @@ function fixture(seed) {
           : null;
       },
     },
+    resolution: {
+      async selectExisting() {
+        throw new Error("Organization resolution must not run for invalid request input.");
+      },
+    },
     locations: {
       async getByOrganizationId(value) {
         return value === organization.id ? location : null;
@@ -454,6 +459,47 @@ test("activation location address validation retains typed request semantics", a
       postalCode: "23@704",
       isHomeOrPrivate: false,
       visibility: "approximate",
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+});
+
+test("activation organization identity and identifier validation retain typed request semantics", async () => {
+  const current = fixture({
+    websiteDisposition: "available",
+    websiteUrl: "https://example.org/",
+    phone: "+1 757 555 0100",
+  });
+
+  await assert.rejects(
+    () => current.service.searchOrganizations(current.context, {
+      displayName: "   ",
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+  await assert.rejects(
+    () => current.service.createOrganization(current.context, {
+      displayName: "Harborlight Fabrication",
+      reviewedCandidateOrganizationIds: ["   "],
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+  await assert.rejects(
+    () => current.service.selectExistingOrganization(current.context, {
+      displayName: "Harborlight Fabrication",
+      organizationId: "   ",
+    }),
+    (error) => error instanceof ActivationRequestValidationError &&
+      error.code === "request-invalid",
+  );
+  await assert.rejects(
+    () => current.service.selectExistingOrganization(current.context, {
+      displayName: "Harborlight Fabrication",
+      organizationId: "organization-existing",
+      domainEmailReference: `${"a".repeat(501)}@example.org`,
     }),
     (error) => error instanceof ActivationRequestValidationError &&
       error.code === "request-invalid",
