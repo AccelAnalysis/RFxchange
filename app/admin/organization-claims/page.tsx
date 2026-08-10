@@ -3,10 +3,12 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { geographyId as parseGeographyId } from "@/src/domain/geography/model";
+import { visibleImplementedAdminRuntimeDestinations } from "@/src/application/admin/portal-navigation";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
 import { resolveAdminRoute } from "@/src/infrastructure/auth/admin-route-runtime";
 import { getServerFirestore, createServerFirestoreFoundationRepositories } from "@/src/infrastructure/firestore/runtime";
 import { createFirestoreOrganizationAuthorityClaims } from "@/src/infrastructure/firestore/organization-authority-claims";
+import { getRequestDictionary } from "@/src/i18n/server";
 
 import styles from "./page.module.css";
 
@@ -92,14 +94,39 @@ export default async function OrganizationClaimsAdminPage({
   const canAdjudicate = access.authority.effectivePermissions.some(
     (permission) => permission === "organization.claim.adjudicate",
   );
+  const destinations = visibleImplementedAdminRuntimeDestinations(
+    access.authority,
+    access.grants,
+    new Date().toISOString(),
+  );
+  const { dictionary } = await getRequestDictionary();
+  const navigationCopy = dictionary.participantNavigation;
 
   return (
     <main className={styles.page}>
       <aside className={styles.sidebar}>
         <Link href="/" className={styles.wordmark}><span>RF</span>xchange<sup>™</sup></Link>
-        <nav aria-label="Administrative navigation">
-          <span className={styles.active}>Organization claims</span>
-          <Link href="/organization-profile">Participant account</Link>
+        <nav aria-label={navigationCopy.adminAriaLabel}>
+          {destinations.map((destination) => (
+            <Link
+              key={destination.navigationId}
+              href={destination.href}
+              className={
+                destination.key === "organization-claims" && destination.scope.value === access.scope.value
+                  ? styles.active
+                  : undefined
+              }
+              aria-current={
+                destination.key === "organization-claims" && destination.scope.value === access.scope.value
+                  ? "page"
+                  : undefined
+              }
+            >
+              <span>{navigationCopy[destination.labelKey]}</span>
+              {destination.scope.kind === "GLOBAL" ? null : <small>{String(destination.scope.targetId)}</small>}
+            </Link>
+          ))}
+          <Link href="/organization-profile">{navigationCopy.participantAccount}</Link>
         </nav>
         <div className={styles.scope}>
           <span>Current scope</span>

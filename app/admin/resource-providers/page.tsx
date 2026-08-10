@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
+import { visibleImplementedAdminRuntimeDestinations } from "@/src/application/admin/portal-navigation";
 import { AdminPortalShell } from "@/src/components/admin/AdminPortalShell";
 import { ProviderReviewConsole } from "@/src/components/resource-providers/ProviderReviewConsole";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
@@ -22,5 +23,6 @@ export default async function ResourceProvidersAdminPage({ searchParams }: Reado
   const applications = requestedOrganizationId && access.scope.kind !== "GLOBAL" ? [Object.freeze({ id: String(detail?.application.id ?? requestedOrganizationId), organizationId: requestedOrganizationId, status: detail?.application.status ?? "unknown", version: detail?.application.version ?? 0, categories: detail?.application.content.categories ?? [], submittedAt: detail?.application.submittedAt ?? null, updatedAt: detail?.application.updatedAt ?? "" })] : await service.adminQueue(adminScope);
   const reviewAccess = requestedOrganizationId ? await resolveAdminRoute({ sessionCookie, permission: "provider.application.review", scope: `ORGANIZATION:${requestedOrganizationId}`, access: "write" }) : null;
   const canReview = reviewAccess?.kind === "authorized";
-  return <AdminPortalShell authority={access.authority} currentPath="/admin/resource-providers"><ProviderReviewConsole applications={applications} detail={detail} canReview={canReview} /></AdminPortalShell>;
+  const destinations = visibleImplementedAdminRuntimeDestinations(access.authority, access.grants, new Date().toISOString());
+  return <AdminPortalShell destinations={destinations} currentDestination="resource-providers" currentScope={access.scope.value}><ProviderReviewConsole applications={applications} detail={detail} canReview={canReview} /></AdminPortalShell>;
 }

@@ -24,7 +24,8 @@ const primaryNavigation = [
 
 function NavigationItems({
   activeItem,
-}: Readonly<{ activeItem?: ParticipantNavigationItem }>) {
+  administrationHref,
+}: Readonly<{ activeItem?: ParticipantNavigationItem; administrationHref?: string }>) {
   const { t } = useI18n();
   return (
     <>
@@ -43,20 +44,26 @@ function NavigationItems({
       >
         {t("participantNavigation.account")}
       </Link>
+      {administrationHref ? (
+        <Link href={administrationHref}>
+          {t("participantNavigation.administration")}
+        </Link>
+      ) : null}
     </>
   );
 }
 
 export function ParticipantTopNavigation({
   activeItem,
-}: Readonly<{ activeItem?: ParticipantNavigationItem }>) {
+  administrationHref,
+}: Readonly<{ activeItem?: ParticipantNavigationItem; administrationHref?: string }>) {
   const { t } = useI18n();
   return (
     <NavigationFrame
       className={b2Styles.navigation}
       brand={<BrandWordmark compact />}
-      desktopNavigation={<NavigationItems activeItem={activeItem} />}
-      mobileNavigation={<NavigationItems activeItem={activeItem} />}
+      desktopNavigation={<NavigationItems activeItem={activeItem} administrationHref={administrationHref} />}
+      mobileNavigation={<NavigationItems activeItem={activeItem} administrationHref={administrationHref} />}
       mobileLabel={t("participantNavigation.menu")}
       navigationLabel={t("participantNavigation.ariaLabel")}
     />

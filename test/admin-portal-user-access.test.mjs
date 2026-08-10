@@ -3,9 +3,12 @@ import assert from "node:assert/strict";
 
 import {
   ADMIN_PORTAL_SECTION_KEYS,
+  IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS,
   assertAdminPortalSectionAccess,
   visibleAdminPortalSections,
+  visibleImplementedAdminRuntimeDestinations,
 } from "../src/application/admin/portal-navigation.ts";
+import { createAdminPermissionGrant } from "../src/domain/admin-authorization/grants.ts";
 import { buildUserAccess360 } from "../src/application/admin/user-access-360.ts";
 import {
   assertAdministrativeMembershipDeactivationSafe,
@@ -30,6 +33,17 @@ const operations = resolveAuthorityContextFromAdminRolePreset("admin-ops", defau
 const support = resolveAuthorityContextFromAdminRolePreset("admin-support", defaultAdminRolePreset("member-success-support-administrator"));
 const technical = resolveAuthorityContextFromAdminRolePreset("admin-tech", defaultAdminRolePreset("technical-system-administrator"));
 const now = "2026-07-30T16:00:00.000Z";
+
+function grant(authority, permission, scope, id, expiresAt) {
+  return createAdminPermissionGrant({
+    id,
+    administratorId: authority.administratorId,
+    permission,
+    scope,
+    createdAt: "2026-07-30T15:00:00.000Z",
+    ...(expiresAt ? { expiresAt } : {}),
+  });
+}
 
 function fixture() {
   const user = createUserIdentity({
@@ -65,6 +79,98 @@ test("navigation hides unauthorized domains and server guard blocks them", () =>
   assert.equal(visible.includes("rfx-opportunities"), false);
   assert.throws(() => assertAdminPortalSectionAccess(technical, "commerce"), /access denied/);
   assert.equal(assertAdminPortalSectionAccess(technical, "integrations-system").key, "integrations-system");
+});
+
+test("implemented runtime registry exposes only live destinations with current exact grants", () => {
+  assert.deepEqual(IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS, [
+    "organization-claims",
+    "resource-providers",
+  ]);
+
+  const destinations = visibleImplementedAdminRuntimeDestinations(
+    root,
+    [
+      grant(root, "organization.claim.read", "GLOBAL", "grant-claims"),
+      grant(root, "provider.application.read", "GLOBAL", "grant-providers"),
+    ],
+    now,
+  );
+  assert.deepEqual(destinations.map((destination) => destination.key), IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS);
+  assert.deepEqual(destinations.map((destination) => destination.href), [
+    "/admin/organization-claims",
+    "/admin/resource-providers",
+  ]);
+  assert.equal(destinations.some((destination) => destination.href === "/admin/overview"), false);
+});
+
+test("implemented runtime navigation preserves bounded grant scope and filters future or dead sections", () => {
+  const destinations = visibleImplementedAdminRuntimeDestinations(
+    operations,
+    [
+      grant(operations, "provider.application.read", "ORGANIZATION:org-a", "grant-provider-org"),
+      grant(operations, "organization.claim.read", "ORGANIZATION:org-a", "grant-unsupported-claim-scope"),
+      grant(
+        operations,
+        "organization.claim.read",
+        "GLOBAL",
+        "grant-expired-claims",
+        "2026-07-30T15:30:00.000Z",
+      ),
+    ],
+    now,
+  );
+
+  assert.deepEqual(destinations.map((destination) => destination.key), ["resource-providers"]);
+  assert.equal(destinations[0].href, "/admin/resource-providers?organizationId=org-a");
+  assert.equal(destinations[0].scope.value, "ORGANIZATION:org-a");
+});
+
+test("implemented runtime navigation preserves every distinct authorized bounded scope", () => {
+  const destinations = visibleImplementedAdminRuntimeDestinations(
+    operations,
+    [
+      grant(operations, "provider.application.read", "ORGANIZATION:org-b", "grant-provider-org-b"),
+      grant(operations, "provider.application.read", "ORGANIZATION:org-a", "grant-provider-org-a"),
+      grant(operations, "provider.application.read", "ORGANIZATION:org-a", "grant-provider-org-a-duplicate"),
+    ],
+    now,
+  );
+
+  assert.deepEqual(destinations.map((destination) => destination.navigationId), [
+    "resource-providers:ORGANIZATION:org-a",
+    "resource-providers:ORGANIZATION:org-b",
+  ]);
+  assert.deepEqual(destinations.map((destination) => destination.href), [
+    "/admin/resource-providers?organizationId=org-a",
+    "/admin/resource-providers?organizationId=org-b",
+  ]);
+});
+
+test("permission visibility without an active implemented-runtime grant grants no portal destination", () => {
+  assert.deepEqual(visibleImplementedAdminRuntimeDestinations(root, [], now), []);
+  assert.deepEqual(
+    visibleImplementedAdminRuntimeDestinations(
+      technical,
+      [grant(technical, "system.health.read", "GLOBAL", "grant-system-health")],
+      now,
+    ),
+    [],
+  );
+  assert.deepEqual(
+    visibleImplementedAdminRuntimeDestinations(
+      root,
+      [createAdminPermissionGrant({
+        id: "grant-conditioned-claims",
+        administratorId: root.administratorId,
+        permission: "organization.claim.read",
+        scope: "GLOBAL",
+        conditionKeys: ["case-assignment"],
+        createdAt: "2026-07-30T15:00:00.000Z",
+      })],
+      now,
+    ),
+    [],
+  );
 });
 
 test("operating admin presets receive user access repair while analyst remains read-only", () => {

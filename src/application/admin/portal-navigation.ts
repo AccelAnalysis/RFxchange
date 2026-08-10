@@ -1,5 +1,11 @@
 import type { AdminPermissionKey, PlatformAdministratorAuthorityContext } from "../../domain/admin-authorization/model.ts";
 import { requireCataloguedAdminPermission } from "../../domain/admin-authorization/model.ts";
+import {
+  authorizeScopedAdministrativeAction,
+  createScopedAdministrativeActionRequirement,
+  type AdminGrantScope,
+  type AdminPermissionGrant,
+} from "../../domain/admin-authorization/grants.ts";
 
 export const ADMIN_PORTAL_SECTION_KEYS = [
   "overview",
@@ -87,4 +93,118 @@ export function assertAdminPortalSectionAccess(
     throw new Error(`Administrative portal section access denied: ${sectionKey}.`);
   }
   return section;
+}
+
+export const IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS = [
+  "organization-claims",
+  "resource-providers",
+] as const;
+
+export type ImplementedAdminRuntimeDestinationKey =
+  (typeof IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS)[number];
+
+interface ImplementedAdminRuntimeRegistration {
+  readonly key: ImplementedAdminRuntimeDestinationKey;
+  readonly labelKey: "organizationClaims" | "resourceProviders";
+  readonly description: string;
+  readonly permission: AdminPermissionKey;
+  readonly supportedScopeKinds: readonly AdminGrantScope["kind"][];
+  readonly href: (scope: AdminGrantScope) => `/admin/${string}`;
+}
+
+export interface ImplementedAdminRuntimeDestination {
+  readonly navigationId: string;
+  readonly key: ImplementedAdminRuntimeDestinationKey;
+  readonly labelKey: ImplementedAdminRuntimeRegistration["labelKey"];
+  readonly description: string;
+  readonly permission: AdminPermissionKey;
+  readonly scope: AdminGrantScope;
+  readonly grantId: string;
+  readonly href: `/admin/${string}`;
+}
+
+/**
+ * Server-owned registry of protected administrative routes that have truthful production runtimes.
+ * Specification-only portal sections intentionally remain outside this registry.
+ */
+const IMPLEMENTED_ADMIN_RUNTIME_REGISTRY: readonly ImplementedAdminRuntimeRegistration[] =
+  Object.freeze([
+    Object.freeze({
+      key: "organization-claims",
+      labelKey: "organizationClaims",
+      description: "Review live organization authority claims within the active grant scope.",
+      permission: requireCataloguedAdminPermission("organization.claim.read"),
+      supportedScopeKinds: Object.freeze(["GLOBAL", "GEOGRAPHY"] as const),
+      href: (scope: AdminGrantScope): `/admin/${string}` => scope.kind === "GEOGRAPHY"
+        ? `/admin/organization-claims?geographyId=${encodeURIComponent(String(scope.targetId))}`
+        : "/admin/organization-claims",
+    }),
+    Object.freeze({
+      key: "resource-providers",
+      labelKey: "resourceProviders",
+      description: "Review live Official Resource Provider applications within the active grant scope.",
+      permission: requireCataloguedAdminPermission("provider.application.read"),
+      supportedScopeKinds: Object.freeze(["GLOBAL", "ORGANIZATION"] as const),
+      href: (scope: AdminGrantScope): `/admin/${string}` => scope.kind === "ORGANIZATION"
+        ? `/admin/resource-providers?organizationId=${encodeURIComponent(String(scope.targetId))}`
+        : "/admin/resource-providers",
+    }),
+  ]);
+
+function scopePriority(scope: AdminGrantScope): number {
+  return scope.kind === "GLOBAL" ? 0 : 1;
+}
+
+/**
+ * Produces only destinations that are both implemented and authorized by a current exact grant.
+ * The returned href preserves a bounded grant scope instead of widening it to GLOBAL.
+ */
+export function visibleImplementedAdminRuntimeDestinations(
+  context: PlatformAdministratorAuthorityContext,
+  grants: readonly AdminPermissionGrant[],
+  now: string,
+): readonly ImplementedAdminRuntimeDestination[] {
+  return Object.freeze(
+    IMPLEMENTED_ADMIN_RUNTIME_REGISTRY.flatMap((registration) => {
+      const candidateScopes = [...new Map(grants
+        .filter((grant) =>
+          grant.administratorId === context.administratorId &&
+          grant.permission === registration.permission &&
+          registration.supportedScopeKinds.includes(grant.scope.kind),
+        )
+        .map((grant) => [grant.scope.value, grant.scope] as const),
+      ).values()]
+        .sort((left, right) =>
+          scopePriority(left) - scopePriority(right) || left.value.localeCompare(right.value),
+        );
+
+      return candidateScopes.flatMap((scope) => {
+        const decision = authorizeScopedAdministrativeAction(
+          context,
+          grants,
+          createScopedAdministrativeActionRequirement({
+            permission: registration.permission,
+            access: "read",
+            scope: scope.value,
+          }),
+          // The landing routes do not accept action-specific condition evidence. A conditioned
+          // grant therefore remains hidden until the destination can resolve that evidence too.
+          { now, satisfiedConditionKeys: Object.freeze([]) },
+        );
+        if (decision.kind === "allow") {
+          return [Object.freeze({
+            navigationId: `${registration.key}:${scope.value}`,
+            key: registration.key,
+            labelKey: registration.labelKey,
+            description: registration.description,
+            permission: registration.permission,
+            scope,
+            grantId: String(decision.grantId),
+            href: registration.href(scope),
+          })];
+        }
+        return [];
+      });
+    }),
+  );
 }
