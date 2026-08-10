@@ -302,6 +302,8 @@ export class MarketProfileService {
       this.dependencies.repository.getIndustryProfile(authorization.organization.id),
     ]);
     if ((existingProfile?.revision ?? 0) !== input.expectedIndustryRevision) {
+      const concurrentPrior = await this.replay(scope, "industry-context-updated", requestFingerprint);
+      if (concurrentPrior) return Object.freeze({ replayed: true as const, receipt: concurrentPrior });
       throw new MarketProfileError("conflict", "Industry context changed. Refresh before saving again.");
     }
     const naics = await Promise.all(input.naics.map(async (selection) => {

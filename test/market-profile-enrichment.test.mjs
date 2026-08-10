@@ -96,7 +96,7 @@ function fixture(rolePreset = "primary-administrator", options = {}) {
   });
   const scope = { context, organizationId: organization.id, membershipId: membership.id, commandId: "command-1" };
   const claimInput = { capabilityId: CAPABILITY.conceptId, entityScope: "reporting_entity", marketRoleIds: [MARKET_ROLE.market_role_id], deliveryRoles: ["prime"], serviceGeographyIds: ["us-va-portsmouth"], specialties: ["Public facilities"], capacity: { value: 4, unitId: "delivery-crew", period: "month", note: "Participant-reported planning capacity" }, visibility: "network", source: { kind: "manual" } };
-  return { organization, user, membership, state, service, scope, claimInput };
+  return { organization, user, membership, state, repository, service, scope, claimInput };
 }
 
 test("manual AMACS selection creates a self-reported organization claim and idempotent evidence", async () => {
@@ -196,6 +196,42 @@ test("industry command replay remains idempotent after the profile revision adva
   assert.equal(f.state.industry.revision, 1);
   assert.equal(f.state.commands.size, 1);
   assert.equal(f.state.events.length, 1);
+});
+
+test("an in-flight identical industry retry rechecks its receipt after observing the committed revision", async () => {
+  const f = fixture();
+  const commandId = "command-overlapping-industry-retry";
+  const input = {
+    industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }],
+    naics: [{ code: "236220", version: "2022", visibility: "network" }],
+    preserveExistingNaics: false,
+    expectedIndustryRevision: 0,
+  };
+  const receipt = Object.freeze({
+    id: commandId,
+    organizationId: f.organization.id,
+    action: "industry-context-updated",
+    resultId: f.organization.id,
+    requestFingerprint: createHash("sha256").update(JSON.stringify(input)).digest("hex"),
+    actorUserId: f.user.id,
+    recordedAt: NOW,
+  });
+  let commandReads = 0;
+  f.repository.getCommand = async () => {
+    commandReads += 1;
+    return commandReads === 1 ? null : receipt;
+  };
+  f.state.industry = Object.freeze({ revision: 1 });
+
+  const replay = await f.service.updateIndustry(
+    { ...f.scope, commandId },
+    input,
+  );
+
+  assert.equal(replay.replayed, true);
+  assert.equal(replay.receipt, receipt);
+  assert.equal(commandReads, 2);
+  assert.equal(f.state.events.length, 0);
 });
 
 test("an exact pre-revision industry receipt replays before migrated request validation", async () => {
