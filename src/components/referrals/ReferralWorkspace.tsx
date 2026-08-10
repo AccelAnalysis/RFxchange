@@ -245,7 +245,7 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
               <p className={styles.boundary}>{t("referralWorkspace.detail.boundary")}</p>
               {hasPath ? <p className={styles.pathText}>{t("referralWorkspace.path.visible", { status: readable(selected.status) })}</p> : <p className={styles.pathText}>{t("referralWorkspace.path.unavailable")}</p>}
               {nextActions(selected).length ? <WorkflowExplainer explainerKey="referral-response" /> : null}
-              <div className={styles.actions}>{nextActions(selected).map((action) => <button key={action} type="button" disabled={busy} onClick={() => transition(action)}>{t(`referralWorkspace.actions.${action}`)}</button>)}{selected.role === "sender" && selected.status === "sent" && selected.notificationStatus === "retryable-failure" ? <button type="button" disabled={busy} onClick={retryCommunication}>{t("referralWorkspace.actions.retry")}</button> : null}</div>
+              <div className={styles.actions}>{nextActions(selected).map((action) => <button key={action} type="button" disabled={busy} onClick={() => transition(action)}>{t(`referralWorkspace.actions.${action}`)}</button>)}{selected.role === "sender" && selected.status === "sent" && selected.notificationStatus === "retryable-failure" && !(selected.recipientKind === "external" && selected.recipientOrganizationId !== null) ? <button type="button" disabled={busy} onClick={retryCommunication}>{t("referralWorkspace.actions.retry")}</button> : null}</div>
             </article>
           ) : null}
         </aside>
