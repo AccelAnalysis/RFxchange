@@ -7,6 +7,7 @@ import {
   ReferralCreateAndSendService,
   type ReferralCreateAndSendDependencies,
 } from "../../application/referrals/referral-create-and-send.ts";
+import { referralInvitationDeliveryPermitted } from "../../application/referrals/referral-invitation-delivery.ts";
 import {
   ReferralNetworkService,
   type ReferralAcquisitionIssuer,
@@ -113,14 +114,35 @@ function microsoftConfigured(): boolean {
   ].every((value) => Boolean(value?.trim()));
 }
 
+export interface ReferralCommunicationAttemptResult {
+  readonly communication: ReferralCommunicationIntent;
+  readonly blocked: boolean;
+  readonly attempted: boolean;
+}
+
+/**
+ * The route may perform an early presentation/response check, but this function is the delivery
+ * authority boundary. It reloads both the durable intent and its current referral immediately
+ * before provider delivery so a stale route snapshot cannot authorize an invitation after the
+ * lifecycle advances or an external acquisition invitation is consumed.
+ */
 export async function attemptReferralCommunication(
   intent: ReferralCommunicationIntent,
   db: Firestore = getServerFirestore(),
-): Promise<ReferralCommunicationIntent> {
+): Promise<ReferralCommunicationAttemptResult> {
   const repository = new FirestoreReferralRepository(db);
   const current = await repository.getCommunication(intent.id);
   if (!current) throw new Error("Referral communication intent is unavailable.");
-  if (current.status === "accepted" || !microsoftConfigured()) return current;
+  const referral = await repository.getById(current.referralId);
+  if (!referral || referral.communicationMessageId !== current.id) {
+    throw new Error("Referral communication authority is unavailable.");
+  }
+  if (!referralInvitationDeliveryPermitted(referral, current)) {
+    return Object.freeze({ communication: current, blocked: true, attempted: false });
+  }
+  if (!microsoftConfigured()) {
+    return Object.freeze({ communication: current, blocked: false, attempted: false });
+  }
   try {
     const service = new TransactionalEmailService(new MicrosoftGraphTransactionalEmailProvider(
       microsoftGraphTransactionalEmailConfigurationFromEnvironment(),
@@ -137,9 +159,15 @@ export async function attemptReferralCommunication(
       relatedObjectType: current.request.metadata.relatedObjectType, relatedObjectId: current.request.metadata.relatedObjectId,
       tags: current.request.metadata.tags,
     });
-    return repository.recordCommunicationResult({ intent: current, receipt });
+    const communication = await repository.recordCommunicationResult({ intent: current, receipt });
+    return Object.freeze({ communication, blocked: false, attempted: true });
   } catch (error) {
     const providerError = error instanceof TransactionalEmailProviderError ? error : null;
-    return repository.recordCommunicationResult({ intent: current, errorCode: providerError?.code ?? "transactional-email-provider-unhandled", retryable: providerError?.retryable ?? true });
+    const communication = await repository.recordCommunicationResult({
+      intent: current,
+      errorCode: providerError?.code ?? "transactional-email-provider-unhandled",
+      retryable: providerError?.retryable ?? true,
+    });
+    return Object.freeze({ communication, blocked: false, attempted: true });
   }
 }
