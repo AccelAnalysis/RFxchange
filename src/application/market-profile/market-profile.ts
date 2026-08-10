@@ -325,9 +325,27 @@ export class MarketProfileService {
       throw new MarketProfileError("invalid", "Select each governed NAICS industry only once.");
     }
     const selectedIdentities = new Set(naics.map((industry) => `${industry.version}:${industry.code}`));
-    const preservedNaics = existingProfile?.naics.filter(
-      (industry) => !selectedIdentities.has(`${industry.version}:${industry.code}`),
-    ) ?? [];
+    const canonicalProvenance = `Participant selected from ${release.sourceName} ${release.version} NAICS`;
+    const preservedNaics = input.preserveExistingNaics && existingProfile
+      ? (await Promise.all(existingProfile.naics.map(async (descriptor) => {
+          const governed = await this.dependencies.naicsCatalog.getIndustry(
+            descriptor.code,
+            descriptor.version,
+          );
+          const isCanonicalGovernedDescriptor = Boolean(
+            governed &&
+            descriptor.id === `naics-${governed.code}` &&
+            descriptor.title === governed.title &&
+            descriptor.version === release.version &&
+            descriptor.source === "participant_selected" &&
+            descriptor.provenance === canonicalProvenance
+          );
+          return !isCanonicalGovernedDescriptor &&
+            !selectedIdentities.has(`${descriptor.version}:${descriptor.code}`)
+            ? descriptor
+            : null;
+        }))).filter((descriptor) => descriptor !== null)
+      : [];
     if (preservedNaics.length + naics.length > 30) {
       throw new MarketProfileError("invalid", "Industry context exceeds supported limits.");
     }

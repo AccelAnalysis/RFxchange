@@ -67,6 +67,7 @@ assert.match(marketService, /naicsCatalog\.getIndustry/);
 assert.match(marketService, /Participant selected from \$\{release\.sourceName\}/);
 assert.match(marketService, /repository\.getIndustryProfile/);
 assert.match(marketService, /preserveExistingNaics/);
+assert.match(marketService, /isCanonicalGovernedDescriptor/);
 assert.match(marketRuntime, /loadImmutableNaicsCatalog/);
 assert.match(marketPanel, /marketProfile\.catalog\.resultCount/);
 assert.match(marketPanel, /setCapabilityResultLimit/);

@@ -161,8 +161,17 @@ test("industry, past performance, preferences, and provisional terms preserve th
   assert.equal(f.state.terms[0].status, "submitted");
 });
 
-test("industry updates preserve stored legacy NAICS until an explicit replacement", async () => {
+test("industry updates independently preserve history and replace the governed NAICS selection", async () => {
   const f = fixture();
+  const current = Object.freeze({
+    id: "naics-236220",
+    code: "236220",
+    title: NAICS_INDUSTRY.title,
+    version: "2022",
+    source: "participant_selected",
+    provenance: "Participant selected from U.S. Census Bureau 2022 NAICS",
+    visibility: "network",
+  });
   const legacy = Object.freeze({
     id: "naics-import-23622",
     code: "23622",
@@ -176,7 +185,7 @@ test("industry updates preserve stored legacy NAICS until an explicit replacemen
     id: f.organization.id,
     organizationId: f.organization.id,
     industries: Object.freeze([]),
-    naics: Object.freeze([legacy]),
+    naics: Object.freeze([current, legacy]),
     updatedByUserId: f.user.id,
     updatedByMembershipId: f.membership.id,
     updatedAt: NOW,
@@ -193,16 +202,26 @@ test("industry updates preserve stored legacy NAICS until an explicit replacemen
   assert.deepEqual(f.state.industry.naics, [legacy]);
 
   await f.service.updateIndustry(
-    { ...f.scope, commandId: "command-replace-legacy-naics" },
+    { ...f.scope, commandId: "command-replace-governed-naics" },
+    {
+      industries: [{ id: "industry-renovation", label: "Renovation", visibility: "network" }],
+      naics: [{ code: "236220", version: "2022", visibility: "network" }],
+      preserveExistingNaics: true,
+    },
+  );
+  assert.deepEqual(f.state.industry.naics.map((descriptor) => descriptor.code), ["23622", "236220"]);
+  assert.equal(f.state.industry.naics[0].source, "authorized_import");
+  assert.equal(f.state.industry.naics[1].source, "participant_selected");
+
+  await f.service.updateIndustry(
+    { ...f.scope, commandId: "command-remove-legacy-naics" },
     {
       industries: [{ id: "industry-renovation", label: "Renovation", visibility: "network" }],
       naics: [{ code: "236220", version: "2022", visibility: "network" }],
       preserveExistingNaics: false,
     },
   );
-  assert.equal(f.state.industry.naics.length, 1);
-  assert.equal(f.state.industry.naics[0].code, "236220");
-  assert.equal(f.state.industry.naics[0].source, "participant_selected");
+  assert.deepEqual(f.state.industry.naics.map((descriptor) => descriptor.code), ["236220"]);
 });
 
 test("industry updates reject invented or stale NAICS identities before persistence", async () => {
