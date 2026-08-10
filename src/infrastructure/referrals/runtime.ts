@@ -7,7 +7,7 @@ import {
   ReferralCreateAndSendService,
   type ReferralCreateAndSendDependencies,
 } from "../../application/referrals/referral-create-and-send.ts";
-import { referralInvitationDeliveryPermitted } from "../../application/referrals/referral-invitation-delivery.ts";
+import { resolveReferralCommunicationDeliveryAuthority } from "../../application/referrals/referral-communication-delivery.ts";
 import {
   ReferralNetworkService,
   type ReferralAcquisitionIssuer,
@@ -131,13 +131,12 @@ export async function attemptReferralCommunication(
   db: Firestore = getServerFirestore(),
 ): Promise<ReferralCommunicationAttemptResult> {
   const repository = new FirestoreReferralRepository(db);
-  const current = await repository.getCommunication(intent.id);
-  if (!current) throw new Error("Referral communication intent is unavailable.");
-  const referral = await repository.getById(current.referralId);
-  if (!referral || referral.communicationMessageId !== current.id) {
-    throw new Error("Referral communication authority is unavailable.");
-  }
-  if (!referralInvitationDeliveryPermitted(referral, current)) {
+  const authority = await resolveReferralCommunicationDeliveryAuthority(intent, {
+    getCommunication: (id) => repository.getCommunication(id),
+    getReferral: (id) => repository.getById(id),
+  });
+  const current = authority.communication;
+  if (!authority.permitted) {
     return Object.freeze({ communication: current, blocked: true, attempted: false });
   }
   if (!microsoftConfigured()) {
