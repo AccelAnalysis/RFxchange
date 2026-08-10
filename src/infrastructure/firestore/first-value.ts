@@ -1,6 +1,9 @@
 import { Timestamp, type Firestore } from "firebase-admin/firestore";
 
-import type { FirstValueSelection } from "../../domain/first-value/model.ts";
+import {
+  FirstValueStateError,
+  type FirstValueSelection,
+} from "../../domain/first-value/model.ts";
 import type { FirstValueSelectionRepository } from "../../domain/first-value/repository.ts";
 import type { AccessLifecycleRecord } from "../../domain/lifecycle/model.ts";
 import { FIRESTORE_SCHEMA_VERSION } from "./schema.ts";
@@ -62,17 +65,32 @@ export class FirestoreFirstValueSelectionRepository implements FirstValueSelecti
         transaction.get(selectionRef),
         transaction.get(eventRef),
       ]);
-      if (event.exists) throw new Error("Activation release event identity already exists.");
+      if (event.exists) {
+        throw new FirstValueStateError("conflict", "Activation release event identity already exists.");
+      }
       if (input.expectedUpdatedAt === null) {
-        if (current.exists) throw new Error("First-value selection already exists; reload before continuing.");
+        if (current.exists) {
+          throw new FirstValueStateError(
+            "conflict",
+            "First-value selection already exists; reload before continuing.",
+          );
+        }
       } else if (!current.exists || hydrateSelection(current.data()).updatedAt !== input.expectedUpdatedAt) {
-        throw new Error("First-value selection changed; reload before continuing.");
+        throw new FirstValueStateError(
+          "conflict",
+          "First-value selection changed; reload before continuing.",
+        );
       }
       if (
         input.event.accessJourneyId !== input.selection.accessJourneyId ||
         input.event.userId !== input.selection.userId ||
         input.event.organizationId !== input.selection.organizationId
-      ) throw new Error("First-value event scope does not match the selection.");
+      ) {
+        throw new FirstValueStateError(
+          "forbidden",
+          "First-value event scope does not match the selection.",
+        );
+      }
       transaction.set(selectionRef, persisted(input.selection));
       transaction.create(eventRef, persisted(input.event));
     });
@@ -98,10 +116,18 @@ export class FirestoreFirstValueSelectionRepository implements FirstValueSelecti
         currentLifecycle.userId !== input.selection.userId ||
         currentSelection.updatedAt !== input.selection.updatedAt ||
         currentSelection.accessJourneyId !== currentLifecycle.id
-      ) throw new Error("OPEN release scope or first-value state changed before commit.");
+      ) {
+        throw new FirstValueStateError(
+          "conflict",
+          "OPEN release scope or first-value state changed before commit.",
+        );
+      }
       if (currentLifecycle.state === "open-platform" && eventSnapshot.exists) return "already-open" as const;
       if (currentLifecycle.state !== "controlled-platform" || eventSnapshot.exists) {
-        throw new Error("OPEN release requires one controlled-platform transition and unused evidence identity.");
+        throw new FirstValueStateError(
+          "conflict",
+          "OPEN release requires one controlled-platform transition and unused evidence identity.",
+        );
       }
       if (input.lifecycle.state !== "open-platform") throw new Error("OPEN release lifecycle must target open-platform.");
       transaction.set(lifecycleRef, persisted(input.lifecycle));

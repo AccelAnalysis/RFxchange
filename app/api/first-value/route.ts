@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { firstValueIntent } from "@/src/domain/first-value/model";
+import { FirstValueStateError, firstValueIntent } from "@/src/domain/first-value/model";
 import {
   createServerFirstValueAndOpenReleaseService,
   openReleaseScopeFromAccess,
@@ -45,12 +45,30 @@ export async function POST(request: NextRequest) {
       nextUrl: result.lifecycleState === "open-platform" ? "/exchange" : result.gate.kind === "blocked" ? result.gate.remediation : "/first-value",
     });
   } catch (cause) {
+    const stateError = cause instanceof FirstValueStateError ? cause : null;
+    const status = cause instanceof SyntaxError
+      ? 400
+      : stateError?.code === "forbidden"
+        ? 403
+        : stateError?.code === "conflict"
+          ? 409
+          : 500;
     return apiProblem(request, {
-      status: cause instanceof SyntaxError ? 400 : 500,
+      status,
       participantMessage: cause instanceof SyntaxError
         ? "The first-value request could not be read."
+        : stateError?.code === "forbidden"
+          ? "First-value selection is unavailable for this participant context."
+          : stateError?.code === "conflict"
+            ? "First-value state changed before this selection could be completed. Refresh and try again."
         : "First-value selection is temporarily unavailable. Retry the request.",
-      code: cause instanceof SyntaxError ? "request-invalid" : "dependency-unavailable",
+      code: cause instanceof SyntaxError
+        ? "request-invalid"
+        : stateError?.code === "forbidden"
+          ? "first-value-unavailable"
+          : stateError?.code === "conflict"
+            ? "first-value-conflict"
+            : "dependency-unavailable",
       cause,
     });
   }

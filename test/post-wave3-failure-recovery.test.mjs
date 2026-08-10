@@ -139,3 +139,15 @@ test("orientation preserves expected state conflicts while dependency failures r
   assert.match(model, /class OrientationJourneyStateError/);
   assert.match(repository, /Orientation journey changed; reload before continuing/);
 });
+
+test("first-value release preserves stale lifecycle conflicts while dependency failures remain retryable", () => {
+  const route = read("app/api/first-value/route.ts");
+  const service = read("src/application/activation/open-release.ts");
+  const repository = read("src/infrastructure/firestore/first-value.ts");
+
+  assert.match(route, /cause instanceof FirstValueStateError/);
+  assert.match(route, /stateError\?\.code === "conflict"[\s\S]{0,80}\? 409/);
+  assert.match(route, /: 500/);
+  assert.match(service, /new FirstValueStateError\([\s\S]{0,40}"conflict"/);
+  assert.match(repository, /First-value selection changed; reload before continuing/);
+});
