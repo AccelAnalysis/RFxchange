@@ -298,6 +298,12 @@ try {
     claimedAt: new Date(claimNow.getTime() + 1_000).toISOString(),
     expiresAt: claimExpiresAt,
   })).claimed, false);
+  assert.equal((await repository.claimCommunicationDelivery({
+    communicationId: primaryCommunication.intent.id,
+    claimId: `claim-primary-after-deadline-${suffix}`,
+    claimedAt: new Date(claimNow.getTime() + 121_000).toISOString(),
+    expiresAt: new Date(claimNow.getTime() + 241_000).toISOString(),
+  })).claimed, false);
   const acceptedWhileDelivering = transitionReferral({
     referral: sent,
     expectedVersion: 2,
@@ -357,7 +363,7 @@ try {
   });
   assert.equal(retryable.status, "retryable-failure");
   assert.equal(retryable.deliveryClaim, null);
-  console.log("Referral create-and-send atomicity, replay, acquisition context, delivery-claim coordination, tenant queries, communication outbox, and direct-client denial emulator smoke passed.");
+  console.log("Referral create-and-send atomicity, replay, acquisition context, non-reclaimable delivery-claim coordination, tenant queries, communication outbox, and direct-client denial emulator smoke passed.");
 } finally {
   const paths = Object.entries(createdIds).flatMap(([collection, ids]) => ids.map((id) => [collection, id]));
   await Promise.allSettled(paths.map(([collection, id]) => adminDb.collection(collection).doc(id).delete()));

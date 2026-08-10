@@ -245,7 +245,11 @@ export class FirestoreReferralRepository implements ReferralRepository {
         return Object.freeze({ communication, referral, claimed: false as const });
       }
       const existingClaim = communication.deliveryClaim;
-      if (existingClaim && existingClaim.expiresAt > input.claimedAt) {
+      // A claim is the durable record that a provider side effect may already have occurred. Its
+      // deadline bounds how long referral lifecycle writes wait, but it never makes delivery
+      // automatically reclaimable: a crash or accepted-receipt persistence failure has an unknown
+      // external outcome and must not permit a duplicate send.
+      if (existingClaim) {
         return Object.freeze({ communication, referral, claimed: false as const });
       }
       const claimed = Object.freeze({
@@ -254,6 +258,7 @@ export class FirestoreReferralRepository implements ReferralRepository {
           id: input.claimId,
           claimedAt: input.claimedAt,
           expiresAt: input.expiresAt,
+          outcome: "unknown" as const,
         }),
         updatedAt: input.claimedAt,
       });

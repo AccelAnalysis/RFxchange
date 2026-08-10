@@ -130,6 +130,7 @@ export interface ReferralCommunicationIntent {
     readonly id: string;
     readonly claimedAt: string;
     readonly expiresAt: string;
+    readonly outcome: "unknown";
   }> | null;
   readonly updatedAt: string;
 }
