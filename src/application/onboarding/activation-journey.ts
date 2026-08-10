@@ -174,6 +174,15 @@ export class ActivationJourneyError extends Error {
   }
 }
 
+export class ActivationRequestValidationError extends Error {
+  readonly code = "request-invalid" as const;
+
+  constructor(message: string) {
+    super(message);
+    this.name = "ActivationRequestValidationError";
+  }
+}
+
 function publicGeographies(definitions: readonly GeographyDefinition[]) {
   return Object.freeze(
     definitions
@@ -193,9 +202,18 @@ function normalizedWebsiteUrl(value: string): string {
   const candidate = /^[a-z][a-z0-9+.-]*:/i.test(normalized)
     ? normalized
     : `https://${normalized}`;
-  const parsed = new URL(candidate);
+  let parsed: URL;
+  try {
+    parsed = new URL(candidate);
+  } catch {
+    throw new ActivationRequestValidationError(
+      "Organization website must be a valid URL.",
+    );
+  }
   if (!["http:", "https:"].includes(parsed.protocol)) {
-    throw new Error("Organization website must use HTTP or HTTPS.");
+    throw new ActivationRequestValidationError(
+      "Organization website must use HTTP or HTTPS.",
+    );
   }
   parsed.hash = "";
   return parsed.toString();
@@ -622,7 +640,9 @@ export class ActivationJourneyService {
       });
     }
     if (activation.organizationIdentitySeed.websiteDisposition === null) {
-      throw new Error("Confirm the organization website or indicate that no public website applies.");
+      throw new ActivationRequestValidationError(
+        "Confirm the organization website or indicate that no public website applies.",
+      );
     }
     const organizationId = activation.organizationId;
     const membershipId = activation.membershipId;

@@ -1,4 +1,7 @@
-import type { ActivationJourneyService } from "../../../../src/application/onboarding/activation-journey.ts";
+import {
+  ActivationRequestValidationError,
+  type ActivationJourneyService,
+} from "../../../../src/application/onboarding/activation-journey.ts";
 
 type ActivationRequestBody = Readonly<Record<string, unknown>>;
 type SaveProfileInput = Parameters<ActivationJourneyService["saveProfile"]>[1];
@@ -18,7 +21,7 @@ export function parseWebsiteIdentityFields(
     hasWebsiteNotApplicable &&
     typeof body.websiteNotApplicable !== "boolean"
   ) {
-    throw new Error(
+    throw new ActivationRequestValidationError(
       "websiteNotApplicable must be a boolean when supplied.",
     );
   }

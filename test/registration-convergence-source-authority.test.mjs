@@ -50,6 +50,9 @@ test("registration convergence remains aligned across runtime and canonical auth
       "websiteNotApplicable must be a boolean when supplied.",
     ),
   );
+  assert.ok(requestBoundary.includes("ActivationRequestValidationError"));
+  assert.ok(route.includes("error instanceof ActivationRequestValidationError"));
+  assert.match(route, /status: 400,[\s\S]*code: error\.code/);
 
   assert.ok(slice27.includes("business objectives are not collected during activation"));
   assert.ok(slice27.includes("Resource Provider” is not a registration checkbox"));

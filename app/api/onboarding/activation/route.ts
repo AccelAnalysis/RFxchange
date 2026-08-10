@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { ServerSessionError, type AuthenticatedServerContext } from "@/src/application/auth/server-session";
-import { ActivationJourneyError } from "@/src/application/onboarding/activation-journey";
+import {
+  ActivationJourneyError,
+  ActivationRequestValidationError,
+} from "@/src/application/onboarding/activation-journey";
 import { isCurrentActivationLegalAcceptance } from "@/src/domain/onboarding/model";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
@@ -105,6 +108,14 @@ async function verifiedEmail(
 }
 
 function errorResponse(request: NextRequest, error: unknown) {
+  if (error instanceof ActivationRequestValidationError) {
+    return apiProblem(request, {
+      status: 400,
+      participantMessage: "The activation request contains an invalid value.",
+      code: error.code,
+      cause: error,
+    });
+  }
   if (error instanceof ActivationJourneyError) {
     return apiProblem(request, {
       status: 409,

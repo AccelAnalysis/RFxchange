@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { authenticatedServerContext } from "../src/application/auth/server-session.ts";
-import { ActivationJourneyService } from "../src/application/onboarding/activation-journey.ts";
+import {
+  ActivationJourneyService,
+  ActivationRequestValidationError,
+} from "../src/application/onboarding/activation-journey.ts";
 import {
   createAccessLifecycle,
   advanceAccessLifecycle,
@@ -377,7 +380,25 @@ test("malformed supplied websiteNotApplicable values are rejected", () => {
   for (const value of [null, "false", 0, {}]) {
     assert.throws(
       () => parseSaveProfileBody(validProfileBody({ websiteNotApplicable: value })),
-      /websiteNotApplicable must be a boolean when supplied/,
+      (error) => error instanceof ActivationRequestValidationError &&
+        /websiteNotApplicable must be a boolean when supplied/.test(error.message),
+    );
+  }
+});
+
+test("invalid activation websites retain typed request-validation semantics", async () => {
+  for (const website of ["not a valid URL", "ftp://example.org"]) {
+    await assert.rejects(
+      () => saveProfile(
+        {
+          websiteDisposition: null,
+          websiteUrl: null,
+          phone: "+1 757 555 0100",
+        },
+        validProfileBody({ website, websiteNotApplicable: false }),
+      ),
+      (error) => error instanceof ActivationRequestValidationError &&
+        error.code === "request-invalid",
     );
   }
 });
