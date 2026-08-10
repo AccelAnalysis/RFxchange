@@ -80,6 +80,7 @@ function communicationFor(referral, messageId, recipientEmail, recipientName) {
       status: "queued",
       attemptCount: 0,
       lastErrorCode: null,
+      deliveryClaim: null,
       updatedAt: now,
     },
   };
@@ -282,13 +283,81 @@ try {
     providerKey: "emulator-fake",
     recordedAt: now,
   });
+  const claimNow = new Date();
+  const claimExpiresAt = new Date(claimNow.getTime() + 120_000).toISOString();
+  const primaryClaim = await repository.claimCommunicationDelivery({
+    communicationId: primaryCommunication.intent.id,
+    claimId: `claim-primary-${suffix}`,
+    claimedAt: claimNow.toISOString(),
+    expiresAt: claimExpiresAt,
+  });
+  assert.equal(primaryClaim.claimed, true);
+  assert.equal((await repository.claimCommunicationDelivery({
+    communicationId: primaryCommunication.intent.id,
+    claimId: `claim-primary-competing-${suffix}`,
+    claimedAt: new Date(claimNow.getTime() + 1_000).toISOString(),
+    expiresAt: claimExpiresAt,
+  })).claimed, false);
+  const acceptedWhileDelivering = transitionReferral({
+    referral: sent,
+    expectedVersion: 2,
+    to: "accepted",
+    actorUserId: `user-recipient-${suffix}`,
+    now: new Date(claimNow.getTime() + 2_000).toISOString(),
+  });
+  await assert.rejects(
+    repository.save({
+      referral: acceptedWhileDelivering,
+      event: event(`event-claimed-transition-${suffix}`, "accepted", acceptedWhileDelivering, `command-claimed-transition-${suffix}`, "sent"),
+      command: command(`command-claimed-transition-${suffix}`, referralId, "accepted", 3),
+      audits: [],
+      communication: null,
+    }),
+    /delivery is in progress/,
+  );
   const delivered = await repository.recordCommunicationResult({
-    intent: primaryCommunication.intent,
+    intent: primaryClaim.communication,
+    claimId: `claim-primary-${suffix}`,
     receipt,
   });
   assert.equal(delivered.status, "accepted");
   assert.equal(delivered.attemptCount, 1);
-  console.log("Referral create-and-send atomicity, replay, acquisition context, tenant queries, communication outbox, and direct-client denial emulator smoke passed.");
+
+  const externalClaim = await repository.claimCommunicationDelivery({
+    communicationId: externalCommunication.intent.id,
+    claimId: `claim-external-${suffix}`,
+    claimedAt: claimNow.toISOString(),
+    expiresAt: claimExpiresAt,
+  });
+  assert.equal(externalClaim.claimed, true);
+  await assert.rejects(
+    repository.save({
+      referral: {
+        ...externalSent,
+        version: 3,
+        attachedRecipientOrganizationId: `org-external-${suffix}`,
+        recipientActorUserId: `user-external-${suffix}`,
+        updatedAt: new Date(claimNow.getTime() + 2_000).toISOString(),
+      },
+      event: {
+        ...event(`event-claimed-attachment-${suffix}`, "recipient-attached", externalSent, `command-claimed-attachment-${suffix}`, "sent"),
+        aggregateVersion: 3,
+      },
+      command: command(`command-claimed-attachment-${suffix}`, externalReferralId, "recipient-attached", 3),
+      audits: [],
+      communication: null,
+    }),
+    /delivery is in progress/,
+  );
+  const retryable = await repository.recordCommunicationResult({
+    intent: externalClaim.communication,
+    claimId: `claim-external-${suffix}`,
+    errorCode: "emulator-retryable",
+    retryable: true,
+  });
+  assert.equal(retryable.status, "retryable-failure");
+  assert.equal(retryable.deliveryClaim, null);
+  console.log("Referral create-and-send atomicity, replay, acquisition context, delivery-claim coordination, tenant queries, communication outbox, and direct-client denial emulator smoke passed.");
 } finally {
   const paths = Object.entries(createdIds).flatMap(([collection, ids]) => ids.map((id) => [collection, id]));
   await Promise.allSettled(paths.map(([collection, id]) => adminDb.collection(collection).doc(id).delete()));

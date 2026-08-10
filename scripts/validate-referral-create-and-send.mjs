@@ -7,6 +7,7 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 const [
   route,
   deliveryPolicy,
+  referralModel,
   deliveryAuthority,
   referralPage,
   resourcePage,
@@ -21,6 +22,7 @@ const [
 ] = await Promise.all([
   read("app/api/referrals/route.ts"),
   read("src/application/referrals/referral-invitation-delivery.ts"),
+  read("src/domain/referrals/model.ts"),
   read("src/application/referrals/referral-communication-delivery.ts"),
   read("app/referrals/page.tsx"),
   read("app/resources/page.tsx"),
@@ -39,10 +41,11 @@ assert.match(route, /createServerReferralCreateAndSendService\(\)\.createAndSend
 assert.match(route, /referralInvitationDeliveryPermitted/);
 assert.match(route, /delivery\.blocked/);
 assert.match(route, /This referral no longer permits invitation delivery/);
-assert.match(deliveryPolicy, /referral\.status !== "sent"/);
-assert.match(deliveryPolicy, /referral\.recipient\.kind === "external"/);
-assert.match(deliveryPolicy, /referral\.attachedRecipientOrganizationId !== null/);
-assert.match(deliveryPolicy, /communication\.status === "queued" \|\| communication\.status === "retryable-failure"/);
+assert.match(deliveryPolicy, /referralInvitationDeliveryPermitted/);
+assert.match(referralModel, /referral\.status !== "sent"/);
+assert.match(referralModel, /referral\.recipient\.kind === "external"/);
+assert.match(referralModel, /referral\.attachedRecipientOrganizationId !== null/);
+assert.match(referralModel, /communication\.status === "queued" \|\| communication\.status === "retryable-failure"/);
 assert.match(deliveryAuthority, /getCommunication/);
 assert.match(deliveryAuthority, /getReferral/);
 assert.match(deliveryAuthority, /referralInvitationDeliveryPermitted\(referral, communication\)/);
@@ -83,6 +86,9 @@ assert.match(service, /communication,/);
 assert.match(service, /acquisition,/);
 
 assert.match(repository, /runTransaction/);
+assert.match(repository, /claimCommunicationDelivery/);
+assert.match(repository, /delivery is in progress/);
+assert.match(repository, /current\.deliveryClaim\.id !== input\.claimId/);
 assert.match(repository, /transaction\.create\(referralRef/);
 assert.match(repository, /transaction\.create\(educationRef/);
 assert.match(repository, /ACQUISITION_CONTEXTS/);
@@ -91,11 +97,12 @@ assert.match(repository, /return "replayed" as const/);
 assert.match(runtime, /ReferralCreateAndSendDependencies/);
 assert.match(runtime, /prepareTrusted/);
 assert.match(runtime, /resolveReferralCommunicationDeliveryAuthority/);
-assert.match(runtime, /if \(!authority\.permitted\)/);
+assert.match(runtime, /claimCommunicationDelivery/);
+assert.match(runtime, /if \(!claim\.claimed\)/);
 assert.match(runtime, /service\.request/);
 assert.ok(
-  runtime.indexOf("resolveReferralCommunicationDeliveryAuthority") < runtime.indexOf("service.request"),
-  "Provider delivery must occur only after current referral and communication authority are re-resolved.",
+  runtime.indexOf("claimCommunicationDelivery") < runtime.indexOf("service.request"),
+  "Provider delivery must occur only after durable current-state authority is claimed.",
 );
 assert.match(acquisition, /prepareTrusted/);
 assert.match(architecture, /one `create-and-send` command/);
@@ -103,7 +110,8 @@ assert.match(architecture, /failed Firestore transaction leaves no referral/);
 assert.match(architecture, /latest authoritative referral aggregate/);
 assert.match(architecture, /organization and membership/);
 assert.match(architecture, /external recipient has not already attached/);
-assert.match(architecture, /delivery authority boundary reloads both/);
+assert.match(architecture, /delivery authority boundary atomically claims both/);
+assert.match(architecture, /durable delivery claim/i);
 assert.match(architecture, /Retry action is hidden/);
 
 console.log("Referral and provider-request create-and-send transaction integrity validated.");

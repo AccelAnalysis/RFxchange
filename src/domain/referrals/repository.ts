@@ -29,6 +29,12 @@ export interface ReferralCreateAndSendBundle {
 
 export type ReferralCreateAndSendPersistenceResult = "created" | "replayed";
 
+export interface ReferralCommunicationDeliveryClaimResult {
+  readonly communication: ReferralCommunicationIntent;
+  readonly referral: BusinessReferral;
+  readonly claimed: boolean;
+}
+
 export interface ReferralRepository {
   getById(id: string): Promise<BusinessReferral | null>;
   listInvolvingOrganization(organizationId: OrganizationId): Promise<readonly BusinessReferral[]>;
@@ -39,5 +45,6 @@ export interface ReferralRepository {
   saveCreateAndSend(bundle: ReferralCreateAndSendBundle): Promise<ReferralCreateAndSendPersistenceResult>;
   attachInvitation(input: Readonly<{ referral: BusinessReferral; event: ReferralEvent; command: ReferralCommandReceipt; audit: OrganizationActionAuditEvent }>): Promise<void>;
   getCommunication(id: string): Promise<ReferralCommunicationIntent | null>;
-  recordCommunicationResult(input: Readonly<{ intent: ReferralCommunicationIntent; receipt?: TransactionalEmailDeliveryReceipt | null; errorCode?: string | null; retryable?: boolean }>): Promise<ReferralCommunicationIntent>;
+  claimCommunicationDelivery(input: Readonly<{ communicationId: string; claimId: string; claimedAt: string; expiresAt: string }>): Promise<ReferralCommunicationDeliveryClaimResult>;
+  recordCommunicationResult(input: Readonly<{ intent: ReferralCommunicationIntent; claimId?: string | null; receipt?: TransactionalEmailDeliveryReceipt | null; errorCode?: string | null; retryable?: boolean }>): Promise<ReferralCommunicationIntent>;
 }

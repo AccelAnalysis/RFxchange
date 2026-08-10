@@ -2,12 +2,13 @@ import { FieldValue, type Firestore } from "firebase-admin/firestore";
 
 import type { TransactionalEmailDeliveryReceipt } from "../../domain/communications/transactional-email.ts";
 import type { OrganizationId } from "../../domain/organizations/model.ts";
-import type {
-  BusinessReferral,
-  ReferralCommandReceipt,
-  ReferralCommunicationIntent,
-  ReferralEducationAcknowledgement,
-  ReferralPersistenceBundle,
+import {
+  referralInvitationDeliveryPermitted,
+  type BusinessReferral,
+  type ReferralCommandReceipt,
+  type ReferralCommunicationIntent,
+  type ReferralEducationAcknowledgement,
+  type ReferralPersistenceBundle,
 } from "../../domain/referrals/model.ts";
 import type {
   ReferralCreateAndSendBundle,
@@ -126,6 +127,7 @@ export class FirestoreReferralRepository implements ReferralRepository {
     const commandRef = this.db.collection(COMMANDS).doc(bundle.command.id);
     const communicationRef = bundle.communication ? this.db.collection(COMMUNICATIONS).doc(bundle.communication.id) : null;
     const auditRefs = bundle.audits.map((audit) => this.db.collection(AUDITS).doc(audit.id));
+    const persistenceAttemptedAt = new Date().toISOString();
     await this.db.runTransaction(async (transaction) => {
       const snapshots = await transaction.getAll(commandRef, eventRef, ...auditRefs, ...(communicationRef ? [communicationRef] : []));
       if (snapshots[0]?.exists) {
@@ -138,6 +140,17 @@ export class FirestoreReferralRepository implements ReferralRepository {
       if (currentSnapshot.exists) {
         const current = currentSnapshot.data() as BusinessReferral;
         if (current.version + 1 !== bundle.referral.version || current.id !== bundle.referral.id) throw new Error(`Referral changed; current version is ${current.version}.`);
+        if (current.communicationMessageId) {
+          const currentCommunicationSnapshot = await transaction.get(
+            this.db.collection(COMMUNICATIONS).doc(current.communicationMessageId),
+          );
+          const claim = currentCommunicationSnapshot.exists
+            ? (currentCommunicationSnapshot.data() as ReferralCommunicationIntent).deliveryClaim
+            : null;
+          if (claim && claim.expiresAt > persistenceAttemptedAt) {
+            throw new Error("Referral invitation delivery is in progress; retry this action shortly.");
+          }
+        }
       } else if (bundle.referral.version !== 1 || bundle.event.kind !== "created") {
         throw new Error("Referral aggregate is unavailable for this transition.");
       }
@@ -212,7 +225,44 @@ export class FirestoreReferralRepository implements ReferralRepository {
     return getFirestoreRecordById<ReferralCommunicationIntent>(this.db, "referralCommunicationIntents", id);
   }
 
-  async recordCommunicationResult(input: Readonly<{ intent: ReferralCommunicationIntent; receipt?: TransactionalEmailDeliveryReceipt | null; errorCode?: string | null; retryable?: boolean }>): Promise<ReferralCommunicationIntent> {
+  async claimCommunicationDelivery(
+    input: Parameters<ReferralRepository["claimCommunicationDelivery"]>[0],
+  ) {
+    if (!input.claimId.trim() || input.claimedAt >= input.expiresAt) {
+      throw new Error("Referral communication delivery claim is invalid.");
+    }
+    const communicationRef = this.db.collection(COMMUNICATIONS).doc(input.communicationId);
+    return this.db.runTransaction(async (transaction) => {
+      const communicationSnapshot = await transaction.get(communicationRef);
+      if (!communicationSnapshot.exists) throw new Error("Referral communication intent is unavailable.");
+      const communication = communicationSnapshot.data() as ReferralCommunicationIntent;
+      const referralSnapshot = await transaction.get(
+        this.db.collection(REFERRALS).doc(communication.referralId),
+      );
+      if (!referralSnapshot.exists) throw new Error("Referral communication authority is unavailable.");
+      const referral = referralSnapshot.data() as BusinessReferral;
+      if (!referralInvitationDeliveryPermitted(referral, communication)) {
+        return Object.freeze({ communication, referral, claimed: false as const });
+      }
+      const existingClaim = communication.deliveryClaim;
+      if (existingClaim && existingClaim.expiresAt > input.claimedAt) {
+        return Object.freeze({ communication, referral, claimed: false as const });
+      }
+      const claimed = Object.freeze({
+        ...communication,
+        deliveryClaim: Object.freeze({
+          id: input.claimId,
+          claimedAt: input.claimedAt,
+          expiresAt: input.expiresAt,
+        }),
+        updatedAt: input.claimedAt,
+      });
+      transaction.set(communicationRef, mutable(claimed));
+      return Object.freeze({ communication: claimed, referral, claimed: true as const });
+    });
+  }
+
+  async recordCommunicationResult(input: Readonly<{ intent: ReferralCommunicationIntent; claimId?: string | null; receipt?: TransactionalEmailDeliveryReceipt | null; errorCode?: string | null; retryable?: boolean }>): Promise<ReferralCommunicationIntent> {
     const ref = this.db.collection(COMMUNICATIONS).doc(input.intent.id);
     return this.db.runTransaction(async (transaction) => {
       const snapshot = await transaction.get(ref);
@@ -220,8 +270,14 @@ export class FirestoreReferralRepository implements ReferralRepository {
       const current = snapshot.data() as ReferralCommunicationIntent;
       if (current.referralId !== input.intent.referralId || current.request.metadata.idempotencyKey !== input.intent.request.metadata.idempotencyKey) throw new Error("Referral communication intent identity mismatch.");
       if (current.status === "accepted") return current;
+      if (
+        (current.deliveryClaim && current.deliveryClaim.id !== input.claimId) ||
+        (input.claimId && !current.deliveryClaim)
+      ) {
+        throw new Error("Referral communication delivery claim is no longer current.");
+      }
       const status = input.receipt?.status === "accepted" ? "accepted" as const : input.retryable ? "retryable-failure" as const : "terminal-failure" as const;
-      const updated = Object.freeze({ ...current, status, attemptCount: current.attemptCount + 1, lastErrorCode: input.errorCode ?? input.receipt?.diagnosticCode ?? null, updatedAt: new Date().toISOString() });
+      const updated = Object.freeze({ ...current, status, attemptCount: current.attemptCount + 1, lastErrorCode: input.errorCode ?? input.receipt?.diagnosticCode ?? null, deliveryClaim: null, updatedAt: new Date().toISOString() });
       transaction.set(ref, mutable(updated));
       return updated;
     });

@@ -126,6 +126,11 @@ export interface ReferralCommunicationIntent {
   readonly status: "queued" | "accepted" | "retryable-failure" | "terminal-failure";
   readonly attemptCount: number;
   readonly lastErrorCode: string | null;
+  readonly deliveryClaim?: Readonly<{
+    readonly id: string;
+    readonly claimedAt: string;
+    readonly expiresAt: string;
+  }> | null;
   readonly updatedAt: string;
 }
 
@@ -135,6 +140,16 @@ export interface ReferralPersistenceBundle {
   readonly command: ReferralCommandReceipt;
   readonly audits: readonly OrganizationActionAuditEvent[];
   readonly communication: ReferralCommunicationIntent | null;
+}
+
+export function referralInvitationDeliveryPermitted(
+  referral: Pick<BusinessReferral, "communicationMessageId" | "status" | "recipient" | "attachedRecipientOrganizationId">,
+  communication: ReferralCommunicationIntent | null,
+): communication is ReferralCommunicationIntent {
+  if (!communication || referral.communicationMessageId !== communication.id) return false;
+  if (referral.status !== "sent") return false;
+  if (referral.recipient.kind === "external" && referral.attachedRecipientOrganizationId !== null) return false;
+  return communication.status === "queued" || communication.status === "retryable-failure";
 }
 
 export interface SenderReferralProjection {

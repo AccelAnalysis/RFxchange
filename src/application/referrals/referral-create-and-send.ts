@@ -412,6 +412,7 @@ export class ReferralCreateAndSendService {
         status: "queued" as const,
         attemptCount: 0,
         lastErrorCode: null,
+        deliveryClaim: null,
         updatedAt: now,
       });
     }

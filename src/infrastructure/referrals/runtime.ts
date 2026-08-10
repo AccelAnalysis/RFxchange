@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import type { Firestore } from "firebase-admin/firestore";
 
 import { serializeAcquisitionContextToken } from "../../application/acquisition/acquisition-context.ts";
@@ -122,29 +122,47 @@ export interface ReferralCommunicationAttemptResult {
 
 /**
  * The route may perform an early presentation/response check, but this function is the delivery
- * authority boundary. It reloads both the durable intent and its current referral immediately
- * before provider delivery so a stale route snapshot cannot authorize an invitation after the
- * lifecycle advances or an external acquisition invitation is consumed.
+ * authority boundary. When delivery is configured, it atomically claims the durable intent and
+ * current referral before invoking the provider. Referral lifecycle and recipient-attachment
+ * writes coordinate with that bounded claim, closing the gap between a current-state read and the
+ * external provider request.
  */
 export async function attemptReferralCommunication(
   intent: ReferralCommunicationIntent,
   db: Firestore = getServerFirestore(),
 ): Promise<ReferralCommunicationAttemptResult> {
   const repository = new FirestoreReferralRepository(db);
-  const authority = await resolveReferralCommunicationDeliveryAuthority(intent, {
-    getCommunication: (id) => repository.getCommunication(id),
-    getReferral: (id) => repository.getById(id),
-  });
-  const current = authority.communication;
-  if (!authority.permitted) {
-    return Object.freeze({ communication: current, blocked: true, attempted: false });
-  }
   if (!microsoftConfigured()) {
-    return Object.freeze({ communication: current, blocked: false, attempted: false });
+    const authority = await resolveReferralCommunicationDeliveryAuthority(intent, {
+      getCommunication: (id) => repository.getCommunication(id),
+      getReferral: (id) => repository.getById(id),
+    });
+    return Object.freeze({
+      communication: authority.communication,
+      blocked: !authority.permitted,
+      attempted: false,
+    });
   }
+  const configuration = microsoftGraphTransactionalEmailConfigurationFromEnvironment();
+  const claimedAt = new Date();
+  const claimId = `referral-delivery-${randomUUID()}`;
+  const claim = await repository.claimCommunicationDelivery({
+    communicationId: intent.id,
+    claimId,
+    claimedAt: claimedAt.toISOString(),
+    // Token acquisition and Graph delivery each use the configured timeout. The additional
+    // margin keeps lifecycle writes serialized until both bounded provider calls settle.
+    expiresAt: new Date(
+      claimedAt.getTime() + configuration.timeoutMilliseconds * 2 + 30_000,
+    ).toISOString(),
+  });
+  if (!claim.claimed) {
+    return Object.freeze({ communication: claim.communication, blocked: true, attempted: false });
+  }
+  const current = claim.communication;
   try {
     const service = new TransactionalEmailService(new MicrosoftGraphTransactionalEmailProvider(
-      microsoftGraphTransactionalEmailConfigurationFromEnvironment(),
+      configuration,
       referralTransactionalEmailCatalog,
     ));
     const receipt = await service.request({
@@ -158,12 +176,13 @@ export async function attemptReferralCommunication(
       relatedObjectType: current.request.metadata.relatedObjectType, relatedObjectId: current.request.metadata.relatedObjectId,
       tags: current.request.metadata.tags,
     });
-    const communication = await repository.recordCommunicationResult({ intent: current, receipt });
+    const communication = await repository.recordCommunicationResult({ intent: current, claimId, receipt });
     return Object.freeze({ communication, blocked: false, attempted: true });
   } catch (error) {
     const providerError = error instanceof TransactionalEmailProviderError ? error : null;
     const communication = await repository.recordCommunicationResult({
       intent: current,
+      claimId,
       errorCode: providerError?.code ?? "transactional-email-provider-unhandled",
       retryable: providerError?.retryable ?? true,
     });
