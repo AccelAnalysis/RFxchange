@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useRef, useState } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import type { SenderReferralProjection, RecipientReferralProjection, ReferralStatus } from "../../domain/referrals/model";
@@ -9,6 +9,10 @@ import { MapboxLocalityCanvas, type ControlledLocalityPointOverlay, type Control
 import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
+import {
+  clearRetryStableCommand,
+  resolveRetryStableCommand,
+} from "./retry-stable-command";
 
 import styles from "./ReferralWorkspace.module.css";
 
@@ -19,13 +23,21 @@ type ReferralOrganizationOption = Readonly<{
   marker: Readonly<{ id: string; coordinate: readonly [number, number]; accessibleLocationLabel: string }>;
 }>;
 
+type PendingCreateAndSend = Readonly<{
+  fingerprint: string;
+  commandId: string;
+}>;
+
 interface ReferralWorkspaceProps {
   readonly model: ControlledLocalityMapModel;
   readonly homeMarker: ExchangeHomeMarker;
   readonly initialReferrals: readonly ReferralProjection[];
   readonly organizations: readonly ReferralOrganizationOption[];
+  readonly commandRecoveryScope: string;
   readonly requestedReferralId?: string | null;
 }
+
+const REFERRAL_CREATE_SEND_STORAGE_KEY = "rfxchange:referral-create-and-send";
 
 function readable(value: string): string {
   return value.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
@@ -44,6 +56,14 @@ function otherOrganization(selected: ReferralProjection | null, organizations: r
     ? selected.recipientOrganizationId ? String(selected.recipientOrganizationId) : null
     : organizations.find((organization) => organization.displayName === selected.senderOrganizationName)?.organizationId ?? null;
   return otherId ? organizations.find((organization) => organization.organizationId === otherId) ?? null : null;
+}
+
+function browserSessionStorage(): Storage | null {
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
 }
 
 const ReferralMap = memo(function ReferralMap({ model, homeMarker, selected, organizations }: Readonly<{
@@ -65,7 +85,7 @@ const ReferralMap = memo(function ReferralMap({ model, homeMarker, selected, org
   return <MapboxLocalityCanvas model={model} pointOverlays={pointOverlays} relationshipPaths={relationshipPaths} overlaySide="split" />;
 });
 
-export function ReferralWorkspace({ model, homeMarker, initialReferrals, organizations, requestedReferralId }: ReferralWorkspaceProps) {
+export function ReferralWorkspace({ model, homeMarker, initialReferrals, organizations, commandRecoveryScope, requestedReferralId }: ReferralWorkspaceProps) {
   const { t } = useI18n();
   const [referrals, setReferrals] = useState(initialReferrals);
   const [selectedId, setSelectedId] = useState(requestedReferralId ?? initialReferrals[0]?.id ?? null);
@@ -79,6 +99,8 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
   const [educationOpen, setEducationOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const createAndSendCommandRef = useRef<PendingCreateAndSend | null>(null);
+  const commandStorageKey = `${REFERRAL_CREATE_SEND_STORAGE_KEY}:${encodeURIComponent(commandRecoveryScope)}`;
   const selected = referrals.find((referral) => referral.id === selectedId) ?? null;
 
   async function api(body: Record<string, unknown>) {
@@ -96,20 +118,78 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
     if (selectId) setSelectedId(selectId);
   }
 
-  async function acknowledgeCreateAndSend() {
-    setBusy(true); setNotice(null);
+  function operationInput() {
     const existing = organizations.find((organization) => String(organization.organizationId) === recipientOrganizationId);
     const label = recipientKind === "organization" ? existing?.displayName ?? "" : recipientLabel;
-    const sharedFields = ["sender-organization", "summary"];
+    const sharedFields = ["sender-organization", "summary"] as const;
+    return Object.freeze({
+      fingerprint: JSON.stringify({
+        recipientKind,
+        recipientOrganizationId: recipientKind === "organization" ? recipientOrganizationId : null,
+        recipientLabel: recipientKind === "external" ? recipientLabel : null,
+        recipientEmail: recipientKind === "external" ? recipientEmail.trim().toLowerCase() : null,
+        need: "introduction",
+        summary,
+        urgency: "standard",
+        preferredContactMethod: "email",
+        purpose: "business-introduction",
+        sharedFields,
+        consentAcknowledged: consent,
+      }),
+      label,
+      sharedFields,
+    });
+  }
+
+  function commandForFingerprint(fingerprint: string): string {
+    const inMemory = createAndSendCommandRef.current;
+    if (inMemory?.fingerprint === fingerprint) return inMemory.commandId;
+    const commandId = resolveRetryStableCommand({
+      storage: browserSessionStorage(),
+      storageKey: commandStorageKey,
+      fingerprint,
+      prefix: "ref-create-send",
+    });
+    createAndSendCommandRef.current = Object.freeze({ fingerprint, commandId });
+    return commandId;
+  }
+
+  function clearPendingCommand() {
+    const pending = createAndSendCommandRef.current;
+    clearRetryStableCommand({
+      storage: browserSessionStorage(),
+      storageKey: commandStorageKey,
+      commandId: pending?.commandId,
+    });
+    createAndSendCommandRef.current = null;
+  }
+
+  function closeComposer() {
+    clearPendingCommand();
+    setComposerOpen(false);
+    setEducationOpen(false);
+  }
+
+  function beginEducationReview() {
+    const operation = operationInput();
+    commandForFingerprint(operation.fingerprint);
+    setEducationOpen(true);
+  }
+
+  async function acknowledgeCreateAndSend() {
+    setBusy(true); setNotice(null);
+    const operation = operationInput();
+    const commandId = commandForFingerprint(operation.fingerprint);
     try {
-      await api({ action: "education", commandId: `refedu-${crypto.randomUUID()}`, recipientLabel: label, sharedFields });
-      const created = await api({ action: "create", commandId: `refcreate-${crypto.randomUUID()}`, recipientKind, recipientOrganizationId, recipientLabel: label, recipientEmail, need: "introduction", summary, urgency: "standard", preferredContactMethod: "email", purpose: "business-introduction", sharedFields, consentAcknowledged: consent });
-      const referral = created.referral as ReferralProjection;
-      await api({ action: "send", commandId: `refsend-${crypto.randomUUID()}`, referralId: referral.id, expectedVersion: referral.version });
+      const result = await api({ action: "create-and-send", commandId, recipientKind, recipientOrganizationId, recipientLabel: operation.label, recipientEmail, need: "introduction", summary, urgency: "standard", preferredContactMethod: "email", purpose: "business-introduction", sharedFields: operation.sharedFields, consentAcknowledged: consent });
+      const referral = result.referral as Readonly<{ id: string; version: number }>;
       await refresh(referral.id);
+      clearPendingCommand();
       setComposerOpen(false); setEducationOpen(false); setSummary(""); setRecipientEmail(""); setRecipientLabel(""); setConsent(false);
       setNotice(t("referralWorkspace.states.sent"));
     } catch (error) {
+      // Keep the exact command in memory and actor-scoped session storage so an uncertain response
+      // can replay after a same-tab reload without granting authority or creating a duplicate.
       setNotice(error instanceof Error ? error.message : t("referralWorkspace.states.error"));
     } finally { setBusy(false); }
   }
@@ -165,14 +245,14 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
               <p className={styles.boundary}>{t("referralWorkspace.detail.boundary")}</p>
               {hasPath ? <p className={styles.pathText}>{t("referralWorkspace.path.visible", { status: readable(selected.status) })}</p> : <p className={styles.pathText}>{t("referralWorkspace.path.unavailable")}</p>}
               {nextActions(selected).length ? <WorkflowExplainer explainerKey="referral-response" /> : null}
-              <div className={styles.actions}>{nextActions(selected).map((action) => <button key={action} type="button" disabled={busy} onClick={() => transition(action)}>{t(`referralWorkspace.actions.${action}`)}</button>)}{selected.role === "sender" && selected.notificationStatus === "retryable-failure" ? <button type="button" disabled={busy} onClick={retryCommunication}>{t("referralWorkspace.actions.retry")}</button> : null}</div>
+              <div className={styles.actions}>{nextActions(selected).map((action) => <button key={action} type="button" disabled={busy} onClick={() => transition(action)}>{t(`referralWorkspace.actions.${action}`)}</button>)}{selected.role === "sender" && selected.status === "sent" && selected.notificationStatus === "retryable-failure" ? <button type="button" disabled={busy} onClick={retryCommunication}>{t("referralWorkspace.actions.retry")}</button> : null}</div>
             </article>
           ) : null}
         </aside>
 
         {composerOpen ? <div className={styles.modalBackdrop} role="presentation"><section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="referral-composer-title">
-          <div className={styles.modalHeader}><div><p>{t("referralWorkspace.education.eyebrow")}</p><h2 id="referral-composer-title">{t("referralWorkspace.composer.title")}</h2></div><button type="button" onClick={() => { setComposerOpen(false); setEducationOpen(false); }} aria-label={t("referralWorkspace.composer.close")}>×</button></div>
-          {!educationOpen ? <form onSubmit={(event) => { event.preventDefault(); setEducationOpen(true); }} className={styles.form}>
+          <div className={styles.modalHeader}><div><p>{t("referralWorkspace.education.eyebrow")}</p><h2 id="referral-composer-title">{t("referralWorkspace.composer.title")}</h2></div><button type="button" onClick={closeComposer} aria-label={t("referralWorkspace.composer.close")}>×</button></div>
+          {!educationOpen ? <form onSubmit={(event) => { event.preventDefault(); beginEducationReview(); }} className={styles.form}>
             <fieldset><legend>{t("referralWorkspace.composer.recipientType")}</legend><label><input type="radio" checked={recipientKind === "organization"} onChange={() => setRecipientKind("organization")} />{t("referralWorkspace.composer.existing")}</label><label><input type="radio" checked={recipientKind === "external"} onChange={() => setRecipientKind("external")} />{t("referralWorkspace.composer.external")}</label></fieldset>
             {recipientKind === "organization" ? <label>{t("referralWorkspace.composer.organization")}<select required value={recipientOrganizationId} onChange={(event) => setRecipientOrganizationId(event.target.value)}><option value="">{t("referralWorkspace.composer.choose")}</option>{organizations.map((organization) => <option key={organization.organizationId} value={organization.organizationId}>{organization.displayName}</option>)}</select></label> : <><label>{t("referralWorkspace.composer.name")}<input required value={recipientLabel} onChange={(event) => setRecipientLabel(event.target.value)} maxLength={160} /></label><label>{t("referralWorkspace.composer.email")}<input required type="email" value={recipientEmail} onChange={(event) => setRecipientEmail(event.target.value)} /></label></>}
             <label>{t("referralWorkspace.composer.summary")}<textarea required value={summary} onChange={(event) => setSummary(event.target.value)} maxLength={1200} /></label>
@@ -183,7 +263,7 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
             <h3>{t("referralWorkspace.education.title")}</h3><p>{t("referralWorkspace.education.body")}</p>
             <dl><div><dt>{t("referralWorkspace.education.recipient")}</dt><dd>{recipientKind === "organization" ? markerLookup.get(recipientOrganizationId)?.displayName : recipientLabel}</dd></div><div><dt>{t("referralWorkspace.education.shared")}</dt><dd>{t("referralWorkspace.education.sharedValue")}</dd></div></dl>
             <p>{t("referralWorkspace.education.states")}</p><p>{t("referralWorkspace.education.next")}</p>
-            <div className={styles.actions}><button type="button" onClick={() => setEducationOpen(false)}>{t("referralWorkspace.composer.back")}</button><button className={styles.primary} type="button" disabled={busy} onClick={acknowledgeCreateAndSend}>{busy ? t("referralWorkspace.composer.sending") : t("referralWorkspace.composer.acknowledge")}</button></div>
+            <div className={styles.actions}><button type="button" onClick={() => { clearPendingCommand(); setEducationOpen(false); }}>{t("referralWorkspace.composer.back")}</button><button className={styles.primary} type="button" disabled={busy} onClick={acknowledgeCreateAndSend}>{busy ? t("referralWorkspace.composer.sending") : t("referralWorkspace.composer.acknowledge")}</button></div>
           </div>}
         </section></div> : null}
       </SpatialWorkspace>
