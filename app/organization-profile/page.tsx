@@ -111,6 +111,7 @@ async function MarketProfileSection({
     organizationName={organizationName}
     snapshot={marketProfile.snapshot}
     catalog={marketProfile.catalog}
+    naicsCatalog={marketProfile.naics}
     marketRoles={marketProfile.marketRoles}
     serviceGeographies={marketProfile.serviceGeographies}
   />;

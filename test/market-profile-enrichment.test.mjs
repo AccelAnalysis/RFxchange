@@ -19,6 +19,7 @@ const CAPABILITY = Object.freeze({
   aliases: ["general contractor"], status: "active", replacementConceptIds: [], releaseVersion: "0.5.0",
 });
 const MARKET_ROLE = Object.freeze({ market_role_id: "AMACS-MROLE-000003", preferred_label: "Service provider" });
+const NAICS_INDUSTRY = Object.freeze({ code: "236220", title: "Commercial and Institutional Building Construction" });
 
 function fixture(rolePreset = "primary-administrator", options = {}) {
   const organization = createOrganizationAccount({ id: "org-market-profile", now: NOW });
@@ -66,6 +67,12 @@ function fixture(rolePreset = "primary-administrator", options = {}) {
       async listDomains() { return [{ domainId: CAPABILITY.domainId, preferredLabel: CAPABILITY.domainLabel, definition: "", status: "active" }]; },
       async listFamilies() { return []; }, async listCapabilities() { return [CAPABILITY]; }, async searchCapabilities() { throw new Error("unused"); },
       async getRequestFamily() { return null; }, async getRequirementType() { return null; }, async getResponseTemplate() { return null; }, async getDecisionTemplate() { return null; }, async getReadinessRules() { return []; }, async getConceptInterpretationGuidance() { return null; }, async resolveHistoricalCapability() { return null; },
+    },
+    naicsCatalog: {
+      async getRelease() { return { version: "2022", sourceName: "U.S. Census Bureau", sourceUrl: "https://www.census.gov/naics/", retrievedAt: "2026-08-10", sourceSha256: "a".repeat(64), level: 6, entryCount: 1 }; },
+      async listIndustries() { return [NAICS_INDUSTRY]; },
+      async getIndustry(code, version) { return code === NAICS_INDUSTRY.code && version === "2022" ? NAICS_INDUSTRY : null; },
+      async getProjection() { throw new Error("unused"); },
     },
     interpretations: {
       async getRecord() { return state.interpretationRecord; }, async getCandidate() { return state.interpretationCandidate; },
@@ -140,15 +147,44 @@ test("wrong organization, invented catalog IDs, and out-of-scope geography fail 
 test("industry, past performance, preferences, and provisional terms preserve their boundaries", async () => {
   const f = fixture();
   const claim = await f.service.claimCapability(f.scope, f.claimInput);
-  await f.service.updateIndustry({ ...f.scope, commandId: "command-industry" }, { industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }], naics: [{ id: "naics-236220", code: "236220", title: "Commercial and Institutional Building Construction", version: "2022", source: "participant_selected", provenance: "Participant selected", visibility: "network" }] });
+  await f.service.updateIndustry({ ...f.scope, commandId: "command-industry" }, { industries: [{ id: "industry-construction", label: "Commercial construction", visibility: "network" }], naics: [{ code: "236220", version: "2022", visibility: "network" }] });
   await f.service.addPastPerformance({ ...f.scope, commandId: "command-performance" }, { id: "project-1", title: "Municipal facilities modernization", summary: "Renovated occupied municipal facilities through a phased construction plan.", role: "Prime contractor", value: { currency: "USD", exactMinorUnits: 125000000, disclosed: false }, outputs: ["Renovated facilities"], outcomesClaimed: ["Work completed on schedule"], supportingCapabilityClaimIds: [claim.claim.id], visibility: "private" });
   await f.service.updatePreferences({ ...f.scope, commandId: "command-preferences" }, { deliveryRoleInterests: ["prime", "subcontractor"], teamPreferences: ["Local specialty trades"], referralPreferences: ["Warm introductions"], resourceNeeds: ["Bonding support"], contactPreference: "structured_intake", intakeNotes: "Review fit before introduction.", visibility: "network" });
   await f.service.submitProvisionalTerm({ ...f.scope, commandId: "command-term" }, { id: "term-1", proposedLabel: "Resilient waterfront retrofit coordination", proposedDefinition: "Coordinates multi-disciplinary retrofit work for occupied waterfront facilities.", exampleWork: "Sequencing marine access, structural, and building systems work.", suggestedDomainId: CAPABILITY.domainId });
   assert.equal(f.state.industry.naics[0].code, "236220");
+  assert.equal(f.state.industry.naics[0].title, NAICS_INDUSTRY.title);
+  assert.equal(f.state.industry.naics[0].version, "2022");
+  assert.equal(f.state.industry.naics[0].provenance, "Participant selected from U.S. Census Bureau 2022 NAICS");
   assert.equal(f.state.performance[0].confirmationState, "self_reported");
   assert.equal(f.state.performance[0].value.disclosed, false);
   assert.deepEqual(f.state.preferences.deliveryRoleInterests, ["prime", "subcontractor"]);
   assert.equal(f.state.terms[0].status, "submitted");
+});
+
+test("industry updates reject invented or stale NAICS identities before persistence", async () => {
+  const f = fixture();
+  await assert.rejects(
+    f.service.updateIndustry(
+      { ...f.scope, commandId: "command-invented-naics" },
+      { industries: [], naics: [{ code: "999999", version: "2022", visibility: "network" }] },
+    ),
+    (error) => error instanceof MarketProfileError && error.code === "invalid",
+  );
+  await assert.rejects(
+    f.service.updateIndustry(
+      { ...f.scope, commandId: "command-stale-naics" },
+      { industries: [], naics: [{ code: "236220", version: "2017", visibility: "network" }] },
+    ),
+    (error) => error instanceof MarketProfileError && error.code === "invalid",
+  );
+  await assert.rejects(
+    f.service.updateIndustry(
+      { ...f.scope, commandId: "command-duplicate-naics" },
+      { industries: [], naics: [{ code: "236220", version: "2022", visibility: "network" }, { code: "236220", version: "2022", visibility: "network" }] },
+    ),
+    (error) => error instanceof MarketProfileError && error.code === "invalid",
+  );
+  assert.equal(f.state.industry, null);
 });
 
 test("market-profile model validation remains a typed participant input error", async () => {

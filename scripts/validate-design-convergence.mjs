@@ -6,6 +6,7 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 
 const [
   workspace,
+  participantNavigation,
   existingWorkspace,
   sharedPrimitives,
   workspaceStyles,
@@ -27,6 +28,7 @@ const [
   tracker,
 ] = await Promise.all([
   read("src/components/participant/ParticipantWorkspace.tsx"),
+  read("src/components/participant/ParticipantTopNavigation.tsx"),
   read("src/components/participant/ExistingWorkspaceFoundation.tsx"),
   read("src/components/ui/Primitives.tsx"),
   read("src/components/participant/ParticipantWorkspace.module.css"),
@@ -48,6 +50,7 @@ const [
   read("docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md"),
 ]);
 
+const participantComponents = `${workspace}\n${participantNavigation}`;
 for (const primitive of [
   "ParticipantShell",
   "ParticipantTopNavigation",
@@ -59,10 +62,10 @@ for (const primitive of [
   "LocalityStatusOverlay",
   "SearchFilterOverlay",
 ]) {
-  assert.ok(workspace.includes(`function ${primitive}`), `Shared primitive is missing: ${primitive}`);
+  assert.ok(participantComponents.includes(`function ${primitive}`), `Shared primitive is missing: ${primitive}`);
 }
 
-const participantContractSource = `${workspace}\n${sharedPrimitives}`;
+const participantContractSource = `${participantComponents}\n${sharedPrimitives}`;
 for (const contract of [
   "data-participant-navigation",
   'data-participant-default="warm-ivory"',

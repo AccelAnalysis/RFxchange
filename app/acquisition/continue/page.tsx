@@ -79,7 +79,7 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
   const mapUrl = access.state.lifecycleState === "open-platform" ? acquisition.kind === "provider" ? "/resources" : "/referrals" : "/orientation";
 
   return (
-    <ParticipantShell activeItem={acquisition.kind === "opportunity" ? "Opportunities" : acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Intelligence"}>
+    <ParticipantShell activeItem={acquisition.kind === "opportunity" ? undefined : acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Network"}>
       <OperationalWorkspace ariaLabel="Saved acquisition context">
         <section className={styles.wrap}>
           <p className={styles.eyebrow}>Context recovered</p>

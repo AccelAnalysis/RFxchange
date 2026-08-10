@@ -58,7 +58,7 @@ export function FirstValueChoiceClient({
   }
 
   return (
-    <ParticipantShell activeItem="Intelligence">
+    <ParticipantShell activeItem="Network">
       <OperationalWorkspace ariaLabel="Post-orientation first-value selection" className={styles.workspace}>
         <section className={styles.wrap}>
           <p className={styles.eyebrow}>Orientation complete · one final activation step</p>

@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 
 import type { AmacsCatalogPort } from "../amacs/catalog.ts";
+import type { NaicsCatalogPort } from "../naics/catalog.ts";
 import {
   authorizeOrganizationOperation,
   type OrganizationOperationAuthorizationDependencies,
@@ -50,6 +51,7 @@ function marketProfileInput<T>(operation: () => T, fallbackMessage: string): T {
 export interface MarketProfileServiceDependencies {
   readonly authorization: OrganizationOperationAuthorizationDependencies;
   readonly catalog: AmacsCatalogPort;
+  readonly naicsCatalog: NaicsCatalogPort;
   readonly interpretations: AiInterpretationRepository;
   readonly serviceGeographies: OrganizationServiceGeographyRepository;
   readonly repository: OrganizationMarketProfileRepository;
@@ -271,15 +273,57 @@ export class MarketProfileService {
 
   async updateIndustry(scope: MarketProfileCommandScope, input: Readonly<{
     industries: readonly Readonly<{ id: string; label: string; visibility: string }>[];
-    naics: readonly Readonly<{ id: string; code: string; title: string; version: string; source: string; provenance: string; visibility: string }>[];
+    naics: readonly Readonly<{ code: string; version: string; visibility: string }>[];
   }>) {
-    const requestFingerprint = fingerprint(input);
     const authorization = await this.authorize(scope);
+    if (
+      !Array.isArray(input.industries) ||
+      !Array.isArray(input.naics) ||
+      input.industries.length > 20 ||
+      input.naics.length > 30
+    ) {
+      throw new MarketProfileError("invalid", "Industry context exceeds supported limits.");
+    }
+    const release = await this.dependencies.naicsCatalog.getRelease();
+    const naics = await Promise.all(input.naics.map(async (selection) => {
+      if (
+        !selection ||
+        typeof selection.code !== "string" ||
+        typeof selection.version !== "string" ||
+        typeof selection.visibility !== "string"
+      ) {
+        throw new MarketProfileError("invalid", "Select a governed NAICS industry.");
+      }
+      const industry = await this.dependencies.naicsCatalog.getIndustry(
+        selection.code,
+        selection.version,
+      );
+      if (!industry) {
+        throw new MarketProfileError(
+          "invalid",
+          "Select a current industry from the governed NAICS release.",
+        );
+      }
+      return Object.freeze({
+        id: `naics-${industry.code}`,
+        code: industry.code,
+        title: industry.title,
+        version: release.version,
+        source: "participant_selected",
+        provenance: `Participant selected from ${release.sourceName} ${release.version} NAICS`,
+        visibility: selection.visibility,
+      });
+    }));
+    if (new Set(naics.map((industry) => industry.code)).size !== naics.length) {
+      throw new MarketProfileError("invalid", "Select each governed NAICS industry only once.");
+    }
+    const canonicalInput = Object.freeze({ industries: input.industries, naics });
+    const requestFingerprint = fingerprint(canonicalInput);
     const prior = await this.replay(scope, "industry-context-updated", requestFingerprint);
     if (prior) return Object.freeze({ replayed: true as const, receipt: prior });
     const now = this.now();
     const profile = marketProfileInput(
-      () => createIndustryProfile({ organizationId: authorization.organization.id, ...input, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
+      () => createIndustryProfile({ organizationId: authorization.organization.id, ...canonicalInput, userId: authorization.context.user.id, membershipId: authorization.membership.id, now }),
       "Industry context is invalid.",
     );
     const receipt = await this.persist({ scope, authorization, action: "industry-context-updated", subjectId: profile.id, requestFingerprint, record: { kind: "industry", value: profile }, now });

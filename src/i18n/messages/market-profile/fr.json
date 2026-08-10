@@ -51,7 +51,9 @@
     "placeholder": "Rechercher parmi les 615 capacités",
     "domain": "Domaine",
     "family": "Famille",
-    "resultsLabel": "Capacités AMACS"
+    "resultsLabel": "Capacités AMACS",
+    "resultCount": "{visible} capacités régies affichées sur {total}",
+    "showMore": "Afficher {count} capacités supplémentaires"
   },
   "claim": {
     "eyebrow": "Écriture autoritative distincte",
@@ -97,6 +99,17 @@
     "code": "Code NAICS",
     "naicsTitle": "Intitulé NAICS",
     "version": "Version",
+    "selectorTitle": "Sélection NAICS régie",
+    "selectorBody": "Sélectionnez une industrie exacte à six chiffres dans la classification {version} publiée par {source}. Les intitulés et versions ne peuvent pas être saisis manuellement.",
+    "search": "Rechercher un code ou un intitulé NAICS",
+    "searchPlaceholder": "Par exemple : 236220 ou construction commerciale",
+    "resultsLabel": "Industries NAICS régies",
+    "resultCount": "{visible} industries régies affichées sur {total}",
+    "showMore": "Afficher {count} industries supplémentaires",
+    "release": "NAICS {version}",
+    "clear": "Effacer la sélection NAICS",
+    "noneSelected": "Aucune industrie NAICS régie n’est sélectionnée.",
+    "sourceLink": "Ouvrir le fichier source de {source}",
     "boundaryTitle": "Classification descriptive",
     "boundaryBody": "Les données NAICS et sectorielles n’établissent ni capacité, ni certification, ni admissibilité, ni qualification, ni aptitude aux marchés publics.",
     "save": "Enregistrer le contexte sectoriel"

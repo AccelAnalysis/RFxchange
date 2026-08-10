@@ -4,12 +4,13 @@ import { readFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
-const [primitives, primitiveCss, contracts, exportsFile, participant, participantB2, roadmap] = await Promise.all([
+const [primitives, primitiveCss, contracts, exportsFile, participant, participantNavigation, participantB2, roadmap] = await Promise.all([
   read("src/components/ui/Primitives.tsx"),
   read("src/components/ui/Primitives.module.css"),
   read("src/components/ui/object-contracts.ts"),
   read("src/components/ui/index.ts"),
   read("src/components/participant/ParticipantWorkspace.tsx"),
+  read("src/components/participant/ParticipantTopNavigation.tsx"),
   read("src/components/participant/ParticipantWorkspaceB2.module.css"),
   read("docs/brand/BRAND_IMPLEMENTATION_ROADMAP.md"),
 ]);
@@ -90,6 +91,7 @@ assert.ok(
   "Brand B2 visual contracts must validate authoritative record/version/time provenance.",
 );
 
+const participantComponents = `${participant}\n${participantNavigation}`;
 for (const migration of [
   "NavigationFrame",
   "OverlayPanel",
@@ -99,10 +101,10 @@ for (const migration of [
   "StatusSummary",
   "VisuallyHidden",
 ]) {
-  assert.ok(participant.includes(migration), `Participant workspace has not migrated to shared ${migration}.`);
+  assert.ok(participantComponents.includes(migration), `Participant workspace has not migrated to shared ${migration}.`);
 }
 assert.ok(
-  participant.includes("Available in a later approved product slice") &&
+  !participantNavigation.includes("Opportunities") &&
     participant.includes("Opportunity and resource layers remain unavailable"),
   "Brand B2 must preserve truthful unavailable-layer language.",
 );

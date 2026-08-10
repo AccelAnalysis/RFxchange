@@ -57,6 +57,8 @@ Implementation and acceptance authority: [POST_WAVE_3_STABILIZATION_5_MAP_ACTIVA
 
 ### Stabilization 6 — data correctness and participant UX
 
+Implementation and acceptance authority: [POST_WAVE_3_STABILIZATION_6_DATA_CORRECTNESS.md](./POST_WAVE_3_STABILIZATION_6_DATA_CORRECTNESS.md).
+
 1. Carry stable sender and recipient organization IDs in referral projections; never join by display name.
 2. Replace silent AMACS result truncation with count, paging or virtualization, and deterministic hierarchical fallback.
 3. Replace free-text authoritative NAICS title/version entry with a governed versioned picker.

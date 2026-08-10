@@ -129,7 +129,7 @@ function WorkspaceBoundary({ status }: Readonly<{ status: Exclude<ExistingWorksp
   };
   const href = actionHref[status];
   return (
-    <ParticipantShell activeItem="Intelligence">
+    <ParticipantShell activeItem="Network">
       <main className={styles.stateWorkspace} aria-label={t("networkWorkspace.status.ariaLabel")}>
         <StatePanel
           state={status}
@@ -246,7 +246,7 @@ export function ExistingWorkspaceFoundation({
   };
 
   return (
-    <ParticipantShell activeItem="Intelligence">
+    <ParticipantShell activeItem="Network">
       <SpatialWorkspace ariaLabel={t("networkWorkspace.ariaLabel")}>
         <ExchangeSpatialScene
           model={model}

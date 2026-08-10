@@ -124,7 +124,7 @@ export function OrientationJourneyClient({
   const part = completed < 4 ? 1 : 2;
 
   return (
-    <ParticipantShell activeItem="Intelligence">
+    <ParticipantShell activeItem="Network">
       <SpatialWorkspace ariaLabel="RFxchange synthetic orientation workspace">
         <ExchangeSpatialScene
           model={model}

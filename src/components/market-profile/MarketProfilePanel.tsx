@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition, type FormEvent } from "react";
+import { useDeferredValue, useMemo, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import type { AiInterpretationCandidateEnvelope } from "../../domain/ai-interpretation/model";
 import type { AmacsCapability, AmacsDomain, AmacsFamily, AmacsReleaseMetadata } from "../../domain/amacs/model";
+import type { NaicsCatalogProjection } from "../../domain/naics/model";
 import type {
   OrganizationCapabilityClaim,
   OrganizationIndustryProfile,
@@ -39,7 +40,10 @@ interface MarketProfilePanelProps {
   }>;
   readonly marketRoles: readonly Readonly<{ id: string; label: string; definition: string }>[];
   readonly serviceGeographies: readonly Readonly<{ id: string; label: string }>[];
+  readonly naicsCatalog: NaicsCatalogProjection;
 }
+
+const GOVERNED_RESULT_INCREMENT = 30;
 
 async function postJson(path: string, body: unknown) {
   const response = await fetch(path, {
@@ -63,29 +67,33 @@ function splitLines(value: string): readonly string[] {
 export function MarketProfilePanel(props: MarketProfilePanelProps) {
   const router = useRouter();
   const { locale, t } = useI18n();
+  const numberFormat = useMemo(() => new Intl.NumberFormat(locale), [locale]);
   const [tab, setTab] = useState<Tab>("capabilities");
   const [notice, setNotice] = useState<Notice>(null);
   const [isPending, startTransition] = useTransition();
   const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const [domainId, setDomainId] = useState(props.catalog.domains[0]?.domainId ?? "");
   const availableFamilies = useMemo(
     () => props.catalog.families.filter((family) => family.domainId === domainId),
     [domainId, props.catalog.families],
   );
   const [familyId, setFamilyId] = useState("");
+  const [capabilityResultLimit, setCapabilityResultLimit] = useState(GOVERNED_RESULT_INCREMENT);
   const effectiveFamilyId = availableFamilies.some((family) => family.familyId === familyId)
     ? familyId
     : availableFamilies[0]?.familyId ?? "";
-  const visibleCapabilities = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase("en-US");
+  const matchingCapabilities = useMemo(() => {
+    const normalized = deferredQuery.trim().toLocaleLowerCase("en-US");
     return props.catalog.capabilities.filter((capability) => {
       if (normalized) {
         const corpus = [capability.preferredLabel, capability.definition, ...capability.aliases, capability.familyLabel, capability.domainLabel].join(" ").toLocaleLowerCase("en-US");
         return normalized.split(/\s+/).every((term) => corpus.includes(term));
       }
       return capability.familyId === effectiveFamilyId;
-    }).slice(0, 30);
-  }, [effectiveFamilyId, props.catalog.capabilities, query]);
+    });
+  }, [deferredQuery, effectiveFamilyId, props.catalog.capabilities]);
+  const visibleCapabilities = matchingCapabilities.slice(0, capabilityResultLimit);
   const [selectedCapabilityId, setSelectedCapabilityId] = useState("");
   const selectedCapability = props.catalog.capabilities.find((capability) => capability.conceptId === selectedCapabilityId) ?? null;
   const [claimSource, setClaimSource] = useState<
@@ -98,6 +106,26 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
   const [assistanceBusy, setAssistanceBusy] = useState(false);
   const [editingCandidateId, setEditingCandidateId] = useState("");
   const [editedCandidateValue, setEditedCandidateValue] = useState("");
+  const [naicsQuery, setNaicsQuery] = useState("");
+  const deferredNaicsQuery = useDeferredValue(naicsQuery);
+  const [naicsResultLimit, setNaicsResultLimit] = useState(GOVERNED_RESULT_INCREMENT);
+  const [selectedNaicsCode, setSelectedNaicsCode] = useState(
+    props.snapshot.industry?.naics[0]?.version === props.naicsCatalog.release.version
+      ? props.snapshot.industry.naics[0].code
+      : "",
+  );
+  const matchingNaics = useMemo(() => {
+    const terms = deferredNaicsQuery.trim().toLocaleLowerCase("en-US").split(/\s+/).filter(Boolean);
+    return props.naicsCatalog.entries.filter((industry) => {
+      if (!terms.length) return true;
+      const corpus = `${industry.code} ${industry.title}`.toLocaleLowerCase("en-US");
+      return terms.every((term) => corpus.includes(term));
+    });
+  }, [deferredNaicsQuery, props.naicsCatalog.entries]);
+  const visibleNaics = matchingNaics.slice(0, naicsResultLimit);
+  const selectedNaics = props.naicsCatalog.entries.find(
+    (industry) => industry.code === selectedNaicsCode,
+  ) ?? null;
 
   const refreshAfter = (message: Notice) => {
     setNotice(message);
@@ -209,9 +237,7 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const industries = splitLines(String(data.get("industries") ?? "")).map((label, index) => ({ id: `industry-${index + 1}-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 60)}`, label, visibility: String(data.get("visibility") ?? "network") }));
-    const naicsCode = String(data.get("naicsCode") ?? "").trim();
-    const naicsTitle = String(data.get("naicsTitle") ?? "").trim();
-    const naics = naicsCode || naicsTitle ? [{ id: `naics-${naicsCode}`, code: naicsCode, title: naicsTitle, version: String(data.get("naicsVersion") ?? "2022"), source: "participant_selected", provenance: "Selected by an authorized organization participant", visibility: String(data.get("visibility") ?? "network") }] : [];
+    const naics = selectedNaics ? [{ code: selectedNaics.code, version: props.naicsCatalog.release.version, visibility: String(data.get("visibility") ?? "network") }] : [];
     try {
       await postJson("/api/organization-market-profile", { organizationId: props.organizationId, commandId: commandId("industry"), action: "update-industry", input: { industries, naics } });
       refreshAfter({ tone: "success", title: t("marketProfile.notices.industrySavedTitle"), body: t("marketProfile.notices.industrySavedBody") });
@@ -329,15 +355,17 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
             <p className={styles.eyebrow}>{t("marketProfile.catalog.eyebrow")}</p>
             <h3 id="manual-catalog-title">{t("marketProfile.catalog.title")}</h3>
             <label>{t("marketProfile.catalog.search")}
-              <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("marketProfile.catalog.placeholder")} />
+              <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setCapabilityResultLimit(GOVERNED_RESULT_INCREMENT); }} placeholder={t("marketProfile.catalog.placeholder")} />
             </label>
             <div className={styles.twoColumns}>
-              <label>{t("marketProfile.catalog.domain")}<select value={domainId} onChange={(event) => { setDomainId(event.target.value); setFamilyId(""); setQuery(""); }} disabled={Boolean(query)}>{props.catalog.domains.map((domain) => <option key={domain.domainId} value={domain.domainId}>{domain.preferredLabel}</option>)}</select></label>
-              <label>{t("marketProfile.catalog.family")}<select value={effectiveFamilyId} onChange={(event) => { setFamilyId(event.target.value); setQuery(""); }} disabled={Boolean(query)}>{availableFamilies.map((family) => <option key={family.familyId} value={family.familyId}>{family.preferredLabel}</option>)}</select></label>
+              <label>{t("marketProfile.catalog.domain")}<select value={domainId} onChange={(event) => { setDomainId(event.target.value); setFamilyId(""); setQuery(""); setCapabilityResultLimit(GOVERNED_RESULT_INCREMENT); }} disabled={Boolean(query)}>{props.catalog.domains.map((domain) => <option key={domain.domainId} value={domain.domainId}>{domain.preferredLabel}</option>)}</select></label>
+              <label>{t("marketProfile.catalog.family")}<select value={effectiveFamilyId} onChange={(event) => { setFamilyId(event.target.value); setQuery(""); setCapabilityResultLimit(GOVERNED_RESULT_INCREMENT); }} disabled={Boolean(query)}>{availableFamilies.map((family) => <option key={family.familyId} value={family.familyId}>{family.preferredLabel}</option>)}</select></label>
             </div>
+            <p className={styles.resultSummary} role="status">{t("marketProfile.catalog.resultCount", { visible: numberFormat.format(visibleCapabilities.length), total: numberFormat.format(matchingCapabilities.length) })}</p>
             <div className={styles.catalogResults} role="group" aria-label={t("marketProfile.catalog.resultsLabel")}>
               {visibleCapabilities.map((capability) => <button key={capability.conceptId} type="button" aria-pressed={selectedCapabilityId === capability.conceptId} onClick={() => { setSelectedCapabilityId(capability.conceptId); setClaimSource({ kind: "manual" }); }}><strong>{capability.preferredLabel}</strong><span>{capability.domainLabel} · {capability.familyLabel}</span><small>{capability.definition}</small></button>)}
             </div>
+            {visibleCapabilities.length < matchingCapabilities.length ? <button className={styles.quietButton} type="button" onClick={() => setCapabilityResultLimit((current) => current + GOVERNED_RESULT_INCREMENT)}>{t("marketProfile.catalog.showMore", { count: numberFormat.format(Math.min(GOVERNED_RESULT_INCREMENT, matchingCapabilities.length - visibleCapabilities.length)) })}</button> : null}
           </section>
 
           {selectedCapability ? (
@@ -375,7 +403,21 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
         <form className={styles.singleForm} onSubmit={saveIndustry}>
           <h3>{t("marketProfile.industry.title")}</h3><p>{t("marketProfile.industry.body")}</p>
           <label>{t("marketProfile.industry.industries")}<textarea name="industries" defaultValue={props.snapshot.industry?.industries.map((item) => item.label).join("\n") ?? ""} /></label>
-          <div className={styles.threeColumns}><label>{t("marketProfile.industry.code")}<input name="naicsCode" inputMode="numeric" pattern="[0-9]{2,6}" defaultValue={props.snapshot.industry?.naics[0]?.code ?? ""} /></label><label>{t("marketProfile.industry.naicsTitle")}<input name="naicsTitle" defaultValue={props.snapshot.industry?.naics[0]?.title ?? ""} /></label><label>{t("marketProfile.industry.version")}<input name="naicsVersion" defaultValue={props.snapshot.industry?.naics[0]?.version ?? "2022"} /></label></div>
+          <fieldset className={styles.governedSelector}>
+            <legend>{t("marketProfile.industry.selectorTitle")}</legend>
+            <p className={styles.help}>{t("marketProfile.industry.selectorBody", { version: props.naicsCatalog.release.version, source: props.naicsCatalog.release.sourceName })}</p>
+            <div className={styles.twoColumns}>
+              <label>{t("marketProfile.industry.version")}<select value={props.naicsCatalog.release.version} disabled><option value={props.naicsCatalog.release.version}>{props.naicsCatalog.release.version}</option></select></label>
+              <label>{t("marketProfile.industry.search")}<input type="search" value={naicsQuery} onChange={(event) => { setNaicsQuery(event.target.value); setNaicsResultLimit(GOVERNED_RESULT_INCREMENT); }} placeholder={t("marketProfile.industry.searchPlaceholder")} /></label>
+            </div>
+            <p className={styles.resultSummary} role="status">{t("marketProfile.industry.resultCount", { visible: numberFormat.format(visibleNaics.length), total: numberFormat.format(matchingNaics.length) })}</p>
+            <div className={styles.catalogResults} role="group" aria-label={t("marketProfile.industry.resultsLabel")}>
+              {visibleNaics.map((industry) => <button key={industry.code} type="button" aria-pressed={selectedNaicsCode === industry.code} onClick={() => setSelectedNaicsCode(industry.code)}><strong>{industry.code}</strong><span>{industry.title}</span></button>)}
+            </div>
+            {visibleNaics.length < matchingNaics.length ? <button className={styles.quietButton} type="button" onClick={() => setNaicsResultLimit((current) => current + GOVERNED_RESULT_INCREMENT)}>{t("marketProfile.industry.showMore", { count: numberFormat.format(Math.min(GOVERNED_RESULT_INCREMENT, matchingNaics.length - visibleNaics.length)) })}</button> : null}
+            {selectedNaics ? <div className={styles.selectionSummary}><strong>{selectedNaics.code} · {selectedNaics.title}</strong><span>{props.naicsCatalog.release.sourceName} · {t("marketProfile.industry.release", { version: props.naicsCatalog.release.version })}</span><button className={styles.quietButton} type="button" onClick={() => setSelectedNaicsCode("")}>{t("marketProfile.industry.clear")}</button></div> : <p className={styles.help}>{t("marketProfile.industry.noneSelected")}</p>}
+            <a href={props.naicsCatalog.release.sourceUrl} target="_blank" rel="noreferrer">{t("marketProfile.industry.sourceLink", { source: props.naicsCatalog.release.sourceName })}</a>
+          </fieldset>
           <label>{t("marketProfile.common.visibility")}<select name="visibility" defaultValue={props.snapshot.industry?.industries[0]?.visibility ?? "network"}><option value="network">{t("marketProfile.common.network")}</option><option value="public">{t("marketProfile.common.public")}</option><option value="private">{t("marketProfile.common.private")}</option></select></label>
           <AlertBanner title={t("marketProfile.industry.boundaryTitle")} tone="information">{t("marketProfile.industry.boundaryBody")}</AlertBanner>
           <button className={styles.primaryButton} type="submit">{t("marketProfile.industry.save")}</button>

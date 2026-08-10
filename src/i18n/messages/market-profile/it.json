@@ -51,7 +51,9 @@
     "placeholder": "Cerca tutte le 615 capacità",
     "domain": "Dominio",
     "family": "Famiglia",
-    "resultsLabel": "Capacità AMACS"
+    "resultsLabel": "Capacità AMACS",
+    "resultCount": "Mostrate {visible} di {total} capacità governate",
+    "showMore": "Mostra altre {count} capacità"
   },
   "claim": {
     "eyebrow": "Scrittura autoritativa separata",
@@ -97,6 +99,17 @@
     "code": "Codice NAICS",
     "naicsTitle": "Titolo NAICS",
     "version": "Versione",
+    "selectorTitle": "Selezione NAICS governata",
+    "selectorBody": "Seleziona un settore esatto a sei cifre dalla classificazione {version} pubblicata da {source}. Titoli e versioni non possono essere inseriti manualmente.",
+    "search": "Cerca codice o titolo NAICS",
+    "searchPlaceholder": "Ad esempio: 236220 o costruzione commerciale",
+    "resultsLabel": "Settori NAICS governati",
+    "resultCount": "Mostrati {visible} di {total} settori governati",
+    "showMore": "Mostra altri {count} settori",
+    "release": "NAICS {version}",
+    "clear": "Cancella selezione NAICS",
+    "noneSelected": "Nessun settore NAICS governato selezionato.",
+    "sourceLink": "Apri il file sorgente di {source}",
     "boundaryTitle": "Classificazione descrittiva",
     "boundaryBody": "I dati NAICS e di settore non stabiliscono capacità, certificazione, idoneità, qualificazione o preparazione agli appalti.",
     "save": "Salva contesto di settore"

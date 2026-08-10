@@ -51,7 +51,9 @@
     "placeholder": "Alle 615 Fähigkeiten durchsuchen",
     "domain": "Domäne",
     "family": "Familie",
-    "resultsLabel": "AMACS-Fähigkeiten"
+    "resultsLabel": "AMACS-Fähigkeiten",
+    "resultCount": "{visible} von {total} verwalteten Fähigkeiten angezeigt",
+    "showMore": "Weitere {count} Fähigkeiten anzeigen"
   },
   "claim": {
     "eyebrow": "Separate verbindliche Speicherung",
@@ -97,6 +99,17 @@
     "code": "NAICS-Code",
     "naicsTitle": "NAICS-Bezeichnung",
     "version": "Version",
+    "selectorTitle": "Verwaltete NAICS-Auswahl",
+    "selectorBody": "Wählen Sie eine genaue sechsstellige Branche aus der von {source} veröffentlichten Klassifikation {version}. Titel und Versionen können nicht manuell eingegeben werden.",
+    "search": "NAICS-Code oder -Titel suchen",
+    "searchPlaceholder": "Zum Beispiel: 236220 oder Gewerbebau",
+    "resultsLabel": "Verwaltete NAICS-Branchen",
+    "resultCount": "{visible} von {total} verwalteten Branchen angezeigt",
+    "showMore": "Weitere {count} Branchen anzeigen",
+    "release": "NAICS {version}",
+    "clear": "NAICS-Auswahl löschen",
+    "noneSelected": "Keine verwaltete NAICS-Branche ausgewählt.",
+    "sourceLink": "Quelldatei von {source} öffnen",
     "boundaryTitle": "Beschreibende Klassifikation",
     "boundaryBody": "NAICS- und Branchendaten belegen weder Fähigkeit noch Zertifizierung, Berechtigung, Qualifikation oder Beschaffungsreife.",
     "save": "Branchenkontext speichern"

@@ -1,0 +1,9 @@
+{
+  "version": "2022",
+  "sourceName": "U.S. Census Bureau",
+  "sourceUrl": "https://www.census.gov/naics/2022NAICS/2022_NAICS_Structure.xlsx",
+  "retrievedAt": "2026-08-10",
+  "sourceSha256": "217c9e0d4d74e7517bc288f5f308b73aa0de5ee787976a6dd222412be28ada22",
+  "level": 6,
+  "entryCount": 1012
+}

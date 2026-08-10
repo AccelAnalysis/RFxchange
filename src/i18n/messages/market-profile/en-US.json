@@ -51,7 +51,9 @@
     "placeholder": "Search all 615 capabilities",
     "domain": "Domain",
     "family": "Family",
-    "resultsLabel": "AMACS capabilities"
+    "resultsLabel": "AMACS capabilities",
+    "resultCount": "{visible} of {total} governed capabilities shown",
+    "showMore": "Show {count} more capabilities"
   },
   "claim": {
     "eyebrow": "Separate authoritative write",
@@ -97,6 +99,17 @@
     "code": "NAICS code",
     "naicsTitle": "NAICS title",
     "version": "Version",
+    "selectorTitle": "Governed NAICS selection",
+    "selectorBody": "Select an exact six-digit industry from the {version} classification published by the {source}. Titles and versions cannot be entered manually.",
+    "search": "Search NAICS code or title",
+    "searchPlaceholder": "For example: 236220 or commercial construction",
+    "resultsLabel": "Governed NAICS industries",
+    "resultCount": "{visible} of {total} governed industries shown",
+    "showMore": "Show {count} more industries",
+    "release": "NAICS {version}",
+    "clear": "Clear NAICS selection",
+    "noneSelected": "No governed NAICS industry selected.",
+    "sourceLink": "Open the {source} source file",
     "boundaryTitle": "Descriptive classification",
     "boundaryBody": "NAICS and industry data do not establish capability, certification, eligibility, qualification, or procurement readiness.",
     "save": "Save industry context"

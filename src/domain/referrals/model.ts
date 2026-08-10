@@ -157,6 +157,7 @@ export interface SenderReferralProjection {
   readonly role: "sender";
   readonly id: string;
   readonly version: number;
+  readonly senderOrganizationId: OrganizationId;
   readonly recipientLabel: string;
   readonly recipientKind: ReferralRecipient["kind"];
   readonly recipientOrganizationId: OrganizationId | null;
@@ -195,7 +196,7 @@ export function projectReferralNotificationStatus(
     : communication.status;
 }
 
-export interface RecipientReferralProjection extends Omit<SenderReferralProjection, "role" | "recipientKind" | "recipientOrganizationId"> {
+export interface RecipientReferralProjection extends Omit<SenderReferralProjection, "role" | "recipientKind"> {
   readonly role: "recipient";
   readonly senderOrganizationName: string;
 }
@@ -331,8 +332,8 @@ export function attachReferralRecipient(input: Readonly<{
 }
 
 export function projectReferral(referral: BusinessReferral, organizationId: OrganizationId): SenderReferralProjection | RecipientReferralProjection | null {
-  const base = Object.freeze({ id: referral.id, version: referral.version, recipientLabel: referral.recipient.displayName, need: referral.need, summary: referral.summary, urgency: referral.urgency, preferredContactMethod: referral.preferredContactMethod, purpose: referral.purpose, opportunityReference: referral.opportunityReference, providerContext: referral.providerContext ?? null, providerRedirect: referral.providerRedirect ?? null, sharedFields: referral.sharedFields, status: referral.status, outcome: referral.outcome, correlationId: referral.correlationId, notificationStatus: referral.communicationMessageId ? "queued" as const : "unavailable" as const, createdAt: referral.createdAt, sentAt: referral.sentAt, expiresAt: referral.expiresAt, updatedAt: referral.updatedAt });
-  if (organizationId === referral.senderOrganizationId) return Object.freeze({ ...base, role: "sender" as const, recipientKind: referral.recipient.kind, recipientOrganizationId: referral.attachedRecipientOrganizationId });
+  const base = Object.freeze({ id: referral.id, version: referral.version, senderOrganizationId: referral.senderOrganizationId, recipientLabel: referral.recipient.displayName, recipientOrganizationId: referral.attachedRecipientOrganizationId, need: referral.need, summary: referral.summary, urgency: referral.urgency, preferredContactMethod: referral.preferredContactMethod, purpose: referral.purpose, opportunityReference: referral.opportunityReference, providerContext: referral.providerContext ?? null, providerRedirect: referral.providerRedirect ?? null, sharedFields: referral.sharedFields, status: referral.status, outcome: referral.outcome, correlationId: referral.correlationId, notificationStatus: referral.communicationMessageId ? "queued" as const : "unavailable" as const, createdAt: referral.createdAt, sentAt: referral.sentAt, expiresAt: referral.expiresAt, updatedAt: referral.updatedAt });
+  if (organizationId === referral.senderOrganizationId) return Object.freeze({ ...base, role: "sender" as const, recipientKind: referral.recipient.kind });
   if (referral.status !== "draft" && organizationId === referral.attachedRecipientOrganizationId) return Object.freeze({ ...base, role: "recipient" as const, senderOrganizationName: referral.senderOrganizationName });
   return null;
 }
