@@ -58,6 +58,21 @@ PR #142 specifically removed duplicate activation reconstruction, returning-user
 3. Replace free-text authoritative NAICS title/version entry with a governed versioned picker.
 4. Align participant mobile navigation with the currently live Network destinations while keeping future RFx surfaces clearly non-live.
 
+### Stabilization 7 — administrative portal runtime convergence
+
+This is a no-Feature-ID integration gate over already accepted administrative foundations, including `ADM-057` and the existing command-center/User 360 foundations. It must not reopen or change their tracker completion state merely to make their approved components reachable in the production runtime.
+
+1. Add a server-authorized `/admin` entry that resolves the authenticated RFxchange session to a persisted platform-administrator account, privileged-security state, authority context and active grants before selecting an administrative destination. Route an administrator to `/admin/overview` only when that section is permitted **and its truthful runtime is registered as available**; otherwise route to the first actually permitted, implemented administrative section. Non-administrators must fail closed.
+2. Preserve `buildAdministrativeCommandCenter` as the accepted strict `ADM-058`/`ADM-059` projection: it must continue to require exact coverage for all ten queues and all seven health panels. `/admin/overview` must not call that builder until every required provider has a truthful authoritative source. Stabilization 7 may instead introduce a separate, bounded administrative runtime-overview projection that reports only implemented protected surfaces and existing operational sources, with explicit unavailable state for future-domain slots and no fabricated zero counts, health states or metrics. If neither a complete strict command center nor that truthful availability-aware overview is implemented, withhold `/admin/overview` and route to the first permitted implemented section.
+3. Add an `Administration` entry from the authenticated Account/Menu experience only when the server-resolved identity has legitimate administrative access. Ordinary participants must not receive an administrative affordance solely because they are signed in.
+4. Make the canonical administrative navigation production-safe through an explicit server-owned implemented-runtime registry: a destination is visible only when both the administrator's current permission/grant scope permits it and its protected runtime is registered as implemented. Permission visibility alone is not runtime availability. Withhold dead administrative links and future domains; do not create placeholder authority or fabricate RFx, commerce, credibility or other domain state.
+5. Preserve minimum-necessary permission and scope checks on every section and action. Portal entry and navigation visibility never grant feature authority, organization authority, entitlement, credibility, lifecycle or RFx authority.
+6. Add configured-browser acceptance for Super Admin entry, narrower permission-and-runtime-filtered navigation, direct-route denial, truthful overview availability or deferral, recent-reauthentication handling, return-to behavior after sign-in and absence of administrative navigation for a normal participant.
+
+### Stabilization 7 boundary
+
+This gate makes the already-approved administrative information architecture operationally reachable and coherent. It does not weaken the strict accepted command-center coverage contract, create new administrative powers, implement future administrative Feature IDs, begin RFx Core, or change tracker totals. Any administrative domain whose underlying runtime or authoritative provider is still future work remains explicitly unavailable or absent rather than being simulated by the portal shell.
+
 ## Release discipline
 
 Each stabilization correction is implemented and reviewed separately. A correction may not change tracker totals or mark a future RFx, credibility, outcome, commercial, or administrative Feature ID complete. Production CI and focused regression coverage are required before merge.
