@@ -15,6 +15,7 @@ export interface BackgroundTransactionalEmailDeliveryReceipt {
 export interface TransactionalEmailProviderFailureClassification {
   readonly code: string;
   readonly retryable: boolean;
+  readonly deliveryOutcome: "known-failure" | "unknown";
   readonly providerKey: string;
   readonly externalReference: string | null;
   readonly retryAfterSeconds: number | null;
@@ -33,6 +34,7 @@ export function classifyTransactionalEmailProviderFailure(
   const candidate = error as {
     readonly code?: unknown;
     readonly retryable?: unknown;
+    readonly deliveryOutcome?: unknown;
     readonly providerKey?: unknown;
     readonly externalReference?: unknown;
     readonly retryAfterSeconds?: unknown;
@@ -40,6 +42,8 @@ export function classifyTransactionalEmailProviderFailure(
   if (
     typeof candidate.code !== "string" ||
     typeof candidate.retryable !== "boolean" ||
+    (candidate.deliveryOutcome !== undefined &&
+      !["known-failure", "unknown"].includes(String(candidate.deliveryOutcome))) ||
     typeof candidate.providerKey !== "string"
   ) {
     return null;
@@ -59,6 +63,7 @@ export function classifyTransactionalEmailProviderFailure(
     ? Object.freeze({
         code,
         retryable: candidate.retryable,
+        deliveryOutcome: candidate.deliveryOutcome === "unknown" ? "unknown" : "known-failure",
         providerKey,
         externalReference,
         retryAfterSeconds,
@@ -98,6 +103,12 @@ export function transactionalEmailBackgroundJobHandler(
         );
       }
       const code = `transactional-email-${failure.providerKey}-${failure.code}`.slice(0, 120);
+      if (failure.deliveryOutcome === "unknown") {
+        throw terminalBackgroundJobError(
+          `${code}-delivery-outcome-unknown`.slice(0, 120),
+          "Transactional email delivery requires reconciliation and must not be retried automatically.",
+        );
+      }
       throw failure.retryable
         ? retryableBackgroundJobError(code, "Transactional email delivery should be retried.")
         : terminalBackgroundJobError(code, "Transactional email delivery must not be retried.");

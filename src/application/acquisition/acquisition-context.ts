@@ -6,6 +6,8 @@ import {
   boundAcquisitionContext,
   createAcquisitionContextEnvelope,
   createAcquisitionContextEvent,
+  type AcquisitionContextEnvelope,
+  type AcquisitionContextEvent,
   type AcquisitionIntentKind,
   type AcquisitionSourceChannel,
   type BoundAcquisitionContext,
@@ -24,6 +26,12 @@ export interface AcquisitionContextToken {
   readonly browserSecret: string;
 }
 
+export interface PreparedAcquisitionContext {
+  readonly token: AcquisitionContextToken;
+  readonly context: AcquisitionContextEnvelope;
+  readonly event: AcquisitionContextEvent;
+}
+
 export interface AcquisitionContextServiceDependencies {
   readonly contexts: AcquisitionContextRepository;
   readonly opportunities: PublicOpportunityProjectionRepository;
@@ -37,6 +45,21 @@ export interface AcquisitionContextServiceDependencies {
   }>;
   readonly now: () => string;
 }
+
+type TrustedAcquisitionInput = Readonly<{
+  kind: Exclude<AcquisitionIntentKind, "opportunity" | "direct">;
+  subjectReference: string;
+  channel: Exclude<AcquisitionSourceChannel, "public-opportunity" | "direct">;
+  sourceReference?: string | null;
+  referrer?: string | null;
+}>;
+
+type PreparedIdentity = Readonly<{
+  contextId?: string;
+  eventId?: string;
+  browserSecret?: string;
+  issuedAt?: string;
+}>;
 
 function expiryFrom(now: string): string {
   return new Date(new Date(now).valueOf() + CONTEXT_LIFETIME_MS).toISOString();
@@ -81,30 +104,35 @@ export class AcquisitionContextService {
   }
 
   /**
-   * Server-internal issuance seam for later approved claim/referral/team/provider/buyer workflows.
-   * No public route accepts these values in Slice 2.9.
+   * Server-internal issuance seam for approved claim/referral/team/provider/buyer workflows.
    */
-  async issueTrusted(input: Readonly<{
-    kind: Exclude<AcquisitionIntentKind, "opportunity" | "direct">;
-    subjectReference: string;
-    channel: Exclude<AcquisitionSourceChannel, "public-opportunity" | "direct">;
-    sourceReference?: string | null;
-    referrer?: string | null;
-  }>): Promise<AcquisitionContextToken> {
+  async issueTrusted(input: TrustedAcquisitionInput): Promise<AcquisitionContextToken> {
     return this.issue(input);
   }
 
-  private async issue(input: Readonly<{
+  /**
+   * Builds a valid context, issued event, and browser token without writing them. An application
+   * transaction coordinator may include the returned context and event in the same database
+   * transaction as the business object that owns the invitation. The browser secret remains only
+   * in the returned token; persistence receives its digest.
+   */
+  prepareTrusted(
+    input: TrustedAcquisitionInput & PreparedIdentity,
+  ): PreparedAcquisitionContext {
+    return this.prepare(input);
+  }
+
+  private prepare(input: Readonly<{
     kind: AcquisitionIntentKind;
     subjectReference?: string | null;
     channel: AcquisitionSourceChannel;
     sourceReference?: string | null;
     referrer?: string | null;
-  }>): Promise<AcquisitionContextToken> {
-    const now = new Date(this.dependencies.now()).toISOString();
-    const browserSecret = this.dependencies.secrets.create();
+  }> & PreparedIdentity): PreparedAcquisitionContext {
+    const now = new Date(input.issuedAt ?? this.dependencies.now()).toISOString();
+    const browserSecret = input.browserSecret?.trim() || this.dependencies.secrets.create();
     const context = createAcquisitionContextEnvelope({
-      id: this.dependencies.ids.context(),
+      id: input.contextId?.trim() || this.dependencies.ids.context(),
       intent: acquisitionIntent({
         kind: input.kind,
         subjectReference: input.subjectReference,
@@ -118,16 +146,29 @@ export class AcquisitionContextService {
       issuedAt: now,
       expiresAt: expiryFrom(now),
     });
-    await this.dependencies.contexts.create(
+    const event = createAcquisitionContextEvent({
+      id: input.eventId?.trim() || this.dependencies.ids.event(),
       context,
-      createAcquisitionContextEvent({
-        id: this.dependencies.ids.event(),
-        context,
-        kind: "issued",
-        occurredAt: now,
-      }),
-    );
-    return Object.freeze({ contextId: context.id, browserSecret });
+      kind: "issued",
+      occurredAt: now,
+    });
+    return Object.freeze({
+      token: Object.freeze({ contextId: context.id, browserSecret }),
+      context,
+      event,
+    });
+  }
+
+  private async issue(input: Readonly<{
+    kind: AcquisitionIntentKind;
+    subjectReference?: string | null;
+    channel: AcquisitionSourceChannel;
+    sourceReference?: string | null;
+    referrer?: string | null;
+  }>): Promise<AcquisitionContextToken> {
+    const prepared = this.prepare(input);
+    await this.dependencies.contexts.create(prepared.context, prepared.event);
+    return prepared.token;
   }
 
   async bind(input: Readonly<{

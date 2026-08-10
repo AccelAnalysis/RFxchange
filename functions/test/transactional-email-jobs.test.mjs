@@ -44,3 +44,22 @@ test("transactional email job handler maps provider retryability into INF-007 er
     );
   }
 });
+
+test("transactional email job handler never automatically retries an unknown delivery outcome", async () => {
+  const handler = transactionalEmailBackgroundJobHandler(async () => {
+    throw {
+      code: "graph-transport-unavailable",
+      retryable: true,
+      deliveryOutcome: "unknown",
+      providerKey: "microsoft-graph",
+    };
+  });
+  await assert.rejects(
+    () => handler({ request: {}, jobId: "job-unknown", attemptNumber: 1 }),
+    (error) => {
+      assert.equal(error.retryable, false);
+      assert.match(error.code, /delivery-outcome-unknown/);
+      return true;
+    },
+  );
+});

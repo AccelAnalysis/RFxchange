@@ -126,6 +126,12 @@ export interface ReferralCommunicationIntent {
   readonly status: "queued" | "accepted" | "retryable-failure" | "terminal-failure";
   readonly attemptCount: number;
   readonly lastErrorCode: string | null;
+  readonly deliveryClaim?: Readonly<{
+    readonly id: string;
+    readonly claimedAt: string;
+    readonly expiresAt: string;
+    readonly outcome: "unknown";
+  }> | null;
   readonly updatedAt: string;
 }
 
@@ -135,6 +141,16 @@ export interface ReferralPersistenceBundle {
   readonly command: ReferralCommandReceipt;
   readonly audits: readonly OrganizationActionAuditEvent[];
   readonly communication: ReferralCommunicationIntent | null;
+}
+
+export function referralInvitationDeliveryPermitted(
+  referral: Pick<BusinessReferral, "communicationMessageId" | "status" | "recipient" | "attachedRecipientOrganizationId">,
+  communication: ReferralCommunicationIntent | null,
+): communication is ReferralCommunicationIntent {
+  if (!communication || referral.communicationMessageId !== communication.id) return false;
+  if (referral.status !== "sent") return false;
+  if (referral.recipient.kind === "external" && referral.attachedRecipientOrganizationId !== null) return false;
+  return communication.status === "queued" || communication.status === "retryable-failure";
 }
 
 export interface SenderReferralProjection {
@@ -156,11 +172,27 @@ export interface SenderReferralProjection {
   readonly status: ReferralStatus;
   readonly outcome: ReferralOutcome | null;
   readonly correlationId: string;
-  readonly notificationStatus: "unavailable" | "queued" | "accepted" | "retryable-failure" | "terminal-failure";
+  readonly notificationStatus: ReferralNotificationStatus;
   readonly createdAt: string;
   readonly sentAt: string | null;
   readonly expiresAt: string;
   readonly updatedAt: string;
+}
+
+export type ReferralNotificationStatus =
+  | "unavailable"
+  | "queued"
+  | "accepted"
+  | "retryable-failure"
+  | "terminal-failure"
+  | "delivery-outcome-unknown";
+
+export function projectReferralNotificationStatus(
+  communication: ReferralCommunicationIntent,
+): ReferralNotificationStatus {
+  return communication.deliveryClaim?.outcome === "unknown"
+    ? "delivery-outcome-unknown"
+    : communication.status;
 }
 
 export interface RecipientReferralProjection extends Omit<SenderReferralProjection, "role" | "recipientKind" | "recipientOrganizationId"> {

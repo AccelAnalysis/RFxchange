@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import type { ProviderDiscoveryProjection, ProviderRequestMessageProjection, ProviderResourceProjection } from "../../domain/resource-network/model";
@@ -11,6 +11,10 @@ import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { MapboxLocalityCanvas, type ControlledLocalityPointOverlay, type ControlledLocalityServiceField } from "../map/MapboxLocalityCanvas";
 import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
+import {
+  clearRetryStableCommand,
+  resolveRetryStableCommand,
+} from "../referrals/retry-stable-command";
 
 import styles from "./ResourceNetworkWorkspace.module.css";
 
@@ -24,9 +28,12 @@ interface Props {
   readonly resources: readonly ProviderResourceProjection[];
   readonly referrals: readonly Referral[];
   readonly owner: Owner;
+  readonly commandRecoveryScope: string;
   readonly initialQuery?: string;
   readonly messageThreads: Readonly<Record<string, readonly ProviderRequestMessageProjection[]>>;
 }
+
+const PROVIDER_REQUEST_STORAGE_KEY = "rfxchange:provider-request-create-and-send";
 
 function readable(value: string) { return value.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" "); }
 function requestPartyLabel(referral: Referral, organizationId: string): string {
@@ -34,13 +41,23 @@ function requestPartyLabel(referral: Referral, organizationId: string): string {
   return referral.role === "recipient" ? referral.senderOrganizationName : "Your organization";
 }
 
-export function ResourceNetworkWorkspace({ model, homeMarker, providers, resources, referrals, owner, initialQuery = "", messageThreads }: Props) {
+function browserSessionStorage(): Storage | null {
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+export function ResourceNetworkWorkspace({ model, homeMarker, providers, resources, referrals, owner, commandRecoveryScope, initialQuery = "", messageThreads }: Props) {
   const { t } = useI18n();
   const [selectedId, setSelectedId] = useState(providers[0] ? String(providers[0].organizationId) : "");
   const [query, setQuery] = useState(initialQuery);
   const [availability, setAvailability] = useState("all");
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const providerRequestCommandRef = useRef<Readonly<{ fingerprint: string; commandId: string }> | null>(null);
+  const providerRequestStorageKey = `${PROVIDER_REQUEST_STORAGE_KEY}:${encodeURIComponent(commandRecoveryScope)}`;
   const selected = providers.find((provider) => String(provider.organizationId) === selectedId) ?? null;
   const visible = providers.filter((provider) => {
     const corpus = `${provider.displayName} ${provider.categories.join(" ")} ${provider.services.map((service) => `${service.name} ${service.description}`).join(" ")}`.toLowerCase();
@@ -65,16 +82,42 @@ export function ResourceNetworkWorkspace({ model, homeMarker, providers, resourc
     const serviceId = String(form.get("serviceId") ?? "");
     const summary = String(form.get("summary") ?? "");
     if (form.get("consent") !== "yes") { setNotice("Review and acknowledge the exact recipient and shared information before sending."); return; }
+    const operationFingerprint = JSON.stringify({
+      providerOrganizationId: String(selected.organizationId),
+      serviceId,
+      publicationVersion: selected.publicationVersion,
+      summary,
+    });
+    const priorOperation = providerRequestCommandRef.current;
+    const commandId = priorOperation?.fingerprint === operationFingerprint
+      ? priorOperation.commandId
+      : resolveRetryStableCommand({
+          storage: browserSessionStorage(),
+          storageKey: providerRequestStorageKey,
+          fingerprint: operationFingerprint,
+          prefix: "provider-create-send",
+        });
+    providerRequestCommandRef.current = Object.freeze({
+      fingerprint: operationFingerprint,
+      commandId,
+    });
     setBusy(true); setNotice(null);
     try {
       const sharedFields = ["sender-organization", "summary"];
-      await post("/api/referrals", { action: "education", commandId: `provider-education-${crypto.randomUUID()}`, recipientLabel: selected.displayName, sharedFields });
-      const created = await post("/api/referrals", { action: "create", commandId: `provider-create-${crypto.randomUUID()}`, recipientKind: "organization", recipientOrganizationId: String(selected.organizationId), recipientLabel: selected.displayName, need: "introduction", summary, urgency: "standard", preferredContactMethod: "platform", purpose: "provider-connection", providerOrganizationId: String(selected.organizationId), serviceId, publicationVersion: selected.publicationVersion, sharedFields, consentAcknowledged: true });
-      const referral = created.referral as Referral;
-      await post("/api/referrals", { action: "send", commandId: `provider-send-${crypto.randomUUID()}`, referralId: referral.id, expectedVersion: referral.version });
+      await post("/api/referrals", { action: "create-and-send", commandId, recipientKind: "organization", recipientOrganizationId: String(selected.organizationId), recipientLabel: selected.displayName, need: "introduction", summary, urgency: "standard", preferredContactMethod: "platform", purpose: "provider-connection", providerOrganizationId: String(selected.organizationId), serviceId, publicationVersion: selected.publicationVersion, sharedFields, consentAcknowledged: true });
+      clearRetryStableCommand({
+        storage: browserSessionStorage(),
+        storageKey: providerRequestStorageKey,
+        commandId,
+      });
+      providerRequestCommandRef.current = null;
       setNotice(`Request sent to ${selected.displayName}.`);
       window.location.reload();
-    } catch (error) { setNotice(error instanceof Error ? error.message : "Request failed."); }
+    } catch (error) {
+      // An uncertain response keeps the same command in memory and actor-scoped session storage.
+      // Re-entering the same provider, service, publication and summary after reload replays it.
+      setNotice(error instanceof Error ? error.message : "Request failed.");
+    }
     finally { setBusy(false); }
   }
 
@@ -105,7 +148,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, providers, resourc
         </div>
         <section className={styles.fieldAlternative} aria-label="Accessible service territory descriptions"><h2>Service territories</h2><ul>{providers.map((provider) => <li key={String(provider.organizationId)}><strong>{provider.displayName}</strong><span>Serves {provider.territory.name}; this field is separate from the provider&apos;s office marker.</span></li>)}</ul></section>
         {resources.length ? <section className={styles.resources}><h2>Published resources</h2><ul>{resources.map((resource) => <li key={resource.id}><strong>{resource.title}</strong><span>{resource.providerDisplayName} · {readable(resource.kind)}</span><p>{resource.summary}</p>{resource.intakeUrl ? <a href={resource.intakeUrl}>Open intake information</a> : null}</li>)}</ul></section> : null}
-        <section className={styles.requests}><h2>Provider requests</h2>{providerReferrals.length ? <ul>{providerReferrals.map((referral) => <li key={referral.id}><strong>{referral.role === "sender" ? referral.recipientLabel : referral.senderOrganizationName}</strong><span>{readable(referral.status)}</span><p>{referral.summary}</p>{referral.role === "recipient" && referral.status === "sent" ? <div><WorkflowExplainer explainerKey="provider-response" /><button disabled={busy} onClick={() => referralAction({ action: "accepted", referralId: referral.id, expectedVersion: referral.version })}>Accept</button><button disabled={busy} onClick={() => referralAction({ action: "declined", referralId: referral.id, expectedVersion: referral.version })}>Decline</button><form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); referralAction({ action: "redirected", referralId: referral.id, expectedVersion: referral.version, suggestedProviderOrganizationId: data.get("provider"), redirectReason: data.get("reason") }); }}><label>Suggest another published provider<select name="provider" required><option value="">Choose provider</option>{providers.filter((provider) => String(provider.organizationId) !== String(referral.providerContext?.providerOrganizationId)).map((provider) => <option key={String(provider.organizationId)} value={String(provider.organizationId)}>{provider.displayName}</option>)}</select></label><label>Reason<input name="reason" required maxLength={600} /></label><button disabled={busy}>Redirect</button></form></div> : null}{["sent", "accepted", "contacted"].includes(referral.status) ? <form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); resourceAction({ action: "message-add", referralId: referral.id, message: data.get("message") }); }}><label>Private request message<textarea name="message" required maxLength={2000} /></label><button disabled={busy}>Add message</button></form> : null}{referral.providerRedirect ? <p>Suggested provider: {referral.providerRedirect.suggestedProviderDisplayName}. {referral.providerRedirect.reason}</p> : null}</li>)}</ul> : <p>No provider requests yet.</p>}</section>
+        <section className={styles.requests}><h2>Provider requests</h2>{providerReferrals.length ? <ul>{providerReferrals.map((referral) => <li key={referral.id}><strong>{referral.role === "sender" ? referral.recipientLabel : referral.senderOrganizationName}</strong><span>{readable(referral.status)}</span>{referral.notificationStatus === "delivery-outcome-unknown" ? <p className={styles.notice} role="status">{t("referralWorkspace.notificationStates.deliveryOutcomeUnknown")}</p> : null}<p>{referral.summary}</p>{referral.role === "recipient" && referral.status === "sent" ? <div><WorkflowExplainer explainerKey="provider-response" /><button disabled={busy} onClick={() => referralAction({ action: "accepted", referralId: referral.id, expectedVersion: referral.version })}>Accept</button><button disabled={busy} onClick={() => referralAction({ action: "declined", referralId: referral.id, expectedVersion: referral.version })}>Decline</button><form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); referralAction({ action: "redirected", referralId: referral.id, expectedVersion: referral.version, suggestedProviderOrganizationId: data.get("provider"), redirectReason: data.get("reason") }); }}><label>Suggest another published provider<select name="provider" required><option value="">Choose provider</option>{providers.filter((provider) => String(provider.organizationId) !== String(referral.providerContext?.providerOrganizationId)).map((provider) => <option key={String(provider.organizationId)} value={String(provider.organizationId)}>{provider.displayName}</option>)}</select></label><label>Reason<input name="reason" required maxLength={600} /></label><button disabled={busy}>Redirect</button></form></div> : null}{["sent", "accepted", "contacted"].includes(referral.status) ? <form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); resourceAction({ action: "message-add", referralId: referral.id, message: data.get("message") }); }}><label>Private request message<textarea name="message" required maxLength={2000} /></label><button disabled={busy}>Add message</button></form> : null}{referral.providerRedirect ? <p>Suggested provider: {referral.providerRedirect.suggestedProviderDisplayName}. {referral.providerRedirect.reason}</p> : null}</li>)}</ul> : <p>No provider requests yet.</p>}</section>
         {owner?.serviceProfile ? <OwnerManagement owner={Object.freeze({ ...owner, serviceProfile: owner.serviceProfile })} busy={busy} onSubmit={resourceAction} /> : null}
         {Object.values(messageThreads).some((messages) => messages.length) ? <section className={styles.requests}><h2>Request communication history</h2>{Object.entries(messageThreads).map(([referralId, messages]) => { const referral = providerReferrals.find((candidate) => candidate.id === referralId); return messages.length && referral ? <article key={referralId}><strong>{referral.role === "recipient" ? referral.senderOrganizationName : referral.recipientLabel}</strong><ol>{messages.map((message) => <li key={message.id}><small>{requestPartyLabel(referral, String(message.authorOrganizationId))} · {new Date(message.createdAt).toLocaleString()}</small><p>{message.body}</p></li>)}</ol></article> : null; })}</section> : null}
       </aside>

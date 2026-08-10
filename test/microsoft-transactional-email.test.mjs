@@ -218,6 +218,7 @@ test("COMMS-002 classifies Graph throttling and permanent failures without leaki
       (error) => {
         assert.equal(error instanceof TransactionalEmailProviderError, true);
         assert.equal(error.retryable, scenario.expectedRetryable);
+        assert.equal(error.deliveryOutcome, "known-failure");
         assert.equal(error.externalReference, `failure-${scenario.status}`);
         assert.equal(error.retryAfterSeconds, scenario.expectedRetryAfter);
         assert.match(error.code, new RegExp(scenario.providerCode.toLowerCase()));
@@ -226,6 +227,57 @@ test("COMMS-002 classifies Graph throttling and permanent failures without leaki
       },
     );
   }
+});
+
+test("COMMS-002 distinguishes known pre-dispatch failure from an unknown Graph dispatch outcome", async () => {
+  const identityUnavailable = new TransactionalEmailService(
+    new MicrosoftGraphTransactionalEmailProvider(
+      configuration,
+      renderer,
+      async () => { throw new Error("identity transport unavailable"); },
+      () => new Date(NOW),
+    ),
+  );
+  await assert.rejects(
+    () => identityUnavailable.request(emailInput("message-identity-unavailable")),
+    (error) => {
+      assert.equal(error instanceof TransactionalEmailProviderError, true);
+      assert.equal(error.code, "microsoft-identity-unavailable");
+      assert.equal(error.retryable, true);
+      assert.equal(error.deliveryOutcome, "known-failure");
+      return true;
+    },
+  );
+
+  let callCount = 0;
+  const graphOutcomeUnknown = new TransactionalEmailService(
+    new MicrosoftGraphTransactionalEmailProvider(
+      configuration,
+      renderer,
+      async () => {
+        callCount += 1;
+        if (callCount === 1) {
+          return new Response(JSON.stringify({
+            token_type: "Bearer",
+            expires_in: 3600,
+            access_token: "opaque-access-token",
+          }), { status: 200, headers: { "content-type": "application/json" } });
+        }
+        throw new Error("response lost after dispatch");
+      },
+      () => new Date(NOW),
+    ),
+  );
+  await assert.rejects(
+    () => graphOutcomeUnknown.request(emailInput("message-graph-outcome-unknown")),
+    (error) => {
+      assert.equal(error instanceof TransactionalEmailProviderError, true);
+      assert.equal(error.code, "microsoft-graph-unavailable");
+      assert.equal(error.retryable, false);
+      assert.equal(error.deliveryOutcome, "unknown");
+      return true;
+    },
+  );
 });
 
 test("COMMS-002 delivery composes with INF-007 response recording and retry classification", async () => {
@@ -299,6 +351,7 @@ test("COMMS-002 delivery composes with INF-007 response recording and retry clas
       code: "microsoft-graph-toomanyrequests",
       message: "Throttled.",
       retryable: true,
+      deliveryOutcome: "known-failure",
       providerKey: "microsoft-graph",
     });
   });

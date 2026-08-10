@@ -113,6 +113,28 @@ test("sender and recipient projections minimize private invitation and actor dat
   assert.equal(projectReferral(sent.referral, f.organizations[1].id), null);
 });
 
+test("participant snapshot exposes a durable unknown delivery outcome without converting it to retryable failure", async () => {
+  const f = fixture();
+  const sent = await f.prepareAndSend({ kind: "external", displayName: "External Recipient", email: "recipient@example.test" });
+  f.state.communications.set(sent.communication.id, Object.freeze({
+    ...sent.communication,
+    deliveryClaim: Object.freeze({
+      id: "delivery-claim-unknown",
+      claimedAt: START,
+      expiresAt: "2026-08-08T15:01:00.000Z",
+      outcome: "unknown",
+    }),
+  }));
+
+  const snapshot = await f.service.snapshot({
+    context: f.contexts[0],
+    organizationId: f.organizations[0].id,
+    membershipId: f.memberships[0].id,
+  });
+  assert.equal(snapshot.length, 1);
+  assert.equal(snapshot[0].notificationStatus, "delivery-outcome-unknown");
+});
+
 test("external invitations reuse one referral, acquisition context, and versioned communication intent", async () => {
   const f = fixture();
   const sent = await f.prepareAndSend({ kind: "external", displayName: "External Recipient", email: "recipient@example.test" });

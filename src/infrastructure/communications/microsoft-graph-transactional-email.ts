@@ -72,6 +72,7 @@ function configurationError(message: string): TransactionalEmailProviderError {
     code: "microsoft-email-configuration-invalid",
     message,
     retryable: false,
+    deliveryOutcome: "known-failure",
     providerKey: MICROSOFT_GRAPH_TRANSACTIONAL_EMAIL_PROVIDER_KEY,
   });
 }
@@ -165,6 +166,7 @@ function requiredRenderedValue(value: string, label: string, maximumLength: numb
       code: "transactional-email-content-invalid",
       message: `${label} is required.`,
       retryable: false,
+      deliveryOutcome: "known-failure",
       providerKey: MICROSOFT_GRAPH_TRANSACTIONAL_EMAIL_PROVIDER_KEY,
     });
   }
@@ -173,6 +175,7 @@ function requiredRenderedValue(value: string, label: string, maximumLength: numb
       code: "transactional-email-content-invalid",
       message: `${label} cannot exceed ${maximumLength} characters.`,
       retryable: false,
+      deliveryOutcome: "known-failure",
       providerKey: MICROSOFT_GRAPH_TRANSACTIONAL_EMAIL_PROVIDER_KEY,
     });
   }
@@ -276,6 +279,7 @@ class MicrosoftGraphApplicationTokenSource {
         code: "microsoft-identity-unavailable",
         message: "Microsoft identity token acquisition was unavailable.",
         retryable: true,
+        deliveryOutcome: "known-failure",
         providerKey: MICROSOFT_GRAPH_TRANSACTIONAL_EMAIL_PROVIDER_KEY,
       });
     }
@@ -285,6 +289,7 @@ class MicrosoftGraphApplicationTokenSource {
         code: await providerDiagnosticCode(response, "microsoft-identity"),
         message: "Microsoft identity rejected token acquisition.",
         retryable: retryableStatus(response.status),
+        deliveryOutcome: "known-failure",
         providerKey: MICROSOFT_GRAPH_TRANSACTIONAL_EMAIL_PROVIDER_KEY,
         externalReference: providerReference(response),
         retryAfterSeconds: retryAfterSeconds(response),
@@ -299,6 +304,7 @@ class MicrosoftGraphApplicationTokenSource {
         code: "microsoft-identity-response-invalid",
         message: "Microsoft identity returned an invalid token response.",
         retryable: true,
+        deliveryOutcome: "known-failure",
         providerKey: MICROSOFT_GRAPH_TRANSACTIONAL_EMAIL_PROVIDER_KEY,
         externalReference: providerReference(response),
       });
@@ -314,6 +320,7 @@ class MicrosoftGraphApplicationTokenSource {
         code: "microsoft-identity-response-invalid",
         message: "Microsoft identity returned an incomplete token response.",
         retryable: true,
+        deliveryOutcome: "known-failure",
         providerKey: MICROSOFT_GRAPH_TRANSACTIONAL_EMAIL_PROVIDER_KEY,
         externalReference: providerReference(response),
       });
@@ -402,8 +409,9 @@ export class MicrosoftGraphTransactionalEmailProvider implements TransactionalEm
     } catch {
       throw new TransactionalEmailProviderError({
         code: "microsoft-graph-unavailable",
-        message: "Microsoft Graph email delivery was unavailable.",
-        retryable: true,
+        message: "Microsoft Graph email delivery returned an unknown outcome.",
+        retryable: false,
+        deliveryOutcome: "unknown",
         providerKey: MICROSOFT_GRAPH_TRANSACTIONAL_EMAIL_PROVIDER_KEY,
       });
     }
@@ -414,6 +422,7 @@ export class MicrosoftGraphTransactionalEmailProvider implements TransactionalEm
         code: await providerDiagnosticCode(response, "microsoft-graph"),
         message: "Microsoft Graph did not accept the email request.",
         retryable: retryableStatus(response.status),
+        deliveryOutcome: "known-failure",
         providerKey: MICROSOFT_GRAPH_TRANSACTIONAL_EMAIL_PROVIDER_KEY,
         externalReference,
         retryAfterSeconds: retryAfterSeconds(response),
@@ -446,6 +455,7 @@ export class MicrosoftGraphAcceptanceEmailRenderer
         code: "transactional-email-template-not-configured",
         message: "No reviewed transactional email renderer is configured for this template.",
         retryable: false,
+        deliveryOutcome: "known-failure",
         providerKey: MICROSOFT_GRAPH_TRANSACTIONAL_EMAIL_PROVIDER_KEY,
       });
     }

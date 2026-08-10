@@ -2,6 +2,7 @@
   "ariaLabel":"RFxchange referral workspace","eyebrow":"Organization referrals","title":"Referral network","create":"New referral",
   "list":{"label":"Business referrals"},"empty":{"title":"No referrals yet","body":"Send one intentional referral to one named recipient. The Exchange never fabricates activity."},
   "roles":{"sender":"Sending organization","recipient":"Recipient organization"},
+  "notificationStates":{"deliveryOutcomeUnknown":"Delivery outcome unknown — support reconciliation is required before another attempt."},
   "fields":{"purpose":"Purpose","urgency":"Urgency","contact":"Preferred contact","notification":"Notification","expires":"Expires"},
   "detail":{"boundary":"This is participant-reported context. It is not an endorsement, verified outcome, contract, or sale."},
   "path":{"label":"Referral path","visible":"A real permitted path is shown for the {status} referral.","unavailable":"No path is drawn because an eligible privacy-safe endpoint is unavailable or this state does not permit one."},

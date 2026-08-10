@@ -8,7 +8,7 @@ import { organizationId, type OrganizationId } from "../../domain/organizations/
 import type { OrganizationProfileRepository } from "../../domain/organizations/repository.ts";
 import { hydrateEssentialOrganizationProfile } from "../../domain/organization-profile/model.ts";
 import {
-  attachReferralRecipient, createReferral, projectReferral, transitionReferral,
+  attachReferralRecipient, createReferral, projectReferral, projectReferralNotificationStatus, transitionReferral,
   type BusinessReferral, type ReferralCommandReceipt, type ReferralCommunicationIntent,
   type ReferralEducationAcknowledgement, type ReferralEvent, type ReferralEventKind,
   type ReferralNeed, type ReferralUrgency, type ReferralContactMethod, type ReferralPurpose,
@@ -101,7 +101,12 @@ export class ReferralNetworkService {
       const communication = record.communicationMessageId
         ? await this.dependencies.repository.getCommunication(record.communicationMessageId)
         : null;
-      return Object.freeze({ ...projection, notificationStatus: communication?.status ?? projection.notificationStatus });
+      return Object.freeze({
+        ...projection,
+        notificationStatus: communication
+          ? projectReferralNotificationStatus(communication)
+          : projection.notificationStatus,
+      });
     }));
     return Object.freeze(projected.flatMap((projection) => projection ? [projection] : []));
   }
@@ -205,7 +210,7 @@ export class ReferralNetworkService {
         ? `${this.dependencies.publicOrigin}/api/acquisition/referral?token=${encodeURIComponent(serializedToken)}`
         : `${this.dependencies.publicOrigin}/referrals?referral=${encodeURIComponent(updated.id)}`;
       const request = createTransactionalEmailRequest({ id: messageId, purpose: reference.purpose, recipientEmail, recipientDisplayName: current.recipient.displayName, eventKey: reference.eventKey, eventVersion: reference.eventVersion, templateKey: reference.templateKey, templateVersion: reference.templateVersion, variables: { recipient_name: current.recipient.displayName, sender_organization: current.senderOrganizationName, referral_summary: current.summary, continue_url: continueUrl }, correlationId: current.correlationId, idempotencyKey: `referral-invitation:${current.id}`, requestedAt: now, organizationId: String(current.senderOrganizationId), userId: String(authorization.context.user.id), relatedObjectType: "business-referral", relatedObjectId: current.id, tags: ["referral", current.recipient.kind] });
-      communication = Object.freeze({ id: messageId, referralId: current.id, request, status: "queued" as const, attemptCount: 0, lastErrorCode: null, updatedAt: now });
+      communication = Object.freeze({ id: messageId, referralId: current.id, request, status: "queued" as const, attemptCount: 0, lastErrorCode: null, deliveryClaim: null, updatedAt: now });
     }
     const receipt = command({ id: scope.commandId, referralId: updated.id, organizationId: authorization.organization.id, action: "sent", requestFingerprint, version: updated.version, now });
     await this.dependencies.repository.save({ referral: updated, event: event({ id: `refevent_${this.id()}`, referral: updated, kind: "sent", from: current.status, actorUserId: authorization.context.user.id, actorMembershipId: authorization.membership.id, commandId: scope.commandId, now }), command: receipt, audits: [createOrganizationActionAuditEvent(authorization.context.user, authorization.membership, authorization.organization, { id: `audit_${this.id()}`, action: "referral.sent", occurredAt: now })], communication });
