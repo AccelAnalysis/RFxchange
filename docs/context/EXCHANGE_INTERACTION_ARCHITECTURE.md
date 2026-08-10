@@ -348,12 +348,11 @@ Own-organization actions may include:
 Other-organization actions may include:
 
 - view the organization's referral policy;
-- refer someone to the selected organization;
-- refer the selected organization to someone else;
+- create a referral from the participant's organization to the selected recipient organization;
 - review permitted relationship context;
-- track a referral created by the participant's organization.
+- track a referral sent by the participant's organization to that recipient.
 
-Referral direction must be unmistakable. `Refer someone to this organization` and `Refer this organization to someone` are different actions and must not be collapsed into ambiguous copy.
+The current referral aggregate has one sending organization and one recipient organization or external intended recipient. It does not represent a separately referred third organization or person. Copy should identify the participant's organization as sender and the selected organization as recipient. `Refer someone to this organization` and `Refer this organization to someone else` are deferred when they would imply an unsupported third-party subject, consent projection, or lifecycle.
 
 A referral does not imply acceptance, service completion, sale, award, endorsement, or verified economic outcome.
 
