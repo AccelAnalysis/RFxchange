@@ -35,6 +35,43 @@
   line-height: 1.45;
 }
 
+.recoveryStack {
+  position: fixed;
+  z-index: 6;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  width: min(390px, calc(100% - 40px));
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.recoveryNotice {
+  padding: var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  border: var(--border-hairline) solid var(--semantic-state-information);
+  border-radius: var(--radius-panel);
+  color: var(--semantic-text-primary);
+  background: var(--semantic-surface-glass-strong);
+  box-shadow: var(--elevation-overlay);
+  backdrop-filter: blur(22px) saturate(126%);
+  -webkit-backdrop-filter: blur(22px) saturate(126%);
+}
+
+.recoveryNotice button {
+  min-height: 42px;
+  padding: 0 var(--space-md);
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--semantic-action-primary-foreground);
+  background: var(--semantic-action-primary-background);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .content {
   position: relative;
   z-index: 1;
@@ -115,6 +152,13 @@
     left: 10px;
     width: auto;
   }
+
+  .recoveryStack {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -131,7 +175,8 @@
   .content > :global(main) > :global(header),
   .experience[data-map-visible="true"] .content :global(section section),
   .experience[data-map-visible="true"] .content :global(article),
-  .continuityStatus {
+  .continuityStatus,
+  .recoveryNotice {
     background: var(--semantic-canvas-elevated) !important;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;

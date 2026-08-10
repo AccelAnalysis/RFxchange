@@ -48,6 +48,8 @@ Implementation and acceptance authority: [POST_WAVE_3_STABILIZATION_4_WORKSPACE_
 
 ### Stabilization 5 — map and activation correctness
 
+Implementation and acceptance authority: [POST_WAVE_3_STABILIZATION_5_MAP_ACTIVATION_CORRECTNESS.md](./POST_WAVE_3_STABILIZATION_5_MAP_ACTIVATION_CORRECTNESS.md).
+
 1. Plot and confirm the same selected geocoder candidate.
 2. Add bounded retry/recovery for required spatial-model and home-scene requests.
 3. Reserve continuous orbit for instructional or milestone moments; pause or stop it in daily workspaces.

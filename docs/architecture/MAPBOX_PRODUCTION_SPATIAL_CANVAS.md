@@ -96,14 +96,16 @@ Future highlighted markers such as top resource providers, sponsors, opportuniti
 
 The spatial scene fills the full viewport beneath activation, navigation, and workspace overlays. The account form remains map-free until a server-recognized RFxchange activation journey exists.
 
-Canonical ambient camera presets are:
+Canonical instructional/milestone camera presets are:
 
 - regional/locality: 225-second orbit, 60-degree pitch, and fitted authoritative bounds;
-- organization home: 225-second orbit, 75-degree pitch, zoom 16, and the privacy-safe organization marker as target.
+- organization-visible milestone: 225-second orbit, 75-degree pitch, zoom 16, and the privacy-safe organization marker as target.
+
+Continuous orbit is not a normal daily-workspace behavior. The authenticated Network workspace uses the same authoritative camera targets and map controls but settles after its initial camera transition.
 
 The current participant organization marker is rendered as a native GeoJSON source/layer with viewport-aligned RF identity and organization name. It remains visible without a popup and uses collision-overlap settings appropriate to the participant's own home marker.
 
-Ambient rotation is user-controllable from Account through the `rfxchange:map-rotation-enabled` browser preference and is always suppressed by `prefers-reduced-motion: reduce`.
+Eligible ambient rotation is user-controllable from Account through the `rfxchange:map-rotation-enabled` browser preference and is always suppressed by `prefers-reduced-motion: reduce`. The preference cannot authorize orbit on an ordinary workspace.
 
 The complete contract and regression criteria are in `docs/architecture/SPATIAL_ONBOARDING_HOME_ORBIT.md`.
 

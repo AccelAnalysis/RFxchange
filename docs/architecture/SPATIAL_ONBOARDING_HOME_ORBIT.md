@@ -52,22 +52,22 @@ Home-locality selection updates the activation state, retrieves the server-autho
 
 ## Camera presets
 
-### Regional and locality ambient
+### Regional and locality instructional ambient
 
 - orbit period: **225 seconds per 360-degree revolution**;
 - pitch: **60 degrees**;
 - zoom: calculated with `fitBounds` so the configured region or authoritative locality fits the available screen area after overlay-aware padding;
-- bearing: continuous while ambient rotation is enabled.
+- bearing: continuous only while the scene is explicitly instructional and ambient rotation is enabled.
 
 The locality zoom is deliberately not a fixed number. Different locality geometries, screens, and overlay dimensions require a fitted camera.
 
-### Organization home
+### Organization-visible milestone
 
 - orbit period: **225 seconds per 360-degree revolution**;
 - pitch: **75 degrees**;
 - zoom: **16**;
 - target: the organization marker's approved map coordinate;
-- bearing: continuous while ambient rotation is enabled.
+- bearing: continuous only during the bounded organization-visible milestone while ambient rotation is enabled. The normal authenticated workspace settles and remains participant controlled.
 
 The organization target must use the existing privacy projection. Exact private coordinates must never be substituted for locality-only or approximate public marker settings.
 
@@ -81,7 +81,7 @@ The browser preference is stored under:
 rfxchange:map-rotation-enabled
 ```
 
-Default is enabled. Turning the setting off stops ambient rotation in activation, locality, and organization-home scenes. Turning it on can resume the active ambient scene without reloading the page.
+Default is enabled. Turning the setting off stops ambient rotation in eligible activation, orientation, and organization-visible milestone scenes. Turning it on can resume an eligible ambient scene without reloading the page, but it cannot introduce continuous motion into a normal daily workspace.
 
 `prefers-reduced-motion: reduce` always suppresses orbit and animated flight regardless of the account preference.
 
@@ -89,7 +89,7 @@ The motion setting changes viewport behavior only. It does not change map data, 
 
 ## User interaction
 
-In the authenticated interactive workspace, drag, rotate, pitch, wheel, or touch interaction immediately stops automatic orbit for the current scene. The participant then controls the camera.
+In instructional interactive scenes, drag, rotate, pitch, wheel, or touch interaction immediately stops automatic orbit for the current scene. Normal authenticated workspaces do not start automatic orbit; the participant controls the camera after the initial authoritative fit/fly movement settles.
 
 Activation background scenes are noninteractive so map gestures cannot compete with registration forms.
 
@@ -118,7 +118,7 @@ When server state confirms the active marker and controlled-platform authorizati
 1. activation overlays fade away;
 2. the activation map changes to Organization Home;
 3. the camera flies to the approved marker at zoom 16 and pitch 75 degrees;
-4. ambient orbit begins if allowed;
+4. milestone ambient orbit begins if allowed;
 5. the runtime enters the authorized geography workspace.
 
 The home-scene endpoint must resolve the authenticated organization, active marker, confirmed location, authoritative locality geometry, and privacy-safe projected marker. It must reject unauthenticated, activation-incomplete, restricted, or otherwise unauthorized access.
@@ -151,7 +151,8 @@ The following are regressions:
 - using an opaque activation page that hides the spatial scene;
 - reloading the page when a participant selects a home locality;
 - using a browser-provided geometry instead of the server-authoritative spatial model;
-- using an orbit period other than 225 seconds for canonical locality or organization scenes without an approved architecture change;
+- using an orbit period other than 225 seconds for an explicitly eligible instructional or milestone scene without an approved architecture change;
+- starting continuous orbit in a normal daily workspace;
 - using a fixed locality zoom instead of fitting its bounds;
 - changing organization-home pitch from 75 degrees or zoom from 16 without an approved architecture change;
 - removing the Account rotation toggle;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import mapboxgl from "mapbox-gl";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
@@ -64,6 +64,12 @@ type MapSearchResult = Readonly<{
   featureType: string;
   center: readonly [number, number];
   bbox: readonly [number, number, number, number] | null;
+}>;
+
+type OverlayMarkerRecord = Readonly<{
+  overlay: ControlledLocalityPointOverlay;
+  marker: mapboxgl.Marker;
+  popup: mapboxgl.Popup;
 }>;
 
 const HOME_LOCALITY_SOURCE_ID = "rfx-home-locality";
@@ -391,6 +397,9 @@ export function MapboxLocalityCanvas({
 }: MapboxLocalityCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const mapLoadedRef = useRef(false);
+  const overlayMarkersRef = useRef(new Map<string, OverlayMarkerRecord>());
+  const pointOverlaysRef = useRef(pointOverlays);
   const searchMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
   const [viewMode, setViewMode] = useState<MapViewMode>("2d");
@@ -443,6 +452,8 @@ export function MapboxLocalityCanvas({
     type: "FeatureCollection" as const,
     features: serviceFields.map((field) => ({ type: "Feature" as const, properties: { id: field.id, label: field.label, selected: field.selected === true }, geometry: field.geometry })),
   }), [serviceFields]);
+  const relationshipPathGeoJsonRef = useRef(relationshipPathGeoJson);
+  const serviceFieldGeoJsonRef = useRef(serviceFieldGeoJson);
 
   const selectedStyles = useMemo(() => {
     const fill = model.layers.find((layer) => layer.id === "selected-fill")?.style;
@@ -559,8 +570,62 @@ export function MapboxLocalityCanvas({
     }
   };
 
+  const synchronizePointOverlays = useCallback((map: mapboxgl.Map) => {
+    const nextOverlays = pointOverlaysRef.current;
+    const nextIds = new Set(nextOverlays.map((overlay) => overlay.id));
+
+    for (const [id, record] of overlayMarkersRef.current) {
+      if (nextIds.has(id)) continue;
+      record.popup.remove();
+      record.marker.remove();
+      overlayMarkersRef.current.delete(id);
+    }
+
+    for (const overlay of nextOverlays) {
+      const existing = overlayMarkersRef.current.get(overlay.id);
+      if (
+        existing &&
+        existing.overlay.position[0] === overlay.position[0] &&
+        existing.overlay.position[1] === overlay.position[1] &&
+        existing.overlay.label === overlay.label &&
+        existing.overlay.kind === overlay.kind &&
+        existing.overlay.privacyLabel === overlay.privacyLabel &&
+        existing.overlay.activated === overlay.activated
+      ) {
+        continue;
+      }
+      existing?.popup.remove();
+      existing?.marker.remove();
+
+      const element = document.createElement("button");
+      element.type = "button";
+      element.className = styles.markerButton;
+      element.dataset.kind = overlay.kind;
+      element.dataset.activated = String(overlay.activated ?? false);
+      element.setAttribute(
+        "aria-label",
+        `${overlay.label}. ${overlay.privacyLabel ?? "Geographically anchored RFxchange map point."}`,
+      );
+
+      const popupContent = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = overlay.label;
+      const detail = document.createElement("div");
+      detail.textContent = overlay.privacyLabel ?? "RFxchange geographic point";
+      popupContent.append(title, detail);
+
+      const popup = new mapboxgl.Popup({ offset: 28, closeButton: true }).setDOMContent(popupContent);
+      const marker = new mapboxgl.Marker({ element, anchor: "bottom" })
+        .setLngLat([overlay.position[0], overlay.position[1]])
+        .setPopup(popup)
+        .addTo(map);
+      overlayMarkersRef.current.set(overlay.id, { overlay, marker, popup });
+    }
+  }, []);
+
   useEffect(() => {
     if (!containerRef.current || !token.startsWith("pk.") || !homeFeature) return;
+    const overlayMarkers = overlayMarkersRef.current;
 
     const persistedCamera = readPersistedCamera(storageKey);
     const initialViewMode = persistedCamera?.viewMode ?? mapViewModeForPitch(model.camera.pitchDegrees);
@@ -596,10 +661,10 @@ export function MapboxLocalityCanvas({
     );
     map.addControl(new mapboxgl.ScaleControl({ maxWidth: 120, unit: "imperial" }), "bottom-right");
 
-    const markers: mapboxgl.Marker[] = [];
     const popups: mapboxgl.Popup[] = [];
 
     map.on("load", () => {
+      mapLoadedRef.current = true;
       map.addSource(HOME_MASK_SOURCE_ID, {
         type: "geojson",
         data: homeMaskGeoJson,
@@ -675,10 +740,10 @@ export function MapboxLocalityCanvas({
 
       map.addSource(RELATIONSHIP_PATH_SOURCE_ID, {
         type: "geojson",
-        data: relationshipPathGeoJson,
+        data: relationshipPathGeoJsonRef.current,
       });
 
-      map.addSource(SERVICE_FIELD_SOURCE_ID, { type: "geojson", data: serviceFieldGeoJson });
+      map.addSource(SERVICE_FIELD_SOURCE_ID, { type: "geojson", data: serviceFieldGeoJsonRef.current });
       map.addLayer({ id: SERVICE_FIELD_FILL_LAYER_ID, type: "fill", source: SERVICE_FIELD_SOURCE_ID, paint: { "fill-color": ["case", ["==", ["get", "selected"], true], "#2e5eaa", "#4f718f"], "fill-opacity": ["case", ["==", ["get", "selected"], true], 0.16, 0.07] } });
       map.addLayer({ id: SERVICE_FIELD_LINE_LAYER_ID, type: "line", source: SERVICE_FIELD_SOURCE_ID, paint: { "line-color": ["case", ["==", ["get", "selected"], true], "#2e5eaa", "#4f718f"], "line-opacity": 0.75, "line-width": ["case", ["==", ["get", "selected"], true], 2.5, 1.25], "line-dasharray": [2, 1.5] } });
       map.addLayer({
@@ -693,32 +758,7 @@ export function MapboxLocalityCanvas({
         },
       });
 
-      for (const overlay of pointOverlays) {
-        const element = document.createElement("button");
-        element.type = "button";
-        element.className = styles.markerButton;
-        element.dataset.kind = overlay.kind;
-        element.dataset.activated = String(overlay.activated ?? false);
-        element.setAttribute(
-          "aria-label",
-          `${overlay.label}. ${overlay.privacyLabel ?? "Geographically anchored RFxchange map point."}`,
-        );
-
-        const popupContent = document.createElement("div");
-        const title = document.createElement("strong");
-        title.textContent = overlay.label;
-        const detail = document.createElement("div");
-        detail.textContent = overlay.privacyLabel ?? "RFxchange geographic point";
-        popupContent.append(title, detail);
-
-        const popup = new mapboxgl.Popup({ offset: 28, closeButton: true }).setDOMContent(popupContent);
-        const marker = new mapboxgl.Marker({ element, anchor: "bottom" })
-          .setLngLat([overlay.position[0], overlay.position[1]])
-          .setPopup(popup)
-          .addTo(map);
-        markers.push(marker);
-        popups.push(popup);
-      }
+      synchronizePointOverlays(map);
 
       map.on("mouseenter", HOME_FILL_LAYER_ID, () => {
         map.getCanvas().style.cursor = "pointer";
@@ -783,9 +823,14 @@ export function MapboxLocalityCanvas({
       searchAbortRef.current?.abort();
       searchMarkerRef.current?.remove();
       searchMarkerRef.current = null;
+      mapLoadedRef.current = false;
       mapRef.current = null;
       for (const popup of popups) popup.remove();
-      for (const marker of markers) marker.remove();
+      for (const record of overlayMarkers.values()) {
+        record.popup.remove();
+        record.marker.remove();
+      }
+      overlayMarkers.clear();
       map.remove();
     };
   }, [
@@ -795,15 +840,31 @@ export function MapboxLocalityCanvas({
     initialZoom,
     mobileControlPosition,
     model,
-    pointOverlays,
-    relationshipPathGeoJson,
-    relationshipPaths,
-    serviceFieldGeoJson,
-    serviceFields,
     selectedStyles,
     storageKey,
+    synchronizePointOverlays,
     token,
   ]);
+
+  useEffect(() => {
+    pointOverlaysRef.current = pointOverlays;
+    const map = mapRef.current;
+    if (map && mapLoadedRef.current) synchronizePointOverlays(map);
+  }, [pointOverlays, synchronizePointOverlays]);
+
+  useEffect(() => {
+    relationshipPathGeoJsonRef.current = relationshipPathGeoJson;
+    if (!mapLoadedRef.current) return;
+    const source = mapRef.current?.getSource(RELATIONSHIP_PATH_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    source?.setData(relationshipPathGeoJson);
+  }, [relationshipPathGeoJson]);
+
+  useEffect(() => {
+    serviceFieldGeoJsonRef.current = serviceFieldGeoJson;
+    if (!mapLoadedRef.current) return;
+    const source = mapRef.current?.getSource(SERVICE_FIELD_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    source?.setData(serviceFieldGeoJson);
+  }, [serviceFieldGeoJson]);
 
   if (!token.startsWith("pk.")) {
     return (
