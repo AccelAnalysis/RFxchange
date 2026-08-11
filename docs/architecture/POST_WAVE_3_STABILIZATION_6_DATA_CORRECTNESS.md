@@ -49,7 +49,7 @@ During the shell gate:
 - the participant shell persists across ordinary client-side route changes; and
 - route-specific loading remains below the shell rather than replacing it with the former `Preparing this page` treatment.
 
-This reconciliation does not make Opportunities/RFx available, implement any RFx Feature ID, create an RFx route or record, add Intelligence datasets, restore Locations as a peer lens, or begin Slice 4.1 runtime.
+This reconciliation does not make Opportunities/RFx available. It does not implement any RFx Feature ID, create an RFx route or record, add Intelligence datasets, restore Locations as a peer lens, or begin Slice 4.1 runtime.
 
 ## Scope boundary
 
