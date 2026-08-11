@@ -1,8 +1,11 @@
 # Exchange Shell Truthfulness Reconciliation Ledger
 
-**Gate:** `fix/exchange-shell-truthfulness-performance`  
-**Exact base:** `87fb29ef3b442410deecf61a470bc94c9c013c60`  
-**Feature-ID effect:** none  
+**Gate:** `fix/exchange-shell-truthfulness-performance`
+
+**Exact base:** `87fb29ef3b442410deecf61a470bc94c9c013c60`
+
+**Feature-ID effect:** none
+
 **Tracker effect:** none
 
 This ledger records the governing-document review for the no-Feature-ID participant-shell truthfulness and transition-loading gate. It distinguishes a required correction from an authority that remains valid and therefore should not be rewritten merely because the shell implementation changed.
