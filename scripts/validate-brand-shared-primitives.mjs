@@ -146,9 +146,15 @@ assert.ok(
   persistentShell.includes('data-participant-shell="persistent"') &&
     persistentShell.includes("ParticipantTopNavigation") &&
     persistentShell.includes("data-participant-content-region") &&
-    participant.includes("usePersistentParticipantShell") &&
-    participant.includes("if (persistentShell) return <>{children}</>"),
+    participant.includes("usePersistentParticipantShellContext") &&
+    participant.includes("if (shellContext.persistent) return <>{children}</>"),
   "The participant header must be composed once by the persistent shell rather than recreated by each workspace.",
+);
+assert.ok(
+  persistentShell.includes("reportAuthorizedOrganizationName") &&
+    participant.includes("reportAuthorizedOrganizationName") &&
+    !participantNavigation.includes('fetch("/api/participant-shell"'),
+  "The persistent shell must reuse already-authorized page context instead of repeating session and organization hydration.",
 );
 assert.ok(
   participantRegistry.indexOf('id: "opportunities-rfx"') <
