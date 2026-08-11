@@ -1,8 +1,8 @@
 # RFx Core documentation authority
 
-**Status: canonical planning index after merge; no RFx Core implementation is authorized by this documentation alone.**
+**Status: CANONICAL RFx CORE AUTHORITY — SLICE 4.1 IMPLEMENTATION IS DEFINED BUT RUNTIME REMAINS NOT STARTED.**
 
-This directory contains the converged product, architecture, AMACS, UX, feature-crosswalk and acceptance authority for the future live RFx Core.
+This directory contains the converged product, architecture, AMACS, UX, feature-crosswalk and acceptance authority for the future live RFx Core. The specific implementation boundary for the first Wave 4 slice is now defined in `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md`; documentation alone does not complete or implement a Feature ID.
 
 The governing decision is:
 
@@ -14,39 +14,62 @@ The RFx Core workspaces operate within the cross-cutting Exchange interaction ar
 
 1. [`../context/EXCHANGE_INTERACTION_ARCHITECTURE.md`](../context/EXCHANGE_INTERACTION_ARCHITECTURE.md) — RFx-first lens hierarchy, persistent spatial context, marker/selection behavior, Intelligence/Locations boundary and cross-lens continuation rules.
 2. [`RFX_CORE_AMACS_CONVERGENCE.md`](RFX_CORE_AMACS_CONVERGENCE.md) — adopted RFx aggregate, structured-field, workspace and scope decisions.
-3. [`AMACS_0_5_RECONCILIATION.md`](AMACS_0_5_RECONCILIATION.md) — the current AMACS 0.5.0 version/semantic-entry reconciliation that supersedes older 0.1.0 baseline assumptions.
+3. [`AMACS_0_5_RECONCILIATION.md`](AMACS_0_5_RECONCILIATION.md) — current AMACS 0.5.0 version/semantic-entry reconciliation that supersedes older 0.1.0 baseline assumptions.
 4. [`AMACS_INTEGRATION_CONTRACT.md`](AMACS_INTEGRATION_CONTRACT.md) — pinned 0.5.0 ingestion, runtime projection, need/interpretation, search, migration and snapshot rules.
 5. [`RFX_CORE_FEATURE_CROSSWALK.md`](RFX_CORE_FEATURE_CROSSWALK.md) — all 41 Wave 4 Feature IDs accounted for exactly once.
 6. [`RFX_CORE_PRODUCT_WORKSPACES.md`](RFX_CORE_PRODUCT_WORKSPACES.md) — issuer, responder and teammate workspace/interaction authority.
 7. [`RFX_CORE_ACCEPTANCE_MATRIX.md`](RFX_CORE_ACCEPTANCE_MATRIX.md) — pre-merge acceptance and anti-regression requirements, including AMACS 0.5.0 and AI interpretation boundaries.
-8. [`../slices/WAVE_4_RFX_CORE_ROADMAP.md`](../slices/WAVE_4_RFX_CORE_ROADMAP.md) — adopted planning sequence; implementation remains not started.
-9. [`../brand/BRAND_GATE_B6C_RFX_LENS.md`](../brand/BRAND_GATE_B6C_RFX_LENS.md) — real-data RFx spatial expression and map boundaries.
-10. [`../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md`](../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md) — approved prototype-derived visual decisions and explicit non-production mechanics.
+8. [`../slices/WAVE_4_RFX_CORE_ROADMAP.md`](../slices/WAVE_4_RFX_CORE_ROADMAP.md) — adopted Wave 4 sequence.
+9. [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) — exact organization-owned RFx kernel, request-family snapshot, blank-draft creation, security, persistence, acceptance and non-scope authority for `ISS-001`, `ISS-002` and `ISS-003`.
+10. [`../brand/BRAND_GATE_B6C_RFX_LENS.md`](../brand/BRAND_GATE_B6C_RFX_LENS.md) — future real-data RFx spatial expression and map boundaries; not eligible before authoritative publication.
+11. [`../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md`](../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md) — approved prototype-derived visual decisions and explicit non-production mechanics.
 
 ## Authority order
 
-For future RFx implementation:
+For RFx implementation:
 
-1. current authorized slice/task;
+1. current explicit implementation instruction;
 2. security, privacy, organization authority, geography, lifecycle, tracker and dependency authority;
-3. the applicable Wave 4 slice brief;
+3. the applicable approved Wave 4 slice authority;
 4. the cross-cutting Exchange interaction architecture for participant shell, spatial continuity, lens hierarchy and cross-lens behavior;
-5. this RFx Core documentation package, with the explicit 0.5.0 reconciliation taking precedence over older AMACS version assumptions;
+5. this RFx Core documentation package, with the explicit 0.5.0 reconciliation taking precedence over older AMACS-version assumptions;
 6. `docs/brand/` target experience;
 7. `docs/design/` converged implementation baseline;
-8. existing production abstractions and tests;
-9. prototype references only for the decisions explicitly adopted by their companion notes.
+8. existing production abstractions and tests; and
+9. prototype references only for decisions explicitly adopted by their companion notes.
+
+## Current Wave 4 boundary
+
+Merged `main` at `42c9a33499d9c37af74b6f61d7e1a8f823d0e0f8` includes PR #150, **Define the Exchange interaction architecture**. Wave 3, AMACS 0.5.0 reconciliation and the AI/AMACS Interpretation Foundation satisfy the reviewed prerequisites for Slice 4.1 planning.
+
+The Slice 4.1 authority concludes that `ISS-001`, `ISS-002` and `ISS-003` are dependency-eligible for a later, separately authorized runtime implementation. It makes no tracker change. The required implementation remains bounded to:
+
+- one organization-owned RFx aggregate;
+- one `draft` lifecycle state;
+- expected-version and idempotent command seams;
+- append-only RFx event, command-receipt and organization-audit evidence;
+- a deterministic AMACS 0.5.0 request-family snapshot; and
+- blank-source draft creation in a bounded Operational Workspace entry.
+
+It does not authorize publication, opportunity projection, beacons, discovery, fit, teaming, response, evaluation, award or the complete four-lens Exchange shell.
+
+Stabilization 2C remains incomplete and isolated to release engineering: the App Hosting backend and GitHub connection now exist, but trustworthy build-time source-SHA binding and an accepted same-SHA live rollout proof do not. No canonical dependency authority makes 2C a prerequisite for RFx Core product-domain implementation.
+
+Canonical totals remain **438 total · 152 Done · 286 Not Started**, with Wave 4 RFx Core **0/41** and B6b intentionally pending.
 
 ## Explicit boundaries
 
-This package:
+This package and the Slice 4.1 documentation authority:
 
-- changes no Feature-ID status or tracker total;
-- creates no live RFx, opportunity, pursuit, response, team, submission, evaluation, award or outcome record;
-- adds no fake map, organization, opportunity, statistics or market activity;
-- does not import prototype HTML/CSS/JavaScript into production;
-- does not expose AMACS implementation identifiers as ordinary participant language;
-- does not make an AI interpretation record or candidate authoritative;
-- does not authorize an Exchange-shell convergence or appearance implementation;
-- does not authorize Wave 4 before the current stabilization/sequence and explicit implementation authorization are complete; and
-- does not move Wave 5 evaluator/award capabilities into Wave 4.
+- change no Feature-ID status or tracker total;
+- create no live RFx, opportunity, pursuit, response, team, submission, evaluation, award or outcome record;
+- add no fake map, organization, opportunity, statistics or market activity;
+- do not import prototype HTML/CSS/JavaScript into production;
+- do not expose AMACS implementation identifiers as ordinary participant language;
+- do not make an AI interpretation record or candidate authoritative;
+- do not authorize an Exchange-shell convergence or appearance implementation;
+- do not make Stabilization 2C a product dependency;
+- do not move Wave 5 evaluator/award capabilities into Wave 4; and
+- do not begin Slice 4.2 or later work.
+
+**Light Appearance** and **Dark Appearance** are presentation terminology. **Intelligence** is the functional analytical lens. Dark Appearance, appearance preferences and Presentation Mode remain separately unauthorized capabilities.
