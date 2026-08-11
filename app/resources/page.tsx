@@ -110,7 +110,7 @@ export default async function ResourcesPage({ searchParams }: Props) {
   const selectedMessages = selectedRequestId
     ? await service.messages(actor, selectedRequestId)
     : [];
-  const commandRecoveryScope = `${organizationId}:${membershipId}`;
+  const commandRecoveryScope = `${String(access.membership.organizationId)}:${String(access.membership.id)}`;
 
   return (
     <ResourceNetworkWorkspace
