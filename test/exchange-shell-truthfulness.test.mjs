@@ -175,8 +175,20 @@ test("ordinary participant navigation uses Next links and immediate transition e
   assert.match(navigation, /rfxchange:participant-transition/);
   assert.doesNotMatch(
     navigation,
-    /window\.location|location\.assign|location\.replace|document\.location|setTimeout/,
+    /location\.(?:assign|replace)\s*\(|(?:window|document)\.location\s*=|setTimeout/,
   );
+});
+
+test("Intelligence context preservation is bounded to the canonical same-origin route and remains non-authorizing", () => {
+  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
+
+  assert.match(navigation, /INTELLIGENCE_CONTEXT_STORAGE_KEY/);
+  assert.match(navigation, /safeIntelligenceHref/);
+  assert.match(navigation, /parsed\.origin !== window\.location\.origin/);
+  assert.match(navigation, /parsed\.pathname !== CANONICAL_INTELLIGENCE_HREF/);
+  assert.match(navigation, /window\.sessionStorage\.setItem/);
+  assert.match(navigation, /lens\.id === "intelligence" \? intelligenceHref : lens\.href/);
+  assert.doesNotMatch(navigation, /authorize|permission|membership|tenancy/);
 });
 
 test("loading is scoped below the persistent shell and the page-wide takeover cannot return", () => {
