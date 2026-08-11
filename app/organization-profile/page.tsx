@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { MapMotionPreferenceToggle } from "@/src/components/account/MapMotionPreferenceToggle";
-import { SignOutButton } from "@/src/components/auth/SignOutButton";
 import { MarketProfilePanel } from "@/src/components/market-profile/MarketProfilePanel";
 import {
   OrganizationEnrichmentLocationMap,
@@ -16,7 +15,6 @@ import {
 } from "@/src/components/participant/ParticipantWorkspace";
 import { hydrateEssentialOrganizationProfile } from "@/src/domain/organization-profile/model";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
-import { resolveAdminPortalAccess } from "@/src/infrastructure/auth/admin-route-runtime";
 import {
   ParticipantRouteDependencyUnavailableError,
   RFXCHANGE_SESSION_COOKIE_NAME,
@@ -49,24 +47,29 @@ function readable(value: string): string {
     .join(" ");
 }
 
-async function accountAdministrationHref(sessionCookie?: string): Promise<"/admin" | null> {
-  try {
-    const access = await resolveAdminPortalAccess({ sessionCookie });
-    return access.kind === "authorized" ? "/admin" : null;
-  } catch {
-    // Administrative entry is an optional, independently authorized affordance. A dependency
-    // outage must fail the link closed without taking down the participant Account workspace.
-    return null;
-  }
-}
+type MarketProfileResult = OptionalWorkspacePanelResult<
+  Awaited<ReturnType<typeof loadAuthorizedMarketProfile>>
+>;
+type EnrichmentResult = OptionalWorkspacePanelResult<
+  Awaited<ReturnType<typeof loadAuthorizedOrganizationEnrichment>>
+>;
+type MapProjectionResult = OptionalWorkspacePanelResult<
+  Awaited<ReturnType<typeof loadAuthorizedParticipantMapProjection>>
+>;
+type WorkspaceResilienceCopy = Awaited<
+  ReturnType<typeof getRequestDictionary>
+>["dictionary"]["workspaceResilience"];
 
-type MarketProfileResult = OptionalWorkspacePanelResult<Awaited<ReturnType<typeof loadAuthorizedMarketProfile>>>;
-type EnrichmentResult = OptionalWorkspacePanelResult<Awaited<ReturnType<typeof loadAuthorizedOrganizationEnrichment>>>;
-type MapProjectionResult = OptionalWorkspacePanelResult<Awaited<ReturnType<typeof loadAuthorizedParticipantMapProjection>>>;
-type WorkspaceResilienceCopy = Awaited<ReturnType<typeof getRequestDictionary>>["dictionary"]["workspaceResilience"];
-
-function OptionalPanelState({ title, message }: Readonly<{ title: string; message: string }>) {
-  return <section className={styles.optionalPanel} role="status"><h2>{title}</h2><p>{message}</p></section>;
+function OptionalPanelState({
+  title,
+  message,
+}: Readonly<{ title: string; message: string }>) {
+  return (
+    <section className={styles.optionalPanel} role="status">
+      <h2>{title}</h2>
+      <p>{message}</p>
+    </section>
+  );
 }
 
 async function GeographyCard({
@@ -84,24 +87,35 @@ async function GeographyCard({
   const selectedGeography = result.available
     ? result.value?.model.selectedGeography ?? null
     : null;
-  return <article className={styles.card}>
-    <h2>{copy.geographyTitle}</h2>
-    <dl className={styles.definitionList}>
-      <dt>Home locality</dt>
-      <dd>{result.available ? selectedGeography?.name ?? "Not recorded" : copy.geographyUnavailable}</dd>
-      <dt>Location visibility</dt>
-      <dd>{locationVisibility ? readable(locationVisibility) : "Not recorded"}</dd>
-      <dt>Marker</dt>
-      <dd>{markerActive ? "Active" : "Not active"}</dd>
-      <dt>Initial service geography</dt>
-      <dd>{result.available ? selectedGeography?.name ?? "Not recorded" : copy.geographyUnavailable}</dd>
-    </dl>
-    <p className={styles.empty}>
-      During minimum activation, RFxchange initializes the confirmed home locality as the
-      organization&apos;s initial service geography. Expanded service territories remain a
-      separate profile concept and can be refined in later profile enrichment.
-    </p>
-  </article>;
+
+  return (
+    <article className={styles.card}>
+      <h2>{copy.geographyTitle}</h2>
+      <dl className={styles.definitionList}>
+        <dt>Home locality</dt>
+        <dd>
+          {result.available
+            ? selectedGeography?.name ?? "Not recorded"
+            : copy.geographyUnavailable}
+        </dd>
+        <dt>Location visibility</dt>
+        <dd>{locationVisibility ? readable(locationVisibility) : "Not recorded"}</dd>
+        <dt>Marker</dt>
+        <dd>{markerActive ? "Active" : "Not active"}</dd>
+        <dt>Initial service geography</dt>
+        <dd>
+          {result.available
+            ? selectedGeography?.name ?? "Not recorded"
+            : copy.geographyUnavailable}
+        </dd>
+      </dl>
+      <p className={styles.empty}>
+        During minimum activation, RFxchange initializes the confirmed home locality as the
+        organization&apos;s initial service geography. Expanded service territories remain a
+        separate profile concept and can be refined in later profile enrichment.
+      </p>
+    </article>
+  );
 }
 
 async function MarketProfileSection({
@@ -116,18 +130,27 @@ async function MarketProfileSection({
   copy: WorkspaceResilienceCopy;
 }>) {
   const result = await pendingMarketProfile;
-  if (!result.available) return <OptionalPanelState title={copy.marketProfileTitle} message={copy.marketProfileUnavailable} />;
+  if (!result.available) {
+    return (
+      <OptionalPanelState
+        title={copy.marketProfileTitle}
+        message={copy.marketProfileUnavailable}
+      />
+    );
+  }
   const marketProfile = result.value;
-  return <MarketProfilePanel
-    key={`${organizationId}:industry:${marketProfile.snapshot.industry?.revision ?? 0}`}
-    organizationId={organizationId}
-    organizationName={organizationName}
-    snapshot={marketProfile.snapshot}
-    catalog={marketProfile.catalog}
-    naicsCatalog={marketProfile.naics}
-    marketRoles={marketProfile.marketRoles}
-    serviceGeographies={marketProfile.serviceGeographies}
-  />;
+  return (
+    <MarketProfilePanel
+      key={`${organizationId}:industry:${marketProfile.snapshot.industry?.revision ?? 0}`}
+      organizationId={organizationId}
+      organizationName={organizationName}
+      snapshot={marketProfile.snapshot}
+      catalog={marketProfile.catalog}
+      naicsCatalog={marketProfile.naics}
+      marketRoles={marketProfile.marketRoles}
+      serviceGeographies={marketProfile.serviceGeographies}
+    />
+  );
 }
 
 async function EnrichmentSection({
@@ -142,20 +165,35 @@ async function EnrichmentSection({
   copy: WorkspaceResilienceCopy;
 }>) {
   const enrichmentResult = await pendingEnrichment;
-  if (!enrichmentResult.available) return <OptionalPanelState title={copy.enrichmentTitle} message={copy.enrichmentUnavailable} />;
-  return <OrganizationEnrichmentPanel
-    organizationId={organizationId}
-    snapshot={enrichmentResult.value.snapshot}
-    locationMap={
-      <Suspense fallback={<p className={styles.empty} role="status">{copy.geographyLoading}</p>}>
-        <EnrichmentLocationMapSection
-          pendingMap={pendingMap}
-          snapshot={enrichmentResult.value.snapshot}
-          unavailableMessage={copy.geographyUnavailable}
-        />
-      </Suspense>
-    }
-  />;
+  if (!enrichmentResult.available) {
+    return (
+      <OptionalPanelState
+        title={copy.enrichmentTitle}
+        message={copy.enrichmentUnavailable}
+      />
+    );
+  }
+  return (
+    <OrganizationEnrichmentPanel
+      organizationId={organizationId}
+      snapshot={enrichmentResult.value.snapshot}
+      locationMap={(
+        <Suspense
+          fallback={(
+            <p className={styles.empty} role="status">
+              {copy.geographyLoading}
+            </p>
+          )}
+        >
+          <EnrichmentLocationMapSection
+            pendingMap={pendingMap}
+            snapshot={enrichmentResult.value.snapshot}
+            unavailableMessage={copy.geographyUnavailable}
+          />
+        </Suspense>
+      )}
+    />
+  );
 }
 
 async function EnrichmentLocationMapSection({
@@ -164,32 +202,37 @@ async function EnrichmentLocationMapSection({
   unavailableMessage,
 }: Readonly<{
   pendingMap: Promise<MapProjectionResult>;
-  snapshot: Awaited<ReturnType<typeof loadAuthorizedOrganizationEnrichment>>["snapshot"];
+  snapshot: Awaited<
+    ReturnType<typeof loadAuthorizedOrganizationEnrichment>
+  >["snapshot"];
   unavailableMessage: string;
 }>) {
   const mapResult = await pendingMap;
   if (!mapResult.available || !mapResult.value) {
     return <p className={styles.empty} role="status">{unavailableMessage}</p>;
   }
-  return <OrganizationEnrichmentLocationMap
-    snapshot={snapshot}
-    mapModel={mapResult.value.model}
-    homeMarker={mapResult.value.homeMarker}
-  />;
+  return (
+    <OrganizationEnrichmentLocationMap
+      snapshot={snapshot}
+      mapModel={mapResult.value.model}
+      homeMarker={mapResult.value.homeMarker}
+    />
+  );
 }
 
 export default async function OrganizationProfilePage() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
-  const access = await resolveParticipantRoute({
-    sessionCookie,
-  });
+  const sessionCookie = (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
+  const access = await resolveParticipantRoute({ sessionCookie });
 
   if (access.kind === "unauthenticated") {
     redirect("/signin?returnTo=%2Forganization-profile");
   }
-  if (access.kind === "access-resolution-required") redirect(participantEntryDestination(access));
-  if (access.kind === "activation-required") redirect(participantEntryDestination(access));
+  if (access.kind === "access-resolution-required") {
+    redirect(participantEntryDestination(access));
+  }
+  if (access.kind === "activation-required") {
+    redirect(participantEntryDestination(access));
+  }
   if (access.kind === "wrong-organization") {
     redirect(access.state.controlledPlatformUrl ?? "/join");
   }
@@ -209,8 +252,7 @@ export default async function OrganizationProfilePage() {
     "participant-map",
     loadAuthorizedParticipantMapProjection(access),
   );
-  const { dictionary } = await getRequestDictionary();
-  const copy = dictionary.workspaceResilience;
+  const dictionaryPromise = getRequestDictionary();
 
   const db = getServerFirestore();
   const foundation = createServerFirestoreFoundationRepositories(db);
@@ -224,14 +266,14 @@ export default async function OrganizationProfilePage() {
     markerActivation,
     profileCompletion,
     location,
-    administrationHref,
+    { dictionary },
   ] = await Promise.all([
     foundation.organizations.profiles.getByOrganizationId(organizationId),
     foundation.organizationAuthorization.getByMembershipId(access.membership.id),
     markerRepositories.activations.getByOrganizationId(organizationId),
     profileRepositories.completions.getByOrganizationId(organizationId),
     locations.locations.getByOrganizationId(organizationId),
-    accountAdministrationHref(sessionCookie),
+    dictionaryPromise,
   ]);
   if (!profileRecord) {
     throw new ParticipantRouteDependencyUnavailableError(
@@ -240,15 +282,13 @@ export default async function OrganizationProfilePage() {
     );
   }
 
+  const copy = dictionary.workspaceResilience;
   const profile = hydrateEssentialOrganizationProfile(profileRecord);
   const workspaceStatus = access.state.lifecycleState === "open-platform" ? "Open" : "Active";
   const buildIdentity = currentBuildIdentity();
 
   return (
-    <ParticipantShell
-      activeItem="Account"
-      administrationHref={administrationHref ?? undefined}
-    >
+    <ParticipantShell activeItem="account">
       <OperationalWorkspace ariaLabel="Organization account workspace">
         <section className={styles.page}>
           <header className={styles.header}>
@@ -260,7 +300,6 @@ export default async function OrganizationProfilePage() {
                 can use to discover what your organization says it does.
               </p>
             </div>
-            <SignOutButton className={styles.signOut} />
           </header>
 
           <section className={styles.grid}>
@@ -270,16 +309,34 @@ export default async function OrganizationProfilePage() {
                 <dt>Organization ID</dt>
                 <dd>{String(access.membership.organizationId)}</dd>
                 <dt>Organization type</dt>
-                <dd>{profile.organizationType ? readable(profile.organizationType) : "Optional enrichment not recorded"}</dd>
+                <dd>
+                  {profile.organizationType
+                    ? readable(profile.organizationType)
+                    : "Optional enrichment not recorded"}
+                </dd>
                 <dt>Profile status</dt>
-                <dd>{profileCompletion?.status === "active" ? "Profile Complete" : "Incomplete"}</dd>
+                <dd>
+                  {profileCompletion?.status === "active" ? "Profile Complete" : "Incomplete"}
+                </dd>
                 <dt>Workspace state</dt>
                 <dd><span className={styles.status}>{workspaceStatus}</span></dd>
               </dl>
             </article>
 
-            <Suspense fallback={<article className={styles.card}><h2>{copy.geographyTitle}</h2><p className={styles.empty}>{copy.geographyLoading}</p></article>}>
-              <GeographyCard pendingMap={pendingMap} markerActive={markerActivation?.status === "active"} locationVisibility={location?.visibility ?? null} copy={copy} />
+            <Suspense
+              fallback={(
+                <article className={styles.card}>
+                  <h2>{copy.geographyTitle}</h2>
+                  <p className={styles.empty}>{copy.geographyLoading}</p>
+                </article>
+              )}
+            >
+              <GeographyCard
+                pendingMap={pendingMap}
+                markerActive={markerActivation?.status === "active"}
+                locationVisibility={location?.visibility ?? null}
+                copy={copy}
+              />
             </Suspense>
 
             <article className={styles.card}>
@@ -317,7 +374,11 @@ export default async function OrganizationProfilePage() {
                 <dt>Membership</dt>
                 <dd>Active</dd>
                 <dt>Authorization role</dt>
-                <dd>{authorization ? readable(String(authorization.roleKey)) : "No authorization role recorded"}</dd>
+                <dd>
+                  {authorization
+                    ? readable(String(authorization.roleKey))
+                    : "No authorization role recorded"}
+                </dd>
                 <dt>Granted capabilities</dt>
                 <dd>{authorization?.permissions.length ?? 0}</dd>
               </dl>
@@ -346,11 +407,35 @@ export default async function OrganizationProfilePage() {
             </article>
           </section>
 
-          <Suspense fallback={<OptionalPanelState title={copy.marketProfileTitle} message={copy.marketProfileLoading} />}>
-            <MarketProfileSection pendingMarketProfile={pendingMarketProfile} organizationId={String(access.membership.organizationId)} organizationName={profile.displayName} copy={copy} />
+          <Suspense
+            fallback={(
+              <OptionalPanelState
+                title={copy.marketProfileTitle}
+                message={copy.marketProfileLoading}
+              />
+            )}
+          >
+            <MarketProfileSection
+              pendingMarketProfile={pendingMarketProfile}
+              organizationId={String(access.membership.organizationId)}
+              organizationName={profile.displayName}
+              copy={copy}
+            />
           </Suspense>
-          <Suspense fallback={<OptionalPanelState title={copy.enrichmentTitle} message={copy.enrichmentLoading} />}>
-            <EnrichmentSection pendingEnrichment={pendingEnrichment} pendingMap={pendingMap} organizationId={String(access.membership.organizationId)} copy={copy} />
+          <Suspense
+            fallback={(
+              <OptionalPanelState
+                title={copy.enrichmentTitle}
+                message={copy.enrichmentLoading}
+              />
+            )}
+          >
+            <EnrichmentSection
+              pendingEnrichment={pendingEnrichment}
+              pendingMap={pendingMap}
+              organizationId={String(access.membership.organizationId)}
+              copy={copy}
+            />
           </Suspense>
         </section>
       </OperationalWorkspace>
