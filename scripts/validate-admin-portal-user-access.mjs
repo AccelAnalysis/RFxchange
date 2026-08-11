@@ -76,10 +76,27 @@ assert.doesNotMatch(entry, /redirect\("\/admin\/overview"\)/);
 assert.doesNotMatch(entry, /buildAdministrativeCommandCenter/);
 
 const account = await readFile("app/organization-profile/page.tsx", "utf8");
-assert.match(account, /resolveAdminPortalAccess/);
-assert.match(account, /accountAdministrationHref/);
-assert.match(account, /dependency[\s\S]*fail the link closed/);
-assert.match(account, /administrationHref=/);
+assert.doesNotMatch(
+  account,
+  /resolveAdminPortalAccess|accountAdministrationHref|administrationHref=/,
+  "Optional administrative access resolution must not block the participant Account page.",
+);
+const shellAdministration = await readFile(
+  "app/api/participant-shell/administration/route.ts",
+  "utf8",
+);
+assert.match(shellAdministration, /resolveAdminPortalAccess/);
+assert.match(shellAdministration, /access\.kind === "authorized" \? "\/admin" : null/);
+assert.match(shellAdministration, /catch[\s\S]*closedAdministrationContext/);
+assert.match(shellAdministration, /cache-control/);
+const participantNavigation = await readFile(
+  "src/components/participant/ParticipantTopNavigation.tsx",
+  "utf8",
+);
+assert.match(participantNavigation, /\/api\/participant-shell\/administration/);
+assert.match(participantNavigation, /if \(administrationResolved\) return/);
+assert.match(participantNavigation, /administrationHref \? \(/);
+assert.match(participantNavigation, /resolveAdministration\(\)/);
 
 const configuredAcceptance = await readFile(
   "scripts/acceptance-post-wave3-admin-runtime-configured.mjs",
@@ -131,4 +148,4 @@ for (const component of [
   assert.ok(source.length > 0, `${component} must exist`);
 }
 
-console.log("ADM-057/ADM-067/ADM-069 admin portal and User & Access guardrails validated.");
+console.log("ADM-057/ADM-067/ADM-069 admin portal and lazy participant Administration utility guardrails validated.");
