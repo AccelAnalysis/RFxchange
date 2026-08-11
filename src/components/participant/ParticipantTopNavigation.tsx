@@ -7,6 +7,7 @@ import {
   useId,
   useRef,
   useState,
+  useSyncExternalStore,
   type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
@@ -39,6 +40,7 @@ export type ParticipantNavigationItem =
 type NavigationDestination = Exclude<ParticipantNavigationState, null>;
 
 const INTELLIGENCE_CONTEXT_STORAGE_KEY = "rfxchange:participant:intelligence-href";
+const INTELLIGENCE_CONTEXT_CHANGED_EVENT = "rfxchange:participant:intelligence-href-changed";
 const CANONICAL_INTELLIGENCE_HREF = "/geography/canvas";
 
 function normalizedActiveItem(item?: ParticipantNavigationItem): ParticipantNavigationState {
@@ -96,15 +98,42 @@ function transitionMarkName(destination: NavigationDestination): string {
   return `rfxchange.participant-transition:${destination}`;
 }
 
+function subscribeIntelligenceHref(onStoreChange: () => void): () => void {
+  window.addEventListener(INTELLIGENCE_CONTEXT_CHANGED_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.removeEventListener(INTELLIGENCE_CONTEXT_CHANGED_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
+function storedIntelligenceHref(): string {
+  return safeIntelligenceHref(
+    window.sessionStorage.getItem(INTELLIGENCE_CONTEXT_STORAGE_KEY),
+  ) ?? CANONICAL_INTELLIGENCE_HREF;
+}
+
 function useTransitionFeedback(pathname: string) {
-  const [pendingDestination, setPendingDestination] = useState<NavigationDestination | null>(null);
-  const [transitionFromPathname, setTransitionFromPathname] = useState<string | null>(null);
-  const [intelligenceHref, setIntelligenceHref] = useState(CANONICAL_INTELLIGENCE_HREF);
+  const pendingTransition = useRef<Readonly<{
+    id: number;
+    destination: NavigationDestination;
+    fromPathname: string;
+  }> | null>(null);
+  const nextTransitionId = useRef(0);
+  const intelligenceHref = useSyncExternalStore(
+    subscribeIntelligenceHref,
+    storedIntelligenceHref,
+    () => CANONICAL_INTELLIGENCE_HREF,
+  );
 
   useEffect(() => {
-    if (!pendingDestination || participantNavigationState(pathname) !== pendingDestination) return;
+    const transition = pendingTransition.current;
+    if (
+      !transition
+      || participantNavigationState(pathname) !== transition.destination
+    ) return;
 
-    const markName = transitionMarkName(pendingDestination);
+    const markName = transitionMarkName(transition.destination);
     const endMark = `${markName}:settled`;
     performance.clearMarks(endMark);
     performance.mark(endMark);
@@ -119,15 +148,16 @@ function useTransitionFeedback(pathname: string) {
       "measure",
     ).at(-1);
     const detail = Object.freeze({
-      destination: pendingDestination,
-      fromPathname: transitionFromPathname ?? pathname,
+      destination: transition.destination,
+      fromPathname: transition.fromPathname,
       toPathname: pathname,
       durationMs: Math.max(0, measure?.duration ?? 0),
       documentNavigationEntries: performance.getEntriesByType("navigation").length,
     });
+    pendingTransition.current = null;
     window.dispatchEvent(new CustomEvent("rfxchange:participant-transition", { detail }));
     console.info("rfxchange.participant-transition", detail);
-  }, [pathname, pendingDestination, transitionFromPathname]);
+  }, [pathname]);
 
   function begin(destination: NavigationDestination) {
     const currentState = participantNavigationState(pathname);
@@ -138,8 +168,8 @@ function useTransitionFeedback(pathname: string) {
         `${window.location.pathname}${window.location.search}`,
       );
       if (currentHref) {
-        setIntelligenceHref(currentHref);
         window.sessionStorage.setItem(INTELLIGENCE_CONTEXT_STORAGE_KEY, currentHref);
+        window.dispatchEvent(new Event(INTELLIGENCE_CONTEXT_CHANGED_EVENT));
       }
     }
 
@@ -147,20 +177,18 @@ function useTransitionFeedback(pathname: string) {
     performance.clearMarks(markName);
     performance.clearMarks(`${markName}:settled`);
     performance.mark(markName);
-    setTransitionFromPathname(pathname);
-    setPendingDestination(destination);
+    nextTransitionId.current += 1;
+    pendingTransition.current = Object.freeze({
+      id: nextTransitionId.current,
+      destination,
+      fromPathname: pathname,
+    });
   }
 
-  const visiblePendingDestination =
-    pendingDestination && participantNavigationState(pathname) !== pendingDestination
-      ? pendingDestination
-      : null;
-
-  return Object.freeze({
-    pendingDestination: visiblePendingDestination,
+  return {
     intelligenceHref,
     begin,
-  });
+  };
 }
 
 function NavigationLinkContent({
@@ -204,13 +232,11 @@ function NavigationLinkContent({
 function LensItems({
   activeState,
   intelligenceHref,
-  pendingDestination,
   beginNavigation,
   onNavigate,
 }: Readonly<{
   activeState: ParticipantNavigationState;
   intelligenceHref: string;
-  pendingDestination: NavigationDestination | null;
   beginNavigation(destination: NavigationDestination): void;
   onNavigate?: (event: MouseEvent<HTMLAnchorElement>) => void;
 }>) {
@@ -245,10 +271,8 @@ function LensItems({
         href={href}
         className={styles.lensLink}
         aria-current={activeState === lens.id ? "page" : undefined}
-        aria-busy={pendingDestination === lens.id ? "true" : undefined}
         data-participant-lens={lens.id}
         data-availability="enabled"
-        data-pending={pendingDestination === lens.id ? "true" : undefined}
         onClick={(event) => {
           if (isUnmodifiedPrimaryClick(event)) beginNavigation(lens.id);
           onNavigate?.(event);
@@ -279,13 +303,11 @@ function AccountUtility({
   activeState,
   administrationHref: initialAdministrationHref,
   organizationName,
-  pendingDestination,
   beginNavigation,
 }: Readonly<{
   activeState: ParticipantNavigationState;
   administrationHref?: string;
   organizationName: string | null;
-  pendingDestination: NavigationDestination | null;
   beginNavigation(destination: NavigationDestination): void;
 }>) {
   const { t } = useI18n();
@@ -411,7 +433,6 @@ function AccountUtility({
             role="menuitem"
             href={PARTICIPANT_UTILITY_DESTINATIONS.account.href}
             aria-current={activeState === "account" ? "page" : undefined}
-            aria-busy={pendingDestination === "account" ? "true" : undefined}
             onClick={(event) => {
               if (isUnmodifiedPrimaryClick(event)) beginNavigation("account");
               else hideMenu();
@@ -427,7 +448,6 @@ function AccountUtility({
             role="menuitem"
             href={PARTICIPANT_UTILITY_DESTINATIONS["quick-start"].href}
             aria-current={activeState === "quick-start" ? "page" : undefined}
-            aria-busy={pendingDestination === "quick-start" ? "true" : undefined}
             onClick={(event) => {
               if (isUnmodifiedPrimaryClick(event)) beginNavigation("quick-start");
               else hideMenu();
@@ -492,16 +512,6 @@ export function ParticipantTopNavigation({
     ? participantNavigationState(pathname)
     : normalizedActiveItem(activeItem);
   const transition = useTransitionFeedback(pathname);
-  const pendingLens = PARTICIPANT_LENSES.find(
-    (lens) => lens.id === transition.pendingDestination,
-  );
-  const pendingLabel = pendingLens
-    ? t(pendingLens.labelKey)
-    : transition.pendingDestination === "account"
-      ? t("participantNavigation.organizationProfile")
-      : transition.pendingDestination === "quick-start"
-        ? t("participantNavigation.quickStart")
-        : null;
 
   return (
     <header
@@ -514,7 +524,6 @@ export function ParticipantTopNavigation({
         <LensItems
           activeState={activeState}
           intelligenceHref={transition.intelligenceHref}
-          pendingDestination={transition.pendingDestination}
           beginNavigation={transition.begin}
         />
       </nav>
@@ -522,7 +531,6 @@ export function ParticipantTopNavigation({
         <LensItems
           activeState={activeState}
           intelligenceHref={transition.intelligenceHref}
-          pendingDestination={transition.pendingDestination}
           beginNavigation={transition.begin}
           onNavigate={closeMobileLensMenu}
         />
@@ -531,14 +539,8 @@ export function ParticipantTopNavigation({
         activeState={activeState}
         administrationHref={administrationHref}
         organizationName={organizationName}
-        pendingDestination={transition.pendingDestination}
         beginNavigation={transition.begin}
       />
-      <span className={styles.liveStatus} role="status" aria-live="polite" aria-atomic="true">
-        {pendingLabel
-          ? `${t("participantNavigation.loadingDestination")} ${pendingLabel}`
-          : ""}
-      </span>
     </header>
   );
 }

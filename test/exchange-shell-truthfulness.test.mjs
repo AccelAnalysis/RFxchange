@@ -169,7 +169,7 @@ test("ordinary participant navigation uses Next links and immediate transition e
 
   assert.match(navigation, /import Link, \{ useLinkStatus \} from "next\/link"/);
   assert.match(navigation, /const \{ pending \} = useLinkStatus\(\)/);
-  assert.match(navigation, /setPendingDestination\(destination\)/);
+  assert.match(navigation, /pendingTransition\.current = null/);
   assert.match(navigation, /data-link-pending="true"/);
   assert.match(navigation, /performance\.mark/);
   assert.match(navigation, /performance\.measure/);
@@ -189,6 +189,8 @@ test("Intelligence context preservation is bounded to the canonical same-origin 
   assert.match(navigation, /parsed\.origin !== window\.location\.origin/);
   assert.match(navigation, /parsed\.pathname !== CANONICAL_INTELLIGENCE_HREF/);
   assert.match(navigation, /window\.sessionStorage\.setItem/);
+  assert.match(navigation, /window\.sessionStorage\.getItem/);
+  assert.match(navigation, /useSyncExternalStore/);
   assert.match(navigation, /lens\.id === "intelligence" \? intelligenceHref : lens\.href/);
   assert.doesNotMatch(navigation, /authorize|permission|membership|tenancy/);
 });

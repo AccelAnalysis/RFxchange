@@ -957,6 +957,21 @@ async function runCandidate({ cwd, port, sessionCookie }) {
     assert.equal(observations[0].scopedLoading, true, "Delayed Resources transition never exposed scoped content loading.");
     assert.equal(observations.every((item) => item.navigationEntries === 1), true);
 
+    const ordinaryDocumentRequests = [...diagnostics.documentRequests];
+    await cdp.send("Page.reload", { ignoreCache: true });
+    const restoredIntelligenceHref = await waitForExpression(
+      cdp,
+      `document.readyState === "complete"
+        && document.querySelector('[data-participant-navigation] a[data-participant-lens="intelligence"]')
+          ?.getAttribute("href")`,
+      "restored Intelligence href after shell remount",
+    );
+    assert.equal(
+      restoredIntelligenceHref,
+      `/geography/canvas?query=shell-acceptance&selectedOrganization=${organizationId}`,
+      "Shell remount discarded the safe session-scoped Intelligence context.",
+    );
+
     const durations = observations.map((item) => item.durationMs);
     const result = {
       sha: candidateSha,
@@ -966,12 +981,13 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       persistentShellInstance: initialShell,
       shellRemounts: 0,
       rootTakeoverObserved: false,
-      fullDocumentNavigationCount: diagnostics.documentRequests.length,
+      fullDocumentNavigationCount: ordinaryDocumentRequests.length,
       intelligenceContextPreserved: true,
+      intelligenceContextRestoredAfterShellRemount: true,
       activationReplayObserved: finalState.activationReplay,
       protectedInitializationReplayObserved: false,
       transitionEvents: finalState.transitions,
-      documentRequests: diagnostics.documentRequests,
+      documentRequests: ordinaryDocumentRequests,
       serverTiming: diagnostics.serverTiming,
       consoleErrors: diagnostics.consoleErrors,
       exceptions: diagnostics.exceptions,

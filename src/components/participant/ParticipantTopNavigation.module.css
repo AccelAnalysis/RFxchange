@@ -56,7 +56,6 @@
   content: "";
 }
 
-.lensLink[data-pending="true"]::before,
 .lensLink:has([data-link-pending="true"])::before {
   position: absolute;
   right: -0.55rem;
@@ -365,7 +364,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lensLink[data-pending="true"]::before,
   .lensLink:has([data-link-pending="true"])::before {
     animation: none;
   }

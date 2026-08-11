@@ -67,6 +67,10 @@ export default async function ResourcesPage({ searchParams }: Props) {
     if (error instanceof ResourceNetworkError && error.code === "forbidden") return null;
     throw error;
   });
+  const independentHydrationPromise = Promise.allSettled([
+    referralsPromise,
+    ownerPromise,
+  ] as const);
 
   const network = await networkPromise;
   const markers = network.available
@@ -87,11 +91,14 @@ export default async function ResourcesPage({ searchParams }: Props) {
     availability: queryState.availability === "all" ? null : queryState.availability,
     markers,
   });
-  const [resourceProjection, referrals, owner] = await Promise.all([
+  const [resourceProjection, [referralsResult, ownerResult]] = await Promise.all([
     resourcePromise,
-    referralsPromise,
-    ownerPromise,
+    independentHydrationPromise,
   ]);
+  if (referralsResult.status === "rejected") throw referralsResult.reason;
+  if (ownerResult.status === "rejected") throw ownerResult.reason;
+  const referrals = referralsResult.value;
+  const owner = ownerResult.value;
 
   const requestReferrals = referrals.filter(
     (referral) => referral.purpose === "provider-connection",
