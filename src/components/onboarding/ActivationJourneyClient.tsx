@@ -282,6 +282,7 @@ export function ActivationJourneyClient({
         ...(relationship ? { organizationRelationship: relationship } : {}),
       }),
     });
+    clearParticipantIntelligenceContext();
     if (result.state) applyState(result.state);
     return result.state;
   }

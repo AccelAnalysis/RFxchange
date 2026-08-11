@@ -187,6 +187,7 @@ test("Intelligence context preservation is bounded to the canonical same-origin 
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
   const storage = read("src/application/participant/intelligence-context-storage.ts");
   const signOut = read("src/components/auth/SignOutButton.tsx");
+  const signIn = read("src/components/auth/SignInClient.tsx");
   const activation = read("src/components/onboarding/ActivationJourneyClient.tsx");
 
   assert.match(storage, /PARTICIPANT_INTELLIGENCE_CONTEXT_STORAGE_KEY/);
@@ -203,6 +204,8 @@ test("Intelligence context preservation is bounded to the canonical same-origin 
   assert.match(navigation, /lens\.id === "intelligence" \? intelligenceHref : lens\.href/);
   assert.doesNotMatch(navigation, /authorize|permission|membership|tenancy/);
   assert.match(signOut, /clearParticipantIntelligenceContext\(\)[\s\S]*\.signOut\(\)/);
+  assert.match(signIn, /method: "POST"[\s\S]*clearParticipantIntelligenceContext\(\)/);
+  assert.match(activation, /method: "POST"[\s\S]*clearParticipantIntelligenceContext\(\)/);
   assert.match(activation, /clearParticipantIntelligenceContext\(\)[\s\S]*\.signOut\(\)/);
 });
 
