@@ -1249,7 +1249,7 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
         cdp,
         `document.readyState === "complete"
           && document.documentElement.lang === "${locale}"
-          && document.querySelector('[data-participant-authorized="true"] [data-participant-navigation]')`,
+          && Boolean(document.querySelector('[data-participant-authorized="true"] [data-participant-navigation]'))`,
         `${locale} authorized participant navigation`,
       );
       const labels = await evaluate(cdp, `(() => {
