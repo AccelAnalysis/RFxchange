@@ -129,8 +129,8 @@ The no-Feature-ID reconciliation gate is limited to release integration, generat
 
 | Slice | Minimum acceptance focus |
 | --- | --- |
-| 4.1 | organization ownership, permission, lifecycle or version, request-family snapshot, draft autosave and conflict |
-| 4.2 | AMACS 0.5.0 MarketNeed, assisted or manual interpretation, structured location, value, term and requirements |
+| 4.1 | organization ownership, permission, private draft persistence and re-entry, lifecycle or version, governed request-family snapshot, idempotent creation and stale-version conflict |
+| 4.2 | AMACS 0.5.0 MarketNeed, assisted or manual interpretation, structured location, value, term and requirements, builder autosave and version conflict |
 | 4.3 | full picker, capability or qualifier semantics, response or evaluation links, weighted-total rules |
 | 4.4 | deep-linked readiness, exact preview parity, atomic publication, immutable snapshot, permitted projection |
 | 4.5 | controlled opportunity search, saved or watch or deadline relations, reliable alerts, no private leakage |
@@ -139,6 +139,8 @@ The no-Feature-ID reconciliation gate is limited to release integration, generat
 | 4.8 | requirement-linked response, stable IDs, role or assignment controls, continuous readiness |
 | 4.9 | current-version and deadline recheck, human final review, immutable receipt or truthful external handoff |
 | 4.10 | contextual education only; no tutorial domain objects or false live-state explanation |
+
+Slice 4.1 proves persistence through a server-created private draft that survives reload and authorized re-entry, plus a version-checked request-family mutation. It does not implement generic builder autosave because the converged feature crosswalk assigns `RFxPackage`, module completion and autosave/version conflict to `ISS-005` in Slice 4.2. Slice 4.2 must extend the same expected-version contract to builder-content autosave; neither slice may be marked complete without its respective conflict, recovery and persistence evidence.
 
 ## 9. Configured-browser acceptance
 
