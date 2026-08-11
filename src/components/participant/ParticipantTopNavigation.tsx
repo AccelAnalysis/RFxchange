@@ -127,7 +127,6 @@ function useTransitionFeedback(pathname: string) {
     });
     window.dispatchEvent(new CustomEvent("rfxchange:participant-transition", { detail }));
     console.info("rfxchange.participant-transition", detail);
-    setPendingDestination(null);
   }, [pathname, pendingDestination, transitionFromPathname]);
 
   function begin(destination: NavigationDestination) {
@@ -152,7 +151,16 @@ function useTransitionFeedback(pathname: string) {
     setPendingDestination(destination);
   }
 
-  return Object.freeze({ pendingDestination, intelligenceHref, begin });
+  const visiblePendingDestination =
+    pendingDestination && participantNavigationState(pathname) !== pendingDestination
+      ? pendingDestination
+      : null;
+
+  return Object.freeze({
+    pendingDestination: visiblePendingDestination,
+    intelligenceHref,
+    begin,
+  });
 }
 
 function LensItems({
