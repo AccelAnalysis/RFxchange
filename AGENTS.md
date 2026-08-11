@@ -5,12 +5,25 @@ This repository implements **The RFxchange**, an organization-centered, map-base
 ## Product model
 
 - The **organization** is the primary market entity. Individual users authenticate separately but act through one or more organizations with explicit membership, role and permission state.
-- The RFxchange is not a generic social network, static directory, conventional bid portal, CRM replacement or procurement system of record.
+- The RFxchange is RFx-centered and organization-centered. Opportunities/RFx is the primary transaction lens and principal market-action proposition; Resources, Intelligence and Referrals are supporting lenses over the same market.
+- The RFxchange is not a generic social network, static directory, conventional bid portal, CRM replacement, procurement system of record or commercial-real-estate listing marketplace.
 - The core product connects organization identity, geography, capability discovery, RFx activity, teaming, referrals, resources, credibility and economic intelligence.
-- Geography is a controlled product concept, not browser presentation state. Locality participation and release state must be enforced server-side.
-- Activation culminates in the organization's **real marker appearing on the real controlled map** after the required identity, authority, location, profile and geography conditions are satisfied.
+- Geography is a controlled product concept, not browser presentation state. Locality participation and release state are enforced server-side.
+- Activation culminates in the organization's **real marker appearing on the real controlled map** after required identity, authority, location, profile and geography conditions are satisfied.
 - Organizational claim/authority and Organization Verification are separate concepts. A user may establish authority to manage an organization without making that organization Verified.
 - Commercial status, membership, Founding recognition or sponsorship must never silently alter substantive credibility, verification, RFx qualification, market matching or neutral discovery.
+- Do not fabricate RFxs, opportunity beacons, organizations, matches, providers, referrals, sites, outcomes, statistics, intelligence or market activity to simulate a target experience.
+
+## Vocabulary
+
+Use the cross-cutting vocabulary in `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md`:
+
+- **Lens** — functional market context;
+- **Layer** — map/analytical projection within a lens;
+- **Appearance** — visual treatment only;
+- **Workspace** — interaction composition for a task.
+
+**Intelligence** is the functional analytical lens. **Light Appearance** and **Dark Appearance** are presentation terms. **Presentation Mode** is a separate future presentation-safe capability. **High Contrast** is an accessibility treatment. Do not use `Intelligence Dark` as though Intelligence were an appearance, and do not implement Dark Appearance or an appearance preference without explicit authority.
 
 ## Source authority
 
@@ -19,47 +32,82 @@ Use these sources together rather than treating one file as universally authorit
 1. **Current explicit task instructions** define the work requested in the current task.
 2. `docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md` is the live Feature-ID completion authority. A checked item requires acceptance and implementation evidence.
 3. `docs/tracking/RFxchange_DEPENDENCY_MAP.md` is the live sequencing/dependency authority. Reviewed corrections there supersede seeded spreadsheet dependencies for scheduling.
-4. The applicable `docs/slices/` brief defines the approved implementation boundary for that slice. A brief cannot mark a feature complete or waive its documented acceptance intent.
-5. `docs/context/` contains normalized cross-cutting product rules distilled from approved source material.
-6. `docs/brand/` defines the approved target brand architecture, semantic meaning, messaging, map/data grammar, motion, sensory rules, viewing modes and brand acceptance after Brand Gate B0.
-7. `docs/design/` defines the currently implemented visual/UI/presentation baseline. For user-facing UI read `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`; map/geography work also requires `docs/design/MAP_VISUAL_SYSTEM.md`.
-8. Existing production architecture and merged architecture decisions govern implementation mechanics unless the current task intentionally changes them.
-9. `docs/reference/` contains provenance and visual/prototype references. Reference artifacts demonstrate product intent; they are not automatically production architecture.
+4. The applicable `docs/slices/` execution authority defines the approved implementation boundary. A brief cannot mark a feature complete or waive documented acceptance intent.
+5. `docs/context/` contains normalized cross-cutting product rules. `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md`, merged through PR #150, governs participant-facing lens hierarchy, spatial continuity, workspace boundaries and truthful cross-lens behavior.
+6. `docs/rfx/` contains the converged RFx Core/AMACS/workspace/acceptance package.
+7. `docs/brand/` defines approved target brand architecture, semantic meaning, messaging, map/data grammar, motion, sensory rules, appearance/presentation authority and brand acceptance after Brand Gate B0.
+8. `docs/design/` defines the currently implemented visual/UI/presentation baseline. For user-facing UI read `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`; map/geography work also requires `docs/design/MAP_VISUAL_SYSTEM.md`.
+9. Existing production architecture and merged architecture decisions govern implementation mechanics unless the current task intentionally changes them.
+10. `docs/reference/` contains provenance and visual/prototype references. Reference artifacts demonstrate product intent; they are not automatically production architecture.
 
 Authority order for participant-facing work is:
 
 1. current task and authorized slice/gate;
 2. security, privacy, authorization, lifecycle, geography, domain, tracker and dependency authorities;
-3. `docs/brand/` for the approved target experience;
-4. `docs/design/` for the currently converged implementation baseline;
-5. existing runtime as implementation evidence and compatibility context.
+3. Exchange Interaction Architecture and applicable RFx Core authority;
+4. `docs/brand/` for approved target experience;
+5. `docs/design/` for currently converged implementation baseline; and
+6. existing runtime as implementation evidence and compatibility context.
 
-If two sources appear to conflict, do not silently choose the easiest interpretation. Preserve the stricter security/privacy requirement and report the conflict before widening scope. A visual or brand rule never grants authority or expands slice scope.
+If sources appear to conflict, do not silently choose the easiest interpretation. Preserve the stricter security/privacy requirement and report the conflict before widening scope. A visual or brand rule never grants authority or expands slice scope.
 
 ## Build sequencing
 
 - Use a **single-active-slice or single-active-gate model** unless the current task explicitly authorizes otherwise.
-- Preparation and code inspection for the next slice may occur while the current slice is validating, but do not begin implementation of the next slice before the current slice is merged and dependency eligibility is recalculated.
+- Preparation and code inspection for the next slice may occur while the current slice validates, but do not begin implementation of the next slice before the current slice is merged and dependency eligibility is recalculated.
 - Do not implement future Feature IDs merely because adjacent code makes them convenient.
 - Incidental satisfaction of another Feature ID must be evaluated against that feature's own acceptance check before tracker status changes.
 - Recalculate the next slice from merged `main`, not from assumptions made on an older branch.
 - Documentation-only planning and reconciliation do not authorize production implementation.
+- No deployment/release blocker becomes a product-domain dependency unless a current canonical dependency authority establishes that edge.
 
-## Current wave and brand boundary
+## Current wave, stabilization and planning boundary
 
-Wave 2 is complete and reconciled on merged `main` at `097b574ccce8865d4127cfe381fb0bd6199de0a5` with **43/43 Activation** features complete.
+Wave 2 is complete with **43/43 Activation** features.
 
-Wave 3 Slices 3.1 through 3.8 are complete via PRs #107, #120, #126, #128, #130, #132, #137 and #139. Slice 3.8 merged at `2727b6111d1582225e8ece409d015b8696a8cce7` and post-merge production CI run `31303727886` passed before the separate configured-browser closeout began. Wave 3 Network is **38/38** with exit evidence in `docs/architecture/WAVE_3_CLOSEOUT.md`. Brand Gates B0 through B6a are complete and B6b remains intentionally pending because no bounded convergence gate is required. The current tracker state is **438 total · 152 Done · 286 Not Started**, with Activation **43/43**.
+Wave 3 Slices 3.1 through 3.8 are complete via PRs #107, #120, #126, #128, #130, #132, #137 and #139. Wave 3 Network is **38/38**, with integrated configured-browser and zero-residual evidence in `docs/architecture/WAVE_3_CLOSEOUT.md`.
 
-PR #117 established the cross-cutting internationalization foundation for `en-US`, Spanish, French, Italian and German interface content without changing any Feature-ID status. Participant-authored RFx requirements, responses, contractual terms, private messages, uploaded documents, certifications, licenses and organization-authored legal representations remain outside automatic translation. Configured deployment-browser multilingual acceptance remains a release/migrated-surface gate rather than a Feature-ID completion claim.
+Brand Gates B0 through B6a are complete. B6b remains **Not Started / intentionally pending** because no bounded convergence gate is currently required. B6c remains ineligible before real RFx publication authority. Later appearance, sensory, presentation, credibility and outcome gates require separate authority.
 
-**Wave 3 Slice 3.2 — Controlled Network Entry & Discovery (`GEO-012`, `DSC-001`, `DSC-002`, `DSC-003`) is complete via PR #120.** Configured-browser acceptance proved current OPEN and organization authority, exact/approximate/locality-only privacy, capability and service-area search, synchronized map/list/detail behavior, stale-state and lifecycle/restriction denial, responsive/accessibility behavior, all five platform locales and clean-console operation. Cleanup removed the complete disposable footprint and returned a zero-residual scan.
+All independently executable work under Post-Wave 3 Stabilizations 1–7 is complete. **Stabilization 2C remains incomplete and isolated to release engineering.** The Firebase App Hosting backend `rfxchange`, project/repository connection, region `us-east4`, live branch `main`, root `/`, retained Web App and reserved App Hosting URL exist. The remaining blocker is trustworthy build-time source-SHA binding and an accepted same-SHA live rollout proving source SHA → `RFXCHANGE_BUILD_SHA`/build identity → rendered SHA. Do not solve 2C under a product slice, weaken `RFXCHANGE_BUILD_SHA`, change rollout architecture or claim 2C complete. It does not block RFx Core product development.
 
-AMACS 0.5.0 is merged in the independent `AccelAnalysis/amacs` repository at `da7879f2609271b067ae6d02875e9388a02c4fe5`. It preserves the 615-capability catalog and adds provider-neutral MarketNeed, InterpretationRecord, InterpretationCandidate and ConceptInterpretationGuidance contracts. RFxchange reconciliation to that immutable release is complete via PR #123, including the historical 0.1.0 release, deterministic generated projections, runtime contracts, migration preview and participant-surface isolation. This no-Feature-ID gate changes no RFxchange Feature-ID state.
+PR #150, **Define the Exchange interaction architecture**, is merged at `42c9a33499d9c37af74b6f61d7e1a8f823d0e0f8`. Consume its authority; do not recreate its PR or implement the complete Exchange shell under a narrower slice.
 
-The AI/AMACS Interpretation Foundation is complete via PR #124. **Wave 3 Slice 3.3 — Market Profile Enrichment** (`ORG-013`, `ORG-014`, `ORG-016`, `ORG-017`) is complete via PR #126. **Wave 3 Slice 3.4 — Credential, Media & Location Enrichment** (`ORG-015`, `ORG-018`, `ORG-019`) is complete via PR #128. **Wave 3 Slice 3.5 — Referral Network & Referral Acquisition** (`REF-001`–`REF-005`, `EDU-014`, `ACQ-006`) is complete via PR #130. **Wave 3 Slice 3.6 — Official Resource Provider Foundation** (`RES-001`, `RES-002`, `RES-003`, `ADM-070`) is complete via PR #132. **Wave 3 Slice 3.7 — Resource Discovery, Routing & Provider Distribution** (`RES-004`, `RES-005`, `DSC-011`, `REF-006`, `RES-007`, `RES-008`, `ACQ-008`) is complete via PR #137. **Wave 3 Slice 3.8 — Persistent Network Education** (`EDU-016`, `EDU-017`) is complete via PR #139 with exact-head and post-merge production CI passed. The separate end-to-end closeout evidence is in `docs/architecture/WAVE_3_CLOSEOUT.md`. See `docs/architecture/WAVE_3_SLICE_3_7.md`, `docs/architecture/WAVE_3_SLICE_3_8.md`, `docs/rfx/AMACS_0_5_RECONCILIATION.md`, `docs/rfx/AMACS_INTEGRATION_CONTRACT.md`, `docs/slices/AI_AMACS_INTERPRETATION_FOUNDATION.md`, `docs/slices/SLICE_3_7_EXECUTION_AUTHORITY.md`, `docs/slices/SLICE_3_8_EXECUTION_AUTHORITY.md` and `docs/slices/WAVE_3_ROADMAP.md`.
+The current tracker state is:
 
-Wave 4 RFx Core remains governed by the canonical planning authority merged through PR #118 and the later AMACS 0.5.0 reconciliation authority. After this closeout, the next planning candidate is a documentation-only Slice 4.1 dependency/authority reconciliation for `ISS-001`, `ISS-002` and `ISS-003`; no Wave 4 implementation is authorized without a specific approved brief. Subsequent Brand Gates and net-new capabilities such as Intelligence Dark, Presentation Mode, production sound or haptics likewise require explicit authorization and any necessary tracker governance.
+- **438 total · 152 Done · 286 Not Started**;
+- Activation: **43/43**;
+- Network: **38/38**;
+- Wave 4 RFx Core: **0/41**; and
+- B6b: **Not Started / intentionally pending**.
+
+The current planning gate is the documentation-only Slice 4.1 authority for `ISS-001`, `ISS-002` and `ISS-003` in `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md`.
+
+That authority establishes:
+
+- one organization-owned RFx aggregate;
+- one bounded `draft` lifecycle state;
+- expected-version, immutable-event, idempotent-command and organization-audit seams;
+- a deterministic governed AMACS 0.5.0 request-family snapshot; and
+- safe blank-source draft creation in a bounded Operational Workspace entry.
+
+This documentation work leaves all three Feature IDs Not Started and starts no runtime. After the authority is reviewed, merged and post-merge green, a **separate explicit instruction** may authorize Slice 4.1 runtime implementation as the next dependency-eligible candidate. Do not begin Slice 4.2, B6c or later behavior under Slice 4.1 authority.
+
+## AMACS and interpretation boundary
+
+AMACS 0.5.0 is merged in the independent `AccelAnalysis/amacs` repository at `da7879f2609271b067ae6d02875e9388a02c4fe5`. RFxchange reconciliation is complete via PR #123, including deterministic generated projections, runtime contracts, migration evidence and participant-surface isolation.
+
+The AI/AMACS Interpretation Foundation is complete via PR #124. The governing rule is:
+
+> AI or other assistance interprets and proposes. AMACS defines and constrains. The participant confirms. RFxchange stores and operates the authoritative market record.
+
+- Provider/model types remain behind application/infrastructure boundaries.
+- AMACS identifiers validate against the pinned release projection; model memory cannot invent authority.
+- Interpretation records/candidates are non-authoritative.
+- Accepted suggestions require a separate current-authority domain command.
+- Rejected or unresolved suggestions cannot influence matching, publication or public market observations.
+- Manual AMACS browse/search remains available for authorized consumers.
+- Slice 4.1 uses deterministic manual request-family selection and does not need an AI call.
 
 ## Required reading before a slice or gate
 
@@ -67,28 +115,35 @@ Before implementing any slice or Brand Gate:
 
 1. Read this file.
 2. Read `docs/context/README.md`.
-3. Read the canonical tracker and dependency map.
-4. Read the applicable wave roadmap.
-5. Read the specific slice or Brand Gate authority.
-6. Read the context documents listed under **Must read**.
-7. Inspect existing production abstractions before designing new ones.
-8. If the work creates or materially changes user-facing UI, read `docs/brand/README.md`, the applicable brand guides, `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`.
-9. If the work creates or materially changes map/geography UI, also read `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md` and `docs/design/MAP_VISUAL_SYSTEM.md`.
-10. If the work creates customer-facing copy or communications, read `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md`.
-11. If the work introduces motion, sound, haptics or a viewing mode, read the corresponding brand authority and confirm that the capability is explicitly authorized.
-12. If the work consumes AMACS or AI interpretation, read the current AMACS integration/reconciliation contracts and keep AMACS semantics separate from RFxchange provider/model implementation provenance.
+3. Read `docs/context/PRODUCT_PRINCIPLES.md`.
+4. Read `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md` for participant-facing work.
+5. Read the canonical tracker and dependency map.
+6. Read the applicable wave roadmap.
+7. Read the specific slice or Brand Gate authority.
+8. Read the context/RFx documents listed under the authority's **Must read** or governing section.
+9. Inspect existing production abstractions before designing new ones.
+10. If work creates or materially changes user-facing UI, read `docs/brand/README.md`, applicable brand guides, `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`.
+11. If work changes map/geography UI, also read `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md` and `docs/design/MAP_VISUAL_SYSTEM.md`.
+12. If work creates customer-facing copy or communications, read `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md`.
+13. If work introduces motion, sound, haptics, appearance or Presentation Mode, read the corresponding authority and confirm the capability is explicitly authorized.
+14. If work consumes AMACS or AI interpretation, read the current AMACS integration/reconciliation contracts and keep AMACS semantics separate from provider/model implementation provenance.
 
 ## Brand requirement classes
 
 - **Cross-cutting standards** may govern authorized surfaces without claiming a new domain feature: naming, semantic color, typography, messaging, evidence integrity, loading/empty/error states, accessibility, reduced motion, state preservation and performance.
-- **Domain-dependent expressions** may be designed but cannot appear as live product state before their authoritative domain exists: opportunity beacons, service fields, referral/team/RFx paths, credibility seals and outcome paths.
-- **Net-new capabilities** require explicit scope, persistence, permissions, tests and tracker treatment where appropriate: Intelligence Dark, Presentation Mode, sonic preferences/runtime, haptics and comparable new settings or projections.
+- **Domain-dependent expressions** may be designed but cannot appear as live product state before authoritative domains exist: opportunity beacons, service fields, referral/team/RFx paths, credibility seals and outcome paths.
+- **Net-new capabilities** require explicit scope, persistence, permissions, tests and tracker treatment where appropriate: Dark Appearance, appearance preferences, Presentation Mode, sonic preferences/runtime, haptics and comparable settings or projections.
 
 ## Engineering invariants
 
 - Server-side authorization is authoritative. Client state never grants access.
-- Keep Firebase UID, RFxchange user identity, organization membership and administrative authority conceptually separate.
-- Preserve immutable/auditable history for sensitive administrative, access, claim, credibility and policy decisions.
+- Keep provider subject/Firebase UID, RFxchange user identity, organization membership and administrative authority conceptually separate.
+- An authenticated user does not personally own an organization RFx. The issuing organization owns it; actor user/membership are audit evidence.
+- Reuse the canonical organization-operation authorization boundary for consequential organization-scoped commands.
+- Preserve immutable/auditable history for sensitive administrative, access, claim, credibility, policy and consequential domain decisions.
+- Expected-version checks and aggregate/evidence writes occur atomically where the domain requires optimistic concurrency.
+- Stable command IDs and fingerprints support exact replay; a command ID reused for different intent conflicts.
+- Direct browser Firestore access remains default-denied; trusted server handlers project only permitted data.
 - Do not expose sensitive evidence or private organization data through public projections.
 - Prefer explicit state machines and typed domain contracts over UI-only state.
 - Provider adapters remain behind domain/application boundaries; do not leak Firebase, Microsoft, payment-provider or AI-provider implementation details into domain models.
@@ -99,43 +154,46 @@ Before implementing any slice or Brand Gate:
 
 ## Runtime and validation
 
-Repository/CI development runtime is Node.js **24.18.x** (`package.json` requires `>=24.18.0 <25`). Firebase Functions deploy on **Node.js 22** as pinned in `firebase.json`; the functions workspace remains testable in the repository toolchain.
+Repository/CI development runtime is Node.js **24.18.x** (`package.json` requires `>=24.18.0 <25`). Firebase Functions deploy on **Node.js 22** as pinned in `firebase.json`; the Functions workspace remains testable in the repository toolchain.
 
-Before claiming a slice or gate complete, run the slice/gate-specific checks plus the repository validation expected by the task. The canonical full local gate is:
+Before claiming a slice or gate complete, run slice/gate-specific checks plus repository validation. The canonical full local gate is:
 
 ```bash
 npm run check
 ```
 
-Key scripts are defined in `package.json`. Add focused validation scripts/tests for new architectural contracts when appropriate, and keep existing gates green.
-
-Brand acceptance supplements and never replaces domain, security, lifecycle, geography, emulator or configured-browser acceptance.
+Run focused product/architecture/dependency/internationalization/emulator checks first where applicable. Production CI must pass on the exact reviewed PR head and again on merged `main`. Brand acceptance supplements and never replaces domain, security, lifecycle, geography, emulator or configured-browser acceptance.
 
 ## Tracker discipline
 
 - Do not delete, rename or reorder approved Feature IDs casually.
-- Mark `[x]` only after the feature's documented acceptance check passes and evidence exists.
+- Mark `[x]` only after the feature's documented acceptance check passes and implementation/validation evidence exists.
 - Update evidence in the same PR as implementation whenever practical.
 - Documentation-only planning/reconciliation must not change progress totals or completion statuses.
-- A visual simulation or tutorial never completes the corresponding live domain Feature ID.
+- A visual simulation, architecture document or tutorial never completes the corresponding live domain Feature ID.
+- `ISS-001`, `ISS-002` and `ISS-003` remain Not Started until their runtime acceptance evidence is merged.
 
 ## Design, brand and visual references
 
 - Treat `docs/brand/` as the approved target experience after B0 and `docs/design/` as the currently implemented/converged baseline.
-- Do not reconstruct design rules from screenshots when the brand or design systems address the topic.
+- Do not reconstruct design rules from screenshots when brand/design systems address the topic.
 - Read `docs/reference/prototypes/README.md` before using prototype code.
 - Read `docs/reference/screenshots/README.md` before treating screenshots as visual requirements.
-- Preserve anchored geographic markers, authoritative locality geometry, strong selected-locality treatment, muted surrounding context, restrained glassmorphism, reduced container/border chrome and a continuous map-first workspace where those rules apply.
-- Normal markers/nodes are not outlined as a default treatment; use fill, glyph, shadow and separate hover/selection emphasis while keeping the geographic anchor fixed.
-- Domain-dependent objects must remain absent or truthfully unavailable until their source domains exist.
-- Never copy prototype architecture wholesale merely because it visually demonstrates the desired behavior.
+- Preserve anchored geographic markers, authoritative locality geometry, strong selected-locality treatment, muted surrounding context, restrained glassmorphism, reduced container/border chrome and continuous map-first workspace where applicable.
+- Normal markers/nodes are not outlined by default; use fill, glyph, shadow and separate hover/selection emphasis while keeping the geographic anchor fixed.
+- Domain-dependent objects remain absent or truthfully unavailable until their source domains exist.
+- Never copy prototype architecture wholesale merely because it visually demonstrates desired behavior.
 
 ## Completion report
 
 At the end of implementation or reconciliation work, report:
 
-- Feature IDs or Brand Gate/cross-cutting gate addressed.
-- Acceptance evidence and tests run.
-- Any architecture/dependency discoveries that affect later slices or gates.
-- Tracker changes made or intentionally not made.
-- Explicit confirmation that later slices/gates were not begun unless authorized.
+- starting merged `main` SHA;
+- PR number, reviewed final head, merge SHA, exact-head CI and post-merge CI;
+- exact files changed;
+- Feature IDs or Brand Gate/cross-cutting gate addressed;
+- dependency result;
+- acceptance evidence and tests run;
+- tracker changes made or intentionally not made;
+- Stabilization 2C and B6b status where relevant; and
+- explicit confirmation that later slices/gates and unauthorized runtime work were not begun.
