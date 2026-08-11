@@ -9,17 +9,31 @@ export type ParticipantLensId = (typeof PARTICIPANT_LENS_IDS)[number];
 export type ParticipantUtilityId = "account" | "quick-start";
 export type ParticipantNavigationState = ParticipantLensId | ParticipantUtilityId | null;
 
-export interface ParticipantLensDefinition {
-  readonly id: ParticipantLensId;
-  readonly labelKey:
-    | "participantNavigation.opportunitiesRfx"
-    | "participantNavigation.resources"
-    | "participantNavigation.intelligence"
-    | "participantNavigation.referrals";
-  readonly href: "/resources" | "/geography/canvas" | "/referrals" | null;
-  readonly availability: "enabled" | "unavailable";
-  readonly activePathPrefixes: readonly string[];
-}
+type ParticipantLensLabelKey =
+  | "participantNavigation.opportunitiesRfx"
+  | "participantNavigation.resources"
+  | "participantNavigation.intelligence"
+  | "participantNavigation.referrals";
+
+type ParticipantEnabledLensDefinition = Readonly<{
+  id: Exclude<ParticipantLensId, "opportunities-rfx">;
+  labelKey: ParticipantLensLabelKey;
+  href: "/resources" | "/geography/canvas" | "/referrals";
+  availability: "enabled";
+  activePathPrefixes: readonly string[];
+}>;
+
+type ParticipantUnavailableLensDefinition = Readonly<{
+  id: "opportunities-rfx";
+  labelKey: "participantNavigation.opportunitiesRfx";
+  href: null;
+  availability: "unavailable";
+  activePathPrefixes: readonly [];
+}>;
+
+export type ParticipantLensDefinition =
+  | ParticipantEnabledLensDefinition
+  | ParticipantUnavailableLensDefinition;
 
 /**
  * Stable participant information architecture.
@@ -33,7 +47,7 @@ export const PARTICIPANT_LENSES: readonly ParticipantLensDefinition[] = Object.f
     labelKey: "participantNavigation.opportunitiesRfx",
     href: null,
     availability: "unavailable",
-    activePathPrefixes: Object.freeze([]),
+    activePathPrefixes: Object.freeze([]) as readonly [],
   }),
   Object.freeze({
     id: "resources",
