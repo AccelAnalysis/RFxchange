@@ -38,11 +38,6 @@ export type ParticipantNavigationItem =
 
 type NavigationDestination = Exclude<ParticipantNavigationState, null>;
 
-type ShellOrganization = Readonly<{
-  id: string;
-  name: string | null;
-}>;
-
 function normalizedActiveItem(item?: ParticipantNavigationItem): ParticipantNavigationState {
   switch (item) {
     case "Network":
@@ -79,43 +74,6 @@ function organizationInitials(name: string | null): string {
     .map((part) => part.charAt(0).toUpperCase())
     .join("");
   return initials || "A";
-}
-
-function useShellOrganization(): ShellOrganization | null {
-  const [organization, setOrganization] = useState<ShellOrganization | null>(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void fetch("/api/participant-shell", {
-      cache: "no-store",
-      credentials: "same-origin",
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) return null;
-        const payload = await response.json() as {
-          organization?: { id?: unknown; name?: unknown } | null;
-        };
-        const id = typeof payload.organization?.id === "string"
-          ? payload.organization.id
-          : null;
-        if (!id) return null;
-        return Object.freeze({
-          id,
-          name: typeof payload.organization?.name === "string"
-            ? payload.organization.name
-            : null,
-        });
-      })
-      .then((value) => {
-        if (value) setOrganization(value);
-      })
-      .catch(() => undefined);
-
-    return () => controller.abort();
-  }, []);
-
-  return organization;
 }
 
 function useTransitionFeedback(pathname: string) {
@@ -239,16 +197,17 @@ function moveMenuFocus(menu: HTMLElement, current: EventTarget | null, direction
 function AccountUtility({
   activeState,
   administrationHref: initialAdministrationHref,
+  organizationName,
   pendingDestination,
   beginNavigation,
 }: Readonly<{
   activeState: ParticipantNavigationState;
   administrationHref?: string;
+  organizationName: string | null;
   pendingDestination: NavigationDestination | null;
   beginNavigation(destination: NavigationDestination): void;
 }>) {
   const { t } = useI18n();
-  const organization = useShellOrganization();
   const [open, setOpen] = useState(false);
   const [administrationHref, setAdministrationHref] = useState<string | null>(
     initialAdministrationHref ?? null,
@@ -306,7 +265,6 @@ function AccountUtility({
     return () => document.removeEventListener("pointerdown", dismiss);
   }, [open]);
 
-  const organizationName = organization?.name ?? null;
   const buttonLabel = organizationName
     ? `${t("participantNavigation.accountUtilities")}: ${organizationName}`
     : t("participantNavigation.accountUtilities");
@@ -421,7 +379,7 @@ function MobileLensMenu({
         if (event.key === "Escape") {
           event.preventDefault();
           close();
-          detailsRef.current?.querySelector("summary")?.focus();
+          detailsRef.current?.querySelector<HTMLElement>("summary")?.focus();
         }
       }}
     >
@@ -434,7 +392,12 @@ function MobileLensMenu({
 export function ParticipantTopNavigation({
   activeItem,
   administrationHref,
-}: Readonly<{ activeItem?: ParticipantNavigationItem; administrationHref?: string }>) {
+  organizationName = null,
+}: Readonly<{
+  activeItem?: ParticipantNavigationItem;
+  administrationHref?: string;
+  organizationName?: string | null;
+}>) {
   const { t } = useI18n();
   const pathname = usePathname();
   const activeState = activeItem === undefined
@@ -479,6 +442,7 @@ export function ParticipantTopNavigation({
       <AccountUtility
         activeState={activeState}
         administrationHref={administrationHref}
+        organizationName={organizationName}
         pendingDestination={transition.pendingDestination}
         beginNavigation={transition.begin}
       />
