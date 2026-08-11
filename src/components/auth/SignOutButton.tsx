@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useI18n } from "../i18n/I18nProvider";
+import { clearParticipantIntelligenceContext } from "../../application/participant/intelligence-context-storage";
 import { createClientAuthenticationProvider } from "../../infrastructure/auth/firebase-client";
 
 export function SignOutButton({
@@ -24,8 +25,13 @@ export function SignOutButton({
         setBusy(true);
         void (async () => {
           try {
-            await createClientAuthenticationProvider().signOut().catch(() => undefined);
-            await fetch("/api/auth/session", { method: "DELETE" });
+            clearParticipantIntelligenceContext();
+            try {
+              await createClientAuthenticationProvider().signOut();
+            } catch {
+              // Server-session invalidation must still run if client-provider teardown is unavailable.
+            }
+            await fetch("/api/auth/session", { method: "DELETE" }).catch(() => undefined);
           } finally {
             router.replace("/");
           }

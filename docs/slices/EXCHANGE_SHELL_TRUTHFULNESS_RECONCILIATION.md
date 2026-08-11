@@ -27,7 +27,7 @@ Ordinary lens changes retain one persistent participant shell. Route-specific lo
 | `AGENTS.md` | Updated | Makes the four-part participant truthfulness definition, exact lens order, separate utility boundary, persistent-shell rule, active gate and Slice 4.1 stop boundary explicit. |
 | `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md` | Updated | Governs structural, capability, state and continuity truthfulness; records the dated historical reconciliation; retains `/geography/canvas` as the Intelligence seam; separates the administrative rule. |
 | `docs/context/README.md` | Updated | Indexes the bounded shell authority and records current sequencing and vocabulary. |
-| `docs/architecture/POST_WAVE_3_STABILIZATION.md` | Updated | Preserves the historical stabilization checkpoint and appends the August 2026 ongoing-shell reconciliation. |
+| `docs/architecture/POST_WAVE_3_STABILIZATION.md` | Updated | Preserves the historical stabilization checkpoint and appends the August 2026 participant-shell architectural reconciliation. |
 | `docs/architecture/POST_WAVE_3_STABILIZATION_6_DATA_CORRECTNESS.md` | Updated | Preserves the temporary removal of Opportunities as valid historical evidence while superseding the narrower rule for the permanent participant architecture. |
 | `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md` | Inspected; existing authority retained | Its evidence/state-language rules already require truthful, bounded, non-promotional loading and unavailable copy. The implementation uses concise localized `Not yet available` language and destination-specific loading copy. No brand claim, launch marketing, credibility claim or future-domain promise is added. |
 | `docs/design/README.md` | Updated | Records the persistent participant header, exact permanent lens order, separate utilities, scoped loading and stable Intelligence route as the implemented baseline. |
@@ -55,6 +55,17 @@ The performance pass corrects actual blocking or duplicate work rather than mere
 Configured-browser acceptance compares this branch with exact base `87fb29ef3b442410deecf61a470bc94c9c013c60`, records representative warm-transition durations and Server-Timing evidence, verifies one `PerformanceNavigationTiming` document entry, and confirms that the shell remains mounted throughout:
 
 `Intelligence → Resources → Referrals → Intelligence → Account → Quick Start`
+
+The acceptance command fails closed unless it writes
+`artifacts/exchange-shell-transition-evidence.json`; CI uploads that JSON as
+`exchange-shell-transition-evidence-<exact-candidate-sha>`. The artifact binds the exact base and
+candidate SHAs to per-transition interaction-to-route-commit and separate content-settlement
+measurements, median and p90 summaries, document-request counts, takeover/shell-remount results,
+Intelligence context restoration (including an in-content exit and an explicit shell remount),
+session-end context clearing, activation/protected-initialization replay checks, 390px/reduced-motion/
+keyboard/five-locale acceptance, console and exception results, and one overall pass/fail result.
+Those timings are representative controlled-browser evidence, not a production-network promise; the
+exact accepted values and immutable Actions run are recorded in the PR completion record.
 
 ## Explicit unchanged boundaries
 

@@ -23,6 +23,7 @@ import {
   createClientAuthenticationLifecycle,
   createClientAuthenticationProvider,
 } from "../../infrastructure/auth/firebase-client";
+import { clearParticipantIntelligenceContext } from "../../application/participant/intelligence-context-storage";
 
 import styles from "./ActivationJourneyClient.module.css";
 
@@ -325,7 +326,12 @@ export function ActivationJourneyClient({
             type="button"
             disabled={busy}
             onClick={() => run(async () => {
-              await createClientAuthenticationProvider().signOut().catch(() => undefined);
+              clearParticipantIntelligenceContext();
+              try {
+                await createClientAuthenticationProvider().signOut();
+              } catch {
+                // Server-session invalidation must still run if client-provider teardown is unavailable.
+              }
               await fetch("/api/auth/session", { method: "DELETE" });
               setState(null);
               setNeedsActivationSetup(false);

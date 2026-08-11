@@ -140,6 +140,14 @@ Server authorization, tenancy, lifecycle, restriction, privacy, geography, provi
 
 Transition evidence records a named browser performance measure, start/end path, destination, duration, and the current number of `PerformanceNavigationTiming` entries. Browser acceptance must prove that no second document-navigation entry is introduced.
 
+Acceptance must fail closed unless it writes
+`artifacts/exchange-shell-transition-evidence.json`, and CI must upload the JSON under a name bound
+to the exact candidate SHA. The artifact reports interaction-to-route-commit timing separately from
+content settlement, and records context restoration, document requests, shell persistence, loading
+treatment, responsive/accessibility/localization checks, clean console/exception state and an overall
+result. Representative controlled-browser timings are evidence for this gate, not a production-
+network latency promise.
+
 ## 8. Context preservation
 
 The Intelligence canonical seam remains `/geography/canvas`. This label convergence does not move or replace the map route, and therefore does not discard existing URL-derived map, search, selected-object, filter, or return parameters merely because the top-level label changes.

@@ -1,7 +1,7 @@
 "use client";
 
 import Link, { useLinkStatus } from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   useEffect,
   useId,
@@ -19,6 +19,11 @@ import {
   participantNavigationState,
   type ParticipantNavigationState,
 } from "../../application/participant/participant-lens-registry";
+import {
+  PARTICIPANT_INTELLIGENCE_CONTEXT_CHANGED_EVENT,
+  readParticipantIntelligenceContext,
+  writeParticipantIntelligenceContext,
+} from "../../application/participant/intelligence-context-storage";
 import { SignOutButton } from "../auth/SignOutButton";
 import { BrandWordmark } from "../brand/BrandWordmark";
 import { useI18n } from "../i18n/I18nProvider";
@@ -39,8 +44,6 @@ export type ParticipantNavigationItem =
 
 type NavigationDestination = Exclude<ParticipantNavigationState, null>;
 
-const INTELLIGENCE_CONTEXT_STORAGE_KEY = "rfxchange:participant:intelligence-href";
-const INTELLIGENCE_CONTEXT_CHANGED_EVENT = "rfxchange:participant:intelligence-href-changed";
 const CANONICAL_INTELLIGENCE_HREF = "/geography/canvas";
 
 function normalizedActiveItem(item?: ParticipantNavigationItem): ParticipantNavigationState {
@@ -99,21 +102,21 @@ function transitionMarkName(destination: NavigationDestination): string {
 }
 
 function subscribeIntelligenceHref(onStoreChange: () => void): () => void {
-  window.addEventListener(INTELLIGENCE_CONTEXT_CHANGED_EVENT, onStoreChange);
+  window.addEventListener(PARTICIPANT_INTELLIGENCE_CONTEXT_CHANGED_EVENT, onStoreChange);
   window.addEventListener("storage", onStoreChange);
   return () => {
-    window.removeEventListener(INTELLIGENCE_CONTEXT_CHANGED_EVENT, onStoreChange);
+    window.removeEventListener(PARTICIPANT_INTELLIGENCE_CONTEXT_CHANGED_EVENT, onStoreChange);
     window.removeEventListener("storage", onStoreChange);
   };
 }
 
 function storedIntelligenceHref(): string {
-  return safeIntelligenceHref(
-    window.sessionStorage.getItem(INTELLIGENCE_CONTEXT_STORAGE_KEY),
-  ) ?? CANONICAL_INTELLIGENCE_HREF;
+  return safeIntelligenceHref(readParticipantIntelligenceContext()) ?? CANONICAL_INTELLIGENCE_HREF;
 }
 
 function useTransitionFeedback(pathname: string) {
+  const searchParams = useSearchParams();
+  const serializedSearchParams = searchParams.toString();
   const pendingTransition = useRef<Readonly<{
     id: number;
     destination: NavigationDestination;
@@ -125,6 +128,14 @@ function useTransitionFeedback(pathname: string) {
     storedIntelligenceHref,
     () => CANONICAL_INTELLIGENCE_HREF,
   );
+
+  useEffect(() => {
+    if (participantNavigationState(pathname) !== "intelligence") return;
+    const currentHref = safeIntelligenceHref(
+      `${pathname}${serializedSearchParams ? `?${serializedSearchParams}` : ""}`,
+    );
+    if (currentHref) writeParticipantIntelligenceContext(currentHref);
+  }, [pathname, serializedSearchParams]);
 
   useEffect(() => {
     const transition = pendingTransition.current;
@@ -162,16 +173,6 @@ function useTransitionFeedback(pathname: string) {
   function begin(destination: NavigationDestination) {
     const currentState = participantNavigationState(pathname);
     if (currentState === destination) return;
-
-    if (currentState === "intelligence" && destination !== "intelligence") {
-      const currentHref = safeIntelligenceHref(
-        `${window.location.pathname}${window.location.search}`,
-      );
-      if (currentHref) {
-        window.sessionStorage.setItem(INTELLIGENCE_CONTEXT_STORAGE_KEY, currentHref);
-        window.dispatchEvent(new Event(INTELLIGENCE_CONTEXT_CHANGED_EVENT));
-      }
-    }
 
     const markName = transitionMarkName(destination);
     performance.clearMarks(markName);

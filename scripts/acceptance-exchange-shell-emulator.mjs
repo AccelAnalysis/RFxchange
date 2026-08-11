@@ -54,6 +54,7 @@ import {
 import { evaluateOrganizationMarkerActivation } from "../src/domain/organization-markers/model.ts";
 import { createOrganizationAccount, createOrganizationProfile } from "../src/domain/organizations/model.ts";
 import { createOrganizationMembership, createUserIdentity } from "../src/domain/users/model.ts";
+import { PARTICIPANT_INTELLIGENCE_CONTEXT_STORAGE_KEY } from "../src/application/participant/intelligence-context-storage.ts";
 import {
   HAMPTON_ROADS_CONTROLLED_LOCALITY_DEFINITIONS,
   PORTSMOUTH_CONTROLLED_LOCALITY,
@@ -586,7 +587,11 @@ async function createPage(chrome, baseUrl, sessionCookie, locale = "en-US") {
   };
 
   cdp.on("Runtime.exceptionThrown", ({ exceptionDetails }) => {
-    diagnostics.exceptions.push(exceptionDetails?.text ?? "Runtime exception");
+    diagnostics.exceptions.push(
+      exceptionDetails?.exception?.description
+        ?? exceptionDetails?.text
+        ?? "Runtime exception",
+    );
   });
   cdp.on("Runtime.consoleAPICalled", ({ type, args }) => {
     if (type !== "error" && type !== "assert") return;
@@ -929,7 +934,16 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       `?query=shell-acceptance&selectedOrganization=${organizationId}`,
       "Returning to Intelligence discarded safe URL-derived map/query context.",
     );
-    observations.push(await clickUtility(cdp, "/organization-profile", "/organization-profile", true));
+    const inContentIntelligenceHref =
+      `/geography/canvas?query=shell-in-content&selectedOrganization=${organizationId}`;
+    await evaluate(cdp, `history.replaceState({}, "", ${JSON.stringify(inContentIntelligenceHref)})`);
+    await waitForExpression(
+      cdp,
+      `document.querySelector('[data-participant-navigation] a[data-participant-lens="intelligence"]')
+        ?.getAttribute("href") === ${JSON.stringify(inContentIntelligenceHref)}`,
+      "Intelligence context captured before an in-content exit",
+    );
+    observations.push(await clickHref(cdp, "/organization-profile", "/organization-profile", { candidate: true }));
     observations.push(await clickUtility(cdp, "/quick-start", "/quick-start", true));
 
     const finalState = await evaluate(cdp, `(() => ({
@@ -968,9 +982,27 @@ async function runCandidate({ cwd, port, sessionCookie }) {
     );
     assert.equal(
       restoredIntelligenceHref,
-      `/geography/canvas?query=shell-acceptance&selectedOrganization=${organizationId}`,
+      inContentIntelligenceHref,
       "Shell remount discarded the safe session-scoped Intelligence context.",
     );
+    await evaluate(cdp, `document.querySelector('[data-participant-utility="account"] > button')?.click()`);
+    await waitForExpression(
+      cdp,
+      `Boolean(document.querySelector('[role="menu"] button[role="menuitem"]'))`,
+      "Sign out utility",
+    );
+    await evaluate(cdp, `document.querySelector('[role="menu"] button[role="menuitem"]')?.click()`);
+    await waitForExpression(cdp, `location.pathname === "/"`, "signed-out public entry");
+    assert.equal(
+      await evaluate(
+        cdp,
+        `sessionStorage.getItem(${JSON.stringify(PARTICIPANT_INTELLIGENCE_CONTEXT_STORAGE_KEY)})`,
+      ),
+      null,
+      "Signing out retained another participant's Intelligence context.",
+    );
+    assert.equal(diagnostics.consoleErrors.length, 0, diagnostics.consoleErrors.join("\n"));
+    assert.equal(diagnostics.exceptions.length, 0, diagnostics.exceptions.join("\n"));
 
     const durations = observations.map((item) => item.durationMs);
     const result = {
@@ -983,7 +1015,9 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       rootTakeoverObserved: false,
       fullDocumentNavigationCount: ordinaryDocumentRequests.length,
       intelligenceContextPreserved: true,
+      intelligenceContextCapturedForInContentExit: true,
       intelligenceContextRestoredAfterShellRemount: true,
+      intelligenceContextClearedOnSignOut: true,
       activationReplayObserved: finalState.activationReplay,
       protectedInitializationReplayObserved: false,
       transitionEvents: finalState.transitions,

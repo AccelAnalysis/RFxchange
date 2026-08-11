@@ -183,16 +183,25 @@ test("ordinary participant navigation uses Next links and immediate transition e
 
 test("Intelligence context preservation is bounded to the canonical same-origin route and remains non-authorizing", () => {
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
+  const storage = read("src/application/participant/intelligence-context-storage.ts");
+  const signOut = read("src/components/auth/SignOutButton.tsx");
+  const activation = read("src/components/onboarding/ActivationJourneyClient.tsx");
 
-  assert.match(navigation, /INTELLIGENCE_CONTEXT_STORAGE_KEY/);
+  assert.match(storage, /PARTICIPANT_INTELLIGENCE_CONTEXT_STORAGE_KEY/);
   assert.match(navigation, /safeIntelligenceHref/);
   assert.match(navigation, /parsed\.origin !== window\.location\.origin/);
   assert.match(navigation, /parsed\.pathname !== CANONICAL_INTELLIGENCE_HREF/);
-  assert.match(navigation, /window\.sessionStorage\.setItem/);
-  assert.match(navigation, /window\.sessionStorage\.getItem/);
+  assert.match(navigation, /useSearchParams/);
+  assert.match(navigation, /participantNavigationState\(pathname\) !== "intelligence"/);
+  assert.match(navigation, /writeParticipantIntelligenceContext\(currentHref\)/);
+  assert.match(storage, /window\.sessionStorage\.setItem/);
+  assert.match(storage, /window\.sessionStorage\.getItem/);
+  assert.match(storage, /window\.sessionStorage\.removeItem/);
   assert.match(navigation, /useSyncExternalStore/);
   assert.match(navigation, /lens\.id === "intelligence" \? intelligenceHref : lens\.href/);
   assert.doesNotMatch(navigation, /authorize|permission|membership|tenancy/);
+  assert.match(signOut, /clearParticipantIntelligenceContext\(\)[\s\S]*\.signOut\(\)/);
+  assert.match(activation, /clearParticipantIntelligenceContext\(\)[\s\S]*\.signOut\(\)/);
 });
 
 test("loading is scoped below the persistent shell and the page-wide takeover cannot return", () => {
@@ -305,4 +314,9 @@ test("the configured browser runner links every canonical source import before a
   );
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.doesNotMatch(runner, /domain\/organization-authorization|domain\/geography-selection/);
+  assert.match(runner, /Intelligence context captured before an in-content exit/);
+  assert.match(runner, /intelligenceContextCapturedForInContentExit: true/);
+  assert.match(runner, /intelligenceContextClearedOnSignOut: true/);
+  assert.match(runner, /Signing out retained another participant's Intelligence context/);
+  assert.match(runner, /assert\.equal\(diagnostics\.exceptions\.length, 0/);
 });
