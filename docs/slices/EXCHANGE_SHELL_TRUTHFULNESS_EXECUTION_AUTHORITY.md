@@ -2,9 +2,9 @@
 
 **Status: AUTHORIZED NO-FEATURE-ID CROSS-CUTTING IMPLEMENTATION GATE — ACTIVE UNTIL MERGED AND POST-MERGE VALIDATED**
 
-**Exact base:** `87fb29ef3b442410deecf61a470bc94c9c013c60`  
-**Branch:** `fix/exchange-shell-truthfulness-performance`  
-**Pull request:** `Converge participant lens truthfulness and transition loading`  
+**Exact base:** `87fb29ef3b442410deecf61a470bc94c9c013c60`
+**Branch:** `fix/exchange-shell-truthfulness-performance`
+**Pull request:** `Converge participant lens truthfulness and transition loading`
 **Sequence:** after merged documentation-only Wave 4 Slice 4.1 authority; before participant-facing Slice 4.1 RFx entry may be integrated into the shared shell.
 
 ## 1. Purpose and boundary
