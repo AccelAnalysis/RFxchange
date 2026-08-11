@@ -11,7 +11,7 @@ const route = await read("app/geography/canvas/page.tsx");
 const workspace = await read("src/components/participant/ExistingWorkspaceFoundation.tsx");
 const workspaceStyles = await read("src/components/participant/ExistingWorkspaceFoundation.module.css");
 const map = await read("src/components/map/ExchangeSpatialScene.tsx");
-const state = await read("src/application/participant/existing-workspace-state.ts");
+const state = await read("src/application/participant/participant-spatial-context.ts");
 
 test("Slice 3.2 revalidates current participant and geography authority on the server", () => {
   assert.match(route, /resolveParticipantRoute/);
@@ -44,9 +44,9 @@ test("Slice 3.2 search is capability-first and service-area bounded", () => {
 });
 
 test("Slice 3.2 keeps map list and detail on one authorized selection identity", () => {
-  assert.match(workspace, /authorizedObjectIds\.has\(restored\.selectedObjectId\)/);
+  assert.match(workspace, /authorizedObjectIds\.has\(spatialContext\.selection\.markerId\)/);
   assert.match(workspace, /organizationMarkers=\{networkMarkers\}/);
-  assert.match(workspace, /focusedMarkerId=\{workspaceState\.selectedObjectId\}/);
+  assert.match(workspace, /focusedMarkerId=\{selectedObjectId\}/);
   assert.match(workspace, /onOrganizationMarkerSelect/);
   assert.match(map, /rfx-spatial-scene-network-organizations/);
   assert.match(map, /onOrganizationMarkerSelectRef\.current/);
@@ -56,7 +56,7 @@ test("Slice 3.2 browser persistence remains UI-only and fails closed for stale s
   assert.match(state, /storesAuthorization: false/);
   assert.match(state, /storesPrivateCoordinates: false/);
   assert.match(state, /storesDomainRecords: false/);
-  assert.match(state, /selectedObjectMustBeAuthorizedProjection: true/);
+  assert.match(state, /serverRevalidatesSelectedObjectsAndActions: true/);
   assert.match(workspace, /authorizedObjectIds/);
 });
 
@@ -69,7 +69,8 @@ test("Slice 3.2 keeps the mobile search and result surface legible over the map"
 test("Slice 3.2 does not fabricate later Network or RFx domain objects", () => {
   const implementation = `${runtime}\n${service}\n${workspace}\n${map}`;
   assert.doesNotMatch(implementation, /opportunity-beacon/);
-  assert.doesNotMatch(implementation, /provider-service-field/);
   assert.doesNotMatch(implementation, /credibility-seal/);
-  assert.doesNotMatch(implementation, /relationship-path/);
+  assert.doesNotMatch(implementation, /synthetic-provider|synthetic-referral/);
+  assert.match(map, /relationshipPaths = \[\]/);
+  assert.match(map, /serviceFields = \[\]/);
 });

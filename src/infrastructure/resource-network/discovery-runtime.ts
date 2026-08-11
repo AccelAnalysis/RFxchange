@@ -1,4 +1,5 @@
 import { evaluateGeographyParticipation } from "../../domain/geography/policy.ts";
+import { organizationId } from "../../domain/organizations/model.ts";
 import type { ParticipantRouteResolution } from "../auth/participant-route-runtime.ts";
 import { createFirestoreGeographyRepositories } from "../firestore/geography-repositories.ts";
 import { getServerFirestore } from "../firestore/runtime.ts";
@@ -6,6 +7,38 @@ import type { AuthenticatedMapProjection } from "../geography/participant-map-ru
 import { createServerResourceNetworkService } from "./runtime.ts";
 
 type AuthorizedParticipant = Extract<ParticipantRouteResolution, { readonly kind: "authorized" }>;
+
+const MAXIMUM_OPTIONAL_PROVIDER_STATUS_LOOKUPS = 25;
+
+/**
+ * Projects only the governed provider availability needed by already-authorized organization
+ * results. This deliberately avoids full Resource discovery (including catalog/resource reads),
+ * stays bounded to one Network result page plus one separately revalidated carried organization,
+ * and fails closed because organization actions are an
+ * optional Intelligence enhancement rather than a dependency of the spatial workspace.
+ */
+export async function loadOptionalOfficialResourceProviderOrganizationIds(input: Readonly<{
+  access: AuthorizedParticipant;
+  organizationIds: readonly string[];
+  selectedGeographyId: string;
+}>): Promise<readonly string[]> {
+  if (input.access.state.lifecycleState !== "open-platform") return Object.freeze([]);
+  const candidates = [...new Set(input.organizationIds.map((value) => value.trim()).filter(Boolean))];
+  if (candidates.length > MAXIMUM_OPTIONAL_PROVIDER_STATUS_LOOKUPS) return Object.freeze([]);
+  try {
+    const service = createServerResourceNetworkService();
+    const statuses = await Promise.all(candidates.map(async (candidate) => Object.freeze({
+      organizationId: candidate,
+      eligibility: await service.inspectProviderEligibility({
+        organizationId: organizationId(candidate),
+        serviceGeographyId: input.selectedGeographyId,
+      }),
+    })));
+    return Object.freeze(statuses.flatMap((status) => status.eligibility.eligible ? [status.organizationId] : []));
+  } catch {
+    return Object.freeze([]);
+  }
+}
 
 export async function loadAuthorizedResourceDiscovery(input: Readonly<{
   access: AuthorizedParticipant;

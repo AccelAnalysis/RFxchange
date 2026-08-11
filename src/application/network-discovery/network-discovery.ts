@@ -80,6 +80,9 @@ export interface NetworkDiscoveryCandidateSource {
     geographyId: GeographyDefinition["id"],
     limit: number,
   ): Promise<readonly OrganizationMarkerActivation[]>;
+  getByOrganizationId(
+    organizationId: OrganizationId,
+  ): Promise<OrganizationMarkerActivation | null>;
 }
 
 export interface NetworkDiscoveryDependencies {
@@ -223,6 +226,20 @@ function scoreProfile(
   });
 }
 
+export function resolveNetworkDiscoveryPage(input: Readonly<{
+  organizations: readonly Pick<NetworkDiscoveryOrganization, "organizationId">[];
+  requestedPage: number;
+  pageCount: number;
+  focusOrganizationId?: OrganizationId | null;
+}>): number {
+  const focusedOrganizationIndex = input.focusOrganizationId
+    ? input.organizations.findIndex((candidate) => candidate.organizationId === input.focusOrganizationId)
+    : -1;
+  return focusedOrganizationIndex >= 0
+    ? Math.floor(focusedOrganizationIndex / NETWORK_DISCOVERY_PAGE_SIZE) + 1
+    : Math.min(input.requestedPage, input.pageCount);
+}
+
 export class NetworkDiscoveryService {
   constructor(private readonly dependencies: NetworkDiscoveryDependencies) {}
 
@@ -231,21 +248,33 @@ export class NetworkDiscoveryService {
     selectedGeography: GeographyDefinition;
     selectedGeographyGeometry: AuthoritativeGeoJsonGeometry;
     query: NetworkDiscoveryQuery;
+    focusOrganizationId?: OrganizationId | null;
   }>): Promise<NetworkDiscoveryProjection> {
     const viewerOrganizationId = organizationId(input.viewerOrganizationId);
     if (input.query.baseGeographyId !== input.selectedGeography.id) {
       throw new Error("Network discovery base geography must equal the authorized selected geography.");
     }
 
-    const activations = await this.dependencies.candidates.listByBaseGeographyId(
-      input.selectedGeography.id,
-      NETWORK_DISCOVERY_MAX_CANDIDATES,
-    );
+    const [listedActivations, focusedActivation] = await Promise.all([
+      this.dependencies.candidates.listByBaseGeographyId(
+        input.selectedGeography.id,
+        NETWORK_DISCOVERY_MAX_CANDIDATES,
+      ),
+      input.focusOrganizationId
+        ? this.dependencies.candidates.getByOrganizationId(input.focusOrganizationId)
+        : Promise.resolve(null),
+    ]);
+    const activations = focusedActivation && !listedActivations.some(
+      (activation) => activation.organizationId === focusedActivation.organizationId,
+    )
+      ? Object.freeze([...listedActivations, focusedActivation])
+      : listedActivations;
 
     const projected = await Promise.all(
       activations
         .filter((activation) => activation.status === "active")
         .filter((activation) => activation.organizationId !== viewerOrganizationId)
+        .filter((activation) => activation.geographyId === input.selectedGeography.id)
         .map(async (activation): Promise<NetworkDiscoveryOrganization | null> => {
           const organizationIdValue = activation.organizationId;
           const [rawProfile, completion, location, serviceGeographies, restriction, claims] = await Promise.all([
@@ -342,7 +371,12 @@ export class NetworkDiscoveryService {
       );
     const totalMatched = organizations.length;
     const pageCount = Math.max(1, Math.ceil(totalMatched / NETWORK_DISCOVERY_PAGE_SIZE));
-    const page = Math.min(input.query.page, pageCount);
+    const page = resolveNetworkDiscoveryPage({
+      organizations,
+      requestedPage: input.query.page,
+      pageCount,
+      focusOrganizationId: input.focusOrganizationId,
+    });
     const start = (page - 1) * NETWORK_DISCOVERY_PAGE_SIZE;
     const pageOrganizations = Object.freeze(
       organizations.slice(start, start + NETWORK_DISCOVERY_PAGE_SIZE),

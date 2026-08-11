@@ -1,14 +1,20 @@
 "use client";
 
-import { memo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
+import type { ParticipantSpatialScope } from "../../application/participant/participant-spatial-context";
 import type { SenderReferralProjection, RecipientReferralProjection, ReferralStatus } from "../../domain/referrals/model";
-import type { ExchangeHomeMarker } from "../map/ExchangeSpatialScene";
-import { MapboxLocalityCanvas, type ControlledLocalityPointOverlay, type ControlledLocalityRelationshipPath } from "../map/MapboxLocalityCanvas";
+import {
+  ExchangeSpatialScene,
+  type ExchangeHomeMarker,
+  type ExchangeRelationshipPath,
+} from "../map/ExchangeSpatialScene";
 import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
+import { useParticipantSpatialContext } from "../participant/useParticipantSpatialContext";
 import {
   clearRetryStableCommand,
   markRetryStableCommandAttempted,
@@ -34,10 +40,13 @@ type PendingCreateAndSend = Readonly<{
 interface ReferralWorkspaceProps {
   readonly model: ControlledLocalityMapModel;
   readonly homeMarker: ExchangeHomeMarker;
+  readonly spatialScope: ParticipantSpatialScope;
   readonly initialReferrals: readonly ReferralProjection[];
   readonly organizations: readonly ReferralOrganizationOption[];
   readonly commandRecoveryScope: string;
   readonly requestedReferralId?: string | null;
+  readonly requestedOrganizationId?: string | null;
+  readonly preferOrganizationSelection?: boolean;
 }
 
 const REFERRAL_CREATE_SEND_STORAGE_KEY = "rfxchange:referral-create-and-send";
@@ -64,10 +73,14 @@ function nextActions(referral: ReferralProjection): readonly ReferralStatus[] {
 
 function otherOrganization(selected: ReferralProjection | null, organizations: readonly ReferralOrganizationOption[]) {
   if (!selected) return null;
-  const otherId = selected.role === "sender"
+  const otherId = counterpartyOrganizationId(selected);
+  return otherId ? organizations.find((organization) => organization.organizationId === otherId) ?? null : null;
+}
+
+function counterpartyOrganizationId(selected: ReferralProjection): string | null {
+  return selected.role === "sender"
     ? selected.recipientOrganizationId ? String(selected.recipientOrganizationId) : null
     : String(selected.senderOrganizationId);
-  return otherId ? organizations.find((organization) => organization.organizationId === otherId) ?? null : null;
 }
 
 function browserSessionStorage(): Storage | null {
@@ -78,32 +91,27 @@ function browserSessionStorage(): Storage | null {
   }
 }
 
-const ReferralMap = memo(function ReferralMap({ model, homeMarker, selected, organizations }: Readonly<{
-  model: ControlledLocalityMapModel;
-  homeMarker: ExchangeHomeMarker;
-  selected: ReferralProjection | null;
-  organizations: readonly ReferralOrganizationOption[];
-}>) {
+export function ReferralWorkspace({ model, homeMarker, spatialScope, initialReferrals, organizations, commandRecoveryScope, requestedReferralId, requestedOrganizationId, preferOrganizationSelection = false }: ReferralWorkspaceProps) {
   const { t } = useI18n();
-  const other = otherOrganization(selected, organizations);
-  const pointOverlays: readonly ControlledLocalityPointOverlay[] = Object.freeze([
-    Object.freeze({ id: homeMarker.id, position: homeMarker.coordinate, label: homeMarker.label, kind: "organization-marker" as const, privacyLabel: homeMarker.accessibleLocationLabel, activated: true }),
-    ...(other ? [Object.freeze({ id: other.marker.id, position: other.marker.coordinate, label: other.displayName, kind: "organization-marker" as const, privacyLabel: other.marker.accessibleLocationLabel, activated: true })] : []),
-  ]);
-  const pathEligible = selected && ["sent", "accepted", "contacted", "closed"].includes(selected.status) && other;
-  const relationshipPaths: readonly ControlledLocalityRelationshipPath[] = pathEligible
-    ? [Object.freeze({ id: selected.id, from: selected.role === "sender" ? homeMarker.coordinate : other.marker.coordinate, to: selected.role === "sender" ? other.marker.coordinate : homeMarker.coordinate, label: `${t("referralWorkspace.path.label")}: ${readable(selected.status)}`, status: selected.status as ControlledLocalityRelationshipPath["status"] })]
-    : [];
-  return <MapboxLocalityCanvas model={model} pointOverlays={pointOverlays} relationshipPaths={relationshipPaths} overlaySide="split" />;
-});
-
-export function ReferralWorkspace({ model, homeMarker, initialReferrals, organizations, commandRecoveryScope, requestedReferralId }: ReferralWorkspaceProps) {
-  const { t } = useI18n();
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [, startNavigation] = useTransition();
+  const [spatialContext, updateSpatialContext] = useParticipantSpatialContext({ scope: spatialScope, homeMarkerId: homeMarker.id, activeLens: "referrals" });
   const [referrals, setReferrals] = useState(initialReferrals);
-  const [selectedId, setSelectedId] = useState(requestedReferralId ?? initialReferrals[0]?.id ?? null);
+  const restoredReferralId = initialReferrals.some((referral) => referral.id === spatialContext.selection.relationshipId)
+    ? spatialContext.selection.relationshipId
+    : null;
+  const [selectedId, setSelectedId] = useState(requestedReferralId ?? restoredReferralId ?? (preferOrganizationSelection ? null : initialReferrals[0]?.id) ?? null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [recipientKind, setRecipientKind] = useState<"organization" | "external">("organization");
-  const [recipientOrganizationId, setRecipientOrganizationId] = useState(organizations[0] ? String(organizations[0].organizationId) : "");
+  const [recipientOrganizationId, setRecipientOrganizationId] = useState(
+    requestedOrganizationId && organizations.some((organization) => organization.organizationId === requestedOrganizationId)
+      ? requestedOrganizationId
+      : organizations.some((organization) => organization.organizationId === spatialContext.selection.organizationId)
+      ? spatialContext.selection.organizationId
+      : "",
+  );
   const [recipientLabel, setRecipientLabel] = useState("");
   const [recipientEmail, setRecipientEmail] = useState("");
   const [summary, setSummary] = useState("");
@@ -112,9 +120,139 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const createAndSendCommandRef = useRef<PendingCreateAndSend | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
   const attemptedCreateAndSendCommandIdRef = useRef<string | null>(null);
   const commandStorageKey = `${REFERRAL_CREATE_SEND_STORAGE_KEY}:${encodeURIComponent(commandRecoveryScope)}`;
   const selected = referrals.find((referral) => referral.id === selectedId) ?? null;
+  const selectedOtherOrganization = otherOrganization(selected, organizations);
+  const relationshipPaths: readonly ExchangeRelationshipPath[] = selected && selectedOtherOrganization && ["sent", "accepted", "contacted", "closed"].includes(selected.status)
+    ? [Object.freeze({
+        id: selected.id,
+        from: selected.role === "sender" ? homeMarker.coordinate : selectedOtherOrganization.marker.coordinate,
+        to: selected.role === "sender" ? selectedOtherOrganization.marker.coordinate : homeMarker.coordinate,
+        label: `${t("referralWorkspace.path.label")}: ${readable(selected.status)}`,
+        status: selected.status as ExchangeRelationshipPath["status"],
+      })]
+    : [];
+  const organizationMarkers = useMemo(() => organizations.map((organization) => Object.freeze({
+    id: organization.marker.id,
+    coordinate: organization.marker.coordinate,
+    label: organization.displayName,
+    accessibleLocationLabel: organization.marker.accessibleLocationLabel,
+  })), [organizations]);
+  useEffect(() => {
+    if (panelRef.current) panelRef.current.scrollTop = spatialContext.lensState.referrals.listScrollTop;
+  }, [spatialContext.lensState.referrals.listScrollTop]);
+  useEffect(() => {
+    if (!preferOrganizationSelection || !requestedOrganizationId) return;
+    const organization = organizations.find(
+      (candidate) => candidate.organizationId === requestedOrganizationId,
+    );
+    if (
+      !organization
+      || (
+        spatialContext.selection.organizationId === organization.organizationId
+        && spatialContext.selection.markerId === organization.marker.id
+        && spatialContext.selection.relationshipId === null
+      )
+    ) return;
+    updateSpatialContext((current) => Object.freeze({
+      ...current,
+      activeLens: "referrals" as const,
+      selection: Object.freeze({
+        organizationId: organization.organizationId,
+        markerId: organization.marker.id,
+        relationshipId: null,
+      }),
+      panelOpen: true,
+      originLens: current.activeLens,
+    }));
+  }, [organizations, preferOrganizationSelection, requestedOrganizationId, spatialContext.selection.markerId, spatialContext.selection.organizationId, spatialContext.selection.relationshipId, updateSpatialContext]);
+  useEffect(() => {
+    const activeReferral = referrals.find((referral) => referral.id === selectedId) ?? null;
+    const other = otherOrganization(activeReferral, organizations);
+    if (
+      !activeReferral
+      || !other
+      || (
+        spatialContext.selection.organizationId === other.organizationId
+        && spatialContext.selection.markerId === other.marker.id
+        && spatialContext.selection.relationshipId === activeReferral.id
+      )
+    ) return;
+    updateSpatialContext((current) => Object.freeze({
+      ...current,
+      activeLens: "referrals" as const,
+      selection: Object.freeze({
+        organizationId: other.organizationId,
+        markerId: other.marker.id,
+        relationshipId: activeReferral.id,
+      }),
+      panelOpen: true,
+      originLens: current.activeLens,
+    }));
+  }, [organizations, referrals, selectedId, spatialContext.selection.markerId, spatialContext.selection.organizationId, spatialContext.selection.relationshipId, updateSpatialContext]);
+
+  function selectOrganizationMarker(markerId: string) {
+    const organization = organizations.find((candidate) => candidate.marker.id === markerId);
+    const organizationId = organization?.organizationId ?? spatialScope.organizationId;
+    const selectedCounterpartyId = selected ? counterpartyOrganizationId(selected) : null;
+    const keepsSelectedReferral = selected !== null && selectedCounterpartyId === organizationId;
+    if (!keepsSelectedReferral) {
+      setSelectedId(null);
+      const next = new URLSearchParams(searchParams.toString());
+      next.delete("referral");
+      if (organization) next.set("organization", organization.organizationId);
+      else next.delete("organization");
+      startNavigation(() => router.replace(`${pathname}${next.size ? `?${next.toString()}` : ""}`, { scroll: false }));
+    }
+    updateSpatialContext((current) => Object.freeze({
+      ...current,
+      activeLens: "referrals" as const,
+      selection: Object.freeze({
+        organizationId,
+        markerId,
+        relationshipId: keepsSelectedReferral ? selected.id : null,
+      }),
+      panelOpen: true,
+      originLens: current.activeLens,
+    }));
+    setRecipientOrganizationId(organization?.organizationId ?? "");
+  }
+
+  function selectReferral(referral: ReferralProjection, resultIndex: number) {
+    setSelectedId(referral.id);
+    const other = otherOrganization(referral, organizations);
+    const counterpartyId = counterpartyOrganizationId(referral);
+    const next = new URLSearchParams(searchParams.toString());
+    next.set("referral", referral.id);
+    if (counterpartyId) {
+      next.set("organization", counterpartyId);
+      setRecipientOrganizationId(counterpartyId);
+    } else {
+      next.delete("organization");
+      setRecipientOrganizationId("");
+    }
+    startNavigation(() => router.replace(`${pathname}${next.size ? `?${next.toString()}` : ""}`, { scroll: false }));
+    if (counterpartyId && !other) {
+      return;
+    }
+    updateSpatialContext((current) => Object.freeze({
+      ...current,
+      activeLens: "referrals" as const,
+      selection: Object.freeze({
+        organizationId: other?.organizationId ?? spatialScope.organizationId,
+        markerId: other?.marker.id ?? homeMarker.id,
+        relationshipId: referral.id,
+      }),
+      panelOpen: true,
+      originLens: current.activeLens,
+      lensState: Object.freeze({
+        ...current.lensState,
+        referrals: Object.freeze({ ...current.lensState.referrals, resultIndex }),
+      }),
+    }));
+  }
 
   async function api(body: Record<string, unknown>) {
     const response = await fetch("/api/referrals", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -262,8 +400,35 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
   return (
     <ParticipantShell activeItem="Referrals">
       <SpatialWorkspace ariaLabel={t("referralWorkspace.ariaLabel")} className={styles.workspace}>
-        <ReferralMap model={model} homeMarker={homeMarker} selected={selected} organizations={organizations} />
-        <aside className={styles.panel} aria-label={t("referralWorkspace.list.label")}>
+        <ExchangeSpatialScene
+          model={model}
+          mode="organization"
+          marker={homeMarker}
+          organizationMarkers={organizationMarkers}
+          relationshipPaths={relationshipPaths}
+          focusedMarkerId={spatialContext.selection.markerId}
+          onOrganizationMarkerSelect={selectOrganizationMarker}
+          initialCamera={spatialContext.camera}
+          onCameraChange={(camera) => updateSpatialContext((current) => Object.freeze({ ...current, activeLens: "referrals" as const, camera }))}
+          interactive
+          showSearch={false}
+          workspaceOverlay="right"
+        />
+        <aside
+          ref={panelRef}
+          className={styles.panel}
+          aria-label={t("referralWorkspace.list.label")}
+          onScroll={(event) => {
+            const listScrollTop = Math.max(0, Math.round(event.currentTarget.scrollTop));
+            updateSpatialContext((current) => Object.freeze({
+              ...current,
+              lensState: Object.freeze({
+                ...current.lensState,
+                referrals: Object.freeze({ ...current.lensState.referrals, listScrollTop }),
+              }),
+            }));
+          }}
+        >
           <header className={styles.header}>
             <div><p>{t("referralWorkspace.eyebrow")}</p><h1>{t("referralWorkspace.title")}</h1></div>
             <button type="button" className={styles.primary} onClick={() => setComposerOpen(true)}>{t("referralWorkspace.create")}</button>
@@ -271,7 +436,7 @@ export function ReferralWorkspace({ model, homeMarker, initialReferrals, organiz
           {notice ? <p className={styles.notice} role="status">{notice}</p> : null}
           {referrals.length ? (
             <ul className={styles.list}>
-              {referrals.map((referral) => <li key={referral.id}><button type="button" aria-current={selectedId === referral.id} onClick={() => setSelectedId(referral.id)}><strong>{referral.role === "sender" ? referral.recipientLabel : referral.senderOrganizationName}</strong><span>{readable(referral.status)} · {readable(referral.need)}</span></button></li>)}
+              {referrals.map((referral, resultIndex) => <li key={referral.id}><button type="button" aria-current={selectedId === referral.id} onClick={() => selectReferral(referral, resultIndex)}><strong>{referral.role === "sender" ? referral.recipientLabel : referral.senderOrganizationName}</strong><span>{readable(referral.status)} · {readable(referral.need)}</span></button></li>)}
             </ul>
           ) : <div className={styles.empty}><h2>{t("referralWorkspace.empty.title")}</h2><p>{t("referralWorkspace.empty.body")}</p></div>}
           {selected ? (

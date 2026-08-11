@@ -81,15 +81,27 @@
     "visibleLocation": "Visible location",
     "serviceAreas": "Service areas",
     "noServiceAreas": "No public service areas are listed.",
-    "approximateLocation": "approximate location",
-    "localityOnlyLocation": "locality only",
+    "nearLocation": "Near {locality}",
+    "inLocality": "In {locality}",
     "capabilities": "Capabilities",
     "capabilityEvidence": "What this organization says it can do",
     "publicContact": "Public contact",
     "contactUnavailable": "No public contact is listed",
     "website": "Visit organization website",
     "profileEvidenceTitle": "Profile evidence boundary",
-    "profileEvidence": "Organization profile and capability information is organization-provided unless separately identified as verified. Discovery does not certify capability, performance, or eligibility."
+    "profileEvidence": "Organization profile and capability information is organization-provided unless separately identified as verified. Discovery does not certify capability, performance, or eligibility.",
+    "actions": "Organization actions"
+  },
+  "actions": {
+    "manage-profile": "Manage profile",
+    "view-resources": "View resources",
+    "start-referral": "Start a referral",
+    "opportunities-rfx": "Opportunities/RFx"
+  },
+  "actionReasons": {
+    "self-only": "Only members of this organization can manage its profile.",
+    "not-an-official-provider": "This organization has no published Official Resource Provider services.",
+    "rfx-runtime-unavailable": "Opportunities/RFx is not yet available."
   },
   "provenance": {
     "eyebrow": "Data provenance",

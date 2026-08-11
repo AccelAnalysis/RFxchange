@@ -8,6 +8,7 @@ import {
 } from "../../application/network-discovery/network-discovery.ts";
 import { evaluateGeographyParticipation } from "../../domain/geography/policy.ts";
 import type { OrganizationMarkerActivation } from "../../domain/organization-markers/model.ts";
+import { organizationId, type OrganizationId } from "../../domain/organizations/model.ts";
 import type { ParticipantRouteResolution } from "../auth/participant-route-runtime.ts";
 import { createFirestoreGeographyRepositories } from "../firestore/geography-repositories.ts";
 import { createFirestoreOrganizationLocationRepositories } from "../firestore/organization-location.ts";
@@ -18,7 +19,7 @@ import {
   getServerFirestore,
 } from "../firestore/runtime.ts";
 import { firestoreCollectionName } from "../firestore/schema.ts";
-import { listFirestoreRecords } from "../firestore/support.ts";
+import { getFirestoreRecordById, listFirestoreRecords } from "../firestore/support.ts";
 import type { AuthenticatedMapProjection } from "../geography/participant-map-runtime.ts";
 
 export interface NetworkServiceAreaOption {
@@ -41,6 +42,16 @@ type AuthorizedParticipant = Extract<ParticipantRouteResolution, { readonly kind
 
 class FirestoreNetworkDiscoveryCandidateSource implements NetworkDiscoveryCandidateSource {
   constructor(private readonly db: Firestore) {}
+
+  getByOrganizationId(
+    organizationId: Parameters<NetworkDiscoveryCandidateSource["getByOrganizationId"]>[0],
+  ): Promise<OrganizationMarkerActivation | null> {
+    return getFirestoreRecordById<OrganizationMarkerActivation>(
+      this.db,
+      "organizationMarkerActivations",
+      organizationId,
+    );
+  }
 
   listByBaseGeographyId(
     geographyId: Parameters<NetworkDiscoveryCandidateSource["listByBaseGeographyId"]>[0],
@@ -78,6 +89,7 @@ export async function loadAuthorizedNetworkDiscovery(input: Readonly<{
   capability?: string | null;
   serviceGeographyId?: string | null;
   page?: string | number | null;
+  focusedOrganizationId?: string | null;
 }>): Promise<AuthenticatedNetworkDiscovery> {
   if (input.access.state.lifecycleState !== "open-platform") {
     return Object.freeze({
@@ -135,11 +147,20 @@ export async function loadAuthorizedNetworkDiscovery(input: Readonly<{
     restrictions: foundation.lifecycle.restrictions,
     capabilityClaims: marketProfiles.claims,
   });
+  let focusOrganizationId: OrganizationId | null = null;
+  try {
+    focusOrganizationId = input.focusedOrganizationId
+      ? organizationId(input.focusedOrganizationId)
+      : null;
+  } catch {
+    // Browser continuity is non-authorizing. Invalid or stale identifiers fail closed.
+  }
   const projection = await service.search({
     viewerOrganizationId: input.mapProjection.organizationId,
     selectedGeography: geography,
     selectedGeographyGeometry: selectedFeature.boundary.geometry,
     query,
+    focusOrganizationId,
   });
 
   return Object.freeze({

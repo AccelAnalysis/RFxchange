@@ -13,6 +13,7 @@ import { getServerFirebaseAuth } from "../auth/firebase-server.ts";
 import { CensusOrganizationGeocodingProvider } from "../geocoding/census-geocoder.ts";
 import { createFirestoreGeographyRepositories } from "../firestore/geography-repositories.ts";
 import { FirestoreActivationJourneyContextRepository } from "../firestore/activation-journey.ts";
+import { FirestoreOrientationJourneyRepository } from "../firestore/orientation-journey.ts";
 import { createFirestoreOrganizationAuthorityClaims } from "../firestore/organization-authority-claims.ts";
 import { createFirestoreOrganizationLocationRepositories } from "../firestore/organization-location.ts";
 import { createFirestoreOrganizationMarkerRepositories } from "../firestore/organization-marker.ts";
@@ -134,6 +135,7 @@ export function createServerActivationJourneyService(
     accounts: foundation.organizations.accounts,
     profiles: foundation.organizations.profiles,
     memberships: foundation.users.memberships,
+    orientations: new FirestoreOrientationJourneyRepository(db),
     accountSecurity,
     ids: {
       markerEvent: () => `marker-event-${randomUUID()}`,

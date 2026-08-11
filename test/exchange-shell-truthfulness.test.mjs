@@ -214,7 +214,7 @@ test("Intelligence context preservation is bounded to the canonical same-origin 
   assert.match(storage, /window\.sessionStorage\.getItem/);
   assert.match(storage, /window\.sessionStorage\.removeItem/);
   assert.match(navigation, /useSyncExternalStore/);
-  assert.match(navigation, /lens\.id === "intelligence" \? intelligenceHref : lens\.href/);
+  assert.match(navigation, /lens\.id === "intelligence"[\s\S]*intelligenceHref[\s\S]*lens\.id === "resources"[\s\S]*resourceHref/);
   assert.doesNotMatch(navigation, /authorize|permission|membership|tenancy/);
   assert.match(signOut, /clearParticipantIntelligenceContext\(\)[\s\S]*\.signOut\(\)/);
   assert.match(signIn, /method: "POST"[\s\S]*clearParticipantIntelligenceContext\(\)/);
@@ -222,9 +222,8 @@ test("Intelligence context preservation is bounded to the canonical same-origin 
   assert.match(activation, /clearParticipantIntelligenceContext\(\)[\s\S]*\.signOut\(\)/);
 });
 
-test("loading is scoped below the persistent shell and the page-wide takeover cannot return", () => {
+test("warm participant navigation preserves current content and no route takeover can return", () => {
   assert.equal(exists("app/loading.tsx"), false, "The root loading takeover must stay removed.");
-  const sharedLoading = read("src/components/participant/ParticipantContentLoading.tsx");
   const routeLoading = [
     ["app/geography/canvas/loading.tsx", "intelligence"],
     ["app/resources/loading.tsx", "resources"],
@@ -235,16 +234,15 @@ test("loading is scoped below the persistent shell and the page-wide takeover ca
     ["app/exchange/loading.tsx", "exchange-entry"],
   ];
 
-  assert.match(sharedLoading, /data-participant-content-loading=\{target\}/);
-  assert.match(sharedLoading, /role="status"/);
-  assert.match(sharedLoading, /aria-live="polite"/);
-  assert.match(sharedLoading, /aria-busy="true"/);
-  assert.doesNotMatch(sharedLoading, /Preparing this page|Loading RFxchange|setTimeout/);
-  for (const [path, target] of routeLoading) {
-    const source = read(path);
-    assert.match(source, /ParticipantContentLoading/);
-    assert.match(source, new RegExp(`target="${target}"`));
+  for (const [path] of routeLoading) {
+    assert.equal(exists(path), false, `${path} would replace the current warm workspace.`);
   }
+  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
+  const navigationCss = read("src/components/participant/ParticipantTopNavigation.module.css");
+  assert.match(navigation, /useLinkStatus/);
+  assert.match(navigation, /aria-live="polite"/);
+  assert.doesNotMatch(navigationCss, /spinner|pendingPulse|progress/);
+  assert.doesNotMatch(navigation, /Preparing this page|Loading RFxchange|setTimeout/);
 });
 
 test("new shell, unavailable, utility, and scoped-loading copy is complete in all supported locales", () => {
@@ -298,14 +296,12 @@ test("new shell, unavailable, utility, and scoped-loading copy is complete in al
 test("the participant shell preserves 390px, focus, Light Appearance, and reduced-motion contracts", () => {
   const navigationCss = read("src/components/participant/ParticipantTopNavigation.module.css");
   const persistentCss = read("src/components/participant/PersistentParticipantShell.module.css");
-  const loadingCss = read("src/components/participant/ParticipantContentLoading.module.css");
 
   assert.match(navigationCss, /@media \(max-width: 390px\)/);
   assert.match(navigationCss, /focus-visible/);
-  assert.match(navigationCss, /@media \(prefers-reduced-motion: reduce\)/);
-  assert.match(loadingCss, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.doesNotMatch(navigationCss, /animation:/);
   assert.match(persistentCss, /overflow-x: clip/);
-  assert.doesNotMatch(`${navigationCss}\n${persistentCss}\n${loadingCss}`, /dark|prefers-color-scheme/);
+  assert.doesNotMatch(`${navigationCss}\n${persistentCss}`, /dark|prefers-color-scheme/);
 });
 
 test("the configured browser runner links every canonical source import before acceptance", () => {

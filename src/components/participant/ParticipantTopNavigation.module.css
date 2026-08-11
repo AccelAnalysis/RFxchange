@@ -56,17 +56,9 @@
   content: "";
 }
 
-.lensLink:has([data-link-pending="true"])::before {
-  position: absolute;
-  right: -0.55rem;
-  top: 50%;
-  width: 0.38rem;
-  height: 0.38rem;
-  border-radius: var(--radius-pill);
-  background: currentColor;
-  content: "";
-  transform: translateY(-50%);
-  animation: pendingPulse var(--motion-feedback) ease-in-out infinite alternate;
+.lensLink:has([data-link-pending="true"]) {
+  color: var(--semantic-text-primary);
+  background: color-mix(in srgb, var(--semantic-action-selected-background) 9%, transparent);
 }
 
 .lensLink:focus-visible,
@@ -100,23 +92,22 @@
 
 .accountButton {
   min-width: 44px;
-  max-width: min(260px, 30vw);
+  width: 44px;
   min-height: 44px;
-  padding: var(--space-xs) var(--space-sm);
-  display: flex;
+  padding: 7px;
+  display: grid;
+  place-items: center;
   align-items: center;
-  gap: var(--space-sm);
-  border: var(--border-hairline) solid var(--semantic-border-subtle);
-  border-radius: var(--radius-control);
+  border: 0;
+  border-radius: 50%;
   color: var(--semantic-text-primary);
-  background: var(--semantic-surface-elevated);
+  background: transparent;
   cursor: pointer;
   font: inherit;
 }
 
 .accountButton[data-current="true"] {
-  border-color: var(--semantic-border-focus);
-  background: var(--semantic-surface-connection);
+  background: color-mix(in srgb, var(--semantic-action-selected-background) 12%, transparent);
 }
 
 .accountAvatar {
@@ -129,33 +120,6 @@
   color: var(--semantic-text-on-emphasis, var(--exchange-black));
   background: var(--semantic-action-selected-background);
   font: 800 0.72rem/1 var(--type-interface-family);
-}
-
-.accountText {
-  min-width: 0;
-  display: grid;
-  text-align: left;
-}
-
-.accountText strong,
-.accountText small {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.accountText strong {
-  font-size: 0.72rem;
-}
-
-.accountText small {
-  color: var(--semantic-text-muted);
-  font-size: 0.65rem;
-}
-
-.chevron {
-  flex: 0 0 auto;
-  color: var(--semantic-text-muted);
 }
 
 .accountMenu {
@@ -287,11 +251,6 @@
   border: 0;
 }
 
-@keyframes pendingPulse {
-  from { opacity: 0.35; transform: translateY(-50%) scale(0.8); }
-  to { opacity: 1; transform: translateY(-50%) scale(1.1); }
-}
-
 @media (max-width: 900px) {
   .header {
     grid-template-columns: auto 1fr auto auto;
@@ -301,9 +260,6 @@
     gap: var(--space-md);
   }
 
-  .accountText strong {
-    display: none;
-  }
 }
 
 @media (max-width: 760px) {
@@ -325,16 +281,6 @@
 
   .accountUtility {
     grid-column: 3;
-  }
-
-  .accountButton {
-    max-width: 48px;
-    padding-inline: var(--space-xs);
-  }
-
-  .accountText,
-  .chevron {
-    display: none;
   }
 
   .brand {
@@ -360,12 +306,6 @@
   .accountButton {
     min-width: 42px;
     min-height: 42px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lensLink:has([data-link-pending="true"])::before {
-    animation: none;
   }
 }
 

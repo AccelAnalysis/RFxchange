@@ -13,7 +13,7 @@ export default async function QuickStartPage() {
   if (access.kind === "activation-required") redirect(participantEntryDestination(access));
   if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
-  if (access.state.lifecycleState !== "open-platform") redirect("/orientation");
+  if (access.state.lifecycleState !== "open-platform") redirect(access.state.controlledPlatformUrl ?? "/join");
   const organizationId = String(access.membership.organizationId);
   const initialSnapshot = await createServerNetworkEducationService().snapshot(
     { context: access.context, organizationId, membershipId: String(access.membership.id) },

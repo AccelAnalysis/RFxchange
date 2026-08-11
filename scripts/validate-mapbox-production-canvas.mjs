@@ -8,6 +8,7 @@ const [
   packageJson,
   envExample,
   layout,
+  mapViewContract,
   mapboxCanvas,
   spatialScene,
   geographyRoute,
@@ -22,6 +23,7 @@ const [
   read("package.json"),
   read(".env.example"),
   read("app/layout.tsx"),
+  read("src/application/geography/map-view.ts"),
   read("src/components/map/MapboxLocalityCanvas.tsx"),
   read("src/components/map/ExchangeSpatialScene.tsx"),
   read("app/geography/canvas/page.tsx"),
@@ -58,10 +60,7 @@ for (const requirement of [
   "search/searchbox/v1/forward",
   "Search moves the camera only and never changes your home locality.",
   "Fit home",
-  "VIEW_MODE_OPTIONS",
-  'label: "2D"',
-  'label: "Perspective"',
-  'label: "3D"',
+  "PARTICIPANT_MAP_VIEW_OPTIONS",
   "map.easeTo",
   "aria-pressed",
   "viewMode: resolvedViewMode",
@@ -82,16 +81,21 @@ for (const requirement of [
   "search/searchbox/v1/forward",
   "Search moves the camera only and never changes your home locality.",
   "Fit home",
-  "VIEW_MODE_OPTIONS",
-  'label: "2D"',
-  'label: "Perspective"',
-  'label: "3D"',
+  "PARTICIPANT_MAP_VIEW_OPTIONS",
   "map.easeTo",
   "aria-pressed",
   "HOME_MARKER_LABEL_LAYER_ID",
   "EXCHANGE_ORBIT_PERIOD_MS = 225_000",
 ]) {
   assert.ok(spatialScene.includes(requirement), `Spatial home-orbit Mapbox scene is missing ${requirement}.`);
+}
+for (const requirement of [
+  'label: "2D"',
+  'label: "Perspective"',
+  'label: "3D"',
+  "mapViewModeForPitch",
+]) {
+  assert.ok(mapViewContract.includes(requirement), `Canonical participant map-view contract is missing ${requirement}.`);
 }
 
 assert.ok(

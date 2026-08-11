@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 
 const files = {
   scene: await readFile("src/components/map/ExchangeSpatialScene.tsx", "utf8"),
+  mapView: await readFile("src/application/geography/map-view.ts", "utf8"),
   sceneCss: await readFile("src/components/map/ExchangeSpatialScene.module.css", "utf8"),
   preference: await readFile("src/components/map/map-motion-preference.ts", "utf8"),
   preferenceUi: await readFile("src/components/account/MapMotionPreferenceToggle.tsx", "utf8"),
@@ -29,7 +30,8 @@ assert.match(files.scene, /text-pitch-alignment": "viewport"/);
 assert.match(files.scene, /HOME_MARKER_LABEL_LAYER_ID/);
 assert.match(files.scene, /NETWORK_MARKER_SOURCE_ID/);
 assert.match(files.scene, /search\/searchbox\/v1\/forward/);
-assert.match(files.scene, /VIEW_MODE_OPTIONS/);
+assert.match(files.scene, /PARTICIPANT_MAP_VIEW_OPTIONS/);
+assert.match(files.mapView, /mapViewModeForPitch/);
 
 assert.match(files.sceneCss, /position: fixed/);
 assert.match(files.sceneCss, /inset: 0/);
@@ -82,7 +84,7 @@ assert.match(files.workspace, /mode="organization"/);
 assert.match(files.workspace, /marker=\{homeMarker\}/);
 assert.match(files.workspace, /organizationMarkers=\{networkMarkers\}/);
 assert.match(files.workspace, /workspaceOverlay=\{panelOpen \? "right" : "left"\}/);
-assert.match(files.workspace, /authorizedObjectIds\.has\(restored\.selectedObjectId\)/);
+assert.match(files.workspace, /authorizedObjectIds\.has\(spatialContext\.selection\.markerId\)/);
 
 assert.match(files.architecture, /225 seconds/);
 assert.match(files.architecture, /60 degrees/);

@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useId,
   useMemo,
   useState,
@@ -12,6 +13,7 @@ import {
 import { usePathname } from "next/navigation";
 
 import { isPersistentParticipantPath } from "../../application/participant/participant-lens-registry";
+import { clearParticipantSpatialContexts } from "../../application/participant/participant-spatial-context";
 import {
   ParticipantTopNavigation,
   type ParticipantNavigationItem,
@@ -127,6 +129,10 @@ function MountedPersistentParticipantShell({ children }: Readonly<{ children: Re
 export function PersistentParticipantShell({ children }: Readonly<{ children: ReactNode }>) {
   const pathname = usePathname();
   const persistent = isPersistentParticipantPath(pathname);
+
+  useEffect(() => {
+    if (/^\/(?:signin|join|access)(?:\/|$)/.test(pathname)) clearParticipantSpatialContexts();
+  }, [pathname]);
 
   if (!persistent) return children;
   return <MountedPersistentParticipantShell>{children}</MountedPersistentParticipantShell>;

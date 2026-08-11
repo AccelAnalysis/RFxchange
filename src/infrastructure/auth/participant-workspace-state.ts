@@ -1,11 +1,14 @@
 import type { AuthenticatedServerContext } from "../../application/auth/server-session.ts";
+import { participantLifecycleDestination } from "../../application/auth/participant-lifecycle-destination.ts";
 import type {
   AcquisitionIntentKind,
   AcquisitionSourceChannel,
 } from "../../domain/acquisition/model.ts";
 import { accessJourneyId, type AccessLifecycleRecord } from "../../domain/lifecycle/model.ts";
+import { orientationJourneyIdForAccessJourney } from "../../domain/orientation/model.ts";
 import type { OrganizationMembership } from "../../domain/users/model.ts";
 import { FirestoreActivationJourneyContextRepository } from "../firestore/activation-journey.ts";
+import { FirestoreOrientationJourneyRepository } from "../firestore/orientation-journey.ts";
 import { createServerFirestoreFoundationRepositories, getServerFirestore } from "../firestore/runtime.ts";
 import { measureServerOperation } from "../observability/server-timing.ts";
 
@@ -53,16 +56,7 @@ export class ParticipantWorkspaceProjectionError extends Error {
   }
 }
 
-function controlledPlatformUrl(
-  lifecycleState: AccessLifecycleRecord["state"],
-  organizationId: string | null,
-  hasAcquisitionContinuation: boolean,
-): string | null {
-  if (!organizationId) return null;
-  if (lifecycleState === "open-platform") return "/exchange";
-  if (lifecycleState !== "controlled-platform") return null;
-  return hasAcquisitionContinuation ? "/acquisition/continue" : "/orientation";
-}
+export { participantLifecycleDestination } from "../../application/auth/participant-lifecycle-destination.ts";
 
 /**
  * Minimal participant projection for protected navigation.
@@ -82,6 +76,7 @@ export async function loadParticipantWorkspaceProjection(
 ): Promise<ParticipantWorkspaceProjection | null> {
   const db = getServerFirestore();
   const contexts = new FirestoreActivationJourneyContextRepository(db);
+  const orientations = new FirestoreOrientationJourneyRepository(db);
   const foundation = createServerFirestoreFoundationRepositories(db);
 
   const [activation, memberships] = await measureServerOperation(
@@ -134,7 +129,22 @@ export async function loadParticipantWorkspaceProjection(
         status: "preserved" as const,
       })
     : null;
-  const hasAcquisitionContinuation = Boolean(acquisitionContext && acquisitionContext.kind !== "direct");
+  const orientation = lifecycle.state === "controlled-platform"
+    ? await measureServerOperation(
+        "workspace-state.firestore-controlled-release-stage",
+        () => orientations.getById(
+          orientationJourneyIdForAccessJourney(accessJourneyId(activation.accessJourneyId)),
+        ),
+        "controlled participant orientation stage",
+      )
+    : null;
+  const orientationComplete = Boolean(
+    orientation?.status === "completed" &&
+    orientation.completedThroughStep === 8 &&
+    orientation.userId === context.user.id &&
+    String(orientation.accessJourneyId) === String(activation.accessJourneyId) &&
+    (!resolvedOrganizationId || String(orientation.organizationId) === resolvedOrganizationId),
+  );
 
   return Object.freeze({
     state: Object.freeze({
@@ -142,10 +152,10 @@ export async function loadParticipantWorkspaceProjection(
       lifecycleState: lifecycle.state,
       organization: resolvedOrganizationId ? Object.freeze({ id: resolvedOrganizationId }) : null,
       membershipId: resolvedMembershipId,
-      controlledPlatformUrl: controlledPlatformUrl(
+      controlledPlatformUrl: participantLifecycleDestination(
         lifecycle.state,
         resolvedOrganizationId,
-        hasAcquisitionContinuation,
+        orientationComplete,
       ),
       acquisitionContext,
     }),

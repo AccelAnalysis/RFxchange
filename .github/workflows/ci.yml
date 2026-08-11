@@ -67,14 +67,16 @@ jobs:
       - name: Production build
         env:
           RFXCHANGE_BUILD_SHA: ${{ steps.build_identity.outputs.sha }}
+          NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}
         run: npm run build
       - name: Canonical full gate
         env:
           RFXCHANGE_BUILD_SHA: ${{ steps.build_identity.outputs.sha }}
+          NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}
         run: npm run check
       - name: Build exact pre-gate baseline
         env:
-          RFXCHANGE_SHELL_BASE_SHA: 87fb29ef3b442410deecf61a470bc94c9c013c60
+          RFXCHANGE_SHELL_BASE_SHA: 7e61fd94232ad72de32f4776befdb61d9e729cf6
         shell: bash
         run: |
           set -euo pipefail
@@ -90,9 +92,10 @@ jobs:
           RFXCHANGE_ENV: development
           RFXCHANGE_EXPECTED_PROJECT_ID: demo-rfxchange
           RFXCHANGE_ACCEPTANCE_BASE_WORKTREE: /tmp/rfxchange-shell-base
-          RFXCHANGE_ACCEPTANCE_BASE_SHA: 87fb29ef3b442410deecf61a470bc94c9c013c60
+          RFXCHANGE_ACCEPTANCE_BASE_SHA: 7e61fd94232ad72de32f4776befdb61d9e729cf6
           RFXCHANGE_ACCEPTANCE_CANDIDATE_SHA: ${{ steps.build_identity.outputs.sha }}
           RFXCHANGE_ACCEPTANCE_OUTPUT: artifacts/exchange-shell-transition-evidence.json
+          RFXCHANGE_CONFIGURED_MAP_ACCEPTANCE: ${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN != '' && '1' || '0' }}
         run: |
           ./node_modules/.bin/firebase emulators:exec --only auth,firestore --project demo-rfxchange \
             "node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/acceptance-exchange-shell-emulator.mjs"

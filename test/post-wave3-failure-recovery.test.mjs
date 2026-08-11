@@ -27,7 +27,6 @@ const convergedRoutes = [
 ];
 
 test("runtime recovery conventions keep participant loading below the shell and preserve root failure boundaries", () => {
-  const scopedLoading = read("src/components/participant/ParticipantContentLoading.tsx");
   const persistentShell = read("src/components/participant/PersistentParticipantShell.tsx");
   const notFound = read("app/not-found.tsx");
   const renderError = read("app/error.tsx");
@@ -35,11 +34,6 @@ test("runtime recovery conventions keep participant loading below the shell and 
 
   assert.equal(exists("app/loading.tsx"), false, "The page-wide root loading takeover must stay removed.");
   assert.match(persistentShell, /data-participant-content-region/);
-  assert.match(scopedLoading, /role="status"/);
-  assert.match(scopedLoading, /aria-live="polite"/);
-  assert.match(scopedLoading, /aria-busy="true"/);
-  assert.match(scopedLoading, /data-participant-content-loading/);
-  assert.doesNotMatch(scopedLoading, /Preparing this page|Loading RFxchange/);
   for (const path of [
     "app/geography/canvas/loading.tsx",
     "app/resources/loading.tsx",
@@ -47,7 +41,7 @@ test("runtime recovery conventions keep participant loading below the shell and 
     "app/organization-profile/loading.tsx",
     "app/quick-start/loading.tsx",
   ]) {
-    assert.match(read(path), /ParticipantContentLoading/, path);
+    assert.equal(exists(path), false, `${path} would replace the current participant content.`);
   }
   assert.match(notFound, /recovery\.notFoundTitle/);
   assert.match(renderError, /\berror\.digest\b/);

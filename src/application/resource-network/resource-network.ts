@@ -110,10 +110,10 @@ export class ResourceNetworkService {
     return Object.freeze({ status, profile, publication, completion, serviceGeography, restriction, organizationProfile });
   }
 
-  async inspectProviderEligibility(input: Readonly<{ organizationId: OrganizationId; serviceId?: string | null; publicationVersion?: number | null }>): Promise<Readonly<{ eligible: boolean; displayName: string | null }>> {
+  async inspectProviderEligibility(input: Readonly<{ organizationId: OrganizationId; serviceId?: string | null; publicationVersion?: number | null; serviceGeographyId?: string | null }>): Promise<Readonly<{ eligible: boolean; displayName: string | null }>> {
     const source = await this.providerSource(input.organizationId);
     const serviceIds = source.profile?.services.map((service) => service.id) ?? [];
-    const eligible = Boolean(source.status?.status === "official-resource-provider" && source.profile?.status === "active" && source.publication?.status === "published" && source.publication.sourceProfileVersion === source.profile.version && source.completion?.status === "active" && source.serviceGeography && (!source.restriction || source.restriction.state === "none") && source.organizationProfile && (!input.serviceId || source.publication.visibleServiceIds.includes(input.serviceId) && serviceIds.includes(input.serviceId)) && (!input.publicationVersion || source.publication.version === input.publicationVersion));
+    const eligible = Boolean(source.status?.status === "official-resource-provider" && source.profile?.status === "active" && source.publication?.status === "published" && source.publication.sourceProfileVersion === source.profile.version && source.completion?.status === "active" && source.serviceGeography && (!source.restriction || source.restriction.state === "none") && source.organizationProfile && (!input.serviceId || source.publication.visibleServiceIds.includes(input.serviceId) && serviceIds.includes(input.serviceId)) && (!input.publicationVersion || source.publication.version === input.publicationVersion) && (!input.serviceGeographyId || source.serviceGeography.serviceGeographyIds.map(String).includes(input.serviceGeographyId)));
     return Object.freeze({ eligible, displayName: eligible ? source.organizationProfile?.displayName ?? null : null });
   }
 

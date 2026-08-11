@@ -76,7 +76,12 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
   const opportunity = acquisition.kind === "opportunity" && acquisition.subjectReference
     ? await resolvePublicOpportunityProjection(acquisition.subjectReference)
     : null;
-  const mapUrl = access.state.lifecycleState === "open-platform" ? acquisition.kind === "provider" ? "/resources" : "/referrals" : "/orientation";
+  const mapUrl = access.state.lifecycleState === "open-platform"
+    ? acquisition.kind === "provider" ? "/resources" : "/referrals"
+    : access.state.controlledPlatformUrl ?? "/orientation";
+  const continuationLabel = access.state.lifecycleState === "open-platform"
+    ? acquisition.kind === "provider" ? "Continue to Resources" : "Continue to referrals"
+    : mapUrl === "/first-value" ? "Continue to first value" : "Continue to orientation";
 
   return (
     <ParticipantShell activeItem={acquisition.kind === "opportunity" ? undefined : acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Network"}>
@@ -130,7 +135,7 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
                 Review public opportunity
               </Link>
             ) : null}
-            <Link className={styles.secondary} href={mapUrl}>{access.state.lifecycleState === "open-platform" ? acquisition.kind === "provider" ? "Continue to Resources" : "Continue to referrals" : "Continue to orientation"}</Link>
+            <Link className={styles.secondary} href={mapUrl}>{continuationLabel}</Link>
           </div>
         </section>
       </OperationalWorkspace>

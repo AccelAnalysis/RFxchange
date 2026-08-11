@@ -1,5 +1,5 @@
 .workspace { position: relative; min-height: calc(100vh - 72px); overflow: hidden; }
-.panel { position: absolute; z-index: 4; inset: 20px auto 20px 20px; width: min(430px, calc(100vw - 40px)); overflow: auto; border: 1px solid rgba(23,21,17,.12); border-radius: 22px; background: rgba(255,253,247,.94); box-shadow: 0 20px 55px rgba(30,25,18,.14); padding: 20px; color: #171511; backdrop-filter: blur(18px); }
+.panel { position: absolute; z-index: 4; inset: 20px 20px 20px auto; width: min(430px, calc(100vw - 40px)); overflow: auto; border: 1px solid rgba(23,21,17,.12); border-radius: 22px; background: rgba(255,253,247,.94); box-shadow: 0 20px 55px rgba(30,25,18,.14); padding: 20px; color: #171511; backdrop-filter: blur(18px); }
 .header,.modalHeader { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
 .header p,.modalHeader p { margin:0 0 4px; color:#7a673b; font-size:.75rem; font-weight:750; letter-spacing:.12em; text-transform:uppercase; }
 .header h1,.modalHeader h2 { margin:0; font-size:clamp(1.45rem,3vw,2rem); }

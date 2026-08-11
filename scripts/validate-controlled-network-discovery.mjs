@@ -11,7 +11,7 @@ const service = read("src/application/network-discovery/network-discovery.ts");
 const runtime = read("src/infrastructure/network-discovery/runtime.ts");
 const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
 const map = read("src/components/map/ExchangeSpatialScene.tsx");
-const state = read("src/application/participant/existing-workspace-state.ts");
+const state = read("src/application/participant/participant-spatial-context.ts");
 const slice = read("docs/slices/SLICE_3_2_CONTROLLED_NETWORK_ENTRY_AND_DISCOVERY.md");
 
 assert.match(slice, /GEO-012/);
@@ -51,9 +51,9 @@ assert.match(service, /kind: "organization-name"/);
 assert.doesNotMatch(service, /qualified|endorsed|award likelihood/i);
 
 assert.match(workspace, /authorizedObjectIds/);
-assert.match(workspace, /authorizedObjectIds\.has\(restored\.selectedObjectId\)/);
+assert.match(workspace, /authorizedObjectIds\.has\(spatialContext\.selection\.markerId\)/);
 assert.match(workspace, /organizationMarkers=\{networkMarkers\}/);
-assert.match(workspace, /focusedMarkerId=\{workspaceState\.selectedObjectId\}/);
+assert.match(workspace, /focusedMarkerId=\{selectedObjectId\}/);
 assert.match(workspace, /onOrganizationMarkerSelect/);
 assert.match(workspace, /showSearch=\{false\}/);
 assert.match(workspace, /role="search"/);
@@ -62,12 +62,10 @@ assert.match(workspace, /aria-pressed=\{selected\}/);
 assert.match(workspace, /networkWorkspace\.match\.disclaimer/);
 assert.doesNotMatch(workspace, /firebase-admin|firebase\/firestore/);
 
-assert.match(state, /"organization-home"/);
-assert.match(state, /"selected-object"/);
 assert.match(state, /storesAuthorization: false/);
 assert.match(state, /storesPrivateCoordinates: false/);
 assert.match(state, /storesDomainRecords: false/);
-assert.match(state, /selectedObjectMustBeAuthorizedProjection: true/);
+assert.match(state, /serverRevalidatesSelectedObjectsAndActions: true/);
 
 assert.match(map, /NETWORK_MARKER_SOURCE_ID/);
 assert.match(map, /rfx-spatial-scene-network-organizations/);
