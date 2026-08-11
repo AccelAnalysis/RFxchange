@@ -133,12 +133,14 @@ type RequestFamilySnapshot = Readonly<{
   requestFamilyId: string;
   labelSnapshot: string;
   purposeSnapshot: string;
-  lifecycleSnapshot: readonly Readonly<{
-    stateId: string;
-    label: string;
-    sequence: number;
-    endpointKind: string | null;
-  }>[];
+  lifecycleSnapshot: readonly string[];
+  defaultEndpointSnapshot: string;
+  supportsAwardSnapshot: boolean;
+  defaultResponseTemplateIdSnapshot: string;
+  defaultDecisionTemplateIdSnapshot: string;
+  defaultGovernanceProfileIdSnapshot: string;
+  allowedGovernanceProfileIdsSnapshot: readonly string[];
+  recommendedRequirementBundleIdsSnapshot: readonly string[];
   selectedAt: string;
 }>;
 
@@ -191,7 +193,7 @@ In particular, Slice 4.1 does not implement:
 - evaluation, selection, award or outcome; or
 - a fake terminal state for testing convenience.
 
-The AMACS request-family snapshot may retain the selected family’s governed default lifecycle as explanatory/versioned metadata. That snapshot does not advance the RFx or authorize any of those future states.
+The AMACS request-family snapshot retains the selected family’s governed ordered lifecycle and top-level endpoint, award-support, response/decision template, governance-profile and recommended-requirement-bundle configuration as explanatory/versioned metadata. That snapshot does not advance the RFx or authorize any of those future states.
 
 ## 7. Versioning, concurrency and idempotency
 
@@ -272,19 +274,20 @@ The server must:
 
 1. retrieve the requested family from the pinned governed projection;
 2. reject an absent, malformed, deprecated-without-permitted-use or model-invented identifier;
-3. build the snapshot from the verified catalog record rather than participant labels or model memory;
-4. preserve stable ID, release version, source commit and participant-readable label/purpose/lifecycle snapshots; and
-5. persist the selected snapshot as part of the same versioned aggregate transaction.
+3. build the snapshot from the verified catalog record rather than participant labels, participant-supplied module configuration or model memory;
+4. preserve the stable family ID, release version, source commit, participant-readable label/purpose, ordered lifecycle strings, `default_endpoint`, `supports_award`, default response/decision template IDs, default/allowed governance profile IDs and recommended requirement bundle IDs as top-level snapshot fields mirroring the governed request-family record;
+5. reject any participant- or model-supplied attempt to override those governed snapshot values; and
+6. persist the selected snapshot as part of the same versioned aggregate transaction.
 
-Ordinary participant UI shows request-type names, concise purposes and accessible lifecycle explanation. Raw AMACS IDs, source commit and schema vocabulary remain technical details, not primary copy.
+Ordinary participant UI shows request-type names, concise purposes and accessible lifecycle explanation. Raw AMACS IDs, source commit, endpoint/module identifiers and schema vocabulary remain technical details, not primary copy.
 
 ### 9.2 Deterministic historical meaning
 
-A later AMACS release must not silently change an existing draft’s selected request family, labels, purpose or lifecycle meaning.
+A later AMACS release must not silently change an existing draft’s selected request family, labels, purpose, ordered lifecycle, endpoint, award support, response/decision templates, governance profiles or recommended requirement bundles.
 
-- Existing drafts retain their stored release/provenance snapshot.
+- Existing drafts retain the complete stored release/provenance and family-configuration snapshot.
 - A future explicit migration or family-change command requires separate authority and an expected-version mutation.
-- A participant-authorized family change records a new snapshot, increments the aggregate version and appends an event that preserves enough prior/new context to explain the change.
+- A participant-authorized family change records a complete new snapshot, increments the aggregate version and appends an event that preserves enough prior/new context to explain the change.
 - Published-record migration remains later authority and is not implied here.
 
 ### 9.3 AI boundary
@@ -464,12 +467,13 @@ Runtime evidence must prove:
 
 1. request families come only from the pinned verified AMACS 0.5.0 projection;
 2. invalid or model-invented IDs are rejected;
-3. release version, source commit, stable family ID, participant-readable label/purpose and lifecycle snapshot are retained;
-4. a later catalog/release change cannot silently reinterpret the stored draft;
-5. an authorized family change requires the current version, increments exactly once and appends prior/new evidence;
-6. raw implementation IDs/source commit are absent from ordinary participant labels;
-7. manual selection works with AI disabled/unavailable; and
-8. no interpretation candidate directly changes the aggregate.
+3. release version, source commit, stable family ID, participant-readable label/purpose, ordered lifecycle strings, default endpoint, award-support flag, default response/decision template IDs, default/allowed governance profile IDs and recommended requirement bundle IDs are retained from the verified catalog as top-level snapshot fields;
+4. participant or AI input cannot override any governed family snapshot value;
+5. a later catalog/release change cannot silently reinterpret the stored draft or alter its snapshotted family configuration;
+6. an authorized family change requires the current version, increments exactly once and appends complete prior/new snapshot evidence;
+7. raw implementation IDs/source commit are absent from ordinary participant labels;
+8. manual selection works with AI disabled/unavailable; and
+9. no interpretation candidate directly changes the aggregate.
 
 ### 14.3 `ISS-003` acceptance
 
