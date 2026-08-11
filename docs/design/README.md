@@ -7,23 +7,39 @@ This directory defines the currently implemented and converged visual system for
 Brand Gate B0 adds `docs/brand/` as the approved target Brand Experience System. The two directories have different responsibilities:
 
 - `docs/brand/` defines the target product identity, semantic meaning, map/data grammar, messaging, motion, sensory boundaries, viewing modes, acceptance and sequential implementation plan.
-- `docs/design/` defines the current implemented component, layout, map and presentation baseline until an authorized Brand Gate converges a surface.
+- `docs/design/` defines the current implemented component, layout, map and presentation baseline until an authorized Brand Gate or bounded cross-cutting gate converges a surface.
 
 ## Authority
 
 For visual and interaction decisions, use the following order:
 
-1. Current explicit task instructions and the authorized slice or Brand Gate.
-2. Security, privacy, authorization and domain invariants in `/AGENTS.md`, the canonical tracker/dependency map and applicable slice brief.
-3. `docs/brand/` for target brand meaning and brand acceptance.
-4. This directory for the currently implemented visual/UI/presentation baseline.
-5. `docs/context/BRAND_AND_UX.md` for concise cross-cutting intent.
-6. Existing merged production UI as implementation evidence and compatibility context.
-7. `docs/reference/` prototypes/screenshots as reference only.
+1. Current explicit task instructions and the authorized slice, Brand Gate or bounded cross-cutting gate.
+2. Security, privacy, authorization and domain invariants in `/AGENTS.md`, the canonical tracker/dependency map and applicable execution authority.
+3. `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md` for participant lens hierarchy, truthfulness and continuity.
+4. `docs/brand/` for target brand meaning and brand acceptance.
+5. This directory for the currently implemented visual/UI/presentation baseline.
+6. `docs/context/BRAND_AND_UX.md` for concise cross-cutting intent.
+7. Existing merged production UI as implementation evidence and compatibility context.
+8. `docs/reference/` prototypes/screenshots as reference only.
 
 A brand or visual rule never overrides security or product authority. If a target brand requirement would require widening a slice beyond its approved Feature IDs, preserve the intent, report the gap and defer the implementation rather than silently expanding scope.
 
 A domain-dependent brand expression may ship only when its authoritative domain exists. Do not fabricate opportunities, service territories, referral/team/RFx relationships, credibility or outcomes to satisfy a visual design.
+
+## Implemented participant-shell convergence
+
+The no-Feature-ID Exchange-shell truthfulness gate establishes the current participant navigation and loading baseline:
+
+- the primary lens sequence is exactly `Opportunities/RFx | Resources | Intelligence | Referrals`;
+- Opportunities/RFx is visibly present but explicitly unavailable, has no href, is not current and is described with text and assistive semantics rather than color alone;
+- Network remains the current organization-network view/domain concept within Intelligence, not a peer lens;
+- Account and Quick Start are separate utilities in the persistent participant header;
+- Administration is optional, server-authoritative and limited to implemented destinations;
+- the participant header and utility area persist across ordinary client-side lens changes;
+- pending route content uses scoped status/skeleton treatment below the header; and
+- the former root-level `Loading RFxchange` / `Preparing this page` takeover is not part of ordinary authenticated navigation.
+
+The stable Intelligence route remains `/geography/canvas`, including compatible query parameters. This gate does not enable Opportunities/RFx, create RFx state, add Intelligence datasets, change Feature IDs or tracker totals, implement Dark Appearance, or begin Slice 4.1 runtime.
 
 ## Target brand authority
 
@@ -54,9 +70,10 @@ The implemented design baseline is based on:
 - current RFxchange product/user-journey rules;
 - approved map direction: authoritative locality geometry, prominent selected geography, muted non-focus geography, real-coordinate markers, service-area overlays, restrained glassmorphism, less container chrome and higher-detail rendering;
 - completed Wave 2 geography rendering, activation, marker, orientation, first-value and OPEN contracts;
-- the post-Slice 2.8 Design Convergence Gate, which established the Warm Ivory participant default plus shared Spatial and Operational Workspace shells.
+- the post-Slice 2.8 Design Convergence Gate, which established the Warm Ivory participant default plus shared Spatial and Operational Workspace shells; and
+- the Exchange-shell truthfulness/performance gate, which converged the persistent participant header, permanent lens registry, utility separation and scoped loading behavior without changing a Feature ID.
 
-The PowerPoint deck remains provenance and presentation guidance. The Brand Experience System now controls target brand convergence, while this directory remains the current implementation authority until each gate is merged.
+The PowerPoint deck remains provenance and presentation guidance. The Brand Experience System controls target brand convergence, while this directory records the current implementation baseline after each authorized gate merges.
 
 ## Design-system evolution
 
@@ -67,7 +84,7 @@ When the design changes:
 - distinguish deliberate design changes from implementation accidents;
 - do not retroactively mark an already-complete Feature ID incomplete merely because a later design refinement exists unless its documented acceptance condition is actually invalidated;
 - if an existing merged component differs from the target Brand Experience System, migrate it only when its owning surface/gate is authorized;
-- keep net-new capabilities such as Intelligence Dark, Presentation Mode, sound preferences and haptics behind explicit product/tracker governance.
+- keep net-new capabilities such as Dark Appearance, Presentation Mode, sound preferences and haptics behind explicit product/tracker governance.
 
 ## Codex reading rule
 
