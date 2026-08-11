@@ -759,10 +759,18 @@ async function clickHref(cdp, href, expectedPath, { candidate = false, latencyMs
     assert.equal(immediate.currentText.includes("Preparing this page"), false);
   }
   await waitForExpression(cdp, `location.pathname === "${expectedPath}"`, expectedPath);
+  const routeCommitMs = performance.now() - wallStartedAt;
+  await waitForExpression(
+    cdp,
+    `!document.querySelector("[data-participant-content-loading]")`,
+    `${expectedPath} content settlement`,
+  );
   const observation = await finishObservation(cdp);
-  if (!Number.isFinite(observation.durationMs)) {
-    observation.durationMs = performance.now() - wallStartedAt;
-  }
+  const contentSettlementMs = Number.isFinite(observation.durationMs)
+    ? observation.durationMs
+    : performance.now() - wallStartedAt;
+  observation.durationMs = routeCommitMs;
+  observation.contentSettlementMs = contentSettlementMs;
   if (latencyMs > 0) {
     await cdp.send("Network.emulateNetworkConditions", {
       offline: false,
@@ -782,7 +790,11 @@ async function clickLens(cdp, id, expectedPath, options = {}) {
 }
 
 async function clickUtility(cdp, href, expectedPath, candidate) {
-  await evaluate(cdp, `document.querySelector('[data-participant-utility="account"] > button')?.click()`);
+  await evaluate(cdp, `(() => {
+    if (!document.querySelector('[role="menu"]')) {
+      document.querySelector('[data-participant-utility="account"] > button')?.click();
+    }
+  })()`);
   await waitForExpression(cdp, `Boolean(document.querySelector('[role="menu"] a[href="${href}"]'))`, href);
   return clickHref(cdp, href, expectedPath, { candidate });
 }
@@ -819,7 +831,9 @@ async function runBaseline({ cwd, port, sessionCookie }) {
         `Boolean(document.querySelector('a[href="${href}"]'))`,
         `baseline navigation link ${href}`,
       );
-      observations.push(await clickHref(cdp, href, route));
+      observations.push(await clickHref(cdp, href, route, {
+        latencyMs: href === "/resources" ? 450 : 0,
+      }));
       const nextToken = await ensureShellToken(cdp);
       if (token && nextToken !== token) remounts += 1;
       token = nextToken;
@@ -1119,12 +1133,15 @@ try {
       "Account",
       "Quick Start",
     ],
+    benchmarkLatencyMs: 450,
     baseline,
     candidate: candidateRun.result,
     mobileAndLocales,
     interpretation: {
       timingsAreRepresentative: true,
       productionNetworkPromise: false,
+      transitionTimingMetric: "interaction-to-route-commit",
+      contentSettlementReportedSeparately: true,
       removedBlockingWork: [
         "page-local participant shell recreation",
         "root page-wide participant loading takeover",
