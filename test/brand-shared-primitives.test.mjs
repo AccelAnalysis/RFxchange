@@ -10,6 +10,8 @@ const styles = await read("src/components/ui/Primitives.module.css");
 const contracts = await read("src/components/ui/object-contracts.ts");
 const participant = await read("src/components/participant/ParticipantWorkspace.tsx");
 const participantNavigation = await read("src/components/participant/ParticipantTopNavigation.tsx");
+const persistentShell = await read("src/components/participant/PersistentParticipantShell.tsx");
+const participantRegistry = await read("src/application/participant/participant-lens-registry.ts");
 
 test("Brand B2 exposes shared participant and operational primitives", () => {
   for (const name of [
@@ -52,10 +54,9 @@ test("Brand B2 future visual objects fail closed without authoritative provenanc
   assert.match(contracts, /outcome-evidence/);
 });
 
-test("Participant workspace consumes the shared B2 primitives without enabling later domains", () => {
+test("Participant workspace consumes shared B2 primitives through one persistent shell without enabling later domains", () => {
   const participantComponents = `${participant}\n${participantNavigation}`;
   for (const name of [
-    "NavigationFrame",
     "OverlayPanel",
     "ResponsiveSheet",
     "ControlGroup",
@@ -64,6 +65,18 @@ test("Participant workspace consumes the shared B2 primitives without enabling l
   ]) {
     assert.match(participantComponents, new RegExp(`\\b${name}\\b`));
   }
+
+  assert.match(persistentShell, /ParticipantTopNavigation/);
+  assert.match(persistentShell, /data-participant-shell="persistent"/);
+  assert.match(persistentShell, /data-participant-content-region/);
+  assert.match(participant, /if \(shellContext\.persistent\) return <>\{children\}<\/>/);
   assert.match(participant, /Opportunity and resource layers remain unavailable/);
-  assert.doesNotMatch(participantNavigation, /Opportunities|available: false/);
+
+  assert.match(
+    participantRegistry,
+    /id: "opportunities-rfx"[\s\S]*?href: null[\s\S]*?availability: "unavailable"/,
+  );
+  assert.match(participantNavigation, /aria-disabled="true"/);
+  assert.match(participantNavigation, /participantNavigation\.notYetAvailable/);
+  assert.doesNotMatch(participantRegistry, /id: "network"/);
 });
