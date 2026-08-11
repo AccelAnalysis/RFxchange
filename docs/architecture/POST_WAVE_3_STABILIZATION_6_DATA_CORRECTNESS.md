@@ -18,10 +18,39 @@ Previously stored NAICS descriptors remain visible and are preserved by default 
 
 NAICS remains descriptive/filter metadata. It does not establish capability, evidence, verification, eligibility, qualification, procurement readiness or credibility, and it cannot create an AMACS capability assertion.
 
-## Currently live navigation
+## Currently live navigation at the stabilization checkpoint
 
-The shared participant navigation now names the live map destination `Network` and exposes only currently live post-Wave 3 destinations: Network, Referrals, Resources, Quick Start and Account. The future Opportunities/RFx destination is absent rather than appearing functional. Navigation and changed catalog controls are localized for `en-US`, Spanish, French, Italian and German.
+At the time Stabilization 6 merged, the shared participant navigation named the live map destination `Network` and exposed only destinations with working runtime: Network, Referrals, Resources, Quick Start and Account. The future Opportunities/RFx destination was removed rather than appearing functional. Navigation and changed catalog controls were localized for `en-US`, Spanish, French, Italian and German.
+
+That result remains accurate historical evidence. It was a valid temporary capability-truthfulness correction at the post-Wave-3 checkpoint; it did not establish the permanent participant information architecture.
+
+## Architectural reconciliation — August 11, 2026
+
+The merged Exchange Interaction Architecture and the separately authorized no-Feature-ID shell gate supersede the narrower navigation rule for the ongoing participant shell without rewriting the historical result above.
+
+Participant-facing truthfulness now has four parts:
+
+1. **Structural truthfulness** — show the governed permanent lens architecture rather than a disposable taxonomy.
+2. **Capability truthfulness** — visible does not mean available; unavailable lenses have no action, href, fabricated state or current-page treatment.
+3. **State truthfulness** — unavailable, loading, empty, error, restricted and recovery states describe the relevant surface accurately.
+4. **Continuity truthfulness** — ordinary lens movement stays visibly inside one authenticated Exchange.
+
+The permanent lens order is therefore:
+
+`Opportunities/RFx | Resources | Intelligence | Referrals`
+
+During the shell gate:
+
+- Opportunities/RFx is present first but explicitly unavailable, non-routable and never current;
+- Resources, Intelligence and Referrals use their existing authorized runtime;
+- `/geography/canvas` remains the stable Intelligence route, and Network remains its current organization-network view/domain concept;
+- Quick Start and Account move to a separate Account utility control;
+- Administration remains limited to implemented, server-authorized destinations and fails closed;
+- the participant shell persists across ordinary client-side route changes; and
+- route-specific loading remains below the shell rather than replacing it with the former `Preparing this page` treatment.
+
+This reconciliation does not make Opportunities/RFx available, implement any RFx Feature ID, create an RFx route or record, add Intelligence datasets, restore Locations as a peer lens, or begin Slice 4.1 runtime.
 
 ## Scope boundary
 
-This stabilization changes no Feature ID or tracker total; totals remain `438 total · 152 Done · 286 Not Started`. It does not implement RFx Core, an Opportunities runtime, PR #150’s final lens hierarchy, the future Exchange shell, Intelligence or Locations runtime, Dark Appearance, Presentation Mode, B6b, automatic translation of participant-authored content or any later slice/gate.
+This stabilization and its later shell reconciliation change no Feature ID or tracker total; totals remain `438 total · 152 Done · 286 Not Started`. Activation remains `43/43`, Network remains `38/38`, Wave 4 RFx Core remains `0/41`, and B6b remains intentionally pending. Stabilization 2C remains separate and parked.
