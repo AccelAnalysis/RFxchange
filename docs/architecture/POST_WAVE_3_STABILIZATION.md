@@ -35,7 +35,7 @@ PR #142 specifically removed duplicate activation reconstruction, returning-user
 
 ### Stabilization 3 — failure classification and recovery
 
-1. Add route/global loading, error, and not-found boundaries.
+1. Add route/global loading, error, and not-found boundaries. At this historical checkpoint, a root loading boundary supplied general loading accessibility coverage; the August 11, 2026 participant-shell reconciliation below supersedes only its use during ordinary authenticated lens transitions.
 2. Distinguish absent activation data from dependency failure; dependency failure must produce a retryable service state rather than an onboarding redirect.
 3. Standardize sanitized API problem responses, correlation IDs, and secured internal diagnostics.
 
@@ -64,7 +64,7 @@ Implementation and acceptance authority: [POST_WAVE_3_STABILIZATION_6_DATA_CORRE
 1. Carry stable sender and recipient organization IDs in referral projections; never join by display name.
 2. Replace silent AMACS result truncation with count, paging or virtualization, and deterministic hierarchical fallback.
 3. Replace free-text authoritative NAICS title/version entry with a governed versioned picker.
-4. Align participant mobile navigation with the currently live Network destinations while keeping future RFx surfaces clearly non-live.
+4. Align participant mobile navigation with the destinations that were live at that stabilization checkpoint while removing a misleading active Opportunities destination. This was a valid temporary correction and did not establish the permanent participant information architecture.
 
 ### Stabilization 7 — administrative portal runtime convergence
 
@@ -105,6 +105,23 @@ This gate makes the already-approved administrative information architecture ope
 - This integration gate changes no Feature-ID or Brand-Gate status. Tracker totals remain
   **438 total · 152 Done · 286 Not Started**, Activation remains **43/43**, Network remains **38/38**
   and B6b remains intentionally pending.
+
+### Participant-shell architectural reconciliation — 2026-08-11
+
+The historical stabilization results above remain accurate evidence of what was corrected at the time. They are not rewritten as though the former navigation or root loading treatment never existed.
+
+The merged Exchange Interaction Architecture and the separately authorized no-Feature-ID shell gate now govern the ongoing participant shell:
+
+- the permanent participant lens order is `Opportunities/RFx | Resources | Intelligence | Referrals`;
+- Opportunities/RFx remains visible but explicitly unavailable, non-routable and never current until a separately accepted real participant RFx runtime exists;
+- Network remains the current organization-network view/domain concept within Intelligence, not a peer lens;
+- Account and Quick Start are separate utilities;
+- Administration remains different: it exposes only implemented, server-authorized destinations and fails closed;
+- ordinary authenticated lens changes preserve one persistent Exchange shell;
+- route-specific loading is scoped below that shell; and
+- the former page-wide `Preparing this page` treatment is not used for ordinary participant transitions.
+
+This reconciliation does not begin Slice 4.1 runtime, change any Feature ID, alter tracker totals, change B6b, or affect Stabilization 2C.
 
 ## Release discipline
 
