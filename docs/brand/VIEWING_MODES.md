@@ -1,218 +1,246 @@
-# RFxchange Viewing Modes
+# RFxchange Appearance and Presentation Authority
 
-**Status: PLANNING AUTHORITY — EXCHANGE LIGHT IS THE CURRENT DIRECTION; INTELLIGENCE DARK AND PRESENTATION MODE ARE NET-NEW CAPABILITIES**
+**Status: CURRENT PLANNING AUTHORITY — LIGHT APPEARANCE IS THE IMPLEMENTED BASELINE; DARK APPEARANCE AND PRESENTATION MODE ARE SEPARATELY UNAUTHORIZED CAPABILITIES.**
 
-## 1. Purpose
+## 1. Purpose and vocabulary
 
-RFxchange should support distinct environments for daily work, analytical work, and executive/public presentation without fragmenting into separate products.
+RFxchange supports one organization-centered product whose functional lenses, visual appearance and task workspaces must not be conflated.
 
-The governed viewing modes are:
+Use these terms precisely:
 
-1. **Exchange Light** — default participant experience.
-2. **Intelligence Dark** — optional dark mode for extended analytical use.
-3. **Presentation Mode** — controlled briefing environment for meetings and large displays.
-4. **High Contrast** — accessibility mode or system-compatible high-contrast treatment.
+| Term | Meaning |
+| --- | --- |
+| **Lens** | Functional market context that changes permitted projections, search semantics, filters and actions. The primary lenses are Opportunities/RFx, Resources, Intelligence and Referrals. |
+| **Layer** | A map or analytical projection inside a lens, such as organizations, locality boundaries, service fields, opportunity beacons or capability density. |
+| **Appearance** | Visual treatment only. The governed appearance names are **Light Appearance** and **Dark Appearance**. Appearance never changes authority or data access. |
+| **Workspace** | Interaction composition used to complete a task. Spatial Workspace preserves geographic context; Operational Workspace supports authoring, forms, tables, review and other dense work. |
+| **Presentation Mode** | A separate future presentation-safe briefing capability, not an appearance and not an enlarged ordinary interface. |
+| **High Contrast** | An accessibility treatment/system compatibility requirement, not a brand mode or data tier. |
 
-Modes change presentation, density, contrast, and permitted disclosure. They do not change domain authority, organization permissions, lifecycle, matching, credibility, or commercial status.
+**Intelligence is the functional analytical lens. It is not the name of Dark Appearance.**
 
-## 2. Exchange Light
+Older active references to `Exchange Light` and `Intelligence Dark` are compatibility terminology only and must be interpreted as **Light Appearance** and **Dark Appearance**. Historical evidence may retain its original wording when changing it would distort the record. New governing and participant-facing language uses the current terminology.
 
-### 2.1 Purpose
+Avoid the generic word `mode` when lens, layer, appearance, workspace, Presentation Mode or High Contrast is the actual meaning.
 
-Exchange Light is the default daily environment for onboarding, map exploration, opportunity review, referrals, resources, profiles, and ordinary participant work.
+## 2. Authority boundary
 
-### 2.2 Visual treatment
+Appearance may change:
 
-- Warm Ivory foundation;
-- warm low-saturation map;
-- Exchange Black/Graphite typography and structure;
-- restrained RF Gold focus and connection cues;
-- Signal Blue data and opportunity cues;
-- Growth Green only for appropriate positive outcomes;
-- light contextual overlays;
-- opaque surfaces for dense tables and long workflows.
+- visual canvas and surface treatment;
+- text and non-text contrast;
+- map styling consistent with semantic meaning;
+- chart treatment;
+- density and presentation affordances; and
+- transition treatment within accessibility limits.
 
-### 2.3 Behavior
+Appearance must not change:
 
-- map remains primary where geography is relevant;
-- one restrained top navigation;
-- panels remain calm and readable;
-- no full-screen black participant shell;
-- no excessive glow, gradients, or decorative cards;
-- photography and video on public pages use readability gradients rather than boxed copy where appropriate.
+- organization, user or membership authority;
+- geography/release eligibility;
+- lifecycle;
+- search or matching truth;
+- credibility or verification;
+- provider/referral status;
+- commercial entitlement;
+- private/public data boundaries;
+- RFx publication or response access; or
+- the meaning of a lens, layer or workspace.
 
-### 2.4 Default status
+A participant must not gain or lose data merely by changing visual presentation.
 
-Exchange Light is the ordinary participant default. A participant may later persist another mode, but public onboarding and safety-critical recovery surfaces should remain legible without depending on a stored mode.
-
-## 3. Intelligence Dark
+## 3. Light Appearance
 
 ### 3.1 Purpose
 
-Intelligence Dark supports low-light and extended analytical work, particularly for map intelligence, dense data review, and operational monitoring.
-
-It is not a separate premium tier and must not communicate privileged market access.
+Light Appearance is the current default participant presentation for public acquisition, activation, map exploration, Opportunities/RFx, Resources, Intelligence, Referrals, profiles, Account and ordinary operational work.
 
 ### 3.2 Visual treatment
 
-- near-black, Graphite, or charcoal foundation;
-- Warm Ivory primary text;
-- muted Signal Blue and RF Gold;
-- restrained Growth Green;
-- low-contrast roads, labels, and 3D buildings;
-- no neon cyan, luminous grid, arcade glow, or speculative-finance aesthetic;
-- opaque Graphite data surfaces where transparency would reduce readability.
+- Warm Ivory foundation;
+- warm, low-saturation map treatment;
+- Exchange Black/Graphite typography and structure;
+- restrained RF Gold focus and connection cues;
+- Signal Blue for active data and opportunity cues;
+- Growth Green only for appropriate positive resolution/outcome meaning;
+- light contextual overlays; and
+- opaque surfaces for dense tables and long workflows where transparency harms readability.
 
-### 3.3 Organization nodes
+### 3.3 Behavior
 
-- Graphite core;
-- Warm Ivory internal detail;
-- muted gold focus/selection;
-- separate accessible focus ring;
-- no bright white permanent outline.
+- map remains primary where geography is relevant;
+- one restrained participant navigation system is reused;
+- panels remain calm and readable;
+- there is no default full-screen black participant shell;
+- glow, gradients and decorative cards remain restrained;
+- public photography/video uses readability treatment without pretending that appearance changes product truth; and
+- Operational Workspace surfaces may use an opaque light canvas while preserving safe return context to the Spatial Workspace.
 
-### 3.4 Charts and heatmaps
+### 3.4 Current implementation status
 
-- semantic colors retain the same meaning as Exchange Light;
-- contrast is recalculated rather than merely inverting colors;
-- density remains Signal Blue-led;
-- gold identifies selected/focused context;
-- green remains an outcome layer;
-- patterns and labels remain available.
+The semantic token/runtime baseline implemented through Brand Gate B1 and subsequent convergence uses the internal compatibility key `exchangeLight`. That internal key does not override current participant/governing terminology: the presentation is **Light Appearance**.
 
-### 3.5 Dark-mode boundary
+This terminology reconciliation does not rename runtime token keys, migrate persistence, create a preference or change current UI behavior.
 
-Intelligence Dark must not:
-
-- imply a secret intelligence product;
-- hide map attribution;
-- reduce accessibility;
-- use dark mode to disguise low-contrast text;
-- become the marketing default merely because black and gold are signature colors;
-- change what data a participant can access.
-
-## 4. Presentation Mode
+## 4. Dark Appearance
 
 ### 4.1 Purpose
 
-Presentation Mode supports:
+Dark Appearance is a possible future visual treatment for low-light and extended work across applicable RFxchange surfaces, including analytical work in the Intelligence lens. It is not an Intelligence product, a separate market, a premium tier or privileged data access.
+
+Dark Appearance may be used while a participant is in Opportunities/RFx, Resources, Intelligence or Referrals if a future authority implements it consistently. Conversely, the Intelligence lens may operate in Light Appearance.
+
+### 4.2 Target visual treatment
+
+When separately authorized, Dark Appearance should use:
+
+- near-black, Graphite or charcoal foundation;
+- Warm Ivory primary text;
+- muted Signal Blue and RF Gold;
+- restrained Growth Green;
+- low-contrast roads, labels and 3D buildings that still meet accessibility requirements;
+- opaque Graphite data surfaces where transparency reduces readability; and
+- semantic contrast recalculated per component rather than a mechanical color inversion.
+
+### 4.3 Organization nodes, charts and heatmaps
+
+Potential future treatment:
+
+- organization nodes retain their canonical identity and anchor;
+- focus/selection uses governed semantic emphasis rather than permanent white outlines or glow;
+- charts preserve the same semantic meanings as Light Appearance;
+- Signal Blue remains data/intelligence-led;
+- gold remains focus/connection rather than payment, superiority or verification;
+- green remains bounded to genuine positive resolution/outcome meaning; and
+- patterns, labels and non-color distinctions remain available.
+
+### 4.4 Prohibitions
+
+Dark Appearance must not:
+
+- imply a secret or privileged Intelligence product;
+- hide map attribution or provenance;
+- reduce accessibility;
+- disguise low-contrast content;
+- become a public marketing default merely because black and gold are signature colors;
+- change data availability, matching, status or permissions;
+- invent analytical data, RFxs, opportunity beacons or market activity; or
+- create a separate participant shell.
+
+### 4.5 Current status
+
+Dark Appearance is **not implemented and not authorized** by this document, PR #150 or Wave 4 Slice 4.1. No appearance preference, system/dark selector, persistence, first-render behavior or dark map asset may be added without a separate bounded authority and acceptance plan.
+
+## 5. Intelligence lens boundary
+
+Intelligence answers analytical questions about permitted organizations, capabilities, demand, geography, locations/sites, workforce, market context and relationships. Its scope is governed by `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md`.
+
+Intelligence may use Light Appearance or, after separate implementation, Dark Appearance. Appearance does not determine whether a participant is in the Intelligence lens.
+
+Location Intelligence and Site & Facility Intelligence live within the Intelligence lens. They do not become a peer commercial-real-estate product merely because a map or dark presentation is used.
+
+## 6. Presentation Mode
+
+### 6.1 Purpose
+
+Presentation Mode is a separate future capability for:
 
 - buyer meetings;
 - economic-development briefings;
 - executive reviews;
 - community presentations;
-- large displays;
+- large displays; and
 - guided demonstrations.
 
-It is not an enlarged version of the daily interface.
+It is not an appearance selector and not an enlarged version of the daily interface.
 
-### 4.2 Core behavior
+### 6.2 Core behavior
 
-Presentation Mode should:
+When separately authorized, Presentation Mode should:
 
+- use an explicit presentation-safe projection;
 - hide private or sensitive fields by default;
-- apply a presentation-safe data projection;
 - minimize controls;
-- increase label and data size;
+- increase label/data size;
 - use cinematic but restrained map transitions;
-- emphasize one locality, journey, opportunity, or data story;
+- emphasize one locality, journey, opportunity or data story;
 - support a guided sequence of approved views;
-- display provenance and caveats clearly;
-- preserve visible attribution;
-- avoid showing private notifications or account controls.
+- display provenance/caveats clearly;
+- preserve visible attribution; and
+- exclude private notifications and ordinary account controls.
 
-### 4.3 Story structure
+Presentation Mode may offer an approved light or dark presentation treatment, but those treatments remain subordinate to the safe projection and do not convert it into ordinary Light/Dark Appearance preference behavior.
 
-A presentation sequence may contain approved frames such as:
+### 6.3 Privacy and authorization
 
-1. locality overview;
-2. capability distribution;
-3. opportunity or buyer need;
-4. organization match context;
-5. teammate or provider connection;
-6. response/evaluation pathway;
-7. outcome and provenance;
-8. aggregate intelligence and limitations.
+Presentation Mode requires a separate server-authorized projection. It must not expose information merely because the presenting user can see it in an ordinary authenticated workspace.
 
-### 4.4 Privacy and authorization
-
-Presentation Mode requires a separate projection/permission evaluation. It must not expose information merely because the ordinary authenticated user can see it.
-
-At minimum, it must protect:
+At minimum it protects:
 
 - private organization documents;
-- nonpublic contact information;
+- nonpublic contacts;
 - private buyer deliberations;
 - evaluator comments;
 - referral details without consent;
 - protected provider/client context;
-- private credibility ledger data;
-- hidden commercial/payment state;
-- private notifications;
+- private credibility records;
+- commercial/payment state;
+- private notifications; and
 - unpublished RFx or response data.
 
-### 4.5 Real evidence only
+### 6.4 Real evidence only
 
 Presentation Mode may use:
 
-- real, authorized platform records;
-- aggregated/suppressed data;
-- clearly labeled synthetic tutorial scenarios;
+- real authorized platform records;
+- governed aggregated/suppressed data;
+- clearly labeled synthetic tutorial scenarios; and
 - approved conceptual diagrams.
 
-It may not use invented organizations, opportunities, statistics, outcomes, testimonials, or market activity represented as real.
+It may not represent invented organizations, opportunities, statistics, outcomes, testimonials or market activity as real.
 
-### 4.6 Presenter controls
+### 6.5 Current status
 
-Potential controls, subject to implementation scope:
+Presentation Mode remains not implemented and requires separate product scope, projection/permission rules, responsive/accessibility acceptance and tracker governance where applicable.
 
-- start/end presentation;
-- next/previous approved frame;
-- pause/resume camera movement;
-- fit current subject;
-- show/hide labels;
-- reveal caveat/provenance panel;
-- switch between approved light/dark presentation treatment;
-- exit to the originating authorized workspace.
+## 7. High Contrast accessibility treatment
 
-Presentation controls must remain keyboard operable and should not appear in audience-facing capture unless intentionally displayed.
-
-## 5. High Contrast
-
-High Contrast is an accessibility requirement, not a brand variation.
+High Contrast is an accessibility requirement and operating-system compatibility treatment, not a lens, appearance brand variant or commercial tier.
 
 It must:
 
 - preserve visible focus;
 - strengthen surface and text contrast;
 - avoid translucent backgrounds behind dense content;
-- provide patterns and labels in addition to color;
-- preserve all statuses and object distinctions;
-- remain compatible with operating-system forced-colors behavior where possible;
-- avoid hiding Mapbox attribution or required labels;
-- preserve selected/focused object meaning without glow alone.
+- provide patterns/labels in addition to color;
+- preserve every status and object distinction;
+- remain compatible with forced-colors behavior where practical;
+- avoid hiding Mapbox attribution or required labels; and
+- preserve selected/focused meaning without relying on glow.
 
-## 6. Sensory settings
+High Contrast may coexist with Light or future Dark Appearance. System behavior and readability take precedence over decorative brand treatment.
 
-The account/settings experience should eventually support:
+## 8. Sensory and preference boundary
 
-- appearance: system/light/dark where governed;
+Potential future account/settings controls include:
+
+- appearance: system/light/dark;
 - reduced motion;
 - ambient orbit on/off;
 - master sound on/off;
 - notification sound on/off;
 - milestone sound on/off;
-- high contrast or system high contrast;
-- haptics on/off where implemented;
+- High Contrast/system High Contrast support;
+- haptics on/off where implemented; and
 - presentation preferences where authorized.
 
-These are net-new capabilities when persistence, cross-device behavior, and account controls do not yet exist. They require explicit product scope and tests.
+Every persistent control is a net-new capability when its server/client authority, cross-device behavior and account surface do not yet exist. None is authorized merely by being listed here.
 
-## 7. Mode-aware semantic tokens
+Wave 4 Slice 4.1 must not implement Dark Appearance or appearance preferences.
 
-Implementation should separate raw palette from semantic roles.
+## 9. Appearance-aware semantic tokens
 
-Proposed semantic roles include:
+Implementation must separate raw palette from semantic roles. Existing and future roles may include:
 
 - `surface.canvas`
 - `surface.panel`
@@ -237,59 +265,68 @@ Proposed semantic roles include:
 - `node.detail`
 - `beacon.active`
 
-A raw color must not be used as a new semantic meaning merely because it looks acceptable in one mode.
+A raw color must not gain a new semantic meaning merely because it looks acceptable in one appearance. Runtime compatibility names such as `exchangeLight` do not become customer-facing terminology.
 
-## 8. Persistence and fallback
+## 10. Persistence and fallback requirements for future appearance work
 
-- authenticated preference persistence requires server/client authority definition;
-- first render should minimize theme flash;
-- unauthenticated public pages may use system preference only where the approved design supports it;
-- legal, authentication recovery, and error pages must remain readable even when preference loading fails;
-- stale preference must not block access;
-- unsupported browsers receive a stable Exchange Light fallback;
-- print/export uses a governed presentation-safe style rather than blindly printing dark mode.
+A future Dark Appearance implementation must define and test:
 
-## 9. Accessibility
+- server/client preference authority;
+- system/light/dark resolution;
+- first-render theme-flash mitigation;
+- unauthenticated public behavior;
+- readable legal/authentication/error fallbacks;
+- stale/invalid preference recovery;
+- stable unsupported-browser fallback to Light Appearance;
+- print/export treatment; and
+- Mapbox style-transition and asset-loading performance.
 
-Each mode must independently pass:
+None of these mechanisms exists by implication in current Wave 4 work.
 
-- text contrast;
-- non-text contrast;
+## 11. Accessibility acceptance
+
+Each implemented presentation treatment must independently pass:
+
+- text and non-text contrast;
 - keyboard/focus visibility;
 - screen-reader naming;
 - reduced motion;
-- forced colors/high contrast where supported;
+- forced colors/High Contrast where supported;
 - color-blind differentiation;
 - zoom and reflow;
 - responsive layout;
-- map/list parity;
+- map/list parity; and
 - dense table readability.
 
-Passing Exchange Light does not automatically prove Intelligence Dark or Presentation Mode.
+Passing Light Appearance does not prove future Dark Appearance or Presentation Mode.
 
-## 10. Performance
+## 12. Performance requirements
 
-- mode switching should avoid full application reload where practical;
-- Mapbox style transitions must not freeze interaction;
-- font loading must not block essential content;
-- mode assets should be lazy where appropriate;
-- Presentation Mode must remain responsive on large displays;
-- dark mode should not multiply duplicate map assets unnecessarily;
-- transition effects stop under reduced motion;
-- the public page should not load both full media treatments when only one is used.
+Future appearance/presentation work must ensure:
 
-## 11. Acceptance
+- switching avoids full application reload where practical;
+- Mapbox transitions do not freeze interaction;
+- font loading does not block essential content;
+- optional assets are lazy where appropriate;
+- large-display presentation remains responsive;
+- dark treatment does not multiply duplicate assets unnecessarily;
+- transitions stop under reduced motion; and
+- public pages do not load unused full media treatments.
 
-A viewing mode is complete only when:
+## 13. Completion criteria
+
+A new appearance or Presentation Mode capability is complete only when:
 
 - semantic tokens are centralized;
 - all key participant surfaces are reviewed;
 - map and non-map workflows are covered;
-- loading, empty, success, error, permission, and expired states are covered;
-- charts, tables, overlays, forms, and focus states pass contrast;
-- mode preference and fallback work;
-- no domain authority changes with mode;
+- loading, empty, success, error, permission and expired states are covered;
+- charts, tables, overlays, forms and focus states pass contrast;
+- preference/projection/fallback behavior works as applicable;
+- no domain authority changes with presentation;
 - Presentation Mode uses a safe projection;
 - synthetic content remains labeled;
-- reduced motion, sound, and orbit controls remain respected;
-- responsive and configured-browser acceptance passes.
+- reduced-motion and sensory controls are respected; and
+- responsive/configured-browser acceptance passes.
+
+This documentation reconciliation changes terminology only. It does not implement Dark Appearance, Presentation Mode, High Contrast settings or any appearance preference.
