@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import {
   ControlGroup,
@@ -14,11 +14,12 @@ import {
 import styles from "./ParticipantWorkspace.module.css";
 import b2Styles from "./ParticipantWorkspaceB2.module.css";
 import { ParticipantTopNavigation, type ParticipantNavigationItem } from "./ParticipantTopNavigation";
-import { usePersistentParticipantShell } from "./PersistentParticipantShell";
+import { usePersistentParticipantShellContext } from "./PersistentParticipantShell";
 
 interface ParticipantShellProps {
   readonly activeItem?: ParticipantNavigationItem;
   readonly administrationHref?: string;
+  readonly organizationName?: string;
   readonly children: ReactNode;
 }
 
@@ -43,16 +44,26 @@ interface ResponsiveEdgeSheetProps {
 /**
  * Compatibility boundary for participant workspaces that predate the persistent root-layout shell.
  * Within the governed Exchange shell it contributes only page content, preventing a route change
- * from destroying and recreating product identity or navigation. Transitional routes outside the
- * persistent shell retain the same truthful page-local navigation until they receive their own gate.
+ * from destroying and recreating product identity or navigation. It may report organization identity
+ * only from the already-authorized page projection; it never performs an additional session or
+ * organization read. Transitional routes outside the persistent shell retain the same truthful
+ * page-local navigation until they receive their own gate.
  */
 export function ParticipantShell({
   activeItem,
   administrationHref,
+  organizationName,
   children,
 }: ParticipantShellProps) {
-  const persistentShell = usePersistentParticipantShell();
-  if (persistentShell) return <>{children}</>;
+  const shellContext = usePersistentParticipantShellContext();
+
+  useEffect(() => {
+    if (shellContext.persistent && organizationName) {
+      shellContext.reportAuthorizedOrganizationName(organizationName);
+    }
+  }, [organizationName, shellContext]);
+
+  if (shellContext.persistent) return <>{children}</>;
 
   return (
     <div
@@ -60,7 +71,11 @@ export function ParticipantShell({
       data-participant-shell="page-local"
       data-participant-default="warm-ivory"
     >
-      <ParticipantTopNavigation activeItem={activeItem} administrationHref={administrationHref} />
+      <ParticipantTopNavigation
+        activeItem={activeItem}
+        administrationHref={administrationHref}
+        organizationName={organizationName ?? null}
+      />
       {children}
     </div>
   );
