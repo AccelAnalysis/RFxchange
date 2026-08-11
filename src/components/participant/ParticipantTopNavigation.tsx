@@ -38,6 +38,9 @@ export type ParticipantNavigationItem =
 
 type NavigationDestination = Exclude<ParticipantNavigationState, null>;
 
+const INTELLIGENCE_CONTEXT_STORAGE_KEY = "rfxchange:participant:intelligence-href";
+const CANONICAL_INTELLIGENCE_HREF = "/geography/canvas";
+
 function normalizedActiveItem(item?: ParticipantNavigationItem): ParticipantNavigationState {
   switch (item) {
     case "Network":
@@ -76,14 +79,39 @@ function organizationInitials(name: string | null): string {
   return initials || "A";
 }
 
+function safeIntelligenceHref(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const parsed = new URL(value, window.location.origin);
+    if (parsed.origin !== window.location.origin || parsed.pathname !== CANONICAL_INTELLIGENCE_HREF) {
+      return null;
+    }
+    return `${parsed.pathname}${parsed.search}`;
+  } catch {
+    return null;
+  }
+}
+
 function useTransitionFeedback(pathname: string) {
   const [pendingDestination, setPendingDestination] = useState<NavigationDestination | null>(null);
+  const [intelligenceHref, setIntelligenceHref] = useState(CANONICAL_INTELLIGENCE_HREF);
   const pendingRef = useRef<Readonly<{
     destination: NavigationDestination;
     markName: string;
     startedAt: number;
     fromPathname: string;
   }> | null>(null);
+
+  useEffect(() => {
+    const current = pathname === CANONICAL_INTELLIGENCE_HREF
+      ? safeIntelligenceHref(`${window.location.pathname}${window.location.search}`)
+      : null;
+    const stored = safeIntelligenceHref(
+      window.sessionStorage.getItem(INTELLIGENCE_CONTEXT_STORAGE_KEY),
+    );
+    const resolved = current ?? stored;
+    if (resolved) setIntelligenceHref(resolved);
+  }, [pathname]);
 
   useEffect(() => {
     const pending = pendingRef.current;
@@ -111,7 +139,19 @@ function useTransitionFeedback(pathname: string) {
   }, [pathname]);
 
   function begin(destination: NavigationDestination) {
-    if (participantNavigationState(pathname) === destination) return;
+    const currentState = participantNavigationState(pathname);
+    if (currentState === destination) return;
+
+    if (currentState === "intelligence" && destination !== "intelligence") {
+      const currentHref = safeIntelligenceHref(
+        `${window.location.pathname}${window.location.search}`,
+      );
+      if (currentHref) {
+        setIntelligenceHref(currentHref);
+        window.sessionStorage.setItem(INTELLIGENCE_CONTEXT_STORAGE_KEY, currentHref);
+      }
+    }
+
     const markName = `rfxchange.participant-transition:${destination}:${Date.now()}`;
     performance.mark(markName);
     pendingRef.current = Object.freeze({
@@ -123,16 +163,18 @@ function useTransitionFeedback(pathname: string) {
     setPendingDestination(destination);
   }
 
-  return Object.freeze({ pendingDestination, begin });
+  return Object.freeze({ pendingDestination, intelligenceHref, begin });
 }
 
 function LensItems({
   activeState,
+  intelligenceHref,
   pendingDestination,
   beginNavigation,
   onNavigate,
 }: Readonly<{
   activeState: ParticipantNavigationState;
+  intelligenceHref: string;
   pendingDestination: NavigationDestination | null;
   beginNavigation(destination: NavigationDestination): void;
   onNavigate?: () => void;
@@ -161,10 +203,11 @@ function LensItems({
       );
     }
 
+    const href = lens.id === "intelligence" ? intelligenceHref : lens.href;
     return (
       <Link
         key={lens.id}
-        href={lens.href}
+        href={href}
         className={styles.lensLink}
         aria-current={activeState === lens.id ? "page" : undefined}
         aria-busy={pendingDestination === lens.id ? "true" : undefined}
@@ -425,6 +468,7 @@ export function ParticipantTopNavigation({
       <nav className={styles.desktopLenses} aria-label={t("participantNavigation.ariaLabel")}>
         <LensItems
           activeState={activeState}
+          intelligenceHref={transition.intelligenceHref}
           pendingDestination={transition.pendingDestination}
           beginNavigation={transition.begin}
         />
@@ -433,6 +477,7 @@ export function ParticipantTopNavigation({
         {(close) => (
           <LensItems
             activeState={activeState}
+            intelligenceHref={transition.intelligenceHref}
             pendingDestination={transition.pendingDestination}
             beginNavigation={transition.begin}
             onNavigate={close}
