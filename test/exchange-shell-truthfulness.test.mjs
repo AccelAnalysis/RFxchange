@@ -109,16 +109,23 @@ test("the persistent shell owns navigation while page-local shells collapse to c
   const compatibility = read("src/components/participant/ParticipantWorkspace.tsx");
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
   const accountPage = read("app/organization-profile/page.tsx");
+  const exchangePage = read("app/exchange/page.tsx");
+  const providerApplicationPage = read("app/provider-application/page.tsx");
 
   assert.match(layout, /<PersistentParticipantShell>\{children\}<\/PersistentParticipantShell>/);
   assert.match(persistent, /data-participant-shell="persistent"/);
   assert.match(persistent, /data-participant-shell-instance=\{shellInstanceId\}/);
   assert.match(persistent, /data-participant-content-region/);
   assert.match(persistent, /reportAuthorizedOrganizationName/);
+  assert.match(persistent, /registerExplicitActiveItem/);
+  assert.match(persistent, /activeItem=\{explicitActiveItem\?\.activeItem\}/);
   assert.match(compatibility, /usePersistentParticipantShellContext\(\)/);
-  assert.match(compatibility, /if \(shellContext\.persistent\) return <>\{children\}<\/>/);
+  assert.match(compatibility, /if \(persistent\) return <>\{children\}<\/>/);
   assert.match(compatibility, /reportAuthorizedOrganizationName\(organizationName\)/);
+  assert.match(compatibility, /registerExplicitActiveItem\(activeItem\)/);
   assert.match(accountPage, /<ParticipantShell activeItem="account" organizationName=\{profile\.displayName\}>/);
+  assert.match(exchangePage, /<ParticipantShell activeItem=\{destination\.workspace/);
+  assert.match(providerApplicationPage, /<ParticipantShell activeItem="Account">/);
   assert.doesNotMatch(navigation, /fetch\("\/api\/participant-shell"/);
   assert.equal(
     exists("app/api/participant-shell/route.ts"),

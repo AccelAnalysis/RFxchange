@@ -147,7 +147,7 @@ assert.ok(
     persistentShell.includes("ParticipantTopNavigation") &&
     persistentShell.includes("data-participant-content-region") &&
     participant.includes("usePersistentParticipantShellContext") &&
-    participant.includes("if (shellContext.persistent) return <>{children}</>"),
+    participant.includes("if (persistent) return <>{children}</>"),
   "The participant header must be composed once by the persistent shell rather than recreated by each workspace.",
 );
 assert.ok(
