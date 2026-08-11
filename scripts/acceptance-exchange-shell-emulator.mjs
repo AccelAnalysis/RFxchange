@@ -442,9 +442,10 @@ async function waitForHttp(url, processHandle, timeoutMs = 60_000) {
 
 function startServer(cwd, port, label) {
   const output = [];
+  const nextBinary = path.join(cwd, "node_modules", "next", "dist", "bin", "next");
   const child = spawn(
-    "npm",
-    ["run", "start", "--", "-H", "127.0.0.1", "-p", String(port)],
+    process.execPath,
+    [nextBinary, "start", "-H", "127.0.0.1", "-p", String(port)],
     {
       cwd,
       env: {
