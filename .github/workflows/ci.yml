@@ -103,7 +103,7 @@ jobs:
         with:
           name: exchange-shell-transition-evidence-${{ steps.build_identity.outputs.sha }}
           path: artifacts/exchange-shell-transition-evidence.json
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 30
       - name: Remove exact pre-gate worktree
         if: always()
