@@ -11,20 +11,43 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24.18.0
+          cache: npm
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
       - name: Install dependencies
         run: npm ci
+      - name: Determine exact checkout identity
+        id: build_identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_sha="${{ github.event.pull_request.head.sha || github.sha }}"
+          actual_sha="$(git rev-parse HEAD)"
+          if [ "$actual_sha" != "$expected_sha" ]; then
+            echo "Expected exact source $expected_sha but checked out $actual_sha" >&2
+            exit 1
+          fi
+          echo "sha=$actual_sha" >> "$GITHUB_OUTPUT"
+      - name: Whitespace integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff --check "${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            git diff --check HEAD^ HEAD
+          fi
       - name: Repository guardrails
         run: npm run validate
       - name: Cloud Functions build and unit tests
@@ -35,7 +58,7 @@ jobs:
           RFXCHANGE_EXPECTED_PROJECT_ID: demo-rfxchange
           RFXCHANGE_FIREBASE_STORAGE_BUCKET: demo-rfxchange.appspot.com
         run: ./node_modules/.bin/firebase emulators:exec --only auth,firestore,functions,storage --project demo-rfxchange "node scripts/smoke-firebase-auth-emulator.mjs && node scripts/smoke-firebase-user-resolution-emulator.mjs && node scripts/smoke-firebase-server-session-emulator.mjs && node scripts/smoke-firebase-authentication-lifecycle-emulator.mjs && node scripts/smoke-firebase-auth-firestore-security-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-first-persisted-authenticated-vertical-slice-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-geography-authority-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-organization-resolution-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-organization-authority-claims-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-organization-location-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-essential-organization-profile-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-marker-activation-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-controlled-network-discovery-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-acquisition-continuity-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-orientation-discovery-team-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-first-value-open-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-ai-amacs-interpretation-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-market-profile-enrichment-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-organization-enrichment-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-referral-network-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-resource-provider-foundation-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-resource-network-emulator.mjs && node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-network-education-emulator.mjs && node scripts/smoke-firebase-functions-runtime-emulator.mjs && node scripts/smoke-firebase-background-jobs-emulator.mjs && node scripts/smoke-transactional-email-reliability-emulator.mjs && node scripts/smoke-firebase-storage-emulator.mjs"
-      - name: Architecture tests
+      - name: Focused architecture and participant shell tests
         run: npm run test:architecture
       - name: Typecheck
         run: npm run typecheck
@@ -43,11 +66,54 @@ jobs:
         run: npm run lint
       - name: Production build
         env:
-          RFXCHANGE_BUILD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RFXCHANGE_BUILD_SHA: ${{ steps.build_identity.outputs.sha }}
         run: npm run build
+      - name: Canonical full gate
+        env:
+          RFXCHANGE_BUILD_SHA: ${{ steps.build_identity.outputs.sha }}
+        run: npm run check
+      - name: Build exact pre-gate baseline
+        env:
+          RFXCHANGE_SHELL_BASE_SHA: 87fb29ef3b442410deecf61a470bc94c9c013c60
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/rfxchange-shell-base
+          git worktree add --detach /tmp/rfxchange-shell-base "$RFXCHANGE_SHELL_BASE_SHA"
+          ln -s "$GITHUB_WORKSPACE/node_modules" /tmp/rfxchange-shell-base/node_modules
+          (
+            cd /tmp/rfxchange-shell-base
+            RFXCHANGE_BUILD_SHA="$RFXCHANGE_SHELL_BASE_SHA" NEXT_TELEMETRY_DISABLED=1 npm run build
+          )
+      - name: Configured browser shell, accessibility and transition acceptance
+        env:
+          RFXCHANGE_ENV: development
+          RFXCHANGE_EXPECTED_PROJECT_ID: demo-rfxchange
+          RFXCHANGE_ACCEPTANCE_BASE_WORKTREE: /tmp/rfxchange-shell-base
+          RFXCHANGE_ACCEPTANCE_BASE_SHA: 87fb29ef3b442410deecf61a470bc94c9c013c60
+          RFXCHANGE_ACCEPTANCE_CANDIDATE_SHA: ${{ steps.build_identity.outputs.sha }}
+          RFXCHANGE_ACCEPTANCE_OUTPUT: artifacts/exchange-shell-transition-evidence.json
+        run: |
+          ./node_modules/.bin/firebase emulators:exec --only auth,firestore --project demo-rfxchange \
+            "node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/acceptance-exchange-shell-emulator.mjs"
+          cat artifacts/exchange-shell-transition-evidence.json
+      - name: Upload participant shell transition evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exchange-shell-transition-evidence-${{ steps.build_identity.outputs.sha }}
+          path: artifacts/exchange-shell-transition-evidence.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Remove exact pre-gate worktree
+        if: always()
+        shell: bash
+        run: |
+          git worktree remove --force /tmp/rfxchange-shell-base 2>/dev/null || true
+          git worktree prune
       - name: Verify compiled and visible build identity
         env:
-          RFXCHANGE_EXPECTED_BUILD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RFXCHANGE_EXPECTED_BUILD_SHA: ${{ steps.build_identity.outputs.sha }}
         shell: bash
         run: |
           test "$(cat .next/BUILD_ID)" = "$RFXCHANGE_EXPECTED_BUILD_SHA"
