@@ -1046,6 +1046,124 @@ async function runCandidate({ cwd, port, sessionCookie }) {
   }
 }
 
+async function runAuthorizationAndAliasBoundaries({ baseUrl, sessionCookie }) {
+  let chrome;
+  try {
+    chrome = await launchChrome(9304);
+    const { cdp, diagnostics } = await createPage(chrome, baseUrl, sessionCookie);
+    await navigate(cdp, `${baseUrl}/organization-profile`);
+
+    await cdp.send("Network.emulateNetworkConditions", {
+      offline: false,
+      latency: 450,
+      downloadThroughput: 1_000_000,
+      uploadThroughput: 1_000_000,
+      connectionType: "wifi",
+    });
+    assert.equal(
+      await evaluate(cdp, `Boolean(document.querySelector('a[href="/provider-application"]'))`),
+      true,
+      "Authorized Account did not expose the provider-application route.",
+    );
+    await evaluate(cdp, `document.querySelector('a[href="/provider-application"]')?.click()`);
+    await waitForExpression(
+      cdp,
+      `location.pathname === "/provider-application"
+        && Boolean(document.querySelector('[data-participant-content-loading="provider-application"]'))`,
+      "provider-application loading boundary",
+    );
+    const aliasLoadingState = await evaluate(cdp, `({
+      pathname: location.pathname,
+      accountCurrent: document.querySelector('[data-participant-utility="account"] > button')
+        ?.dataset.current === "true",
+      participantAuthorized: document.querySelector('[data-participant-authorized]')
+        ?.getAttribute("data-participant-authorized") === "true",
+    })`);
+    assert.equal(aliasLoadingState.accountCurrent, true, "Provider alias lost Account-current state while loading.");
+    assert.equal(aliasLoadingState.participantAuthorized, true);
+    await cdp.send("Network.emulateNetworkConditions", {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+      connectionType: "none",
+    });
+    await waitForExpression(
+      cdp,
+      `!document.querySelector("[data-participant-content-loading]")`,
+      "provider-application content settlement",
+    );
+
+    await evaluate(cdp, `document.querySelector('[data-participant-utility="account"] > button')?.click()`);
+    await waitForExpression(
+      cdp,
+      `Boolean(document.querySelector('[role="menu"] button[role="menuitem"]'))`,
+      "boundary-test sign out utility",
+    );
+    await evaluate(cdp, `document.querySelector('[role="menu"] button[role="menuitem"]')?.click()`);
+    await waitForExpression(cdp, `location.pathname === "/"`, "boundary-test signed-out entry");
+
+    const expectSignedOutKey = "rfxchange:shell-acceptance:expect-signed-out";
+    const shellObservedKey = "rfxchange:shell-acceptance:unauthorized-shell-observed";
+    await cdp.send("Page.addScriptToEvaluateOnNewDocument", {
+      source: `
+        (() => {
+          if (sessionStorage.getItem(${JSON.stringify(expectSignedOutKey)}) !== "true") return;
+          const detect = () => {
+            if (document.querySelector("[data-participant-navigation], [data-participant-shell='persistent']")) {
+              sessionStorage.setItem(${JSON.stringify(shellObservedKey)}, "true");
+            }
+          };
+          detect();
+          new MutationObserver(detect).observe(document, { subtree: true, childList: true });
+        })();
+      `,
+    });
+    await evaluate(
+      cdp,
+      `sessionStorage.setItem(${JSON.stringify(expectSignedOutKey)}, "true")`,
+    );
+    await cdp.send("Page.navigate", { url: `${baseUrl}/resources` });
+    await waitForExpression(
+      cdp,
+      `location.pathname === "/signin" && document.readyState === "complete"`,
+      "signed-out protected-route redirect",
+    );
+    await wait(100);
+    const unauthorizedState = await evaluate(cdp, `({
+      shellObserved: sessionStorage.getItem(${JSON.stringify(shellObservedKey)}) === "true",
+      navigationPresent: Boolean(document.querySelector("[data-participant-navigation]")),
+      shellPresent: Boolean(document.querySelector("[data-participant-shell='persistent']")),
+    })`);
+    assert.deepEqual(unauthorizedState, {
+      shellObserved: false,
+      navigationPresent: false,
+      shellPresent: false,
+    });
+    await evaluate(
+      cdp,
+      `sessionStorage.removeItem(${JSON.stringify(expectSignedOutKey)});
+       sessionStorage.removeItem(${JSON.stringify(shellObservedKey)});`,
+    );
+    assert.equal(diagnostics.consoleErrors.length, 0, diagnostics.consoleErrors.join("\n"));
+    assert.equal(diagnostics.exceptions.length, 0, diagnostics.exceptions.join("\n"));
+    cdp.close();
+    return {
+      providerAliasAccountCurrentWhileLoading: aliasLoadingState.accountCurrent,
+      participantAuthorizationRetainedAcrossAliasLoading: aliasLoadingState.participantAuthorized,
+      unauthorizedParticipantShellObserved: unauthorizedState.shellObserved,
+      signedOutRedirect: "/signin",
+      consoleErrors: diagnostics.consoleErrors,
+      exceptions: diagnostics.exceptions,
+    };
+  } finally {
+    if (chrome) {
+      await stopProcess(chrome.child);
+      await rm(chrome.profile, { recursive: true, force: true });
+    }
+  }
+}
+
 async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
   let chrome;
   try {
@@ -1172,6 +1290,10 @@ try {
     port: 3100,
     sessionCookie: seed.sessionCookie,
   });
+  const authorizationAndAliasBoundaries = await runAuthorizationAndAliasBoundaries({
+    baseUrl: candidateRun.baseUrl,
+    sessionCookie: seed.sessionCookie,
+  });
   await removeAdministrativeAccess(seed);
   const mobileAndLocales = await runMobileAndLocales({
     server: candidateRun.server,
@@ -1194,6 +1316,7 @@ try {
     benchmarkLatencyMs: 450,
     baseline,
     candidate: candidateRun.result,
+    authorizationAndAliasBoundaries,
     mobileAndLocales,
     interpretation: {
       timingsAreRepresentative: true,

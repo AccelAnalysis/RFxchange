@@ -26,6 +26,7 @@ function loadRegistryContract() {
         intelligence: participantLensForPathname("/geography/canvas"),
         referrals: participantLensForPathname("/referrals"),
         account: participantNavigationState("/organization-profile"),
+        providerApplication: participantNavigationState("/provider-application"),
         quickStart: participantUtilityForPathname("/quick-start"),
         noLens: participantNavigationState("/orientation"),
         unavailable: participantLensForPathname("/opportunities"),
@@ -88,6 +89,7 @@ test("the typed registry preserves governed lens order, availability, routing, a
     intelligence: "intelligence",
     referrals: "referrals",
     account: "account",
+    providerApplication: "account",
     quickStart: "quick-start",
     noLens: null,
     unavailable: null,
@@ -113,15 +115,19 @@ test("the persistent shell owns navigation while page-local shells collapse to c
   const providerApplicationPage = read("app/provider-application/page.tsx");
 
   assert.match(layout, /<PersistentParticipantShell>\{children\}<\/PersistentParticipantShell>/);
-  assert.match(persistent, /data-participant-shell="persistent"/);
-  assert.match(persistent, /data-participant-shell-instance=\{shellInstanceId\}/);
+  assert.match(persistent, /data-participant-shell=\{authorizedParticipant \? "persistent" : undefined\}/);
+  assert.match(persistent, /data-participant-shell-instance=\{authorizedParticipant \? shellInstanceId : undefined\}/);
   assert.match(persistent, /data-participant-content-region/);
   assert.match(persistent, /reportAuthorizedOrganizationName/);
+  assert.match(persistent, /reportAuthorizedParticipant/);
+  assert.match(persistent, /data-participant-authorized=\{authorizedParticipant \? "true" : "false"\}/);
+  assert.match(persistent, /\{authorizedParticipant \? \(/);
   assert.match(persistent, /registerExplicitActiveItem/);
   assert.match(persistent, /activeItem=\{explicitActiveItem\?\.activeItem\}/);
   assert.match(compatibility, /usePersistentParticipantShellContext\(\)/);
   assert.match(compatibility, /if \(persistent\) return <>\{children\}<\/>/);
   assert.match(compatibility, /reportAuthorizedOrganizationName\(organizationName\)/);
+  assert.match(compatibility, /reportAuthorizedParticipant\(\)/);
   assert.match(compatibility, /registerExplicitActiveItem\(activeItem\)/);
   assert.match(accountPage, /<ParticipantShell activeItem="account" organizationName=\{profile\.displayName\}>/);
   assert.match(exchangePage, /<ParticipantShell activeItem=\{destination\.workspace/);
@@ -330,6 +336,9 @@ test("the configured browser runner links every canonical source import before a
   assert.match(runner, /intelligenceContextCapturedForInContentExit: true/);
   assert.match(runner, /intelligenceContextClearedOnSignOut: true/);
   assert.match(runner, /authorizedOrganizationContextReported: true/);
+  assert.match(runner, /providerAliasAccountCurrentWhileLoading: aliasLoadingState\.accountCurrent/);
+  assert.match(runner, /unauthorizedParticipantShellObserved: unauthorizedState\.shellObserved/);
+  assert.match(runner, /\[data-participant-navigation\], \[data-participant-shell='persistent'\]/);
   assert.match(runner, /authorized organization identity in Account utility/);
   assert.match(runner, /Signing out retained another participant's Intelligence context/);
   assert.match(runner, /assert\.equal\(diagnostics\.exceptions\.length, 0/);

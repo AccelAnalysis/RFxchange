@@ -60,7 +60,12 @@ export function ParticipantShell({
     persistent,
     registerExplicitActiveItem,
     reportAuthorizedOrganizationName,
+    reportAuthorizedParticipant,
   } = usePersistentParticipantShellContext();
+
+  useEffect(() => {
+    if (persistent) reportAuthorizedParticipant();
+  }, [persistent, reportAuthorizedParticipant]);
 
   useEffect(() => {
     if (persistent && organizationName) {

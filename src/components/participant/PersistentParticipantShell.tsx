@@ -22,6 +22,7 @@ import styles from "./PersistentParticipantShell.module.css";
 interface PersistentParticipantShellContextValue {
   readonly persistent: boolean;
   readonly organizationName: string | null;
+  readonly reportAuthorizedParticipant: () => void;
   readonly reportAuthorizedOrganizationName: (organizationName: string) => void;
   readonly registerExplicitActiveItem: (activeItem: ParticipantNavigationItem) => () => void;
 }
@@ -34,6 +35,7 @@ interface ExplicitActiveItemRegistration {
 const EMPTY_SHELL_CONTEXT: PersistentParticipantShellContextValue = Object.freeze({
   persistent: false,
   organizationName: null,
+  reportAuthorizedParticipant: () => undefined,
   reportAuthorizedOrganizationName: () => undefined,
   registerExplicitActiveItem: () => () => undefined,
 });
@@ -52,8 +54,12 @@ export function usePersistentParticipantShellContext(): PersistentParticipantShe
 
 function MountedPersistentParticipantShell({ children }: Readonly<{ children: ReactNode }>) {
   const shellInstanceId = useId();
+  const [authorizedParticipant, setAuthorizedParticipant] = useState(false);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
   const [explicitActiveItem, setExplicitActiveItem] = useState<ExplicitActiveItemRegistration>();
+  const reportAuthorizedParticipant = useCallback(() => {
+    setAuthorizedParticipant(true);
+  }, []);
   const reportAuthorizedOrganizationName = useCallback((value: string) => {
     const normalized = value.trim();
     if (normalized) setOrganizationName((current) => current === normalized ? current : normalized);
@@ -70,22 +76,34 @@ function MountedPersistentParticipantShell({ children }: Readonly<{ children: Re
   const context = useMemo<PersistentParticipantShellContextValue>(() => Object.freeze({
     persistent: true,
     organizationName,
+    reportAuthorizedParticipant,
     reportAuthorizedOrganizationName,
     registerExplicitActiveItem,
-  }), [organizationName, registerExplicitActiveItem, reportAuthorizedOrganizationName]);
+  }), [
+    organizationName,
+    registerExplicitActiveItem,
+    reportAuthorizedOrganizationName,
+    reportAuthorizedParticipant,
+  ]);
 
   return (
     <PersistentParticipantShellContext.Provider value={context}>
       <div
-        className={styles.shell}
-        data-participant-shell="persistent"
-        data-participant-shell-instance={shellInstanceId}
+        className={authorizedParticipant ? styles.shell : undefined}
+        data-participant-shell={authorizedParticipant ? "persistent" : undefined}
+        data-participant-shell-instance={authorizedParticipant ? shellInstanceId : undefined}
+        data-participant-authorized={authorizedParticipant ? "true" : "false"}
       >
-        <ParticipantTopNavigation
-          activeItem={explicitActiveItem?.activeItem}
-          organizationName={organizationName}
-        />
-        <div className={styles.content} data-participant-content-region>
+        {authorizedParticipant ? (
+          <ParticipantTopNavigation
+            activeItem={explicitActiveItem?.activeItem}
+            organizationName={organizationName}
+          />
+        ) : null}
+        <div
+          className={authorizedParticipant ? styles.content : undefined}
+          data-participant-content-region={authorizedParticipant ? "" : undefined}
+        >
           {children}
         </div>
       </div>
@@ -99,11 +117,12 @@ function MountedPersistentParticipantShell({ children }: Readonly<{ children: Re
  * The component itself stays mounted with the root layout. Its participant shell remains the same
  * React/DOM shell while the pathname moves among authenticated market lenses and Account utilities.
  * Transitional, public, administrative, and recovery routes remain outside this participant shell.
- * Already-authorized page projections report organization identity and compatibility-route
- * navigation state through this in-memory context; the shell never repeats participant-route
- * verification or organization hydration merely to label its controls. Leaving the participant
- * route family unmounts the inner shell so its in-memory state cannot leak into a later participant
- * session.
+ * Navigation remains absent until an already-authorized page projection reports into this in-memory
+ * context, preventing a protected pathname's streamed loading state from presenting a participant
+ * shell to a signed-out visitor. Authorized pages may then report organization identity and
+ * compatibility-route navigation state without repeated participant-route verification or
+ * organization hydration. Leaving the participant route family unmounts the inner shell so its
+ * in-memory state cannot leak into a later participant session.
  */
 export function PersistentParticipantShell({ children }: Readonly<{ children: ReactNode }>) {
   const pathname = usePathname();

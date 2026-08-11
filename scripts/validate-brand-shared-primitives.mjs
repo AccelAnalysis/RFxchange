@@ -143,7 +143,7 @@ for (const migration of [
 }
 
 assert.ok(
-  persistentShell.includes('data-participant-shell="persistent"') &&
+  persistentShell.includes('data-participant-shell={authorizedParticipant ? "persistent" : undefined}') &&
     persistentShell.includes("ParticipantTopNavigation") &&
     persistentShell.includes("data-participant-content-region") &&
     participant.includes("usePersistentParticipantShellContext") &&

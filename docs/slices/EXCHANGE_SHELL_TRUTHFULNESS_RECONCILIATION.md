@@ -62,8 +62,10 @@ The acceptance command fails closed unless it writes
 candidate SHAs to per-transition interaction-to-route-commit and separate content-settlement
 measurements, median and p90 summaries, document-request counts, takeover/shell-remount results,
 Intelligence context restoration (including an in-content exit and an explicit shell remount),
-session-end context clearing, activation/protected-initialization replay checks, 390px/reduced-motion/
-keyboard/five-locale acceptance, console and exception results, and one overall pass/fail result.
+session-end context clearing, signed-out protected-route shell exclusion, Account-current treatment for
+the provider-application alias loading boundary, activation/protected-initialization replay checks,
+390px/reduced-motion/keyboard/five-locale acceptance, console and exception results, and one overall
+pass/fail result.
 Those timings are representative controlled-browser evidence, not a production-network promise; the
 exact accepted values and immutable Actions run are recorded in the PR completion record.
 

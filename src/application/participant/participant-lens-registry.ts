@@ -104,7 +104,12 @@ export function participantLensForPathname(pathname: string): ParticipantLensId 
 }
 
 export function participantUtilityForPathname(pathname: string): ParticipantUtilityId | null {
-  if (matchesPrefix(pathname, PARTICIPANT_UTILITY_DESTINATIONS.account.href)) return "account";
+  if (
+    matchesPrefix(pathname, PARTICIPANT_UTILITY_DESTINATIONS.account.href)
+    || matchesPrefix(pathname, "/provider-application")
+  ) {
+    return "account";
+  }
   if (matchesPrefix(pathname, PARTICIPANT_UTILITY_DESTINATIONS["quick-start"].href)) {
     return "quick-start";
   }

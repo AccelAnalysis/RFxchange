@@ -67,7 +67,7 @@ test("Participant workspace consumes shared B2 primitives through one persistent
   }
 
   assert.match(persistentShell, /ParticipantTopNavigation/);
-  assert.match(persistentShell, /data-participant-shell="persistent"/);
+  assert.match(persistentShell, /data-participant-shell=\{authorizedParticipant \? "persistent" : undefined\}/);
   assert.match(persistentShell, /data-participant-content-region/);
   assert.match(participant, /if \(persistent\) return <>\{children\}<\/>/);
   assert.match(participant, /registerExplicitActiveItem\(activeItem\)/);
