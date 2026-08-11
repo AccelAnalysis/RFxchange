@@ -1,0 +1,18 @@
+.shell {
+  min-width: 0;
+  min-height: 100dvh;
+  overflow-x: clip;
+  color: var(--semantic-text-primary);
+  background: var(--participant-canvas);
+}
+
+.content {
+  min-width: 0;
+  min-height: calc(100dvh - var(--participant-nav-height));
+}
+
+@supports not (overflow: clip) {
+  .shell {
+    overflow-x: hidden;
+  }
+}
