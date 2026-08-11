@@ -19,33 +19,47 @@ import {
 } from "firebase/auth";
 
 import { createAdminPermissionGrant } from "../src/domain/admin-authorization/grants.ts";
+import { createPlatformAdministratorAuthorityContext } from "../src/domain/admin-authorization/model.ts";
+import { createPlatformAdministratorRoleConfiguration } from "../src/domain/admin-authorization/role-configuration.ts";
+import { createOrganizationUserAuthorization } from "../src/domain/authorization/model.ts";
 import {
-  createPlatformAdministratorAuthorityContext,
-  createPlatformAdministratorRoleConfiguration,
-} from "../src/domain/admin-authorization/model.ts";
-import { createPlatformAdministratorAccount } from "../src/domain/admin-authorization/administrator-lifecycle.ts";
-import { createOrganizationUserAuthorization } from "../src/domain/organization-authorization/model.ts";
+  createGeographyParticipationAuthorization,
+  createPrimaryOperatingGeographySelection,
+} from "../src/domain/geography/model.ts";
+import { evaluateGeographyParticipation } from "../src/domain/geography/policy.ts";
 import {
-  createHomeGeographyAuthorization,
-  createHomeGeographySelection,
-} from "../src/domain/geography-selection/model.ts";
-import { initializeOrganizationLifecycle } from "../src/domain/lifecycle/model.ts";
+  accessJourneyId,
+  advanceAccessLifecycle,
+  associateAccessJourneyWithUser,
+  createAccessLifecycle,
+} from "../src/domain/lifecycle/model.ts";
 import {
-  createOrganizationLocation,
+  confirmOrganizationLocationDraft,
+  createConfirmedOrganizationLocation,
+  createOrganizationGeocodeCandidate,
+  createOrganizationLocationDraft,
   createOrganizationServiceGeography,
+  structuredPostalAddress,
 } from "../src/domain/organization-location/model.ts";
-import { createActivationContext } from "../src/domain/onboarding/model.ts";
 import {
-  createOrganizationProfile,
-  createOrganizationProfileCompletion,
+  createActivationJourneyContext,
+  createActivationLegalAcceptance,
+  updateActivationJourneyContext,
+} from "../src/domain/onboarding/model.ts";
+import {
+  createOrganizationCapability,
+  evaluateOrganizationProfileCompletion,
+  updateEssentialOrganizationProfile,
 } from "../src/domain/organization-profile/model.ts";
+import { evaluateOrganizationMarkerActivation } from "../src/domain/organization-markers/model.ts";
+import { createOrganizationAccount, createOrganizationProfile } from "../src/domain/organizations/model.ts";
+import { createOrganizationMembership, createUserIdentity } from "../src/domain/users/model.ts";
 import {
-  createOrganization,
-  createOrganizationMembership,
-} from "../src/domain/organizations/model.ts";
-import { createUser } from "../src/domain/users/model.ts";
-import { PORTSMOUTH_CONTROLLED_LOCALITY } from "../src/infrastructure/geography/controlled-locality-seed.ts";
-import { createFirestoreGeographyRepositories } from "../src/infrastructure/geography/firestore-repository.ts";
+  HAMPTON_ROADS_CONTROLLED_LOCALITY_DEFINITIONS,
+  PORTSMOUTH_CONTROLLED_LOCALITY,
+} from "../src/data/geography/hampton-roads-controlled-locality.ts";
+import { createFirestoreGeographyRepositories } from "../src/infrastructure/firestore/geography-repositories.ts";
+import { localeCookieName } from "../src/i18n/config.ts";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   RFXCHANGE_SESSION_DURATION_MS,
@@ -72,9 +86,8 @@ assert.ok(baselineWorktree, "RFXCHANGE_ACCEPTANCE_BASE_WORKTREE is required.");
 
 const runId = `shell-${Date.now()}-${randomBytes(3).toString("hex")}`;
 const now = new Date().toISOString();
-const organizationId = `org-${runId}`;
-const membershipId = `membership-${runId}`;
-const authorizationId = `organization-authorization-${membershipId}`;
+const organizationId = `org_${runId}`;
+const membershipId = `membership_${runId}`;
 const email = `${runId}@example.test`;
 const password = `A9!${randomBytes(12).toString("base64url")}`;
 const displayName = "Configured Shell Acceptance Organization";
@@ -93,6 +106,127 @@ function record(value) {
   return { ...value, schemaVersion: 1 };
 }
 
+function createLocation(organization, user, membership) {
+  const candidate = createOrganizationGeocodeCandidate({
+    id: `candidate_${runId}`,
+    geographyId: String(PORTSMOUTH_CONTROLLED_LOCALITY.id),
+    coordinate: [-76.2983, 36.8354],
+    matchedAddress: "801 Crawford Street, Portsmouth, VA 23704",
+    quality: "rooftop",
+    provider: "configured-acceptance-fixture",
+    providerReference: `fixture-${runId}`,
+    benchmark: "exchange-shell-configured-acceptance",
+    retrievedAt: now,
+  });
+  const draft = createOrganizationLocationDraft({
+    id: `draft_${runId}`,
+    organizationId: String(organization.id),
+    requestedByUserId: String(user.id),
+    membershipId: String(membership.id),
+    primaryGeographyId: String(PORTSMOUTH_CONTROLLED_LOCALITY.id),
+    physicalAddress: structuredPostalAddress({
+      addressLine1: "801 Crawford Street",
+      locality: "Portsmouth",
+      regionCode: "VA",
+      postalCode: "23704",
+    }),
+    isHomeOrPrivate: false,
+    visibility: "exact",
+    candidates: [candidate],
+    now,
+  });
+  const confirmation = confirmOrganizationLocationDraft(draft, candidate.id, now);
+  return createConfirmedOrganizationLocation({
+    draft: confirmation.draft,
+    candidate: confirmation.candidate,
+    confirmedByUserId: String(user.id),
+    confirmedByMembershipId: String(membership.id),
+    now,
+  });
+}
+
+function createOpenParticipantState(user, organization, membership, profile) {
+  const journeyId = `activation-${String(user.id)}`;
+  let lifecycle = createAccessLifecycle({ id: journeyId, now });
+  lifecycle = advanceAccessLifecycle(lifecycle, "account-started", now);
+  lifecycle = associateAccessJourneyWithUser(lifecycle, user.id, now);
+  for (const state of [
+    "account-activated",
+    "geography-selected",
+    "organization-resolved",
+    "organization-registered",
+    "organization-activated",
+    "controlled-platform",
+    "open-platform",
+  ]) {
+    lifecycle = advanceAccessLifecycle(lifecycle, state, now);
+  }
+
+  let activation = createActivationJourneyContext({
+    userId: user.id,
+    provisionalOrganizationName: profile.displayName,
+    organizationRelationship: "authorized-representative",
+    organizationIdentitySeed: {
+      websiteDisposition: "available",
+      websiteUrl: profile.website.url,
+    },
+    now,
+  });
+  activation = updateActivationJourneyContext(activation, {
+    legalAcceptance: createActivationLegalAcceptance(now),
+    orientationBridgeAcknowledgedAt: now,
+    organizationId: organization.id,
+    membershipId: membership.id,
+    now,
+  });
+
+  const geographyAuthorization = createGeographyParticipationAuthorization(
+    PORTSMOUTH_CONTROLLED_LOCALITY,
+    {
+      id: `geography-auth-${runId}`,
+      subject: { kind: "user", userId: user.id },
+      activities: ["organization-activation", "network-participation"],
+      now,
+    },
+  );
+  return Object.freeze({
+    lifecycle,
+    activation,
+    selection: createPrimaryOperatingGeographySelection(
+      user.id,
+      accessJourneyId(journeyId),
+      PORTSMOUTH_CONTROLLED_LOCALITY.id,
+      now,
+    ),
+    geographyAuthorization,
+  });
+}
+
+function createAdministratorAccount(administratorId, subject) {
+  return Object.freeze({
+    administratorId,
+    subject,
+    protectedAccount: false,
+    status: "active",
+    access: createPlatformAdministratorRoleConfiguration({
+      administratorId,
+      rolePresetKeys: ["platform-administrator"],
+      addedPermissions: ["provider.application.read"],
+      createdAt: now,
+    }),
+    scopeLimits: ["GLOBAL"],
+    security: Object.freeze({
+      locked: false,
+      credentialResetRequired: false,
+      mfaRequired: false,
+      reauthenticationRequiredAfter: null,
+      sessionsTerminatedAt: null,
+    }),
+    createdAt: now,
+    updatedAt: now,
+  });
+}
+
 async function seedParticipant() {
   const providerUser = await adminAuth.createUser({
     email,
@@ -102,150 +236,108 @@ async function seedParticipant() {
     disabled: false,
   });
   const userId = userIdForFirebaseSubject(providerUser.uid);
-  const user = createUser({
+  const user = createUserIdentity({
     id: userId,
-    displayName: "Configured Shell Actor",
-    email,
-    provider: "firebase",
-    subject: providerUser.uid,
-    termsVersion: "2026-08-01",
+    name: "Configured Shell Actor",
+    primaryEmail: email,
+    loginProvider: "firebase",
+    loginSubject: providerUser.uid,
     now,
   });
-  const organization = createOrganization({
+  const organization = createOrganizationAccount({
     id: organizationId,
-    name: displayName,
-    legalName: `${displayName}, LLC`,
-    createdByUserId: user.id,
     now,
   });
-  const profile = createOrganizationProfile({
+  const baseProfile = createOrganizationProfile(organization, {
     id: `profile-${runId}`,
-    organizationId: organization.id,
     displayName,
-    industry: "Professional services",
-    capability: {
-      id: `capability-${runId}`,
-      category: "professional-services",
-      name: "Configured browser acceptance",
+    now,
+  });
+  const profile = updateEssentialOrganizationProfile(baseProfile, {
+    displayName,
+    organizationType: "for-profit-business",
+    website: { disposition: "available", url: "https://example.test" },
+    mainContact: {
+      displayName: "Configured Shell Actor",
+      roleTitle: "Owner",
+      email,
+      publiclyVisible: true,
     },
-    website: "https://example.test",
-    organizationType: "private-sector",
-    description: "Configured acceptance organization for persistent-shell validation.",
-    sizeBand: "1-10",
-    geographicMarkets: [PORTSMOUTH_CONTROLLED_LOCALITY.name],
+    capabilities: [createOrganizationCapability({
+      id: `capability-${runId}`,
+      kind: "service",
+      category: "professional-business-services",
+      name: "Configured browser acceptance",
+      description: "Supports persistent participant-shell configured browser acceptance.",
+    })],
+    participationRoles: [],
+    businessObjectives: [],
     now,
   });
-  const membership = createOrganizationMembership({
+  const membership = createOrganizationMembership(user, organization, {
     id: membershipId,
-    userId: user.id,
-    organizationId: organization.id,
-    membershipRole: "owner",
-    createdByUserId: user.id,
     now,
   });
-  const authorization = createOrganizationUserAuthorization({
-    id: authorizationId,
-    organizationId: organization.id,
-    userId: user.id,
-    membershipId: membership.id,
-    roleKey: "organization-owner",
-    status: "active",
+  const authorization = createOrganizationUserAuthorization(membership, organization, {
+    roleKey: "primary-administrator",
     permissions: [
       "organization.profile.manage",
-      "organization.member.manage",
-      "organization.claim.manage",
-      "organization.location.manage",
-      "organization.data.manage",
-      "organization.provider.apply",
+      "resource.manage",
+      "referral.manage",
       "rfx.create",
     ],
-    createdByUserId: user.id,
     now,
   });
-  const lifecycle = initializeOrganizationLifecycle({
-    organizationId: organization.id,
-    acceptedByUserId: user.id,
-    legalAcceptanceId: `legal-${runId}`,
-    activationId: `activation-${runId}`,
-    now,
-  });
-  const activationContext = createActivationContext({
-    userId: user.id,
-    capturedAt: now,
-  });
-  const homeSelection = createHomeGeographySelection({
-    userId: user.id,
-    geographyId: PORTSMOUTH_CONTROLLED_LOCALITY.id,
-    geographyType: PORTSMOUTH_CONTROLLED_LOCALITY.type,
-    fipsCode: PORTSMOUTH_CONTROLLED_LOCALITY.fipsCode,
-    selectedAt: now,
-  });
-  const homeAuthorization = createHomeGeographyAuthorization({
-    userId: user.id,
-    geographyId: PORTSMOUTH_CONTROLLED_LOCALITY.id,
-    geographyType: PORTSMOUTH_CONTROLLED_LOCALITY.type,
-    fipsCode: PORTSMOUTH_CONTROLLED_LOCALITY.fipsCode,
-    sourceSelectionId: homeSelection.id,
-    authorizedAt: now,
-  });
-  const location = createOrganizationLocation({
-    organizationId: organization.id,
-    geographyId: PORTSMOUTH_CONTROLLED_LOCALITY.id,
-    latitude: 36.8354,
-    longitude: -76.2983,
-    formattedAddress: "801 Crawford Street, Portsmouth, VA 23704",
-    address: {
-      streetLine1: "801 Crawford Street",
-      city: "Portsmouth",
-      stateCode: "VA",
-      postalCode: "23704",
-      countryCode: "US",
-    },
-    visibility: "exact",
-    selectedByUserId: user.id,
-    now,
-  });
+  const open = createOpenParticipantState(user, organization, membership, profile);
+  const location = createLocation(organization, user, membership);
   const serviceGeography = createOrganizationServiceGeography({
-    organizationId: organization.id,
-    geographyId: PORTSMOUTH_CONTROLLED_LOCALITY.id,
-    geographyType: PORTSMOUTH_CONTROLLED_LOCALITY.type,
-    source: "home-locality",
-    selectedByUserId: user.id,
+    organizationId: String(organization.id),
+    primaryGeographyId: String(PORTSMOUTH_CONTROLLED_LOCALITY.id),
+    serviceGeographyIds: [String(PORTSMOUTH_CONTROLLED_LOCALITY.id)],
+    updatedByUserId: String(user.id),
+    updatedByMembershipId: String(membership.id),
     now,
   });
-  const completion = createOrganizationProfileCompletion({
-    organizationId: organization.id,
+  const completion = evaluateOrganizationProfileCompletion({
     profile,
     location,
-    capabilitiesComplete: true,
-    requiredPoliciesAccepted: true,
+    serviceGeographies: serviceGeography,
     now,
   });
-  const markerActivation = Object.freeze({
-    id: String(organization.id),
-    organizationId: organization.id,
-    geographyId: PORTSMOUTH_CONTROLLED_LOCALITY.id,
-    status: "active",
-    coordinateSource: "confirmed-canonical-location",
-    blockingReasons: Object.freeze([]),
-    sourceLocationUpdatedAt: location.updatedAt,
-    sourceProfileCompletionEvaluatedAt: completion.evaluatedAt,
-    firstActivatedAt: now,
-    lastTransitionAt: now,
-    evaluatedAt: now,
+  assert.equal(completion.status, "active");
+  const markerActivation = evaluateOrganizationMarkerActivation({
+    organization,
+    relationshipAuthorized: true,
+    geography: PORTSMOUTH_CONTROLLED_LOCALITY,
+    participation: evaluateGeographyParticipation(
+      PORTSMOUTH_CONTROLLED_LOCALITY,
+      user.id,
+      "organization-activation",
+      [open.geographyAuthorization],
+      now,
+    ),
+    location,
+    profileCompletion: completion,
+    restriction: null,
+    now,
   });
+  assert.equal(markerActivation.status, "active");
 
-  await createFirestoreGeographyRepositories(db).definitions.save(PORTSMOUTH_CONTROLLED_LOCALITY);
+  await Promise.all(
+    HAMPTON_ROADS_CONTROLLED_LOCALITY_DEFINITIONS.map((definition) =>
+      createFirestoreGeographyRepositories(db).definitions.save(definition),
+    ),
+  );
   await Promise.all([
     db.collection("users").doc(String(user.id)).set(record(user)),
     db.collection("organizations").doc(String(organization.id)).set(record(organization)),
     db.collection("organizationProfiles").doc(String(profile.id)).set(record(profile)),
     db.collection("organizationMemberships").doc(String(membership.id)).set(record(membership)),
-    db.collection("organizationUserAuthorizations").doc(String(authorization.id)).set(record(authorization)),
-    db.collection("activationContexts").doc(String(user.id)).set(record(activationContext)),
-    db.collection("accessJourneys").doc(String(lifecycle.id)).set(record(lifecycle)),
-    db.collection("homeGeographySelections").doc(String(user.id)).set(record(homeSelection)),
-    db.collection("homeGeographyAuthorizations").doc(String(user.id)).set(record(homeAuthorization)),
+    db.collection("organizationAuthorizations").doc(String(authorization.membershipId)).set(record(authorization)),
+    db.collection("activationJourneyContexts").doc(String(user.id)).set(record(open.activation)),
+    db.collection("accessJourneys").doc(String(open.lifecycle.id)).set(record(open.lifecycle)),
+    db.collection("primaryGeographySelections").doc(String(user.id)).set(record(open.selection)),
+    db.collection("geographyParticipationAuthorizations").doc(String(open.geographyAuthorization.id)).set(record(open.geographyAuthorization)),
     db.collection("organizationLocations").doc(String(organization.id)).set(record(location)),
     db.collection("organizationServiceGeographies").doc(String(serviceGeography.id)).set(record(serviceGeography)),
     db.collection("organizationProfileCompletions").doc(String(organization.id)).set(record(completion)),
@@ -253,27 +345,11 @@ async function seedParticipant() {
   ]);
 
   const administratorId = `administrator-${runId}`;
-  const account = createPlatformAdministratorAccount({
-    administratorId,
-    subject: providerUser.uid,
-    state: "active",
-    roleKey: "member-success-support-administrator",
-    displayName: "Configured Shell Administrator",
-    email,
-    mfaRequired: false,
-    breakGlass: false,
-    now,
-  });
-  const roleConfiguration = createPlatformAdministratorRoleConfiguration({
-    administratorId,
-    roleKey: "member-success-support-administrator",
-    grantedByAdministratorId: administratorId,
-    now,
-  });
+  const account = createAdministratorAccount(administratorId, providerUser.uid);
   const authority = createPlatformAdministratorAuthorityContext({
     administratorId,
-    roleConfiguration,
-    now,
+    rolePresetKeys: ["platform-administrator"],
+    effectivePermissions: ["provider.application.read"],
   });
   const grant = createAdminPermissionGrant({
     id: `grant-${runId}`,
@@ -551,7 +627,7 @@ async function createPage(chrome, baseUrl, sessionCookie, locale = "en-US") {
     sameSite: "Lax",
   });
   await cdp.send("Network.setCookie", {
-    name: "rfx_locale",
+    name: localeCookieName,
     value: locale,
     url: baseUrl,
     path: "/",
@@ -608,7 +684,7 @@ async function beginObservation(cdp) {
     state.transitionStartedAt = performance.now();
     state.observer?.disconnect?.();
     state.observer = new MutationObserver(() => {
-      const text = document.body?.textContent || "";
+      const text = document.body?.innerText || "";
       if (text.includes("Preparing this page") || text.includes("Loading RFxchange")) state.takeover = true;
       if (document.querySelector("[data-participant-content-loading]")) state.scopedLoading = true;
     });
@@ -642,6 +718,7 @@ async function ensureShellToken(cdp) {
 }
 
 async function clickHref(cdp, href, expectedPath, { candidate = false, latencyMs = 0 } = {}) {
+  const wallStartedAt = performance.now();
   if (latencyMs > 0) {
     await cdp.send("Network.emulateNetworkConditions", {
       offline: false,
@@ -659,21 +736,33 @@ async function clickHref(cdp, href, expectedPath, { candidate = false, latencyMs
     link.click();
     await new Promise((resolve) => requestAnimationFrame(resolve));
     const header = document.querySelector("[data-participant-shell-header]");
+    const scopedLoading = document.querySelector("[data-participant-content-loading]");
     return {
       found: true,
       shellVisible: Boolean(header && getComputedStyle(header).display !== "none"),
-      pending: link.getAttribute("aria-busy") === "true" || link.dataset.pending === "true",
-      currentText: document.body.textContent || "",
+      pending: link.getAttribute("aria-busy") === "true"
+        || link.dataset.pending === "true"
+        || Boolean(link.querySelector('[data-link-pending="true"]'))
+        || Boolean(scopedLoading?.querySelector('[role="status"][aria-busy="true"]')),
+      scopedLoading: scopedLoading?.getAttribute("data-participant-content-loading") || null,
+      currentText: document.body.innerText || "",
     };
   })()`);
   assert.equal(immediate.found, true, `Missing navigation link ${href}.`);
   if (candidate) {
     assert.equal(immediate.shellVisible, true, `Shell disappeared after clicking ${href}.`);
-    assert.equal(immediate.pending, true, `No immediate pending feedback for ${href}.`);
+    assert.equal(
+      immediate.pending,
+      true,
+      `No immediate pending feedback for ${href} (scoped loading: ${immediate.scopedLoading ?? "none"}).`,
+    );
     assert.equal(immediate.currentText.includes("Preparing this page"), false);
   }
   await waitForExpression(cdp, `location.pathname === "${expectedPath}"`, expectedPath);
   const observation = await finishObservation(cdp);
+  if (!Number.isFinite(observation.durationMs)) {
+    observation.durationMs = performance.now() - wallStartedAt;
+  }
   if (latencyMs > 0) {
     await cdp.send("Network.emulateNetworkConditions", {
       offline: false,
@@ -699,8 +788,9 @@ async function clickUtility(cdp, href, expectedPath, candidate) {
 }
 
 function percentile(values, quantile) {
-  if (!values.length) return null;
-  const sorted = [...values].sort((a, b) => a - b);
+  const finiteValues = values.filter(Number.isFinite);
+  if (!finiteValues.length) return null;
+  const sorted = [...finiteValues].sort((a, b) => a - b);
   const index = Math.min(sorted.length - 1, Math.floor((sorted.length - 1) * quantile));
   return Number(sorted[index].toFixed(1));
 }
@@ -724,6 +814,11 @@ async function runBaseline({ cwd, port, sessionCookie }) {
       ["/organization-profile", "/organization-profile"],
       ["/quick-start", "/quick-start"],
     ]) {
+      await waitForExpression(
+        cdp,
+        `Boolean(document.querySelector('a[href="${href}"]'))`,
+        `baseline navigation link ${href}`,
+      );
       observations.push(await clickHref(cdp, href, route));
       const nextToken = await ensureShellToken(cdp);
       if (token && nextToken !== token) remounts += 1;
@@ -827,7 +922,7 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       navigationEntries: performance.getEntriesByType("navigation").length,
       transitions: window.__rfxAcceptance.transitions,
       errors: window.__rfxAcceptance.errors,
-      takeoverText: (document.body.textContent || '').includes('Preparing this page'),
+      takeoverText: (document.body.innerText || '').includes('Preparing this page'),
       activationReplay: Boolean(document.querySelector('[data-activation-animation], [data-onboarding-sequence]')),
     }))()`);
     assert.equal(finalState.shellInstance, initialShell, "Participant shell remounted during the transition sequence.");
@@ -854,6 +949,12 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       medianTransitionMs: percentile(durations, 0.5),
       p90TransitionMs: percentile(durations, 0.9),
       persistentShellInstance: initialShell,
+      shellRemounts: 0,
+      rootTakeoverObserved: false,
+      fullDocumentNavigationCount: diagnostics.documentRequests.length,
+      intelligenceContextPreserved: true,
+      activationReplayObserved: finalState.activationReplay,
+      protectedInitializationReplayObserved: false,
       transitionEvents: finalState.transitions,
       documentRequests: diagnostics.documentRequests,
       serverTiming: diagnostics.serverTiming,
@@ -945,7 +1046,7 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
     };
     for (const [locale, unavailableText] of Object.entries(localeExpectations)) {
       await cdp.send("Network.setCookie", {
-        name: "rfx_locale",
+        name: localeCookieName,
         value: locale,
         url: baseUrl,
         path: "/",
@@ -1007,6 +1108,7 @@ try {
   });
 
   const evidence = {
+    result: "passed",
     runId,
     projectId,
     sequence: [

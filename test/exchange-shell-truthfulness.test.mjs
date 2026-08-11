@@ -167,8 +167,10 @@ test("Account and Quick Start stay outside primary lenses and Administration rem
 test("ordinary participant navigation uses Next links and immediate transition evidence without a document reload", () => {
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
 
-  assert.match(navigation, /import Link from "next\/link"/);
+  assert.match(navigation, /import Link, \{ useLinkStatus \} from "next\/link"/);
+  assert.match(navigation, /const \{ pending \} = useLinkStatus\(\)/);
   assert.match(navigation, /setPendingDestination\(destination\)/);
+  assert.match(navigation, /data-link-pending="true"/);
   assert.match(navigation, /performance\.mark/);
   assert.match(navigation, /performance\.measure/);
   assert.match(navigation, /performance\.getEntriesByType\("navigation"\)\.length/);
@@ -275,4 +277,30 @@ test("the participant shell preserves 390px, focus, Light Appearance, and reduce
   assert.match(loadingCss, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(persistentCss, /overflow-x: clip/);
   assert.doesNotMatch(`${navigationCss}\n${persistentCss}\n${loadingCss}`, /dark|prefers-color-scheme/);
+});
+
+test("the configured browser runner links every canonical source import before acceptance", () => {
+  const runner = read("scripts/acceptance-exchange-shell-emulator.mjs");
+  const sourceImports = [...runner.matchAll(
+    /^import(?:\s+[\s\S]*?\s+from\s+)?["'](\.\.\/src\/[^"']+)["'];/gm,
+  )].map((match) => match[0].replace(match[1], match[1].replace("../src/", "./src/")));
+
+  assert.ok(sourceImports.length > 0, "Configured browser runner has no source imports to validate.");
+  const result = spawnSync(
+    process.execPath,
+    [
+      "--experimental-transform-types",
+      "--experimental-loader",
+      "./scripts/node-typescript-source-loader.mjs",
+      "--input-type=module",
+      "--eval",
+      sourceImports.join("\n"),
+    ],
+    {
+      cwd: new URL(".", root),
+      encoding: "utf8",
+    },
+  );
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.doesNotMatch(runner, /domain\/organization-authorization|domain\/geography-selection/);
 });

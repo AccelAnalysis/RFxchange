@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import {
   useEffect,
@@ -163,6 +163,44 @@ function useTransitionFeedback(pathname: string) {
   });
 }
 
+function NavigationLinkContent({
+  label,
+  loadingLabel,
+  onSettled,
+}: Readonly<{
+  label: string;
+  loadingLabel: string;
+  onSettled?: () => void;
+}>) {
+  const { pending } = useLinkStatus();
+  const observedPending = useRef(false);
+
+  useEffect(() => {
+    if (pending) {
+      observedPending.current = true;
+    } else if (observedPending.current) {
+      observedPending.current = false;
+      onSettled?.();
+    }
+  }, [onSettled, pending]);
+
+  return (
+    <>
+      <span>{label}</span>
+      {pending ? (
+        <span
+          className={styles.liveStatus}
+          role="status"
+          aria-live="polite"
+          data-link-pending="true"
+        >
+          {loadingLabel}
+        </span>
+      ) : null}
+    </>
+  );
+}
+
 function LensItems({
   activeState,
   intelligenceHref,
@@ -216,7 +254,10 @@ function LensItems({
           onNavigate?.(event);
         }}
       >
-        {label}
+        <NavigationLinkContent
+          label={label}
+          loadingLabel={`${t("participantNavigation.loadingDestination")} ${label}`}
+        />
       </Link>
     );
   });
@@ -373,10 +414,14 @@ function AccountUtility({
             aria-busy={pendingDestination === "account" ? "true" : undefined}
             onClick={(event) => {
               if (isUnmodifiedPrimaryClick(event)) beginNavigation("account");
-              hideMenu();
+              else hideMenu();
             }}
           >
-            {t("participantNavigation.organizationProfile")}
+            <NavigationLinkContent
+              label={t("participantNavigation.organizationProfile")}
+              loadingLabel={`${t("participantNavigation.loadingDestination")} ${t("participantNavigation.organizationProfile")}`}
+              onSettled={hideMenu}
+            />
           </Link>
           <Link
             role="menuitem"
@@ -385,10 +430,14 @@ function AccountUtility({
             aria-busy={pendingDestination === "quick-start" ? "true" : undefined}
             onClick={(event) => {
               if (isUnmodifiedPrimaryClick(event)) beginNavigation("quick-start");
-              hideMenu();
+              else hideMenu();
             }}
           >
-            {t("participantNavigation.quickStart")}
+            <NavigationLinkContent
+              label={t("participantNavigation.quickStart")}
+              loadingLabel={`${t("participantNavigation.loadingDestination")} ${t("participantNavigation.quickStart")}`}
+              onSettled={hideMenu}
+            />
           </Link>
           {administrationHref ? (
             <Link role="menuitem" href={administrationHref} onClick={() => hideMenu()}>
