@@ -34,7 +34,7 @@ test("trusted lockfile mirrors root and Functions dependency manifests", async (
   assert.equal(lock.packages["node_modules/firebase-tools"].version, "15.24.0");
 });
 
-test("production CI requires immutable npm installs, locked tooling, and read-only repository authority", async () => {
+test("production CI requires immutable npm installs, locked tooling, read-only repository authority, and bounded evidence export", async () => {
   const workflow = await read(".github/workflows/ci.yml");
 
   assert.match(workflow, /permissions:\n  contents: read\n/);
@@ -44,7 +44,14 @@ test("production CI requires immutable npm installs, locked tooling, and read-on
   assert.doesNotMatch(workflow, /\bnpx\b[^\n]*firebase-tools/);
   assert.doesNotMatch(workflow, /firebase-tools@/);
   assert.doesNotMatch(workflow, /contents: write/);
-  assert.doesNotMatch(workflow, /actions\/upload-artifact/);
+  assert.equal(
+    workflow.match(/uses: actions\/upload-artifact@v4/g)?.length ?? 0,
+    1,
+    "Only the bounded participant-shell evidence artifact may be exported.",
+  );
+  assert.match(workflow, /name: exchange-shell-transition-evidence-\$\{\{ steps\.build_identity\.outputs\.sha \}\}/);
+  assert.match(workflow, /path: artifacts\/exchange-shell-transition-evidence\.json/);
+  assert.match(workflow, /if-no-files-found: error/);
   assert.doesNotMatch(workflow, /Commit trusted dependency lockfile/);
   assert.doesNotMatch(workflow, /Commit locked Firebase CLI dependency/);
   assert.doesNotMatch(workflow, /github\.head_ref/);
