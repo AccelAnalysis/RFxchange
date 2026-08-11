@@ -1245,7 +1245,13 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
         sameSite: "Lax",
       });
       await cdp.send("Page.reload", { ignoreCache: true });
-      await waitForExpression(cdp, `document.readyState === "complete" && document.documentElement.lang === "${locale}"`, `${locale} locale`);
+      await waitForExpression(
+        cdp,
+        `document.readyState === "complete"
+          && document.documentElement.lang === "${locale}"
+          && document.querySelector('[data-participant-authorized="true"] [data-participant-navigation]')`,
+        `${locale} authorized participant navigation`,
+      );
       const labels = await evaluate(cdp, `(() => {
         const item = document.querySelector('[data-participant-navigation] [data-participant-lens="opportunities-rfx"]');
         return { label: item?.getAttribute('aria-label'), text: item?.textContent || '' };
