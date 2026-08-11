@@ -92,51 +92,43 @@ function safeIntelligenceHref(value: string | null): string | null {
   }
 }
 
+function transitionMarkName(destination: NavigationDestination): string {
+  return `rfxchange.participant-transition:${destination}`;
+}
+
 function useTransitionFeedback(pathname: string) {
   const [pendingDestination, setPendingDestination] = useState<NavigationDestination | null>(null);
+  const [transitionFromPathname, setTransitionFromPathname] = useState<string | null>(null);
   const [intelligenceHref, setIntelligenceHref] = useState(CANONICAL_INTELLIGENCE_HREF);
-  const pendingRef = useRef<Readonly<{
-    destination: NavigationDestination;
-    markName: string;
-    startedAt: number;
-    fromPathname: string;
-  }> | null>(null);
 
   useEffect(() => {
-    const current = pathname === CANONICAL_INTELLIGENCE_HREF
-      ? safeIntelligenceHref(`${window.location.pathname}${window.location.search}`)
-      : null;
-    const stored = safeIntelligenceHref(
-      window.sessionStorage.getItem(INTELLIGENCE_CONTEXT_STORAGE_KEY),
-    );
-    const resolved = current ?? stored;
-    if (resolved) setIntelligenceHref(resolved);
-  }, [pathname]);
+    if (!pendingDestination || participantNavigationState(pathname) !== pendingDestination) return;
 
-  useEffect(() => {
-    const pending = pendingRef.current;
-    if (!pending || participantNavigationState(pathname) !== pending.destination) return;
-
-    const endedAt = performance.now();
-    const endMark = `${pending.markName}:settled`;
+    const markName = transitionMarkName(pendingDestination);
+    const endMark = `${markName}:settled`;
+    performance.clearMarks(endMark);
     performance.mark(endMark);
+    performance.clearMeasures("rfxchange.participant-transition");
     performance.measure(
       "rfxchange.participant-transition",
-      pending.markName,
+      markName,
       endMark,
     );
+    const measure = performance.getEntriesByName(
+      "rfxchange.participant-transition",
+      "measure",
+    ).at(-1);
     const detail = Object.freeze({
-      destination: pending.destination,
-      fromPathname: pending.fromPathname,
+      destination: pendingDestination,
+      fromPathname: transitionFromPathname ?? pathname,
       toPathname: pathname,
-      durationMs: Math.max(0, endedAt - pending.startedAt),
+      durationMs: Math.max(0, measure?.duration ?? 0),
       documentNavigationEntries: performance.getEntriesByType("navigation").length,
     });
     window.dispatchEvent(new CustomEvent("rfxchange:participant-transition", { detail }));
     console.info("rfxchange.participant-transition", detail);
-    pendingRef.current = null;
     setPendingDestination(null);
-  }, [pathname]);
+  }, [pathname, pendingDestination, transitionFromPathname]);
 
   function begin(destination: NavigationDestination) {
     const currentState = participantNavigationState(pathname);
@@ -152,14 +144,11 @@ function useTransitionFeedback(pathname: string) {
       }
     }
 
-    const markName = `rfxchange.participant-transition:${destination}:${Date.now()}`;
+    const markName = transitionMarkName(destination);
+    performance.clearMarks(markName);
+    performance.clearMarks(`${markName}:settled`);
     performance.mark(markName);
-    pendingRef.current = Object.freeze({
-      destination,
-      markName,
-      startedAt: performance.now(),
-      fromPathname: pathname,
-    });
+    setTransitionFromPathname(pathname);
     setPendingDestination(destination);
   }
 
@@ -177,7 +166,7 @@ function LensItems({
   intelligenceHref: string;
   pendingDestination: NavigationDestination | null;
   beginNavigation(destination: NavigationDestination): void;
-  onNavigate?: () => void;
+  onNavigate?: (event: MouseEvent<HTMLAnchorElement>) => void;
 }>) {
   const { t } = useI18n();
   const scopeId = useId().replaceAll(":", "");
@@ -216,7 +205,7 @@ function LensItems({
         data-pending={pendingDestination === lens.id ? "true" : undefined}
         onClick={(event) => {
           if (isUnmodifiedPrimaryClick(event)) beginNavigation(lens.id);
-          onNavigate?.();
+          onNavigate?.(event);
         }}
       >
         {label}
@@ -405,29 +394,28 @@ function AccountUtility({
   );
 }
 
+function closeMobileLensMenu(event: MouseEvent<HTMLAnchorElement>) {
+  const details = event.currentTarget.closest("details");
+  if (details instanceof HTMLDetailsElement) details.open = false;
+}
+
 function MobileLensMenu({
   children,
   label,
-}: Readonly<{ children: (close: () => void) => ReactNode; label: string }>) {
-  const detailsRef = useRef<HTMLDetailsElement>(null);
-  const close = () => {
-    if (detailsRef.current) detailsRef.current.open = false;
-  };
-
+}: Readonly<{ children: ReactNode; label: string }>) {
   return (
     <details
-      ref={detailsRef}
       className={styles.mobileLensMenu}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.preventDefault();
-          close();
-          detailsRef.current?.querySelector<HTMLElement>("summary")?.focus();
+          event.currentTarget.open = false;
+          event.currentTarget.querySelector<HTMLElement>("summary")?.focus();
         }
       }}
     >
       <summary>{label}</summary>
-      <nav aria-label={label}>{children(close)}</nav>
+      <nav aria-label={label}>{children}</nav>
     </details>
   );
 }
@@ -474,15 +462,13 @@ export function ParticipantTopNavigation({
         />
       </nav>
       <MobileLensMenu label={t("participantNavigation.menu")}>
-        {(close) => (
-          <LensItems
-            activeState={activeState}
-            intelligenceHref={transition.intelligenceHref}
-            pendingDestination={transition.pendingDestination}
-            beginNavigation={transition.begin}
-            onNavigate={close}
-          />
-        )}
+        <LensItems
+          activeState={activeState}
+          intelligenceHref={transition.intelligenceHref}
+          pendingDestination={transition.pendingDestination}
+          beginNavigation={transition.begin}
+          onNavigate={closeMobileLensMenu}
+        />
       </MobileLensMenu>
       <AccountUtility
         activeState={activeState}
