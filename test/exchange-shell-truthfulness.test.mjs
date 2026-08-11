@@ -126,15 +126,21 @@ test("the persistent shell owns navigation while page-local shells collapse to c
 });
 
 test("unavailable Opportunities/RFx is perceivable but has no dead or synthetic route", () => {
-  const registry = read("src/application/participant/participant-lens-registry.ts");
+  const contract = loadRegistryContract();
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
+  const unavailable = contract.lenses[0];
 
-  assert.match(registry, /id: "opportunities-rfx"[\s\S]*?href: null[\s\S]*?availability: "unavailable"/);
+  assert.deepEqual(unavailable, {
+    id: "opportunities-rfx",
+    labelKey: "participantNavigation.opportunitiesRfx",
+    href: null,
+    availability: "unavailable",
+    activePathPrefixes: [],
+  });
   assert.match(navigation, /role="link"/);
   assert.match(navigation, /aria-disabled="true"/);
   assert.match(navigation, /aria-describedby=\{descriptionId\}/);
   assert.match(navigation, /participantNavigation\.notYetAvailable/);
-  assert.doesNotMatch(registry, /opportunities-rfx[\s\S]{0,220}href: "\//);
   assert.doesNotMatch(navigation, /href=\{[^}]*opportunit/i);
 });
 
