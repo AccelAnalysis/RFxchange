@@ -24,7 +24,6 @@ function loadRegistryContract() {
         resources: participantLensForPathname("/resources"),
         resourceDetail: participantLensForPathname("/resources/detail"),
         intelligence: participantLensForPathname("/geography/canvas"),
-        intelligenceQuery: participantLensForPathname("/geography/canvas?organization=org-1"),
         referrals: participantLensForPathname("/referrals"),
         account: participantNavigationState("/organization-profile"),
         quickStart: participantUtilityForPathname("/quick-start"),
@@ -87,7 +86,6 @@ test("the typed registry preserves governed lens order, availability, routing, a
     resources: "resources",
     resourceDetail: "resources",
     intelligence: "intelligence",
-    intelligenceQuery: null,
     referrals: "referrals",
     account: "account",
     quickStart: "quick-start",
@@ -109,13 +107,22 @@ test("the persistent shell owns navigation while page-local shells collapse to c
   const layout = read("app/layout.tsx");
   const persistent = read("src/components/participant/PersistentParticipantShell.tsx");
   const compatibility = read("src/components/participant/ParticipantWorkspace.tsx");
+  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
 
   assert.match(layout, /<PersistentParticipantShell>\{children\}<\/PersistentParticipantShell>/);
   assert.match(persistent, /data-participant-shell="persistent"/);
   assert.match(persistent, /data-participant-shell-instance=\{shellInstanceId\}/);
   assert.match(persistent, /data-participant-content-region/);
-  assert.match(compatibility, /usePersistentParticipantShell\(\)/);
-  assert.match(compatibility, /if \(persistentShell\) return <>\{children\}<\/>/);
+  assert.match(persistent, /reportAuthorizedOrganizationName/);
+  assert.match(compatibility, /usePersistentParticipantShellContext\(\)/);
+  assert.match(compatibility, /if \(shellContext\.persistent\) return <>\{children\}<\/>/);
+  assert.match(compatibility, /reportAuthorizedOrganizationName\(organizationName\)/);
+  assert.doesNotMatch(navigation, /fetch\("\/api\/participant-shell"/);
+  assert.equal(
+    exists("app/api/participant-shell/route.ts"),
+    false,
+    "The persistent shell must not repeat session or organization hydration.",
+  );
 });
 
 test("unavailable Opportunities/RFx is perceivable but has no dead or synthetic route", () => {
@@ -231,6 +238,7 @@ test("new shell, unavailable, utility, and scoped-loading copy is complete in al
 
   for (const [locale, dictionary] of dictionaries) {
     assert.deepEqual(Object.keys(dictionary).sort(), referenceKeys, `${locale} key drift`);
+    assert.equal(dictionary.opportunitiesRfx, "Opportunities/RFx", `${locale} governed name`);
     for (const key of requiredKeys) {
       assert.equal(typeof dictionary[key], "string", `${locale}.${key}`);
       assert.ok(dictionary[key].trim(), `${locale}.${key}`);
