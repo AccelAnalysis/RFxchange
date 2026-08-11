@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
-const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+const root = new URL("../", import.meta.url);
+const read = (path) => readFileSync(new URL(path, root), "utf8");
+const exists = (path) => existsSync(new URL(path, root));
 
 const convergedRoutes = [
   "app/api/admin/provider-applications/route.ts",
@@ -24,14 +26,29 @@ const convergedRoutes = [
   "app/api/resources/route.ts",
 ];
 
-test("runtime recovery conventions provide loading, not-found, render, and root failure boundaries", () => {
-  const loading = read("app/loading.tsx");
+test("runtime recovery conventions keep participant loading below the shell and preserve root failure boundaries", () => {
+  const scopedLoading = read("src/components/participant/ParticipantContentLoading.tsx");
+  const persistentShell = read("src/components/participant/PersistentParticipantShell.tsx");
   const notFound = read("app/not-found.tsx");
   const renderError = read("app/error.tsx");
   const globalError = read("app/global-error.tsx");
 
-  assert.match(loading, /role="status"/);
-  assert.match(loading, /aria-live="polite"/);
+  assert.equal(exists("app/loading.tsx"), false, "The page-wide root loading takeover must stay removed.");
+  assert.match(persistentShell, /data-participant-content-region/);
+  assert.match(scopedLoading, /role="status"/);
+  assert.match(scopedLoading, /aria-live="polite"/);
+  assert.match(scopedLoading, /aria-busy="true"/);
+  assert.match(scopedLoading, /data-participant-content-loading/);
+  assert.doesNotMatch(scopedLoading, /Preparing this page|Loading RFxchange/);
+  for (const path of [
+    "app/geography/canvas/loading.tsx",
+    "app/resources/loading.tsx",
+    "app/referrals/loading.tsx",
+    "app/organization-profile/loading.tsx",
+    "app/quick-start/loading.tsx",
+  ]) {
+    assert.match(read(path), /ParticipantContentLoading/, path);
+  }
   assert.match(notFound, /recovery\.notFoundTitle/);
   assert.match(renderError, /\berror\.digest\b/);
   assert.doesNotMatch(renderError, /\berror\.message\b|\berror\.stack\b/);
