@@ -5,6 +5,7 @@ import "../src/design/semantic-tokens.css";
 import "./globals.css";
 
 import { I18nProvider } from "@/src/components/i18n/I18nProvider";
+import { PersistentParticipantShell } from "@/src/components/participant/PersistentParticipantShell";
 import { getRequestDictionary } from "@/src/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,7 +34,7 @@ export default async function RootLayout({
     <html lang={locale} data-scroll-behavior="smooth">
       <body>
         <I18nProvider dictionary={dictionary} locale={locale}>
-          {children}
+          <PersistentParticipantShell>{children}</PersistentParticipantShell>
         </I18nProvider>
       </body>
     </html>

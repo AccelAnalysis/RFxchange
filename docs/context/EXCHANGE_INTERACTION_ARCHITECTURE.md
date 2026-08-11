@@ -1,18 +1,20 @@
 # RFxchange Exchange Interaction Architecture
 
-**Status: CROSS-CUTTING PLANNING AUTHORITY — DOCUMENTATION ONLY. THIS DOCUMENT DOES NOT AUTHORIZE RUNTIME IMPLEMENTATION, CHANGE FEATURE-ID STATUS, CHANGE TRACKER TOTALS, OR REPOSITION THE PUBLIC MARKETING EXPERIENCE.**
+**Status: CROSS-CUTTING GOVERNING AUTHORITY. THE ORIGINAL PR #150 RECONCILIATION WAS DOCUMENTATION ONLY. RUNTIME MAY IMPLEMENT THIS AUTHORITY ONLY THROUGH A SEPARATELY AUTHORIZED SLICE OR BOUNDED CROSS-CUTTING GATE. THIS DOCUMENT DOES NOT CHANGE FEATURE-ID STATUS, TRACKER TOTALS, OR PUBLIC MARKETING POSITIONING.**
 
 ## 1. Purpose
 
 This document reconciles the RFxchange participant experience around one persistent, organization-centered spatial environment. It defines:
 
 - the hierarchy and meaning of the Opportunities/RFx, Resources, Intelligence, and Referrals lenses;
+- structural, capability, state, and continuity truthfulness for participant-facing navigation;
 - the retained role of location and site functionality inside Intelligence;
 - the persistent map/context contract across lenses;
 - own-organization and other-organization marker behavior;
 - the distinction between lens, appearance, layer, and workspace;
 - resource-provider eligibility and application boundaries;
-- cross-lens workflow continuity; and
+- cross-lens workflow continuity;
+- persistent-shell and scoped-loading behavior; and
 - the boundary between authenticated product architecture and public RFx-centered positioning.
 
 Use this document with:
@@ -23,26 +25,77 @@ Use this document with:
 - `RFX_TRANSACTION_CYCLE.md`;
 - `COMMERCIAL_MODEL.md`;
 - `BRAND_AND_UX.md`;
+- `../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md` while that bounded gate is active; and
 - the applicable RFx Core, brand, design, security, privacy, geography, lifecycle, tracker, dependency, and slice authorities.
 
-Security, privacy, organization authority, lifecycle, geography, domain, tracker, and authorized-slice requirements remain controlling. This document supersedes prototype or narrative assumptions that treat the four lenses as separate applications, treat them as equal public product propositions, or make Locations a peer product identity.
+Security, privacy, organization authority, lifecycle, geography, domain, tracker, and authorized-slice requirements remain controlling. This document supersedes prototype or narrative assumptions that treat the four lenses as separate applications, treat them as equal public product propositions, make Locations a peer product identity, or make a temporary availability taxonomy the permanent information architecture.
 
-Documentation planning does not authorize implementation.
+The governing architecture alone does not authorize runtime implementation.
 
 ## 2. Governing product decision
 
 > **The RFxchange is an RFx-centered, organization-centered spatial market environment. Opportunities/RFx is the primary transaction lens. Resources, Intelligence, and Referrals are supporting lenses over the same organizations, geography, relationships, and market activity. Changing lenses changes the question being asked and the actions available; it does not reset the market the participant is viewing.**
 
-The product hierarchy is intentional:
+The permanent authenticated lens hierarchy and order is exactly:
 
-1. **Opportunities / RFx** — turn market need into structured action and transaction.
+1. **Opportunities/RFx** — turn market need into structured action and transaction.
 2. **Resources** — help organizations obtain approved business support relevant to what they are trying to accomplish.
 3. **Intelligence** — help participants understand organizations, capabilities, demand, geography, locations, sites, and market context.
 4. **Referrals** — make and track trusted, consented introductions.
 
 These lenses are connected, but they are not four equal products. The RFxchange remains named and positioned around RFx activity. Supporting lenses make RFx activity more discoverable, understandable, completable, and useful.
 
-Once real published RFx discovery exists, Opportunities/RFx should receive primary placement and market-action emphasis in the authenticated Exchange. Until then, the interface must not fabricate RFxs, opportunity beacons, matches, bids, awards, outcomes, or market activity merely to simulate the final hierarchy.
+The permanent order remains visible even before every lens is enabled. Opportunities/RFx therefore remains present in first position while unavailable, with no href, placeholder route, synthetic data, simulated workflow, or current-page state. The authenticated Exchange may continue to enter through the available Intelligence/Network experience until a separately authorized and accepted real participant RFx runtime provides a legitimate Opportunities/RFx destination. The interface must never fabricate RFxs, opportunity beacons, matches, bids, awards, outcomes, or market activity merely to simulate the mature hierarchy.
+
+### 2.1 Structural truthfulness
+
+The interface represents the stable, governed product architecture rather than a temporary taxonomy that will later be discarded.
+
+The permanent participant lens sequence is `Opportunities/RFx | Resources | Intelligence | Referrals`. Network may be the current organization-network view or layer inside Intelligence. Quick Start and Account are utilities, not peer market lenses.
+
+> **The stable lens architecture remains visible even when a lens is unavailable. Availability governs action, not whether a governed permanent lens exists in the information architecture.**
+
+### 2.2 Capability truthfulness
+
+Visibility does not mean availability.
+
+A governed lens may be visible before it is enabled only when all of the following are true:
+
+- it is part of the approved permanent product architecture;
+- its unavailable state is visually explicit;
+- its unavailable state is conveyed without relying on color alone;
+- assistive technology receives an equivalent unavailable description;
+- it has no dead link, synthetic route, fabricated data, or simulated workflow;
+- it cannot receive active/current-page treatment;
+- it does not imply Feature-ID completion; and
+- enabling it later requires an accepted real runtime, not merely changing copy.
+
+This rule permits unavailable Opportunities/RFx to remain visible. It does not authorize an RFx route, aggregate, draft, opportunity, beacon, response, or other RFx record.
+
+### 2.3 State truthfulness
+
+Enabled, unavailable, loading, empty, error, restricted, and recovery states describe the actual state of the relevant surface.
+
+Do not hide a permanent lens merely because it is unavailable. Do not make an unavailable lens appear clickable. Do not present a route-specific wait as though RFxchange is launching, activation is repeating, or the participant is entering a different application.
+
+### 2.4 Continuity truthfulness
+
+Ordinary movement among authenticated lenses preserves the fact that the participant remains inside one Exchange.
+
+A lens transition must not masquerade as:
+
+- reloading RFxchange;
+- repeating activation or onboarding;
+- opening a separate application;
+- discarding the participant shell;
+- losing the authenticated organization context; or
+- restarting the workspace merely because route-specific information is pending.
+
+> **Loading truthfulness requires the current Exchange shell to remain visible during ordinary lens changes. A route-level wait must not be presented as though RFxchange is being launched again.**
+
+### 2.5 Administrative boundary
+
+The participant unavailable-lens rule does not change administrative navigation truthfulness. Administrative navigation exposes only destinations that are both implemented and server-authorized. Do not add unavailable future administrative sections merely because permanent participant lenses remain visible.
 
 ## 3. Vocabulary and collision prevention
 
@@ -112,11 +165,21 @@ Changing lens should preserve the same map session, including the focal organiza
 
 Examples:
 
-- Resources → Opportunities retains the selected organization and map position while replacing provider/resource actions with RFx actions.
-- Opportunities → Intelligence retains the selected RFx or organization while exposing analytical context.
+- Resources → Opportunities retains the selected organization and map position while replacing provider/resource actions with RFx actions after Opportunities has a real accepted runtime.
+- Opportunities → Intelligence retains the selected RFx or organization while exposing analytical context after an authoritative RFx exists.
 - Intelligence → Referrals retains the selected organization while replacing analytical actions with referral actions.
 
 If the selected object has no applicable projection in the new lens, the product should retain spatial focus and state truthfully that no applicable records/actions are available. It should not imply that the object disappeared from the Exchange.
+
+### 4.4 Persistent runtime shell and loading seam
+
+A shared participant shell owns product identity, the four primary lenses, the separate Account utility, current organization identity where safely available, and the minimum accessibility/reduced-motion context needed by the shell. Page-specific private data remains below that seam.
+
+The canonical current Intelligence seam is `/geography/canvas`. Existing deep links and URL-derived map/query state remain compatible; changing the visible top-level label does not justify a throwaway route.
+
+Ordinary enabled-lens and Account-utility navigation uses client-side routing. The shell remains mounted and visible while route-specific content is pending. Loading behavior is scoped below the shell with region-specific `aria-busy` and live-region semantics. Optional identity or Administration projection cannot block the shell; Administration fails closed and direct administrative routes remain independently authorized.
+
+No artificial minimum loading duration or timeout-based presentation hold is allowed. A large root-level `Loading RFxchange` or `Preparing this page` card must not replace the participant shell during ordinary navigation.
 
 ## 5. Marker and selection grammar
 
@@ -182,11 +245,11 @@ List view is not another destination. It is a synchronized representation of the
 
 ## 7. Lens architecture
 
-### 7.1 Opportunities / RFx — primary transaction lens
+### 7.1 Opportunities/RFx — primary transaction lens
 
 The Opportunities/RFx lens is the principal authenticated market-action lens and the main product/marketing draw.
 
-Its mature scope includes, only as implemented and authorized:
+Until a separately authorized and accepted real participant RFx runtime exists, the lens remains present but unavailable. Its mature scope includes, only as implemented and authorized:
 
 - issuer creation and management of structured RFxs;
 - published opportunity discovery;
@@ -197,7 +260,7 @@ Its mature scope includes, only as implemented and authorized:
 - submission or truthful external handoff;
 - later evaluation, selection, award/close, and outcome stages under their own authorities.
 
-Own-organization actions may include:
+Own-organization actions may include, only after the applicable runtime exists:
 
 - Create RFx;
 - manage drafts and published RFxs;
@@ -206,7 +269,7 @@ Own-organization actions may include:
 - resume response work;
 - evaluate and close when the applicable domain exists.
 
-Other-organization/opportunity actions may include:
+Other-organization/opportunity actions may include, only after the applicable runtime exists:
 
 - view published RFx details;
 - assess fit;
@@ -273,6 +336,8 @@ When another selected organization is an eligible approved provider, the partici
 Intelligence answers:
 
 > **What do the organizations, capabilities, demand, relationships, geography, and places around this market activity tell the participant?**
+
+The current organization/geography/map experience may identify its default view as `Intelligence · Network`. Network domain models, Feature IDs, internal concepts, and historical evidence remain intact.
 
 Intelligence may grow through authorized sub-lenses/layers such as:
 
@@ -371,7 +436,7 @@ This document does not assign raw colors. Lens treatment must:
 
 - remain compatible with the approved brand palette or an explicitly approved semantic extension;
 - preserve canonical object color meanings;
-- never make color the only indication of lens;
+- never make color the only indication of lens or availability;
 - retain labels, icons, focus, and accessible contrast;
 - avoid using Growth Green for ordinary navigation when it would imply an outcome; and
 - avoid using RF Gold to imply paid, verified, ranked, or qualified status.
@@ -390,6 +455,8 @@ Cross-lens actions are first-class continuations of one market workflow, not sho
 | Selected organization | Open Referrals | selected organization and referral direction intent |
 | Referral context | View relevant organization, resource, or opportunity | referral identifier, permitted minimum-necessary context, return target |
 | Approved provider | View relevant Opportunities | provider organization, public capabilities/service geography, current search context |
+
+The table describes mature authorized continuations. An unavailable destination remains non-actionable until the applicable runtime exists.
 
 A carried-forward suggestion or analytical observation is not an authoritative RFx field. The participant must review and confirm any data that becomes part of an authoritative domain record.
 
@@ -444,11 +511,22 @@ This document makes no marketing-page runtime or copy change.
 
 ## 11. Current implementation and convergence boundary
 
-The existing participant shell, routes, resources, referrals, organization discovery, geography canvas, and Wave 3 projections remain valid implementation evidence and compatibility context.
+The existing participant routes, resources, referrals, organization discovery, geography canvas, and Wave 3 projections remain valid implementation evidence and compatibility context.
 
-This document does not require an immediate route rewrite or authorize an Exchange-shell convergence implementation. Current destinations may remain separate routes until an explicit bounded convergence gate is authorized after dependency/stabilization review.
+### Dated reconciliation — August 11, 2026
 
-Future reconciliation should reuse existing production abstractions and domain projections rather than rebuilding:
+PR #150 validly established this architecture as documentation-only authority. The earlier post-Wave-3 stabilization removal of Opportunities from the runtime was also valid as a temporary correction: at that checkpoint the interface removed a misleading working destination that lacked complete runtime.
+
+That historical result is not rewritten. For the ongoing participant shell, the narrower rule is superseded by the four-part truthfulness definition in Section 2:
+
+- permanent participant lenses remain structurally visible;
+- unavailable lenses remain non-actionable and fully described;
+- unavailable state does not imply Feature-ID completion; and
+- ordinary lens changes preserve one persistent Exchange shell.
+
+The separately authorized no-Feature-ID gate in `../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md` implements only this bounded convergence. It does not begin Slice 4.1 runtime.
+
+The implementation reuses existing production abstractions and domain projections rather than rebuilding:
 
 - organization authority and current membership;
 - controlled geography and location privacy;
@@ -459,12 +537,23 @@ Future reconciliation should reuse existing production abstractions and domain p
 - resource publishing/discovery;
 - RFx Core authorities and future real-data opportunity projections.
 
-No future lens may fabricate unavailable domain state. In particular, Opportunities/RFx must remain truthfully unavailable or bounded until real RFxs can be created/published and real opportunity discovery exists.
+No lens may fabricate unavailable domain state. Opportunities/RFx remains present, explicitly unavailable, and non-routable until a separately accepted real participant RFx runtime provides a legitimate destination.
 
-## 12. Future implementation acceptance requirements
+## 12. Implementation acceptance requirements
 
-Any later authorized convergence must prove at least:
+Any authorized convergence must prove at least:
 
+- exact primary-lens order `Opportunities/RFx | Resources | Intelligence | Referrals`;
+- Opportunities/RFx visible, unavailable, non-routable, not current, and described without color-only communication;
+- Network absent as a peer lens and retained only as an Intelligence view/domain concept;
+- Account and Quick Start absent from the lens list and available through a separate keyboard-operable utility control;
+- Administration optional, server-authoritative, limited to implemented destinations, and fail-closed without blocking the shell;
+- persistent product identity/header/lens/account shell across ordinary client-side route transitions;
+- no second `PerformanceNavigationTiming` document entry during the transition sequence;
+- scoped content-region loading with `aria-busy`/live-region behavior;
+- no root `Preparing this page` takeover during ordinary participant navigation;
+- no artificial minimum loading duration;
+- before/after transition and Server-Timing evidence;
 - own organization entry/orientation and standing logo marker behavior;
 - selected external node-to-standing-marker transition without anchor drift;
 - synchronized marker/card/popup/drawer selection;
@@ -479,6 +568,8 @@ Any later authorized convergence must prove at least:
 - server-authorized access after every transition and return;
 - spatial-to-operational return-state restoration;
 - keyboard, screen-reader, reduced-motion, reflow, high-contrast, and touch acceptance;
+- 390px behavior without horizontal document overflow;
+- all five supported locales without silent fallback;
 - lens identity through more than color alone;
 - Light Appearance/Dark Appearance terminology kept separate from the Intelligence lens;
 - no public marketing repositioning by accident; and
@@ -488,8 +579,8 @@ Any later authorized convergence must prove at least:
 
 This authority does not decide or authorize:
 
-- final route/URL structure;
-- the persistence mechanism for spatial context;
+- route/URL structure beyond the stable current participant seams and canonical `/geography/canvas` Intelligence route;
+- the persistence mechanism for the complete future cross-lens spatial context contract;
 - raw lens colors or a new palette;
 - Dark Appearance implementation or preference persistence;
 - Presentation Mode implementation;
@@ -505,10 +596,11 @@ This authority does not decide or authorize:
 
 ## 14. Scope confirmation
 
-This reconciliation is documentation only.
+The original PR #150 reconciliation was documentation only. Runtime convergence is bounded by its separate execution authority.
 
-- No Feature ID is added, removed, renamed, reordered, or marked complete.
+- No Feature ID is added, removed, renamed, reordered, or marked complete by this architecture reconciliation or shell gate.
 - Tracker totals remain unchanged.
-- No runtime component, route, API, database record, Firebase rule, entitlement, provider authority, RFx aggregate, opportunity projection, intelligence dataset, location/site inventory, appearance setting, or marketing page is created or changed.
-- Current stabilization and single-active-gate sequencing remain controlling.
-- RFx Core and any participant-shell convergence remain unstarted unless separately authorized.
+- Opportunities/RFx remains unavailable and no RFx aggregate, draft, publication, opportunity projection, beacon, response, Intelligence dataset, location/site inventory, appearance setting, or marketing page is created by the shell gate.
+- Current provider and referral authority remains unchanged.
+- Stabilization 2C remains isolated release engineering.
+- Slice 4.1 runtime remains unstarted unless separately authorized after the shell gate merges and passes post-merge validation.

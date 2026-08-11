@@ -6,6 +6,10 @@ This repository implements **The RFxchange**, an organization-centered, map-base
 
 - The **organization** is the primary market entity. Individual users authenticate separately but act through one or more organizations with explicit membership, role and permission state.
 - The RFxchange is RFx-centered and organization-centered. Opportunities/RFx is the primary transaction lens and principal market-action proposition; Resources, Intelligence and Referrals are supporting lenses over the same market.
+- The permanent authenticated participant-lens order is exactly `Opportunities/RFx | Resources | Intelligence | Referrals`. Availability governs action, not whether a governed permanent lens exists in the information architecture.
+- Opportunities/RFx remains visibly first but unavailable, non-routable and never current until a separately authorized and accepted real participant RFx runtime exists. Do not create a placeholder route, draft, opportunity, beacon, match, response or simulated workflow to enable it.
+- Network remains the current organization-network view/domain concept within Intelligence. It is not a peer lens. Account and Quick Start are utilities, not market lenses.
+- Administrative navigation remains different: it exposes only implemented, server-authorized destinations. Do not generalize participant unavailable-lens visibility to future administrative sections.
 - The RFxchange is not a generic social network, static directory, conventional bid portal, CRM replacement, procurement system of record or commercial-real-estate listing marketplace.
 - The core product connects organization identity, geography, capability discovery, RFx activity, teaming, referrals, resources, credibility and economic intelligence.
 - Geography is a controlled product concept, not browser presentation state. Locality participation and release state are enforced server-side.
@@ -25,6 +29,13 @@ Use the cross-cutting vocabulary in `docs/context/EXCHANGE_INTERACTION_ARCHITECT
 
 **Intelligence** is the functional analytical lens. **Light Appearance** and **Dark Appearance** are presentation terms. **Presentation Mode** is a separate future presentation-safe capability. **High Contrast** is an accessibility treatment. Do not use `Intelligence Dark` as though Intelligence were an appearance, and do not implement Dark Appearance or an appearance preference without explicit authority.
 
+Participant-facing truthfulness has four required dimensions:
+
+1. **Structural truthfulness** — represent the stable governed architecture rather than a temporary taxonomy.
+2. **Capability truthfulness** — visible does not mean available; unavailable permanent lenses are explicit, non-actionable and non-current.
+3. **State truthfulness** — unavailable, loading, empty, error, restricted and recovery states describe the relevant surface accurately.
+4. **Continuity truthfulness** — ordinary authenticated movement remains visibly inside one Exchange and does not resemble a new application launch.
+
 ## Source authority
 
 Use these sources together rather than treating one file as universally authoritative:
@@ -33,7 +44,7 @@ Use these sources together rather than treating one file as universally authorit
 2. `docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md` is the live Feature-ID completion authority. A checked item requires acceptance and implementation evidence.
 3. `docs/tracking/RFxchange_DEPENDENCY_MAP.md` is the live sequencing/dependency authority. Reviewed corrections there supersede seeded spreadsheet dependencies for scheduling.
 4. The applicable `docs/slices/` execution authority defines the approved implementation boundary. A brief cannot mark a feature complete or waive documented acceptance intent.
-5. `docs/context/` contains normalized cross-cutting product rules. `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md`, merged through PR #150, governs participant-facing lens hierarchy, spatial continuity, workspace boundaries and truthful cross-lens behavior.
+5. `docs/context/` contains normalized cross-cutting product rules. `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md`, originally merged through PR #150 and reconciled by the bounded shell gate, governs participant-facing lens hierarchy, structural/capability/state/continuity truthfulness, spatial continuity, workspace boundaries and truthful cross-lens behavior.
 6. `docs/rfx/` contains the converged RFx Core/AMACS/workspace/acceptance package.
 7. `docs/brand/` defines approved target brand architecture, semantic meaning, messaging, map/data grammar, motion, sensory rules, appearance/presentation authority and brand acceptance after Brand Gate B0.
 8. `docs/design/` defines the currently implemented visual/UI/presentation baseline. For user-facing UI read `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`; map/geography work also requires `docs/design/MAP_VISUAL_SYSTEM.md`.
@@ -60,8 +71,9 @@ If sources appear to conflict, do not silently choose the easiest interpretation
 - Recalculate the next slice from merged `main`, not from assumptions made on an older branch.
 - Documentation-only planning and reconciliation do not authorize production implementation.
 - No deployment/release blocker becomes a product-domain dependency unless a current canonical dependency authority establishes that edge.
+- Participant-facing Slice 4.1 RFx entry cannot be integrated into the shared shell until the no-Feature-ID Exchange-shell truthfulness/performance gate is merged and post-merge green.
 
-## Current wave, stabilization and planning boundary
+## Current wave, stabilization and active gate boundary
 
 Wave 2 is complete with **43/43 Activation** features.
 
@@ -71,7 +83,7 @@ Brand Gates B0 through B6a are complete. B6b remains **Not Started / intentional
 
 All independently executable work under Post-Wave 3 Stabilizations 1–7 is complete. **Stabilization 2C remains incomplete and isolated to release engineering.** The Firebase App Hosting backend `rfxchange`, project/repository connection, region `us-east4`, live branch `main`, root `/`, retained Web App and reserved App Hosting URL exist. The remaining blocker is trustworthy build-time source-SHA binding and an accepted same-SHA live rollout proving source SHA → `RFXCHANGE_BUILD_SHA`/build identity → rendered SHA. Do not solve 2C under a product slice, weaken `RFXCHANGE_BUILD_SHA`, change rollout architecture or claim 2C complete. It does not block RFx Core product development.
 
-PR #150, **Define the Exchange interaction architecture**, is merged at `42c9a33499d9c37af74b6f61d7e1a8f823d0e0f8`. Consume its authority; do not recreate its PR or implement the complete Exchange shell under a narrower slice.
+PR #150, **Define the Exchange interaction architecture**, established the cross-cutting documentation authority. PR #158, the documentation-only Slice 4.1 authority, is merged at `87fb29ef3b442410deecf61a470bc94c9c013c60`. It leaves `ISS-001`, `ISS-002` and `ISS-003` Not Started and authorizes no runtime by itself.
 
 The current tracker state is:
 
@@ -81,9 +93,25 @@ The current tracker state is:
 - Wave 4 RFx Core: **0/41**; and
 - B6b: **Not Started / intentionally pending**.
 
-The current planning gate is the documentation-only Slice 4.1 authority for `ISS-001`, `ISS-002` and `ISS-003` in `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md`.
+The single active gate is the no-Feature-ID cross-cutting authority in `docs/slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md`, based on merged `main` at `87fb29ef3b442410deecf61a470bc94c9c013c60` and implemented on `fix/exchange-shell-truthfulness-performance`.
 
-That authority establishes:
+That gate is limited to:
+
+- one typed participant-lens registry in the exact permanent order;
+- Opportunities/RFx visible but explicitly unavailable, with no href, synthetic route, fabricated data or current-page state;
+- Resources, Intelligence and Referrals routed to their existing authorized runtimes;
+- Network retained as the Intelligence organization-network view/domain concept;
+- Account and Quick Start moved to a separate keyboard-accessible utility control;
+- Administration resolved lazily through existing server authority and failed closed without blocking the shell;
+- one persistent participant shell across ordinary client-side lens changes;
+- route-specific loading scoped below that shell;
+- removal of the page-wide `Preparing this page` takeover during ordinary authenticated navigation;
+- preservation of current safe map/query context through the stable `/geography/canvas` Intelligence seam; and
+- removal of avoidable blocking/duplicate work without weakening authorization.
+
+The gate does not implement Slice 4.1 runtime, Slice 4.2, RFx publication/discovery, Intelligence datasets, Location/Site Intelligence, B6c, commercial enrollment, Dark Appearance, Presentation Mode, sound, haptics, Firebase App Hosting or build-identity changes. Stop after the gate is merged, reconciled and post-merge validated.
+
+The merged Slice 4.1 documentation authority establishes, for a later separately authorized runtime pass:
 
 - one organization-owned RFx aggregate;
 - one bounded `draft` lifecycle state;
@@ -91,7 +119,7 @@ That authority establishes:
 - a deterministic governed AMACS 0.5.0 request-family snapshot; and
 - safe blank-source draft creation in a bounded Operational Workspace entry.
 
-This documentation work leaves all three Feature IDs Not Started and starts no runtime. After the authority is reviewed, merged and post-merge green, a **separate explicit instruction** may authorize Slice 4.1 runtime implementation as the next dependency-eligible candidate. Do not begin Slice 4.2, B6c or later behavior under Slice 4.1 authority.
+Do not begin that runtime while the shell gate is active or immediately after it merges without a new explicit instruction.
 
 ## AMACS and interpretation boundary
 
@@ -119,7 +147,7 @@ Before implementing any slice or Brand Gate:
 4. Read `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md` for participant-facing work.
 5. Read the canonical tracker and dependency map.
 6. Read the applicable wave roadmap.
-7. Read the specific slice or Brand Gate authority.
+7. Read the specific slice or Brand Gate authority. For the current shell gate, read `docs/slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md` and the merged `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md` only to preserve its stop boundary.
 8. Read the context/RFx documents listed under the authority's **Must read** or governing section.
 9. Inspect existing production abstractions before designing new ones.
 10. If work creates or materially changes user-facing UI, read `docs/brand/README.md`, applicable brand guides, `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`.
@@ -151,6 +179,9 @@ Before implementing any slice or Brand Gate:
 - Do not weaken existing security rules or architecture tests to make new work pass.
 - Motion, sound and visual success states consume authoritative application/domain facts; button clicks and optimistic UI are not authority.
 - Do not fabricate organizations, opportunities, maps, statistics, outcomes, testimonials, provider availability or live network activity.
+- A participant-shell convenience projection must not repeat session verification or organization hydration when already-authorized page data can supply the same non-authorizing display context.
+- Optional Administration resolution must never block the participant shell and must fail closed; direct administrative routes remain independently authorized.
+- Client-side navigation, URL state and persistent shell context never grant organization, lens, record or administrative authority.
 
 ## Runtime and validation
 
@@ -162,6 +193,8 @@ Before claiming a slice or gate complete, run slice/gate-specific checks plus re
 npm run check
 ```
 
+For the active shell gate, configured-browser acceptance must also prove one mounted shell across `Intelligence → Resources → Referrals → Intelligence → Account → Quick Start`, no page-wide `Preparing this page` takeover, immediate pending feedback, no second document-navigation entry, no activation/geography replay, route-scoped loading, optional-delay resilience, no artificial hold, safe map/query restoration, keyboard/mobile/five-locale accessibility and clean console/unhandled-rejection behavior. Record representative before/after timings and relevant `Server-Timing` spans without turning one local run into a brittle production-network promise.
+
 Run focused product/architecture/dependency/internationalization/emulator checks first where applicable. Production CI must pass on the exact reviewed PR head and again on merged `main`. Brand acceptance supplements and never replaces domain, security, lifecycle, geography, emulator or configured-browser acceptance.
 
 ## Tracker discipline
@@ -172,6 +205,8 @@ Run focused product/architecture/dependency/internationalization/emulator checks
 - Documentation-only planning/reconciliation must not change progress totals or completion statuses.
 - A visual simulation, architecture document or tutorial never completes the corresponding live domain Feature ID.
 - `ISS-001`, `ISS-002` and `ISS-003` remain Not Started until their runtime acceptance evidence is merged.
+- Showing an unavailable Opportunities/RFx lens does not make it available and does not complete an RFx Feature ID.
+- The shell truthfulness/performance gate changes no Feature ID, tracker total, Wave completion count, Brand Gate status or B6b status.
 
 ## Design, brand and visual references
 
@@ -189,11 +224,15 @@ Run focused product/architecture/dependency/internationalization/emulator checks
 At the end of implementation or reconciliation work, report:
 
 - starting merged `main` SHA;
-- PR number, reviewed final head, merge SHA, exact-head CI and post-merge CI;
+- PR #158 final disposition and merge SHA when relevant;
+- active gate branch, PR number, reviewed final head, merge SHA, exact-head CI and post-merge CI;
+- final primary-lens order/availability and Account utility contents;
+- persistent-shell architecture, loading-boundary result and actual latency causes/corrections;
+- before/after transition and `Server-Timing` evidence;
 - exact files changed;
 - Feature IDs or Brand Gate/cross-cutting gate addressed;
 - dependency result;
-- acceptance evidence and tests run;
+- automated, emulator, localization, accessibility and configured-browser evidence;
 - tracker changes made or intentionally not made;
-- Stabilization 2C and B6b status where relevant; and
-- explicit confirmation that later slices/gates and unauthorized runtime work were not begun.
+- Stabilization 2C and B6b status; and
+- explicit confirmation that Slice 4.1 runtime, later slices/gates and unauthorized runtime work were not begun.

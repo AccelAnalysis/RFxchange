@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, type ReactNode } from "react";
 
 import {
   ControlGroup,
@@ -12,10 +14,12 @@ import {
 import styles from "./ParticipantWorkspace.module.css";
 import b2Styles from "./ParticipantWorkspaceB2.module.css";
 import { ParticipantTopNavigation, type ParticipantNavigationItem } from "./ParticipantTopNavigation";
+import { usePersistentParticipantShellContext } from "./PersistentParticipantShell";
 
 interface ParticipantShellProps {
   readonly activeItem?: ParticipantNavigationItem;
   readonly administrationHref?: string;
+  readonly organizationName?: string;
   readonly children: ReactNode;
 }
 
@@ -37,18 +41,56 @@ interface ResponsiveEdgeSheetProps {
   readonly width?: "standard" | "wide";
 }
 
+/**
+ * Compatibility boundary for participant workspaces that predate the persistent root-layout shell.
+ * Within the governed Exchange shell it contributes only page content, preventing a route change
+ * from destroying and recreating product identity or navigation. It may report organization identity
+ * only from the already-authorized page projection and preserves an explicit current navigation item
+ * for compatibility aliases that cannot be derived from their pathname. It never performs an
+ * additional session or organization read. Transitional routes outside the persistent shell retain
+ * the same truthful page-local navigation until they receive their own gate.
+ */
 export function ParticipantShell({
   activeItem,
   administrationHref,
+  organizationName,
   children,
 }: ParticipantShellProps) {
+  const {
+    persistent,
+    registerExplicitActiveItem,
+    reportAuthorizedOrganizationName,
+    reportAuthorizedParticipant,
+  } = usePersistentParticipantShellContext();
+
+  useEffect(() => {
+    if (persistent) reportAuthorizedParticipant();
+  }, [persistent, reportAuthorizedParticipant]);
+
+  useEffect(() => {
+    if (persistent && organizationName) {
+      reportAuthorizedOrganizationName(organizationName);
+    }
+  }, [organizationName, persistent, reportAuthorizedOrganizationName]);
+
+  useEffect(() => {
+    if (!persistent || activeItem === undefined) return;
+    return registerExplicitActiveItem(activeItem);
+  }, [activeItem, persistent, registerExplicitActiveItem]);
+
+  if (persistent) return <>{children}</>;
+
   return (
     <div
       className={styles.participantShell}
-      data-participant-shell
+      data-participant-shell="page-local"
       data-participant-default="warm-ivory"
     >
-      <ParticipantTopNavigation activeItem={activeItem} administrationHref={administrationHref} />
+      <ParticipantTopNavigation
+        activeItem={activeItem}
+        administrationHref={administrationHref}
+        organizationName={organizationName ?? null}
+      />
       {children}
     </div>
   );

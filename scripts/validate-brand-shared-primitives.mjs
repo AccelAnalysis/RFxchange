@@ -4,13 +4,34 @@ import { readFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
-const [primitives, primitiveCss, contracts, exportsFile, participant, participantNavigation, participantB2, roadmap] = await Promise.all([
+const [
+  primitives,
+  primitiveCss,
+  contracts,
+  exportsFile,
+  participant,
+  participantNavigation,
+  participantNavigationCss,
+  persistentShell,
+  persistentShellCss,
+  participantLoading,
+  participantLoadingCss,
+  participantRegistry,
+  participantB2,
+  roadmap,
+] = await Promise.all([
   read("src/components/ui/Primitives.tsx"),
   read("src/components/ui/Primitives.module.css"),
   read("src/components/ui/object-contracts.ts"),
   read("src/components/ui/index.ts"),
   read("src/components/participant/ParticipantWorkspace.tsx"),
   read("src/components/participant/ParticipantTopNavigation.tsx"),
+  read("src/components/participant/ParticipantTopNavigation.module.css"),
+  read("src/components/participant/PersistentParticipantShell.tsx"),
+  read("src/components/participant/PersistentParticipantShell.module.css"),
+  read("src/components/participant/ParticipantContentLoading.tsx"),
+  read("src/components/participant/ParticipantContentLoading.module.css"),
+  read("src/application/participant/participant-lens-registry.ts"),
   read("src/components/participant/ParticipantWorkspaceB2.module.css"),
   read("docs/brand/BRAND_IMPLEMENTATION_ROADMAP.md"),
 ]);
@@ -56,13 +77,22 @@ assert.ok(
   "Brand B2 must include reduced-motion and reduced-transparency behavior.",
 );
 assert.ok(
-  primitiveCss.includes("focus-visible") && participantB2.includes("focus-visible"),
-  "Brand B2 shared primitives must define keyboard focus behavior.",
+  primitiveCss.includes("focus-visible") &&
+    participantB2.includes("focus-visible") &&
+    participantNavigationCss.includes("focus-visible"),
+  "Brand B2 shared primitives and the persistent participant shell must define keyboard focus behavior.",
 );
+
+const participantShellCss = [
+  participantB2,
+  participantNavigationCss,
+  persistentShellCss,
+  participantLoadingCss,
+].join("\n");
 assert.equal(
-  /#(?:0b0b0d|f7f3ea|252932|d6a23a|8a6418|2e5eaa|3b7b57)\b/i.test(`${primitiveCss}\n${participantB2}`),
+  /#(?:0b0b0d|f7f3ea|252932|d6a23a|8a6418|2e5eaa|3b7b57)\b/i.test(`${primitiveCss}\n${participantShellCss}`),
   false,
-  "Brand B2 shared primitive styling must consume semantic tokens rather than approved raw palette literals.",
+  "Brand B2 and participant-shell styling must consume semantic tokens rather than approved raw palette literals.",
 );
 
 for (const visualContract of [
@@ -74,8 +104,14 @@ for (const visualContract of [
   "OutcomePathVisualInput",
   "VisualAuthorityReference",
 ]) {
-  assert.ok(contracts.includes(`interface ${visualContract}`) || contracts.includes(`type ${visualContract}`), `Brand B2 is missing ${visualContract}.`);
-  assert.ok(exportsFile.includes(visualContract), `Brand B2 public object contract exports are missing ${visualContract}.`);
+  assert.ok(
+    contracts.includes(`interface ${visualContract}`) || contracts.includes(`type ${visualContract}`),
+    `Brand B2 is missing ${visualContract}.`,
+  );
+  assert.ok(
+    exportsFile.includes(visualContract),
+    `Brand B2 public object contract exports are missing ${visualContract}.`,
+  );
 }
 assert.ok(
   contracts.includes("syntheticRuntimeObjectsAllowed: false") &&
@@ -93,7 +129,6 @@ assert.ok(
 
 const participantComponents = `${participant}\n${participantNavigation}`;
 for (const migration of [
-  "NavigationFrame",
   "OverlayPanel",
   "ResponsiveSheet",
   "ControlGroup",
@@ -101,12 +136,61 @@ for (const migration of [
   "StatusSummary",
   "VisuallyHidden",
 ]) {
-  assert.ok(participantComponents.includes(migration), `Participant workspace has not migrated to shared ${migration}.`);
+  assert.ok(
+    participantComponents.includes(migration),
+    `Participant workspace has not migrated to shared ${migration}.`,
+  );
 }
+
 assert.ok(
-  !participantNavigation.includes("Opportunities") &&
-    participant.includes("Opportunity and resource layers remain unavailable"),
-  "Brand B2 must preserve truthful unavailable-layer language.",
+  persistentShell.includes('data-participant-shell={authorizedParticipant ? "persistent" : undefined}') &&
+    persistentShell.includes("ParticipantTopNavigation") &&
+    persistentShell.includes("data-participant-content-region") &&
+    participant.includes("usePersistentParticipantShellContext") &&
+    participant.includes("if (persistent) return <>{children}</>"),
+  "The participant header must be composed once by the persistent shell rather than recreated by each workspace.",
+);
+assert.ok(
+  persistentShell.includes("reportAuthorizedOrganizationName") &&
+    participant.includes("reportAuthorizedOrganizationName") &&
+    !participantNavigation.includes('fetch("/api/participant-shell"'),
+  "The persistent shell must reuse already-authorized page context instead of repeating session and organization hydration.",
+);
+assert.ok(
+  participantRegistry.indexOf('id: "opportunities-rfx"') <
+    participantRegistry.indexOf('id: "resources"') &&
+    participantRegistry.indexOf('id: "resources"') <
+      participantRegistry.indexOf('id: "intelligence"') &&
+    participantRegistry.indexOf('id: "intelligence"') <
+      participantRegistry.indexOf('id: "referrals"'),
+  "The governed participant lenses are not in the required order.",
+);
+assert.ok(
+  participantRegistry.includes('href: null') &&
+    participantRegistry.includes('availability: "unavailable"') &&
+    participantNavigation.includes('aria-disabled="true"') &&
+    participantNavigation.includes("participantNavigation.notYetAvailable") &&
+    !participantRegistry.includes('id: "network"'),
+  "The persistent shell must expose Opportunities/RFx truthfully without restoring Network as a peer lens.",
+);
+assert.ok(
+  participantNavigation.includes('role="menu"') &&
+    participantNavigation.includes('role="menuitem"') &&
+    participantNavigation.includes("PARTICIPANT_UTILITY_DESTINATIONS") &&
+    participantNavigation.includes("/api/participant-shell/administration"),
+  "Account utilities must remain separate, keyboard-operable, and server-authoritative for Administration.",
+);
+assert.ok(
+  participantLoading.includes('role="status"') &&
+    participantLoading.includes('aria-live="polite"') &&
+    participantLoading.includes('aria-busy="true"') &&
+    participantLoading.includes("data-participant-content-loading"),
+  "Scoped participant loading must preserve the shared accessibility state contract below the shell.",
+);
+assert.ok(
+  participantNavigationCss.includes("@media (prefers-reduced-motion: reduce)") &&
+    participantNavigationCss.includes("@media (max-width: 390px)"),
+  "The persistent participant shell must preserve reduced-motion and 390px responsive acceptance.",
 );
 assert.ok(
   roadmap.includes("Brand Gate B2 — Shared component primitives") &&
@@ -115,5 +199,5 @@ assert.ok(
 );
 
 console.log(
-  "Brand Gate B2 shared primitives validated: reusable navigation, surfaces, search/filter, state, object, timeline and table contracts with accessibility, reduced motion, semantic styling and authority-gated future objects.",
+  "Brand Gate B2 shared primitives and persistent participant-shell composition validated with semantic styling, keyboard focus, scoped loading, reduced motion, and authority-gated future objects.",
 );

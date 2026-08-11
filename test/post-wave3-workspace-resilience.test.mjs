@@ -77,6 +77,7 @@ test("live workspace sources retain bounded hydration, scoped refresh, and strea
   const marketProfileRuntime = read("src/infrastructure/market-profile/runtime.ts");
 
   assert.match(resourcePage, /selectedRequestId\s*\?\s*await service\.messages/);
+  assert.match(resourcePage, /Promise\.allSettled\(\[\s*referralsPromise,\s*ownerPromise/);
   assert.doesNotMatch(resourcePage, /Promise\.all\(requestReferrals\.map/);
   assert.doesNotMatch(resourceWorkspace, /window\.location\.reload/);
   assert.match(resourceWorkspace, /router\.refresh\(\)/);

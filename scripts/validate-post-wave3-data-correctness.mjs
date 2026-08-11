@@ -13,6 +13,7 @@ const [
   marketPanel,
   participantWorkspace,
   participantTopNavigation,
+  participantLensRegistry,
   dictionary,
   authority,
   tracker,
@@ -27,6 +28,7 @@ const [
   read("src/components/market-profile/MarketProfilePanel.tsx"),
   read("src/components/participant/ParticipantWorkspace.tsx"),
   read("src/components/participant/ParticipantTopNavigation.tsx"),
+  read("src/application/participant/participant-lens-registry.ts"),
   read("src/i18n/get-dictionary.ts"),
   read("docs/architecture/POST_WAVE_3_STABILIZATION_6_DATA_CORRECTNESS.md"),
   read("docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md"),
@@ -87,30 +89,54 @@ assert.match(marketPanel, /preservedSnapshotNaics/);
 assert.match(marketPanel, /preserveExistingNaics/);
 assert.doesNotMatch(marketPanel, /name="naicsTitle"|name="naicsCode"|name="naicsVersion"/);
 
-for (const route of ["/geography/canvas", "/referrals", "/resources", "/quick-start", "/organization-profile"]) {
-  assert.match(participantTopNavigation, new RegExp(route.replaceAll("/", "\\/")));
-}
+const opportunitiesIndex = participantLensRegistry.indexOf('id: "opportunities-rfx"');
+const resourcesIndex = participantLensRegistry.indexOf('id: "resources"');
+const intelligenceIndex = participantLensRegistry.indexOf('id: "intelligence"');
+const referralsIndex = participantLensRegistry.indexOf('id: "referrals"');
+assert.ok(
+  opportunitiesIndex >= 0 &&
+    opportunitiesIndex < resourcesIndex &&
+    resourcesIndex < intelligenceIndex &&
+    intelligenceIndex < referralsIndex,
+  "The permanent participant lenses must retain the governed order.",
+);
+assert.match(participantLensRegistry, /id: "opportunities-rfx"[\s\S]*?href: null[\s\S]*?availability: "unavailable"/);
+assert.match(participantLensRegistry, /id: "resources"[\s\S]*?href: "\/resources"/);
+assert.match(participantLensRegistry, /id: "intelligence"[\s\S]*?href: "\/geography\/canvas"/);
+assert.match(participantLensRegistry, /id: "referrals"[\s\S]*?href: "\/referrals"/);
+assert.doesNotMatch(participantLensRegistry, /id: "network"/);
+assert.match(participantLensRegistry, /PARTICIPANT_UTILITY_DESTINATIONS/);
+assert.match(participantLensRegistry, /account:[\s\S]*?\/organization-profile/);
+assert.match(participantLensRegistry, /"quick-start":[\s\S]*?\/quick-start/);
 assert.match(participantWorkspace, /ParticipantTopNavigation/);
-assert.match(participantTopNavigation, /labelKey: "network"/);
-assert.match(participantTopNavigation, /participantNavigation\.\$\{item\.labelKey\}/);
-assert.doesNotMatch(participantTopNavigation, /Intelligence|Opportunities|available: false/);
+assert.match(participantWorkspace, /usePersistentParticipantShell/);
+assert.match(participantTopNavigation, /PARTICIPANT_LENSES\.map/);
+assert.match(participantTopNavigation, /aria-disabled="true"/);
+assert.match(participantTopNavigation, /participantNavigation\.notYetAvailable/);
+assert.match(participantTopNavigation, /role="menu"/);
 assert.match(dictionary, /participantNavigation/);
 
 for (const locale of ["en-US", "es", "fr", "it", "de"]) {
-  const [marketCopy, navigationCopy] = await Promise.all([
+  const [marketCopyText, navigationCopyText] = await Promise.all([
     read(`src/i18n/messages/market-profile/${locale}.json`),
     read(`src/i18n/messages/participant-navigation/${locale}.json`),
   ]);
-  assert.match(marketCopy, /"resultCount"/);
-  assert.match(marketCopy, /"selectorTitle"/);
-  assert.match(navigationCopy, /"network"/);
-  assert.doesNotMatch(navigationCopy, /opportunit/i);
+  const navigationCopy = JSON.parse(navigationCopyText);
+  assert.match(marketCopyText, /"resultCount"/);
+  assert.match(marketCopyText, /"selectorTitle"/);
+  assert.equal(navigationCopy.opportunitiesRfx, "Opportunities/RFx");
+  assert.equal(typeof navigationCopy.resources, "string");
+  assert.equal(typeof navigationCopy.intelligence, "string");
+  assert.equal(typeof navigationCopy.referrals, "string");
+  assert.equal(typeof navigationCopy.notYetAvailable, "string");
+  assert.equal(typeof navigationCopy.accountUtilities, "string");
 }
 
 assert.match(authority, /438 total · 152 Done · 286 Not Started/);
-assert.match(authority, /does not implement RFx Core/);
+assert.match(authority, /does not make Opportunities\/RFx available/);
+assert.match(authority, /does not implement any RFx Feature ID/);
 assert.match(tracker, /438 total/);
 assert.match(tracker, /152 Done/);
 assert.match(tracker, /286 Not Started/);
 
-console.log("Post-Wave 3 Stabilization 6 data correctness and participant UX validated.");
+console.log("Post-Wave 3 Stabilization 6 data correctness and permanent participant-lens reconciliation validated.");
