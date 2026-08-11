@@ -944,6 +944,12 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       "Intelligence context captured before an in-content exit",
     );
     observations.push(await clickHref(cdp, "/organization-profile", "/organization-profile", { candidate: true }));
+    await waitForExpression(
+      cdp,
+      `document.querySelector('[data-participant-utility="account"] > button')
+        ?.getAttribute("aria-label")?.includes(${JSON.stringify(displayName)})`,
+      "authorized organization identity in Account utility",
+    );
     observations.push(await clickUtility(cdp, "/quick-start", "/quick-start", true));
 
     const finalState = await evaluate(cdp, `(() => ({
@@ -1018,6 +1024,7 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       intelligenceContextCapturedForInContentExit: true,
       intelligenceContextRestoredAfterShellRemount: true,
       intelligenceContextClearedOnSignOut: true,
+      authorizedOrganizationContextReported: true,
       activationReplayObserved: finalState.activationReplay,
       protectedInitializationReplayObserved: false,
       transitionEvents: finalState.transitions,

@@ -108,6 +108,7 @@ test("the persistent shell owns navigation while page-local shells collapse to c
   const persistent = read("src/components/participant/PersistentParticipantShell.tsx");
   const compatibility = read("src/components/participant/ParticipantWorkspace.tsx");
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
+  const accountPage = read("app/organization-profile/page.tsx");
 
   assert.match(layout, /<PersistentParticipantShell>\{children\}<\/PersistentParticipantShell>/);
   assert.match(persistent, /data-participant-shell="persistent"/);
@@ -117,6 +118,7 @@ test("the persistent shell owns navigation while page-local shells collapse to c
   assert.match(compatibility, /usePersistentParticipantShellContext\(\)/);
   assert.match(compatibility, /if \(shellContext\.persistent\) return <>\{children\}<\/>/);
   assert.match(compatibility, /reportAuthorizedOrganizationName\(organizationName\)/);
+  assert.match(accountPage, /<ParticipantShell activeItem="account" organizationName=\{profile\.displayName\}>/);
   assert.doesNotMatch(navigation, /fetch\("\/api\/participant-shell"/);
   assert.equal(
     exists("app/api/participant-shell/route.ts"),
@@ -317,6 +319,8 @@ test("the configured browser runner links every canonical source import before a
   assert.match(runner, /Intelligence context captured before an in-content exit/);
   assert.match(runner, /intelligenceContextCapturedForInContentExit: true/);
   assert.match(runner, /intelligenceContextClearedOnSignOut: true/);
+  assert.match(runner, /authorizedOrganizationContextReported: true/);
+  assert.match(runner, /authorized organization identity in Account utility/);
   assert.match(runner, /Signing out retained another participant's Intelligence context/);
   assert.match(runner, /assert\.equal\(diagnostics\.exceptions\.length, 0/);
 });

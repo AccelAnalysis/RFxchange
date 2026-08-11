@@ -288,7 +288,7 @@ export default async function OrganizationProfilePage() {
   const buildIdentity = currentBuildIdentity();
 
   return (
-    <ParticipantShell activeItem="account">
+    <ParticipantShell activeItem="account" organizationName={profile.displayName}>
       <OperationalWorkspace ariaLabel="Organization account workspace">
         <section className={styles.page}>
           <header className={styles.header}>
