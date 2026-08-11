@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 
 import {
@@ -12,6 +14,7 @@ import {
 import styles from "./ParticipantWorkspace.module.css";
 import b2Styles from "./ParticipantWorkspaceB2.module.css";
 import { ParticipantTopNavigation, type ParticipantNavigationItem } from "./ParticipantTopNavigation";
+import { usePersistentParticipantShell } from "./PersistentParticipantShell";
 
 interface ParticipantShellProps {
   readonly activeItem?: ParticipantNavigationItem;
@@ -37,15 +40,24 @@ interface ResponsiveEdgeSheetProps {
   readonly width?: "standard" | "wide";
 }
 
+/**
+ * Compatibility boundary for participant workspaces that predate the persistent root-layout shell.
+ * Within the governed Exchange shell it contributes only page content, preventing a route change
+ * from destroying and recreating product identity or navigation. Transitional routes outside the
+ * persistent shell retain the same truthful page-local navigation until they receive their own gate.
+ */
 export function ParticipantShell({
   activeItem,
   administrationHref,
   children,
 }: ParticipantShellProps) {
+  const persistentShell = usePersistentParticipantShell();
+  if (persistentShell) return <>{children}</>;
+
   return (
     <div
       className={styles.participantShell}
-      data-participant-shell
+      data-participant-shell="page-local"
       data-participant-default="warm-ivory"
     >
       <ParticipantTopNavigation activeItem={activeItem} administrationHref={administrationHref} />
