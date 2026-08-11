@@ -7,7 +7,8 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 ## Read first
 
 - [`PRODUCT_PRINCIPLES.md`](PRODUCT_PRINCIPLES.md) — cross-cutting product invariants and boundaries.
-- [`EXCHANGE_INTERACTION_ARCHITECTURE.md`](EXCHANGE_INTERACTION_ARCHITECTURE.md) — RFx-first lens hierarchy, persistent spatial context, marker/selection behavior, Intelligence/Locations boundary, provider gating and cross-lens workflow rules.
+- [`EXCHANGE_INTERACTION_ARCHITECTURE.md`](EXCHANGE_INTERACTION_ARCHITECTURE.md) — RFx-first lens hierarchy, participant truthfulness, persistent spatial context, marker/selection behavior, Intelligence/Locations boundary, provider gating and cross-lens workflow rules.
+- [`../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md`](../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md) — bounded no-Feature-ID authority for the persistent participant shell, exact lens registry, separate Account utilities, scoped loading and transition-performance acceptance.
 - [`USER_JOURNEY.md`](USER_JOURNEY.md) — canonical activation journey from public discovery through OPEN.
 - [`MAP_AND_GEOGRAPHY.md`](MAP_AND_GEOGRAPHY.md) — locality, FIPS, release-state, boundary, camera and marker principles.
 - [`ORGANIZATION_MODEL.md`](ORGANIZATION_MODEL.md) — organization/user hierarchy, claim authority, identity resolution, AMACS-backed capability assertion, profile and location concepts.
@@ -20,17 +21,34 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 
 ## Exchange interaction authority
 
-[`EXCHANGE_INTERACTION_ARCHITECTURE.md`](EXCHANGE_INTERACTION_ARCHITECTURE.md), merged through PR #150, establishes the cross-cutting participant interaction target:
+[`EXCHANGE_INTERACTION_ARCHITECTURE.md`](EXCHANGE_INTERACTION_ARCHITECTURE.md), originally merged through PR #150 and reconciled by the bounded Exchange-shell gate, establishes the cross-cutting participant interaction authority:
 
+- the permanent authenticated lens order is exactly `Opportunities/RFx | Resources | Intelligence | Referrals`;
 - Opportunities/RFx remains the primary transaction lens and principal public positioning;
 - Resources, Intelligence and Referrals are supporting lenses over the same market rather than separate applications;
+- stable architecture remains visible when a permanent lens is unavailable; availability governs action rather than whether the lens exists;
+- Opportunities/RFx is present but explicitly unavailable until a separately accepted real participant RFx runtime exists, with no href, placeholder route, fabricated data or current-page state;
 - location and site functionality remains first-class inside Intelligence rather than becoming a peer commercial-real-estate product identity;
+- Network remains the current organization-network view/domain concept inside Intelligence, not a peer lens;
+- Account and Quick Start are separate utilities, not market lenses;
+- ordinary authenticated lens changes preserve the current Exchange shell rather than presenting route waits as a new application launch;
 - lens switching preserves authorized map/search/selection context where meaningful;
 - the participant's own organization uses the standing logo marker, while a selected external organization transitions from a compact node to the standing selected marker;
 - Official Resource Provider actions remain gated by the existing application/review/approval authority;
 - referral actions remain bounded by the current referral aggregate;
 - complex RFx authoring may use an Operational Workspace while retaining a safe return seam to the Spatial Workspace; and
 - no interface fabricates RFxs, opportunities, matches, providers, referrals, sites, intelligence, outcomes or market activity.
+
+Participant-facing truthfulness has four required dimensions:
+
+1. **Structural truthfulness** — represent the governed permanent architecture rather than a disposable temporary taxonomy.
+2. **Capability truthfulness** — visible does not mean available; an unavailable permanent lens is non-actionable and fully described.
+3. **State truthfulness** — unavailable, loading, empty, error, restricted and recovery states describe the relevant surface accurately.
+4. **Continuity truthfulness** — ordinary movement remains visibly inside one authenticated Exchange.
+
+> The stable lens architecture remains visible even when a lens is unavailable. Availability governs action, not whether a governed permanent lens exists in the information architecture.
+
+> Loading truthfulness requires the current Exchange shell to remain visible during ordinary lens changes. A route-level wait must not be presented as though RFxchange is being launched again.
 
 The vocabulary is binding:
 
@@ -41,7 +59,9 @@ The vocabulary is binding:
 
 **Intelligence** is the functional analytical lens. **Light Appearance** and **Dark Appearance** are presentation terminology. Dark Appearance is not implemented or authorized by the interaction architecture.
 
-PR #150 is documentation authority, not runtime authority for the complete Exchange shell.
+PR #150 remains the documentation origin for the complete interaction target. The separately authorized no-Feature-ID gate in [`../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md`](../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md) implements only the participant lens/persistent-shell/loading convergence described there. It does not authorize Slice 4.1 runtime or complete any RFx Feature ID.
+
+Administrative navigation remains governed separately: it exposes only implemented, server-authorized destinations. The participant unavailable-lens rule must not be generalized to future administrative sections.
 
 ## AMACS 0.5.0 and interpretation authority
 
@@ -72,23 +92,26 @@ The RFx Core planning package is indexed at [`../rfx/README.md`](../rfx/README.m
 - anti-regression and configured-browser acceptance; and
 - the real-data-only B6c RFx map lens.
 
-The specific implementation authority for the first Wave 4 slice is [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md). It covers exactly `ISS-001`, `ISS-002` and `ISS-003`: the organization-owned RFx aggregate, draft-only lifecycle/version/event/idempotency seams, governed AMACS request-family snapshot and blank-source draft creation.
+The specific documentation authority for the first Wave 4 slice is [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md). It covers exactly `ISS-001`, `ISS-002` and `ISS-003`: the organization-owned RFx aggregate, draft-only lifecycle/version/event/idempotency seams, governed AMACS request-family snapshot and blank-source draft creation.
 
-That authority leaves all three Feature IDs Not Started. Runtime implementation requires a separate explicit instruction after the documentation PR is reviewed, merged and post-merge green.
+That documentation authority is merged but leaves all three Feature IDs Not Started. Runtime implementation still requires a separate explicit instruction and cannot be integrated into the participant shell until the no-Feature-ID shell truthfulness gate is merged and post-merge green.
 
 ## Current sequencing status
 
 Wave 2 is complete. Wave 3 Slices 3.1 through 3.8 and Brand Gates B0–B6a are merged, and the configured-browser/zero-residual Wave 3 exit accepted Network at 38/38. B6b remains intentionally pending.
 
-Merged `main` at `42c9a33499d9c37af74b6f61d7e1a8f823d0e0f8` includes PR #150. The reviewed Slice 4.1 dependency result is:
+Merged `main` at `87fb29ef3b442410deecf61a470bc94c9c013c60` includes PR #150 and the documentation-only Slice 4.1 authority from PR #158. The current active work boundary is the no-Feature-ID Exchange-shell truthfulness/performance gate based on that exact SHA.
+
+The dependency result remains:
 
 - Wave 3 handoff: satisfied;
 - AMACS 0.5.0 reconciliation: satisfied;
 - AI/AMACS foundation: satisfied and reusable, but not required for manual Slice 4.1 request-family selection;
 - organization authority/tenancy/audit/concurrency foundations: satisfied by prior cross-cutting implementation;
-- Exchange Interaction Architecture: satisfied by PR #150;
+- Exchange Interaction Architecture: satisfied by PR #150 and reconciled by the active shell gate;
+- Slice 4.1 documentation authority: merged, runtime still unstarted;
 - Stabilization 2C: isolated release engineering, not a product prerequisite; and
-- no genuine dependency-map correction required.
+- no genuine Feature-ID dependency-map correction required.
 
 Canonical totals remain **438 total · 152 Done · 286 Not Started**, with Wave 4 RFx Core **0/41**.
 
@@ -96,7 +119,7 @@ Canonical totals remain **438 total · 152 Done · 286 Not Started**, with Wave 
 
 The App Hosting backend `rfxchange`, project/repository connection, region `us-east4`, live branch `main`, root `/`, retained Web App and reserved App Hosting URL now exist. The remaining 2C blocker is trustworthy build-time source-SHA binding and accepted same-SHA live-deployment evidence. The managed source build has not exposed a documented immutable source SHA that can be bound to `RFXCHANGE_BUILD_SHA`.
 
-Stabilization 2C remains incomplete and is handled separately. It does not block RFx Core domain development, and no RFx slice may weaken build identity or change rollout architecture under product authority.
+Stabilization 2C remains incomplete and is handled separately. It does not block RFx Core domain development, and no RFx slice or shell gate may weaken build identity or change rollout architecture under product authority.
 
 ## Brand and design authority
 
