@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import type {
+  RfxDefinitionCatalog,
   RfxPerformanceLocationOption,
   RfxRequestFamilyOption,
 } from "../../application/rfx/rfx-draft-service";
@@ -19,6 +20,7 @@ import {
 
 import styles from "./RFxDraftWorkspace.module.css";
 import { RFxPackageBuilder } from "./RFxPackageBuilder";
+import { RFxDefinitionBuilder } from "./RFxDefinitionBuilder";
 
 interface Props {
   readonly canCreate: boolean;
@@ -28,6 +30,7 @@ interface Props {
   readonly commandRecoveryScope: string;
   readonly organizationId: string;
   readonly performanceLocationOption: RfxPerformanceLocationOption | null;
+  readonly definitionCatalog: RfxDefinitionCatalog;
 }
 
 function storage(): Storage | null {
@@ -50,6 +53,7 @@ export function RFxDraftWorkspace({
   commandRecoveryScope,
   organizationId,
   performanceLocationOption,
+  definitionCatalog,
 }: Props) {
   const { t } = useI18n();
   const [drafts, setDrafts] = useState(initialDrafts);
@@ -306,6 +310,19 @@ export function RFxDraftWorkspace({
                       organizationId={organizationId}
                       commandRecoveryScope={commandRecoveryScope}
                       performanceLocationOption={performanceLocationOption}
+                      onCommitted={(aggregate) =>
+                        setDrafts((current) =>
+                          current.map((draft) =>
+                            draft.id === aggregate.id ? aggregate : draft,
+                          ),
+                        )
+                      }
+                    />
+                    <RFxDefinitionBuilder
+                      aggregate={selectedDraft}
+                      catalog={definitionCatalog}
+                      organizationId={organizationId}
+                      commandRecoveryScope={commandRecoveryScope}
                       onCommitted={(aggregate) =>
                         setDrafts((current) =>
                           current.map((draft) =>

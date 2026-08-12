@@ -50,8 +50,12 @@ function exactReplay(
 }
 
 function currentAggregate(record: RfxAggregate): RfxAggregate {
-  return record.package === undefined
-    ? Object.freeze({ ...record, package: null })
+  return record.package === undefined || record.definition === undefined
+    ? Object.freeze({
+        ...record,
+        package: record.package ?? null,
+        definition: record.definition ?? null,
+      })
     : record;
 }
 

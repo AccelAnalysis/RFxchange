@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   RfxDraftError,
   type RfxCommandScope,
+  type RfxDefinitionSelectionInput,
 } from "@/src/application/rfx/rfx-draft-service";
 import type { RfxPackageInput } from "@/src/domain/rfx/model";
 import {
@@ -15,6 +16,25 @@ import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import { createServerRfxDraftService } from "@/src/infrastructure/rfx/runtime";
 
 export const runtime = "nodejs";
+
+export async function GET(request: NextRequest) {
+  try {
+    const scope = await commandScope();
+    if (scope instanceof NextResponse) return scope;
+    const query = request.nextUrl.searchParams.get("q") ?? "";
+    const domainId = request.nextUrl.searchParams.get("domain");
+    const familyId = request.nextUrl.searchParams.get("family");
+    const capabilities = await (
+      await createServerRfxDraftService()
+    ).searchCapabilities(scope, { query, domainId, familyId });
+    return NextResponse.json(
+      { capabilities },
+      { headers: { "cache-control": "private, no-store" } },
+    );
+  } catch (error) {
+    return problem(request, error);
+  }
+}
 
 async function commandScope(
   commandId: string = randomUUID(),
@@ -136,6 +156,24 @@ export async function POST(request: NextRequest) {
         rfxId: String(body.rfxId ?? ""),
         expectedVersion: Number(body.expectedVersion),
         package: body.package as RfxPackageInput,
+      });
+      return NextResponse.json(result);
+    }
+    if (action === "save-definition") {
+      if (
+        !body.definition ||
+        typeof body.definition !== "object" ||
+        Array.isArray(body.definition)
+      ) {
+        return NextResponse.json(
+          { error: "RFx definition is required." },
+          { status: 400 },
+        );
+      }
+      const result = await service.saveDefinition(scope, {
+        rfxId: String(body.rfxId ?? ""),
+        expectedVersion: Number(body.expectedVersion),
+        definition: body.definition as RfxDefinitionSelectionInput,
       });
       return NextResponse.json(result);
     }

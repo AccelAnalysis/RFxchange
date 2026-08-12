@@ -168,6 +168,18 @@ export class ImmutableAmacsCatalog implements AmacsCatalogPort {
     return this.registries.registries["request-families"] ?? [];
   }
 
+  async listRequirementTypes(): Promise<readonly AmacsRegistryRecord[]> {
+    return this.registries.registries["requirement-types"] ?? [];
+  }
+
+  async listResponseTemplates(): Promise<readonly AmacsRegistryRecord[]> {
+    return this.registries.registries["response-templates"] ?? [];
+  }
+
+  async listDecisionTemplates(): Promise<readonly AmacsRegistryRecord[]> {
+    return this.registries.registries["decision-templates"] ?? [];
+  }
+
   private registryRecord(registry: string, key: string, id: string): AmacsRegistryRecord | null {
     return this.registries.registries[registry]?.find((record) => recordId(record, key) === id) ?? null;
   }
@@ -184,8 +196,16 @@ export class ImmutableAmacsCatalog implements AmacsCatalogPort {
     return this.registryRecord("response-templates", "response_template_id", responseTemplateId);
   }
 
+  async getResponseSection(responseSectionId: string): Promise<AmacsRegistryRecord | null> {
+    return this.registryRecord("response-sections", "response_section_id", responseSectionId);
+  }
+
   async getDecisionTemplate(decisionTemplateId: string): Promise<AmacsRegistryRecord | null> {
     return this.registryRecord("decision-templates", "decision_template_id", decisionTemplateId);
+  }
+
+  async getDecisionFactor(decisionFactorId: string): Promise<AmacsRegistryRecord | null> {
+    return this.registryRecord("decision-factors", "decision_factor_id", decisionFactorId);
   }
 
   async getReadinessRules(requestFamilyId: string): Promise<readonly AmacsRegistryRecord[]> {

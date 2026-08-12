@@ -13,11 +13,11 @@
 
 Brand Gate work through B6a and the later no-Feature-ID AMACS reconciliation change no Feature-ID status. Accepted product work through Wave 4 Slice 4.2 establishes:
 
-**438 total · 157 Done · 281 Not Started**
+**438 total · 160 Done · 278 Not Started**
 
 - Activation: **43/43**
 - Network: **38/38**
-- RFx Core: **5/41**
+- RFx Core: **8/41**
 
 ## Gate ledger
 

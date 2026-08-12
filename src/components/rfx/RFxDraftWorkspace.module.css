@@ -569,3 +569,271 @@
     box-shadow: 0 8px 30px rgb(0 0 0 / 12%);
   }
 }
+
+.definitionBuilder {
+  min-width: 0;
+  margin-top: 72px;
+  padding-top: 44px;
+  border-top: 2px solid var(--exchange-black);
+}
+.definitionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 28px;
+}
+.definitionHeader > div:first-child {
+  min-width: 0;
+  max-width: 680px;
+}
+.definitionHeader h2 {
+  margin: 7px 0 9px;
+  font: 700 clamp(1.8rem, 3vw, 2.8rem) / 1 var(--font-display);
+}
+.definitionHeader p,
+.definitionModule > p {
+  color: var(--muted-ink);
+  line-height: 1.6;
+}
+.definitionStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.definitionStatus span {
+  color: var(--muted-ink);
+  font-size: 0.78rem;
+}
+.definitionStatus button,
+.removeText {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.78);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.definitionStatus button:disabled {
+  opacity: 0.48;
+  cursor: default;
+}
+.definitionModule {
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 720px;
+  min-width: 0;
+  margin-top: 42px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+}
+.definitionModule h3 {
+  margin: 3px 0 0;
+  font: 700 clamp(1.35rem, 2.4vw, 2rem) / 1.1 var(--font-display);
+}
+.definitionRows {
+  display: grid;
+  min-width: 0;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.definitionRow,
+.compactDefinitionRow {
+  min-width: 0;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.rowMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.rowMeta span {
+  color: var(--muted-ink);
+  font-size: 0.75rem;
+}
+.definitionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.definitionGrid label,
+.compactDefinitionRow label,
+.templateChoice,
+.capabilityPicker label {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+.definitionGrid input,
+.definitionGrid select,
+.compactDefinitionRow input,
+.compactDefinitionRow select,
+.templateChoice select,
+.capabilityPicker input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.82);
+  font: inherit;
+  font-weight: 500;
+}
+.capabilityPicker {
+  position: relative;
+  margin-top: 14px;
+}
+.capabilityBrowse {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.capabilityBrowse select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.82);
+  font: inherit;
+  font-weight: 500;
+}
+.capabilityPicker ul {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  max-height: 320px;
+  margin: 4px 0 0;
+  padding: 4px;
+  overflow-y: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--workspace-surface, white);
+  list-style: none;
+  box-shadow: 0 18px 38px rgb(0 0 0 / 14%);
+}
+.capabilityPicker li button {
+  display: grid;
+  width: 100%;
+  gap: 3px;
+  padding: 11px;
+  border: 0;
+  border-radius: 7px;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.capabilityPicker li button:hover,
+.capabilityPicker li button:focus-visible {
+  background: rgba(46, 94, 170, 0.09);
+  outline: var(--focus-ring);
+}
+.capabilityPicker small,
+.capabilityPicker li span,
+.capabilityPicker > p {
+  color: var(--muted-ink);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+.removeText {
+  margin-top: 12px;
+  border-color: transparent;
+  color: var(--signal-red);
+  background: transparent;
+}
+.templateChoice {
+  max-width: 620px;
+  margin-top: 18px;
+}
+.compactDefinitionRow {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.5fr) minmax(150px, 1fr) minmax(90px, 0.55fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+.compactDefinitionRow > span {
+  color: var(--rf-gold);
+  font-weight: 800;
+}
+.weightSummary {
+  position: sticky;
+  top: 76px;
+  z-index: 3;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 12px 15px;
+  border-left: 3px solid var(--signal-red);
+  background: color-mix(in srgb, var(--workspace-surface, white) 92%, transparent);
+  backdrop-filter: blur(12px);
+}
+.weightSummary[data-valid="true"] {
+  border-left-color: var(--signal-green);
+}
+.weightSummary small {
+  color: var(--muted-ink);
+}
+.sheetBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  justify-items: end;
+  background: rgb(0 0 0 / 28%);
+}
+.sheetBackdrop > div {
+  width: min(100%, 620px);
+  height: 100%;
+}
+.sheetBackdrop aside {
+  height: 100%;
+  padding: 32px;
+}
+.sheetActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+@media (max-width: 900px) {
+  .definitionGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .compactDefinitionRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .definitionHeader,
+  .definitionStatus,
+  .rowMeta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .definitionGrid,
+  .compactDefinitionRow,
+  .capabilityBrowse {
+    grid-template-columns: 1fr;
+  }
+  .weightSummary {
+    position: static;
+    flex-wrap: wrap;
+  }
+  .sheetBackdrop aside {
+    padding: 24px 18px;
+  }
+}

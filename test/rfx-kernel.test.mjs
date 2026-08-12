@@ -10,6 +10,7 @@ import { createOrganizationUserAuthorization } from "../src/domain/authorization
 import { standardOrganizationRolePreset } from "../src/domain/authorization/organization-role-presets.ts";
 import { createOrganizationAccount } from "../src/domain/organizations/model.ts";
 import { RfxPersistenceConflictError } from "../src/domain/rfx/repository.ts";
+import { normalizeRfxDefinition } from "../src/domain/rfx/model.ts";
 import {
   createOrganizationMembership,
   createUserIdentity,
@@ -39,6 +40,69 @@ const family = (id, label = "Request for Information") =>
     allowed_governance_profile_ids: ["AMACS-GOV-000001", "AMACS-GOV-000002"],
     recommended_requirement_bundle_ids: ["AMACS-RBND-000001"],
   });
+const requirementTypes = [
+  {
+    requirement_type_id: "AMACS-RTYP-000001",
+    code: "CAPABILITY",
+    preferred_label: "Capability requirement",
+    definition: "A governed capability requirement.",
+    allowed_decision_treatments: ["gate_only", "scored_only"],
+    team_coverage_allowed: true,
+    status: "active",
+  },
+  {
+    requirement_type_id: "AMACS-RTYP-000007",
+    code: "EVIDENCE",
+    preferred_label: "Evidence requirement",
+    definition: "Evidence needed to substantiate another requirement.",
+    allowed_decision_treatments: ["gate_only", "informational_only"],
+    team_coverage_allowed: false,
+    status: "active",
+  },
+];
+const capability = {
+  conceptId: "AMACS-CAP-000001",
+  preferredLabel: "Continuity planning",
+  definition: "Ability to plan operational continuity.",
+  domainId: "AMACS-DOM-000001",
+  domainLabel: "Operations",
+  familyId: "AMACS-FAM-000001",
+  familyLabel: "Resilience",
+  aliases: [],
+  status: "active",
+  replacementConceptIds: [],
+  releaseVersion: "0.5.0",
+};
+const responseSection = {
+  response_section_id: "AMACS-RSP-000001",
+  preferred_label: "Technical response",
+  purpose: "Explain the proposed response.",
+  response_type: "narrative",
+  attachments_allowed: true,
+  status: "active",
+};
+const responseTemplate = {
+  response_template_id: "AMACS-RSPT-000001",
+  preferred_label: "Market Capability Response",
+  description: "A governed response architecture.",
+  section_ids: [responseSection.response_section_id],
+  status: "active",
+};
+const decisionFactor = {
+  decision_factor_id: "AMACS-DEC-000001",
+  preferred_label: "Mandatory capability coverage",
+  definition: "Whether mandatory capabilities are covered.",
+  method: "gate",
+  status: "active",
+};
+const decisionTemplate = {
+  decision_template_id: "AMACS-DECT-000001",
+  preferred_label: "Capability and Market Assessment",
+  description: "A governed decision structure.",
+  factor_ids: [decisionFactor.decision_factor_id],
+  weighting_required: false,
+  status: "active",
+};
 
 function fixture() {
   let sequence = 0;
@@ -178,12 +242,71 @@ function fixture() {
     async listRequestFamilies() {
       return [currentFamily, secondFamily];
     },
+    async listDomains() {
+      return [
+        {
+          domainId: "AMACS-DOM-000001",
+          preferredLabel: "Operations",
+          definition: "Operational capabilities.",
+          status: "active",
+        },
+      ];
+    },
+    async listFamilies() {
+      return [
+        {
+          familyId: "AMACS-FAM-000001",
+          domainId: "AMACS-DOM-000001",
+          preferredLabel: "Resilience",
+          definition: "Resilience capabilities.",
+          status: "active",
+        },
+      ];
+    },
+    async listRequirementTypes() {
+      return requirementTypes;
+    },
+    async listResponseTemplates() {
+      return [responseTemplate];
+    },
+    async listDecisionTemplates() {
+      return [decisionTemplate];
+    },
     async getRequestFamily(id) {
       return (
         [currentFamily, secondFamily].find(
           (item) => item.request_family_id === id,
         ) ?? null
       );
+    },
+    async getRequirementType(id) {
+      return requirementTypes.find((item) => item.requirement_type_id === id) ?? null;
+    },
+    async getCapability(id) {
+      return id === capability.conceptId ? capability : null;
+    },
+    async searchCapabilities() {
+      return {
+        release: RELEASE,
+        query: "continuity",
+        results: [{ capability, score: 100, matchedBy: "label" }],
+        page: 1,
+        pageSize: 40,
+        total: 1,
+        pageCount: 1,
+      };
+    },
+    async getResponseTemplate(id) {
+      return id === responseTemplate.response_template_id ? responseTemplate : null;
+    },
+    async getResponseSection(id) {
+      return id === responseSection.response_section_id ? responseSection : null;
+    },
+    async getDecisionTemplate(id) {
+      return id === decisionTemplate.decision_template_id ? decisionTemplate : null;
+    },
+    async getDecisionFactor(id) {
+      return id === decisionFactor.decision_factor_id ? decisionFactor : null;
     },
   };
   const geography = Object.freeze({
@@ -399,6 +522,62 @@ function packageInput(
   };
 }
 
+function definitionInput() {
+  return {
+    requirements: [
+      {
+        id: "defined-requirement-1",
+        requirementTypeId: "AMACS-RTYP-000001",
+        capabilityId: "AMACS-CAP-000001",
+        title: "Continuity planning",
+        description: "Demonstrate continuity planning capability.",
+        level: "required",
+        decisionTreatment: "gate_only",
+        satisfyingParty: "any-accepted-team-member",
+        qualifiers: [
+          { kind: "text", label: "Condition", value: "Three comparable sites" },
+        ],
+        evidenceRequirementIds: [],
+        linkedFoundationRequirementIds: ["requirement-1"],
+      },
+    ],
+    responseStructure: {
+      responseTemplateId: "AMACS-RSPT-000001",
+      sections: [
+        {
+          id: "section-1",
+          sourceSectionId: "AMACS-RSP-000001",
+          title: "Technical response",
+          instructions: "Explain the proposed response.",
+          format: "narrative",
+          required: true,
+          characterLimit: 5000,
+          itemLimit: null,
+          attachmentsAllowed: true,
+          linkedRequirementIds: ["defined-requirement-1"],
+        },
+      ],
+    },
+    evaluationDefinition: {
+      decisionTemplateId: "AMACS-DECT-000001",
+      factors: [
+        {
+          id: "factor-1",
+          sourceFactorId: "AMACS-DEC-000001",
+          title: "Mandatory capability coverage",
+          description: "Confirm capability coverage.",
+          treatment: "required-condition",
+          weightBasisPoints: null,
+          linkedRequirementIds: ["defined-requirement-1"],
+          linkedResponseSectionIds: ["section-1"],
+          linkedEvidenceRequirementIds: [],
+        },
+      ],
+    },
+    interpretationRecordIds: [],
+  };
+}
+
 async function expectForbiddenReason(promise, reason) {
   await assert.rejects(
     promise,
@@ -571,6 +750,240 @@ test("structured package save derives module status and preserves one versioned 
       rfxId: created.aggregate.id,
       expectedVersion: 1,
       package: packageInput(),
+    }),
+    (error) => error instanceof RfxDraftError && error.code === "conflict",
+  );
+});
+
+test("AMACS requirements, response structure, and evaluation definition persist atomically", async () => {
+  const f = fixture();
+  const created = await f.service.createDraft(f.scope(0, "definition-create"), {
+    requestFamilyId: "AMACS-REQ-000001",
+  });
+  const packaged = await f.service.savePackage(f.scope(0, "definition-package"), {
+    rfxId: created.aggregate.id,
+    expectedVersion: 1,
+    package: packageInput(),
+  });
+  const saved = await f.service.saveDefinition(f.scope(0, "definition-save"), {
+    rfxId: created.aggregate.id,
+    expectedVersion: packaged.aggregate.version,
+    definition: definitionInput(),
+  });
+  assert.equal(saved.aggregate.version, 3);
+  assert.equal(saved.aggregate.lifecycleState, "draft");
+  assert.equal(saved.aggregate.definition.schemaVersion, 1);
+  assert.equal(
+    saved.aggregate.definition.requirements[0].capability.labelSnapshot,
+    "Continuity planning",
+  );
+  assert.equal(
+    saved.aggregate.definition.requirements[0].teamCoverageAllowed,
+    true,
+  );
+  assert.deepEqual(saved.aggregate.definition.moduleStatus, {
+    requirements: "complete",
+    responseStructure: "complete",
+    evaluationDefinition: "complete",
+  });
+  assert.deepEqual(
+    saved.aggregate.definition.requirements[0].linkedResponseSectionIds,
+    ["section-1"],
+  );
+  assert.deepEqual(
+    saved.aggregate.definition.requirements[0].linkedEvaluationFactorIds,
+    ["factor-1"],
+  );
+  assert.equal(f.state.events.at(-1).kind, "rfx-definition-saved");
+  assert.equal(f.state.audits.at(-1).action, "rfx.definition-saved");
+
+  const replay = await f.service.saveDefinition(f.scope(0, "definition-save"), {
+    rfxId: created.aggregate.id,
+    expectedVersion: 2,
+    definition: definitionInput(),
+  });
+  assert.equal(replay.replayed, true);
+  assert.equal(f.state.events.length, 3);
+  await assert.rejects(
+    f.service.saveDefinition(f.scope(0, "definition-save"), {
+      rfxId: created.aggregate.id,
+      expectedVersion: 2,
+      definition: {
+        ...definitionInput(),
+        requirements: [
+          { ...definitionInput().requirements[0], title: "Altered intent" },
+        ],
+      },
+    }),
+    (error) => error instanceof RfxDraftError && error.code === "conflict",
+  );
+});
+
+test("definition qualifier variants and conditional basis-point totals are deterministic", async () => {
+  const f = fixture();
+  const created = await f.service.createDraft(f.scope(0, "definition-variant-create"), {
+    requestFamilyId: "AMACS-REQ-000001",
+  });
+  const packaged = await f.service.savePackage(f.scope(0, "definition-variant-package"), {
+    rfxId: created.aggregate.id,
+    expectedVersion: 1,
+    package: packageInput(),
+  });
+  const saved = await f.service.saveDefinition(f.scope(0, "definition-variant-save"), {
+    rfxId: created.aggregate.id,
+    expectedVersion: packaged.aggregate.version,
+    definition: definitionInput(),
+  });
+  const canonical = saved.aggregate.definition;
+  const requirement = canonical.requirements[0];
+  const factor = canonical.evaluationDefinition.factors[0];
+  const normalized = normalizeRfxDefinition(
+    {
+      ...canonical,
+      requirements: [
+        {
+          ...requirement,
+          decisionTreatment: "scored_only",
+          qualifiers: [
+            { kind: "text", label: "Condition", value: "Current" },
+            { kind: "quantity", label: "Minimum sites", amount: 3, unit: "sites" },
+            { kind: "boolean", label: "Credential current", requiredValue: true },
+            { kind: "geography", label: "Localities", localityIds: ["county-51013"] },
+          ],
+        },
+      ],
+      evaluationDefinition: {
+        ...canonical.evaluationDefinition,
+        weightingRequired: true,
+        factors: [
+          {
+            ...factor,
+            sourceFactor: null,
+            sourceMethod: null,
+            treatment: "scored-factor",
+            weightBasisPoints: 10_000,
+          },
+        ],
+      },
+    },
+    ["requirement-1"],
+  );
+  assert.deepEqual(normalized.requirements[0].qualifiers.map((item) => item.kind), [
+    "text",
+    "quantity",
+    "boolean",
+    "geography",
+  ]);
+  assert.equal(normalized.evaluationDefinition.weightingRequired, true);
+  assert.equal(normalized.moduleStatus.evaluationDefinition, "complete");
+  const incomplete = normalizeRfxDefinition(
+    {
+      ...normalized,
+      evaluationDefinition: {
+        ...normalized.evaluationDefinition,
+        factors: [
+          { ...normalized.evaluationDefinition.factors[0], weightBasisPoints: 9_999 },
+        ],
+      },
+    },
+    ["requirement-1"],
+  );
+  assert.equal(incomplete.moduleStatus.evaluationDefinition, "in-progress");
+  assert.throws(
+    () =>
+      normalizeRfxDefinition(
+        {
+          ...normalized,
+          requirements: [
+            {
+              ...normalized.requirements[0],
+              qualifiers: [
+                { kind: "quantity", label: "Minimum sites", amount: -1, unit: "sites" },
+              ],
+            },
+          ],
+        },
+        ["requirement-1"],
+      ),
+    /qualifier.*amount/i,
+  );
+});
+
+test("definition validation rejects invented AMACS, forbidden team coverage, dangling links, and stale writes", async () => {
+  const f = fixture();
+  const created = await f.service.createDraft(f.scope(0, "definition-invalid-create"), {
+    requestFamilyId: "AMACS-REQ-000001",
+  });
+  const packaged = await f.service.savePackage(f.scope(0, "definition-invalid-package"), {
+    rfxId: created.aggregate.id,
+    expectedVersion: 1,
+    package: packageInput(),
+  });
+  const evidenceCount = f.state.events.length;
+  for (const [commandId, definition] of [
+    [
+      "definition-invented-capability",
+      {
+        ...definitionInput(),
+        requirements: [
+          {
+            ...definitionInput().requirements[0],
+            capabilityId: "AMACS-CAP-INVENTED",
+          },
+        ],
+      },
+    ],
+    [
+      "definition-lead-only",
+      {
+        ...definitionInput(),
+        requirements: [
+          {
+            ...definitionInput().requirements[0],
+            requirementTypeId: "AMACS-RTYP-000007",
+            capabilityId: null,
+            satisfyingParty: "combined-response-team",
+          },
+        ],
+      },
+    ],
+    [
+      "definition-dangling-link",
+      {
+        ...definitionInput(),
+        responseStructure: {
+          ...definitionInput().responseStructure,
+          sections: [
+            {
+              ...definitionInput().responseStructure.sections[0],
+              linkedRequirementIds: ["missing-requirement"],
+            },
+          ],
+        },
+      },
+    ],
+  ]) {
+    await assert.rejects(
+      f.service.saveDefinition(f.scope(0, commandId), {
+        rfxId: created.aggregate.id,
+        expectedVersion: packaged.aggregate.version,
+        definition,
+      }),
+      (error) => error instanceof RfxDraftError && error.code === "invalid",
+    );
+  }
+  assert.equal(f.state.events.length, evidenceCount);
+  const saved = await f.service.saveDefinition(f.scope(0, "definition-current"), {
+    rfxId: created.aggregate.id,
+    expectedVersion: packaged.aggregate.version,
+    definition: definitionInput(),
+  });
+  assert.equal(saved.aggregate.version, 3);
+  await assert.rejects(
+    f.service.saveDefinition(f.scope(0, "definition-stale"), {
+      rfxId: created.aggregate.id,
+      expectedVersion: 2,
+      definition: definitionInput(),
     }),
     (error) => error instanceof RfxDraftError && error.code === "conflict",
   );

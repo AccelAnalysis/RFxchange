@@ -42,9 +42,9 @@ For RFx implementation:
 
 ## Current Wave 4 boundary
 
-Merged `main` at `90ee6e08a18a67cc794ff1a84a047a8313ad50d6` includes the accepted Exchange shell and implemented Slice 4.1–4.2 runtime. This documentation gate defines the Slice 4.3 authority; its merge completes no Feature ID. Wave 3, AMACS 0.5.0 reconciliation and the AI/AMACS Interpretation Foundation remain satisfied prerequisites.
+Merged `main` through the Slice 4.3 documentation authority at `6dcf09ace96ba1881bd229ab76eef79cde1a33a0` includes the accepted Exchange shell and implemented Slice 4.1–4.2 runtime. The bounded Slice 4.3 runtime implements the private governed definition without widening the lifecycle. Wave 3, AMACS 0.5.0 reconciliation and the AI/AMACS Interpretation Foundation remain satisfied prerequisites.
 
-The Slice 4.1 and 4.2 authorities govern the implemented `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006` runtime. The implementation remains bounded to:
+The Slice 4.1 through 4.3 authorities govern the implemented `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009` and `ISS-011` runtime. The implementation remains bounded to:
 
 - one organization-owned RFx aggregate;
 - one `draft` lifecycle state;
@@ -53,18 +53,19 @@ The Slice 4.1 and 4.2 authorities govern the implemented `ISS-001`, `ISS-002`, `
 - a deterministic AMACS 0.5.0 request-family snapshot; and
 - blank-source draft creation in a bounded Operational Workspace entry; and
 - one private structured need/package with controlled geography, value, term, typed foundation requirements, module status, save/recovery and optional non-authoritative interpretation.
+- one private governed AMACS requirement, response-structure and evaluation-definition layer with a complete manual path.
 
 It does not authorize publication, opportunity projection, beacons, discovery, fit, teaming, response, evaluation, award or the complete four-lens Exchange shell.
 
 Stabilization 2C remains incomplete and isolated to release engineering: the App Hosting backend and GitHub connection now exist, but trustworthy build-time source-SHA binding and an accepted same-SHA live rollout proof do not. No canonical dependency authority makes 2C a prerequisite for RFx Core product-domain implementation.
 
-Canonical totals are **438 total · 157 Done · 281 Not Started**, with Wave 4 RFx Core **5/41** and B6b intentionally pending.
+Canonical totals are **438 total · 160 Done · 278 Not Started**, with Wave 4 RFx Core **8/41** and B6b intentionally pending.
 
 ## Explicit boundaries
 
-This package and the Slice 4.1–4.2 runtime:
+This package and the Slice 4.1–4.3 runtime:
 
-- complete only `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006`;
+- complete only `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009` and `ISS-011`;
 - create only private organization-owned RFx drafts, never an opportunity, pursuit, response, team, submission, evaluation, award or outcome record;
 - add no fake map, organization, opportunity, statistics or market activity;
 - do not import prototype HTML/CSS/JavaScript into production;

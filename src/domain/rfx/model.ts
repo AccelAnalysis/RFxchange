@@ -16,6 +16,7 @@ export type RfxId = Brand<string, "RfxId">;
 export const RFX_AGGREGATE_SCHEMA_VERSION = 1 as const;
 export const RFX_CREATION_SOURCE_SCHEMA_VERSION = 1 as const;
 export const RFX_PACKAGE_SCHEMA_VERSION = 1 as const;
+export const RFX_DEFINITION_SCHEMA_VERSION = 1 as const;
 export const RFX_AMACS_RELEASE_VERSION = "0.5.0" as const;
 export const RFX_AMACS_SOURCE_COMMIT =
   "da7879f2609271b067ae6d02875e9388a02c4fe5" as const;
@@ -210,6 +211,142 @@ export interface RfxPackage {
   readonly moduleStatus: RfxPackageModuleStatus;
 }
 
+export type RfxDefinitionModuleState = "not-started" | "in-progress" | "complete";
+export type RfxDefinitionModuleStatus = Readonly<{
+  requirements: RfxDefinitionModuleState;
+  responseStructure: RfxDefinitionModuleState;
+  evaluationDefinition: RfxDefinitionModuleState;
+}>;
+
+export interface AmacsDefinitionSnapshot {
+  readonly kind:
+    | "requirement-type"
+    | "capability"
+    | "response-template"
+    | "response-section"
+    | "decision-template"
+    | "decision-factor";
+  readonly id: string;
+  readonly labelSnapshot: string;
+  readonly definitionSnapshot: string;
+  readonly amacsReleaseVersion: typeof RFX_AMACS_RELEASE_VERSION;
+  readonly amacsSourceCommit: typeof RFX_AMACS_SOURCE_COMMIT;
+}
+
+export type RfxRequirementLevel = "required" | "preferred" | "informational";
+export type RfxDecisionTreatment =
+  | "gate_only"
+  | "scored_only"
+  | "gate_and_scored_depth"
+  | "informational_only";
+export type RfxSatisfyingParty =
+  | "lead-organization"
+  | "any-accepted-team-member"
+  | "combined-response-team";
+
+export type RfxRequirementQualifier =
+  | Readonly<{ kind: "text"; label: string; value: string }>
+  | Readonly<{
+      kind: "quantity";
+      label: string;
+      amount: number;
+      unit: string;
+    }>
+  | Readonly<{ kind: "boolean"; label: string; requiredValue: boolean }>
+  | Readonly<{
+      kind: "geography";
+      label: string;
+      localityIds: readonly string[];
+    }>;
+
+export interface RfxRequirementDefinition {
+  readonly id: string;
+  readonly requirementType: AmacsDefinitionSnapshot;
+  readonly requirementTypeCode: string;
+  readonly allowedDecisionTreatments: readonly RfxDecisionTreatment[];
+  readonly teamCoverageAllowed: boolean;
+  readonly capability: AmacsDefinitionSnapshot | null;
+  readonly capabilityBreadcrumb: string | null;
+  readonly title: string;
+  readonly description: string;
+  readonly level: RfxRequirementLevel;
+  readonly decisionTreatment: RfxDecisionTreatment;
+  readonly satisfyingParty: RfxSatisfyingParty;
+  readonly qualifiers: readonly RfxRequirementQualifier[];
+  readonly evidenceRequirementIds: readonly string[];
+  readonly linkedFoundationRequirementIds: readonly string[];
+  readonly linkedResponseSectionIds: readonly string[];
+  readonly linkedEvaluationFactorIds: readonly string[];
+}
+
+export type RfxResponseSectionFormat =
+  | "narrative"
+  | "structured-answer"
+  | "attachment"
+  | "pricing"
+  | "acknowledgment";
+
+export interface RfxResponseSectionDefinition {
+  readonly id: string;
+  readonly sourceSection: AmacsDefinitionSnapshot | null;
+  readonly title: string;
+  readonly instructions: string;
+  readonly format: RfxResponseSectionFormat;
+  readonly required: boolean;
+  readonly order: number;
+  readonly characterLimit: number | null;
+  readonly itemLimit: number | null;
+  readonly attachmentsAllowed: boolean;
+  readonly linkedRequirementIds: readonly string[];
+}
+
+export interface RfxResponseStructure {
+  readonly sourceTemplate: AmacsDefinitionSnapshot | null;
+  readonly sections: readonly RfxResponseSectionDefinition[];
+}
+
+export type RfxEvaluationFactorTreatment =
+  | "required-condition"
+  | "scored-factor"
+  | "required-and-scored"
+  | "informational-only";
+
+export interface RfxEvaluationFactor {
+  readonly id: string;
+  readonly sourceFactor: AmacsDefinitionSnapshot | null;
+  readonly sourceMethod: "gate" | "scored" | "narrative" | "formula" | null;
+  readonly title: string;
+  readonly description: string;
+  readonly treatment: RfxEvaluationFactorTreatment;
+  readonly weightBasisPoints: number | null;
+  readonly order: number;
+  readonly linkedRequirementIds: readonly string[];
+  readonly linkedResponseSectionIds: readonly string[];
+  readonly linkedEvidenceRequirementIds: readonly string[];
+}
+
+export interface RfxEvaluationDefinition {
+  readonly sourceTemplate: AmacsDefinitionSnapshot | null;
+  readonly weightingRequired: boolean;
+  readonly factors: readonly RfxEvaluationFactor[];
+}
+
+export interface RfxDefinition {
+  readonly schemaVersion: typeof RFX_DEFINITION_SCHEMA_VERSION;
+  readonly requirements: readonly RfxRequirementDefinition[];
+  readonly responseStructure: RfxResponseStructure;
+  readonly evaluationDefinition: RfxEvaluationDefinition;
+  readonly interpretationRecordIds: readonly string[];
+  readonly moduleStatus: RfxDefinitionModuleStatus;
+}
+
+export interface RfxDefinitionInput {
+  readonly requirements: unknown;
+  readonly responseStructure: unknown;
+  readonly evaluationDefinition: unknown;
+  readonly interpretationRecordIds: unknown;
+}
+
 export type RfxSinglePerformanceLocationSelection =
   | Readonly<{
       mode:
@@ -245,6 +382,7 @@ export interface RfxAggregate {
   readonly version: number;
   readonly requestFamily: RequestFamilySnapshot;
   readonly package: RfxPackage | null;
+  readonly definition: RfxDefinition | null;
   readonly creationSource: RfxCreationSource;
   readonly createdByUserId: UserId;
   readonly createdByMembershipId: OrganizationMembershipId;
@@ -255,7 +393,10 @@ export interface RfxAggregate {
 }
 
 export type RfxEventKind =
-  "rfx-draft-created" | "rfx-request-family-changed" | "rfx-package-saved";
+  | "rfx-draft-created"
+  | "rfx-request-family-changed"
+  | "rfx-package-saved"
+  | "rfx-definition-saved";
 
 export interface RfxEvent {
   readonly id: string;
@@ -270,6 +411,8 @@ export interface RfxEvent {
   readonly priorRequestFamily: RequestFamilySnapshot | null;
   readonly package: RfxPackage | null;
   readonly priorPackage: RfxPackage | null;
+  readonly definition: RfxDefinition | null;
+  readonly priorDefinition: RfxDefinition | null;
   readonly occurredAt: string;
 }
 
@@ -277,7 +420,11 @@ export interface RfxCommandReceipt {
   readonly id: string;
   readonly issuerOrganizationId: OrganizationId;
   readonly rfxId: RfxId;
-  readonly action: "create-draft" | "change-request-family" | "save-package";
+  readonly action:
+    | "create-draft"
+    | "change-request-family"
+    | "save-package"
+    | "save-definition";
   readonly requestFingerprint: string;
   readonly resultingVersion: number;
   readonly recordedAt: string;
@@ -755,6 +902,517 @@ export function normalizeRfxPackage(
   });
 }
 
+function uniqueStableList(
+  value: unknown,
+  label: string,
+  maximumItems = 100,
+): readonly string[] {
+  if (value == null) return Object.freeze([]);
+  if (!Array.isArray(value) || value.length > maximumItems)
+    throw new Error(`${label} is invalid.`);
+  const normalized = value.map((item) => stable(item, label));
+  if (new Set(normalized).size !== normalized.length)
+    throw new Error(`${label} contains duplicates.`);
+  return Object.freeze(normalized);
+}
+
+function nullableSafeInteger(
+  value: unknown,
+  label: string,
+  minimum = 0,
+  maximum = Number.MAX_SAFE_INTEGER,
+): number | null {
+  if (value == null || value === "") return null;
+  return safeInteger(value, label, minimum, maximum);
+}
+
+function definitionSnapshot(
+  value: unknown,
+  kind: AmacsDefinitionSnapshot["kind"],
+  label: string,
+): AmacsDefinitionSnapshot {
+  const source = record(value, label);
+  if (
+    source.kind !== kind ||
+    source.amacsReleaseVersion !== RFX_AMACS_RELEASE_VERSION ||
+    source.amacsSourceCommit !== RFX_AMACS_SOURCE_COMMIT
+  )
+    throw new Error(`${label} provenance is invalid.`);
+  return Object.freeze({
+    kind,
+    id: stable(source.id, `${label} id`),
+    labelSnapshot: required(source.labelSnapshot, `${label} label`, 300),
+    definitionSnapshot: required(
+      source.definitionSnapshot,
+      `${label} definition`,
+      2_000,
+    ),
+    amacsReleaseVersion: RFX_AMACS_RELEASE_VERSION,
+    amacsSourceCommit: RFX_AMACS_SOURCE_COMMIT,
+  });
+}
+
+function optionalDefinitionSnapshot(
+  value: unknown,
+  kind: AmacsDefinitionSnapshot["kind"],
+  label: string,
+): AmacsDefinitionSnapshot | null {
+  return value == null ? null : definitionSnapshot(value, kind, label);
+}
+
+function requirementQualifier(
+  value: unknown,
+  index: number,
+): RfxRequirementQualifier {
+  const source = record(value, `Requirement qualifier ${index + 1}`);
+  const label = required(
+    source.label,
+    `Requirement qualifier ${index + 1} label`,
+    160,
+  );
+  if (source.kind === "text")
+    return Object.freeze({
+      kind: "text",
+      label,
+      value: required(
+        source.value,
+        `Requirement qualifier ${index + 1} value`,
+        1_000,
+      ),
+    });
+  if (source.kind === "quantity") {
+    const amount = typeof source.amount === "number" ? source.amount : Number.NaN;
+    if (!Number.isFinite(amount) || amount <= 0 || amount > 1_000_000_000)
+      throw new Error(`Requirement qualifier ${index + 1} amount is invalid.`);
+    return Object.freeze({
+      kind: "quantity",
+      label,
+      amount,
+      unit: required(
+        source.unit,
+        `Requirement qualifier ${index + 1} unit`,
+        80,
+      ),
+    });
+  }
+  if (source.kind === "boolean") {
+    if (typeof source.requiredValue !== "boolean")
+      throw new Error(`Requirement qualifier ${index + 1} value is invalid.`);
+    return Object.freeze({
+      kind: "boolean",
+      label,
+      requiredValue: source.requiredValue,
+    });
+  }
+  if (source.kind === "geography")
+    return Object.freeze({
+      kind: "geography",
+      label,
+      localityIds: uniqueStableList(
+        source.localityIds,
+        `Requirement qualifier ${index + 1} locality`,
+        16,
+      ),
+    });
+  throw new Error(`Requirement qualifier ${index + 1} kind is invalid.`);
+}
+
+function definitionModuleState(
+  count: number,
+  complete: boolean,
+): RfxDefinitionModuleState {
+  if (complete) return "complete";
+  return count > 0 ? "in-progress" : "not-started";
+}
+
+export function normalizeRfxDefinition(
+  input: RfxDefinitionInput,
+  foundationRequirementIds: readonly string[],
+): RfxDefinition {
+  if (!Array.isArray(input.requirements) || input.requirements.length > 100)
+    throw new Error("RFx requirements are invalid.");
+  const foundationIds = new Set(foundationRequirementIds);
+  const baseRequirements = input.requirements.map((item, index) => {
+    const source = record(item, `RFx requirement ${index + 1}`);
+    const requirementType = definitionSnapshot(
+      source.requirementType,
+      "requirement-type",
+      `RFx requirement ${index + 1} type`,
+    );
+    const requirementTypeCode = required(
+      source.requirementTypeCode,
+      `RFx requirement ${index + 1} type code`,
+      80,
+    ).toUpperCase();
+    const allowedDecisionTreatments = uniqueStableList(
+      source.allowedDecisionTreatments,
+      `RFx requirement ${index + 1} allowed treatment`,
+      4,
+    ) as readonly RfxDecisionTreatment[];
+    const decisionTreatment = source.decisionTreatment as RfxDecisionTreatment;
+    if (
+      !(
+        [
+          "gate_only",
+          "scored_only",
+          "gate_and_scored_depth",
+          "informational_only",
+        ] as const
+      ).includes(decisionTreatment) ||
+      !allowedDecisionTreatments.includes(decisionTreatment)
+    )
+      throw new Error(`RFx requirement ${index + 1} treatment is invalid.`);
+    const level = source.level as RfxRequirementLevel;
+    if (!("required preferred informational".split(" ") as string[]).includes(level))
+      throw new Error(`RFx requirement ${index + 1} level is invalid.`);
+    const satisfyingParty = source.satisfyingParty as RfxSatisfyingParty;
+    if (
+      !(
+        [
+          "lead-organization",
+          "any-accepted-team-member",
+          "combined-response-team",
+        ] as const
+      ).includes(satisfyingParty)
+    )
+      throw new Error(`RFx requirement ${index + 1} satisfying party is invalid.`);
+    const teamCoverageAllowed = source.teamCoverageAllowed === true;
+    if (satisfyingParty !== "lead-organization" && !teamCoverageAllowed)
+      throw new Error(`RFx requirement ${index + 1} requires the lead organization.`);
+    const capability = optionalDefinitionSnapshot(
+      source.capability,
+      "capability",
+      `RFx requirement ${index + 1} capability`,
+    );
+    if ((requirementTypeCode === "CAPABILITY") !== Boolean(capability))
+      throw new Error(`RFx requirement ${index + 1} capability is invalid.`);
+    if (!Array.isArray(source.qualifiers) || source.qualifiers.length > 24)
+      throw new Error(`RFx requirement ${index + 1} qualifiers are invalid.`);
+    const linkedFoundationRequirementIds = uniqueStableList(
+      source.linkedFoundationRequirementIds,
+      `RFx requirement ${index + 1} foundation link`,
+      20,
+    );
+    if (linkedFoundationRequirementIds.some((id) => !foundationIds.has(id)))
+      throw new Error(`RFx requirement ${index + 1} foundation link is unavailable.`);
+    return Object.freeze({
+      id: stable(source.id, `RFx requirement ${index + 1} id`),
+      requirementType,
+      requirementTypeCode,
+      allowedDecisionTreatments,
+      teamCoverageAllowed,
+      capability,
+      capabilityBreadcrumb:
+        optionalText(
+          source.capabilityBreadcrumb,
+          `RFx requirement ${index + 1} capability breadcrumb`,
+          500,
+        ) || null,
+      title: required(source.title, `RFx requirement ${index + 1} title`, 300),
+      description: optionalText(
+        source.description,
+        `RFx requirement ${index + 1} description`,
+        2_000,
+      ),
+      level,
+      decisionTreatment,
+      satisfyingParty,
+      qualifiers: Object.freeze(
+        source.qualifiers.map((qualifier, qualifierIndex) =>
+          requirementQualifier(qualifier, qualifierIndex),
+        ),
+      ),
+      evidenceRequirementIds: uniqueStableList(
+        source.evidenceRequirementIds,
+        `RFx requirement ${index + 1} evidence link`,
+        20,
+      ),
+      linkedFoundationRequirementIds,
+    });
+  });
+  const requirementIds = baseRequirements.map((item) => item.id);
+  if (new Set(requirementIds).size !== requirementIds.length)
+    throw new Error("RFx requirement identities must be unique.");
+  const requirementById = new Map(baseRequirements.map((item) => [item.id, item]));
+  for (const requirement of baseRequirements) {
+    for (const evidenceId of requirement.evidenceRequirementIds) {
+      const evidence = requirementById.get(evidenceId);
+      if (!evidence || evidence.requirementTypeCode !== "EVIDENCE" || evidenceId === requirement.id)
+        throw new Error(`Evidence link for ${requirement.id} is invalid.`);
+    }
+  }
+
+  const responseSource = record(input.responseStructure, "Response structure");
+  const sourceTemplate = optionalDefinitionSnapshot(
+    responseSource.sourceTemplate,
+    "response-template",
+    "Response template",
+  );
+  if (!Array.isArray(responseSource.sections) || responseSource.sections.length > 50)
+    throw new Error("Response sections are invalid.");
+  const sections = Object.freeze(
+    responseSource.sections.map((item, index) => {
+      const source = record(item, `Response section ${index + 1}`);
+      const format = source.format as RfxResponseSectionFormat;
+      if (
+        !(
+          [
+            "narrative",
+            "structured-answer",
+            "attachment",
+            "pricing",
+            "acknowledgment",
+          ] as const
+        ).includes(format)
+      )
+        throw new Error(`Response section ${index + 1} format is invalid.`);
+      const linkedRequirementIds = uniqueStableList(
+        source.linkedRequirementIds,
+        `Response section ${index + 1} requirement link`,
+        100,
+      );
+      if (linkedRequirementIds.some((id) => !requirementById.has(id)))
+        throw new Error(`Response section ${index + 1} has an unavailable requirement link.`);
+      return Object.freeze({
+        id: stable(source.id, `Response section ${index + 1} id`),
+        sourceSection: optionalDefinitionSnapshot(
+          source.sourceSection,
+          "response-section",
+          `Response section ${index + 1} source`,
+        ),
+        title: required(source.title, `Response section ${index + 1} title`, 300),
+        instructions: optionalText(
+          source.instructions,
+          `Response section ${index + 1} instructions`,
+          4_000,
+        ),
+        format,
+        required: source.required === true,
+        order: index,
+        characterLimit: nullableSafeInteger(
+          source.characterLimit,
+          `Response section ${index + 1} character limit`,
+          1,
+          1_000_000,
+        ),
+        itemLimit: nullableSafeInteger(
+          source.itemLimit,
+          `Response section ${index + 1} item limit`,
+          1,
+          10_000,
+        ),
+        attachmentsAllowed: source.attachmentsAllowed === true,
+        linkedRequirementIds,
+      });
+    }),
+  );
+  if (new Set(sections.map((item) => item.id)).size !== sections.length)
+    throw new Error("Response section identities must be unique.");
+  const sectionById = new Map(sections.map((item) => [item.id, item]));
+
+  const evaluationSource = record(
+    input.evaluationDefinition,
+    "Evaluation definition",
+  );
+  const evaluationTemplate = optionalDefinitionSnapshot(
+    evaluationSource.sourceTemplate,
+    "decision-template",
+    "Decision template",
+  );
+  const weightingRequired = evaluationSource.weightingRequired === true;
+  if (!Array.isArray(evaluationSource.factors) || evaluationSource.factors.length > 50)
+    throw new Error("Evaluation factors are invalid.");
+  const factors = Object.freeze(
+    evaluationSource.factors.map((item, index) => {
+      const source = record(item, `Evaluation factor ${index + 1}`);
+      const treatment = source.treatment as RfxEvaluationFactorTreatment;
+      if (
+        !(
+          [
+            "required-condition",
+            "scored-factor",
+            "required-and-scored",
+            "informational-only",
+          ] as const
+        ).includes(treatment)
+      )
+        throw new Error(`Evaluation factor ${index + 1} treatment is invalid.`);
+      const sourceMethod = source.sourceMethod as RfxEvaluationFactor["sourceMethod"];
+      if (
+        sourceMethod !== null &&
+        !("gate scored narrative formula".split(" ") as string[]).includes(sourceMethod)
+      )
+        throw new Error(`Evaluation factor ${index + 1} source method is invalid.`);
+      if (
+        (sourceMethod === "gate" && treatment !== "required-condition") ||
+        (sourceMethod === "scored" &&
+          treatment !== "scored-factor" &&
+          treatment !== "required-and-scored") ||
+        (sourceMethod === "narrative" && treatment !== "informational-only")
+      )
+        throw new Error(`Evaluation factor ${index + 1} treatment conflicts with AMACS.`);
+      const scored = treatment === "scored-factor" || treatment === "required-and-scored";
+      const weightBasisPoints = nullableSafeInteger(
+        source.weightBasisPoints,
+        `Evaluation factor ${index + 1} weight`,
+        0,
+        10_000,
+      );
+      if ((!scored && weightBasisPoints !== null) || (scored && weightingRequired && weightBasisPoints === null))
+        throw new Error(`Evaluation factor ${index + 1} weight is invalid.`);
+      const linkedRequirementIds = uniqueStableList(
+        source.linkedRequirementIds,
+        `Evaluation factor ${index + 1} requirement link`,
+        100,
+      );
+      const linkedResponseSectionIds = uniqueStableList(
+        source.linkedResponseSectionIds,
+        `Evaluation factor ${index + 1} response link`,
+        50,
+      );
+      const linkedEvidenceRequirementIds = uniqueStableList(
+        source.linkedEvidenceRequirementIds,
+        `Evaluation factor ${index + 1} evidence link`,
+        50,
+      );
+      if (
+        linkedRequirementIds.some((id) => !requirementById.has(id)) ||
+        linkedResponseSectionIds.some((id) => !sectionById.has(id)) ||
+        linkedEvidenceRequirementIds.some(
+          (id) => requirementById.get(id)?.requirementTypeCode !== "EVIDENCE",
+        )
+      )
+        throw new Error(`Evaluation factor ${index + 1} has an unavailable link.`);
+      return Object.freeze({
+        id: stable(source.id, `Evaluation factor ${index + 1} id`),
+        sourceFactor: optionalDefinitionSnapshot(
+          source.sourceFactor,
+          "decision-factor",
+          `Evaluation factor ${index + 1} source`,
+        ),
+        sourceMethod,
+        title: required(source.title, `Evaluation factor ${index + 1} title`, 300),
+        description: optionalText(
+          source.description,
+          `Evaluation factor ${index + 1} description`,
+          2_000,
+        ),
+        treatment,
+        weightBasisPoints,
+        order: index,
+        linkedRequirementIds,
+        linkedResponseSectionIds,
+        linkedEvidenceRequirementIds,
+      });
+    }),
+  );
+  if (new Set(factors.map((item) => item.id)).size !== factors.length)
+    throw new Error("Evaluation factor identities must be unique.");
+
+  const requirements = Object.freeze(
+    baseRequirements.map((requirement) =>
+      Object.freeze({
+        ...requirement,
+        linkedResponseSectionIds: Object.freeze(
+          sections
+            .filter((section) => section.linkedRequirementIds.includes(requirement.id))
+            .map((section) => section.id),
+        ),
+        linkedEvaluationFactorIds: Object.freeze(
+          factors
+            .filter((factor) => factor.linkedRequirementIds.includes(requirement.id))
+            .map((factor) => factor.id),
+        ),
+      }),
+    ),
+  );
+  const requiredRequirements = requirements.filter((item) => item.level === "required");
+  const requiredDecisionLinksComplete = requiredRequirements.every((item) => {
+    const linked = factors.filter((factor) =>
+      factor.linkedRequirementIds.includes(item.id),
+    );
+    if (
+      item.decisionTreatment === "gate_only" ||
+      item.decisionTreatment === "gate_and_scored_depth"
+    )
+      return linked.some(
+        (factor) =>
+          factor.treatment === "required-condition" ||
+          factor.treatment === "required-and-scored",
+      );
+    if (item.decisionTreatment === "scored_only")
+      return linked.some(
+        (factor) =>
+          factor.treatment === "scored-factor" ||
+          factor.treatment === "required-and-scored",
+      );
+    return linked.length > 0;
+  });
+  const responseComplete =
+    sections.length > 0 &&
+    requiredRequirements.every(
+      (item) => item.linkedResponseSectionIds.length > 0 || item.evidenceRequirementIds.length > 0,
+    );
+  const scoredWeightTotal = factors.reduce(
+    (total, factor) => total + (factor.weightBasisPoints ?? 0),
+    0,
+  );
+  const evaluationComplete =
+    factors.length > 0 &&
+    requiredDecisionLinksComplete &&
+    (!weightingRequired || scoredWeightTotal === 10_000);
+  return Object.freeze({
+    schemaVersion: RFX_DEFINITION_SCHEMA_VERSION,
+    requirements,
+    responseStructure: Object.freeze({ sourceTemplate, sections }),
+    evaluationDefinition: Object.freeze({
+      sourceTemplate: evaluationTemplate,
+      weightingRequired,
+      factors,
+    }),
+    interpretationRecordIds: uniqueStableList(
+      input.interpretationRecordIds,
+      "Definition interpretation record",
+      12,
+    ),
+    moduleStatus: Object.freeze({
+      requirements: definitionModuleState(
+        requirements.length,
+        requirements.length > 0,
+      ),
+      responseStructure: definitionModuleState(sections.length, responseComplete),
+      evaluationDefinition: definitionModuleState(factors.length, evaluationComplete),
+    }),
+  });
+}
+
+export function saveRfxDefinition(
+  input: Readonly<{
+    aggregate: RfxAggregate;
+    expectedVersion: number;
+    definition: RfxDefinition;
+    actorUserId: UserId;
+    actorMembershipId: OrganizationMembershipId;
+    now: string;
+  }>,
+): RfxAggregate {
+  if (input.aggregate.lifecycleState !== "draft")
+    throw new Error("Only a draft RFx can be edited.");
+  if (
+    !Number.isInteger(input.expectedVersion) ||
+    input.expectedVersion !== input.aggregate.version
+  )
+    throw new Error(`RFx changed; current version is ${input.aggregate.version}.`);
+  return Object.freeze({
+    ...input.aggregate,
+    definition: input.definition,
+    version: input.aggregate.version + 1,
+    updatedByUserId: input.actorUserId,
+    updatedByMembershipId: input.actorMembershipId,
+    updatedAt: timestamp(input.now, "RFx update time"),
+  });
+}
+
 export function saveRfxPackage(
   input: Readonly<{
     aggregate: RfxAggregate;
@@ -881,6 +1539,7 @@ export function createRfxDraft(
     version: 1,
     requestFamily: input.requestFamily,
     package: null,
+    definition: null,
     creationSource: Object.freeze({
       kind: "blank",
       schemaVersion: RFX_CREATION_SOURCE_SCHEMA_VERSION,

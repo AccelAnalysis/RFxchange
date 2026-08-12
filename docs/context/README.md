@@ -100,7 +100,7 @@ Both implemented slices are accepted on merged `main`. The Slice 4.3 authority c
 
 Wave 2 is complete. Wave 3 Slices 3.1 through 3.8 and Brand Gates B0–B6a are merged, and the configured-browser/zero-residual Wave 3 exit accepted Network at 38/38. B6b remains intentionally pending.
 
-Merged `main` at `90ee6e08a18a67cc794ff1a84a047a8313ad50d6` includes the accepted Exchange shell and Slice 4.1–4.2 runtime. The current gate is the documentation-only Slice 4.3 authority; runtime cannot begin before that authority is reviewed and merged.
+Merged `main` through the Slice 4.3 documentation authority at `6dcf09ace96ba1881bd229ab76eef79cde1a33a0` includes the accepted Exchange shell and Slice 4.1–4.2 runtime. The bounded Slice 4.3 implementation adds only the authorized private definition runtime.
 
 The dependency result remains:
 
@@ -109,11 +109,11 @@ The dependency result remains:
 - AI/AMACS foundation: satisfied and reusable for optional Slice 4.3 request-structure interpretation; the manual path remains complete;
 - organization authority/tenancy/audit/concurrency foundations: satisfied by prior cross-cutting implementation;
 - Exchange Interaction Architecture: satisfied by PR #150 and reconciled by the active shell gate;
-- Slices 4.1–4.2 RFx kernel/package: implemented and accepted on merged `main` for `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006`;
+- Slices 4.1–4.3 RFx kernel/package/definition: implemented for `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009` and `ISS-011`;
 - Stabilization 2C: isolated release engineering, not a product prerequisite; and
 - the reviewed `ISS-009` dependency on stable Slice 4.2 and Slice 4.3 requirements is adopted; no other dependency correction is introduced.
 
-Canonical totals are **438 total · 157 Done · 281 Not Started**, with Wave 4 RFx Core **5/41**. Later Wave 4 runtime remains unimplemented pending slice-specific authority.
+Canonical totals are **438 total · 160 Done · 278 Not Started**, with Wave 4 RFx Core **8/41**. Later Wave 4 runtime remains unimplemented pending slice-specific authority.
 
 ## Stabilization 2C boundary
 
