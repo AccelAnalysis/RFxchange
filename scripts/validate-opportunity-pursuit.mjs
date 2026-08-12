@@ -108,7 +108,10 @@ for (const id of ["RSP-001", "RSP-002", "RSP-003", "RSP-004", "RSP-006"]) {
   const record = requirements.requirements.find((item) => item.id === `RFX-FEATURE-${id}`);
   assert.ok(record, `missing Four-Lens requirement RFX-FEATURE-${id}`);
   assert.equal(record.status, "Implemented — Not Verified");
-  assert.equal(record.acceptanceLane, "Independent Acceptance");
+  assert.equal(record.implementation?.pr, 171);
+  assert.equal(record.implementation?.sha, "e70413e2e45db4b75517376acdc0700f9838a963");
+  assert.equal(record.acceptance?.lane, null);
+  assert.equal(record.acceptance?.result, null);
 }
 assert.match(evidence, /Implemented — Not Verified/);
 assert.match(evidence, /rfx-46-reconciliation-2026-08-12/);
