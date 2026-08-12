@@ -2,9 +2,9 @@
 
 **Status:** exact-candidate validation ledger for `WP-INTEL-ROADMAP-01`; no production acceptance claim.
 
-**Packet:** `WP-INTEL-ROADMAP-01`  
-**Activation epoch:** `initial-operational-2026-08-12`  
-**Immutable activation base:** `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`  
+**Packet:** `WP-INTEL-ROADMAP-01`
+**Activation epoch:** `initial-operational-2026-08-12`
+**Immutable activation base:** `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`
 **Execution branch start:** `69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068`
 
 ## Validation intent
