@@ -404,6 +404,7 @@ async function seedParticipant() {
       "referral.manage",
       "rfx.create",
       "rfx.publish",
+      "response.create",
     ],
     now,
   });
@@ -1629,6 +1630,9 @@ async function runSpatialAcceptance({ baseUrl, sessionCookie }) {
 async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
   let chrome;
   let evidence = null;
+  let externalProjectionReference = null;
+  let pursuitEvidence = null;
+  const capabilityClaimId = `capability-claim-${runId}`;
   const authorizationRef = db.collection("organizationAuthorizations").doc(membershipId);
   const authorizationSnapshot = await authorizationRef.get();
   assert.equal(authorizationSnapshot.exists, true, "RFx authorization fixture was missing.");
@@ -1967,7 +1971,7 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     const shareEvidence = await evaluate(cdp, `({
       rawIdsVisible: document.body.innerText.includes('AMACS-'),
       internalRfxIdSerialized: document.documentElement.innerHTML.includes(${JSON.stringify(created.id)}),
-      serverIndexEnvelopeSerialized: document.documentElement.innerHTML.includes('capabilityIndexKeys') || document.documentElement.innerHTML.includes('localityIndexKeys'),
+      serverIndexEnvelopeSerialized: ['capabilityIndexKeys', 'localityIndexKeys', 'requirementIndex', 'issuerOrganizationIndexKey'].some((key) => document.documentElement.innerHTML.includes(key)),
       exactLocationVisible: document.body.innerText.includes('Portsmouth Blvd'),
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     })`);
@@ -1985,7 +1989,7 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     const discoveryView = await evaluate(cdp, `({
       current: document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current'),
       selected: document.querySelector('[data-selected-opportunity-reference]')?.dataset.selectedOpportunityReference,
-      indexLeak: document.documentElement.innerHTML.includes('capabilityIndexKeys') || document.documentElement.innerHTML.includes('localityIndexKeys'),
+      indexLeak: ['capabilityIndexKeys', 'localityIndexKeys', 'requirementIndex', 'issuerOrganizationIndexKey'].some((key) => document.documentElement.innerHTML.includes(key)),
       deadlineView: document.body.innerText.includes('Watched deadlines'),
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     })`);
@@ -2005,6 +2009,32 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.equal(watch.replay, 200);
     assert.equal(watch.replayBody.replayed, true);
     assert.match(watch.id, /^oppwatch_[a-f0-9]{40}$/);
+    const publishedProjection = (await db.collection("rfxOpportunityProjections").doc(previewEvidence.reference).get()).data();
+    externalProjectionReference = `opp_external_${createHash("sha256").update(runId).digest("hex").slice(0, 32)}`;
+    await Promise.all([
+      db.collection("rfxOpportunityProjections").doc(externalProjectionReference).set({ ...publishedProjection, reference: externalProjectionReference, issuerOrganizationIndexKey: externalOrganizationIds.harbor }),
+      db.collection("organizationCapabilityClaims").doc(capabilityClaimId).set(record({ id: capabilityClaimId, organizationId, capabilityId: publishedProjection.requirementIndex[0].capabilityId, amacsReleaseVersion: publishedProjection.requirementIndex[0].amacsReleaseVersion, labelSnapshot: publishedProjection.payload.requirements[0].capabilityLabel, definitionSnapshot: publishedProjection.payload.requirements[0].capabilityDefinition, domainId: "AMACS-DOM-000001", domainLabelSnapshot: "Operations", familyId: "AMACS-FAM-000001", familyLabelSnapshot: "Resilience", entityScope: "reporting_entity", marketRoleIds: [], deliveryRoles: ["prime"], serviceGeographyIds: [String(PORTSMOUTH_CONTROLLED_LOCALITY.id)], specialties: [], capacity: null, evidenceIds: [], assertionStatus: "self_reported", visibility: "network", source: { kind: "manual" }, assertedByUserId: seed.userId, assertedByMembershipId: membershipId, createdAt: now, updatedAt: now })),
+    ]);
+    await navigate(cdp, `${baseUrl}/opportunities/${externalProjectionReference}/assess`);
+    await waitForExpression(cdp, `document.querySelector('[data-opportunity-assessment-reference]')?.dataset.opportunityAssessmentReference === ${JSON.stringify(externalProjectionReference)}`, "opportunity assessment workspace");
+    const assessmentView = await evaluate(cdp, `({ potentialMatch: document.body.innerText.includes('Potential Match'), indexLeak: ['requirementIndex', 'issuerOrganizationIndexKey', 'capabilityIndexKeys'].some((key) => document.documentElement.innerHTML.includes(key)), operational: document.querySelector('[data-participant-workspace="operational"]') !== null, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth })`);
+    assert.equal(assessmentView.potentialMatch, true);
+    assert.equal(assessmentView.indexLeak, false);
+    assert.equal(assessmentView.operational, true);
+    assert.ok(assessmentView.overflow <= 0);
+    await evaluate(cdp, `document.querySelector('[data-opportunity-pursue]')?.click()`);
+    await waitForExpression(cdp, `document.body.innerText.includes('Pursuit recorded for your organization.')`, "organization pursuit confirmation");
+    const pursuitSnapshot = await db.collection("opportunityPursuits").where("organizationId", "==", organizationId).where("opportunityReference", "==", externalProjectionReference).get();
+    assert.equal(pursuitSnapshot.size, 1);
+    assert.equal(pursuitSnapshot.docs[0].data().decision, "pursue");
+    pursuitEvidence = Object.freeze({
+      opportunityReference: externalProjectionReference,
+      attribution: Object.freeze(["discovered", "potential-match"]),
+      decision: pursuitSnapshot.docs[0].data().decision,
+      version: pursuitSnapshot.docs[0].data().version,
+      privateIndicesSerialized: assessmentView.indexLeak,
+      overflowPx: assessmentView.overflow,
+    });
     await navigate(cdp, `${baseUrl}/opportunities/manage?draft=${encodeURIComponent(created.id)}`);
     await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '5'`, "published RFx workspace return");
 
@@ -2088,6 +2118,7 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
       moduleStatus: packageAggregate.package.moduleStatus,
       definitionModuleStatus: definitionAggregate.definition.moduleStatus,
       publication: { previewDigest: previewEvidence.digest, reference: previewEvidence.reference, shareEvidence },
+      pursuit: pursuitEvidence,
       eventKinds: events.docs.map((snapshot) => snapshot.data().kind).sort(),
       commandCount: commands.size,
       auditCount: rfxAudits.length,
@@ -2103,7 +2134,7 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     return evidence;
   } finally {
     await authorizationRef.set(authorizationSnapshot.data());
-    const [aggregates, events, commands, audits, publicationSnapshots, savedSearches, watches, matches, alerts, relationCommands, relationEvents] = await Promise.all([
+    const [aggregates, events, commands, audits, publicationSnapshots, savedSearches, watches, matches, alerts, relationCommands, relationEvents, fitSnapshots, pursuits, pursuitCommands, pursuitEvents] = await Promise.all([
       db.collection("rfxAggregates").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxCommands").where("issuerOrganizationId", "==", organizationId).get(),
@@ -2115,14 +2146,20 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
       db.collection("opportunityAlertIntents").where("organizationId", "==", organizationId).get(),
       db.collection("opportunityRelationCommands").where("organizationId", "==", organizationId).get(),
       db.collection("opportunityRelationEvents").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityFitSnapshots").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityPursuits").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityPursuitCommands").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityPursuitEvents").where("organizationId", "==", organizationId).get(),
     ]);
     const rfxAudits = audits.docs.filter((snapshot) => String(snapshot.data().action).startsWith("rfx."));
     const projectionRefs = publicationSnapshots.docs.map((snapshot) =>
       db.collection("rfxOpportunityProjections").doc(snapshot.data().reference),
     );
     const opportunityAudits = audits.docs.filter((snapshot) => String(snapshot.data().action).startsWith("opportunity."));
-    await Promise.all([...aggregates.docs, ...events.docs, ...commands.docs, ...rfxAudits, ...opportunityAudits, ...publicationSnapshots.docs, ...savedSearches.docs, ...watches.docs, ...matches.docs, ...alerts.docs, ...relationCommands.docs, ...relationEvents.docs].map((snapshot) => snapshot.ref.delete()));
+    await Promise.all([...aggregates.docs, ...events.docs, ...commands.docs, ...rfxAudits, ...opportunityAudits, ...publicationSnapshots.docs, ...savedSearches.docs, ...watches.docs, ...matches.docs, ...alerts.docs, ...relationCommands.docs, ...relationEvents.docs, ...fitSnapshots.docs, ...pursuits.docs, ...pursuitCommands.docs, ...pursuitEvents.docs].map((snapshot) => snapshot.ref.delete()));
     await Promise.all(projectionRefs.map((reference) => reference.delete()));
+    if (externalProjectionReference) await db.collection("rfxOpportunityProjections").doc(externalProjectionReference).delete();
+    await db.collection("organizationCapabilityClaims").doc(capabilityClaimId).delete();
     const residuals = await Promise.all([
       db.collection("rfxAggregates").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
@@ -2134,6 +2171,10 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
       db.collection("opportunityAlertIntents").where("organizationId", "==", organizationId).get(),
       db.collection("opportunityRelationCommands").where("organizationId", "==", organizationId).get(),
       db.collection("opportunityRelationEvents").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityFitSnapshots").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityPursuits").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityPursuitCommands").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityPursuitEvents").where("organizationId", "==", organizationId).get(),
     ]);
     const projectionResiduals = await Promise.all(projectionRefs.map((reference) => reference.get()));
     assert.equal(residuals.reduce((total, snapshot) => total + snapshot.size, 0), 0, "RFx configured acceptance left fixture residue.");
@@ -2506,6 +2547,9 @@ try {
   console.log("Exchange shell configured-browser acceptance passed.");
   console.log(JSON.stringify(evidence, null, 2));
 } catch (error) {
+  if (candidateServer?.acceptanceOutput?.length) {
+    console.error(`Candidate server output:\n${candidateServer.acceptanceOutput.join("")}`);
+  }
   console.error(error);
   process.exitCode = 1;
 } finally {

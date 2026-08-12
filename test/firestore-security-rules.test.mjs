@@ -56,6 +56,10 @@ const canonicalCollections = [
   "networkEducationProgress",
   "networkEducationEvents",
   "networkEducationCommands",
+  "opportunityFitSnapshots",
+  "opportunityPursuits",
+  "opportunityPursuitCommands",
+  "opportunityPursuitEvents",
 ];
 
 const appendOnlyCollections = [
@@ -81,6 +85,9 @@ const appendOnlyCollections = [
   "activationReleaseEvents",
   "networkEducationEvents",
   "networkEducationCommands",
+  "opportunityFitSnapshots",
+  "opportunityPursuitCommands",
+  "opportunityPursuitEvents",
 ];
 
 test("INF-004 binds the Firebase project to the source-controlled Firestore ruleset", () => {

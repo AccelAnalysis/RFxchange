@@ -37,6 +37,8 @@ import { FirestoreRfxRepository } from "../src/infrastructure/firestore/rfx.ts";
 import { FirestoreOpportunityDiscoveryRepository } from "../src/infrastructure/firestore/opportunity-discovery.ts";
 import { FirestorePublishedOpportunityRepository } from "../src/infrastructure/acquisition/firestore-published-opportunities.ts";
 import { OpportunityDiscoveryService } from "../src/application/rfx/opportunity-discovery-service.ts";
+import { FirestoreOpportunityPursuitRepository } from "../src/infrastructure/firestore/opportunity-pursuit.ts";
+import { calculateOpportunityFit, normalizePursuitAssessment, opportunityFitSnapshotId, opportunityPursuitId } from "../src/domain/rfx/pursuit.ts";
 
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, "127.0.0.1:8080");
 const projectId = "demo-rfxchange";
@@ -57,6 +59,9 @@ connectFirestoreEmulator(clientDb, "127.0.0.1", 8080);
 const repository = new FirestoreRfxRepository(adminDb);
 const now = "2026-08-12T12:00:00.000Z";
 const organizationId = `org-rfx-${suffix}`;
+const responderOrganizationId = `org-responder-${suffix}`;
+const responderUserId = `user-responder-${suffix}`;
+const responderMembershipId = `membership-responder-${suffix}`;
 const aggregateId = `rfx-${suffix}`;
 const geographyId = `geo-rfx-${suffix}`.toLowerCase();
 const release = {
@@ -115,6 +120,10 @@ const ids = {
   opportunityRelationCommands: [`relation-command-${suffix}`, `watch-command-${suffix}`],
   opportunityRelationEvents: [`relation-event-${suffix}`],
   geographies: [geographyId],
+  opportunityFitSnapshots: [],
+  opportunityPursuits: [],
+  opportunityPursuitCommands: [`pursuit-command-${suffix}`],
+  opportunityPursuitEvents: [`pursuit-event-${suffix}`],
 };
 const event = (id, aggregate, kind, commandId, priorRequestFamily = null, priorPackage = null, priorDefinition = null) => ({
   id,
@@ -403,6 +412,32 @@ try {
   assert.equal((await discovery.setWatch(participantScope, { commandId: `watch-command-${suffix}`, reference, watching: true })).replayed, true);
   assert.equal((await adminDb.collection("opportunitySavedSearchMatches").where("organizationId", "==", organizationId).get()).size, 1);
   assert.equal((await adminDb.collection("opportunityAlertIntents").where("organizationId", "==", organizationId).get()).size, 1);
+  const responderWatchId = `watch-responder-${suffix}`;
+  await Promise.all([
+    adminDb.collection("organizations").doc(responderOrganizationId).set({ id: responderOrganizationId, createdAt: now, updatedAt: now }),
+    adminDb.collection("organizationMemberships").doc(responderMembershipId).set({ id: responderMembershipId, userId: responderUserId, organizationId: responderOrganizationId, status: "active", createdAt: now, updatedAt: now }),
+    adminDb.collection("organizationAuthorizations").doc(responderMembershipId).set({ membershipId: responderMembershipId, userId: responderUserId, organizationId: responderOrganizationId, permissions: ["response.create"], createdAt: now, updatedAt: now }),
+    adminDb.collection("organizationServiceGeographies").doc(responderOrganizationId).set({ id: responderOrganizationId, organizationId: responderOrganizationId, primaryGeographyId: geographyId, serviceGeographyIds: [geographyId], updatedByUserId: responderUserId, updatedByMembershipId: responderMembershipId, updatedAt: now }),
+    adminDb.collection("organizationCapabilityClaims").doc(`claim-responder-${suffix}`).set({ schemaVersion: 1, id: `claim-responder-${suffix}`, organizationId: responderOrganizationId, capabilityId: projection.requirementIndex[0].capabilityId, amacsReleaseVersion: projection.requirementIndex[0].amacsReleaseVersion, labelSnapshot: projection.payload.requirements[0].capabilityLabel, definitionSnapshot: projection.payload.requirements[0].capabilityDefinition, domainId: "domain", domainLabelSnapshot: "Operations", familyId: "family", familyLabelSnapshot: "Resilience", entityScope: "reporting_entity", marketRoleIds: [], deliveryRoles: ["prime"], serviceGeographyIds: [geographyId], specialties: [], capacity: null, evidenceIds: [], assertionStatus: "self_reported", visibility: "network", source: { kind: "manual" }, assertedByUserId: responderUserId, assertedByMembershipId: responderMembershipId, createdAt: now, updatedAt: now }),
+    adminDb.collection("opportunityWatches").doc(responderWatchId).set({ schemaVersion: 1, id: responderWatchId, organizationId: responderOrganizationId, userId: responderUserId, membershipId: responderMembershipId, opportunityReference: reference, status: "watching", version: 1, createdAt: now, updatedAt: now }),
+  ]);
+  const pursuitRepository = new FirestoreOpportunityPursuitRepository(adminDb);
+  const claims = await pursuitRepository.listCapabilityClaims(responderOrganizationId);
+  const geographies = await pursuitRepository.getServiceGeographyIds(responderOrganizationId);
+  const explanation = calculateOpportunityFit({ organizationId: responderOrganizationId, projection, claims, serviceGeographyIds: geographies, calculatedAt: now });
+  assert.deepEqual(explanation.attribution, ["discovered", "potential-match"]);
+  const fitId = opportunityFitSnapshotId({ organizationId: responderOrganizationId, reference, projectionVersion: projection.aggregateVersion, projectionDigest: projection.digest, capabilityInputDigest: explanation.organizationCapabilityInputDigest });
+  ids.opportunityFitSnapshots.push(fitId);
+  const fit = { schemaVersion: 1, id: fitId, organizationId: responderOrganizationId, opportunityReference: reference, explanation, recordedAt: now };
+  assert.equal(await pursuitRepository.recordFit(fit), "created");
+  assert.equal(await pursuitRepository.recordFit(fit), "replayed");
+  const pursuitId = opportunityPursuitId(responderOrganizationId, reference);
+  ids.opportunityPursuits.push(pursuitId);
+  const pursuit = { schemaVersion: 1, id: pursuitId, organizationId: responderOrganizationId, opportunityReference: reference, decision: "pursue", assessment: normalizePursuitAssessment({ fit: { state: "acceptable", note: "Confirmed canonical alignment." }, gaps: { state: "needs-confirmation", note: "Review remaining requirements." } }), reviewedFitSnapshotId: fitId, reviewedProjectionVersion: projection.aggregateVersion, reviewedProjectionDigest: projection.digest, reviewedCapabilityInputDigest: explanation.organizationCapabilityInputDigest, fitPolicyVersion: 1, version: 1, createdByUserId: responderUserId, createdByMembershipId: responderMembershipId, updatedByUserId: responderUserId, updatedByMembershipId: responderMembershipId, createdAt: now, updatedAt: now };
+  const pursuitBundle = { record: pursuit, expectedVersion: null, expectedFitSnapshotId: fitId, actingUserWatchId: responderWatchId, command: { schemaVersion: 1, id: `pursuit-command-${suffix}`, organizationId: responderOrganizationId, action: "pursuit.save", requestFingerprint: "4".repeat(64), pursuitId, resultingVersion: 1, recordedAt: now }, event: { schemaVersion: 1, id: `pursuit-event-${suffix}`, organizationId: responderOrganizationId, actorUserId: responderUserId, actorMembershipId: responderMembershipId, kind: "pursuit-created", pursuitId, pursuitVersion: 1, decision: "pursue", commandId: `pursuit-command-${suffix}`, occurredAt: now }, audit: { id: `audit-pursuit-${suffix}`, organizationId: responderOrganizationId, actor: { userId: responderUserId, membershipId: responderMembershipId }, action: "opportunity.pursuit-created", target: null, occurredAt: now } };
+  assert.equal(await pursuitRepository.savePursuit(pursuitBundle), "created");
+  assert.equal(await pursuitRepository.savePursuit(pursuitBundle), "replayed");
+  assert.equal((await adminDb.collection("opportunityWatches").doc(responderWatchId).get()).data().status, "removed");
   const publishedOpportunities = new FirestorePublishedOpportunityRepository(adminDb);
   assert.equal((await publishedOpportunities.getByReference(reference)).reference, reference);
   assert.equal(await publishedOpportunities.getResponderProjection("portsmouth-facilities-partner-search", true), null);
@@ -431,6 +466,10 @@ try {
     "opportunityAlertIntents",
     "opportunityRelationCommands",
     "opportunityRelationEvents",
+    "opportunityFitSnapshots",
+    "opportunityPursuits",
+    "opportunityPursuitCommands",
+    "opportunityPursuitEvents",
     "organizationAuditEvents",
   ]) {
     await assert.rejects(
@@ -441,10 +480,17 @@ try {
     );
   }
 } finally {
-  const opportunityCollections = ["opportunitySavedSearches", "opportunityWatches", "opportunitySavedSearchMatches", "opportunityAlertIntents", "opportunityRelationCommands", "opportunityRelationEvents"];
-  const opportunitySnapshots = await Promise.all(opportunityCollections.map((collection) => adminDb.collection(collection).where("organizationId", "==", organizationId).get()));
-  const opportunityAudits = (await adminDb.collection("organizationAuditEvents").where("organizationId", "==", organizationId).get()).docs.filter((snapshot) => String(snapshot.data().action).startsWith("opportunity."));
+  const opportunityCollections = ["opportunitySavedSearches", "opportunityWatches", "opportunitySavedSearchMatches", "opportunityAlertIntents", "opportunityRelationCommands", "opportunityRelationEvents", "opportunityFitSnapshots", "opportunityPursuits", "opportunityPursuitCommands", "opportunityPursuitEvents"];
+  const opportunitySnapshots = await Promise.all(opportunityCollections.flatMap((collection) => [organizationId, responderOrganizationId].map((id) => adminDb.collection(collection).where("organizationId", "==", id).get())));
+  const opportunityAudits = (await Promise.all([organizationId, responderOrganizationId].map((id) => adminDb.collection("organizationAuditEvents").where("organizationId", "==", id).get()))).flatMap((result) => result.docs).filter((snapshot) => String(snapshot.data().action).startsWith("opportunity."));
   await Promise.all([...opportunitySnapshots.flatMap((snapshot) => snapshot.docs), ...opportunityAudits].map((snapshot) => snapshot.ref.delete()));
+  await Promise.all([
+    adminDb.collection("organizationCapabilityClaims").doc(`claim-responder-${suffix}`).delete(),
+    adminDb.collection("organizationServiceGeographies").doc(responderOrganizationId).delete(),
+    adminDb.collection("organizationAuthorizations").doc(responderMembershipId).delete(),
+    adminDb.collection("organizationMemberships").doc(responderMembershipId).delete(),
+    adminDb.collection("organizations").doc(responderOrganizationId).delete(),
+  ]);
   for (const [collection, documentIds] of Object.entries(ids)) {
     await Promise.all(
       documentIds.map((id) => adminDb.collection(collection).doc(id).delete()),
@@ -464,5 +510,5 @@ try {
 }
 
 console.log(
-  "Slice 4.4 RFx publication atomicity, projection parity, replay, conflict, direct-client deny, immutability, and zero-residual acceptance passed.",
+  "Slice 4.6 RFx publication, discovery, fit, pursuit replay/conflict, direct-client deny, immutable evidence, and zero-residual acceptance passed.",
 );

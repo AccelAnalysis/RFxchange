@@ -11,6 +11,7 @@ import type {
   RfxFoundationRequirement,
   RfxId,
   RfxRequirementLevel,
+  RfxRequirementDefinition,
   RfxRequirementQualifier,
   RfxResponseSectionFormat,
   RfxTiming,
@@ -61,6 +62,17 @@ export interface ResponderRequirementProjection {
   readonly evidence: readonly string[];
 }
 
+export interface ResponderRequirementIndexEntry {
+  readonly ordinal: number;
+  readonly requirementId: string;
+  readonly capabilityId: string | null;
+  readonly amacsReleaseVersion: string | null;
+  readonly level: RfxRequirementLevel;
+  readonly satisfyingParty: RfxRequirementDefinition["satisfyingParty"];
+  readonly teamCoverageAllowed: boolean;
+  readonly evidenceRequired: boolean;
+}
+
 export interface ResponderOpportunityPayload {
   readonly title: string;
   readonly summary: string;
@@ -109,6 +121,10 @@ export interface ResponderOpportunityProjection {
   readonly digest: string;
   readonly payload: ResponderOpportunityPayload;
   readonly publishedAt: string | null;
+  /** Trusted-server comparison data. Never project this index into participant HTML/API envelopes. */
+  readonly issuerOrganizationIndexKey?: string;
+  /** Stable requirement semantics used by deterministic fit. Never expose as primary participant labels. */
+  readonly requirementIndex?: readonly ResponderRequirementIndexEntry[];
   readonly requestFamilyIndexKey: string;
   readonly localityIndexKeys: readonly string[];
   readonly capabilityIndexKeys: readonly string[];
@@ -267,6 +283,19 @@ export function projectResponderOpportunity(input: Readonly<{
     digest: stableDigest(payload),
     payload,
     publishedAt: input.mode === "published" ? (input.publishedAt ?? null) : null,
+    issuerOrganizationIndexKey: String(aggregate.issuerOrganizationId),
+    requirementIndex: Object.freeze(
+      aggregate.definition.requirements.map((requirement, ordinal) => Object.freeze({
+        ordinal,
+        requirementId: requirement.id,
+        capabilityId: requirement.capability?.id ?? null,
+        amacsReleaseVersion: requirement.capability?.amacsReleaseVersion ?? null,
+        level: requirement.level,
+        satisfyingParty: requirement.satisfyingParty,
+        teamCoverageAllowed: requirement.teamCoverageAllowed,
+        evidenceRequired: requirement.evidenceRequirementIds.length > 0,
+      })),
+    ),
     requestFamilyIndexKey: aggregate.requestFamily.requestFamilyId,
     localityIndexKeys: Object.freeze(permittedLocalities.map((item) => item.indexKey)),
     capabilityIndexKeys: Object.freeze(

@@ -1,0 +1,46 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const read = (value) => fs.readFileSync(path.join(root, value), "utf8");
+const domain = read("src/domain/rfx/pursuit.ts");
+const publication = read("src/domain/rfx/publication.ts");
+const service = read("src/application/rfx/opportunity-pursuit-service.ts");
+const repository = read("src/infrastructure/firestore/opportunity-pursuit.ts");
+const route = read("app/api/opportunities/pursuit/route.ts");
+const page = read("app/opportunities/[reference]/assess/page.tsx");
+const workspace = read("src/components/rfx/OpportunityAssessmentWorkspace.tsx");
+const english = read("src/i18n/messages/rfx/en-US.json");
+const rules = read("firestore.rules");
+const tracker = read("docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md");
+const evidence = read("docs/architecture/WAVE_4_SLICE_4_6.md");
+
+for (const contract of ["MatchExplanation", "RequirementFitObservation", "OpportunityGap", "PursuitAssessment", "OpportunityPursuit", "OpportunityFitSnapshot", "OpportunityPursuitCommandReceipt", "OpportunityPursuitEvent"]) assert.match(domain, new RegExp(contract));
+assert.match(publication, /issuerOrganizationIndexKey/);
+assert.match(publication, /requirementIndex/);
+assert.match(service, /permission: "response\.create"/);
+assert.match(service, /authorizeOrganizationOperation/);
+assert.match(service, /expectedFitSnapshotId/);
+assert.match(service, /opportunityWatchId/);
+assert.doesNotMatch(service + domain, /awardLikelihood|qualificationScore|matchPercent|paidPlacement/);
+assert.match(repository, /runTransaction/);
+assert.match(repository, /opportunityCapabilityInputDigest/);
+assert.match(repository, /response\.create/);
+for (const collection of ["opportunityFitSnapshots", "opportunityPursuits", "opportunityPursuitCommands", "opportunityPursuitEvents"]) assert.match(repository + rules, new RegExp(collection));
+assert.match(route, /resolveParticipantRoute/);
+assert.match(route, /Same-origin request required/);
+assert.doesNotMatch(route + page + workspace, /firebase-admin|firebase\/firestore/);
+assert.match(workspace, /ParticipantShell activeItem="opportunities-rfx"/);
+assert.match(workspace, /rfxWorkspace\.discovery\.pursuit\.boundaryTitle/);
+assert.match(workspace, /rfxWorkspace\.discovery\.pursuit\.responseUnavailable/);
+assert.match(english, /Decision support, not a qualification score/);
+assert.match(english, /Response construction and submission are not available/);
+assert.match(tracker, /438 total · 175 Done · 263 Not Started/);
+assert.match(tracker, /RFx Core: \*\*23\/41\*\*/);
+for (const id of ["RSP-001", "RSP-002", "RSP-003", "RSP-004", "RSP-006"]) {
+  assert.match(tracker, new RegExp("\\[x\\] `" + id + "`"));
+  assert.match(evidence, new RegExp(id));
+}
+console.log("Wave 4 Slice 4.6 deterministic fit, gap, assessment, and organization pursuit guardrails validated.");

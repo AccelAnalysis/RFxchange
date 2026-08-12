@@ -12,12 +12,12 @@
 
 ## Progress
 
-**438 total · 170 Done · 268 Not Started**
+**438 total · 175 Done · 263 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
 - 3 - Network: **38/38**
-- 4 - RFx Core: **18/41**
+- 4 - RFx Core: **23/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
 - 7 - Institutional & Scale: **1/47**
@@ -55,8 +55,9 @@ Network completion is **38/38**: four inherited Wave 1 foundations, three Slice 
 - **Slice 4.3 — `ISS-007` + `ISS-009` + `ISS-011`**: extends the same private aggregate with server-canonical AMACS requirements, an expandable linked response structure and an expandable linked evaluation definition with governed treatment/weight rules, bounded save/recovery and a complete manual path. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_3.md`.
 - **Slice 4.4 — `ISS-016` + `ISS-018` + `ISS-019` + `ISS-020` + `ACQ-009`**: adds current server-derived readiness, exact preview/publication projection parity, atomic one-way publication with immutable evidence, audience-gated controlled sharing and the truthful free/basic commercial boundary. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_4.md`.
 - **Slice 4.5 — `DSC-004` + `DSC-005` + `DSC-006` + `DSC-007` + `DSC-008`**: adds real permitted opportunity discovery in the Spatial Workspace, governed saved searches, minimized idempotent alert/digest requests, one private watch relation and canonical watched-deadline views. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_5.md`.
+- **Slice 4.6 — `RSP-001` + `RSP-002` + `RSP-003` + `RSP-004` + `RSP-006`**: adds versioned deterministic canonical-capability fit attribution, explainable requirement observations, private organization assessment, typed gaps and one organization-owned Watch/Pursue/Decline decision with explicit acting-user bookmark transition. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_6.md`.
 
-Wave 4 RFx Core is **18/41**. Slice 4.5 consumes only real Slice 4.4 projections and makes Slice 4.6 documentation authority dependency-eligible. B6c remains eligible but Not Started; no fit, pursuit, response, teaming, submission or later lifecycle runtime was introduced.
+Wave 4 RFx Core is **23/41**. Slice 4.6 consumes only real Slice 4.5 opportunities and current confirmed organization profile inputs. Slice 4.7 documentation authority is the next dependency-eligible sequencing action. B6c remains eligible but Not Started; no invitation, teaming, response, submission or later lifecycle runtime was introduced.
 
 ## Feature-ID checklist
 
@@ -256,11 +257,11 @@ Wave 4 RFx Core is **18/41**. Slice 4.5 consumes only real Slice 4.4 projections
 - [x] `ISS-018` — Slice 4.4; one minimized responder projector with exact preview/publication substantive payload and digest parity
 - [x] `ISS-019` — Slice 4.4; atomic one-way publication, immutable snapshot/projection/event/receipt/audit evidence, replay and stale-authority/version/digest rejection
 - [x] `ISS-020` — Slice 4.4; free-participation basic issuance with unknown advanced RFx capabilities failing closed and no commercial effect on market truth
-- [ ] `RSP-001`
-- [ ] `RSP-002`
-- [ ] `RSP-003`
-- [ ] `RSP-004`
-- [ ] `RSP-006`
+- [x] `RSP-001` — Slice 4.6; attributable Discovered/Potential Match semantics from one versioned exact canonical capability policy, with Invited unavailable until a real invitation exists
+- [x] `RSP-002` — Slice 4.6; private reproducible requirement-by-requirement explanation over exact projection/profile digests, separate geography observation and explicit staleness
+- [x] `RSP-003` — Slice 4.6; private organization-owned six-dimension Go/No-Go assessment with bounded notes, expected-version recovery and no system eligibility judgment
+- [x] `RSP-004` — Slice 4.6; one organization-owned versioned Watch/Pursue/Decline relation using `response.create`, immutable evidence and acting-user bookmark transition
+- [x] `RSP-006` — Slice 4.6; typed missing, unconfirmed, review and evidence-confirmation gaps without a percentage, qualification or award-likelihood claim
 - [ ] `RSP-007`
 - [ ] `RSP-008`
 - [ ] `RSP-009`

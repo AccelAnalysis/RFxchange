@@ -389,6 +389,27 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // RSP-001/002/003/004/006 deterministic fit and organization pursuit state remain private.
+    // Fit snapshots, commands and events are immutable evidence; only the current pursuit mutates.
+    match /opportunityFitSnapshots/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /opportunityPursuits/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /opportunityPursuitCommands/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /opportunityPursuitEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /referralEducationAcknowledgements/{documentId} {
       allow read, create: if serverManagedOnly();
       allow update, delete: if false;

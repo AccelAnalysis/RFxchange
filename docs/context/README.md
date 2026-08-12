@@ -92,9 +92,9 @@ The RFx Core planning package is indexed at [`../rfx/README.md`](../rfx/README.m
 - anti-regression and configured-browser acceptance; and
 - the real-data-only B6c RFx map lens.
 
-The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) through [`../slices/SLICE_4_4_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_4_EXECUTION_AUTHORITY.md). They cover exactly `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009`, `ISS-011`, `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020` and `ACQ-009`: the organization-owned RFx kernel, private structured package/definition, readiness, exact preview, atomic publication and controlled sharing.
+The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) through [`../slices/SLICE_4_6_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_6_EXECUTION_AUTHORITY.md). They cover exactly 23 Feature IDs through real opportunity discovery, deterministic fit explanation, private assessment, typed gaps and organization pursuit.
 
-Slices 4.1–4.4 have implementation and acceptance evidence. Slice 4.5, B6c and later work still require their own documentation authority and runtime evidence.
+Slices 4.1–4.6 have implementation and acceptance evidence. Slice 4.7, B6c and later work still require their own documentation authority and runtime evidence.
 
 ## Current sequencing status
 
@@ -114,7 +114,7 @@ The dependency result remains:
 - Stabilization 2C: isolated release engineering, not a product prerequisite; and
 - the reviewed `ISS-009` dependency on stable Slice 4.2 and Slice 4.3 requirements is adopted; no other dependency correction is introduced.
 
-Canonical totals are **438 total · 170 Done · 268 Not Started**, with Wave 4 RFx Core **18/41**. B6c opportunity expression remains eligible but Not Started; Slice 4.6 documentation authority is the next dependency-eligible sequencing action after the Slice 4.5 merge is reconciled.
+Canonical totals are **438 total · 175 Done · 263 Not Started**, with Wave 4 RFx Core **23/41**. B6c opportunity expression remains eligible but Not Started; Slice 4.7 documentation authority is the next dependency-eligible sequencing action after the Slice 4.6 merge is reconciled.
 
 ## Stabilization 2C boundary
 

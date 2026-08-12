@@ -105,8 +105,8 @@ assert.match(authority, /ISS-007/);
 assert.match(authority, /ISS-009/);
 assert.match(authority, /ISS-011/);
 assert.match(evidence, /Configured-browser acceptance/);
-assert.match(tracker, /438 total · 170 Done · 268 Not Started/);
-assert.match(tracker, /RFx Core: \*\*18\/41\*\*/);
+assert.match(tracker, /438 total · 175 Done · 263 Not Started/);
+assert.match(tracker, /RFx Core: \*\*23\/41\*\*/);
 for (const id of ["ISS-007", "ISS-009", "ISS-011"])
   assert.match(tracker, new RegExp("\\[x\\] `" + id + "`"));
 assert.match(dependency, /Slice 4\.3 implementation result/);
