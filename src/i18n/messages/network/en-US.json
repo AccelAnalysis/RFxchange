@@ -101,7 +101,8 @@
   "actionReasons": {
     "self-only": "Only members of this organization can manage its profile.",
     "not-an-official-provider": "This organization has no published Official Resource Provider services.",
-    "rfx-runtime-unavailable": "Opportunities/RFx is not yet available."
+    "rfx-runtime-unavailable": "Opportunities/RFx is not yet available.",
+    "exchange-action-unavailable": "This action is not available yet. You can continue exploring the Exchange."
   },
   "provenance": {
     "eyebrow": "Data provenance",

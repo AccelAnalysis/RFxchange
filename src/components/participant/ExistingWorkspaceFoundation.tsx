@@ -51,8 +51,16 @@ interface ExistingWorkspaceFoundationProps {
   readonly focusedOrganization?: NetworkDiscoveryOrganization | null;
   readonly serviceAreaOptions?: readonly NetworkServiceAreaOption[];
   readonly officialResourceProviderOrganizationIds?: readonly string[];
+  readonly operationalActionsAvailable?: boolean;
   readonly status?: ExistingWorkspaceStatus;
 }
+
+const MAP_ONLY_UNAVAILABLE_LENSES = Object.freeze([
+  "opportunities-rfx",
+  "resources",
+  "referrals",
+] as const);
+const MAP_ONLY_UNAVAILABLE_UTILITIES = Object.freeze(["quick-start"] as const);
 
 function buildDiscoveryUrl(input: Readonly<{
   organizationId: string;
@@ -89,7 +97,13 @@ function visibleLocation(
   return labels.inLocality.replace("{locality}", location.localityName);
 }
 
-function WorkspaceBoundary({ status }: Readonly<{ status: Exclude<ExistingWorkspaceStatus, "ready"> }>) {
+function WorkspaceBoundary({
+  status,
+  operationalActionsAvailable,
+}: Readonly<{
+  status: Exclude<ExistingWorkspaceStatus, "ready">;
+  operationalActionsAvailable: boolean;
+}>) {
   const { t } = useI18n();
   const actionHref: Partial<Record<Exclude<ExistingWorkspaceStatus, "ready">, string>> = {
     empty: "/join",
@@ -100,7 +114,11 @@ function WorkspaceBoundary({ status }: Readonly<{ status: Exclude<ExistingWorksp
   };
   const href = actionHref[status];
   return (
-    <ParticipantShell activeItem="Network">
+    <ParticipantShell
+      activeItem="Network"
+      unavailableLensIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_LENSES}
+      unavailableUtilityIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_UTILITIES}
+    >
       <main className={styles.stateWorkspace} aria-label={t("networkWorkspace.status.ariaLabel")}>
         <StatePanel
           state={status}
@@ -125,6 +143,7 @@ export function ExistingWorkspaceFoundation({
   focusedOrganization = null,
   serviceAreaOptions = [],
   officialResourceProviderOrganizationIds = [],
+  operationalActionsAvailable = true,
   status = "ready",
 }: ExistingWorkspaceFoundationProps) {
   const { locale, t } = useI18n();
@@ -189,6 +208,7 @@ export function ExistingWorkspaceFoundation({
     viewerOrganizationId: organizationId,
     selectedOrganizationId,
     officialResourceProvider: officialResourceProviderOrganizationIds.includes(selectedOrganizationId),
+    operationalActionsAvailable,
   });
   const locality = model.selectedGeography.name;
   const locationLabel = homeMarker.accessibleLocationLabel ?? `${locality} organization location`;
@@ -260,10 +280,21 @@ export function ExistingWorkspaceFoundation({
     inLocality: t("networkWorkspace.detail.inLocality", { locality }),
   };
 
-  if (status !== "ready") return <WorkspaceBoundary status={status} />;
+  if (status !== "ready") {
+    return (
+      <WorkspaceBoundary
+        status={status}
+        operationalActionsAvailable={operationalActionsAvailable}
+      />
+    );
+  }
 
   return (
-    <ParticipantShell activeItem="Network">
+    <ParticipantShell
+      activeItem="Network"
+      unavailableLensIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_LENSES}
+      unavailableUtilityIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_UTILITIES}
+    >
       <SpatialWorkspace ariaLabel={t("networkWorkspace.ariaLabel")}>
         <ExchangeSpatialScene
           model={model}
@@ -573,11 +604,23 @@ export function ExistingWorkspaceFoundation({
                     {t(`networkWorkspace.actions.${action.id}`)}
                   </Link>
                 ) : (
-                  <span key={action.id} aria-disabled="true" data-organization-action={action.id} title={t(`networkWorkspace.actionReasons.${action.reason}`)}>
+                  <span
+                    key={action.id}
+                    className={styles.unavailableAction}
+                    aria-disabled="true"
+                    aria-label={`${t(`networkWorkspace.actions.${action.id}`)}: ${t(`networkWorkspace.actionReasons.${action.reason}`)}`}
+                    data-organization-action={action.id}
+                    title={t(`networkWorkspace.actionReasons.${action.reason}`)}
+                  >
                     {t(`networkWorkspace.actions.${action.id}`)}
                   </span>
                 ))}
               </section>
+              {!operationalActionsAvailable ? (
+                <p className={styles.actionAvailabilityNote} role="status">
+                  {t("networkWorkspace.actionReasons.exchange-action-unavailable")}
+                </p>
+              ) : null}
 
               <section className={styles.provenance} aria-labelledby="provenance-title">
                 <p className={styles.eyebrow}>{t("networkWorkspace.provenance.eyebrow")}</p>

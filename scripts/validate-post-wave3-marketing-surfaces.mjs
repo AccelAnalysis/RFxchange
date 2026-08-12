@@ -27,11 +27,13 @@ assert.match(founding, /<MarketingAvailability/, "Founding must use the shared a
 assert.match(foundersRedirect, /permanentRedirect\("\/founding"\)/, "/founders must permanently redirect to canonical /founding");
 assert.match(founding, /foundingActivationHref = "\/acquisition\/founding"/, "Founding conversion actions must enter the persisted acquisition path");
 assert.match(foundingEntry, /httpOnly: true/, "Founding campaign intent must be persisted server-side");
-assert.match(homeScene, /appendFoundingAcquisitionIntent/, "Activation completion must carry Founding intent into first value");
-for (const [name, surface] of Object.entries({ geographyCanvas, orientation, exchange })) {
+assert.match(homeScene, /appendFoundingAcquisitionIntent/, "Activation completion must carry Founding intent into the Exchange");
+for (const [name, surface] of Object.entries({ geographyCanvas, orientation })) {
   assert.match(surface, /FoundingAcquisitionContinuation/, `${name} must consume preserved Founding intent on a canonical participant destination`);
   assert.match(surface, /acquisitionIntent/, `${name} must parse the bounded Founding acquisition query`);
 }
+assert.match(exchange, /resolveFoundingAcquisitionIntent/, "Exchange entry must parse the bounded Founding acquisition query");
+assert.match(exchange, /appendFoundingAcquisitionIntent\("\/geography\/canvas"\)/, "Exchange entry must carry Founding intent to the map shell");
 assert.match(continuation, /href="\/founding"/, "Preserved Founding intent must return to the campaign offer");
 assert.match(chrome, /MarketingChromeResponsive/, "Marketing navigation must consume the responsive collapse contract");
 assert.match(chrome, /<details className=\{responsive\.navMenu\}/, "Long localized marketing navigation must have an accessible collapsed menu");

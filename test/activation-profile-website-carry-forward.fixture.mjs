@@ -370,7 +370,7 @@ test("carried available website survives Profile Complete unchanged", async () =
   assert.equal(state.nextStep, "complete");
 });
 
-test("activation resume sends completed orientation with acquisition context to first value", async () => {
+test("activation resume sends a controlled participant with acquisition context to the Exchange", async () => {
   const { current } = await saveProfile(
     {
       websiteDisposition: "available",
@@ -383,7 +383,7 @@ test("activation resume sends completed orientation with acquisition context to 
   const resumed = await current.service.state(current.context);
   assert.equal(resumed.lifecycleState, "controlled-platform");
   assert.equal(resumed.acquisitionContext.kind, "provider");
-  assert.equal(resumed.controlledPlatformUrl, "/first-value");
+  assert.equal(resumed.controlledPlatformUrl, "/exchange");
 });
 
 test("initial website confirmation preserves explicit false and normalizes the URL", async () => {

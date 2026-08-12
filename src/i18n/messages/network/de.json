@@ -101,7 +101,8 @@
   "actionReasons": {
     "self-only": "Nur Mitglieder dieser Organisation können ihr Profil verwalten.",
     "not-an-official-provider": "Diese Organisation hat keine veröffentlichten Dienste als offizieller Ressourcenanbieter.",
-    "rfx-runtime-unavailable": "Chancen/RFx ist noch nicht verfügbar."
+    "rfx-runtime-unavailable": "Chancen/RFx ist noch nicht verfügbar.",
+    "exchange-action-unavailable": "Diese Aktion ist noch nicht verfügbar. Sie können den Exchange weiter erkunden."
   },
   "provenance": {
     "eyebrow": "Datenherkunft",

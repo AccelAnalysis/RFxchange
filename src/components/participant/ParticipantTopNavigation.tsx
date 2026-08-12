@@ -17,7 +17,9 @@ import {
   PARTICIPANT_LENSES,
   PARTICIPANT_UTILITY_DESTINATIONS,
   participantNavigationState,
+  type ParticipantLensId,
   type ParticipantNavigationState,
+  type ParticipantUtilityId,
 } from "../../application/participant/participant-lens-registry";
 import {
   PARTICIPANT_INTELLIGENCE_CONTEXT_CHANGED_EVENT,
@@ -282,6 +284,7 @@ function LensItems({
   opportunityHref,
   resourceHref,
   referralHref,
+  unavailableLensIds,
   beginNavigation,
   onNavigate,
 }: Readonly<{
@@ -290,6 +293,7 @@ function LensItems({
   opportunityHref: string;
   resourceHref: string;
   referralHref: string;
+  unavailableLensIds: readonly ParticipantLensId[];
   beginNavigation(destination: NavigationDestination): void;
   onNavigate?: (event: MouseEvent<HTMLAnchorElement>) => void;
 }>) {
@@ -298,7 +302,7 @@ function LensItems({
 
   return PARTICIPANT_LENSES.map((lens) => {
     const label = t(lens.labelKey);
-    if (lens.availability === "unavailable") {
+    if (lens.availability === "unavailable" || unavailableLensIds.includes(lens.id)) {
       const descriptionId = `${scopeId}-${lens.id}-availability`;
       return (
         <span
@@ -350,7 +354,7 @@ function LensItems({
 
 function moveMenuFocus(menu: HTMLElement, current: EventTarget | null, direction: 1 | -1) {
   const items = Array.from(
-    menu.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])'),
+    menu.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled]):not([aria-disabled="true"])'),
   );
   if (!items.length) return;
   const currentIndex = current instanceof HTMLElement ? items.indexOf(current) : -1;
@@ -364,11 +368,13 @@ function AccountUtility({
   activeState,
   administrationHref: initialAdministrationHref,
   organizationName,
+  quickStartUnavailable,
   beginNavigation,
 }: Readonly<{
   activeState: ParticipantNavigationState;
   administrationHref?: string;
   organizationName: string | null;
+  quickStartUnavailable: boolean;
   beginNavigation(destination: NavigationDestination): void;
 }>) {
   const { t } = useI18n();
@@ -500,21 +506,33 @@ function AccountUtility({
               onSettled={hideMenu}
             />
           </Link>
-          <Link
-            role="menuitem"
-            href={PARTICIPANT_UTILITY_DESTINATIONS["quick-start"].href}
-            aria-current={activeState === "quick-start" ? "page" : undefined}
-            onClick={(event) => {
-              if (isUnmodifiedPrimaryClick(event)) beginNavigation("quick-start");
-              else hideMenu();
-            }}
-          >
-            <NavigationLinkContent
-              label={t("participantNavigation.quickStart")}
-              loadingLabel={`${t("participantNavigation.loadingDestination")} ${t("participantNavigation.quickStart")}`}
-              onSettled={hideMenu}
-            />
-          </Link>
+          {quickStartUnavailable ? (
+            <span
+              className={styles.unavailableUtility}
+              role="menuitem"
+              aria-disabled="true"
+              data-availability="unavailable"
+            >
+              <span>{t("participantNavigation.quickStart")}</span>
+              <small>{t("participantNavigation.notYetAvailable")}</small>
+            </span>
+          ) : (
+            <Link
+              role="menuitem"
+              href={PARTICIPANT_UTILITY_DESTINATIONS["quick-start"].href}
+              aria-current={activeState === "quick-start" ? "page" : undefined}
+              onClick={(event) => {
+                if (isUnmodifiedPrimaryClick(event)) beginNavigation("quick-start");
+                else hideMenu();
+              }}
+            >
+              <NavigationLinkContent
+                label={t("participantNavigation.quickStart")}
+                loadingLabel={`${t("participantNavigation.loadingDestination")} ${t("participantNavigation.quickStart")}`}
+                onSettled={hideMenu}
+              />
+            </Link>
+          )}
           {administrationHref ? (
             <Link role="menuitem" href={administrationHref} onClick={() => hideMenu()}>
               {t("participantNavigation.administration")}
@@ -557,10 +575,14 @@ export function ParticipantTopNavigation({
   activeItem,
   administrationHref,
   organizationName = null,
+  unavailableLensIds = [],
+  unavailableUtilityIds = [],
 }: Readonly<{
   activeItem?: ParticipantNavigationItem;
   administrationHref?: string;
   organizationName?: string | null;
+  unavailableLensIds?: readonly ParticipantLensId[];
+  unavailableUtilityIds?: readonly ParticipantUtilityId[];
 }>) {
   const { t } = useI18n();
   const pathname = usePathname();
@@ -583,6 +605,7 @@ export function ParticipantTopNavigation({
           opportunityHref={transition.opportunityHref}
           resourceHref={transition.resourceHref}
           referralHref={transition.referralHref}
+          unavailableLensIds={unavailableLensIds}
           beginNavigation={transition.begin}
         />
       </nav>
@@ -593,6 +616,7 @@ export function ParticipantTopNavigation({
           opportunityHref={transition.opportunityHref}
           resourceHref={transition.resourceHref}
           referralHref={transition.referralHref}
+          unavailableLensIds={unavailableLensIds}
           beginNavigation={transition.begin}
           onNavigate={closeMobileLensMenu}
         />
@@ -601,6 +625,7 @@ export function ParticipantTopNavigation({
         activeState={activeState}
         administrationHref={administrationHref}
         organizationName={organizationName}
+        quickStartUnavailable={unavailableUtilityIds.includes("quick-start")}
         beginNavigation={transition.begin}
       />
     </header>

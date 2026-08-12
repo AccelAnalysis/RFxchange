@@ -30,7 +30,7 @@ export interface NetworkServiceAreaOption {
 export type AuthenticatedNetworkDiscovery =
   | Readonly<{
       readonly available: false;
-      readonly reason: "open-required" | "geography-not-permitted";
+      readonly reason: "geography-not-permitted";
     }>
   | Readonly<{
       readonly available: true;
@@ -91,13 +91,6 @@ export async function loadAuthorizedNetworkDiscovery(input: Readonly<{
   page?: string | number | null;
   focusedOrganizationId?: string | null;
 }>): Promise<AuthenticatedNetworkDiscovery> {
-  if (input.access.state.lifecycleState !== "open-platform") {
-    return Object.freeze({
-      available: false as const,
-      reason: "open-required" as const,
-    });
-  }
-
   const db = getServerFirestore();
   const geographyRepositories = createFirestoreGeographyRepositories(db);
   const geography = input.mapProjection.model.selectedGeography;

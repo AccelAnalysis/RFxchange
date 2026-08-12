@@ -78,10 +78,10 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
     : null;
   const mapUrl = access.state.lifecycleState === "open-platform"
     ? acquisition.kind === "provider" ? "/resources" : "/referrals"
-    : access.state.controlledPlatformUrl ?? "/orientation";
+    : access.state.controlledPlatformUrl ?? "/exchange";
   const continuationLabel = access.state.lifecycleState === "open-platform"
     ? acquisition.kind === "provider" ? "Continue to Resources" : "Continue to referrals"
-    : mapUrl === "/first-value" ? "Continue to first value" : "Continue to orientation";
+    : mapUrl === "/exchange" ? "Enter the Exchange" : "Continue setup";
 
   return (
     <ParticipantShell activeItem={acquisition.kind === "opportunity" ? undefined : acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Network"}>

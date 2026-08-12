@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       selection: { selectedIntent: result.selection.selectedIntent },
       gate: result.gate,
       lifecycleState: result.lifecycleState,
-      nextUrl: result.lifecycleState === "open-platform" ? "/exchange" : result.gate.kind === "blocked" ? result.gate.remediation : "/first-value",
+      nextUrl: "/exchange",
     });
   } catch (cause) {
     const stateError = cause instanceof FirstValueStateError ? cause : null;
