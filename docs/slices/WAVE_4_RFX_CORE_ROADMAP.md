@@ -83,7 +83,7 @@ Feature IDs:
 
 Purpose:
 
-Implement the operational builder foundation and structured business need, scope, requested outputs, performance location, estimated value, engagement term and typed requirement records. Reuse existing organization location, Census/TIGER locality and geocoding authority.
+Implement the operational builder foundation and structured business need, scope, requested outputs, performance location, estimated value, engagement term and typed requirement records. Reuse existing organization location, Census/TIGER locality and geocoding authority. The bounded execution authority is `docs/slices/SLICE_4_2_EXECUTION_AUTHORITY.md`; its documentation merge does not complete either Feature ID.
 
 This slice is the first Wave 4 consumer of the cross-cutting AI/AMACS Interpretation Foundation. An issuer may begin with ordinary-language problem/need/outcome descriptions and receive reviewable structured interpretations and focused clarification prompts. Material AI interpretations remain proposals until the authorized issuer confirms or edits them. The complete non-AI structured/manual path remains available.
 
