@@ -33,7 +33,7 @@ for (const required of ["accountSecurity.inspect", "getForMembership", "isCurren
 assert.ok(api.includes('Readonly<{ selectedIntent?: unknown }>'));
 assert.ok(api.includes("resolveParticipantRoute") && !api.includes("organizationId?: unknown"));
 assert.ok(firstValuePage.includes('orientation.status !== "completed"'));
-assert.ok(service.includes('href: "/join?step=legal"'), "Current-policy OPEN remediation must point to the legal remediation route.");
+assert.ok(service.includes('"current-policies": "/join?step=legal"'), "Current-policy OPEN remediation must point to the legal remediation route.");
 for (const required of [
   'requestedStep === "legal"',
   'access.state.lifecycleState === "controlled-platform"',
