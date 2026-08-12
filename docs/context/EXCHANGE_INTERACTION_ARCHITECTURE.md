@@ -45,7 +45,7 @@ The permanent authenticated lens hierarchy and order is exactly:
 
 These lenses are connected, but they are not four equal products. The RFxchange remains named and positioned around RFx activity. Supporting lenses make RFx activity more discoverable, understandable, completable, and useful.
 
-The permanent order remains visible even before every lens is enabled. Opportunities/RFx therefore remains present in first position while unavailable, with no href, placeholder route, synthetic data, simulated workflow, or current-page state. The authenticated Exchange may continue to enter through the available Intelligence/Network experience until a separately authorized and accepted real participant RFx runtime provides a legitimate Opportunities/RFx destination. The interface must never fabricate RFxs, opportunity beacons, matches, bids, awards, outcomes, or market activity merely to simulate the mature hierarchy.
+The permanent order remains visible even before every lens is enabled. Before Slice 4.5, Opportunities/RFx therefore remained present in first position while unavailable, with no href, placeholder route, synthetic data, simulated workflow, or current-page state. The separately authorized and accepted Slice 4.5 runtime now supplies the legitimate `/opportunities` destination over real permitted Slice 4.4 publications. Availability remains bounded to implemented server-authorized behavior; the interface must never fabricate RFxs, opportunity beacons, matches, bids, awards, outcomes, or market activity merely to simulate later maturity.
 
 ### 2.1 Structural truthfulness
 
@@ -249,7 +249,7 @@ List view is not another destination. It is a synchronized representation of the
 
 The Opportunities/RFx lens is the principal authenticated market-action lens and the main product/marketing draw.
 
-Until a separately authorized and accepted real participant RFx runtime exists, the lens remains present but unavailable. Its mature scope includes, only as implemented and authorized:
+The lens remained present but unavailable until a separately authorized and accepted real participant RFx runtime existed. Slices 4.1–4.5 now provide real issuer draft/definition/publication and participant discovery/watch/deadline behavior. Its further mature scope includes, only as separately implemented and authorized:
 
 - issuer creation and management of structured RFxs;
 - published opportunity discovery;
@@ -537,7 +537,7 @@ The implementation reuses existing production abstractions and domain projection
 - resource publishing/discovery;
 - RFx Core authorities and future real-data opportunity projections.
 
-No lens may fabricate unavailable domain state. Opportunities/RFx remains present, explicitly unavailable, and non-routable until a separately accepted real participant RFx runtime provides a legitimate destination.
+No lens may fabricate unavailable domain state. Opportunities/RFx is now routable only because the separately accepted Slice 4.5 real participant discovery runtime provides a legitimate destination; later actions remain unavailable until their own accepted runtimes exist.
 
 ## 12. Implementation acceptance requirements
 

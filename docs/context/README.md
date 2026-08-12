@@ -8,6 +8,7 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 
 - [`PRODUCT_PRINCIPLES.md`](PRODUCT_PRINCIPLES.md) — cross-cutting product invariants and boundaries.
 - [`EXCHANGE_INTERACTION_ARCHITECTURE.md`](EXCHANGE_INTERACTION_ARCHITECTURE.md) — RFx-first lens hierarchy, participant truthfulness, persistent spatial context, marker/selection behavior, Intelligence/Locations boundary, provider gating and cross-lens workflow rules.
+- [`../program/FOUR_LENS_PROGRAM_AUTHORITY.md`](../program/FOUR_LENS_PROGRAM_AUTHORITY.md) — parallel lane delivery, immutable experience requirements and independent acceptance governance.
 - [`../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md`](../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md) — bounded no-Feature-ID authority for the persistent participant shell, exact lens registry, separate Account utilities, scoped loading and transition-performance acceptance.
 - [`USER_JOURNEY.md`](USER_JOURNEY.md) — canonical activation journey from public discovery through OPEN.
 - [`MAP_AND_GEOGRAPHY.md`](MAP_AND_GEOGRAPHY.md) — locality, FIPS, release-state, boundary, camera and marker principles.
@@ -27,7 +28,7 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 - Opportunities/RFx remains the primary transaction lens and principal public positioning;
 - Resources, Intelligence and Referrals are supporting lenses over the same market rather than separate applications;
 - stable architecture remains visible when a permanent lens is unavailable; availability governs action rather than whether the lens exists;
-- Opportunities/RFx is present but explicitly unavailable until a separately accepted real participant RFx runtime exists, with no href, placeholder route, fabricated data or current-page state;
+- Opportunities/RFx was present but explicitly unavailable until the accepted real Slice 4.5 participant discovery runtime supplied `/opportunities`; its current availability is bounded to implemented and server-authorized RFx behavior;
 - location and site functionality remains first-class inside Intelligence rather than becoming a peer commercial-real-estate product identity;
 - Network remains the current organization-network view/domain concept inside Intelligence, not a peer lens;
 - Account and Quick Start are separate utilities, not market lenses;
@@ -59,7 +60,7 @@ The vocabulary is binding:
 
 **Intelligence** is the functional analytical lens. **Light Appearance** and **Dark Appearance** are presentation terminology. Dark Appearance is not implemented or authorized by the interaction architecture.
 
-PR #150 remains the documentation origin for the complete interaction target. The separately authorized no-Feature-ID gate in [`../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md`](../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md) implements only the participant lens/persistent-shell/loading convergence described there. It does not authorize Slice 4.1 runtime or complete any RFx Feature ID.
+PR #150 remains the documentation origin for the complete interaction target. The separately authorized no-Feature-ID shell and post-PR-#159 gates implemented the participant lens/persistent-shell/loading/spatial convergence without completing an RFx Feature ID. Slices 4.1–4.5 later supplied the separately authorized real RFx kernel, builder, definition, publication and participant discovery runtimes.
 
 Administrative navigation remains governed separately: it exposes only implemented, server-authorized destinations. The participant unavailable-lens rule must not be generalized to future administrative sections.
 
@@ -92,15 +93,13 @@ The RFx Core planning package is indexed at [`../rfx/README.md`](../rfx/README.m
 - anti-regression and configured-browser acceptance; and
 - the real-data-only B6c RFx map lens.
 
-The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) through [`../slices/SLICE_4_4_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_4_EXECUTION_AUTHORITY.md). They cover exactly `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009`, `ISS-011`, `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020` and `ACQ-009`: the organization-owned RFx kernel, private structured package/definition, readiness, exact preview, atomic publication and controlled sharing.
-
-Slices 4.1–4.4 have implementation and acceptance evidence. Slice 4.5, B6c and later work still require their own documentation authority and runtime evidence.
+The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) through [`../slices/SLICE_4_5_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_5_EXECUTION_AUTHORITY.md). They cover 18 RFx Core Feature IDs: the organization-owned RFx kernel, private structured package/definition, readiness, exact preview, atomic publication, controlled sharing and real permitted opportunity discovery/watch/deadline behavior. The Four-Lens program retains their tracker state while retroactive independent assurance is pending.
 
 ## Current sequencing status
 
 Wave 2 is complete. Wave 3 Slices 3.1 through 3.8 and Brand Gates B0–B6a are merged, and the configured-browser/zero-residual Wave 3 exit accepted Network at 38/38. B6b remains intentionally pending.
 
-The Slice 4.4 implementation baseline is its authority merged through PR #166 at `4ebb0599af7e7a7470b696d8d2a2a9e7b60f2e00`. The runtime now supplies current readiness, exact preview/live projection parity, atomic immutable publication and controlled sharing over the Slices 4.1–4.3 issuer definition.
+Current volatile lane, work-packet and candidate state belongs in `../program/PARALLEL_DELIVERY_MATRIX.md` and `../../governance/four-lens-workstreams.json`. Do not copy it into this durable context index.
 
 The dependency result remains:
 
@@ -108,13 +107,13 @@ The dependency result remains:
 - AMACS 0.5.0 reconciliation: satisfied;
 - AI/AMACS foundation: satisfied; Slice 4.4 readiness/preview/publication does not require or authorize an AI call;
 - organization authority/tenancy/audit/concurrency foundations: satisfied by prior cross-cutting implementation;
-- Exchange Interaction Architecture: satisfied by PR #150 and reconciled by the active shell gate;
-- Slices 4.1–4.4 RFx kernel/package/definition/publication: implemented for `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009`, `ISS-011`, `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020` and `ACQ-009`;
+- Exchange Interaction Architecture: satisfied by PR #150 and the merged shell/post-PR-#159 convergence gates;
+- Slices 4.1–4.5 RFx kernel/package/definition/publication/discovery: implemented for the canonical 18/41 RFx Core Feature IDs and pending retroactive Four-Lens assurance;
 - ACQ-002/003 public projection and acquisition continuity: satisfied and reused by the canonical live Slice 4.4 RFx publication adapter;
 - Stabilization 2C: isolated release engineering, not a product prerequisite; and
 - the reviewed `ISS-009` dependency on stable Slice 4.2 and Slice 4.3 requirements is adopted; no other dependency correction is introduced.
 
-Canonical totals are **438 total · 170 Done · 268 Not Started**, with Wave 4 RFx Core **18/41**. B6c opportunity expression remains eligible but Not Started; Slice 4.6 documentation authority is the next dependency-eligible sequencing action after the Slice 4.5 merge is reconciled.
+At Four-Lens adoption, canonical totals were **438 total · 170 Done · 268 Not Started**, with Wave 4 RFx Core **18/41**. Treat that as a historical snapshot and read the tracker for current arithmetic. B6c opportunity expression is eligible but Not Started. Slice 4.6 authority is merged; its runtime PR #171 remains a preserved candidate pending program reconciliation and independent acceptance, and Slice 4.7 remains ineligible before accepted 4.6 merges.
 
 ## Stabilization 2C boundary
 

@@ -243,7 +243,7 @@ Wave 3 approved handoff / dependency recalculation [complete]
 → Wave 5 evaluator/Q&A/addenda/selection authority
 ```
 
-Use one active implementation slice/gate unless explicitly authorized otherwise.
+Under the merged Four-Lens Program Authority, Wave 4 may execute concurrently with dependency-independent lane work through declared work packets. Wave 4's own merge order remains this dependency sequence, builders cannot self-certify completion, and a dependent RFx slice cannot merge before its predecessor is independently accepted and present on merged `main`.
 
 ## 5. Exchange interaction boundary
 
