@@ -92,28 +92,29 @@ The RFx Core planning package is indexed at [`../rfx/README.md`](../rfx/README.m
 - anti-regression and configured-browser acceptance; and
 - the real-data-only B6c RFx map lens.
 
-The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) and [`../slices/SLICE_4_2_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_2_EXECUTION_AUTHORITY.md). They cover exactly `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006`: the organization-owned draft kernel followed by its private structured need/package foundation. [`../slices/SLICE_4_3_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_3_EXECUTION_AUTHORITY.md) is the documentation-only authority for the next runtime.
+The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) through [`../slices/SLICE_4_3_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_3_EXECUTION_AUTHORITY.md). They cover exactly `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009` and `ISS-011`: the organization-owned draft kernel, private structured need/package and governed definition. [`../slices/SLICE_4_4_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_4_EXECUTION_AUTHORITY.md) is the documentation-only authority for the next runtime.
 
-Both implemented slices are accepted on merged `main`. The Slice 4.3 authority completes no Feature ID; later slices still require their own documentation authority and runtime evidence.
+Slices 4.1–4.3 are accepted on merged `main`. The Slice 4.4 authority completes no Feature ID; later slices still require their own documentation authority and runtime evidence.
 
 ## Current sequencing status
 
 Wave 2 is complete. Wave 3 Slices 3.1 through 3.8 and Brand Gates B0–B6a are merged, and the configured-browser/zero-residual Wave 3 exit accepted Network at 38/38. B6b remains intentionally pending.
 
-Merged `main` through the Slice 4.3 documentation authority at `6dcf09ace96ba1881bd229ab76eef79cde1a33a0` includes the accepted Exchange shell and Slice 4.1–4.2 runtime. The bounded Slice 4.3 implementation adds only the authorized private definition runtime.
+Merged `main` at `81ec0c7a7fbd28a2a4827d4ba448a5ceb28b6ed7` includes the accepted Exchange shell and implemented Slices 4.1–4.3 runtime. PR #165 passed exact-head CI run `31561013074`; post-merge `main` passed run `31561286020`. The current gate is the documentation-only Slice 4.4 authority; publication runtime cannot begin before that authority is reviewed and merged.
 
 The dependency result remains:
 
 - Wave 3 handoff: satisfied;
 - AMACS 0.5.0 reconciliation: satisfied;
-- AI/AMACS foundation: satisfied and reusable for optional Slice 4.3 request-structure interpretation; the manual path remains complete;
+- AI/AMACS foundation: satisfied; Slice 4.4 readiness/preview/publication does not require or authorize an AI call;
 - organization authority/tenancy/audit/concurrency foundations: satisfied by prior cross-cutting implementation;
 - Exchange Interaction Architecture: satisfied by PR #150 and reconciled by the active shell gate;
 - Slices 4.1–4.3 RFx kernel/package/definition: implemented for `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009` and `ISS-011`;
+- ACQ-002/003 public projection and acquisition continuity: satisfied and ready for the canonical live Slice 4.4 RFx publication adapter;
 - Stabilization 2C: isolated release engineering, not a product prerequisite; and
 - the reviewed `ISS-009` dependency on stable Slice 4.2 and Slice 4.3 requirements is adopted; no other dependency correction is introduced.
 
-Canonical totals are **438 total · 160 Done · 278 Not Started**, with Wave 4 RFx Core **8/41**. Later Wave 4 runtime remains unimplemented pending slice-specific authority.
+Canonical totals are **438 total · 160 Done · 278 Not Started**, with Wave 4 RFx Core **8/41**. Slice 4.4 remains unimplemented pending the new authority; B6c remains ineligible until its real publication runtime is accepted.
 
 ## Stabilization 2C boundary
 

@@ -22,9 +22,10 @@ The RFx Core workspaces operate within the cross-cutting Exchange interaction ar
 8. [`../slices/WAVE_4_RFX_CORE_ROADMAP.md`](../slices/WAVE_4_RFX_CORE_ROADMAP.md) — adopted Wave 4 sequence.
 9. [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) — exact organization-owned RFx kernel, request-family snapshot, blank-draft creation, security, persistence, acceptance and non-scope authority for `ISS-001`, `ISS-002` and `ISS-003`.
 10. [`../slices/SLICE_4_2_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_2_EXECUTION_AUTHORITY.md) — implemented structured need/package, controlled geography, value, term, requirements and optional interpretation authority for `ISS-005` and `ISS-006`.
-11. [`../slices/SLICE_4_3_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_3_EXECUTION_AUTHORITY.md) — documentation-only AMACS requirements, response-structure and evaluation-definition authority for `ISS-007`, `ISS-009` and `ISS-011`.
-12. [`../brand/BRAND_GATE_B6C_RFX_LENS.md`](../brand/BRAND_GATE_B6C_RFX_LENS.md) — future real-data RFx spatial expression and map boundaries; not eligible before authoritative publication.
-13. [`../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md`](../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md) — approved prototype-derived visual decisions and explicit non-production mechanics.
+11. [`../slices/SLICE_4_3_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_3_EXECUTION_AUTHORITY.md) — implemented AMACS requirements, response-structure and evaluation-definition authority for `ISS-007`, `ISS-009` and `ISS-011`.
+12. [`../slices/SLICE_4_4_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_4_EXECUTION_AUTHORITY.md) — documentation-only readiness, exact preview, atomic publication, permitted projection, sharing and commercial-boundary authority for `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020` and `ACQ-009`.
+13. [`../brand/BRAND_GATE_B6C_RFX_LENS.md`](../brand/BRAND_GATE_B6C_RFX_LENS.md) — future real-data RFx spatial expression and map boundaries; not eligible before authoritative publication.
+14. [`../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md`](../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md) — approved prototype-derived visual decisions and explicit non-production mechanics.
 
 ## Authority order
 
@@ -42,7 +43,7 @@ For RFx implementation:
 
 ## Current Wave 4 boundary
 
-Merged `main` through the Slice 4.3 documentation authority at `6dcf09ace96ba1881bd229ab76eef79cde1a33a0` includes the accepted Exchange shell and implemented Slice 4.1–4.2 runtime. The bounded Slice 4.3 runtime implements the private governed definition without widening the lifecycle. Wave 3, AMACS 0.5.0 reconciliation and the AI/AMACS Interpretation Foundation remain satisfied prerequisites.
+Merged `main` at `81ec0c7a7fbd28a2a4827d4ba448a5ceb28b6ed7` includes the accepted Exchange shell and implemented Slice 4.1–4.3 runtime. PR #165 exact-head CI run `31561013074` and post-merge run `31561286020` passed. This documentation gate defines Slice 4.4 readiness/preview/publication authority and completes no Feature ID. Wave 3, AMACS 0.5.0 reconciliation, AI/AMACS Interpretation and ACQ-002/003 continuity remain satisfied prerequisites.
 
 The Slice 4.1 through 4.3 authorities govern the implemented `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009` and `ISS-011` runtime. The implementation remains bounded to:
 
@@ -55,7 +56,7 @@ The Slice 4.1 through 4.3 authorities govern the implemented `ISS-001`, `ISS-002
 - one private structured need/package with controlled geography, value, term, typed foundation requirements, module status, save/recovery and optional non-authoritative interpretation.
 - one private governed AMACS requirement, response-structure and evaluation-definition layer with a complete manual path.
 
-It does not authorize publication, opportunity projection, beacons, discovery, fit, teaming, response, evaluation, award or the complete four-lens Exchange shell.
+The Slice 4.4 documentation authority permits a later bounded runtime to add readiness, exact responder preview, atomic publication, immutable snapshot, permitted projection and controlled sharing. Until that runtime is accepted, the existing implementation still authorizes no publication, opportunity projection, beacon, discovery, fit, teaming, response, evaluation or award.
 
 Stabilization 2C remains incomplete and isolated to release engineering: the App Hosting backend and GitHub connection now exist, but trustworthy build-time source-SHA binding and an accepted same-SHA live rollout proof do not. No canonical dependency authority makes 2C a prerequisite for RFx Core product-domain implementation.
 
@@ -63,7 +64,7 @@ Canonical totals are **438 total · 160 Done · 278 Not Started**, with Wave 4 R
 
 ## Explicit boundaries
 
-This package and the Slice 4.1–4.3 runtime:
+This package, the Slice 4.1–4.3 runtime and the documentation-only Slice 4.4 gate:
 
 - complete only `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009` and `ISS-011`;
 - create only private organization-owned RFx drafts, never an opportunity, pursuit, response, team, submission, evaluation, award or outcome record;
