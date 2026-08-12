@@ -8,7 +8,7 @@
 
 ## 1. Authority and completion boundary
 
-This document authorizes one later runtime implementation of discovery-source attribution, deterministic AMACS/requirement fit explanation, a private responder Go/No-Go assessment, one Pursue/Watch/Decline relation and typed gap assessment. It does not itself complete a Feature ID, change tracker arithmetic, fabricate a match, create a response or notify an issuer.
+This document authorizes one later runtime implementation of discovery-source attribution, deterministic AMACS/requirement fit explanation, a private organization-owned responder Go/No-Go assessment, one organization-owned Pursue/Watch/Decline relation and typed gap assessment. It does not itself complete a Feature ID, change tracker arithmetic, fabricate a match, create a response or notify an issuer.
 
 Slice 4.6 is complete only when a currently authorized organization can open a real permitted Slice 4.5 opportunity, see why it surfaced, inspect a reproducible comparison between the immutable published requirements and that organization's current confirmed structured profile, record private assessment facts, choose Pursue, Watch or Decline through one governed relation and inspect typed gaps without any qualification, eligibility, endorsement, profitability or award-likelihood claim.
 
@@ -18,7 +18,7 @@ Browser state, a search match, a watch, a fit explanation, a private assessment 
 
 | Dependency | Result |
 | --- | --- |
-| Slice 4.5 real opportunity discovery and canonical watch/deadline relations | Satisfied through PR #169 at the merged baseline; fit consumes only currently permitted open opportunity projections and must adopt the existing watch identity. |
+| Slice 4.5 real opportunity discovery and canonical personal watch/deadline relations | Satisfied through PR #169 at the merged baseline; fit consumes only currently permitted open opportunity projections and explicitly transitions the acting user's watch when an organization pursuit decision is recorded. |
 | Slice 4.4 immutable publication requirements and exact projection digest/version | Satisfied; all comparison inputs come from the accepted responder projection and stable published requirement IDs/snapshots. |
 | Slice 3.3 confirmed organization market-profile capabilities | Satisfied; deterministic comparison may consume the acting organization's current authoritative structured claims, never another organization's private claims or profile prose. |
 | Organization/member authority, restrictions and response operation permissions | Satisfied and reused; no client or discovery state grants a consequential pursuit decision. |
@@ -129,17 +129,17 @@ Assessment create/update requires current authority, expected version and exact 
 
 ## 8. Pursue, Watch and Decline relation
 
-`RSP-004` establishes one effective organization/user opportunity relation in `watch | pursue | decline`, with an implicit undecided absence state. It references the one immutable published opportunity and never clones or transfers RFx ownership.
+`RSP-004` establishes one organization-owned `OpportunityPursuit` per `(organization, opportunity reference)` in `watch | pursue | decline`, with an implicit undecided absence state. Actor user/membership remain audit evidence rather than ownership. The relation references the one immutable published opportunity and never clones or transfers RFx ownership.
 
-The existing Slice 4.5 `OpportunityWatch` identity must be adopted rather than competed with:
+The existing Slice 4.5 `OpportunityWatch` remains the canonical user-private bookmark and must be explicitly transitioned rather than silently reinterpreted:
 
-- an active existing watch resolves as the initial `watch` decision;
-- the first Slice 4.6 mutation atomically promotes/adopts that tuple into the canonical pursuit relation;
-- all watch actions after convergence use the same application service and effective state;
-- no tuple may retain two conflicting active decisions; and
+- an active watch owned by the acting user may initialize the proposed organization decision as `watch`;
+- saving that organization decision atomically creates/updates the organization pursuit and removes the acting user's personal watch from active state;
+- later organization decision changes use the same pursuit service and record;
+- personal watches owned by other users remain distinct bookmarks and never compete with, override or grant the organization decision; and
 - historical watch commands/events remain append-only evidence.
 
-Before the canonical deadline, an authorized participant may change among Watch, Pursue and Decline with expected-version and current-input review. A decision change appends evidence; it never rewrites history. Passed deadlines, stale/withdrawn publication authority, permission loss or restrictions fail closed. Decline does not notify the issuer or suppress another authorized member's access. Pursue does not create a response, invite a teammate, reserve capacity, prove eligibility or promise submission; it only makes the later Slice 4.8 response-creation precondition true.
+Before the canonical deadline, an authorized participant may change the organization decision among Watch, Pursue and Decline with expected-version and current-input review. A decision change appends evidence; it never rewrites history. Passed deadlines, stale/withdrawn publication authority, permission loss or restrictions fail closed. Decline does not notify the issuer or prevent another currently authorized response manager from reviewing/changing the organization decision. Pursue does not create a response, invite a teammate, reserve capacity, prove eligibility or promise submission; it only makes the later Slice 4.8 response-creation precondition true.
 
 Consequential assessment and Pursue/Decline decisions reuse the canonical organization-operation authorization boundary and current `response.create` permission rather than conflating responder authority with issuer-only `rfx.create`/`rfx.publish`, inventing client authority or creating a parallel permission system. Watch remains available through the accepted Slice 4.5 participant relation boundary, while any transition to or from a consequential decision rechecks the stronger current authority server-side.
 
@@ -181,7 +181,7 @@ Direct browser Firestore access remains default-denied for fit snapshots, assess
 
 ## 12. Persistence, concurrency and evidence
 
-Private assessment/pursuit state uses stable tuple identity, explicit version, server timestamps, expected-version concurrency, stable command IDs/fingerprints, immutable events and organization audit evidence. Decision plus watch adoption/projection plus command/event/audit writes occur atomically.
+Private assessment/pursuit state uses stable `(organization, opportunity reference)` identity, explicit version, server timestamps, expected-version concurrency, stable command IDs/fingerprints, immutable events and organization audit evidence. Decision plus acting-user watch transition plus command/event/audit writes occur atomically.
 
 Exact replay returns the committed result without duplicate state or evidence. A command ID reused for changed intent conflicts. Concurrent or stale explanation, assessment, opportunity, profile-input or pursuit versions fail without partial writes. Business state remains separate from optional telemetry or UI analytics.
 
@@ -215,7 +215,7 @@ All changed RFxchange-controlled copy exists in English, Spanish, French, Italia
 - geography/value/term/deadline facts remain separate from inferred organizational capability;
 - stale opportunity/profile/policy/assessment inputs require recomputation and explicit review;
 - assessment dimensions remain private and participant-confirmed;
-- one tuple has one effective Watch/Pursue/Decline state and existing watch adoption leaves no conflicting active relation;
+- one organization/opportunity tuple has one Watch/Pursue/Decline decision while personal bookmarks remain separately scoped and non-authorizing;
 - Pursue is the only later response-creation precondition but creates no response here;
 - typed gaps reference stable published requirements and resolve only from current authoritative facts; and
 - all negative account/membership/permission/restriction/audience/deadline/tenant cases fail closed.
@@ -226,7 +226,7 @@ All changed RFxchange-controlled copy exists in English, Spanish, French, Italia
 - confirmed structured claim overlap creates reproducible Potential Match provenance and exact observation rows;
 - unconfirmed, provisional, legacy-text, private-other-tenant and invented AMACS inputs do not align;
 - assessment create/update and Watch/Pursue/Decline transitions atomically persist one current record, command receipt, append-only event and organization audit;
-- an existing Slice 4.5 watch is adopted without duplicate/conflicting active state;
+- an existing acting-user Slice 4.5 watch is atomically transitioned when the organization decision is created, without rewriting another user's bookmark;
 - exact replay is inert; altered fingerprint, stale version/digest and concurrent mutation fail without partial writes;
 - permission/restriction/deadline/publication changes between read and write fail closed;
 - issuer/other-responder/cross-tenant and direct-client reads/writes are denied; and
@@ -253,7 +253,7 @@ Run focused fit/assessment/pursuit tests, Firestore emulator acceptance, interna
 - `RSP-001` is accepted only with real attributable Discovered/Potential Match semantics, a truthful future Invited boundary and no qualification/endorsement overclaim.
 - `RSP-002` is accepted only with reproducible release-aware requirement/capability alignment, explicit uncertainty/gaps and separate canonical market facts.
 - `RSP-003` is accepted only with a private versioned participant-confirmed Go/No-Go assessment covering fit, eligibility, capacity, economics, geography and gaps.
-- `RSP-004` is accepted only with one governed Watch/Pursue/Decline state, atomic adoption of existing watches, authorized replay-safe transitions and no response creation.
+- `RSP-004` is accepted only with one organization-owned governed Watch/Pursue/Decline state, an explicit atomic acting-user watch transition, authorized replay-safe changes and no response creation.
 - `RSP-006` is accepted only with typed stable requirement-linked missing/unconfirmed/review/evidence gaps that cannot be resolved by UI assertion.
 
 Tracker changes occur only in the runtime PR after each feature's own acceptance passes. This documentation authority leaves the tracker at **438 total · 170 Done · 268 Not Started**, Wave 4 RFx Core at **18/41**, B6b intentionally pending and B6c eligible but Not Started.
