@@ -2,7 +2,7 @@
 
 **Canonical volatile program-status source**
 
-**Snapshot basis:** current merged `main` `7d4deb37377c0ad7bd027dab64acd44a4d1d2e66`; initial operational activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`
+**Snapshot basis:** operational Control Room transition `7d4deb37377c0ad7bd027dab64acd44a4d1d2e66`; initial operational activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`
 **Update rule:** Control Room recalculates this document from merged `main` after every program merge.
 
 The Master Build Tracker remains the Feature-ID authority. This matrix reports independent experience verification and must not be used to rewrite tracker arithmetic.
