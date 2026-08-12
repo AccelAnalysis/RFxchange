@@ -92,26 +92,26 @@ The RFx Core planning package is indexed at [`../rfx/README.md`](../rfx/README.m
 - anti-regression and configured-browser acceptance; and
 - the real-data-only B6c RFx map lens.
 
-The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) and [`../slices/SLICE_4_2_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_2_EXECUTION_AUTHORITY.md). They cover exactly `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006`: the organization-owned draft kernel followed by its private structured need/package foundation.
+The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) and [`../slices/SLICE_4_2_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_2_EXECUTION_AUTHORITY.md). They cover exactly `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006`: the organization-owned draft kernel followed by its private structured need/package foundation. [`../slices/SLICE_4_3_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_3_EXECUTION_AUTHORITY.md) is the documentation-only authority for the next runtime.
 
-Both documentation authorities are merged and the Slice 4.1 runtime is accepted. Slice 4.2 runtime acceptance is recorded on its implementation tree; later slices still require their own documentation authority and runtime evidence.
+Both implemented slices are accepted on merged `main`. The Slice 4.3 authority completes no Feature ID; later slices still require their own documentation authority and runtime evidence.
 
 ## Current sequencing status
 
 Wave 2 is complete. Wave 3 Slices 3.1 through 3.8 and Brand Gates B0–B6a are merged, and the configured-browser/zero-residual Wave 3 exit accepted Network at 38/38. B6b remains intentionally pending.
 
-Merged `main` at `f2d16b9cbf7aa019d8cbd0d798f10f15782f54ec` includes PR #162's Slice 4.2 documentation authority after the accepted Exchange shell and Slice 4.1 runtime. The current active runtime boundary is Slice 4.2 under `docs/slices/SLICE_4_2_EXECUTION_AUTHORITY.md`.
+Merged `main` at `90ee6e08a18a67cc794ff1a84a047a8313ad50d6` includes the accepted Exchange shell and Slice 4.1–4.2 runtime. The current gate is the documentation-only Slice 4.3 authority; runtime cannot begin before that authority is reviewed and merged.
 
 The dependency result remains:
 
 - Wave 3 handoff: satisfied;
 - AMACS 0.5.0 reconciliation: satisfied;
-- AI/AMACS foundation: satisfied and reusable, but not required for manual Slice 4.1 request-family selection;
+- AI/AMACS foundation: satisfied and reusable for optional Slice 4.3 request-structure interpretation; the manual path remains complete;
 - organization authority/tenancy/audit/concurrency foundations: satisfied by prior cross-cutting implementation;
 - Exchange Interaction Architecture: satisfied by PR #150 and reconciled by the active shell gate;
-- Slices 4.1–4.2 RFx kernel/package: implemented and accepted on the Slice 4.2 candidate tree for `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006`;
+- Slices 4.1–4.2 RFx kernel/package: implemented and accepted on merged `main` for `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006`;
 - Stabilization 2C: isolated release engineering, not a product prerequisite; and
-- no genuine Feature-ID dependency-map correction required.
+- the reviewed `ISS-009` dependency on stable Slice 4.2 and Slice 4.3 requirements is adopted; no other dependency correction is introduced.
 
 Canonical totals are **438 total · 157 Done · 281 Not Started**, with Wave 4 RFx Core **5/41**. Later Wave 4 runtime remains unimplemented pending slice-specific authority.
 
