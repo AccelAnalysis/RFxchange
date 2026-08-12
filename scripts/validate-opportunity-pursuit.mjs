@@ -18,7 +18,7 @@ const rules = read("firestore.rules");
 const tracker = read("docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md");
 const evidence = read("docs/architecture/WAVE_4_SLICE_4_6.md");
 
-for (const contract of ["MatchExplanation", "RequirementFitObservation", "OpportunityGap", "PursuitAssessment", "OpportunityPursuit", "OpportunityFitSnapshot", "OpportunityPursuitCommandReceipt", "OpportunityPursuitEvent"]) assert.match(domain, new RegExp(contract));
+for (const contract of ["MatchExplanation", "RequirementFitObservation", "OpportunityGap", "OpportunityGapAssessment", "PursuitAssessment", "OpportunityPursuit", "OpportunityFitSnapshot", "OpportunityPursuitCommandReceipt", "OpportunityPursuitEvent"]) assert.match(domain, new RegExp(contract));
 assert.match(publication, /issuerOrganizationIndexKey/);
 assert.match(publication, /requirementIndex/);
 assert.match(service, /permission: "response\.create"/);
@@ -31,6 +31,9 @@ assert.match(service, /prior\.resultingPursuit/);
 assert.match(service, /ParticipantOpportunityPursuit/);
 assert.match(service, /participantPursuitView/);
 assert.match(service, /assessment: normalizePursuitAssessment\(record\.assessment\)/);
+assert.match(service, /gapAssessmentRecords/);
+assert.match(service, /resolved-by-current-profile/);
+assert.match(service, /Opportunity gaps changed/);
 assert.match(service, /const commitAuthority = await this\.authorizeWrite\(scope\)/);
 assert.match(service, /error instanceof OpportunityPursuitError/);
 assert.match(service, /error instanceof OpportunityPursuitRepositoryError/);
@@ -45,6 +48,7 @@ assert.match(repository, /releaseState/);
 assert.match(repository, /resultingPursuit/);
 assert.match(repository, /OpportunityPursuitRepositoryError/);
 assert.match(repository, /dependency-unavailable/);
+assert.match(repository, /cannot be resolved by participant assertion/);
 for (const collection of ["opportunityFitSnapshots", "opportunityPursuits", "opportunityPursuitCommands", "opportunityPursuitEvents"]) assert.match(repository + rules, new RegExp(collection));
 assert.match(route, /resolveParticipantRoute/);
 assert.match(route, /Same-origin request required/);
@@ -61,6 +65,8 @@ assert.match(workspace, /pursuitGeography\.\$\{explanation\.geographyObservation
 assert.match(workspace, /role="list"/);
 assert.match(workspace, /role="listitem"/);
 assert.match(workspace, /currencyValueFromMinorUnits/);
+assert.match(workspace, /data-opportunity-gap-status/);
+assert.match(workspace, /pursuitGapStatus/);
 assert.match(page, /error instanceof OpportunityPursuitError/);
 assert.match(unavailable, /ParticipantShell activeItem="opportunities-rfx"/);
 assert.match(unavailable, /OperationalWorkspace/);
@@ -76,7 +82,12 @@ assert.match(english, /"not-applicable": "Review required"/);
 assert.match(english, /"pursuitFormat"/);
 assert.match(english, /"pursuitUnavailable"/);
 assert.match(english, /"pursuitGeography"/);
+assert.match(english, /"pursuitGapStatus"/);
 assert.match(english, /"undecided": "Undecided"/);
+for (const locale of ["en-US", "es", "fr", "it", "de"]) {
+  const catalog = JSON.parse(read(`src/i18n/messages/rfx/${locale}.json`));
+  for (const status of ["open", "acknowledged", "deferred", "resolved-by-current-profile"]) assert.ok(catalog.pursuitGapStatus?.[status]);
+}
 assert.match(tracker, /438 total · 175 Done · 263 Not Started/);
 assert.match(tracker, /RFx Core: \*\*23\/41\*\*/);
 for (const id of ["RSP-001", "RSP-002", "RSP-003", "RSP-004", "RSP-006"]) {

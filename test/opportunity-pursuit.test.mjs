@@ -180,15 +180,18 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
   });
   const scope = Object.freeze({ context, organizationId: "org-responder", userId: "user", membershipId: "membership" });
   const explained = await service.explain(scope, projection.reference);
-  const input = Object.freeze({ commandId: "command-replay", reference: projection.reference, expectedVersion: null, expectedFitSnapshotId: explained.fitSnapshotId, decision: "pursue", assessment: Object.freeze({ fit: Object.freeze({ state: "acceptable", note: "Reviewed\nverbatim" }) }) });
+  const missingGap = explained.explanation.gaps.find((gap) => gap.kind === "missing-capability");
+  assert.ok(missingGap);
+  const input = Object.freeze({ commandId: "command-replay", reference: projection.reference, expectedVersion: null, expectedFitSnapshotId: explained.fitSnapshotId, decision: "pursue", assessment: Object.freeze({ fit: Object.freeze({ state: "acceptable", note: "Reviewed\nverbatim" }) }), gapResolutions: Object.freeze({ [missingGap.reference]: "acknowledged" }) });
   const first = await service.save(scope, input);
   assert.equal(first.replayed, false);
   assert.equal(first.pursuit.version, 1);
   assert.deepEqual(Object.keys(first.pursuit).sort(), ["assessment", "decision", "version"]);
   assert.equal("createdByUserId" in first.pursuit, false);
   assert.equal("updatedByMembershipId" in first.pursuit, false);
+  assert.equal(committedCommand.resultingPursuit.gapAssessments.find((gap) => gap.reference === missingGap.reference)?.status, "acknowledged");
   currentPursuit = Object.freeze({ ...committedCommand.resultingPursuit, decision: "decline", version: 2, updatedAt: "2026-08-12T12:01:00.000Z" });
-  currentClaims = Object.freeze([]);
+  currentClaims = Object.freeze([claim(), claim({ id: "claim-2", capabilityId: "AMACS-CAP-000002", labelSnapshot: "Exercise facilitation" })]);
   const changed = await service.explain(scope, projection.reference);
   assert.notEqual(changed.fitSnapshotId, explained.fitSnapshotId);
   const replay = await service.save(scope, input);
@@ -199,6 +202,12 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
   assert.deepEqual(Object.keys(replay.pursuit).sort(), ["assessment", "decision", "version"]);
   const workspace = await service.workspace(scope, projection.reference);
   assert.deepEqual(Object.keys(workspace.pursuit).sort(), ["assessment", "decision", "version"]);
+  assert.equal(workspace.gaps.find((gap) => gap.reference === missingGap.reference)?.status, "resolved-by-current-profile");
+  assert.equal(workspace.gaps.find((gap) => gap.reference === missingGap.reference)?.current, false);
+  await assert.rejects(
+    service.save(scope, { ...input, commandId: "command-forged-gap", expectedVersion: 2, expectedFitSnapshotId: changed.fitSnapshotId, gapResolutions: { forged_gap: "acknowledged" } }),
+    (error) => error?.code === "conflict",
+  );
   committedCommand = null;
   currentPursuit = null;
   currentClaims = Object.freeze([claim()]);

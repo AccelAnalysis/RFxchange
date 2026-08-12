@@ -39,7 +39,7 @@ function markerId(reference: string): string {
   return `opportunity-${reference}`;
 }
 
-function queryHref(result: OpportunityDiscoveryResult, selectedReference?: string | null): string {
+function queryHref(result: OpportunityDiscoveryResult, selectedReference?: string | null, cursor: string | null = result.query.cursor ?? null): string {
   const params = new URLSearchParams();
   if (result.query.text) params.set("q", result.query.text);
   if (result.query.deadlineWindow !== "all-open") params.set("deadline", result.query.deadlineWindow);
@@ -47,7 +47,7 @@ function queryHref(result: OpportunityDiscoveryResult, selectedReference?: strin
   for (const locality of result.query.localityIds) params.append("locality", locality);
   for (const capability of result.query.capabilityIds) params.append("capability", capability);
   for (const family of result.query.requestFamilyKeys) params.append("requestFamily", family);
-  if (result.query.cursor) params.set("cursor", result.query.cursor);
+  if (cursor) params.set("cursor", cursor);
   if (selectedReference) params.set("selected", selectedReference);
   return params.size ? `/opportunities?${params.toString()}` : "/opportunities";
 }
@@ -226,7 +226,7 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
                 {result.items.map((item) => <li key={item.reference}><button type="button" aria-pressed={selected?.reference === item.reference} data-opportunity-reference={item.reference} onClick={() => select(item)}><span><strong>{item.title}</strong><small>{item.issuerDisplayName}</small></span><span>{item.localities.map((locality) => locality.label).join(" · ")}</span><span>{t("rfxWorkspace.discovery.deadline", { date: item.responseDeadline })}</span></button></li>)}
               </ul>
             ) : <StatePanel state="empty" title={t("rfxWorkspace.discovery.emptyTitle")}>{t("rfxWorkspace.discovery.emptyBody")}</StatePanel>}
-            {result.nextCursor ? <Link className={styles.more} href={`${queryHref(result)}${queryHref(result).includes("?") ? "&" : "?"}cursor=${encodeURIComponent(result.nextCursor)}`}>{t("rfxWorkspace.discovery.more")}</Link> : null}
+            {result.nextCursor ? <Link className={styles.more} href={queryHref(result, null, result.nextCursor)}>{t("rfxWorkspace.discovery.more")}</Link> : null}
             <details className={styles.save}>
               <summary>{t("rfxWorkspace.discovery.saved.action")}</summary>
               <label><span>{t("rfxWorkspace.discovery.saved.label")}</span><input value={saveLabel} onChange={(event) => setSaveLabel(event.target.value)} maxLength={80} /></label>

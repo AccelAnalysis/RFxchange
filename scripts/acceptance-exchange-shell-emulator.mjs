@@ -2037,15 +2037,24 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     await cdp.send("Page.reload", { ignoreCache: true });
     await waitForExpression(cdp, `document.querySelector('[data-opportunity-pursue]')?.disabled === false`, "restored pursuit management permission");
     await wait(100);
+    await evaluate(cdp, `(() => {
+      const select = document.querySelector('[data-opportunity-gap-reference] select');
+      if (!select) throw new Error('expected-current-gap-resolution-control');
+      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(select, 'acknowledged');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    })()`);
     await evaluate(cdp, `document.querySelector('[data-opportunity-pursue]')?.click()`);
     await waitForExpression(cdp, `document.body.innerText.includes('Pursuit recorded for your organization.')`, "organization pursuit confirmation");
+    await cdp.send("Page.reload", { ignoreCache: true });
+    await waitForExpression(cdp, `document.querySelector('[data-opportunity-gap-status="acknowledged"]') !== null`, "participant-confirmed gap resolution reload");
     const participantPursuitView = await evaluate(cdp, `(async () => {
       const response = await fetch('/api/opportunities/pursuit?reference=${encodeURIComponent(externalProjectionReference)}');
       const body = await response.json();
-      return { status: response.status, keys: Object.keys(body.pursuit ?? {}).sort(), auditKeysSerialized: ['createdByUserId', 'createdByMembershipId', 'updatedByUserId', 'updatedByMembershipId', 'reviewedFitSnapshotId'].some((key) => JSON.stringify(body).includes(key)) };
+      return { status: response.status, keys: Object.keys(body.pursuit ?? {}).sort(), gapStatuses: (body.gaps ?? []).map((gap) => gap.status), auditKeysSerialized: ['createdByUserId', 'createdByMembershipId', 'updatedByUserId', 'updatedByMembershipId', 'reviewedFitSnapshotId'].some((key) => JSON.stringify(body).includes(key)) };
     })()`);
     assert.equal(participantPursuitView.status, 200);
     assert.deepEqual(participantPursuitView.keys, ["assessment", "decision", "version"]);
+    assert.ok(participantPursuitView.gapStatuses.includes("acknowledged"));
     assert.equal(participantPursuitView.auditKeysSerialized, false);
     const pursuitSnapshot = await db.collection("opportunityPursuits").where("organizationId", "==", organizationId).where("opportunityReference", "==", externalProjectionReference).get();
     assert.equal(pursuitSnapshot.size, 1);

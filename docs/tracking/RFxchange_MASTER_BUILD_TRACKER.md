@@ -261,7 +261,7 @@ Wave 4 RFx Core is **23/41**. Slice 4.6 consumes only real Slice 4.5 opportuniti
 - [x] `RSP-002` — Slice 4.6; private reproducible requirement-by-requirement explanation over exact projection/profile digests, separate geography observation and explicit staleness
 - [x] `RSP-003` — Slice 4.6; private organization-owned six-dimension Go/No-Go assessment with bounded notes, expected-version recovery and no system eligibility judgment
 - [x] `RSP-004` — Slice 4.6; one organization-owned versioned Watch/Pursue/Decline relation using `response.create`, immutable evidence and acting-user bookmark transition
-- [x] `RSP-006` — Slice 4.6; typed missing, unconfirmed, review and evidence-confirmation gaps without a percentage, qualification or award-likelihood claim
+- [x] `RSP-006` — Slice 4.6; stable requirement-linked missing, unconfirmed, review and evidence-confirmation gaps with participant-confirmed open/acknowledged/deferred status, authoritative profile-derived resolution and no percentage, qualification or award-likelihood claim
 - [ ] `RSP-007`
 - [ ] `RSP-008`
 - [ ] `RSP-009`

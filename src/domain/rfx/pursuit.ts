@@ -15,6 +15,8 @@ export type GeographyFitState = "aligned" | "outside-confirmed-area" | "needs-co
 export type PursuitDecision = "watch" | "pursue" | "decline";
 export type PursuitAssessmentState = "not-reviewed" | "acceptable" | "concern" | "blocking" | "needs-confirmation";
 export type OpportunityGapKind = "missing-capability" | "unconfirmed-capability" | "requirement-review" | "evidence-confirmation";
+export type OpportunityGapStatus = "open" | "acknowledged" | "resolved-by-current-profile" | "deferred";
+export type ParticipantGapStatus = Exclude<OpportunityGapStatus, "resolved-by-current-profile">;
 
 export interface RequirementFitObservation {
   readonly reference: string;
@@ -34,11 +36,26 @@ export interface OpportunityGap {
   readonly observationReference: string;
   readonly kind: OpportunityGapKind;
   readonly title: string;
-  readonly status: "open" | "acknowledged" | "resolved-by-current-profile" | "deferred";
+  readonly capabilityLabel: string | null;
+  readonly explanationInputDigest: string;
+  readonly status: OpportunityGapStatus;
+}
+
+export interface OpportunityGapAssessment {
+  readonly reference: string;
+  readonly observationReference: string;
+  readonly kind: OpportunityGapKind;
+  readonly title: string;
+  readonly capabilityLabel: string | null;
+  readonly openedExplanationInputDigest: string;
+  readonly reviewedExplanationInputDigest: string;
+  readonly reviewedFitSnapshotId: string;
+  readonly status: OpportunityGapStatus;
 }
 
 export interface MatchExplanation {
   readonly policyVersion: typeof OPPORTUNITY_FIT_POLICY_VERSION;
+  readonly inputDigest: string;
   readonly organizationId: OrganizationId;
   readonly opportunityReference: string;
   readonly opportunityProjectionVersion: number;
@@ -78,6 +95,7 @@ export interface OpportunityPursuit {
   readonly opportunityReference: string;
   readonly decision: PursuitDecision;
   readonly assessment: PursuitAssessment;
+  readonly gapAssessments: readonly OpportunityGapAssessment[];
   readonly reviewedFitSnapshotId: string;
   readonly reviewedProjectionVersion: number;
   readonly reviewedProjectionDigest: string;
@@ -205,6 +223,7 @@ export function calculateOpportunityFit(input: Readonly<{
   calculatedAt: string;
 }>): MatchExplanation {
   const capabilityInputDigest = opportunityCapabilityInputDigest(input.claims, input.serviceGeographyIds);
+  const explanationInputDigest = digest({ policyVersion: OPPORTUNITY_FIT_POLICY_VERSION, opportunityProjectionVersion: input.projection.aggregateVersion, opportunityProjectionDigest: input.projection.digest, organizationCapabilityInputDigest: capabilityInputDigest });
   const eligibleClaims = input.claims.filter((claim) => claim.assertionStatus !== "suspended" && claim.source.kind !== "legacy_migration");
   const observations = input.projection.payload.requirements.map((requirement, ordinal): RequirementFitObservation => {
     const index = input.projection.requirementIndex?.find((item) => item.ordinal === ordinal);
@@ -227,10 +246,11 @@ export function calculateOpportunityFit(input: Readonly<{
   });
   const gaps: OpportunityGap[] = [];
   for (const observation of observations) {
-    if (observation.state === "missing") gaps.push(Object.freeze({ reference: opaque("oppgap", observation.reference, "missing"), observationReference: observation.reference, kind: "missing-capability", title: observation.title, status: "open" }));
-    else if (observation.state === "unconfirmed") gaps.push(Object.freeze({ reference: opaque("oppgap", observation.reference, "unconfirmed"), observationReference: observation.reference, kind: "unconfirmed-capability", title: observation.title, status: "open" }));
-    else if (observation.state === "not-applicable") gaps.push(Object.freeze({ reference: opaque("oppgap", observation.reference, "review"), observationReference: observation.reference, kind: "requirement-review", title: observation.title, status: "open" }));
-    if (observation.evidenceRequired && observation.state === "aligned") gaps.push(Object.freeze({ reference: opaque("oppgap", observation.reference, "evidence"), observationReference: observation.reference, kind: "evidence-confirmation", title: observation.title, status: "open" }));
+    const shared = { observationReference: observation.reference, title: observation.title, capabilityLabel: observation.capabilityLabel, explanationInputDigest } as const;
+    if (observation.state === "missing") gaps.push(Object.freeze({ reference: opaque("oppgap", observation.reference, "missing"), ...shared, kind: "missing-capability", status: "open" }));
+    else if (observation.state === "unconfirmed") gaps.push(Object.freeze({ reference: opaque("oppgap", observation.reference, "unconfirmed"), ...shared, kind: "unconfirmed-capability", status: "open" }));
+    else if (observation.state === "not-applicable") gaps.push(Object.freeze({ reference: opaque("oppgap", observation.reference, "review"), ...shared, kind: "requirement-review", status: "open" }));
+    if (observation.evidenceRequired && observation.state === "aligned") gaps.push(Object.freeze({ reference: opaque("oppgap", observation.reference, "evidence"), ...shared, kind: "evidence-confirmation", status: "open" }));
   }
   const localityIds = input.projection.payload.localities.map((item) => item.id);
   const geographyObservation: GeographyFitState = !localityIds.length
@@ -243,6 +263,7 @@ export function calculateOpportunityFit(input: Readonly<{
   const potentialMatch = observations.some((item) => item.state === "aligned");
   return Object.freeze({
     policyVersion: OPPORTUNITY_FIT_POLICY_VERSION,
+    inputDigest: explanationInputDigest,
     organizationId: input.organizationId,
     opportunityReference: input.projection.reference,
     opportunityProjectionVersion: input.projection.aggregateVersion,

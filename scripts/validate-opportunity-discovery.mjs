@@ -47,6 +47,8 @@ assert.match(workspace, /ParticipantShell activeItem="opportunities-rfx"/);
 assert.match(workspace, /opportunityMarkers=\{opportunityMarkers\}/);
 assert.match(workspace, /data-selected-opportunity-reference/);
 assert.match(workspace, /result\.deadlines\.next7Days/);
+assert.match(workspace, /queryHref\(result, null, result\.nextCursor\)/);
+assert.doesNotMatch(workspace, /cursor=\$\{encodeURIComponent\(result\.nextCursor\)\}/);
 assert.match(workspace, /Discovery and watching do not mean|rfxWorkspace\.discovery\.detail\.disclaimer/);
 assert.match(map, /OPPORTUNITY_MARKER_SOURCE_ID/);
 assert.match(map, /#1769aa/i);

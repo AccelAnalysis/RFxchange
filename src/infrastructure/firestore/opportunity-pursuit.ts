@@ -5,6 +5,7 @@ import type { OrganizationId } from "../../domain/organizations/model.ts";
 import type { OpportunityWatch } from "../../domain/rfx/discovery.ts";
 import type { ResponderOpportunityProjection, RfxPublicationSnapshot } from "../../domain/rfx/publication.ts";
 import {
+  calculateOpportunityFit,
   opportunityCapabilityInputDigest,
   OpportunityPursuitRepositoryError,
   type OpportunityFitSnapshot,
@@ -147,6 +148,24 @@ export class FirestoreOpportunityPursuitRepository implements OpportunityPursuit
       if (!fitSnapshot.exists || !fit || !projectionSnapshot.exists || !projection) throw new OpportunityPursuitRepositoryError("dependency-unavailable", "Governed opportunity fit evidence is temporarily unavailable.");
       const deadline = projection.payload.timing.responseDeadline;
       if (fit.organizationId !== bundle.record.organizationId || fit.opportunityReference !== bundle.record.opportunityReference || fit.explanation.opportunityProjectionDigest !== bundle.record.reviewedProjectionDigest || fit.explanation.organizationCapabilityInputDigest !== bundle.record.reviewedCapabilityInputDigest || projection.mode !== "published" || !projection.publishedAt || (projection.audience !== "public" && projection.audience !== "authenticated-participants") || projection.reference !== bundle.record.opportunityReference || projection.aggregateVersion !== bundle.record.reviewedProjectionVersion || projection.digest !== bundle.record.reviewedProjectionDigest || projection.issuerOrganizationIndexKey === String(bundle.record.organizationId) || !deadline || Date.parse(`${deadline}T23:59:59.999Z`) <= Date.now() || !membershipSnapshot.exists || !membership || membership.userId !== bundle.record.updatedByUserId || membership.organizationId !== bundle.record.organizationId || membership.status !== "active" || !authorizationSnapshot.exists || !authorization || authorization.userId !== bundle.record.updatedByUserId || authorization.organizationId !== bundle.record.organizationId || !authorization.permissions?.includes("response.create") || activeRestriction || opportunityCapabilityInputDigest(claims, serviceGeographyIds) !== bundle.record.reviewedCapabilityInputDigest || bundle.audit.organizationId !== bundle.record.organizationId || bundle.audit.actor.userId !== bundle.record.updatedByUserId || bundle.audit.actor.membershipId !== bundle.record.updatedByMembershipId) throw new OpportunityPursuitRepositoryError("conflict", "Opportunity pursuit authority or reviewed facts changed.");
+      const currentExplanation = calculateOpportunityFit({ organizationId: bundle.record.organizationId, projection, claims, serviceGeographyIds, calculatedAt: bundle.record.updatedAt });
+      const currentGaps = new Map(currentExplanation.gaps.map((gap) => [gap.reference, gap]));
+      const priorGaps = new Map((current?.gapAssessments ?? []).map((gap) => [gap.reference, gap]));
+      const seenGaps = new Set<string>();
+      for (const gap of bundle.record.gapAssessments) {
+        if (seenGaps.has(gap.reference) || gap.reviewedExplanationInputDigest !== currentExplanation.inputDigest || gap.reviewedFitSnapshotId !== bundle.expectedFitSnapshotId) throw new OpportunityPursuitRepositoryError("conflict", "Opportunity gap assessment is stale or malformed.");
+        seenGaps.add(gap.reference);
+        const expected = currentGaps.get(gap.reference);
+        if (expected) {
+          if (gap.status === "resolved-by-current-profile") throw new OpportunityPursuitRepositoryError("conflict", "Opportunity gap cannot be resolved by participant assertion.");
+          if ((gap.status !== "open" && gap.status !== "acknowledged" && gap.status !== "deferred") || gap.observationReference !== expected.observationReference || gap.kind !== expected.kind || gap.title !== expected.title || gap.capabilityLabel !== expected.capabilityLabel || gap.openedExplanationInputDigest !== (priorGaps.get(gap.reference)?.openedExplanationInputDigest ?? expected.explanationInputDigest)) throw new OpportunityPursuitRepositoryError("conflict", "Opportunity gap assessment does not match current authoritative facts.");
+          continue;
+        }
+        const prior = priorGaps.get(gap.reference);
+        const resolvedByProfile = Boolean(prior && gap.status === "resolved-by-current-profile" && (gap.kind === "missing-capability" || gap.kind === "unconfirmed-capability") && gap.observationReference === prior.observationReference && gap.kind === prior.kind && gap.title === prior.title && gap.capabilityLabel === prior.capabilityLabel && gap.openedExplanationInputDigest === prior.openedExplanationInputDigest && currentExplanation.requirementObservations.some((observation) => observation.reference === gap.observationReference && observation.state === "aligned"));
+        if (!resolvedByProfile) throw new OpportunityPursuitRepositoryError("conflict", "Opportunity gap cannot be resolved by participant assertion.");
+      }
+      if ([...currentGaps.keys()].some((reference) => !seenGaps.has(reference))) throw new OpportunityPursuitRepositoryError("conflict", "Current opportunity gaps are missing from the assessment.");
       const geographySnapshots = await Promise.all(projection.payload.localities.map((item) => transaction.get(this.db.collection(GEOGRAPHIES).doc(item.id))));
       if (!geographySnapshots.length || geographySnapshots.some((item) => !item.exists || item.get("releaseState") !== "released")) throw new OpportunityPursuitRepositoryError("conflict", "Opportunity geography authority changed.");
       transaction.set(pursuitRef, mutable(bundle.record));

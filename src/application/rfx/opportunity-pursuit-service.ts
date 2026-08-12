@@ -10,11 +10,15 @@ import {
   opportunityPursuitId,
   type MatchExplanation,
   type OpportunityFitSnapshot,
+  type OpportunityGapAssessment,
+  type OpportunityGapKind,
+  type OpportunityGapStatus,
   type OpportunityPursuit,
   type OpportunityPursuitCommandReceipt,
   type OpportunityPursuitEvent,
   type OpportunityPursuitRepository,
   OpportunityPursuitRepositoryError,
+  type ParticipantGapStatus,
   type PursuitAssessment,
   type PursuitDecision,
 } from "../../domain/rfx/pursuit.ts";
@@ -44,6 +48,7 @@ export interface OpportunityPursuitWorkspace {
   readonly explanation: MatchExplanation;
   readonly fitSnapshotId: string;
   readonly pursuit: ParticipantOpportunityPursuit | null;
+  readonly gaps: readonly ParticipantOpportunityGap[];
   readonly stale: boolean;
   readonly canManage: boolean;
 }
@@ -52,6 +57,14 @@ export interface ParticipantOpportunityPursuit {
   readonly decision: PursuitDecision;
   readonly assessment: PursuitAssessment;
   readonly version: number;
+}
+
+export interface ParticipantOpportunityGap {
+  readonly reference: string;
+  readonly kind: OpportunityGapKind;
+  readonly title: string;
+  readonly status: OpportunityGapStatus;
+  readonly current: boolean;
 }
 
 function stable(value: string, label: string): string {
@@ -80,6 +93,53 @@ function participantPursuitView(record: OpportunityPursuit): ParticipantOpportun
     assessment: normalizePursuitAssessment(record.assessment),
     version: record.version,
   });
+}
+
+function requestedGapStatuses(input: Readonly<Record<string, string>> | undefined): Readonly<Record<string, ParticipantGapStatus>> {
+  const normalized: Record<string, ParticipantGapStatus> = {};
+  for (const [rawReference, rawStatus] of Object.entries(input ?? {}).sort(([left], [right]) => left.localeCompare(right))) {
+    const reference = stable(rawReference, "Gap reference");
+    if (rawStatus !== "open" && rawStatus !== "acknowledged" && rawStatus !== "deferred") throw new OpportunityPursuitError("invalid", "Gap status is unsupported.");
+    if (reference in normalized) throw new OpportunityPursuitError("invalid", "Gap reference is duplicated.");
+    normalized[reference] = rawStatus;
+  }
+  return Object.freeze(normalized);
+}
+
+function gapAssessmentRecords(
+  explanation: MatchExplanation,
+  fitSnapshotId: string,
+  pursuit: OpportunityPursuit | null,
+  requested?: Readonly<Record<string, ParticipantGapStatus>>,
+): readonly OpportunityGapAssessment[] {
+  const previous = new Map((pursuit?.gapAssessments ?? []).map((item) => [item.reference, item]));
+  const currentReferences = new Set(explanation.gaps.map((item) => item.reference));
+  for (const reference of Object.keys(requested ?? {})) if (!currentReferences.has(reference)) throw new OpportunityPursuitError("conflict", "Opportunity gaps changed; review the current facts before saving.");
+  const current = explanation.gaps.map((gap): OpportunityGapAssessment => {
+    const prior = previous.get(gap.reference);
+    const retainedStatus = prior && prior.reviewedExplanationInputDigest === explanation.inputDigest && prior.status !== "resolved-by-current-profile" ? prior.status : "open";
+    return Object.freeze({
+      reference: gap.reference,
+      observationReference: gap.observationReference,
+      kind: gap.kind,
+      title: gap.title,
+      capabilityLabel: gap.capabilityLabel,
+      openedExplanationInputDigest: prior?.openedExplanationInputDigest ?? gap.explanationInputDigest,
+      reviewedExplanationInputDigest: explanation.inputDigest,
+      reviewedFitSnapshotId: fitSnapshotId,
+      status: requested?.[gap.reference] ?? retainedStatus,
+    });
+  });
+  const resolved = [...previous.values()].filter((prior) => {
+    if (currentReferences.has(prior.reference) || (prior.kind !== "missing-capability" && prior.kind !== "unconfirmed-capability")) return false;
+    return explanation.requirementObservations.some((observation) => observation.reference === prior.observationReference && observation.state === "aligned");
+  }).map((prior): OpportunityGapAssessment => Object.freeze({ ...prior, reviewedExplanationInputDigest: explanation.inputDigest, reviewedFitSnapshotId: fitSnapshotId, status: "resolved-by-current-profile" }));
+  return Object.freeze([...current, ...resolved]);
+}
+
+function participantGapViews(records: readonly OpportunityGapAssessment[], explanation: MatchExplanation): readonly ParticipantOpportunityGap[] {
+  const currentReferences = new Set(explanation.gaps.map((item) => item.reference));
+  return Object.freeze(records.map((item) => Object.freeze({ reference: item.reference, kind: item.kind, title: item.title, status: item.status, current: currentReferences.has(item.reference) })));
 }
 
 export class OpportunityPursuitService {
@@ -151,9 +211,10 @@ export class OpportunityPursuitService {
     await this.authorizeRead(scope);
     const result = await this.calculate(scope, reference);
     const pursuit = await this.dependencies.repository.getPursuit(opportunityPursuitId(String(scope.organizationId), result.explanation.opportunityReference));
+    const gaps = gapAssessmentRecords(result.explanation, result.snapshot.id, pursuit);
     const stale = Boolean(pursuit && (pursuit.reviewedFitSnapshotId !== result.snapshot.id || pursuit.reviewedProjectionDigest !== result.explanation.opportunityProjectionDigest || pursuit.reviewedCapabilityInputDigest !== result.explanation.organizationCapabilityInputDigest));
     const management = await authorizeOrganizationOperation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId, permission: "response.create" }, this.dependencies.authorization);
-    return Object.freeze({ explanation: result.explanation, fitSnapshotId: result.snapshot.id, pursuit: pursuit ? participantPursuitView(pursuit) : null, stale, canManage: management.allowed });
+    return Object.freeze({ explanation: result.explanation, fitSnapshotId: result.snapshot.id, pursuit: pursuit ? participantPursuitView(pursuit) : null, gaps: participantGapViews(gaps, result.explanation), stale, canManage: management.allowed });
   }
 
   async save(scope: OpportunityPursuitScope, input: Readonly<{
@@ -163,6 +224,7 @@ export class OpportunityPursuitService {
     expectedFitSnapshotId: string;
     decision: string;
     assessment: Partial<Record<keyof PursuitAssessment, Readonly<{ state?: string; note?: string }>>>;
+    gapResolutions?: Readonly<Record<string, string>>;
   }>): Promise<Readonly<{ pursuit: ParticipantOpportunityPursuit; replayed: boolean }>> {
     await this.authorizeWrite(scope);
     const commandId = stable(input.commandId, "Command identity");
@@ -170,8 +232,9 @@ export class OpportunityPursuitService {
     const reference = stable(input.reference, "Opportunity reference");
     const id = opportunityPursuitId(String(scope.organizationId), reference);
     const assessment = normalizePursuitAssessment(input.assessment);
+    const gapResolutions = requestedGapStatuses(input.gapResolutions);
     const nextDecision = decision(input.decision);
-    const requestFingerprint = hash({ action: "pursuit.save", organizationId: scope.organizationId, reference, expectedVersion: input.expectedVersion, expectedFitSnapshotId, decision: nextDecision, assessment });
+    const requestFingerprint = hash({ action: "pursuit.save", organizationId: scope.organizationId, reference, expectedVersion: input.expectedVersion, expectedFitSnapshotId, decision: nextDecision, assessment, gapResolutions });
     const prior = await this.dependencies.repository.getCommand(commandId);
     if (prior) {
       if (prior.requestFingerprint !== requestFingerprint || prior.pursuitId !== id) throw new OpportunityPursuitError("conflict", "Command identity was reused for different intent.");
@@ -183,10 +246,11 @@ export class OpportunityPursuitService {
     const existing = await this.dependencies.repository.getPursuit(id);
     const expectedVersion = input.expectedVersion === null ? null : Number(input.expectedVersion);
     if ((!existing && expectedVersion !== null) || (existing && expectedVersion !== existing.version)) throw new OpportunityPursuitError("conflict", `Pursuit changed${existing ? `; current version is ${existing.version}` : ""}.`);
+    const gapAssessments = gapAssessmentRecords(result.explanation, result.snapshot.id, existing, gapResolutions);
     const now = this.now();
     const pursuit: OpportunityPursuit = Object.freeze({
       schemaVersion: 1, id, organizationId: scope.organizationId, opportunityReference: result.explanation.opportunityReference,
-      decision: nextDecision, assessment, reviewedFitSnapshotId: result.snapshot.id,
+      decision: nextDecision, assessment, gapAssessments, reviewedFitSnapshotId: result.snapshot.id,
       reviewedProjectionVersion: result.explanation.opportunityProjectionVersion,
       reviewedProjectionDigest: result.explanation.opportunityProjectionDigest,
       reviewedCapabilityInputDigest: result.explanation.organizationCapabilityInputDigest,
