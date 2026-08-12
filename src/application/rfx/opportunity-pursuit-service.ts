@@ -22,7 +22,7 @@ import {
   type PursuitAssessment,
   type PursuitDecision,
 } from "../../domain/rfx/pursuit.ts";
-import { responderOpportunityFitIndex } from "../../domain/rfx/publication.ts";
+import { governedResponderOpportunityProjection } from "../../domain/rfx/publication.ts";
 import type { OrganizationMembershipId, UserId } from "../../domain/users/model.ts";
 import { authorizeOrganizationOperation, authorizeOrganizationParticipation, type OrganizationOperationAuthorizationDependencies } from "../auth/authorize-organization-operation.ts";
 import type { AuthenticatedServerContext } from "../auth/server-session.ts";
@@ -177,12 +177,15 @@ export class OpportunityPursuitService {
     const reference = stable(referenceInput, "Opportunity reference");
     const persistedProjection = await this.dependencies.repository.getProjection(reference);
     if (!persistedProjection || persistedProjection.mode !== "published" || !persistedProjection.publishedAt || (persistedProjection.audience !== "public" && persistedProjection.audience !== "authenticated-participants") || opportunityDeadlineState(persistedProjection, this.now()) === "passed") throw new OpportunityPursuitError("not-found", "Opportunity is unavailable.");
-    let projection = persistedProjection;
-    if (!projection.requirementIndex || !projection.issuerOrganizationIndexKey) {
-      const snapshot = await this.dependencies.repository.getPublicationSnapshotByReference(reference);
-      if (!snapshot || snapshot.reference !== reference || snapshot.aggregateVersion !== projection.aggregateVersion || snapshot.projectionDigest !== projection.digest || snapshot.aggregate.version !== projection.aggregateVersion || snapshot.aggregate.lifecycleState !== "published") throw new OpportunityPursuitError("dependency-unavailable", "The governed fit source for this opportunity is temporarily unavailable.");
-      projection = Object.freeze({ ...projection, ...responderOpportunityFitIndex(snapshot.aggregate) });
-    }
+    const publicationEvidence = await this.dependencies.repository.getPublicationSnapshotByReference(reference);
+    if (!publicationEvidence) throw new OpportunityPursuitError("dependency-unavailable", "The governed fit source for this opportunity is temporarily unavailable.");
+    const projection = (() => {
+      try {
+        return governedResponderOpportunityProjection(persistedProjection, publicationEvidence);
+      } catch {
+        throw new OpportunityPursuitError("dependency-unavailable", "The governed fit source for this opportunity is temporarily unavailable.");
+      }
+    })();
     if (projection.issuerOrganizationIndexKey === String(scope.organizationId)) throw new OpportunityPursuitError("forbidden", "The issuing organization cannot pursue its own opportunity.");
     const [claims, serviceGeographyIds] = await Promise.all([
       this.dependencies.repository.listCapabilityClaims(scope.organizationId),

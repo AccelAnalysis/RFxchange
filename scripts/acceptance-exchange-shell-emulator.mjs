@@ -1631,6 +1631,7 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
   let chrome;
   let evidence = null;
   let externalProjectionReference = null;
+  let externalPublicationSnapshotId = null;
   let pursuitEvidence = null;
   const capabilityClaimId = `capability-claim-${runId}`;
   const authorizationRef = db.collection("organizationAuthorizations").doc(membershipId);
@@ -2011,9 +2012,13 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.match(watch.id, /^oppwatch_[a-f0-9]{40}$/);
     const publishedProjection = (await db.collection("rfxOpportunityProjections").doc(previewEvidence.reference).get()).data();
     externalProjectionReference = `opp_external_${createHash("sha256").update(runId).digest("hex").slice(0, 32)}`;
+    externalPublicationSnapshotId = `rfxpublication_external_${createHash("sha256").update(runId).digest("hex").slice(0, 32)}`;
     const externalProjection = { ...publishedProjection, reference: externalProjectionReference, issuerOrganizationIndexKey: externalOrganizationIds.harbor };
+    const sourcePublication = publicationSnapshot.docs[0].data();
+    const externalPublication = { ...sourcePublication, id: externalPublicationSnapshotId, reference: externalProjectionReference, issuerOrganizationId: externalOrganizationIds.harbor, aggregate: { ...sourcePublication.aggregate, issuerOrganizationId: externalOrganizationIds.harbor } };
     await Promise.all([
       db.collection("rfxOpportunityProjections").doc(externalProjectionReference).set(externalProjection),
+      db.collection("rfxPublicationSnapshots").doc(externalPublicationSnapshotId).set(externalPublication),
       db.collection("organizationCapabilityClaims").doc(capabilityClaimId).set(record({ id: capabilityClaimId, organizationId, capabilityId: publishedProjection.requirementIndex[0].capabilityId, amacsReleaseVersion: publishedProjection.requirementIndex[0].amacsReleaseVersion, labelSnapshot: publishedProjection.payload.requirements[0].capabilityLabel, definitionSnapshot: publishedProjection.payload.requirements[0].capabilityDefinition, domainId: "AMACS-DOM-000001", domainLabelSnapshot: "Operations", familyId: "AMACS-FAM-000001", familyLabelSnapshot: "Resilience", entityScope: "reporting_entity", marketRoleIds: [], deliveryRoles: ["prime"], serviceGeographyIds: [String(PORTSMOUTH_CONTROLLED_LOCALITY.id)], specialties: [], capacity: null, evidenceIds: [], assertionStatus: "self_reported", visibility: "network", source: { kind: "manual" }, assertedByUserId: seed.userId, assertedByMembershipId: membershipId, createdAt: now, updatedAt: now })),
     ]);
     await authorizationRef.set({
@@ -2023,7 +2028,7 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     const assessmentReturn = `/opportunities?q=continuity&deadline=next-30-days&locality=${encodeURIComponent(String(PORTSMOUTH_CONTROLLED_LOCALITY.id))}&selected=${encodeURIComponent(externalProjectionReference)}`;
     await navigate(cdp, `${baseUrl}/opportunities/${externalProjectionReference}/assess?returnTo=${encodeURIComponent(assessmentReturn)}`);
     await waitForExpression(cdp, `document.querySelector('[data-opportunity-assessment-reference]')?.dataset.opportunityAssessmentReference === ${JSON.stringify(externalProjectionReference)}`, "opportunity assessment workspace");
-    const assessmentView = await evaluate(cdp, `({ potentialMatch: document.body.innerText.includes('Potential Match'), indexLeak: ['requirementIndex', 'issuerOrganizationIndexKey', 'capabilityIndexKeys'].some((key) => document.documentElement.innerHTML.includes(key)), operational: document.querySelector('[data-participant-workspace="operational"]') !== null, geographyObservation: document.querySelector('[data-opportunity-geography-observation]')?.dataset.opportunityGeographyObservation, geographyComparisonVisible: document.body.innerText.includes('Within your organization’s confirmed service area'), observationListSemantics: document.querySelector('[role="list"] [role="listitem"]') !== null, pursueDisabledWithoutPermission: document.querySelector('[data-opportunity-pursue]')?.disabled, backHref: document.querySelector('[data-opportunity-assessment-reference] header a')?.getAttribute('href'), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth })`);
+    const assessmentView = await evaluate(cdp, `({ potentialMatch: document.body.innerText.includes('Potential Match'), indexLeak: ['requirementIndex', 'issuerOrganizationIndexKey', 'capabilityIndexKeys'].some((key) => document.documentElement.innerHTML.includes(key)), operational: document.querySelector('[data-participant-workspace="operational"]') !== null, geographyObservation: document.querySelector('[data-opportunity-geography-observation]')?.dataset.opportunityGeographyObservation, geographyComparisonVisible: document.body.innerText.includes('Within your organization’s confirmed service area'), observationListSemantics: document.querySelector('[role="list"] [role="listitem"]') !== null, pursueDisabledWithoutPermission: document.querySelector('[data-opportunity-pursue]')?.disabled, assessmentInputsDisabledWithoutPermission: [...document.querySelectorAll('fieldset select, fieldset textarea')].every((control) => control.disabled), readOnlyExplanationVisible: document.body.innerText.includes('cannot change the assessment or pursuit decision'), backHref: document.querySelector('[data-opportunity-assessment-reference] header a')?.getAttribute('href'), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth })`);
     assert.equal(assessmentView.potentialMatch, true);
     assert.equal(assessmentView.indexLeak, false);
     assert.equal(assessmentView.operational, true);
@@ -2031,6 +2036,8 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.equal(assessmentView.geographyComparisonVisible, true);
     assert.equal(assessmentView.observationListSemantics, true);
     assert.equal(assessmentView.pursueDisabledWithoutPermission, true);
+    assert.equal(assessmentView.assessmentInputsDisabledWithoutPermission, true);
+    assert.equal(assessmentView.readOnlyExplanationVisible, true);
     assert.equal(assessmentView.backHref, assessmentReturn);
     assert.ok(assessmentView.overflow <= 0);
     await authorizationRef.set(originalAuthorization);
@@ -2208,6 +2215,7 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     await Promise.all([...aggregates.docs, ...events.docs, ...commands.docs, ...rfxAudits, ...opportunityAudits, ...publicationSnapshots.docs, ...savedSearches.docs, ...watches.docs, ...matches.docs, ...alerts.docs, ...relationCommands.docs, ...relationEvents.docs, ...fitSnapshots.docs, ...pursuits.docs, ...pursuitCommands.docs, ...pursuitEvents.docs].map((snapshot) => snapshot.ref.delete()));
     await Promise.all(projectionRefs.map((reference) => reference.delete()));
     if (externalProjectionReference) await db.collection("rfxOpportunityProjections").doc(externalProjectionReference).delete();
+    if (externalPublicationSnapshotId) await db.collection("rfxPublicationSnapshots").doc(externalPublicationSnapshotId).delete();
     await db.collection("organizationCapabilityClaims").doc(capabilityClaimId).delete();
     const residuals = await Promise.all([
       db.collection("rfxAggregates").where("issuerOrganizationId", "==", organizationId).get(),

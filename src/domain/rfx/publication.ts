@@ -167,6 +167,32 @@ export function responderOpportunityFitIndex(aggregate: RfxAggregate): Readonly<
   });
 }
 
+export function governedResponderOpportunityProjection(
+  projection: ResponderOpportunityProjection,
+  snapshot: RfxPublicationSnapshot,
+): ResponderOpportunityProjection {
+  if (
+    snapshot.reference !== projection.reference ||
+    snapshot.aggregateVersion !== projection.aggregateVersion ||
+    snapshot.projectionDigest !== projection.digest ||
+    snapshot.aggregate.version !== projection.aggregateVersion ||
+    snapshot.aggregate.lifecycleState !== "published"
+  ) throw new Error("Opportunity publication evidence does not match the responder projection.");
+  const canonical = responderOpportunityFitIndex(snapshot.aggregate);
+  const indexMatches = projection.requirementIndex === undefined || (
+    projection.requirementIndex.length === canonical.requirementIndex.length &&
+    projection.requirementIndex.every((item, ordinal) => {
+      const expected = canonical.requirementIndex[ordinal];
+      return item.ordinal === expected.ordinal && item.requirementId === expected.requirementId && item.capabilityId === expected.capabilityId && item.amacsReleaseVersion === expected.amacsReleaseVersion && item.level === expected.level && item.satisfyingParty === expected.satisfyingParty && item.teamCoverageAllowed === expected.teamCoverageAllowed && item.evidenceRequired === expected.evidenceRequired;
+    })
+  );
+  if (
+    (projection.issuerOrganizationIndexKey !== undefined && projection.issuerOrganizationIndexKey !== canonical.issuerOrganizationIndexKey) ||
+    !indexMatches
+  ) throw new Error("Opportunity fit indexes do not match immutable publication evidence.");
+  return Object.freeze({ ...projection, ...canonical });
+}
+
 function stableDigest(payload: ResponderOpportunityPayload): string {
   return createHash("sha256").update(JSON.stringify(payload)).digest("hex");
 }

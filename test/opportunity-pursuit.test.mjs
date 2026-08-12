@@ -30,6 +30,29 @@ function claim(overrides = {}) {
   return Object.freeze({ id: "claim-1", organizationId: "org-responder", capabilityId: "AMACS-CAP-000001", amacsReleaseVersion: "0.5.0", labelSnapshot: "Continuity planning", definitionSnapshot: "Plan continuity.", domainId: "domain", domainLabelSnapshot: "Operations", familyId: "family", familyLabelSnapshot: "Resilience", entityScope: "reporting_entity", marketRoleIds: Object.freeze([]), deliveryRoles: Object.freeze(["prime"]), serviceGeographyIds: Object.freeze(["county-51013"]), specialties: Object.freeze([]), capacity: null, evidenceIds: Object.freeze([]), assertionStatus: "self_reported", visibility: "network", source: Object.freeze({ kind: "manual" }), assertedByUserId: "user", assertedByMembershipId: "membership", createdAt: NOW, updatedAt: NOW, ...overrides });
 }
 
+function publicationEvidence() {
+  return Object.freeze({
+    reference: projection.reference,
+    aggregateVersion: projection.aggregateVersion,
+    projectionDigest: projection.digest,
+    aggregate: Object.freeze({
+      issuerOrganizationId: "org-issuer",
+      version: projection.aggregateVersion,
+      lifecycleState: "published",
+      definition: Object.freeze({
+        requirements: Object.freeze(projection.requirementIndex.map((item, ordinal) => Object.freeze({
+          id: item.requirementId,
+          capability: Object.freeze({ id: item.capabilityId, amacsReleaseVersion: item.amacsReleaseVersion }),
+          level: item.level,
+          satisfyingParty: item.satisfyingParty,
+          teamCoverageAllowed: item.teamCoverageAllowed,
+          evidenceRequirementIds: ordinal === 0 ? Object.freeze(["evidence-1"]) : Object.freeze([]),
+        }))),
+      }),
+    }),
+  });
+}
+
 test("RSP-001/002 requires exact confirmed AMACS alignment and explains gaps without a score", () => {
   const explanation = calculateOpportunityFit({ organizationId: "org-responder", projection, claims: [claim()], serviceGeographyIds: ["county-51013"], calculatedAt: NOW });
   assert.deepEqual(explanation.attribution, ["discovered", "potential-match"]);
@@ -89,26 +112,7 @@ test("RSP-001/002 read-only participants can inspect fit and legacy publications
     },
     repository: {
       getProjection: async () => currentProjection,
-      getPublicationSnapshotByReference: async () => Object.freeze({
-        reference: projection.reference,
-        aggregateVersion: projection.aggregateVersion,
-        projectionDigest: projection.digest,
-        aggregate: Object.freeze({
-          issuerOrganizationId: "org-issuer",
-          version: projection.aggregateVersion,
-          lifecycleState: "published",
-          definition: Object.freeze({
-            requirements: Object.freeze(projection.requirementIndex.map((item, ordinal) => Object.freeze({
-              id: item.requirementId,
-              capability: Object.freeze({ id: item.capabilityId, amacsReleaseVersion: item.amacsReleaseVersion }),
-              level: item.level,
-              satisfyingParty: item.satisfyingParty,
-              teamCoverageAllowed: item.teamCoverageAllowed,
-              evidenceRequirementIds: ordinal === 0 ? Object.freeze(["evidence-1"]) : Object.freeze([]),
-            }))),
-          }),
-        }),
-      }),
+      getPublicationSnapshotByReference: async () => publicationEvidence(),
       listCapabilityClaims: async () => Object.freeze([claim()]),
       getServiceGeographyIds: async () => Object.freeze(["county-51013"]),
       getPursuit: async () => null,
@@ -127,6 +131,16 @@ test("RSP-001/002 read-only participants can inspect fit and legacy publications
   assert.deepEqual(workspace.explanation.attribution, ["discovered", "potential-match"]);
   assert.equal(fitSnapshots.length, 1);
   assert.equal(fitSnapshots[0].explanation.opportunityProjectionDigest, projection.digest);
+  currentProjection = Object.freeze({ ...projection, issuerOrganizationIndexKey: "org-corrupt" });
+  await assert.rejects(
+    service.explain({ context, organizationId: "org-responder", userId: "user", membershipId: "membership" }, projection.reference),
+    (error) => error?.code === "dependency-unavailable",
+  );
+  currentProjection = Object.freeze({ ...projection, requirementIndex: Object.freeze([]) });
+  await assert.rejects(
+    service.explain({ context, organizationId: "org-responder", userId: "user", membershipId: "membership" }, projection.reference),
+    (error) => error?.code === "dependency-unavailable",
+  );
   currentProjection = Object.freeze({ ...projection, audience: "unsupported-audience" });
   await assert.rejects(
     service.explain({ context, organizationId: "org-responder", userId: "user", membershipId: "membership" }, projection.reference),
@@ -163,7 +177,7 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
     },
     repository: {
       getProjection: async () => projection,
-      getPublicationSnapshotByReference: async () => null,
+      getPublicationSnapshotByReference: async () => publicationEvidence(),
       listCapabilityClaims: async () => currentClaims,
       getServiceGeographyIds: async () => Object.freeze(["county-51013"]),
       getPursuit: async () => currentPursuit,
@@ -242,7 +256,7 @@ test("RSP-003 revalidates current account authority at the pursuit commit bounda
     },
     repository: {
       getProjection: async () => projection,
-      getPublicationSnapshotByReference: async () => null,
+      getPublicationSnapshotByReference: async () => publicationEvidence(),
       listCapabilityClaims: async () => Object.freeze([claim()]),
       getServiceGeographyIds: async () => Object.freeze(["county-51013"]),
       getPursuit: async () => null,

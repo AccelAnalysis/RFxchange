@@ -3,7 +3,7 @@ import {
   deleteApp as deleteAdminApp,
   initializeApp as initializeAdminApp,
 } from "firebase-admin/app";
-import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
+import { FieldValue, getFirestore as getAdminFirestore } from "firebase-admin/firestore";
 import {
   deleteApp as deleteClientApp,
   initializeApp as initializeClientApp,
@@ -448,6 +448,10 @@ try {
   await assert.rejects(pursuitRepository.savePursuit(pursuitBundle), /authority or reviewed facts changed/);
   assert.equal((await adminDb.collection("opportunityPursuitCommands").doc(pursuitBundle.command.id).get()).exists, false);
   await adminDb.collection("rfxOpportunityProjections").doc(reference).update({ audience: projection.audience });
+  await adminDb.collection("rfxOpportunityProjections").doc(reference).update({ requirementIndex: [] });
+  await assert.rejects(pursuitRepository.savePursuit(pursuitBundle), /publication evidence changed or is inconsistent/);
+  assert.equal((await adminDb.collection("opportunityPursuitCommands").doc(pursuitBundle.command.id).get()).exists, false);
+  await adminDb.collection("rfxOpportunityProjections").doc(reference).update({ issuerOrganizationIndexKey: FieldValue.delete(), requirementIndex: FieldValue.delete() });
   const forgedRecord = { ...pursuit, gapAssessments: pursuit.gapAssessments.map((gap, index) => index === 0 ? { ...gap, status: "resolved-by-current-profile" } : gap) };
   const forgedBundle = { ...pursuitBundle, record: forgedRecord, command: { ...pursuitBundle.command, id: `pursuit-command-forged-gap-${suffix}`, resultingPursuit: forgedRecord }, event: { ...pursuitBundle.event, id: `pursuit-event-forged-gap-${suffix}`, commandId: `pursuit-command-forged-gap-${suffix}` }, audit: { ...pursuitBundle.audit, id: `audit-pursuit-forged-gap-${suffix}` } };
   await assert.rejects(pursuitRepository.savePursuit(forgedBundle), /cannot be resolved by participant assertion/);
