@@ -14,6 +14,7 @@ import {
   type OpportunityPursuitCommandReceipt,
   type OpportunityPursuitEvent,
   type OpportunityPursuitRepository,
+  OpportunityPursuitRepositoryError,
   type PursuitAssessment,
   type PursuitDecision,
 } from "../../domain/rfx/pursuit.ts";
@@ -116,7 +117,12 @@ export class OpportunityPursuitService {
     const explanation = calculateOpportunityFit({ organizationId: scope.organizationId, projection, claims, serviceGeographyIds, calculatedAt });
     const id = opportunityFitSnapshotId({ organizationId: String(scope.organizationId), reference, projectionVersion: projection.aggregateVersion, projectionDigest: projection.digest, capabilityInputDigest: explanation.organizationCapabilityInputDigest });
     const snapshot: OpportunityFitSnapshot = Object.freeze({ schemaVersion: 1, id, organizationId: scope.organizationId, opportunityReference: reference, explanation, recordedAt: calculatedAt });
-    await this.dependencies.repository.recordFit(snapshot);
+    try {
+      await this.dependencies.repository.recordFit(snapshot);
+    } catch (error) {
+      if (error instanceof OpportunityPursuitRepositoryError) throw new OpportunityPursuitError("dependency-unavailable", error.message);
+      throw new OpportunityPursuitError("dependency-unavailable", "Opportunity fit persistence is temporarily unavailable.");
+    }
     return Object.freeze({ explanation, snapshot });
   }
 
@@ -188,7 +194,9 @@ export class OpportunityPursuitService {
       }
       return Object.freeze({ pursuit, replayed: false });
     } catch (error) {
-      throw new OpportunityPursuitError("conflict", error instanceof Error ? error.message : "Pursuit changed before persistence.");
+      if (error instanceof OpportunityPursuitError) throw error;
+      if (error instanceof OpportunityPursuitRepositoryError) throw new OpportunityPursuitError(error.code, error.message);
+      throw new OpportunityPursuitError("dependency-unavailable", "Pursuit persistence is temporarily unavailable.");
     }
   }
 }

@@ -6,6 +6,7 @@ import type { OpportunityWatch } from "../../domain/rfx/discovery.ts";
 import type { ResponderOpportunityProjection, RfxPublicationSnapshot } from "../../domain/rfx/publication.ts";
 import {
   opportunityCapabilityInputDigest,
+  OpportunityPursuitRepositoryError,
   type OpportunityFitSnapshot,
   type OpportunityPursuit,
   type OpportunityPursuitCommandReceipt,
@@ -39,6 +40,12 @@ function mutable(value: object) {
 
 function sameCommand(left: OpportunityPursuitCommandReceipt, right: OpportunityPursuitCommandReceipt) {
   return left.organizationId === right.organizationId && left.action === right.action && left.requestFingerprint === right.requestFingerprint && left.pursuitId === right.pursuitId && left.resultingVersion === right.resultingVersion;
+}
+
+function repositoryFailure(error: unknown, message: string): OpportunityPursuitRepositoryError {
+  if (error instanceof OpportunityPursuitRepositoryError) return error;
+  const code = typeof error === "object" && error !== null && "code" in error ? (error as { readonly code?: unknown }).code : null;
+  return new OpportunityPursuitRepositoryError(code === 10 || code === "aborted" ? "conflict" : "dependency-unavailable", message, { cause: error });
 }
 
 export class FirestoreOpportunityPursuitRepository implements OpportunityPursuitRepository {
@@ -90,11 +97,11 @@ export class FirestoreOpportunityPursuitRepository implements OpportunityPursuit
       if (current.exists) {
         const prior = current.data() as OpportunityFitSnapshot;
         if (prior.organizationId === snapshot.organizationId && prior.opportunityReference === snapshot.opportunityReference && prior.explanation.opportunityProjectionDigest === snapshot.explanation.opportunityProjectionDigest && prior.explanation.organizationCapabilityInputDigest === snapshot.explanation.organizationCapabilityInputDigest) return "replayed" as const;
-        throw new Error("Opportunity fit snapshot identity collision.");
+        throw new OpportunityPursuitRepositoryError("conflict", "Opportunity fit snapshot identity collision.");
       }
       transaction.create(reference, immutable(snapshot));
       return "created" as const;
-    });
+    }).catch((error: unknown) => { throw repositoryFailure(error, "Opportunity fit persistence is temporarily unavailable."); });
   }
 
   savePursuit(bundle: Parameters<OpportunityPursuitRepository["savePursuit"]>[0]): Promise<"created" | "replayed"> {
@@ -102,7 +109,7 @@ export class FirestoreOpportunityPursuitRepository implements OpportunityPursuit
       bundle.command.resultingVersion !== bundle.record.version ||
       bundle.command.resultingPursuit.id !== bundle.record.id ||
       JSON.stringify(bundle.command.resultingPursuit) !== JSON.stringify(bundle.record)
-    ) throw new Error("Opportunity pursuit command result does not match the persisted record.");
+    ) throw new OpportunityPursuitRepositoryError("conflict", "Opportunity pursuit command result does not match the persisted record.");
     const pursuitRef = this.db.collection(PURSUITS).doc(bundle.record.id);
     const fitRef = this.db.collection(FITS).doc(bundle.expectedFitSnapshotId);
     const projectionRef = this.db.collection(PROJECTIONS).doc(bundle.record.opportunityReference);
@@ -123,13 +130,13 @@ export class FirestoreOpportunityPursuitRepository implements OpportunityPursuit
       if (commandSnapshot.exists) {
         const prior = commandSnapshot.data() as OpportunityPursuitCommandReceipt;
         if (sameCommand(prior, bundle.command)) return "replayed" as const;
-        throw new Error("Opportunity pursuit command identity collision.");
+        throw new OpportunityPursuitRepositoryError("conflict", "Opportunity pursuit command identity collision.");
       }
-      if (eventSnapshot.exists || auditSnapshot.exists) throw new Error("Opportunity pursuit evidence identity collision.");
+      if (eventSnapshot.exists || auditSnapshot.exists) throw new OpportunityPursuitRepositoryError("conflict", "Opportunity pursuit evidence identity collision.");
       const current = pursuitSnapshot.data() as OpportunityPursuit | undefined;
       if (bundle.expectedVersion === null) {
-        if (pursuitSnapshot.exists || bundle.record.version !== 1) throw new Error("Opportunity pursuit identity already exists.");
-      } else if (!current || current.organizationId !== bundle.record.organizationId || current.version !== bundle.expectedVersion || bundle.record.version !== bundle.expectedVersion + 1) throw new Error("Opportunity pursuit changed before this command.");
+        if (pursuitSnapshot.exists || bundle.record.version !== 1) throw new OpportunityPursuitRepositoryError("conflict", "Opportunity pursuit identity already exists.");
+      } else if (!current || current.organizationId !== bundle.record.organizationId || current.version !== bundle.expectedVersion || bundle.record.version !== bundle.expectedVersion + 1) throw new OpportunityPursuitRepositoryError("conflict", "Opportunity pursuit changed before this command.");
       const fit = fitSnapshot.data() as OpportunityFitSnapshot | undefined;
       const projection = projectionSnapshot.data() as ResponderOpportunityProjection | undefined;
       const membership = membershipSnapshot.data() as { userId?: string; organizationId?: string; status?: string } | undefined;
@@ -137,10 +144,11 @@ export class FirestoreOpportunityPursuitRepository implements OpportunityPursuit
       const claims = claimsSnapshot.docs.map((item) => item.data() as OrganizationCapabilityClaim);
       const serviceGeographyIds = (serviceGeographySnapshot.data()?.serviceGeographyIds as readonly string[] | undefined) ?? [];
       const activeRestriction = [...organizationRestrictions.docs, ...membershipRestrictions.docs].some((item) => item.get("state") !== "none");
-      const deadline = projection?.payload.timing.responseDeadline;
-      if (!fitSnapshot.exists || !fit || fit.organizationId !== bundle.record.organizationId || fit.opportunityReference !== bundle.record.opportunityReference || fit.explanation.opportunityProjectionDigest !== bundle.record.reviewedProjectionDigest || fit.explanation.organizationCapabilityInputDigest !== bundle.record.reviewedCapabilityInputDigest || !projectionSnapshot.exists || !projection || projection.mode !== "published" || !projection.publishedAt || (projection.audience !== "public" && projection.audience !== "authenticated-participants") || projection.reference !== bundle.record.opportunityReference || projection.aggregateVersion !== bundle.record.reviewedProjectionVersion || projection.digest !== bundle.record.reviewedProjectionDigest || projection.issuerOrganizationIndexKey === String(bundle.record.organizationId) || !deadline || Date.parse(`${deadline}T23:59:59.999Z`) <= Date.now() || !membershipSnapshot.exists || !membership || membership.userId !== bundle.record.updatedByUserId || membership.organizationId !== bundle.record.organizationId || membership.status !== "active" || !authorizationSnapshot.exists || !authorization || authorization.userId !== bundle.record.updatedByUserId || authorization.organizationId !== bundle.record.organizationId || !authorization.permissions?.includes("response.create") || activeRestriction || opportunityCapabilityInputDigest(claims, serviceGeographyIds) !== bundle.record.reviewedCapabilityInputDigest || bundle.audit.organizationId !== bundle.record.organizationId || bundle.audit.actor.userId !== bundle.record.updatedByUserId || bundle.audit.actor.membershipId !== bundle.record.updatedByMembershipId) throw new Error("Opportunity pursuit authority or reviewed facts changed.");
+      if (!fitSnapshot.exists || !fit || !projectionSnapshot.exists || !projection) throw new OpportunityPursuitRepositoryError("dependency-unavailable", "Governed opportunity fit evidence is temporarily unavailable.");
+      const deadline = projection.payload.timing.responseDeadline;
+      if (fit.organizationId !== bundle.record.organizationId || fit.opportunityReference !== bundle.record.opportunityReference || fit.explanation.opportunityProjectionDigest !== bundle.record.reviewedProjectionDigest || fit.explanation.organizationCapabilityInputDigest !== bundle.record.reviewedCapabilityInputDigest || projection.mode !== "published" || !projection.publishedAt || (projection.audience !== "public" && projection.audience !== "authenticated-participants") || projection.reference !== bundle.record.opportunityReference || projection.aggregateVersion !== bundle.record.reviewedProjectionVersion || projection.digest !== bundle.record.reviewedProjectionDigest || projection.issuerOrganizationIndexKey === String(bundle.record.organizationId) || !deadline || Date.parse(`${deadline}T23:59:59.999Z`) <= Date.now() || !membershipSnapshot.exists || !membership || membership.userId !== bundle.record.updatedByUserId || membership.organizationId !== bundle.record.organizationId || membership.status !== "active" || !authorizationSnapshot.exists || !authorization || authorization.userId !== bundle.record.updatedByUserId || authorization.organizationId !== bundle.record.organizationId || !authorization.permissions?.includes("response.create") || activeRestriction || opportunityCapabilityInputDigest(claims, serviceGeographyIds) !== bundle.record.reviewedCapabilityInputDigest || bundle.audit.organizationId !== bundle.record.organizationId || bundle.audit.actor.userId !== bundle.record.updatedByUserId || bundle.audit.actor.membershipId !== bundle.record.updatedByMembershipId) throw new OpportunityPursuitRepositoryError("conflict", "Opportunity pursuit authority or reviewed facts changed.");
       const geographySnapshots = await Promise.all(projection.payload.localities.map((item) => transaction.get(this.db.collection(GEOGRAPHIES).doc(item.id))));
-      if (!geographySnapshots.length || geographySnapshots.some((item) => !item.exists || item.get("releaseState") !== "released")) throw new Error("Opportunity geography authority changed.");
+      if (!geographySnapshots.length || geographySnapshots.some((item) => !item.exists || item.get("releaseState") !== "released")) throw new OpportunityPursuitRepositoryError("conflict", "Opportunity geography authority changed.");
       transaction.set(pursuitRef, mutable(bundle.record));
       if (watchSnapshot.exists) {
         const watch = watchSnapshot.data() as OpportunityWatch;
@@ -150,6 +158,6 @@ export class FirestoreOpportunityPursuitRepository implements OpportunityPursuit
       transaction.create(eventRef, immutable(bundle.event));
       transaction.create(auditRef, immutable(bundle.audit));
       return "created" as const;
-    });
+    }).catch((error: unknown) => { throw repositoryFailure(error, "Opportunity pursuit persistence is temporarily unavailable."); });
   }
 }

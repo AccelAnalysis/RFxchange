@@ -8,7 +8,7 @@ import type { OpportunityPursuitWorkspace } from "../../application/rfx/opportun
 import type { EngagementTerm, EstimatedValue, StructuredDuration } from "../../domain/rfx/model";
 import type { OpportunityPursuit, PursuitAssessment, PursuitAssessmentState, PursuitDecision } from "../../domain/rfx/pursuit";
 import type { Locale } from "../../i18n/config";
-import { formatCurrency, formatDate, formatNumber } from "../../i18n/format";
+import { currencyValueFromMinorUnits, formatCurrency, formatDate, formatNumber } from "../../i18n/format";
 import { OperationalWorkspace, ParticipantShell } from "../participant/ParticipantWorkspace";
 import { useI18n } from "../i18n/I18nProvider";
 import { StatusPill } from "../ui";
@@ -30,10 +30,10 @@ function durationLabel(duration: StructuredDuration, locale: Locale): string {
 
 function estimatedValueLabel(value: EstimatedValue, locale: Locale, t: Translate): string {
   if (value.mode === "not-disclosed") return t("rfxWorkspace.pursuitFormat.valueNotDisclosed");
-  if (value.mode === "exact") return formatCurrency(locale, value.amountMinor / 100, value.currency);
+  if (value.mode === "exact") return formatCurrency(locale, currencyValueFromMinorUnits(locale, value.amountMinor, value.currency), value.currency);
   return t("rfxWorkspace.pursuitFormat.valueRange", {
-    minimum: formatCurrency(locale, value.minimumMinor / 100, value.currency),
-    maximum: formatCurrency(locale, value.maximumMinor / 100, value.currency),
+    minimum: formatCurrency(locale, currencyValueFromMinorUnits(locale, value.minimumMinor, value.currency), value.currency),
+    maximum: formatCurrency(locale, currencyValueFromMinorUnits(locale, value.maximumMinor, value.currency), value.currency),
   });
 }
 
@@ -88,8 +88,8 @@ export function OpportunityAssessmentWorkspace({ workspace, returnHref }: Readon
         {explanation.attribution.map((item) => <StatusPill key={item} tone={item === "potential-match" ? "positive" : "neutral"}>{t(`rfxWorkspace.discovery.pursuit.attribution.${item}`)}</StatusPill>)}
       </div>
       <section className={styles.facts}><h2>{t("rfxWorkspace.discovery.pursuit.facts")}</h2><dl><div><dt>{t("rfxWorkspace.discovery.pursuit.deadline")}</dt><dd>{explanation.publishedFacts.deadline ? formatDate(locale, explanation.publishedFacts.deadline, { dateStyle: "medium", timeZone: "UTC" }) : "—"}</dd></div><div><dt>{t("rfxWorkspace.discovery.pursuit.value")}</dt><dd>{estimatedValueLabel(explanation.publishedFacts.estimatedValue, locale, t)}</dd></div><div><dt>{t("rfxWorkspace.discovery.pursuit.term")}</dt><dd>{engagementTermLabel(explanation.publishedFacts.engagementTerm, locale, t)}</dd></div><div><dt>{t("rfxWorkspace.discovery.pursuit.location")}</dt><dd>{explanation.publishedFacts.locationSummary || t("rfxWorkspace.discovery.pursuit.noLocation")}</dd></div><div data-opportunity-geography-observation={explanation.geographyObservation}><dt>{t("rfxWorkspace.pursuitGeography.label")}</dt><dd>{t(`rfxWorkspace.pursuitGeography.${explanation.geographyObservation}`)}</dd></div></dl></section>
-      <section className={styles.requirements}><h2>{t("rfxWorkspace.discovery.pursuit.why")}</h2><div className={styles.table} role="table" aria-label={t("rfxWorkspace.discovery.pursuit.observations")}>
-        {explanation.requirementObservations.map((item) => <article key={item.reference} role="row"><div><strong>{item.title}</strong><span>{t(`rfxWorkspace.${item.level}`)}</span></div><p>{item.description}</p><p><b>{t(`rfxWorkspace.discovery.pursuit.observation.${item.state}`)}</b>{item.alignedOrganizationCapabilities.length ? ` — ${item.alignedOrganizationCapabilities.join(", ")}` : ""}</p>{item.teamCoverageAllowed ? <small>{t("rfxWorkspace.discovery.pursuit.teamCoverage")}</small> : null}</article>)}
+      <section className={styles.requirements}><h2>{t("rfxWorkspace.discovery.pursuit.why")}</h2><div className={styles.table} role="list" aria-label={t("rfxWorkspace.discovery.pursuit.observations")}>
+        {explanation.requirementObservations.map((item) => <article key={item.reference} role="listitem"><div><strong>{item.title}</strong><span>{t(`rfxWorkspace.${item.level}`)}</span></div><p>{item.description}</p><p><b>{t(`rfxWorkspace.discovery.pursuit.observation.${item.state}`)}</b>{item.alignedOrganizationCapabilities.length ? ` — ${item.alignedOrganizationCapabilities.join(", ")}` : ""}</p>{item.teamCoverageAllowed ? <small>{t("rfxWorkspace.discovery.pursuit.teamCoverage")}</small> : null}</article>)}
       </div></section>
       <section className={styles.gaps}><h2>{t("rfxWorkspace.discovery.pursuit.gaps")}</h2>{explanation.gaps.length ? <ul>{explanation.gaps.map((gap) => <li key={gap.reference}>{gap.title}: {t(`rfxWorkspace.discovery.pursuit.gapKind.${gap.kind}`)}</li>)}</ul> : <p>{t("rfxWorkspace.discovery.pursuit.noGaps")}</p>}</section>
       <section className={styles.assessment}><h2>{t("rfxWorkspace.discovery.pursuit.assessment")}</h2>{dimensions.map((key) => <fieldset key={key}><legend>{t(`rfxWorkspace.discovery.pursuit.dimension.${key}`)}</legend><label>{t("rfxWorkspace.discovery.pursuit.status")}<select value={assessment[key].state} onChange={(event) => changeDimension(key, { state: event.target.value as PursuitAssessmentState })}>{states.map((state) => <option key={state} value={state}>{t(`rfxWorkspace.discovery.pursuit.state.${state}`)}</option>)}</select></label><label>{t("rfxWorkspace.discovery.pursuit.note")}<textarea value={assessment[key].note} maxLength={600} onChange={(event) => changeDimension(key, { note: event.target.value })} /></label></fieldset>)}</section>

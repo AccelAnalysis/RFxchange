@@ -137,6 +137,16 @@ export interface OpportunityPursuitBundle {
   readonly audit: OrganizationActionAuditEvent;
 }
 
+export class OpportunityPursuitRepositoryError extends Error {
+  readonly code: "conflict" | "dependency-unavailable";
+
+  constructor(code: OpportunityPursuitRepositoryError["code"], message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.code = code;
+    this.name = "OpportunityPursuitRepositoryError";
+  }
+}
+
 export interface OpportunityPursuitRepository {
   getProjection(reference: string): Promise<ResponderOpportunityProjection | null>;
   getPublicationSnapshotByReference(reference: string): Promise<RfxPublicationSnapshot | null>;

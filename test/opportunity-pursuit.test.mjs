@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { OpportunityPursuitService } from "../src/application/rfx/opportunity-pursuit-service.ts";
-import { calculateOpportunityFit, normalizePursuitAssessment, opportunityCapabilityInputDigest, opportunityFitSnapshotId, opportunityPursuitId } from "../src/domain/rfx/pursuit.ts";
+import { calculateOpportunityFit, normalizePursuitAssessment, opportunityCapabilityInputDigest, opportunityFitSnapshotId, opportunityPursuitId, OpportunityPursuitRepositoryError } from "../src/domain/rfx/pursuit.ts";
+import { currencyValueFromMinorUnits } from "../src/i18n/format.ts";
 
 const NOW = "2026-08-12T12:00:00.000Z";
 const projection = Object.freeze({
@@ -59,6 +60,12 @@ test("RSP-003/004/006 identities, review normalization, and organization input d
   assert.equal(assessment.capacity.state, "not-reviewed");
 });
 
+test("RSP-002 currency facts honor ISO minor-unit exponents", () => {
+  assert.equal(currencyValueFromMinorUnits("en-US", 1_234, "USD"), 12.34);
+  assert.equal(currencyValueFromMinorUnits("en-US", 100, "JPY"), 100);
+  assert.equal(currencyValueFromMinorUnits("en-US", 1_000, "KWD"), 1);
+});
+
 test("RSP-001/002 read-only participants can inspect fit and legacy publications use immutable snapshot semantics", async () => {
   const context = Object.freeze({
     user: Object.freeze({ id: "user", name: "Reader", primaryEmail: "reader@example.test", login: Object.freeze({ provider: "firebase", subject: "firebase-reader" }), security: Object.freeze({ mfaEnabled: false, credentialVersion: 1 }), createdAt: NOW, updatedAt: NOW }),
@@ -70,6 +77,7 @@ test("RSP-001/002 read-only participants can inspect fit and legacy publications
   const fitSnapshots = [];
   const legacyProjection = Object.freeze({ ...projection, issuerOrganizationIndexKey: undefined, requirementIndex: undefined });
   let currentProjection = legacyProjection;
+  let fitPersistenceFailure = null;
   const service = new OpportunityPursuitService({
     now: () => NOW,
     authorization: {
@@ -105,7 +113,11 @@ test("RSP-001/002 read-only participants can inspect fit and legacy publications
       getServiceGeographyIds: async () => Object.freeze(["county-51013"]),
       getPursuit: async () => null,
       getFitSnapshot: async () => null,
-      recordFit: async (snapshot) => { fitSnapshots.push(snapshot); return "created"; },
+      recordFit: async (snapshot) => {
+        if (fitPersistenceFailure) throw fitPersistenceFailure;
+        fitSnapshots.push(snapshot);
+        return "created";
+      },
       getCommand: async () => null,
       savePursuit: async () => { throw new Error("read-only test must not save pursuit"); },
     },
@@ -120,6 +132,12 @@ test("RSP-001/002 read-only participants can inspect fit and legacy publications
     service.explain({ context, organizationId: "org-responder", userId: "user", membershipId: "membership" }, projection.reference),
     (error) => error?.code === "not-found",
   );
+  currentProjection = projection;
+  fitPersistenceFailure = new OpportunityPursuitRepositoryError("conflict", "Opportunity fit snapshot identity collision.");
+  await assert.rejects(
+    service.explain({ context, organizationId: "org-responder", userId: "user", membershipId: "membership" }, projection.reference),
+    (error) => error?.code === "dependency-unavailable",
+  );
 });
 
 test("RSP-004 exact command replay returns the originally committed pursuit version", async () => {
@@ -133,6 +151,7 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
   let committedCommand = null;
   let currentPursuit = null;
   let currentClaims = Object.freeze([claim()]);
+  let persistenceFailure = null;
   const service = new OpportunityPursuitService({
     now: () => NOW,
     authorization: {
@@ -152,6 +171,7 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
       recordFit: async () => "created",
       getCommand: async () => committedCommand,
       savePursuit: async (bundle) => {
+        if (persistenceFailure) throw persistenceFailure;
         committedCommand = bundle.command;
         currentPursuit = bundle.record;
         return "created";
@@ -173,6 +193,14 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
   assert.equal(replay.pursuit.version, 1);
   assert.equal(replay.pursuit.decision, "pursue");
   assert.equal(replay.pursuit.assessment.fit.note, "Reviewed\nverbatim");
+  committedCommand = null;
+  currentPursuit = null;
+  currentClaims = Object.freeze([claim()]);
+  persistenceFailure = new OpportunityPursuitRepositoryError("dependency-unavailable", "Fit evidence is temporarily unavailable.");
+  await assert.rejects(
+    service.save(scope, { ...input, commandId: "command-dependency" }),
+    (error) => error?.code === "dependency-unavailable",
+  );
 });
 
 test("RSP-003 revalidates current account authority at the pursuit commit boundary", async () => {
