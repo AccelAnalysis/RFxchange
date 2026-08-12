@@ -52,14 +52,18 @@ import {
   updateEssentialOrganizationProfile,
 } from "../src/domain/organization-profile/model.ts";
 import { evaluateOrganizationMarkerActivation } from "../src/domain/organization-markers/model.ts";
+import { ORIENTATION_STEP_SEQUENCE } from "../src/domain/orientation/model.ts";
 import { createOrganizationAccount, createOrganizationProfile } from "../src/domain/organizations/model.ts";
 import { createOrganizationMembership, createUserIdentity } from "../src/domain/users/model.ts";
+import { OrientationJourneyService } from "../src/application/orientation/orientation-journey.ts";
 import { PARTICIPANT_INTELLIGENCE_CONTEXT_STORAGE_KEY } from "../src/application/participant/intelligence-context-storage.ts";
+import { PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX } from "../src/application/participant/participant-spatial-context.ts";
 import {
   HAMPTON_ROADS_CONTROLLED_LOCALITY_DEFINITIONS,
   PORTSMOUTH_CONTROLLED_LOCALITY,
 } from "../src/data/geography/hampton-roads-controlled-locality.ts";
 import { createFirestoreGeographyRepositories } from "../src/infrastructure/firestore/geography-repositories.ts";
+import { FirestoreOrientationJourneyRepository } from "../src/infrastructure/firestore/orientation-journey.ts";
 import { localeCookieName } from "../src/i18n/config.ts";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
@@ -74,8 +78,9 @@ const authEmulatorHost = process.env.FIREBASE_AUTH_EMULATOR_HOST?.trim();
 const firestoreEmulatorHost = process.env.FIRESTORE_EMULATOR_HOST?.trim();
 const baselineWorktree = process.env.RFXCHANGE_ACCEPTANCE_BASE_WORKTREE?.trim();
 const baselineSha = process.env.RFXCHANGE_ACCEPTANCE_BASE_SHA?.trim()
-  || "87fb29ef3b442410deecf61a470bc94c9c013c60";
+  || "7e61fd94232ad72de32f4776befdb61d9e729cf6";
 const candidateSha = process.env.RFXCHANGE_ACCEPTANCE_CANDIDATE_SHA?.trim() || "unknown";
+const configuredMapAcceptance = process.env.RFXCHANGE_CONFIGURED_MAP_ACCEPTANCE?.trim() === "1";
 const outputPath = path.resolve(
   process.env.RFXCHANGE_ACCEPTANCE_OUTPUT?.trim()
     || "artifacts/exchange-shell-transition-evidence.json",
@@ -88,6 +93,11 @@ assert.ok(baselineWorktree, "RFXCHANGE_ACCEPTANCE_BASE_WORKTREE is required.");
 const runId = `shell-${Date.now()}-${randomBytes(3).toString("hex")}`;
 const now = new Date().toISOString();
 const organizationId = `org_${runId}`;
+const externalOrganizationIds = Object.freeze({
+  harbor: `org_harbor_${runId}`,
+  tidewater: `org_tidewater_${runId}`,
+  atlantic: `org_atlantic_${runId}`,
+});
 const membershipId = `membership_${runId}`;
 const email = `${runId}@example.test`;
 const password = `A9!${randomBytes(12).toString("base64url")}`;
@@ -144,6 +154,113 @@ function createLocation(organization, user, membership) {
     confirmedByMembershipId: String(membership.id),
     now,
   });
+}
+
+function createDiscoverableOrganizationFixture({ id, displayName, coordinate, addressLine1 }) {
+  const organization = createOrganizationAccount({ id, now });
+  const user = createUserIdentity({
+    id: `user_${id}`,
+    name: `${displayName} Acceptance Actor`,
+    primaryEmail: `${id}@example.test`,
+    loginProvider: "firebase",
+    loginSubject: `subject_${id}`,
+    now,
+  });
+  const membership = createOrganizationMembership(user, organization, {
+    id: `membership_${id}`,
+    now,
+  });
+  const baseProfile = createOrganizationProfile(organization, {
+    id: `profile_${id}`,
+    displayName,
+    now,
+  });
+  const profile = updateEssentialOrganizationProfile(baseProfile, {
+    displayName,
+    organizationType: "for-profit-business",
+    website: { disposition: "available", url: `https://${id}.example.test` },
+    mainContact: {
+      displayName: `${displayName} Contact`,
+      roleTitle: "Business Development",
+      email: `${id}@example.test`,
+      publiclyVisible: true,
+    },
+    capabilities: [createOrganizationCapability({
+      id: `capability_${id}`,
+      kind: "service",
+      category: "professional-business-services",
+      name: "Shell acceptance coordination",
+      description: "Supports configured browser spatial-continuity acceptance.",
+    })],
+    participationRoles: ["business", "supplier"],
+    businessObjectives: ["find-opportunities", "find-teammates"],
+    now,
+  });
+  const candidate = createOrganizationGeocodeCandidate({
+    id: `candidate_${id}`,
+    geographyId: String(PORTSMOUTH_CONTROLLED_LOCALITY.id),
+    coordinate,
+    matchedAddress: `${addressLine1}, Portsmouth, VA 23704`,
+    quality: "rooftop",
+    provider: "configured-acceptance-fixture",
+    providerReference: `fixture-${id}`,
+    benchmark: "post-pr159-spatial-acceptance",
+    retrievedAt: now,
+  });
+  const draft = createOrganizationLocationDraft({
+    id: `draft_${id}`,
+    organizationId: organization.id,
+    requestedByUserId: user.id,
+    membershipId: membership.id,
+    primaryGeographyId: String(PORTSMOUTH_CONTROLLED_LOCALITY.id),
+    physicalAddress: structuredPostalAddress({
+      addressLine1,
+      locality: "Portsmouth",
+      regionCode: "VA",
+      postalCode: "23704",
+    }),
+    isHomeOrPrivate: false,
+    visibility: "exact",
+    candidates: [candidate],
+    now,
+  });
+  const confirmation = confirmOrganizationLocationDraft(draft, candidate.id, now);
+  const location = createConfirmedOrganizationLocation({
+    draft: confirmation.draft,
+    candidate: confirmation.candidate,
+    confirmedByUserId: user.id,
+    confirmedByMembershipId: membership.id,
+    now,
+  });
+  const serviceGeography = createOrganizationServiceGeography({
+    organizationId: organization.id,
+    primaryGeographyId: String(PORTSMOUTH_CONTROLLED_LOCALITY.id),
+    serviceGeographyIds: [String(PORTSMOUTH_CONTROLLED_LOCALITY.id)],
+    updatedByUserId: user.id,
+    updatedByMembershipId: membership.id,
+    now,
+  });
+  const completion = evaluateOrganizationProfileCompletion({
+    profile,
+    location,
+    serviceGeographies: serviceGeography,
+    now,
+  });
+  assert.equal(completion.status, "active");
+  const markerActivation = Object.freeze({
+    id: organization.id,
+    organizationId: organization.id,
+    geographyId: PORTSMOUTH_CONTROLLED_LOCALITY.id,
+    status: "active",
+    coordinateSource: "confirmed-canonical-location",
+    blockingReasons: Object.freeze([]),
+    sourceLocationUpdatedAt: location.updatedAt,
+    sourceProfileCompletionEvaluatedAt: completion.evaluatedAt,
+    firstActivatedAt: now,
+    lastTransitionAt: now,
+    evaluatedAt: now,
+  });
+  return { organization, profile, location, serviceGeography, completion, markerActivation };
 }
 
 function createOpenParticipantState(user, organization, membership, profile) {
@@ -323,6 +440,26 @@ async function seedParticipant() {
     now,
   });
   assert.equal(markerActivation.status, "active");
+  const externalOrganizations = [
+    createDiscoverableOrganizationFixture({
+      id: externalOrganizationIds.harbor,
+      displayName: "Harbor Systems Group",
+      coordinate: [-76.3002, 36.8364],
+      addressLine1: "500 Crawford Street",
+    }),
+    createDiscoverableOrganizationFixture({
+      id: externalOrganizationIds.tidewater,
+      displayName: "Tidewater Advisory Partners",
+      coordinate: [-76.3022, 36.8374],
+      addressLine1: "600 Crawford Street",
+    }),
+    createDiscoverableOrganizationFixture({
+      id: externalOrganizationIds.atlantic,
+      displayName: "Atlantic Operations Group",
+      coordinate: [-76.3032, 36.8379],
+      addressLine1: "700 Crawford Street",
+    }),
+  ];
 
   await Promise.all(
     HAMPTON_ROADS_CONTROLLED_LOCALITY_DEFINITIONS.map((definition) =>
@@ -343,6 +480,14 @@ async function seedParticipant() {
     db.collection("organizationServiceGeographies").doc(String(serviceGeography.id)).set(record(serviceGeography)),
     db.collection("organizationProfileCompletions").doc(String(organization.id)).set(record(completion)),
     db.collection("organizationMarkerActivations").doc(String(organization.id)).set(record(markerActivation)),
+    ...externalOrganizations.flatMap((fixture) => [
+      db.collection("organizations").doc(String(fixture.organization.id)).set(record(fixture.organization)),
+      db.collection("organizationProfiles").doc(String(fixture.profile.id)).set(record(fixture.profile)),
+      db.collection("organizationLocations").doc(String(fixture.organization.id)).set(record(fixture.location)),
+      db.collection("organizationServiceGeographies").doc(String(fixture.organization.id)).set(record(fixture.serviceGeography)),
+      db.collection("organizationProfileCompletions").doc(String(fixture.organization.id)).set(record(fixture.completion)),
+      db.collection("organizationMarkerActivations").doc(String(fixture.organization.id)).set(record(fixture.markerActivation)),
+    ]),
   ]);
 
   const administratorId = `administrator-${runId}`;
@@ -538,11 +683,10 @@ async function launchChrome(debugPort) {
   const binary = await chromeBinary();
   const profile = path.join(tmpdir(), `${runId}-chrome-${debugPort}`);
   await rm(profile, { recursive: true, force: true });
-  const child = spawn(binary, [
+  const browserArguments = [
     "--headless=new",
     "--no-sandbox",
     "--disable-dev-shm-usage",
-    "--disable-gpu",
     "--disable-background-networking",
     "--disable-component-update",
     "--disable-default-apps",
@@ -554,7 +698,13 @@ async function launchChrome(debugPort) {
     `--user-data-dir=${profile}`,
     "--window-size=1440,1000",
     "about:blank",
-  ], { stdio: "ignore" });
+  ];
+  if (configuredMapAcceptance) {
+    browserArguments.splice(3, 0, "--enable-unsafe-swiftshader", "--use-gl=angle", "--use-angle=swiftshader");
+  } else {
+    browserArguments.splice(3, 0, "--disable-gpu");
+  }
+  const child = spawn(binary, browserArguments, { stdio: "ignore" });
   const endpoint = `http://127.0.0.1:${debugPort}`;
   const deadline = Date.now() + 20_000;
   while (Date.now() < deadline) {
@@ -617,7 +767,7 @@ async function createPage(chrome, baseUrl, sessionCookie, locale = "en-US") {
   ]);
   await cdp.send("Page.addScriptToEvaluateOnNewDocument", {
     source: `
-      window.__rfxAcceptance = { errors: [], transitions: [], takeover: false, scopedLoading: false };
+      window.__rfxAcceptance = { errors: [], transitions: [], takeover: false, contentReplaced: false };
       window.addEventListener("error", (event) => window.__rfxAcceptance.errors.push(String(event.message || "window error")));
       window.addEventListener("unhandledrejection", (event) => window.__rfxAcceptance.errors.push(String(event.reason || "unhandled rejection")));
       window.addEventListener("rfxchange:participant-transition", (event) => window.__rfxAcceptance.transitions.push(event.detail));
@@ -686,13 +836,14 @@ async function beginObservation(cdp) {
   await evaluate(cdp, `(() => {
     const state = window.__rfxAcceptance;
     state.takeover = false;
-    state.scopedLoading = false;
+    state.contentReplaced = false;
+    state.contentBefore = document.querySelector("[data-participant-content-region]")?.firstElementChild || null;
     state.transitionStartedAt = performance.now();
     state.observer?.disconnect?.();
     state.observer = new MutationObserver(() => {
       const text = document.body?.innerText || "";
       if (text.includes("Preparing this page") || text.includes("Loading RFxchange")) state.takeover = true;
-      if (document.querySelector("[data-participant-content-loading]")) state.scopedLoading = true;
+      if (state.contentBefore && !state.contentBefore.isConnected) state.contentReplaced = true;
     });
     state.observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
     return true;
@@ -705,7 +856,7 @@ async function finishObservation(cdp) {
     state.observer?.disconnect?.();
     return {
       takeover: state.takeover,
-      scopedLoading: state.scopedLoading,
+      contentReplaced: state.contentReplaced,
       durationMs: performance.now() - state.transitionStartedAt,
       navigationEntries: performance.getEntriesByType("navigation").length,
       pathname: location.pathname,
@@ -742,15 +893,15 @@ async function clickHref(cdp, href, expectedPath, { candidate = false, latencyMs
     link.click();
     await new Promise((resolve) => requestAnimationFrame(resolve));
     const header = document.querySelector("[data-participant-shell-header]");
-    const scopedLoading = document.querySelector("[data-participant-content-loading]");
+    const contentBefore = window.__rfxAcceptance.contentBefore;
     return {
       found: true,
       shellVisible: Boolean(header && getComputedStyle(header).display !== "none"),
       pending: link.getAttribute("aria-busy") === "true"
         || link.dataset.pending === "true"
-        || Boolean(link.querySelector('[data-link-pending="true"]'))
-        || Boolean(scopedLoading?.querySelector('[role="status"][aria-busy="true"]')),
-      scopedLoading: scopedLoading?.getAttribute("data-participant-content-loading") || null,
+        || Boolean(link.querySelector('[data-link-pending="true"]')),
+      contentPreserved: Boolean(contentBefore && contentBefore.isConnected),
+      routeCommitted: location.pathname === ${JSON.stringify(expectedPath)},
       currentText: document.body.innerText || "",
     };
   })()`);
@@ -758,25 +909,29 @@ async function clickHref(cdp, href, expectedPath, { candidate = false, latencyMs
   if (candidate) {
     assert.equal(immediate.shellVisible, true, `Shell disappeared after clicking ${href}.`);
     assert.equal(
-      immediate.pending,
+      immediate.pending || immediate.routeCommitted,
       true,
-      `No immediate pending feedback for ${href} (scoped loading: ${immediate.scopedLoading ?? "none"}).`,
+      `No immediate pending feedback for ${href}.`,
+    );
+    assert.equal(
+      immediate.contentPreserved || immediate.routeCommitted,
+      true,
+      `Current content was replaced before ${href} committed.`,
     );
     assert.equal(immediate.currentText.includes("Preparing this page"), false);
   }
   await waitForExpression(cdp, `location.pathname === "${expectedPath}"`, expectedPath);
   const routeCommitMs = performance.now() - wallStartedAt;
-  await waitForExpression(
-    cdp,
-    `!document.querySelector("[data-participant-content-loading]")`,
-    `${expectedPath} content settlement`,
-  );
+  await waitForExpression(cdp, `Boolean(document.querySelector("[data-participant-content-region] > *"))`, `${expectedPath} content settlement`);
   const observation = await finishObservation(cdp);
   const contentSettlementMs = Number.isFinite(observation.durationMs)
     ? observation.durationMs
     : performance.now() - wallStartedAt;
   observation.durationMs = routeCommitMs;
   observation.contentSettlementMs = contentSettlementMs;
+  observation.immediatePendingFeedback = immediate.pending ?? false;
+  observation.immediateRouteCommitted = immediate.routeCommitted ?? false;
+  observation.immediateContentPreserved = immediate.contentPreserved ?? false;
   if (latencyMs > 0) {
     await cdp.send("Network.emulateNetworkConditions", {
       offline: false,
@@ -813,6 +968,30 @@ function percentile(values, quantile) {
   return Number(sorted[index].toFixed(1));
 }
 
+function summarizedLoggedServerTimings(server) {
+  const grouped = new Map();
+  for (const line of server.acceptanceOutput.join("").split("\n")) {
+    if (!line.includes('"type":"rfx.server-timing"')) continue;
+    try {
+      const entry = JSON.parse(line);
+      if (entry.type !== "rfx.server-timing" || typeof entry.name !== "string" || !Number.isFinite(entry.durationMs)) continue;
+      const current = grouped.get(entry.name) ?? { description: entry.description ?? "", values: [] };
+      current.values.push(entry.durationMs);
+      grouped.set(entry.name, current);
+    } catch {
+      // Non-JSON framework output is irrelevant to server timing evidence.
+    }
+  }
+  return [...grouped.entries()].map(([name, group]) => Object.freeze({
+    name,
+    description: group.description,
+    count: group.values.length,
+    minimumMs: Math.min(...group.values),
+    medianMs: percentile(group.values, 0.5),
+    maximumMs: Math.max(...group.values),
+  }));
+}
+
 async function runBaseline({ cwd, port, sessionCookie }) {
   const server = startServer(cwd, port, "baseline");
   let chrome;
@@ -821,25 +1000,24 @@ async function runBaseline({ cwd, port, sessionCookie }) {
     chrome = await launchChrome(9301);
     const baseUrl = `http://127.0.0.1:${port}`;
     const { cdp, diagnostics } = await createPage(chrome, baseUrl, sessionCookie);
-    await navigate(cdp, `${baseUrl}/geography/canvas?query=shell-acceptance&selectedOrganization=${organizationId}`);
+    await navigate(cdp, `${baseUrl}/geography/canvas?organizationId=${organizationId}`);
     let token = await ensureShellToken(cdp);
     let remounts = 0;
     const observations = [];
-    for (const [href, route] of [
-      ["/resources", "/resources"],
-      ["/referrals", "/referrals"],
-      ["/geography/canvas", "/geography/canvas"],
-      ["/organization-profile", "/organization-profile"],
-      ["/quick-start", "/quick-start"],
+    for (const [kind, target, route] of [
+      ["lens", "resources", "/resources"],
+      ["lens", "referrals", "/referrals"],
+      ["lens", "intelligence", "/geography/canvas"],
+      ["utility", "/organization-profile", "/organization-profile"],
+      ["utility", "/quick-start", "/quick-start"],
     ]) {
-      await waitForExpression(
-        cdp,
-        `Boolean(document.querySelector('a[href="${href}"]'))`,
-        `baseline navigation link ${href}`,
+      observations.push(
+        kind === "lens"
+          ? await clickLens(cdp, target, route, {
+              latencyMs: target === "resources" ? 450 : 0,
+            })
+          : await clickUtility(cdp, target, route, false),
       );
-      observations.push(await clickHref(cdp, href, route, {
-        latencyMs: href === "/resources" ? 450 : 0,
-      }));
       const nextToken = await ensureShellToken(cdp);
       if (token && nextToken !== token) remounts += 1;
       token = nextToken;
@@ -943,7 +1121,7 @@ async function runCandidate({ cwd, port, sessionCookie }) {
         ?.getAttribute("href") === ${JSON.stringify(inContentIntelligenceHref)}`,
       "Intelligence context captured before an in-content exit",
     );
-    observations.push(await clickHref(cdp, "/organization-profile", "/organization-profile", { candidate: true }));
+    observations.push(await clickUtility(cdp, "/organization-profile", "/organization-profile", true));
     await waitForExpression(
       cdp,
       `document.querySelector('[data-participant-utility="account"] > button')
@@ -974,7 +1152,11 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       diagnostics.protectedRequests.join("\n"),
     );
     assert.equal(observations.some((item) => item.takeover), false);
-    assert.equal(observations[0].scopedLoading, true, "Delayed Resources transition never exposed scoped content loading.");
+    assert.equal(
+      observations[0].immediateContentPreserved || observations[0].immediateRouteCommitted,
+      true,
+      "Delayed Resources transition replaced the current workspace before commit.",
+    );
     assert.equal(observations.every((item) => item.navigationEntries === 1), true);
 
     const ordinaryDocumentRequests = [...diagnostics.documentRequests];
@@ -1007,6 +1189,14 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       null,
       "Signing out retained another participant's Intelligence context.",
     );
+    assert.deepEqual(
+      await evaluate(
+        cdp,
+        `Object.keys(sessionStorage).filter((key) => key.startsWith(${JSON.stringify(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)}))`,
+      ),
+      [],
+      "Signing out retained participant spatial context.",
+    );
     assert.equal(diagnostics.consoleErrors.length, 0, diagnostics.consoleErrors.join("\n"));
     assert.equal(diagnostics.exceptions.length, 0, diagnostics.exceptions.join("\n"));
 
@@ -1024,6 +1214,7 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       intelligenceContextCapturedForInContentExit: true,
       intelligenceContextRestoredAfterShellRemount: true,
       intelligenceContextClearedOnSignOut: true,
+      spatialContextClearedOnSignOut: true,
       authorizedOrganizationContextReported: true,
       activationReplayObserved: finalState.activationReplay,
       protectedInitializationReplayObserved: false,
@@ -1036,6 +1227,7 @@ async function runCandidate({ cwd, port, sessionCookie }) {
     cdp.close();
     return { result, server, baseUrl };
   } catch (error) {
+    console.error(`Candidate server output:\n${server.acceptanceOutput.join("")}`);
     await stopProcess(server);
     throw error;
   } finally {
@@ -1065,13 +1257,19 @@ async function runAuthorizationAndAliasBoundaries({ baseUrl, sessionCookie }) {
       true,
       "Authorized Account did not expose the provider-application route.",
     );
-    await evaluate(cdp, `document.querySelector('a[href="/provider-application"]')?.click()`);
-    await waitForExpression(
-      cdp,
-      `location.pathname === "/provider-application"
-        && Boolean(document.querySelector('[data-participant-content-loading="provider-application"]'))`,
-      "provider-application loading boundary",
-    );
+    await beginObservation(cdp);
+    const providerImmediate = await evaluate(cdp, `(async () => {
+      const prior = document.querySelector("[data-participant-content-region]")?.firstElementChild;
+      const link = document.querySelector('a[href="/provider-application"]');
+      link?.click();
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      return {
+        pending: Boolean(link?.querySelector('[data-link-pending="true"]')),
+        contentPreserved: Boolean(prior?.isConnected),
+      };
+    })()`);
+    assert.equal(providerImmediate.contentPreserved, true, "Provider alias replaced Account before the route was ready.");
+    await waitForExpression(cdp, `location.pathname === "/provider-application"`, "provider-application route");
     const aliasLoadingState = await evaluate(cdp, `({
       pathname: location.pathname,
       accountCurrent: document.querySelector('[data-participant-utility="account"] > button')
@@ -1088,11 +1286,7 @@ async function runAuthorizationAndAliasBoundaries({ baseUrl, sessionCookie }) {
       uploadThroughput: -1,
       connectionType: "none",
     });
-    await waitForExpression(
-      cdp,
-      `!document.querySelector("[data-participant-content-loading]")`,
-      "provider-application content settlement",
-    );
+    await finishObservation(cdp);
 
     await evaluate(cdp, `document.querySelector('[data-participant-utility="account"] > button')?.click()`);
     await waitForExpression(
@@ -1164,6 +1358,344 @@ async function runAuthorizationAndAliasBoundaries({ baseUrl, sessionCookie }) {
   }
 }
 
+function cameraSnapshotFromDom(cdp) {
+  return evaluate(cdp, `(() => {
+    const scene = document.querySelector('[data-map-ready="true"]');
+    const [longitude, latitude] = (scene?.dataset.mapCenter || '').split(',').map(Number);
+    return {
+      viewMode: scene?.dataset.mapViewMode || null,
+      pitch: Number(scene?.dataset.mapPitch),
+      bearing: Number(scene?.dataset.mapBearing),
+      longitude,
+      latitude,
+      zoom: Number(scene?.dataset.mapZoom),
+      selectedMarkerId: scene?.dataset.selectedMarkerId || null,
+      selectedMarkerIdentity: scene?.dataset.selectedMarkerIdentity || null,
+      markerCount: Number(scene?.dataset.networkMarkerCount),
+      clusterCount: Number(scene?.dataset.renderedClusterCount),
+      clusterPoint: scene?.dataset.renderedClusterPoint || null,
+      selectedStandingCount: Number(scene?.dataset.renderedSelectedMarkerCount),
+      padding: (scene?.dataset.mapPadding || '').split(',').map(Number),
+      cameraInitialization: scene?.dataset.cameraInitialization || null,
+    };
+  })()`);
+}
+
+async function waitForCameraPadding(cdp, side, label, timeoutMs = 30_000) {
+  const deadline = Date.now() + timeoutMs;
+  let last = null;
+  while (Date.now() < deadline) {
+    last = await cameraSnapshotFromDom(cdp);
+    const [, right, , left] = last.padding;
+    if (side === "right" ? right >= 100 && right > left : left >= 100 && left > right) return last;
+    await wait(50);
+  }
+  throw new Error(`Timed out waiting for ${label}. Last camera snapshot: ${JSON.stringify(last)}`);
+}
+
+function assertCameraNear(actual, expected, label) {
+  assert.ok(Math.abs(actual.longitude - expected.longitude) < 0.00001, `${label} changed longitude.`);
+  assert.ok(Math.abs(actual.latitude - expected.latitude) < 0.00001, `${label} changed latitude.`);
+  assert.ok(Math.abs(actual.zoom - expected.zoom) < 0.05, `${label} changed zoom.`);
+  assert.ok(Math.abs(actual.bearing - expected.bearing) < 0.05, `${label} changed bearing.`);
+}
+
+async function chooseMapView(cdp, mode, pitch) {
+  await evaluate(cdp, `(() => {
+    const button = [...document.querySelectorAll('[role="group"][aria-label="Map view"] button')]
+      .find((candidate) => candidate.textContent?.trim() === ${JSON.stringify(mode)});
+    button?.click();
+  })()`);
+  await waitForExpression(
+    cdp,
+    `(() => {
+      const scene = document.querySelector('[data-map-ready="true"]');
+      const button = [...document.querySelectorAll('[role="group"][aria-label="Map view"] button')]
+        .find((candidate) => candidate.textContent?.trim() === ${JSON.stringify(mode)});
+      return scene?.dataset.mapViewMode === ${JSON.stringify(mode.toLowerCase())}
+        && Math.abs(Number(scene?.dataset.mapPitch) - ${pitch}) < 1
+        && button?.getAttribute('aria-pressed') === 'true';
+    })()`,
+    `${mode} actual Mapbox pitch`,
+  );
+  return cameraSnapshotFromDom(cdp);
+}
+
+async function runSpatialAcceptance({ baseUrl, sessionCookie }) {
+  let chrome;
+  try {
+    chrome = await launchChrome(9305);
+    const { cdp, diagnostics } = await createPage(chrome, baseUrl, sessionCookie);
+    await navigate(cdp, `${baseUrl}/geography/canvas?query=shell-acceptance&selectedOrganization=${organizationId}`);
+    await waitForExpression(cdp, `Boolean(document.querySelector('[data-map-ready="true"]'))`, "configured Mapbox scene", 45_000);
+    await waitForExpression(
+      cdp,
+      `(() => { const scene = document.querySelector('[data-map-ready="true"]'); return scene?.dataset.mapViewMode === '3d' && Math.abs(Number(scene.dataset.mapPitch) - 75) < 1; })()`,
+      "settled initial 3D Mapbox pitch",
+      45_000,
+    );
+    await waitForExpression(
+      cdp,
+      `document.querySelectorAll('[data-organization-id]').length >= 2`,
+      "discoverable Organization B and C results",
+    );
+
+    const ownActions = await evaluate(cdp, `Object.fromEntries([...document.querySelectorAll('[data-organization-action]')].map((action) => [action.dataset.organizationAction, { available: action.tagName === 'A', disabled: action.getAttribute('aria-disabled') === 'true', href: action.getAttribute('href') }]))`);
+    assert.equal(ownActions["manage-profile"].href, "/organization-profile");
+    assert.equal(ownActions["view-resources"].href, "/resources");
+    assert.equal(ownActions["start-referral"].href, "/referrals");
+    assert.equal(ownActions["opportunities-rfx"].disabled, true);
+
+    const initial = await cameraSnapshotFromDom(cdp);
+    assert.equal(initial.viewMode, "3d");
+    assert.ok(Math.abs(initial.pitch - 75) < 1, `Initial actual pitch was ${initial.pitch}.`);
+    assert.ok(initial.markerCount >= 3, `Expected at least three external markers, found ${initial.markerCount}.`);
+    assert.match(initial.selectedMarkerIdentity, /^[A-Z]{1,2}$/);
+    const desktopAccountAvatar = await evaluate(cdp, `(() => {
+      const button = document.querySelector('[data-participant-utility="account"] > button');
+      const avatar = button?.firstElementChild;
+      const buttonRect = button?.getBoundingClientRect();
+      const avatarRect = avatar?.getBoundingClientRect();
+      return buttonRect && avatarRect ? { hitWidth: buttonRect.width, hitHeight: buttonRect.height, avatarWidth: avatarRect.width, avatarHeight: avatarRect.height } : null;
+    })()`);
+    assert.ok(desktopAccountAvatar?.hitWidth >= 44 && desktopAccountAvatar?.hitHeight >= 44);
+    assert.ok(desktopAccountAvatar?.avatarWidth >= 30 && desktopAccountAvatar?.avatarWidth <= 36);
+
+    const perspective = await chooseMapView(cdp, "Perspective", 35);
+    const harborMarkerId = await evaluate(cdp, `document.querySelector('[data-organization-id="${externalOrganizationIds.harbor}"]')?.dataset.markerId || null`);
+    const visibleOrganizationIds = await evaluate(cdp, `[...document.querySelectorAll('[data-organization-id]')].map((element) => element.dataset.organizationId)`);
+    assert.ok(harborMarkerId, `Organization B marker id was unavailable among ${JSON.stringify(visibleOrganizationIds)}.`);
+    await evaluate(cdp, `document.querySelector('[data-organization-id="${externalOrganizationIds.harbor}"]')?.click()`);
+    await waitForExpression(
+      cdp,
+      `document.querySelector('#organization-detail-panel')?.dataset.selectedOrganizationId === ${JSON.stringify(externalOrganizationIds.harbor)}`,
+      "Organization B detail selection",
+    );
+    await waitForExpression(
+      cdp,
+      `document.querySelector('[data-organization-id="${externalOrganizationIds.harbor}"]')?.getAttribute('aria-pressed') === 'true'`,
+      "Organization B list selection",
+    );
+    await waitForExpression(
+      cdp,
+      `document.querySelector('[data-map-ready="true"]')?.dataset.selectedMarkerId === ${JSON.stringify(harborMarkerId)}`,
+      "Organization B map selection",
+    );
+    await waitForCameraPadding(cdp, "right", "Organization B right-side padding");
+    const selectedPerspective = await cameraSnapshotFromDom(cdp);
+    assert.equal(selectedPerspective.viewMode, "perspective");
+    assert.ok(Math.abs(selectedPerspective.pitch - 35) < 1);
+    assertCameraNear(selectedPerspective, perspective, "Organization selection");
+
+    const otherActions = await evaluate(cdp, `Object.fromEntries([...document.querySelectorAll('[data-organization-action]')].map((action) => [action.dataset.organizationAction, { available: action.tagName === 'A', disabled: action.getAttribute('aria-disabled') === 'true', href: action.getAttribute('href') }]))`);
+    assert.equal(otherActions["manage-profile"].disabled, true);
+    assert.equal(otherActions["view-resources"].disabled, true);
+    assert.equal(otherActions["start-referral"].href, `/referrals?organization=${encodeURIComponent(externalOrganizationIds.harbor)}`);
+    assert.equal(otherActions["opportunities-rfx"].disabled, true);
+    const internalCopyAbsent = await evaluate(cdp, `(() => {
+      const text = document.body.innerText;
+      return ${JSON.stringify([
+        "Exact public location in",
+        "Approximate public location in",
+        "locality presence; exact location is private",
+        "privacyTreatment",
+        "coordinateSource",
+        "provider projection",
+        "participant projection",
+        "lifecycle state",
+        "Loading RFxchange",
+        "Preparing this page",
+      ])}.every((phrase) => !text.includes(phrase));
+    })()`);
+    assert.equal(internalCopyAbsent, true, "Participant detail exposed prohibited internal copy.");
+
+    await evaluate(cdp, `document.querySelector('#organization-detail-panel button')?.click()`);
+    await waitForExpression(cdp, `!document.querySelector('#organization-detail-panel')`, "closed organization detail");
+    await waitForCameraPadding(cdp, "left", "restored left-side padding");
+    const closedPerspective = await cameraSnapshotFromDom(cdp);
+    assert.equal(closedPerspective.viewMode, "perspective");
+    assertCameraNear(closedPerspective, selectedPerspective, "Detail close");
+    assert.ok(selectedPerspective.padding[1] > selectedPerspective.padding[3], "Detail overlay did not apply right-side camera padding.");
+    assert.ok(closedPerspective.padding[3] > closedPerspective.padding[1], "Closed detail did not restore left-side camera padding.");
+
+    const lensSnapshots = [];
+    let referralRecipientCarryForward = false;
+    for (const [lens, route] of [["resources", "/resources"], ["referrals", "/referrals"], ["intelligence", "/geography/canvas"]]) {
+      await clickLens(cdp, lens, route);
+      await waitForExpression(
+        cdp,
+        `(() => { const scene = document.querySelector('[data-map-ready="true"]'); return scene?.dataset.mapViewMode === 'perspective' && Math.abs(Number(scene.dataset.mapPitch) - 35) < 1 && scene.dataset.selectedMarkerId === ${JSON.stringify(harborMarkerId)}; })()`,
+        `${lens} Perspective and Organization B continuity`,
+        45_000,
+      );
+      const snapshot = await cameraSnapshotFromDom(cdp);
+      assertCameraNear(snapshot, selectedPerspective, `${lens} lens`);
+      lensSnapshots.push({ lens, ...snapshot });
+      if (lens === "referrals") {
+        await evaluate(cdp, `document.querySelector('aside header button')?.click()`);
+        await waitForExpression(cdp, `Boolean(document.querySelector('[role="dialog"] select'))`, "referral composer selected recipient");
+        referralRecipientCarryForward = await evaluate(cdp, `document.querySelector('[role="dialog"] select')?.value === ${JSON.stringify(externalOrganizationIds.harbor)}`);
+        assert.equal(referralRecipientCarryForward, true, "Referral composer did not retain Organization B.");
+        await evaluate(cdp, `document.querySelector('[role="dialog"] button[aria-label]')?.click()`);
+        await waitForExpression(cdp, `!document.querySelector('[role="dialog"]')`, "closed referral composer");
+      }
+    }
+
+    const flat = await chooseMapView(cdp, "2D", 0);
+    assert.ok(Math.abs(flat.bearing) < 1, `2D bearing was ${flat.bearing}.`);
+    const threeDimensional = await chooseMapView(cdp, "3D", 75);
+    assert.ok(Math.abs(threeDimensional.pitch - 75) < 1);
+
+    await evaluate(cdp, `(() => { const button = [...document.querySelectorAll('[role="group"][aria-label="Map view"] button')].find((candidate) => candidate.textContent?.trim() === 'Fit home'); button?.click(); })()`);
+    await waitForExpression(cdp, `Number(document.querySelector('[data-map-ready="true"]')?.dataset.mapZoom) < 13`, "home-locality fit before cluster zoom");
+    const canvasPoint = await evaluate(cdp, `(() => { const canvas = document.querySelector('[data-map-ready="true"] canvas'); const rect = canvas?.getBoundingClientRect(); return rect ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } : null; })()`);
+    assert.ok(canvasPoint, "Map canvas was unavailable for cluster zoom acceptance.");
+    for (let index = 0; index < 8; index += 1) {
+      const previousZoom = Number(await evaluate(cdp, `document.querySelector('[data-map-ready="true"]')?.dataset.mapZoom`));
+      if (previousZoom < 9.5) break;
+      assert.equal(
+        await evaluate(cdp, `(() => { const button = document.querySelector('.mapboxgl-ctrl-zoom-out'); button?.click(); return Boolean(button); })()`),
+        true,
+        "Mapbox zoom-out control was unavailable.",
+      );
+      await waitForExpression(
+        cdp,
+        `Number(document.querySelector('[data-map-ready="true"]')?.dataset.mapZoom) < ${JSON.stringify(previousZoom - 0.4)}`,
+        `settled cluster zoom-out ${index + 1}`,
+      );
+    }
+    await waitForExpression(cdp, `Number(document.querySelector('[data-map-ready="true"]')?.dataset.mapZoom) < 10`, "wide cluster zoom");
+    await waitForExpression(
+      cdp,
+      `(() => { const scene = document.querySelector('[data-map-ready="true"]'); return Number(scene?.dataset.renderedClusterCount) >= 1 && Boolean(scene?.dataset.renderedClusterPoint); })()`,
+      "rendered external organization cluster and click target",
+    );
+    await wait(1_000);
+    const clustered = await cameraSnapshotFromDom(cdp);
+    assert.equal(clustered.selectedMarkerId, harborMarkerId);
+    assert.equal(clustered.selectedStandingCount, 1, "Selected organization disappeared into a cluster.");
+    let expanded = clustered;
+    for (let attempt = 0; attempt < 3 && expanded.zoom <= clustered.zoom + 0.4; attempt += 1) {
+      await waitForExpression(
+        cdp,
+        `Boolean(document.querySelector('[data-map-ready="true"]')?.dataset.renderedClusterPoint)`,
+        `cluster click target ${attempt + 1}`,
+      );
+      const currentCluster = await cameraSnapshotFromDom(cdp);
+      const [clusterX, clusterY] = currentCluster.clusterPoint.split(",").map(Number);
+      const canvasRect = await evaluate(cdp, `(() => { const rect = document.querySelector('[data-map-ready="true"] canvas')?.getBoundingClientRect(); return rect ? { left: rect.left, top: rect.top } : null; })()`);
+      assert.ok(canvasRect && Number.isFinite(clusterX) && Number.isFinite(clusterY));
+      await cdp.send("Input.dispatchMouseEvent", { type: "mousePressed", x: canvasRect.left + clusterX, y: canvasRect.top + clusterY, button: "left", clickCount: 1 });
+      await cdp.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: canvasRect.left + clusterX, y: canvasRect.top + clusterY, button: "left", clickCount: 1 });
+      await wait(2_000);
+      expanded = await cameraSnapshotFromDom(cdp);
+    }
+    assert.ok(expanded.zoom > clustered.zoom + 0.4, `Cluster did not expand from zoom ${clustered.zoom}; final zoom ${expanded.zoom}.`);
+    assert.equal(expanded.selectedMarkerId, harborMarkerId);
+
+    assert.equal(diagnostics.consoleErrors.length, 0, diagnostics.consoleErrors.join("\n"));
+    assert.equal(diagnostics.exceptions.length, 0, diagnostics.exceptions.join("\n"));
+    cdp.close();
+    return {
+      initial,
+      perspective,
+      selectedOrganizationId: externalOrganizationIds.harbor,
+      selectedPerspective,
+      lensSnapshots,
+      flat,
+      threeDimensional,
+      cluster: { beforeExpansion: clustered, afterExpansion: expanded },
+      actionStates: { own: ownActions, other: otherActions },
+      organizationIdentityFallback: selectedPerspective.selectedMarkerIdentity,
+      markerListSynchronization: true,
+      resultDrawer: { desktopEdgeSheetOpened: true, closedWithoutCameraReset: true },
+      referralRecipientCarryForward,
+      internalCopyAbsent,
+      desktopAccountAvatar,
+      consoleErrors: diagnostics.consoleErrors,
+      exceptions: diagnostics.exceptions,
+    };
+  } finally {
+    if (chrome) {
+      await stopProcess(chrome.child);
+      await rm(chrome.profile, { recursive: true, force: true });
+    }
+  }
+}
+
+function controlledLifecycleForUser(userId) {
+  const journeyId = `activation-${userId}`;
+  let lifecycle = createAccessLifecycle({ id: journeyId, now });
+  lifecycle = advanceAccessLifecycle(lifecycle, "account-started", now);
+  lifecycle = associateAccessJourneyWithUser(lifecycle, userId, now);
+  for (const state of [
+    "account-activated",
+    "geography-selected",
+    "organization-resolved",
+    "organization-registered",
+    "organization-activated",
+    "controlled-platform",
+  ]) lifecycle = advanceAccessLifecycle(lifecycle, state, now);
+  return lifecycle;
+}
+
+async function runLifecycleAcceptance({ baseUrl, sessionCookie, seed }) {
+  const lifecycleRef = db.collection("accessJourneys").doc(`activation-${seed.userId}`);
+  const originalLifecycle = await lifecycleRef.get();
+  assert.equal(originalLifecycle.exists, true, "Open lifecycle fixture was missing.");
+  const controlled = controlledLifecycleForUser(seed.userId);
+  const orientationRepository = new FirestoreOrientationJourneyRepository(db);
+  const orientationService = new OrientationJourneyService({
+    journeys: orientationRepository,
+    ids: { event: () => `orientation-event-${runId}-${randomBytes(3).toString("hex")}` },
+    now: () => now,
+  });
+  const scope = {
+    userId: seed.userId,
+    accessJourneyId: controlled.id,
+    organizationId,
+    geographyId: String(PORTSMOUTH_CONTROLLED_LOCALITY.id),
+  };
+  let chrome;
+  try {
+    chrome = await launchChrome(9306);
+    const { cdp, diagnostics } = await createPage(chrome, baseUrl, sessionCookie);
+    await lifecycleRef.set(record(controlled));
+    await cdp.send("Page.navigate", { url: `${baseUrl}/resources` });
+    await waitForExpression(cdp, `location.pathname === "/orientation"`, "orientation-incomplete redirect");
+
+    await orientationService.start(scope);
+    for (const step of ORIENTATION_STEP_SEQUENCE) await orientationService.completeStep(scope, step.key);
+    await cdp.send("Page.navigate", { url: `${baseUrl}/resources` });
+    await waitForExpression(cdp, `location.pathname === "/first-value"`, "orientation-complete first-value redirect");
+
+    await lifecycleRef.set(originalLifecycle.data());
+    await cdp.send("Page.navigate", { url: `${baseUrl}/resources` });
+    await waitForExpression(
+      cdp,
+      `location.pathname === "/resources" && Boolean(document.querySelector('[data-participant-navigation]'))`,
+      "fully released requested Exchange lens",
+    );
+    assert.equal(diagnostics.consoleErrors.length, 0, diagnostics.consoleErrors.join("\n"));
+    assert.equal(diagnostics.exceptions.length, 0, diagnostics.exceptions.join("\n"));
+    cdp.close();
+    return {
+      orientationIncompleteDestination: "/orientation",
+      orientationCompleteFirstValueIncompleteDestination: "/first-value",
+      fullyReleasedDestination: "/resources",
+      completedTutorialReplayed: false,
+      consoleErrors: diagnostics.consoleErrors,
+      exceptions: diagnostics.exceptions,
+    };
+  } finally {
+    if (originalLifecycle.exists) await lifecycleRef.set(originalLifecycle.data());
+    if (chrome) {
+      await stopProcess(chrome.child);
+      await rm(chrome.profile, { recursive: true, force: true });
+    }
+  }
+}
+
 async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
   let chrome;
   try {
@@ -1178,21 +1710,52 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
     await cdp.send("Emulation.setEmulatedMedia", {
       features: [{ name: "prefers-reduced-motion", value: "reduce" }],
     });
-    await navigate(cdp, `${baseUrl}/resources`);
+    await navigate(cdp, `${baseUrl}/geography/canvas`);
     const mobile = await evaluate(cdp, `(() => {
       const summary = document.querySelector('[data-participant-navigation] details > summary');
       const account = document.querySelector('[data-participant-utility="account"] > button');
+      const avatar = account?.firstElementChild;
+      const accountRect = account?.getBoundingClientRect();
+      const avatarRect = avatar?.getBoundingClientRect();
       return {
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         menuVisible: Boolean(summary && getComputedStyle(summary).display !== 'none'),
         accountVisible: Boolean(account && getComputedStyle(account).display !== 'none'),
         reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+        accountAvatar: accountRect && avatarRect ? {
+          hitWidth: accountRect.width,
+          hitHeight: accountRect.height,
+          avatarWidth: avatarRect.width,
+          avatarHeight: avatarRect.height,
+        } : null,
       };
     })()`);
     assert.ok(mobile.overflow <= 0, `390px overflow: ${mobile.overflow}px.`);
     assert.equal(mobile.menuVisible, true);
     assert.equal(mobile.accountVisible, true);
     assert.equal(mobile.reducedMotion, true);
+    assert.ok(mobile.accountAvatar?.hitWidth >= 44 && mobile.accountAvatar?.hitHeight >= 44);
+    assert.ok(mobile.accountAvatar?.avatarWidth >= 30 && mobile.accountAvatar?.avatarWidth <= 36);
+    let spatialSheet = null;
+    if (configuredMapAcceptance) {
+      await waitForExpression(cdp, `Boolean(document.querySelector('[data-map-ready="true"]'))`, "mobile configured map");
+      spatialSheet = await evaluate(cdp, `(() => {
+        const scene = document.querySelector('[data-map-ready="true"]');
+        const panel = document.querySelector('#organization-detail-panel')?.parentElement;
+        const sceneRect = scene?.getBoundingClientRect();
+        const panelRect = panel?.getBoundingClientRect();
+        return sceneRect && panelRect ? {
+          mapVisible: sceneRect.width > 300 && sceneRect.height > 500,
+          bottomGap: window.innerHeight - panelRect.bottom,
+          sheetWidth: panelRect.width,
+          sheetTop: panelRect.top,
+        } : null;
+      })()`);
+      assert.ok(spatialSheet?.mapVisible, "Mobile bottom sheet obscured or removed the map.");
+      assert.ok(spatialSheet.bottomGap <= 10, `Mobile sheet was not bottom-anchored (${spatialSheet.bottomGap}px).`);
+      assert.ok(spatialSheet.sheetWidth <= 374, `Mobile sheet exceeded viewport-safe width (${spatialSheet.sheetWidth}px).`);
+      assert.ok(spatialSheet.sheetTop > 100, `Mobile sheet behaved like a page takeover (${spatialSheet.sheetTop}px).`);
+    }
 
     await evaluate(cdp, `document.querySelector('[data-participant-navigation] details > summary')?.click()`);
     const unavailable = await waitForExpression(cdp, `(() => {
@@ -1269,7 +1832,9 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
       width: 390,
       overflowPx: mobile.overflow,
       reducedMotion: mobile.reducedMotion,
+      accountAvatar: mobile.accountAvatar,
       accountKeyboard: keyboard,
+      spatialSheet,
       locales: Object.keys(localeExpectations),
       consoleErrors: diagnostics.consoleErrors,
       exceptions: diagnostics.exceptions,
@@ -1284,6 +1849,7 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
 }
 
 let seed;
+let candidateServer;
 try {
   seed = await seedParticipant();
   const baseline = await runBaseline({
@@ -1296,6 +1862,18 @@ try {
     port: 3100,
     sessionCookie: seed.sessionCookie,
   });
+  candidateServer = candidateRun.server;
+  const spatial = configuredMapAcceptance
+    ? await runSpatialAcceptance({
+        baseUrl: candidateRun.baseUrl,
+        sessionCookie: seed.sessionCookie,
+      })
+    : null;
+  const lifecycle = await runLifecycleAcceptance({
+    baseUrl: candidateRun.baseUrl,
+    sessionCookie: seed.sessionCookie,
+    seed,
+  });
   const authorizationAndAliasBoundaries = await runAuthorizationAndAliasBoundaries({
     baseUrl: candidateRun.baseUrl,
     sessionCookie: seed.sessionCookie,
@@ -1306,6 +1884,65 @@ try {
     baseUrl: candidateRun.baseUrl,
     sessionCookie: seed.sessionCookie,
   });
+  const serverLogTimings = summarizedLoggedServerTimings(candidateRun.server);
+  const acceptanceChecklist = Object.freeze({
+    candidateSha,
+    startingSha: baselineSha,
+    routeChain: ["Intelligence", "Resources", "Referrals", "Intelligence", "Account", "Quick Start"],
+    documentNavigationCount: candidateRun.result.fullDocumentNavigationCount,
+    shellRemountCount: candidateRun.result.shellRemounts,
+    loadingScreenOccurrenceCount: candidateRun.result.rootTakeoverObserved ? 1 : 0,
+    orientationReplayCount: candidateRun.result.activationReplayObserved ? 1 : 0,
+    lifecycleRouteAssertions: lifecycle,
+    mapViewPerLens: spatial?.lensSnapshots ?? null,
+    actualPitchPerView: spatial ? {
+      initial3d: spatial.initial.pitch,
+      perspective: spatial.perspective.pitch,
+      flat2d: spatial.flat.pitch,
+      restored3d: spatial.threeDimensional.pitch,
+    } : null,
+    cameraBeforeAfterTransitions: spatial?.lensSnapshots ?? null,
+    selectedObjectBeforeAfter: spatial ? {
+      organizationId: spatial.selectedOrganizationId,
+      before: spatial.selectedPerspective.selectedMarkerId,
+      after: spatial.lensSnapshots.at(-1)?.selectedMarkerId ?? null,
+    } : null,
+    standingMarkerState: spatial ? { selectedMarkerId: spatial.selectedPerspective.selectedMarkerId } : null,
+    compactMarkerState: spatial ? { externalMarkerCount: spatial.initial.markerCount, selectedStandingCount: spatial.cluster.beforeExpansion.selectedStandingCount } : null,
+    clusterState: spatial?.cluster ?? null,
+    organizationIdentityFallback: spatial?.organizationIdentityFallback ?? null,
+    markerListSynchronization: spatial?.markerListSynchronization ?? false,
+    resultDrawerState: spatial?.resultDrawer ?? null,
+    searchFilterPreservation: candidateRun.result.intelligenceContextPreserved,
+    ownOrganizationActionResults: spatial?.actionStates.own ?? null,
+    externalOrganizationActionResults: spatial?.actionStates.other ?? null,
+    resourcesAvailabilityState: spatial?.actionStates.other["view-resources"] ?? null,
+    referralRecipientCarryForward: spatial?.referralRecipientCarryForward ?? false,
+    internalCopyAbsent: spatial?.internalCopyAbsent ?? false,
+    accountAvatar: spatial ? { desktop: spatial.desktopAccountAvatar, mobile: mobileAndLocales.accountAvatar } : null,
+    desktop: spatial !== null,
+    mobile390: mobileAndLocales.spatialSheet,
+    keyboard: mobileAndLocales.accountKeyboard,
+    reducedMotion: mobileAndLocales.reducedMotion,
+    fiveLocales: mobileAndLocales.locales,
+    consoleErrors: [
+      ...candidateRun.result.consoleErrors,
+      ...(spatial?.consoleErrors ?? []),
+      ...lifecycle.consoleErrors,
+      ...authorizationAndAliasBoundaries.consoleErrors,
+      ...mobileAndLocales.consoleErrors,
+    ],
+    unhandledExceptions: [
+      ...candidateRun.result.exceptions,
+      ...(spatial?.exceptions ?? []),
+      ...lifecycle.exceptions,
+      ...authorizationAndAliasBoundaries.exceptions,
+      ...mobileAndLocales.exceptions,
+    ],
+  });
+  if (configuredMapAcceptance) {
+    assert.equal(Object.values(acceptanceChecklist).some((value) => value === null || value === false), false, "Configured evidence checklist is incomplete.");
+  }
 
   const evidence = {
     result: "passed",
@@ -1322,8 +1959,12 @@ try {
     benchmarkLatencyMs: 450,
     baseline,
     candidate: candidateRun.result,
+    spatial,
+    lifecycle,
     authorizationAndAliasBoundaries,
     mobileAndLocales,
+    serverLogTimings,
+    acceptanceChecklist,
     interpretation: {
       timingsAreRepresentative: true,
       productionNetworkPromise: false,
@@ -1346,6 +1987,7 @@ try {
   console.error(error);
   process.exitCode = 1;
 } finally {
+  await stopProcess(candidateServer);
   try {
     if (seed?.providerUid) await adminAuth.deleteUser(seed.providerUid);
   } catch {

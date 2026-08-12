@@ -36,7 +36,9 @@ export default async function ResourcesPage({ searchParams }: Props) {
   if (access.kind === "restricted") {
     redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   }
-  if (access.state.lifecycleState !== "open-platform") redirect("/orientation");
+  if (access.state.lifecycleState !== "open-platform") {
+    redirect(access.state.controlledPlatformUrl ?? "/join");
+  }
 
   const [mapProjection, params] = await Promise.all([
     loadAuthorizedParticipantMapProjection(access),
@@ -61,7 +63,11 @@ export default async function ResourcesPage({ searchParams }: Props) {
 
   // These reads are independent. Keep optional/owner and referral hydration off the critical path
   // while Network discovery supplies the only input required by provider/resource discovery.
-  const networkPromise = loadAuthorizedNetworkDiscovery({ access, mapProjection });
+  const networkPromise = loadAuthorizedNetworkDiscovery({
+    access,
+    mapProjection,
+    focusedOrganizationId: queryState.organizationId ?? queryState.providerId,
+  });
   const referralsPromise = createServerReferralNetworkService().snapshot(actor);
   const ownerPromise = service.ownerSnapshot(actor).catch((error: unknown) => {
     if (error instanceof ResourceNetworkError && error.code === "forbidden") return null;
@@ -110,6 +116,10 @@ export default async function ResourcesPage({ searchParams }: Props) {
     queryState.providerId,
     providers.map((provider) => String(provider.organizationId)),
   );
+  const selectedOrganizationId = authorizedWorkspaceSelection(
+    queryState.organizationId,
+    markers.map((organization) => organization.organizationId),
+  );
   const selectedRequestId = authorizedWorkspaceSelection(
     queryState.requestId,
     requestReferrals.map((referral) => referral.id),
@@ -123,6 +133,21 @@ export default async function ResourcesPage({ searchParams }: Props) {
     <ResourceNetworkWorkspace
       model={mapProjection.model}
       homeMarker={mapProjection.homeMarker}
+      spatialScope={{
+        participantId: String(access.context.user.id),
+        membershipId: String(access.membership.id),
+        organizationId: String(access.membership.organizationId),
+        geographyId: String(mapProjection.model.selectedGeography.id),
+      }}
+      organizations={network.available ? network.projection.organizations.map((organization) => Object.freeze({
+        organizationId: String(organization.organizationId),
+        marker: Object.freeze({
+          id: organization.marker.id,
+          coordinate: organization.marker.coordinate,
+          label: organization.profile.displayName,
+          accessibleLocationLabel: organization.marker.accessibleLocationLabel,
+        }),
+      })) : []}
       providers={providers}
       resources={resourceProjection.available ? resourceProjection.projection.resources : []}
       referrals={referrals}
@@ -130,6 +155,7 @@ export default async function ResourcesPage({ searchParams }: Props) {
       commandRecoveryScope={commandRecoveryScope}
       queryState={Object.freeze({
         ...queryState,
+        organizationId: selectedOrganizationId,
         providerId: selectedProviderId,
         requestId: selectedRequestId,
       })}

@@ -6,6 +6,7 @@ export type ResourceAvailabilityFilter = "all" | "available" | "limited" | "unkn
 export interface ResourceNetworkWorkspaceQuery {
   readonly query: string;
   readonly availability: ResourceAvailabilityFilter;
+  readonly organizationId: string | null;
   readonly providerId: string | null;
   readonly requestId: string | null;
 }
@@ -35,6 +36,7 @@ export function parseResourceNetworkWorkspaceQuery(
   return Object.freeze({
     query,
     availability,
+    organizationId: workspaceId(params.organization),
     providerId: workspaceId(params.provider),
     requestId: workspaceId(params.request),
   });

@@ -24,6 +24,7 @@ import {
   createOrganizationMembership,
   createUserIdentity,
 } from "../src/domain/users/model.ts";
+import { orientationJourneyIdForAccessJourney } from "../src/domain/orientation/model.ts";
 import { PORTSMOUTH_CONTROLLED_LOCALITY } from "../src/data/geography/hampton-roads-controlled-locality.ts";
 import {
   parseSaveProfileBody,
@@ -122,6 +123,7 @@ function fixture(seed) {
   let markerActivation = null;
   let persistedWebsite = null;
   let markerRecalculations = 0;
+  let orientation = null;
 
   const location = Object.freeze({
     id: "location-website-carry-forward",
@@ -189,6 +191,10 @@ function fixture(seed) {
         return value === organization.id ? markerActivation : null;
       },
     },
+    orientations: {
+      async getById(value) { return value === orientation?.id ? orientation : null; },
+      async saveTransition() { throw new Error("not used"); },
+    },
     accounts: {
       async getById(value) {
         return value === organization.id ? organization : null;
@@ -252,6 +258,41 @@ function fixture(seed) {
     lifecycle: () => lifecycle,
     persistedWebsite: () => persistedWebsite,
     markerRecalculations: () => markerRecalculations,
+    completeOrientationWithAcquisition() {
+      activation = updateActivationJourneyContext(activation, {
+        acquisitionContext: Object.freeze({
+          id: "acquisition-website-carry-forward",
+          version: 1,
+          intent: Object.freeze({ kind: "provider", subjectReference: "provider-invitation" }),
+          source: Object.freeze({ channel: "provider-link", sourceReference: "provider-invitation", referrerHost: null }),
+          boundUserId: user.id,
+          boundAccessJourneyId: activation.accessJourneyId,
+          issuedAt: NOW,
+          expiresAt: "2026-09-01T12:00:00.000Z",
+          boundAt: NOW,
+          resumeStatus: "pending",
+          firstResumedAt: null,
+        }),
+        now: LATER,
+      });
+      orientation = Object.freeze({
+        id: orientationJourneyIdForAccessJourney(activation.accessJourneyId),
+        version: 1,
+        scenarioId: "exchange-network-basics",
+        scenarioVersion: 1,
+        userId: user.id,
+        accessJourneyId: activation.accessJourneyId,
+        organizationId: organization.id,
+        geographyId: PORTSMOUTH_CONTROLLED_LOCALITY.id,
+        status: "completed",
+        completedThroughStep: 8,
+        revision: 9,
+        restartCount: 0,
+        startedAt: NOW,
+        updatedAt: LATER,
+        completedAt: LATER,
+      });
+    },
   };
 }
 
@@ -327,6 +368,22 @@ test("carried available website survives Profile Complete unchanged", async () =
   });
   assert.equal(current.markerRecalculations(), 1);
   assert.equal(state.nextStep, "complete");
+});
+
+test("activation resume sends completed orientation with acquisition context to first value", async () => {
+  const { current } = await saveProfile(
+    {
+      websiteDisposition: "available",
+      websiteUrl: "https://example.org/",
+      phone: "+1 757 555 0100",
+    },
+    validProfileBody(),
+  );
+  current.completeOrientationWithAcquisition();
+  const resumed = await current.service.state(current.context);
+  assert.equal(resumed.lifecycleState, "controlled-platform");
+  assert.equal(resumed.acquisitionContext.kind, "provider");
+  assert.equal(resumed.controlledPlatformUrl, "/first-value");
 });
 
 test("initial website confirmation preserves explicit false and normalizes the URL", async () => {

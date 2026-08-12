@@ -5,7 +5,7 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
-const state = await read("src/application/participant/existing-workspace-state.ts");
+const state = await read("src/application/participant/participant-spatial-context.ts");
 const component = await read("src/components/participant/ExistingWorkspaceFoundation.tsx");
 const styles = await read("src/components/participant/ExistingWorkspaceFoundation.module.css");
 const page = await read("app/geography/canvas/page.tsx");
@@ -15,15 +15,16 @@ const networkCatalog = JSON.parse(
   await read("src/i18n/messages/network/en-US.json"),
 );
 
-test("Brand B6a browser state is deterministic and stores no authority or coordinates", () => {
-  assert.match(state, /viewportIntent: "organization-home"/);
-  assert.match(state, /"selected-object"/);
+test("Brand B6a browser state is deterministic, scoped, and non-authorizing", () => {
+  assert.match(state, /participantId/);
+  assert.match(state, /membershipId/);
+  assert.match(state, /geographyId/);
   assert.match(state, /storesAuthorization: false/);
   assert.match(state, /storesPrivateCoordinates: false/);
   assert.match(state, /storesDomainRecords: false/);
-  assert.match(state, /selectedObjectMustBeAuthorizedProjection: true/);
-  assert.doesNotMatch(state, /longitude|latitude|permission|membership|sessionCookie/);
-  assert.match(component, /authorizedObjectIds\.has\(restored\.selectedObjectId\)/);
+  assert.match(state, /serverRevalidatesSelectedObjectsAndActions: true/);
+  assert.doesNotMatch(state, /permission|sessionCookie/);
+  assert.match(component, /authorizedObjectIds\.has\(spatialContext\.selection\.markerId\)/);
 });
 
 test("Brand B6a supports truthful localized loading and recovery boundaries", () => {

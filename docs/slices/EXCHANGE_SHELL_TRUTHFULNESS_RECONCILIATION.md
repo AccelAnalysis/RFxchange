@@ -18,7 +18,7 @@ The stable authenticated participant lens order is exactly:
 
 Opportunities/RFx is visible but unavailable, has no href, cannot be current, creates no RFx state, and does not imply Feature-ID completion. Resources, Intelligence and Referrals use their already-authorized runtimes. Network remains the current organization-network view/domain concept within Intelligence. Account and Quick Start are separate utilities. Administration remains limited to implemented, server-authorized destinations.
 
-Ordinary lens changes retain one persistent participant shell. Route-specific loading remains below that shell; a route wait is not presented as a new RFxchange launch.
+Ordinary lens changes retain one persistent participant shell. PR #159 originally used route-specific fallbacks below that shell. The post-PR-#159 convergence gate supersedes that warm-navigation treatment: the current authorized workspace remains usable until the destination commits, while pending state is announced inside the persistent navigation.
 
 ## Reconciliation ledger
 
@@ -36,11 +36,11 @@ Ordinary lens changes retain one persistent participant shell. Route-specific lo
 | `docs/slices/WAVE_4_RFX_CORE_ROADMAP.md` | Inspected; sequencing retained | Wave 4 remains `0/41`. The shell gate is a cross-cutting prerequisite for later participant-facing RFx entry, not a Wave 4 Feature-ID slice and not a change to the adopted Feature-ID sequence. |
 | `docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md` | Inspected; no edits required | Totals remain **438 total · 152 Done · 286 Not Started**. Activation remains **43/43**, Network remains **38/38**, Wave 4 RFx Core remains **0/41**, and B6b remains intentionally pending. Lens visibility or shell convergence is not Feature-ID completion evidence. |
 | `docs/tracking/RFxchange_DEPENDENCY_MAP.md` | Inspected; no dependency edge changed | The gate is a bounded cross-cutting integration prerequisite before participant-facing Slice 4.1 shell entry. It does not create a Feature-ID dependency edge, make Slice 4.1 runtime complete, or make Stabilization 2C a product dependency. |
-| Relevant architecture validators | Updated | Validators now test the typed registry, exact lens order, unavailable non-route, utility separation, server-authoritative Administration, persistent shell, scoped loading, five-locale parity, responsive/reduced-motion behavior and unchanged tracker boundary. |
+| Relevant architecture validators | Updated | Validators test the typed registry, exact lens order, unavailable non-route, utility separation, server-authoritative Administration, persistent shell, non-page-like warm pending state, five-locale parity, responsive/reduced-motion behavior and unchanged tracker boundary. |
 
 ## Loading and performance reconciliation
 
-The former root `app/loading.tsx` card is removed. Destination loading boundaries now live below the persistent shell and provide scoped `role="status"`, `aria-live="polite"` and `aria-busy="true"` semantics.
+The former root `app/loading.tsx` card was removed by the original shell gate. The post-PR-#159 convergence pass also removes the participant destination `loading.tsx` fallbacks. Warm navigation now keeps the current authorized workspace mounted until route commit and exposes concise `role="status"` / `aria-live="polite"` pending state inside the activated link. There is no spinner, dot, progress bar, loading heading, loading card or artificial minimum hold. Cold protected entry remains fail-closed and does not render an unauthorized participant shell.
 
 The performance pass corrects actual blocking or duplicate work rather than merely concealing it:
 

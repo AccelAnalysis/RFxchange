@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { useI18n } from "../i18n/I18nProvider";
 import { clearParticipantIntelligenceContext } from "../../application/participant/intelligence-context-storage";
+import { clearParticipantSpatialContexts } from "../../application/participant/participant-spatial-context";
 import { createClientAuthenticationProvider } from "../../infrastructure/auth/firebase-client";
 
 export function SignOutButton({
@@ -26,6 +27,7 @@ export function SignOutButton({
         void (async () => {
           try {
             clearParticipantIntelligenceContext();
+            clearParticipantSpatialContexts();
             try {
               await createClientAuthenticationProvider().signOut();
             } catch {

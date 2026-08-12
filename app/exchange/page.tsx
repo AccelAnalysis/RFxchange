@@ -52,7 +52,8 @@ export default async function ExchangePage({ searchParams }: ExchangePageProps) 
   }
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   if (access.state.lifecycleState !== "open-platform") {
-    redirect(acquisitionIntent ? appendFoundingAcquisitionIntent("/first-value") : "/first-value");
+    const destination = access.state.controlledPlatformUrl ?? "/join";
+    redirect(acquisitionIntent ? appendFoundingAcquisitionIntent(destination) : destination);
   }
 
   const scope = openReleaseScopeFromAccess(access);

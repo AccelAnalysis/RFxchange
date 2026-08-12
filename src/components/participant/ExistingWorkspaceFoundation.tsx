@@ -1,20 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import type {
   NetworkDiscoveryOrganization,
   NetworkDiscoveryProjection,
 } from "../../application/network-discovery/network-discovery";
-import {
-  createExistingWorkspaceState,
-  existingWorkspaceStorageKey,
-  parseExistingWorkspaceState,
-  serializeExistingWorkspaceState,
-  type ExistingWorkspaceState,
-} from "../../application/participant/existing-workspace-state";
+import type { ParticipantSpatialScope } from "../../application/participant/participant-spatial-context";
+import { projectOrganizationActions } from "../../application/participant/organization-actions";
 import type { NetworkServiceAreaOption } from "../../infrastructure/network-discovery/runtime";
 import { formatDate } from "../../i18n/format";
 import { useI18n } from "../i18n/I18nProvider";
@@ -36,6 +31,7 @@ import {
 } from "./ParticipantWorkspace";
 
 import styles from "./ExistingWorkspaceFoundation.module.css";
+import { useParticipantSpatialContext } from "./useParticipantSpatialContext";
 
 export type ExistingWorkspaceStatus =
   | "ready"
@@ -50,37 +46,12 @@ interface ExistingWorkspaceFoundationProps {
   readonly model: ControlledLocalityMapModel;
   readonly homeMarker: ExchangeHomeMarker;
   readonly organizationId: string;
+  readonly spatialScope: ParticipantSpatialScope;
   readonly discovery?: NetworkDiscoveryProjection | null;
+  readonly focusedOrganization?: NetworkDiscoveryOrganization | null;
   readonly serviceAreaOptions?: readonly NetworkServiceAreaOption[];
+  readonly officialResourceProviderOrganizationIds?: readonly string[];
   readonly status?: ExistingWorkspaceStatus;
-}
-
-const WORKSPACE_STATE_EVENT = "rfxchange:existing-workspace-state";
-const workspaceMemoryStore = new Map<string, string>();
-
-function readWorkspaceSnapshot(storageKey: string, fallback: string): string {
-  if (typeof window === "undefined") return fallback;
-  try {
-    const stored = window.localStorage.getItem(storageKey);
-    if (stored !== null) {
-      workspaceMemoryStore.set(storageKey, stored);
-      return stored;
-    }
-  } catch {
-    // Browser UI-state storage may be unavailable. Authority and domain state do not depend on it.
-  }
-  return workspaceMemoryStore.get(storageKey) ?? fallback;
-}
-
-function persistWorkspaceSnapshot(storageKey: string, state: ExistingWorkspaceState): void {
-  const snapshot = serializeExistingWorkspaceState(state);
-  workspaceMemoryStore.set(storageKey, snapshot);
-  try {
-    window.localStorage.setItem(storageKey, snapshot);
-  } catch {
-    // UI state persistence is optional and never affects authority or domain state.
-  }
-  window.dispatchEvent(new CustomEvent(WORKSPACE_STATE_EVENT, { detail: storageKey }));
 }
 
 function buildDiscoveryUrl(input: Readonly<{
@@ -99,8 +70,8 @@ function buildDiscoveryUrl(input: Readonly<{
 function visibleLocation(
   organization: NetworkDiscoveryOrganization,
   labels: Readonly<{
-    approximate: string;
-    localityOnly: string;
+    near: string;
+    inLocality: string;
   }>,
 ): string {
   const location = organization.profile.location;
@@ -113,9 +84,9 @@ function visibleLocation(
     ].filter(Boolean).join(", ");
   }
   if (location.visibility === "approximate") {
-    return `${location.localityName} · ${labels.approximate}`;
+    return labels.near.replace("{locality}", location.localityName);
   }
-  return `${location.localityName} · ${labels.localityOnly}`;
+  return labels.inLocality.replace("{locality}", location.localityName);
 }
 
 function WorkspaceBoundary({ status }: Readonly<{ status: Exclude<ExistingWorkspaceStatus, "ready"> }>) {
@@ -149,101 +120,147 @@ export function ExistingWorkspaceFoundation({
   model,
   homeMarker,
   organizationId,
+  spatialScope,
   discovery = null,
+  focusedOrganization = null,
   serviceAreaOptions = [],
+  officialResourceProviderOrganizationIds = [],
   status = "ready",
 }: ExistingWorkspaceFoundationProps) {
   const { locale, t } = useI18n();
-  const storageKey = useMemo(
-    () => existingWorkspaceStorageKey(organizationId),
-    [organizationId],
-  );
-  const fallbackState = useMemo(
-    () => createExistingWorkspaceState({ organizationId, selectedObjectId: homeMarker.id }),
-    [homeMarker.id, organizationId],
-  );
-  const fallbackSnapshot = useMemo(
-    () => serializeExistingWorkspaceState(fallbackState),
-    [fallbackState],
-  );
-  const authorizedObjectIds = useMemo(
-    () => new Set([
-      homeMarker.id,
-      ...(discovery?.organizations.map((organization) => organization.marker.id) ?? []),
-    ]),
-    [discovery?.organizations, homeMarker.id],
-  );
+  const [spatialContext, updateSpatialContext] = useParticipantSpatialContext({
+    scope: spatialScope,
+    homeMarkerId: homeMarker.id,
+    activeLens: "intelligence",
+  });
+  const resultListRef = useRef<HTMLUListElement | null>(null);
+  const appliedFocusedOrganizationIdRef = useRef<string | null>(null);
+  const organizationsByMarkerId = useMemo(() => new Map(
+    [
+      ...(discovery?.organizations ?? []),
+      ...(focusedOrganization ? [focusedOrganization] : []),
+    ].map((organization) => [organization.marker.id, organization]),
+  ), [discovery?.organizations, focusedOrganization]);
+  const authorizedObjectIds = useMemo(() => new Set([homeMarker.id, ...organizationsByMarkerId.keys()]), [homeMarker.id, organizationsByMarkerId]);
+  const restoredSelectionIsAuthorized = authorizedObjectIds.has(spatialContext.selection.markerId);
+  const selectedObjectId = restoredSelectionIsAuthorized
+    ? spatialContext.selection.markerId
+    : homeMarker.id;
 
-  const subscribe = useCallback((onStoreChange: () => void) => {
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === storageKey) onStoreChange();
-    };
-    const handleWorkspaceState = (event: Event) => {
-      if ((event as CustomEvent<string>).detail === storageKey) onStoreChange();
-    };
-    window.addEventListener("storage", handleStorage);
-    window.addEventListener(WORKSPACE_STATE_EVENT, handleWorkspaceState);
-    return () => {
-      window.removeEventListener("storage", handleStorage);
-      window.removeEventListener(WORKSPACE_STATE_EVENT, handleWorkspaceState);
-    };
-  }, [storageKey]);
+  useEffect(() => {
+    if (restoredSelectionIsAuthorized) return;
+    updateSpatialContext((current) => Object.freeze({
+      ...current,
+      selection: Object.freeze({
+        organizationId,
+        markerId: homeMarker.id,
+        relationshipId: null,
+      }),
+      panelOpen: true,
+    }));
+  }, [homeMarker.id, organizationId, restoredSelectionIsAuthorized, updateSpatialContext]);
+  useEffect(() => {
+    if (!focusedOrganization) {
+      appliedFocusedOrganizationIdRef.current = null;
+      return;
+    }
+    if (
+      appliedFocusedOrganizationIdRef.current === String(focusedOrganization.organizationId)
+    ) return;
+    appliedFocusedOrganizationIdRef.current = String(focusedOrganization.organizationId);
+    updateSpatialContext((current) => Object.freeze({
+      ...current,
+      activeLens: "intelligence" as const,
+      selection: Object.freeze({
+        organizationId: String(focusedOrganization.organizationId),
+        markerId: focusedOrganization.marker.id,
+        relationshipId: null,
+      }),
+      panelOpen: true,
+      originLens: current.activeLens,
+    }));
+  }, [focusedOrganization, updateSpatialContext]);
 
-  const getSnapshot = useCallback(
-    () => readWorkspaceSnapshot(storageKey, fallbackSnapshot),
-    [fallbackSnapshot, storageKey],
-  );
-  const snapshot = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    () => fallbackSnapshot,
-  );
-  const workspaceState = useMemo(() => {
-    const restored = parseExistingWorkspaceState(snapshot, organizationId);
-    return restored && authorizedObjectIds.has(restored.selectedObjectId)
-      ? restored
-      : fallbackState;
-  }, [authorizedObjectIds, fallbackState, organizationId, snapshot]);
-
-  if (status !== "ready") return <WorkspaceBoundary status={status} />;
-
-  const panelOpen = workspaceState.panelOpen;
-  const selectedHome = workspaceState.selectedObjectId === homeMarker.id;
-  const selectedOrganization = discovery?.organizations.find(
-    (organization) => organization.marker.id === workspaceState.selectedObjectId,
-  ) ?? null;
+  const panelOpen = spatialContext.panelOpen;
+  const selectedHome = selectedObjectId === homeMarker.id;
+  const selectedOrganization = organizationsByMarkerId.get(selectedObjectId) ?? null;
+  const selectedOrganizationId = selectedOrganization ? String(selectedOrganization.organizationId) : organizationId;
+  const organizationActions = projectOrganizationActions({
+    viewerOrganizationId: organizationId,
+    selectedOrganizationId,
+    officialResourceProvider: officialResourceProviderOrganizationIds.includes(selectedOrganizationId),
+  });
   const locality = model.selectedGeography.name;
   const locationLabel = homeMarker.accessibleLocationLabel ?? `${locality} organization location`;
   const serviceAreaNames = new Map(serviceAreaOptions.map((option) => [option.id, option.name]));
-  const networkMarkers = discovery?.organizations.map((organization) => organization.marker) ?? [];
+  const networkMarkers = [...organizationsByMarkerId.values()].map((organization) => organization.marker);
 
   const selectObject = (selectedObjectId: string, panelOpenValue = true) => {
     if (!authorizedObjectIds.has(selectedObjectId)) return;
-    persistWorkspaceSnapshot(storageKey, createExistingWorkspaceState({
-      organizationId,
-      selectedObjectId,
+    const selected = organizationsByMarkerId.get(selectedObjectId);
+    updateSpatialContext((current) => Object.freeze({
+      ...current,
+      activeLens: "intelligence" as const,
+      selection: Object.freeze({
+        organizationId: selected ? String(selected.organizationId) : organizationId,
+        markerId: selectedObjectId,
+        relationshipId: null,
+      }),
       panelOpen: panelOpenValue,
-      viewportIntent: selectedObjectId === homeMarker.id ? "organization-home" : "selected-object",
+      originLens: current.activeLens,
     }));
   };
 
   const updatePanel = (panelOpenValue: boolean) => {
-    persistWorkspaceSnapshot(storageKey, createExistingWorkspaceState({
-      organizationId,
-      selectedObjectId: workspaceState.selectedObjectId,
-      panelOpen: panelOpenValue,
-      viewportIntent: workspaceState.viewportIntent,
-    }));
+    updateSpatialContext((current) => Object.freeze({ ...current, panelOpen: panelOpenValue }));
   };
 
   const query = discovery?.query;
   const capability = query?.capability ?? "";
   const serviceAreaId = query?.serviceGeographyId ?? null;
+  useEffect(() => {
+    const page = query?.page ?? 1;
+    const returnHref = buildDiscoveryUrl({ organizationId, capability, serviceAreaId, page });
+    const nextFilterValues: Record<string, string> = {};
+    if (serviceAreaId) nextFilterValues.serviceArea = serviceAreaId;
+    const nextFilters: Readonly<Record<string, string>> = Object.freeze(nextFilterValues);
+    updateSpatialContext((current) => {
+      const lensState = current.lensState.intelligence;
+      if (
+        current.activeLens === "intelligence" &&
+        current.returnHref === returnHref &&
+        lensState.search === capability &&
+        lensState.resultPage === page &&
+        lensState.filters.serviceArea === (serviceAreaId ?? undefined)
+      ) return current;
+      return Object.freeze({
+        ...current,
+        activeLens: "intelligence" as const,
+        returnHref,
+        lensState: Object.freeze({
+          ...current.lensState,
+          intelligence: Object.freeze({
+            ...lensState,
+            search: capability,
+            filters: nextFilters,
+            resultPage: page,
+            resultIndex: lensState.search === capability && lensState.filters.serviceArea === (serviceAreaId ?? undefined) ? lensState.resultIndex : 0,
+            listScrollTop: lensState.search === capability && lensState.filters.serviceArea === (serviceAreaId ?? undefined) ? lensState.listScrollTop : 0,
+          }),
+        }),
+      });
+    });
+  }, [capability, organizationId, query?.page, serviceAreaId, updateSpatialContext]);
+  useEffect(() => {
+    if (resultListRef.current) resultListRef.current.scrollTop = spatialContext.lensState.intelligence.listScrollTop;
+  }, [spatialContext.lensState.intelligence.listScrollTop]);
   const clearHref = buildDiscoveryUrl({ organizationId, capability: "", serviceAreaId: null });
   const locationLabels = {
-    approximate: t("networkWorkspace.detail.approximateLocation"),
-    localityOnly: t("networkWorkspace.detail.localityOnlyLocation"),
+    near: t("networkWorkspace.detail.nearLocation", { locality }),
+    inLocality: t("networkWorkspace.detail.inLocality", { locality }),
   };
+
+  if (status !== "ready") return <WorkspaceBoundary status={status} />;
 
   return (
     <ParticipantShell activeItem="Network">
@@ -253,8 +270,14 @@ export function ExistingWorkspaceFoundation({
           mode="organization"
           marker={homeMarker}
           organizationMarkers={networkMarkers}
-          focusedMarkerId={workspaceState.selectedObjectId}
+          focusedMarkerId={selectedObjectId}
           onOrganizationMarkerSelect={(markerId) => selectObject(markerId)}
+          initialCamera={spatialContext.camera}
+          onCameraChange={(camera) => updateSpatialContext((current) => Object.freeze({
+            ...current,
+            activeLens: "intelligence" as const,
+            camera,
+          }))}
           interactive
           showSearch={false}
           workspaceOverlay={panelOpen ? "right" : "left"}
@@ -304,9 +327,23 @@ export function ExistingWorkspaceFoundation({
               </div>
 
               {discovery.organizations.length > 0 ? (
-                <ul className={styles.networkResults} aria-label={t("networkWorkspace.search.listLabel")}>
-                  {discovery.organizations.map((organization) => {
-                    const selected = organization.marker.id === workspaceState.selectedObjectId;
+                <ul
+                  ref={resultListRef}
+                  className={styles.networkResults}
+                  aria-label={t("networkWorkspace.search.listLabel")}
+                  onScroll={(event) => {
+                    const listScrollTop = Math.max(0, Math.round(event.currentTarget.scrollTop));
+                    updateSpatialContext((current) => Object.freeze({
+                      ...current,
+                      lensState: Object.freeze({
+                        ...current.lensState,
+                        intelligence: Object.freeze({ ...current.lensState.intelligence, listScrollTop }),
+                      }),
+                    }));
+                  }}
+                >
+                  {discovery.organizations.map((organization, resultIndex) => {
+                    const selected = organization.marker.id === selectedObjectId;
                     const matchLabel = organization.match.kind === "capability"
                       ? t("networkWorkspace.match.capability")
                       : organization.match.kind === "organization-name"
@@ -317,9 +354,20 @@ export function ExistingWorkspaceFoundation({
                         <button
                           type="button"
                           className={styles.networkResultButton}
+                          data-organization-id={String(organization.organizationId)}
+                          data-marker-id={organization.marker.id}
                           data-selected={selected}
                           aria-pressed={selected}
-                          onClick={() => selectObject(organization.marker.id)}
+                          onClick={() => {
+                            selectObject(organization.marker.id);
+                            updateSpatialContext((current) => Object.freeze({
+                              ...current,
+                              lensState: Object.freeze({
+                                ...current.lensState,
+                                intelligence: Object.freeze({ ...current.lensState.intelligence, resultIndex }),
+                              }),
+                            }));
+                          }}
                         >
                           <span className={styles.resultHeading}>
                             <strong>{organization.profile.displayName}</strong>
@@ -370,25 +418,13 @@ export function ExistingWorkspaceFoundation({
           </MapOverlaySurface>
         ) : null}
 
-        <div className={styles.workspaceActions}>
-          <button
-            type="button"
-            className={styles.organizationHomeButton}
-            onClick={() => selectObject(homeMarker.id)}
-            aria-expanded={panelOpen && selectedHome}
-            aria-controls="organization-detail-panel"
-          >
-            <span className={styles.organizationNode} aria-hidden="true">RF</span>
-            <span>
-              <small>{t("networkWorkspace.home.eyebrow")}</small>
-              <strong>{homeMarker.label}</strong>
-            </span>
-          </button>
-        </div>
-
         {panelOpen ? (
           <ResponsiveEdgeSheet ariaLabelledBy="organization-detail-title" side="right" width="standard">
-            <div id="organization-detail-panel" className={styles.organizationHome}>
+            <div
+              id="organization-detail-panel"
+              className={styles.organizationHome}
+              data-selected-organization-id={selectedOrganizationId}
+            >
               <div className={styles.sheetHeader}>
                 <div>
                   <p className={styles.eyebrow}>
@@ -443,24 +479,20 @@ export function ExistingWorkspaceFoundation({
                   <section className={styles.capabilitySection} aria-labelledby="capability-list-title">
                     <p className={styles.eyebrow}>{t("networkWorkspace.detail.capabilities")}</p>
                     <h2 id="capability-list-title">
-                      {selectedOrganization.capabilities.length > 0
-                        ? "Confirmed organization capability claims"
-                        : t("networkWorkspace.detail.capabilityEvidence")}
+                      {t("networkWorkspace.detail.capabilityEvidence")}
                     </h2>
                     <ul className={styles.capabilityList}>
                       {selectedOrganization.capabilities.length > 0
                         ? selectedOrganization.capabilities.map((capabilityItem) => (
                             <li key={capabilityItem.id}>
                               <strong>{capabilityItem.label}</strong>
-                              <span>{capabilityItem.domainLabel} → {capabilityItem.familyLabel}</span>
-                              <small>{capabilityItem.provenanceLabel} · {capabilityItem.assertionStatus.replaceAll("_", " ")} · not independently verified</small>
+                              <span>{capabilityItem.definition}</span>
                             </li>
                           ))
                         : selectedOrganization.profile.capabilities.map((capabilityItem) => (
                             <li key={capabilityItem.id}>
                               <strong>{capabilityItem.name}</strong>
                               <span>{capabilityItem.description}</span>
-                              <small>Legacy activation profile capability</small>
                             </li>
                           ))}
                     </ul>
@@ -534,6 +566,18 @@ export function ExistingWorkspaceFoundation({
                   </AlertBanner>
                 </>
               )}
+
+              <section className={styles.cardActions} aria-label={t("networkWorkspace.detail.actions")}>
+                {organizationActions.map((action) => action.availability === "available" && action.href ? (
+                  <Link key={action.id} className={styles.secondaryAction} href={action.href} data-organization-action={action.id}>
+                    {t(`networkWorkspace.actions.${action.id}`)}
+                  </Link>
+                ) : (
+                  <span key={action.id} aria-disabled="true" data-organization-action={action.id} title={t(`networkWorkspace.actionReasons.${action.reason}`)}>
+                    {t(`networkWorkspace.actions.${action.id}`)}
+                  </span>
+                ))}
+              </section>
 
               <section className={styles.provenance} aria-labelledby="provenance-title">
                 <p className={styles.eyebrow}>{t("networkWorkspace.provenance.eyebrow")}</p>

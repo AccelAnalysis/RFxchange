@@ -81,15 +81,27 @@
     "visibleLocation": "Posizione visibile",
     "serviceAreas": "Aree di servizio",
     "noServiceAreas": "Non sono indicate aree di servizio pubbliche.",
-    "approximateLocation": "posizione approssimativa",
-    "localityOnlyLocation": "solo località",
+    "nearLocation": "Vicino a {locality}",
+    "inLocality": "A {locality}",
     "capabilities": "Capacità",
     "capabilityEvidence": "Ciò che questa organizzazione dichiara di saper fare",
     "publicContact": "Contatto pubblico",
     "contactUnavailable": "Non è indicato alcun contatto pubblico",
     "website": "Visita il sito dell’organizzazione",
     "profileEvidenceTitle": "Limite delle prove del profilo",
-    "profileEvidence": "Le informazioni sul profilo e sulle capacità sono fornite dall’organizzazione, salvo quando siano identificate separatamente come verificate. La scoperta non certifica capacità, prestazioni o idoneità."
+    "profileEvidence": "Le informazioni sul profilo e sulle capacità sono fornite dall’organizzazione, salvo quando siano identificate separatamente come verificate. La scoperta non certifica capacità, prestazioni o idoneità.",
+    "actions": "Azioni dell’organizzazione"
+  },
+  "actions": {
+    "manage-profile": "Gestisci profilo",
+    "view-resources": "Visualizza risorse",
+    "start-referral": "Avvia una segnalazione",
+    "opportunities-rfx": "Opportunità/RFx"
+  },
+  "actionReasons": {
+    "self-only": "Solo i membri di questa organizzazione possono gestirne il profilo.",
+    "not-an-official-provider": "Questa organizzazione non ha servizi pubblicati come Fornitore Ufficiale di Risorse.",
+    "rfx-runtime-unavailable": "Opportunità/RFx non è ancora disponibile."
   },
   "provenance": {
     "eyebrow": "Provenienza dei dati",

@@ -24,6 +24,12 @@ import {
   readParticipantIntelligenceContext,
   writeParticipantIntelligenceContext,
 } from "../../application/participant/intelligence-context-storage";
+import {
+  PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT,
+  participantSpatialIntelligenceHref,
+  participantSpatialLensHref,
+  readActiveParticipantSpatialContext,
+} from "../../application/participant/participant-spatial-context";
 import { SignOutButton } from "../auth/SignOutButton";
 import { BrandWordmark } from "../brand/BrandWordmark";
 import { useI18n } from "../i18n/I18nProvider";
@@ -103,15 +109,33 @@ function transitionMarkName(destination: NavigationDestination): string {
 
 function subscribeIntelligenceHref(onStoreChange: () => void): () => void {
   window.addEventListener(PARTICIPANT_INTELLIGENCE_CONTEXT_CHANGED_EVENT, onStoreChange);
+  window.addEventListener(PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT, onStoreChange);
   window.addEventListener("storage", onStoreChange);
   return () => {
     window.removeEventListener(PARTICIPANT_INTELLIGENCE_CONTEXT_CHANGED_EVENT, onStoreChange);
+    window.removeEventListener(PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT, onStoreChange);
     window.removeEventListener("storage", onStoreChange);
   };
 }
 
 function storedIntelligenceHref(): string {
-  return safeIntelligenceHref(readParticipantIntelligenceContext()) ?? CANONICAL_INTELLIGENCE_HREF;
+  const spatialContext = readActiveParticipantSpatialContext();
+  const safeQueryBaseHref = safeIntelligenceHref(readParticipantIntelligenceContext());
+  return (spatialContext
+      ? safeIntelligenceHref(participantSpatialIntelligenceHref(
+          spatialContext,
+          safeQueryBaseHref ?? spatialContext.returnHref,
+        ))
+      : safeQueryBaseHref)
+    ?? CANONICAL_INTELLIGENCE_HREF;
+}
+
+function storedResourceHref(): string {
+  return participantSpatialLensHref("resources");
+}
+
+function storedReferralHref(): string {
+  return participantSpatialLensHref("referrals");
 }
 
 function useTransitionFeedback(pathname: string) {
@@ -127,6 +151,16 @@ function useTransitionFeedback(pathname: string) {
     subscribeIntelligenceHref,
     storedIntelligenceHref,
     () => CANONICAL_INTELLIGENCE_HREF,
+  );
+  const resourceHref = useSyncExternalStore(
+    subscribeIntelligenceHref,
+    storedResourceHref,
+    () => "/resources",
+  );
+  const referralHref = useSyncExternalStore(
+    subscribeIntelligenceHref,
+    storedReferralHref,
+    () => "/referrals",
   );
 
   useEffect(() => {
@@ -188,6 +222,8 @@ function useTransitionFeedback(pathname: string) {
 
   return {
     intelligenceHref,
+    resourceHref,
+    referralHref,
     begin,
   };
 }
@@ -233,11 +269,15 @@ function NavigationLinkContent({
 function LensItems({
   activeState,
   intelligenceHref,
+  resourceHref,
+  referralHref,
   beginNavigation,
   onNavigate,
 }: Readonly<{
   activeState: ParticipantNavigationState;
   intelligenceHref: string;
+  resourceHref: string;
+  referralHref: string;
   beginNavigation(destination: NavigationDestination): void;
   onNavigate?: (event: MouseEvent<HTMLAnchorElement>) => void;
 }>) {
@@ -265,7 +305,13 @@ function LensItems({
       );
     }
 
-    const href = lens.id === "intelligence" ? intelligenceHref : lens.href;
+    const href = lens.id === "intelligence"
+      ? intelligenceHref
+      : lens.id === "resources"
+        ? resourceHref
+        : lens.id === "referrals"
+          ? referralHref
+          : lens.href;
     return (
       <Link
         key={lens.id}
@@ -398,11 +444,6 @@ function AccountUtility({
         <span className={styles.accountAvatar} aria-hidden="true">
           {organizationInitials(organizationName)}
         </span>
-        <span className={styles.accountText}>
-          {organizationName ? <strong>{organizationName}</strong> : null}
-          <small>{t("participantNavigation.account")}</small>
-        </span>
-        <span className={styles.chevron} aria-hidden="true">⌄</span>
       </button>
       {open ? (
         <div
@@ -525,6 +566,8 @@ export function ParticipantTopNavigation({
         <LensItems
           activeState={activeState}
           intelligenceHref={transition.intelligenceHref}
+          resourceHref={transition.resourceHref}
+          referralHref={transition.referralHref}
           beginNavigation={transition.begin}
         />
       </nav>
@@ -532,6 +575,8 @@ export function ParticipantTopNavigation({
         <LensItems
           activeState={activeState}
           intelligenceHref={transition.intelligenceHref}
+          resourceHref={transition.resourceHref}
+          referralHref={transition.referralHref}
           beginNavigation={transition.begin}
           onNavigate={closeMobileLensMenu}
         />

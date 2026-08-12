@@ -24,6 +24,7 @@ import {
   createClientAuthenticationProvider,
 } from "../../infrastructure/auth/firebase-client";
 import { clearParticipantIntelligenceContext } from "../../application/participant/intelligence-context-storage";
+import { clearParticipantSpatialContexts } from "../../application/participant/participant-spatial-context";
 
 import styles from "./ActivationJourneyClient.module.css";
 
@@ -283,6 +284,7 @@ export function ActivationJourneyClient({
       }),
     });
     clearParticipantIntelligenceContext();
+    clearParticipantSpatialContexts();
     if (result.state) applyState(result.state);
     return result.state;
   }
@@ -328,6 +330,7 @@ export function ActivationJourneyClient({
             disabled={busy}
             onClick={() => run(async () => {
               clearParticipantIntelligenceContext();
+              clearParticipantSpatialContexts();
               try {
                 await createClientAuthenticationProvider().signOut();
               } catch {

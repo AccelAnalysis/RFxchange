@@ -1,0 +1,257 @@
+import {
+  isParticipantMapCamera,
+  type ParticipantMapCamera,
+} from "../geography/map-view.ts";
+import type { ParticipantLensId } from "./participant-lens-registry.ts";
+
+export const PARTICIPANT_SPATIAL_CONTEXT_VERSION = 1 as const;
+export const PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX = "rfxchange:participant-spatial:v1:";
+export const PARTICIPANT_SPATIAL_ACTIVE_KEY = "rfxchange:participant-spatial:active";
+export const PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT = "rfxchange:participant-spatial-changed";
+
+export interface ParticipantSpatialScope {
+  readonly participantId: string;
+  readonly membershipId: string;
+  readonly organizationId: string;
+  readonly geographyId: string;
+}
+
+export interface ParticipantSpatialSelection {
+  readonly organizationId: string;
+  readonly markerId: string;
+  readonly relationshipId: string | null;
+}
+
+export interface ParticipantSpatialLensState {
+  readonly search: string;
+  readonly filters: Readonly<Record<string, string>>;
+  readonly resultPage: number;
+  readonly resultIndex: number;
+  readonly listScrollTop: number;
+}
+
+export interface ParticipantSpatialContext {
+  readonly version: typeof PARTICIPANT_SPATIAL_CONTEXT_VERSION;
+  readonly scope: ParticipantSpatialScope;
+  readonly activeLens: Exclude<ParticipantLensId, "opportunities-rfx">;
+  readonly selection: ParticipantSpatialSelection;
+  readonly camera: ParticipantMapCamera | null;
+  readonly lensState: Readonly<Record<Exclude<ParticipantLensId, "opportunities-rfx">, ParticipantSpatialLensState>>;
+  readonly panelOpen: boolean;
+  readonly originLens: Exclude<ParticipantLensId, "opportunities-rfx">;
+  readonly returnHref: string;
+}
+
+const LENSES = ["resources", "intelligence", "referrals"] as const;
+type AvailableParticipantLens = (typeof LENSES)[number];
+
+function required(value: string, label: string): string {
+  const normalized = value.trim();
+  if (!normalized || normalized.length > 192) throw new Error(`${label} is invalid.`);
+  return normalized;
+}
+
+function isAvailableLens(value: unknown): value is AvailableParticipantLens {
+  return typeof value === "string" && LENSES.includes(value as AvailableParticipantLens);
+}
+
+function emptyLensState(): ParticipantSpatialLensState {
+  return Object.freeze({ search: "", filters: Object.freeze({}), resultPage: 1, resultIndex: 0, listScrollTop: 0 });
+}
+
+export function participantSpatialScope(input: ParticipantSpatialScope): ParticipantSpatialScope {
+  return Object.freeze({
+    participantId: required(input.participantId, "Participant id"),
+    membershipId: required(input.membershipId, "Membership id"),
+    organizationId: required(input.organizationId, "Organization id"),
+    geographyId: required(input.geographyId, "Geography id"),
+  });
+}
+
+export function participantSpatialStorageKey(scopeInput: ParticipantSpatialScope): string {
+  const scope = participantSpatialScope(scopeInput);
+  return `${PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX}${[
+    scope.participantId,
+    scope.membershipId,
+    scope.organizationId,
+    scope.geographyId,
+  ].map(encodeURIComponent).join(":")}`;
+}
+
+export function createParticipantSpatialContext(input: Readonly<{
+  scope: ParticipantSpatialScope;
+  homeMarkerId: string;
+  activeLens?: AvailableParticipantLens;
+}>): ParticipantSpatialContext {
+  const scope = participantSpatialScope(input.scope);
+  const activeLens = input.activeLens ?? "intelligence";
+  return Object.freeze({
+    version: PARTICIPANT_SPATIAL_CONTEXT_VERSION,
+    scope,
+    activeLens,
+    selection: Object.freeze({
+      organizationId: scope.organizationId,
+      markerId: required(input.homeMarkerId, "Home marker id"),
+      relationshipId: null,
+    }),
+    camera: null,
+    lensState: Object.freeze({
+      resources: emptyLensState(),
+      intelligence: emptyLensState(),
+      referrals: emptyLensState(),
+    }),
+    panelOpen: true,
+    originLens: activeLens,
+    returnHref: "/geography/canvas",
+  });
+}
+
+function safeInteger(value: unknown, fallback: number, maximum: number): number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0
+    ? Math.min(value, maximum)
+    : fallback;
+}
+
+function parseLensState(value: unknown): ParticipantSpatialLensState | null {
+  if (!value || typeof value !== "object") return null;
+  const candidate = value as Partial<ParticipantSpatialLensState>;
+  if (typeof candidate.search !== "string" || candidate.search.length > 240) return null;
+  if (!candidate.filters || typeof candidate.filters !== "object" || Array.isArray(candidate.filters)) return null;
+  const filters: Record<string, string> = {};
+  for (const [key, filter] of Object.entries(candidate.filters)) {
+    if (!key.trim() || key.length > 80 || typeof filter !== "string" || filter.length > 191) return null;
+    filters[key] = filter;
+  }
+  return Object.freeze({
+    search: candidate.search,
+    filters: Object.freeze(filters),
+    resultPage: Math.max(1, safeInteger(candidate.resultPage, 1, 100)),
+    resultIndex: safeInteger(candidate.resultIndex, 0, 10_000),
+    listScrollTop: safeInteger(candidate.listScrollTop, 0, 10_000_000),
+  });
+}
+
+function safeReturnHref(value: unknown): string {
+  if (typeof value !== "string") return "/geography/canvas";
+  try {
+    const parsed = new URL(value, "https://participant.invalid");
+    if (parsed.origin !== "https://participant.invalid" || parsed.pathname !== "/geography/canvas") return "/geography/canvas";
+    return `${parsed.pathname}${parsed.search}`;
+  } catch {
+    return "/geography/canvas";
+  }
+}
+
+export function parseParticipantSpatialContext(
+  serialized: string | null,
+  expectedScopeInput: ParticipantSpatialScope,
+): ParticipantSpatialContext | null {
+  if (!serialized) return null;
+  const expectedScope = participantSpatialScope(expectedScopeInput);
+  try {
+    const parsed = JSON.parse(serialized) as Partial<ParticipantSpatialContext>;
+    if (parsed.version !== PARTICIPANT_SPATIAL_CONTEXT_VERSION || !parsed.scope) return null;
+    if (LENSES.some((lens) => !parseLensState(parsed.lensState?.[lens]))) return null;
+    const scope = participantSpatialScope(parsed.scope);
+    if (Object.keys(expectedScope).some((key) => scope[key as keyof ParticipantSpatialScope] !== expectedScope[key as keyof ParticipantSpatialScope])) return null;
+    if (!isAvailableLens(parsed.activeLens) || !isAvailableLens(parsed.originLens)) return null;
+    if (!parsed.selection || typeof parsed.selection.organizationId !== "string" || typeof parsed.selection.markerId !== "string") return null;
+    if (parsed.selection.relationshipId !== null && typeof parsed.selection.relationshipId !== "string") return null;
+    if (parsed.camera !== null && !isParticipantMapCamera(parsed.camera)) return null;
+    if (typeof parsed.panelOpen !== "boolean") return null;
+    return Object.freeze({
+      version: PARTICIPANT_SPATIAL_CONTEXT_VERSION,
+      scope,
+      activeLens: parsed.activeLens,
+      selection: Object.freeze({
+        organizationId: required(parsed.selection.organizationId, "Selected organization id"),
+        markerId: required(parsed.selection.markerId, "Selected marker id"),
+        relationshipId: parsed.selection.relationshipId ? required(parsed.selection.relationshipId, "Relationship id") : null,
+      }),
+      camera: parsed.camera,
+      lensState: Object.freeze({
+        resources: parseLensState(parsed.lensState?.resources)!,
+        intelligence: parseLensState(parsed.lensState?.intelligence)!,
+        referrals: parseLensState(parsed.lensState?.referrals)!,
+      }),
+      panelOpen: parsed.panelOpen,
+      originLens: parsed.originLens,
+      returnHref: safeReturnHref(parsed.returnHref),
+    });
+  } catch {
+    return null;
+  }
+}
+
+export function serializeParticipantSpatialContext(context: ParticipantSpatialContext): string {
+  return JSON.stringify(context);
+}
+
+export function clearParticipantSpatialContexts(): void {
+  if (typeof window === "undefined") return;
+  try {
+    for (let index = window.sessionStorage.length - 1; index >= 0; index -= 1) {
+      const key = window.sessionStorage.key(index);
+      if (key?.startsWith(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)) window.sessionStorage.removeItem(key);
+    }
+    window.sessionStorage.removeItem(PARTICIPANT_SPATIAL_ACTIVE_KEY);
+  } catch {
+    // Optional continuity state never affects sign-out or participant authority.
+  }
+  window.dispatchEvent(new Event(PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT));
+}
+
+export function readActiveParticipantSpatialContext(): ParticipantSpatialContext | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const key = window.sessionStorage.getItem(PARTICIPANT_SPATIAL_ACTIVE_KEY);
+    if (!key?.startsWith(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)) return null;
+    const serialized = window.sessionStorage.getItem(key);
+    if (!serialized) return null;
+    const parsed = JSON.parse(serialized) as Partial<ParticipantSpatialContext>;
+    return parsed.scope ? parseParticipantSpatialContext(serialized, parsed.scope) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function participantSpatialIntelligenceHref(
+  context: ParticipantSpatialContext,
+  safeQueryBaseHref: string = context.returnHref,
+): string {
+  const destination = new URL(safeReturnHref(safeQueryBaseHref), "https://participant.invalid");
+  if (context.selection.organizationId !== context.scope.organizationId) {
+    destination.searchParams.set("selectedOrganization", context.selection.organizationId);
+  } else if (destination.searchParams.get("selectedOrganization") !== context.scope.organizationId) {
+    destination.searchParams.delete("selectedOrganization");
+  }
+  return `${destination.pathname}${destination.search}`;
+}
+
+export function participantSpatialLensHref(lens: "resources" | "intelligence" | "referrals"): string {
+  const context = readActiveParticipantSpatialContext();
+  if (!context) return lens === "resources" ? "/resources" : lens === "referrals" ? "/referrals" : "/geography/canvas";
+  if (lens === "intelligence") return participantSpatialIntelligenceHref(context);
+  if (lens === "referrals") {
+    return context.selection.organizationId !== context.scope.organizationId
+      ? `/referrals?organization=${encodeURIComponent(context.selection.organizationId)}`
+      : "/referrals";
+  }
+  const state = context.lensState.resources;
+  const params = new URLSearchParams();
+  if (state.search) params.set("q", state.search);
+  for (const [key, value] of Object.entries(state.filters)) if (value) params.set(key, value);
+  if (context.selection.organizationId !== context.scope.organizationId) {
+    params.set("organization", context.selection.organizationId);
+    params.set("provider", context.selection.organizationId);
+  }
+  return params.size ? `/resources?${params.toString()}` : "/resources";
+}
+
+export const participantSpatialContextPolicy = Object.freeze({
+  storesAuthorization: false,
+  storesPrivateCoordinates: false,
+  storesDomainRecords: false,
+  scopeIncludesParticipantMembershipOrganizationAndGeography: true,
+  serverRevalidatesSelectedObjectsAndActions: true,
+} as const);

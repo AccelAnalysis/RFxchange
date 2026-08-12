@@ -81,15 +81,27 @@
     "visibleLocation": "Emplacement visible",
     "serviceAreas": "Zones de service",
     "noServiceAreas": "Aucune zone de service publique n’est indiquée.",
-    "approximateLocation": "emplacement approximatif",
-    "localityOnlyLocation": "localité uniquement",
+    "nearLocation": "Près de {locality}",
+    "inLocality": "À {locality}",
     "capabilities": "Capacités",
     "capabilityEvidence": "Ce que cette organisation déclare pouvoir faire",
     "publicContact": "Contact public",
     "contactUnavailable": "Aucun contact public n’est indiqué",
     "website": "Visiter le site de l’organisation",
     "profileEvidenceTitle": "Limite de preuve du profil",
-    "profileEvidence": "Les informations du profil et des capacités sont fournies par l’organisation, sauf si elles sont identifiées séparément comme vérifiées. La découverte ne certifie ni la capacité, ni la performance, ni l’éligibilité."
+    "profileEvidence": "Les informations du profil et des capacités sont fournies par l’organisation, sauf si elles sont identifiées séparément comme vérifiées. La découverte ne certifie ni la capacité, ni la performance, ni l’éligibilité.",
+    "actions": "Actions de l’organisation"
+  },
+  "actions": {
+    "manage-profile": "Gérer le profil",
+    "view-resources": "Voir les ressources",
+    "start-referral": "Créer une recommandation",
+    "opportunities-rfx": "Opportunités/RFx"
+  },
+  "actionReasons": {
+    "self-only": "Seuls les membres de cette organisation peuvent gérer son profil.",
+    "not-an-official-provider": "Cette organisation ne publie aucun service de fournisseur officiel de ressources.",
+    "rfx-runtime-unavailable": "Opportunités/RFx n’est pas encore disponible."
   },
   "provenance": {
     "eyebrow": "Provenance des données",

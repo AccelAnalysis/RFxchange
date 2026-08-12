@@ -4,8 +4,10 @@ import { readFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
-const [state, component, styles, page, runtime, networkRuntime, roadmap, networkCatalogText] = await Promise.all([
+const [state, spatialState, spatialHook, component, styles, page, runtime, networkRuntime, roadmap, networkCatalogText] = await Promise.all([
   read("src/application/participant/existing-workspace-state.ts"),
+  read("src/application/participant/participant-spatial-context.ts"),
+  read("src/components/participant/useParticipantSpatialContext.ts"),
   read("src/components/participant/ExistingWorkspaceFoundation.tsx"),
   read("src/components/participant/ExistingWorkspaceFoundation.module.css"),
   read("app/geography/canvas/page.tsx"),
@@ -54,11 +56,17 @@ for (const requirement of [
   'workspaceOverlay={panelOpen ? "right" : "left"}',
   "ResponsiveEdgeSheet",
   "authorizedObjectIds",
-  "window.localStorage",
-  "UI state persistence is optional and never affects authority or domain state",
 ]) {
   assert.ok(component.includes(requirement), `Brand B6a workspace implementation is missing ${requirement}.`);
 }
+assert.ok(
+  component.includes("useParticipantSpatialContext") &&
+    spatialHook.includes("window.sessionStorage") &&
+    spatialState.includes("storesAuthorization: false") &&
+    spatialState.includes("storesPrivateCoordinates: false") &&
+    spatialState.includes("serverRevalidatesSelectedObjectsAndActions: true"),
+  "Brand B6a workspace continuity must use the canonical authority-safe participant spatial context.",
+);
 
 assert.equal(networkCatalog.home.eyebrow, "Organization home");
 assert.equal(networkCatalog.provenance.eyebrow, "Data provenance");

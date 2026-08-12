@@ -4,9 +4,10 @@ import { readFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
-const [contract, localityModel, mapboxCanvas, mapboxStyles, spatialScene, spatialStyles, roadmap] = await Promise.all([
+const [contract, localityModel, mapViewContract, mapboxCanvas, mapboxStyles, spatialScene, spatialStyles, roadmap] = await Promise.all([
   read("src/design/cartography.ts"),
   read("src/application/geography/controlled-locality-map.ts"),
+  read("src/application/geography/map-view.ts"),
   read("src/components/map/MapboxLocalityCanvas.tsx"),
   read("src/components/map/MapboxLocalityCanvas.module.css"),
   read("src/components/map/ExchangeSpatialScene.tsx"),
@@ -35,12 +36,12 @@ for (const renderer of [mapboxCanvas, spatialScene]) {
     "show3dObjects: true",
     "map.fitBounds",
     "map.easeTo",
-    'label: "2D"',
-    'label: "Perspective"',
-    'label: "3D"',
   ]) {
     assert.ok(renderer.includes(requirement), `Brand B3 renderer is missing ${requirement}.`);
   }
+}
+for (const label of ['label: "2D"', 'label: "Perspective"', 'label: "3D"']) {
+  assert.ok(mapViewContract.includes(label), `Brand B3 canonical map-view contract is missing ${label}.`);
 }
 
 assert.ok(
@@ -73,7 +74,7 @@ assert.equal(
 for (const preserved of [
   "HOME_MARKER_HALO_LAYER_ID",
   "HOME_MARKER_CORE_LAYER_ID",
-  "HOME_MARKER_RF_LAYER_ID",
+  "HOME_MARKER_IDENTITY_LAYER_ID",
   "HOME_MARKER_LABEL_LAYER_ID",
   "EXCHANGE_ORBIT_PERIOD_MS = 225_000",
   "LOCALITY_ORBIT_PITCH = 60",

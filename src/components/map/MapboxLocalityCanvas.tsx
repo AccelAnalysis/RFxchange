@@ -5,6 +5,12 @@ import mapboxgl from "mapbox-gl";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import type { ControlledLocalityZoomLevel } from "../../application/geography/geographic-projection";
+import {
+  PARTICIPANT_MAP_VIEW_OPTIONS,
+  isMapViewMode,
+  mapViewModeForPitch,
+  type MapViewMode,
+} from "../../application/geography/map-view";
 
 import styles from "./MapboxLocalityCanvas.module.css";
 
@@ -46,7 +52,6 @@ export type LocalityGeometry =
   | { readonly type: "Polygon"; readonly coordinates: number[][][] }
   | { readonly type: "MultiPolygon"; readonly coordinates: number[][][][] };
 
-type MapViewMode = "2d" | "perspective" | "3d";
 
 type PersistedCamera = Readonly<{
   longitude: number;
@@ -96,36 +101,6 @@ const EMPTY_FEATURE_COLLECTION = Object.freeze({
   type: "FeatureCollection" as const,
   features: [] as never[],
 });
-
-const VIEW_MODE_OPTIONS: readonly Readonly<{
-  id: MapViewMode;
-  label: string;
-  pitch: number;
-  resetBearing: boolean;
-  description: string;
-}>[] = [
-  {
-    id: "2d",
-    label: "2D",
-    pitch: 0,
-    resetBearing: true,
-    description: "Flat north-up operational map",
-  },
-  {
-    id: "perspective",
-    label: "Perspective",
-    pitch: 35,
-    resetBearing: false,
-    description: "Tilted spatial context",
-  },
-  {
-    id: "3d",
-    label: "3D",
-    pitch: 58,
-    resetBearing: false,
-    description: "Deep 3D spatial view",
-  },
-] as const;
 
 function copyRing(ring: readonly (readonly [number, number])[]): number[][] {
   return ring.map(([longitude, latitude]) => [longitude, latitude]);
@@ -208,16 +183,6 @@ function featureProperties(feature: unknown): Readonly<Record<string, unknown>> 
   const properties = (feature as { readonly properties?: unknown }).properties;
   if (!properties || typeof properties !== "object" || Array.isArray(properties)) return null;
   return properties as Readonly<Record<string, unknown>>;
-}
-
-function mapViewModeForPitch(pitch: number): MapViewMode {
-  if (pitch >= 48) return "3d";
-  if (pitch >= 15) return "perspective";
-  return "2d";
-}
-
-function isMapViewMode(value: unknown): value is MapViewMode {
-  return value === "2d" || value === "perspective" || value === "3d";
 }
 
 function readPersistedCamera(key: string): PersistedCamera | null {
@@ -469,7 +434,7 @@ export function MapboxLocalityCanvas({
   const selectViewMode = (nextMode: MapViewMode) => {
     const map = mapRef.current;
     if (!map) return;
-    const option = VIEW_MODE_OPTIONS.find((candidate) => candidate.id === nextMode);
+    const option = PARTICIPANT_MAP_VIEW_OPTIONS.find((candidate) => candidate.id === nextMode);
     if (!option) return;
 
     setViewMode(nextMode);
@@ -652,6 +617,7 @@ export function MapboxLocalityCanvas({
       bearing: persistedCamera?.bearing ?? model.camera.bearingDegrees,
       minZoom: 0,
       maxZoom: MAPBOX_MAX_ZOOM,
+      maxPitch: 85,
     });
     mapRef.current = map;
 
@@ -956,7 +922,7 @@ export function MapboxLocalityCanvas({
       </section>
 
       <div className={styles.viewModeControl} role="group" aria-label="Map view mode">
-        {VIEW_MODE_OPTIONS.map((option) => (
+        {PARTICIPANT_MAP_VIEW_OPTIONS.map((option) => (
           <button
             key={option.id}
             type="button"

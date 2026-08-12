@@ -15,6 +15,7 @@ import {
 } from "@/src/infrastructure/auth/participant-route-runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
 import { loadAuthorizedNetworkDiscovery } from "@/src/infrastructure/network-discovery/runtime";
+import { loadOptionalOfficialResourceProviderOrganizationIds } from "@/src/infrastructure/resource-network/discovery-runtime";
 
 interface GeographyCanvasPageProps {
   readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
@@ -80,6 +81,9 @@ async function resolveAuthenticatedMapProjection(
   if (access.kind === "restricted") {
     redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   }
+  if (access.state.lifecycleState !== "open-platform") {
+    redirect(access.state.controlledPlatformUrl ?? "/join");
+  }
 
   const mapProjection = await loadAuthorizedParticipantMapProjection(access);
   if (!mapProjection) {
@@ -96,6 +100,7 @@ export default async function GeographyCanvasPage({
 }: GeographyCanvasPageProps) {
   const params = searchParams ? await searchParams : {};
   const requestedOrganizationId = firstSearchParam(params.organizationId);
+  const selectedOrganizationId = firstSearchParam(params.selectedOrganization);
   const capability = firstSearchParam(params.q);
   const serviceGeographyId = firstSearchParam(params.serviceArea);
   const page = firstSearchParam(params.page);
@@ -110,7 +115,38 @@ export default async function GeographyCanvasPage({
     capability,
     serviceGeographyId,
     page,
+    focusedOrganizationId: selectedOrganizationId,
   });
+  let focusedOrganization = discovery.available && selectedOrganizationId
+    ? discovery.projection.organizations.find(
+        (organization) => String(organization.organizationId) === selectedOrganizationId,
+      ) ?? null
+    : null;
+  if (selectedOrganizationId && !focusedOrganization) {
+    const focusedDiscovery = await loadAuthorizedNetworkDiscovery({
+      access: authenticated.access,
+      mapProjection: authenticated.mapProjection,
+      focusedOrganizationId: selectedOrganizationId,
+    });
+    focusedOrganization = focusedDiscovery.available
+      ? focusedDiscovery.projection.organizations.find(
+          (organization) => String(organization.organizationId) === selectedOrganizationId,
+        ) ?? null
+      : null;
+  }
+  const providerStatusOrganizationIds = discovery.available
+    ? [
+        ...(focusedOrganization ? [String(focusedOrganization.organizationId)] : []),
+        ...discovery.projection.organizations.map((organization) => String(organization.organizationId)),
+      ].filter((organizationId, index, values) => values.indexOf(organizationId) === index)
+    : [];
+  const officialResourceProviderOrganizationIds = discovery.available
+    ? await loadOptionalOfficialResourceProviderOrganizationIds({
+      access: authenticated.access,
+      organizationIds: providerStatusOrganizationIds,
+      selectedGeographyId: String(authenticated.mapProjection.model.selectedGeography.id),
+    })
+    : [];
 
   return (
     <>
@@ -119,8 +155,16 @@ export default async function GeographyCanvasPage({
         model={authenticated.mapProjection.model}
         homeMarker={authenticated.mapProjection.homeMarker}
         organizationId={authenticated.mapProjection.organizationId}
+        spatialScope={{
+          participantId: String(authenticated.access.context.user.id),
+          membershipId: String(authenticated.access.membership.id),
+          organizationId: authenticated.mapProjection.organizationId,
+          geographyId: String(authenticated.mapProjection.model.selectedGeography.id),
+        }}
         discovery={discovery.available ? discovery.projection : null}
+        focusedOrganization={focusedOrganization}
         serviceAreaOptions={discovery.available ? discovery.serviceAreaOptions : []}
+        officialResourceProviderOrganizationIds={officialResourceProviderOrganizationIds}
       />
     </>
   );

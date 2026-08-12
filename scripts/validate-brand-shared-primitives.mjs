@@ -14,8 +14,6 @@ const [
   participantNavigationCss,
   persistentShell,
   persistentShellCss,
-  participantLoading,
-  participantLoadingCss,
   participantRegistry,
   participantB2,
   roadmap,
@@ -29,8 +27,6 @@ const [
   read("src/components/participant/ParticipantTopNavigation.module.css"),
   read("src/components/participant/PersistentParticipantShell.tsx"),
   read("src/components/participant/PersistentParticipantShell.module.css"),
-  read("src/components/participant/ParticipantContentLoading.tsx"),
-  read("src/components/participant/ParticipantContentLoading.module.css"),
   read("src/application/participant/participant-lens-registry.ts"),
   read("src/components/participant/ParticipantWorkspaceB2.module.css"),
   read("docs/brand/BRAND_IMPLEMENTATION_ROADMAP.md"),
@@ -87,7 +83,6 @@ const participantShellCss = [
   participantB2,
   participantNavigationCss,
   persistentShellCss,
-  participantLoadingCss,
 ].join("\n");
 assert.equal(
   /#(?:0b0b0d|f7f3ea|252932|d6a23a|8a6418|2e5eaa|3b7b57)\b/i.test(`${primitiveCss}\n${participantShellCss}`),
@@ -181,16 +176,16 @@ assert.ok(
   "Account utilities must remain separate, keyboard-operable, and server-authoritative for Administration.",
 );
 assert.ok(
-  participantLoading.includes('role="status"') &&
-    participantLoading.includes('aria-live="polite"') &&
-    participantLoading.includes('aria-busy="true"') &&
-    participantLoading.includes("data-participant-content-loading"),
-  "Scoped participant loading must preserve the shared accessibility state contract below the shell.",
+  participantNavigation.includes('role="status"') &&
+    participantNavigation.includes('aria-live="polite"') &&
+    participantNavigation.includes('data-link-pending="true"') &&
+    participantNavigation.includes("useLinkStatus"),
+  "Warm participant navigation must expose immediate accessible pending state inside the persistent shell.",
 );
 assert.ok(
-  participantNavigationCss.includes("@media (prefers-reduced-motion: reduce)") &&
+  !participantNavigationCss.includes("animation:") &&
     participantNavigationCss.includes("@media (max-width: 390px)"),
-  "The persistent participant shell must preserve reduced-motion and 390px responsive acceptance.",
+  "The persistent participant shell must keep transition feedback nonanimated and preserve 390px responsive acceptance.",
 );
 assert.ok(
   roadmap.includes("Brand Gate B2 — Shared component primitives") &&
@@ -199,5 +194,5 @@ assert.ok(
 );
 
 console.log(
-  "Brand Gate B2 shared primitives and persistent participant-shell composition validated with semantic styling, keyboard focus, scoped loading, reduced motion, and authority-gated future objects.",
+  "Brand Gate B2 shared primitives and persistent participant-shell composition validated with semantic styling, keyboard focus, warm-navigation pending state, reduced motion, and authority-gated future objects.",
 );

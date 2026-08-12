@@ -11,6 +11,12 @@ import {
 import mapboxgl from "mapbox-gl";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
+import {
+  PARTICIPANT_MAP_VIEW_OPTIONS,
+  mapViewModeForPitch,
+  type MapViewMode,
+  type ParticipantMapCamera,
+} from "../../application/geography/map-view";
 import type { SyntheticOrientationMapOverlay } from "../../application/orientation/synthetic-scenario";
 import {
   MAP_ROTATION_PREFERENCE_EVENT,
@@ -21,7 +27,6 @@ import styles from "./ExchangeSpatialScene.module.css";
 
 export type ExchangeSpatialSceneMode = "regional" | "locality" | "organization";
 export type ExchangeContinuousMotion = "instructional" | "milestone";
-type MapViewMode = "2d" | "perspective" | "3d";
 
 export interface ExchangeHomeMarker {
   readonly id: string;
@@ -32,13 +37,36 @@ export interface ExchangeHomeMarker {
 
 export type ExchangeOrganizationMarker = ExchangeHomeMarker;
 
+export type ExchangeSpatialGeometry =
+  | { readonly type: "Polygon"; readonly coordinates: number[][][] }
+  | { readonly type: "MultiPolygon"; readonly coordinates: number[][][][] };
+
+export interface ExchangeRelationshipPath {
+  readonly id: string;
+  readonly from: readonly [number, number];
+  readonly to: readonly [number, number];
+  readonly label: string;
+  readonly status: "sent" | "accepted" | "contacted" | "closed";
+}
+
+export interface ExchangeServiceField {
+  readonly id: string;
+  readonly label: string;
+  readonly geometry: ExchangeSpatialGeometry;
+  readonly selected?: boolean;
+}
+
 export interface ExchangeSpatialSceneProps {
   readonly model: ControlledLocalityMapModel;
   readonly mode: ExchangeSpatialSceneMode;
   readonly marker?: ExchangeHomeMarker | null;
   readonly organizationMarkers?: readonly ExchangeOrganizationMarker[];
+  readonly relationshipPaths?: readonly ExchangeRelationshipPath[];
+  readonly serviceFields?: readonly ExchangeServiceField[];
   readonly focusedMarkerId?: string | null;
   readonly onOrganizationMarkerSelect?: (markerId: string) => void;
+  readonly initialCamera?: ParticipantMapCamera | null;
+  readonly onCameraChange?: (camera: ParticipantMapCamera) => void;
   readonly interactive?: boolean;
   readonly activationOverlay?: boolean;
   readonly workspaceOverlay?: "left" | "right" | null;
@@ -48,9 +76,7 @@ export interface ExchangeSpatialSceneProps {
   readonly className?: string;
 }
 
-type LocalityGeometry =
-  | { readonly type: "Polygon"; readonly coordinates: number[][][] }
-  | { readonly type: "MultiPolygon"; readonly coordinates: number[][][][] };
+type LocalityGeometry = ExchangeSpatialGeometry;
 
 type MapSearchResult = Readonly<{
   id: string;
@@ -68,14 +94,18 @@ const LOCALITY_FILL_LAYER_ID = "rfx-spatial-scene-locality-fill";
 const LOCALITY_OUTLINE_CONTRAST_LAYER_ID = "rfx-spatial-scene-locality-outline-contrast";
 const LOCALITY_OUTLINE_LAYER_ID = "rfx-spatial-scene-locality-outline";
 const NETWORK_MARKER_SOURCE_ID = "rfx-spatial-scene-network-organizations";
+const NETWORK_SELECTED_MARKER_SOURCE_ID = "rfx-spatial-scene-selected-network-organization";
+const NETWORK_CLUSTER_CORE_LAYER_ID = "rfx-spatial-scene-network-cluster-core";
+const NETWORK_CLUSTER_COUNT_LAYER_ID = "rfx-spatial-scene-network-cluster-count";
 const NETWORK_MARKER_HALO_LAYER_ID = "rfx-spatial-scene-network-organization-halo";
 const NETWORK_MARKER_CORE_LAYER_ID = "rfx-spatial-scene-network-organization-core";
-const NETWORK_MARKER_RF_LAYER_ID = "rfx-spatial-scene-network-organization-rf";
+const NETWORK_SELECTED_MARKER_CORE_LAYER_ID = "rfx-spatial-scene-selected-network-organization-core";
+const NETWORK_MARKER_IDENTITY_LAYER_ID = "rfx-spatial-scene-network-organization-identity";
 const NETWORK_MARKER_LABEL_LAYER_ID = "rfx-spatial-scene-network-organization-label";
 const HOME_MARKER_SOURCE_ID = "rfx-spatial-scene-home-marker";
 const HOME_MARKER_HALO_LAYER_ID = "rfx-spatial-scene-home-marker-halo";
 const HOME_MARKER_CORE_LAYER_ID = "rfx-spatial-scene-home-marker-core";
-const HOME_MARKER_RF_LAYER_ID = "rfx-spatial-scene-home-marker-rf";
+const HOME_MARKER_IDENTITY_LAYER_ID = "rfx-spatial-scene-home-marker-identity";
 const HOME_MARKER_LABEL_LAYER_ID = "rfx-spatial-scene-home-marker-label";
 const SEARCH_AREA_SOURCE_ID = "rfx-spatial-scene-search-area";
 const SEARCH_AREA_FILL_LAYER_ID = "rfx-spatial-scene-search-fill";
@@ -87,6 +117,11 @@ const TUTORIAL_NODE_HALO_LAYER_ID = "rfx-spatial-scene-tutorial-node-halo";
 const TUTORIAL_NODE_CORE_LAYER_ID = "rfx-spatial-scene-tutorial-node-core";
 const TUTORIAL_NODE_GLYPH_LAYER_ID = "rfx-spatial-scene-tutorial-node-glyph";
 const TUTORIAL_NODE_LABEL_LAYER_ID = "rfx-spatial-scene-tutorial-node-label";
+const RELATIONSHIP_PATH_SOURCE_ID = "rfx-spatial-scene-relationship-paths";
+const RELATIONSHIP_PATH_LAYER_ID = "rfx-spatial-scene-relationship-paths-line";
+const SERVICE_FIELD_SOURCE_ID = "rfx-spatial-scene-service-fields";
+const SERVICE_FIELD_FILL_LAYER_ID = "rfx-spatial-scene-service-fields-fill";
+const SERVICE_FIELD_LINE_LAYER_ID = "rfx-spatial-scene-service-fields-line";
 
 export const EXCHANGE_ORBIT_PERIOD_MS = 225_000;
 export const LOCALITY_ORBIT_PITCH = 60;
@@ -98,17 +133,6 @@ const HAMPTON_ROADS_BOUNDS: mapboxgl.LngLatBoundsLike = [
   [-76.515, 36.615],
   [-75.86, 37.085],
 ];
-
-const VIEW_MODE_OPTIONS: readonly Readonly<{
-  id: MapViewMode;
-  label: string;
-  pitch: number;
-  resetBearing: boolean;
-}>[] = [
-  { id: "2d", label: "2D", pitch: 0, resetBearing: true },
-  { id: "perspective", label: "Perspective", pitch: 35, resetBearing: false },
-  { id: "3d", label: "3D", pitch: ORGANIZATION_ORBIT_PITCH, resetBearing: false },
-] as const;
 
 const EMPTY_FEATURE_COLLECTION = Object.freeze({
   type: "FeatureCollection" as const,
@@ -215,6 +239,7 @@ function markerGeoJson(marker?: ExchangeHomeMarker | null) {
         properties: {
           id: marker.id,
           label: marker.label,
+          identity: organizationInitials(marker.label),
           accessibleLocationLabel: marker.accessibleLocationLabel ?? "RFxchange organization marker",
         },
         geometry: {
@@ -237,6 +262,7 @@ function organizationMarkerGeoJson(
       properties: {
         id: marker.id,
         label: marker.label,
+        identity: organizationInitials(marker.label),
         selected: marker.id === focusedMarkerId ? 1 : 0,
       },
       geometry: {
@@ -245,6 +271,38 @@ function organizationMarkerGeoJson(
       },
     })),
   };
+}
+
+function relationshipPathGeoJson(paths: readonly ExchangeRelationshipPath[]) {
+  return {
+    type: "FeatureCollection" as const,
+    features: paths.map((path) => ({
+      type: "Feature" as const,
+      properties: { id: path.id, label: path.label, status: path.status },
+      geometry: { type: "LineString" as const, coordinates: [[...path.from], [...path.to]] },
+    })),
+  };
+}
+
+function serviceFieldGeoJson(fields: readonly ExchangeServiceField[]) {
+  return {
+    type: "FeatureCollection" as const,
+    features: fields.map((field) => ({
+      type: "Feature" as const,
+      properties: { id: field.id, label: field.label, selected: field.selected === true },
+      geometry: field.geometry,
+    })),
+  };
+}
+
+function organizationInitials(label: string): string {
+  return label
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toLocaleUpperCase("en-US"))
+    .join("") || "•";
 }
 
 function tutorialNodeGeoJson(overlay?: SyntheticOrientationMapOverlay | null) {
@@ -404,12 +462,6 @@ function searchZoom(featureType: string): number {
   }
 }
 
-function mapViewModeForPitch(pitch: number): MapViewMode {
-  if (pitch >= 48) return "3d";
-  if (pitch >= 15) return "perspective";
-  return "2d";
-}
-
 function cameraPadding(activationOverlay: boolean, workspaceOverlay: "left" | "right" | null) {
   const overlay = workspaceOverlay ?? (activationOverlay ? "left" : null);
   if (!overlay) {
@@ -424,13 +476,27 @@ function cameraPadding(activationOverlay: boolean, workspaceOverlay: "left" | "r
     : { top: 88, right: panelSpace, bottom: 62, left: 72 };
 }
 
+function renderedMapPadding(map: mapboxgl.Map) {
+  const padding = map.getPadding();
+  return {
+    top: padding.top ?? 0,
+    right: padding.right ?? 0,
+    bottom: padding.bottom ?? 0,
+    left: padding.left ?? 0,
+  };
+}
+
 export function ExchangeSpatialScene({
   model,
   mode,
   marker = null,
   organizationMarkers = [],
+  relationshipPaths = [],
+  serviceFields = [],
   focusedMarkerId = null,
   onOrganizationMarkerSelect,
+  initialCamera = null,
+  onCameraChange,
   interactive = false,
   activationOverlay = false,
   workspaceOverlay = null,
@@ -442,31 +508,58 @@ export function ExchangeSpatialScene({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const paddingRepairFrameRef = useRef<number | null>(null);
   const orbitStartRef = useRef(0);
   const orbitBearingRef = useRef(0);
   const orbitTargetRef = useRef<readonly [number, number] | null>(null);
   const mapLoadedRef = useRef(false);
+  const sceneInitializationStartedRef = useRef(false);
   const manuallyPausedRef = useRef(false);
   const rotationEnabledRef = useRef(true);
   const reducedMotionRef = useRef(false);
   const modeRef = useRef(mode);
   const modelRef = useRef(model);
   const markerRef = useRef(marker);
-  const organizationMarkersRef = useRef(organizationMarkers);
-  const focusedMarkerIdRef = useRef(focusedMarkerId);
   const onOrganizationMarkerSelectRef = useRef(onOrganizationMarkerSelect);
+  const initialCameraRef = useRef(initialCamera);
+  const onCameraChangeRef = useRef(onCameraChange);
   const activationOverlayRef = useRef(activationOverlay);
   const continuousMotionRef = useRef(continuousMotion);
   const workspaceOverlayRef = useRef(workspaceOverlay);
+  const appliedOverlayRef = useRef({ activationOverlay, workspaceOverlay });
   const homeGeoJsonRef = useRef(localityGeoJson(model));
   const homeMaskGeoJsonRef = useRef(localityMaskGeoJson(model));
   const homeMarkerGeoJsonRef = useRef(markerGeoJson(marker));
-  const networkMarkerGeoJsonRef = useRef(organizationMarkerGeoJson(organizationMarkers, focusedMarkerId));
+  const networkMarkerGeoJsonRef = useRef(organizationMarkerGeoJson(
+    organizationMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
+    null,
+  ));
+  const selectedNetworkMarkerGeoJsonRef = useRef(organizationMarkerGeoJson(
+    organizationMarkers.filter((candidate) => candidate.id === focusedMarkerId),
+    focusedMarkerId,
+  ));
+  const relationshipPathGeoJsonRef = useRef(relationshipPathGeoJson(relationshipPaths));
+  const serviceFieldGeoJsonRef = useRef(serviceFieldGeoJson(serviceFields));
   const tutorialNodeGeoJsonRef = useRef(tutorialNodeGeoJson(tutorialOverlay));
   const tutorialPathGeoJsonRef = useRef(tutorialPathGeoJson(tutorialOverlay));
   const searchMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
   const [viewMode, setViewMode] = useState<MapViewMode>("3d");
+  const [settledPitch, setSettledPitch] = useState(ORGANIZATION_ORBIT_PITCH);
+  const [settledCamera, setSettledCamera] = useState<ParticipantMapCamera>(() => initialCamera ?? Object.freeze({
+    longitude: marker?.coordinate[0] ?? model.camera.center.longitude,
+    latitude: marker?.coordinate[1] ?? model.camera.center.latitude,
+    zoom: ORGANIZATION_ORBIT_ZOOM,
+    pitch: ORGANIZATION_ORBIT_PITCH,
+    bearing: 0,
+    viewMode: "3d",
+  }));
+  const [renderedClusterCount, setRenderedClusterCount] = useState(0);
+  const [renderedClusterPoint, setRenderedClusterPoint] = useState("");
+  const [renderedSelectedMarkerCount, setRenderedSelectedMarkerCount] = useState(0);
+  const [settledPadding, setSettledPadding] = useState({ top: 0, right: 0, bottom: 0, left: 0 });
+  const [mapReady, setMapReady] = useState(false);
+  const [cameraInitialization, setCameraInitialization] = useState<"pending" | "restored" | "organization" | "locality">("pending");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<readonly MapSearchResult[]>([]);
   const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "error">("idle");
@@ -477,18 +570,30 @@ export function ExchangeSpatialScene({
   const homeMaskGeoJson = useMemo(() => localityMaskGeoJson(model), [model]);
   const homeMarkerGeoJson = useMemo(() => markerGeoJson(marker), [marker]);
   const networkMarkersGeoJson = useMemo(
-    () => organizationMarkerGeoJson(organizationMarkers, focusedMarkerId),
+    () => organizationMarkerGeoJson(
+      organizationMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
+      null,
+    ),
     [focusedMarkerId, organizationMarkers],
   );
+  const selectedNetworkMarkerGeoJson = useMemo(
+    () => organizationMarkerGeoJson(
+      organizationMarkers.filter((candidate) => candidate.id === focusedMarkerId),
+      focusedMarkerId,
+    ),
+    [focusedMarkerId, organizationMarkers],
+  );
+  const relationshipPathsGeoJson = useMemo(() => relationshipPathGeoJson(relationshipPaths), [relationshipPaths]);
+  const serviceFieldsGeoJson = useMemo(() => serviceFieldGeoJson(serviceFields), [serviceFields]);
   const tutorialNodes = useMemo(() => tutorialNodeGeoJson(tutorialOverlay), [tutorialOverlay]);
   const tutorialPaths = useMemo(() => tutorialPathGeoJson(tutorialOverlay), [tutorialOverlay]);
 
   modeRef.current = mode;
   modelRef.current = model;
   markerRef.current = marker;
-  organizationMarkersRef.current = organizationMarkers;
-  focusedMarkerIdRef.current = focusedMarkerId;
+  if (!sceneInitializationStartedRef.current) initialCameraRef.current = initialCamera;
   onOrganizationMarkerSelectRef.current = onOrganizationMarkerSelect;
+  onCameraChangeRef.current = onCameraChange;
   activationOverlayRef.current = activationOverlay;
   continuousMotionRef.current = continuousMotion;
   workspaceOverlayRef.current = workspaceOverlay;
@@ -496,6 +601,9 @@ export function ExchangeSpatialScene({
   homeMaskGeoJsonRef.current = homeMaskGeoJson;
   homeMarkerGeoJsonRef.current = homeMarkerGeoJson;
   networkMarkerGeoJsonRef.current = networkMarkersGeoJson;
+  selectedNetworkMarkerGeoJsonRef.current = selectedNetworkMarkerGeoJson;
+  relationshipPathGeoJsonRef.current = relationshipPathsGeoJson;
+  serviceFieldGeoJsonRef.current = serviceFieldsGeoJson;
   tutorialNodeGeoJsonRef.current = tutorialNodes;
   tutorialPathGeoJsonRef.current = tutorialPaths;
 
@@ -504,6 +612,33 @@ export function ExchangeSpatialScene({
       window.cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
+  }, []);
+
+  const repairGovernedPaddingAfterMovement = useCallback(() => {
+    if (paddingRepairFrameRef.current !== null) {
+      window.cancelAnimationFrame(paddingRepairFrameRef.current);
+    }
+    const repair = () => {
+      const map = mapRef.current;
+      if (!map || !mapLoadedRef.current) {
+        paddingRepairFrameRef.current = null;
+        return;
+      }
+      if (map.isMoving()) {
+        paddingRepairFrameRef.current = window.requestAnimationFrame(repair);
+        return;
+      }
+      paddingRepairFrameRef.current = null;
+      const expectedPadding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current);
+      const actualPadding = renderedMapPadding(map);
+      const paddingIsSettled = (["top", "right", "bottom", "left"] as const).every(
+        (side) => Math.abs(actualPadding[side] - expectedPadding[side]) < 0.5,
+      );
+      if (paddingIsSettled) return;
+      map.jumpTo({ padding: expectedPadding });
+      setSettledPadding(renderedMapPadding(map));
+    };
+    paddingRepairFrameRef.current = window.requestAnimationFrame(repair);
   }, []);
 
   const pauseForInteraction = useCallback(() => {
@@ -574,17 +709,27 @@ export function ExchangeSpatialScene({
     manuallyPausedRef.current = false;
     const padding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current);
     const activeMode = modeRef.current;
-    const focusedMarker = focusedMarkerIdRef.current
-      ? markerRef.current?.id === focusedMarkerIdRef.current
-        ? markerRef.current
-        : organizationMarkersRef.current.find(
-            (candidate) => candidate.id === focusedMarkerIdRef.current,
-          ) ?? null
-      : null;
-    const activeMarker = focusedMarker ?? markerRef.current;
+    const activeMarker = markerRef.current;
     setLocalityLayerVisibility(activeMode !== "regional");
 
+    const persistedCamera = initialCameraRef.current;
+    if (persistedCamera) {
+      setCameraInitialization("restored");
+      orbitTargetRef.current = [persistedCamera.longitude, persistedCamera.latitude];
+      map.jumpTo({
+        center: [persistedCamera.longitude, persistedCamera.latitude],
+        zoom: persistedCamera.zoom,
+        pitch: persistedCamera.pitch,
+        bearing: persistedCamera.bearing,
+        padding,
+      });
+      setSettledPadding(renderedMapPadding(map));
+      setViewMode(mapViewModeForPitch(map.getPitch()));
+      return;
+    }
+
     if (activeMode === "organization" && activeMarker) {
+      setCameraInitialization("organization");
       orbitTargetRef.current = activeMarker.coordinate;
       setViewMode("3d");
       map.flyTo({
@@ -604,6 +749,7 @@ export function ExchangeSpatialScene({
       ? HAMPTON_ROADS_BOUNDS
       : localityBounds(modelRef.current);
     setViewMode("3d");
+    setCameraInitialization("locality");
     map.fitBounds(bounds, {
       padding,
       pitch: LOCALITY_ORBIT_PITCH,
@@ -636,10 +782,9 @@ export function ExchangeSpatialScene({
 
   const selectViewMode = useCallback((nextMode: MapViewMode) => {
     const map = mapRef.current;
-    const option = VIEW_MODE_OPTIONS.find((candidate) => candidate.id === nextMode);
+    const option = PARTICIPANT_MAP_VIEW_OPTIONS.find((candidate) => candidate.id === nextMode);
     if (!map || !option) return;
     pauseForInteraction();
-    setViewMode(nextMode);
     map.easeTo({
       pitch: option.pitch,
       bearing: option.resetBearing ? 0 : map.getBearing(),
@@ -771,10 +916,33 @@ export function ExchangeSpatialScene({
       bearing: -24,
       minZoom: 0,
       maxZoom: 24,
+      maxPitch: 85,
       interactive,
       attributionControl: true,
     });
     mapRef.current = map;
+    const captureRenderedClusters = () => {
+      if (!map.getLayer(NETWORK_CLUSTER_CORE_LAYER_ID)) return;
+      const renderedClusters = map.queryRenderedFeatures({ layers: [NETWORK_CLUSTER_CORE_LAYER_ID] });
+      const clusterIds = new Set(renderedClusters
+        .map((feature) => feature.properties?.cluster_id)
+        .filter((clusterId): clusterId is number => typeof clusterId === "number"));
+      setRenderedClusterCount(clusterIds.size);
+      const firstCluster = renderedClusters[0]?.toJSON();
+      const clusterCoordinate = validCoordinatePair(firstCluster?.geometry.type === "Point"
+        ? firstCluster.geometry.coordinates
+        : null);
+      if (clusterCoordinate) {
+        const projected = map.project([clusterCoordinate[0], clusterCoordinate[1]]);
+        setRenderedClusterPoint(`${projected.x.toFixed(1)},${projected.y.toFixed(1)}`);
+      } else {
+        setRenderedClusterPoint("");
+      }
+      const selectedMarkers = map.getLayer(NETWORK_SELECTED_MARKER_CORE_LAYER_ID)
+        ? map.queryRenderedFeatures({ layers: [NETWORK_SELECTED_MARKER_CORE_LAYER_ID] })
+        : [];
+      setRenderedSelectedMarkerCount(selectedMarkers.length);
+    };
 
     if (interactive) {
       map.addControl(
@@ -792,6 +960,7 @@ export function ExchangeSpatialScene({
 
     map.on("load", () => {
       mapLoadedRef.current = true;
+      setMapReady(true);
       map.addSource(LOCALITY_MASK_SOURCE_ID, { type: "geojson", data: homeMaskGeoJsonRef.current });
       map.addLayer({
         id: LOCALITY_MASK_LAYER_ID,
@@ -854,6 +1023,35 @@ export function ExchangeSpatialScene({
           "line-width": 2.5,
           "line-dasharray": [1.5, 1.5],
         },
+      });
+
+      map.addSource(SERVICE_FIELD_SOURCE_ID, { type: "geojson", data: serviceFieldGeoJsonRef.current });
+      map.addLayer({
+        id: SERVICE_FIELD_FILL_LAYER_ID,
+        type: "fill",
+        source: SERVICE_FIELD_SOURCE_ID,
+        paint: {
+          "fill-color": ["case", ["==", ["get", "selected"], true], "#2e5eaa", "#4f718f"],
+          "fill-opacity": ["case", ["==", ["get", "selected"], true], 0.16, 0.07],
+        },
+      });
+      map.addLayer({
+        id: SERVICE_FIELD_LINE_LAYER_ID,
+        type: "line",
+        source: SERVICE_FIELD_SOURCE_ID,
+        paint: {
+          "line-color": ["case", ["==", ["get", "selected"], true], "#2e5eaa", "#4f718f"],
+          "line-opacity": 0.75,
+          "line-width": ["case", ["==", ["get", "selected"], true], 2.5, 1.25],
+          "line-dasharray": [2, 1.5],
+        },
+      });
+      map.addSource(RELATIONSHIP_PATH_SOURCE_ID, { type: "geojson", data: relationshipPathGeoJsonRef.current });
+      map.addLayer({
+        id: RELATIONSHIP_PATH_LAYER_ID,
+        type: "line",
+        source: RELATIONSHIP_PATH_SOURCE_ID,
+        paint: { "line-color": "#b98727", "line-opacity": 0.9, "line-width": 3, "line-dasharray": [2, 1.4] },
       });
 
       map.addSource(TUTORIAL_PATH_SOURCE_ID, { type: "geojson", data: tutorialPathGeoJsonRef.current });
@@ -921,35 +1119,81 @@ export function ExchangeSpatialScene({
         },
       });
 
-      map.addSource(NETWORK_MARKER_SOURCE_ID, { type: "geojson", data: networkMarkerGeoJsonRef.current });
+      map.addSource(NETWORK_MARKER_SOURCE_ID, {
+        type: "geojson",
+        data: networkMarkerGeoJsonRef.current,
+        cluster: true,
+        clusterMaxZoom: 10,
+        clusterRadius: 48,
+      });
+      map.addLayer({
+        id: NETWORK_CLUSTER_CORE_LAYER_ID,
+        type: "circle",
+        source: NETWORK_MARKER_SOURCE_ID,
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-radius": ["step", ["get", "point_count"], 14, 10, 18, 40, 22],
+          "circle-color": "#252932",
+          "circle-opacity": 0.92,
+        },
+      });
+      map.addLayer({
+        id: NETWORK_CLUSTER_COUNT_LAYER_ID,
+        type: "symbol",
+        source: NETWORK_MARKER_SOURCE_ID,
+        filter: ["has", "point_count"],
+        layout: {
+          "text-field": ["get", "point_count_abbreviated"],
+          "text-size": 11,
+          "text-allow-overlap": true,
+          "text-ignore-placement": true,
+        },
+        paint: { "text-color": "#f7f3ea" },
+      });
+      map.addSource(NETWORK_SELECTED_MARKER_SOURCE_ID, {
+        type: "geojson",
+        data: selectedNetworkMarkerGeoJsonRef.current,
+      });
       map.addLayer({
         id: NETWORK_MARKER_HALO_LAYER_ID,
         type: "circle",
-        source: NETWORK_MARKER_SOURCE_ID,
+        source: NETWORK_SELECTED_MARKER_SOURCE_ID,
         paint: {
-          "circle-radius": ["case", ["==", ["get", "selected"], 1], 18, 0],
+          "circle-radius": 18,
           "circle-color": "rgba(214,162,58,0.18)",
           "circle-stroke-color": "rgba(214,162,58,0.5)",
-          "circle-stroke-width": ["case", ["==", ["get", "selected"], 1], 2, 0],
+          "circle-stroke-width": 2,
         },
       });
       map.addLayer({
         id: NETWORK_MARKER_CORE_LAYER_ID,
         type: "circle",
         source: NETWORK_MARKER_SOURCE_ID,
+        filter: ["!", ["has", "point_count"]],
         paint: {
-          "circle-radius": ["case", ["==", ["get", "selected"], 1], 12, 10],
+          "circle-radius": 6,
           "circle-color": "#252932",
-          "circle-stroke-color": "#d6a23a",
-          "circle-stroke-width": ["case", ["==", ["get", "selected"], 1], 3, 2],
+          "circle-stroke-color": "rgba(0,0,0,0)",
+          "circle-stroke-width": 0,
         },
       });
       map.addLayer({
-        id: NETWORK_MARKER_RF_LAYER_ID,
+        id: NETWORK_SELECTED_MARKER_CORE_LAYER_ID,
+        type: "circle",
+        source: NETWORK_SELECTED_MARKER_SOURCE_ID,
+        paint: {
+          "circle-radius": 12,
+          "circle-color": "#252932",
+          "circle-stroke-color": "#d6a23a",
+          "circle-stroke-width": 3,
+        },
+      });
+      map.addLayer({
+        id: NETWORK_MARKER_IDENTITY_LAYER_ID,
         type: "symbol",
-        source: NETWORK_MARKER_SOURCE_ID,
+        source: NETWORK_SELECTED_MARKER_SOURCE_ID,
         layout: {
-          "text-field": "RF",
+          "text-field": ["get", "identity"],
           "text-size": 10,
           "text-allow-overlap": true,
           "text-ignore-placement": true,
@@ -961,8 +1205,8 @@ export function ExchangeSpatialScene({
       map.addLayer({
         id: NETWORK_MARKER_LABEL_LAYER_ID,
         type: "symbol",
-        source: NETWORK_MARKER_SOURCE_ID,
-        minzoom: 10,
+        source: NETWORK_SELECTED_MARKER_SOURCE_ID,
+        minzoom: 8,
         layout: {
           "text-field": ["get", "label"],
           "text-size": 12,
@@ -1003,11 +1247,11 @@ export function ExchangeSpatialScene({
         },
       });
       map.addLayer({
-        id: HOME_MARKER_RF_LAYER_ID,
+        id: HOME_MARKER_IDENTITY_LAYER_ID,
         type: "symbol",
         source: HOME_MARKER_SOURCE_ID,
         layout: {
-          "text-field": "RF",
+          "text-field": ["get", "identity"],
           "text-size": 12,
           "text-allow-overlap": true,
           "text-ignore-placement": true,
@@ -1053,7 +1297,33 @@ export function ExchangeSpatialScene({
         map.on("mouseleave", NETWORK_MARKER_CORE_LAYER_ID, () => {
           map.getCanvas().style.cursor = "";
         });
-        map.on("click", NETWORK_MARKER_CORE_LAYER_ID, (event) => {
+        map.on("mouseenter", NETWORK_SELECTED_MARKER_CORE_LAYER_ID, () => {
+          map.getCanvas().style.cursor = "pointer";
+        });
+        map.on("mouseleave", NETWORK_SELECTED_MARKER_CORE_LAYER_ID, () => {
+          map.getCanvas().style.cursor = "";
+        });
+        map.on("mouseenter", NETWORK_CLUSTER_CORE_LAYER_ID, () => {
+          map.getCanvas().style.cursor = "pointer";
+        });
+        map.on("mouseleave", NETWORK_CLUSTER_CORE_LAYER_ID, () => {
+          map.getCanvas().style.cursor = "";
+        });
+        map.on("click", NETWORK_CLUSTER_CORE_LAYER_ID, (event) => {
+          const feature = event.features?.[0] as unknown as
+            | { readonly properties?: Readonly<Record<string, unknown>>; readonly geometry?: { readonly coordinates?: unknown } }
+            | undefined;
+          const clusterId = feature?.properties?.cluster_id;
+          const coordinate = validCoordinatePair(feature?.geometry?.coordinates);
+          const source = map.getSource(NETWORK_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+          if (typeof clusterId !== "number" || !coordinate || !source) return;
+          source.getClusterExpansionZoom(clusterId, (error, zoom) => {
+            if (error || typeof zoom !== "number") return;
+            pauseForInteraction();
+            map.easeTo({ center: [coordinate[0], coordinate[1]], zoom, duration: reducedMotionRef.current ? 0 : 650 });
+          });
+        });
+        const selectNetworkMarker = (event: mapboxgl.MapLayerMouseEvent) => {
           const feature = event.features?.[0] as unknown as
             | { readonly properties?: Readonly<Record<string, unknown>> }
             | undefined;
@@ -1061,43 +1331,63 @@ export function ExchangeSpatialScene({
           if (typeof markerId === "string") {
             onOrganizationMarkerSelectRef.current?.(markerId);
           }
-        });
+        };
+        map.on("click", NETWORK_MARKER_CORE_LAYER_ID, selectNetworkMarker);
+        map.on("click", NETWORK_SELECTED_MARKER_CORE_LAYER_ID, selectNetworkMarker);
         map.on("click", HOME_MARKER_CORE_LAYER_ID, (event) => {
-          const feature = event.features?.[0] as unknown as
-            | { readonly properties?: Readonly<Record<string, unknown>> }
-            | undefined;
-          const properties = feature?.properties ?? {};
-          const popup = document.createElement("div");
-          const title = document.createElement("strong");
-          title.textContent = String(properties.label ?? markerRef.current?.label ?? "Your organization");
-          const detail = document.createElement("div");
-          detail.textContent = String(
-            properties.accessibleLocationLabel ??
-              markerRef.current?.accessibleLocationLabel ??
-              "RFxchange organization marker",
-          );
-          popup.append(title, detail);
-          new mapboxgl.Popup({ offset: 24 })
-            .setLngLat(event.lngLat)
-            .setDOMContent(popup)
-            .addTo(map);
+          if (map.queryRenderedFeatures(event.point, {
+            layers: [
+              NETWORK_CLUSTER_CORE_LAYER_ID,
+              NETWORK_MARKER_CORE_LAYER_ID,
+              NETWORK_SELECTED_MARKER_CORE_LAYER_ID,
+            ],
+          }).length > 0) return;
+          const markerId = markerRef.current?.id;
+          if (markerId) onOrganizationMarkerSelectRef.current?.(markerId);
         });
       }
 
+      sceneInitializationStartedRef.current = true;
       applyScene();
     });
 
-    map.on("moveend", () => setViewMode(mapViewModeForPitch(map.getPitch())));
+    map.on("moveend", () => {
+      if (!sceneInitializationStartedRef.current) return;
+      const center = map.getCenter();
+      const settledMode = mapViewModeForPitch(map.getPitch());
+      const camera = Object.freeze({
+        longitude: center.lng,
+        latitude: center.lat,
+        zoom: map.getZoom(),
+        pitch: map.getPitch(),
+        bearing: map.getBearing(),
+        viewMode: settledMode,
+      });
+      setViewMode(settledMode);
+      setSettledPitch(map.getPitch());
+      setSettledCamera(camera);
+      setSettledPadding(renderedMapPadding(map));
+      captureRenderedClusters();
+      onCameraChangeRef.current?.(camera);
+      repairGovernedPaddingAfterMovement();
+    });
+    map.on("idle", captureRenderedClusters);
 
     return () => {
       searchAbortRef.current?.abort();
       searchMarkerRef.current?.remove();
       stopOrbit();
+      if (paddingRepairFrameRef.current !== null) {
+        window.cancelAnimationFrame(paddingRepairFrameRef.current);
+        paddingRepairFrameRef.current = null;
+      }
       mapLoadedRef.current = false;
+      sceneInitializationStartedRef.current = false;
+      setMapReady(false);
       mapRef.current = null;
       map.remove();
     };
-  }, [applyScene, interactive, pauseForInteraction, stopOrbit, token]);
+  }, [applyScene, interactive, pauseForInteraction, repairGovernedPaddingAfterMovement, stopOrbit, token]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -1110,25 +1400,44 @@ export function ExchangeSpatialScene({
     markerSource?.setData(homeMarkerGeoJson);
     const networkMarkerSource = map.getSource(NETWORK_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     networkMarkerSource?.setData(networkMarkersGeoJson);
+    const selectedNetworkMarkerSource = map.getSource(NETWORK_SELECTED_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    selectedNetworkMarkerSource?.setData(selectedNetworkMarkerGeoJson);
+    const relationshipPathSource = map.getSource(RELATIONSHIP_PATH_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    relationshipPathSource?.setData(relationshipPathsGeoJson);
+    const serviceFieldSource = map.getSource(SERVICE_FIELD_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    serviceFieldSource?.setData(serviceFieldsGeoJson);
     const tutorialNodeSource = map.getSource(TUTORIAL_NODE_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     tutorialNodeSource?.setData(tutorialNodes);
     const tutorialPathSource = map.getSource(TUTORIAL_PATH_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     tutorialPathSource?.setData(tutorialPaths);
-    applyScene();
   }, [
-    applyScene,
     homeGeoJson,
     homeMaskGeoJson,
     homeMarkerGeoJson,
     networkMarkersGeoJson,
+    selectedNetworkMarkerGeoJson,
+    relationshipPathsGeoJson,
+    serviceFieldsGeoJson,
     tutorialNodes,
     tutorialPaths,
-    mode,
-    activationOverlay,
-    continuousMotion,
-    workspaceOverlay,
-    focusedMarkerId,
   ]);
+
+  useEffect(() => {
+    applyScene();
+  }, [applyScene, continuousMotion, mode]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!mapLoadedRef.current || !map || !mapReady) return;
+    const previous = appliedOverlayRef.current;
+    if (
+      previous.activationOverlay === activationOverlay
+      && previous.workspaceOverlay === workspaceOverlay
+    ) return;
+    appliedOverlayRef.current = { activationOverlay, workspaceOverlay };
+    map.jumpTo({ padding: cameraPadding(activationOverlay, workspaceOverlay) });
+    setSettledPadding(renderedMapPadding(map));
+  }, [activationOverlay, mapReady, workspaceOverlay]);
 
   if (!token.startsWith("pk.")) {
     return (
@@ -1138,12 +1447,29 @@ export function ExchangeSpatialScene({
     );
   }
 
+  const focusedOrganizationMarker = organizationMarkers.find((candidate) => candidate.id === focusedMarkerId);
+  const selectedMarkerIdentity = organizationInitials(focusedOrganizationMarker?.label ?? marker?.label ?? "Organization");
+
   return (
     <figure
       className={`${styles.scene} ${className ?? ""}`}
       data-scene={mode}
       data-interactive={interactive}
       data-workspace-overlay={workspaceOverlay ?? "none"}
+      data-map-view-mode={viewMode}
+      data-map-pitch={settledPitch.toFixed(2)}
+      data-map-bearing={settledCamera.bearing.toFixed(2)}
+      data-map-center={`${settledCamera.longitude.toFixed(6)},${settledCamera.latitude.toFixed(6)}`}
+      data-map-zoom={settledCamera.zoom.toFixed(2)}
+      data-selected-marker-id={focusedMarkerId ?? marker?.id ?? ""}
+      data-selected-marker-identity={selectedMarkerIdentity}
+      data-network-marker-count={organizationMarkers.length}
+      data-rendered-cluster-count={renderedClusterCount}
+      data-rendered-cluster-point={renderedClusterPoint}
+      data-rendered-selected-marker-count={renderedSelectedMarkerCount}
+      data-map-padding={`${settledPadding.top},${settledPadding.right},${settledPadding.bottom},${settledPadding.left}`}
+      data-map-ready={mapReady}
+      data-camera-initialization={cameraInitialization}
       aria-label={`RFxchange ${mode} spatial scene`}
     >
       <div ref={containerRef} className={styles.map} />
@@ -1203,8 +1529,8 @@ export function ExchangeSpatialScene({
             </p>
           </section> : null}
 
-          <div className={styles.viewModeControl} role="group" aria-label="Map view mode">
-            {VIEW_MODE_OPTIONS.map((option) => (
+          <div className={styles.viewModeControl} role="group" aria-label="Map view">
+            {PARTICIPANT_MAP_VIEW_OPTIONS.map((option) => (
               <button
                 key={option.id}
                 type="button"

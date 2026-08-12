@@ -16,7 +16,7 @@ export default async function ProviderApplicationPage() {
   if (access.kind === "activation-required") redirect(participantEntryDestination(access));
   if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
-  if (access.state.lifecycleState !== "open-platform") redirect("/orientation");
+  if (access.state.lifecycleState !== "open-platform") redirect(access.state.controlledPlatformUrl ?? "/join");
   const providerFoundation = createServerResourceProviderFoundationService();
   let initialSnapshot: Awaited<ReturnType<typeof providerFoundation.participantSnapshot>> | null = null;
   try {

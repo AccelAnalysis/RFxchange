@@ -16,12 +16,14 @@ test("Resource Network query state normalizes the bounded URL contract", () => {
     parseResourceNetworkWorkspaceQuery({
       q: "  capital assistance  ",
       availability: "limited",
+      organization: "org-focus.1",
       provider: "org-provider.1",
       request: ["referral:1", "ignored"],
     }),
     {
       query: "capital assistance",
       availability: "limited",
+      organizationId: "org-focus.1",
       providerId: "org-provider.1",
       requestId: "referral:1",
     },
@@ -30,11 +32,13 @@ test("Resource Network query state normalizes the bounded URL contract", () => {
   const invalid = parseResourceNetworkWorkspaceQuery({
     q: "x".repeat(200),
     availability: "fabricated",
+    organization: "../not-authority",
     provider: "../not-authority",
     request: "",
   });
   assert.equal(invalid.query.length, 160);
   assert.equal(invalid.availability, "all");
+  assert.equal(invalid.organizationId, null);
   assert.equal(invalid.providerId, null);
   assert.equal(invalid.requestId, null);
 });

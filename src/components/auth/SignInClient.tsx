@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import type { ActivationJourneyState } from "../../application/onboarding/activation-journey";
 import { clearParticipantIntelligenceContext } from "../../application/participant/intelligence-context-storage";
+import { clearParticipantSpatialContexts } from "../../application/participant/participant-spatial-context";
 import { BrandWordmark } from "../brand/BrandWordmark";
 import { createClientAuthenticationProvider } from "../../infrastructure/auth/firebase-client";
 
@@ -86,6 +87,7 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
                     },
                   );
                   clearParticipantIntelligenceContext();
+                  clearParticipantSpatialContexts();
 
                   // Administration is an independent authority plane. Once authentication succeeds,
                   // an explicit admin return target is evaluated by the protected admin route itself.

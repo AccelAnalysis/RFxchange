@@ -54,7 +54,8 @@ test("activation state hydrates independent persistence in parallel", async () =
   assert.match(stateFor, /this\.dependencies\.accountSecurity\.inspect/);
   assert.match(stateFor, /this\.dependencies\.resolutions\.getByAccessJourneyId/);
   assert.match(stateFor, /this\.dependencies\.memberships\.listActiveByUserId/);
-  assert.match(stateFor, /const \[selectedDefinition, organization, profile, location, completion, marker\] = await Promise\.all/);
+  assert.match(stateFor, /const \[selectedDefinition, organization, profile, location, completion, marker, orientation\] = await Promise\.all/);
+  assert.match(stateFor, /lifecycle\.state === "controlled-platform"[\s\S]*orientations\.getById/);
 });
 
 test("activation actions use narrow preconditions instead of pre-hydrating full state", async () => {

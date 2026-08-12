@@ -1,4 +1,5 @@
 import type { AuthenticationAccountSecurityReader } from "../auth/authorize-organization-operation.ts";
+import { participantLifecycleDestination } from "../auth/participant-lifecycle-destination.ts";
 import type {
   AcquisitionIntentKind,
   AcquisitionSourceChannel,
@@ -58,6 +59,8 @@ import type {
 } from "../../domain/organization-location/repository.ts";
 import type { OrganizationMarkerActivation } from "../../domain/organization-markers/model.ts";
 import type { OrganizationMarkerActivationRepository } from "../../domain/organization-markers/repository.ts";
+import { orientationJourneyIdForAccessJourney } from "../../domain/orientation/model.ts";
+import type { OrientationJourneyRepository } from "../../domain/orientation/repository.ts";
 import type {
   OrganizationAccountRepository,
   OrganizationProfileRepository,
@@ -151,6 +154,7 @@ export interface ActivationJourneyDependencies {
   readonly accounts: OrganizationAccountRepository;
   readonly profiles: OrganizationProfileRepository;
   readonly memberships: OrganizationMembershipRepository;
+  readonly orientations: OrientationJourneyRepository;
   readonly accountSecurity: AuthenticationAccountSecurityReader;
   readonly ids: Readonly<{
     markerEvent(): string;
@@ -829,7 +833,7 @@ export class ActivationJourneyService {
     }
 
     const resolvedOrganizationId = activation.organizationId ?? resolution?.organizationId ?? null;
-    const [selectedDefinition, organization, profile, location, completion, marker] = await Promise.all([
+    const [selectedDefinition, organization, profile, location, completion, marker, orientation] = await Promise.all([
       selection
         ? this.dependencies.definitions.getById(selection.geographyId)
         : Promise.resolve(null),
@@ -848,12 +852,22 @@ export class ActivationJourneyService {
       resolvedOrganizationId
         ? this.dependencies.markerActivations.getByOrganizationId(resolvedOrganizationId)
         : Promise.resolve(null),
+      lifecycle.state === "controlled-platform"
+        ? this.dependencies.orientations.getById(orientationJourneyIdForAccessJourney(journeyId))
+        : Promise.resolve(null),
     ]);
     const membership = activation.membershipId
       ? memberships.find((candidate) => candidate.id === activation.membershipId) ?? null
       : resolvedOrganizationId
         ? memberships.find((candidate) => candidate.organizationId === resolvedOrganizationId) ?? null
         : null;
+    const orientationComplete = Boolean(
+      orientation?.status === "completed" &&
+      orientation.completedThroughStep === 8 &&
+      orientation.userId === context.user.id &&
+      String(orientation.accessJourneyId) === String(activation.accessJourneyId) &&
+      (!resolvedOrganizationId || String(orientation.organizationId) === String(resolvedOrganizationId)),
+    );
 
     const nextStep = this.nextStep({
       activation,
@@ -903,13 +917,17 @@ export class ActivationJourneyService {
         ? Object.freeze({ status: marker.status, geographyId: String(marker.geographyId) })
         : null,
       controlledPlatformUrl:
-        lifecycle.state === "open-platform" && resolvedOrganizationId
-          ? "/exchange"
-          : lifecycle.state === "controlled-platform" && resolvedOrganizationId
-            ? activation.acquisitionContext && activation.acquisitionContext.intent.kind !== "direct"
-              ? "/acquisition/continue"
-              : "/orientation"
-            : null,
+        lifecycle.state === "controlled-platform" &&
+        resolvedOrganizationId &&
+        !orientationComplete &&
+        activation.acquisitionContext &&
+        activation.acquisitionContext.intent.kind !== "direct"
+          ? "/acquisition/continue"
+          : participantLifecycleDestination(
+              lifecycle.state,
+              resolvedOrganizationId ? String(resolvedOrganizationId) : null,
+              orientationComplete,
+            ),
       orientationImplementationPending: false,
       acquisitionContext: activation.acquisitionContext
         ? Object.freeze({

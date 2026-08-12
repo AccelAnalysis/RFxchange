@@ -1,18 +1,24 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
+import type { ParticipantSpatialScope } from "../../application/participant/participant-spatial-context";
 import type { ResourceNetworkWorkspaceQuery } from "../../application/resource-network/resource-network-workspace";
 import type { ProviderDiscoveryProjection, ProviderRequestMessageProjection, ProviderResourceProjection } from "../../domain/resource-network/model";
 import type { ProviderServiceProfile } from "../../domain/resource-providers/model";
 import type { RecipientReferralProjection, SenderReferralProjection } from "../../domain/referrals/model";
-import type { ExchangeHomeMarker } from "../map/ExchangeSpatialScene";
+import {
+  ExchangeSpatialScene,
+  type ExchangeHomeMarker,
+  type ExchangeOrganizationMarker,
+  type ExchangeServiceField,
+} from "../map/ExchangeSpatialScene";
 import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
-import { MapboxLocalityCanvas, type ControlledLocalityPointOverlay, type ControlledLocalityServiceField } from "../map/MapboxLocalityCanvas";
 import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
+import { useParticipantSpatialContext } from "../participant/useParticipantSpatialContext";
 import {
   clearRetryStableCommand,
   resolveRetryStableCommand,
@@ -26,6 +32,8 @@ type Owner = Readonly<{ serviceProfile: ProviderServiceProfile | null; serviceGe
 interface Props {
   readonly model: ControlledLocalityMapModel;
   readonly homeMarker: ExchangeHomeMarker;
+  readonly spatialScope: ParticipantSpatialScope;
+  readonly organizations: readonly Readonly<{ organizationId: string; marker: ExchangeOrganizationMarker }>[];
   readonly providers: readonly ProviderDiscoveryProjection[];
   readonly resources: readonly ProviderResourceProjection[];
   readonly referrals: readonly Referral[];
@@ -51,7 +59,7 @@ function browserSessionStorage(): Storage | null {
   }
 }
 
-export function ResourceNetworkWorkspace({ model, homeMarker, providers, resources, referrals, owner, commandRecoveryScope, queryState, selectedMessages }: Props) {
+export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, organizations, providers, resources, referrals, owner, commandRecoveryScope, queryState, selectedMessages }: Props) {
   const { t } = useI18n();
   const pathname = usePathname();
   const router = useRouter();
@@ -60,18 +68,137 @@ export function ResourceNetworkWorkspace({ model, homeMarker, providers, resourc
   const [busy, setBusy] = useState(false);
   const [navigationPending, startNavigation] = useTransition();
   const providerRequestCommandRef = useRef<Readonly<{ fingerprint: string; commandId: string }> | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
   const providerRequestStorageKey = `${PROVIDER_REQUEST_STORAGE_KEY}:${encodeURIComponent(commandRecoveryScope)}`;
-  const selected = providers.find((provider) => String(provider.organizationId) === queryState.providerId) ?? null;
+  const [spatialContext, updateSpatialContext] = useParticipantSpatialContext({ scope: spatialScope, homeMarkerId: homeMarker.id, activeLens: "resources" });
+  const selectedOrganizationId = queryState.providerId ?? queryState.organizationId ?? spatialContext.selection.organizationId;
+  const selected = providers.find((provider) => String(provider.organizationId) === selectedOrganizationId) ?? null;
   const providerReferrals = referrals.filter((referral) => referral.purpose === "provider-connection");
   const selectedRequest = providerReferrals.find((referral) => referral.id === queryState.requestId) ?? null;
   const actionBusy = busy || navigationPending;
-  const pointOverlays: readonly ControlledLocalityPointOverlay[] = useMemo(() => Object.freeze([
-    Object.freeze({ id: homeMarker.id, position: homeMarker.coordinate, label: homeMarker.label, kind: "organization-marker" as const, privacyLabel: homeMarker.accessibleLocationLabel, activated: true }),
-    ...providers.flatMap((provider) => provider.marker ? [Object.freeze({ id: provider.marker.id, position: provider.marker.coordinate, label: provider.displayName, kind: "organization-marker" as const, privacyLabel: provider.marker.accessibleLocationLabel, activated: true })] : []),
-  ]), [homeMarker, providers]);
-  const serviceFields: readonly ControlledLocalityServiceField[] = useMemo(() => providers.map((provider) => Object.freeze({ id: `service-field-${String(provider.organizationId)}`, label: `${provider.displayName} service territory`, geometry: provider.territory.geometry as ControlledLocalityServiceField["geometry"], selected: String(provider.organizationId) === queryState.providerId })), [providers, queryState.providerId]);
+  const organizationMarkers = useMemo(() => organizations.map((organization) => organization.marker), [organizations]);
+  const serviceFields: readonly ExchangeServiceField[] = useMemo(() => providers.map((provider) => Object.freeze({ id: `service-field-${String(provider.organizationId)}`, label: `${provider.displayName} service territory`, geometry: provider.territory.geometry as ExchangeServiceField["geometry"], selected: String(provider.organizationId) === selectedOrganizationId })), [providers, selectedOrganizationId]);
 
-  function updateWorkspaceQuery(updates: Readonly<Partial<Record<"q" | "availability" | "provider" | "request", string | null | undefined>>>) {
+  useEffect(() => {
+    updateSpatialContext((current) => {
+      const lensState = current.lensState.resources;
+      const availability = queryState.availability === "all" ? "" : queryState.availability;
+      const filterValues: Record<string, string> = {};
+      if (availability) filterValues.availability = availability;
+      const filters: Readonly<Record<string, string>> = Object.freeze(filterValues);
+      if (current.activeLens === "resources" && lensState.search === queryState.query && (lensState.filters.availability ?? "") === availability) return current;
+      return Object.freeze({
+        ...current,
+        activeLens: "resources" as const,
+        lensState: Object.freeze({
+          ...current.lensState,
+          resources: Object.freeze({
+            ...lensState,
+            search: queryState.query,
+            filters,
+            resultPage: 1,
+            resultIndex: lensState.search === queryState.query && (lensState.filters.availability ?? "") === availability ? lensState.resultIndex : 0,
+            listScrollTop: lensState.search === queryState.query && (lensState.filters.availability ?? "") === availability ? lensState.listScrollTop : 0,
+          }),
+        }),
+      });
+    });
+  }, [queryState.availability, queryState.query, updateSpatialContext]);
+  useEffect(() => {
+    if (panelRef.current) panelRef.current.scrollTop = spatialContext.lensState.resources.listScrollTop;
+  }, [spatialContext.lensState.resources.listScrollTop]);
+  useEffect(() => {
+    const focusedOrganizationId = queryState.organizationId ?? queryState.providerId;
+    if (!focusedOrganizationId) return;
+    const organization = organizations.find(
+      (candidate) => candidate.organizationId === focusedOrganizationId,
+    );
+    const crossGeographyProvider = queryState.providerId
+      ? providers.find(
+          (candidate) => String(candidate.organizationId) === queryState.providerId && candidate.marker === null,
+        )
+      : null;
+    if (!organization && crossGeographyProvider) {
+      if (
+        spatialContext.selection.organizationId === spatialScope.organizationId
+        && spatialContext.selection.markerId === homeMarker.id
+      ) return;
+      updateSpatialContext((current) => Object.freeze({
+        ...current,
+        activeLens: "resources" as const,
+        selection: Object.freeze({
+          organizationId: spatialScope.organizationId,
+          markerId: homeMarker.id,
+          relationshipId: null,
+        }),
+        panelOpen: true,
+        originLens: current.activeLens,
+      }));
+      return;
+    }
+    if (
+      !organization
+      || (
+        spatialContext.selection.organizationId === organization.organizationId
+        && spatialContext.selection.markerId === organization.marker.id
+      )
+    ) return;
+    updateSpatialContext((current) => Object.freeze({
+      ...current,
+      activeLens: "resources" as const,
+      selection: Object.freeze({
+        organizationId: organization.organizationId,
+        markerId: organization.marker.id,
+        relationshipId: null,
+      }),
+      panelOpen: true,
+      originLens: current.activeLens,
+    }));
+  }, [homeMarker.id, organizations, providers, queryState.organizationId, queryState.providerId, spatialContext.selection.markerId, spatialContext.selection.organizationId, spatialScope.organizationId, updateSpatialContext]);
+
+  function selectOrganization(markerId: string) {
+    const organization = organizations.find((candidate) => candidate.marker.id === markerId);
+    const organizationId = organization?.organizationId ?? spatialScope.organizationId;
+    updateSpatialContext((current) => Object.freeze({
+      ...current,
+      activeLens: "resources" as const,
+      selection: Object.freeze({ organizationId, markerId, relationshipId: null }),
+      panelOpen: true,
+      originLens: current.activeLens,
+    }));
+    updateWorkspaceQuery({
+      organization: organization ? organizationId : null,
+      provider: providers.some((provider) => String(provider.organizationId) === organizationId) ? organizationId : null,
+    });
+  }
+
+  function selectProvider(organizationId: string, resultIndex: number) {
+    const organization = organizations.find((candidate) => candidate.organizationId === organizationId);
+    if (organization) selectOrganization(organization.marker.id);
+    else {
+      updateWorkspaceQuery({ organization: null, provider: organizationId });
+      updateSpatialContext((current) => Object.freeze({
+        ...current,
+        activeLens: "resources" as const,
+        selection: Object.freeze({
+          organizationId: spatialScope.organizationId,
+          markerId: homeMarker.id,
+          relationshipId: null,
+        }),
+        panelOpen: true,
+        originLens: current.activeLens,
+      }));
+    }
+    updateSpatialContext((current) => Object.freeze({
+      ...current,
+      lensState: Object.freeze({
+        ...current.lensState,
+        resources: Object.freeze({ ...current.lensState.resources, resultIndex }),
+      }),
+    }));
+  }
+
+  function updateWorkspaceQuery(updates: Readonly<Partial<Record<"q" | "availability" | "organization" | "provider" | "request", string | null | undefined>>>) {
     const next = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(updates)) {
       if (!value || (key === "availability" && value === "all")) next.delete(key);
@@ -157,8 +284,34 @@ export function ResourceNetworkWorkspace({ model, homeMarker, providers, resourc
 
   return <ParticipantShell activeItem="Resources">
     <SpatialWorkspace ariaLabel={t("resourceNetworkWorkspace.ariaLabel")} className={styles.workspace}>
-      <MapboxLocalityCanvas model={model} pointOverlays={pointOverlays} serviceFields={serviceFields} overlaySide="split" />
-      <aside className={styles.panel}>
+      <ExchangeSpatialScene
+        model={model}
+        mode="organization"
+        marker={homeMarker}
+        organizationMarkers={organizationMarkers}
+        serviceFields={serviceFields}
+        focusedMarkerId={spatialContext.selection.markerId}
+        onOrganizationMarkerSelect={selectOrganization}
+        initialCamera={spatialContext.camera}
+        onCameraChange={(camera) => updateSpatialContext((current) => Object.freeze({ ...current, activeLens: "resources" as const, camera }))}
+        interactive
+        showSearch={false}
+        workspaceOverlay="right"
+      />
+      <aside
+        ref={panelRef}
+        className={styles.panel}
+        onScroll={(event) => {
+          const listScrollTop = Math.max(0, Math.round(event.currentTarget.scrollTop));
+          updateSpatialContext((current) => Object.freeze({
+            ...current,
+            lensState: Object.freeze({
+              ...current.lensState,
+              resources: Object.freeze({ ...current.lensState.resources, listScrollTop }),
+            }),
+          }));
+        }}
+      >
         <header><p className={styles.eyebrow}>{t("resourceNetworkWorkspace.eyebrow")}</p><h1>{t("resourceNetworkWorkspace.title")}</h1><p>{t("resourceNetworkWorkspace.supporting")}</p></header>
         <form className={styles.filters} onSubmit={(event) => {
           event.preventDefault();
@@ -175,7 +328,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, providers, resourc
         </form>
         {notice ? <p className={styles.notice} role="status">{notice}</p> : null}
         <div className={styles.columns}>
-          <section aria-label="Provider results"><h2>{providers.length} {t("resourceNetworkWorkspace.providers")}</h2>{providers.length ? <ul className={styles.list}>{providers.map((provider) => <li key={String(provider.organizationId)}><button type="button" aria-current={String(provider.organizationId) === queryState.providerId} disabled={actionBusy} onClick={() => updateWorkspaceQuery({ provider: String(provider.organizationId) })}><strong>{provider.displayName}</strong><span>{provider.services.map((service) => service.name).join(" · ")}</span><small>{provider.match.reasons.join(" · ")}</small></button></li>)}</ul> : <div className={styles.empty}><strong>{t("resourceNetworkWorkspace.empty")}</strong><p>Try broader terms or another maintained availability state.</p></div>}</section>
+          <section aria-label="Provider results"><h2>{providers.length} {t("resourceNetworkWorkspace.providers")}</h2>{providers.length ? <ul className={styles.list}>{providers.map((provider, resultIndex) => <li key={String(provider.organizationId)}><button type="button" aria-current={String(provider.organizationId) === selectedOrganizationId} disabled={actionBusy} onClick={() => selectProvider(String(provider.organizationId), resultIndex)}><strong>{provider.displayName}</strong><span>{provider.services.map((service) => service.name).join(" · ")}</span><small>{provider.match.reasons.join(" · ")}</small></button></li>)}</ul> : <div className={styles.empty}><strong>{t("resourceNetworkWorkspace.empty")}</strong><p>Try broader terms or another maintained availability state.</p></div>}</section>
           <section className={styles.detail} aria-live="polite">{selected ? <><p className={styles.status}>{readable(selected.availability)} · {selected.territory.name}</p><h2>{selected.displayName}</h2><p>{selected.populationsServed}</p><dl><div><dt>Eligibility</dt><dd>{selected.eligibility}</dd></div><div><dt>Intake</dt><dd>{selected.intakeMethod}</dd></div><div><dt>Languages</dt><dd>{selected.languages.join(", ")}</dd></div><div><dt>Modalities</dt><dd>{selected.modalities.map(readable).join(", ")}</dd></div></dl><form action={connect} className={styles.form}><label>Service<select name="serviceId" required>{selected.services.map((service) => <option key={service.id} value={service.id}>{service.name} · {readable(service.availability)}</option>)}</select></label><label>What do you need?<textarea name="summary" required maxLength={1200} /></label><WorkflowExplainer explainerKey="provider-connection" /><label className={styles.check}><input name="consent" value="yes" type="checkbox" required />Share my organization name and this summary only with {selected.displayName}.</label><button disabled={actionBusy} type="submit">Send provider request</button></form></> : <p>Select a provider to see its published services and territory.</p>}</section>
         </div>
         <section className={styles.fieldAlternative} aria-label="Accessible service territory descriptions"><h2>Service territories</h2><ul>{providers.map((provider) => <li key={String(provider.organizationId)}><strong>{provider.displayName}</strong><span>Serves {provider.territory.name}; this field is separate from the provider&apos;s office marker.</span></li>)}</ul></section>

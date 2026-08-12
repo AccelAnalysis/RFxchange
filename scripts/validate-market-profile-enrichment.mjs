@@ -60,8 +60,8 @@ assert.match(styles, /prefers-reduced-motion/);
 assert.match(discovery, /confirmed-structured/);
 assert.match(discovery, /legacy-essential/);
 assert.match(discovery, /projectOrganizationCapabilityClaim/);
-assert.match(workspace, /provenanceLabel/);
-assert.match(workspace, /Legacy activation profile capability/);
+assert.doesNotMatch(workspace, /provenanceLabel/);
+assert.doesNotMatch(workspace, /Legacy activation profile capability/);
 assert.doesNotMatch(`${model}\n${service}\n${panel}`, /paid.*(rank|verified)|guaranteed|universal qualification/i);
 for (const collection of ["organizationCapabilityClaims", "organizationIndustryProfiles", "organizationPastPerformance", "organizationMarketPreferences", "organizationProvisionalTerms", "organizationMarketProfileEvents", "organizationMarketProfileCommands"]) {
   assert.match(schema, new RegExp(collection));
