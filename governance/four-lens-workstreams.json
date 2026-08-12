@@ -98,6 +98,15 @@
         "WP-RFX-46-RECONCILE"
       ],
       "purpose": "Authorize reconciliation of preserved Slice 4.6 PR #171 candidate under the installed Four-Lens authority without accepting or merging it."
+    },
+    {
+      "id": "rfx-42-iss006-correction-2026-08-12",
+      "mainBaseSha": "69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068",
+      "controlPullRequest": 182,
+      "packetIds": [
+        "WP-RFX-42-ISS006-CORRECT-01"
+      ],
+      "purpose": "Authorize only the participant-directed ISS-006 corrective implementation while independent review capacity is unavailable; builder output remains Implemented — Not Verified."
     }
   ],
   "lanes": [
@@ -208,12 +217,17 @@
       "lane": "shared-exchange",
       "owner": "Shared Experience Completion",
       "branch": "codex/program-shared-experience-completion-01",
-      "candidate": null,
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 174,
+        "sha": "bc6d4f6dea158c7cdd359cc7bb64fd262e9bd7c1",
+        "mergeSha": null
+      },
       "candidateHistory": [],
       "exactBaseSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
       "activationEpochId": "initial-operational-2026-08-12",
       "basePolicy": "authority-merge-sha",
-      "status": "active",
+      "status": "implemented-not-verified",
       "requirementIds": [
         "SHARED-CONTINUITY-002",
         "SHARED-EVIDENCE-001"
@@ -263,13 +277,18 @@
       "lane": "independent-acceptance",
       "owner": "Wave 4 Assurance",
       "branch": "codex/acceptance-wave4-slices-4-1-4-5",
-      "candidate": null,
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 178,
+        "sha": "6f6a1b6a1c4a303458156780f8d715d5e48c3c58",
+        "mergeSha": null
+      },
       "candidateHistory": [],
       "independentReviewer": null,
       "exactBaseSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
       "activationEpochId": "initial-operational-2026-08-12",
       "basePolicy": "authority-merge-sha",
-      "status": "active",
+      "status": "blocked",
       "requirementIds": [
         "RFX-FEATURE-ISS-001",
         "RFX-FEATURE-ISS-002",
@@ -340,14 +359,21 @@
       "candidate": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "e70413e2e45db4b75517376acdc0700f9838a963",
+        "sha": "60764f2deaabcd2d184aea40734da880f2b6f1c0",
         "mergeSha": null
       },
-      "candidateHistory": [],
+      "candidateHistory": [
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 171,
+          "sha": "e70413e2e45db4b75517376acdc0700f9838a963",
+          "mergeSha": null
+        }
+      ],
       "exactBaseSha": "347015829d64cfc596cdef1010601d8bda447818",
       "activationEpochId": "rfx-46-reconciliation-2026-08-12",
       "basePolicy": "authority-merge-sha plus preserved candidate e70413e2e45db4b75517376acdc0700f9838a963",
-      "status": "reconciliation-authorized",
+      "status": "implemented-not-verified",
       "requirementIds": [
         "RFX-FEATURE-RSP-001",
         "RFX-FEATURE-RSP-002",
@@ -453,12 +479,17 @@
       "lane": "intelligence",
       "owner": "Intelligence Program",
       "branch": "codex/intelligence-provenance-roadmap-01",
-      "candidate": null,
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 177,
+        "sha": "c8e899ebe68ec10c383ba5fd58ce5269a6e6d8ab",
+        "mergeSha": null
+      },
       "candidateHistory": [],
       "exactBaseSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
       "activationEpochId": "initial-operational-2026-08-12",
       "basePolicy": "authority-merge-sha",
-      "status": "active",
+      "status": "implemented-not-verified",
       "requirementIds": [
         "INTEL-PROVENANCE-001",
         "INTEL-LAYER-001",
@@ -504,12 +535,17 @@
       "lane": "resources",
       "owner": "Resources Completion",
       "branch": "codex/resources-completion-inventory-01",
-      "candidate": null,
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 176,
+        "sha": "c9425df5726cadbbdcbf3a5b20b3378ef9f9e513",
+        "mergeSha": null
+      },
       "candidateHistory": [],
       "exactBaseSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
       "activationEpochId": "initial-operational-2026-08-12",
       "basePolicy": "authority-merge-sha",
-      "status": "active",
+      "status": "implemented-not-verified",
       "requirementIds": [
         "RES-LENS-001",
         "RES-LENS-002",
@@ -558,12 +594,17 @@
       "lane": "referrals",
       "owner": "Referrals Completion",
       "branch": "codex/referrals-completion-inventory-01",
-      "candidate": null,
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 175,
+        "sha": "649b47b22354c6bf705d71f7c86c5fedae30a067",
+        "mergeSha": null
+      },
       "candidateHistory": [],
       "exactBaseSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
       "activationEpochId": "initial-operational-2026-08-12",
       "basePolicy": "authority-merge-sha",
-      "status": "active",
+      "status": "implemented-not-verified",
       "requirementIds": [
         "REF-LENS-001",
         "REF-LENS-002",
@@ -606,6 +647,68 @@
       ],
       "expectedOutput": "Verified inventory of present/partial/missing/blocked Referrals experience and bounded follow-up packets.",
       "stopBoundary": "Do not implement gaps during the inventory packet."
+    },
+    {
+      "id": "WP-RFX-42-ISS006-CORRECT-01",
+      "lane": "opportunities-rfx",
+      "owner": "Wave 4 Slice 4.2 Corrective Production",
+      "branch": "fix/rfx42-iss006-correction",
+      "candidate": null,
+      "candidateHistory": [],
+      "exactBaseSha": "69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068",
+      "activationEpochId": "rfx-42-iss006-correction-2026-08-12",
+      "basePolicy": "Exact current-main activation base; participant-authorized corrective implementation of RFX-FEATURE-ISS-006 only.",
+      "status": "active",
+      "requirementIds": [
+        "RFX-FEATURE-ISS-006"
+      ],
+      "sources": [
+        "docs/slices/SLICE_4_2_EXECUTION_AUTHORITY.md",
+        "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md",
+        "docs/program/INDEPENDENT_ACCEPTANCE_PROTOCOL.md"
+      ],
+      "dependencies": [
+        {
+          "packetId": "WP-CONTROL-AUTHORITY-SETUP",
+          "requiredStatuses": [
+            "completed",
+            "closed"
+          ]
+        }
+      ],
+      "ownedPaths": [
+        "src/domain/rfx/**",
+        "src/application/rfx/**",
+        "src/infrastructure/rfx/**",
+        "src/components/rfx/**",
+        "app/opportunities/**",
+        "test/**",
+        "scripts/**",
+        "docs/architecture/**"
+      ],
+      "nonOwnedPaths": [
+        "docs/tracking/**",
+        "app/geography/canvas/**",
+        "src/domain/referrals/**",
+        "src/domain/resource-providers/**",
+        "Slice 4.3/4.4/4.5 correction scope",
+        "PR #171 / Slice 4.6 scope",
+        "Slice 4.7"
+      ],
+      "acceptanceRequired": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility",
+        "emulator",
+        "five-locales",
+        "configured-browser",
+        "exact-head-ci",
+        "exact-head-review",
+        "independent-acceptance"
+      ],
+      "expectedOutput": "Correct RFX-FEATURE-ISS-006 only against its original requirement and Slice 4.2 authority; builder output may reach only Implemented — Not Verified.",
+      "stopBoundary": "Do not implement ISS-007/ISS-009/ISS-011, Slice 4.4/4.5 corrections, alter PR #171, start Slice 4.7, promote tracker state, merge the correction or claim Verified. Exact-head independent review is externally blocked by Issue #181. RFX-FEATURE-ISS-001 remains independently unverified and therefore blocks final Verified/merge until resolved, but does not block this bounded corrective implementation."
     }
   ]
 }
