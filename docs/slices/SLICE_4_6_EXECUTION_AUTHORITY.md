@@ -21,7 +21,7 @@ Browser state, a search match, a watch, a fit explanation, a private assessment 
 | Slice 4.5 real opportunity discovery and canonical watch/deadline relations | Satisfied through PR #169 at the merged baseline; fit consumes only currently permitted open opportunity projections and must adopt the existing watch identity. |
 | Slice 4.4 immutable publication requirements and exact projection digest/version | Satisfied; all comparison inputs come from the accepted responder projection and stable published requirement IDs/snapshots. |
 | Slice 3.3 confirmed organization market-profile capabilities | Satisfied; deterministic comparison may consume the acting organization's current authoritative structured claims, never another organization's private claims or profile prose. |
-| Organization/member authority, restrictions and RFx operation permissions | Satisfied and reused; no client or discovery state grants a consequential pursuit decision. |
+| Organization/member authority, restrictions and response operation permissions | Satisfied and reused; no client or discovery state grants a consequential pursuit decision. |
 | AMACS 0.5.0 release-aware catalog and historical compatibility contracts | Satisfied; comparisons are identifier/snapshot based and never label- or model-memory based. |
 | Wave 3 organization/resource discovery for gap resolution | Available but not consumed as a live route until Slice 4.7 authority. Slice 4.6 identifies gaps only. |
 | B6c RFx-lens expression | Eligible but remains a separate uncompleted gate. This slice uses existing approved workspace/object semantics only for its bounded real task. |
@@ -141,7 +141,7 @@ The existing Slice 4.5 `OpportunityWatch` identity must be adopted rather than c
 
 Before the canonical deadline, an authorized participant may change among Watch, Pursue and Decline with expected-version and current-input review. A decision change appends evidence; it never rewrites history. Passed deadlines, stale/withdrawn publication authority, permission loss or restrictions fail closed. Decline does not notify the issuer or suppress another authorized member's access. Pursue does not create a response, invite a teammate, reserve capacity, prove eligibility or promise submission; it only makes the later Slice 4.8 response-creation precondition true.
 
-Consequential Pursue/Decline decisions reuse the canonical organization-operation authorization boundary and current `rfx.create` operational permission rather than inventing client authority or a parallel permission system. Watch remains available through the accepted Slice 4.5 participant relation boundary, while any transition to or from a consequential decision rechecks the stronger current authority server-side.
+Consequential assessment and Pursue/Decline decisions reuse the canonical organization-operation authorization boundary and current `response.create` permission rather than conflating responder authority with issuer-only `rfx.create`/`rfx.publish`, inventing client authority or creating a parallel permission system. Watch remains available through the accepted Slice 4.5 participant relation boundary, while any transition to or from a consequential decision rechecks the stronger current authority server-side.
 
 ## 9. Typed gaps
 
