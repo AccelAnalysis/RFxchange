@@ -1,8 +1,8 @@
 # Wave 4 — RFx Core roadmap
 
-**Status: ACTIVE CANONICAL ROADMAP — SLICES 4.1–4.6 IMPLEMENTED; WAVE 4 IS 23/41.**
+**Status: ACTIVE CANONICAL ROADMAP — SLICES 4.1–4.5 IMPLEMENTED; WAVE 4 IS 18/41.**
 
-Wave 4 contains **41 RFx Core Feature IDs**. Slices 4.1–4.6 implement 23; 18 remain Not Started. This roadmap preserves the tracker inventory and separates the basic live RFx path through submission from Wave 5 evaluation/selection/award.
+Wave 4 contains **41 RFx Core Feature IDs**. Slices 4.1–4.5 implement 18; 23 remain Not Started. This roadmap preserves the tracker inventory and separates the basic live RFx path through submission from Wave 5 evaluation/selection/award.
 
 The cross-cutting AI/AMACS Interpretation Foundation is complete and reusable for later guided buyer/issuer need interpretation. Wave 4 does not create a second AI stack. Merged PR #150, **Define the Exchange interaction architecture**, is required participant-experience authority for every Wave 4 slice.
 
@@ -157,7 +157,7 @@ Explain how an RFx surfaced, calculate bounded AMACS/requirement fit and uncerta
 
 Potential match remains distinct from qualification, eligibility, endorsement and award likelihood. The comparison of confirmed structured records is deterministic; an AI model may later explain the result but is not required to compute it.
 
-The bounded documentation authority is `docs/slices/SLICE_4_6_EXECUTION_AUTHORITY.md`. The accepted runtime preserves Slice 4.5 user-private bookmarks while explicitly transitioning the acting user's watch into one organization-owned Watch/Pursue/Decline decision, versions exact structured fit inputs and leaves invitation, teaming and response runtime to later slices. Evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_6.md`; B6c remains uncompleted.
+The bounded documentation authority is `docs/slices/SLICE_4_6_EXECUTION_AUTHORITY.md`. It preserves Slice 4.5 user-private bookmarks while explicitly transitioning the acting user's watch into one organization-owned Watch/Pursue/Decline decision, versions exact structured fit inputs and leaves invitation, teaming and response runtime to later slices. The authority changes no Feature-ID state and does not complete B6c.
 
 ### Slice 4.7 — Gap resolution, teaming and external invite continuity
 
@@ -243,7 +243,7 @@ Wave 3 approved handoff / dependency recalculation [complete]
 → Wave 5 evaluator/Q&A/addenda/selection authority
 ```
 
-Use one active implementation slice/gate unless explicitly authorized otherwise.
+Under the merged Four-Lens Program Authority, Wave 4 may execute concurrently with dependency-independent lane work through declared work packets. Wave 4's own merge order remains this dependency sequence, builders cannot self-certify completion, and a dependent RFx slice cannot merge before its predecessor is independently accepted and present on merged `main`.
 
 ## 5. Exchange interaction boundary
 

@@ -44,7 +44,7 @@ For RFx implementation:
 
 ## Current Wave 4 boundary
 
-The Slice 4.6 implementation baseline is the documentation authority merged at `21c4fc080a823ae03f33ae1e58dd2752f317dc67`. Slices 4.1–4.6 now provide the accepted Exchange shell, private issuer definition flow, current readiness, exact preview/publication parity, atomic immutable publication, controlled sharing, real permitted opportunity discovery/management, deterministic fit explanation, private assessment, typed gaps and organization pursuit. Wave 3, AMACS 0.5.0 reconciliation, AI/AMACS Interpretation and ACQ-002/003 continuity remain satisfied prerequisites.
+The Slice 4.5 implementation baseline is the documentation authority merged at `426300e8d94a6370e2dea040b204da0889014102`. Slices 4.1–4.5 now provide the accepted Exchange shell, private issuer definition flow, current readiness, exact preview/publication parity, atomic immutable publication, controlled sharing and real permitted opportunity discovery/management. Wave 3, AMACS 0.5.0 reconciliation, AI/AMACS Interpretation and ACQ-002/003 continuity remain satisfied prerequisites.
 
 The Slice 4.1 through 4.4 authorities govern the implemented `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009`, `ISS-011`, `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020` and `ACQ-009` runtime. The implementation remains bounded to:
 
@@ -58,11 +58,11 @@ The Slice 4.1 through 4.4 authorities govern the implemented `ISS-001`, `ISS-002
 - one private governed AMACS requirement, response-structure and evaluation-definition layer with a complete manual path; and
 - current readiness, exact responder preview, atomic immutable publication, minimized audience-gated projection and controlled sharing.
 
-Slice 4.4 supplies the first legitimate real publication source, Slice 4.5 consumes it for bounded discovery/search, saved searches, alerts, watches and deadlines, and Slice 4.6 adds bounded deterministic fit, private organization assessment, typed gaps and pursuit. It authorizes no teaming, response, evaluation or award. Slice 4.7 and B6c each require their own reviewed authority before implementation.
+Slice 4.4 supplies the first legitimate real publication source, and Slice 4.5 consumes it for bounded discovery/search, saved searches, alerts, watches and deadlines. It authorizes no fit, pursuit, teaming, response, evaluation or award. Slice 4.6 and B6c each require their own reviewed authority before implementation.
 
 Stabilization 2C remains incomplete and isolated to release engineering: the App Hosting backend and GitHub connection now exist, but trustworthy build-time source-SHA binding and an accepted same-SHA live rollout proof do not. No canonical dependency authority makes 2C a prerequisite for RFx Core product-domain implementation.
 
-Canonical totals are **438 total · 175 Done · 263 Not Started**, with Wave 4 RFx Core **23/41** and B6b intentionally pending.
+Canonical totals are **438 total · 170 Done · 268 Not Started**, with Wave 4 RFx Core **18/41** and B6b intentionally pending.
 
 ## Explicit boundaries
 
@@ -77,6 +77,6 @@ This package and the Slice 4.1–4.4 runtime:
 - do not authorize an Exchange-shell convergence or appearance implementation;
 - do not make Stabilization 2C a product dependency;
 - do not move Wave 5 evaluator/award capabilities into Wave 4; and
-- do not begin Slice 4.7, B6c or later work without its own reviewed authority.
+- do not begin Slice 4.5, B6c or later work without its own reviewed authority.
 
 **Light Appearance** and **Dark Appearance** are presentation terminology. **Intelligence** is the functional analytical lens. Dark Appearance, appearance preferences and Presentation Mode remain separately unauthorized capabilities.

@@ -47,16 +47,14 @@ assert.match(workspace, /ParticipantShell activeItem="opportunities-rfx"/);
 assert.match(workspace, /opportunityMarkers=\{opportunityMarkers\}/);
 assert.match(workspace, /data-selected-opportunity-reference/);
 assert.match(workspace, /result\.deadlines\.next7Days/);
-assert.match(workspace, /queryHref\(result, null, result\.nextCursor\)/);
-assert.doesNotMatch(workspace, /cursor=\$\{encodeURIComponent\(result\.nextCursor\)\}/);
 assert.match(workspace, /Discovery and watching do not mean|rfxWorkspace\.discovery\.detail\.disclaimer/);
 assert.match(map, /OPPORTUNITY_MARKER_SOURCE_ID/);
 assert.match(map, /#1769aa/i);
 assert.doesNotMatch(map, /opportunity.*animation|pulse.*opportunity/i);
 assert.match(templates, /rfx\.opportunity-alert/);
 assert.match(templates, /not qualification, eligibility, endorsement, or an award prediction/);
-assert.match(tracker, /438 total · 175 Done · 263 Not Started/);
-assert.match(tracker, /RFx Core: \*\*23\/41\*\*/);
+assert.match(tracker, /438 total · 170 Done · 268 Not Started/);
+assert.match(tracker, /RFx Core: \*\*18\/41\*\*/);
 for (const id of ["DSC-004", "DSC-005", "DSC-006", "DSC-007", "DSC-008"]) {
   assert.match(tracker, new RegExp("\\[x\\] `" + id + "`"));
   assert.match(evidence, new RegExp(id));

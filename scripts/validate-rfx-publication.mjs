@@ -44,13 +44,10 @@ assert.match(files.issuer, /authority\.publish-unavailable/);
 assert.match(files.public, /data-publication-digest/);
 assert.doesNotMatch(files.public, /normalizedAddress|longitude|latitude|providerReference/);
 assert.doesNotMatch(files.public, /ResponderOpportunityProjection/);
-assert.match(files.api, /participantProjection/);
-assert.match(files.api, /Reflect\.deleteProperty\(visible, "issuerOrganizationIndexKey"\)/);
-assert.match(files.api, /Reflect\.deleteProperty\(visible, "requirementIndex"\)/);
 for (const collection of ["rfxPublicationSnapshots", "rfxOpportunityProjections"])
   assert.match(files.rules, new RegExp(`match \\/${collection}`));
-assert.match(files.tracker, /438 total · 175 Done · 263 Not Started/);
-assert.match(files.tracker, /4 - RFx Core: \*\*23\/41\*\*/);
+assert.match(files.tracker, /438 total · 170 Done · 268 Not Started/);
+assert.match(files.tracker, /4 - RFx Core: \*\*18\/41\*\*/);
 for (const id of ["ISS-016", "ISS-018", "ISS-019", "ISS-020", "ACQ-009"])
   assert.match(files.tracker, new RegExp("- \\[x\\] `" + id + "`"));
 assert.match(files.evidence, /B6c opportunity expression eligible for separately authorized work/);

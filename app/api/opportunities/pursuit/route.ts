@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
       expectedFitSnapshotId: String(body.expectedFitSnapshotId ?? ""), decision: String(body.decision ?? ""),
       assessment: body.assessment && typeof body.assessment === "object" && !Array.isArray(body.assessment) ? body.assessment as never : {},
       gapResolutions: body.gapResolutions && typeof body.gapResolutions === "object" && !Array.isArray(body.gapResolutions) ? body.gapResolutions as Record<string, string> : {},
+      reconfirmedStaleInputs: body.reconfirmedStaleInputs === true,
     });
     return NextResponse.json(result, { status: result.replayed ? 200 : 201 });
   } catch (error) { return problem(request, error); }

@@ -175,6 +175,7 @@ export function governedResponderOpportunityProjection(
     snapshot.reference !== projection.reference ||
     snapshot.aggregateVersion !== projection.aggregateVersion ||
     snapshot.projectionDigest !== projection.digest ||
+    stableDigest(projection.payload) !== projection.digest ||
     snapshot.aggregate.version !== projection.aggregateVersion ||
     snapshot.aggregate.lifecycleState !== "published"
   ) throw new Error("Opportunity publication evidence does not match the responder projection.");

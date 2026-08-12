@@ -95,6 +95,16 @@ function participantPursuitView(record: OpportunityPursuit): ParticipantOpportun
   });
 }
 
+function pursuitIsStale(pursuit: OpportunityPursuit | null, result: Readonly<{ explanation: MatchExplanation; snapshot: OpportunityFitSnapshot }>): boolean {
+  return Boolean(pursuit && (
+    pursuit.reviewedFitSnapshotId !== result.snapshot.id ||
+    pursuit.reviewedProjectionVersion !== result.explanation.opportunityProjectionVersion ||
+    pursuit.reviewedProjectionDigest !== result.explanation.opportunityProjectionDigest ||
+    pursuit.reviewedCapabilityInputDigest !== result.explanation.organizationCapabilityInputDigest ||
+    pursuit.fitPolicyVersion !== result.explanation.policyVersion
+  ));
+}
+
 function requestedGapStatuses(input: Readonly<Record<string, string>> | undefined): Readonly<Record<string, ParticipantGapStatus>> {
   const normalized: Record<string, ParticipantGapStatus> = {};
   for (const [rawReference, rawStatus] of Object.entries(input ?? {}).sort(([left], [right]) => left.localeCompare(right))) {
@@ -215,7 +225,7 @@ export class OpportunityPursuitService {
     const result = await this.calculate(scope, reference);
     const pursuit = await this.dependencies.repository.getPursuit(opportunityPursuitId(String(scope.organizationId), result.explanation.opportunityReference));
     const gaps = gapAssessmentRecords(result.explanation, result.snapshot.id, pursuit);
-    const stale = Boolean(pursuit && (pursuit.reviewedFitSnapshotId !== result.snapshot.id || pursuit.reviewedProjectionDigest !== result.explanation.opportunityProjectionDigest || pursuit.reviewedCapabilityInputDigest !== result.explanation.organizationCapabilityInputDigest));
+    const stale = pursuitIsStale(pursuit, result);
     const management = await authorizeOrganizationOperation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId, permission: "response.create" }, this.dependencies.authorization);
     return Object.freeze({ explanation: result.explanation, fitSnapshotId: result.snapshot.id, pursuit: pursuit ? participantPursuitView(pursuit) : null, gaps: participantGapViews(gaps, result.explanation), stale, canManage: management.allowed });
   }
@@ -228,6 +238,7 @@ export class OpportunityPursuitService {
     decision: string;
     assessment: Partial<Record<keyof PursuitAssessment, Readonly<{ state?: string; note?: string }>>>;
     gapResolutions?: Readonly<Record<string, string>>;
+    reconfirmedStaleInputs?: boolean;
   }>): Promise<Readonly<{ pursuit: ParticipantOpportunityPursuit; replayed: boolean }>> {
     await this.authorizeWrite(scope);
     const commandId = stable(input.commandId, "Command identity");
@@ -237,6 +248,8 @@ export class OpportunityPursuitService {
     const assessment = normalizePursuitAssessment(input.assessment);
     const gapResolutions = requestedGapStatuses(input.gapResolutions);
     const nextDecision = decision(input.decision);
+    const reconfirmedStaleInputs = input.reconfirmedStaleInputs === true;
+    // Reconfirmation is review evidence, not business intent, so historical command fingerprints remain replay-compatible.
     const requestFingerprint = hash({ action: "pursuit.save", organizationId: scope.organizationId, reference, expectedVersion: input.expectedVersion, expectedFitSnapshotId, decision: nextDecision, assessment, gapResolutions });
     const prior = await this.dependencies.repository.getCommand(commandId);
     if (prior) {
@@ -249,6 +262,7 @@ export class OpportunityPursuitService {
     const existing = await this.dependencies.repository.getPursuit(id);
     const expectedVersion = input.expectedVersion === null ? null : Number(input.expectedVersion);
     if ((!existing && expectedVersion !== null) || (existing && expectedVersion !== existing.version)) throw new OpportunityPursuitError("conflict", `Pursuit changed${existing ? `; current version is ${existing.version}` : ""}.`);
+    if (pursuitIsStale(existing, result) && !reconfirmedStaleInputs) throw new OpportunityPursuitError("conflict", "Opportunity fit changed; explicitly reconfirm the retained assessment against the current facts before saving.");
     const gapAssessments = gapAssessmentRecords(result.explanation, result.snapshot.id, existing, gapResolutions);
     const now = this.now();
     const pursuit: OpportunityPursuit = Object.freeze({

@@ -55,23 +55,30 @@ export function OpportunityAssessmentWorkspace({ workspace, returnHref }: Readon
   const [assessment, setAssessment] = useState<PursuitAssessment>(workspace.pursuit?.assessment ?? emptyAssessment());
   const [currentPursuit, setCurrentPursuit] = useState<ParticipantOpportunityPursuit | null>(workspace.pursuit);
   const [gapResolutions, setGapResolutions] = useState<Readonly<Record<string, ParticipantGapStatus>>>(() => Object.freeze(Object.fromEntries(workspace.gaps.filter((gap) => gap.current).map((gap) => [gap.reference, gap.status as ParticipantGapStatus]))));
+  const [staleInputsConfirmed, setStaleInputsConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(workspace.stale ? t("rfxWorkspace.discovery.pursuit.stale") : null);
   const explanation = workspace.explanation;
+  const staleReviewRequired = workspace.stale && !staleInputsConfirmed;
 
   function changeDimension(key: typeof dimensions[number], patch: Partial<PursuitAssessment[typeof key]>) {
     setAssessment((current) => ({ ...current, [key]: { ...current[key], ...patch } }));
   }
 
   async function save(nextDecision: PursuitDecision) {
+    if (staleReviewRequired) {
+      setNotice(t("rfxWorkspace.discovery.pursuit.stale"));
+      return;
+    }
     setBusy(true); setNotice(null);
     try {
-      const response = await fetch("/api/opportunities/pursuit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ commandId: crypto.randomUUID(), reference: explanation.opportunityReference, expectedVersion: currentPursuit?.version ?? null, expectedFitSnapshotId: workspace.fitSnapshotId, decision: nextDecision, assessment, gapResolutions }) });
+      const response = await fetch("/api/opportunities/pursuit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ commandId: crypto.randomUUID(), reference: explanation.opportunityReference, expectedVersion: currentPursuit?.version ?? null, expectedFitSnapshotId: workspace.fitSnapshotId, decision: nextDecision, assessment, gapResolutions, reconfirmedStaleInputs: workspace.stale ? staleInputsConfirmed : false }) });
       if (!response.ok) throw new Error("save-failed");
       const result = await response.json() as Readonly<{ pursuit?: ParticipantOpportunityPursuit }>;
       if (!result.pursuit || result.pursuit.decision !== nextDecision) throw new Error("save-result-invalid");
       setCurrentPursuit(result.pursuit);
       setAssessment(result.pursuit.assessment);
+      setStaleInputsConfirmed(false);
       setNotice(t(`rfxWorkspace.discovery.pursuit.saved.${nextDecision}`));
       router.refresh();
     } catch { setNotice(t("rfxWorkspace.discovery.pursuit.error")); }
@@ -95,7 +102,8 @@ export function OpportunityAssessmentWorkspace({ workspace, returnHref }: Readon
       </div></section>
       <section className={styles.gaps}><h2>{t("rfxWorkspace.discovery.pursuit.gaps")}</h2>{workspace.gaps.length ? <ul className={styles.gapList}>{workspace.gaps.map((gap) => <li key={gap.reference} data-opportunity-gap-reference={gap.reference} data-opportunity-gap-status={gap.status}><div><strong>{gap.title}</strong><span>{t(`rfxWorkspace.discovery.pursuit.gapKind.${gap.kind}`)}</span></div>{gap.current && workspace.canManage ? <label>{t("rfxWorkspace.pursuitGapStatus.label")}<select value={gapResolutions[gap.reference] ?? "open"} onChange={(event) => setGapResolutions((current) => Object.freeze({ ...current, [gap.reference]: event.target.value as ParticipantGapStatus }))}>{gapStatuses.map((status) => <option key={status} value={status}>{t(`rfxWorkspace.pursuitGapStatus.${status}`)}</option>)}</select></label> : <span>{t(`rfxWorkspace.pursuitGapStatus.${gap.status}`)}</span>}</li>)}</ul> : <p>{t("rfxWorkspace.discovery.pursuit.noGaps")}</p>}</section>
       <section className={styles.assessment}><h2>{t("rfxWorkspace.discovery.pursuit.assessment")}</h2>{dimensions.map((key) => <fieldset key={key} disabled={!workspace.canManage}><legend>{t(`rfxWorkspace.discovery.pursuit.dimension.${key}`)}</legend><label>{t("rfxWorkspace.discovery.pursuit.status")}<select value={assessment[key].state} onChange={(event) => changeDimension(key, { state: event.target.value as PursuitAssessmentState })}>{states.map((state) => <option key={state} value={state}>{t(`rfxWorkspace.discovery.pursuit.state.${state}`)}</option>)}</select></label><label>{t("rfxWorkspace.discovery.pursuit.note")}<textarea value={assessment[key].note} maxLength={600} onChange={(event) => changeDimension(key, { note: event.target.value })} /></label></fieldset>)}</section>
-      <footer className={styles.actions}><div><span>{t("rfxWorkspace.discovery.pursuit.current")} <strong>{currentPursuit ? t(`rfxWorkspace.discovery.pursuit.${currentPursuit.decision}`) : t("rfxWorkspace.pursuitFormat.undecided")}</strong></span>{notice ? <p role="status">{notice}</p> : null}{!workspace.canManage ? <p role="note">{t("rfxWorkspace.pursuitReadOnly")}</p> : null}</div><div><button type="button" disabled={busy || !workspace.canManage} onClick={() => save("watch")}>{t("rfxWorkspace.discovery.pursuit.watch")}</button><button type="button" disabled={busy || !workspace.canManage} onClick={() => save("decline")}>{t("rfxWorkspace.discovery.pursuit.decline")}</button><button type="button" disabled={busy || !workspace.canManage} data-opportunity-pursue onClick={() => save("pursue")}>{t("rfxWorkspace.discovery.pursuit.pursue")}</button></div><small>{t("rfxWorkspace.discovery.pursuit.responseUnavailable")}</small></footer>
+      {workspace.stale && workspace.canManage ? <label className={styles.reconfirm} data-opportunity-stale-reconfirmation><input type="checkbox" checked={staleInputsConfirmed} onChange={(event) => setStaleInputsConfirmed(event.target.checked)} /><span>{t("rfxWorkspace.discovery.pursuit.stale")}</span></label> : null}
+      <footer className={styles.actions}><div><span>{t("rfxWorkspace.discovery.pursuit.current")} <strong>{currentPursuit ? t(`rfxWorkspace.discovery.pursuit.${currentPursuit.decision}`) : t("rfxWorkspace.pursuitFormat.undecided")}</strong></span>{notice ? <p role="status">{notice}</p> : null}{!workspace.canManage ? <p role="note">{t("rfxWorkspace.pursuitReadOnly")}</p> : null}</div><div><button type="button" disabled={busy || !workspace.canManage || staleReviewRequired} onClick={() => save("watch")}>{t("rfxWorkspace.discovery.pursuit.watch")}</button><button type="button" disabled={busy || !workspace.canManage || staleReviewRequired} onClick={() => save("decline")}>{t("rfxWorkspace.discovery.pursuit.decline")}</button><button type="button" disabled={busy || !workspace.canManage || staleReviewRequired} data-opportunity-pursue onClick={() => save("pursue")}>{t("rfxWorkspace.discovery.pursuit.pursue")}</button></div><small>{t("rfxWorkspace.discovery.pursuit.responseUnavailable")}</small></footer>
       </div>
     </OperationalWorkspace>
   </ParticipantShell>;
