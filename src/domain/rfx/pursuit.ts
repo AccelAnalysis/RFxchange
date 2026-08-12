@@ -4,6 +4,7 @@ import type { OrganizationActionAuditEvent } from "../audit/model.ts";
 import type { OrganizationCapabilityClaim } from "../market-profile/model.ts";
 import type { OrganizationId } from "../organizations/model.ts";
 import type { OrganizationMembershipId, UserId } from "../users/model.ts";
+import type { EngagementTerm, EstimatedValue } from "./model.ts";
 import type { ResponderOpportunityProjection, RfxPublicationSnapshot } from "./publication.ts";
 
 export const OPPORTUNITY_FIT_POLICY_VERSION = 1 as const;
@@ -49,8 +50,8 @@ export interface MatchExplanation {
   readonly geographyObservation: GeographyFitState;
   readonly publishedFacts: Readonly<{
     deadline: string;
-    valueSummary: string;
-    termSummary: string;
+    estimatedValue: EstimatedValue;
+    engagementTerm: EngagementTerm;
     locationSummary: string;
   }>;
   readonly calculatedAt: string;
@@ -108,6 +109,7 @@ export interface OpportunityPursuitCommandReceipt {
   readonly requestFingerprint: string;
   readonly pursuitId: string;
   readonly resultingVersion: number;
+  readonly resultingPursuit: OpportunityPursuit;
   readonly recordedAt: string;
 }
 
@@ -185,22 +187,6 @@ export function opportunityCapabilityInputDigest(claims: readonly OrganizationCa
   });
 }
 
-function valueSummary(projection: ResponderOpportunityProjection): string {
-  const value = projection.payload.estimatedValue;
-  if (value.mode === "not-disclosed") return "Not disclosed";
-  if (value.mode === "exact") return `${value.currency} ${value.amountMinor / 100}`;
-  return `${value.currency} ${value.minimumMinor / 100}–${value.maximumMinor / 100}`;
-}
-
-function termSummary(projection: ResponderOpportunityProjection): string {
-  const term = projection.payload.engagementTerm;
-  if (term.mode === "ongoing") return "Ongoing";
-  if (term.mode === "milestone-based") return "Milestone based";
-  return term.mode === "fixed-with-options"
-    ? `${term.baseDuration.value} ${term.baseDuration.unit} with ${term.optionCount} option period${term.optionCount === 1 ? "" : "s"}`
-    : `${term.duration.value} ${term.duration.unit}`;
-}
-
 export function calculateOpportunityFit(input: Readonly<{
   organizationId: OrganizationId;
   projection: ResponderOpportunityProjection;
@@ -258,8 +244,8 @@ export function calculateOpportunityFit(input: Readonly<{
     geographyObservation,
     publishedFacts: Object.freeze({
       deadline: input.projection.payload.timing.responseDeadline ?? "",
-      valueSummary: valueSummary(input.projection),
-      termSummary: termSummary(input.projection),
+      estimatedValue: input.projection.payload.estimatedValue,
+      engagementTerm: input.projection.payload.engagementTerm,
       locationSummary: input.projection.payload.localities.map((item) => item.label).join(", "),
     }),
     calculatedAt: new Date(input.calculatedAt).toISOString(),
@@ -271,7 +257,7 @@ export function normalizePursuitAssessment(input: Partial<Record<keyof PursuitAs
   const dimension = (key: keyof PursuitAssessment): PursuitAssessmentDimension => {
     const value = input[key];
     const state = states.has(value?.state as PursuitAssessmentState) ? value!.state as PursuitAssessmentState : "not-reviewed";
-    return Object.freeze({ state, note: (value?.note ?? "").trim().replace(/\s+/g, " ").slice(0, 600) });
+    return Object.freeze({ state, note: (value?.note ?? "").slice(0, 600) });
   };
   return Object.freeze({ fit: dimension("fit"), eligibility: dimension("eligibility"), capacity: dimension("capacity"), economics: dimension("economics"), geography: dimension("geography"), gaps: dimension("gaps") });
 }

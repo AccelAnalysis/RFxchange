@@ -155,9 +155,8 @@ export class OpportunityPursuitService {
     const prior = await this.dependencies.repository.getCommand(commandId);
     if (prior) {
       if (prior.requestFingerprint !== requestFingerprint || prior.pursuitId !== id) throw new OpportunityPursuitError("conflict", "Command identity was reused for different intent.");
-      const replay = await this.dependencies.repository.getPursuit(id);
-      if (!replay || replay.version < prior.resultingVersion) throw new OpportunityPursuitError("dependency-unavailable", "Pursuit replay is temporarily unavailable.");
-      return Object.freeze({ pursuit: replay, replayed: true });
+      if (!prior.resultingPursuit || prior.resultingPursuit.id !== id || prior.resultingPursuit.version !== prior.resultingVersion) throw new OpportunityPursuitError("dependency-unavailable", "Pursuit replay is temporarily unavailable.");
+      return Object.freeze({ pursuit: prior.resultingPursuit, replayed: true });
     }
     const existing = await this.dependencies.repository.getPursuit(id);
     const expectedVersion = input.expectedVersion === null ? null : Number(input.expectedVersion);
@@ -175,12 +174,17 @@ export class OpportunityPursuitService {
       createdAt: existing?.createdAt ?? now, updatedAt: now,
     });
     const eventId = opaque("opppursuitevent", String(scope.organizationId), commandId);
-    const command: OpportunityPursuitCommandReceipt = Object.freeze({ schemaVersion: 1, id: commandId, organizationId: scope.organizationId, action: "pursuit.save", requestFingerprint, pursuitId: id, resultingVersion: pursuit.version, recordedAt: now });
+    const command: OpportunityPursuitCommandReceipt = Object.freeze({ schemaVersion: 1, id: commandId, organizationId: scope.organizationId, action: "pursuit.save", requestFingerprint, pursuitId: id, resultingVersion: pursuit.version, resultingPursuit: pursuit, recordedAt: now });
     const event: OpportunityPursuitEvent = Object.freeze({ schemaVersion: 1, id: eventId, organizationId: scope.organizationId, actorUserId: scope.userId, actorMembershipId: scope.membershipId, kind: existing ? "pursuit-updated" : "pursuit-created", pursuitId: id, pursuitVersion: pursuit.version, decision: nextDecision, commandId, occurredAt: now });
     const audit = createOrganizationActionAuditEvent(authority.context.user, authority.membership, authority.organization, { id: opaque("audit", String(scope.organizationId), commandId), action: existing ? "opportunity.pursuit-updated" : "opportunity.pursuit-created", occurredAt: now });
     try {
       const saved = await this.dependencies.repository.savePursuit({ record: pursuit, expectedVersion, expectedFitSnapshotId, actingUserWatchId: opportunityWatchId(String(scope.organizationId), String(scope.userId), result.explanation.opportunityReference), command, event, audit });
-      return Object.freeze({ pursuit, replayed: saved === "replayed" });
+      if (saved === "replayed") {
+        const committed = await this.dependencies.repository.getCommand(commandId);
+        if (!committed?.resultingPursuit || committed.resultingPursuit.id !== id || committed.resultingPursuit.version !== committed.resultingVersion) throw new OpportunityPursuitError("dependency-unavailable", "Pursuit replay is temporarily unavailable.");
+        return Object.freeze({ pursuit: committed.resultingPursuit, replayed: true });
+      }
+      return Object.freeze({ pursuit, replayed: false });
     } catch (error) {
       throw new OpportunityPursuitError("conflict", error instanceof Error ? error.message : "Pursuit changed before persistence.");
     }

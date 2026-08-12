@@ -98,6 +98,11 @@ export class FirestoreOpportunityPursuitRepository implements OpportunityPursuit
   }
 
   savePursuit(bundle: Parameters<OpportunityPursuitRepository["savePursuit"]>[0]): Promise<"created" | "replayed"> {
+    if (
+      bundle.command.resultingVersion !== bundle.record.version ||
+      bundle.command.resultingPursuit.id !== bundle.record.id ||
+      JSON.stringify(bundle.command.resultingPursuit) !== JSON.stringify(bundle.record)
+    ) throw new Error("Opportunity pursuit command result does not match the persisted record.");
     const pursuitRef = this.db.collection(PURSUITS).doc(bundle.record.id);
     const fitRef = this.db.collection(FITS).doc(bundle.expectedFitSnapshotId);
     const projectionRef = this.db.collection(PROJECTIONS).doc(bundle.record.opportunityReference);

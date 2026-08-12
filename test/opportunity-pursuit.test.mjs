@@ -36,6 +36,8 @@ test("RSP-001/002 requires exact confirmed AMACS alignment and explains gaps wit
   assert.ok(explanation.gaps.some((item) => item.kind === "missing-capability"));
   assert.ok(explanation.gaps.some((item) => item.kind === "evidence-confirmation"));
   assert.equal(explanation.geographyObservation, "aligned");
+  assert.deepEqual(explanation.publishedFacts.estimatedValue, projection.payload.estimatedValue);
+  assert.deepEqual(explanation.publishedFacts.engagementTerm, projection.payload.engagementTerm);
   assert.doesNotMatch(JSON.stringify(explanation), /score|percent|qualified|award likelihood/i);
 });
 
@@ -52,8 +54,8 @@ test("RSP-003/004/006 identities, review normalization, and organization input d
   assert.equal(digest, opportunityCapabilityInputDigest([claim()], ["county-51013"]));
   assert.match(opportunityPursuitId("org-responder", projection.reference), /^opppursuit_[a-f0-9]{40}$/);
   assert.match(opportunityFitSnapshotId({ organizationId: "org-responder", reference: projection.reference, projectionVersion: 9, projectionDigest: projection.digest, capabilityInputDigest: digest }), /^oppfit_[a-f0-9]{40}$/);
-  const assessment = normalizePursuitAssessment({ fit: { state: "acceptable", note: "  confirmed   by team " }, capacity: { state: "unsupported", note: "x" } });
-  assert.deepEqual(assessment.fit, { state: "acceptable", note: "confirmed by team" });
+  const assessment = normalizePursuitAssessment({ fit: { state: "acceptable", note: "  confirmed\n  by team " }, capacity: { state: "unsupported", note: "x" } });
+  assert.deepEqual(assessment.fit, { state: "acceptable", note: "  confirmed\n  by team " });
   assert.equal(assessment.capacity.state, "not-reviewed");
 });
 
@@ -112,4 +114,53 @@ test("RSP-001/002 read-only participants can inspect fit and legacy publications
   assert.deepEqual(workspace.explanation.attribution, ["discovered", "potential-match"]);
   assert.equal(fitSnapshots.length, 1);
   assert.equal(fitSnapshots[0].explanation.opportunityProjectionDigest, projection.digest);
+});
+
+test("RSP-004 exact command replay returns the originally committed pursuit version", async () => {
+  const context = Object.freeze({
+    user: Object.freeze({ id: "user", name: "Manager", primaryEmail: "manager@example.test", login: Object.freeze({ provider: "firebase", subject: "firebase-manager" }), security: Object.freeze({ mfaEnabled: false, credentialVersion: 1 }), createdAt: NOW, updatedAt: NOW }),
+    authentication: Object.freeze({ provider: "firebase", subject: "firebase-manager", authenticatedAt: NOW, issuedAt: NOW, expiresAt: "2026-08-12T13:00:00.000Z", source: "id-token" }),
+  });
+  const organization = Object.freeze({ id: "org-responder", createdAt: NOW, updatedAt: NOW });
+  const membership = Object.freeze({ id: "membership", userId: "user", organizationId: "org-responder", status: "active", createdAt: NOW, updatedAt: NOW });
+  const authorization = Object.freeze({ membershipId: "membership", userId: "user", organizationId: "org-responder", roleKey: "response-manager", permissions: Object.freeze(["response.create"]), createdAt: NOW, updatedAt: NOW });
+  let committedCommand = null;
+  let currentPursuit = null;
+  const service = new OpportunityPursuitService({
+    now: () => NOW,
+    authorization: {
+      accountSecurity: { inspect: async () => Object.freeze({ provider: "firebase", subject: "firebase-manager", email: "manager@example.test", emailVerified: true, disabled: false, mfaEnrolled: false, tokensValidAfter: "2026-08-12T11:00:00.000Z", lastSignInAt: NOW }) },
+      organizations: { getById: async () => organization },
+      memberships: { getById: async () => membership },
+      authorizations: { getByMembershipId: async () => authorization },
+      restrictions: { getForOrganization: async () => null, getForMembership: async () => null },
+    },
+    repository: {
+      getProjection: async () => projection,
+      getPublicationSnapshotByReference: async () => null,
+      listCapabilityClaims: async () => Object.freeze([claim()]),
+      getServiceGeographyIds: async () => Object.freeze(["county-51013"]),
+      getPursuit: async () => currentPursuit,
+      getFitSnapshot: async () => null,
+      recordFit: async () => "created",
+      getCommand: async () => committedCommand,
+      savePursuit: async (bundle) => {
+        committedCommand = bundle.command;
+        currentPursuit = bundle.record;
+        return "created";
+      },
+    },
+  });
+  const scope = Object.freeze({ context, organizationId: "org-responder", userId: "user", membershipId: "membership" });
+  const explained = await service.explain(scope, projection.reference);
+  const input = Object.freeze({ commandId: "command-replay", reference: projection.reference, expectedVersion: null, expectedFitSnapshotId: explained.fitSnapshotId, decision: "pursue", assessment: Object.freeze({ fit: Object.freeze({ state: "acceptable", note: "Reviewed\nverbatim" }) }) });
+  const first = await service.save(scope, input);
+  assert.equal(first.replayed, false);
+  assert.equal(first.pursuit.version, 1);
+  currentPursuit = Object.freeze({ ...first.pursuit, decision: "decline", version: 2, updatedAt: "2026-08-12T12:01:00.000Z" });
+  const replay = await service.save(scope, input);
+  assert.equal(replay.replayed, true);
+  assert.equal(replay.pursuit.version, 1);
+  assert.equal(replay.pursuit.decision, "pursue");
+  assert.equal(replay.pursuit.assessment.fit.note, "Reviewed\nverbatim");
 });
