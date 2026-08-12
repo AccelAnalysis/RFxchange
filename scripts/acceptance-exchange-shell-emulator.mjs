@@ -2011,8 +2011,9 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.match(watch.id, /^oppwatch_[a-f0-9]{40}$/);
     const publishedProjection = (await db.collection("rfxOpportunityProjections").doc(previewEvidence.reference).get()).data();
     externalProjectionReference = `opp_external_${createHash("sha256").update(runId).digest("hex").slice(0, 32)}`;
+    const externalProjection = { ...publishedProjection, reference: externalProjectionReference, issuerOrganizationIndexKey: externalOrganizationIds.harbor };
     await Promise.all([
-      db.collection("rfxOpportunityProjections").doc(externalProjectionReference).set({ ...publishedProjection, reference: externalProjectionReference, issuerOrganizationIndexKey: externalOrganizationIds.harbor }),
+      db.collection("rfxOpportunityProjections").doc(externalProjectionReference).set(externalProjection),
       db.collection("organizationCapabilityClaims").doc(capabilityClaimId).set(record({ id: capabilityClaimId, organizationId, capabilityId: publishedProjection.requirementIndex[0].capabilityId, amacsReleaseVersion: publishedProjection.requirementIndex[0].amacsReleaseVersion, labelSnapshot: publishedProjection.payload.requirements[0].capabilityLabel, definitionSnapshot: publishedProjection.payload.requirements[0].capabilityDefinition, domainId: "AMACS-DOM-000001", domainLabelSnapshot: "Operations", familyId: "AMACS-FAM-000001", familyLabelSnapshot: "Resilience", entityScope: "reporting_entity", marketRoleIds: [], deliveryRoles: ["prime"], serviceGeographyIds: [String(PORTSMOUTH_CONTROLLED_LOCALITY.id)], specialties: [], capacity: null, evidenceIds: [], assertionStatus: "self_reported", visibility: "network", source: { kind: "manual" }, assertedByUserId: seed.userId, assertedByMembershipId: membershipId, createdAt: now, updatedAt: now })),
     ]);
     await authorizationRef.set({
@@ -2038,11 +2039,28 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     const pursuitSnapshot = await db.collection("opportunityPursuits").where("organizationId", "==", organizationId).where("opportunityReference", "==", externalProjectionReference).get();
     assert.equal(pursuitSnapshot.size, 1);
     assert.equal(pursuitSnapshot.docs[0].data().decision, "pursue");
+    await db.collection("rfxOpportunityProjections").doc(externalProjectionReference).set({ ...externalProjection, mode: "withdrawn" });
+    await navigate(cdp, `${baseUrl}/opportunities/${externalProjectionReference}/assess?returnTo=${encodeURIComponent(assessmentReturn)}`);
+    await waitForExpression(cdp, `document.querySelector('[data-opportunity-assessment-unavailable="not-found"]') !== null`, "withdrawn opportunity bounded recovery");
+    const unavailableView = await evaluate(cdp, `({ shell: document.querySelector('[data-participant-shell]') !== null, operational: document.querySelector('[data-participant-workspace="operational"]') !== null, backHref: document.querySelector('[data-opportunity-assessment-unavailable] nav a')?.getAttribute('href'), rootError: document.body.innerText.includes('Something went wrong') })`);
+    assert.equal(unavailableView.shell, true);
+    assert.equal(unavailableView.operational, true);
+    assert.equal(unavailableView.backHref, assessmentReturn);
+    assert.equal(unavailableView.rootError, false);
+    await db.collection("rfxOpportunityProjections").doc(externalProjectionReference).set({ ...externalProjection, requirementIndex: null, issuerOrganizationIndexKey: null });
+    await navigate(cdp, `${baseUrl}/opportunities/${externalProjectionReference}/assess?returnTo=${encodeURIComponent(assessmentReturn)}`);
+    await waitForExpression(cdp, `document.querySelector('[data-opportunity-assessment-unavailable="dependency-unavailable"]') !== null`, "missing governed fit source bounded recovery");
+    const dependencyView = await evaluate(cdp, `({ retry: document.querySelectorAll('[data-opportunity-assessment-unavailable] nav a').length === 2, backHref: document.querySelector('[data-opportunity-assessment-unavailable] nav a')?.getAttribute('href') })`);
+    assert.equal(dependencyView.retry, true);
+    assert.equal(dependencyView.backHref, assessmentReturn);
+    await db.collection("rfxOpportunityProjections").doc(externalProjectionReference).set(externalProjection);
     pursuitEvidence = Object.freeze({
       opportunityReference: externalProjectionReference,
       attribution: Object.freeze(["discovered", "potential-match"]),
       decision: pursuitSnapshot.docs[0].data().decision,
       version: pursuitSnapshot.docs[0].data().version,
+      boundedUnavailableRecovery: unavailableView.shell && unavailableView.operational && !unavailableView.rootError,
+      dependencyRetryRecovery: dependencyView.retry,
       privateIndicesSerialized: assessmentView.indexLeak,
       overflowPx: assessmentView.overflow,
     });

@@ -143,7 +143,7 @@ export class OpportunityPursuitService {
     decision: string;
     assessment: Partial<Record<keyof PursuitAssessment, Readonly<{ state?: string; note?: string }>>>;
   }>): Promise<Readonly<{ pursuit: OpportunityPursuit; replayed: boolean }>> {
-    const authority = await this.authorizeWrite(scope);
+    await this.authorizeWrite(scope);
     const commandId = stable(input.commandId, "Command identity");
     const expectedFitSnapshotId = stable(input.expectedFitSnapshotId, "Fit snapshot identity");
     const result = await this.calculate(scope, input.reference);
@@ -176,7 +176,8 @@ export class OpportunityPursuitService {
     const eventId = opaque("opppursuitevent", String(scope.organizationId), commandId);
     const command: OpportunityPursuitCommandReceipt = Object.freeze({ schemaVersion: 1, id: commandId, organizationId: scope.organizationId, action: "pursuit.save", requestFingerprint, pursuitId: id, resultingVersion: pursuit.version, resultingPursuit: pursuit, recordedAt: now });
     const event: OpportunityPursuitEvent = Object.freeze({ schemaVersion: 1, id: eventId, organizationId: scope.organizationId, actorUserId: scope.userId, actorMembershipId: scope.membershipId, kind: existing ? "pursuit-updated" : "pursuit-created", pursuitId: id, pursuitVersion: pursuit.version, decision: nextDecision, commandId, occurredAt: now });
-    const audit = createOrganizationActionAuditEvent(authority.context.user, authority.membership, authority.organization, { id: opaque("audit", String(scope.organizationId), commandId), action: existing ? "opportunity.pursuit-updated" : "opportunity.pursuit-created", occurredAt: now });
+    const commitAuthority = await this.authorizeWrite(scope);
+    const audit = createOrganizationActionAuditEvent(commitAuthority.context.user, commitAuthority.membership, commitAuthority.organization, { id: opaque("audit", String(scope.organizationId), commandId), action: existing ? "opportunity.pursuit-updated" : "opportunity.pursuit-created", occurredAt: now });
     try {
       const saved = await this.dependencies.repository.savePursuit({ record: pursuit, expectedVersion, expectedFitSnapshotId, actingUserWatchId: opportunityWatchId(String(scope.organizationId), String(scope.userId), result.explanation.opportunityReference), command, event, audit });
       if (saved === "replayed") {

@@ -2,8 +2,10 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { OpportunityAssessmentWorkspace } from "@/src/components/rfx/OpportunityAssessmentWorkspace";
+import { OpportunityAssessmentUnavailable } from "@/src/components/rfx/OpportunityAssessmentUnavailable";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
+import { OpportunityPursuitError, type OpportunityPursuitWorkspace } from "@/src/application/rfx/opportunity-pursuit-service";
 import { createServerOpportunityPursuitService } from "@/src/infrastructure/rfx/opportunity-pursuit-runtime";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +34,14 @@ export default async function OpportunityAssessmentPage({ params, searchParams }
   if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   if (access.state.lifecycleState !== "open-platform") redirect(access.state.controlledPlatformUrl ?? "/join");
-  const workspace = await createServerOpportunityPursuitService().workspace({ context: access.context, organizationId: access.membership.organizationId, userId: access.context.user.id, membershipId: access.membership.id }, reference);
-  return <OpportunityAssessmentWorkspace workspace={workspace} returnHref={returnHref} />;
+  let outcome: Readonly<{ kind: "available"; workspace: OpportunityPursuitWorkspace }> | Readonly<{ kind: "unavailable"; error: OpportunityPursuitError }>;
+  try {
+    const workspace = await createServerOpportunityPursuitService().workspace({ context: access.context, organizationId: access.membership.organizationId, userId: access.context.user.id, membershipId: access.membership.id }, reference);
+    outcome = Object.freeze({ kind: "available", workspace });
+  } catch (error) {
+    if (!(error instanceof OpportunityPursuitError)) throw error;
+    outcome = Object.freeze({ kind: "unavailable", error });
+  }
+  if (outcome.kind === "unavailable") return <OpportunityAssessmentUnavailable errorCode={outcome.error.code} returnHref={returnHref} retryHref={currentHref} />;
+  return <OpportunityAssessmentWorkspace workspace={outcome.workspace} returnHref={returnHref} />;
 }

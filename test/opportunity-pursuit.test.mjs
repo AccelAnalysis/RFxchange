@@ -164,3 +164,48 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
   assert.equal(replay.pursuit.decision, "pursue");
   assert.equal(replay.pursuit.assessment.fit.note, "Reviewed\nverbatim");
 });
+
+test("RSP-003 revalidates current account authority at the pursuit commit boundary", async () => {
+  const context = Object.freeze({
+    user: Object.freeze({ id: "user", name: "Manager", primaryEmail: "manager@example.test", login: Object.freeze({ provider: "firebase", subject: "firebase-manager" }), security: Object.freeze({ mfaEnabled: false, credentialVersion: 1 }), createdAt: NOW, updatedAt: NOW }),
+    authentication: Object.freeze({ provider: "firebase", subject: "firebase-manager", authenticatedAt: NOW, issuedAt: NOW, expiresAt: "2026-08-12T13:00:00.000Z", source: "id-token" }),
+  });
+  const organization = Object.freeze({ id: "org-responder", createdAt: NOW, updatedAt: NOW });
+  const membership = Object.freeze({ id: "membership", userId: "user", organizationId: "org-responder", status: "active", createdAt: NOW, updatedAt: NOW });
+  const authorization = Object.freeze({ membershipId: "membership", userId: "user", organizationId: "org-responder", roleKey: "response-manager", permissions: Object.freeze(["response.create"]), createdAt: NOW, updatedAt: NOW });
+  let accountInspections = 0;
+  let persistenceAttempted = false;
+  const service = new OpportunityPursuitService({
+    now: () => NOW,
+    authorization: {
+      accountSecurity: { inspect: async () => {
+        accountInspections += 1;
+        return Object.freeze({ provider: "firebase", subject: "firebase-manager", email: "manager@example.test", emailVerified: true, disabled: accountInspections > 1, mfaEnrolled: false, tokensValidAfter: "2026-08-12T11:00:00.000Z", lastSignInAt: NOW });
+      } },
+      organizations: { getById: async () => organization },
+      memberships: { getById: async () => membership },
+      authorizations: { getByMembershipId: async () => authorization },
+      restrictions: { getForOrganization: async () => null, getForMembership: async () => null },
+    },
+    repository: {
+      getProjection: async () => projection,
+      getPublicationSnapshotByReference: async () => null,
+      listCapabilityClaims: async () => Object.freeze([claim()]),
+      getServiceGeographyIds: async () => Object.freeze(["county-51013"]),
+      getPursuit: async () => null,
+      getFitSnapshot: async () => null,
+      recordFit: async () => "created",
+      getCommand: async () => null,
+      savePursuit: async () => { persistenceAttempted = true; return "created"; },
+    },
+  });
+  const scope = Object.freeze({ context, organizationId: "org-responder", userId: "user", membershipId: "membership" });
+  const explained = await service.explain(scope, projection.reference);
+  accountInspections = 0;
+  await assert.rejects(
+    service.save(scope, { commandId: "command-authority-race", reference: projection.reference, expectedVersion: null, expectedFitSnapshotId: explained.fitSnapshotId, decision: "pursue", assessment: {} }),
+    (error) => error?.code === "forbidden",
+  );
+  assert.equal(accountInspections, 2);
+  assert.equal(persistenceAttempted, false);
+});

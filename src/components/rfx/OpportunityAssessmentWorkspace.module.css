@@ -6,6 +6,11 @@
 .header p { max-width: 50rem; color: #52605b; }
 .header a { color: inherit; white-space: nowrap; }
 .truth { display: grid; gap: .35rem; padding: 1rem 1.2rem; border-left: .25rem solid #17755b; background: #e6efe9; }
+.unavailable { display: grid; gap: 1rem; max-width: 48rem; margin-block: clamp(3rem, 10vh, 8rem); padding: clamp(1.25rem, 4vw, 2.5rem); background: rgba(255,255,255,.78); border: 1px solid #d7d0c1; border-radius: 1rem; }
+.unavailable h1, .unavailable p { margin: 0; }
+.unavailableActions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.unavailableActions a { padding: .65rem 1rem; border: 1px solid #527066; border-radius: 2rem; color: inherit; }
+.unavailableActions a:first-child { background: #173229; color: white; }
 .attribution { display: flex; gap: .5rem; padding-block: 1.25rem; }
 .facts, .requirements, .gaps, .assessment { margin-block: 1rem; padding: clamp(1rem, 2.5vw, 1.75rem); background: rgba(255,255,255,.72); border: 1px solid #d7d0c1; border-radius: 1rem; }
 .facts dl { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 1rem; }
