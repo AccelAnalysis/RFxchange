@@ -149,7 +149,7 @@ test("marker hierarchy and account utility express organization identity without
   assert.match(navigation, /aria-label=\{buttonLabel\}/);
 });
 
-test("organization actions are lens-aware and RFx remains unavailable", () => {
+test("organization actions expose private RFx creation only for the selected home organization", () => {
   const contract = loadBehavioralContract();
   assert.equal(contract.selfActions.find(({ id }) => id === "manage-profile").href, "/organization-profile");
   assert.equal(contract.externalActions.find(({ id }) => id === "manage-profile").availability, "unavailable");
@@ -158,9 +158,12 @@ test("organization actions are lens-aware and RFx remains unavailable", () => {
   assert.match(contract.providerActions.find(({ id }) => id === "view-resources").href, /^\/resources\?provider=/);
   assert.deepEqual(contract.selfActions.find(({ id }) => id === "opportunities-rfx"), {
     id: "opportunities-rfx",
-    availability: "unavailable",
-    href: null,
-    reason: "rfx-runtime-unavailable",
+    availability: "available",
+    href: "/opportunities",
+    reason: null,
+  });
+  assert.deepEqual(contract.externalActions.find(({ id }) => id === "opportunities-rfx"), {
+    id: "opportunities-rfx", availability: "unavailable", href: null, reason: "self-only",
   });
 });
 

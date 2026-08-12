@@ -42,7 +42,7 @@ For RFx implementation:
 
 Merged `main` at `42c9a33499d9c37af74b6f61d7e1a8f823d0e0f8` includes PR #150, **Define the Exchange interaction architecture**. Wave 3, AMACS 0.5.0 reconciliation and the AI/AMACS Interpretation Foundation satisfy the reviewed prerequisites for Slice 4.1 planning.
 
-The Slice 4.1 authority concludes that `ISS-001`, `ISS-002` and `ISS-003` are dependency-eligible for a later, separately authorized runtime implementation. It makes no tracker change. The required implementation remains bounded to:
+The Slice 4.1 authority governs the implemented `ISS-001`, `ISS-002` and `ISS-003` runtime. The implementation remains bounded to:
 
 - one organization-owned RFx aggregate;
 - one `draft` lifecycle state;
@@ -55,14 +55,14 @@ It does not authorize publication, opportunity projection, beacons, discovery, f
 
 Stabilization 2C remains incomplete and isolated to release engineering: the App Hosting backend and GitHub connection now exist, but trustworthy build-time source-SHA binding and an accepted same-SHA live rollout proof do not. No canonical dependency authority makes 2C a prerequisite for RFx Core product-domain implementation.
 
-Canonical totals remain **438 total · 152 Done · 286 Not Started**, with Wave 4 RFx Core **0/41** and B6b intentionally pending.
+Canonical totals are **438 total · 155 Done · 283 Not Started**, with Wave 4 RFx Core **3/41** and B6b intentionally pending.
 
 ## Explicit boundaries
 
-This package and the Slice 4.1 documentation authority:
+This package and the Slice 4.1 runtime:
 
-- change no Feature-ID status or tracker total;
-- create no live RFx, opportunity, pursuit, response, team, submission, evaluation, award or outcome record;
+- complete only `ISS-001`, `ISS-002` and `ISS-003`;
+- create only private organization-owned RFx drafts, never an opportunity, pursuit, response, team, submission, evaluation, award or outcome record;
 - add no fake map, organization, opportunity, statistics or market activity;
 - do not import prototype HTML/CSS/JavaScript into production;
 - do not expose AMACS implementation identifiers as ordinary participant language;

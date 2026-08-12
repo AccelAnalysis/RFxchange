@@ -100,7 +100,7 @@ assert.ok(
     intelligenceIndex < referralsIndex,
   "The permanent participant lenses must retain the governed order.",
 );
-assert.match(participantLensRegistry, /id: "opportunities-rfx"[\s\S]*?href: null[\s\S]*?availability: "unavailable"/);
+assert.match(participantLensRegistry, /id: "opportunities-rfx"[\s\S]*?href: "\/opportunities"[\s\S]*?availability: "enabled"/);
 assert.match(participantLensRegistry, /id: "resources"[\s\S]*?href: "\/resources"/);
 assert.match(participantLensRegistry, /id: "intelligence"[\s\S]*?href: "\/geography\/canvas"/);
 assert.match(participantLensRegistry, /id: "referrals"[\s\S]*?href: "\/referrals"/);
@@ -111,8 +111,7 @@ assert.match(participantLensRegistry, /"quick-start":[\s\S]*?\/quick-start/);
 assert.match(participantWorkspace, /ParticipantTopNavigation/);
 assert.match(participantWorkspace, /usePersistentParticipantShell/);
 assert.match(participantTopNavigation, /PARTICIPANT_LENSES\.map/);
-assert.match(participantTopNavigation, /aria-disabled="true"/);
-assert.match(participantTopNavigation, /participantNavigation\.notYetAvailable/);
+assert.match(participantTopNavigation, /PARTICIPANT_LENSES\.map/);
 assert.match(participantTopNavigation, /role="menu"/);
 assert.match(dictionary, /participantNavigation/);
 
@@ -136,7 +135,7 @@ assert.match(authority, /438 total · 152 Done · 286 Not Started/);
 assert.match(authority, /does not make Opportunities\/RFx available/);
 assert.match(authority, /does not implement any RFx Feature ID/);
 assert.match(tracker, /438 total/);
-assert.match(tracker, /152 Done/);
-assert.match(tracker, /286 Not Started/);
+assert.match(tracker, /155 Done/);
+assert.match(tracker, /283 Not Started/);
 
 console.log("Post-Wave 3 Stabilization 6 data correctness and permanent participant-lens reconciliation validated.");

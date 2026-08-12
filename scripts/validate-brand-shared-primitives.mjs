@@ -161,12 +161,11 @@ assert.ok(
   "The governed participant lenses are not in the required order.",
 );
 assert.ok(
-  participantRegistry.includes('href: null') &&
-    participantRegistry.includes('availability: "unavailable"') &&
-    participantNavigation.includes('aria-disabled="true"') &&
-    participantNavigation.includes("participantNavigation.notYetAvailable") &&
+  participantRegistry.includes('href: "/opportunities"') &&
+    participantRegistry.includes('availability: "enabled"') &&
+    participantNavigation.includes("PARTICIPANT_LENSES.map") &&
     !participantRegistry.includes('id: "network"'),
-  "The persistent shell must expose Opportunities/RFx truthfully without restoring Network as a peer lens.",
+  "The persistent shell must route the now-authorized Opportunities/RFx runtime without restoring Network as a peer lens.",
 );
 assert.ok(
   participantNavigation.includes('role="menu"') &&

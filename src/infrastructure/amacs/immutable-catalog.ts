@@ -164,6 +164,10 @@ export class ImmutableAmacsCatalog implements AmacsCatalogPort {
     return this.registries.registries["market-roles"] ?? [];
   }
 
+  async listRequestFamilies(): Promise<readonly AmacsRegistryRecord[]> {
+    return this.registries.registries["request-families"] ?? [];
+  }
+
   private registryRecord(registry: string, key: string, id: string): AmacsRegistryRecord | null {
     return this.registries.registries[registry]?.find((record) => recordId(record, key) === id) ?? null;
   }

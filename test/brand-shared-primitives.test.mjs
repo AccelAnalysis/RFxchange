@@ -71,13 +71,12 @@ test("Participant workspace consumes shared B2 primitives through one persistent
   assert.match(persistentShell, /data-participant-content-region/);
   assert.match(participant, /if \(persistent\) return <>\{children\}<\/>/);
   assert.match(participant, /registerExplicitActiveItem\(activeItem\)/);
-  assert.match(participant, /Opportunity and resource layers remain unavailable/);
+  assert.match(participant, /Opportunity map layers remain unavailable until authorized publication exists/);
 
   assert.match(
     participantRegistry,
-    /id: "opportunities-rfx"[\s\S]*?href: null[\s\S]*?availability: "unavailable"/,
+    /id: "opportunities-rfx"[\s\S]*?href: "\/opportunities"[\s\S]*?availability: "enabled"/,
   );
-  assert.match(participantNavigation, /aria-disabled="true"/);
-  assert.match(participantNavigation, /participantNavigation\.notYetAvailable/);
+  assert.match(participantNavigation, /PARTICIPANT_LENSES\.map/);
   assert.doesNotMatch(participantRegistry, /id: "network"/);
 });

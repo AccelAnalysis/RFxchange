@@ -197,8 +197,7 @@ export function SearchFilterOverlay() {
             <span>Visible layer</span>
             <strong>Organizations</strong>
             <p>
-              Opportunity and resource layers remain unavailable until their approved
-              product slices are complete.
+              Opportunity map layers remain unavailable until authorized publication exists.
             </p>
           </div>
         </details>

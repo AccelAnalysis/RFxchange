@@ -16,9 +16,9 @@ type ParticipantLensLabelKey =
   | "participantNavigation.referrals";
 
 type ParticipantEnabledLensDefinition = Readonly<{
-  id: Exclude<ParticipantLensId, "opportunities-rfx">;
+  id: ParticipantLensId;
   labelKey: ParticipantLensLabelKey;
-  href: "/resources" | "/geography/canvas" | "/referrals";
+  href: "/opportunities" | "/resources" | "/geography/canvas" | "/referrals";
   availability: "enabled";
   activePathPrefixes: readonly string[];
 }>;
@@ -38,16 +38,16 @@ export type ParticipantLensDefinition =
 /**
  * Stable participant information architecture.
  *
- * Availability controls action, not whether a governed permanent lens exists. The unavailable
- * Opportunities/RFx lens deliberately has no href and can never resolve as the current page.
+ * Availability controls action, not whether a governed permanent lens exists. Opportunities/RFx
+ * becomes enabled only when an owning slice supplies a real authorized runtime.
  */
 export const PARTICIPANT_LENSES: readonly ParticipantLensDefinition[] = Object.freeze([
   Object.freeze({
     id: "opportunities-rfx",
     labelKey: "participantNavigation.opportunitiesRfx",
-    href: null,
-    availability: "unavailable",
-    activePathPrefixes: Object.freeze([]) as readonly [],
+    href: "/opportunities",
+    availability: "enabled",
+    activePathPrefixes: Object.freeze(["/opportunities"]),
   }),
   Object.freeze({
     id: "resources",
@@ -79,6 +79,7 @@ export const PARTICIPANT_UTILITY_DESTINATIONS = Object.freeze({
 
 const PERSISTENT_PARTICIPANT_PATH_PREFIXES = Object.freeze([
   "/exchange",
+  "/opportunities",
   "/geography/canvas",
   "/resources",
   "/referrals",

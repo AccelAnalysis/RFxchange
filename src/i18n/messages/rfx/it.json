@@ -1,0 +1,7 @@
+{
+  "ariaLabel": "Area bozze RFx", "eyebrow": "Opportunità / RFx", "title": "Crea una bozza RFx governata", "intro": "Scegli il tipo di richiesta adatto alla conversazione di mercato. L’organizzazione possiede ogni bozza creata qui.",
+  "privateDraft": "Bozza privata", "privateDraftDetail": "Le bozze non sono pubblicate, visibili sulla mappa, individuabili, abbinate o inviate.",
+  "permissionTitle": "Creazione non disponibile", "permissionBody": "Il ruolo attuale non consente la creazione di RFx. Nessuna informazione sulle bozze è stata divulgata.",
+  "draftsLabel": "Bozze RFx dell’organizzazione", "draftsTitle": "Bozze", "empty": "Nessuna bozza.", "version": "Versione {version}", "draftState": "Bozza", "lifecycle": "Ciclo di vita governato", "release": "Autorità del tipo", "versionLabel": "Versione bozza", "changeType": "Cambia tipo di richiesta", "nextBoundary": "Esigenza, ambito, luogo, valore, requisiti, preparazione e pubblicazione saranno disponibili solo in passaggi governati successivi.",
+  "createTitle": "Scegli un tipo di richiesta", "createBody": "Questa prima azione crea solo il nucleo RFx privato e la relativa istantanea governata.", "chooseType": "Tipo di richiesta", "createAction": "Crea bozza privata", "creating": "Creazione bozza…", "created": "Bozza RFx privata creata.", "changed": "Tipo di richiesta aggiornato con una nuova versione.", "recovered": "La modifica già completata è stata recuperata senza duplicazioni.", "error": "Impossibile completare l’azione RFx."
+}

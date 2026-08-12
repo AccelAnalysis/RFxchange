@@ -330,6 +330,22 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ISS-001/002/003 RFx drafts are private organization-owned server aggregates. RFx events
+    // and idempotency receipts are immutable evidence; no draft is a public opportunity projection.
+    match /rfxAggregates/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /rfxEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /rfxCommands/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /referralEducationAcknowledgements/{documentId} {
       allow read, create: if serverManagedOnly();
       allow update, delete: if false;

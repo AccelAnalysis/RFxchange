@@ -100,7 +100,7 @@ That documentation authority is merged but leaves all three Feature IDs Not Star
 
 Wave 2 is complete. Wave 3 Slices 3.1 through 3.8 and Brand Gates B0–B6a are merged, and the configured-browser/zero-residual Wave 3 exit accepted Network at 38/38. B6b remains intentionally pending.
 
-Merged `main` at `87fb29ef3b442410deecf61a470bc94c9c013c60` includes PR #150 and the documentation-only Slice 4.1 authority from PR #158. The current active work boundary is the no-Feature-ID Exchange-shell truthfulness/performance gate based on that exact SHA.
+Merged `main` at `01767a7a5721d8a6b303532b951ef1e2f2b497c7` includes PR #160's accepted Exchange-shell truthfulness/performance convergence. The current active work boundary is Slice 4.1 under `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md`.
 
 The dependency result remains:
 
@@ -109,11 +109,11 @@ The dependency result remains:
 - AI/AMACS foundation: satisfied and reusable, but not required for manual Slice 4.1 request-family selection;
 - organization authority/tenancy/audit/concurrency foundations: satisfied by prior cross-cutting implementation;
 - Exchange Interaction Architecture: satisfied by PR #150 and reconciled by the active shell gate;
-- Slice 4.1 documentation authority: merged, runtime still unstarted;
+- Slice 4.1 RFx kernel: implemented and accepted on its candidate tree for `ISS-001`, `ISS-002` and `ISS-003`;
 - Stabilization 2C: isolated release engineering, not a product prerequisite; and
 - no genuine Feature-ID dependency-map correction required.
 
-Canonical totals remain **438 total · 152 Done · 286 Not Started**, with Wave 4 RFx Core **0/41**.
+Canonical totals are **438 total · 155 Done · 283 Not Started**, with Wave 4 RFx Core **3/41**. Later Wave 4 runtime remains unimplemented pending slice-specific authority.
 
 ## Stabilization 2C boundary
 
