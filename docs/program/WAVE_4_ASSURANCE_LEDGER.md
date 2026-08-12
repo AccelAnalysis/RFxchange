@@ -4,11 +4,11 @@ The canonical tracker remains **18/41 RFx Core Done** at adoption. This ledger d
 
 | Slice | Feature IDs | Implementation PR/head | Program state | Assurance packet |
 | --- | --- | --- | --- | --- |
-| 4.1 | `ISS-001`, `ISS-002`, `ISS-003` | #161 / `10d1156d45ac90e9c10b4a2704c78fe30606a3b0` | Previously accepted — independent assurance pending | `WP-ACCEPT-W4-41` |
-| 4.2 | `ISS-005`, `ISS-006` | #163 / `d18986544881c9e81fb9a37858bccb35109724c4` | Previously accepted — independent assurance pending | `WP-ACCEPT-W4-42` |
-| 4.3 | `ISS-007`, `ISS-009`, `ISS-011` | #165 / `c07f45ffa451aafb80852e40384a5bb31cbec5cf` | Previously accepted — independent assurance pending | `WP-ACCEPT-W4-43` |
-| 4.4 | `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020`, `ACQ-009` | #167 / `8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99` | Previously accepted — independent assurance pending | `WP-ACCEPT-W4-44` |
-| 4.5 | `DSC-004`, `DSC-005`, `DSC-006`, `DSC-007`, `DSC-008` | #169 / `18bbcb56b4057927d2d7c8e57a2ca512cc60e231` | Previously accepted — independent assurance pending | `WP-ACCEPT-W4-45` |
+| 4.1 | `ISS-001`, `ISS-002`, `ISS-003` | #161 / `10d1156d45ac90e9c10b4a2704c78fe30606a3b0` | Previously accepted — independent assurance pending | `WP-ACCEPT-W4-41-45` |
+| 4.2 | `ISS-005`, `ISS-006` | #163 / `d18986544881c9e81fb9a37858bccb35109724c4` | Previously accepted — independent assurance pending | `WP-ACCEPT-W4-41-45` |
+| 4.3 | `ISS-007`, `ISS-009`, `ISS-011` | #165 / `c07f45ffa451aafb80852e40384a5bb31cbec5cf` | Previously accepted — independent assurance pending | `WP-ACCEPT-W4-41-45` |
+| 4.4 | `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020`, `ACQ-009` | #167 / `8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99` | Previously accepted — independent assurance pending | `WP-ACCEPT-W4-41-45` |
+| 4.5 | `DSC-004`, `DSC-005`, `DSC-006`, `DSC-007`, `DSC-008` | #169 / `18bbcb56b4057927d2d7c8e57a2ca512cc60e231` | Previously accepted — independent assurance pending | `WP-ACCEPT-W4-41-45` |
 | 4.6 | `RSP-001`, `RSP-002`, `RSP-003`, `RSP-004`, `RSP-006` | #171 / frozen `e70413e2e45db4b75517376acdc0700f9838a963` | Implemented — Not Verified; governance reconciliation and substantive corrections pending | `WP-RFX-46-RECONCILE`, then `WP-ACCEPT-W4-46` |
 
 ## Audit order

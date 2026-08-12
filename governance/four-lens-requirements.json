@@ -11,6 +11,7 @@
     "recordCount": 105,
     "idDigest": "517138fc932bc8be942a56434948e35cb2139a6432ce8ce4108d46436a578506",
     "originalRequirementDigest": "84821b87114b17721441933f91a2790f116570a29e696ac87a2d6d3be098d166",
+    "governanceMetadataDigest": "ee0c399d50da4bea28d9a457f6e913fd37c758b3f64a225f51bfaf4e6736a34e",
     "policy": "The first 105 adoption records are frozen in order. New requirements append; clarification or supersession never rewrites or removes an adoption record."
   },
   "statuses": [

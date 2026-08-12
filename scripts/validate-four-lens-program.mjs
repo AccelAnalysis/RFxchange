@@ -28,6 +28,7 @@ const requirements = JSON.parse(read("governance/four-lens-requirements.json"));
 const workstreams = JSON.parse(read("governance/four-lens-workstreams.json"));
 const authority = read("docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md");
 const matrix = read("docs/program/PARALLEL_DELIVERY_MATRIX.md");
+const wave4Assurance = read("docs/program/WAVE_4_ASSURANCE_LEDGER.md");
 const agents = read("AGENTS.md");
 const tracker = read("docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md");
 
@@ -49,6 +50,7 @@ const adoptionBaseline = {
   recordCount: 105,
   idDigest: "517138fc932bc8be942a56434948e35cb2139a6432ce8ce4108d46436a578506",
   originalRequirementDigest: "84821b87114b17721441933f91a2790f116570a29e696ac87a2d6d3be098d166",
+  governanceMetadataDigest: "ee0c399d50da4bea28d9a457f6e913fd37c758b3f64a225f51bfaf4e6736a34e",
 };
 assert.deepEqual(requirements.statuses, expectedStatuses);
 assert.deepEqual(requirements.acceptanceDispositions, expectedDispositions);
@@ -61,6 +63,7 @@ assert.equal(requirements.adoptionBaseline?.algorithm, adoptionBaseline.algorith
 assert.equal(requirements.adoptionBaseline?.recordCount, adoptionBaseline.recordCount);
 assert.equal(requirements.adoptionBaseline?.idDigest, adoptionBaseline.idDigest);
 assert.equal(requirements.adoptionBaseline?.originalRequirementDigest, adoptionBaseline.originalRequirementDigest);
+assert.equal(requirements.adoptionBaseline?.governanceMetadataDigest, adoptionBaseline.governanceMetadataDigest);
 assert.ok(requirements.requirements.length >= adoptionBaseline.recordCount, "The immutable adoption requirement baseline cannot shrink");
 const baselineRecords = requirements.requirements.slice(0, adoptionBaseline.recordCount);
 assert.equal(digest(baselineRecords.map((record) => record.id)), adoptionBaseline.idDigest, "Immutable adoption requirement IDs were deleted, substituted, or reordered");
@@ -68,6 +71,11 @@ assert.equal(
   digest(baselineRecords.map(({ id, originalRequirement }) => ({ id, originalRequirement }))),
   adoptionBaseline.originalRequirementDigest,
   "Immutable adoption requirement text was deleted, substituted, reordered, or rewritten",
+);
+assert.equal(
+  digest(baselineRecords.map(({ id, source, lane, dependentLanes, dependencies, acceptanceTypes }) => ({ id, source, lane, dependentLanes, dependencies, acceptanceTypes }))),
+  adoptionBaseline.governanceMetadataDigest,
+  "Immutable adoption governance source, ownership, dependency, or acceptance obligations were rewritten",
 );
 
 assert.match(authority, /Parallelize production\. Centralize product intent\. Independently certify acceptance\./);
@@ -183,11 +191,14 @@ const requiredPacketIds = [
   "WP-SHARED-COMPLETE-01",
   "WP-ACCEPT-W4-41-45",
   "WP-RFX-46-RECONCILE",
+  "WP-ACCEPT-W4-46",
   "WP-INTEL-ROADMAP-01",
   "WP-RES-INVENTORY-01",
   "WP-REF-INVENTORY-01",
 ];
 assert.deepEqual(workstreams.workPackets.map((packet) => packet.id), requiredPacketIds);
+const packetById = new Map(workstreams.workPackets.map((packet) => [packet.id, packet]));
+const lifecycleDependencyStatuses = new Set(["in-progress", "active", "reconciliation-authorized", "implemented-not-verified", "acceptance-pending", "verified", "completed", "closed"]);
 for (const packet of workstreams.workPackets) {
   assert.ok(expectedLanes.includes(packet.lane), `${packet.id} has unknown lane`);
   assert.ok(expectedPacketStatuses.includes(packet.status), `${packet.id} has unknown status ${packet.status}`);
@@ -195,6 +206,18 @@ for (const packet of workstreams.workPackets) {
   assert.ok(Array.isArray(packet.requirementIds) && Array.isArray(packet.sources) && Array.isArray(packet.dependencies), `${packet.id} needs arrays`);
   assert.ok(Array.isArray(packet.ownedPaths) && Array.isArray(packet.nonOwnedPaths) && Array.isArray(packet.acceptanceRequired), `${packet.id} needs ownership and acceptance arrays`);
   for (const requirementId of packet.requirementIds) assert.ok(ids.has(requirementId), `${packet.id} references missing requirement ${requirementId}`);
+  const dependencyIds = new Set();
+  for (const dependency of packet.dependencies) {
+    assert.ok(dependency && typeof dependency.packetId === "string" && Array.isArray(dependency.requiredStatuses) && dependency.requiredStatuses.length > 0, `${packet.id} has an incomplete packet dependency`);
+    assert.ok(packetById.has(dependency.packetId), `${packet.id} references undeclared packet dependency ${dependency.packetId}`);
+    assert.notEqual(dependency.packetId, packet.id, `${packet.id} cannot depend on itself`);
+    assert.ok(!dependencyIds.has(dependency.packetId), `${packet.id} repeats packet dependency ${dependency.packetId}`);
+    dependencyIds.add(dependency.packetId);
+    for (const status of dependency.requiredStatuses) assert.ok(expectedPacketStatuses.includes(status), `${packet.id} allows unknown dependency status ${status}`);
+    if (lifecycleDependencyStatuses.has(packet.status)) {
+      assert.ok(dependency.requiredStatuses.includes(packetById.get(dependency.packetId).status), `${packet.id} is ${packet.status} before dependency ${dependency.packetId} reached one of: ${dependency.requiredStatuses.join(", ")}`);
+    }
+  }
   const preActivation = ["ready-after-authority-merge", "frozen-until-authority-merge"].includes(packet.status);
   if (preActivation) {
     assert.equal(packet.exactBaseSha, null, `${packet.id} must leave its exact base unset until activation`);
@@ -202,6 +225,22 @@ for (const packet of workstreams.workPackets) {
   } else {
     assert.match(packet.exactBaseSha, shaPattern, `${packet.id} ${packet.status} state requires an exact base SHA`);
   }
+}
+
+const visitedPackets = new Set();
+const activePacketPath = new Set();
+const visitPacket = (packetId) => {
+  if (visitedPackets.has(packetId)) return;
+  assert.ok(!activePacketPath.has(packetId), `Work-packet dependency cycle reaches ${packetId}`);
+  activePacketPath.add(packetId);
+  for (const dependency of packetById.get(packetId).dependencies) visitPacket(dependency.packetId);
+  activePacketPath.delete(packetId);
+  visitedPackets.add(packetId);
+};
+for (const packetId of packetById.keys()) visitPacket(packetId);
+
+for (const packetId of wave4Assurance.matchAll(/`(WP-[A-Z0-9-]+)`/g)) {
+  assert.ok(packetById.has(packetId[1]), `Wave 4 assurance ledger references undeclared packet ${packetId[1]}`);
 }
 
 console.log(`Four-Lens program governance validated: ${requirements.requirements.length} immutable requirements, ${workstreams.workPackets.length} bounded work packets, and ${trackerRfxIds.length} RFx Feature IDs.`);

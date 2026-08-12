@@ -86,7 +86,7 @@ Each record retains:
 
 Original requirement text is immutable. Clarification may be appended without replacing the original intent.
 
-The machine ledger freezes its 105-record adoption baseline in order with reviewed SHA-256 digests over the complete ID sequence and the paired ID/original-text sequence. A new requirement appends after that baseline. A correction, clarification or supersession receives separate metadata or a new ID; it must not delete, reorder or rewrite an adoption record. The architecture validator fails on baseline deletion, substitution, reordering or original-text drift.
+The machine ledger freezes its 105-record adoption baseline in order with reviewed SHA-256 digests over the complete ID sequence, the paired ID/original-text sequence, and the governing source/lane/dependent-lanes/dependencies/acceptance-types metadata. A new requirement appends after that baseline. A correction, clarification or supersession receives separate mutable clarification metadata or a new ID; it must not delete, reorder, rewrite or weaken the authority or evidence obligations of an adoption record. The architecture validator fails on baseline deletion, substitution, reordering, original-text drift or governance-metadata drift.
 
 Allowed statuses are exactly:
 
