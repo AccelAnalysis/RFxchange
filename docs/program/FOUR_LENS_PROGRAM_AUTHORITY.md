@@ -4,11 +4,11 @@
 
 This authority changes delivery and acceptance governance only. It does not complete a Feature ID, change tracker arithmetic, alter a domain authority, authorize an otherwise unauthorized capability, or weaken security, privacy, lifecycle, geography, tenancy, data, brand, or product authority.
 
-The adoption snapshot is historical: merged `main` was `21c4fc080a823ae03f33ae1e58dd2752f317dc67`, the tracker was **438 total · 170 Done · 268 Not Started**, RFx Core was **18/41**, and Slice 4.6 runtime PR #171 was open and unmerged. Current program state belongs only in [`PARALLEL_DELIVERY_MATRIX.md`](PARALLEL_DELIVERY_MATRIX.md).
+The adoption snapshot is historical: merged `main` was `21c4fc080a823ae03f33ae1e58dd2752f317dc67`, the tracker was **438 total · 170 Done · 268 Not Started**, RFx Core was **18/41**, and Slice 4.6 runtime PR #171 was open and unmerged. Current program state belongs in the current program artifacts, not in remembered chat state.
 
 ## 1. Governing principle
 
-The permanent authenticated lenses remain, in exact order:
+The permanent authenticated participant lenses remain, in exact order:
 
 1. Opportunities/RFx;
 2. Resources;
@@ -25,30 +25,31 @@ Build may proceed in parallel. Merge order remains dependency-aware. Completion 
 
 ## 2. Supersession and scope
 
-For work packets governed by this authority, the former default single-active-slice or single-active-gate rule is superseded. Multiple lanes may execute concurrently only when their immutable requirements, ownership, exact branch bases, dependencies, shared paths, acceptance obligations, and stop boundaries are explicit.
+For work packets governed by this authority, the former default single-active-slice or single-active-gate rule is superseded. Multiple lanes may execute concurrently only when immutable requirements, ownership, exact activation bases, dependencies, shared paths, acceptance obligations, and stop boundaries are explicit.
 
 This supersession does not permit:
 
 - uncontrolled parallel merges;
 - work against an assumed unmerged dependency;
 - a lane to redefine another lane's domain;
-- a feature or experience to be marked complete without independent acceptance; or
+- a builder to promote its own production work to `Verified`;
+- a feature or experience to be marked complete without the required independent disposition; or
 - documentation-only authority to be treated as runtime authority.
 
 Work outside this program retains the repository's ordinary sequencing rules unless separately authorized.
 
-## 3. Permanent lanes
+## 3. Eight permanent lanes
 
 | Lane | Name | Owns | Must not do |
 | --- | --- | --- | --- |
-| 00 | Control Room | current-`main` coordination, dependency assignment, packets, branch ownership, merge order, shared-contract routing, status and reconciliation | normally implement domain runtime or certify completion |
+| 00 | Control Room | current-`main` coordination, dependency assignment, packets, activation epochs, branch ownership, merge order, shared-contract routing, status and reconciliation | normally implement domain runtime or certify production completion |
 | 01 | Shared Exchange Platform | participant shell, spatial/selected-object contracts, map/list/detail primitives, marker grammar, search/filter grammar, cross-lens context, Account utility, loading, accessibility and participant truthfulness | privately redefine a lens domain |
 | 02 | Opportunities/RFx | Wave 4 and later authorized RFx transaction runtime | redefine Shared Exchange behavior or begin an ineligible slice |
 | 03 | Intelligence | organization, capability, market, location, site, RFx/demand, resource, referral and later outcome intelligence under real-data authority | fabricate market activity or consume unaccepted private projections |
 | 04 | Resources | provider application/status, approved-provider representation, discovery, details, service geography, resource and request experience | grant provider status or duplicate Shared Exchange contracts |
 | 05 | Referrals | sender/recipient interaction, creation, lifecycle, relationship context, paths and cross-lens continuity | invent unsupported third-party referral semantics |
 | 06 | Independent Acceptance | authority-outward audit, acceptance tests/evidence, findings and dispositions | implement production feature code or weaken the original requirement |
-| 07 | Integration / Cross-Lens QA | integrated journeys, shared state, desktop/mobile, accessibility, locales, performance and authority isolation | substitute integration evidence for a missing lane-level acceptance |
+| 07 | Integration / Cross-Lens QA | integrated journeys, shared state, desktop/mobile, accessibility, locales, performance and authority isolation | substitute integration evidence for missing requirement acceptance |
 
 Lane charters are binding in [`CHAT_LANE_CHARTERS.md`](CHAT_LANE_CHARTERS.md).
 
@@ -64,29 +65,52 @@ The durable program artifacts are:
 - [`SHARED_EXCHANGE_CONTRACTS.md`](SHARED_EXCHANGE_CONTRACTS.md);
 - [`INDEPENDENT_ACCEPTANCE_PROTOCOL.md`](INDEPENDENT_ACCEPTANCE_PROTOCOL.md);
 - [`CHAT_LANE_CHARTERS.md`](CHAT_LANE_CHARTERS.md);
+- [`FOUR_LENS_BOOTSTRAP_RECOVERY.md`](FOUR_LENS_BOOTSTRAP_RECOVERY.md);
 - [`../../governance/four-lens-requirements.json`](../../governance/four-lens-requirements.json); and
 - [`../../governance/four-lens-workstreams.json`](../../governance/four-lens-workstreams.json).
 
-The Master Build Tracker remains the Feature-ID completion authority. The dependency map remains the sequencing authority. This program ledger adds experience completion and independent-assurance state; it does not silently supersede either canonical source.
+The Master Build Tracker remains the Feature-ID completion authority. The canonical dependency map remains the sequencing authority. This program ledger adds experience and assurance state; it does not silently supersede either source.
 
-## 5. Immutable requirements
+## 5. Layer 1 — Bootstrap Governance
 
-Every approved experience requirement receives a stable program ID. Existing Feature IDs retain their canonical IDs and are represented in the program ledger as `RFX-FEATURE-<Feature-ID>` records without renaming the underlying feature.
+Layer 1 is the governance required to install and operate the Four-Lens model safely. It is required for PR #172.
+
+Layer 1 includes:
+
+- stable authorities and lane charters;
+- the immutable requirement ledger;
+- the eight initial packet/workstream definitions;
+- dependency graph and admissible predecessor states;
+- packet status, explicit owner, exact activation base and activation epoch;
+- Shared Exchange ownership of shared participant contracts;
+- exact implementation actor and SHA when implementation is claimed;
+- independent reviewer identity and exact acceptance SHA when `Verified` is claimed;
+- no-self-certification enforcement;
+- requirement-type evidence coverage;
+- dependency satisfaction before `Verified`;
+- truthful matrix and tracker arithmetic; and
+- deterministic structural repository validation.
+
+Layer 1 validation must not require live GitHub API calls, retained Actions downloads, future acceptance workflows, or a certification system that does not yet exist merely to install the lanes.
+
+### Immutable requirements
+
+Every approved experience requirement has a stable program ID. Existing Feature IDs retain their canonical IDs and are represented as `RFX-FEATURE-<Feature-ID>` records without renaming the underlying feature.
 
 Each record retains:
 
 - stable ID and original requirement text;
 - governing source and owning lane;
-- dependent lanes and capability/domain dependencies;
+- dependent lanes and dependencies;
 - acceptance types;
 - current status;
-- implementation PR and SHA;
-- independent acceptance disposition, accepting lane/reviewer identity, SHA and evidence; and
-- exact deferral authority when applicable.
+- implementation actor, PR and SHA;
+- independent acceptance lane/reviewer, SHA, result and evidence; and
+- explicit deferral data when applicable.
 
 Original requirement text is immutable. Clarification may be appended without replacing the original intent.
 
-The machine ledger freezes every adopted requirement in order with reviewed SHA-256 digests over the complete ID sequence, the paired ID/original-text sequence, and the governing source/lane/dependent-lanes/dependencies/acceptance-types metadata. A newly authorized requirement appends only when the same reviewed authority change advances the protected record count and all digests; no appended requirement may sit outside the baseline. A correction, clarification or supersession receives separate mutable clarification metadata or a new ID; it must not delete, reorder, rewrite or weaken the authority or evidence obligations of an adopted record. The architecture validator fails on count drift, deletion, substitution, reordering, original-text drift or governance-metadata drift.
+The machine ledger freezes every adopted requirement in order with reviewed SHA-256 digests over the complete ID sequence, paired ID/original-text sequence, and governing source/lane/dependent-lanes/dependencies/acceptance-types metadata. A new requirement requires a separately reviewed baseline advance. No adopted requirement may silently disappear, reorder, weaken its source/dependencies/acceptance obligations, or rewrite original text.
 
 Allowed statuses are exactly:
 
@@ -98,11 +122,16 @@ Allowed statuses are exactly:
 - `Deferred — Explicitly Approved`; and
 - `Not Applicable — Explicitly Approved`.
 
-Only `Verified` satisfies experience completion. A canonical Feature ID is marked Done only under the tracker protocol after its governing requirement has independent acceptance.
+Only `Verified` satisfies experience completion.
 
 ## 6. Builder and acceptance separation
 
-An implementation lane may report `Implemented`, `Implementation complete; independent acceptance pending`, `Partial`, or `Blocked`. It may not report `Verified`, `Accepted`, `Complete`, or `Closed` for its own candidate unless it is quoting an already-recorded Independent Acceptance disposition.
+Implementation and acceptance are separate stages:
+
+1. implementation produces `Implemented — Not Verified`;
+2. only Independent Acceptance may produce `Verified` for a production requirement.
+
+An implementation lane may report `Implemented`, `Implementation complete; independent acceptance pending`, `Partial`, or `Blocked`. It may not report `Verified`, `Accepted`, `Complete`, or `Closed` for its own production candidate unless it is quoting an already-recorded Independent Acceptance disposition.
 
 Independent Acceptance evaluates in this order:
 
@@ -115,127 +144,180 @@ original requirement
 → disposition
 ```
 
-It must not infer the intended requirement from the implementation summary or its tests.
+A `Verified` record must:
 
-A `Verified` record must retain the implementation actor, name Lane 06 (`independent-acceptance`) and name a distinct independent reviewer identity. The reviewer must not equal the implementation actor. Builder identity or a blank/generic acceptance record is not an independent disposition.
+- retain the implementation actor and exact implementation SHA;
+- name Lane 06 (`independent-acceptance`);
+- name an explicitly authorized independent GitHub reviewer identity;
+- use a reviewer identity different from the implementation actor;
+- bind acceptance to the exact implementation SHA;
+- record an exact GitHub review signal;
+- cover every declared acceptance type with candidate-bound evidence; and
+- have all governed dependencies resolved.
 
-Allowed acceptance dispositions are:
+A blank, generic, invented, builder-identical, or unauthorized reviewer cannot certify a production requirement.
 
-- `Verified`;
-- `Partial`;
-- `Not Implemented`;
-- `Blocked`;
-- `Deferred`; and
-- `Decision Required`.
+Allowed acceptance dispositions are `Verified`, `Partial`, `Not Implemented`, `Blocked`, `Deferred`, and `Decision Required`. Only `Verified` contributes to the Verified numerator.
 
-`Partial`, `Not Implemented`, `Blocked`, and `Decision Required` block completion. `Deferred` is valid only with explicit approval.
+## 7. Configurable authenticated Independent Acceptance identities
 
-## 7. Evidence must match the requirement
+Independent Acceptance is not coupled to one third-party mechanism.
+
+Canonical identities are:
+
+- `github:<login>` for a GitHub human identity;
+- `github-app:<login>` for a GitHub App identity.
+
+`github-app:chatgpt-codex-connector[bot]` is an explicitly program-authorized Lane 06 identity.
+
+Control Room may also explicitly assign another exact GitHub human or App identity to a Lane 06 packet before acceptance begins. The assignment is packet-scoped authorization, not a global privilege. The acceptance signal must be authored in GitHub by that exact configured or packet-assigned identity.
+
+The implementation actor is always excluded from certifying its own production requirement, regardless of whether the independent reviewer is a human, Codex GitHub App, or another authorized App.
+
+Layer 1 structurally validates identity, authorization, SHA binding and separation. Live GitHub API reauthentication of review actors and historical provenance is Layer 2 hardening, not a bootstrap prerequisite.
+
+## 8. Evidence and deferral discipline
+
+Minimum evidence follows the declared requirement type:
 
 | Requirement type | Minimum evidence |
 | --- | --- |
 | Functional | candidate runtime behavior |
 | Domain/security | positive and negative runtime or emulator evidence |
-| Visual | actual browser-rendered evidence |
-| Responsive | evidence at the relevant viewport classes |
+| Visual | browser-rendered evidence |
+| Responsive | applicable viewport evidence |
 | Motion | before, transition and settled state |
 | Accessibility | keyboard, semantics, focus and assistive state |
-| Participant copy | rendered-output review in every governed locale |
-| Cross-lens continuity | actual multi-lens journeys |
-| Performance | measurements appropriate to the stated claim |
+| Participant copy | rendered-output review in governed locales |
+| Cross-lens continuity | actual supported multi-lens journey |
+| Performance | bounded measurements appropriate to the claim |
 
-Static or source-code evidence may supplement but cannot replace the required acceptance type.
+Static/source evidence may supplement but not replace the required acceptance type.
 
-For `Verified`, each typed ledger evidence entry points to a tracked Lane 06 JSON manifest under `docs/program/evidence/`. The manifest binds the exact candidate SHA, exact merged base SHA, distinct independent reviewer, GitHub Actions run, configured environment, and passed timestamped execution plus durable artifacts for every claimed acceptance type. At least one manifest-backed entry covers every acceptance type declared by that requirement. A generic file/string, self-asserted metadata, future timestamp, stale-candidate evidence or partial type coverage cannot enter the Verified numerator.
+For `Verified`, each ledger evidence entry points to the exact candidate's tracked Lane 06 manifest under `docs/program/evidence/`. The manifest records the exact candidate/base SHAs, independent reviewer, GitHub Actions run reference, configured environment, checks and durable artifact references. Layer 1 validates structure, exact-SHA binding, reviewer separation and declared-type coverage.
 
-## 8. Explicit deferral discipline
+A new defer or N/A requires the exact requirement, reason, impact, future owner, independent authorized approver and exact GitHub approval signal. Builder-authored prose alone is not approval. The one adoption-time cursor deferral remains a frozen historical exception and may not be silently broadened.
 
-A defer requires the exact requirement ID, reason, missing dependency, participant/product impact, future owner, future milestone where known, and explicit approval. Difficulty, time, an inconvenient architecture, or unavailable tests do not authorize deferral. Unapproved omissions remain incomplete.
+## 9. Packets, dependencies, exact bases and activation epochs
 
-## 9. Parallel branch and dependency rules
+Every work packet declares one owner, branch, requirement range, sources, dependencies, owned/non-owned paths, acceptance obligations, expected output, and stop boundary.
 
-Every work packet declares one owner, branch, exact base SHA, immutable requirement range, owned paths/domain, non-owned paths/domain, dependencies, acceptance required, expected output, and stop boundary.
+The eight initial packet governance definitions are digest-frozen in order. Lifecycle fields include candidate, candidate history, status, exact base SHA, activation epoch, post-merge setup evidence, and packet-scoped Lane 06 reviewer assignment.
 
-Every adopted packet definition is digest-frozen over its ID, lane, ownership, branch/base policy, requirement range, sources, dependency edges with admissible predecessor states, owned/non-owned paths, acceptance obligations, output and stop boundary. Only packet `status` and `exactBaseSha` are ordinary lifecycle fields. Removing or weakening an adopted dependency edge or obligation fails validation; a newly authorized packet appends only when the same reviewed change advances the protected packet count and digests.
+Only `ready-after-authority-merge` and `frozen-until-authority-merge` may have no exact base. Any in-progress, active, reconciliation, implemented, acceptance, verified, completed, blocked-after-activation, or closed packet is bound to an exact activation epoch and the epoch's exact `mainBaseSha`.
 
-Only the pre-activation statuses `ready-after-authority-merge` and `frozen-until-authority-merge` may temporarily use a base policy instead of an exact base SHA. Every in-progress, active, reconciliation, acceptance, verified, completed, blocked or closed packet remains bound to an exact base SHA.
+An activation epoch is a Control Room record of the exact current-main SHA observed when work is authorized. A later candidate branch or PR may start from that SHA or a descendant current-main SHA. It may not claim an unrelated or invented base.
 
-No packet may treat an unmerged branch as authoritative unless it names the candidate SHA explicitly. A dependent branch may build dependency-safe portions, but it cannot merge before its dependency is independently accepted and present on merged `main`. After a dependency merge, reconcile with current `main`, rerun applicable evidence, and obtain a fresh exact-head acceptance result.
+Every packet dependency must name another declared packet and explicit admissible predecessor states. No self-dependency, undeclared dependency, dependency cycle, or active packet with an unsatisfied predecessor is permitted.
 
-Shared paths are controlled by Lane 01. A domain lane needing a new shared capability submits a Shared Contract Request under [`SHARED_EXCHANGE_CONTRACTS.md`](SHARED_EXCHANGE_CONTRACTS.md).
+Shared paths are controlled by Lane 01. A domain lane needing a new shared capability routes it through [`SHARED_EXCHANGE_CONTRACTS.md`](SHARED_EXCHANGE_CONTRACTS.md).
 
-## 10. Exact-head freeze and merge rule
+## 10. Exact-head review rule without bootstrap self-invalidation
 
-When final acceptance begins at candidate `X`, any substantive finding means `X` fails final acceptance. A correction creates candidate `Y`. `Y` requires full applicable CI, independent acceptance, a fresh reviewer signal, resolution of all substantive findings, and merge protection against that exact head.
+Exact-head review remains a real merge gate: a substantive finding on candidate `X` fails `X`; a correction creates `Y`; `Y` requires full applicable CI and a fresh independent review before merge.
+
+The final review is external GitHub state. PR #172 does **not** commit the final review ID into the same candidate it is reviewing. Therefore the review does not invalidate itself merely because recording review provenance would otherwise require a new commit.
 
 No material product, security, integrity, accessibility, privacy, authority, or P1/P2-equivalent finding may remain at merge. Green CI never overrides such a finding.
 
-## 11. Completion accounting
+## 11. Bootstrap lifecycle and post-merge transition
 
-Implementation and independent acceptance are two conceptual stages:
+The setup lifecycle deliberately separates values knowable before merge from values knowable only afterward.
 
-1. implementation produces `Implemented — Not Verified`;
-2. Independent Acceptance may produce `Verified` for the exact candidate.
+### Before PR #172 merges
 
-Only after independent verification may canonical completion accounting be promoted. Where practical, tracker promotion occurs through an acceptance/closeout change rather than the builder's implementation change.
+`governance/four-lens-workstreams.json` records:
 
-Wave completion and lens completion remain separate. The Four-Lens Experience Matrix records explicit denominators for Shared Exchange, Opportunities/RFx, Resources, Intelligence, and Referrals. Percentages are prohibited until the denominator is established, and only Verified requirements enter the numerator.
+- `programPhase = authority-setup`;
+- `WP-CONTROL-AUTHORITY-SETUP.status = in-progress`;
+- setup candidate PR `172`, actor `github:AccelAnalysis`, SHA sentinel `SELF`;
+- `mergeSha = null`;
+- `postMergeMainSha = null`;
+- `postMergeRunUrl = null`;
+- setup exact base `21c4fc080a823ae03f33ae1e58dd2752f317dc67` through the authority-setup activation epoch; and
+- every downstream packet pre-activation with null exact base and null activation epoch.
 
-## 12. Program-specific work
+`SELF` is not evidence of a production implementation and is valid only for the open authority-setup candidate. It prevents the program from pretending to know its final head or merge SHA before those facts exist.
+
+### After PR #172 merges
+
+Control Room must first wait for the `production-ci` push run on the authority merge in `main` to succeed. It then fetches current `main` and creates the post-merge Control Room transition based on that exact SHA.
+
+That one transition:
+
+1. replaces setup `candidate.sha = SELF` with the exact final #172 head;
+2. records the exact authority `mergeSha`;
+3. records `postMergeMainSha` and the successful `production-ci` Actions URL for that merge;
+4. changes the setup packet to `completed` or `closed`;
+5. changes `programPhase` to `operational`;
+6. creates the initial operational activation epoch(s) using the exact current-main SHA observed for activation; and
+7. assigns that epoch/base to Shared Experience, Wave 4 Assurance, Intelligence, Resources and Referrals.
+
+Slice 4.6 reconciliation and its Lane 06 acceptance packet remain dependency-aware and are not activated by that initial transition. PR #171 stays preserved until Control Room separately authorizes reconciliation against then-current `main`.
+
+This sequence is intentionally:
+
+```text
+merge governance authority
+→ successful main production-ci
+→ close authority setup
+→ switch operational
+→ activate independent packets from exact current-main
+```
+
+not a circular requirement that demands post-merge facts before merge.
+
+## 12. Layer 2 — Acceptance Integrity Hardening
+
+Planned packet: `WP-ACCEPTANCE-INTEGRITY-HARDENING-01`.
+
+It is non-blocking for governance bootstrap and is not activated by PR #172. Its intended scope includes:
+
+- long-term Actions artifact retention;
+- cryptographic/digest retention of acceptance artifacts and history;
+- live GitHub API provenance hardening for PR authors, review actors, runs, artifacts and merge ancestry;
+- workflow/harness immutability and constrained execution environments;
+- multi-stage source/certification/disposition mechanics where justified;
+- historical/retroactive assurance mechanics;
+- durable superseded acceptance/deferral/candidate/activation history; and
+- stronger evidence-only PR/path/rename enforcement.
+
+Deferring those controls does not permit builder self-promotion. Layer 1 continues to reject `Verified` unless Lane 06 records an authorized reviewer distinct from the implementation actor, exact-SHA acceptance, the exact GitHub signal, complete declared-type evidence and resolved dependencies.
+
+The detailed bootstrap audit and historical P1/P2 disposition are recorded in [`FOUR_LENS_BOOTSTRAP_RECOVERY.md`](FOUR_LENS_BOOTSTRAP_RECOVERY.md).
+
+## 13. Completion accounting and tracker truth
+
+Only `Verified` satisfies Four-Lens requirement completion.
+
+A canonical Feature ID may be promoted only through the canonical tracker protocol after its governing requirement has the required independent acceptance. Previously completed Wave 4 tracker records are not silently revoked by assurance work, and this governance-bootstrap PR does not add any tracker completion.
+
+While `programPhase = authority-setup`, deterministic validation requires the canonical tracker to remain at the adoption completion counts: **438 total · 170 Done · 268 Not Started** and RFx Core **18/41**.
+
+## 14. Program-specific sequencing
 
 ### Shared Experience Completion
 
-The post-PR-#160 record is retained in [`SHARED_EXPERIENCE_COMPLETION_BACKLOG.md`](SHARED_EXPERIENCE_COMPLETION_BACKLOG.md). It distinguishes implemented-but-unverified behavior, a substantive final-head finding, the explicitly approved cursor defer, an organization-logo/data-contract dependency, a privacy/location policy decision, procedural acceptance failure, and documentation drift. The original requests remain visible.
+The post-PR-#160 record remains in [`SHARED_EXPERIENCE_COMPLETION_BACKLOG.md`](SHARED_EXPERIENCE_COMPLETION_BACKLOG.md). Shared Exchange owns shared participant contracts and corrections.
 
-### Wave 4 assurance and production
+### Wave 4 assurance
 
-Slices 4.1–4.5 are classified `Previously accepted — independent assurance pending`. This does not automatically revoke their 18 tracker completions. Material assurance findings are recorded, assessed for tracker correction, corrected in bounded work, independently verified, and reconciled truthfully.
+Slices 4.1–4.5 remain `Previously accepted — independent assurance pending`. Their prior tracker completions are not silently revoked. Lane 06 audits them without self-correcting production code.
 
-PR #171 is the first runtime candidate to pass fully through this program. It remains preserved and unmerged until the authority is merged, the branch is recalculated against new `main`, its five Feature IDs are mapped, the candidate is independently audited, all substantive findings are corrected, and exact-head evidence and review are fresh. Slice 4.7 may not begin before accepted Slice 4.6 is merged.
+### Slice 4.6
 
-### Intelligence
+PR #171 remains preserved and unmerged during authority setup. Its reconciliation and acceptance remain separate packets with explicit dependency ordering. This bootstrap does not merge PR #171, change its five Feature IDs, or begin Slice 4.7.
 
-Intelligence is a permanent lens and receives a dedicated roadmap independent of numbered-wave visibility. Dependency-independent work may use current authoritative data. RFx-, Resource-, Referral-, and outcome-dependent layers may consume only accepted authoritative sources, and no layer may fabricate activity.
+### Intelligence, Resources and Referrals
 
-### Resources and Referrals
+These permanent lenses receive their approved inventory/roadmap packets only after the post-merge Control Room transition supplies exact activation bases. Prior Feature-ID completion does not automatically prove a complete lens experience.
 
-Prior Feature-ID completion does not automatically prove complete lens experience. Each lens receives a vision-to-runtime inventory, immutable requirements, gap classification, bounded packets, independent acceptance, and integration acceptance.
+## 15. Integration acceptance
 
-## 13. Cross-lens integration acceptance
+Lane 07 tests the combined Exchange only after applicable lane work is accepted and merged. Integration acceptance supplements rather than replaces Lane 06 requirement acceptance.
 
-After accepted lane work merges, Lane 07 exercises supported journeys such as:
+## 16. Stop boundary and truthfulness
 
-```text
-Intelligence
-→ selected organization
-→ Resources
-→ Referrals
-→ Opportunities/RFx
-→ safe return
-```
-
-It verifies selected object, camera, lens state, action availability, privacy, URL context, stale-detail prevention, hidden-target parity, authority isolation, accessibility, mobile behavior, five locales, and performance.
-
-## 14. Immediate transition and stop boundary
-
-The adoption sequence is:
-
-```text
-preserve/freeze PR #171
-→ merge this authority and program artifacts
-→ recalculate current main
-→ establish and activate lane work packets
-→ launch Shared Experience, Wave 4 Assurance, Intelligence, Resources and Referrals
-→ reconcile PR #171
-→ independently accept or reject the exact Slice 4.6 candidate
-→ merge only an accepted exact head
-→ then recalculate eligibility for Slice 4.7
-```
-
-The authority-setup PR must not implement missing Shared Exchange UX, modify RFx runtime, complete Slice 4.6, begin Slice 4.7, implement Intelligence layers, modify Resource or Referral domain behavior, or change Feature-ID completion.
-
-## 15. Truthfulness
+PR #172 must not implement missing Shared Exchange UX, modify RFx runtime, complete Slice 4.6, begin Slice 4.7, implement Intelligence layers, change Resources/Referrals domain behavior, or change Feature-ID completion.
 
 > **The interface and the development process must accurately communicate what exists, what is available, what is implemented, what is selected, what is verified, and what remains unavailable or incomplete—without implying capabilities, authority, data, outcomes, workflow states, or completion evidence that do not actually exist.**
-
-A governed permanent option may remain visible while unavailable. Internal implementation language does not become participant copy. A development report is held to the same truthfulness standard as the product.
