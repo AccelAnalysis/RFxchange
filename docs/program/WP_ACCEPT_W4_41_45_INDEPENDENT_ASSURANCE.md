@@ -1,11 +1,11 @@
 # WP-ACCEPT-W4-41-45 — Independent Assurance Result
 
-**Lane:** 06 — Independent Acceptance  
-**Packet:** `WP-ACCEPT-W4-41-45`  
-**Packet status at audit:** `active`  
-**Activation epoch:** `initial-operational-2026-08-12`  
-**Activation base:** `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`  
-**Acceptance branch base:** `69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068`  
+**Lane:** 06 — Independent Acceptance
+**Packet:** `WP-ACCEPT-W4-41-45`
+**Packet status at audit:** `active`
+**Activation epoch:** `initial-operational-2026-08-12`
+**Activation base:** `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`
+**Acceptance branch base:** `69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068`
 **Acceptance branch:** `codex/acceptance-wave4-slices-4-1-4-5`
 
 ## Result
