@@ -142,10 +142,11 @@ test("the persistent shell owns navigation while page-local shells collapse to c
   );
 });
 
-test("enabled Opportunities/RFx resolves only to the authorized private draft runtime", () => {
+test("enabled Opportunities/RFx resolves to authorized discovery while issuer management remains private", () => {
   const contract = loadRegistryContract();
   const opportunity = contract.lenses[0];
   const page = read("app/opportunities/page.tsx");
+  const managePage = read("app/opportunities/manage/page.tsx");
   const route = read("app/api/rfx/route.ts");
   const workspace = read("src/components/rfx/RFxDraftWorkspace.tsx");
 
@@ -157,6 +158,8 @@ test("enabled Opportunities/RFx resolves only to the authorized private draft ru
     activePathPrefixes: ["/opportunities"],
   });
   assert.match(page, /resolveParticipantRoute/);
+  assert.match(page, /OpportunityDiscoveryWorkspace/);
+  assert.match(managePage, /resolveParticipantRoute/);
   assert.match(route, /createServerRfxDraftService/);
   assert.match(workspace, /privateDraft/);
   assert.doesNotMatch(workspace, /opportunity beacon|publishAction|match responder/i);

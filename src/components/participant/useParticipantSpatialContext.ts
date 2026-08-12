@@ -18,7 +18,7 @@ const memory = new Map<string, string>();
 export function useParticipantSpatialContext(input: Readonly<{
   scope: ParticipantSpatialScope;
   homeMarkerId: string;
-  activeLens: "intelligence" | "resources" | "referrals";
+  activeLens: ParticipantSpatialContext["activeLens"];
 }>): readonly [ParticipantSpatialContext, (update: (current: ParticipantSpatialContext) => ParticipantSpatialContext) => void] {
   const storageKey = useMemo(() => participantSpatialStorageKey(input.scope), [input.scope]);
   const fallback = useMemo(

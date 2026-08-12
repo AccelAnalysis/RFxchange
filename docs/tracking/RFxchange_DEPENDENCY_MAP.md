@@ -189,6 +189,8 @@ Wave 3 contains **38 Network features**. All 38 have implementation and acceptan
 
 **Slice 4.5 authority result:** Slice 4.4 merged through PR #167 at `273b98283f70fe558e1313aed16419943500bb1f`; exact-head CI run `31565248391` and post-merge `main` run `31566108284` passed. The documentation-only Slice 4.5 execution authority for `DSC-004`, `DSC-005`, `DSC-006`, `DSC-007` and `DSC-008` is now defined in `docs/slices/SLICE_4_5_EXECUTION_AUTHORITY.md`. Existing dependencies on `ISS-019`, Wave 3 controlled discovery and `COMMS-003/004/005` are satisfied; no dependency edge or Feature-ID state changes.
 
+**Slice 4.5 implementation result:** `DSC-004`, `DSC-005`, `DSC-006`, `DSC-007` and `DSC-008` now add permitted real opportunity discovery, governed saved searches, deterministic match events with minimized versioned communication requests, one private watch relation and canonical deadline views. Wave 4 is **18/41 Done**. B6c remains eligible but Not Started; no fit, pursuit or later runtime was introduced.
+
 **Next-authority result:** after the Slice 4.5 runtime merges and post-merge validation is green, recalculate from merged `main` and define a documentation-only Slice 4.6 authority for `RSP-001`, `RSP-002`, `RSP-003`, `RSP-004` and `RSP-006`. No fit, pursuit or later runtime begins before its reviewed authority.
 
 See `docs/slices/WAVE_3_ROADMAP.md`, `docs/slices/WAVE_4_RFX_CORE_ROADMAP.md`, `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md`, `docs/brand/BRAND_GATE_B1_SEMANTIC_FOUNDATION.md` and the applicable canonical slice authority for detailed boundaries and acceptance intent.

@@ -90,6 +90,9 @@ export const FIRESTORE_QUERY_CONTRACTS: readonly FirestoreQueryContract[] = Obje
   contract("referrals-by-sending-organization", "businessReferrals", ["senderOrganizationId"], "many"),
   contract("referrals-by-recipient-organization", "businessReferrals", ["attachedRecipientOrganizationId"], "many"),
   contract("referral-education-by-organization-actor", "referralEducationAcknowledgements", ["organizationId", "actorUserId"], "many"),
+  contract("opportunity-saved-searches-by-owner", "opportunitySavedSearches", ["organizationId", "userId"], "many"),
+  contract("active-opportunity-saved-searches", "opportunitySavedSearches", ["status"], "many"),
+  contract("opportunity-watches-by-owner", "opportunityWatches", ["organizationId", "userId"], "many"),
 ]);
 
 export const FIRESTORE_AUTOMATIC_INDEX_CONTRACTS = Object.freeze(

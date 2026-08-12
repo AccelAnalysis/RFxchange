@@ -109,6 +109,7 @@ export interface ResponderOpportunityProjection {
   readonly digest: string;
   readonly payload: ResponderOpportunityPayload;
   readonly publishedAt: string | null;
+  readonly requestFamilyIndexKey: string;
   readonly localityIndexKeys: readonly string[];
   readonly capabilityIndexKeys: readonly string[];
 }
@@ -266,6 +267,7 @@ export function projectResponderOpportunity(input: Readonly<{
     digest: stableDigest(payload),
     payload,
     publishedAt: input.mode === "published" ? (input.publishedAt ?? null) : null,
+    requestFamilyIndexKey: aggregate.requestFamily.requestFamilyId,
     localityIndexKeys: Object.freeze(permittedLocalities.map((item) => item.indexKey)),
     capabilityIndexKeys: Object.freeze(
       [...new Set(aggregate.definition.requirements.flatMap((item) =>

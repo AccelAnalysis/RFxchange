@@ -12,12 +12,12 @@
 
 ## Progress
 
-**438 total · 165 Done · 273 Not Started**
+**438 total · 170 Done · 268 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
 - 3 - Network: **38/38**
-- 4 - RFx Core: **13/41**
+- 4 - RFx Core: **18/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
 - 7 - Institutional & Scale: **1/47**
@@ -54,8 +54,9 @@ Network completion is **38/38**: four inherited Wave 1 foundations, three Slice 
 - **Slice 4.2 — `ISS-005` + `ISS-006`**: extends that aggregate with the structured market need, scope, requested outputs, timing, governed performance location, estimated value, engagement term, typed foundation requirements, six server-derived module statuses, bounded save/recovery and optional non-authoritative interpretation. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_2.md`.
 - **Slice 4.3 — `ISS-007` + `ISS-009` + `ISS-011`**: extends the same private aggregate with server-canonical AMACS requirements, an expandable linked response structure and an expandable linked evaluation definition with governed treatment/weight rules, bounded save/recovery and a complete manual path. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_3.md`.
 - **Slice 4.4 — `ISS-016` + `ISS-018` + `ISS-019` + `ISS-020` + `ACQ-009`**: adds current server-derived readiness, exact preview/publication projection parity, atomic one-way publication with immutable evidence, audience-gated controlled sharing and the truthful free/basic commercial boundary. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_4.md`.
+- **Slice 4.5 — `DSC-004` + `DSC-005` + `DSC-006` + `DSC-007` + `DSC-008`**: adds real permitted opportunity discovery in the Spatial Workspace, governed saved searches, minimized idempotent alert/digest requests, one private watch relation and canonical watched-deadline views. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_5.md`.
 
-Wave 4 RFx Core is **13/41**. Slice 4.4 creates the first real permitted opportunity projection and makes B6c opportunity expression eligible for separate authority; it creates no discovery, matching, response, teaming, submission or later lifecycle runtime.
+Wave 4 RFx Core is **18/41**. Slice 4.5 consumes only real Slice 4.4 projections and makes Slice 4.6 documentation authority dependency-eligible. B6c remains eligible but Not Started; no fit, pursuit, response, teaming, submission or later lifecycle runtime was introduced.
 
 ## Feature-ID checklist
 
@@ -237,11 +238,11 @@ Wave 4 RFx Core is **13/41**. Slice 4.4 creates the first real permitted opportu
 - [ ] `EDU-011`
 - [ ] `EDU-012`
 - [ ] `EDU-013`
-- [ ] `DSC-004`
-- [ ] `DSC-005`
-- [ ] `DSC-006`
-- [ ] `DSC-007`
-- [ ] `DSC-008`
+- [x] `DSC-004` — Slice 4.5; permitted real publication search/filter with stable ordering/cursors and synchronized map/list/detail over one minimized projection
+- [x] `DSC-005` — Slice 4.5; private versioned saved searches with governed lifecycle, expected-version commands, replay/conflict, event and audit evidence
+- [x] `DSC-006` — Slice 4.5; deterministic new-projection match evaluation with immutable tuple identity and minimized versioned immediate/daily communication requests
+- [x] `DSC-007` — Slice 4.5; one private idempotent watch relation per organization/user/opportunity without pursuit or issuer-awareness claims
+- [x] `DSC-008` — Slice 4.5; watched deadline views derived from canonical structured dates and server time with passed opportunities excluded
 - [ ] `DSC-010`
 - [x] `ISS-001` — Slice 4.1; canonical organization-owned private RFx aggregate with one `draft` lifecycle, version/event/idempotency/audit seams and tenant-safe persistence
 - [x] `ISS-002` — Slice 4.1; governed immutable AMACS 0.5.0 request-family snapshot, deterministic selection/change and historical meaning preservation

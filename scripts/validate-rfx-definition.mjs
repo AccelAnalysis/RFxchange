@@ -27,7 +27,7 @@ const [
   read("src/application/amacs/catalog.ts"),
   read("src/infrastructure/amacs/immutable-catalog.ts"),
   read("app/api/rfx/route.ts"),
-  read("app/opportunities/page.tsx"),
+  read("app/opportunities/manage/page.tsx"),
   read("src/components/rfx/RFxDraftWorkspace.tsx"),
   read("src/components/rfx/RFxDefinitionBuilder.tsx"),
   read("src/components/rfx/RFxDraftWorkspace.module.css"),
@@ -105,8 +105,8 @@ assert.match(authority, /ISS-007/);
 assert.match(authority, /ISS-009/);
 assert.match(authority, /ISS-011/);
 assert.match(evidence, /Configured-browser acceptance/);
-assert.match(tracker, /438 total · 165 Done · 273 Not Started/);
-assert.match(tracker, /RFx Core: \*\*13\/41\*\*/);
+assert.match(tracker, /438 total · 170 Done · 268 Not Started/);
+assert.match(tracker, /RFx Core: \*\*18\/41\*\*/);
 for (const id of ["ISS-007", "ISS-009", "ISS-011"])
   assert.match(tracker, new RegExp("\\[x\\] `" + id + "`"));
 assert.match(dependency, /Slice 4\.3 implementation result/);

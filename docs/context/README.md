@@ -114,7 +114,7 @@ The dependency result remains:
 - Stabilization 2C: isolated release engineering, not a product prerequisite; and
 - the reviewed `ISS-009` dependency on stable Slice 4.2 and Slice 4.3 requirements is adopted; no other dependency correction is introduced.
 
-Canonical totals are **438 total · 165 Done · 273 Not Started**, with Wave 4 RFx Core **13/41**. B6c opportunity expression is now eligible but not begun; Slice 4.5 documentation authority is the next sequencing action after the Slice 4.4 merge is reconciled.
+Canonical totals are **438 total · 170 Done · 268 Not Started**, with Wave 4 RFx Core **18/41**. B6c opportunity expression remains eligible but Not Started; Slice 4.6 documentation authority is the next dependency-eligible sequencing action after the Slice 4.5 merge is reconciled.
 
 ## Stabilization 2C boundary
 

@@ -359,6 +359,36 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // DSC-004/005/006/007/008 discovery projections and private saved-search/watch/deadline
+    // relationships resolve only through trusted current-participant handlers. Match, command,
+    // event and audit evidence is immutable; direct clients cannot enumerate or mutate it.
+    match /opportunitySavedSearches/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /opportunityWatches/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /opportunitySavedSearchMatches/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /opportunityAlertIntents/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /opportunityRelationCommands/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /opportunityRelationEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /referralEducationAcknowledgements/{documentId} {
       allow read, create: if serverManagedOnly();
       allow update, delete: if false;

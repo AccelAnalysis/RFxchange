@@ -66,9 +66,8 @@ test("Slice 3.2 keeps the mobile search and result surface legible over the map"
   assert.match(workspaceStyles, /prefers-reduced-transparency[\s\S]*\.networkSearch[\s\S]*backdrop-filter: none/);
 });
 
-test("Slice 3.2 does not fabricate later Network or RFx domain objects", () => {
+test("Slice 3.2 does not fabricate provider, referral, or credibility objects", () => {
   const implementation = `${runtime}\n${service}\n${workspace}\n${map}`;
-  assert.doesNotMatch(implementation, /opportunity-beacon/);
   assert.doesNotMatch(implementation, /credibility-seal/);
   assert.doesNotMatch(implementation, /synthetic-provider|synthetic-referral/);
   assert.match(map, /relationshipPaths = \[\]/);

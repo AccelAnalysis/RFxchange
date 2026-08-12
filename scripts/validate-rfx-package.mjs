@@ -26,7 +26,7 @@ const [
   read("src/application/rfx/rfx-draft-service.ts"),
   read("src/infrastructure/rfx/runtime.ts"),
   read("app/api/rfx/route.ts"),
-  read("app/opportunities/page.tsx"),
+  read("app/opportunities/manage/page.tsx"),
   read("src/components/rfx/RFxDraftWorkspace.tsx"),
   read("src/components/rfx/RFxPackageBuilder.tsx"),
   read("src/components/rfx/RFxDraftWorkspace.module.css"),
@@ -120,8 +120,8 @@ assert.match(workflow, /smoke-rfx-kernel-emulator/);
 assert.match(authority, /ISS-005/);
 assert.match(authority, /ISS-006/);
 assert.match(evidence, /Configured-browser acceptance/);
-assert.match(tracker, /438 total · 165 Done · 273 Not Started/);
-assert.match(tracker, /RFx Core: \*\*13\/41\*\*/);
+assert.match(tracker, /438 total · 170 Done · 268 Not Started/);
+assert.match(tracker, /RFx Core: \*\*18\/41\*\*/);
 for (const id of ["ISS-005", "ISS-006"])
   assert.match(tracker, new RegExp("\\[x\\] `" + id + "`"));
 assert.match(dependency, /Slice 4\.2 implementation result/);
