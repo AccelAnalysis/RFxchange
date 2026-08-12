@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "authority": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md",
   "adoptionBaseSha": "21c4fc080a823ae03f33ae1e58dd2752f317dc67",
-  "programPhase": "authority-setup",
+  "programPhase": "operational",
   "activationRule": "A packet becomes active only through a Control Room activation epoch that records the exact current-main SHA observed for activation; later candidate branches may start from or descend from that immutable base.",
   "bootstrapTransition": {
     "authorityPullRequest": 172,
@@ -13,7 +13,7 @@
       "switch-program-operational",
       "activate-independent-packets-from-exact-current-main"
     ],
-    "preMergeCandidateSha": "SELF",
+    "preMergeCandidateSha": "619b3794b59f1609d14596e59d9d2f045756c945",
     "postMergeRule": "SELF, mergeSha, postMergeMainSha and postMergeRunUrl are lifecycle fields. SELF is valid only while PR #172 is open and the setup packet is in-progress. The first post-merge Control Room change replaces SELF with the exact final PR head, records the exact authority merge SHA and successful production-ci URL/SHA, closes setup, switches the program operational and opens activation epoch(s)."
   },
   "independentAcceptanceIdentityModel": {
@@ -76,6 +76,19 @@
         "WP-CONTROL-AUTHORITY-SETUP"
       ],
       "purpose": "Install Four-Lens governance only."
+    },
+    {
+      "id": "initial-operational-2026-08-12",
+      "mainBaseSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
+      "controlPullRequest": 172,
+      "packetIds": [
+        "WP-SHARED-COMPLETE-01",
+        "WP-ACCEPT-W4-41-45",
+        "WP-INTEL-ROADMAP-01",
+        "WP-RES-INVENTORY-01",
+        "WP-REF-INVENTORY-01"
+      ],
+      "purpose": "Activate the initial independent Four-Lens operational packets after authority installation and successful post-merge production CI."
     }
   ],
   "lanes": [
@@ -145,15 +158,15 @@
       "candidate": {
         "actor": "github:AccelAnalysis",
         "pr": 172,
-        "sha": "SELF",
-        "mergeSha": null
+        "sha": "619b3794b59f1609d14596e59d9d2f045756c945",
+        "mergeSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed"
       },
       "candidateHistory": [],
       "exactBaseSha": "21c4fc080a823ae03f33ae1e58dd2752f317dc67",
       "activationEpochId": "authority-setup-2026-08-12",
-      "postMergeRunUrl": null,
-      "postMergeMainSha": null,
-      "status": "in-progress",
+      "postMergeRunUrl": "https://github.com/AccelAnalysis/RFxchange/actions/runs/31631552463",
+      "postMergeMainSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
+      "status": "closed",
       "requirementIds": [],
       "sources": [
         "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md"
@@ -188,10 +201,10 @@
       "branch": "codex/program-shared-experience-completion-01",
       "candidate": null,
       "candidateHistory": [],
-      "exactBaseSha": null,
-      "activationEpochId": null,
+      "exactBaseSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
+      "activationEpochId": "initial-operational-2026-08-12",
       "basePolicy": "authority-merge-sha",
-      "status": "ready-after-authority-merge",
+      "status": "active",
       "requirementIds": [
         "SHARED-CONTINUITY-002",
         "SHARED-EVIDENCE-001"
@@ -244,10 +257,10 @@
       "candidate": null,
       "candidateHistory": [],
       "independentReviewer": null,
-      "exactBaseSha": null,
-      "activationEpochId": null,
+      "exactBaseSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
+      "activationEpochId": "initial-operational-2026-08-12",
       "basePolicy": "authority-merge-sha",
-      "status": "ready-after-authority-merge",
+      "status": "active",
       "requirementIds": [
         "RFX-FEATURE-ISS-001",
         "RFX-FEATURE-ISS-002",
@@ -433,10 +446,10 @@
       "branch": "codex/intelligence-provenance-roadmap-01",
       "candidate": null,
       "candidateHistory": [],
-      "exactBaseSha": null,
-      "activationEpochId": null,
+      "exactBaseSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
+      "activationEpochId": "initial-operational-2026-08-12",
       "basePolicy": "authority-merge-sha",
-      "status": "ready-after-authority-merge",
+      "status": "active",
       "requirementIds": [
         "INTEL-PROVENANCE-001",
         "INTEL-LAYER-001",
@@ -484,10 +497,10 @@
       "branch": "codex/resources-completion-inventory-01",
       "candidate": null,
       "candidateHistory": [],
-      "exactBaseSha": null,
-      "activationEpochId": null,
+      "exactBaseSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
+      "activationEpochId": "initial-operational-2026-08-12",
       "basePolicy": "authority-merge-sha",
-      "status": "ready-after-authority-merge",
+      "status": "active",
       "requirementIds": [
         "RES-LENS-001",
         "RES-LENS-002",
@@ -538,10 +551,10 @@
       "branch": "codex/referrals-completion-inventory-01",
       "candidate": null,
       "candidateHistory": [],
-      "exactBaseSha": null,
-      "activationEpochId": null,
+      "exactBaseSha": "e2e2db0d199f1d10e54c597c581dcf9d8a36dbed",
+      "activationEpochId": "initial-operational-2026-08-12",
       "basePolicy": "authority-merge-sha",
-      "status": "ready-after-authority-merge",
+      "status": "active",
       "requirementIds": [
         "REF-LENS-001",
         "REF-LENS-002",
