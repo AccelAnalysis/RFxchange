@@ -138,6 +138,10 @@ function storedReferralHref(): string {
   return participantSpatialLensHref("referrals");
 }
 
+function storedOpportunityHref(): string {
+  return participantSpatialLensHref("opportunities-rfx");
+}
+
 function useTransitionFeedback(pathname: string) {
   const searchParams = useSearchParams();
   const serializedSearchParams = searchParams.toString();
@@ -161,6 +165,11 @@ function useTransitionFeedback(pathname: string) {
     subscribeIntelligenceHref,
     storedReferralHref,
     () => "/referrals",
+  );
+  const opportunityHref = useSyncExternalStore(
+    subscribeIntelligenceHref,
+    storedOpportunityHref,
+    () => "/opportunities",
   );
 
   useEffect(() => {
@@ -222,6 +231,7 @@ function useTransitionFeedback(pathname: string) {
 
   return {
     intelligenceHref,
+    opportunityHref,
     resourceHref,
     referralHref,
     begin,
@@ -269,6 +279,7 @@ function NavigationLinkContent({
 function LensItems({
   activeState,
   intelligenceHref,
+  opportunityHref,
   resourceHref,
   referralHref,
   beginNavigation,
@@ -276,6 +287,7 @@ function LensItems({
 }: Readonly<{
   activeState: ParticipantNavigationState;
   intelligenceHref: string;
+  opportunityHref: string;
   resourceHref: string;
   referralHref: string;
   beginNavigation(destination: NavigationDestination): void;
@@ -307,6 +319,8 @@ function LensItems({
 
     const href = lens.id === "intelligence"
       ? intelligenceHref
+      : lens.id === "opportunities-rfx"
+        ? opportunityHref
       : lens.id === "resources"
         ? resourceHref
         : lens.id === "referrals"
@@ -566,6 +580,7 @@ export function ParticipantTopNavigation({
         <LensItems
           activeState={activeState}
           intelligenceHref={transition.intelligenceHref}
+          opportunityHref={transition.opportunityHref}
           resourceHref={transition.resourceHref}
           referralHref={transition.referralHref}
           beginNavigation={transition.begin}
@@ -575,6 +590,7 @@ export function ParticipantTopNavigation({
         <LensItems
           activeState={activeState}
           intelligenceHref={transition.intelligenceHref}
+          opportunityHref={transition.opportunityHref}
           resourceHref={transition.resourceHref}
           referralHref={transition.referralHref}
           beginNavigation={transition.begin}

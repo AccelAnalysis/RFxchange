@@ -264,6 +264,24 @@
     "definition_responseStructure_incomplete": "Complete the response structure.",
     "definition_evaluationDefinition_incomplete": "Complete the evaluation definition."
   },
+  "discovery": {
+    "ariaLabel": "Published opportunity discovery",
+    "eyebrow": "Opportunities / RFx",
+    "title": "Find real published opportunities",
+    "manage": "Manage your RFxs",
+    "resultsLabel": "Permitted published opportunities",
+    "deadline": "Responses due {date}",
+    "emptyTitle": "No permitted opportunities match this search",
+    "emptyBody": "Broaden or clear the filters. The Exchange does not create placeholder opportunities or infer market activity.",
+    "more": "Load more results",
+    "pending": "Saving…",
+    "actionError": "The change was not confirmed. Retry it from the current opportunity state.",
+    "search": { "ariaLabel": "Search and filter published opportunities", "label": "Opportunity, requirement, issuer, or capability", "placeholder": "Search published opportunities", "deadline": "Response deadline", "allOpen": "All open", "next7": "Next 7 days", "next30": "Next 30 days", "watched": "Watched only", "submit": "Search", "clear": "Clear", "count": "{count} permitted opportunities", "truth": "Only real, currently permitted publications are shown." },
+    "deadlines": { "title": "Watched deadlines", "next7": "Next 7 days", "next30": "Days 8–30", "later": "Later", "source": "Derived from canonical response deadlines and the server clock." },
+    "saved": { "action": "Save this search", "label": "Saved search name", "defaultLabel": "My opportunity search", "alertPolicy": "Alerts", "off": "No alerts", "immediate": "Immediate alert", "daily": "Daily digest", "confirm": "Save search", "confirmed": "Search saved with its current governed filters.", "count": "{count} saved searches", "listLabel": "Your saved opportunity searches", "pause": "Pause", "resume": "Resume", "delete": "Delete", "updated": "Saved search status updated." },
+    "watch": { "action": "Watch opportunity", "remove": "Stop watching", "confirmed": "Opportunity added to your private watch view.", "removed": "Opportunity removed from your private watch view." },
+    "detail": { "eyebrow": "Published opportunity", "close": "Close opportunity details", "discovered": "Discovered", "dueSoon": "Due soon", "issuer": "Issuing organization", "requestType": "Request type", "location": "Performance locality", "deadline": "Response deadline", "requirements": "Responder-visible requirements", "open": "Open published details", "disclaimer": "Discovery and watching do not mean qualification, eligibility, endorsement, invitation, pursuit, selection, or award likelihood." }
+  },
   "treatment": {
     "gate_only": "Required condition",
     "scored_only": "Scored factor",

@@ -5,7 +5,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const [model, service, repository, runtime, route, page, workspace, rules, schema, support, registry, dictionary, workflow, authority, tracker, dependency, evidence, browserAcceptance] = await Promise.all([
   read("src/domain/rfx/model.ts"), read("src/application/rfx/rfx-draft-service.ts"),
   read("src/infrastructure/firestore/rfx.ts"), read("src/infrastructure/rfx/runtime.ts"),
-  read("app/api/rfx/route.ts"), read("app/opportunities/page.tsx"), read("src/components/rfx/RFxDraftWorkspace.tsx"),
+  read("app/api/rfx/route.ts"), read("app/opportunities/manage/page.tsx"), read("src/components/rfx/RFxDraftWorkspace.tsx"),
   read("firestore.rules"), read("src/infrastructure/firestore/schema.ts"), read("src/infrastructure/firestore/support.ts"),
   read("src/application/participant/participant-lens-registry.ts"), read("src/i18n/get-dictionary.ts"),
   read(".github/workflows/ci.yml"), read("docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md"),
@@ -39,8 +39,8 @@ assert.match(registry, /availability: "enabled"/);
 for (const locale of ["EnUS", "Es", "Fr", "It", "De"]) assert.ok(dictionary.includes(`rfxWorkspace${locale}`), `RFx locale missing: ${locale}`);
 assert.match(workflow, /smoke-rfx-kernel-emulator/);
 assert.match(authority, /ISS-001/);
-assert.match(tracker, /438 total · 165 Done · 273 Not Started/);
-assert.match(tracker, /RFx Core: \*\*13\/41\*\*/);
+assert.match(tracker, /438 total · 170 Done · 268 Not Started/);
+assert.match(tracker, /RFx Core: \*\*18\/41\*\*/);
 for (const id of ["ISS-001", "ISS-002", "ISS-003"]) assert.match(tracker, new RegExp("\\[x\\] `" + id + "`"));
 assert.match(dependency, /Slice 4\.1 implementation result/);
 assert.match(evidence, /Configured-browser acceptance proves/);

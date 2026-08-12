@@ -1,85 +1,70 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { RfxDraftError } from "@/src/application/rfx/rfx-draft-service";
-import { RFxDraftWorkspace } from "@/src/components/rfx/RFxDraftWorkspace";
+import { OpportunityDiscoveryWorkspace } from "@/src/components/rfx/OpportunityDiscoveryWorkspace";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
+  ParticipantRouteDependencyUnavailableError,
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
-import { createServerRfxDraftService } from "@/src/infrastructure/rfx/runtime";
+import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
+import { createServerOpportunityDiscoveryService } from "@/src/infrastructure/rfx/opportunity-discovery-runtime";
 
 interface Props {
-  readonly searchParams?: Promise<
-    Readonly<Record<string, string | string[] | undefined>>
-  >;
+  readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
+}
+
+function first(value: string | string[] | undefined): string | null {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  return Array.isArray(value) && value[0]?.trim() ? value[0].trim() : null;
+}
+
+function values(value: string | string[] | undefined): readonly string[] {
+  return Object.freeze((Array.isArray(value) ? value : value ? [value] : []).flatMap((item) => item.split(",")).map((item) => item.trim()).filter(Boolean));
 }
 
 export default async function OpportunitiesPage({ searchParams }: Props) {
+  const params = searchParams ? await searchParams : {};
   const access = await resolveParticipantRoute({
     sessionCookie: (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
   });
-  if (access.kind === "unauthenticated")
-    redirect("/signin?returnTo=%2Fopportunities");
-  if (
-    access.kind === "access-resolution-required" ||
-    access.kind === "activation-required"
-  ) {
-    redirect(participantEntryDestination(access));
-  }
-  if (access.kind === "wrong-organization")
-    redirect(access.state.controlledPlatformUrl ?? "/join");
-  if (access.kind === "restricted")
-    redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
-  if (access.state.lifecycleState !== "open-platform")
-    redirect(access.state.controlledPlatformUrl ?? "/join");
-
-  const service = await createServerRfxDraftService();
-  const scope = Object.freeze({
-    context: access.context,
-    organizationId: String(access.membership.organizationId),
-    membershipId: String(access.membership.id),
+  if (access.kind === "unauthenticated") redirect("/signin?returnTo=%2Fopportunities");
+  if (access.kind === "access-resolution-required" || access.kind === "activation-required") redirect(participantEntryDestination(access));
+  if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
+  if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
+  if (access.state.lifecycleState !== "open-platform") redirect(access.state.controlledPlatformUrl ?? "/join");
+  const mapProjection = await loadAuthorizedParticipantMapProjection(access);
+  if (!mapProjection) throw new ParticipantRouteDependencyUnavailableError("workspace-state", new Error("Authorized opportunity map projection is incomplete."));
+  const geographyId = String(mapProjection.model.selectedGeography.id);
+  const requestedLocalities = values(params.locality);
+  const result = await createServerOpportunityDiscoveryService().discover({
+    organizationId: access.membership.organizationId,
+    userId: access.context.user.id,
+    membershipId: access.membership.id,
+  }, {
+    text: first(params.q),
+    requestFamilyKeys: values(params.requestFamily),
+    capabilityIds: values(params.capability),
+    localityIds: requestedLocalities.length ? requestedLocalities : [geographyId],
+    deadlineWindow: first(params.deadline),
+    watched: first(params.watched) === "true" ? true : first(params.watched) === "false" ? false : null,
+    cursor: first(params.cursor),
   });
-  let workspace;
-  let canCreate = true;
-  try {
-    workspace = await service.workspace(scope);
-  } catch (error) {
-    if (!(error instanceof RfxDraftError) || error.code !== "forbidden")
-      throw error;
-    canCreate = false;
-    workspace = Object.freeze({
-      drafts: Object.freeze([]),
-      requestFamilies: await service.requestFamilies(),
-      definitionCatalog: await service.definitionCatalog(),
-      performanceLocationOption: null,
-    });
-  }
-  const params: Readonly<Record<string, string | string[] | undefined>> =
-    searchParams ? await searchParams : {};
-  const requestedDraft =
-    typeof params.draft === "string"
-      ? params.draft
-      : Array.isArray(params.draft)
-        ? params.draft[0]
-        : null;
-  const selectedDraftId =
-    requestedDraft &&
-    workspace.drafts.some((draft) => draft.id === requestedDraft)
-      ? requestedDraft
-      : (workspace.drafts[0]?.id ?? null);
-
-  return (
-    <RFxDraftWorkspace
-      canCreate={canCreate}
-      initialDrafts={workspace.drafts}
-      requestFamilies={workspace.requestFamilies}
-      selectedDraftId={selectedDraftId}
-      commandRecoveryScope={`${scope.organizationId}:${scope.membershipId}`}
-      organizationId={scope.organizationId}
-      performanceLocationOption={workspace.performanceLocationOption}
-      definitionCatalog={workspace.definitionCatalog}
-    />
-  );
+  const requestedSelection = first(params.selected);
+  const selectedReference = requestedSelection && result.items.some((item) => item.reference === requestedSelection)
+    ? requestedSelection
+    : null;
+  return <OpportunityDiscoveryWorkspace
+    model={mapProjection.model}
+    homeMarker={mapProjection.homeMarker}
+    spatialScope={{
+      participantId: String(access.context.user.id),
+      membershipId: String(access.membership.id),
+      organizationId: String(access.membership.organizationId),
+      geographyId,
+    }}
+    result={result}
+    selectedReference={selectedReference}
+  />;
 }

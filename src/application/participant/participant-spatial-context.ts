@@ -33,16 +33,16 @@ export interface ParticipantSpatialLensState {
 export interface ParticipantSpatialContext {
   readonly version: typeof PARTICIPANT_SPATIAL_CONTEXT_VERSION;
   readonly scope: ParticipantSpatialScope;
-  readonly activeLens: Exclude<ParticipantLensId, "opportunities-rfx">;
+  readonly activeLens: ParticipantLensId;
   readonly selection: ParticipantSpatialSelection;
   readonly camera: ParticipantMapCamera | null;
-  readonly lensState: Readonly<Record<Exclude<ParticipantLensId, "opportunities-rfx">, ParticipantSpatialLensState>>;
+  readonly lensState: Readonly<Record<ParticipantLensId, ParticipantSpatialLensState>>;
   readonly panelOpen: boolean;
-  readonly originLens: Exclude<ParticipantLensId, "opportunities-rfx">;
+  readonly originLens: ParticipantLensId;
   readonly returnHref: string;
 }
 
-const LENSES = ["resources", "intelligence", "referrals"] as const;
+const LENSES = ["opportunities-rfx", "resources", "intelligence", "referrals"] as const;
 type AvailableParticipantLens = (typeof LENSES)[number];
 
 function required(value: string, label: string): string {
@@ -99,6 +99,7 @@ export function createParticipantSpatialContext(input: Readonly<{
       resources: emptyLensState(),
       intelligence: emptyLensState(),
       referrals: emptyLensState(),
+      "opportunities-rfx": emptyLensState(),
     }),
     panelOpen: true,
     originLens: activeLens,
@@ -151,7 +152,7 @@ export function parseParticipantSpatialContext(
   try {
     const parsed = JSON.parse(serialized) as Partial<ParticipantSpatialContext>;
     if (parsed.version !== PARTICIPANT_SPATIAL_CONTEXT_VERSION || !parsed.scope) return null;
-    if (LENSES.some((lens) => !parseLensState(parsed.lensState?.[lens]))) return null;
+    if (["resources", "intelligence", "referrals"].some((lens) => !parseLensState(parsed.lensState?.[lens as AvailableParticipantLens]))) return null;
     const scope = participantSpatialScope(parsed.scope);
     if (Object.keys(expectedScope).some((key) => scope[key as keyof ParticipantSpatialScope] !== expectedScope[key as keyof ParticipantSpatialScope])) return null;
     if (!isAvailableLens(parsed.activeLens) || !isAvailableLens(parsed.originLens)) return null;
@@ -173,6 +174,7 @@ export function parseParticipantSpatialContext(
         resources: parseLensState(parsed.lensState?.resources)!,
         intelligence: parseLensState(parsed.lensState?.intelligence)!,
         referrals: parseLensState(parsed.lensState?.referrals)!,
+        "opportunities-rfx": parseLensState(parsed.lensState?.["opportunities-rfx"]) ?? emptyLensState(),
       }),
       panelOpen: parsed.panelOpen,
       originLens: parsed.originLens,
@@ -228,10 +230,17 @@ export function participantSpatialIntelligenceHref(
   return `${destination.pathname}${destination.search}`;
 }
 
-export function participantSpatialLensHref(lens: "resources" | "intelligence" | "referrals"): string {
+export function participantSpatialLensHref(lens: ParticipantLensId): string {
   const context = readActiveParticipantSpatialContext();
-  if (!context) return lens === "resources" ? "/resources" : lens === "referrals" ? "/referrals" : "/geography/canvas";
+  if (!context) return lens === "resources" ? "/resources" : lens === "referrals" ? "/referrals" : lens === "opportunities-rfx" ? "/opportunities" : "/geography/canvas";
   if (lens === "intelligence") return participantSpatialIntelligenceHref(context);
+  if (lens === "opportunities-rfx") {
+    const state = context.lensState["opportunities-rfx"];
+    const params = new URLSearchParams();
+    if (state.search) params.set("q", state.search);
+    for (const [key, value] of Object.entries(state.filters)) if (value) params.set(key, value);
+    return params.size ? `/opportunities?${params.toString()}` : "/opportunities";
+  }
   if (lens === "referrals") {
     return context.selection.organizationId !== context.scope.organizationId
       ? `/referrals?organization=${encodeURIComponent(context.selection.organizationId)}`

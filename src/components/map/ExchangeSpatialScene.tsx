@@ -36,6 +36,7 @@ export interface ExchangeHomeMarker {
 }
 
 export type ExchangeOrganizationMarker = ExchangeHomeMarker;
+export type ExchangeOpportunityMarker = ExchangeHomeMarker;
 
 export type ExchangeSpatialGeometry =
   | { readonly type: "Polygon"; readonly coordinates: number[][][] }
@@ -61,10 +62,12 @@ export interface ExchangeSpatialSceneProps {
   readonly mode: ExchangeSpatialSceneMode;
   readonly marker?: ExchangeHomeMarker | null;
   readonly organizationMarkers?: readonly ExchangeOrganizationMarker[];
+  readonly opportunityMarkers?: readonly ExchangeOpportunityMarker[];
   readonly relationshipPaths?: readonly ExchangeRelationshipPath[];
   readonly serviceFields?: readonly ExchangeServiceField[];
   readonly focusedMarkerId?: string | null;
   readonly onOrganizationMarkerSelect?: (markerId: string) => void;
+  readonly onOpportunityMarkerSelect?: (markerId: string) => void;
   readonly initialCamera?: ParticipantMapCamera | null;
   readonly onCameraChange?: (camera: ParticipantMapCamera) => void;
   readonly interactive?: boolean;
@@ -102,6 +105,14 @@ const NETWORK_MARKER_CORE_LAYER_ID = "rfx-spatial-scene-network-organization-cor
 const NETWORK_SELECTED_MARKER_CORE_LAYER_ID = "rfx-spatial-scene-selected-network-organization-core";
 const NETWORK_MARKER_IDENTITY_LAYER_ID = "rfx-spatial-scene-network-organization-identity";
 const NETWORK_MARKER_LABEL_LAYER_ID = "rfx-spatial-scene-network-organization-label";
+const OPPORTUNITY_MARKER_SOURCE_ID = "rfx-spatial-scene-opportunities";
+const OPPORTUNITY_SELECTED_MARKER_SOURCE_ID = "rfx-spatial-scene-selected-opportunity";
+const OPPORTUNITY_CLUSTER_LAYER_ID = "rfx-spatial-scene-opportunity-cluster";
+const OPPORTUNITY_CLUSTER_COUNT_LAYER_ID = "rfx-spatial-scene-opportunity-cluster-count";
+const OPPORTUNITY_MARKER_LAYER_ID = "rfx-spatial-scene-opportunity-beacon";
+const OPPORTUNITY_SELECTED_HALO_LAYER_ID = "rfx-spatial-scene-selected-opportunity-halo";
+const OPPORTUNITY_SELECTED_MARKER_LAYER_ID = "rfx-spatial-scene-selected-opportunity-beacon";
+const OPPORTUNITY_SELECTED_LABEL_LAYER_ID = "rfx-spatial-scene-selected-opportunity-label";
 const HOME_MARKER_SOURCE_ID = "rfx-spatial-scene-home-marker";
 const HOME_MARKER_HALO_LAYER_ID = "rfx-spatial-scene-home-marker-halo";
 const HOME_MARKER_CORE_LAYER_ID = "rfx-spatial-scene-home-marker-core";
@@ -263,6 +274,27 @@ function organizationMarkerGeoJson(
         id: marker.id,
         label: marker.label,
         identity: organizationInitials(marker.label),
+        selected: marker.id === focusedMarkerId ? 1 : 0,
+      },
+      geometry: {
+        type: "Point" as const,
+        coordinates: [marker.coordinate[0], marker.coordinate[1]],
+      },
+    })),
+  };
+}
+
+function opportunityMarkerGeoJson(
+  markers: readonly ExchangeOpportunityMarker[],
+  focusedMarkerId: string | null,
+) {
+  return {
+    type: "FeatureCollection" as const,
+    features: markers.map((marker) => ({
+      type: "Feature" as const,
+      properties: {
+        id: marker.id,
+        label: marker.label,
         selected: marker.id === focusedMarkerId ? 1 : 0,
       },
       geometry: {
@@ -491,10 +523,12 @@ export function ExchangeSpatialScene({
   mode,
   marker = null,
   organizationMarkers = [],
+  opportunityMarkers = [],
   relationshipPaths = [],
   serviceFields = [],
   focusedMarkerId = null,
   onOrganizationMarkerSelect,
+  onOpportunityMarkerSelect,
   initialCamera = null,
   onCameraChange,
   interactive = false,
@@ -521,6 +555,7 @@ export function ExchangeSpatialScene({
   const modelRef = useRef(model);
   const markerRef = useRef(marker);
   const onOrganizationMarkerSelectRef = useRef(onOrganizationMarkerSelect);
+  const onOpportunityMarkerSelectRef = useRef(onOpportunityMarkerSelect);
   const initialCameraRef = useRef(initialCamera);
   const onCameraChangeRef = useRef(onCameraChange);
   const activationOverlayRef = useRef(activationOverlay);
@@ -536,6 +571,14 @@ export function ExchangeSpatialScene({
   ));
   const selectedNetworkMarkerGeoJsonRef = useRef(organizationMarkerGeoJson(
     organizationMarkers.filter((candidate) => candidate.id === focusedMarkerId),
+    focusedMarkerId,
+  ));
+  const opportunityMarkerGeoJsonRef = useRef(opportunityMarkerGeoJson(
+    opportunityMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
+    null,
+  ));
+  const selectedOpportunityMarkerGeoJsonRef = useRef(opportunityMarkerGeoJson(
+    opportunityMarkers.filter((candidate) => candidate.id === focusedMarkerId),
     focusedMarkerId,
   ));
   const relationshipPathGeoJsonRef = useRef(relationshipPathGeoJson(relationshipPaths));
@@ -583,6 +626,20 @@ export function ExchangeSpatialScene({
     ),
     [focusedMarkerId, organizationMarkers],
   );
+  const opportunityMarkersGeoJson = useMemo(
+    () => opportunityMarkerGeoJson(
+      opportunityMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
+      null,
+    ),
+    [focusedMarkerId, opportunityMarkers],
+  );
+  const selectedOpportunityMarkerGeoJson = useMemo(
+    () => opportunityMarkerGeoJson(
+      opportunityMarkers.filter((candidate) => candidate.id === focusedMarkerId),
+      focusedMarkerId,
+    ),
+    [focusedMarkerId, opportunityMarkers],
+  );
   const relationshipPathsGeoJson = useMemo(() => relationshipPathGeoJson(relationshipPaths), [relationshipPaths]);
   const serviceFieldsGeoJson = useMemo(() => serviceFieldGeoJson(serviceFields), [serviceFields]);
   const tutorialNodes = useMemo(() => tutorialNodeGeoJson(tutorialOverlay), [tutorialOverlay]);
@@ -593,6 +650,7 @@ export function ExchangeSpatialScene({
   markerRef.current = marker;
   if (!sceneInitializationStartedRef.current) initialCameraRef.current = initialCamera;
   onOrganizationMarkerSelectRef.current = onOrganizationMarkerSelect;
+  onOpportunityMarkerSelectRef.current = onOpportunityMarkerSelect;
   onCameraChangeRef.current = onCameraChange;
   activationOverlayRef.current = activationOverlay;
   continuousMotionRef.current = continuousMotion;
@@ -602,6 +660,8 @@ export function ExchangeSpatialScene({
   homeMarkerGeoJsonRef.current = homeMarkerGeoJson;
   networkMarkerGeoJsonRef.current = networkMarkersGeoJson;
   selectedNetworkMarkerGeoJsonRef.current = selectedNetworkMarkerGeoJson;
+  opportunityMarkerGeoJsonRef.current = opportunityMarkersGeoJson;
+  selectedOpportunityMarkerGeoJsonRef.current = selectedOpportunityMarkerGeoJson;
   relationshipPathGeoJsonRef.current = relationshipPathsGeoJson;
   serviceFieldGeoJsonRef.current = serviceFieldsGeoJson;
   tutorialNodeGeoJsonRef.current = tutorialNodes;
@@ -1223,6 +1283,84 @@ export function ExchangeSpatialScene({
         },
       });
 
+      map.addSource(OPPORTUNITY_MARKER_SOURCE_ID, {
+        type: "geojson",
+        data: opportunityMarkerGeoJsonRef.current,
+        cluster: true,
+        clusterMaxZoom: 13,
+        clusterRadius: 36,
+      });
+      map.addLayer({
+        id: OPPORTUNITY_CLUSTER_LAYER_ID,
+        type: "circle",
+        source: OPPORTUNITY_MARKER_SOURCE_ID,
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-radius": ["step", ["get", "point_count"], 15, 10, 19, 40, 23],
+          "circle-color": "#1769aa",
+          "circle-opacity": 0.92,
+          "circle-stroke-color": "rgba(255,255,255,0.86)",
+          "circle-stroke-width": 2,
+        },
+      });
+      map.addLayer({
+        id: OPPORTUNITY_CLUSTER_COUNT_LAYER_ID,
+        type: "symbol",
+        source: OPPORTUNITY_MARKER_SOURCE_ID,
+        filter: ["has", "point_count"],
+        layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 11, "text-allow-overlap": true },
+        paint: { "text-color": "#ffffff" },
+      });
+      map.addLayer({
+        id: OPPORTUNITY_MARKER_LAYER_ID,
+        type: "symbol",
+        source: OPPORTUNITY_MARKER_SOURCE_ID,
+        filter: ["!", ["has", "point_count"]],
+        layout: {
+          "text-field": "◆",
+          "text-size": 22,
+          "text-allow-overlap": true,
+          "text-ignore-placement": true,
+          "text-pitch-alignment": "viewport",
+          "text-rotation-alignment": "viewport",
+        },
+        paint: {
+          "text-color": "#1769aa",
+          "text-halo-color": "rgba(255,255,255,0.92)",
+          "text-halo-width": 2,
+        },
+      });
+      map.addSource(OPPORTUNITY_SELECTED_MARKER_SOURCE_ID, {
+        type: "geojson",
+        data: selectedOpportunityMarkerGeoJsonRef.current,
+      });
+      map.addLayer({
+        id: OPPORTUNITY_SELECTED_HALO_LAYER_ID,
+        type: "circle",
+        source: OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
+        paint: {
+          "circle-radius": 22,
+          "circle-color": "rgba(23,105,170,0.14)",
+          "circle-stroke-color": "rgba(23,105,170,0.48)",
+          "circle-stroke-width": 2,
+        },
+      });
+      map.addLayer({
+        id: OPPORTUNITY_SELECTED_MARKER_LAYER_ID,
+        type: "symbol",
+        source: OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
+        layout: { "text-field": "◆", "text-size": 30, "text-allow-overlap": true, "text-ignore-placement": true, "text-pitch-alignment": "viewport" },
+        paint: { "text-color": "#1769aa", "text-halo-color": "#ffffff", "text-halo-width": 2.5 },
+      });
+      map.addLayer({
+        id: OPPORTUNITY_SELECTED_LABEL_LAYER_ID,
+        type: "symbol",
+        source: OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
+        minzoom: 7,
+        layout: { "text-field": ["get", "label"], "text-size": 12, "text-offset": [0, 2.25], "text-anchor": "top", "text-allow-overlap": false, "text-pitch-alignment": "viewport" },
+        paint: { "text-color": "#0b0b0d", "text-halo-color": "rgba(247,243,234,0.98)", "text-halo-width": 2 },
+      });
+
       map.addSource(HOME_MARKER_SOURCE_ID, { type: "geojson", data: homeMarkerGeoJsonRef.current });
       map.addLayer({
         id: HOME_MARKER_HALO_LAYER_ID,
@@ -1334,6 +1472,33 @@ export function ExchangeSpatialScene({
         };
         map.on("click", NETWORK_MARKER_CORE_LAYER_ID, selectNetworkMarker);
         map.on("click", NETWORK_SELECTED_MARKER_CORE_LAYER_ID, selectNetworkMarker);
+        for (const layerId of [OPPORTUNITY_MARKER_LAYER_ID, OPPORTUNITY_SELECTED_MARKER_LAYER_ID, OPPORTUNITY_CLUSTER_LAYER_ID]) {
+          map.on("mouseenter", layerId, () => { map.getCanvas().style.cursor = "pointer"; });
+          map.on("mouseleave", layerId, () => { map.getCanvas().style.cursor = ""; });
+        }
+        map.on("click", OPPORTUNITY_CLUSTER_LAYER_ID, (event) => {
+          const feature = event.features?.[0] as unknown as
+            | { readonly properties?: Readonly<Record<string, unknown>>; readonly geometry?: { readonly coordinates?: unknown } }
+            | undefined;
+          const clusterId = feature?.properties?.cluster_id;
+          const coordinate = validCoordinatePair(feature?.geometry?.coordinates);
+          const source = map.getSource(OPPORTUNITY_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+          if (typeof clusterId !== "number" || !coordinate || !source) return;
+          source.getClusterExpansionZoom(clusterId, (error, zoom) => {
+            if (error || typeof zoom !== "number") return;
+            pauseForInteraction();
+            map.easeTo({ center: [coordinate[0], coordinate[1]], zoom, duration: reducedMotionRef.current ? 0 : 650 });
+          });
+        });
+        const selectOpportunityMarker = (event: mapboxgl.MapLayerMouseEvent) => {
+          const feature = event.features?.[0] as unknown as
+            | { readonly properties?: Readonly<Record<string, unknown>> }
+            | undefined;
+          const markerId = feature?.properties?.id;
+          if (typeof markerId === "string") onOpportunityMarkerSelectRef.current?.(markerId);
+        };
+        map.on("click", OPPORTUNITY_MARKER_LAYER_ID, selectOpportunityMarker);
+        map.on("click", OPPORTUNITY_SELECTED_MARKER_LAYER_ID, selectOpportunityMarker);
         map.on("click", HOME_MARKER_CORE_LAYER_ID, (event) => {
           if (map.queryRenderedFeatures(event.point, {
             layers: [
@@ -1402,6 +1567,10 @@ export function ExchangeSpatialScene({
     networkMarkerSource?.setData(networkMarkersGeoJson);
     const selectedNetworkMarkerSource = map.getSource(NETWORK_SELECTED_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     selectedNetworkMarkerSource?.setData(selectedNetworkMarkerGeoJson);
+    const opportunityMarkerSource = map.getSource(OPPORTUNITY_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    opportunityMarkerSource?.setData(opportunityMarkersGeoJson);
+    const selectedOpportunityMarkerSource = map.getSource(OPPORTUNITY_SELECTED_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    selectedOpportunityMarkerSource?.setData(selectedOpportunityMarkerGeoJson);
     const relationshipPathSource = map.getSource(RELATIONSHIP_PATH_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     relationshipPathSource?.setData(relationshipPathsGeoJson);
     const serviceFieldSource = map.getSource(SERVICE_FIELD_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
@@ -1416,6 +1585,8 @@ export function ExchangeSpatialScene({
     homeMarkerGeoJson,
     networkMarkersGeoJson,
     selectedNetworkMarkerGeoJson,
+    opportunityMarkersGeoJson,
+    selectedOpportunityMarkerGeoJson,
     relationshipPathsGeoJson,
     serviceFieldsGeoJson,
     tutorialNodes,

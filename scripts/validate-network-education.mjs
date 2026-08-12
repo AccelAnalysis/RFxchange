@@ -41,7 +41,7 @@ for (const locale of ["en-US", "es", "fr", "it", "de"]) {
     assert.ok(value.what && value.why && value.happens && value.next);
   }
 }
-assert.match(tracker, /438 total · 165 Done · 273 Not Started/);
+assert.match(tracker, /438 total · 170 Done · 268 Not Started/);
 assert.match(tracker, /Network: \*\*38\/38\*\*/);
 assert.match(tracker, /\[x\] `EDU-016`/);
 assert.match(tracker, /\[x\] `EDU-017`/);

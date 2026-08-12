@@ -73,7 +73,9 @@ assert.match(map, /NETWORK_MARKER_CORE_LAYER_ID/);
 assert.match(map, /"circle-color": "#252932"/);
 assert.match(map, /"circle-stroke-color": "#d6a23a"/);
 assert.match(map, /onOrganizationMarkerSelectRef\.current/);
-assert.doesNotMatch(map, /opportunity-beacon|provider-service-field|credibility-seal/);
+// Slice 4.5 owns the now-authorized real opportunity object. Network discovery must still not
+// introduce provider-field or credibility expressions that remain separately governed.
+assert.doesNotMatch(map, /provider-service-field|credibility-seal/);
 
 for (const locale of ["en-US", "es", "fr", "it", "de"]) {
   const catalogPath = path.join(root, "src", "i18n", "messages", "network", `${locale}.json`);

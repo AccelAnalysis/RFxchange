@@ -1635,7 +1635,7 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
   try {
     chrome = await launchChrome(9307);
     const { cdp, diagnostics } = await createPage(chrome, baseUrl, sessionCookie);
-    await navigate(cdp, `${baseUrl}/opportunities`);
+    await navigate(cdp, `${baseUrl}/opportunities/manage`);
     await waitForExpression(cdp, `Boolean(document.querySelector('[data-rfx-workspace="private-drafts"]'))`, "private RFx workspace");
     const initial = await evaluate(cdp, `(() => {
       const workspace = document.querySelector('[data-rfx-workspace="private-drafts"]');
@@ -1898,6 +1898,16 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     })()`);
     assert.equal(previewContract.preview.digest, previewEvidence.digest);
 
+    const savedSearch = await evaluate(cdp, `(async () => {
+      const response = await fetch('/api/opportunities', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ action: 'save-search', commandId: 'opportunity-search-${runId}', label: 'Configured acceptance search', alertPolicy: 'immediate', query: {} }),
+      });
+      return { status: response.status, body: await response.json() };
+    })()`);
+    assert.equal(savedSearch.status, 201);
+    assert.equal(savedSearch.body.savedSearch.alertPolicy, "immediate");
+
     const stalePreview = await evaluate(cdp, `(async () => {
       const response = await fetch('/api/rfx', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -1940,6 +1950,14 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.equal(projectionSnapshot.data().digest, previewEvidence.digest);
     assert.equal(publicationSnapshot.docs[0].data().projectionDigest, previewEvidence.digest);
     assert.deepEqual(projectionSnapshot.data().payload, previewContract.preview.payload);
+    const [discoveryMatches, discoveryAlerts] = await Promise.all([
+      db.collection("opportunitySavedSearchMatches").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityAlertIntents").where("organizationId", "==", organizationId).get(),
+    ]);
+    assert.equal(discoveryMatches.size, 1);
+    assert.equal(discoveryAlerts.size, 1);
+    assert.equal(discoveryAlerts.docs[0].data().request.eventKey, "rfx.opportunity-alert");
+    assert.equal(discoveryAlerts.docs[0].data().request.variables.opportunity_count, 1);
 
     const shareHref = await evaluate(cdp, `document.querySelector('[data-rfx-publication="published"] a')?.getAttribute('href')`);
     assert.equal(shareHref, `/opportunities/${previewEvidence.reference}`);
@@ -1960,7 +1978,34 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.ok(shareEvidence.overflow <= 0);
     const seededFallbackStatus = await evaluate(cdp, `(async () => (await fetch('/opportunities/portsmouth-facilities-partner-search')).status)()`);
     assert.equal(seededFallbackStatus, 404);
-    await navigate(cdp, `${baseUrl}/opportunities?draft=${encodeURIComponent(created.id)}`);
+    await navigate(cdp, `${baseUrl}/opportunities`);
+    await waitForExpression(cdp, `Boolean(document.querySelector('[data-opportunity-reference="${previewEvidence.reference}"]'))`, "published opportunity discovery result");
+    await evaluate(cdp, `document.querySelector('[data-opportunity-reference="${previewEvidence.reference}"]')?.click()`);
+    await waitForExpression(cdp, `document.querySelector('[data-selected-opportunity-reference]')?.dataset.selectedOpportunityReference === "${previewEvidence.reference}"`, "synchronized opportunity detail");
+    const discoveryView = await evaluate(cdp, `({
+      current: document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current'),
+      selected: document.querySelector('[data-selected-opportunity-reference]')?.dataset.selectedOpportunityReference,
+      indexLeak: document.documentElement.innerHTML.includes('capabilityIndexKeys') || document.documentElement.innerHTML.includes('localityIndexKeys'),
+      deadlineView: document.body.innerText.includes('Watched deadlines'),
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    })`);
+    assert.equal(discoveryView.current, "page");
+    assert.equal(discoveryView.selected, previewEvidence.reference);
+    assert.equal(discoveryView.indexLeak, false);
+    assert.equal(discoveryView.deadlineView, true);
+    assert.ok(discoveryView.overflow <= 0);
+    const watch = await evaluate(cdp, `(async () => {
+      const body = { action: 'set-watch', commandId: 'opportunity-watch-${runId}', reference: ${JSON.stringify(previewEvidence.reference)}, watching: true };
+      const first = await fetch('/api/opportunities', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      const firstBody = await first.json();
+      const replay = await fetch('/api/opportunities', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      return { first: first.status, replay: replay.status, replayBody: await replay.json(), id: firstBody.watch.id };
+    })()`);
+    assert.equal(watch.first, 200);
+    assert.equal(watch.replay, 200);
+    assert.equal(watch.replayBody.replayed, true);
+    assert.match(watch.id, /^oppwatch_[a-f0-9]{40}$/);
+    await navigate(cdp, `${baseUrl}/opportunities/manage?draft=${encodeURIComponent(created.id)}`);
     await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '5'`, "published RFx workspace return");
 
     const stale = await evaluate(cdp, `(async () => {
@@ -2058,24 +2103,37 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     return evidence;
   } finally {
     await authorizationRef.set(authorizationSnapshot.data());
-    const [aggregates, events, commands, audits, publicationSnapshots] = await Promise.all([
+    const [aggregates, events, commands, audits, publicationSnapshots, savedSearches, watches, matches, alerts, relationCommands, relationEvents] = await Promise.all([
       db.collection("rfxAggregates").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxCommands").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("organizationAuditEvents").where("organizationId", "==", organizationId).get(),
       db.collection("rfxPublicationSnapshots").where("issuerOrganizationId", "==", organizationId).get(),
+      db.collection("opportunitySavedSearches").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityWatches").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunitySavedSearchMatches").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityAlertIntents").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityRelationCommands").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityRelationEvents").where("organizationId", "==", organizationId).get(),
     ]);
     const rfxAudits = audits.docs.filter((snapshot) => String(snapshot.data().action).startsWith("rfx."));
     const projectionRefs = publicationSnapshots.docs.map((snapshot) =>
       db.collection("rfxOpportunityProjections").doc(snapshot.data().reference),
     );
-    await Promise.all([...aggregates.docs, ...events.docs, ...commands.docs, ...rfxAudits, ...publicationSnapshots.docs].map((snapshot) => snapshot.ref.delete()));
+    const opportunityAudits = audits.docs.filter((snapshot) => String(snapshot.data().action).startsWith("opportunity."));
+    await Promise.all([...aggregates.docs, ...events.docs, ...commands.docs, ...rfxAudits, ...opportunityAudits, ...publicationSnapshots.docs, ...savedSearches.docs, ...watches.docs, ...matches.docs, ...alerts.docs, ...relationCommands.docs, ...relationEvents.docs].map((snapshot) => snapshot.ref.delete()));
     await Promise.all(projectionRefs.map((reference) => reference.delete()));
     const residuals = await Promise.all([
       db.collection("rfxAggregates").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxCommands").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxPublicationSnapshots").where("issuerOrganizationId", "==", organizationId).get(),
+      db.collection("opportunitySavedSearches").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityWatches").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunitySavedSearchMatches").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityAlertIntents").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityRelationCommands").where("organizationId", "==", organizationId).get(),
+      db.collection("opportunityRelationEvents").where("organizationId", "==", organizationId).get(),
     ]);
     const projectionResiduals = await Promise.all(projectionRefs.map((reference) => reference.get()));
     assert.equal(residuals.reduce((total, snapshot) => total + snapshot.size, 0), 0, "RFx configured acceptance left fixture residue.");

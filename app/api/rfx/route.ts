@@ -17,6 +17,7 @@ import {
   createServerRfxDraftService,
   createServerRfxPublicationService,
 } from "@/src/infrastructure/rfx/runtime";
+import { createServerOpportunityDiscoveryService } from "@/src/infrastructure/rfx/opportunity-discovery-runtime";
 
 export const runtime = "nodejs";
 
@@ -204,7 +205,25 @@ export async function POST(request: NextRequest) {
         previewDigest: String(body.previewDigest ?? ""),
         audience: String(body.audience ?? ""),
       });
-      return NextResponse.json(result);
+      let discoveryEvaluation: Readonly<{
+        status: "completed" | "pending";
+        matches: number;
+        alerts: number;
+      }>;
+      try {
+        const evaluated = await createServerOpportunityDiscoveryService()
+          .evaluatePublishedProjection(result.projection);
+        discoveryEvaluation = Object.freeze({ status: "completed", ...evaluated });
+      } catch (error) {
+        console.error(JSON.stringify({
+          type: "rfx.opportunity-discovery-evaluation-pending",
+          reference: result.projection.reference,
+          projectionVersion: result.projection.aggregateVersion,
+          error: error instanceof Error ? error.name : "unknown",
+        }));
+        discoveryEvaluation = Object.freeze({ status: "pending", matches: 0, alerts: 0 });
+      }
+      return NextResponse.json({ ...result, discoveryEvaluation });
     }
     return NextResponse.json(
       { error: "RFx action is unsupported." },

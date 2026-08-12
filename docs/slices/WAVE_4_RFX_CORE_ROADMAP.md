@@ -1,8 +1,8 @@
 # Wave 4 — RFx Core roadmap
 
-**Status: ACTIVE CANONICAL ROADMAP — SLICES 4.1–4.4 IMPLEMENTED; WAVE 4 IS 13/41.**
+**Status: ACTIVE CANONICAL ROADMAP — SLICES 4.1–4.5 IMPLEMENTED; WAVE 4 IS 18/41.**
 
-Wave 4 contains **41 RFx Core Feature IDs**. Slices 4.1–4.4 implement 13; 28 remain Not Started. This roadmap preserves the tracker inventory and separates the basic live RFx path through submission from Wave 5 evaluation/selection/award.
+Wave 4 contains **41 RFx Core Feature IDs**. Slices 4.1–4.5 implement 18; 23 remain Not Started. This roadmap preserves the tracker inventory and separates the basic live RFx path through submission from Wave 5 evaluation/selection/award.
 
 The cross-cutting AI/AMACS Interpretation Foundation is complete and reusable for later guided buyer/issuer need interpretation. Wave 4 does not create a second AI stack. Merged PR #150, **Define the Exchange interaction architecture**, is required participant-experience authority for every Wave 4 slice.
 
@@ -229,8 +229,9 @@ Wave 3 approved handoff / dependency recalculation [complete]
 → Slice 4.4 documentation authority [complete]
 → 4.4 readiness/publication [complete]
 → B6c opportunity expression becomes eligible [eligible; not begun]
-→ reconcile and define Slice 4.5 authority [next]
-→ 4.5 discovery/manage
+→ reconcile and define Slice 4.5 authority [complete]
+→ 4.5 discovery/manage [complete]
+→ reconcile and define Slice 4.6 authority [next]
 → 4.6 deterministic fit/pursuit
 → 4.7 gap/team/resource
 → 4.8 response construction

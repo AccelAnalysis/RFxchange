@@ -34,7 +34,9 @@ import {
   rfxPublicationSnapshotId,
 } from "../src/domain/rfx/publication.ts";
 import { FirestoreRfxRepository } from "../src/infrastructure/firestore/rfx.ts";
+import { FirestoreOpportunityDiscoveryRepository } from "../src/infrastructure/firestore/opportunity-discovery.ts";
 import { FirestorePublishedOpportunityRepository } from "../src/infrastructure/acquisition/firestore-published-opportunities.ts";
+import { OpportunityDiscoveryService } from "../src/application/rfx/opportunity-discovery-service.ts";
 
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, "127.0.0.1:8080");
 const projectId = "demo-rfxchange";
@@ -99,12 +101,19 @@ const ids = {
   organizations: [organizationId],
   organizationMemberships: [`membership-${suffix}`],
   organizationAuthorizations: [`membership-${suffix}`],
+  users: [`user-${suffix}`],
   rfxAggregates: [aggregateId],
   rfxEvents: [`event-create-${suffix}`, `event-change-${suffix}`, `event-package-${suffix}`, `event-definition-${suffix}`, `event-publish-${suffix}`],
   rfxCommands: [`command-create-${suffix}`, `command-change-${suffix}`, `command-package-${suffix}`, `command-definition-${suffix}`, `command-publish-${suffix}`],
   organizationAuditEvents: [`audit-create-${suffix}`, `audit-change-${suffix}`, `audit-package-${suffix}`, `audit-definition-${suffix}`, `audit-publish-${suffix}`],
   rfxPublicationSnapshots: [rfxPublicationSnapshotId(created.id)],
   rfxOpportunityProjections: [rfxPublicationReference(created.id), `participant-${suffix}`],
+  opportunitySavedSearches: [`saved-search-${suffix}`],
+  opportunityWatches: [`watch-${suffix}`],
+  opportunitySavedSearchMatches: [`match-${suffix}`],
+  opportunityAlertIntents: [`alert-${suffix}`],
+  opportunityRelationCommands: [`relation-command-${suffix}`, `watch-command-${suffix}`],
+  opportunityRelationEvents: [`relation-event-${suffix}`],
   geographies: [geographyId],
 };
 const event = (id, aggregate, kind, commandId, priorRequestFamily = null, priorPackage = null, priorDefinition = null) => ({
@@ -173,6 +182,13 @@ try {
       userId: `user-${suffix}`,
       organizationId,
       permissions: ["rfx.create", "rfx.publish"],
+      createdAt: now,
+      updatedAt: now,
+    }),
+    adminDb.collection("users").doc(`user-${suffix}`).set({
+      id: `user-${suffix}`,
+      name: "RFx Test Participant",
+      primaryEmail: "rfx-participant@example.com",
       createdAt: now,
       updatedAt: now,
     }),
@@ -372,6 +388,21 @@ try {
   assert.equal((await repository.getById(published.id)).lifecycleState, "published");
   assert.equal((await repository.getPublicationSnapshot(publicationSnapshot.id)).projectionDigest, preview.digest);
   assert.deepEqual((await repository.getProjection(reference)).payload, preview.payload);
+  const discoveryRepository = new FirestoreOpportunityDiscoveryRepository(adminDb);
+  const discovery = new OpportunityDiscoveryService(discoveryRepository, () => now, "https://example.test");
+  const participantScope = { organizationId, userId: `user-${suffix}`, membershipId: `membership-${suffix}` };
+  const savedSearch = await discovery.saveSearch(participantScope, { commandId: `relation-command-${suffix}`, label: "Continuity", alertPolicy: "immediate", query: { text: "continuity", localityIds: [geographyId] } });
+  assert.equal(savedSearch.replayed, false);
+  assert.equal((await discovery.saveSearch(participantScope, { commandId: `relation-command-${suffix}`, label: "Continuity", alertPolicy: "immediate", query: { text: "continuity", localityIds: [geographyId] } })).replayed, true);
+  assert.deepEqual(await discovery.evaluatePublishedProjection(projection), { matches: 1, alerts: 1 });
+  assert.deepEqual(await discovery.evaluatePublishedProjection(projection), { matches: 0, alerts: 0 });
+  const discovered = await discovery.discover(participantScope, { localityIds: [geographyId] });
+  assert.deepEqual(discovered.items.map((item) => item.reference), [reference]);
+  const watched = await discovery.setWatch(participantScope, { commandId: `watch-command-${suffix}`, reference, watching: true });
+  assert.equal(watched.replayed, false);
+  assert.equal((await discovery.setWatch(participantScope, { commandId: `watch-command-${suffix}`, reference, watching: true })).replayed, true);
+  assert.equal((await adminDb.collection("opportunitySavedSearchMatches").where("organizationId", "==", organizationId).get()).size, 1);
+  assert.equal((await adminDb.collection("opportunityAlertIntents").where("organizationId", "==", organizationId).get()).size, 1);
   const publishedOpportunities = new FirestorePublishedOpportunityRepository(adminDb);
   assert.equal((await publishedOpportunities.getByReference(reference)).reference, reference);
   assert.equal(await publishedOpportunities.getResponderProjection("portsmouth-facilities-partner-search", true), null);
@@ -394,6 +425,12 @@ try {
     "rfxCommands",
     "rfxPublicationSnapshots",
     "rfxOpportunityProjections",
+    "opportunitySavedSearches",
+    "opportunityWatches",
+    "opportunitySavedSearchMatches",
+    "opportunityAlertIntents",
+    "opportunityRelationCommands",
+    "opportunityRelationEvents",
     "organizationAuditEvents",
   ]) {
     await assert.rejects(
@@ -404,6 +441,10 @@ try {
     );
   }
 } finally {
+  const opportunityCollections = ["opportunitySavedSearches", "opportunityWatches", "opportunitySavedSearchMatches", "opportunityAlertIntents", "opportunityRelationCommands", "opportunityRelationEvents"];
+  const opportunitySnapshots = await Promise.all(opportunityCollections.map((collection) => adminDb.collection(collection).where("organizationId", "==", organizationId).get()));
+  const opportunityAudits = (await adminDb.collection("organizationAuditEvents").where("organizationId", "==", organizationId).get()).docs.filter((snapshot) => String(snapshot.data().action).startsWith("opportunity."));
+  await Promise.all([...opportunitySnapshots.flatMap((snapshot) => snapshot.docs), ...opportunityAudits].map((snapshot) => snapshot.ref.delete()));
   for (const [collection, documentIds] of Object.entries(ids)) {
     await Promise.all(
       documentIds.map((id) => adminDb.collection(collection).doc(id).delete()),
