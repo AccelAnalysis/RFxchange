@@ -6,10 +6,10 @@ Wave 2 is complete, Brand Gates B0 through B6a and Wave 3 Slices 3.1 through 3.8
 
 Current Feature-ID state after the later Wave 4 Slice 4.2 implementation is:
 
-- **438 total · 157 Done · 281 Not Started**
+- **438 total · 160 Done · 278 Not Started**
 - Activation: **43/43**
 - Network: **38/38**
-- RFx Core: **5/41**
+- RFx Core: **8/41**
 
 AMACS 0.5.0, Brand Gates, the RFxchange AMACS reconciliation and the AI/AMACS Interpretation Foundation are no-Feature-ID cross-cutting work. They do not mark any Network feature Done.
 

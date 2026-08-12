@@ -12,12 +12,12 @@
 
 ## Progress
 
-**438 total · 157 Done · 281 Not Started**
+**438 total · 160 Done · 278 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
 - 3 - Network: **38/38**
-- 4 - RFx Core: **5/41**
+- 4 - RFx Core: **8/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
 - 7 - Institutional & Scale: **1/47**
@@ -52,8 +52,9 @@ Network completion is **38/38**: four inherited Wave 1 foundations, three Slice 
 
 - **Slice 4.1 — `ISS-001` + `ISS-002` + `ISS-003`**: establishes the private organization-owned RFx aggregate, the single bounded `draft` lifecycle, immutable version/event/idempotency/audit seams, a complete governed AMACS 0.5.0 request-family snapshot, and safe blank-source creation/re-entry in the Operational Workspace. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_1.md`.
 - **Slice 4.2 — `ISS-005` + `ISS-006`**: extends that aggregate with the structured market need, scope, requested outputs, timing, governed performance location, estimated value, engagement term, typed foundation requirements, six server-derived module statuses, bounded save/recovery and optional non-authoritative interpretation. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_2.md`.
+- **Slice 4.3 — `ISS-007` + `ISS-009` + `ISS-011`**: extends the same private aggregate with server-canonical AMACS requirements, an expandable linked response structure and an expandable linked evaluation definition with governed treatment/weight rules, bounded save/recovery and a complete manual path. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_3.md`.
 
-Wave 4 RFx Core is **5/41**. Slices 4.1–4.2 create no publication, opportunity projection, discovery, matching, response, teaming, submission or later lifecycle runtime. B6c remains ineligible before Slice 4.4 publication authority.
+Wave 4 RFx Core is **8/41**. Slices 4.1–4.3 create no publication, opportunity projection, discovery, matching, response, teaming, submission or later lifecycle runtime. B6c remains ineligible before Slice 4.4 publication authority.
 
 ## Feature-ID checklist
 
@@ -246,9 +247,9 @@ Wave 4 RFx Core is **5/41**. Slices 4.1–4.2 create no publication, opportunity
 - [x] `ISS-003` — Slice 4.1; authorized blank-source draft creation and private Operational Workspace re-entry without publication or opportunity projection
 - [x] `ISS-005` — Slice 4.2; task-organized private builder with six server-derived module statuses, bounded debounced/explicit save, stable retry and configured-browser completion/re-entry
 - [x] `ISS-006` — Slice 4.2; structured market need, scope, outputs, timing, governed performance location, value, term and foundation requirements with optional non-authoritative interpretation
-- [ ] `ISS-007`
-- [ ] `ISS-009`
-- [ ] `ISS-011`
+- [x] `ISS-007` — Slice 4.3; governed AMACS capability/typed requirements with qualifiers, decision treatment, satisfying-party rules and foundation/evidence links
+- [x] `ISS-009` — Slice 4.3; expandable linked evaluation definition with governed factors, treatments, conditional exact basis-point totals and server-derived completeness
+- [x] `ISS-011` — Slice 4.3; standardized AMACS response templates/sections with issuer expansion, typed responder controls and explicit requirement links
 - [ ] `ISS-016`
 - [ ] `ISS-018`
 - [ ] `ISS-019`

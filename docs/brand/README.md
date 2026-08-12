@@ -46,10 +46,10 @@ The final B6a implementation merged at:
 
 The Brand Gates and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Wave 4 Slice 4.2 acceptance are:
 
-- **438 total · 157 Done · 281 Not Started**
+- **438 total · 160 Done · 278 Not Started**
 - Activation: **43/43**
 - Network: **38/38**
-- Wave 4 RFx Core: **5/41**
+- Wave 4 RFx Core: **8/41**
 
 See:
 
@@ -144,7 +144,7 @@ B4 and B5 are also complete under the adopted execution sequence.
 
 Wave 3 Slice 3.2 is complete via PR #120, the no-Feature-ID AMACS and AI foundations are complete via PRs #123–#124, Slices 3.3–3.6 are complete via PRs #126, #128, #130 and #132, Slice 3.7 is complete via PR #137, and Slice 3.8 is complete via PR #139. Final-head/post-merge CI and the separate integrated exit passed. B6b remains intentionally pending.
 
-Neither Brand Gates, AMACS reconciliation nor the AI/AMACS foundation completed an additional Feature ID. Slices 4.1–4.2 complete only `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006`, producing **438 total · 157 Done · 281 Not Started**, Network **38/38** and RFx Core **5/41**.
+Neither Brand Gates, AMACS reconciliation nor the AI/AMACS foundation completed an additional Feature ID. Slices 4.1–4.3 complete only `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009` and `ISS-011`, producing **438 total · 160 Done · 278 Not Started**, Network **38/38** and RFx Core **8/41**.
 
 Merged PR #150 is now required authority for participant-facing Wave 4 work. The Slice 4.1 documentation authority covers only `ISS-001`, `ISS-002` and `ISS-003`; it does not implement B6c or a complete Opportunities lens.
 

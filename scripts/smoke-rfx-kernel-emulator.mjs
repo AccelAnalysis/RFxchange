@@ -20,9 +20,11 @@ import {
   createRfxDraft,
   changeRfxRequestFamily,
   normalizeRfxPackage,
+  normalizeRfxDefinition,
   performanceLocationFromLocality,
   requestFamilySnapshotFromAmacs,
   saveRfxPackage,
+  saveRfxDefinition,
 } from "../src/domain/rfx/model.ts";
 import { FirestoreRfxRepository } from "../src/infrastructure/firestore/rfx.ts";
 
@@ -86,11 +88,11 @@ const created = createRfxDraft({
 });
 const ids = {
   rfxAggregates: [aggregateId],
-  rfxEvents: [`event-create-${suffix}`, `event-change-${suffix}`, `event-package-${suffix}`],
-  rfxCommands: [`command-create-${suffix}`, `command-change-${suffix}`, `command-package-${suffix}`],
-  organizationAuditEvents: [`audit-create-${suffix}`, `audit-change-${suffix}`, `audit-package-${suffix}`],
+  rfxEvents: [`event-create-${suffix}`, `event-change-${suffix}`, `event-package-${suffix}`, `event-definition-${suffix}`],
+  rfxCommands: [`command-create-${suffix}`, `command-change-${suffix}`, `command-package-${suffix}`, `command-definition-${suffix}`],
+  organizationAuditEvents: [`audit-create-${suffix}`, `audit-change-${suffix}`, `audit-package-${suffix}`, `audit-definition-${suffix}`],
 };
-const event = (id, aggregate, kind, commandId, priorRequestFamily = null, priorPackage = null) => ({
+const event = (id, aggregate, kind, commandId, priorRequestFamily = null, priorPackage = null, priorDefinition = null) => ({
   id,
   rfxId: aggregate.id,
   issuerOrganizationId: aggregate.issuerOrganizationId,
@@ -103,6 +105,8 @@ const event = (id, aggregate, kind, commandId, priorRequestFamily = null, priorP
   priorRequestFamily,
   package: aggregate.package,
   priorPackage,
+  definition: aggregate.definition,
+  priorDefinition,
   occurredAt: now,
 });
 const command = (id, aggregate, action, fingerprint) => ({
@@ -242,6 +246,27 @@ try {
   assert.equal((await repository.getById(packaged.id)).package.moduleStatus["performance-location"], "complete");
   await assert.rejects(repository.save({ ...packageBundle, command: { ...packageBundle.command, id: `command-package-stale-${suffix}`, requestFingerprint: "f".repeat(64) }, event: { ...packageBundle.event, id: `event-package-stale-${suffix}`, commandId: `command-package-stale-${suffix}` }, audit: { ...packageBundle.audit, id: `audit-package-stale-${suffix}` } }), /current version is 3/);
 
+  const snapshot = (kind, id, label, definition) => ({ kind, id, labelSnapshot: label, definitionSnapshot: definition, amacsReleaseVersion: "0.5.0", amacsSourceCommit: release.sourceCommit });
+  const definitionRecord = normalizeRfxDefinition({
+    requirements: [{ id: "defined-requirement-1", requirementType: snapshot("requirement-type", "AMACS-RTYP-000001", "Capability requirement", "A governed capability requirement."), requirementTypeCode: "CAPABILITY", allowedDecisionTreatments: ["gate_only", "scored_only"], teamCoverageAllowed: true, capability: snapshot("capability", "AMACS-CAP-000001", "Continuity planning", "Ability to plan operational continuity."), capabilityBreadcrumb: "Operations / Resilience / Continuity planning", title: "Continuity planning", description: "Demonstrate capability.", level: "required", decisionTreatment: "gate_only", satisfyingParty: "any-accepted-team-member", qualifiers: [], evidenceRequirementIds: [], linkedFoundationRequirementIds: ["requirement-1"] }],
+    responseStructure: { sourceTemplate: snapshot("response-template", "AMACS-RSPT-000001", "Market Capability Response", "A governed response architecture."), sections: [{ id: "section-1", sourceSection: snapshot("response-section", "AMACS-RSP-000001", "Technical response", "Explain the proposed response."), title: "Technical response", instructions: "Explain the response.", format: "narrative", required: true, characterLimit: 5000, itemLimit: null, attachmentsAllowed: true, linkedRequirementIds: ["defined-requirement-1"] }] },
+    evaluationDefinition: { sourceTemplate: snapshot("decision-template", "AMACS-DECT-000001", "Capability and Market Assessment", "A governed decision structure."), weightingRequired: false, factors: [{ id: "factor-1", sourceFactor: snapshot("decision-factor", "AMACS-DEC-000001", "Mandatory capability coverage", "Whether mandatory capabilities are covered."), sourceMethod: "gate", title: "Mandatory capability coverage", description: "Confirm coverage.", treatment: "required-condition", weightBasisPoints: null, linkedRequirementIds: ["defined-requirement-1"], linkedResponseSectionIds: ["section-1"], linkedEvidenceRequirementIds: [] }] },
+    interpretationRecordIds: [],
+  }, ["requirement-1"]);
+  const defined = saveRfxDefinition({ aggregate: packaged, expectedVersion: 3, definition: definitionRecord, actorUserId: `user-${suffix}`, actorMembershipId: `membership-${suffix}`, now });
+  const definitionBundle = {
+    aggregate: defined,
+    expectedVersion: 3,
+    event: event(ids.rfxEvents[3], defined, "rfx-definition-saved", ids.rfxCommands[3], null, packaged.package, packaged.definition),
+    command: command(ids.rfxCommands[3], defined, "save-definition", "1".repeat(64)),
+    audit: audit(ids.organizationAuditEvents[3], "rfx.definition-saved"),
+  };
+  assert.equal(await repository.save(definitionBundle), "created");
+  assert.equal(await repository.save(definitionBundle), "replayed");
+  assert.equal((await repository.getById(defined.id)).version, 4);
+  assert.deepEqual((await repository.getById(defined.id)).definition.moduleStatus, { requirements: "complete", responseStructure: "complete", evaluationDefinition: "complete" });
+  await assert.rejects(repository.save({ ...definitionBundle, command: { ...definitionBundle.command, id: `command-definition-stale-${suffix}`, requestFingerprint: "2".repeat(64) }, event: { ...definitionBundle.event, id: `event-definition-stale-${suffix}`, commandId: `command-definition-stale-${suffix}` }, audit: { ...definitionBundle.audit, id: `audit-definition-stale-${suffix}` } }), /current version is 4/);
+
   for (const collection of [
     "rfxEvents",
     "rfxCommands",
@@ -274,5 +299,5 @@ try {
 }
 
 console.log(
-  "Slice 4.2 RFx package atomicity, replay, conflict, tenant isolation, direct-client deny, immutability, and zero-residual acceptance passed.",
+  "Slice 4.3 RFx definition atomicity, replay, conflict, tenant isolation, direct-client deny, immutability, and zero-residual acceptance passed.",
 );

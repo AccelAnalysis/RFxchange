@@ -20,10 +20,15 @@ export interface AmacsCatalogPort {
   hasCanonicalCapability(capabilityId: string): Promise<boolean>;
   listMarketRoles(): Promise<readonly AmacsRegistryRecord[]>;
   listRequestFamilies(): Promise<readonly AmacsRegistryRecord[]>;
+  listRequirementTypes(): Promise<readonly AmacsRegistryRecord[]>;
+  listResponseTemplates(): Promise<readonly AmacsRegistryRecord[]>;
+  listDecisionTemplates(): Promise<readonly AmacsRegistryRecord[]>;
   getRequestFamily(requestFamilyId: string): Promise<AmacsRegistryRecord | null>;
   getRequirementType(requirementTypeId: string): Promise<AmacsRegistryRecord | null>;
   getResponseTemplate(responseTemplateId: string): Promise<AmacsRegistryRecord | null>;
+  getResponseSection(responseSectionId: string): Promise<AmacsRegistryRecord | null>;
   getDecisionTemplate(decisionTemplateId: string): Promise<AmacsRegistryRecord | null>;
+  getDecisionFactor(decisionFactorId: string): Promise<AmacsRegistryRecord | null>;
   getReadinessRules(requestFamilyId: string): Promise<readonly AmacsRegistryRecord[]>;
   getConceptInterpretationGuidance(
     capabilityId: string,

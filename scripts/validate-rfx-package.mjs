@@ -120,15 +120,15 @@ assert.match(workflow, /smoke-rfx-kernel-emulator/);
 assert.match(authority, /ISS-005/);
 assert.match(authority, /ISS-006/);
 assert.match(evidence, /Configured-browser acceptance/);
-assert.match(tracker, /438 total · 157 Done · 281 Not Started/);
-assert.match(tracker, /RFx Core: \*\*5\/41\*\*/);
+assert.match(tracker, /438 total · 160 Done · 278 Not Started/);
+assert.match(tracker, /RFx Core: \*\*8\/41\*\*/);
 for (const id of ["ISS-005", "ISS-006"])
   assert.match(tracker, new RegExp("\\[x\\] `" + id + "`"));
 assert.match(dependency, /Slice 4\.2 implementation result/);
 assert.match(browserAcceptance, /RFx package version 3/);
 assert.match(browserAcceptance, /moduleStatus/);
 assert.match(smoke, /rfx-package-saved/);
-assert.match(smoke, /current version is 3/);
+assert.match(smoke, /current version is 4/);
 for (const [index, locale] of locales.entries()) {
   const parsed = JSON.parse(locale);
   for (const key of [

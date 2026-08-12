@@ -1744,6 +1744,131 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.equal(packageAggregate.package.performanceLocation.mode, "exact-address");
     assert.deepEqual(Object.values(packageAggregate.package.moduleStatus), ["complete", "complete", "complete", "complete", "complete", "complete"]);
 
+    await evaluate(cdp, `document.querySelector('[data-rfx-add-defined-requirement]').click()`);
+    await waitForExpression(cdp, `Boolean(document.querySelector('[data-rfx-capability-search]'))`, "RFx capability picker");
+    await evaluate(cdp, `(() => {
+      const input = document.querySelector('[data-rfx-capability-search]');
+      input.focus();
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, 'continuity');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    })()`);
+    await waitForExpression(cdp, `Boolean(document.querySelector('[data-rfx-capability-result]'))`, "AMACS capability search result");
+    await evaluate(cdp, `document.querySelector('[data-rfx-capability-result]').click()`);
+    await wait(100);
+    const governedRequirementTypes = [
+      ["AMACS-RTYP-000002", "Current operating credential"],
+      ["AMACS-RTYP-000003", "Comparable continuity experience"],
+      ["AMACS-RTYP-000004", "Issuer locality coverage"],
+      ["AMACS-RTYP-000005", "Four-hour response capacity"],
+      ["AMACS-RTYP-000007", "Supporting continuity evidence"],
+    ];
+    for (const [index, [typeId, title]] of governedRequirementTypes.entries()) {
+      const expectedCount = index + 2;
+      await evaluate(cdp, `document.querySelector('[data-rfx-add-defined-requirement]').click()`);
+      await waitForExpression(cdp, `document.querySelectorAll('[data-rfx-requirement]').length === ${expectedCount}`, `RFx governed requirement ${expectedCount}`);
+      await evaluate(cdp, `(() => {
+        const row = document.querySelectorAll('[data-rfx-requirement]')[${index + 1}];
+        const grid = row.children[1];
+        const type = grid.querySelector('select');
+        const title = grid.querySelector('input');
+        const condition = grid.querySelectorAll('input')[1];
+        Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(type, ${JSON.stringify(typeId)});
+        type.dispatchEvent(new Event('change', { bubbles: true }));
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(title, ${JSON.stringify(title)});
+        title.dispatchEvent(new Event('input', { bubbles: true }));
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(condition, 'Confirmed before response deadline');
+        condition.dispatchEvent(new Event('input', { bubbles: true }));
+      })()`);
+      await wait(50);
+    }
+    const controlledRequirementOptions = await evaluate(cdp, `(() => {
+      const rows = [...document.querySelectorAll('[data-rfx-requirement]')];
+      const credential = rows[1];
+      const treatment = credential.querySelectorAll('select')[2];
+      const satisfyingParty = credential.querySelectorAll('select')[3];
+      return {
+        credentialTeamOptions: satisfyingParty.options.length,
+        credentialTreatmentOptions: [...treatment.options].map((option) => option.value),
+        rawIdsVisible: document.body.innerText.includes('AMACS-RTYP-') || document.body.innerText.includes('AMACS-CAP-'),
+      };
+    })()`);
+    assert.equal(controlledRequirementOptions.credentialTeamOptions, 1);
+    assert.deepEqual(controlledRequirementOptions.credentialTreatmentOptions, ["gate_only", "scored_only", "gate_and_scored_depth", "informational_only"]);
+    assert.equal(controlledRequirementOptions.rawIdsVisible, false);
+    await evaluate(cdp, `(() => {
+      const select = (selector, value) => {
+        const element = document.querySelector(selector);
+        Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(element, value);
+        element.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+      select('[data-rfx-response-template]', ${JSON.stringify(aggregate.requestFamily.defaultResponseTemplateIdSnapshot)});
+      select('[data-rfx-decision-template]', 'AMACS-DECT-000003');
+    })()`);
+    await waitForExpression(cdp, `document.querySelectorAll('[data-rfx-response-section]').length > 0 && document.querySelectorAll('[data-rfx-evaluation-factor]').length > 0`, "RFx response and evaluation templates");
+    const originalSectionCount = Number(await evaluate(cdp, `document.querySelectorAll('[data-rfx-response-section]').length`));
+    await evaluate(cdp, `document.querySelector('[data-rfx-add-section]').click()`);
+    await waitForExpression(cdp, `Boolean(document.querySelector('[role="dialog"]'))`, "RFx custom section sheet");
+    assert.equal(await evaluate(cdp, `document.querySelector('[role="dialog"]').contains(document.activeElement)`), true, "RFx custom section sheet did not receive focus.");
+    await evaluate(cdp, `document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
+    await waitForExpression(cdp, `!document.querySelector('[role="dialog"]')`, "dismissed RFx custom section sheet");
+    assert.equal(await evaluate(cdp, `document.activeElement?.matches('[data-rfx-add-section]')`), true, "RFx custom section sheet did not restore focus.");
+    await evaluate(cdp, `document.querySelector('[data-rfx-add-section]').click()`);
+    await waitForExpression(cdp, `Boolean(document.querySelector('[role="dialog"]'))`, "reopened RFx custom section sheet");
+    await evaluate(cdp, `document.querySelector('[role="dialog"] button').click()`);
+    await waitForExpression(cdp, `document.querySelectorAll('[data-rfx-response-section]').length === ${originalSectionCount + 1}`, "added RFx custom response section");
+    await evaluate(cdp, `(() => {
+      const rows = [...document.querySelectorAll('[data-rfx-response-section]')];
+      const custom = rows.at(-1);
+      const title = custom.querySelector('input');
+      const link = custom.querySelector('select');
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(title, 'Continuity evidence schedule');
+      title.dispatchEvent(new Event('input', { bubbles: true }));
+      const linked = [...link.options].find((option) => option.value);
+      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(link, linked.value);
+      link.dispatchEvent(new Event('change', { bubbles: true }));
+      custom.querySelector('[data-rfx-section-up]').click();
+    })()`);
+    await waitForExpression(cdp, `[...document.querySelectorAll('[data-rfx-response-section]')].some((row, index, rows) => row.querySelector('input')?.value === 'Continuity evidence schedule' && index < rows.length - 1)`, "reordered RFx custom response section");
+    const weightedValidation = await evaluate(cdp, `(() => {
+      const summary = document.querySelector('[data-valid]');
+      const input = document.querySelector('[data-rfx-factor-weight]');
+      if (!summary || !input) return null;
+      const original = input.value;
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, '0');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      return { original };
+    })()`);
+    assert.ok(weightedValidation?.original, "Weighted decision template did not expose an editable scored factor.");
+    await waitForExpression(cdp, `document.querySelector('[data-valid]')?.dataset.valid === 'false'`, "invalid RFx weighted total");
+    await evaluate(cdp, `(() => {
+      const input = document.querySelector('[data-rfx-factor-weight]');
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, ${JSON.stringify(weightedValidation.original)});
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      const firstFactor = document.querySelector('[data-rfx-evaluation-factor]');
+      const title = firstFactor?.querySelector('input:not([type="number"])');
+      if (title) {
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(title, 'Mandatory capability coverage — issuer clarified');
+        title.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      const secondFactor = document.querySelectorAll('[data-rfx-evaluation-factor]')[1];
+      const link = secondFactor?.querySelectorAll('select')[1];
+      const linked = link ? [...link.options].find((option) => option.value) : null;
+      if (link && linked) {
+        Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(link, linked.value);
+        link.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    })()`);
+    await waitForExpression(cdp, `document.querySelector('[data-valid]')?.dataset.valid === 'true'`, "resolved RFx weighted total");
+    await evaluate(cdp, `document.querySelector('[data-rfx-definition-save]').click()`);
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id]')?.dataset.rfxVersion === '4'`, "RFx definition version 4");
+    const definitionSnapshot = await db.collection("rfxAggregates").doc(created.id).get();
+    const definitionAggregate = definitionSnapshot.data();
+    assert.equal(definitionAggregate.version, 4);
+    assert.equal(definitionAggregate.definition.requirements.length, 6);
+    assert.deepEqual(definitionAggregate.definition.requirements.map((requirement) => requirement.requirementTypeCode), ["CAPABILITY", "CREDENTIAL", "EXPERIENCE", "GEOGRAPHY", "CAPACITY", "EVIDENCE"]);
+    assert.equal(definitionAggregate.definition.requirements[0].capability.amacsReleaseVersion, "0.5.0");
+    assert.deepEqual(Object.values(definitionAggregate.definition.moduleStatus), ["complete", "complete", "complete"]);
+
     const stale = await evaluate(cdp, `(async () => {
       const response = await fetch('/api/rfx', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -1752,10 +1877,10 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
       return { status: response.status, body: await response.json() };
     })()`);
     assert.equal(stale.status, 409);
-    assert.equal((await db.collection("rfxAggregates").doc(created.id).get()).data().version, 3);
+    assert.equal((await db.collection("rfxAggregates").doc(created.id).get()).data().version, 4);
 
     await cdp.send("Page.reload", { ignoreCache: true });
-    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '3'`, "authorized RFx reload re-entry");
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '4'`, "authorized RFx reload re-entry");
     await waitForExpression(cdp, `document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current') === 'page'`, "current RFx participant lens");
     const shellAfterReload = await evaluate(cdp, `({
       current: document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current'),
@@ -1805,7 +1930,7 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.equal(missingPermission.current, "page");
     await authorizationRef.set(originalAuthorization);
     await cdp.send("Page.reload", { ignoreCache: true });
-    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '3'`, "RFx permission restoration");
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '4'`, "RFx permission restoration");
 
     const [events, commands, audits] = await Promise.all([
       db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
@@ -1813,16 +1938,17 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
       db.collection("organizationAuditEvents").where("organizationId", "==", organizationId).get(),
     ]);
     const rfxAudits = audits.docs.filter((snapshot) => String(snapshot.data().action).startsWith("rfx."));
-    assert.deepEqual(events.docs.map((snapshot) => snapshot.data().kind).sort(), ["rfx-draft-created", "rfx-package-saved", "rfx-request-family-changed"]);
-    assert.equal(commands.size, 3);
-    assert.equal(rfxAudits.length, 3);
+    assert.deepEqual(events.docs.map((snapshot) => snapshot.data().kind).sort(), ["rfx-definition-saved", "rfx-draft-created", "rfx-package-saved", "rfx-request-family-changed"]);
+    assert.equal(commands.size, 4);
+    assert.equal(rfxAudits.length, 4);
     evidence = Object.freeze({
       rfxId: created.id,
-      versions: [1, 2, 3],
+      versions: [1, 2, 3, 4],
       amacsRelease: aggregate.requestFamily.amacsReleaseVersion,
       lifecycleState: aggregate.lifecycleState,
       staleStatus: stale.status,
       moduleStatus: packageAggregate.package.moduleStatus,
+      definitionModuleStatus: definitionAggregate.definition.moduleStatus,
       eventKinds: events.docs.map((snapshot) => snapshot.data().kind).sort(),
       commandCount: commands.size,
       auditCount: rfxAudits.length,

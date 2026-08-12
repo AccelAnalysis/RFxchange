@@ -52,6 +52,7 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
     workspace = Object.freeze({
       drafts: Object.freeze([]),
       requestFamilies: await service.requestFamilies(),
+      definitionCatalog: await service.definitionCatalog(),
       performanceLocationOption: null,
     });
   }
@@ -78,6 +79,7 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
       commandRecoveryScope={`${scope.organizationId}:${scope.membershipId}`}
       organizationId={scope.organizationId}
       performanceLocationOption={workspace.performanceLocationOption}
+      definitionCatalog={workspace.definitionCatalog}
     />
   );
 }
