@@ -58,11 +58,13 @@ function buildDiscoveryUrl(input: Readonly<{
   organizationId: string;
   capability: string;
   serviceAreaId: string | null;
+  selectedOrganizationId?: string | null;
   page?: number;
 }>): string {
   const params = new URLSearchParams({ organizationId: input.organizationId });
   if (input.capability) params.set("q", input.capability);
   if (input.serviceAreaId) params.set("serviceArea", input.serviceAreaId);
+  if (input.selectedOrganizationId) params.set("selectedOrganization", input.selectedOrganizationId);
   if (input.page && input.page > 1) params.set("page", String(input.page));
   return `/geography/canvas?${params.toString()}`;
 }
@@ -185,6 +187,7 @@ export function ExistingWorkspaceFoundation({
   const selectedHome = selectedObjectId === homeMarker.id;
   const selectedOrganization = organizationsByMarkerId.get(selectedObjectId) ?? null;
   const selectedOrganizationId = selectedOrganization ? String(selectedOrganization.organizationId) : organizationId;
+  const selectedOrganizationQueryId = selectedHome ? null : selectedOrganizationId;
   const organizationActions = projectOrganizationActions({
     viewerOrganizationId: organizationId,
     selectedOrganizationId,
@@ -220,7 +223,13 @@ export function ExistingWorkspaceFoundation({
   const serviceAreaId = query?.serviceGeographyId ?? null;
   useEffect(() => {
     const page = query?.page ?? 1;
-    const returnHref = buildDiscoveryUrl({ organizationId, capability, serviceAreaId, page });
+    const returnHref = buildDiscoveryUrl({
+      organizationId,
+      capability,
+      serviceAreaId,
+      selectedOrganizationId: selectedOrganizationQueryId,
+      page,
+    });
     const nextFilterValues: Record<string, string> = {};
     if (serviceAreaId) nextFilterValues.serviceArea = serviceAreaId;
     const nextFilters: Readonly<Record<string, string>> = Object.freeze(nextFilterValues);
@@ -250,11 +259,16 @@ export function ExistingWorkspaceFoundation({
         }),
       });
     });
-  }, [capability, organizationId, query?.page, serviceAreaId, updateSpatialContext]);
+  }, [capability, organizationId, query?.page, selectedOrganizationQueryId, serviceAreaId, updateSpatialContext]);
   useEffect(() => {
     if (resultListRef.current) resultListRef.current.scrollTop = spatialContext.lensState.intelligence.listScrollTop;
   }, [spatialContext.lensState.intelligence.listScrollTop]);
-  const clearHref = buildDiscoveryUrl({ organizationId, capability: "", serviceAreaId: null });
+  const clearHref = buildDiscoveryUrl({
+    organizationId,
+    capability: "",
+    serviceAreaId: null,
+    selectedOrganizationId: selectedOrganizationQueryId,
+  });
   const locationLabels = {
     near: t("networkWorkspace.detail.nearLocation", { locality }),
     inLocality: t("networkWorkspace.detail.inLocality", { locality }),
@@ -288,6 +302,9 @@ export function ExistingWorkspaceFoundation({
             <section className={styles.networkSearch} aria-label={t("networkWorkspace.search.ariaLabel")}>
               <form className={styles.networkForm} role="search" method="get" action="/geography/canvas">
                 <input type="hidden" name="organizationId" value={organizationId} />
+                {selectedOrganizationQueryId ? (
+                  <input type="hidden" name="selectedOrganization" value={selectedOrganizationQueryId} />
+                ) : null}
                 <label className={styles.networkField}>
                   <span>{t("networkWorkspace.search.capabilityLabel")}</span>
                   <input
@@ -399,6 +416,7 @@ export function ExistingWorkspaceFoundation({
                       organizationId,
                       capability,
                       serviceAreaId,
+                      selectedOrganizationId: selectedOrganizationQueryId,
                       page: discovery.page - 1,
                     })}>{t("networkWorkspace.search.previous")}</Link>
                   ) : <span />}
@@ -408,6 +426,7 @@ export function ExistingWorkspaceFoundation({
                       organizationId,
                       capability,
                       serviceAreaId,
+                      selectedOrganizationId: selectedOrganizationQueryId,
                       page: discovery.page + 1,
                     })}>{t("networkWorkspace.search.next")}</Link>
                   ) : <span />}
