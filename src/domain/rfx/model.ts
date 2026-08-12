@@ -378,7 +378,7 @@ export interface RfxAggregate {
   readonly id: RfxId;
   readonly schemaVersion: typeof RFX_AGGREGATE_SCHEMA_VERSION;
   readonly issuerOrganizationId: OrganizationId;
-  readonly lifecycleState: "draft";
+  readonly lifecycleState: "draft" | "published";
   readonly version: number;
   readonly requestFamily: RequestFamilySnapshot;
   readonly package: RfxPackage | null;
@@ -396,7 +396,8 @@ export type RfxEventKind =
   | "rfx-draft-created"
   | "rfx-request-family-changed"
   | "rfx-package-saved"
-  | "rfx-definition-saved";
+  | "rfx-definition-saved"
+  | "rfx-published";
 
 export interface RfxEvent {
   readonly id: string;
@@ -424,7 +425,8 @@ export interface RfxCommandReceipt {
     | "create-draft"
     | "change-request-family"
     | "save-package"
-    | "save-definition";
+    | "save-definition"
+    | "publish";
   readonly requestFingerprint: string;
   readonly resultingVersion: number;
   readonly recordedAt: string;

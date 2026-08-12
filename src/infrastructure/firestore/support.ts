@@ -82,6 +82,8 @@ const DOMAIN_TIMESTAMP_EXPOSURE: Readonly<Record<FirestoreCollectionKey, DomainT
     rfxAggregates: Object.freeze({ createdAt: true, updatedAt: true }),
     rfxEvents: Object.freeze({ createdAt: false, updatedAt: false }),
     rfxCommands: Object.freeze({ createdAt: false, updatedAt: false }),
+    rfxPublicationSnapshots: Object.freeze({ createdAt: false, updatedAt: false }),
+    rfxOpportunityProjections: Object.freeze({ createdAt: false, updatedAt: false }),
     referralEducationAcknowledgements: Object.freeze({ createdAt: false, updatedAt: false }),
     referralCommunicationIntents: Object.freeze({ createdAt: false, updatedAt: true }),
     providerApplications: Object.freeze({ createdAt: true, updatedAt: true }),

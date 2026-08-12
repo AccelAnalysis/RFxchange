@@ -12,12 +12,12 @@
 
 ## Progress
 
-**438 total · 160 Done · 278 Not Started**
+**438 total · 165 Done · 273 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
 - 3 - Network: **38/38**
-- 4 - RFx Core: **8/41**
+- 4 - RFx Core: **13/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
 - 7 - Institutional & Scale: **1/47**
@@ -53,8 +53,9 @@ Network completion is **38/38**: four inherited Wave 1 foundations, three Slice 
 - **Slice 4.1 — `ISS-001` + `ISS-002` + `ISS-003`**: establishes the private organization-owned RFx aggregate, the single bounded `draft` lifecycle, immutable version/event/idempotency/audit seams, a complete governed AMACS 0.5.0 request-family snapshot, and safe blank-source creation/re-entry in the Operational Workspace. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_1.md`.
 - **Slice 4.2 — `ISS-005` + `ISS-006`**: extends that aggregate with the structured market need, scope, requested outputs, timing, governed performance location, estimated value, engagement term, typed foundation requirements, six server-derived module statuses, bounded save/recovery and optional non-authoritative interpretation. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_2.md`.
 - **Slice 4.3 — `ISS-007` + `ISS-009` + `ISS-011`**: extends the same private aggregate with server-canonical AMACS requirements, an expandable linked response structure and an expandable linked evaluation definition with governed treatment/weight rules, bounded save/recovery and a complete manual path. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_3.md`.
+- **Slice 4.4 — `ISS-016` + `ISS-018` + `ISS-019` + `ISS-020` + `ACQ-009`**: adds current server-derived readiness, exact preview/publication projection parity, atomic one-way publication with immutable evidence, audience-gated controlled sharing and the truthful free/basic commercial boundary. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_4.md`.
 
-Wave 4 RFx Core is **8/41**. Slices 4.1–4.3 create no publication, opportunity projection, discovery, matching, response, teaming, submission or later lifecycle runtime. B6c remains ineligible before Slice 4.4 publication authority.
+Wave 4 RFx Core is **13/41**. Slice 4.4 creates the first real permitted opportunity projection and makes B6c opportunity expression eligible for separate authority; it creates no discovery, matching, response, teaming, submission or later lifecycle runtime.
 
 ## Feature-ID checklist
 
@@ -232,7 +233,7 @@ Wave 4 RFx Core is **8/41**. Slices 4.1–4.3 create no publication, opportunity
 ### 4 - RFx Core
 
 - [ ] `ACQ-007`
-- [ ] `ACQ-009`
+- [x] `ACQ-009` — Slice 4.4; opaque audience-bound share reference over the canonical minimized live projection with public/participant gates, acquisition continuity and no seeded production fallback
 - [ ] `EDU-011`
 - [ ] `EDU-012`
 - [ ] `EDU-013`
@@ -250,10 +251,10 @@ Wave 4 RFx Core is **8/41**. Slices 4.1–4.3 create no publication, opportunity
 - [x] `ISS-007` — Slice 4.3; governed AMACS capability/typed requirements with qualifiers, decision treatment, satisfying-party rules and foundation/evidence links
 - [x] `ISS-009` — Slice 4.3; expandable linked evaluation definition with governed factors, treatments, conditional exact basis-point totals and server-derived completeness
 - [x] `ISS-011` — Slice 4.3; standardized AMACS response templates/sections with issuer expansion, typed responder controls and explicit requirement links
-- [ ] `ISS-016`
-- [ ] `ISS-018`
-- [ ] `ISS-019`
-- [ ] `ISS-020`
+- [x] `ISS-016` — Slice 4.4; current server-derived deep-linked readiness with per-requirement response/evidence and treatment-compatible evaluation status
+- [x] `ISS-018` — Slice 4.4; one minimized responder projector with exact preview/publication substantive payload and digest parity
+- [x] `ISS-019` — Slice 4.4; atomic one-way publication, immutable snapshot/projection/event/receipt/audit evidence, replay and stale-authority/version/digest rejection
+- [x] `ISS-020` — Slice 4.4; free-participation basic issuance with unknown advanced RFx capabilities failing closed and no commercial effect on market truth
 - [ ] `RSP-001`
 - [ ] `RSP-002`
 - [ ] `RSP-003`

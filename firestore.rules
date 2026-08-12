@@ -346,6 +346,19 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ISS-019/ACQ-009 publication snapshots and permitted opportunity projections are created
+    // atomically by trusted server publication. Even public projections resolve through server
+    // audience gates; browser clients cannot read, write, update, or delete these records directly.
+    match /rfxPublicationSnapshots/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /rfxOpportunityProjections/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
     match /referralEducationAcknowledgements/{documentId} {
       allow read, create: if serverManagedOnly();
       allow update, delete: if false;

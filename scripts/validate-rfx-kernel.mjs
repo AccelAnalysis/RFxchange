@@ -39,14 +39,14 @@ assert.match(registry, /availability: "enabled"/);
 for (const locale of ["EnUS", "Es", "Fr", "It", "De"]) assert.ok(dictionary.includes(`rfxWorkspace${locale}`), `RFx locale missing: ${locale}`);
 assert.match(workflow, /smoke-rfx-kernel-emulator/);
 assert.match(authority, /ISS-001/);
-assert.match(tracker, /438 total · 160 Done · 278 Not Started/);
-assert.match(tracker, /RFx Core: \*\*8\/41\*\*/);
+assert.match(tracker, /438 total · 165 Done · 273 Not Started/);
+assert.match(tracker, /RFx Core: \*\*13\/41\*\*/);
 for (const id of ["ISS-001", "ISS-002", "ISS-003"]) assert.match(tracker, new RegExp("\\[x\\] `" + id + "`"));
 assert.match(dependency, /Slice 4\.1 implementation result/);
 assert.match(evidence, /Configured-browser acceptance proves/);
 assert.match(browserAcceptance, /rfxKernel,/);
 assert.match(browserAcceptance, /RFx missing-permission state/);
-for (const forbidden of ["published", "amended", "awarded", "submitted"]) {
+for (const forbidden of ["amended", "awarded", "submitted"]) {
   assert.doesNotMatch(model, new RegExp(`lifecycleState: [^\\n]*${forbidden}`), `Later lifecycle state leaked into Slice 4.1: ${forbidden}`);
 }
 console.log("Slice 4.1 RFx aggregate, authorization, AMACS snapshot, atomic persistence, private workspace, localization, and non-scope boundaries validated.");

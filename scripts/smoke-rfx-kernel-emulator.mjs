@@ -26,7 +26,15 @@ import {
   saveRfxPackage,
   saveRfxDefinition,
 } from "../src/domain/rfx/model.ts";
+import {
+  evaluatePublicationReadiness,
+  projectResponderOpportunity,
+  publishedAggregate,
+  rfxPublicationReference,
+  rfxPublicationSnapshotId,
+} from "../src/domain/rfx/publication.ts";
 import { FirestoreRfxRepository } from "../src/infrastructure/firestore/rfx.ts";
+import { FirestorePublishedOpportunityRepository } from "../src/infrastructure/acquisition/firestore-published-opportunities.ts";
 
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, "127.0.0.1:8080");
 const projectId = "demo-rfxchange";
@@ -48,6 +56,7 @@ const repository = new FirestoreRfxRepository(adminDb);
 const now = "2026-08-12T12:00:00.000Z";
 const organizationId = `org-rfx-${suffix}`;
 const aggregateId = `rfx-${suffix}`;
+const geographyId = `geo-rfx-${suffix}`.toLowerCase();
 const release = {
   version: "0.5.0",
   sourceCommit: "da7879f2609271b067ae6d02875e9388a02c4fe5",
@@ -87,10 +96,16 @@ const created = createRfxDraft({
   now,
 });
 const ids = {
+  organizations: [organizationId],
+  organizationMemberships: [`membership-${suffix}`],
+  organizationAuthorizations: [`membership-${suffix}`],
   rfxAggregates: [aggregateId],
-  rfxEvents: [`event-create-${suffix}`, `event-change-${suffix}`, `event-package-${suffix}`, `event-definition-${suffix}`],
-  rfxCommands: [`command-create-${suffix}`, `command-change-${suffix}`, `command-package-${suffix}`, `command-definition-${suffix}`],
-  organizationAuditEvents: [`audit-create-${suffix}`, `audit-change-${suffix}`, `audit-package-${suffix}`, `audit-definition-${suffix}`],
+  rfxEvents: [`event-create-${suffix}`, `event-change-${suffix}`, `event-package-${suffix}`, `event-definition-${suffix}`, `event-publish-${suffix}`],
+  rfxCommands: [`command-create-${suffix}`, `command-change-${suffix}`, `command-package-${suffix}`, `command-definition-${suffix}`, `command-publish-${suffix}`],
+  organizationAuditEvents: [`audit-create-${suffix}`, `audit-change-${suffix}`, `audit-package-${suffix}`, `audit-definition-${suffix}`, `audit-publish-${suffix}`],
+  rfxPublicationSnapshots: [rfxPublicationSnapshotId(created.id)],
+  rfxOpportunityProjections: [rfxPublicationReference(created.id), `participant-${suffix}`],
+  geographies: [geographyId],
 };
 const event = (id, aggregate, kind, commandId, priorRequestFamily = null, priorPackage = null, priorDefinition = null) => ({
   id,
@@ -138,6 +153,30 @@ try {
       (error) => /permission-denied/.test(error?.code),
     );
   }
+
+  await Promise.all([
+    adminDb.collection("organizations").doc(organizationId).set({
+      id: organizationId,
+      createdAt: now,
+      updatedAt: now,
+    }),
+    adminDb.collection("organizationMemberships").doc(`membership-${suffix}`).set({
+      id: `membership-${suffix}`,
+      userId: `user-${suffix}`,
+      organizationId,
+      status: "active",
+      createdAt: now,
+      updatedAt: now,
+    }),
+    adminDb.collection("organizationAuthorizations").doc(`membership-${suffix}`).set({
+      membershipId: `membership-${suffix}`,
+      userId: `user-${suffix}`,
+      organizationId,
+      permissions: ["rfx.create", "rfx.publish"],
+      createdAt: now,
+      updatedAt: now,
+    }),
+  ]);
 
   const createBundle = {
     aggregate: created,
@@ -227,7 +266,7 @@ try {
     scope: "Assess, plan, and implement continuity improvements.",
     requestedOutputs: [{ id: "output-1", title: "Continuity plan", description: "Reviewed plan.", quantity: { amount: 1, unit: "plan" }, dueDate: "2026-10-01" }],
     timing: { anticipatedStartDate: "2026-09-01", anticipatedCompletionDate: "2026-12-01", responseDeadline: "2026-08-28" },
-    performanceLocation: performanceLocationFromLocality({ localityId: "county-51013", localityLabel: "Arlington County", bounds: { west: -77.18, south: 38.82, east: -77.03, north: 38.93 } }),
+    performanceLocation: performanceLocationFromLocality({ localityId: geographyId, localityLabel: "Arlington County", bounds: { west: -77.18, south: 38.82, east: -77.03, north: 38.93 } }),
     estimatedValue: { mode: "range", currency: "USD", minimumMinor: 1000000, maximumMinor: 2500000 },
     engagementTerm: { mode: "fixed", duration: { value: 3, unit: "months" }, note: null },
     requirements: [{ id: "requirement-1", kind: "evidence", title: "Continuity evidence", description: "Provide an example.", mandatory: true, quantity: null, dueDate: null, evidenceDescription: "Redacted example." }],
@@ -267,9 +306,94 @@ try {
   assert.deepEqual((await repository.getById(defined.id)).definition.moduleStatus, { requirements: "complete", responseStructure: "complete", evaluationDefinition: "complete" });
   await assert.rejects(repository.save({ ...definitionBundle, command: { ...definitionBundle.command, id: `command-definition-stale-${suffix}`, requestFingerprint: "2".repeat(64) }, event: { ...definitionBundle.event, id: `event-definition-stale-${suffix}`, commandId: `command-definition-stale-${suffix}` }, audit: { ...definitionBundle.audit, id: `audit-definition-stale-${suffix}` } }), /current version is 4/);
 
+  await adminDb.collection("geographies").doc(geographyId).set({
+    id: geographyId,
+    countryCode: "US",
+    name: "Arlington County",
+    releaseState: "released",
+    updatedAt: new Date(now),
+  });
+  const locality = Object.freeze({
+    id: geographyId,
+    label: "Arlington County",
+    indexKey: `us:${geographyId}`,
+    authorityUpdatedAt: now,
+  });
+  const readiness = evaluatePublicationReadiness({
+    aggregate: defined,
+    audience: "public",
+    evaluatedAt: now,
+    localities: [locality],
+    publishAuthorized: true,
+    issuerDisplayNameAvailable: true,
+  });
+  assert.equal(readiness.status, "ready");
+  const reference = rfxPublicationReference(defined.id);
+  const preview = projectResponderOpportunity({ aggregate: defined, issuerDisplayName: "Issuer Organization", localities: [locality], audience: "public", reference, mode: "preview" });
+  const published = publishedAggregate(defined, { userId: `user-${suffix}`, membershipId: `membership-${suffix}` }, now);
+  const projection = projectResponderOpportunity({ aggregate: published, issuerDisplayName: "Issuer Organization", localities: [locality], audience: "public", reference, mode: "published", publishedAt: now });
+  assert.equal(preview.digest, projection.digest);
+  const publicationSnapshot = {
+    schemaVersion: 1,
+    id: rfxPublicationSnapshotId(published.id),
+    reference,
+    rfxId: published.id,
+    issuerOrganizationId: organizationId,
+    audience: "public",
+    aggregateVersion: published.version,
+    aggregate: published,
+    amacsReleaseVersion: published.requestFamily.amacsReleaseVersion,
+    amacsSourceCommit: published.requestFamily.amacsSourceCommit,
+    projectionDigest: projection.digest,
+    publishedAt: now,
+  };
+  const publishBundle = {
+    aggregate: published,
+    expectedVersion: defined.version,
+    expectedGeographies: [{ id: geographyId, authorityUpdatedAt: now }],
+    event: event(ids.rfxEvents[4], published, "rfx-published", ids.rfxCommands[4], null, defined.package, defined.definition),
+    command: command(ids.rfxCommands[4], published, "publish", "3".repeat(64)),
+    audit: audit(ids.organizationAuditEvents[4], "rfx.published"),
+    snapshot: publicationSnapshot,
+    projection,
+  };
+  await adminDb.collection("organizationAuthorizations").doc(`membership-${suffix}`).update({
+    permissions: ["rfx.create"],
+  });
+  await assert.rejects(repository.publish(publishBundle), /publication authority changed/);
+  assert.equal((await repository.getById(defined.id)).lifecycleState, "draft");
+  assert.equal(await repository.getPublicationSnapshot(publicationSnapshot.id), null);
+  assert.equal(await repository.getProjection(reference), null);
+  await adminDb.collection("organizationAuthorizations").doc(`membership-${suffix}`).update({
+    permissions: ["rfx.create", "rfx.publish"],
+  });
+  assert.equal(await repository.publish(publishBundle), "created");
+  assert.equal(await repository.publish(publishBundle), "replayed");
+  assert.equal((await repository.getById(published.id)).lifecycleState, "published");
+  assert.equal((await repository.getPublicationSnapshot(publicationSnapshot.id)).projectionDigest, preview.digest);
+  assert.deepEqual((await repository.getProjection(reference)).payload, preview.payload);
+  const publishedOpportunities = new FirestorePublishedOpportunityRepository(adminDb);
+  assert.equal((await publishedOpportunities.getByReference(reference)).reference, reference);
+  assert.equal(await publishedOpportunities.getResponderProjection("portsmouth-facilities-partner-search", true), null);
+  await adminDb.collection("rfxOpportunityProjections").doc(`participant-${suffix}`).set({
+    ...projection,
+    reference: `participant-${suffix}`,
+    audience: "authenticated-participants",
+  });
+  assert.equal(await publishedOpportunities.getResponderProjection(`participant-${suffix}`, false), null);
+  assert.equal((await publishedOpportunities.getResponderProjection(`participant-${suffix}`, true)).audience, "authenticated-participants");
+  await assert.rejects(repository.publish({
+    ...publishBundle,
+    command: { ...publishBundle.command, id: `command-publish-stale-${suffix}` },
+    event: { ...publishBundle.event, id: `event-publish-stale-${suffix}`, commandId: `command-publish-stale-${suffix}` },
+    audit: { ...publishBundle.audit, id: `audit-publish-stale-${suffix}` },
+  }), /current version is 5|publication evidence identity collision/);
+
   for (const collection of [
     "rfxEvents",
     "rfxCommands",
+    "rfxPublicationSnapshots",
+    "rfxOpportunityProjections",
     "organizationAuditEvents",
   ]) {
     await assert.rejects(
@@ -299,5 +423,5 @@ try {
 }
 
 console.log(
-  "Slice 4.3 RFx definition atomicity, replay, conflict, tenant isolation, direct-client deny, immutability, and zero-residual acceptance passed.",
+  "Slice 4.4 RFx publication atomicity, projection parity, replay, conflict, direct-client deny, immutability, and zero-residual acceptance passed.",
 );

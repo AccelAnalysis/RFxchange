@@ -105,9 +105,9 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
 
           <article className={styles.card}>
             <span>{INTENT_LABELS[acquisition.kind]}</span>
-            <h2>{opportunity?.title ?? "Your saved next step"}</h2>
+            <h2>{opportunity?.payload.title ?? "Your saved next step"}</h2>
             <p>
-              {opportunity?.summary ?? (acquisition.kind === "referral"
+              {opportunity?.payload.summary ?? (acquisition.kind === "referral"
                 ? "Your invitation points to one real business referral. Attaching it makes the minimum referral context available to your organization; it does not accept the referral."
                 : acquisition.kind === "provider"
                   ? "A provider invited your organization to complete its own profile. The invitation preserves that context; it does not grant organization authority, provider status, eligibility, or verification."
@@ -115,9 +115,9 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
             </p>
             {opportunity ? (
               <dl>
-                <div><dt>Issued by</dt><dd>{opportunity.issuerDisplayName}</dd></div>
-                <div><dt>Geography</dt><dd>{opportunity.localityLabel}</dd></div>
-                <div><dt>Status</dt><dd>{opportunity.availabilityLabel}</dd></div>
+                <div><dt>Issued by</dt><dd>{opportunity.payload.issuerDisplayName}</dd></div>
+                <div><dt>Geography</dt><dd>{opportunity.payload.localities.map((item) => item.label).join(", ")}</dd></div>
+                <div><dt>Status</dt><dd>Published</dd></div>
               </dl>
             ) : null}
             <small>Reference: {acquisition.subjectReference}</small>

@@ -6,9 +6,14 @@ import type {
   RfxCommandReceipt,
   RfxId,
 } from "../../domain/rfx/model.ts";
+import type {
+  ResponderOpportunityProjection,
+  RfxPublicationSnapshot,
+} from "../../domain/rfx/publication.ts";
 import {
   RfxPersistenceConflictError,
   type RfxPersistenceBundle,
+  type RfxPublicationPersistenceBundle,
   type RfxRepository,
 } from "../../domain/rfx/repository.ts";
 import { FIRESTORE_SCHEMA_VERSION } from "./schema.ts";
@@ -18,6 +23,13 @@ const AGGREGATES = "rfxAggregates";
 const EVENTS = "rfxEvents";
 const COMMANDS = "rfxCommands";
 const AUDITS = "organizationAuditEvents";
+const SNAPSHOTS = "rfxPublicationSnapshots";
+const PROJECTIONS = "rfxOpportunityProjections";
+const GEOGRAPHIES = "geographies";
+const ORGANIZATIONS = "organizations";
+const MEMBERSHIPS = "organizationMemberships";
+const AUTHORIZATIONS = "organizationAuthorizations";
+const RESTRICTIONS = "accessRestrictions";
 
 function immutable(value: object) {
   return Object.freeze({
@@ -59,6 +71,22 @@ function currentAggregate(record: RfxAggregate): RfxAggregate {
     : record;
 }
 
+function comparableTimestamp(value: unknown): string | null {
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.valueOf()) ? null : parsed.toISOString();
+  }
+  if (
+    value &&
+    typeof value === "object" &&
+    "toDate" in value &&
+    typeof value.toDate === "function"
+  ) {
+    return value.toDate().toISOString();
+  }
+  return null;
+}
+
 export class FirestoreRfxRepository implements RfxRepository {
   private readonly db: Firestore;
 
@@ -94,6 +122,22 @@ export class FirestoreRfxRepository implements RfxRepository {
       this.db,
       "rfxCommands",
       id,
+    );
+  }
+
+  getPublicationSnapshot(id: string) {
+    return getFirestoreRecordById<RfxPublicationSnapshot>(
+      this.db,
+      SNAPSHOTS,
+      id,
+    );
+  }
+
+  getProjection(reference: string) {
+    return getFirestoreRecordById<ResponderOpportunityProjection>(
+      this.db,
+      PROJECTIONS,
+      reference,
     );
   }
 
@@ -153,6 +197,118 @@ export class FirestoreRfxRepository implements RfxRepository {
         transaction.set(aggregateRef, mutable(bundle.aggregate));
       }
 
+      transaction.create(eventRef, immutable(bundle.event));
+      transaction.create(commandRef, immutable(bundle.command));
+      transaction.create(auditRef, immutable(bundle.audit));
+      return "created" as const;
+    });
+  }
+
+  async publish(
+    bundle: RfxPublicationPersistenceBundle,
+  ): Promise<"created" | "replayed"> {
+    const aggregateRef = this.db.collection(AGGREGATES).doc(bundle.aggregate.id);
+    const eventRef = this.db.collection(EVENTS).doc(bundle.event.id);
+    const commandRef = this.db.collection(COMMANDS).doc(bundle.command.id);
+    const auditRef = this.db.collection(AUDITS).doc(bundle.audit.id);
+    const snapshotRef = this.db.collection(SNAPSHOTS).doc(bundle.snapshot.id);
+    const projectionRef = this.db.collection(PROJECTIONS).doc(bundle.projection.reference);
+    const geographyRefs = bundle.expectedGeographies.map((item) =>
+      this.db.collection(GEOGRAPHIES).doc(item.id),
+    );
+    const organizationRef = this.db.collection(ORGANIZATIONS).doc(bundle.aggregate.issuerOrganizationId);
+    const membershipRef = this.db.collection(MEMBERSHIPS).doc(bundle.event.actorMembershipId);
+    const authorizationRef = this.db.collection(AUTHORIZATIONS).doc(bundle.event.actorMembershipId);
+
+    return this.db.runTransaction(async (transaction) => {
+      const records = await transaction.getAll(
+        commandRef,
+        aggregateRef,
+        eventRef,
+        auditRef,
+        snapshotRef,
+        projectionRef,
+        organizationRef,
+        membershipRef,
+        authorizationRef,
+        ...geographyRefs,
+      );
+      const [commandSnapshot, aggregateSnapshot, eventSnapshot, auditSnapshot,
+        publicationSnapshot, projectionSnapshot, organizationSnapshot,
+        membershipSnapshot, authorizationSnapshot, ...geographySnapshots] = records;
+      const [organizationRestrictions, membershipRestrictions] = await Promise.all([
+        transaction.get(
+          this.db.collection(RESTRICTIONS)
+            .where("target.kind", "==", "organization")
+            .where("target.organizationId", "==", bundle.aggregate.issuerOrganizationId),
+        ),
+        transaction.get(
+          this.db.collection(RESTRICTIONS)
+            .where("target.kind", "==", "membership")
+            .where("target.membershipId", "==", bundle.event.actorMembershipId),
+        ),
+      ]);
+      if (commandSnapshot.exists) {
+        const prior = commandSnapshot.data() as RfxCommandReceipt;
+        if (exactReplay(prior, bundle.command)) return "replayed" as const;
+        throw new RfxPersistenceConflictError("RFx command identity collision.");
+      }
+      if (
+        eventSnapshot.exists ||
+        auditSnapshot.exists ||
+        publicationSnapshot.exists ||
+        projectionSnapshot.exists
+      ) throw new RfxPersistenceConflictError("RFx publication evidence identity collision.");
+      if (!aggregateSnapshot.exists)
+        throw new RfxPersistenceConflictError("RFx draft is unavailable for publication.");
+      const current = currentAggregate(aggregateSnapshot.data() as RfxAggregate);
+      const membership = membershipSnapshot.data() as
+        | { id?: string; userId?: string; organizationId?: string; status?: string }
+        | undefined;
+      const authorization = authorizationSnapshot.data() as
+        | { membershipId?: string; userId?: string; organizationId?: string; permissions?: readonly string[] }
+        | undefined;
+      const restricted = [...organizationRestrictions.docs, ...membershipRestrictions.docs]
+        .some((record) => record.get("state") !== "none");
+      if (
+        !organizationSnapshot.exists ||
+        !membershipSnapshot.exists ||
+        !authorizationSnapshot.exists ||
+        !membership ||
+        membership.userId !== bundle.event.actorUserId ||
+        membership.organizationId !== bundle.aggregate.issuerOrganizationId ||
+        membership.status !== "active" ||
+        !authorization ||
+        authorization.membershipId !== bundle.event.actorMembershipId ||
+        authorization.userId !== bundle.event.actorUserId ||
+        authorization.organizationId !== bundle.aggregate.issuerOrganizationId ||
+        !authorization.permissions?.includes("rfx.publish") ||
+        restricted
+      ) throw new RfxPersistenceConflictError("RFx publication authority changed.");
+      if (
+        current.issuerOrganizationId !== bundle.aggregate.issuerOrganizationId ||
+        current.lifecycleState !== "draft" ||
+        current.version !== bundle.expectedVersion ||
+        bundle.aggregate.lifecycleState !== "published" ||
+        bundle.aggregate.version !== bundle.expectedVersion + 1
+      ) throw new RfxPersistenceConflictError(`RFx changed; current version is ${current.version}.`);
+      for (const [index, geographySnapshot] of geographySnapshots.entries()) {
+        const expected = bundle.expectedGeographies[index];
+        const geography = geographySnapshot.data() as
+          | { releaseState?: string; updatedAt?: unknown }
+          | undefined;
+        if (
+          !geographySnapshot.exists ||
+          !geography ||
+          geography.releaseState !== "released" ||
+          comparableTimestamp(geography.updatedAt) !==
+            comparableTimestamp(expected.authorityUpdatedAt)
+        ) throw new RfxPersistenceConflictError("RFx publication geography changed.");
+      }
+
+      transaction.set(aggregateRef, mutable(bundle.aggregate));
+      transaction.create(snapshotRef, immutable(bundle.snapshot));
+      transaction.create(projectionRef, immutable(bundle.projection));
       transaction.create(eventRef, immutable(bundle.event));
       transaction.create(commandRef, immutable(bundle.command));
       transaction.create(auditRef, immutable(bundle.audit));

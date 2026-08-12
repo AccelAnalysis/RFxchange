@@ -13,7 +13,10 @@ import {
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
 import { apiProblem } from "@/src/infrastructure/http/api-problem";
-import { createServerRfxDraftService } from "@/src/infrastructure/rfx/runtime";
+import {
+  createServerRfxDraftService,
+  createServerRfxPublicationService,
+} from "@/src/infrastructure/rfx/runtime";
 
 export const runtime = "nodejs";
 
@@ -21,6 +24,23 @@ export async function GET(request: NextRequest) {
   try {
     const scope = await commandScope();
     if (scope instanceof NextResponse) return scope;
+    if (request.nextUrl.searchParams.get("action") === "publication-readiness") {
+      const result = await createServerRfxPublicationService().readinessAndPreview(scope, {
+        rfxId: request.nextUrl.searchParams.get("rfxId") ?? "",
+        audience: request.nextUrl.searchParams.get("audience") ?? "public",
+      });
+      return NextResponse.json(result, {
+        headers: { "cache-control": "private, no-store" },
+      });
+    }
+    if (request.nextUrl.searchParams.get("action") === "publication") {
+      const result = await createServerRfxPublicationService().currentPublication(scope, {
+        rfxId: request.nextUrl.searchParams.get("rfxId") ?? "",
+      });
+      return NextResponse.json(result, {
+        headers: { "cache-control": "private, no-store" },
+      });
+    }
     const query = request.nextUrl.searchParams.get("q") ?? "";
     const domainId = request.nextUrl.searchParams.get("domain");
     const familyId = request.nextUrl.searchParams.get("family");
@@ -174,6 +194,15 @@ export async function POST(request: NextRequest) {
         rfxId: String(body.rfxId ?? ""),
         expectedVersion: Number(body.expectedVersion),
         definition: body.definition as RfxDefinitionSelectionInput,
+      });
+      return NextResponse.json(result);
+    }
+    if (action === "publish") {
+      const result = await createServerRfxPublicationService().publish(scope, {
+        rfxId: String(body.rfxId ?? ""),
+        expectedVersion: Number(body.expectedVersion),
+        previewDigest: String(body.previewDigest ?? ""),
+        audience: String(body.audience ?? ""),
       });
       return NextResponse.json(result);
     }

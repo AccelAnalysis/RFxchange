@@ -403,6 +403,7 @@ async function seedParticipant() {
       "resource.manage",
       "referral.manage",
       "rfx.create",
+      "rfx.publish",
     ],
     now,
   });
@@ -558,6 +559,8 @@ async function chromeBinary() {
     "/usr/bin/google-chrome-stable",
     "/usr/bin/chromium",
     "/usr/bin/chromium-browser",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
   ].filter(Boolean);
   for (const candidate of candidates) {
     if (await pathExists(candidate)) return candidate;
@@ -1869,6 +1872,97 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.equal(definitionAggregate.definition.requirements[0].capability.amacsReleaseVersion, "0.5.0");
     assert.deepEqual(Object.values(definitionAggregate.definition.moduleStatus), ["complete", "complete", "complete"]);
 
+    await evaluate(cdp, `document.querySelector('[data-rfx-readiness-check]').click()`);
+    await waitForExpression(cdp, `Boolean(document.querySelector('[data-rfx-preview-digest]'))`, "RFx responder preview");
+    const previewEvidence = await evaluate(cdp, `(() => {
+      const preview = document.querySelector('[data-rfx-preview-digest]');
+      return {
+        digest: preview?.dataset.rfxPreviewDigest,
+        reference: preview?.dataset.rfxPreviewReference,
+        status: document.querySelector('[data-readiness-status]')?.dataset.readinessStatus,
+        publishDisabled: document.querySelector('[data-rfx-publish]')?.disabled,
+        rawIdsVisible: preview?.innerText.includes('AMACS-') || false,
+        exactLocationVisible: preview?.innerText.includes('Portsmouth Blvd') || false,
+      };
+    })()`);
+    assert.equal(previewEvidence.status, "ready");
+    assert.equal(previewEvidence.publishDisabled, false);
+    assert.equal(previewEvidence.rawIdsVisible, false);
+    assert.equal(previewEvidence.exactLocationVisible, false);
+    assert.match(previewEvidence.digest, /^[a-f0-9]{64}$/);
+    assert.match(previewEvidence.reference, /^opp_[a-f0-9]{40}$/);
+    assert.equal((await db.collection("rfxOpportunityProjections").doc(previewEvidence.reference).get()).exists, false, "A private draft appeared in the opportunity projection before publication.");
+    const previewContract = await evaluate(cdp, `(async () => {
+      const response = await fetch('/api/rfx?action=publication-readiness&rfxId=${encodeURIComponent(created.id)}&audience=public');
+      return response.json();
+    })()`);
+    assert.equal(previewContract.preview.digest, previewEvidence.digest);
+
+    const stalePreview = await evaluate(cdp, `(async () => {
+      const response = await fetch('/api/rfx', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ action: 'publish', commandId: 'rfx-browser-stale-preview-${runId}', rfxId: ${JSON.stringify(created.id)}, expectedVersion: 4, previewDigest: '0'.repeat(64), audience: 'public' }),
+      });
+      return { status: response.status, body: await response.json() };
+    })()`);
+    assert.equal(stalePreview.status, 409);
+    assert.equal((await db.collection("rfxAggregates").doc(created.id).get()).data().lifecycleState, "draft");
+    assert.equal((await db.collection("rfxOpportunityProjections").doc(previewEvidence.reference).get()).exists, false);
+
+    const originalAuthorization = authorizationSnapshot.data();
+    await authorizationRef.set({
+      ...originalAuthorization,
+      permissions: originalAuthorization.permissions.filter((permission) => permission !== "rfx.publish"),
+    });
+    await evaluate(cdp, `document.querySelector('[data-rfx-publish]').click()`);
+    await waitForExpression(cdp, `Boolean(document.querySelector('[data-rfx-publication="draft"] [role="alert"]'))`, "RFx publish permission removal state");
+    assert.equal((await db.collection("rfxAggregates").doc(created.id).get()).data().lifecycleState, "draft");
+    await authorizationRef.set(originalAuthorization);
+    await evaluate(cdp, `document.querySelector('[data-rfx-readiness-check]').click()`);
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-readiness-check]')?.disabled === true`, "RFx readiness refresh started");
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-readiness-check]')?.disabled === false && document.querySelector('[data-rfx-preview-digest]')?.dataset.rfxPreviewDigest === ${JSON.stringify(previewEvidence.digest)} && document.querySelector('[data-rfx-publish]')?.disabled === false`, "refreshed RFx preview parity");
+    await evaluate(cdp, `document.querySelector('[data-rfx-publish]').click()`);
+    await waitForExpression(cdp, `Boolean(document.querySelector('[data-rfx-publication="published"]') || document.querySelector('[data-rfx-publication="draft"] [role="alert"]'))`, "RFx publication result");
+    const publicationUiError = await evaluate(cdp, `document.querySelector('[data-rfx-publication="draft"] [role="alert"]')?.textContent ?? null`);
+    assert.equal(publicationUiError, null, `RFx publication UI failed: ${publicationUiError}`);
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id]')?.dataset.rfxVersion === '5' && Boolean(document.querySelector('[data-rfx-publication="published"]'))`, "RFx publication version 5");
+
+    const [publishedAggregateSnapshot, publicationSnapshot, projectionSnapshot] = await Promise.all([
+      db.collection("rfxAggregates").doc(created.id).get(),
+      db.collection("rfxPublicationSnapshots").where("rfxId", "==", created.id).get(),
+      db.collection("rfxOpportunityProjections").doc(previewEvidence.reference).get(),
+    ]);
+    const publishedAggregateRecord = publishedAggregateSnapshot.data();
+    assert.equal(publishedAggregateRecord.lifecycleState, "published");
+    assert.equal(publishedAggregateRecord.version, 5);
+    assert.equal(publicationSnapshot.size, 1);
+    assert.equal(projectionSnapshot.exists, true);
+    assert.equal(projectionSnapshot.data().digest, previewEvidence.digest);
+    assert.equal(publicationSnapshot.docs[0].data().projectionDigest, previewEvidence.digest);
+    assert.deepEqual(projectionSnapshot.data().payload, previewContract.preview.payload);
+
+    const shareHref = await evaluate(cdp, `document.querySelector('[data-rfx-publication="published"] a')?.getAttribute('href')`);
+    assert.equal(shareHref, `/opportunities/${previewEvidence.reference}`);
+    await cdp.send("Page.navigate", { url: `${baseUrl}${shareHref}` });
+    await waitForExpression(cdp, `document.readyState === "complete"`, "controlled RFx share document");
+    await waitForExpression(cdp, `document.querySelector('[data-publication-digest]')?.dataset.publicationDigest === ${JSON.stringify(previewEvidence.digest)}`, "controlled RFx share projection");
+    const shareEvidence = await evaluate(cdp, `({
+      rawIdsVisible: document.body.innerText.includes('AMACS-'),
+      internalRfxIdSerialized: document.documentElement.innerHTML.includes(${JSON.stringify(created.id)}),
+      serverIndexEnvelopeSerialized: document.documentElement.innerHTML.includes('capabilityIndexKeys') || document.documentElement.innerHTML.includes('localityIndexKeys'),
+      exactLocationVisible: document.body.innerText.includes('Portsmouth Blvd'),
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    })`);
+    assert.equal(shareEvidence.rawIdsVisible, false);
+    assert.equal(shareEvidence.internalRfxIdSerialized, false);
+    assert.equal(shareEvidence.serverIndexEnvelopeSerialized, false);
+    assert.equal(shareEvidence.exactLocationVisible, false);
+    assert.ok(shareEvidence.overflow <= 0);
+    const seededFallbackStatus = await evaluate(cdp, `(async () => (await fetch('/opportunities/portsmouth-facilities-partner-search')).status)()`);
+    assert.equal(seededFallbackStatus, 404);
+    await navigate(cdp, `${baseUrl}/opportunities?draft=${encodeURIComponent(created.id)}`);
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '5'`, "published RFx workspace return");
+
     const stale = await evaluate(cdp, `(async () => {
       const response = await fetch('/api/rfx', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -1877,10 +1971,10 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
       return { status: response.status, body: await response.json() };
     })()`);
     assert.equal(stale.status, 409);
-    assert.equal((await db.collection("rfxAggregates").doc(created.id).get()).data().version, 4);
+    assert.equal((await db.collection("rfxAggregates").doc(created.id).get()).data().version, 5);
 
     await cdp.send("Page.reload", { ignoreCache: true });
-    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '4'`, "authorized RFx reload re-entry");
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '5'`, "authorized RFx reload re-entry");
     await waitForExpression(cdp, `document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current') === 'page'`, "current RFx participant lens");
     const shellAfterReload = await evaluate(cdp, `({
       current: document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current'),
@@ -1912,7 +2006,6 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
       assert.equal(await evaluate(cdp, `document.body.innerText.includes('rfxWorkspace.')`), false, `${locale} RFx copy fell through to a message key.`);
     }
 
-    const originalAuthorization = authorizationSnapshot.data();
     await authorizationRef.set({
       ...originalAuthorization,
       permissions: originalAuthorization.permissions.filter((permission) => permission !== "rfx.create"),
@@ -1930,7 +2023,7 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.equal(missingPermission.current, "page");
     await authorizationRef.set(originalAuthorization);
     await cdp.send("Page.reload", { ignoreCache: true });
-    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '4'`, "RFx permission restoration");
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '5'`, "RFx permission restoration");
 
     const [events, commands, audits] = await Promise.all([
       db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
@@ -1938,17 +2031,18 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
       db.collection("organizationAuditEvents").where("organizationId", "==", organizationId).get(),
     ]);
     const rfxAudits = audits.docs.filter((snapshot) => String(snapshot.data().action).startsWith("rfx."));
-    assert.deepEqual(events.docs.map((snapshot) => snapshot.data().kind).sort(), ["rfx-definition-saved", "rfx-draft-created", "rfx-package-saved", "rfx-request-family-changed"]);
-    assert.equal(commands.size, 4);
-    assert.equal(rfxAudits.length, 4);
+    assert.deepEqual(events.docs.map((snapshot) => snapshot.data().kind).sort(), ["rfx-definition-saved", "rfx-draft-created", "rfx-package-saved", "rfx-published", "rfx-request-family-changed"]);
+    assert.equal(commands.size, 5);
+    assert.equal(rfxAudits.length, 5);
     evidence = Object.freeze({
       rfxId: created.id,
-      versions: [1, 2, 3, 4],
+      versions: [1, 2, 3, 4, 5],
       amacsRelease: aggregate.requestFamily.amacsReleaseVersion,
-      lifecycleState: aggregate.lifecycleState,
+      lifecycleState: publishedAggregateRecord.lifecycleState,
       staleStatus: stale.status,
       moduleStatus: packageAggregate.package.moduleStatus,
       definitionModuleStatus: definitionAggregate.definition.moduleStatus,
+      publication: { previewDigest: previewEvidence.digest, reference: previewEvidence.reference, shareEvidence },
       eventKinds: events.docs.map((snapshot) => snapshot.data().kind).sort(),
       commandCount: commands.size,
       auditCount: rfxAudits.length,
@@ -1964,20 +2058,28 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     return evidence;
   } finally {
     await authorizationRef.set(authorizationSnapshot.data());
-    const [aggregates, events, commands, audits] = await Promise.all([
+    const [aggregates, events, commands, audits, publicationSnapshots] = await Promise.all([
       db.collection("rfxAggregates").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxCommands").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("organizationAuditEvents").where("organizationId", "==", organizationId).get(),
+      db.collection("rfxPublicationSnapshots").where("issuerOrganizationId", "==", organizationId).get(),
     ]);
     const rfxAudits = audits.docs.filter((snapshot) => String(snapshot.data().action).startsWith("rfx."));
-    await Promise.all([...aggregates.docs, ...events.docs, ...commands.docs, ...rfxAudits].map((snapshot) => snapshot.ref.delete()));
+    const projectionRefs = publicationSnapshots.docs.map((snapshot) =>
+      db.collection("rfxOpportunityProjections").doc(snapshot.data().reference),
+    );
+    await Promise.all([...aggregates.docs, ...events.docs, ...commands.docs, ...rfxAudits, ...publicationSnapshots.docs].map((snapshot) => snapshot.ref.delete()));
+    await Promise.all(projectionRefs.map((reference) => reference.delete()));
     const residuals = await Promise.all([
       db.collection("rfxAggregates").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
       db.collection("rfxCommands").where("issuerOrganizationId", "==", organizationId).get(),
+      db.collection("rfxPublicationSnapshots").where("issuerOrganizationId", "==", organizationId).get(),
     ]);
+    const projectionResiduals = await Promise.all(projectionRefs.map((reference) => reference.get()));
     assert.equal(residuals.reduce((total, snapshot) => total + snapshot.size, 0), 0, "RFx configured acceptance left fixture residue.");
+    assert.equal(projectionResiduals.some((snapshot) => snapshot.exists), false, "RFx configured acceptance left projection residue.");
     if (chrome) {
       await stopProcess(chrome.child);
       await rm(chrome.profile, { recursive: true, force: true });
