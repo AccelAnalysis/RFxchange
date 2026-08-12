@@ -2,11 +2,11 @@
 
 **Status:** Packet output for `WP-INTEL-ROADMAP-01` — documentation/governance only. No live Intelligence layer, dataset, projection, statistic, site, market-activity record, Feature-ID status, Four-Lens requirement status or tracker state is created or changed by this document.
 
-**Lane:** 03 — Intelligence  
-**Packet:** `WP-INTEL-ROADMAP-01`  
-**Activation epoch:** `initial-operational-2026-08-12`  
-**Immutable activation base:** `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`  
-**Execution branch:** `codex/intelligence-provenance-roadmap-01`  
+**Lane:** 03 — Intelligence
+**Packet:** `WP-INTEL-ROADMAP-01`
+**Activation epoch:** `initial-operational-2026-08-12`
+**Immutable activation base:** `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`
+**Execution branch:** `codex/intelligence-provenance-roadmap-01`
 **Execution branch start:** current merged `main` at packet execution start, `69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068`
 
 ## 1. Purpose
@@ -57,8 +57,8 @@ Browser state, map position, search text, cached selections, AI/model output, un
 
 ### 3.1 Canonical controlled geography
 
-**Class:** `first-party-authoritative`  
-**Owning domain:** Geography  
+**Class:** `first-party-authoritative`
+**Owning domain:** Geography
 **Current authority:** `MAP_AND_GEOGRAPHY.md` and the accepted geography implementation.
 
 Permitted source facts include, where present in the canonical geography definition:
@@ -77,7 +77,7 @@ Permitted source facts include, where present in the canonical geography definit
 
 ### 3.2 Authoritative locality boundary geometry
 
-**Class:** `approved-external` as incorporated through the governed RFxchange geography boundary.  
+**Class:** `approved-external` as incorporated through the governed RFxchange geography boundary.
 **Current approved baseline:** U.S. Census TIGER/Line/TIGERweb-style authoritative locality geometry or another explicitly approved authoritative source.
 
 Permitted use is limited to the geographic boundary and metadata accepted by the current RFxchange geography authority.
@@ -95,7 +95,7 @@ Required provenance includes:
 
 ### 3.3 Confirmed organization primary location and privacy-safe location projection
 
-**Private source class:** `first-party-authoritative`.  
+**Private source class:** `first-party-authoritative`.
 **Participant analytical source:** the existing server-produced privacy-safe location/marker projection, not the raw private source record.
 
 The confirmed source record contains exact address/coordinate, selected geography, visibility policy, confirmation actor/evidence and geocoder provenance. Cross-organization Intelligence must consume only the permitted projected form:
@@ -110,7 +110,7 @@ A geocoder candidate is provider evidence until the participant confirms the loc
 
 ### 3.4 Organization service geography
 
-**Class:** `first-party-authoritative` as an organization-controlled domain fact.  
+**Class:** `first-party-authoritative` as an organization-controlled domain fact.
 **Meaning:** where the organization says it serves/operates under the current service-geography contract; it is separate from office/home location.
 
 Permitted Intelligence use must preserve the distinction between:
@@ -150,7 +150,7 @@ Therefore:
 
 ### 3.6 Organization capability claims
 
-**Class:** `first-party-asserted`, with the RFxchange record itself authoritative as the organization’s current claim/disposition.  
+**Class:** `first-party-asserted`, with the RFxchange record itself authoritative as the organization’s current claim/disposition.
 **Semantic authority:** AMACS release reference and snapshots.
 
 The current claim can contain:
@@ -180,7 +180,7 @@ A layer must not convert “organization claimed” into “verified capability�
 
 ### 3.7 AMACS 0.5.0 semantic catalog
 
-**Class:** `approved-external` semantic standard, vendored and checksum-governed by RFxchange.  
+**Class:** `approved-external` semantic standard, vendored and checksum-governed by RFxchange.
 **Pinned source:** `AccelAnalysis/amacs` release 0.5.0 at commit `da7879f2609271b067ae6d02875e9388a02c4fe5` under `AMACS_INTEGRATION_CONTRACT.md`.
 
 Permitted Intelligence use includes:
@@ -196,7 +196,7 @@ Counts in AMACS manifests are release-validation evidence; they are not particip
 
 ### 3.8 Industry and NAICS descriptors
 
-**Class:** RFxchange first-party organization descriptors referencing an external classification.  
+**Class:** RFxchange first-party organization descriptors referencing an external classification.
 **Current meaning:** descriptive/filter context only.
 
 The current record can retain code/title/version, selection/import source, provenance and visibility. Intelligence may use such descriptors only through a future explicitly minimized projection that preserves those fields and visibility.
