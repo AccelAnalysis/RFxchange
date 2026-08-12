@@ -86,7 +86,7 @@ Each record retains:
 
 Original requirement text is immutable. Clarification may be appended without replacing the original intent.
 
-The machine ledger freezes its 105-record adoption baseline in order with reviewed SHA-256 digests over the complete ID sequence, the paired ID/original-text sequence, and the governing source/lane/dependent-lanes/dependencies/acceptance-types metadata. A new requirement appends after that baseline. A correction, clarification or supersession receives separate mutable clarification metadata or a new ID; it must not delete, reorder, rewrite or weaken the authority or evidence obligations of an adoption record. The architecture validator fails on baseline deletion, substitution, reordering, original-text drift or governance-metadata drift.
+The machine ledger freezes every adopted requirement in order with reviewed SHA-256 digests over the complete ID sequence, the paired ID/original-text sequence, and the governing source/lane/dependent-lanes/dependencies/acceptance-types metadata. A newly authorized requirement appends only when the same reviewed authority change advances the protected record count and all digests; no appended requirement may sit outside the baseline. A correction, clarification or supersession receives separate mutable clarification metadata or a new ID; it must not delete, reorder, rewrite or weaken the authority or evidence obligations of an adopted record. The architecture validator fails on count drift, deletion, substitution, reordering, original-text drift or governance-metadata drift.
 
 Allowed statuses are exactly:
 
@@ -146,7 +146,7 @@ Allowed acceptance dispositions are:
 
 Static or source-code evidence may supplement but cannot replace the required acceptance type.
 
-For `Verified`, the machine acceptance record uses structured `{ type, reference }` evidence entries and must contain at least one durable repository path or HTTPS reference for every acceptance type declared by that requirement. A generic evidence string or coverage of only one acceptance type cannot enter the Verified numerator.
+For `Verified`, the machine acceptance record uses structured evidence entries containing `type`, durable `reference`, exact `candidateSha`, and executed `method`/`result`/`observedAt` metadata. Every evidence entry binds to the accepted implementation SHA, and at least one entry covers every acceptance type declared by that requirement. A generic evidence string, stale-candidate evidence or partial type coverage cannot enter the Verified numerator.
 
 ## 8. Explicit deferral discipline
 
@@ -156,7 +156,7 @@ A defer requires the exact requirement ID, reason, missing dependency, participa
 
 Every work packet declares one owner, branch, exact base SHA, immutable requirement range, owned paths/domain, non-owned paths/domain, dependencies, acceptance required, expected output, and stop boundary.
 
-The initial eight packet definitions are append-only and digest-frozen over their IDs, lanes, ownership, branches/base policies, requirement ranges, sources, dependency edges with admissible predecessor states, owned/non-owned paths, acceptance obligations, outputs and stop boundaries. Only packet `status` and `exactBaseSha` are ordinary lifecycle fields. Removing or weakening an adopted dependency edge or obligation fails validation; a newly authorized packet appends.
+Every adopted packet definition is digest-frozen over its ID, lane, ownership, branch/base policy, requirement range, sources, dependency edges with admissible predecessor states, owned/non-owned paths, acceptance obligations, output and stop boundary. Only packet `status` and `exactBaseSha` are ordinary lifecycle fields. Removing or weakening an adopted dependency edge or obligation fails validation; a newly authorized packet appends only when the same reviewed change advances the protected packet count and digests.
 
 Only the pre-activation statuses `ready-after-authority-merge` and `frozen-until-authority-merge` may temporarily use a base policy instead of an exact base SHA. Every in-progress, active, reconciliation, acceptance, verified, completed, blocked or closed packet remains bound to an exact base SHA.
 

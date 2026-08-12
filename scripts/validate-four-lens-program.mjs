@@ -44,7 +44,7 @@ const expectedStatuses = [
 const expectedDispositions = ["Verified", "Partial", "Not Implemented", "Blocked", "Deferred", "Decision Required"];
 const expectedAcceptanceTypes = ["functional", "domain-security", "browser-visual", "responsive", "motion", "accessibility", "copy", "cross-lens", "performance", "governance"];
 const expectedVerifiedEvidenceSchema = {
-  entry: { type: "one declared acceptanceTypes value", reference: "durable repository path or HTTPS URL" },
+  entry: { type: "one declared acceptanceTypes value", reference: "durable repository path or HTTPS URL", candidateSha: "the exact accepted implementation SHA", execution: { method: "the executed command or journey", result: "passed", observedAt: "ISO-8601 timestamp" } },
   coverage: "Verified requires at least one structured evidence entry for every acceptance type declared by the requirement.",
 };
 const expectedLanes = ["control-room", "shared-exchange", "opportunities-rfx", "intelligence", "resources", "referrals", "independent-acceptance", "integration"];
@@ -75,7 +75,7 @@ assert.equal(requirements.adoptionBaseline?.recordCount, adoptionBaseline.record
 assert.equal(requirements.adoptionBaseline?.idDigest, adoptionBaseline.idDigest);
 assert.equal(requirements.adoptionBaseline?.originalRequirementDigest, adoptionBaseline.originalRequirementDigest);
 assert.equal(requirements.adoptionBaseline?.governanceMetadataDigest, adoptionBaseline.governanceMetadataDigest);
-assert.ok(requirements.requirements.length >= adoptionBaseline.recordCount, "The immutable adoption requirement baseline cannot shrink");
+assert.equal(requirements.requirements.length, adoptionBaseline.recordCount, "Every adopted requirement must be included in the immutable baseline count and digests");
 const baselineRecords = requirements.requirements.slice(0, adoptionBaseline.recordCount);
 assert.equal(digest(baselineRecords.map((record) => record.id)), adoptionBaseline.idDigest, "Immutable adoption requirement IDs were deleted, substituted, or reordered");
 assert.equal(
@@ -93,7 +93,7 @@ assert.equal(workstreams.adoptionPacketBaseline?.algorithm, adoptionPacketBaseli
 assert.equal(workstreams.adoptionPacketBaseline?.recordCount, adoptionPacketBaseline.recordCount);
 assert.equal(workstreams.adoptionPacketBaseline?.idDigest, adoptionPacketBaseline.idDigest);
 assert.equal(workstreams.adoptionPacketBaseline?.governanceDigest, adoptionPacketBaseline.governanceDigest);
-assert.ok(workstreams.workPackets.length >= adoptionPacketBaseline.recordCount, "The immutable adoption packet baseline cannot shrink");
+assert.equal(workstreams.workPackets.length, adoptionPacketBaseline.recordCount, "Every adopted packet must be included in the immutable baseline count and digests");
 const baselinePackets = workstreams.workPackets.slice(0, adoptionPacketBaseline.recordCount);
 const packetGovernance = baselinePackets.map(({ id, lane, owner, branch, basePolicy = null, requirementIds, sources, dependencies, ownedPaths, nonOwnedPaths, acceptanceRequired, expectedOutput, stopBoundary }) => ({ id, lane, owner, branch, basePolicy, requirementIds, sources, dependencies, ownedPaths, nonOwnedPaths, acceptanceRequired, expectedOutput, stopBoundary }));
 assert.equal(digest(baselinePackets.map((packet) => packet.id)), adoptionPacketBaseline.idDigest, "Immutable adoption packet IDs were deleted, substituted, or reordered");
@@ -147,6 +147,11 @@ for (const requirement of requirements.requirements) {
       assert.ok(evidence && typeof evidence === "object" && !Array.isArray(evidence), `${requirement.id} Verified evidence must use structured entries`);
       assert.ok(requirement.acceptanceTypes.includes(evidence.type), `${requirement.id} evidence has undeclared type ${evidence.type}`);
       assert.ok(typeof evidence.reference === "string" && evidence.reference.trim(), `${requirement.id} ${evidence.type} evidence has no durable reference`);
+      assert.equal(evidence.candidateSha, requirement.acceptance.sha, `${requirement.id} ${evidence.type} evidence is not bound to the accepted candidate SHA`);
+      assert.ok(evidence.execution && typeof evidence.execution === "object" && !Array.isArray(evidence.execution), `${requirement.id} ${evidence.type} evidence has no execution metadata`);
+      assert.ok(typeof evidence.execution.method === "string" && evidence.execution.method.trim(), `${requirement.id} ${evidence.type} evidence has no executed method`);
+      assert.equal(evidence.execution.result, "passed", `${requirement.id} ${evidence.type} evidence did not pass`);
+      assert.ok(typeof evidence.execution.observedAt === "string" && !Number.isNaN(Date.parse(evidence.execution.observedAt)), `${requirement.id} ${evidence.type} evidence has no valid observation timestamp`);
       const localEvidence = evidence.reference.split("#", 1)[0];
       assert.ok(/^https:\/\//.test(evidence.reference) || exists(localEvidence), `${requirement.id} ${evidence.type} evidence reference is neither HTTPS nor an existing repository path`);
       evidenceTypes.add(evidence.type);
@@ -188,6 +193,32 @@ assert.deepEqual([...programRfxIds].sort(), [...trackerRfxIds].sort(), "Program 
 const checklist = [...tracker.matchAll(/^- \[([ x])\] `([A-Z]+-\d+)`/gm)];
 const trackerDone = checklist.filter((match) => match[1] === "x").length;
 const trackerNotStarted = checklist.length - trackerDone;
+const trackerStatusById = new Map(checklist.map((match) => [match[2], match[1] === "x" ? "Done" : "Not Started"]));
+const requirementById = new Map(requirements.requirements.map((requirement) => [requirement.id, requirement]));
+const visitedRequirements = new Set();
+const activeRequirementPath = new Set();
+const visitRequirement = (requirementId) => {
+  if (visitedRequirements.has(requirementId)) return;
+  assert.ok(!activeRequirementPath.has(requirementId), `Requirement dependency cycle reaches ${requirementId}`);
+  activeRequirementPath.add(requirementId);
+  for (const dependency of requirementById.get(requirementId).dependencies) {
+    if (requirementById.has(dependency)) visitRequirement(dependency);
+  }
+  activeRequirementPath.delete(requirementId);
+  visitedRequirements.add(requirementId);
+};
+for (const requirementId of requirementById.keys()) visitRequirement(requirementId);
+for (const requirement of requirements.requirements.filter((record) => record.status === "Verified")) {
+  for (const dependency of requirement.dependencies) {
+    if (requirementById.has(dependency)) {
+      assert.ok(["Verified", "Not Applicable — Explicitly Approved"].includes(requirementById.get(dependency).status), `${requirement.id} cannot be Verified while requirement dependency ${dependency} is ${requirementById.get(dependency).status}`);
+    } else if (trackerStatusById.has(dependency)) {
+      assert.equal(trackerStatusById.get(dependency), "Done", `${requirement.id} cannot be Verified while tracker dependency ${dependency} is not Done`);
+    } else {
+      assert.fail(`${requirement.id} cannot be Verified while external dependency ${dependency} has no resolved governed state`);
+    }
+  }
+}
 const progress = tracker.match(/\*\*(\d+) total · (\d+) Done · (\d+) Not Started\*\*/);
 assert.ok(progress, "Tracker progress line is missing");
 assert.deepEqual([Number(progress[1]), Number(progress[2]), Number(progress[3])], [checklist.length, trackerDone, trackerNotStarted], "Tracker progress arithmetic is stale");

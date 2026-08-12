@@ -12,7 +12,7 @@
     "idDigest": "517138fc932bc8be942a56434948e35cb2139a6432ce8ce4108d46436a578506",
     "originalRequirementDigest": "84821b87114b17721441933f91a2790f116570a29e696ac87a2d6d3be098d166",
     "governanceMetadataDigest": "ee0c399d50da4bea28d9a457f6e913fd37c758b3f64a225f51bfaf4e6736a34e",
-    "policy": "The first 105 adoption records are frozen in order. New requirements append; clarification or supersession never rewrites or removes an adoption record."
+    "policy": "All 105 adopted records are frozen in order. A newly authorized requirement must append while the same reviewed change advances the baseline count and digests; no appended record may exist outside the baseline."
   },
   "statuses": [
     "Not Started",
@@ -26,7 +26,7 @@
   "acceptanceDispositions": ["Verified", "Partial", "Not Implemented", "Blocked", "Deferred", "Decision Required"],
   "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "motion", "accessibility", "copy", "cross-lens", "performance", "governance"],
   "verifiedEvidenceSchema": {
-    "entry": { "type": "one declared acceptanceTypes value", "reference": "durable repository path or HTTPS URL" },
+    "entry": { "type": "one declared acceptanceTypes value", "reference": "durable repository path or HTTPS URL", "candidateSha": "the exact accepted implementation SHA", "execution": { "method": "the executed command or journey", "result": "passed", "observedAt": "ISO-8601 timestamp" } },
     "coverage": "Verified requires at least one structured evidence entry for every acceptance type declared by the requirement."
   },
   "requirements": [
