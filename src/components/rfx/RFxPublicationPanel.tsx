@@ -211,7 +211,7 @@ export function RFxPublicationPanel({
             </ul>
           ) : null}
           {readiness.requirementStatus.length ? (
-            <div className={styles.requirements} aria-label={t("rfxWorkspace.requirementReadiness")}> 
+            <div className={styles.requirements} aria-label={t("rfxWorkspace.requirementReadiness")}>
               {readiness.requirementStatus.map((item) => (
                 <span key={item.requirementId} data-requirement-readiness={item.status}>
                   {item.status === "ready" ? t("rfxWorkspace.requirementReady") : t("rfxWorkspace.requirementBlocked")}
