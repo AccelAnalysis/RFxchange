@@ -1,10 +1,10 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 
 import { AcquisitionContextService } from "../../application/acquisition/acquisition-context.ts";
-import { projectPermittedPublicOpportunity } from "../../domain/acquisition/public-opportunity.ts";
 import { FirestoreAcquisitionContextRepository } from "../firestore/acquisition-context.ts";
 import { getServerFirestore } from "../firestore/runtime.ts";
-import { SeededPublicOpportunityProjectionRepository } from "./seeded-public-opportunities.ts";
+import { resolveParticipantRoute } from "../auth/participant-route-runtime.ts";
+import { FirestorePublishedOpportunityRepository } from "./firestore-published-opportunities.ts";
 
 export const RFXCHANGE_ACQUISITION_COOKIE_NAME = "rfx_acquisition_context";
 
@@ -19,9 +19,10 @@ export function acquisitionCookieOptions() {
 }
 
 export function createServerAcquisitionContextService(): AcquisitionContextService {
+  const db = getServerFirestore();
   return new AcquisitionContextService({
-    contexts: new FirestoreAcquisitionContextRepository(getServerFirestore()),
-    opportunities: new SeededPublicOpportunityProjectionRepository(),
+    contexts: new FirestoreAcquisitionContextRepository(db),
+    opportunities: new FirestorePublishedOpportunityRepository(db),
     ids: {
       context: () => `acq-${randomUUID()}`,
       event: () => `acq-event-${randomUUID()}`,
@@ -34,8 +35,18 @@ export function createServerAcquisitionContextService(): AcquisitionContextServi
   });
 }
 
-export async function resolvePublicOpportunityProjection(reference: string) {
-  return projectPermittedPublicOpportunity(
-    await new SeededPublicOpportunityProjectionRepository().getByReference(reference),
-  );
+export async function resolvePublicOpportunityProjection(
+  reference: string,
+  participantAuthorized = false,
+) {
+  return new FirestorePublishedOpportunityRepository(
+    getServerFirestore(),
+  ).getResponderProjection(reference, participantAuthorized);
+}
+
+export async function resolveOptionalOpportunityParticipant(
+  sessionCookie: string | null | undefined,
+): Promise<boolean> {
+  const access = await resolveParticipantRoute({ sessionCookie });
+  return access.kind === "authorized" && access.state.lifecycleState === "open-platform";
 }

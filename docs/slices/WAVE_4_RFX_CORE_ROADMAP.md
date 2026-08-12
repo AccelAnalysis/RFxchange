@@ -1,8 +1,8 @@
 # Wave 4 — RFx Core roadmap
 
-**Status: ACTIVE CANONICAL ROADMAP — SLICES 4.1–4.2 IMPLEMENTED; WAVE 4 IS 5/41.**
+**Status: ACTIVE CANONICAL ROADMAP — SLICES 4.1–4.4 IMPLEMENTED; WAVE 4 IS 13/41.**
 
-Wave 4 contains **41 RFx Core Feature IDs**. Slices 4.1–4.2 implement five; 36 remain Not Started. This roadmap preserves the tracker inventory and separates the basic live RFx path through submission from Wave 5 evaluation/selection/award.
+Wave 4 contains **41 RFx Core Feature IDs**. Slices 4.1–4.4 implement 13; 28 remain Not Started. This roadmap preserves the tracker inventory and separates the basic live RFx path through submission from Wave 5 evaluation/selection/award.
 
 The cross-cutting AI/AMACS Interpretation Foundation is complete and reusable for later guided buyer/issuer need interpretation. Wave 4 does not create a second AI stack. Merged PR #150, **Define the Exchange interaction architecture**, is required participant-experience authority for every Wave 4 slice.
 
@@ -123,7 +123,7 @@ Deep-linked publication checks, exact responder/public preview parity, atomic pu
 
 This is the first legitimate source for production opportunity beacons. B6c opportunity expression cannot precede it.
 
-The bounded documentation-only authority is `docs/slices/SLICE_4_4_EXECUTION_AUTHORITY.md`. Its merge changes no Feature-ID status, publishes nothing and does not make B6c eligible; eligibility requires the separately accepted runtime.
+The bounded authority is `docs/slices/SLICE_4_4_EXECUTION_AUTHORITY.md`. The accepted runtime completes only these five Feature IDs and makes B6c opportunity expression eligible for separate authority; it does not complete or begin B6c.
 
 ### Slice 4.5 — Opportunity discovery and management
 
@@ -221,12 +221,13 @@ Wave 3 approved handoff / dependency recalculation [complete]
 → Slice 4.2 documentation authority [complete]
 → 4.2 structured need/requirements foundation + governed AI-assisted interpretation [complete]
 → reconcile main and dependencies [complete]
-→ Slice 4.3 documentation authority [current]
-→ 4.3 AMACS requirements/response/evaluation definition + confirmed AMACS suggestions
-→ reconcile
-→ 4.4 readiness/publication
-→ B6c opportunity expression becomes eligible
-→ reconcile
+→ Slice 4.3 documentation authority [complete]
+→ 4.3 AMACS requirements/response/evaluation definition + confirmed AMACS suggestions [complete]
+→ reconcile [complete]
+→ Slice 4.4 documentation authority [complete]
+→ 4.4 readiness/publication [complete]
+→ B6c opportunity expression becomes eligible [eligible; not begun]
+→ reconcile and define Slice 4.5 authority [next]
 → 4.5 discovery/manage
 → 4.6 deterministic fit/pursuit
 → 4.7 gap/team/resource
@@ -307,4 +308,4 @@ Wave 4 does not require substantive evaluator scoring/consensus, Q&A/addenda, aw
 - Create/approve a specific slice authority before each later implementation slice.
 - Run repository, Firebase/emulator, architecture, accessibility, browser, AI-interpretation benchmark where applicable, and slice-specific acceptance.
 - Recalculate from merged `main` after each implementation/reconciliation merge.
-- Do not begin Slice 4.3 runtime before its authority is reviewed and merged, and do not begin B6c or any later behavior during Slice 4.3 implementation.
+- Do not begin Slice 4.5 runtime, B6c or any later behavior before its applicable authority is reviewed and merged.

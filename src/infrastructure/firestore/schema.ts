@@ -58,6 +58,8 @@ export const FIRESTORE_COLLECTIONS = {
   rfxAggregates: "rfxAggregates",
   rfxEvents: "rfxEvents",
   rfxCommands: "rfxCommands",
+  rfxPublicationSnapshots: "rfxPublicationSnapshots",
+  rfxOpportunityProjections: "rfxOpportunityProjections",
   referralEducationAcknowledgements: "referralEducationAcknowledgements",
   referralCommunicationIntents: "referralCommunicationIntents",
   providerApplications: "providerApplications",
@@ -94,6 +96,7 @@ export type FirestoreRecordScope =
   | "organization-scoped"
   | "user-scoped"
   | "platform-scoped"
+  | "public-projection"
   | "mixed-scope";
 
 export interface FirestoreCollectionConvention {
@@ -102,7 +105,8 @@ export interface FirestoreCollectionConvention {
     | "id"
     | "membershipId"
     | "administratorId"
-    | "userId";
+    | "userId"
+    | "reference";
   readonly scope: FirestoreRecordScope;
   readonly organizationIdRequired: boolean;
   readonly appendOnly: boolean;
@@ -439,6 +443,8 @@ export const FIRESTORE_COLLECTION_CONVENTIONS: Readonly<
   rfxAggregates: Object.freeze({ collection: FIRESTORE_COLLECTIONS.rfxAggregates, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: false, mutable: true }),
   rfxEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.rfxEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
   rfxCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.rfxCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
+  rfxPublicationSnapshots: Object.freeze({ collection: FIRESTORE_COLLECTIONS.rfxPublicationSnapshots, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
+  rfxOpportunityProjections: Object.freeze({ collection: FIRESTORE_COLLECTIONS.rfxOpportunityProjections, documentIdSource: "reference", scope: "public-projection", organizationIdRequired: false, appendOnly: true, mutable: false }),
   referralEducationAcknowledgements: Object.freeze({ collection: FIRESTORE_COLLECTIONS.referralEducationAcknowledgements, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
   referralCommunicationIntents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.referralCommunicationIntents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: false, mutable: true }),
   providerApplications: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerApplications, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),

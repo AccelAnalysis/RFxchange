@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { MarketingFooter, MarketingHeader } from "@/src/components/marketing/MarketingChrome";
-import { resolvePublicOpportunityProjection } from "@/src/infrastructure/acquisition/runtime";
+import { PublicOpportunityView } from "@/src/components/rfx/PublicOpportunityView";
+import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/participant-route-runtime";
+import {
+  resolveOptionalOpportunityParticipant,
+  resolvePublicOpportunityProjection,
+} from "@/src/infrastructure/acquisition/runtime";
 
 import styles from "./page.module.css";
 
@@ -15,57 +21,36 @@ export async function generateMetadata({ params }: PublicOpportunityPageProps): 
   const projection = await resolvePublicOpportunityProjection(reference);
   return projection
     ? {
-        title: `${projection.title} | The RFxchange`,
-        description: projection.summary,
+        title: `${projection.payload.title} | The RFxchange`,
+        description: projection.payload.summary,
       }
     : { title: "Opportunity unavailable | The RFxchange" };
 }
 
 export default async function PublicOpportunityPage({ params }: PublicOpportunityPageProps) {
+  // This trusted route returns only the approved public projection or an authorized participant projection.
   const { reference } = await params;
-  const opportunity = await resolvePublicOpportunityProjection(reference);
+  let opportunity = await resolvePublicOpportunityProjection(reference);
+  if (!opportunity) {
+    opportunity = await resolvePublicOpportunityProjection(
+      reference,
+      await resolveOptionalOpportunityParticipant(
+        (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
+      ),
+    );
+  }
   if (!opportunity) notFound();
+  const viewModel = Object.freeze({
+    reference: opportunity.reference,
+    audience: opportunity.audience,
+    digest: opportunity.digest,
+    payload: opportunity.payload,
+  });
 
   return (
     <main className={styles.site}>
       <MarketingHeader />
-      <section className={styles.hero} aria-labelledby="opportunity-title">
-        <div className={styles.context}>
-          <p className={styles.eyebrow}>Public opportunity</p>
-          <p className={styles.availability}>{opportunity.availabilityLabel}</p>
-          <h1 id="opportunity-title">{opportunity.title}</h1>
-          <p className={styles.summary}>{opportunity.summary}</p>
-          <form action="/api/acquisition/start" method="post">
-            <input type="hidden" name="opportunityReference" value={opportunity.reference} />
-            <button type="submit">View Opportunity</button>
-          </form>
-          <p className={styles.joinNote}>
-            Create or sign in to a free organization account. RFxchange will preserve this
-            opportunity while you complete activation; the link never bypasses participation or
-            organization-authority requirements.
-          </p>
-        </div>
-        <aside className={styles.details} aria-label="Public opportunity details">
-          <span>Issued by</span>
-          <strong>{opportunity.issuerDisplayName}</strong>
-          <span>Geography</span>
-          <strong>{opportunity.localityLabel}</strong>
-          <span>Relevant capabilities</span>
-          <ul>
-            {opportunity.capabilityCategories.map((category) => <li key={category}>{category}</li>)}
-          </ul>
-          <small>{opportunity.provenanceLabel}</small>
-        </aside>
-      </section>
-      <section className={styles.boundary} aria-labelledby="public-boundary-title">
-        <p className={styles.eyebrow}>Public boundary</p>
-        <h2 id="public-boundary-title">Enough context to decide whether to continue.</h2>
-        <p>
-          This page contains only the approved public projection. Response details, issuer-private
-          information, participant identity, evaluation, and protected RFx records remain inside
-          their authoritative workflows.
-        </p>
-      </section>
+      <PublicOpportunityView opportunity={viewModel} />
       <MarketingFooter />
     </main>
   );

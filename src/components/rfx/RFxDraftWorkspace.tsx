@@ -21,6 +21,7 @@ import {
 import styles from "./RFxDraftWorkspace.module.css";
 import { RFxPackageBuilder } from "./RFxPackageBuilder";
 import { RFxDefinitionBuilder } from "./RFxDefinitionBuilder";
+import { RFxPublicationPanel } from "./RFxPublicationPanel";
 
 interface Props {
   readonly canCreate: boolean;
@@ -227,7 +228,9 @@ export function RFxDraftWorkspace({
                               draft.requestFamily.labelSnapshot}
                           </strong>
                           <span>
-                            {t("rfxWorkspace.version", {
+                            {draft.lifecycleState === "published"
+                              ? t("rfxWorkspace.publishedState")
+                              : t("rfxWorkspace.version", {
                               version: draft.version,
                             })}
                           </span>
@@ -259,7 +262,9 @@ export function RFxDraftWorkspace({
                 {selectedDraft ? (
                   <>
                     <span className={styles.state}>
-                      {t("rfxWorkspace.draftState")}
+                      {selectedDraft.lifecycleState === "published"
+                        ? t("rfxWorkspace.publishedState")
+                        : t("rfxWorkspace.draftState")}
                     </span>
                     <h2 id="rfx-task-title">
                       {selectedDraft.package?.title ||
@@ -287,7 +292,7 @@ export function RFxDraftWorkspace({
                         <dd>{selectedDraft.version}</dd>
                       </div>
                     </dl>
-                    <label className={styles.field}>
+                    {selectedDraft.lifecycleState === "draft" ? <label className={styles.field}>
                       <span>{t("rfxWorkspace.changeType")}</span>
                       <select
                         data-rfx-family-select
@@ -303,8 +308,8 @@ export function RFxDraftWorkspace({
                           </option>
                         ))}
                       </select>
-                    </label>
-                    <RFxPackageBuilder
+                    </label> : null}
+                    {selectedDraft.lifecycleState === "draft" ? <RFxPackageBuilder
                       key={selectedDraft.id}
                       aggregate={selectedDraft}
                       organizationId={organizationId}
@@ -317,11 +322,22 @@ export function RFxDraftWorkspace({
                           ),
                         )
                       }
-                    />
-                    <RFxDefinitionBuilder
+                    /> : null}
+                    {selectedDraft.lifecycleState === "draft" ? <RFxDefinitionBuilder
                       aggregate={selectedDraft}
                       catalog={definitionCatalog}
                       organizationId={organizationId}
+                      commandRecoveryScope={commandRecoveryScope}
+                      onCommitted={(aggregate) =>
+                        setDrafts((current) =>
+                          current.map((draft) =>
+                            draft.id === aggregate.id ? aggregate : draft,
+                          ),
+                        )
+                      }
+                    /> : null}
+                    <RFxPublicationPanel
+                      aggregate={selectedDraft}
                       commandRecoveryScope={commandRecoveryScope}
                       onCommitted={(aggregate) =>
                         setDrafts((current) =>

@@ -105,8 +105,8 @@ assert.match(authority, /ISS-007/);
 assert.match(authority, /ISS-009/);
 assert.match(authority, /ISS-011/);
 assert.match(evidence, /Configured-browser acceptance/);
-assert.match(tracker, /438 total · 160 Done · 278 Not Started/);
-assert.match(tracker, /RFx Core: \*\*8\/41\*\*/);
+assert.match(tracker, /438 total · 165 Done · 273 Not Started/);
+assert.match(tracker, /RFx Core: \*\*13\/41\*\*/);
 for (const id of ["ISS-007", "ISS-009", "ISS-011"])
   assert.match(tracker, new RegExp("\\[x\\] `" + id + "`"));
 assert.match(dependency, /Slice 4\.3 implementation result/);
@@ -126,7 +126,7 @@ for (const [index, locale] of locales.entries()) {
   ])
     assert.ok(parsed[key], `RFx definition locale ${index + 1} missing ${key}`);
 }
-for (const forbidden of ["published", "amended", "awarded", "submitted"])
+for (const forbidden of ["amended", "awarded", "submitted"])
   assert.doesNotMatch(
     model,
     new RegExp(`lifecycleState: [^\\n]*${forbidden}`),

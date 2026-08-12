@@ -92,15 +92,15 @@ The RFx Core planning package is indexed at [`../rfx/README.md`](../rfx/README.m
 - anti-regression and configured-browser acceptance; and
 - the real-data-only B6c RFx map lens.
 
-The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) through [`../slices/SLICE_4_3_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_3_EXECUTION_AUTHORITY.md). They cover exactly `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009` and `ISS-011`: the organization-owned draft kernel, private structured need/package and governed definition. [`../slices/SLICE_4_4_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_4_EXECUTION_AUTHORITY.md) is the documentation-only authority for the next runtime.
+The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) through [`../slices/SLICE_4_4_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_4_EXECUTION_AUTHORITY.md). They cover exactly `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009`, `ISS-011`, `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020` and `ACQ-009`: the organization-owned RFx kernel, private structured package/definition, readiness, exact preview, atomic publication and controlled sharing.
 
-Slices 4.1–4.3 are accepted on merged `main`. The Slice 4.4 authority completes no Feature ID; later slices still require their own documentation authority and runtime evidence.
+Slices 4.1–4.4 have implementation and acceptance evidence. Slice 4.5, B6c and later work still require their own documentation authority and runtime evidence.
 
 ## Current sequencing status
 
 Wave 2 is complete. Wave 3 Slices 3.1 through 3.8 and Brand Gates B0–B6a are merged, and the configured-browser/zero-residual Wave 3 exit accepted Network at 38/38. B6b remains intentionally pending.
 
-Merged `main` at `81ec0c7a7fbd28a2a4827d4ba448a5ceb28b6ed7` includes the accepted Exchange shell and implemented Slices 4.1–4.3 runtime. PR #165 passed exact-head CI run `31561013074`; post-merge `main` passed run `31561286020`. The current gate is the documentation-only Slice 4.4 authority; publication runtime cannot begin before that authority is reviewed and merged.
+The Slice 4.4 implementation baseline is its authority merged through PR #166 at `4ebb0599af7e7a7470b696d8d2a2a9e7b60f2e00`. The runtime now supplies current readiness, exact preview/live projection parity, atomic immutable publication and controlled sharing over the Slices 4.1–4.3 issuer definition.
 
 The dependency result remains:
 
@@ -109,12 +109,12 @@ The dependency result remains:
 - AI/AMACS foundation: satisfied; Slice 4.4 readiness/preview/publication does not require or authorize an AI call;
 - organization authority/tenancy/audit/concurrency foundations: satisfied by prior cross-cutting implementation;
 - Exchange Interaction Architecture: satisfied by PR #150 and reconciled by the active shell gate;
-- Slices 4.1–4.3 RFx kernel/package/definition: implemented for `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009` and `ISS-011`;
-- ACQ-002/003 public projection and acquisition continuity: satisfied and ready for the canonical live Slice 4.4 RFx publication adapter;
+- Slices 4.1–4.4 RFx kernel/package/definition/publication: implemented for `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005`, `ISS-006`, `ISS-007`, `ISS-009`, `ISS-011`, `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020` and `ACQ-009`;
+- ACQ-002/003 public projection and acquisition continuity: satisfied and reused by the canonical live Slice 4.4 RFx publication adapter;
 - Stabilization 2C: isolated release engineering, not a product prerequisite; and
 - the reviewed `ISS-009` dependency on stable Slice 4.2 and Slice 4.3 requirements is adopted; no other dependency correction is introduced.
 
-Canonical totals are **438 total · 160 Done · 278 Not Started**, with Wave 4 RFx Core **8/41**. Slice 4.4 remains unimplemented pending the new authority; B6c remains ineligible until its real publication runtime is accepted.
+Canonical totals are **438 total · 165 Done · 273 Not Started**, with Wave 4 RFx Core **13/41**. B6c opportunity expression is now eligible but not begun; Slice 4.5 documentation authority is the next sequencing action after the Slice 4.4 merge is reconciled.
 
 ## Stabilization 2C boundary
 
