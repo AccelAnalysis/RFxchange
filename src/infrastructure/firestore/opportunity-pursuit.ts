@@ -44,8 +44,15 @@ function sameCommand(left: OpportunityPursuitCommandReceipt, right: OpportunityP
 export class FirestoreOpportunityPursuitRepository implements OpportunityPursuitRepository {
   constructor(private readonly db: Firestore) {}
 
-  getProjection(reference: string) {
-    return getFirestoreRecordById<ResponderOpportunityProjection>(this.db, PROJECTIONS, reference);
+  async getProjection(reference: string) {
+    const projection = await getFirestoreRecordById<ResponderOpportunityProjection>(this.db, PROJECTIONS, reference);
+    if (!projection) return null;
+    const localities = await Promise.all(
+      projection.payload.localities.map((item) => this.db.collection(GEOGRAPHIES).doc(item.id).get()),
+    );
+    return localities.length > 0 && localities.every((item) => item.exists && item.get("releaseState") === "released")
+      ? projection
+      : null;
   }
 
   getPublicationSnapshotByReference(reference: string) {

@@ -422,6 +422,10 @@ try {
     adminDb.collection("opportunityWatches").doc(responderWatchId).set({ schemaVersion: 1, id: responderWatchId, organizationId: responderOrganizationId, userId: responderUserId, membershipId: responderMembershipId, opportunityReference: reference, status: "watching", version: 1, createdAt: now, updatedAt: now }),
   ]);
   const pursuitRepository = new FirestoreOpportunityPursuitRepository(adminDb);
+  assert.equal((await pursuitRepository.getProjection(reference)).reference, reference);
+  await adminDb.collection("geographies").doc(geographyId).update({ releaseState: "limited" });
+  assert.equal(await pursuitRepository.getProjection(reference), null);
+  await adminDb.collection("geographies").doc(geographyId).update({ releaseState: "released" });
   const claims = await pursuitRepository.listCapabilityClaims(responderOrganizationId);
   const geographies = await pursuitRepository.getServiceGeographyIds(responderOrganizationId);
   const explanation = calculateOpportunityFit({ organizationId: responderOrganizationId, projection, claims, serviceGeographyIds: geographies, calculatedAt: now });

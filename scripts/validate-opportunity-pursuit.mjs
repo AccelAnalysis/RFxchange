@@ -31,6 +31,7 @@ assert.doesNotMatch(service + domain, /awardLikelihood|qualificationScore|matchP
 assert.match(repository, /runTransaction/);
 assert.match(repository, /opportunityCapabilityInputDigest/);
 assert.match(repository, /response\.create/);
+assert.match(repository, /releaseState/);
 for (const collection of ["opportunityFitSnapshots", "opportunityPursuits", "opportunityPursuitCommands", "opportunityPursuitEvents"]) assert.match(repository + rules, new RegExp(collection));
 assert.match(route, /resolveParticipantRoute/);
 assert.match(route, /Same-origin request required/);
@@ -43,6 +44,7 @@ assert.match(page, /discoveryReturnHref/);
 assert.match(page, /"requestFamily", "cursor", "selected"/);
 assert.match(english, /Decision support, not a qualification score/);
 assert.match(english, /Response construction and submission are not available/);
+assert.match(english, /"not-applicable": "Review required"/);
 assert.match(tracker, /438 total · 175 Done · 263 Not Started/);
 assert.match(tracker, /RFx Core: \*\*23\/41\*\*/);
 for (const id of ["RSP-001", "RSP-002", "RSP-003", "RSP-004", "RSP-006"]) {
