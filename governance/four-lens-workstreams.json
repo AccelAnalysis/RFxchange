@@ -1,25 +1,140 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "authority": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md",
   "adoptionBaseSha": "21c4fc080a823ae03f33ae1e58dd2752f317dc67",
-  "activationRule": "No ready-after-authority-merge packet is active until Control Room replaces exactBaseSha with the resulting authority merge SHA on current main.",
-  "packetStatuses": ["ready-after-authority-merge", "frozen-until-authority-merge", "in-progress", "active", "reconciliation-authorized", "implemented-not-verified", "acceptance-pending", "verified", "completed", "blocked", "closed"],
+  "programPhase": "authority-setup",
+  "activationRule": "A packet becomes active only through a Control Room activation epoch that records the exact current-main SHA observed for activation; later candidate branches may start from or descend from that immutable base.",
+  "bootstrapTransition": {
+    "authorityPullRequest": 172,
+    "requiredSequence": [
+      "merge-authority",
+      "successful-production-ci-on-authority-merge",
+      "close-authority-setup",
+      "switch-program-operational",
+      "activate-independent-packets-from-exact-current-main"
+    ],
+    "preMergeCandidateSha": "SELF",
+    "postMergeRule": "SELF, mergeSha, postMergeMainSha and postMergeRunUrl are lifecycle fields. SELF is valid only while PR #172 is open and the setup packet is in-progress. The first post-merge Control Room change replaces SELF with the exact final PR head, records the exact authority merge SHA and successful production-ci URL/SHA, closes setup, switches the program operational and opens activation epoch(s)."
+  },
+  "independentAcceptanceIdentityModel": {
+    "lane": "independent-acceptance",
+    "identityKinds": [
+      "github",
+      "github-app"
+    ],
+    "configuredIdentities": [
+      {
+        "identity": "github-app:chatgpt-codex-connector[bot]",
+        "kind": "github-app",
+        "status": "active",
+        "authorization": "program"
+      }
+    ],
+    "packetAssignment": {
+      "enabled": true,
+      "allowedKinds": [
+        "github",
+        "github-app"
+      ],
+      "rule": "Control Room may explicitly assign another exact authenticated GitHub user or GitHub App identity to a Lane 06 packet before acceptance begins. That packet assignment is the authorization for that packet and is not a global reviewer grant."
+    },
+    "authentication": "The acceptance signal must be authored in GitHub by the exact configured or packet-assigned identity. Layer 1 validates the recorded identity, exact candidate SHA and separation; API-level provenance hardening is a separate non-bootstrap packet.",
+    "selfCertification": "The independent reviewer must never equal the implementation actor or the acceptance candidate actor."
+  },
+  "acceptanceHardening": {
+    "plannedPacketId": "WP-ACCEPTANCE-INTEGRITY-HARDENING-01",
+    "status": "planned-nonblocking",
+    "blocksBootstrap": false,
+    "document": "docs/program/FOUR_LENS_BOOTSTRAP_RECOVERY.md"
+  },
+  "packetStatuses": [
+    "ready-after-authority-merge",
+    "frozen-until-authority-merge",
+    "in-progress",
+    "active",
+    "reconciliation-authorized",
+    "implemented-not-verified",
+    "acceptance-pending",
+    "verified",
+    "completed",
+    "blocked",
+    "closed"
+  ],
   "adoptionPacketBaseline": {
     "algorithm": "sha256-json-v1",
     "recordCount": 8,
     "idDigest": "7053ba8345ad10c4fb7636f0333dfa228ff8d78773f1590dec260b71eefd2ab5",
     "governanceDigest": "4985a28f70bdca41ebd51cd4c12438ba783e8704485d2cb3ffb14b5525f55379",
-    "policy": "All eight packet definitions are frozen in order except for status and exactBaseSha. A new packet must append while the same reviewed change advances the baseline count and digests."
+    "policy": "The eight initial packet definitions are frozen in order over their governance projection. Candidate, candidateHistory, status, exactBaseSha, activationEpochId, post-merge evidence and Lane 06 reviewer assignment are lifecycle fields."
   },
+  "activationEpochs": [
+    {
+      "id": "authority-setup-2026-08-12",
+      "mainBaseSha": "21c4fc080a823ae03f33ae1e58dd2752f317dc67",
+      "controlPullRequest": 172,
+      "packetIds": [
+        "WP-CONTROL-AUTHORITY-SETUP"
+      ],
+      "purpose": "Install Four-Lens governance only."
+    }
+  ],
   "lanes": [
-    { "id": "control-room", "number": "00", "owner": "program coordination", "productionCode": false, "acceptanceAuthority": false },
-    { "id": "shared-exchange", "number": "01", "owner": "shared participant experience contracts", "productionCode": true, "acceptanceAuthority": false },
-    { "id": "opportunities-rfx", "number": "02", "owner": "authorized RFx domain and experience", "productionCode": true, "acceptanceAuthority": false },
-    { "id": "intelligence", "number": "03", "owner": "Intelligence lens and analytical projections", "productionCode": true, "acceptanceAuthority": false },
-    { "id": "resources", "number": "04", "owner": "Resources lens and provider/resource domain experience", "productionCode": true, "acceptanceAuthority": false },
-    { "id": "referrals", "number": "05", "owner": "Referrals lens and referral domain experience", "productionCode": true, "acceptanceAuthority": false },
-    { "id": "independent-acceptance", "number": "06", "owner": "independent authority-outward acceptance", "productionCode": false, "acceptanceAuthority": true },
-    { "id": "integration", "number": "07", "owner": "cross-lens integrated QA", "productionCode": false, "acceptanceAuthority": false }
+    {
+      "id": "control-room",
+      "number": "00",
+      "owner": "program coordination",
+      "productionCode": false,
+      "acceptanceAuthority": false
+    },
+    {
+      "id": "shared-exchange",
+      "number": "01",
+      "owner": "shared participant experience contracts",
+      "productionCode": true,
+      "acceptanceAuthority": false
+    },
+    {
+      "id": "opportunities-rfx",
+      "number": "02",
+      "owner": "authorized RFx domain and experience",
+      "productionCode": true,
+      "acceptanceAuthority": false
+    },
+    {
+      "id": "intelligence",
+      "number": "03",
+      "owner": "Intelligence lens and analytical projections",
+      "productionCode": true,
+      "acceptanceAuthority": false
+    },
+    {
+      "id": "resources",
+      "number": "04",
+      "owner": "Resources lens and provider/resource domain experience",
+      "productionCode": true,
+      "acceptanceAuthority": false
+    },
+    {
+      "id": "referrals",
+      "number": "05",
+      "owner": "Referrals lens and referral domain experience",
+      "productionCode": true,
+      "acceptanceAuthority": false
+    },
+    {
+      "id": "independent-acceptance",
+      "number": "06",
+      "owner": "independent authority-outward acceptance",
+      "productionCode": false,
+      "acceptanceAuthority": true
+    },
+    {
+      "id": "integration",
+      "number": "07",
+      "owner": "cross-lens integrated QA",
+      "productionCode": false,
+      "acceptanceAuthority": false
+    }
   ],
   "workPackets": [
     {
@@ -27,14 +142,42 @@
       "lane": "control-room",
       "owner": "authority setup",
       "branch": "codex/four-lens-program-authority",
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 172,
+        "sha": "SELF",
+        "mergeSha": null
+      },
+      "candidateHistory": [],
       "exactBaseSha": "21c4fc080a823ae03f33ae1e58dd2752f317dc67",
+      "activationEpochId": "authority-setup-2026-08-12",
+      "postMergeRunUrl": null,
+      "postMergeMainSha": null,
       "status": "in-progress",
       "requirementIds": [],
-      "sources": ["docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md"],
+      "sources": [
+        "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md"
+      ],
       "dependencies": [],
-      "ownedPaths": ["AGENTS.md", "docs/program/**", "governance/four-lens-*.json", "scripts/validate-four-lens-program.mjs", "package.json"],
-      "nonOwnedPaths": ["app/**", "src/**", "functions/**", "firestore.rules", "docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md"],
-      "acceptanceRequired": ["governance", "full-repository-check", "exact-head-review"],
+      "ownedPaths": [
+        "AGENTS.md",
+        "docs/program/**",
+        "governance/four-lens-*.json",
+        "scripts/validate-four-lens-program.mjs",
+        "package.json"
+      ],
+      "nonOwnedPaths": [
+        "app/**",
+        "src/**",
+        "functions/**",
+        "firestore.rules",
+        "docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md"
+      ],
+      "acceptanceRequired": [
+        "governance",
+        "full-repository-check",
+        "exact-head-review"
+      ],
       "expectedOutput": "Merged governance-only authority and deterministic artifacts.",
       "stopBoundary": "No participant UX, RFx runtime, Intelligence layer, Resources/Referrals behavior or Feature-ID completion changes."
     },
@@ -43,15 +186,53 @@
       "lane": "shared-exchange",
       "owner": "Shared Experience Completion",
       "branch": "codex/program-shared-experience-completion-01",
+      "candidate": null,
+      "candidateHistory": [],
       "exactBaseSha": null,
+      "activationEpochId": null,
       "basePolicy": "authority-merge-sha",
       "status": "ready-after-authority-merge",
-      "requirementIds": ["SHARED-CONTINUITY-002", "SHARED-EVIDENCE-001"],
-      "sources": ["docs/program/SHARED_EXPERIENCE_COMPLETION_BACKLOG.md", "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md", "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md"],
-      "dependencies": [{ "packetId": "WP-CONTROL-AUTHORITY-SETUP", "requiredStatuses": ["completed", "closed"] }],
-      "ownedPaths": ["app/geography/canvas/**", "src/components/participant/**", "test/**", "scripts/**", "docs/program/**"],
-      "nonOwnedPaths": ["src/domain/rfx/**", "src/domain/referrals/**", "src/domain/resource-providers/**", "docs/tracking/**"],
-      "acceptanceRequired": ["functional", "domain-security", "cross-lens", "accessibility", "five-locales", "configured-browser", "exact-head-ci", "independent-acceptance"],
+      "requirementIds": [
+        "SHARED-CONTINUITY-002",
+        "SHARED-EVIDENCE-001"
+      ],
+      "sources": [
+        "docs/program/SHARED_EXPERIENCE_COMPLETION_BACKLOG.md",
+        "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md",
+        "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md"
+      ],
+      "dependencies": [
+        {
+          "packetId": "WP-CONTROL-AUTHORITY-SETUP",
+          "requiredStatuses": [
+            "completed",
+            "closed"
+          ]
+        }
+      ],
+      "ownedPaths": [
+        "app/geography/canvas/**",
+        "src/components/participant/**",
+        "test/**",
+        "scripts/**",
+        "docs/program/**"
+      ],
+      "nonOwnedPaths": [
+        "src/domain/rfx/**",
+        "src/domain/referrals/**",
+        "src/domain/resource-providers/**",
+        "docs/tracking/**"
+      ],
+      "acceptanceRequired": [
+        "functional",
+        "domain-security",
+        "cross-lens",
+        "accessibility",
+        "five-locales",
+        "configured-browser",
+        "exact-head-ci",
+        "independent-acceptance"
+      ],
       "expectedOutput": "Bounded correction preserving carried selectedOrganization through Intelligence form, Clear and pagination links, with fresh exact-head evidence.",
       "stopBoundary": "Do not resolve SHARED-PRIVACY-001 or SHARED-IDENTITY-001 without their explicit decision/shared contract."
     },
@@ -60,15 +241,72 @@
       "lane": "independent-acceptance",
       "owner": "Wave 4 Assurance",
       "branch": "codex/acceptance-wave4-slices-4-1-4-5",
+      "candidate": null,
+      "candidateHistory": [],
+      "independentReviewer": null,
       "exactBaseSha": null,
+      "activationEpochId": null,
       "basePolicy": "authority-merge-sha",
       "status": "ready-after-authority-merge",
-      "requirementIds": ["RFX-FEATURE-ISS-001", "RFX-FEATURE-ISS-002", "RFX-FEATURE-ISS-003", "RFX-FEATURE-ISS-005", "RFX-FEATURE-ISS-006", "RFX-FEATURE-ISS-007", "RFX-FEATURE-ISS-009", "RFX-FEATURE-ISS-011", "RFX-FEATURE-ISS-016", "RFX-FEATURE-ISS-018", "RFX-FEATURE-ISS-019", "RFX-FEATURE-ISS-020", "RFX-FEATURE-ACQ-009", "RFX-FEATURE-DSC-004", "RFX-FEATURE-DSC-005", "RFX-FEATURE-DSC-006", "RFX-FEATURE-DSC-007", "RFX-FEATURE-DSC-008"],
-      "sources": ["docs/program/WAVE_4_ASSURANCE_LEDGER.md", "docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md", "docs/slices/SLICE_4_2_EXECUTION_AUTHORITY.md", "docs/slices/SLICE_4_3_EXECUTION_AUTHORITY.md", "docs/slices/SLICE_4_4_EXECUTION_AUTHORITY.md", "docs/slices/SLICE_4_5_EXECUTION_AUTHORITY.md"],
-      "dependencies": [{ "packetId": "WP-CONTROL-AUTHORITY-SETUP", "requiredStatuses": ["completed", "closed"] }],
-      "ownedPaths": ["docs/program/**", "governance/four-lens-requirements.json", "test/**", "scripts/**", "artifacts/**"],
-      "nonOwnedPaths": ["app/**", "src/**", "functions/**", "docs/tracking/**"],
-      "acceptanceRequired": ["independent-authority-audit", "domain-security", "emulator", "configured-browser", "accessibility", "five-locales", "exact-sha-evidence"],
+      "requirementIds": [
+        "RFX-FEATURE-ISS-001",
+        "RFX-FEATURE-ISS-002",
+        "RFX-FEATURE-ISS-003",
+        "RFX-FEATURE-ISS-005",
+        "RFX-FEATURE-ISS-006",
+        "RFX-FEATURE-ISS-007",
+        "RFX-FEATURE-ISS-009",
+        "RFX-FEATURE-ISS-011",
+        "RFX-FEATURE-ISS-016",
+        "RFX-FEATURE-ISS-018",
+        "RFX-FEATURE-ISS-019",
+        "RFX-FEATURE-ISS-020",
+        "RFX-FEATURE-ACQ-009",
+        "RFX-FEATURE-DSC-004",
+        "RFX-FEATURE-DSC-005",
+        "RFX-FEATURE-DSC-006",
+        "RFX-FEATURE-DSC-007",
+        "RFX-FEATURE-DSC-008"
+      ],
+      "sources": [
+        "docs/program/WAVE_4_ASSURANCE_LEDGER.md",
+        "docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md",
+        "docs/slices/SLICE_4_2_EXECUTION_AUTHORITY.md",
+        "docs/slices/SLICE_4_3_EXECUTION_AUTHORITY.md",
+        "docs/slices/SLICE_4_4_EXECUTION_AUTHORITY.md",
+        "docs/slices/SLICE_4_5_EXECUTION_AUTHORITY.md"
+      ],
+      "dependencies": [
+        {
+          "packetId": "WP-CONTROL-AUTHORITY-SETUP",
+          "requiredStatuses": [
+            "completed",
+            "closed"
+          ]
+        }
+      ],
+      "ownedPaths": [
+        "docs/program/**",
+        "governance/four-lens-requirements.json",
+        "test/**",
+        "scripts/**",
+        "artifacts/**"
+      ],
+      "nonOwnedPaths": [
+        "app/**",
+        "src/**",
+        "functions/**",
+        "docs/tracking/**"
+      ],
+      "acceptanceRequired": [
+        "independent-authority-audit",
+        "domain-security",
+        "emulator",
+        "configured-browser",
+        "accessibility",
+        "five-locales",
+        "exact-sha-evidence"
+      ],
       "expectedOutput": "Requirement-level dispositions and material findings for Slices 4.1–4.5 without production code edits.",
       "stopBoundary": "Do not self-correct production code or silently change tracker state."
     },
@@ -77,15 +315,55 @@
       "lane": "opportunities-rfx",
       "owner": "Wave 4 Production",
       "branch": "codex/wave4-slice-4-6",
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 171,
+        "sha": "e70413e2e45db4b75517376acdc0700f9838a963",
+        "mergeSha": null
+      },
+      "candidateHistory": [],
       "exactBaseSha": null,
+      "activationEpochId": null,
       "basePolicy": "authority-merge-sha plus preserved candidate e70413e2e45db4b75517376acdc0700f9838a963",
       "status": "frozen-until-authority-merge",
-      "requirementIds": ["RFX-FEATURE-RSP-001", "RFX-FEATURE-RSP-002", "RFX-FEATURE-RSP-003", "RFX-FEATURE-RSP-004", "RFX-FEATURE-RSP-006"],
-      "sources": ["docs/slices/SLICE_4_6_EXECUTION_AUTHORITY.md", "docs/program/WAVE_4_ASSURANCE_LEDGER.md"],
-      "dependencies": [{ "packetId": "WP-CONTROL-AUTHORITY-SETUP", "requiredStatuses": ["completed", "closed"] }],
-      "ownedPaths": ["existing PR #171 scope only"],
-      "nonOwnedPaths": ["Slice 4.7", "Shared Exchange redesign", "Intelligence layers", "Resources/Referrals domain changes"],
-      "acceptanceRequired": ["full-applicable-ci", "emulator", "configured-browser", "accessibility", "five-locales", "independent-acceptance", "fresh-review"],
+      "requirementIds": [
+        "RFX-FEATURE-RSP-001",
+        "RFX-FEATURE-RSP-002",
+        "RFX-FEATURE-RSP-003",
+        "RFX-FEATURE-RSP-004",
+        "RFX-FEATURE-RSP-006"
+      ],
+      "sources": [
+        "docs/slices/SLICE_4_6_EXECUTION_AUTHORITY.md",
+        "docs/program/WAVE_4_ASSURANCE_LEDGER.md"
+      ],
+      "dependencies": [
+        {
+          "packetId": "WP-CONTROL-AUTHORITY-SETUP",
+          "requiredStatuses": [
+            "completed",
+            "closed"
+          ]
+        }
+      ],
+      "ownedPaths": [
+        "existing PR #171 scope only"
+      ],
+      "nonOwnedPaths": [
+        "Slice 4.7",
+        "Shared Exchange redesign",
+        "Intelligence layers",
+        "Resources/Referrals domain changes"
+      ],
+      "acceptanceRequired": [
+        "full-applicable-ci",
+        "emulator",
+        "configured-browser",
+        "accessibility",
+        "five-locales",
+        "independent-acceptance",
+        "fresh-review"
+      ],
       "expectedOutput": "Reconciled exact candidate with no substantive findings, then Lane 06 audit.",
       "stopBoundary": "Do not merge, promote tracker status or begin Slice 4.7 before exact-head independent acceptance."
     },
@@ -94,15 +372,57 @@
       "lane": "independent-acceptance",
       "owner": "Slice 4.6 Independent Acceptance",
       "branch": "codex/acceptance-wave4-slice-4-6",
+      "candidate": null,
+      "candidateHistory": [],
+      "independentReviewer": null,
       "exactBaseSha": null,
+      "activationEpochId": null,
       "basePolicy": "authority-merge-sha plus the future reconciled Slice 4.6 candidate SHA",
       "status": "frozen-until-authority-merge",
-      "requirementIds": ["RFX-FEATURE-RSP-001", "RFX-FEATURE-RSP-002", "RFX-FEATURE-RSP-003", "RFX-FEATURE-RSP-004", "RFX-FEATURE-RSP-006"],
-      "sources": ["docs/slices/SLICE_4_6_EXECUTION_AUTHORITY.md", "docs/program/WAVE_4_ASSURANCE_LEDGER.md", "docs/program/INDEPENDENT_ACCEPTANCE_PROTOCOL.md"],
-      "dependencies": [{ "packetId": "WP-RFX-46-RECONCILE", "requiredStatuses": ["implemented-not-verified", "acceptance-pending"] }],
-      "ownedPaths": ["docs/program/**", "governance/four-lens-requirements.json", "test/**", "scripts/**", "artifacts/**"],
-      "nonOwnedPaths": ["app/**", "src/**", "functions/**", "docs/tracking/**"],
-      "acceptanceRequired": ["independent-authority-audit", "domain-security", "emulator", "configured-browser", "accessibility", "five-locales", "exact-head-ci", "fresh-review"],
+      "requirementIds": [
+        "RFX-FEATURE-RSP-001",
+        "RFX-FEATURE-RSP-002",
+        "RFX-FEATURE-RSP-003",
+        "RFX-FEATURE-RSP-004",
+        "RFX-FEATURE-RSP-006"
+      ],
+      "sources": [
+        "docs/slices/SLICE_4_6_EXECUTION_AUTHORITY.md",
+        "docs/program/WAVE_4_ASSURANCE_LEDGER.md",
+        "docs/program/INDEPENDENT_ACCEPTANCE_PROTOCOL.md"
+      ],
+      "dependencies": [
+        {
+          "packetId": "WP-RFX-46-RECONCILE",
+          "requiredStatuses": [
+            "implemented-not-verified",
+            "acceptance-pending"
+          ]
+        }
+      ],
+      "ownedPaths": [
+        "docs/program/**",
+        "governance/four-lens-requirements.json",
+        "test/**",
+        "scripts/**",
+        "artifacts/**"
+      ],
+      "nonOwnedPaths": [
+        "app/**",
+        "src/**",
+        "functions/**",
+        "docs/tracking/**"
+      ],
+      "acceptanceRequired": [
+        "independent-authority-audit",
+        "domain-security",
+        "emulator",
+        "configured-browser",
+        "accessibility",
+        "five-locales",
+        "exact-head-ci",
+        "fresh-review"
+      ],
       "expectedOutput": "Exact-SHA dispositions for the reconciled Slice 4.6 candidate, with no production correction in Lane 06.",
       "stopBoundary": "Do not self-correct production code, merge PR #171, promote tracker state or begin Slice 4.7."
     },
@@ -111,15 +431,49 @@
       "lane": "intelligence",
       "owner": "Intelligence Program",
       "branch": "codex/intelligence-provenance-roadmap-01",
+      "candidate": null,
+      "candidateHistory": [],
       "exactBaseSha": null,
+      "activationEpochId": null,
       "basePolicy": "authority-merge-sha",
       "status": "ready-after-authority-merge",
-      "requirementIds": ["INTEL-PROVENANCE-001", "INTEL-LAYER-001", "INTEL-LOCATION-001", "INTEL-CONTROLS-001"],
-      "sources": ["docs/program/INTELLIGENCE_PROGRAM_ROADMAP.md", "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md", "docs/context/MAP_AND_GEOGRAPHY.md"],
-      "dependencies": [{ "packetId": "WP-CONTROL-AUTHORITY-SETUP", "requiredStatuses": ["completed", "closed"] }],
-      "ownedPaths": ["docs/program/**", "proposed Intelligence authority/contract documents"],
-      "nonOwnedPaths": ["production Intelligence runtime", "fabricated datasets", "RFx/Resources/Referrals private records", "docs/tracking/**"],
-      "acceptanceRequired": ["governance", "data-provenance", "privacy", "dependency-review", "independent-review"],
+      "requirementIds": [
+        "INTEL-PROVENANCE-001",
+        "INTEL-LAYER-001",
+        "INTEL-LOCATION-001",
+        "INTEL-CONTROLS-001"
+      ],
+      "sources": [
+        "docs/program/INTELLIGENCE_PROGRAM_ROADMAP.md",
+        "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md",
+        "docs/context/MAP_AND_GEOGRAPHY.md"
+      ],
+      "dependencies": [
+        {
+          "packetId": "WP-CONTROL-AUTHORITY-SETUP",
+          "requiredStatuses": [
+            "completed",
+            "closed"
+          ]
+        }
+      ],
+      "ownedPaths": [
+        "docs/program/**",
+        "proposed Intelligence authority/contract documents"
+      ],
+      "nonOwnedPaths": [
+        "production Intelligence runtime",
+        "fabricated datasets",
+        "RFx/Resources/Referrals private records",
+        "docs/tracking/**"
+      ],
+      "acceptanceRequired": [
+        "governance",
+        "data-provenance",
+        "privacy",
+        "dependency-review",
+        "independent-review"
+      ],
       "expectedOutput": "Source/provenance inventory and one proposed dependency-independent bounded Intelligence authority; no live layer.",
       "stopBoundary": "Do not implement an Intelligence layer under this inventory packet."
     },
@@ -128,15 +482,52 @@
       "lane": "resources",
       "owner": "Resources Completion",
       "branch": "codex/resources-completion-inventory-01",
+      "candidate": null,
+      "candidateHistory": [],
       "exactBaseSha": null,
+      "activationEpochId": null,
       "basePolicy": "authority-merge-sha",
       "status": "ready-after-authority-merge",
-      "requirementIds": ["RES-LENS-001", "RES-LENS-002", "RES-LENS-003", "RES-LENS-004", "RES-LENS-005", "RES-LENS-006", "RES-LENS-007", "RES-LENS-008", "RES-LENS-009", "RES-LENS-010"],
-      "sources": ["docs/program/RESOURCES_REFERRALS_COMPLETION_INVENTORY.md", "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md"],
-      "dependencies": [{ "packetId": "WP-CONTROL-AUTHORITY-SETUP", "requiredStatuses": ["completed", "closed"] }],
-      "ownedPaths": ["docs/program/**", "Resources audit evidence"],
-      "nonOwnedPaths": ["production Resources runtime before gap approval", "Shared Exchange contracts", "docs/tracking/**"],
-      "acceptanceRequired": ["authority-to-runtime-inventory", "domain-security", "browser-inspection", "independent-review"],
+      "requirementIds": [
+        "RES-LENS-001",
+        "RES-LENS-002",
+        "RES-LENS-003",
+        "RES-LENS-004",
+        "RES-LENS-005",
+        "RES-LENS-006",
+        "RES-LENS-007",
+        "RES-LENS-008",
+        "RES-LENS-009",
+        "RES-LENS-010"
+      ],
+      "sources": [
+        "docs/program/RESOURCES_REFERRALS_COMPLETION_INVENTORY.md",
+        "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md"
+      ],
+      "dependencies": [
+        {
+          "packetId": "WP-CONTROL-AUTHORITY-SETUP",
+          "requiredStatuses": [
+            "completed",
+            "closed"
+          ]
+        }
+      ],
+      "ownedPaths": [
+        "docs/program/**",
+        "Resources audit evidence"
+      ],
+      "nonOwnedPaths": [
+        "production Resources runtime before gap approval",
+        "Shared Exchange contracts",
+        "docs/tracking/**"
+      ],
+      "acceptanceRequired": [
+        "authority-to-runtime-inventory",
+        "domain-security",
+        "browser-inspection",
+        "independent-review"
+      ],
       "expectedOutput": "Verified inventory of present/partial/missing/blocked Resources experience and bounded follow-up packets.",
       "stopBoundary": "Do not implement gaps during the inventory packet."
     },
@@ -145,15 +536,52 @@
       "lane": "referrals",
       "owner": "Referrals Completion",
       "branch": "codex/referrals-completion-inventory-01",
+      "candidate": null,
+      "candidateHistory": [],
       "exactBaseSha": null,
+      "activationEpochId": null,
       "basePolicy": "authority-merge-sha",
       "status": "ready-after-authority-merge",
-      "requirementIds": ["REF-LENS-001", "REF-LENS-002", "REF-LENS-003", "REF-LENS-004", "REF-LENS-005", "REF-LENS-006", "REF-LENS-007", "REF-LENS-008", "REF-LENS-009", "REF-LENS-010"],
-      "sources": ["docs/program/RESOURCES_REFERRALS_COMPLETION_INVENTORY.md", "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md"],
-      "dependencies": [{ "packetId": "WP-CONTROL-AUTHORITY-SETUP", "requiredStatuses": ["completed", "closed"] }],
-      "ownedPaths": ["docs/program/**", "Referrals audit evidence"],
-      "nonOwnedPaths": ["production Referrals runtime before gap approval", "Shared Exchange contracts", "docs/tracking/**"],
-      "acceptanceRequired": ["authority-to-runtime-inventory", "domain-security", "browser-inspection", "independent-review"],
+      "requirementIds": [
+        "REF-LENS-001",
+        "REF-LENS-002",
+        "REF-LENS-003",
+        "REF-LENS-004",
+        "REF-LENS-005",
+        "REF-LENS-006",
+        "REF-LENS-007",
+        "REF-LENS-008",
+        "REF-LENS-009",
+        "REF-LENS-010"
+      ],
+      "sources": [
+        "docs/program/RESOURCES_REFERRALS_COMPLETION_INVENTORY.md",
+        "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md"
+      ],
+      "dependencies": [
+        {
+          "packetId": "WP-CONTROL-AUTHORITY-SETUP",
+          "requiredStatuses": [
+            "completed",
+            "closed"
+          ]
+        }
+      ],
+      "ownedPaths": [
+        "docs/program/**",
+        "Referrals audit evidence"
+      ],
+      "nonOwnedPaths": [
+        "production Referrals runtime before gap approval",
+        "Shared Exchange contracts",
+        "docs/tracking/**"
+      ],
+      "acceptanceRequired": [
+        "authority-to-runtime-inventory",
+        "domain-security",
+        "browser-inspection",
+        "independent-review"
+      ],
       "expectedOutput": "Verified inventory of present/partial/missing/blocked Referrals experience and bounded follow-up packets.",
       "stopBoundary": "Do not implement gaps during the inventory packet."
     }
