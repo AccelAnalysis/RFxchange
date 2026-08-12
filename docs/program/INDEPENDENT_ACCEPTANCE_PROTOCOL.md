@@ -75,10 +75,14 @@ No material P1/P2-equivalent product, security, privacy, integrity, accessibilit
 
 Lane 06 records exact-SHA dispositions in `governance/four-lens-requirements.json`. Only `Verified` changes a program requirement numerator. Feature-ID tracker promotion occurs only after the applicable requirements are Verified and follows the tracker update protocol. Retroactive Wave 4 assurance findings are handled under `WAVE_4_ASSURANCE_LEDGER.md`; prior tracker state is not silently rewritten.
 
+Every ledger acceptance object retains the accepting lane and reviewer identity fields even while unset. `Verified` requires the accepting lane to be `independent-acceptance`, a named independent reviewer, and an acceptance SHA identical to the implementation candidate SHA. A builder or blank/generic acceptance record cannot certify its own candidate.
+
 ## Acceptance closeout template
 
 ```text
 Acceptance packet:
+Accepting lane:
+Independent reviewer:
 Candidate SHA:
 Base SHA:
 Requirements:

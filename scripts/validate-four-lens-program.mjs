@@ -100,7 +100,7 @@ for (const requirement of requirements.requirements) {
   for (const type of requirement.acceptanceTypes) assert.ok(allowedTypes.has(type), `${requirement.id} has unknown acceptance type ${type}`);
   assert.ok(allowedStatuses.has(requirement.status), `${requirement.id} has unknown status ${requirement.status}`);
   assert.ok(requirement.implementation && Object.hasOwn(requirement.implementation, "pr") && Object.hasOwn(requirement.implementation, "sha"), `${requirement.id} needs implementation identity fields`);
-  assert.ok(requirement.acceptance && Object.hasOwn(requirement.acceptance, "sha") && Object.hasOwn(requirement.acceptance, "result") && Array.isArray(requirement.acceptance.evidence), `${requirement.id} needs acceptance fields`);
+  assert.ok(requirement.acceptance && Object.hasOwn(requirement.acceptance, "lane") && Object.hasOwn(requirement.acceptance, "reviewer") && Object.hasOwn(requirement.acceptance, "sha") && Object.hasOwn(requirement.acceptance, "result") && Array.isArray(requirement.acceptance.evidence), `${requirement.id} needs acceptance identity and evidence fields`);
   assert.ok(Object.hasOwn(requirement, "deferral"), `${requirement.id} needs an explicit deferral field`);
   if (requirement.implementation.sha !== null) assert.match(requirement.implementation.sha, shaPattern, `${requirement.id} implementation SHA must be exact`);
   if (requirement.acceptance.sha !== null) assert.match(requirement.acceptance.sha, shaPattern, `${requirement.id} acceptance SHA must be exact`);
@@ -108,6 +108,8 @@ for (const requirement of requirements.requirements) {
 
   if (requirement.status === "Verified") {
     assert.equal(requirement.acceptance.result, "Verified", `${requirement.id} is Verified without a Verified disposition`);
+    assert.equal(requirement.acceptance.lane, "independent-acceptance", `${requirement.id} was not accepted by Lane 06`);
+    assert.ok(requirement.acceptance.reviewer?.trim(), `${requirement.id} has no independent reviewer identity`);
     assert.ok(requirement.acceptance.sha, `${requirement.id} is Verified without an exact acceptance SHA`);
     assert.equal(requirement.acceptance.sha, requirement.implementation.sha, `${requirement.id} Verified acceptance does not bind to its exact implementation SHA`);
     assert.ok(requirement.acceptance.evidence.length > 0, `${requirement.id} is Verified without evidence`);

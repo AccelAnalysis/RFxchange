@@ -81,7 +81,7 @@ Each record retains:
 - acceptance types;
 - current status;
 - implementation PR and SHA;
-- independent acceptance disposition, SHA and evidence; and
+- independent acceptance disposition, accepting lane/reviewer identity, SHA and evidence; and
 - exact deferral authority when applicable.
 
 Original requirement text is immutable. Clarification may be appended without replacing the original intent.
@@ -116,6 +116,8 @@ original requirement
 ```
 
 It must not infer the intended requirement from the implementation summary or its tests.
+
+A `Verified` record must name Lane 06 (`independent-acceptance`) and the independent reviewer identity. Builder identity or a blank/generic acceptance record is not an independent disposition.
 
 Allowed acceptance dispositions are:
 
