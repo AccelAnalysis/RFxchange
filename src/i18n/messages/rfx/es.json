@@ -1,0 +1,7 @@
+{
+  "ariaLabel": "Espacio de borradores RFx", "eyebrow": "Oportunidades / RFx", "title": "Crear un borrador RFx gobernado", "intro": "Elija el tipo de solicitud que mejor se adapte a la conversación de mercado. Su organización es propietaria de cada borrador.",
+  "privateDraft": "Borrador privado", "privateDraftDetail": "Los borradores no se publican, no aparecen en el mapa, no se descubren, no se emparejan ni se envían.",
+  "permissionTitle": "Creación no disponible", "permissionBody": "Su función actual no permite crear RFx. No se ha revelado información de borradores.",
+  "draftsLabel": "Borradores RFx de la organización", "draftsTitle": "Borradores", "empty": "Aún no hay borradores.", "version": "Versión {version}", "draftState": "Borrador", "lifecycle": "Ciclo de vida gobernado", "release": "Autoridad del tipo", "versionLabel": "Versión del borrador", "changeType": "Cambiar tipo de solicitud", "nextBoundary": "La necesidad, el alcance, la ubicación, el valor, los requisitos, la preparación y la publicación solo estarán disponibles en pasos posteriores.",
+  "createTitle": "Elija un tipo de solicitud", "createBody": "Esta primera acción crea solo el núcleo privado de RFx y su instantánea gobernada.", "chooseType": "Tipo de solicitud", "createAction": "Crear borrador privado", "creating": "Creando borrador…", "created": "Borrador RFx privado creado.", "changed": "Tipo de solicitud actualizado con una nueva versión.", "recovered": "El cambio completado anteriormente se recuperó sin duplicarlo.", "error": "No se pudo completar la acción RFx."
+}

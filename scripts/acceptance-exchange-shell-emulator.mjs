@@ -1069,14 +1069,13 @@ async function assertPrimaryNavigation(cdp) {
     "intelligence",
     "referrals",
   ]);
-  assert.equal(contract[0].availability, "unavailable");
-  assert.equal(contract[0].href, null);
-  assert.equal(contract[0].disabled, "true");
-  assert.ok(contract[0].describedBy);
+  assert.equal(contract[0].availability, "enabled");
+  assert.equal(contract[0].href, "/opportunities");
+  assert.equal(contract[0].disabled, null);
+  assert.equal(contract[0].describedBy, null);
   assert.match(contract[0].text, /Opportunities\/RFx/);
-  assert.match(contract[0].text, /available/i);
   assert.equal(contract[0].current, null);
-  assert.deepEqual(contract.slice(1).map((item) => item.availability), ["enabled", "enabled", "enabled"]);
+  assert.deepEqual(contract.map((item) => item.availability), ["enabled", "enabled", "enabled", "enabled"]);
 }
 
 async function assertAdministrationVisible(cdp) {
@@ -1104,6 +1103,7 @@ async function runCandidate({ cwd, port, sessionCookie }) {
     assert.equal(initialNavigationEntries, 1);
 
     const observations = [];
+    observations.push(await clickLens(cdp, "opportunities-rfx", "/opportunities", { candidate: true }));
     observations.push(await clickLens(cdp, "resources", "/resources", { candidate: true, latencyMs: 450 }));
     observations.push(await clickLens(cdp, "referrals", "/referrals", { candidate: true }));
     observations.push(await clickLens(cdp, "intelligence", "/geography/canvas", { candidate: true }));
@@ -1444,7 +1444,7 @@ async function runSpatialAcceptance({ baseUrl, sessionCookie }) {
     assert.equal(ownActions["manage-profile"].href, "/organization-profile");
     assert.equal(ownActions["view-resources"].href, "/resources");
     assert.equal(ownActions["start-referral"].href, "/referrals");
-    assert.equal(ownActions["opportunities-rfx"].disabled, true);
+    assert.equal(ownActions["opportunities-rfx"].href, "/opportunities");
 
     const initial = await cameraSnapshotFromDom(cdp);
     assert.equal(initial.viewMode, "3d");
@@ -1623,6 +1623,184 @@ async function runSpatialAcceptance({ baseUrl, sessionCookie }) {
   }
 }
 
+async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
+  let chrome;
+  let evidence = null;
+  const authorizationRef = db.collection("organizationAuthorizations").doc(membershipId);
+  const authorizationSnapshot = await authorizationRef.get();
+  assert.equal(authorizationSnapshot.exists, true, "RFx authorization fixture was missing.");
+  try {
+    chrome = await launchChrome(9307);
+    const { cdp, diagnostics } = await createPage(chrome, baseUrl, sessionCookie);
+    await navigate(cdp, `${baseUrl}/opportunities`);
+    await waitForExpression(cdp, `Boolean(document.querySelector('[data-rfx-workspace="private-drafts"]'))`, "private RFx workspace");
+    const initial = await evaluate(cdp, `(() => {
+      const workspace = document.querySelector('[data-rfx-workspace="private-drafts"]');
+      const radio = workspace?.querySelector('input[type="radio"]');
+      radio?.focus();
+      return {
+        lifecycle: workspace?.querySelector('fieldset')?.textContent || '',
+        keyboardFocus: document.activeElement === radio,
+        noOpportunityObjects: !document.querySelector('[data-opportunity-id], [data-opportunity-beacon]'),
+        createEnabled: !workspace?.querySelector('[data-rfx-create]')?.disabled,
+      };
+    })()`);
+    assert.equal(initial.keyboardFocus, true);
+    assert.equal(initial.noOpportunityObjects, true);
+    assert.equal(initial.createEnabled, true);
+
+    await evaluate(cdp, `document.querySelector('[data-rfx-create]')?.click()`);
+    const createResult = await waitForExpression(cdp, `(() => {
+      const task = document.querySelector('[data-rfx-draft-id]');
+      if (task?.dataset.rfxDraftId && task?.dataset.rfxVersion === '1') {
+        return { kind: 'created', id: task.dataset.rfxDraftId, version: Number(task.dataset.rfxVersion), text: task.textContent || '' };
+      }
+      const alert = document.querySelector('[data-rfx-workspace="private-drafts"] [role="alert"]');
+      return alert ? { kind: 'error', text: alert.textContent || '' } : null;
+    })()`, "created RFx version 1 or explicit error");
+    assert.equal(createResult.kind, "created", `RFx browser creation failed: ${createResult.text}`);
+    const created = createResult;
+    assert.match(created.text, /Draft|Borrador|Brouillon|Bozza|Entwurf/);
+    assert.doesNotMatch(created.text, /Published|Submitted|Awarded/);
+
+    const aggregateSnapshot = await db.collection("rfxAggregates").doc(created.id).get();
+    assert.equal(aggregateSnapshot.exists, true);
+    const aggregate = aggregateSnapshot.data();
+    assert.equal(aggregate.issuerOrganizationId, organizationId);
+    assert.equal(aggregate.lifecycleState, "draft");
+    assert.equal(aggregate.version, 1);
+    assert.equal(aggregate.creationSource.kind, "blank");
+    assert.equal(aggregate.requestFamily.amacsReleaseVersion, "0.5.0");
+    assert.equal(aggregate.requestFamily.amacsSourceCommit, "da7879f2609271b067ae6d02875e9388a02c4fe5");
+
+    const changedFamilyId = await evaluate(cdp, `(() => {
+      const select = document.querySelector('[data-rfx-family-select]');
+      const next = [...select.options].find((option) => option.value !== select.value);
+      if (!next) return null;
+      select.value = next.value;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      return next.value;
+    })()`);
+    assert.ok(changedFamilyId, "Configured AMACS catalog did not expose a second request family.");
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id]')?.dataset.rfxVersion === '2'`, "RFx request-family version 2");
+    const changedSnapshot = await db.collection("rfxAggregates").doc(created.id).get();
+    assert.equal(changedSnapshot.data().version, 2);
+    assert.equal(changedSnapshot.data().requestFamily.requestFamilyId, changedFamilyId);
+
+    const stale = await evaluate(cdp, `(async () => {
+      const response = await fetch('/api/rfx', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ action: 'change-request-family', commandId: 'rfx-browser-stale-${runId}', rfxId: ${JSON.stringify(created.id)}, expectedVersion: 1, requestFamilyId: ${JSON.stringify(aggregate.requestFamily.requestFamilyId)} }),
+      });
+      return { status: response.status, body: await response.json() };
+    })()`);
+    assert.equal(stale.status, 409);
+    assert.equal((await db.collection("rfxAggregates").doc(created.id).get()).data().version, 2);
+
+    await cdp.send("Page.reload", { ignoreCache: true });
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '2'`, "authorized RFx reload re-entry");
+    await waitForExpression(cdp, `document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current') === 'page'`, "current RFx participant lens");
+    const shellAfterReload = await evaluate(cdp, `({
+      current: document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current'),
+      takeover: document.body.innerText.includes('Preparing this page'),
+      errors: window.__rfxAcceptance.errors,
+    })`);
+    assert.equal(shellAfterReload.current, "page");
+    assert.equal(shellAfterReload.takeover, false);
+    assert.equal(shellAfterReload.errors.length, 0);
+
+    await cdp.send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+    await cdp.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+    await cdp.send("Page.reload", { ignoreCache: true });
+    await waitForExpression(cdp, `Boolean(document.querySelector('[data-rfx-draft-id="${created.id}"]'))`, "mobile RFx re-entry");
+    const mobile = await evaluate(cdp, `({
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+      taskVisible: document.querySelector('[data-rfx-draft-id]')?.getBoundingClientRect().width > 0,
+    })`);
+    assert.ok(mobile.overflow <= 0, `RFx mobile overflow: ${mobile.overflow}px.`);
+    assert.equal(mobile.reducedMotion, true);
+    assert.equal(mobile.taskVisible, true);
+
+    const locales = ["en-US", "es", "fr", "it", "de"];
+    for (const locale of locales) {
+      await cdp.send("Network.setCookie", { name: localeCookieName, value: locale, url: baseUrl, path: "/", httpOnly: false, secure: false, sameSite: "Lax" });
+      await cdp.send("Page.reload", { ignoreCache: true });
+      await waitForExpression(cdp, `document.documentElement.lang === "${locale}" && Boolean(document.querySelector('[data-rfx-draft-id="${created.id}"]'))`, `${locale} RFx workspace`);
+      assert.equal(await evaluate(cdp, `document.body.innerText.includes('rfxWorkspace.')`), false, `${locale} RFx copy fell through to a message key.`);
+    }
+
+    const originalAuthorization = authorizationSnapshot.data();
+    await authorizationRef.set({
+      ...originalAuthorization,
+      permissions: originalAuthorization.permissions.filter((permission) => permission !== "rfx.create"),
+    });
+    await cdp.send("Page.reload", { ignoreCache: true });
+    await waitForExpression(cdp, `Boolean(document.querySelector('[data-rfx-workspace="private-drafts"] [role="status"]'))`, "RFx missing-permission state");
+    await waitForExpression(cdp, `document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current') === 'page'`, "current RFx lens in permission state");
+    const missingPermission = await evaluate(cdp, `({
+      draftDisclosed: Boolean(document.querySelector('[data-rfx-draft-id]')),
+      createDisclosed: Boolean(document.querySelector('[data-rfx-create]')),
+      current: document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current'),
+    })`);
+    assert.equal(missingPermission.draftDisclosed, false);
+    assert.equal(missingPermission.createDisclosed, false);
+    assert.equal(missingPermission.current, "page");
+    await authorizationRef.set(originalAuthorization);
+    await cdp.send("Page.reload", { ignoreCache: true });
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '2'`, "RFx permission restoration");
+
+    const [events, commands, audits] = await Promise.all([
+      db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
+      db.collection("rfxCommands").where("issuerOrganizationId", "==", organizationId).get(),
+      db.collection("organizationAuditEvents").where("organizationId", "==", organizationId).get(),
+    ]);
+    const rfxAudits = audits.docs.filter((snapshot) => String(snapshot.data().action).startsWith("rfx."));
+    assert.deepEqual(events.docs.map((snapshot) => snapshot.data().kind).sort(), ["rfx-draft-created", "rfx-request-family-changed"]);
+    assert.equal(commands.size, 2);
+    assert.equal(rfxAudits.length, 2);
+    evidence = Object.freeze({
+      rfxId: created.id,
+      versions: [1, 2],
+      amacsRelease: aggregate.requestFamily.amacsReleaseVersion,
+      lifecycleState: aggregate.lifecycleState,
+      staleStatus: stale.status,
+      eventKinds: events.docs.map((snapshot) => snapshot.data().kind).sort(),
+      commandCount: commands.size,
+      auditCount: rfxAudits.length,
+      mobile,
+      locales,
+      missingPermission,
+      consoleErrors: diagnostics.consoleErrors,
+      exceptions: diagnostics.exceptions,
+    });
+    assert.equal(diagnostics.consoleErrors.length, 0, diagnostics.consoleErrors.join("\n"));
+    assert.equal(diagnostics.exceptions.length, 0, diagnostics.exceptions.join("\n"));
+    cdp.close();
+    return evidence;
+  } finally {
+    await authorizationRef.set(authorizationSnapshot.data());
+    const [aggregates, events, commands, audits] = await Promise.all([
+      db.collection("rfxAggregates").where("issuerOrganizationId", "==", organizationId).get(),
+      db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
+      db.collection("rfxCommands").where("issuerOrganizationId", "==", organizationId).get(),
+      db.collection("organizationAuditEvents").where("organizationId", "==", organizationId).get(),
+    ]);
+    const rfxAudits = audits.docs.filter((snapshot) => String(snapshot.data().action).startsWith("rfx."));
+    await Promise.all([...aggregates.docs, ...events.docs, ...commands.docs, ...rfxAudits].map((snapshot) => snapshot.ref.delete()));
+    const residuals = await Promise.all([
+      db.collection("rfxAggregates").where("issuerOrganizationId", "==", organizationId).get(),
+      db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
+      db.collection("rfxCommands").where("issuerOrganizationId", "==", organizationId).get(),
+    ]);
+    assert.equal(residuals.reduce((total, snapshot) => total + snapshot.size, 0), 0, "RFx configured acceptance left fixture residue.");
+    if (chrome) {
+      await stopProcess(chrome.child);
+      await rm(chrome.profile, { recursive: true, force: true });
+    }
+  }
+}
+
 function controlledLifecycleForUser(userId) {
   const journeyId = `activation-${userId}`;
   let lifecycle = createAccessLifecycle({ id: journeyId, now });
@@ -1758,12 +1936,13 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
     }
 
     await evaluate(cdp, `document.querySelector('[data-participant-navigation] details > summary')?.click()`);
-    const unavailable = await waitForExpression(cdp, `(() => {
+    const opportunity = await waitForExpression(cdp, `(() => {
       const item = document.querySelector('[data-participant-navigation] details [data-participant-lens="opportunities-rfx"]');
-      return item ? { text: item.textContent, disabled: item.getAttribute('aria-disabled') } : null;
-    })()`, "mobile unavailable lens");
-    assert.equal(unavailable.disabled, "true");
-    assert.match(unavailable.text, /available/i);
+      return item ? { text: item.textContent, disabled: item.getAttribute('aria-disabled'), href: item.getAttribute('href') } : null;
+    })()`, "mobile RFx lens");
+    assert.equal(opportunity.disabled, null);
+    assert.equal(opportunity.href, "/opportunities");
+    assert.match(opportunity.text, /Opportunities\/RFx/);
 
     const keyboard = await evaluate(cdp, `(async () => {
       const button = document.querySelector('[data-participant-utility="account"] > button');
@@ -1790,14 +1969,8 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
       "Administration remained visible after server authority was removed.",
     );
 
-    const localeExpectations = {
-      "en-US": "Not yet available",
-      es: "Aún no disponible",
-      fr: "Pas encore disponible",
-      it: "Non ancora disponibile",
-      de: "Noch nicht verfügbar",
-    };
-    for (const [locale, unavailableText] of Object.entries(localeExpectations)) {
+    const localeExpectations = ["en-US", "es", "fr", "it", "de"];
+    for (const locale of localeExpectations) {
       await cdp.send("Network.setCookie", {
         name: localeCookieName,
         value: locale,
@@ -1817,10 +1990,10 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
       );
       const labels = await evaluate(cdp, `(() => {
         const item = document.querySelector('[data-participant-navigation] [data-participant-lens="opportunities-rfx"]');
-        return { label: item?.getAttribute('aria-label'), text: item?.textContent || '' };
+        return { href: item?.getAttribute('href'), text: item?.textContent || '' };
       })()`);
-      assert.equal(labels.label, "Opportunities/RFx");
-      assert.ok(labels.text.includes(unavailableText), `${locale} silently fell back: ${labels.text}`);
+      assert.equal(labels.href, "/opportunities");
+      assert.ok(labels.text.includes("Opportunities/RFx"), `${locale} governed RFx label drifted: ${labels.text}`);
     }
 
     const finalDiagnostics = await evaluate(cdp, `window.__rfxAcceptance.errors`);
@@ -1835,7 +2008,7 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
       accountAvatar: mobile.accountAvatar,
       accountKeyboard: keyboard,
       spatialSheet,
-      locales: Object.keys(localeExpectations),
+      locales: localeExpectations,
       consoleErrors: diagnostics.consoleErrors,
       exceptions: diagnostics.exceptions,
     };
@@ -1869,6 +2042,10 @@ try {
         sessionCookie: seed.sessionCookie,
       })
     : null;
+  const rfxKernel = await runRfxKernelAcceptance({
+    baseUrl: candidateRun.baseUrl,
+    sessionCookie: seed.sessionCookie,
+  });
   const lifecycle = await runLifecycleAcceptance({
     baseUrl: candidateRun.baseUrl,
     sessionCookie: seed.sessionCookie,
@@ -1888,7 +2065,7 @@ try {
   const acceptanceChecklist = Object.freeze({
     candidateSha,
     startingSha: baselineSha,
-    routeChain: ["Intelligence", "Resources", "Referrals", "Intelligence", "Account", "Quick Start"],
+    routeChain: ["Intelligence", "Opportunities/RFx", "Resources", "Referrals", "Intelligence", "Account", "Quick Start"],
     documentNavigationCount: candidateRun.result.fullDocumentNavigationCount,
     shellRemountCount: candidateRun.result.shellRemounts,
     loadingScreenOccurrenceCount: candidateRun.result.rootTakeoverObserved ? 1 : 0,
@@ -1910,6 +2087,7 @@ try {
     standingMarkerState: spatial ? { selectedMarkerId: spatial.selectedPerspective.selectedMarkerId } : null,
     compactMarkerState: spatial ? { externalMarkerCount: spatial.initial.markerCount, selectedStandingCount: spatial.cluster.beforeExpansion.selectedStandingCount } : null,
     clusterState: spatial?.cluster ?? null,
+    rfxKernel,
     organizationIdentityFallback: spatial?.organizationIdentityFallback ?? null,
     markerListSynchronization: spatial?.markerListSynchronization ?? false,
     resultDrawerState: spatial?.resultDrawer ?? null,

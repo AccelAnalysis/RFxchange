@@ -29,9 +29,10 @@ function loadRegistryContract() {
         providerApplication: participantNavigationState("/provider-application"),
         quickStart: participantUtilityForPathname("/quick-start"),
         noLens: participantNavigationState("/orientation"),
-        unavailable: participantLensForPathname("/opportunities"),
+        opportunities: participantLensForPathname("/opportunities"),
       },
       persistent: {
+        opportunities: isPersistentParticipantPath("/opportunities"),
         intelligence: isPersistentParticipantPath("/geography/canvas"),
         resources: isPersistentParticipantPath("/resources"),
         referrals: isPersistentParticipantPath("/referrals"),
@@ -71,10 +72,10 @@ test("the typed registry preserves governed lens order, availability, routing, a
   );
   assert.deepEqual(
     contract.lenses.map(({ availability }) => availability),
-    ["unavailable", "enabled", "enabled", "enabled"],
+    ["enabled", "enabled", "enabled", "enabled"],
   );
-  assert.equal(contract.lenses[0].href, null);
-  assert.deepEqual(contract.lenses[0].activePathPrefixes, []);
+  assert.equal(contract.lenses[0].href, "/opportunities");
+  assert.deepEqual(contract.lenses[0].activePathPrefixes, ["/opportunities"]);
   assert.equal(contract.lenses[1].href, "/resources");
   assert.equal(contract.lenses[2].href, "/geography/canvas");
   assert.equal(contract.lenses[3].href, "/referrals");
@@ -92,9 +93,10 @@ test("the typed registry preserves governed lens order, availability, routing, a
     providerApplication: "account",
     quickStart: "quick-start",
     noLens: null,
-    unavailable: null,
+    opportunities: "opportunities-rfx",
   });
   assert.deepEqual(contract.persistent, {
+    opportunities: true,
     intelligence: true,
     resources: true,
     referrals: true,
@@ -140,23 +142,24 @@ test("the persistent shell owns navigation while page-local shells collapse to c
   );
 });
 
-test("unavailable Opportunities/RFx is perceivable but has no dead or synthetic route", () => {
+test("enabled Opportunities/RFx resolves only to the authorized private draft runtime", () => {
   const contract = loadRegistryContract();
-  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
-  const unavailable = contract.lenses[0];
+  const opportunity = contract.lenses[0];
+  const page = read("app/opportunities/page.tsx");
+  const route = read("app/api/rfx/route.ts");
+  const workspace = read("src/components/rfx/RFxDraftWorkspace.tsx");
 
-  assert.deepEqual(unavailable, {
+  assert.deepEqual(opportunity, {
     id: "opportunities-rfx",
     labelKey: "participantNavigation.opportunitiesRfx",
-    href: null,
-    availability: "unavailable",
-    activePathPrefixes: [],
+    href: "/opportunities",
+    availability: "enabled",
+    activePathPrefixes: ["/opportunities"],
   });
-  assert.match(navigation, /role="link"/);
-  assert.match(navigation, /aria-disabled="true"/);
-  assert.match(navigation, /aria-describedby=\{descriptionId\}/);
-  assert.match(navigation, /participantNavigation\.notYetAvailable/);
-  assert.doesNotMatch(navigation, /href=\{[^}]*opportunit/i);
+  assert.match(page, /resolveParticipantRoute/);
+  assert.match(route, /createServerRfxDraftService/);
+  assert.match(workspace, /privateDraft/);
+  assert.doesNotMatch(workspace, /opportunity beacon|publishAction|match responder/i);
 });
 
 test("Account and Quick Start stay outside primary lenses and Administration remains server-authoritative", () => {

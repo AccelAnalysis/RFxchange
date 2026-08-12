@@ -19,6 +19,7 @@ export interface AmacsCatalogPort {
   getCapability(capabilityId: string): Promise<AmacsCapability | null>;
   hasCanonicalCapability(capabilityId: string): Promise<boolean>;
   listMarketRoles(): Promise<readonly AmacsRegistryRecord[]>;
+  listRequestFamilies(): Promise<readonly AmacsRegistryRecord[]>;
   getRequestFamily(requestFamilyId: string): Promise<AmacsRegistryRecord | null>;
   getRequirementType(requirementTypeId: string): Promise<AmacsRegistryRecord | null>;
   getResponseTemplate(responseTemplateId: string): Promise<AmacsRegistryRecord | null>;

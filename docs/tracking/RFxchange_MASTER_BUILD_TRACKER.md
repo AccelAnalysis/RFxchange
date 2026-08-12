@@ -12,12 +12,12 @@
 
 ## Progress
 
-**438 total · 152 Done · 286 Not Started**
+**438 total · 155 Done · 283 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
 - 3 - Network: **38/38**
-- 4 - RFx Core: **0/41**
+- 4 - RFx Core: **3/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
 - 7 - Institutional & Scale: **1/47**
@@ -46,7 +46,13 @@ Wave 2 remains complete at **43/43 Activation**. The Runtime Convergence Gate, R
 - **AMACS 0.5.0 reconciliation — COMPLETE VIA PR #123; no Feature IDs**: deterministically reconstructed and verified the immutable 0.5.0 release at `da7879f2609271b067ae6d02875e9388a02c4fe5`, preserved the historical 0.1.0 release, generated release-aware catalog/search/registry/runtime projections, proved the 500 historical capabilities remained with 115 additive capabilities and no inferred historical mutation, and isolated all artifacts and infrastructure from participant surfaces. Local `npm run check`, the official upstream validator and 44 upstream tests, seven focused RFxchange tests and production CI run `31284501027` passed on substantive head `c2d6695cdea2f3d3386dab354e37e1bba9440e87`.
 - **AI/AMACS Interpretation Foundation — COMPLETE VIA PR #124; no Feature IDs**: established the authenticated provider-neutral gateway, concrete OpenAI adapter with truthful disabled state, bounded AMACS 0.5.0 retrieval, strict schema/catalog validation, non-authoritative record/candidate and disposition contracts, minimized provenance, metering, transactional quotas, independent manual catalog path and deterministic regression evaluation. Local `npm run check` passed with 400 architecture tests and 19 Functions tests; focused Firestore emulator acceptance proved direct-client denial, atomic persistence, disposition and quota behavior. No live provider smoke was claimed without configured credentials.
 
-Network completion is **38/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, seven Slice 3.5 referral/acquisition features, four Slice 3.6 provider-foundation features, seven Slice 3.7 resource-routing features, and two Slice 3.8 persistent-education features. Slice 3.8 final-head CI run `31303588724` passed, PR #139 merged at `2727b6111d1582225e8ece409d015b8696a8cce7`, and post-merge `main` CI run `31303727886` passed before the separate closeout. The configured-browser exit then exercised the live path from OPEN discovery through profile/location/media/referral/acquisition/provider review/routing/connection/resource and persistent education across the required roles, three viewport classes, keyboard/screen-reader semantics and all five locales. Axe reported zero violations, browser page errors were empty, and exact teardown plus global run-ID sweeps across 27 Firestore collections, Auth and Storage returned zero residuals. See `docs/architecture/WAVE_3_CLOSEOUT.md`. Totals remain **438 total · 152 Done · 286 Not Started**: no AI, AMACS, brand, simulation or adjacent behavior inferred a Feature completion. B6b remains intentionally pending; `RES-006`, `ADM-071`, all 41 RFx Core IDs and every later-wave ID remain Not Started.
+Network completion is **38/38**: four inherited Wave 1 foundations, three Slice 3.1 communications features, four Slice 3.2 discovery features, four Slice 3.3 market-profile features, three Slice 3.4 organization-enrichment features, seven Slice 3.5 referral/acquisition features, four Slice 3.6 provider-foundation features, seven Slice 3.7 resource-routing features, and two Slice 3.8 persistent-education features. Slice 3.8 final-head CI run `31303588724` passed, PR #139 merged at `2727b6111d1582225e8ece409d015b8696a8cce7`, and post-merge `main` CI run `31303727886` passed before the separate closeout. The configured-browser exit then exercised the live path from OPEN discovery through profile/location/media/referral/acquisition/provider review/routing/connection/resource and persistent education across the required roles, three viewport classes, keyboard/screen-reader semantics and all five locales. Axe reported zero violations, browser page errors were empty, and exact teardown plus global run-ID sweeps across 27 Firestore collections, Auth and Storage returned zero residuals. See `docs/architecture/WAVE_3_CLOSEOUT.md`. At that closeout the totals were **438 total · 152 Done · 286 Not Started**: no AI, AMACS, brand, simulation or adjacent behavior inferred a Feature completion. B6b remains intentionally pending, and `RES-006` plus `ADM-071` remain Not Started.
+
+## Wave 4 RFx Core — current
+
+- **Slice 4.1 — `ISS-001` + `ISS-002` + `ISS-003`**: establishes the private organization-owned RFx aggregate, the single bounded `draft` lifecycle, immutable version/event/idempotency/audit seams, a complete governed AMACS 0.5.0 request-family snapshot, and safe blank-source creation/re-entry in the Operational Workspace. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_1.md`.
+
+Wave 4 RFx Core is **3/41**. Slice 4.1 creates no publication, opportunity projection, discovery, matching, response, teaming, submission or later lifecycle runtime. B6c remains ineligible before Slice 4.4 publication authority.
 
 ## Feature-ID checklist
 
@@ -234,9 +240,9 @@ Network completion is **38/38**: four inherited Wave 1 foundations, three Slice 
 - [ ] `DSC-007`
 - [ ] `DSC-008`
 - [ ] `DSC-010`
-- [ ] `ISS-001`
-- [ ] `ISS-002`
-- [ ] `ISS-003`
+- [x] `ISS-001` — Slice 4.1; canonical organization-owned private RFx aggregate with one `draft` lifecycle, version/event/idempotency/audit seams and tenant-safe persistence
+- [x] `ISS-002` — Slice 4.1; governed immutable AMACS 0.5.0 request-family snapshot, deterministic selection/change and historical meaning preservation
+- [x] `ISS-003` — Slice 4.1; authorized blank-source draft creation and private Operational Workspace re-entry without publication or opportunity projection
 - [ ] `ISS-005`
 - [ ] `ISS-006`
 - [ ] `ISS-007`

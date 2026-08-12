@@ -14,21 +14,21 @@ const educationAcceptance = read("scripts/acceptance-network-education-configure
 
 const checked = tracker.match(/^- \[x\] `/gm) ?? [];
 const unchecked = tracker.match(/^- \[ \] `/gm) ?? [];
-assert.equal(checked.length, 152);
-assert.equal(unchecked.length, 286);
-assert.match(tracker, /438 total · 152 Done · 286 Not Started/);
+assert.equal(checked.length, 155);
+assert.equal(unchecked.length, 283);
+assert.match(tracker, /438 total · 155 Done · 283 Not Started/);
 
 const network = tracker.match(/### 3 - Network([\s\S]*?)### 4 - RFx Core/)?.[1] ?? "";
 assert.equal((network.match(/^- \[x\] `/gm) ?? []).length, 38);
 assert.equal((network.match(/^- \[ \] `/gm) ?? []).length, 0);
 const rfxCore = tracker.match(/### 4 - RFx Core([\s\S]*?)### 5 - Trust & Engagement/)?.[1] ?? "";
-assert.equal((rfxCore.match(/^- \[ \] `/gm) ?? []).length, 41);
-assert.equal((rfxCore.match(/^- \[x\] `/gm) ?? []).length, 0);
+assert.equal((rfxCore.match(/^- \[ \] `/gm) ?? []).length, 38);
+assert.equal((rfxCore.match(/^- \[x\] `/gm) ?? []).length, 3);
 
 for (const authority of [tracker, dependencyMap, roadmap, closeout]) {
   assert.match(authority, /Network(?: is|:) \*\*38\/38\*\*|Network \*\*38\/38\*\*|Network at 38\/38/);
 }
-assert.match(dependencyMap, /documentation-only Wave 4 Slice 4\.1 dependency\/authority reconciliation/);
+assert.match(dependencyMap, /Slice 4\.1 implementation result/);
 assert.match(dependencyMap, /`ISS-001`, `ISS-002` and `ISS-003`/);
 assert.match(brandTracker, /B6b — Network Lenses \| Not Started \/ intentionally pending/);
 assert.match(closeout, /all \*\*27\*\* top-level Firestore collections/);
@@ -47,4 +47,4 @@ assert.match(resourceAcceptance, /providerServiceProfileSnapshot\.exists/);
 assert.match(educationAcceptance, /preservedProviderApplication/);
 assert.match(educationAcceptance, /educationCreatedApplications: 0/);
 
-console.log("Wave 3 closeout validation passed: 38/38 Network, exact tracker arithmetic, B6b pending, zero-residual configured acceptance, and documentation-only Slice 4.1 next-authority boundary are reconciled.");
+console.log("Wave 3 closeout validation passed: historical 38/38 Network evidence remains intact while current tracker arithmetic and the post-closeout Slice 4.1 boundary are reconciled.");

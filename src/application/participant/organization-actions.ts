@@ -4,7 +4,7 @@ export interface OrganizationActionProjection {
   readonly id: OrganizationActionId;
   readonly availability: "available" | "unavailable";
   readonly href: string | null;
-  readonly reason: "self-only" | "not-an-official-provider" | "rfx-runtime-unavailable" | null;
+  readonly reason: "self-only" | "not-an-official-provider" | null;
 }
 
 export function projectOrganizationActions(input: Readonly<{
@@ -40,9 +40,9 @@ export function projectOrganizationActions(input: Readonly<{
     }),
     Object.freeze({
       id: "opportunities-rfx" as const,
-      availability: "unavailable" as const,
-      href: null,
-      reason: "rfx-runtime-unavailable" as const,
+      availability: self ? "available" as const : "unavailable" as const,
+      href: self ? "/opportunities" : null,
+      reason: self ? null : "self-only" as const,
     }),
   ]);
 }

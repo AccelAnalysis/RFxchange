@@ -1,8 +1,8 @@
 # Wave 4 — RFx Core roadmap
 
-**Status: CANONICAL PLANNING ROADMAP — SLICE 4.1 AUTHORITY DEFINED; WAVE 4 RUNTIME NOT STARTED.**
+**Status: ACTIVE CANONICAL ROADMAP — SLICE 4.1 IMPLEMENTED; WAVE 4 IS 3/41.**
 
-Wave 4 contains **41 RFx Core Feature IDs**, all currently Not Started. This roadmap preserves the tracker inventory and separates the basic live RFx path through submission from Wave 5 evaluation/selection/award.
+Wave 4 contains **41 RFx Core Feature IDs**. Slice 4.1 implements three; 38 remain Not Started. This roadmap preserves the tracker inventory and separates the basic live RFx path through submission from Wave 5 evaluation/selection/award.
 
 The cross-cutting AI/AMACS Interpretation Foundation is complete and reusable for later guided buyer/issuer need interpretation. Wave 4 does not create a second AI stack. Merged PR #150, **Define the Exchange interaction architecture**, is required participant-experience authority for every Wave 4 slice.
 
@@ -24,7 +24,7 @@ The exact implementation authority for `ISS-001`, `ISS-002` and `ISS-003` is now
 
 `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md`
 
-That document authorizes a future implementation pass only after it merges and a separate explicit instruction starts runtime work. It does not itself implement or complete any Feature ID.
+That document governs the completed Slice 4.1 implementation boundary. Its acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_1.md`.
 
 ## 2. Governing documents
 
@@ -72,7 +72,7 @@ Purpose:
 
 Establish the canonical organization-owned RFx aggregate, one bounded `draft` lifecycle, version/event/idempotency seams, the governed AMACS request-family snapshot and safe draft creation from blank with future extensibility for templates/prior RFxs.
 
-No issuer-builder breadth, publication or opportunity projection beyond the minimum private draft entry. The documentation authority is complete; runtime remains Not Started pending a separate explicit implementation instruction.
+No issuer-builder breadth, publication or opportunity projection exists beyond the minimum private draft entry. Slice 4.1 is implemented; Slice 4.2 remains unavailable until its own specific execution authority is reviewed.
 
 ### Slice 4.2 — Structured need, geography, value, term and requirement foundation
 
@@ -209,10 +209,9 @@ Add bounded first-use issuer/responder/teammate education inside the real workfl
 
 ```text
 Wave 3 approved handoff / dependency recalculation [complete]
-→ Slice 4.1 documentation authority [defined; tracker-neutral]
-→ separate authorization for 4.1 runtime
-→ 4.1 RFx kernel implementation
-→ reconcile main and dependencies
+→ Slice 4.1 documentation authority [complete]
+→ 4.1 RFx kernel implementation [complete]
+→ reconcile main and dependencies [next after merge]
 → 4.2 structured need/requirements foundation + governed AI-assisted interpretation
 → reconcile
 → 4.3 AMACS requirements/response/evaluation definition + confirmed AMACS suggestions
