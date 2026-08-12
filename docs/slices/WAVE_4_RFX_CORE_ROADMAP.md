@@ -89,7 +89,7 @@ This slice is the first Wave 4 consumer of the cross-cutting AI/AMACS Interpreta
 
 Buyer-side interpretation should distinguish at minimum the observed condition/problem, desired outcome, known constraints, solution openness, known timing/location/value/term, unresolved questions and candidate request-family/capability directions without silently asserting procurement or legal requirements.
 
-Slice 4.2 is implemented at this boundary. The bounded documentation-only Slice 4.3 authority is `docs/slices/SLICE_4_3_EXECUTION_AUTHORITY.md`; its merge changes no Feature-ID status, and runtime remains unavailable until that authority is reviewed and merged.
+Slice 4.2 is implemented and preserved at this boundary through PR #163.
 
 ### Slice 4.3 — AMACS requirements, response structure and evaluation definition
 
@@ -104,6 +104,8 @@ Purpose:
 Add the complete AMACS capability picker and structured capability/credential/experience/geography/capacity/evidence requirements; standardized/expandable response structure; standardized/expandable evaluation method linked to requirements and evidence.
 
 AI-assisted capability/requirement suggestions may consume the confirmed/clarified need context from Slice 4.2 through the same interpretation foundation. Returned AMACS identifiers must validate against the pinned/validated AMACS runtime projection and remain non-authoritative until issuer confirmation. Deterministic readiness/matching logic consumes confirmed structured records, not raw model output.
+
+Slice 4.3 is implemented and accepted through PR #165 at `81ec0c7a7fbd28a2a4827d4ba448a5ceb28b6ed7`, completing only `ISS-007`, `ISS-009` and `ISS-011`.
 
 ### Slice 4.4 — Readiness, preview and publication
 
@@ -120,6 +122,8 @@ Purpose:
 Deep-linked publication checks, exact responder/public preview parity, atomic publication/version snapshot, permitted opportunity projection, geography/index/timeline/events, controlled sharing and truthful basic/advanced commercial boundary.
 
 This is the first legitimate source for production opportunity beacons. B6c opportunity expression cannot precede it.
+
+The bounded documentation-only authority is `docs/slices/SLICE_4_4_EXECUTION_AUTHORITY.md`. Its merge changes no Feature-ID status, publishes nothing and does not make B6c eligible; eligibility requires the separately accepted runtime.
 
 ### Slice 4.5 — Opportunity discovery and management
 

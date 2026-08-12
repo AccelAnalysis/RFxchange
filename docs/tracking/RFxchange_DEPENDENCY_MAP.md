@@ -183,6 +183,8 @@ Wave 3 contains **38 Network features**. All 38 have implementation and acceptan
 
 **Slice 4.3 implementation result:** `ISS-007`, `ISS-009` and `ISS-011` now extend the same private aggregate with server-canonical AMACS requirements, an expandable linked response structure and an expandable linked evaluation definition. The manual workflow, atomic version/event/receipt/audit seam and tenant-safe recovery are accepted without publication or an opportunity projection.
 
-**Next-authority result:** after Slice 4.3 merges and post-merge validation is green, the documentation-only Slice 4.4 authority for `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020` and `ACQ-009` is the next eligible action under the standing Wave 4 authorization. Wave 4 is **8/41 Done**, and B6c cannot become eligible before authoritative Slice 4.4 publication.
+**Slice 4.4 authority result:** Slice 4.3 merged through PR #165 at `81ec0c7a7fbd28a2a4827d4ba448a5ceb28b6ed7`; exact-head CI run `31561013074` and post-merge `main` run `31561286020` passed. The documentation-only Slice 4.4 execution authority for `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020` and `ACQ-009` is now defined in `docs/slices/SLICE_4_4_EXECUTION_AUTHORITY.md`. It introduces no runtime or dependency-edge change.
+
+**Next-implementation result:** after this documentation authority merges and post-merge validation is green, the bounded Slice 4.4 runtime is the next eligible action under the standing Wave 4 authorization. Wave 4 remains **8/41 Done**. B6c remains ineligible until that real publication runtime is merged and accepted; it is not automatically complete or next afterward.
 
 See `docs/slices/WAVE_3_ROADMAP.md`, `docs/slices/WAVE_4_RFX_CORE_ROADMAP.md`, `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md`, `docs/brand/BRAND_GATE_B1_SEMANTIC_FOUNDATION.md` and the applicable canonical slice authority for detailed boundaries and acceptance intent.
