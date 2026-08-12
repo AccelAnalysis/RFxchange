@@ -2015,13 +2015,24 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
       db.collection("rfxOpportunityProjections").doc(externalProjectionReference).set({ ...publishedProjection, reference: externalProjectionReference, issuerOrganizationIndexKey: externalOrganizationIds.harbor }),
       db.collection("organizationCapabilityClaims").doc(capabilityClaimId).set(record({ id: capabilityClaimId, organizationId, capabilityId: publishedProjection.requirementIndex[0].capabilityId, amacsReleaseVersion: publishedProjection.requirementIndex[0].amacsReleaseVersion, labelSnapshot: publishedProjection.payload.requirements[0].capabilityLabel, definitionSnapshot: publishedProjection.payload.requirements[0].capabilityDefinition, domainId: "AMACS-DOM-000001", domainLabelSnapshot: "Operations", familyId: "AMACS-FAM-000001", familyLabelSnapshot: "Resilience", entityScope: "reporting_entity", marketRoleIds: [], deliveryRoles: ["prime"], serviceGeographyIds: [String(PORTSMOUTH_CONTROLLED_LOCALITY.id)], specialties: [], capacity: null, evidenceIds: [], assertionStatus: "self_reported", visibility: "network", source: { kind: "manual" }, assertedByUserId: seed.userId, assertedByMembershipId: membershipId, createdAt: now, updatedAt: now })),
     ]);
-    await navigate(cdp, `${baseUrl}/opportunities/${externalProjectionReference}/assess`);
+    await authorizationRef.set({
+      ...originalAuthorization,
+      permissions: originalAuthorization.permissions.filter((permission) => permission !== "response.create"),
+    });
+    const assessmentReturn = `/opportunities?q=continuity&deadline=next-30-days&locality=${encodeURIComponent(String(PORTSMOUTH_CONTROLLED_LOCALITY.id))}&selected=${encodeURIComponent(externalProjectionReference)}`;
+    await navigate(cdp, `${baseUrl}/opportunities/${externalProjectionReference}/assess?returnTo=${encodeURIComponent(assessmentReturn)}`);
     await waitForExpression(cdp, `document.querySelector('[data-opportunity-assessment-reference]')?.dataset.opportunityAssessmentReference === ${JSON.stringify(externalProjectionReference)}`, "opportunity assessment workspace");
-    const assessmentView = await evaluate(cdp, `({ potentialMatch: document.body.innerText.includes('Potential Match'), indexLeak: ['requirementIndex', 'issuerOrganizationIndexKey', 'capabilityIndexKeys'].some((key) => document.documentElement.innerHTML.includes(key)), operational: document.querySelector('[data-participant-workspace="operational"]') !== null, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth })`);
+    const assessmentView = await evaluate(cdp, `({ potentialMatch: document.body.innerText.includes('Potential Match'), indexLeak: ['requirementIndex', 'issuerOrganizationIndexKey', 'capabilityIndexKeys'].some((key) => document.documentElement.innerHTML.includes(key)), operational: document.querySelector('[data-participant-workspace="operational"]') !== null, pursueDisabledWithoutPermission: document.querySelector('[data-opportunity-pursue]')?.disabled, backHref: document.querySelector('[data-opportunity-assessment-reference] header a')?.getAttribute('href'), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth })`);
     assert.equal(assessmentView.potentialMatch, true);
     assert.equal(assessmentView.indexLeak, false);
     assert.equal(assessmentView.operational, true);
+    assert.equal(assessmentView.pursueDisabledWithoutPermission, true);
+    assert.equal(assessmentView.backHref, assessmentReturn);
     assert.ok(assessmentView.overflow <= 0);
+    await authorizationRef.set(originalAuthorization);
+    await cdp.send("Page.reload", { ignoreCache: true });
+    await waitForExpression(cdp, `document.querySelector('[data-opportunity-pursue]')?.disabled === false`, "restored pursuit management permission");
+    await wait(100);
     await evaluate(cdp, `document.querySelector('[data-opportunity-pursue]')?.click()`);
     await waitForExpression(cdp, `document.body.innerText.includes('Pursuit recorded for your organization.')`, "organization pursuit confirmation");
     const pursuitSnapshot = await db.collection("opportunityPursuits").where("organizationId", "==", organizationId).where("opportunityReference", "==", externalProjectionReference).get();

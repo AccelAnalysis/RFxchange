@@ -47,6 +47,7 @@ function queryHref(result: OpportunityDiscoveryResult, selectedReference?: strin
   for (const locality of result.query.localityIds) params.append("locality", locality);
   for (const capability of result.query.capabilityIds) params.append("capability", capability);
   for (const family of result.query.requestFamilyKeys) params.append("requestFamily", family);
+  if (result.query.cursor) params.set("cursor", result.query.cursor);
   if (selectedReference) params.set("selected", selectedReference);
   return params.size ? `/opportunities?${params.toString()}` : "/opportunities";
 }
@@ -253,7 +254,7 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
             <p>{selected.summary}</p>
             <dl><div><dt>{t("rfxWorkspace.discovery.detail.issuer")}</dt><dd>{selected.issuerDisplayName}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.requestType")}</dt><dd>{selected.requestFamilyLabel}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.location")}</dt><dd>{selected.localities.map((locality) => locality.label).join(" · ")}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.deadline")}</dt><dd>{selected.responseDeadline}</dd></div></dl>
             <section><h3>{t("rfxWorkspace.discovery.detail.requirements")}</h3><ul>{selected.projection.payload.requirements.map((requirement, index) => <li key={`${requirement.title}-${index}`}><strong>{requirement.title}</strong><span>{requirement.description}</span></li>)}</ul></section>
-            <div className={styles.detailActions}><button type="button" disabled={busy !== null} onClick={() => setWatch(selected)}>{busy === "watch" ? t("rfxWorkspace.discovery.pending") : selected.watched ? t("rfxWorkspace.discovery.watch.remove") : t("rfxWorkspace.discovery.watch.action")}</button><Link href={`/opportunities/${encodeURIComponent(selected.reference)}/assess`}>{t("rfxWorkspace.discovery.detail.assess")}</Link><Link href={`/opportunities/${encodeURIComponent(selected.reference)}`}>{t("rfxWorkspace.discovery.detail.open")}</Link></div>
+            <div className={styles.detailActions}><button type="button" disabled={busy !== null} onClick={() => setWatch(selected)}>{busy === "watch" ? t("rfxWorkspace.discovery.pending") : selected.watched ? t("rfxWorkspace.discovery.watch.remove") : t("rfxWorkspace.discovery.watch.action")}</button><Link href={`/opportunities/${encodeURIComponent(selected.reference)}/assess?returnTo=${encodeURIComponent(queryHref(result, selected.reference))}`}>{t("rfxWorkspace.discovery.detail.assess")}</Link><Link href={`/opportunities/${encodeURIComponent(selected.reference)}`}>{t("rfxWorkspace.discovery.detail.open")}</Link></div>
             <p className={styles.disclaimer}>{t("rfxWorkspace.discovery.detail.disclaimer")}</p>
           </article>
         </ResponsiveEdgeSheet> : null}

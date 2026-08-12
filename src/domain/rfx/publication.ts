@@ -145,6 +145,28 @@ export interface RfxPublicationSnapshot {
   readonly publishedAt: string;
 }
 
+export function responderOpportunityFitIndex(aggregate: RfxAggregate): Readonly<{
+  issuerOrganizationIndexKey: string;
+  requirementIndex: readonly ResponderRequirementIndexEntry[];
+}> {
+  if (!aggregate.definition) throw new Error("RFx fit index requires a complete definition.");
+  return Object.freeze({
+    issuerOrganizationIndexKey: String(aggregate.issuerOrganizationId),
+    requirementIndex: Object.freeze(
+      aggregate.definition.requirements.map((requirement, ordinal) => Object.freeze({
+        ordinal,
+        requirementId: requirement.id,
+        capabilityId: requirement.capability?.id ?? null,
+        amacsReleaseVersion: requirement.capability?.amacsReleaseVersion ?? null,
+        level: requirement.level,
+        satisfyingParty: requirement.satisfyingParty,
+        teamCoverageAllowed: requirement.teamCoverageAllowed,
+        evidenceRequired: requirement.evidenceRequirementIds.length > 0,
+      })),
+    ),
+  });
+}
+
 function stableDigest(payload: ResponderOpportunityPayload): string {
   return createHash("sha256").update(JSON.stringify(payload)).digest("hex");
 }
@@ -274,6 +296,7 @@ export function projectResponderOpportunity(input: Readonly<{
     }),
   });
   if (!payload.issuerDisplayName) throw new Error("Issuer display identity is unavailable.");
+  const fitIndex = responderOpportunityFitIndex(aggregate);
   return Object.freeze({
     schemaVersion: RFX_PUBLICATION_SCHEMA_VERSION,
     reference: input.reference,
@@ -283,19 +306,7 @@ export function projectResponderOpportunity(input: Readonly<{
     digest: stableDigest(payload),
     payload,
     publishedAt: input.mode === "published" ? (input.publishedAt ?? null) : null,
-    issuerOrganizationIndexKey: String(aggregate.issuerOrganizationId),
-    requirementIndex: Object.freeze(
-      aggregate.definition.requirements.map((requirement, ordinal) => Object.freeze({
-        ordinal,
-        requirementId: requirement.id,
-        capabilityId: requirement.capability?.id ?? null,
-        amacsReleaseVersion: requirement.capability?.amacsReleaseVersion ?? null,
-        level: requirement.level,
-        satisfyingParty: requirement.satisfyingParty,
-        teamCoverageAllowed: requirement.teamCoverageAllowed,
-        evidenceRequired: requirement.evidenceRequirementIds.length > 0,
-      })),
-    ),
+    ...fitIndex,
     requestFamilyIndexKey: aggregate.requestFamily.requestFamilyId,
     localityIndexKeys: Object.freeze(permittedLocalities.map((item) => item.indexKey)),
     capabilityIndexKeys: Object.freeze(

@@ -3,7 +3,7 @@ import { FieldValue, type Firestore } from "firebase-admin/firestore";
 import type { OrganizationCapabilityClaim } from "../../domain/market-profile/model.ts";
 import type { OrganizationId } from "../../domain/organizations/model.ts";
 import type { OpportunityWatch } from "../../domain/rfx/discovery.ts";
-import type { ResponderOpportunityProjection } from "../../domain/rfx/publication.ts";
+import type { ResponderOpportunityProjection, RfxPublicationSnapshot } from "../../domain/rfx/publication.ts";
 import {
   opportunityCapabilityInputDigest,
   type OpportunityFitSnapshot,
@@ -15,6 +15,7 @@ import { FIRESTORE_SCHEMA_VERSION } from "./schema.ts";
 import { getFirestoreRecordById, listFirestoreRecords } from "./support.ts";
 
 const PROJECTIONS = "rfxOpportunityProjections";
+const PUBLICATION_SNAPSHOTS = "rfxPublicationSnapshots";
 const CLAIMS = "organizationCapabilityClaims";
 const SERVICE_GEOGRAPHIES = "organizationServiceGeographies";
 const FITS = "opportunityFitSnapshots";
@@ -45,6 +46,13 @@ export class FirestoreOpportunityPursuitRepository implements OpportunityPursuit
 
   getProjection(reference: string) {
     return getFirestoreRecordById<ResponderOpportunityProjection>(this.db, PROJECTIONS, reference);
+  }
+
+  getPublicationSnapshotByReference(reference: string) {
+    return listFirestoreRecords<RfxPublicationSnapshot>(
+      this.db.collection(PUBLICATION_SNAPSHOTS).where("reference", "==", reference).limit(1),
+      PUBLICATION_SNAPSHOTS,
+    ).then((records) => records[0] ?? null);
   }
 
   listCapabilityClaims(organizationId: OrganizationId) {

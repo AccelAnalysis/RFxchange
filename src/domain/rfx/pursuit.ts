@@ -4,7 +4,7 @@ import type { OrganizationActionAuditEvent } from "../audit/model.ts";
 import type { OrganizationCapabilityClaim } from "../market-profile/model.ts";
 import type { OrganizationId } from "../organizations/model.ts";
 import type { OrganizationMembershipId, UserId } from "../users/model.ts";
-import type { ResponderOpportunityProjection } from "./publication.ts";
+import type { ResponderOpportunityProjection, RfxPublicationSnapshot } from "./publication.ts";
 
 export const OPPORTUNITY_FIT_POLICY_VERSION = 1 as const;
 
@@ -137,6 +137,7 @@ export interface OpportunityPursuitBundle {
 
 export interface OpportunityPursuitRepository {
   getProjection(reference: string): Promise<ResponderOpportunityProjection | null>;
+  getPublicationSnapshotByReference(reference: string): Promise<RfxPublicationSnapshot | null>;
   listCapabilityClaims(organizationId: OrganizationId): Promise<readonly OrganizationCapabilityClaim[]>;
   getServiceGeographyIds(organizationId: OrganizationId): Promise<readonly string[]>;
   getPursuit(id: string): Promise<OpportunityPursuit | null>;

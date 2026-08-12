@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { OpportunityPursuitService } from "../src/application/rfx/opportunity-pursuit-service.ts";
 import { calculateOpportunityFit, normalizePursuitAssessment, opportunityCapabilityInputDigest, opportunityFitSnapshotId, opportunityPursuitId } from "../src/domain/rfx/pursuit.ts";
 
 const NOW = "2026-08-12T12:00:00.000Z";
@@ -54,4 +55,61 @@ test("RSP-003/004/006 identities, review normalization, and organization input d
   const assessment = normalizePursuitAssessment({ fit: { state: "acceptable", note: "  confirmed   by team " }, capacity: { state: "unsupported", note: "x" } });
   assert.deepEqual(assessment.fit, { state: "acceptable", note: "confirmed by team" });
   assert.equal(assessment.capacity.state, "not-reviewed");
+});
+
+test("RSP-001/002 read-only participants can inspect fit and legacy publications use immutable snapshot semantics", async () => {
+  const context = Object.freeze({
+    user: Object.freeze({ id: "user", name: "Reader", primaryEmail: "reader@example.test", login: Object.freeze({ provider: "firebase", subject: "firebase-reader" }), security: Object.freeze({ mfaEnabled: false, credentialVersion: 1 }), createdAt: NOW, updatedAt: NOW }),
+    authentication: Object.freeze({ provider: "firebase", subject: "firebase-reader", authenticatedAt: NOW, issuedAt: NOW, expiresAt: "2026-08-12T13:00:00.000Z", source: "id-token" }),
+  });
+  const organization = Object.freeze({ id: "org-responder", createdAt: NOW, updatedAt: NOW });
+  const membership = Object.freeze({ id: "membership", userId: "user", organizationId: "org-responder", status: "active", createdAt: NOW, updatedAt: NOW });
+  const authorization = Object.freeze({ membershipId: "membership", userId: "user", organizationId: "org-responder", roleKey: "viewer", permissions: Object.freeze([]), createdAt: NOW, updatedAt: NOW });
+  const fitSnapshots = [];
+  const legacyProjection = Object.freeze({ ...projection, issuerOrganizationIndexKey: undefined, requirementIndex: undefined });
+  const service = new OpportunityPursuitService({
+    now: () => NOW,
+    authorization: {
+      accountSecurity: { inspect: async () => Object.freeze({ provider: "firebase", subject: "firebase-reader", email: "reader@example.test", emailVerified: true, disabled: false, mfaEnrolled: false, tokensValidAfter: "2026-08-12T11:00:00.000Z", lastSignInAt: NOW }) },
+      organizations: { getById: async () => organization },
+      memberships: { getById: async () => membership },
+      authorizations: { getByMembershipId: async () => authorization },
+      restrictions: { getForOrganization: async () => null, getForMembership: async () => null },
+    },
+    repository: {
+      getProjection: async () => legacyProjection,
+      getPublicationSnapshotByReference: async () => Object.freeze({
+        reference: projection.reference,
+        aggregateVersion: projection.aggregateVersion,
+        projectionDigest: projection.digest,
+        aggregate: Object.freeze({
+          issuerOrganizationId: "org-issuer",
+          version: projection.aggregateVersion,
+          lifecycleState: "published",
+          definition: Object.freeze({
+            requirements: Object.freeze(projection.requirementIndex.map((item, ordinal) => Object.freeze({
+              id: item.requirementId,
+              capability: Object.freeze({ id: item.capabilityId, amacsReleaseVersion: item.amacsReleaseVersion }),
+              level: item.level,
+              satisfyingParty: item.satisfyingParty,
+              teamCoverageAllowed: item.teamCoverageAllowed,
+              evidenceRequirementIds: ordinal === 0 ? Object.freeze(["evidence-1"]) : Object.freeze([]),
+            }))),
+          }),
+        }),
+      }),
+      listCapabilityClaims: async () => Object.freeze([claim()]),
+      getServiceGeographyIds: async () => Object.freeze(["county-51013"]),
+      getPursuit: async () => null,
+      getFitSnapshot: async () => null,
+      recordFit: async (snapshot) => { fitSnapshots.push(snapshot); return "created"; },
+      getCommand: async () => null,
+      savePursuit: async () => { throw new Error("read-only test must not save pursuit"); },
+    },
+  });
+  const workspace = await service.workspace({ context, organizationId: "org-responder", userId: "user", membershipId: "membership" }, projection.reference);
+  assert.equal(workspace.canManage, false);
+  assert.deepEqual(workspace.explanation.attribution, ["discovered", "potential-match"]);
+  assert.equal(fitSnapshots.length, 1);
+  assert.equal(fitSnapshots[0].explanation.opportunityProjectionDigest, projection.digest);
 });

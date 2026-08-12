@@ -17,13 +17,17 @@ import {
   type PursuitAssessment,
   type PursuitDecision,
 } from "../../domain/rfx/pursuit.ts";
+import { responderOpportunityFitIndex } from "../../domain/rfx/publication.ts";
 import type { OrganizationMembershipId, UserId } from "../../domain/users/model.ts";
-import { authorizeOrganizationOperation, type OrganizationOperationAuthorizationDependencies } from "../auth/authorize-organization-operation.ts";
+import { authorizeOrganizationOperation, authorizeOrganizationParticipation, type OrganizationOperationAuthorizationDependencies } from "../auth/authorize-organization-operation.ts";
 import type { AuthenticatedServerContext } from "../auth/server-session.ts";
 
 export class OpportunityPursuitError extends Error {
-  constructor(readonly code: "invalid" | "forbidden" | "not-found" | "conflict" | "dependency-unavailable", message: string) {
+  readonly code: "invalid" | "forbidden" | "not-found" | "conflict" | "dependency-unavailable";
+
+  constructor(code: OpportunityPursuitError["code"], message: string) {
     super(message);
+    this.code = code;
     this.name = "OpportunityPursuitError";
   }
 }
@@ -64,16 +68,29 @@ function decision(value: string): PursuitDecision {
 
 export class OpportunityPursuitService {
   private readonly now: () => string;
+  private readonly dependencies: Readonly<{
+    authorization: OrganizationOperationAuthorizationDependencies;
+    repository: OpportunityPursuitRepository;
+    now?: () => string;
+  }>;
 
-  constructor(private readonly dependencies: Readonly<{
+  constructor(dependencies: Readonly<{
     authorization: OrganizationOperationAuthorizationDependencies;
     repository: OpportunityPursuitRepository;
     now?: () => string;
   }>) {
+    this.dependencies = dependencies;
     this.now = dependencies.now ?? (() => new Date().toISOString());
   }
 
-  private async authorize(scope: OpportunityPursuitScope) {
+  private async authorizeRead(scope: OpportunityPursuitScope) {
+    if (scope.context.user.id !== scope.userId) throw new OpportunityPursuitError("forbidden", "Pursuit access is unavailable.");
+    const authority = await authorizeOrganizationParticipation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId }, this.dependencies.authorization);
+    if (!authority.allowed) throw new OpportunityPursuitError("forbidden", "Pursuit access is unavailable.");
+    return authority;
+  }
+
+  private async authorizeWrite(scope: OpportunityPursuitScope) {
     if (scope.context.user.id !== scope.userId) throw new OpportunityPursuitError("forbidden", "Pursuit access is unavailable.");
     const authority = await authorizeOrganizationOperation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId, permission: "response.create" }, this.dependencies.authorization);
     if (!authority.allowed) throw new OpportunityPursuitError("forbidden", "Pursuit access is unavailable.");
@@ -82,9 +99,14 @@ export class OpportunityPursuitService {
 
   private async calculate(scope: OpportunityPursuitScope, referenceInput: string): Promise<Readonly<{ explanation: MatchExplanation; snapshot: OpportunityFitSnapshot }>> {
     const reference = stable(referenceInput, "Opportunity reference");
-    const projection = await this.dependencies.repository.getProjection(reference);
-    if (!projection || projection.mode !== "published" || !projection.publishedAt || opportunityDeadlineState(projection, this.now()) === "passed") throw new OpportunityPursuitError("not-found", "Opportunity is unavailable.");
-    if (!projection.requirementIndex || !projection.issuerOrganizationIndexKey) throw new OpportunityPursuitError("dependency-unavailable", "This opportunity predates the governed fit index and cannot yet be assessed.");
+    const persistedProjection = await this.dependencies.repository.getProjection(reference);
+    if (!persistedProjection || persistedProjection.mode !== "published" || !persistedProjection.publishedAt || opportunityDeadlineState(persistedProjection, this.now()) === "passed") throw new OpportunityPursuitError("not-found", "Opportunity is unavailable.");
+    let projection = persistedProjection;
+    if (!projection.requirementIndex || !projection.issuerOrganizationIndexKey) {
+      const snapshot = await this.dependencies.repository.getPublicationSnapshotByReference(reference);
+      if (!snapshot || snapshot.reference !== reference || snapshot.aggregateVersion !== projection.aggregateVersion || snapshot.projectionDigest !== projection.digest || snapshot.aggregate.version !== projection.aggregateVersion || snapshot.aggregate.lifecycleState !== "published") throw new OpportunityPursuitError("dependency-unavailable", "The governed fit source for this opportunity is temporarily unavailable.");
+      projection = Object.freeze({ ...projection, ...responderOpportunityFitIndex(snapshot.aggregate) });
+    }
     if (projection.issuerOrganizationIndexKey === String(scope.organizationId)) throw new OpportunityPursuitError("forbidden", "The issuing organization cannot pursue its own opportunity.");
     const [claims, serviceGeographyIds] = await Promise.all([
       this.dependencies.repository.listCapabilityClaims(scope.organizationId),
@@ -99,17 +121,18 @@ export class OpportunityPursuitService {
   }
 
   async explain(scope: OpportunityPursuitScope, reference: string): Promise<Readonly<{ explanation: MatchExplanation; fitSnapshotId: string }>> {
-    await this.authorize(scope);
+    await this.authorizeRead(scope);
     const result = await this.calculate(scope, reference);
     return Object.freeze({ explanation: result.explanation, fitSnapshotId: result.snapshot.id });
   }
 
   async workspace(scope: OpportunityPursuitScope, reference: string): Promise<OpportunityPursuitWorkspace> {
-    await this.authorize(scope);
+    await this.authorizeRead(scope);
     const result = await this.calculate(scope, reference);
     const pursuit = await this.dependencies.repository.getPursuit(opportunityPursuitId(String(scope.organizationId), result.explanation.opportunityReference));
     const stale = Boolean(pursuit && (pursuit.reviewedFitSnapshotId !== result.snapshot.id || pursuit.reviewedProjectionDigest !== result.explanation.opportunityProjectionDigest || pursuit.reviewedCapabilityInputDigest !== result.explanation.organizationCapabilityInputDigest));
-    return Object.freeze({ explanation: result.explanation, fitSnapshotId: result.snapshot.id, pursuit, stale, canManage: true });
+    const management = await authorizeOrganizationOperation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId, permission: "response.create" }, this.dependencies.authorization);
+    return Object.freeze({ explanation: result.explanation, fitSnapshotId: result.snapshot.id, pursuit, stale, canManage: management.allowed });
   }
 
   async save(scope: OpportunityPursuitScope, input: Readonly<{
@@ -120,7 +143,7 @@ export class OpportunityPursuitService {
     decision: string;
     assessment: Partial<Record<keyof PursuitAssessment, Readonly<{ state?: string; note?: string }>>>;
   }>): Promise<Readonly<{ pursuit: OpportunityPursuit; replayed: boolean }>> {
-    const authority = await this.authorize(scope);
+    const authority = await this.authorizeWrite(scope);
     const commandId = stable(input.commandId, "Command identity");
     const expectedFitSnapshotId = stable(input.expectedFitSnapshotId, "Fit snapshot identity");
     const result = await this.calculate(scope, input.reference);
