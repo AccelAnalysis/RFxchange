@@ -2,9 +2,9 @@
 
 **Status:** **PROPOSED FUTURE EXECUTION AUTHORITY — NOT ACTIVATED BY `WP-INTEL-ROADMAP-01`.** This document is an output of the roadmap/provenance packet. It defines a bounded future implementation contract but does not itself authorize production runtime changes.
 
-**Producing lane:** 03 — Intelligence  
-**Producing packet:** `WP-INTEL-ROADMAP-01`  
-**Activation epoch:** `initial-operational-2026-08-12`  
+**Producing lane:** 03 — Intelligence
+**Producing packet:** `WP-INTEL-ROADMAP-01`
+**Activation epoch:** `initial-operational-2026-08-12`
 **Immutable activation base:** `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`
 
 ## 1. Purpose
