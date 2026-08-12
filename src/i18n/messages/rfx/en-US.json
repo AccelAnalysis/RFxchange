@@ -285,6 +285,7 @@
   },
   "pursuitFormat": { "undecided": "Undecided", "valueNotDisclosed": "Not disclosed", "valueRange": "{minimum}–{maximum}", "termOngoing": "Ongoing", "termMilestoneBased": "Milestone based", "termFixedWithOption": "{base} with {count} option period of {option}", "termFixedWithOptions": "{base} with {count} option periods of {option}" },
   "pursuitUnavailable": { "ariaLabel": "Opportunity assessment unavailable", "title": "This opportunity is no longer available for assessment", "body": "Its publication, deadline, geography, or your current access no longer permits this assessment. Return to discovery for the current governed opportunities.", "dependencyTitle": "Opportunity assessment is temporarily unavailable", "dependencyBody": "The governed publication facts needed for this assessment could not be loaded. Try again, or return to discovery without losing your filters.", "actionsLabel": "Opportunity assessment recovery", "back": "Back to discovery", "retry": "Try again" },
+  "pursuitGeography": { "label": "Organization service-area comparison", "aligned": "Within your organization’s confirmed service area", "outside-confirmed-area": "Outside your organization’s confirmed service area", "needs-confirmation": "Your organization has no confirmed service area for comparison", "not-applicable": "No published performance locality to compare" },
   "treatment": {
     "gate_only": "Required condition",
     "scored_only": "Scored factor",

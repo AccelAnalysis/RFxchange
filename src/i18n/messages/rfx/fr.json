@@ -260,6 +260,7 @@
   },
   "pursuitFormat": { "undecided": "Indécis", "valueNotDisclosed": "Non communiqué", "valueRange": "{minimum}–{maximum}", "termOngoing": "En continu", "termMilestoneBased": "Selon les jalons", "termFixedWithOption": "{base} avec {count} période optionnelle de {option}", "termFixedWithOptions": "{base} avec {count} périodes optionnelles de {option}" },
   "pursuitUnavailable": { "ariaLabel": "Évaluation d’opportunité indisponible", "title": "Cette opportunité n’est plus disponible pour évaluation", "body": "Sa publication, son échéance, sa géographie ou votre accès actuel ne permettent plus cette évaluation. Revenez à la découverte pour consulter les opportunités en vigueur.", "dependencyTitle": "L’évaluation de l’opportunité est temporairement indisponible", "dependencyBody": "Les faits de publication nécessaires n’ont pas pu être chargés. Réessayez ou revenez à la découverte sans perdre vos filtres.", "actionsLabel": "Récupération de l’évaluation", "back": "Retour à la découverte", "retry": "Réessayer" },
+  "pursuitGeography": { "label": "Comparaison avec la zone de service de l’organisation", "aligned": "Dans la zone de service confirmée de votre organisation", "outside-confirmed-area": "Hors de la zone de service confirmée de votre organisation", "needs-confirmation": "Votre organisation n’a pas de zone de service confirmée à comparer", "not-applicable": "Aucun lieu d’exécution publié à comparer" },
   "treatment": {
     "gate_only": "Condition obligatoire",
     "scored_only": "Facteur noté",

@@ -260,6 +260,7 @@
   },
   "pursuitFormat": { "undecided": "Non deciso", "valueNotDisclosed": "Non divulgato", "valueRange": "{minimum}–{maximum}", "termOngoing": "Continuativo", "termMilestoneBased": "Basato su traguardi", "termFixedWithOption": "{base} con {count} periodo opzionale di {option}", "termFixedWithOptions": "{base} con {count} periodi opzionali di {option}" },
   "pursuitUnavailable": { "ariaLabel": "Valutazione dell’opportunità non disponibile", "title": "Questa opportunità non è più disponibile per la valutazione", "body": "La pubblicazione, la scadenza, la geografia o il tuo accesso attuale non consentono più questa valutazione. Torna alla scoperta per le opportunità attuali.", "dependencyTitle": "La valutazione dell’opportunità è temporaneamente non disponibile", "dependencyBody": "Non è stato possibile caricare i dati di pubblicazione necessari. Riprova o torna alla scoperta senza perdere i filtri.", "actionsLabel": "Ripristino della valutazione", "back": "Torna alla scoperta", "retry": "Riprova" },
+  "pursuitGeography": { "label": "Confronto con l’area di servizio dell’organizzazione", "aligned": "All’interno dell’area di servizio confermata della tua organizzazione", "outside-confirmed-area": "Al di fuori dell’area di servizio confermata della tua organizzazione", "needs-confirmation": "La tua organizzazione non ha un’area di servizio confermata da confrontare", "not-applicable": "Nessun luogo di esecuzione pubblicato da confrontare" },
   "treatment": {
     "gate_only": "Condizione obbligatoria",
     "scored_only": "Fattore con punteggio",

@@ -2023,10 +2023,12 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     const assessmentReturn = `/opportunities?q=continuity&deadline=next-30-days&locality=${encodeURIComponent(String(PORTSMOUTH_CONTROLLED_LOCALITY.id))}&selected=${encodeURIComponent(externalProjectionReference)}`;
     await navigate(cdp, `${baseUrl}/opportunities/${externalProjectionReference}/assess?returnTo=${encodeURIComponent(assessmentReturn)}`);
     await waitForExpression(cdp, `document.querySelector('[data-opportunity-assessment-reference]')?.dataset.opportunityAssessmentReference === ${JSON.stringify(externalProjectionReference)}`, "opportunity assessment workspace");
-    const assessmentView = await evaluate(cdp, `({ potentialMatch: document.body.innerText.includes('Potential Match'), indexLeak: ['requirementIndex', 'issuerOrganizationIndexKey', 'capabilityIndexKeys'].some((key) => document.documentElement.innerHTML.includes(key)), operational: document.querySelector('[data-participant-workspace="operational"]') !== null, pursueDisabledWithoutPermission: document.querySelector('[data-opportunity-pursue]')?.disabled, backHref: document.querySelector('[data-opportunity-assessment-reference] header a')?.getAttribute('href'), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth })`);
+    const assessmentView = await evaluate(cdp, `({ potentialMatch: document.body.innerText.includes('Potential Match'), indexLeak: ['requirementIndex', 'issuerOrganizationIndexKey', 'capabilityIndexKeys'].some((key) => document.documentElement.innerHTML.includes(key)), operational: document.querySelector('[data-participant-workspace="operational"]') !== null, geographyObservation: document.querySelector('[data-opportunity-geography-observation]')?.dataset.opportunityGeographyObservation, geographyComparisonVisible: document.body.innerText.includes('Within your organization’s confirmed service area'), pursueDisabledWithoutPermission: document.querySelector('[data-opportunity-pursue]')?.disabled, backHref: document.querySelector('[data-opportunity-assessment-reference] header a')?.getAttribute('href'), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth })`);
     assert.equal(assessmentView.potentialMatch, true);
     assert.equal(assessmentView.indexLeak, false);
     assert.equal(assessmentView.operational, true);
+    assert.equal(assessmentView.geographyObservation, "aligned");
+    assert.equal(assessmentView.geographyComparisonVisible, true);
     assert.equal(assessmentView.pursueDisabledWithoutPermission, true);
     assert.equal(assessmentView.backHref, assessmentReturn);
     assert.ok(assessmentView.overflow <= 0);
@@ -2039,9 +2041,9 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     const pursuitSnapshot = await db.collection("opportunityPursuits").where("organizationId", "==", organizationId).where("opportunityReference", "==", externalProjectionReference).get();
     assert.equal(pursuitSnapshot.size, 1);
     assert.equal(pursuitSnapshot.docs[0].data().decision, "pursue");
-    await db.collection("rfxOpportunityProjections").doc(externalProjectionReference).set({ ...externalProjection, mode: "withdrawn" });
+    await db.collection("rfxOpportunityProjections").doc(externalProjectionReference).set({ ...externalProjection, audience: "unsupported-audience" });
     await navigate(cdp, `${baseUrl}/opportunities/${externalProjectionReference}/assess?returnTo=${encodeURIComponent(assessmentReturn)}`);
-    await waitForExpression(cdp, `document.querySelector('[data-opportunity-assessment-unavailable="not-found"]') !== null`, "withdrawn opportunity bounded recovery");
+    await waitForExpression(cdp, `document.querySelector('[data-opportunity-assessment-unavailable="not-found"]') !== null`, "unsupported opportunity audience bounded recovery");
     const unavailableView = await evaluate(cdp, `({ shell: document.querySelector('[data-participant-shell]') !== null, operational: document.querySelector('[data-participant-workspace="operational"]') !== null, backHref: document.querySelector('[data-opportunity-assessment-unavailable] nav a')?.getAttribute('href'), rootError: document.body.innerText.includes('Something went wrong') })`);
     assert.equal(unavailableView.shell, true);
     assert.equal(unavailableView.operational, true);

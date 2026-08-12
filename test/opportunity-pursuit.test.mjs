@@ -69,6 +69,7 @@ test("RSP-001/002 read-only participants can inspect fit and legacy publications
   const authorization = Object.freeze({ membershipId: "membership", userId: "user", organizationId: "org-responder", roleKey: "viewer", permissions: Object.freeze([]), createdAt: NOW, updatedAt: NOW });
   const fitSnapshots = [];
   const legacyProjection = Object.freeze({ ...projection, issuerOrganizationIndexKey: undefined, requirementIndex: undefined });
+  let currentProjection = legacyProjection;
   const service = new OpportunityPursuitService({
     now: () => NOW,
     authorization: {
@@ -79,7 +80,7 @@ test("RSP-001/002 read-only participants can inspect fit and legacy publications
       restrictions: { getForOrganization: async () => null, getForMembership: async () => null },
     },
     repository: {
-      getProjection: async () => legacyProjection,
+      getProjection: async () => currentProjection,
       getPublicationSnapshotByReference: async () => Object.freeze({
         reference: projection.reference,
         aggregateVersion: projection.aggregateVersion,
@@ -114,6 +115,11 @@ test("RSP-001/002 read-only participants can inspect fit and legacy publications
   assert.deepEqual(workspace.explanation.attribution, ["discovered", "potential-match"]);
   assert.equal(fitSnapshots.length, 1);
   assert.equal(fitSnapshots[0].explanation.opportunityProjectionDigest, projection.digest);
+  currentProjection = Object.freeze({ ...projection, audience: "unsupported-audience" });
+  await assert.rejects(
+    service.explain({ context, organizationId: "org-responder", userId: "user", membershipId: "membership" }, projection.reference),
+    (error) => error?.code === "not-found",
+  );
 });
 
 test("RSP-004 exact command replay returns the originally committed pursuit version", async () => {
@@ -126,6 +132,7 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
   const authorization = Object.freeze({ membershipId: "membership", userId: "user", organizationId: "org-responder", roleKey: "response-manager", permissions: Object.freeze(["response.create"]), createdAt: NOW, updatedAt: NOW });
   let committedCommand = null;
   let currentPursuit = null;
+  let currentClaims = Object.freeze([claim()]);
   const service = new OpportunityPursuitService({
     now: () => NOW,
     authorization: {
@@ -138,7 +145,7 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
     repository: {
       getProjection: async () => projection,
       getPublicationSnapshotByReference: async () => null,
-      listCapabilityClaims: async () => Object.freeze([claim()]),
+      listCapabilityClaims: async () => currentClaims,
       getServiceGeographyIds: async () => Object.freeze(["county-51013"]),
       getPursuit: async () => currentPursuit,
       getFitSnapshot: async () => null,
@@ -158,6 +165,9 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
   assert.equal(first.replayed, false);
   assert.equal(first.pursuit.version, 1);
   currentPursuit = Object.freeze({ ...first.pursuit, decision: "decline", version: 2, updatedAt: "2026-08-12T12:01:00.000Z" });
+  currentClaims = Object.freeze([]);
+  const changed = await service.explain(scope, projection.reference);
+  assert.notEqual(changed.fitSnapshotId, explained.fitSnapshotId);
   const replay = await service.save(scope, input);
   assert.equal(replay.replayed, true);
   assert.equal(replay.pursuit.version, 1);

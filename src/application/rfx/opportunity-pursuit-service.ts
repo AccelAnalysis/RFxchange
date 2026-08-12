@@ -100,7 +100,7 @@ export class OpportunityPursuitService {
   private async calculate(scope: OpportunityPursuitScope, referenceInput: string): Promise<Readonly<{ explanation: MatchExplanation; snapshot: OpportunityFitSnapshot }>> {
     const reference = stable(referenceInput, "Opportunity reference");
     const persistedProjection = await this.dependencies.repository.getProjection(reference);
-    if (!persistedProjection || persistedProjection.mode !== "published" || !persistedProjection.publishedAt || opportunityDeadlineState(persistedProjection, this.now()) === "passed") throw new OpportunityPursuitError("not-found", "Opportunity is unavailable.");
+    if (!persistedProjection || persistedProjection.mode !== "published" || !persistedProjection.publishedAt || (persistedProjection.audience !== "public" && persistedProjection.audience !== "authenticated-participants") || opportunityDeadlineState(persistedProjection, this.now()) === "passed") throw new OpportunityPursuitError("not-found", "Opportunity is unavailable.");
     let projection = persistedProjection;
     if (!projection.requirementIndex || !projection.issuerOrganizationIndexKey) {
       const snapshot = await this.dependencies.repository.getPublicationSnapshotByReference(reference);
@@ -146,18 +146,19 @@ export class OpportunityPursuitService {
     await this.authorizeWrite(scope);
     const commandId = stable(input.commandId, "Command identity");
     const expectedFitSnapshotId = stable(input.expectedFitSnapshotId, "Fit snapshot identity");
-    const result = await this.calculate(scope, input.reference);
-    if (result.snapshot.id !== expectedFitSnapshotId) throw new OpportunityPursuitError("conflict", "Opportunity fit changed; review the current explanation before saving.");
-    const id = opportunityPursuitId(String(scope.organizationId), result.explanation.opportunityReference);
+    const reference = stable(input.reference, "Opportunity reference");
+    const id = opportunityPursuitId(String(scope.organizationId), reference);
     const assessment = normalizePursuitAssessment(input.assessment);
     const nextDecision = decision(input.decision);
-    const requestFingerprint = hash({ action: "pursuit.save", organizationId: scope.organizationId, reference: result.explanation.opportunityReference, expectedVersion: input.expectedVersion, expectedFitSnapshotId, decision: nextDecision, assessment });
+    const requestFingerprint = hash({ action: "pursuit.save", organizationId: scope.organizationId, reference, expectedVersion: input.expectedVersion, expectedFitSnapshotId, decision: nextDecision, assessment });
     const prior = await this.dependencies.repository.getCommand(commandId);
     if (prior) {
       if (prior.requestFingerprint !== requestFingerprint || prior.pursuitId !== id) throw new OpportunityPursuitError("conflict", "Command identity was reused for different intent.");
       if (!prior.resultingPursuit || prior.resultingPursuit.id !== id || prior.resultingPursuit.version !== prior.resultingVersion) throw new OpportunityPursuitError("dependency-unavailable", "Pursuit replay is temporarily unavailable.");
       return Object.freeze({ pursuit: prior.resultingPursuit, replayed: true });
     }
+    const result = await this.calculate(scope, reference);
+    if (result.snapshot.id !== expectedFitSnapshotId) throw new OpportunityPursuitError("conflict", "Opportunity fit changed; review the current explanation before saving.");
     const existing = await this.dependencies.repository.getPursuit(id);
     const expectedVersion = input.expectedVersion === null ? null : Number(input.expectedVersion);
     if ((!existing && expectedVersion !== null) || (existing && expectedVersion !== existing.version)) throw new OpportunityPursuitError("conflict", `Pursuit changed${existing ? `; current version is ${existing.version}` : ""}.`);
