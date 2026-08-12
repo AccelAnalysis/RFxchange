@@ -7,7 +7,7 @@ This repository implements **The RFxchange**, an organization-centered, map-base
 - The **organization** is the primary market entity. Individual users authenticate separately but act through one or more organizations with explicit membership, role and permission state.
 - The RFxchange is RFx-centered and organization-centered. Opportunities/RFx is the primary transaction lens and principal market-action proposition; Resources, Intelligence and Referrals are supporting lenses over the same market.
 - The permanent authenticated participant-lens order is exactly `Opportunities/RFx | Resources | Intelligence | Referrals`. Availability governs action, not whether a governed permanent lens exists in the information architecture.
-- Opportunities/RFx remains visibly first but unavailable, non-routable and never current until a separately authorized and accepted real participant RFx runtime exists. Do not create a placeholder route, draft, opportunity, beacon, match, response or simulated workflow to enable it.
+- Opportunities/RFx remains visibly first. Availability requires a separately authorized and accepted real participant runtime; current merged Slice 4.5 supplies real permitted opportunity discovery at `/opportunities`. Do not create a placeholder route, fabricated opportunity/beacon/match/response or simulated workflow to broaden it.
 - Network remains the current organization-network view/domain concept within Intelligence. It is not a peer lens. Account and Quick Start are utilities, not market lenses.
 - Administrative navigation remains different: it exposes only implemented, server-authorized destinations. Do not generalize participant unavailable-lens visibility to future administrative sections.
 - The RFxchange is not a generic social network, static directory, conventional bid portal, CRM replacement, procurement system of record or commercial-real-estate listing marketplace.
@@ -41,15 +41,16 @@ Participant-facing truthfulness has four required dimensions:
 Use these sources together rather than treating one file as universally authoritative:
 
 1. **Current explicit task instructions** define the work requested in the current task.
-2. `docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md` is the live Feature-ID completion authority. A checked item requires acceptance and implementation evidence.
-3. `docs/tracking/RFxchange_DEPENDENCY_MAP.md` is the live sequencing/dependency authority. Reviewed corrections there supersede seeded spreadsheet dependencies for scheduling.
-4. The applicable `docs/slices/` execution authority defines the approved implementation boundary. A brief cannot mark a feature complete or waive documented acceptance intent.
-5. `docs/context/` contains normalized cross-cutting product rules. `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md`, originally merged through PR #150 and reconciled by the bounded shell gate, governs participant-facing lens hierarchy, structural/capability/state/continuity truthfulness, spatial continuity, workspace boundaries and truthful cross-lens behavior.
-6. `docs/rfx/` contains the converged RFx Core/AMACS/workspace/acceptance package.
-7. `docs/brand/` defines approved target brand architecture, semantic meaning, messaging, map/data grammar, motion, sensory rules, appearance/presentation authority and brand acceptance after Brand Gate B0.
-8. `docs/design/` defines the currently implemented visual/UI/presentation baseline. For user-facing UI read `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`; map/geography work also requires `docs/design/MAP_VISUAL_SYSTEM.md`.
-9. Existing production architecture and merged architecture decisions govern implementation mechanics unless the current task intentionally changes them.
-10. `docs/reference/` contains provenance and visual/prototype references. Reference artifacts demonstrate product intent; they are not automatically production architecture.
+2. `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md` governs parallel delivery and independent acceptance for declared Four-Lens work packets. Its machine ledgers and delivery matrix carry current packet/experience state but never expand product or domain scope.
+3. `docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md` is the live Feature-ID completion authority. A checked item requires implementation and independently accepted evidence under the current program when applicable.
+4. `docs/tracking/RFxchange_DEPENDENCY_MAP.md` is the live sequencing/dependency authority. Reviewed corrections there supersede seeded spreadsheet dependencies for scheduling.
+5. The applicable `docs/slices/` execution authority defines the approved implementation boundary. A brief cannot mark a feature complete or waive documented acceptance intent.
+6. `docs/context/` contains normalized cross-cutting product rules. `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md`, originally merged through PR #150 and reconciled by the bounded shell gate, governs participant-facing lens hierarchy, structural/capability/state/continuity truthfulness, spatial continuity, workspace boundaries and truthful cross-lens behavior.
+7. `docs/rfx/` contains the converged RFx Core/AMACS/workspace/acceptance package.
+8. `docs/brand/` defines approved target brand architecture, semantic meaning, messaging, map/data grammar, motion, sensory rules, appearance/presentation authority and brand acceptance after Brand Gate B0.
+9. `docs/design/` defines the currently implemented visual/UI/presentation baseline. For user-facing UI read `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`; map/geography work also requires `docs/design/MAP_VISUAL_SYSTEM.md`.
+10. Existing production architecture and merged architecture decisions govern implementation mechanics unless the current task intentionally changes them.
+11. `docs/reference/` contains provenance and visual/prototype references. Reference artifacts demonstrate product intent; they are not automatically production architecture.
 
 Authority order for participant-facing work is:
 
@@ -64,62 +65,36 @@ If sources appear to conflict, do not silently choose the easiest interpretation
 
 ## Build sequencing
 
-- Use a **single-active-slice or single-active-gate model** unless the current task explicitly authorizes otherwise.
-- Preparation and code inspection for the next slice may occur while the current slice validates, but do not begin implementation of the next slice before the current slice is merged and dependency eligibility is recalculated.
+- Use the **Four-Lens parallel lane model** only for a declared work packet in `governance/four-lens-workstreams.json`. Work outside that authority retains the single-active-slice or single-active-gate default unless the current task explicitly authorizes otherwise.
+- Parallel work requires explicit lane ownership, exact base SHA, immutable requirement IDs, dependencies, owned/non-owned paths, acceptance obligations and stop boundary. A branch dependent on an unmerged candidate must name its exact SHA.
+- Development may proceed in parallel, but merge order remains dependency-aware. Reconcile every candidate from current merged `main` and obtain fresh exact-head evidence after its dependencies merge.
+- Builders may report `Implemented — Not Verified`; only the Independent Acceptance lane may record `Verified`. No builder certifies its own feature or experience completion.
 - Do not implement future Feature IDs merely because adjacent code makes them convenient.
 - Incidental satisfaction of another Feature ID must be evaluated against that feature's own acceptance check before tracker status changes.
 - Recalculate the next slice from merged `main`, not from assumptions made on an older branch.
 - Documentation-only planning and reconciliation do not authorize production implementation.
 - No deployment/release blocker becomes a product-domain dependency unless a current canonical dependency authority establishes that edge.
-- Participant-facing Slice 4.1 RFx entry cannot be integrated into the shared shell until the no-Feature-ID Exchange-shell truthfulness/performance gate is merged and post-merge green.
+- Shared participant behavior remains Lane 01-owned. Domain lanes submit a Shared Contract Request instead of creating a private divergent implementation.
 
-## Current wave, stabilization and active gate boundary
+## Current wave, stabilization and program boundary
 
 Wave 2 is complete with **43/43 Activation** features.
 
 Wave 3 Slices 3.1 through 3.8 are complete via PRs #107, #120, #126, #128, #130, #132, #137 and #139. Wave 3 Network is **38/38**, with integrated configured-browser and zero-residual evidence in `docs/architecture/WAVE_3_CLOSEOUT.md`.
 
-Brand Gates B0 through B6a are complete. B6b remains **Not Started / intentionally pending** because no bounded convergence gate is currently required. B6c remains ineligible before real RFx publication authority. Later appearance, sensory, presentation, credibility and outcome gates require separate authority.
+Brand Gates B0 through B6a are complete. B6b remains **Not Started / intentionally pending** because no bounded convergence gate is currently required. Real RFx publication now makes B6c eligible, but B6c remains Not Started and requires separate authority. Later appearance, sensory, presentation, credibility and outcome gates require separate authority.
 
 All independently executable work under Post-Wave 3 Stabilizations 1–7 is complete. **Stabilization 2C remains incomplete and isolated to release engineering.** The Firebase App Hosting backend `rfxchange`, project/repository connection, region `us-east4`, live branch `main`, root `/`, retained Web App and reserved App Hosting URL exist. The remaining blocker is trustworthy build-time source-SHA binding and an accepted same-SHA live rollout proving source SHA → `RFXCHANGE_BUILD_SHA`/build identity → rendered SHA. Do not solve 2C under a product slice, weaken `RFXCHANGE_BUILD_SHA`, change rollout architecture or claim 2C complete. It does not block RFx Core product development.
 
-PR #150, **Define the Exchange interaction architecture**, established the cross-cutting documentation authority. PR #158, the documentation-only Slice 4.1 authority, is merged at `87fb29ef3b442410deecf61a470bc94c9c013c60`. It leaves `ISS-001`, `ISS-002` and `ISS-003` Not Started and authorizes no runtime by itself.
+PR #150 established the Exchange interaction architecture. PR #160 merged the post-PR-#159 participant convergence implementation; the Four-Lens Shared Experience backlog preserves its implementation evidence, final-head procedural failure and unresolved requirements without rewriting history. Slices 4.1–4.5 then implemented the first 18 RFx Core Feature IDs.
 
-The current tracker state is:
+Do not copy current tracker totals, active packet SHAs or lane state into this long-lived operating manual. Read `docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md` for Feature-ID arithmetic and `docs/program/PARALLEL_DELIVERY_MATRIX.md` plus `governance/four-lens-workstreams.json` for the current Four-Lens program state.
 
-- **438 total · 152 Done · 286 Not Started**;
-- Activation: **43/43**;
-- Network: **38/38**;
-- Wave 4 RFx Core: **0/41**; and
-- B6b: **Not Started / intentionally pending**.
+The Exchange shell truthfulness/performance gate and post-PR-#159 convergence are historical merged foundations. Current volatile lane, packet, candidate and experience status lives only in `docs/program/PARALLEL_DELIVERY_MATRIX.md` and `governance/four-lens-workstreams.json`.
 
-The single active gate is the no-Feature-ID cross-cutting authority in `docs/slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md`, based on merged `main` at `87fb29ef3b442410deecf61a470bc94c9c013c60` and implemented on `fix/exchange-shell-truthfulness-performance`.
+The permanent participant order is now implemented as `Opportunities/RFx | Resources | Intelligence | Referrals`; all four consume existing server-authorized runtimes, including real Slice 4.5 opportunity discovery. Network remains an Intelligence view/domain concept, Account and Quick Start remain utilities, and navigation context never grants authority.
 
-That gate is limited to:
-
-- one typed participant-lens registry in the exact permanent order;
-- Opportunities/RFx visible but explicitly unavailable, with no href, synthetic route, fabricated data or current-page state;
-- Resources, Intelligence and Referrals routed to their existing authorized runtimes;
-- Network retained as the Intelligence organization-network view/domain concept;
-- Account and Quick Start moved to a separate keyboard-accessible utility control;
-- Administration resolved lazily through existing server authority and failed closed without blocking the shell;
-- one persistent participant shell across ordinary client-side lens changes;
-- route-specific loading scoped below that shell;
-- removal of the page-wide `Preparing this page` takeover during ordinary authenticated navigation;
-- preservation of current safe map/query context through the stable `/geography/canvas` Intelligence seam; and
-- removal of avoidable blocking/duplicate work without weakening authorization.
-
-The gate does not implement Slice 4.1 runtime, Slice 4.2, RFx publication/discovery, Intelligence datasets, Location/Site Intelligence, B6c, commercial enrollment, Dark Appearance, Presentation Mode, sound, haptics, Firebase App Hosting or build-identity changes. Stop after the gate is merged, reconciled and post-merge validated.
-
-The merged Slice 4.1 documentation authority establishes, for a later separately authorized runtime pass:
-
-- one organization-owned RFx aggregate;
-- one bounded `draft` lifecycle state;
-- expected-version, immutable-event, idempotent-command and organization-audit seams;
-- a deterministic governed AMACS 0.5.0 request-family snapshot; and
-- safe blank-source draft creation in a bounded Operational Workspace entry.
-
-Do not begin that runtime while the shell gate is active or immediately after it merges without a new explicit instruction.
+Slices 4.1–4.5 remain subject to the retroactive independent assurance ledger. Slice 4.6 PR #171 is a preserved implementation candidate and must pass Four-Lens reconciliation and independent acceptance before merge. Slice 4.7 remains ineligible until accepted Slice 4.6 is on merged `main` and dependencies are recalculated.
 
 ## AMACS and interpretation boundary
 
@@ -146,15 +121,16 @@ Before implementing any slice or Brand Gate:
 3. Read `docs/context/PRODUCT_PRINCIPLES.md`.
 4. Read `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md` for participant-facing work.
 5. Read the canonical tracker and dependency map.
-6. Read the applicable wave roadmap.
-7. Read the specific slice or Brand Gate authority. For the current shell gate, read `docs/slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md` and the merged `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md` only to preserve its stop boundary.
-8. Read the context/RFx documents listed under the authority's **Must read** or governing section.
-9. Inspect existing production abstractions before designing new ones.
-10. If work creates or materially changes user-facing UI, read `docs/brand/README.md`, applicable brand guides, `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`.
-11. If work changes map/geography UI, also read `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md` and `docs/design/MAP_VISUAL_SYSTEM.md`.
-12. If work creates customer-facing copy or communications, read `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md`.
-13. If work introduces motion, sound, haptics, appearance or Presentation Mode, read the corresponding authority and confirm the capability is explicitly authorized.
-14. If work consumes AMACS or AI interpretation, read the current AMACS integration/reconciliation contracts and keep AMACS semantics separate from provider/model implementation provenance.
+6. For Four-Lens work, read `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md`, `docs/program/PARALLEL_DELIVERY_MATRIX.md`, `docs/program/CHAT_LANE_CHARTERS.md`, `governance/four-lens-requirements.json` and the exact current work packet.
+7. Read the applicable wave/lens roadmap.
+8. Read the specific slice, lens or Brand Gate authority.
+9. Read the context/RFx documents listed under the authority's **Must read** or governing section.
+10. Inspect existing production abstractions before designing new ones.
+11. If work creates or materially changes user-facing UI, read `docs/brand/README.md`, applicable brand guides, `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`.
+12. If work changes map/geography UI, also read `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md` and `docs/design/MAP_VISUAL_SYSTEM.md`.
+13. If work creates customer-facing copy or communications, read `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md`.
+14. If work introduces motion, sound, haptics, appearance or Presentation Mode, read the corresponding authority and confirm the capability is explicitly authorized.
+15. If work consumes AMACS or AI interpretation, read the current AMACS integration/reconciliation contracts and keep AMACS semantics separate from provider/model implementation provenance.
 
 ## Brand requirement classes
 
@@ -193,7 +169,7 @@ Before claiming a slice or gate complete, run slice/gate-specific checks plus re
 npm run check
 ```
 
-For the active shell gate, configured-browser acceptance must also prove one mounted shell across `Intelligence → Resources → Referrals → Intelligence → Account → Quick Start`, no page-wide `Preparing this page` takeover, immediate pending feedback, no second document-navigation entry, no activation/geography replay, route-scoped loading, optional-delay resilience, no artificial hold, safe map/query restoration, keyboard/mobile/five-locale accessibility and clean console/unhandled-rejection behavior. Record representative before/after timings and relevant `Server-Timing` spans without turning one local run into a brittle production-network promise.
+For Four-Lens packets, use the acceptance types declared by each immutable requirement and exact work packet. Cross-lens Shared or Integration candidates must exercise supported multi-lens journeys, exact server revalidation, desktop/mobile, keyboard/accessibility, five locales, clean console/unhandled-rejection behavior and applicable timing evidence without turning a controlled run into a production-network promise.
 
 Run focused product/architecture/dependency/internationalization/emulator checks first where applicable. Production CI must pass on the exact reviewed PR head and again on merged `main`. Brand acceptance supplements and never replaces domain, security, lifecycle, geography, emulator or configured-browser acceptance.
 
@@ -201,11 +177,12 @@ Run focused product/architecture/dependency/internationalization/emulator checks
 
 - Do not delete, rename or reorder approved Feature IDs casually.
 - Mark `[x]` only after the feature's documented acceptance check passes and implementation/validation evidence exists.
+- Under Four-Lens governance, an implementation candidate remains `Implemented — Not Verified` until Lane 06 records independent acceptance on the exact candidate.
 - Update evidence in the same PR as implementation whenever practical.
 - Documentation-only planning/reconciliation must not change progress totals or completion statuses.
 - A visual simulation, architecture document or tutorial never completes the corresponding live domain Feature ID.
-- `ISS-001`, `ISS-002` and `ISS-003` remain Not Started until their runtime acceptance evidence is merged.
-- Showing an unavailable Opportunities/RFx lens does not make it available and does not complete an RFx Feature ID.
+- Existing tracker completion for Slices 4.1–4.5 is preserved while retroactive independent assurance is pending; material assurance findings require explicit tracker-correction analysis.
+- Showing a lens or route does not itself complete an RFx or lens-experience requirement.
 - The shell truthfulness/performance gate changes no Feature ID, tracker total, Wave completion count, Brand Gate status or B6b status.
 
 ## Design, brand and visual references
@@ -224,8 +201,8 @@ Run focused product/architecture/dependency/internationalization/emulator checks
 At the end of implementation or reconciliation work, report:
 
 - starting merged `main` SHA;
-- PR #158 final disposition and merge SHA when relevant;
-- active gate branch, PR number, reviewed final head, merge SHA, exact-head CI and post-merge CI;
+- relevant authority PR disposition and merge SHA;
+- packet branch, PR number, reviewed final head, merge SHA, exact-head CI and post-merge CI;
 - final primary-lens order/availability and Account utility contents;
 - persistent-shell architecture, loading-boundary result and actual latency causes/corrections;
 - before/after transition and `Server-Timing` evidence;
@@ -235,4 +212,6 @@ At the end of implementation or reconciliation work, report:
 - automated, emulator, localization, accessibility and configured-browser evidence;
 - tracker changes made or intentionally not made;
 - Stabilization 2C and B6b status; and
-- explicit confirmation that Slice 4.1 runtime, later slices/gates and unauthorized runtime work were not begun.
+- explicit confirmation that dependency-ineligible or otherwise unauthorized runtime work was not begun.
+
+For Four-Lens program packets, also report the work-packet ID, lane, exact base/candidate SHA, requirement dispositions, independent-acceptance state, Shared Contract Requests, denominator effect, and whether the builder/acceptance separation was preserved.
