@@ -102,6 +102,8 @@ assert.match(builder, /buyer_need_definition/);
 assert.match(builder, /\/api\/ai\/amacs\/disposition/);
 assert.match(builder, /interpretUnavailable/);
 assert.match(styles, /content-visibility: auto/);
+assert.match(styles, /contain-intrinsic-block-size: auto 620px/);
+assert.doesNotMatch(styles, /contain-intrinsic-size: auto 620px/);
 assert.match(styles, /max-width: 620px/);
 for (const collection of [
   "rfxAggregates",

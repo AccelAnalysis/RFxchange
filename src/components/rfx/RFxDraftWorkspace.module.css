@@ -347,7 +347,7 @@
 .moduleSection {
   position: relative;
   content-visibility: auto;
-  contain-intrinsic-size: auto 620px;
+  contain-intrinsic-block-size: auto 620px;
   scroll-margin-top: 170px;
   padding: clamp(24px, 4vw, 42px) 0;
   border-top: 1px solid var(--line);
