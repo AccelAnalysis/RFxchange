@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import type { OpportunityPursuitWorkspace } from "../../application/rfx/opportunity-pursuit-service";
+import type { OpportunityPursuitWorkspace, ParticipantOpportunityPursuit } from "../../application/rfx/opportunity-pursuit-service";
 import type { EngagementTerm, EstimatedValue, StructuredDuration } from "../../domain/rfx/model";
-import type { OpportunityPursuit, PursuitAssessment, PursuitAssessmentState, PursuitDecision } from "../../domain/rfx/pursuit";
+import type { PursuitAssessment, PursuitAssessmentState, PursuitDecision } from "../../domain/rfx/pursuit";
 import type { Locale } from "../../i18n/config";
 import { currencyValueFromMinorUnits, formatCurrency, formatDate, formatNumber } from "../../i18n/format";
 import { OperationalWorkspace, ParticipantShell } from "../participant/ParticipantWorkspace";
@@ -52,7 +52,7 @@ export function OpportunityAssessmentWorkspace({ workspace, returnHref }: Readon
   const { locale, t } = useI18n();
   const router = useRouter();
   const [assessment, setAssessment] = useState<PursuitAssessment>(workspace.pursuit?.assessment ?? emptyAssessment());
-  const [currentPursuit, setCurrentPursuit] = useState<OpportunityPursuit | null>(workspace.pursuit);
+  const [currentPursuit, setCurrentPursuit] = useState<ParticipantOpportunityPursuit | null>(workspace.pursuit);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(workspace.stale ? t("rfxWorkspace.discovery.pursuit.stale") : null);
   const explanation = workspace.explanation;
@@ -66,7 +66,7 @@ export function OpportunityAssessmentWorkspace({ workspace, returnHref }: Readon
     try {
       const response = await fetch("/api/opportunities/pursuit", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ commandId: crypto.randomUUID(), reference: explanation.opportunityReference, expectedVersion: currentPursuit?.version ?? null, expectedFitSnapshotId: workspace.fitSnapshotId, decision: nextDecision, assessment }) });
       if (!response.ok) throw new Error("save-failed");
-      const result = await response.json() as Readonly<{ pursuit?: OpportunityPursuit }>;
+      const result = await response.json() as Readonly<{ pursuit?: ParticipantOpportunityPursuit }>;
       if (!result.pursuit || result.pursuit.decision !== nextDecision) throw new Error("save-result-invalid");
       setCurrentPursuit(result.pursuit);
       setAssessment(result.pursuit.assessment);

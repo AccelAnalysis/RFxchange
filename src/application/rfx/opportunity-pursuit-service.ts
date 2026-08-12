@@ -43,9 +43,15 @@ export interface OpportunityPursuitScope {
 export interface OpportunityPursuitWorkspace {
   readonly explanation: MatchExplanation;
   readonly fitSnapshotId: string;
-  readonly pursuit: OpportunityPursuit | null;
+  readonly pursuit: ParticipantOpportunityPursuit | null;
   readonly stale: boolean;
   readonly canManage: boolean;
+}
+
+export interface ParticipantOpportunityPursuit {
+  readonly decision: PursuitDecision;
+  readonly assessment: PursuitAssessment;
+  readonly version: number;
 }
 
 function stable(value: string, label: string): string {
@@ -65,6 +71,15 @@ function opaque(prefix: string, ...values: readonly string[]): string {
 function decision(value: string): PursuitDecision {
   if (value === "watch" || value === "pursue" || value === "decline") return value;
   throw new OpportunityPursuitError("invalid", "Pursuit decision is unsupported.");
+}
+
+function participantPursuitView(record: OpportunityPursuit): ParticipantOpportunityPursuit {
+  if (!Number.isInteger(record.version) || record.version < 1) throw new OpportunityPursuitError("dependency-unavailable", "Pursuit state is temporarily unavailable.");
+  return Object.freeze({
+    decision: decision(record.decision),
+    assessment: normalizePursuitAssessment(record.assessment),
+    version: record.version,
+  });
 }
 
 export class OpportunityPursuitService {
@@ -138,7 +153,7 @@ export class OpportunityPursuitService {
     const pursuit = await this.dependencies.repository.getPursuit(opportunityPursuitId(String(scope.organizationId), result.explanation.opportunityReference));
     const stale = Boolean(pursuit && (pursuit.reviewedFitSnapshotId !== result.snapshot.id || pursuit.reviewedProjectionDigest !== result.explanation.opportunityProjectionDigest || pursuit.reviewedCapabilityInputDigest !== result.explanation.organizationCapabilityInputDigest));
     const management = await authorizeOrganizationOperation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId, permission: "response.create" }, this.dependencies.authorization);
-    return Object.freeze({ explanation: result.explanation, fitSnapshotId: result.snapshot.id, pursuit, stale, canManage: management.allowed });
+    return Object.freeze({ explanation: result.explanation, fitSnapshotId: result.snapshot.id, pursuit: pursuit ? participantPursuitView(pursuit) : null, stale, canManage: management.allowed });
   }
 
   async save(scope: OpportunityPursuitScope, input: Readonly<{
@@ -148,7 +163,7 @@ export class OpportunityPursuitService {
     expectedFitSnapshotId: string;
     decision: string;
     assessment: Partial<Record<keyof PursuitAssessment, Readonly<{ state?: string; note?: string }>>>;
-  }>): Promise<Readonly<{ pursuit: OpportunityPursuit; replayed: boolean }>> {
+  }>): Promise<Readonly<{ pursuit: ParticipantOpportunityPursuit; replayed: boolean }>> {
     await this.authorizeWrite(scope);
     const commandId = stable(input.commandId, "Command identity");
     const expectedFitSnapshotId = stable(input.expectedFitSnapshotId, "Fit snapshot identity");
@@ -161,7 +176,7 @@ export class OpportunityPursuitService {
     if (prior) {
       if (prior.requestFingerprint !== requestFingerprint || prior.pursuitId !== id) throw new OpportunityPursuitError("conflict", "Command identity was reused for different intent.");
       if (!prior.resultingPursuit || prior.resultingPursuit.id !== id || prior.resultingPursuit.version !== prior.resultingVersion) throw new OpportunityPursuitError("dependency-unavailable", "Pursuit replay is temporarily unavailable.");
-      return Object.freeze({ pursuit: prior.resultingPursuit, replayed: true });
+      return Object.freeze({ pursuit: participantPursuitView(prior.resultingPursuit), replayed: true });
     }
     const result = await this.calculate(scope, reference);
     if (result.snapshot.id !== expectedFitSnapshotId) throw new OpportunityPursuitError("conflict", "Opportunity fit changed; review the current explanation before saving.");
@@ -190,9 +205,9 @@ export class OpportunityPursuitService {
       if (saved === "replayed") {
         const committed = await this.dependencies.repository.getCommand(commandId);
         if (!committed?.resultingPursuit || committed.resultingPursuit.id !== id || committed.resultingPursuit.version !== committed.resultingVersion) throw new OpportunityPursuitError("dependency-unavailable", "Pursuit replay is temporarily unavailable.");
-        return Object.freeze({ pursuit: committed.resultingPursuit, replayed: true });
+        return Object.freeze({ pursuit: participantPursuitView(committed.resultingPursuit), replayed: true });
       }
-      return Object.freeze({ pursuit, replayed: false });
+      return Object.freeze({ pursuit: participantPursuitView(pursuit), replayed: false });
     } catch (error) {
       if (error instanceof OpportunityPursuitError) throw error;
       if (error instanceof OpportunityPursuitRepositoryError) throw new OpportunityPursuitError(error.code, error.message);

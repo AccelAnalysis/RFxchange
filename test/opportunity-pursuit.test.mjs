@@ -184,7 +184,10 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
   const first = await service.save(scope, input);
   assert.equal(first.replayed, false);
   assert.equal(first.pursuit.version, 1);
-  currentPursuit = Object.freeze({ ...first.pursuit, decision: "decline", version: 2, updatedAt: "2026-08-12T12:01:00.000Z" });
+  assert.deepEqual(Object.keys(first.pursuit).sort(), ["assessment", "decision", "version"]);
+  assert.equal("createdByUserId" in first.pursuit, false);
+  assert.equal("updatedByMembershipId" in first.pursuit, false);
+  currentPursuit = Object.freeze({ ...committedCommand.resultingPursuit, decision: "decline", version: 2, updatedAt: "2026-08-12T12:01:00.000Z" });
   currentClaims = Object.freeze([]);
   const changed = await service.explain(scope, projection.reference);
   assert.notEqual(changed.fitSnapshotId, explained.fitSnapshotId);
@@ -193,6 +196,9 @@ test("RSP-004 exact command replay returns the originally committed pursuit vers
   assert.equal(replay.pursuit.version, 1);
   assert.equal(replay.pursuit.decision, "pursue");
   assert.equal(replay.pursuit.assessment.fit.note, "Reviewed\nverbatim");
+  assert.deepEqual(Object.keys(replay.pursuit).sort(), ["assessment", "decision", "version"]);
+  const workspace = await service.workspace(scope, projection.reference);
+  assert.deepEqual(Object.keys(workspace.pursuit).sort(), ["assessment", "decision", "version"]);
   committedCommand = null;
   currentPursuit = null;
   currentClaims = Object.freeze([claim()]);
