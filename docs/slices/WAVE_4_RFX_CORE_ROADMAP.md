@@ -139,6 +139,8 @@ Purpose:
 
 Extend the real Spatial Workspace with permitted RFx search/list/detail, saved searches, reliable alerts/digests, watch relationships and canonical deadline views. No fake opportunities or private location reconstruction.
 
+The bounded authority is `docs/slices/SLICE_4_5_EXECUTION_AUTHORITY.md`. It consumes only real Slice 4.4 projections, preserves one synchronized Spatial Workspace and routes minimized idempotent alerts through the existing transactional-communications substrate. The documentation authority changes no Feature-ID state and does not complete B6c.
+
 ### Slice 4.6 — Fit, Go/No-Go and pursuit
 
 Feature IDs:
