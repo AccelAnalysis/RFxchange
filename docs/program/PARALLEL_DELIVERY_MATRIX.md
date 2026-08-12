@@ -43,7 +43,7 @@ The permanent order is exactly `Opportunities/RFx | Resources | Intelligence | R
 | Intelligence Program | 03 | Active | activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed` | dependency-independent inventory/authority work first |
 | Resources Completion | 04 | Active | activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed` | inventory/audit first |
 | Referrals Completion | 05 | Active | activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed` | inventory/audit first |
-| Slice 4.6 candidate | 02 | Frozen; not activated by initial operational transition | preserved PR #171 head `e70413e2e45db4b75517376acdc0700f9838a963` | no; separate reconciliation and independent acceptance required |
+| Slice 4.6 candidate | 02 | Frozen while separate Control Room activation is staged | preserved PR #171 head `e70413e2e45db4b75517376acdc0700f9838a963` | reconciliation only after this Control Room activation merges; no candidate acceptance or merge yet |
 | Slice 4.6 Independent Acceptance | 06 | Frozen | future reconciled Slice 4.6 candidate | no; depends on reconciliation packet reaching acceptance-pending/implemented-not-verified |
 | Integration | 07 | Standby/continuous after accepted lane merges | current merged `main` | evidence/closeout only |
 
@@ -54,9 +54,10 @@ The five active packets share activation epoch `initial-operational-2026-08-12`.
 1. Four-Lens authority is installed on merged `main`; post-merge production-ci #911 passed on `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`.
 2. Control Room closed authority setup, switched the program operational and activated Shared, Wave 4 Assurance, Intelligence, Resources and Referrals from exact activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`.
 3. Those active packets may execute concurrently within their declared ownership, dependency and stop boundaries.
-4. PR #171 remains a preserved governed candidate and may not be silently merged, modified, accepted or discarded; its reconciliation packet requires a separate Control Room activation.
-5. Slice 4.7 remains ineligible until accepted Slice 4.6 is on merged `main` and dependencies are recalculated.
-6. Lane 07 integration remains downstream of independently accepted component work and does not replace Lane 06.
+4. PR #171 remains a preserved governed candidate; this separate Control Room change may authorize only its reconciliation packet from the exact current-main base observed for that activation. It does not merge, modify, accept or discard the candidate.
+5. Slice 4.6 Independent Acceptance remains frozen until the reconciliation packet produces an eligible exact candidate state.
+6. Slice 4.7 remains ineligible until accepted Slice 4.6 is on merged `main` and dependencies are recalculated.
+7. Lane 07 integration remains downstream of independently accepted component work and does not replace Lane 06.
 
 ## Preserved external statuses
 
