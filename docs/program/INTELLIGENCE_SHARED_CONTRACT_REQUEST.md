@@ -1,10 +1,10 @@
 # Shared Contract Request — Intelligence Layer State and Generic Selection
 
-**Request ID:** `SCR-INTEL-001`  
-**Status:** **PROPOSED — REQUIRES CONTROL ROOM / LANE 01 ACTIVATION AND ACCEPTANCE**  
-**Requesting lane:** 03 — Intelligence  
-**Originating packet:** `WP-INTEL-ROADMAP-01`  
-**Activation epoch:** `initial-operational-2026-08-12`  
+**Request ID:** `SCR-INTEL-001`
+**Status:** **PROPOSED — REQUIRES CONTROL ROOM / LANE 01 ACTIVATION AND ACCEPTANCE**
+**Requesting lane:** 03 — Intelligence
+**Originating packet:** `WP-INTEL-ROADMAP-01`
+**Activation epoch:** `initial-operational-2026-08-12`
 **Immutable activation base:** `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`
 
 ## 1. Request
