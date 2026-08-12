@@ -108,8 +108,8 @@ assert.equal(workstreams.adoptionPacketBaseline?.algorithm, adoptionPacketBaseli
 assert.equal(workstreams.adoptionPacketBaseline?.recordCount, adoptionPacketBaseline.recordCount);
 assert.equal(workstreams.adoptionPacketBaseline?.idDigest, adoptionPacketBaseline.idDigest);
 assert.equal(workstreams.adoptionPacketBaseline?.governanceDigest, adoptionPacketBaseline.governanceDigest);
-assert.equal(workstreams.workPackets.length, adoptionPacketBaseline.recordCount, "PR #172 installs exactly the eight approved initial packets");
-const baselinePackets = workstreams.workPackets;
+assert.ok(workstreams.workPackets.length >= adoptionPacketBaseline.recordCount, "Operational Four-Lens state must retain the eight immutable initial packets");
+const baselinePackets = workstreams.workPackets.slice(0, adoptionPacketBaseline.recordCount);
 const packetGovernance = baselinePackets.map(({ id, lane, owner, branch, basePolicy = null, requirementIds, sources, dependencies, ownedPaths, nonOwnedPaths, acceptanceRequired, expectedOutput, stopBoundary }) => ({
   id, lane, owner, branch, basePolicy, requirementIds, sources, dependencies, ownedPaths, nonOwnedPaths, acceptanceRequired, expectedOutput, stopBoundary,
 }));
@@ -187,7 +187,12 @@ const requiredPacketIds = [
   "WP-RES-INVENTORY-01",
   "WP-REF-INVENTORY-01",
 ];
-assert.deepEqual(workstreams.workPackets.map((packet) => packet.id), requiredPacketIds);
+assert.deepEqual(
+  workstreams.workPackets.slice(0, requiredPacketIds.length).map((packet) => packet.id),
+  requiredPacketIds,
+  "The eight immutable initial packet IDs must remain first and unchanged",
+);
+assert.equal(new Set(workstreams.workPackets.map((packet) => packet.id)).size, workstreams.workPackets.length, "Work-packet IDs must be unique");
 const packetById = new Map(workstreams.workPackets.map((packet) => [packet.id, packet]));
 const epochById = new Map();
 for (const epoch of workstreams.activationEpochs ?? []) {
@@ -464,4 +469,4 @@ for (const match of wave4Assurance.matchAll(/`(WP-[A-Z0-9-]+)`/g)) {
   assert.ok(packetById.has(match[1]), `Wave 4 assurance ledger references undeclared packet ${match[1]}`);
 }
 
-console.log(`Four-Lens bootstrap governance validated deterministically: ${requirements.requirements.length} immutable requirements, ${workstreams.workPackets.length} initial packets, phase ${workstreams.programPhase}, tracker ${trackerDone}/${checklist.length}, RFx ${trackerRfxDone}/${trackerRfxIds.length}.`);
+console.log(`Four-Lens governance validated deterministically: ${requirements.requirements.length} immutable requirements, ${adoptionPacketBaseline.recordCount} immutable initial packets, ${workstreams.workPackets.length} declared packets, phase ${workstreams.programPhase}, tracker ${trackerDone}/${checklist.length}, RFx ${trackerRfxDone}/${trackerRfxIds.length}.`);
