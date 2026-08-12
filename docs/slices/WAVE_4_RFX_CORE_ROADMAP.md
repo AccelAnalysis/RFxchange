@@ -1,8 +1,8 @@
 # Wave 4 — RFx Core roadmap
 
-**Status: ACTIVE CANONICAL ROADMAP — SLICE 4.1 IMPLEMENTED; WAVE 4 IS 3/41.**
+**Status: ACTIVE CANONICAL ROADMAP — SLICES 4.1–4.2 IMPLEMENTED; WAVE 4 IS 5/41.**
 
-Wave 4 contains **41 RFx Core Feature IDs**. Slice 4.1 implements three; 38 remain Not Started. This roadmap preserves the tracker inventory and separates the basic live RFx path through submission from Wave 5 evaluation/selection/award.
+Wave 4 contains **41 RFx Core Feature IDs**. Slices 4.1–4.2 implement five; 36 remain Not Started. This roadmap preserves the tracker inventory and separates the basic live RFx path through submission from Wave 5 evaluation/selection/award.
 
 The cross-cutting AI/AMACS Interpretation Foundation is complete and reusable for later guided buyer/issuer need interpretation. Wave 4 does not create a second AI stack. Merged PR #150, **Define the Exchange interaction architecture**, is required participant-experience authority for every Wave 4 slice.
 
@@ -72,7 +72,7 @@ Purpose:
 
 Establish the canonical organization-owned RFx aggregate, one bounded `draft` lifecycle, version/event/idempotency seams, the governed AMACS request-family snapshot and safe draft creation from blank with future extensibility for templates/prior RFxs.
 
-No issuer-builder breadth, publication or opportunity projection exists beyond the minimum private draft entry. Slice 4.1 is implemented; Slice 4.2 remains unavailable until its own specific execution authority is reviewed.
+No issuer-builder breadth, publication or opportunity projection exists beyond the minimum private draft entry. Slice 4.1 is implemented and preserved by the implemented Slice 4.2 package foundation.
 
 ### Slice 4.2 — Structured need, geography, value, term and requirement foundation
 
@@ -88,6 +88,8 @@ Implement the operational builder foundation and structured business need, scope
 This slice is the first Wave 4 consumer of the cross-cutting AI/AMACS Interpretation Foundation. An issuer may begin with ordinary-language problem/need/outcome descriptions and receive reviewable structured interpretations and focused clarification prompts. Material AI interpretations remain proposals until the authorized issuer confirms or edits them. The complete non-AI structured/manual path remains available.
 
 Buyer-side interpretation should distinguish at minimum the observed condition/problem, desired outcome, known constraints, solution openness, known timing/location/value/term, unresolved questions and candidate request-family/capability directions without silently asserting procurement or legal requirements.
+
+Slice 4.2 is implemented at this boundary. Slice 4.3 remains unavailable until its own documentation authority is reviewed and merged after Slice 4.2 post-merge validation.
 
 ### Slice 4.3 — AMACS requirements, response structure and evaluation definition
 
@@ -211,9 +213,11 @@ Add bounded first-use issuer/responder/teammate education inside the real workfl
 Wave 3 approved handoff / dependency recalculation [complete]
 → Slice 4.1 documentation authority [complete]
 → 4.1 RFx kernel implementation [complete]
+→ reconcile main and dependencies [complete]
+→ Slice 4.2 documentation authority [complete]
+→ 4.2 structured need/requirements foundation + governed AI-assisted interpretation [complete]
 → reconcile main and dependencies [next after merge]
-→ 4.2 structured need/requirements foundation + governed AI-assisted interpretation
-→ reconcile
+→ Slice 4.3 documentation authority
 → 4.3 AMACS requirements/response/evaluation definition + confirmed AMACS suggestions
 → reconcile
 → 4.4 readiness/publication
@@ -294,9 +298,9 @@ Wave 4 does not require substantive evaluator scoring/consensus, Q&A/addenda, aw
 ## 10. Completion discipline
 
 - No Feature ID is Done because this roadmap, PR #150, the cross-cutting AI/AMACS foundation or a slice document exists.
-- `ISS-001`, `ISS-002` and `ISS-003` remain Not Started after the Slice 4.1 documentation authority merges.
-- Update the canonical dependency map only when a genuine reviewed dependency correction exists; no Slice 4.1 correction is currently required.
+- Documentation authority alone marks no Feature ID Done; runtime completion requires its own accepted evidence.
+- Update the canonical dependency map only when a genuine reviewed dependency correction exists; no Slice 4.2 correction is currently required.
 - Create/approve a specific slice authority before each later implementation slice.
 - Run repository, Firebase/emulator, architecture, accessibility, browser, AI-interpretation benchmark where applicable, and slice-specific acceptance.
 - Recalculate from merged `main` after each implementation/reconciliation merge.
-- Do not begin Slice 4.2, B6c or any later behavior during Slice 4.1 implementation.
+- Do not begin Slice 4.3, B6c or any later behavior during Slice 4.2 implementation.

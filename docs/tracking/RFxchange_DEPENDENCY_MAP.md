@@ -177,6 +177,8 @@ Wave 3 contains **38 Network features**. All 38 have implementation and acceptan
 
 **Slice 4.2 authority result:** Slice 4.1 merged at `3a00288f5cef74c1665266da4a2349cf4cddb9bb` and post-merge CI run `31553653104` passed. The documentation-only Slice 4.2 execution authority for `ISS-005` and `ISS-006` is now defined in `docs/slices/SLICE_4_2_EXECUTION_AUTHORITY.md`; it changes no Feature-ID state or dependency edge.
 
-**Next-authority result:** after the Slice 4.2 authority merges and post-merge validation is green, Slice 4.2 runtime implementation is the next eligible action under the standing Wave 4 authorization. Wave 4 remains **3/41 Done**, and B6c cannot become eligible before authoritative Slice 4.4 publication.
+**Slice 4.2 implementation result:** `ISS-005` and `ISS-006` now extend the same private RFx aggregate with a structured need/package builder, controlled performance geography, value, term, typed foundation requirements, module status, bounded save/recovery and optional non-authoritative interpretation. No publication, opportunity projection or later-slice domain was introduced.
+
+**Next-authority result:** after Slice 4.2 runtime merges and post-merge validation is green, Slice 4.3 documentation/dependency reconciliation is the next eligible action under the standing Wave 4 authorization. Wave 4 is **5/41 Done**, and B6c cannot become eligible before authoritative Slice 4.4 publication.
 
 See `docs/slices/WAVE_3_ROADMAP.md`, `docs/slices/WAVE_4_RFX_CORE_ROADMAP.md`, `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md`, `docs/brand/BRAND_GATE_B1_SEMANTIC_FOUNDATION.md` and the applicable canonical slice authority for detailed boundaries and acceptance intent.

@@ -11,20 +11,29 @@ import {
 import { createServerRfxDraftService } from "@/src/infrastructure/rfx/runtime";
 
 interface Props {
-  readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
+  readonly searchParams?: Promise<
+    Readonly<Record<string, string | string[] | undefined>>
+  >;
 }
 
 export default async function OpportunitiesPage({ searchParams }: Props) {
   const access = await resolveParticipantRoute({
     sessionCookie: (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
   });
-  if (access.kind === "unauthenticated") redirect("/signin?returnTo=%2Fopportunities");
-  if (access.kind === "access-resolution-required" || access.kind === "activation-required") {
+  if (access.kind === "unauthenticated")
+    redirect("/signin?returnTo=%2Fopportunities");
+  if (
+    access.kind === "access-resolution-required" ||
+    access.kind === "activation-required"
+  ) {
     redirect(participantEntryDestination(access));
   }
-  if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
-  if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
-  if (access.state.lifecycleState !== "open-platform") redirect(access.state.controlledPlatformUrl ?? "/join");
+  if (access.kind === "wrong-organization")
+    redirect(access.state.controlledPlatformUrl ?? "/join");
+  if (access.kind === "restricted")
+    redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
+  if (access.state.lifecycleState !== "open-platform")
+    redirect(access.state.controlledPlatformUrl ?? "/join");
 
   const service = await createServerRfxDraftService();
   const scope = Object.freeze({
@@ -37,19 +46,28 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
   try {
     workspace = await service.workspace(scope);
   } catch (error) {
-    if (!(error instanceof RfxDraftError) || error.code !== "forbidden") throw error;
+    if (!(error instanceof RfxDraftError) || error.code !== "forbidden")
+      throw error;
     canCreate = false;
-    workspace = Object.freeze({ drafts: Object.freeze([]), requestFamilies: await service.requestFamilies() });
+    workspace = Object.freeze({
+      drafts: Object.freeze([]),
+      requestFamilies: await service.requestFamilies(),
+      performanceLocationOption: null,
+    });
   }
-  const params: Readonly<Record<string, string | string[] | undefined>> = searchParams
-    ? await searchParams
-    : {};
-  const requestedDraft = typeof params.draft === "string"
-    ? params.draft
-    : Array.isArray(params.draft) ? params.draft[0] : null;
-  const selectedDraftId = requestedDraft && workspace.drafts.some((draft) => draft.id === requestedDraft)
-    ? requestedDraft
-    : workspace.drafts[0]?.id ?? null;
+  const params: Readonly<Record<string, string | string[] | undefined>> =
+    searchParams ? await searchParams : {};
+  const requestedDraft =
+    typeof params.draft === "string"
+      ? params.draft
+      : Array.isArray(params.draft)
+        ? params.draft[0]
+        : null;
+  const selectedDraftId =
+    requestedDraft &&
+    workspace.drafts.some((draft) => draft.id === requestedDraft)
+      ? requestedDraft
+      : (workspace.drafts[0]?.id ?? null);
 
   return (
     <RFxDraftWorkspace
@@ -58,6 +76,8 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
       requestFamilies={workspace.requestFamilies}
       selectedDraftId={selectedDraftId}
       commandRecoveryScope={`${scope.organizationId}:${scope.membershipId}`}
+      organizationId={scope.organizationId}
+      performanceLocationOption={workspace.performanceLocationOption}
     />
   );
 }

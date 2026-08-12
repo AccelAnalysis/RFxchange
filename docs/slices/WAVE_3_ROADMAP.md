@@ -4,12 +4,12 @@
 
 Wave 2 is complete, Brand Gates B0 through B6a and Wave 3 Slices 3.1 through 3.8 are merged, and the optional B6b checkpoint remains intentionally pending. Slice 3.8 final-head and post-merge production CI passed before the separate configured-browser and zero-residual closeout in `docs/architecture/WAVE_3_CLOSEOUT.md` accepted the Wave 3 exit.
 
-Current Feature-ID state after the later Wave 4 Slice 4.1 implementation is:
+Current Feature-ID state after the later Wave 4 Slice 4.2 implementation is:
 
-- **438 total · 155 Done · 283 Not Started**
+- **438 total · 157 Done · 281 Not Started**
 - Activation: **43/43**
 - Network: **38/38**
-- RFx Core: **3/41**
+- RFx Core: **5/41**
 
 AMACS 0.5.0, Brand Gates, the RFxchange AMACS reconciliation and the AI/AMACS Interpretation Foundation are no-Feature-ID cross-cutting work. They do not mark any Network feature Done.
 

@@ -45,7 +45,7 @@ assert.match(mapCss, /data-kind="subordinate-location"/);
 for (const locale of ["EnUS", "Es", "Fr", "It", "De"]) assert.ok(dictionary.includes(`organizationEnrichment${locale}`));
 assert.match(authority, /Slice 3\.5 was then recalculated and separately authorized/);
 assert.match(slice, /COMPLETE VIA PR #128/);
-assert.match(tracker, /438 total · 155 Done · 283 Not Started/);
+assert.match(tracker, /438 total · 157 Done · 281 Not Started/);
 assert.match(tracker, /Network completion is \*\*38\/38\*\*/);
 assert.match(dependency, /Slice 3\.4[^\n]+COMPLETE/);
 assert.match(dependency, /Slice 3\.5[^\n]+COMPLETE VIA PR #130/);

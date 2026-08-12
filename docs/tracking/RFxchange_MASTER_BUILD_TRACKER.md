@@ -12,12 +12,12 @@
 
 ## Progress
 
-**438 total · 155 Done · 283 Not Started**
+**438 total · 157 Done · 281 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
 - 3 - Network: **38/38**
-- 4 - RFx Core: **3/41**
+- 4 - RFx Core: **5/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
 - 7 - Institutional & Scale: **1/47**
@@ -51,8 +51,9 @@ Network completion is **38/38**: four inherited Wave 1 foundations, three Slice 
 ## Wave 4 RFx Core — current
 
 - **Slice 4.1 — `ISS-001` + `ISS-002` + `ISS-003`**: establishes the private organization-owned RFx aggregate, the single bounded `draft` lifecycle, immutable version/event/idempotency/audit seams, a complete governed AMACS 0.5.0 request-family snapshot, and safe blank-source creation/re-entry in the Operational Workspace. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_1.md`.
+- **Slice 4.2 — `ISS-005` + `ISS-006`**: extends that aggregate with the structured market need, scope, requested outputs, timing, governed performance location, estimated value, engagement term, typed foundation requirements, six server-derived module statuses, bounded save/recovery and optional non-authoritative interpretation. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_2.md`.
 
-Wave 4 RFx Core is **3/41**. Slice 4.1 creates no publication, opportunity projection, discovery, matching, response, teaming, submission or later lifecycle runtime. B6c remains ineligible before Slice 4.4 publication authority.
+Wave 4 RFx Core is **5/41**. Slices 4.1–4.2 create no publication, opportunity projection, discovery, matching, response, teaming, submission or later lifecycle runtime. B6c remains ineligible before Slice 4.4 publication authority.
 
 ## Feature-ID checklist
 
@@ -243,8 +244,8 @@ Wave 4 RFx Core is **3/41**. Slice 4.1 creates no publication, opportunity proje
 - [x] `ISS-001` — Slice 4.1; canonical organization-owned private RFx aggregate with one `draft` lifecycle, version/event/idempotency/audit seams and tenant-safe persistence
 - [x] `ISS-002` — Slice 4.1; governed immutable AMACS 0.5.0 request-family snapshot, deterministic selection/change and historical meaning preservation
 - [x] `ISS-003` — Slice 4.1; authorized blank-source draft creation and private Operational Workspace re-entry without publication or opportunity projection
-- [ ] `ISS-005`
-- [ ] `ISS-006`
+- [x] `ISS-005` — Slice 4.2; task-organized private builder with six server-derived module statuses, bounded debounced/explicit save, stable retry and configured-browser completion/re-entry
+- [x] `ISS-006` — Slice 4.2; structured market need, scope, outputs, timing, governed performance location, value, term and foundation requirements with optional non-authoritative interpretation
 - [ ] `ISS-007`
 - [ ] `ISS-009`
 - [ ] `ISS-011`
