@@ -157,6 +157,8 @@ Explain how an RFx surfaced, calculate bounded AMACS/requirement fit and uncerta
 
 Potential match remains distinct from qualification, eligibility, endorsement and award likelihood. The comparison of confirmed structured records is deterministic; an AI model may later explain the result but is not required to compute it.
 
+The bounded documentation authority is `docs/slices/SLICE_4_6_EXECUTION_AUTHORITY.md`. It preserves Slice 4.5 user-private bookmarks while explicitly transitioning the acting user's watch into one organization-owned Watch/Pursue/Decline decision, versions exact structured fit inputs and leaves invitation, teaming and response runtime to later slices. The authority changes no Feature-ID state and does not complete B6c.
+
 ### Slice 4.7 — Gap resolution, teaming and external invite continuity
 
 Feature IDs:
@@ -231,8 +233,8 @@ Wave 3 approved handoff / dependency recalculation [complete]
 → B6c opportunity expression becomes eligible [eligible; not begun]
 → reconcile and define Slice 4.5 authority [complete]
 → 4.5 discovery/manage [complete]
-→ reconcile and define Slice 4.6 authority [next]
-→ 4.6 deterministic fit/pursuit
+→ reconcile and define Slice 4.6 authority [complete]
+→ 4.6 deterministic fit/pursuit [next]
 → 4.7 gap/team/resource
 → 4.8 response construction
 → 4.9 submission/handoff
