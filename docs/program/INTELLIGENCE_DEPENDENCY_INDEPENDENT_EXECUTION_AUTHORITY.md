@@ -68,7 +68,7 @@ sourceContractIds[]
 sourceClasses[]
 provenanceResolverId
 geographyScope
-goographyGranularities[]
+geographyGranularities[]
 timeScope | null
 coveredPopulationDefinition
 rendererSemantic
