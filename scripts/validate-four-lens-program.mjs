@@ -19,6 +19,7 @@ const requiredDocuments = [
   "docs/program/WAVE_4_ASSURANCE_LEDGER.md",
   "docs/program/INTELLIGENCE_PROGRAM_ROADMAP.md",
   "docs/program/RESOURCES_REFERRALS_COMPLETION_INVENTORY.md",
+  "docs/program/evidence/README.md",
   "governance/four-lens-requirements.json",
   "governance/four-lens-workstreams.json",
 ];
@@ -44,8 +45,9 @@ const expectedStatuses = [
 const expectedDispositions = ["Verified", "Partial", "Not Implemented", "Blocked", "Deferred", "Decision Required"];
 const expectedAcceptanceTypes = ["functional", "domain-security", "browser-visual", "responsive", "motion", "accessibility", "copy", "cross-lens", "performance", "governance"];
 const expectedVerifiedEvidenceSchema = {
-  entry: { type: "one declared acceptanceTypes value", reference: "durable repository path or HTTPS URL", candidateSha: "the exact accepted implementation SHA", execution: { method: "the executed command or journey", result: "passed", observedAt: "ISO-8601 timestamp" } },
-  coverage: "Verified requires at least one structured evidence entry for every acceptance type declared by the requirement.",
+  entry: { type: "one declared acceptanceTypes value", manifest: "docs/program/evidence/<candidate-sha>.json" },
+  manifest: "A durable Lane 06 JSON manifest binding candidate SHA, base SHA, reviewer, GitHub Actions run, environment, and a passed timestamped check plus artifacts for every claimed type.",
+  coverage: "Verified requires at least one manifest-backed evidence entry for every acceptance type declared by the requirement.",
 };
 const expectedLanes = ["control-room", "shared-exchange", "opportunities-rfx", "intelligence", "resources", "referrals", "independent-acceptance", "integration"];
 const expectedPacketStatuses = ["ready-after-authority-merge", "frozen-until-authority-merge", "in-progress", "active", "reconciliation-authorized", "implemented-not-verified", "acceptance-pending", "verified", "completed", "blocked", "closed"];
@@ -111,6 +113,7 @@ const allowedTypes = new Set(expectedAcceptanceTypes);
 const allowedRequirementLanes = new Set(expectedLanes.slice(1));
 const ids = new Set();
 const shaPattern = /^[0-9a-f]{40}$/;
+const actorIdentityPattern = /^(?:github|github-app):[A-Za-z0-9](?:[A-Za-z0-9-]{0,100})$/;
 
 for (const requirement of requirements.requirements) {
   assert.match(requirement.id, /^[A-Z][A-Z0-9-]+$/, `Invalid requirement ID: ${requirement.id}`);
@@ -128,10 +131,16 @@ for (const requirement of requirements.requirements) {
   assert.ok(Array.isArray(requirement.acceptanceTypes) && requirement.acceptanceTypes.length > 0, `${requirement.id} needs acceptance types`);
   for (const type of requirement.acceptanceTypes) assert.ok(allowedTypes.has(type), `${requirement.id} has unknown acceptance type ${type}`);
   assert.ok(allowedStatuses.has(requirement.status), `${requirement.id} has unknown status ${requirement.status}`);
-  assert.ok(requirement.implementation && Object.hasOwn(requirement.implementation, "pr") && Object.hasOwn(requirement.implementation, "sha"), `${requirement.id} needs implementation identity fields`);
+  assert.ok(requirement.implementation && Object.hasOwn(requirement.implementation, "actor") && Object.hasOwn(requirement.implementation, "pr") && Object.hasOwn(requirement.implementation, "sha"), `${requirement.id} needs implementation actor and identity fields`);
   assert.ok(requirement.acceptance && Object.hasOwn(requirement.acceptance, "lane") && Object.hasOwn(requirement.acceptance, "reviewer") && Object.hasOwn(requirement.acceptance, "sha") && Object.hasOwn(requirement.acceptance, "result") && Array.isArray(requirement.acceptance.evidence), `${requirement.id} needs acceptance identity and evidence fields`);
   assert.ok(Object.hasOwn(requirement, "deferral"), `${requirement.id} needs an explicit deferral field`);
-  if (requirement.implementation.sha !== null) assert.match(requirement.implementation.sha, shaPattern, `${requirement.id} implementation SHA must be exact`);
+  if (requirement.implementation.sha !== null) {
+    assert.match(requirement.implementation.sha, shaPattern, `${requirement.id} implementation SHA must be exact`);
+    assert.ok(requirement.implementation.actor?.trim(), `${requirement.id} has implementation evidence without an actor identity`);
+    assert.match(requirement.implementation.actor, actorIdentityPattern, `${requirement.id} implementation actor is not a canonical GitHub identity`);
+  } else {
+    assert.equal(requirement.implementation.actor, null, `${requirement.id} has an implementation actor without an implementation SHA`);
+  }
   if (requirement.acceptance.sha !== null) assert.match(requirement.acceptance.sha, shaPattern, `${requirement.id} acceptance SHA must be exact`);
   if (requirement.acceptance.result !== null) assert.ok(allowedDispositions.has(requirement.acceptance.result), `${requirement.id} has invalid disposition`);
 
@@ -139,6 +148,9 @@ for (const requirement of requirements.requirements) {
     assert.equal(requirement.acceptance.result, "Verified", `${requirement.id} is Verified without a Verified disposition`);
     assert.equal(requirement.acceptance.lane, "independent-acceptance", `${requirement.id} was not accepted by Lane 06`);
     assert.ok(requirement.acceptance.reviewer?.trim(), `${requirement.id} has no independent reviewer identity`);
+    assert.match(requirement.acceptance.reviewer, actorIdentityPattern, `${requirement.id} reviewer is not a canonical GitHub identity`);
+    assert.ok(requirement.implementation.actor?.trim(), `${requirement.id} has no implementation actor identity`);
+    assert.notEqual(requirement.acceptance.reviewer.trim().toLowerCase(), requirement.implementation.actor.trim().toLowerCase(), `${requirement.id} was self-certified by its implementation actor`);
     assert.ok(requirement.acceptance.sha, `${requirement.id} is Verified without an exact acceptance SHA`);
     assert.equal(requirement.acceptance.sha, requirement.implementation.sha, `${requirement.id} Verified acceptance does not bind to its exact implementation SHA`);
     assert.ok(requirement.acceptance.evidence.length > 0, `${requirement.id} is Verified without evidence`);
@@ -146,14 +158,37 @@ for (const requirement of requirements.requirements) {
     for (const evidence of requirement.acceptance.evidence) {
       assert.ok(evidence && typeof evidence === "object" && !Array.isArray(evidence), `${requirement.id} Verified evidence must use structured entries`);
       assert.ok(requirement.acceptanceTypes.includes(evidence.type), `${requirement.id} evidence has undeclared type ${evidence.type}`);
-      assert.ok(typeof evidence.reference === "string" && evidence.reference.trim(), `${requirement.id} ${evidence.type} evidence has no durable reference`);
-      assert.equal(evidence.candidateSha, requirement.acceptance.sha, `${requirement.id} ${evidence.type} evidence is not bound to the accepted candidate SHA`);
-      assert.ok(evidence.execution && typeof evidence.execution === "object" && !Array.isArray(evidence.execution), `${requirement.id} ${evidence.type} evidence has no execution metadata`);
-      assert.ok(typeof evidence.execution.method === "string" && evidence.execution.method.trim(), `${requirement.id} ${evidence.type} evidence has no executed method`);
-      assert.equal(evidence.execution.result, "passed", `${requirement.id} ${evidence.type} evidence did not pass`);
-      assert.ok(typeof evidence.execution.observedAt === "string" && !Number.isNaN(Date.parse(evidence.execution.observedAt)), `${requirement.id} ${evidence.type} evidence has no valid observation timestamp`);
-      const localEvidence = evidence.reference.split("#", 1)[0];
-      assert.ok(/^https:\/\//.test(evidence.reference) || exists(localEvidence), `${requirement.id} ${evidence.type} evidence reference is neither HTTPS nor an existing repository path`);
+      assert.match(evidence.manifest ?? "", /^docs\/program\/evidence\/[0-9a-f]{40}\.json$/, `${requirement.id} ${evidence.type} evidence must reference a candidate-named Lane 06 manifest`);
+      assert.equal(evidence.manifest, `docs/program/evidence/${requirement.acceptance.sha}.json`, `${requirement.id} ${evidence.type} manifest filename is not the accepted candidate SHA`);
+      assert.ok(exists(evidence.manifest), `${requirement.id} ${evidence.type} evidence manifest does not exist`);
+      const manifest = JSON.parse(read(evidence.manifest));
+      assert.equal(manifest.schemaVersion, 1, `${requirement.id} ${evidence.type} evidence manifest has an unsupported schema`);
+      assert.equal(manifest.candidateSha, requirement.acceptance.sha, `${requirement.id} ${evidence.type} manifest is not bound to the accepted candidate SHA`);
+      assert.match(manifest.baseSha ?? "", shaPattern, `${requirement.id} ${evidence.type} manifest has no exact base SHA`);
+      assert.notEqual(manifest.baseSha, manifest.candidateSha, `${requirement.id} ${evidence.type} manifest does not distinguish merged base from candidate`);
+      const assignedAcceptancePackets = workstreams.workPackets.filter((packet) => packet.lane === "independent-acceptance" && packet.requirementIds.includes(requirement.id));
+      assert.ok(assignedAcceptancePackets.some((packet) => packet.exactBaseSha === manifest.baseSha), `${requirement.id} ${evidence.type} manifest base SHA does not match a declared Lane 06 packet`);
+      assert.equal(manifest.producer?.lane, "independent-acceptance", `${requirement.id} ${evidence.type} manifest was not produced by Lane 06`);
+      assert.equal(manifest.producer?.reviewer, requirement.acceptance.reviewer, `${requirement.id} ${evidence.type} manifest reviewer differs from the acceptance reviewer`);
+      assert.notEqual(manifest.producer?.reviewer?.trim().toLowerCase(), requirement.implementation.actor.trim().toLowerCase(), `${requirement.id} ${evidence.type} manifest was produced by the implementation actor`);
+      assert.match(manifest.runUrl ?? "", /^https:\/\/github\.com\/AccelAnalysis\/RFxchange\/actions\/runs\/\d+(?:\/job\/\d+)?$/, `${requirement.id} ${evidence.type} manifest has no verifiable RFxchange Actions run`);
+      assert.ok(typeof manifest.environment?.name === "string" && manifest.environment.name.trim(), `${requirement.id} ${evidence.type} manifest has no environment name`);
+      assert.ok(typeof manifest.environment?.configurationReference === "string" && manifest.environment.configurationReference.trim(), `${requirement.id} ${evidence.type} manifest has no environment configuration reference`);
+      const configurationReference = manifest.environment.configurationReference.split("#", 1)[0];
+      assert.ok(/^https:\/\//.test(manifest.environment.configurationReference) || exists(configurationReference), `${requirement.id} ${evidence.type} environment configuration is not durable`);
+      assert.ok(Array.isArray(manifest.checks), `${requirement.id} ${evidence.type} manifest checks must be an array`);
+      const check = manifest.checks.find((entry) => entry.type === evidence.type);
+      assert.ok(check, `${requirement.id} ${evidence.type} manifest has no matching execution check`);
+      assert.ok(typeof check.method === "string" && check.method.trim().length >= 8, `${requirement.id} ${evidence.type} manifest has no executed command or journey`);
+      assert.equal(check.result, "passed", `${requirement.id} ${evidence.type} manifest check did not pass`);
+      const observedAt = Date.parse(check.observedAt);
+      assert.ok(!Number.isNaN(observedAt) && observedAt <= Date.now() + 300_000, `${requirement.id} ${evidence.type} manifest has an invalid or future observation timestamp`);
+      assert.ok(Array.isArray(check.artifacts) && check.artifacts.length > 0, `${requirement.id} ${evidence.type} manifest check has no durable artifacts`);
+      for (const artifact of check.artifacts) {
+        assert.ok(typeof artifact === "string" && artifact.trim(), `${requirement.id} ${evidence.type} manifest has an invalid artifact reference`);
+        const localArtifact = artifact.split("#", 1)[0];
+        assert.ok(/^https:\/\//.test(artifact) || exists(localArtifact), `${requirement.id} ${evidence.type} manifest artifact is not durable: ${artifact}`);
+      }
       evidenceTypes.add(evidence.type);
     }
     for (const type of requirement.acceptanceTypes) assert.ok(evidenceTypes.has(type), `${requirement.id} is Verified without ${type} evidence`);
@@ -161,6 +196,7 @@ for (const requirement of requirements.requirements) {
   if (requirement.acceptance.result === "Verified") assert.equal(requirement.status, "Verified", `${requirement.id} has Verified acceptance but non-Verified status`);
   if (["Implemented — Not Verified", "Verified"].includes(requirement.status)) {
     assert.ok(requirement.implementation.sha, `${requirement.id} claims implementation without an exact SHA`);
+    assert.ok(requirement.implementation.actor?.trim(), `${requirement.id} claims implementation without an actor identity`);
   }
   if (requirement.status === "Deferred — Explicitly Approved") {
     assert.equal(requirement.acceptance.result, "Deferred", `${requirement.id} defer needs Deferred disposition`);
@@ -169,6 +205,18 @@ for (const requirement of requirements.requirements) {
     }
   } else if (requirement.status === "Not Applicable — Explicitly Approved") {
     assert.ok(requirement.deferral?.reason && requirement.deferral?.approvedBy, `${requirement.id} N/A needs explicit approval`);
+    assert.equal(requirement.deferral.approval?.lane, "independent-acceptance", `${requirement.id} N/A was not approved by Lane 06`);
+    assert.equal(requirement.deferral.approval?.reviewer, requirement.deferral.approvedBy, `${requirement.id} N/A reviewer differs from approvedBy`);
+    assert.match(requirement.deferral.approvedBy, actorIdentityPattern, `${requirement.id} N/A approver is not a canonical GitHub identity`);
+    if (requirement.implementation.actor) assert.notEqual(requirement.deferral.approvedBy.trim().toLowerCase(), requirement.implementation.actor.trim().toLowerCase(), `${requirement.id} N/A was self-approved by its implementation actor`);
+    const approvedAt = Date.parse(requirement.deferral.approval?.approvedAt);
+    assert.ok(!Number.isNaN(approvedAt) && approvedAt <= Date.now() + 300_000, `${requirement.id} N/A has an invalid or future approval timestamp`);
+    assert.ok(Array.isArray(requirement.deferral.approval?.evidence) && requirement.deferral.approval.evidence.length > 0, `${requirement.id} N/A has no durable approval evidence`);
+    for (const approvalEvidence of requirement.deferral.approval.evidence) {
+      assert.ok(typeof approvalEvidence === "string" && approvalEvidence.trim(), `${requirement.id} N/A has an invalid approval evidence reference`);
+      const localApproval = approvalEvidence.split("#", 1)[0];
+      assert.ok(/^https:\/\//.test(approvalEvidence) || exists(localApproval), `${requirement.id} N/A approval evidence is not durable: ${approvalEvidence}`);
+    }
   } else {
     assert.equal(requirement.deferral, null, `${requirement.id} has deferral data without explicit defer/N/A status`);
   }
@@ -268,6 +316,11 @@ for (const packet of workstreams.workPackets) {
   assert.ok(Array.isArray(packet.requirementIds) && Array.isArray(packet.sources) && Array.isArray(packet.dependencies), `${packet.id} needs arrays`);
   assert.ok(Array.isArray(packet.ownedPaths) && Array.isArray(packet.nonOwnedPaths) && Array.isArray(packet.acceptanceRequired), `${packet.id} needs ownership and acceptance arrays`);
   for (const requirementId of packet.requirementIds) assert.ok(ids.has(requirementId), `${packet.id} references missing requirement ${requirementId}`);
+  if (packet.status === "verified") {
+    assert.equal(packet.lane, "independent-acceptance", `${packet.id} cannot claim verified outside Lane 06`);
+    assert.ok(packet.requirementIds.length > 0, `${packet.id} cannot claim verified without governed requirements`);
+    for (const requirementId of packet.requirementIds) assert.equal(requirementById.get(requirementId).status, "Verified", `${packet.id} claims verified while ${requirementId} is ${requirementById.get(requirementId).status}`);
+  }
   const dependencyIds = new Set();
   for (const dependency of packet.dependencies) {
     assert.ok(dependency && typeof dependency.packetId === "string" && Array.isArray(dependency.requiredStatuses) && dependency.requiredStatuses.length > 0, `${packet.id} has an incomplete packet dependency`);

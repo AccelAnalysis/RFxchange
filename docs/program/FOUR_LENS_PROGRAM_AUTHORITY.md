@@ -117,7 +117,7 @@ original requirement
 
 It must not infer the intended requirement from the implementation summary or its tests.
 
-A `Verified` record must name Lane 06 (`independent-acceptance`) and the independent reviewer identity. Builder identity or a blank/generic acceptance record is not an independent disposition.
+A `Verified` record must retain the implementation actor, name Lane 06 (`independent-acceptance`) and name a distinct independent reviewer identity. The reviewer must not equal the implementation actor. Builder identity or a blank/generic acceptance record is not an independent disposition.
 
 Allowed acceptance dispositions are:
 
@@ -146,7 +146,7 @@ Allowed acceptance dispositions are:
 
 Static or source-code evidence may supplement but cannot replace the required acceptance type.
 
-For `Verified`, the machine acceptance record uses structured evidence entries containing `type`, durable `reference`, exact `candidateSha`, and executed `method`/`result`/`observedAt` metadata. Every evidence entry binds to the accepted implementation SHA, and at least one entry covers every acceptance type declared by that requirement. A generic evidence string, stale-candidate evidence or partial type coverage cannot enter the Verified numerator.
+For `Verified`, each typed ledger evidence entry points to a tracked Lane 06 JSON manifest under `docs/program/evidence/`. The manifest binds the exact candidate SHA, exact merged base SHA, distinct independent reviewer, GitHub Actions run, configured environment, and passed timestamped execution plus durable artifacts for every claimed acceptance type. At least one manifest-backed entry covers every acceptance type declared by that requirement. A generic file/string, self-asserted metadata, future timestamp, stale-candidate evidence or partial type coverage cannot enter the Verified numerator.
 
 ## 8. Explicit deferral discipline
 
