@@ -6,6 +6,13 @@
     "tracker": { "total": 438, "done": 170, "notStarted": 268, "rfxDone": 18, "rfxTotal": 41 },
     "frozenCandidate": { "pr": 171, "sha": "e70413e2e45db4b75517376acdc0700f9838a963" }
   },
+  "adoptionBaseline": {
+    "algorithm": "sha256-json-v1",
+    "recordCount": 105,
+    "idDigest": "517138fc932bc8be942a56434948e35cb2139a6432ce8ce4108d46436a578506",
+    "originalRequirementDigest": "84821b87114b17721441933f91a2790f116570a29e696ac87a2d6d3be098d166",
+    "policy": "The first 105 adoption records are frozen in order. New requirements append; clarification or supersession never rewrites or removes an adoption record."
+  },
   "statuses": [
     "Not Started",
     "In Progress",

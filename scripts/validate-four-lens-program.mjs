@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -42,10 +43,32 @@ const expectedStatuses = [
 const expectedDispositions = ["Verified", "Partial", "Not Implemented", "Blocked", "Deferred", "Decision Required"];
 const expectedAcceptanceTypes = ["functional", "domain-security", "browser-visual", "responsive", "motion", "accessibility", "copy", "cross-lens", "performance", "governance"];
 const expectedLanes = ["control-room", "shared-exchange", "opportunities-rfx", "intelligence", "resources", "referrals", "independent-acceptance", "integration"];
+const expectedPacketStatuses = ["ready-after-authority-merge", "frozen-until-authority-merge", "in-progress", "active", "reconciliation-authorized", "implemented-not-verified", "acceptance-pending", "verified", "completed", "blocked", "closed"];
+const adoptionBaseline = {
+  algorithm: "sha256-json-v1",
+  recordCount: 105,
+  idDigest: "517138fc932bc8be942a56434948e35cb2139a6432ce8ce4108d46436a578506",
+  originalRequirementDigest: "84821b87114b17721441933f91a2790f116570a29e696ac87a2d6d3be098d166",
+};
 assert.deepEqual(requirements.statuses, expectedStatuses);
 assert.deepEqual(requirements.acceptanceDispositions, expectedDispositions);
 assert.deepEqual(requirements.acceptanceTypes, expectedAcceptanceTypes);
 assert.deepEqual(workstreams.lanes.map((lane) => lane.id), expectedLanes);
+assert.deepEqual(workstreams.packetStatuses, expectedPacketStatuses);
+
+const digest = (value) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+assert.equal(requirements.adoptionBaseline?.algorithm, adoptionBaseline.algorithm);
+assert.equal(requirements.adoptionBaseline?.recordCount, adoptionBaseline.recordCount);
+assert.equal(requirements.adoptionBaseline?.idDigest, adoptionBaseline.idDigest);
+assert.equal(requirements.adoptionBaseline?.originalRequirementDigest, adoptionBaseline.originalRequirementDigest);
+assert.ok(requirements.requirements.length >= adoptionBaseline.recordCount, "The immutable adoption requirement baseline cannot shrink");
+const baselineRecords = requirements.requirements.slice(0, adoptionBaseline.recordCount);
+assert.equal(digest(baselineRecords.map((record) => record.id)), adoptionBaseline.idDigest, "Immutable adoption requirement IDs were deleted, substituted, or reordered");
+assert.equal(
+  digest(baselineRecords.map(({ id, originalRequirement }) => ({ id, originalRequirement }))),
+  adoptionBaseline.originalRequirementDigest,
+  "Immutable adoption requirement text was deleted, substituted, reordered, or rewritten",
+);
 
 assert.match(authority, /Parallelize production\. Centralize product intent\. Independently certify acceptance\./);
 assert.match(authority, /No builder may certify its own work as complete/);
@@ -86,6 +109,7 @@ for (const requirement of requirements.requirements) {
   if (requirement.status === "Verified") {
     assert.equal(requirement.acceptance.result, "Verified", `${requirement.id} is Verified without a Verified disposition`);
     assert.ok(requirement.acceptance.sha, `${requirement.id} is Verified without an exact acceptance SHA`);
+    assert.equal(requirement.acceptance.sha, requirement.implementation.sha, `${requirement.id} Verified acceptance does not bind to its exact implementation SHA`);
     assert.ok(requirement.acceptance.evidence.length > 0, `${requirement.id} is Verified without evidence`);
   }
   if (requirement.acceptance.result === "Verified") assert.equal(requirement.status, "Verified", `${requirement.id} has Verified acceptance but non-Verified status`);
@@ -164,12 +188,18 @@ const requiredPacketIds = [
 assert.deepEqual(workstreams.workPackets.map((packet) => packet.id), requiredPacketIds);
 for (const packet of workstreams.workPackets) {
   assert.ok(expectedLanes.includes(packet.lane), `${packet.id} has unknown lane`);
+  assert.ok(expectedPacketStatuses.includes(packet.status), `${packet.id} has unknown status ${packet.status}`);
   assert.ok(packet.branch && packet.status && packet.expectedOutput && packet.stopBoundary, `${packet.id} is incomplete`);
   assert.ok(Array.isArray(packet.requirementIds) && Array.isArray(packet.sources) && Array.isArray(packet.dependencies), `${packet.id} needs arrays`);
   assert.ok(Array.isArray(packet.ownedPaths) && Array.isArray(packet.nonOwnedPaths) && Array.isArray(packet.acceptanceRequired), `${packet.id} needs ownership and acceptance arrays`);
   for (const requirementId of packet.requirementIds) assert.ok(ids.has(requirementId), `${packet.id} references missing requirement ${requirementId}`);
-  if (packet.exactBaseSha !== null) assert.match(packet.exactBaseSha, shaPattern, `${packet.id} base SHA must be exact`);
-  else assert.ok(packet.basePolicy, `${packet.id} needs a base policy while exact base is unset`);
+  const preActivation = ["ready-after-authority-merge", "frozen-until-authority-merge"].includes(packet.status);
+  if (preActivation) {
+    assert.equal(packet.exactBaseSha, null, `${packet.id} must leave its exact base unset until activation`);
+    assert.ok(packet.basePolicy, `${packet.id} needs a base policy before activation`);
+  } else {
+    assert.match(packet.exactBaseSha, shaPattern, `${packet.id} ${packet.status} state requires an exact base SHA`);
+  }
 }
 
 console.log(`Four-Lens program governance validated: ${requirements.requirements.length} immutable requirements, ${workstreams.workPackets.length} bounded work packets, and ${trackerRfxIds.length} RFx Feature IDs.`);

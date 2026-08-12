@@ -3,6 +3,7 @@
   "authority": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md",
   "adoptionBaseSha": "21c4fc080a823ae03f33ae1e58dd2752f317dc67",
   "activationRule": "No ready-after-authority-merge packet is active until Control Room replaces exactBaseSha with the resulting authority merge SHA on current main.",
+  "packetStatuses": ["ready-after-authority-merge", "frozen-until-authority-merge", "in-progress", "active", "reconciliation-authorized", "implemented-not-verified", "acceptance-pending", "verified", "completed", "blocked", "closed"],
   "lanes": [
     { "id": "control-room", "number": "00", "owner": "program coordination", "productionCode": false, "acceptanceAuthority": false },
     { "id": "shared-exchange", "number": "01", "owner": "shared participant experience contracts", "productionCode": true, "acceptanceAuthority": false },

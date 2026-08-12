@@ -86,6 +86,8 @@ Each record retains:
 
 Original requirement text is immutable. Clarification may be appended without replacing the original intent.
 
+The machine ledger freezes its 105-record adoption baseline in order with reviewed SHA-256 digests over the complete ID sequence and the paired ID/original-text sequence. A new requirement appends after that baseline. A correction, clarification or supersession receives separate metadata or a new ID; it must not delete, reorder or rewrite an adoption record. The architecture validator fails on baseline deletion, substitution, reordering or original-text drift.
+
 Allowed statuses are exactly:
 
 - `Not Started`;
@@ -149,6 +151,8 @@ A defer requires the exact requirement ID, reason, missing dependency, participa
 ## 9. Parallel branch and dependency rules
 
 Every work packet declares one owner, branch, exact base SHA, immutable requirement range, owned paths/domain, non-owned paths/domain, dependencies, acceptance required, expected output, and stop boundary.
+
+Only the pre-activation statuses `ready-after-authority-merge` and `frozen-until-authority-merge` may temporarily use a base policy instead of an exact base SHA. Every in-progress, active, reconciliation, acceptance, verified, completed, blocked or closed packet remains bound to an exact base SHA.
 
 No packet may treat an unmerged branch as authoritative unless it names the candidate SHA explicitly. A dependent branch may build dependency-safe portions, but it cannot merge before its dependency is independently accepted and present on merged `main`. After a dependency merge, reconcile with current `main`, rerun applicable evidence, and obtain a fresh exact-head acceptance result.
 
