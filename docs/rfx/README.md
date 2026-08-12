@@ -40,28 +40,29 @@ For RFx implementation:
 
 ## Current Wave 4 boundary
 
-Merged `main` at `42c9a33499d9c37af74b6f61d7e1a8f823d0e0f8` includes PR #150, **Define the Exchange interaction architecture**. Wave 3, AMACS 0.5.0 reconciliation and the AI/AMACS Interpretation Foundation satisfy the reviewed prerequisites for Slice 4.1 planning.
+Merged `main` at `f2d16b9cbf7aa019d8cbd0d798f10f15782f54ec` includes the accepted Exchange shell, Slice 4.1 runtime and PR #162's Slice 4.2 documentation authority. Wave 3, AMACS 0.5.0 reconciliation and the AI/AMACS Interpretation Foundation remain satisfied prerequisites.
 
-The Slice 4.1 authority governs the implemented `ISS-001`, `ISS-002` and `ISS-003` runtime. The implementation remains bounded to:
+The Slice 4.1 and 4.2 authorities govern the implemented `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006` runtime. The implementation remains bounded to:
 
 - one organization-owned RFx aggregate;
 - one `draft` lifecycle state;
 - expected-version and idempotent command seams;
 - append-only RFx event, command-receipt and organization-audit evidence;
 - a deterministic AMACS 0.5.0 request-family snapshot; and
-- blank-source draft creation in a bounded Operational Workspace entry.
+- blank-source draft creation in a bounded Operational Workspace entry; and
+- one private structured need/package with controlled geography, value, term, typed foundation requirements, module status, save/recovery and optional non-authoritative interpretation.
 
 It does not authorize publication, opportunity projection, beacons, discovery, fit, teaming, response, evaluation, award or the complete four-lens Exchange shell.
 
 Stabilization 2C remains incomplete and isolated to release engineering: the App Hosting backend and GitHub connection now exist, but trustworthy build-time source-SHA binding and an accepted same-SHA live rollout proof do not. No canonical dependency authority makes 2C a prerequisite for RFx Core product-domain implementation.
 
-Canonical totals are **438 total · 155 Done · 283 Not Started**, with Wave 4 RFx Core **3/41** and B6b intentionally pending.
+Canonical totals are **438 total · 157 Done · 281 Not Started**, with Wave 4 RFx Core **5/41** and B6b intentionally pending.
 
 ## Explicit boundaries
 
-This package and the Slice 4.1 runtime:
+This package and the Slice 4.1–4.2 runtime:
 
-- complete only `ISS-001`, `ISS-002` and `ISS-003`;
+- complete only `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006`;
 - create only private organization-owned RFx drafts, never an opportunity, pursuit, response, team, submission, evaluation, award or outcome record;
 - add no fake map, organization, opportunity, statistics or market activity;
 - do not import prototype HTML/CSS/JavaScript into production;
@@ -70,6 +71,6 @@ This package and the Slice 4.1 runtime:
 - do not authorize an Exchange-shell convergence or appearance implementation;
 - do not make Stabilization 2C a product dependency;
 - do not move Wave 5 evaluator/award capabilities into Wave 4; and
-- do not begin Slice 4.2 or later work.
+- do not begin Slice 4.3 or later work without its own authority.
 
 **Light Appearance** and **Dark Appearance** are presentation terminology. **Intelligence** is the functional analytical lens. Dark Appearance, appearance preferences and Presentation Mode remain separately unauthorized capabilities.

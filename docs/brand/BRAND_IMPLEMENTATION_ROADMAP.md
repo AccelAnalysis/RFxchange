@@ -32,12 +32,12 @@ Brand Gates B0 through B6a are complete.
 | B5 — Onboarding and activation experience | Complete | PR #114 | `c9b1469cf258a6a9af9b456585af7f3524a5c7b6` |
 | B6a — Existing workspace foundation | Complete | PR #115 | `bf59f1d18fa6db3f43660c42777b494b505be545` |
 
-The gates above and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Wave 4 Slice 4.1 acceptance are:
+The gates above and AMACS reconciliation are no-Feature-ID convergence work. Current product totals after Wave 4 Slice 4.2 acceptance are:
 
-- **438 total · 155 Done · 283 Not Started**
+- **438 total · 157 Done · 281 Not Started**
 - Activation: **43/43**
 - Network: **38/38**
-- RFx Core: **3/41**
+- RFx Core: **5/41**
 
 The consolidated evidence is recorded in:
 

@@ -1687,6 +1687,63 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.equal(changedSnapshot.data().version, 2);
     assert.equal(changedSnapshot.data().requestFamily.requestFamilyId, changedFamilyId);
 
+    await evaluate(cdp, `(() => {
+      const set = (selector, value) => {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error('Missing RFx package control: ' + selector);
+        const prototype = element instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : element instanceof HTMLSelectElement ? HTMLSelectElement.prototype : HTMLInputElement.prototype;
+        Object.getOwnPropertyDescriptor(prototype, 'value').set.call(element, value);
+        element.dispatchEvent(new Event(element instanceof HTMLSelectElement ? 'change' : 'input', { bubbles: true }));
+      };
+      set('[data-rfx-package-title]', 'Regional facilities resilience');
+      set('[data-rfx-source-statement]', 'Improve continuity across critical public facilities.');
+      set('[data-rfx-observed-condition]', 'Recovery is inconsistent across three facilities.');
+      set('[data-rfx-desired-outcome]', 'Restore priority services within four hours.');
+      set('[data-rfx-affected-context]', 'Three public facilities in the issuer locality.');
+      set('[data-rfx-scope]', 'Assess, plan, and implement approved continuity improvements.');
+      set('[data-rfx-start-date]', '2026-09-01');
+      set('[data-rfx-completion-date]', '2026-12-01');
+      set('[data-rfx-response-deadline]', '2026-08-28');
+      set('[data-rfx-location-mode]', 'exact-address');
+      document.querySelector('[data-rfx-add-output]').click();
+      document.querySelector('[data-rfx-add-requirement]').click();
+    })()`);
+    await wait(150);
+    await evaluate(cdp, `(() => {
+      const set = (selector, value) => {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error('Missing RFx package control: ' + selector);
+        const prototype = element instanceof HTMLSelectElement ? HTMLSelectElement.prototype : HTMLInputElement.prototype;
+        Object.getOwnPropertyDescriptor(prototype, 'value').set.call(element, value);
+        element.dispatchEvent(new Event(element instanceof HTMLSelectElement ? 'change' : 'input', { bubbles: true }));
+      };
+      set('[data-rfx-output-title]', 'Continuity plan');
+      set('[data-rfx-requirement-title]', 'Continuity evidence');
+      set('[data-rfx-value-mode]', 'range');
+      set('[data-rfx-term-mode]', 'fixed');
+    })()`);
+    await wait(150);
+    await evaluate(cdp, `(() => {
+      const set = (selector, value) => {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error('Missing RFx package control: ' + selector);
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(element, value);
+        element.dispatchEvent(new Event('input', { bubbles: true }));
+      };
+      set('[data-rfx-value-minimum]', '10000');
+      set('[data-rfx-value-maximum]', '25000');
+      set('[data-rfx-duration-value]', '3');
+    })()`);
+    await wait(150);
+    await evaluate(cdp, `document.querySelector('[data-rfx-package-save]').click()`);
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id]')?.dataset.rfxVersion === '3'`, "RFx package version 3");
+    const packageSnapshot = await db.collection("rfxAggregates").doc(created.id).get();
+    const packageAggregate = packageSnapshot.data();
+    assert.equal(packageAggregate.version, 3);
+    assert.equal(packageAggregate.package.title, "Regional facilities resilience");
+    assert.equal(packageAggregate.package.performanceLocation.mode, "exact-address");
+    assert.deepEqual(Object.values(packageAggregate.package.moduleStatus), ["complete", "complete", "complete", "complete", "complete", "complete"]);
+
     const stale = await evaluate(cdp, `(async () => {
       const response = await fetch('/api/rfx', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -1695,10 +1752,10 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
       return { status: response.status, body: await response.json() };
     })()`);
     assert.equal(stale.status, 409);
-    assert.equal((await db.collection("rfxAggregates").doc(created.id).get()).data().version, 2);
+    assert.equal((await db.collection("rfxAggregates").doc(created.id).get()).data().version, 3);
 
     await cdp.send("Page.reload", { ignoreCache: true });
-    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '2'`, "authorized RFx reload re-entry");
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '3'`, "authorized RFx reload re-entry");
     await waitForExpression(cdp, `document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current') === 'page'`, "current RFx participant lens");
     const shellAfterReload = await evaluate(cdp, `({
       current: document.querySelector('[data-participant-lens="opportunities-rfx"]')?.getAttribute('aria-current'),
@@ -1748,7 +1805,7 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
     assert.equal(missingPermission.current, "page");
     await authorizationRef.set(originalAuthorization);
     await cdp.send("Page.reload", { ignoreCache: true });
-    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '2'`, "RFx permission restoration");
+    await waitForExpression(cdp, `document.querySelector('[data-rfx-draft-id="${created.id}"]')?.dataset.rfxVersion === '3'`, "RFx permission restoration");
 
     const [events, commands, audits] = await Promise.all([
       db.collection("rfxEvents").where("issuerOrganizationId", "==", organizationId).get(),
@@ -1756,15 +1813,16 @@ async function runRfxKernelAcceptance({ baseUrl, sessionCookie }) {
       db.collection("organizationAuditEvents").where("organizationId", "==", organizationId).get(),
     ]);
     const rfxAudits = audits.docs.filter((snapshot) => String(snapshot.data().action).startsWith("rfx."));
-    assert.deepEqual(events.docs.map((snapshot) => snapshot.data().kind).sort(), ["rfx-draft-created", "rfx-request-family-changed"]);
-    assert.equal(commands.size, 2);
-    assert.equal(rfxAudits.length, 2);
+    assert.deepEqual(events.docs.map((snapshot) => snapshot.data().kind).sort(), ["rfx-draft-created", "rfx-package-saved", "rfx-request-family-changed"]);
+    assert.equal(commands.size, 3);
+    assert.equal(rfxAudits.length, 3);
     evidence = Object.freeze({
       rfxId: created.id,
-      versions: [1, 2],
+      versions: [1, 2, 3],
       amacsRelease: aggregate.requestFamily.amacsReleaseVersion,
       lifecycleState: aggregate.lifecycleState,
       staleStatus: stale.status,
+      moduleStatus: packageAggregate.package.moduleStatus,
       eventKinds: events.docs.map((snapshot) => snapshot.data().kind).sort(),
       commandCount: commands.size,
       auditCount: rfxAudits.length,
