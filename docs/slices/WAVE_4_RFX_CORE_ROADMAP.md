@@ -89,7 +89,7 @@ This slice is the first Wave 4 consumer of the cross-cutting AI/AMACS Interpreta
 
 Buyer-side interpretation should distinguish at minimum the observed condition/problem, desired outcome, known constraints, solution openness, known timing/location/value/term, unresolved questions and candidate request-family/capability directions without silently asserting procurement or legal requirements.
 
-Slice 4.2 is implemented at this boundary. Slice 4.3 remains unavailable until its own documentation authority is reviewed and merged after Slice 4.2 post-merge validation.
+Slice 4.2 is implemented at this boundary. The bounded documentation-only Slice 4.3 authority is `docs/slices/SLICE_4_3_EXECUTION_AUTHORITY.md`; its merge changes no Feature-ID status, and runtime remains unavailable until that authority is reviewed and merged.
 
 ### Slice 4.3 — AMACS requirements, response structure and evaluation definition
 
@@ -216,8 +216,8 @@ Wave 3 approved handoff / dependency recalculation [complete]
 → reconcile main and dependencies [complete]
 → Slice 4.2 documentation authority [complete]
 → 4.2 structured need/requirements foundation + governed AI-assisted interpretation [complete]
-→ reconcile main and dependencies [next after merge]
-→ Slice 4.3 documentation authority
+→ reconcile main and dependencies [complete]
+→ Slice 4.3 documentation authority [current]
 → 4.3 AMACS requirements/response/evaluation definition + confirmed AMACS suggestions
 → reconcile
 → 4.4 readiness/publication
@@ -299,8 +299,8 @@ Wave 4 does not require substantive evaluator scoring/consensus, Q&A/addenda, aw
 
 - No Feature ID is Done because this roadmap, PR #150, the cross-cutting AI/AMACS foundation or a slice document exists.
 - Documentation authority alone marks no Feature ID Done; runtime completion requires its own accepted evidence.
-- Update the canonical dependency map only when a genuine reviewed dependency correction exists; no Slice 4.2 correction is currently required.
+- The Slice 4.3 authority adopts the reviewed `ISS-009` dependency on stable Slice 4.2 foundation requirements and Slice 4.3 AMACS requirements; it introduces no other dependency correction.
 - Create/approve a specific slice authority before each later implementation slice.
 - Run repository, Firebase/emulator, architecture, accessibility, browser, AI-interpretation benchmark where applicable, and slice-specific acceptance.
 - Recalculate from merged `main` after each implementation/reconciliation merge.
-- Do not begin Slice 4.3, B6c or any later behavior during Slice 4.2 implementation.
+- Do not begin Slice 4.3 runtime before its authority is reviewed and merged, and do not begin B6c or any later behavior during Slice 4.3 implementation.

@@ -1,8 +1,8 @@
 # RFx Core documentation authority
 
-**Status: CANONICAL RFx CORE AUTHORITY — SLICE 4.1 IMPLEMENTATION IS DEFINED BUT RUNTIME REMAINS NOT STARTED.**
+**Status: CANONICAL RFx CORE AUTHORITY — SLICES 4.1–4.2 IMPLEMENTED; SLICE 4.3 DOCUMENTATION AUTHORITY DEFINED.**
 
-This directory contains the converged product, architecture, AMACS, UX, feature-crosswalk and acceptance authority for the future live RFx Core. The specific implementation boundary for the first Wave 4 slice is now defined in `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md`; documentation alone does not complete or implement a Feature ID.
+This directory contains the converged product, architecture, AMACS, UX, feature-crosswalk and acceptance authority for the live RFx Core sequence. Slice-specific documentation defines bounded implementation authority; documentation alone does not complete or implement a Feature ID.
 
 The governing decision is:
 
@@ -21,8 +21,10 @@ The RFx Core workspaces operate within the cross-cutting Exchange interaction ar
 7. [`RFX_CORE_ACCEPTANCE_MATRIX.md`](RFX_CORE_ACCEPTANCE_MATRIX.md) — pre-merge acceptance and anti-regression requirements, including AMACS 0.5.0 and AI interpretation boundaries.
 8. [`../slices/WAVE_4_RFX_CORE_ROADMAP.md`](../slices/WAVE_4_RFX_CORE_ROADMAP.md) — adopted Wave 4 sequence.
 9. [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) — exact organization-owned RFx kernel, request-family snapshot, blank-draft creation, security, persistence, acceptance and non-scope authority for `ISS-001`, `ISS-002` and `ISS-003`.
-10. [`../brand/BRAND_GATE_B6C_RFX_LENS.md`](../brand/BRAND_GATE_B6C_RFX_LENS.md) — future real-data RFx spatial expression and map boundaries; not eligible before authoritative publication.
-11. [`../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md`](../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md) — approved prototype-derived visual decisions and explicit non-production mechanics.
+10. [`../slices/SLICE_4_2_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_2_EXECUTION_AUTHORITY.md) — implemented structured need/package, controlled geography, value, term, requirements and optional interpretation authority for `ISS-005` and `ISS-006`.
+11. [`../slices/SLICE_4_3_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_3_EXECUTION_AUTHORITY.md) — documentation-only AMACS requirements, response-structure and evaluation-definition authority for `ISS-007`, `ISS-009` and `ISS-011`.
+12. [`../brand/BRAND_GATE_B6C_RFX_LENS.md`](../brand/BRAND_GATE_B6C_RFX_LENS.md) — future real-data RFx spatial expression and map boundaries; not eligible before authoritative publication.
+13. [`../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md`](../reference/prototypes/RFX_VERSION_2_DESIGN_REFERENCE.md) — approved prototype-derived visual decisions and explicit non-production mechanics.
 
 ## Authority order
 
@@ -40,7 +42,7 @@ For RFx implementation:
 
 ## Current Wave 4 boundary
 
-Merged `main` at `f2d16b9cbf7aa019d8cbd0d798f10f15782f54ec` includes the accepted Exchange shell, Slice 4.1 runtime and PR #162's Slice 4.2 documentation authority. Wave 3, AMACS 0.5.0 reconciliation and the AI/AMACS Interpretation Foundation remain satisfied prerequisites.
+Merged `main` at `90ee6e08a18a67cc794ff1a84a047a8313ad50d6` includes the accepted Exchange shell and implemented Slice 4.1–4.2 runtime. This documentation gate defines the Slice 4.3 authority; its merge completes no Feature ID. Wave 3, AMACS 0.5.0 reconciliation and the AI/AMACS Interpretation Foundation remain satisfied prerequisites.
 
 The Slice 4.1 and 4.2 authorities govern the implemented `ISS-001`, `ISS-002`, `ISS-003`, `ISS-005` and `ISS-006` runtime. The implementation remains bounded to:
 
@@ -71,6 +73,6 @@ This package and the Slice 4.1–4.2 runtime:
 - do not authorize an Exchange-shell convergence or appearance implementation;
 - do not make Stabilization 2C a product dependency;
 - do not move Wave 5 evaluator/award capabilities into Wave 4; and
-- do not begin Slice 4.3 or later work without its own authority.
+- do not begin Slice 4.3 runtime until `docs/slices/SLICE_4_3_EXECUTION_AUTHORITY.md` is reviewed and merged, or any later work without its own authority.
 
 **Light Appearance** and **Dark Appearance** are presentation terminology. **Intelligence** is the functional analytical lens. Dark Appearance, appearance preferences and Presentation Mode remain separately unauthorized capabilities.
