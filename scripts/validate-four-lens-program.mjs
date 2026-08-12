@@ -43,6 +43,10 @@ const expectedStatuses = [
 ];
 const expectedDispositions = ["Verified", "Partial", "Not Implemented", "Blocked", "Deferred", "Decision Required"];
 const expectedAcceptanceTypes = ["functional", "domain-security", "browser-visual", "responsive", "motion", "accessibility", "copy", "cross-lens", "performance", "governance"];
+const expectedVerifiedEvidenceSchema = {
+  entry: { type: "one declared acceptanceTypes value", reference: "durable repository path or HTTPS URL" },
+  coverage: "Verified requires at least one structured evidence entry for every acceptance type declared by the requirement.",
+};
 const expectedLanes = ["control-room", "shared-exchange", "opportunities-rfx", "intelligence", "resources", "referrals", "independent-acceptance", "integration"];
 const expectedPacketStatuses = ["ready-after-authority-merge", "frozen-until-authority-merge", "in-progress", "active", "reconciliation-authorized", "implemented-not-verified", "acceptance-pending", "verified", "completed", "blocked", "closed"];
 const adoptionBaseline = {
@@ -52,9 +56,16 @@ const adoptionBaseline = {
   originalRequirementDigest: "84821b87114b17721441933f91a2790f116570a29e696ac87a2d6d3be098d166",
   governanceMetadataDigest: "ee0c399d50da4bea28d9a457f6e913fd37c758b3f64a225f51bfaf4e6736a34e",
 };
+const adoptionPacketBaseline = {
+  algorithm: "sha256-json-v1",
+  recordCount: 8,
+  idDigest: "7053ba8345ad10c4fb7636f0333dfa228ff8d78773f1590dec260b71eefd2ab5",
+  governanceDigest: "4985a28f70bdca41ebd51cd4c12438ba783e8704485d2cb3ffb14b5525f55379",
+};
 assert.deepEqual(requirements.statuses, expectedStatuses);
 assert.deepEqual(requirements.acceptanceDispositions, expectedDispositions);
 assert.deepEqual(requirements.acceptanceTypes, expectedAcceptanceTypes);
+assert.deepEqual(requirements.verifiedEvidenceSchema, expectedVerifiedEvidenceSchema);
 assert.deepEqual(workstreams.lanes.map((lane) => lane.id), expectedLanes);
 assert.deepEqual(workstreams.packetStatuses, expectedPacketStatuses);
 
@@ -77,6 +88,16 @@ assert.equal(
   adoptionBaseline.governanceMetadataDigest,
   "Immutable adoption governance source, ownership, dependency, or acceptance obligations were rewritten",
 );
+
+assert.equal(workstreams.adoptionPacketBaseline?.algorithm, adoptionPacketBaseline.algorithm);
+assert.equal(workstreams.adoptionPacketBaseline?.recordCount, adoptionPacketBaseline.recordCount);
+assert.equal(workstreams.adoptionPacketBaseline?.idDigest, adoptionPacketBaseline.idDigest);
+assert.equal(workstreams.adoptionPacketBaseline?.governanceDigest, adoptionPacketBaseline.governanceDigest);
+assert.ok(workstreams.workPackets.length >= adoptionPacketBaseline.recordCount, "The immutable adoption packet baseline cannot shrink");
+const baselinePackets = workstreams.workPackets.slice(0, adoptionPacketBaseline.recordCount);
+const packetGovernance = baselinePackets.map(({ id, lane, owner, branch, basePolicy = null, requirementIds, sources, dependencies, ownedPaths, nonOwnedPaths, acceptanceRequired, expectedOutput, stopBoundary }) => ({ id, lane, owner, branch, basePolicy, requirementIds, sources, dependencies, ownedPaths, nonOwnedPaths, acceptanceRequired, expectedOutput, stopBoundary }));
+assert.equal(digest(baselinePackets.map((packet) => packet.id)), adoptionPacketBaseline.idDigest, "Immutable adoption packet IDs were deleted, substituted, or reordered");
+assert.equal(digest(packetGovernance), adoptionPacketBaseline.governanceDigest, "Immutable adoption packet ownership, dependency edges, scope, or acceptance obligations were rewritten");
 
 assert.match(authority, /Parallelize production\. Centralize product intent\. Independently certify acceptance\./);
 assert.match(authority, /No builder may certify its own work as complete/);
@@ -121,6 +142,16 @@ for (const requirement of requirements.requirements) {
     assert.ok(requirement.acceptance.sha, `${requirement.id} is Verified without an exact acceptance SHA`);
     assert.equal(requirement.acceptance.sha, requirement.implementation.sha, `${requirement.id} Verified acceptance does not bind to its exact implementation SHA`);
     assert.ok(requirement.acceptance.evidence.length > 0, `${requirement.id} is Verified without evidence`);
+    const evidenceTypes = new Set();
+    for (const evidence of requirement.acceptance.evidence) {
+      assert.ok(evidence && typeof evidence === "object" && !Array.isArray(evidence), `${requirement.id} Verified evidence must use structured entries`);
+      assert.ok(requirement.acceptanceTypes.includes(evidence.type), `${requirement.id} evidence has undeclared type ${evidence.type}`);
+      assert.ok(typeof evidence.reference === "string" && evidence.reference.trim(), `${requirement.id} ${evidence.type} evidence has no durable reference`);
+      const localEvidence = evidence.reference.split("#", 1)[0];
+      assert.ok(/^https:\/\//.test(evidence.reference) || exists(localEvidence), `${requirement.id} ${evidence.type} evidence reference is neither HTTPS nor an existing repository path`);
+      evidenceTypes.add(evidence.type);
+    }
+    for (const type of requirement.acceptanceTypes) assert.ok(evidenceTypes.has(type), `${requirement.id} is Verified without ${type} evidence`);
   }
   if (requirement.acceptance.result === "Verified") assert.equal(requirement.status, "Verified", `${requirement.id} has Verified acceptance but non-Verified status`);
   if (["Implemented — Not Verified", "Verified"].includes(requirement.status)) {

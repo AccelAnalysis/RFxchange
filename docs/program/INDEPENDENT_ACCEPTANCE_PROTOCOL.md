@@ -77,6 +77,8 @@ Lane 06 records exact-SHA dispositions in `governance/four-lens-requirements.jso
 
 Every ledger acceptance object retains the accepting lane and reviewer identity fields even while unset. `Verified` requires the accepting lane to be `independent-acceptance`, a named independent reviewer, and an acceptance SHA identical to the implementation candidate SHA. A builder or blank/generic acceptance record cannot certify its own candidate.
 
+`Verified` evidence is structured as `{ type, reference }`. Every acceptance type declared by the requirement must have at least one mapped durable repository path or HTTPS reference. One generic entry, an unmapped string, or evidence for only a subset of the declared types is insufficient.
+
 ## Acceptance closeout template
 
 ```text

@@ -146,6 +146,8 @@ Allowed acceptance dispositions are:
 
 Static or source-code evidence may supplement but cannot replace the required acceptance type.
 
+For `Verified`, the machine acceptance record uses structured `{ type, reference }` evidence entries and must contain at least one durable repository path or HTTPS reference for every acceptance type declared by that requirement. A generic evidence string or coverage of only one acceptance type cannot enter the Verified numerator.
+
 ## 8. Explicit deferral discipline
 
 A defer requires the exact requirement ID, reason, missing dependency, participant/product impact, future owner, future milestone where known, and explicit approval. Difficulty, time, an inconvenient architecture, or unavailable tests do not authorize deferral. Unapproved omissions remain incomplete.
@@ -153,6 +155,8 @@ A defer requires the exact requirement ID, reason, missing dependency, participa
 ## 9. Parallel branch and dependency rules
 
 Every work packet declares one owner, branch, exact base SHA, immutable requirement range, owned paths/domain, non-owned paths/domain, dependencies, acceptance required, expected output, and stop boundary.
+
+The initial eight packet definitions are append-only and digest-frozen over their IDs, lanes, ownership, branches/base policies, requirement ranges, sources, dependency edges with admissible predecessor states, owned/non-owned paths, acceptance obligations, outputs and stop boundaries. Only packet `status` and `exactBaseSha` are ordinary lifecycle fields. Removing or weakening an adopted dependency edge or obligation fails validation; a newly authorized packet appends.
 
 Only the pre-activation statuses `ready-after-authority-merge` and `frozen-until-authority-merge` may temporarily use a base policy instead of an exact base SHA. Every in-progress, active, reconciliation, acceptance, verified, completed, blocked or closed packet remains bound to an exact base SHA.
 

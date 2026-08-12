@@ -4,6 +4,13 @@
   "adoptionBaseSha": "21c4fc080a823ae03f33ae1e58dd2752f317dc67",
   "activationRule": "No ready-after-authority-merge packet is active until Control Room replaces exactBaseSha with the resulting authority merge SHA on current main.",
   "packetStatuses": ["ready-after-authority-merge", "frozen-until-authority-merge", "in-progress", "active", "reconciliation-authorized", "implemented-not-verified", "acceptance-pending", "verified", "completed", "blocked", "closed"],
+  "adoptionPacketBaseline": {
+    "algorithm": "sha256-json-v1",
+    "recordCount": 8,
+    "idDigest": "7053ba8345ad10c4fb7636f0333dfa228ff8d78773f1590dec260b71eefd2ab5",
+    "governanceDigest": "4985a28f70bdca41ebd51cd4c12438ba783e8704485d2cb3ffb14b5525f55379",
+    "policy": "The first eight packet definitions are frozen in order except for status and exactBaseSha. New packets append."
+  },
   "lanes": [
     { "id": "control-room", "number": "00", "owner": "program coordination", "productionCode": false, "acceptanceAuthority": false },
     { "id": "shared-exchange", "number": "01", "owner": "shared participant experience contracts", "productionCode": true, "acceptanceAuthority": false },
