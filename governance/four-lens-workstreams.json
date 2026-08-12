@@ -89,6 +89,15 @@
         "WP-REF-INVENTORY-01"
       ],
       "purpose": "Activate the initial independent Four-Lens operational packets after authority installation and successful post-merge production CI."
+    },
+    {
+      "id": "rfx-46-reconciliation-2026-08-12",
+      "mainBaseSha": "347015829d64cfc596cdef1010601d8bda447818",
+      "controlPullRequest": 173,
+      "packetIds": [
+        "WP-RFX-46-RECONCILE"
+      ],
+      "purpose": "Authorize reconciliation of preserved Slice 4.6 PR #171 candidate under the installed Four-Lens authority without accepting or merging it."
     }
   ],
   "lanes": [
@@ -335,10 +344,10 @@
         "mergeSha": null
       },
       "candidateHistory": [],
-      "exactBaseSha": null,
-      "activationEpochId": null,
+      "exactBaseSha": "347015829d64cfc596cdef1010601d8bda447818",
+      "activationEpochId": "rfx-46-reconciliation-2026-08-12",
       "basePolicy": "authority-merge-sha plus preserved candidate e70413e2e45db4b75517376acdc0700f9838a963",
-      "status": "frozen-until-authority-merge",
+      "status": "reconciliation-authorized",
       "requirementIds": [
         "RFX-FEATURE-RSP-001",
         "RFX-FEATURE-RSP-002",
