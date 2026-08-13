@@ -700,8 +700,8 @@
         "src/infrastructure/rfx/**",
         "src/components/rfx/**",
         "app/opportunities/**",
-        "test/**",
-        "scripts/**",
+        "test/rfx42-iss006-*.test.mjs",
+        "scripts/rfx42-iss006-*.mjs",
         "docs/architecture/**"
       ],
       "nonOwnedPaths": [
