@@ -43,6 +43,29 @@
   opacity: 0.56;
 }
 
+@media (max-width: 760px) {
+  :global([data-participant-navigation] > nav) {
+    min-width: 0;
+    display: flex !important;
+    justify-content: flex-start;
+    gap: var(--space-sm);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+
+  :global([data-participant-navigation] > nav [data-participant-lens]) {
+    min-height: 44px;
+    flex: 0 0 auto;
+    padding-inline: var(--space-xs);
+    font-size: 0.72rem;
+  }
+
+  :global([data-participant-navigation] > details) {
+    display: none !important;
+  }
+}
+
 @media (max-width: 520px) {
   .actionGrid {
     grid-template-columns: 1fr;
