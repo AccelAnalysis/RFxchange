@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "market-ready-founding-commerce-2026-08-13",
+  "controlAuthority": "docs/program/MARKET_READY_FOUNDING_COMMERCE_CONTROL.md",
+  "marketReadyAuthority": "docs/program/MARKET_READY_BASELINE.md",
+  "mainBaseSha": "97b93f1d0f3405111b700e4d6ca9d443b9722833",
+  "controlPullRequest": null,
+  "packet": {
+    "id": "WP-MARKET-READY-FOUNDING-COMMERCE-01",
+    "status": "activation-pending-control-merge",
+    "releaseClass": "Critical",
+    "implementationRole": "Commercial Release Integrator — Founding Membership Baseline",
+    "implementationBranch": "commercial/founding-live-commerce",
+    "parallelWith": [
+      "WP-EXCHANGE-ROOM-PHASE2-01"
+    ],
+    "fourLensLedgerMembership": false,
+    "fourLensLedgerReason": "Commercial implementation is not owned by any permanent lens; current product-owner task explicitly authorizes this separate market-ready workstream to proceed in parallel without falsifying Four-Lens lane ownership.",
+    "featureIdsPreservedUnchanged": [
+      "COM-039",
+      "COM-040",
+      "COM-041"
+    ],
+    "featureAuthorityFinding": {
+      "status": "source-gap",
+      "finding": "Current repository contains the tracker IDs and the earlier commercial boundary assigning later Stripe/webhook/reconciliation work to subsequent Commercial features, but not the original approved requirement definitions for COM-039 through COM-041.",
+      "rule": "Do not infer or rewrite the original Feature-ID meanings. No COM-039/040/041 tracker completion may be claimed until the original source acceptance definition is recovered and satisfied."
+    },
+    "commercialTerms": {
+      "foundingMonthlyUsd": 49,
+      "capOrganizations": 250,
+      "source": "docs/context/COMMERCIAL_MODEL.md",
+      "status": "planned-subject-to-approved-commercial-readiness-and-live-catalog-reconciliation"
+    },
+    "sources": [
+      "AGENTS.md",
+      "docs/program/MARKET_READY_BASELINE.md",
+      "docs/program/MARKET_READY_FOUNDING_COMMERCE_CONTROL.md",
+      "docs/context/COMMERCIAL_MODEL.md",
+      "docs/architecture/WAVE_1_SLICE_1_30.md",
+      "docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md",
+      "docs/tracking/RFxchange_DEPENDENCY_MAP.md",
+      "src/domain/commercial/model.ts",
+      "src/domain/commercial/payment-provider.ts",
+      "src/application/commercial/organization-commercial-account.ts",
+      "app/founding/page.tsx",
+      "app/acquisition/founding/route.ts"
+    ],
+    "expectedOwnedPathFamilies": [
+      "src/domain/commercial/**",
+      "src/application/commercial/**",
+      "src/infrastructure/commercial/**",
+      "commercial-specific app/api routes",
+      "bounded authenticated Founding conversion surface",
+      "commercial-specific Functions/webhook code",
+      "commercial-specific tests/scripts/evidence"
+    ],
+    "nonOwnedPathFamilies": [
+      "src/application/participant/**",
+      "src/components/participant/**",
+      "app/geography/canvas/**",
+      "Phase 2 lens/action registry tests/scripts/evidence",
+      "RFx domain internals",
+      "Resources domain internals",
+      "Intelligence analytical domain",
+      "Referrals domain internals",
+      "governance/four-lens-requirements.json",
+      "governance/four-lens-workstreams.json",
+      "Independent Acceptance dispositions/evidence"
+    ],
+    "criticalReleaseGates": [
+      "organization billing authority and wrong-organization negatives",
+      "server-authoritative price/plan resolution",
+      "duplicate subscription and idempotency protection",
+      "Stripe webhook signature verification and replay-safe reconciliation",
+      "redirect alone grants no paid state",
+      "correct organization commercial-state correlation",
+      "Founding cap concurrency behavior if the 250 cap remains current",
+      "secret/card-data non-disclosure",
+      "exact-head repository CI",
+      "configured browser payment journey",
+      "exact deployment provenance",
+      "bounded live-mode production payment proof before declaring live",
+      "explicit Control Room Critical release authorization and rollback boundary"
+    ],
+    "maximumBuilderDisposition": "Implemented — Not Verified"
+  }
+}

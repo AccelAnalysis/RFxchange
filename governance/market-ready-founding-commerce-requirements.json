@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "packetId": "WP-MARKET-READY-FOUNDING-COMMERCE-01",
+  "activationId": "market-ready-founding-commerce-2026-08-13",
+  "controlPullRequest": 188,
+  "authority": "docs/program/MARKET_READY_FOUNDING_COMMERCE_REQUIREMENTS.md",
+  "relationshipToFeatureIds": {
+    "preservedUnresolvedFeatureIds": ["COM-039", "COM-040", "COM-041"],
+    "rule": "These packet-local requirements do not infer, replace, rename or complete the unresolved Commercial Feature IDs."
+  },
+  "requirements": [
+    {"id":"MRFC-OFFER-001","acceptanceTypes":["functional","copy","browser-visual","domain-security"]},
+    {"id":"MRFC-AUTH-001","acceptanceTypes":["functional","domain-security"]},
+    {"id":"MRFC-CHECKOUT-001","acceptanceTypes":["functional","domain-security"]},
+    {"id":"MRFC-RECON-001","acceptanceTypes":["functional","domain-security","governance"]},
+    {"id":"MRFC-CAP-001","acceptanceTypes":["functional","domain-security"]},
+    {"id":"MRFC-STATE-001","acceptanceTypes":["functional","domain-security","cross-lens"]},
+    {"id":"MRFC-SEC-001","acceptanceTypes":["domain-security","governance"]},
+    {"id":"MRFC-LIVE-001","acceptanceTypes":["functional","domain-security","browser-visual","governance"]}
+  ],
+  "maximumBuilderDisposition": "Implemented — Not Verified",
+  "criticalReviewerCapacityException": {
+    "mayDeferCertificationOnly": true,
+    "requiresAllCriticalSafetyEvidence": true,
+    "requiresNoKnownMaterialCriticalDefect": true,
+    "requiresExplicitControlRoomAuthorization": true,
+    "requiresExplicitProductOwnerCriticalRiskAcceptance": true,
+    "authority": "docs/program/MARKET_READY_FOUNDING_COMMERCE_REQUIREMENTS.md#critical-reviewer-capacity-rule"
+  }
+}

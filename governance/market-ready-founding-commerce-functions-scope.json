@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "packetId": "WP-MARKET-READY-FOUNDING-COMMERCE-01",
+  "controlPullRequest": 188,
+  "extends": "governance/market-ready-founding-commerce-activation-v2.json",
+  "additionalOwnedPaths": [
+    "functions/package.json",
+    "functions/src/index.ts",
+    "functions/src/market-ready-founding-commerce-functions.ts",
+    "functions/src/application/market-ready-founding-commerce-*.ts",
+    "functions/src/runtime/market-ready-founding-commerce-*.ts",
+    "functions/test/market-ready-founding-commerce-*.test.mjs"
+  ],
+  "readOnlySharedDependencies": [
+    "functions/src/application/background-jobs.ts",
+    "functions/src/runtime/firestore-background-job-store.ts"
+  ],
+  "rule": "Only the listed commercial-specific Functions paths and bounded entrypoint/dependency edits are authorized. Shared runner/store files are consumed without modification unless Control Room later amends scope."
+}
