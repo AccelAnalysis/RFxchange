@@ -60,10 +60,10 @@ const githubReviewPattern = /^https:\/\/github\.com\/AccelAnalysis\/RFxchange\/(
 
 const adoptionBaseline = {
   algorithm: "sha256-json-v1",
-  recordCount: 105,
-  idDigest: "517138fc932bc8be942a56434948e35cb2139a6432ce8ce4108d46436a578506",
-  originalRequirementDigest: "84821b87114b17721441933f91a2790f116570a29e696ac87a2d6d3be098d166",
-  governanceMetadataDigest: "ee0c399d50da4bea28d9a457f6e913fd37c758b3f64a225f51bfaf4e6736a34e",
+  recordCount: 106,
+  idDigest: "ac587e5ce4fefeb6c1b28e7c0cfab89e81e0e180b8e20d9cb7e087ef03219a67",
+  originalRequirementDigest: "f0a839e2fe278bb0c5a45347582b22f24e4e8c055b6201daef7441633f3e09fc",
+  governanceMetadataDigest: "651d332ca89cf25e4a8faaf91114d21274920eff26c8d85e7ce4c26406408235",
 };
 const adoptionPacketBaseline = {
   algorithm: "sha256-json-v1",

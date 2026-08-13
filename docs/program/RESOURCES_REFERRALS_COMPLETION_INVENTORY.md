@@ -29,16 +29,16 @@ These map to `RES-LENS-001`–`008` as `Implemented — Not Verified`.
 - organization-owned referral creation/send, exact recipient binding, consent, minimum sharing and external acquisition continuity;
 - typed lifecycle with immutable history and role-minimized projections;
 - real privacy-safe relationship paths and truthful external no-path state;
-- Shared Exchange selected-recipient, URL, map/detail/composer and return-context convergence from PR #160.
+- Shared Exchange selected-recipient, URL, map/detail/composer and return-context convergence from PR #160;
+- PR #186 candidate `6f160d84dd0f702e8546cbb421c17b2f3ac56dbd` corrected the shared Intelligence query-link selected-organization continuity seam and merged as `10150e66b4a1b37a0cda5381986c5599da96e632`.
 
-These map to `REF-LENS-001`–`009` as `Implemented — Not Verified`.
+`REF-LENS-001`–`009` and `REF-LENS-011` are `Implemented — Not Verified`. `REF-LENS-011` is no longer blocked by the historical PR #160 focus-link defect; independent acceptance remains pending.
 
 ### Open inventory
 
 | Record | Gap | Required action |
 | --- | --- | --- |
 | `REF-LENS-010` | The approved lens experience names a Starred view, but no governed star relation/completion evidence was found. | Confirm authority and persistence; issue a bounded Referrals packet or obtain explicit disposition. |
-| `REF-LENS-011` | Referral continuity depends on the uncorrected PR #160 Intelligence query-link focus behavior. | Consume the corrected/accepted Shared Exchange contract. |
 | `REF-LENS-012` | No whole-lens independent acceptance exists under the new model. | After requirements resolve, run Lane 06 and Lane 07 acceptance. |
 
 ## Initial packets

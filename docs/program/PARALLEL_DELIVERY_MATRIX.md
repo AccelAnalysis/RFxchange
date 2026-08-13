@@ -2,7 +2,7 @@
 
 **Canonical volatile program-status source**
 
-**Snapshot basis:** operational Control Room transition `7d4deb37377c0ad7bd027dab64acd44a4d1d2e66`; initial operational activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`; Slice 4.6 reconciliation activation base `347015829d64cfc596cdef1010601d8bda447818`; ISS-006 correction activation base `69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068`; Build → Release → Verify authority merge `4ca2a12f1d924ac559f87ebae0abc8fe42eac24b`; Exchange Room Phase 1 activation base `4ca2a12f1d924ac559f87ebae0abc8fe42eac24b` through Control Room PR #185
+**Snapshot basis:** operational Control Room transition `7d4deb37377c0ad7bd027dab64acd44a4d1d2e66`; initial operational activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`; Slice 4.6 reconciliation activation base `347015829d64cfc596cdef1010601d8bda447818`; ISS-006 correction activation base `69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068`; Build → Release → Verify authority merge `4ca2a12f1d924ac559f87ebae0abc8fe42eac24b`; Exchange Room Phase 1 activation PR #185 and merged implementation `10150e66b4a1b37a0cda5381986c5599da96e632`; Exchange Room Phase 2 activation base `10150e66b4a1b37a0cda5381986c5599da96e632` through Control Room PR #187
 **Update rule:** Control Room recalculates this document from merged `main` after every program merge.
 
 The Master Build Tracker remains the Feature-ID authority. This matrix reports independent experience verification and must not be used to rewrite tracker arithmetic.
@@ -13,12 +13,12 @@ The initial denominators are established by `governance/four-lens-requirements.j
 
 | Experience | Requirement denominator | Verified | In Progress | Implemented — Not Verified | Not Started | Blocked | Explicitly deferred/N/A |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Shared Exchange | 26 | 0 | 0 | 21 | 0 | 4 | 1 |
+| Shared Exchange | 27 | 0 | 0 | 22 | 1 | 3 | 1 |
 | Opportunities/RFx | 41 | 0 | 0 | 23 | 18 | 0 | 0 |
 | Resources | 12 | 0 | 0 | 8 | 2 | 2 | 0 |
 | Intelligence | 14 | 0 | 0 | 3 | 6 | 5 | 0 |
-| Referrals | 12 | 0 | 0 | 9 | 1 | 2 | 0 |
-| **Program total** | **105** | **0** | **0** | **64** | **27** | **13** | **1** |
+| Referrals | 12 | 0 | 0 | 10 | 1 | 1 | 0 |
+| **Program total** | **106** | **0** | **0** | **66** | **28** | **11** | **1** |
 
 No percentage is reported. This baseline deliberately distinguishes implementation/evidence from independent verification.
 
@@ -51,24 +51,32 @@ CI, builder narrative, Control Room merge/release authorization and product-owne
 
 ## Exchange Room Phase 1
 
-The immediate product critical path is now the **Exchange Room**, not completion of every lens/function.
+Exchange Room Phase 1 is merged and released through the canonical App Hosting path as **Implemented — Not Verified**.
 
-- PR #183 `b15d737bcf5292206f8d7119034c848aa3d8f73d` is the canonical progressive-room source candidate; its historical exact-head production CI #940 passed.
-- PR #174 `bc6d4f6dea158c7cdd359cc7bb64fd262e9bd7c1` is the selected-organization continuity source; its historical exact-head production CI #919 passed.
-- Both predate current `main` and must be reconciled.
-- PR #183 does not contain PR #174's selected-organization propagation through search, Clear, previous/next pagination and safe return. That continuity must be carried forward.
-- Do not merge #174 independently merely to preserve process shape. It may be superseded only after its substantive behavior is present and evidenced in the reconciled Phase 1 candidate.
-- Phase 1 release class is **Elevated** because controlled participants gain the shared Room while protected domain operations remain server-authorized.
-- Independent reviewer scarcity is certification debt, not a Phase 1 merge/release stop.
-- Phase 2 Lens Controller + 16-Action Registry is explicitly downstream and must not become a Phase 1 prerequisite.
+- PR #186 converged the progressive Room source PR #183 with PR #174 selected-organization continuity.
+- Candidate head: `6f160d84dd0f702e8546cbb421c17b2f3ac56dbd`.
+- Merge/current Phase 1 production source: `10150e66b4a1b37a0cda5381986c5599da96e632`.
+- Post-merge production CI #951 / run `31687342981` passed on that exact SHA.
+- Firebase App Hosting rollout for `rfxchange/us-east4/rfxchange` succeeded on that exact SHA.
+- `SHARED-CONTINUITY-002` and dependent `REF-LENS-011` are now `Implemented — Not Verified` from the PR #186 continuity correction; independent acceptance remains pending.
+- Authenticated real-Mapbox production health evidence remains explicit debt; this does not mark Phase 1 Verified or Stabilization 2C complete.
 
-Phase 1 is release-ready only after current-main reconciliation, exact-head CI, controlled/OPEN lifecycle evidence, unauthorized/restricted/wrong-organization negative tests, tenant/geography/privacy evidence, protected-domain-route negative tests, desktop/mobile configured-browser evidence, accessibility/five-locale evidence where applicable, #174 continuity coverage, and no known material unsafe finding.
+## Exchange Room Phase 2
+
+Phase 2 is the active **Elevated** shared participant-surface packet `WP-EXCHANGE-ROOM-PHASE2-01` at activation base `10150e66b4a1b37a0cda5381986c5599da96e632`.
+
+- All four permanent lenses are visible/selectable contexts of the same Exchange Room.
+- Exactly four stable action positions appear per lens, sixteen total.
+- Capability truthfulness is expressed at the individual action level: only the non-usable action is gray/disabled and non-actionable while its normal function label remains visible.
+- The product surface does not add visible unavailable/coming-soon status prose merely to explain a disabled action; internal reason and assistive semantics remain distinct and non-color-only.
+- Lane 01 owns the shared controller/registry implementation only; missing RFx, Resources, Intelligence and Referrals domain functions remain with their domain lanes.
+- Independent certification remains separate; Phase 2 builder output may reach only Implemented — Not Verified.
 
 ## Current participant lens availability
 
 The permanent order is exactly `Opportunities/RFx | Resources | Intelligence | Referrals`. Runtime availability remains controlled by current server-authorized behavior. Availability never broadens record or action authority merely because navigation or a shell is visible.
 
-The Phase 1 Room may expose governed unavailable actions/lenses without making them reachable. Full RFx, Resources, Intelligence, Referrals, Teaming, messaging, notifications, billing expansion and the eventual 16-action registry do **not** block Room entry/release.
+Phase 2 makes every permanent lens selectable as a real context of the same Exchange Room. Function availability does not disable the parent lens: only the individual non-usable action is gray/disabled and non-actionable. Full RFx, Resources, Intelligence, Referrals, Teaming, messaging, notifications and billing expansion do **not** have to be complete for the value architecture to be visible.
 
 ## Current workstreams
 
@@ -76,7 +84,8 @@ The Phase 1 Room may expose governed unavailable actions/lenses without making t
 | --- | --- | --- | --- | --- |
 | Program authority setup | 00 | Closed | PR #172 head `619b3794b59f1609d14596e59d9d2f045756c945`; merge `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`; post-merge production-ci #911 passed | complete |
 | Shared Experience Completion | 01 | Implemented — Not Verified | activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`; PR #174 `bc6d4f6dea158c7cdd359cc7bb64fd262e9bd7c1` | source behavior/provenance is consumed by Exchange Room Phase 1; supersede only after continuity is preserved |
-| Exchange Room Foundation Phase 1 | 01 | Active | activation base `4ca2a12f1d924ac559f87ebae0abc8fe42eac24b`; epoch `exchange-room-phase1-2026-08-12`; packet `WP-EXCHANGE-ROOM-PHASE1-01`; source PRs #183 `b15d737bcf5292206f8d7119034c848aa3d8f73d` + #174 `bc6d4f6dea158c7cdd359cc7bb64fd262e9bd7c1` | converge onto current main; merge as `Implemented — Not Verified` after Elevated merge gates; then post-merge CI + canonical production release/live verification; certification remains later debt |
+| Exchange Room Foundation Phase 1 | 01 | Implemented — Not Verified | activation base `4ca2a12f1d924ac559f87ebae0abc8fe42eac24b`; PR #186 candidate `6f160d84dd0f702e8546cbb421c17b2f3ac56dbd`; merge `10150e66b4a1b37a0cda5381986c5599da96e632`; post-merge CI #951 passed; App Hosting rollout succeeded | merged/released; authenticated real-map health and independent certification remain debt |
+| Exchange Room Phase 2 — Lens Controller + 16-Action Registry | 01 | Active | activation base `10150e66b4a1b37a0cda5381986c5599da96e632`; epoch `exchange-room-phase2-2026-08-13`; packet `WP-EXCHANGE-ROOM-PHASE2-01`; Control Room PR #187 | Lane 01 may implement the shared controller/registry only; max disposition `Implemented — Not Verified`; no domain completion or payment expansion in this packet |
 | Wave 4 Assurance | 06 | Blocked — independent reviewer unavailable | activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`; PR #178 `6f6a1b6a1c4a303458156780f8d715d5e48c3c58`; pending result 0 Verified / 11 Partial / 7 Blocked | cannot produce governed `Verified` dispositions while reviewer signal is unavailable; findings may still guide corrections under participant authority |
 | Intelligence Program | 03 | Implemented — Not Verified | activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`; PR #177 `c8e899ebe68ec10c383ba5fd58ce5269a6e6d8ab` | documentation/governance candidate may integrate under normal safe merge controls; no production requirement becomes Verified |
 | Resources Completion | 04 | Implemented — Not Verified | activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`; PR #176 `c9425df5726cadbbdcbf3a5b20b3378ef9f9e513` | inventory candidate may integrate under normal safe merge controls; no production requirement becomes Verified |
@@ -101,7 +110,7 @@ These candidates retain independent certification/review debt. Their lack of rev
 | #177 | `c8e899ebe68ec10c383ba5fd58ce5269a6e6d8ab` | Intelligence authority; independent certification/review debt remains where applicable |
 | #178 | `6f6a1b6a1c4a303458156780f8d715d5e48c3c58` | Lane 06 assurance artifact; qualifying independent certification signal unavailable |
 | #180 | `09a6c1bcad5c738482fc91aaa51a779aee3f299e` | activation policy-remediation correction; `Implemented — Not Verified`; any production release is Critical risk because it touches policy/lifecycle routing |
-| #183 | `b15d737bcf5292206f8d7119034c848aa3d8f73d` | canonical Phase 1 source candidate; must be reconciled with #174 and current main before merge/release; independent certification later |
+| #183 | `b15d737bcf5292206f8d7119034c848aa3d8f73d` | historical progressive Room source incorporated through PR #186; preserve provenance until supersession closure is reconciled |
 
 ## RFx corrective sequencing
 
@@ -122,7 +131,7 @@ Control Room recalculates stacking and merge order from merged `main` and the ex
 4. Exact-head CI/evidence and current-main reconciliation remain normal merge gates.
 5. No known material security/privacy/tenancy/integrity/authority finding may be ignored because CI is green or reviewer capacity is unavailable.
 6. Production release requires Standard/Elevated/Critical classification and the corresponding evidence/authorization/rollback controls.
-7. Exchange Room Phase 1 is **Elevated** and must satisfy the merge/release gates in `EXCHANGE_ROOM_PHASE1_CONTROL.md` and `WP-EXCHANGE-ROOM-PHASE1-01`.
+7. Exchange Room Phase 1 remains `Implemented — Not Verified`; Phase 2 is **Elevated** and must satisfy `EXCHANGE_ROOM_PHASE2_CONTROL.md` and `WP-EXCHANGE-ROOM-PHASE2-01` before its shared participant-surface implementation merges/releases.
 8. Merge/release does not promote tracker state or the Four-Lens Verified numerator.
 9. Lane 06 may audit an open, merged or deployed exact implementation; only its independently reviewed exact-SHA disposition may produce `Verified`.
 10. Lane 07 integration supplements requirement acceptance and may operate on merged unverified work without self-certifying it.
@@ -133,4 +142,4 @@ Control Room recalculates stacking and merge order from merged `main` and the ex
 - Production deployment may proceed where otherwise authorized, but source-SHA → build identity → rendered-SHA claims remain limited to evidence actually available.
 - B6b remains Not Started / intentionally pending.
 - B6c remains separate authority.
-- No Feature ID, Four-Lens requirement status, tracker total or Verified numerator changes through Phase 1 activation.
+- The appended `SHARED-LENS-CONTEXT-001` requirement increases the Four-Lens program denominator to 106 but does not change the Verified numerator or Master Build Tracker arithmetic. No existing requirement is marked Verified by Phase 2 activation.

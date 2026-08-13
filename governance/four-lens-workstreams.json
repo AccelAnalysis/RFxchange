@@ -116,6 +116,15 @@
         "WP-EXCHANGE-ROOM-PHASE1-01"
       ],
       "purpose": "Authorize Lane 01 to converge PR #183 progressive Exchange shell with PR #174 selected-organization continuity into one Elevated release candidate under Build → Release → Verify."
+    },
+    {
+      "id": "exchange-room-phase2-2026-08-13",
+      "mainBaseSha": "10150e66b4a1b37a0cda5381986c5599da96e632",
+      "controlPullRequest": 187,
+      "packetIds": [
+        "WP-EXCHANGE-ROOM-PHASE2-01"
+      ],
+      "purpose": "Authorize Lane 01 to implement the persistent Exchange Room lens controller and canonical sixteen-action registry: all four permanent lenses remain visible/selectable Room contexts while only individual non-usable actions are gray/disabled and non-actionable."
     }
   ],
   "lanes": [
@@ -691,8 +700,8 @@
         "src/infrastructure/rfx/**",
         "src/components/rfx/**",
         "app/opportunities/**",
-        "test/**",
-        "scripts/**",
+        "test/rfx42-iss006-*.test.mjs",
+        "scripts/rfx42-iss006-*.mjs",
         "docs/architecture/**"
       ],
       "nonOwnedPaths": [
@@ -724,7 +733,12 @@
       "lane": "shared-exchange",
       "owner": "Exchange Room Foundation Phase 1",
       "branch": "lane01/exchange-room-phase1",
-      "candidate": null,
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 186,
+        "sha": "6f160d84dd0f702e8546cbb421c17b2f3ac56dbd",
+        "mergeSha": "10150e66b4a1b37a0cda5381986c5599da96e632"
+      },
       "candidateHistory": [],
       "sourceCandidates": [
         {
@@ -741,7 +755,9 @@
       "exactBaseSha": "4ca2a12f1d924ac559f87ebae0abc8fe42eac24b",
       "activationEpochId": "exchange-room-phase1-2026-08-12",
       "basePolicy": "Post-amendment exact current-main successor convergence. PR #183 is the canonical Room target; preserve PR #174 SHARED-CONTINUITY-002 behavior and provenance while reconciling both onto current main.",
-      "status": "active",
+      "postMergeRunUrl": "https://github.com/AccelAnalysis/RFxchange/actions/runs/31687342981",
+      "postMergeMainSha": "10150e66b4a1b37a0cda5381986c5599da96e632",
+      "status": "implemented-not-verified",
       "releaseClass": "Elevated",
       "requirementIds": [
         "SHARED-CONTINUITY-002"
@@ -837,6 +853,103 @@
       ],
       "expectedOutput": "One reconciled Phase 1 Room candidate using PR #183 as the convergence target, preserving PR #174 selected-organization continuity, eligible to merge as Implemented — Not Verified and proceed through Elevated production release controls.",
       "stopBoundary": "Do not build the Phase 2 16-action registry/lens controller except a tiny compatibility normalization strictly necessary for Phase 1. Do not implement missing RFx, Resources, Intelligence, Referrals, Teaming, messaging, notifications, billing/commercial functions, change tracker completion, claim Stabilization 2C complete, or mark any requirement Verified."
+    },
+    {
+      "id": "WP-EXCHANGE-ROOM-PHASE2-01",
+      "lane": "shared-exchange",
+      "owner": "Exchange Room Phase 2 — Lens Controller + 16-Action Registry",
+      "branch": "lane01/exchange-room-phase2",
+      "candidate": null,
+      "candidateHistory": [],
+      "exactBaseSha": "10150e66b4a1b37a0cda5381986c5599da96e632",
+      "activationEpochId": "exchange-room-phase2-2026-08-13",
+      "basePolicy": "Exact current-main activation after Phase 1 merge. Current explicit product-owner direction authorizes the permanent lens containers as selectable Room contexts while capability truthfulness is enforced at the individual action level.",
+      "status": "active",
+      "releaseClass": "Elevated",
+      "requirementIds": [
+        "SHARED-LENS-CONTEXT-001",
+        "SHARED-SPATIAL-001",
+        "SHARED-CAMERA-001",
+        "SHARED-SELECTION-001",
+        "SHARED-CONTINUITY-001",
+        "SHARED-ACTIONS-001",
+        "SHARED-COPY-001",
+        "SHARED-A11Y-001"
+      ],
+      "sources": [
+        "docs/program/EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md",
+        "docs/program/EXCHANGE_ROOM_PHASE2_CONTROL.md",
+        "docs/program/MARKET_READY_BASELINE.md",
+        "docs/program/SHARED_EXCHANGE_CONTRACTS.md",
+        "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md",
+        "src/application/participant/participant-lens-registry.ts",
+        "src/application/participant/organization-actions.ts"
+      ],
+      "dependencies": [
+        {
+          "packetId": "WP-EXCHANGE-ROOM-PHASE1-01",
+          "requiredStatuses": [
+            "implemented-not-verified",
+            "acceptance-pending",
+            "verified",
+            "completed",
+            "closed"
+          ]
+        }
+      ],
+      "ownedPaths": [
+        "src/application/participant/**",
+        "src/components/participant/**",
+        "app/geography/canvas/**",
+        "src/i18n/messages/network/**",
+        "test/exchange-room-phase2-*.test.mjs",
+        "test/participant-lens-controller-phase2.test.mjs",
+        "test/participant-action-registry-phase2.test.mjs",
+        "scripts/acceptance-exchange-room-phase2*.mjs",
+        "scripts/validate-exchange-room-phase2*.mjs",
+        "docs/program/evidence/exchange-room-phase2/**"
+      ],
+      "nonOwnedPaths": [
+        "src/domain/rfx/**",
+        "src/domain/referrals/**",
+        "src/domain/resource-providers/**",
+        "functions/**",
+        "firestore.rules",
+        "docs/tracking/**"
+      ],
+      "acceptanceRequired": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "responsive",
+        "accessibility",
+        "copy",
+        "cross-lens",
+        "performance",
+        "five-locales",
+        "exact-head-ci",
+        "configured-browser",
+        "configured-map-when-available",
+        "independent-acceptance"
+      ],
+      "mergeGates": [
+        "exact immutable sixteen-action IDs, labels and ordering match EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md",
+        "exact-head production CI",
+        "four permanent lenses visible/selectable as shared Room contexts",
+        "exactly four action definitions per lens",
+        "only individual non-usable actions gray/disabled",
+        "disabled reason semantics remain internally distinct",
+        "no visible unavailable/coming-soon status prose added merely to explain disabled actions",
+        "lens switching preserves map/camera/selection continuity",
+        "existing real handlers remain truthful and authorized",
+        "disabled actions have no usable href/command/trigger",
+        "protected routes remain server-authoritative",
+        "tenant/geography/privacy negative evidence",
+        "desktop/mobile/accessibility/five-locale evidence",
+        "no known material unsafe finding"
+      ],
+      "expectedOutput": "One shared current-main Phase 2 candidate implementing a persistent lens controller and canonical sixteen-action registry. All four lenses remain visible/selectable Room contexts. Only individual inactive action controls are gray/disabled and non-actionable; no visible unavailable-status copy is added merely to explain the disabled state.",
+      "stopBoundary": "Do not implement missing RFx, Resources, Intelligence or Referrals domain features; Teaming; messaging; notifications expansion; payments/billing; commercial policy; tracker completion; or Independent Verification."
     }
   ]
 }

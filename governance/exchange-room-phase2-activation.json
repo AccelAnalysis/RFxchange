@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "authority": "docs/program/EXCHANGE_ROOM_PHASE2_CONTROL.md",
+  "activationEpoch": {
+    "id": "exchange-room-phase2-2026-08-13",
+    "mainBaseSha": "10150e66b4a1b37a0cda5381986c5599da96e632",
+    "controlPullRequest": 187,
+    "packetIds": [
+      "WP-EXCHANGE-ROOM-PHASE2-01"
+    ],
+    "purpose": "Authorize Lane 01 to implement the shared Exchange Room lens controller and canonical 16-action registry while keeping every permanent lens visible/selectable and disabling only individual unavailable action controls."
+  },
+  "workPacket": {
+    "id": "WP-EXCHANGE-ROOM-PHASE2-01",
+    "lane": "shared-exchange",
+    "owner": "Exchange Room Phase 2 — Lens Controller + 16-Action Registry",
+    "branch": "lane01/exchange-room-phase2",
+    "candidate": null,
+    "candidateHistory": [],
+    "exactBaseSha": "10150e66b4a1b37a0cda5381986c5599da96e632",
+    "activationEpochId": "exchange-room-phase2-2026-08-13",
+    "basePolicy": "Exact current-main activation after Phase 1 merge. Current explicit product-owner direction authorizes the permanent lens containers as selectable Room contexts while capability truthfulness is enforced at the individual action level.",
+    "status": "active",
+    "releaseClass": "Elevated",
+    "requirementIds": [
+      "SHARED-LENS-CONTEXT-001",
+      "SHARED-SPATIAL-001",
+      "SHARED-CAMERA-001",
+      "SHARED-SELECTION-001",
+      "SHARED-CONTINUITY-001",
+      "SHARED-ACTIONS-001",
+      "SHARED-COPY-001",
+      "SHARED-A11Y-001"
+    ],
+    "sources": [
+      "docs/program/EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md",
+      "docs/program/EXCHANGE_ROOM_PHASE2_CONTROL.md",
+      "docs/program/MARKET_READY_BASELINE.md",
+      "docs/program/SHARED_EXCHANGE_CONTRACTS.md",
+      "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md",
+      "src/application/participant/participant-lens-registry.ts",
+      "src/application/participant/organization-actions.ts"
+    ],
+    "dependencies": [
+      {
+        "packetId": "WP-EXCHANGE-ROOM-PHASE1-01",
+        "requiredStatuses": [
+          "implemented-not-verified",
+          "acceptance-pending",
+          "verified",
+          "completed",
+          "closed"
+        ]
+      }
+    ],
+    "ownedPaths": [
+      "src/application/participant/**",
+      "src/components/participant/**",
+      "app/geography/canvas/**",
+      "src/i18n/messages/network/**",
+      "test/exchange-room-phase2-*.test.mjs",
+      "test/participant-lens-controller-phase2.test.mjs",
+      "test/participant-action-registry-phase2.test.mjs",
+      "scripts/acceptance-exchange-room-phase2*.mjs",
+      "scripts/validate-exchange-room-phase2*.mjs",
+      "docs/program/evidence/exchange-room-phase2/**"
+    ],
+    "nonOwnedPaths": [
+      "src/domain/rfx/**",
+      "src/domain/referrals/**",
+      "src/domain/resource-providers/**",
+      "functions/**",
+      "firestore.rules",
+      "docs/tracking/**"
+    ],
+    "acceptanceRequired": [
+      "functional",
+      "domain-security",
+      "browser-visual",
+      "responsive",
+      "accessibility",
+      "copy",
+      "cross-lens",
+      "performance",
+      "four-visible-selectable-lenses",
+      "exactly-four-actions-per-lens",
+      "individual-action-disabled-state-only",
+      "room-spatial-continuity",
+      "selected-organization-continuity",
+      "tenant-geography-privacy",
+      "five-locales",
+      "exact-head-ci",
+      "configured-browser",
+      "configured-map-when-available",
+      "independent-acceptance"
+    ],
+    "expectedOutput": "One shared current-main Phase 2 candidate implementing a persistent lens controller and canonical sixteen-action registry. All four lenses remain visible/selectable Room contexts. Only individual inactive action controls are gray/disabled and non-actionable; no visible unavailable-status copy is added merely to explain the disabled state.",
+    "stopBoundary": "Do not implement missing domain features, Teaming, Intelligence datasets, Resource Provider workflows, referral lifecycle expansion, messaging, notifications, billing/payments, commercial policy, tracker completion, or Independent Verification."
+  },
+  "phase1EvidenceDebt": {
+    "mergeSha": "10150e66b4a1b37a0cda5381986c5599da96e632",
+    "appHostingRollout": "success",
+    "realAuthenticatedMapHealth": "pending",
+    "stabilization2C": "not-complete",
+    "certification": "pending"
+  },
+  "productOwnerDirection": {
+    "marketReadyBaseline": "register → organization → Exchange Room/real market → four permanent lenses/value architecture → Founding Membership → live payment → recognized paid member",
+    "lensRule": "Every permanent lens remains visible and selectable as a real context of the shared Exchange Room regardless of unfinished functions.",
+    "actionRule": "Only the individual function button that is not usable for the current participant/selection is gray/disabled. Preserve its normal label and do not add visible unavailable/coming-soon style status copy merely to explain the disabled state.",
+    "reasonSemantics": "The projection must still distinguish not-operational, not-applicable and not-authorized reasons internally and in non-color-only accessibility/state semantics without adding visible status prose to the action grid."
+  }
+}
