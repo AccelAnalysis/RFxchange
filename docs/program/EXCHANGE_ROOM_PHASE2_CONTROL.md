@@ -39,6 +39,22 @@ Permanent order:
 Opportunities/RFx | Resources | Intelligence | Referrals
 ```
 
+## Authority reconciliation — lens container versus function availability
+
+The adopted `SHARED-TRUTH-001` requirement is immutable historical authority and is not rewritten by this packet. Its original capability-truthfulness language says an unavailable permanent lens remains visible, explicit, non-actionable and non-current.
+
+The current explicit product-owner instruction intentionally changes the product model for the **lens container** in Phase 2. Under the authority order in `AGENTS.md`, this packet is the bounded successor/reconciliation for that behavior:
+
+- all four permanent lenses are real selectable contexts of the same shared Exchange Room;
+- selecting a lens does not assert that every function in that lens exists or is complete;
+- therefore the lens container itself is not treated as an unavailable feature merely because one or more functions are unfinished;
+- capability truthfulness moves to the individual action projection inside the selected lens;
+- domain routes, data and protected operations remain independently authorized and are never granted by selecting the lens.
+
+This is not permission to create a fake standalone runtime for an unfinished domain. The real runtime for every permanent lens is the shared Exchange Room controller plus that lens's truthful action projection. Existing dedicated domain routes are handlers/deep links only when real and authorized.
+
+The old `SHARED-TRUTH-001` text remains preserved in `governance/four-lens-requirements.json`; Independent Acceptance for this packet must evaluate the current explicit task plus this successor authority rather than silently changing the historical requirement text.
+
 ## Non-negotiable presentation rule
 
 Every permanent lens is always visible and selectable for a qualified participant in the Exchange Room.
@@ -52,8 +68,10 @@ For each action position:
 - if the function is currently operational and authorized for the current viewer/selected-organization relationship, render the action as a normal active control;
 - if the function is not operational, not applicable to the current relationship, or not authorized for that participant, render only that individual action control in the governed disabled/gray state;
 - the disabled action retains its normal function label so the value architecture remains legible;
-- do not add participant-facing status copy such as `Unavailable`, `Not yet available`, `Coming soon`, `In development`, or equivalent explanatory verbiage merely to explain the disabled state;
-- non-visible accessibility semantics such as native `disabled` and/or `aria-disabled` are required as appropriate;
+- do not add **visible** participant-facing status copy such as `Unavailable`, `Not yet available`, `Coming soon`, `In development`, or equivalent explanatory verbiage merely to explain the disabled state;
+- the projection must still distinguish internally between at least `not-operational`, `not-applicable`, and `not-authorized`; those states must not be collapsed in authorization logic or evidence;
+- disabled presentation must not rely on color alone: use native disabled behavior and/or `aria-disabled`, appropriate disabled affordance beyond hue alone, and assistive semantics while preserving the normal visible function label;
+- if an assistive description is required to satisfy accessibility, it may be visually hidden rather than adding visible status prose to the action grid;
 - disabled actions have no usable href, command, modal trigger, drawer trigger, route transition, mutation, or protected workflow invocation.
 
 The interface should communicate the complete shape of the Exchange through stable lens and action labels, while active versus gray action controls quietly communicate what can be used now.
@@ -125,7 +143,7 @@ Where a governed action label/value proposition exists but its real handler is n
 
 Where current authority genuinely conflicts or does not support a proposed action meaning, stop on that individual action definition and surface the conflict to Control Room rather than fabricating semantics.
 
-The registry should separate at least:
+The registry must separate at least:
 
 - stable action identity;
 - owning lens;
@@ -133,9 +151,12 @@ The registry should separate at least:
 - relationship/applicability projection;
 - runtime availability;
 - authorization outcome or safe projection input;
+- disabled reason state (`not-operational`, `not-applicable`, `not-authorized`, or a stricter governed equivalent);
 - handler kind;
 - handler target/adapter when active;
 - disabled state when inactive.
+
+The participant-facing action grid may present those disabled reasons through the single governed gray/disabled treatment without visible status prose, but tests/evidence must prove the reasons remain semantically distinct and do not widen authorization.
 
 Do not encode authorization solely as client-visible booleans if the protected operation requires server authority.
 
@@ -200,7 +221,7 @@ The market-ready baseline does **not** require all sixteen actions to be active.
 2. the participant can enter the real Exchange Room and see the authorized market;
 3. all four permanent lenses are visible/selectable;
 4. every lens exposes exactly four stable function labels;
-5. only the individual unavailable function buttons are gray/disabled;
+5. only the individual non-usable function buttons are gray/disabled;
 6. active actions are truthful and authorized;
 7. the participant can reach and complete the separately governed Founding Membership payment journey.
 
@@ -250,7 +271,9 @@ Lane 01 must produce one current-main candidate and show, at minimum:
 - active action handler continuity for existing authorized functions;
 - disabled individual actions are gray and non-actionable;
 - no whole-lens disabled treatment;
-- no participant-facing `Unavailable` / `Coming soon` / equivalent action-status copy introduced by this packet;
+- no **visible** participant-facing `Unavailable` / `Coming soon` / equivalent action-status copy introduced by this packet;
+- disabled reason states remain internally distinct and testable;
+- disabled presentation is not color-only and preserves assistive semantics;
 - disabled actions have no usable href/command/trigger;
 - protected direct routes remain server-authoritative;
 - stale/cross-scope selected organization remains non-authorizing;
