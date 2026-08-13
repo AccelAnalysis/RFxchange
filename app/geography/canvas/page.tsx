@@ -13,6 +13,7 @@ import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
+import { createServerFirestoreFoundationRepositories } from "@/src/infrastructure/firestore/runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
 import { loadAuthorizedNetworkDiscovery } from "@/src/infrastructure/network-discovery/runtime";
 import { loadOptionalOfficialResourceProviderOrganizationIds } from "@/src/infrastructure/resource-network/discovery-runtime";
@@ -105,14 +106,18 @@ export default async function GeographyCanvasPage({
     requestedOrganizationId,
     acquisitionIntent,
   );
-  const discovery = await loadAuthorizedNetworkDiscovery({
-    access: authenticated.access,
-    mapProjection: authenticated.mapProjection,
-    capability,
-    serviceGeographyId,
-    page,
-    focusedOrganizationId: selectedOrganizationId,
-  });
+  const foundation = createServerFirestoreFoundationRepositories();
+  const [discovery, organizationAuthorization] = await Promise.all([
+    loadAuthorizedNetworkDiscovery({
+      access: authenticated.access,
+      mapProjection: authenticated.mapProjection,
+      capability,
+      serviceGeographyId,
+      page,
+      focusedOrganizationId: selectedOrganizationId,
+    }),
+    foundation.organizationAuthorization.getByMembershipId(authenticated.access.membership.id),
+  ]);
   let focusedOrganization = discovery.available && selectedOrganizationId
     ? discovery.projection.organizations.find(
         (organization) => String(organization.organizationId) === selectedOrganizationId,
@@ -143,6 +148,7 @@ export default async function GeographyCanvasPage({
       selectedGeographyId: String(authenticated.mapProjection.model.selectedGeography.id),
     })
     : [];
+  const organizationPermissions = organizationAuthorization?.permissions ?? [];
 
   return (
     <>
@@ -162,6 +168,11 @@ export default async function GeographyCanvasPage({
         serviceAreaOptions={discovery.available ? discovery.serviceAreaOptions : []}
         officialResourceProviderOrganizationIds={officialResourceProviderOrganizationIds}
         operationalActionsAvailable={authenticated.access.state.lifecycleState === "open-platform"}
+        actionAuthorization={{
+          rfxCreate: organizationPermissions.includes("rfx.create"),
+          referralManage: organizationPermissions.includes("referral.manage"),
+          resourceManage: organizationPermissions.includes("resource.manage"),
+        }}
       />
     </>
   );
