@@ -8,4 +8,6 @@ The defining presentation correction is:
 
 This direction is incorporated by `EXCHANGE_ROOM_PHASE2_CONTROL.md` and `MARKET_READY_BASELINE.md`.
 
+The successor behavior is canonically identified as `SHARED-LENS-CONTEXT-001`. The historical `SHARED-TRUTH-001` requirement remains immutable and separately dispositioned; Phase 2 does not repurpose that historical requirement as its acceptance identity.
+
 Phase 1 authenticated real-map production health evidence remains pending and is preserved as evidence debt rather than silently rewritten as passed. Phase 2 may proceed under this direct product authorization without converting that debt into `Verified` state.
