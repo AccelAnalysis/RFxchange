@@ -1,89 +1,28 @@
 import type { ParticipantLensId } from "./participant-lens-registry";
 
 export const EXCHANGE_ROOM_ACTION_IDS = [
-  "opportunities.find",
-  "opportunities.create-rfx",
-  "opportunities.pursue-respond",
-  "opportunities.team",
-  "resources.find-providers",
-  "resources.browse-resources",
-  "resources.my-requests",
-  "resources.provider-status",
-  "intelligence.organizations",
-  "intelligence.capabilities",
-  "intelligence.locations",
-  "intelligence.layers",
-  "referrals.new",
-  "referrals.sent",
-  "referrals.received",
-  "referrals.starred",
+  "opportunities.find", "opportunities.create-rfx", "opportunities.pursue-respond", "opportunities.team",
+  "resources.find-providers", "resources.browse-resources", "resources.my-requests", "resources.provider-status",
+  "intelligence.organizations", "intelligence.capabilities", "intelligence.locations", "intelligence.layers",
+  "referrals.new", "referrals.sent", "referrals.received", "referrals.starred",
 ] as const;
-
 export type ExchangeRoomActionId = (typeof EXCHANGE_ROOM_ACTION_IDS)[number];
-export type ExchangeRoomActionDisabledReason =
-  | "not-operational"
-  | "not-applicable"
-  | "not-authorized";
-
-export type ExchangeRoomActionHandler =
-  | Readonly<{ kind: "href"; href: string }>
-  | Readonly<{ kind: "network-focus"; intent: "organizations" | "capabilities" }>;
-
+export type ExchangeRoomActionDisabledReason = "not-operational" | "not-applicable" | "not-authorized";
+export type ExchangeRoomActionHandler = Readonly<{ kind: "href"; href: string }> | Readonly<{ kind: "network-focus"; intent: "organizations" | "capabilities" }>;
 type ApplicabilityRule = "any" | "viewer-organization" | "opportunity-context";
-type AuthorizationRule =
-  | "room-participant"
-  | "open-platform"
-  | "open-platform-rfx-create"
-  | "open-platform-referral-manage"
-  | "open-platform-resource-manage";
-type HandlerRule =
-  | "opportunity-discovery"
-  | "rfx-issuer"
-  | "opportunity-detail"
-  | "resource-discovery"
-  | "resource-browse"
-  | "resource-requests"
-  | "provider-status"
-  | "network-organizations"
-  | "network-capabilities"
-  | "referral-new"
-  | "referral-sent"
-  | "referral-received"
-  | null;
+type AuthorizationRule = "room-participant" | "open-platform" | "open-platform-rfx-create" | "open-platform-referral-manage" | "open-platform-resource-manage";
+type HandlerRule = "opportunity-discovery" | "rfx-issuer" | "opportunity-detail" | "resource-discovery" | "resource-browse" | "resource-requests" | "provider-status" | "network-organizations" | "network-capabilities" | "referral-new" | "referral-sent" | "referral-received" | null;
 
-export interface ExchangeRoomActionDefinition {
-  readonly id: ExchangeRoomActionId;
-  readonly lens: ParticipantLensId;
-  readonly order: 1 | 2 | 3 | 4;
-  readonly canonicalLabel: string;
-  readonly labelKey: string;
-  readonly operational: boolean;
-  readonly applicability: ApplicabilityRule;
-  readonly authorization: AuthorizationRule;
-  readonly handler: HandlerRule;
-}
-
-export interface ExchangeRoomActionProjection extends ExchangeRoomActionDefinition {
-  readonly operational: boolean;
-  readonly applicable: boolean;
-  readonly authorized: boolean;
-  readonly availability: "active" | "disabled";
-  readonly disabledReason: ExchangeRoomActionDisabledReason | null;
-  readonly resolvedHandler: ExchangeRoomActionHandler | null;
-}
-
+export interface ExchangeRoomActionDefinition { readonly id: ExchangeRoomActionId; readonly lens: ParticipantLensId; readonly order: 1 | 2 | 3 | 4; readonly canonicalLabel: string; readonly labelKey: string; readonly operational: boolean; readonly applicability: ApplicabilityRule; readonly authorization: AuthorizationRule; readonly handler: HandlerRule; }
+export interface ExchangeRoomActionProjection extends ExchangeRoomActionDefinition { readonly operational: boolean; readonly applicable: boolean; readonly authorized: boolean; readonly availability: "active" | "disabled"; readonly disabledReason: ExchangeRoomActionDisabledReason | null; readonly resolvedHandler: ExchangeRoomActionHandler | null; }
 export interface ExchangeRoomActionProjectionInput {
   readonly activeLens: ParticipantLensId;
   readonly viewerOrganizationId: string;
   readonly selectedOrganizationId: string;
   readonly selectedOrganizationIsOfficialResourceProvider: boolean;
   readonly openPlatformActionsAuthorized: boolean;
-  readonly networkDiscoveryAvailable: boolean;
-  readonly actionAuthorization: Readonly<{
-    rfxCreate: boolean;
-    referralManage: boolean;
-    resourceManage: boolean;
-  }>;
+  readonly networkDiscoveryAvailable?: boolean;
+  readonly actionAuthorization?: Readonly<{ rfxCreate: boolean; referralManage: boolean; resourceManage: boolean }>;
   readonly currentOpportunityReference?: string | null;
 }
 
@@ -105,7 +44,6 @@ const DEFINITIONS: readonly ExchangeRoomActionDefinition[] = Object.freeze([
   Object.freeze({ id: "referrals.received", lens: "referrals", order: 3, canonicalLabel: "Received", labelKey: "networkWorkspace.exchangeRoom.actions.referrals.received", operational: true, applicability: "any", authorization: "open-platform", handler: "referral-received" }),
   Object.freeze({ id: "referrals.starred", lens: "referrals", order: 4, canonicalLabel: "Starred", labelKey: "networkWorkspace.exchangeRoom.actions.referrals.starred", operational: false, applicability: "any", authorization: "open-platform", handler: null }),
 ]);
-
 export const EXCHANGE_ROOM_ACTION_REGISTRY = DEFINITIONS;
 
 function applicable(definition: ExchangeRoomActionDefinition, input: ExchangeRoomActionProjectionInput): boolean {
@@ -113,22 +51,19 @@ function applicable(definition: ExchangeRoomActionDefinition, input: ExchangeRoo
   if (definition.applicability === "opportunity-context") return Boolean(input.currentOpportunityReference);
   return true;
 }
-
 function authorized(definition: ExchangeRoomActionDefinition, input: ExchangeRoomActionProjectionInput): boolean {
   if (definition.authorization === "room-participant") return true;
   if (!input.openPlatformActionsAuthorized) return false;
-  if (definition.authorization === "open-platform-rfx-create") return input.actionAuthorization.rfxCreate;
-  if (definition.authorization === "open-platform-referral-manage") return input.actionAuthorization.referralManage;
-  if (definition.authorization === "open-platform-resource-manage") return input.actionAuthorization.resourceManage;
+  if (definition.authorization === "open-platform-rfx-create") return input.actionAuthorization?.rfxCreate ?? false;
+  if (definition.authorization === "open-platform-referral-manage") return input.actionAuthorization?.referralManage ?? false;
+  if (definition.authorization === "open-platform-resource-manage") return input.actionAuthorization?.resourceManage ?? false;
   return true;
 }
-
 function runtimeOperational(definition: ExchangeRoomActionDefinition, input: ExchangeRoomActionProjectionInput): boolean {
   if (!definition.operational) return false;
-  if ((definition.handler === "network-organizations" || definition.handler === "network-capabilities") && !input.networkDiscoveryAvailable) return false;
+  if ((definition.handler === "network-organizations" || definition.handler === "network-capabilities") && !(input.networkDiscoveryAvailable ?? false)) return false;
   return true;
 }
-
 function resourceTarget(input: ExchangeRoomActionProjectionInput): string {
   if (input.selectedOrganizationId !== input.viewerOrganizationId && input.selectedOrganizationIsOfficialResourceProvider) {
     const selected = encodeURIComponent(input.selectedOrganizationId);
@@ -136,7 +71,6 @@ function resourceTarget(input: ExchangeRoomActionProjectionInput): string {
   }
   return "/resources";
 }
-
 function resolveHandler(definition: ExchangeRoomActionDefinition, input: ExchangeRoomActionProjectionInput): ExchangeRoomActionHandler | null {
   switch (definition.handler) {
     case "opportunity-discovery": return Object.freeze({ kind: "href", href: "/opportunities" });
@@ -154,35 +88,14 @@ function resolveHandler(definition: ExchangeRoomActionDefinition, input: Exchang
     default: return null;
   }
 }
-
-export function exchangeRoomActionDefinitionsForLens(lens: ParticipantLensId): readonly ExchangeRoomActionDefinition[] {
-  return Object.freeze(DEFINITIONS.filter((definition) => definition.lens === lens));
-}
-
+export function exchangeRoomActionDefinitionsForLens(lens: ParticipantLensId): readonly ExchangeRoomActionDefinition[] { return Object.freeze(DEFINITIONS.filter((definition) => definition.lens === lens)); }
 export function projectExchangeRoomActions(input: ExchangeRoomActionProjectionInput): readonly ExchangeRoomActionProjection[] {
   return Object.freeze(exchangeRoomActionDefinitionsForLens(input.activeLens).map((definition) => {
     const isOperational = runtimeOperational(definition, input);
     const isApplicable = applicable(definition, input);
     const isAuthorized = authorized(definition, input);
     const resolvedHandler = isOperational && isApplicable && isAuthorized ? resolveHandler(definition, input) : null;
-    const disabledReason: ExchangeRoomActionDisabledReason | null = !isOperational
-      ? "not-operational"
-      : !isApplicable
-        ? "not-applicable"
-        : !isAuthorized
-          ? "not-authorized"
-          : resolvedHandler
-            ? null
-            : "not-operational";
-
-    return Object.freeze({
-      ...definition,
-      operational: isOperational,
-      applicable: isApplicable,
-      authorized: isAuthorized,
-      availability: resolvedHandler ? "active" as const : "disabled" as const,
-      disabledReason,
-      resolvedHandler,
-    });
+    const disabledReason: ExchangeRoomActionDisabledReason | null = !isOperational ? "not-operational" : !isApplicable ? "not-applicable" : !isAuthorized ? "not-authorized" : resolvedHandler ? null : "not-operational";
+    return Object.freeze({ ...definition, operational: isOperational, applicable: isApplicable, authorized: isAuthorized, availability: resolvedHandler ? "active" as const : "disabled" as const, disabledReason, resolvedHandler });
   }));
 }
