@@ -1,19 +1,42 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-const root=new URL("../",import.meta.url); const read=(p)=>readFileSync(new URL(p,root),"utf8");
-test("Room authorization endpoint projects only required permission booleans",()=>{
-  const source=read("app/geography/canvas/action-authorization/route.ts");
-  for(const permission of ["rfx.create","referral.manage","resource.manage"]) assert.ok(source.includes(permission));
-  assert.match(source,/access\.kind !== "authorized"/); assert.match(source,/lifecycleState !== "open-platform"/);
+
+const root = new URL("../", import.meta.url);
+const read = (path) => readFileSync(new URL(path, root), "utf8");
+
+test("Room authorization endpoint projects only required permission booleans", () => {
+  const source = read("app/geography/canvas/action-authorization/route.ts");
+  for (const permission of ["rfx.create", "referral.manage", "resource.manage"]) {
+    assert.ok(source.includes(permission));
+  }
+  assert.match(source, /access\.kind !== "authorized"/);
+  assert.match(source, /lifecycleState !== "open-platform"/);
 });
-test("shared controller hydrates authorization fail-closed and requires discovery UI",()=>{
-  const source=read("src/components/participant/ExchangeRoomActionController.tsx");
-  assert.match(source,/DENIED_ACTION_AUTHORIZATION/); assert.match(source,/action-authorization/);
-  assert.ok(source.includes('form[action="/geography/canvas"]')); assert.match(source,/reopenExchangeRoomActionPanel/);
+
+test("shared controller hydrates authorization fail-closed and requires discovery UI", () => {
+  const source = read("src/components/participant/ExchangeRoomActionController.tsx");
+  assert.match(source, /DENIED_ACTION_AUTHORIZATION/);
+  assert.match(source, /action-authorization/);
+  assert.ok(source.includes('form[action="/geography/canvas"]'));
 });
-test("lens recovery reopens the persisted panel without changing selection or camera",()=>{
-  const source=read("src/application/participant/exchange-room-spatial-controls.ts");
-  assert.match(source,/\.\.\.context/); assert.match(source,/panelOpen: true/);
-  assert.doesNotMatch(source,/selection:/); assert.doesNotMatch(source,/camera:/);
+
+test("closing organization detail cannot remove the shared four-action architecture", () => {
+  const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
+  const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
+  assert.equal((workspace.match(/<ExchangeRoomActionController/g) ?? []).length, 1);
+  assert.ok(workspace.indexOf("<ExchangeRoomActionController") < workspace.indexOf("{panelOpen ? ("));
+  assert.match(workspace, /onClick=\{\(\) => updatePanel\(false\)\}/);
+  assert.match(styles, /\.actionGrid \{[\s\S]*?position: absolute;[\s\S]*?z-index: 40;/);
+});
+
+test("ordinary mobile lens selection is in-place without swallowing the menu close handler", () => {
+  const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
+  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
+  assert.match(controller, /event\.preventDefault\(\)/);
+  assert.doesNotMatch(controller, /stopPropagation/);
+  assert.doesNotMatch(controller, /reopenExchangeRoomActionPanel/);
+  assert.match(navigation, /function closeMobileLensMenu/);
+  assert.match(navigation, /onNavigate=\{closeMobileLensMenu\}/);
+  assert.match(navigation, /event\.currentTarget\.open = false/);
 });
