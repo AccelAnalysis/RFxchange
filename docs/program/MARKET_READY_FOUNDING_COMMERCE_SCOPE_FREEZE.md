@@ -8,6 +8,8 @@ PR #188's base SHA is Control Room provenance only. After #188 merges, Control R
 
 Required foundations are the merged `COM-038` commercial boundary, current organization authorization, current Founding acquisition/offer surfaces, and the current MRFC registry. Phase 2 runs in parallel and is not a commercial implementation dependency. `COM-039`–`COM-041` remain unresolved and are not redefined here.
 
+The existing Firebase Functions background-job runner/store are consumed as shared infrastructure under the existing webhook extension convention. This packet does not own or rewrite those shared files unless a later Control Room scope amendment explicitly permits it.
+
 ## Owned paths
 
 - `src/domain/commercial/**`
@@ -30,10 +32,18 @@ Required foundations are the merged `COM-038` commercial boundary, current organ
 - `.env.example`
 - `package.json`
 - `package-lock.json`
+- `functions/package.json`
+- `functions/src/index.ts`
+- `functions/src/market-ready-founding-commerce-functions.ts`
+- `functions/src/application/market-ready-founding-commerce-*.ts`
+- `functions/src/runtime/market-ready-founding-commerce-*.ts`
+- `functions/test/market-ready-founding-commerce-*.test.mjs`
 - `test/firestore-schema.test.mjs`
 - `test/market-ready-founding-commerce-*.test.mjs`
 - `scripts/validate-market-ready-founding-commerce-*.mjs`
 - `docs/program/evidence/market-ready-founding-commerce/**`
+
+The Functions entrypoint is owned only to export the bounded commercial webhook function. `functions/package.json` and the root lockfile are owned only for dependencies required by that commercial adapter. New Functions application/runtime/test files must use the `market-ready-founding-commerce-` prefix. Shared background-job runner/store files remain read-only dependencies.
 
 The canonical Firestore schema file and its existing exact-schema test are owned only for the commercial registration required by existing schema conventions. Marketing locale files are owned only for bounded Founding-offer reconciliation.
 
@@ -50,6 +60,9 @@ No other path is implicitly owned. A newly discovered path requirement needs a C
 - Resources domain paths
 - Intelligence analytical paths
 - Referrals domain paths
+- `functions/src/application/background-jobs.ts`
+- `functions/src/runtime/firestore-background-job-store.ts`
+- other shared Functions runtime files not explicitly listed above
 - `governance/four-lens-requirements.json`
 - `governance/four-lens-workstreams.json`
 - Independent Acceptance dispositions/evidence
