@@ -10,4 +10,13 @@ This direction is incorporated by `EXCHANGE_ROOM_PHASE2_CONTROL.md` and `MARKET_
 
 The successor behavior is canonically identified as `SHARED-LENS-CONTEXT-001`. The historical `SHARED-TRUTH-001` requirement remains immutable and separately dispositioned; Phase 2 does not repurpose that historical requirement as its acceptance identity.
 
+The sixteen permanent action identities are frozen by `EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md`:
+
+- Opportunities/RFx — `Find Opportunities`, `Create RFx`, `Pursue / Respond`, `Team`;
+- Resources — `Find Providers`, `Browse Resources`, `My Requests`, `Provider Status`;
+- Intelligence — `Organizations`, `Capabilities`, `Locations`, `Intelligence Layers`;
+- Referrals — `New Referral`, `Sent`, `Received`, `Starred`.
+
+These labels are the stable value architecture, not a statement that every handler is operational. Lane 01 may attach existing real authorized handlers or leave the individual fixed action gray/disabled; it may not rename/reorder the sixteen positions or build missing domain behavior merely to activate a button.
+
 Phase 1 authenticated real-map production health evidence remains pending and is preserved as evidence debt rather than silently rewritten as passed. Phase 2 may proceed under this direct product authorization without converting that debt into `Verified` state.
