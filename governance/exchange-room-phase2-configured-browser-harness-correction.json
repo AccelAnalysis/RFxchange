@@ -1,0 +1,10 @@
+{
+  "packet": "WP-EXCHANGE-ROOM-PHASE2-01",
+  "kind": "shared-test-authority-debt",
+  "ownedBy": "00-control-room",
+  "implementationCandidate": 191,
+  "staleHarness": "scripts/acceptance-exchange-shell-emulator.mjs",
+  "requiredCorrection": "Ordinary permanent-lens activation must be tested as an in-place Exchange Room context change when the Phase 2 controller is present, while preserving legacy/deep-link href truth and utility navigation.",
+  "lane01MayModifyHarness": false,
+  "status": "open"
+}
