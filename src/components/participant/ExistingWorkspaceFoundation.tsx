@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import type {
   NetworkDiscoveryOrganization,
   NetworkDiscoveryProjection,
 } from "../../application/network-discovery/network-discovery";
+import { projectExchangeRoomActions } from "../../application/participant/exchange-room-actions";
+import type { ParticipantLensId } from "../../application/participant/participant-lens-registry";
 import type { ParticipantSpatialScope } from "../../application/participant/participant-spatial-context";
-import { projectOrganizationActions } from "../../application/participant/organization-actions";
 import type { NetworkServiceAreaOption } from "../../infrastructure/network-discovery/runtime";
 import { formatDate } from "../../i18n/format";
 import { useI18n } from "../i18n/I18nProvider";
@@ -23,6 +24,10 @@ import {
   StatePanel,
   StatusPill,
 } from "../ui";
+import {
+  ExchangeRoomActionController,
+  useExchangeRoomLensController,
+} from "./ExchangeRoomActionController";
 import {
   MapOverlaySurface,
   ParticipantShell,
@@ -55,11 +60,6 @@ interface ExistingWorkspaceFoundationProps {
   readonly status?: ExistingWorkspaceStatus;
 }
 
-const MAP_ONLY_UNAVAILABLE_LENSES = Object.freeze([
-  "opportunities-rfx",
-  "resources",
-  "referrals",
-] as const);
 const MAP_ONLY_UNAVAILABLE_UTILITIES = Object.freeze(["quick-start"] as const);
 
 function buildDiscoveryUrl(input: Readonly<{
@@ -117,8 +117,7 @@ function WorkspaceBoundary({
   const href = actionHref[status];
   return (
     <ParticipantShell
-      activeItem="Network"
-      unavailableLensIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_LENSES}
+      activeItem="intelligence"
       unavailableUtilityIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_UTILITIES}
     >
       <main className={styles.stateWorkspace} aria-label={t("networkWorkspace.status.ariaLabel")}>
@@ -155,6 +154,7 @@ export function ExistingWorkspaceFoundation({
     activeLens: "intelligence",
   });
   const resultListRef = useRef<HTMLUListElement | null>(null);
+  const networkSearchInputRef = useRef<HTMLInputElement | null>(null);
   const appliedFocusedOrganizationIdRef = useRef<string | null>(null);
   const organizationsByMarkerId = useMemo(() => new Map(
     [
@@ -162,7 +162,10 @@ export function ExistingWorkspaceFoundation({
       ...(focusedOrganization ? [focusedOrganization] : []),
     ].map((organization) => [organization.marker.id, organization]),
   ), [discovery?.organizations, focusedOrganization]);
-  const authorizedObjectIds = useMemo(() => new Set([homeMarker.id, ...organizationsByMarkerId.keys()]), [homeMarker.id, organizationsByMarkerId]);
+  const authorizedObjectIds = useMemo(
+    () => new Set([homeMarker.id, ...organizationsByMarkerId.keys()]),
+    [homeMarker.id, organizationsByMarkerId],
+  );
   const restoredSelectionIsAuthorized = authorizedObjectIds.has(spatialContext.selection.markerId);
   const selectedObjectId = restoredSelectionIsAuthorized
     ? spatialContext.selection.markerId
@@ -180,6 +183,7 @@ export function ExistingWorkspaceFoundation({
       panelOpen: true,
     }));
   }, [homeMarker.id, organizationId, restoredSelectionIsAuthorized, updateSpatialContext]);
+
   useEffect(() => {
     if (!focusedOrganization) {
       appliedFocusedOrganizationIdRef.current = null;
@@ -191,7 +195,6 @@ export function ExistingWorkspaceFoundation({
     appliedFocusedOrganizationIdRef.current = String(focusedOrganization.organizationId);
     updateSpatialContext((current) => Object.freeze({
       ...current,
-      activeLens: "intelligence" as const,
       selection: Object.freeze({
         organizationId: String(focusedOrganization.organizationId),
         markerId: focusedOrganization.marker.id,
@@ -205,28 +208,55 @@ export function ExistingWorkspaceFoundation({
   const panelOpen = spatialContext.panelOpen;
   const selectedHome = selectedObjectId === homeMarker.id;
   const selectedOrganization = organizationsByMarkerId.get(selectedObjectId) ?? null;
-  const selectedOrganizationId = selectedOrganization ? String(selectedOrganization.organizationId) : organizationId;
+  const selectedOrganizationId = selectedOrganization
+    ? String(selectedOrganization.organizationId)
+    : organizationId;
   const selectedOrganizationQueryId = selectedHome ? null : selectedOrganizationId;
-  const organizationActions = projectOrganizationActions({
+  const selectedOrganizationIsOfficialResourceProvider = officialResourceProviderOrganizationIds.includes(
+    selectedOrganizationId,
+  );
+  const exchangeRoomActions = projectExchangeRoomActions({
+    activeLens: spatialContext.activeLens,
     viewerOrganizationId: organizationId,
     selectedOrganizationId,
-    officialResourceProvider: officialResourceProviderOrganizationIds.includes(selectedOrganizationId),
-    operationalActionsAvailable,
+    selectedOrganizationIsOfficialResourceProvider,
+    openPlatformActionsAuthorized: operationalActionsAvailable,
   });
   const locality = model.selectedGeography.name;
   const locationLabel = homeMarker.accessibleLocationLabel ?? `${locality} organization location`;
   const serviceAreaNames = new Map(serviceAreaOptions.map((option) => [option.id, option.name]));
   const networkMarkers = [...organizationsByMarkerId.values()].map((organization) => organization.marker);
 
-  const selectObject = (selectedObjectId: string, panelOpenValue = true) => {
-    if (!authorizedObjectIds.has(selectedObjectId)) return;
-    const selected = organizationsByMarkerId.get(selectedObjectId);
+  const selectLens = useCallback((lens: ParticipantLensId) => {
+    updateSpatialContext((current) => {
+      if (current.activeLens === lens) return current;
+      return Object.freeze({
+        ...current,
+        activeLens: lens,
+        originLens: current.activeLens,
+      });
+    });
+  }, [updateSpatialContext]);
+  useExchangeRoomLensController(selectLens);
+
+  const focusNetwork = useCallback((intent: "organizations" | "capabilities") => {
+    selectLens("intelligence");
+    window.requestAnimationFrame(() => {
+      networkSearchInputRef.current?.focus();
+      if (intent === "organizations" && !networkSearchInputRef.current?.value) {
+        resultListRef.current?.scrollTo({ top: 0, behavior: "auto" });
+      }
+    });
+  }, [selectLens]);
+
+  const selectObject = (nextSelectedObjectId: string, panelOpenValue = true) => {
+    if (!authorizedObjectIds.has(nextSelectedObjectId)) return;
+    const selected = organizationsByMarkerId.get(nextSelectedObjectId);
     updateSpatialContext((current) => Object.freeze({
       ...current,
-      activeLens: "intelligence" as const,
       selection: Object.freeze({
         organizationId: selected ? String(selected.organizationId) : organizationId,
-        markerId: selectedObjectId,
+        markerId: nextSelectedObjectId,
         relationshipId: null,
       }),
       panelOpen: panelOpenValue,
@@ -256,15 +286,13 @@ export function ExistingWorkspaceFoundation({
     updateSpatialContext((current) => {
       const lensState = current.lensState.intelligence;
       if (
-        current.activeLens === "intelligence" &&
-        current.returnHref === returnHref &&
-        lensState.search === capability &&
-        lensState.resultPage === page &&
-        lensState.filters.serviceArea === (serviceAreaId ?? undefined)
+        current.returnHref === returnHref
+        && lensState.search === capability
+        && lensState.resultPage === page
+        && lensState.filters.serviceArea === (serviceAreaId ?? undefined)
       ) return current;
       return Object.freeze({
         ...current,
-        activeLens: "intelligence" as const,
         returnHref,
         lensState: Object.freeze({
           ...current.lensState,
@@ -273,16 +301,33 @@ export function ExistingWorkspaceFoundation({
             search: capability,
             filters: nextFilters,
             resultPage: page,
-            resultIndex: lensState.search === capability && lensState.filters.serviceArea === (serviceAreaId ?? undefined) ? lensState.resultIndex : 0,
-            listScrollTop: lensState.search === capability && lensState.filters.serviceArea === (serviceAreaId ?? undefined) ? lensState.listScrollTop : 0,
+            resultIndex: lensState.search === capability
+              && lensState.filters.serviceArea === (serviceAreaId ?? undefined)
+              ? lensState.resultIndex
+              : 0,
+            listScrollTop: lensState.search === capability
+              && lensState.filters.serviceArea === (serviceAreaId ?? undefined)
+              ? lensState.listScrollTop
+              : 0,
           }),
         }),
       });
     });
-  }, [capability, organizationId, query?.page, selectedOrganizationQueryId, serviceAreaId, updateSpatialContext]);
+  }, [
+    capability,
+    organizationId,
+    query?.page,
+    selectedOrganizationQueryId,
+    serviceAreaId,
+    updateSpatialContext,
+  ]);
+
   useEffect(() => {
-    if (resultListRef.current) resultListRef.current.scrollTop = spatialContext.lensState.intelligence.listScrollTop;
+    if (resultListRef.current) {
+      resultListRef.current.scrollTop = spatialContext.lensState.intelligence.listScrollTop;
+    }
   }, [spatialContext.lensState.intelligence.listScrollTop]);
+
   const clearHref = buildDiscoveryUrl({
     organizationId,
     capability: "",
@@ -305,8 +350,7 @@ export function ExistingWorkspaceFoundation({
 
   return (
     <ParticipantShell
-      activeItem="Network"
-      unavailableLensIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_LENSES}
+      activeItem={spatialContext.activeLens}
       unavailableUtilityIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_UTILITIES}
     >
       <SpatialWorkspace ariaLabel={t("networkWorkspace.ariaLabel")}>
@@ -320,7 +364,6 @@ export function ExistingWorkspaceFoundation({
           initialCamera={spatialContext.camera}
           onCameraChange={(camera) => updateSpatialContext((current) => Object.freeze({
             ...current,
-            activeLens: "intelligence" as const,
             camera,
           }))}
           interactive
@@ -339,6 +382,7 @@ export function ExistingWorkspaceFoundation({
                 <label className={styles.networkField}>
                   <span>{t("networkWorkspace.search.capabilityLabel")}</span>
                   <input
+                    ref={networkSearchInputRef}
                     type="search"
                     name="q"
                     defaultValue={capability}
@@ -362,9 +406,13 @@ export function ExistingWorkspaceFoundation({
                   </label>
                 </div>
                 <div className={styles.networkSearchActions}>
-                  <button className={styles.primaryAction} type="submit">{t("networkWorkspace.search.submit")}</button>
+                  <button className={styles.primaryAction} type="submit">
+                    {t("networkWorkspace.search.submit")}
+                  </button>
                   {(capability || serviceAreaId) ? (
-                    <Link className={styles.secondaryAction} href={clearHref}>{t("networkWorkspace.search.clear")}</Link>
+                    <Link className={styles.secondaryAction} href={clearHref}>
+                      {t("networkWorkspace.search.clear")}
+                    </Link>
                   ) : null}
                 </div>
               </form>
@@ -385,7 +433,10 @@ export function ExistingWorkspaceFoundation({
                       ...current,
                       lensState: Object.freeze({
                         ...current.lensState,
-                        intelligence: Object.freeze({ ...current.lensState.intelligence, listScrollTop }),
+                        intelligence: Object.freeze({
+                          ...current.lensState.intelligence,
+                          listScrollTop,
+                        }),
                       }),
                     }));
                   }}
@@ -412,7 +463,10 @@ export function ExistingWorkspaceFoundation({
                               ...current,
                               lensState: Object.freeze({
                                 ...current.lensState,
-                                intelligence: Object.freeze({ ...current.lensState.intelligence, resultIndex }),
+                                intelligence: Object.freeze({
+                                  ...current.lensState.intelligence,
+                                  resultIndex,
+                                }),
                               }),
                             }));
                           }}
@@ -449,9 +503,16 @@ export function ExistingWorkspaceFoundation({
                       serviceAreaId,
                       selectedOrganizationId: selectedOrganizationQueryId,
                       page: discovery.page - 1,
-                    })}>{t("networkWorkspace.search.previous")}</Link>
+                    })}>
+                      {t("networkWorkspace.search.previous")}
+                    </Link>
                   ) : <span />}
-                  <span>{t("networkWorkspace.search.page", { page: discovery.page, pageCount: discovery.pageCount })}</span>
+                  <span>
+                    {t("networkWorkspace.search.page", {
+                      page: discovery.page,
+                      pageCount: discovery.pageCount,
+                    })}
+                  </span>
                   {discovery.hasNextPage ? (
                     <Link href={buildDiscoveryUrl({
                       organizationId,
@@ -459,7 +520,9 @@ export function ExistingWorkspaceFoundation({
                       serviceAreaId,
                       selectedOrganizationId: selectedOrganizationQueryId,
                       page: discovery.page + 1,
-                    })}>{t("networkWorkspace.search.next")}</Link>
+                    })}>
+                      {t("networkWorkspace.search.next")}
+                    </Link>
                   ) : <span />}
                 </nav>
               ) : null}
@@ -486,7 +549,11 @@ export function ExistingWorkspaceFoundation({
                     {selectedOrganization?.profile.displayName ?? homeMarker.label}
                   </h1>
                 </div>
-                <button type="button" className={styles.closeButton} onClick={() => updatePanel(false)}>
+                <button
+                  type="button"
+                  className={styles.closeButton}
+                  onClick={() => updatePanel(false)}
+                >
                   <span aria-hidden="true">×</span>
                   <span className={styles.srOnly}>{t("networkWorkspace.detail.close")}</span>
                 </button>
@@ -561,7 +628,11 @@ export function ExistingWorkspaceFoundation({
                     ) : null}
                     {selectedOrganization.profile.website ? (
                       <p>
-                        <a href={selectedOrganization.profile.website} target="_blank" rel="noreferrer">
+                        <a
+                          href={selectedOrganization.profile.website}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           {t("networkWorkspace.detail.website")}
                         </a>
                       </p>
@@ -583,7 +654,9 @@ export function ExistingWorkspaceFoundation({
                     eyebrow={t("networkWorkspace.home.visibleNow")}
                     title={t("networkWorkspace.home.positionTitle")}
                     tone="connection"
-                    status={selectedHome ? <StatusPill tone="information">{t("networkWorkspace.home.selected")}</StatusPill> : null}
+                    status={selectedHome
+                      ? <StatusPill tone="information">{t("networkWorkspace.home.selected")}</StatusPill>
+                      : null}
                     metadata={<span>{t("networkWorkspace.home.projectionMetadata")}</span>}
                   >
                     <dl className={styles.organizationFacts}>
@@ -617,29 +690,11 @@ export function ExistingWorkspaceFoundation({
                 </>
               )}
 
-              <section className={styles.cardActions} aria-label={t("networkWorkspace.detail.actions")}>
-                {organizationActions.map((action) => action.availability === "available" && action.href ? (
-                  <Link key={action.id} className={styles.secondaryAction} href={action.href} data-organization-action={action.id}>
-                    {t(`networkWorkspace.actions.${action.id}`)}
-                  </Link>
-                ) : (
-                  <span
-                    key={action.id}
-                    className={styles.unavailableAction}
-                    aria-disabled="true"
-                    aria-label={`${t(`networkWorkspace.actions.${action.id}`)}: ${t(`networkWorkspace.actionReasons.${action.reason}`)}`}
-                    data-organization-action={action.id}
-                    title={t(`networkWorkspace.actionReasons.${action.reason}`)}
-                  >
-                    {t(`networkWorkspace.actions.${action.id}`)}
-                  </span>
-                ))}
-              </section>
-              {!operationalActionsAvailable ? (
-                <p className={styles.actionAvailabilityNote} role="status">
-                  {t("networkWorkspace.actionReasons.exchange-action-unavailable")}
-                </p>
-              ) : null}
+              <ExchangeRoomActionController
+                activeLens={spatialContext.activeLens}
+                actions={exchangeRoomActions}
+                onNetworkFocus={focusNetwork}
+              />
 
               <section className={styles.provenance} aria-labelledby="provenance-title">
                 <p className={styles.eyebrow}>{t("networkWorkspace.provenance.eyebrow")}</p>
