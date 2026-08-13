@@ -1,0 +1,56 @@
+.actionGrid {
+  margin-top: var(--space-lg);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-xs);
+}
+
+.activeAction,
+.disabledAction {
+  min-height: 48px;
+  padding: var(--space-sm) var(--space-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-hairline) solid var(--semantic-border-subtle);
+  border-radius: var(--radius-control);
+  font: 760 0.86rem/1.2 var(--type-interface-family);
+  text-align: center;
+}
+
+.activeAction {
+  color: var(--semantic-text-secondary);
+  background: var(--semantic-surface-subtle);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.activeAction:hover {
+  border-color: var(--semantic-border-focus);
+  background: var(--semantic-surface-connection);
+}
+
+.activeAction:focus-visible {
+  outline: var(--focus-outline-width) solid var(--semantic-border-focus);
+  outline-offset: var(--focus-outline-offset-high);
+}
+
+.disabledAction {
+  color: var(--semantic-text-muted);
+  background: var(--semantic-surface-subtle);
+  border-style: dashed;
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
+@media (max-width: 520px) {
+  .actionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activeAction {
+    transition: none;
+  }
+}
