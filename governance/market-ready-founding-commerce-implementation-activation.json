@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "packetId": "WP-MARKET-READY-FOUNDING-COMMERCE-01",
+  "controlPullRequest": 188,
+  "controlMergeSha": "8f753adc1d89f3bd8ceb2d5fe557208ff31bb685",
+  "postMergeMainSha": "8f753adc1d89f3bd8ceb2d5fe557208ff31bb685",
+  "implementationBaseSha": "8f753adc1d89f3bd8ceb2d5fe557208ff31bb685",
+  "implementationBranch": "commercial/founding-live-commerce",
+  "status": "active",
+  "authority": "governance/market-ready-founding-commerce-activation-v2.json",
+  "requirementsRegistry": "governance/market-ready-founding-commerce-requirements-v2.json",
+  "functionsScope": "governance/market-ready-founding-commerce-functions-scope.json",
+  "rule": "The Commercial Release Integrator must create its implementation branch from implementationBaseSha exactly. It must read current merged main before work and reconcile current main again before opening its candidate PR. This binding authorizes implementation only; it does not authorize deployment, production payment, live charges, or a Verified claim."
+}
