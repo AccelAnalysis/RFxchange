@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 
-import {
-  type ExchangeRoomActionProjection,
-} from "../../application/participant/exchange-room-actions";
+import type { ExchangeRoomActionProjection } from "../../application/participant/exchange-room-actions";
 import {
   PARTICIPANT_LENS_IDS,
   type ParticipantLensId,
@@ -26,19 +24,9 @@ function isOrdinaryPrimaryActivation(event: globalThis.MouseEvent): boolean {
     && !event.shiftKey;
 }
 
-export function ExchangeRoomActionController({
-  activeLens,
-  actions,
-  onLensSelect,
-  onNetworkFocus,
-}: Readonly<{
-  activeLens: ParticipantLensId;
-  actions: readonly ExchangeRoomActionProjection[];
-  onLensSelect(lens: ParticipantLensId): void;
-  onNetworkFocus(intent: "organizations" | "capabilities"): void;
-}>) {
-  const { t } = useI18n();
-
+export function useExchangeRoomLensController(
+  onLensSelect: (lens: ParticipantLensId) => void,
+): void {
   useEffect(() => {
     const handleLensActivation = (event: globalThis.MouseEvent) => {
       if (!isOrdinaryPrimaryActivation(event)) return;
@@ -56,7 +44,18 @@ export function ExchangeRoomActionController({
     document.addEventListener("click", handleLensActivation, true);
     return () => document.removeEventListener("click", handleLensActivation, true);
   }, [onLensSelect]);
+}
 
+export function ExchangeRoomActionController({
+  activeLens,
+  actions,
+  onNetworkFocus,
+}: Readonly<{
+  activeLens: ParticipantLensId;
+  actions: readonly ExchangeRoomActionProjection[];
+  onNetworkFocus(intent: "organizations" | "capabilities"): void;
+}>) {
+  const { t } = useI18n();
   const disabledReasonKey = {
     "not-operational": "networkWorkspace.exchangeRoom.disabledReasons.notOperational",
     "not-applicable": "networkWorkspace.exchangeRoom.disabledReasons.notApplicable",
@@ -86,6 +85,7 @@ export function ExchangeRoomActionController({
           );
         }
         if (action.availability === "active" && action.resolvedHandler?.kind === "network-focus") {
+          const intent = action.resolvedHandler.intent;
           return (
             <button
               key={action.id}
@@ -93,9 +93,7 @@ export function ExchangeRoomActionController({
               className={styles.activeAction}
               data-exchange-room-action={action.id}
               data-action-state="active"
-              onClick={() => onNetworkFocus(action.resolvedHandler?.kind === "network-focus"
-                ? action.resolvedHandler.intent
-                : "organizations")}
+              onClick={() => onNetworkFocus(intent)}
             >
               {label}
             </button>
