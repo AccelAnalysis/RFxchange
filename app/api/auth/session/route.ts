@@ -77,13 +77,6 @@ function withBoundAcquisition(
   return Object.freeze({
     ...state,
     acquisitionContext: acquisitionState(context),
-    controlledPlatformUrl:
-      state.lifecycleState === "controlled-platform" &&
-      state.organization &&
-      state.controlledPlatformUrl === "/orientation" &&
-      context.intent.kind !== "direct"
-        ? "/acquisition/continue"
-        : state.controlledPlatformUrl,
   });
 }
 

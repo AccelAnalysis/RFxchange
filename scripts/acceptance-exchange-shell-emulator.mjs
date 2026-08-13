@@ -2184,12 +2184,20 @@ async function runLifecycleAcceptance({ baseUrl, sessionCookie, seed }) {
     const { cdp, diagnostics } = await createPage(chrome, baseUrl, sessionCookie);
     await lifecycleRef.set(record(controlled));
     await cdp.send("Page.navigate", { url: `${baseUrl}/resources` });
-    await waitForExpression(cdp, `location.pathname === "/orientation"`, "orientation-incomplete redirect");
+    await waitForExpression(
+      cdp,
+      `location.pathname === "/geography/canvas" && Boolean(document.querySelector('[data-participant-lens="resources"][aria-disabled="true"]'))`,
+      "controlled participant map-first Exchange entry",
+    );
 
     await orientationService.start(scope);
     for (const step of ORIENTATION_STEP_SEQUENCE) await orientationService.completeStep(scope, step.key);
     await cdp.send("Page.navigate", { url: `${baseUrl}/resources` });
-    await waitForExpression(cdp, `location.pathname === "/first-value"`, "orientation-complete first-value redirect");
+    await waitForExpression(
+      cdp,
+      `location.pathname === "/geography/canvas" && Boolean(document.querySelector('[data-participant-lens="referrals"][aria-disabled="true"]'))`,
+      "orientation-complete controlled participant map entry",
+    );
 
     await lifecycleRef.set(originalLifecycle.data());
     await cdp.send("Page.navigate", { url: `${baseUrl}/resources` });
@@ -2202,8 +2210,9 @@ async function runLifecycleAcceptance({ baseUrl, sessionCookie, seed }) {
     assert.equal(diagnostics.exceptions.length, 0, diagnostics.exceptions.join("\n"));
     cdp.close();
     return {
-      orientationIncompleteDestination: "/orientation",
-      orientationCompleteFirstValueIncompleteDestination: "/first-value",
+      controlledDestination: "/geography/canvas",
+      controlledLensesUnavailable: true,
+      orientationCompleteControlledDestination: "/geography/canvas",
       fullyReleasedDestination: "/resources",
       completedTutorialReplayed: false,
       consoleErrors: diagnostics.consoleErrors,

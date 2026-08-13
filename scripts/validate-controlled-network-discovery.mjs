@@ -25,7 +25,8 @@ assert.match(route, /loadAuthorizedNetworkDiscovery/);
 assert.match(route, /serviceArea/);
 assert.doesNotMatch(route, /firebase-admin|firebase\/firestore/);
 
-assert.match(runtime, /state\.lifecycleState !== "open-platform"/);
+assert.doesNotMatch(route, /lifecycleState !== "open-platform"/);
+assert.doesNotMatch(runtime, /open-required/);
 assert.match(runtime, /evaluateGeographyParticipation/);
 assert.match(runtime, /"network-participation"/);
 assert.match(runtime, /listByUserAndGeography/);

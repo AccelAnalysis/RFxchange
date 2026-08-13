@@ -4,15 +4,17 @@ export interface OrganizationActionProjection {
   readonly id: OrganizationActionId;
   readonly availability: "available" | "unavailable";
   readonly href: string | null;
-  readonly reason: "self-only" | "not-an-official-provider" | null;
+  readonly reason: "self-only" | "not-an-official-provider" | "exchange-action-unavailable" | null;
 }
 
 export function projectOrganizationActions(input: Readonly<{
   viewerOrganizationId: string;
   selectedOrganizationId: string;
   officialResourceProvider: boolean;
+  operationalActionsAvailable?: boolean;
 }>): readonly OrganizationActionProjection[] {
   const self = input.viewerOrganizationId === input.selectedOrganizationId;
+  const operationalActionsAvailable = input.operationalActionsAvailable ?? true;
   return Object.freeze([
     Object.freeze({
       id: "manage-profile" as const,
@@ -22,27 +24,41 @@ export function projectOrganizationActions(input: Readonly<{
     }),
     Object.freeze({
       id: "view-resources" as const,
-      availability: self || input.officialResourceProvider ? "available" as const : "unavailable" as const,
-      href: self
+      availability: operationalActionsAvailable && (self || input.officialResourceProvider)
+        ? "available" as const
+        : "unavailable" as const,
+      href: !operationalActionsAvailable
+        ? null
+        : self
         ? "/resources"
         : input.officialResourceProvider
           ? `/resources?provider=${encodeURIComponent(input.selectedOrganizationId)}`
           : null,
-      reason: self || input.officialResourceProvider ? null : "not-an-official-provider" as const,
+      reason: !operationalActionsAvailable
+        ? "exchange-action-unavailable" as const
+        : self || input.officialResourceProvider
+          ? null
+          : "not-an-official-provider" as const,
     }),
     Object.freeze({
       id: "start-referral" as const,
-      availability: "available" as const,
-      href: self
-        ? "/referrals"
-        : `/referrals?organization=${encodeURIComponent(input.selectedOrganizationId)}`,
-      reason: null,
+      availability: operationalActionsAvailable ? "available" as const : "unavailable" as const,
+      href: operationalActionsAvailable
+        ? self
+          ? "/referrals"
+          : `/referrals?organization=${encodeURIComponent(input.selectedOrganizationId)}`
+        : null,
+      reason: operationalActionsAvailable ? null : "exchange-action-unavailable" as const,
     }),
     Object.freeze({
       id: "opportunities-rfx" as const,
-      availability: self ? "available" as const : "unavailable" as const,
-      href: self ? "/opportunities" : null,
-      reason: self ? null : "self-only" as const,
+      availability: operationalActionsAvailable && self ? "available" as const : "unavailable" as const,
+      href: operationalActionsAvailable && self ? "/opportunities" : null,
+      reason: !operationalActionsAvailable
+        ? "exchange-action-unavailable" as const
+        : self
+          ? null
+          : "self-only" as const,
     }),
   ]);
 }

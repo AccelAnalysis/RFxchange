@@ -342,6 +342,6 @@ test("ACQ-002/003 UI and route boundaries remain responsive and server-authorita
   assert.match(continuation, /resolveParticipantRoute/);
   assert.match(continuation, /activation-required/);
   assert.match(continuation, /restricted/);
-  assert.match(activation, /lifecycle\.state === "controlled-platform"/);
-  assert.match(activation, /\/acquisition\/continue/);
+  assert.match(activation, /controlledPlatformUrl: participantLifecycleDestination/);
+  assert.doesNotMatch(activation, /\/acquisition\/continue/);
 });

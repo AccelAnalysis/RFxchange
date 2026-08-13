@@ -165,6 +165,23 @@
   border-radius: 0 0 var(--radius-control) var(--radius-control);
 }
 
+.accountMenu .unavailableUtility {
+  min-height: 48px;
+  padding: var(--space-sm) var(--space-md);
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  border-radius: var(--radius-control);
+  color: var(--semantic-text-muted);
+  cursor: not-allowed;
+  font: 680 0.82rem/1.2 var(--type-interface-family);
+}
+
+.accountMenu .unavailableUtility small {
+  font-size: 0.68rem;
+  font-weight: 650;
+}
+
 .mobileLensMenu {
   display: none;
   align-self: center;

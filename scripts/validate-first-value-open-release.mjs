@@ -32,7 +32,9 @@ for (const required of ["accountSecurity.inspect", "getForMembership", "isCurren
 assert.ok(api.includes('Readonly<{ selectedIntent?: unknown }>'));
 assert.ok(api.includes("resolveParticipantRoute") && !api.includes("organizationId?: unknown"));
 assert.ok(firstValuePage.includes('orientation.status !== "completed"'));
-assert.ok(exchangePage.includes("service.evaluate(scope)") && exchangePage.includes("gate.remediation"));
+assert.ok(api.includes('nextUrl: "/exchange"'));
+assert.ok(exchangePage.includes('appendFoundingAcquisitionIntent("/geography/canvas")'));
+assert.ok(!exchangePage.includes("service.evaluate(scope)") && !exchangePage.includes("gate.remediation"));
 assert.ok(repository.includes("runTransaction") && repository.includes("activationReleaseEvents"));
 assert.ok(rules.includes("match /firstValueSelections/{documentId}") && rules.includes("match /activationReleaseEvents/{documentId}"));
 assert.ok(workflow.includes("smoke-first-value-open-emulator.mjs"));

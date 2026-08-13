@@ -96,10 +96,10 @@ assert.ok(
   "B6a must receive organization identity from the authenticated server projection.",
 );
 assert.ok(
-  networkRuntime.includes('state.lifecycleState !== "open-platform"') &&
+  !networkRuntime.includes("open-required") &&
     networkRuntime.includes("evaluateGeographyParticipation") &&
     networkRuntime.includes('"network-participation"'),
-  "Slice 3.2 must extend B6a only after current OPEN and geography authority are revalidated on the server.",
+  "The map shell must remain available to controlled participants while geography authority is revalidated on the server.",
 );
 
 assert.equal(

@@ -58,6 +58,7 @@ function loadBehavioralContract() {
       selfActions: projectOrganizationActions({ viewerOrganizationId: "org-a", selectedOrganizationId: "org-a", officialResourceProvider: false }),
       externalActions: projectOrganizationActions({ viewerOrganizationId: "org-a", selectedOrganizationId: "org-b", officialResourceProvider: false }),
       providerActions: projectOrganizationActions({ viewerOrganizationId: "org-a", selectedOrganizationId: "org-b", officialResourceProvider: true }),
+      mapOnlyActions: projectOrganizationActions({ viewerOrganizationId: "org-a", selectedOrganizationId: "org-a", officialResourceProvider: false, operationalActionsAvailable: false }),
       focusedPage: resolveNetworkDiscoveryPage({
         organizations: Array.from({ length: 27 }, (_, index) => ({ organizationId: organizationId(
           index === 25 ? "org-carried" : "org-result-" + index,
@@ -67,9 +68,9 @@ function loadBehavioralContract() {
         focusOrganizationId: organizationId("org-carried"),
       }),
       destinations: {
-        incomplete: participantLifecycleDestination("controlled-platform", "org-a", false),
-        orientationComplete: participantLifecycleDestination("controlled-platform", "org-a", true),
-        open: participantLifecycleDestination("open-platform", "org-a", true),
+        incomplete: participantLifecycleDestination("controlled-platform", "org-a"),
+        orientationComplete: participantLifecycleDestination("controlled-platform", "org-a"),
+        open: participantLifecycleDestination("open-platform", "org-a"),
       },
     }));
   `;
@@ -165,6 +166,13 @@ test("organization actions expose private RFx creation only for the selected hom
   assert.deepEqual(contract.externalActions.find(({ id }) => id === "opportunities-rfx"), {
     id: "opportunities-rfx", availability: "unavailable", href: null, reason: "self-only",
   });
+  assert.equal(contract.mapOnlyActions.find(({ id }) => id === "manage-profile").availability, "available");
+  for (const action of contract.mapOnlyActions.filter(({ id }) => id !== "manage-profile")) {
+    assert.deepEqual(
+      { availability: action.availability, href: action.href, reason: action.reason },
+      { availability: "unavailable", href: null, reason: "exchange-action-unavailable" },
+    );
+  }
 });
 
 test("a carried referral recipient is revalidated into its authorized discovery page without substitution", () => {
@@ -239,11 +247,11 @@ test("selecting an existing referral synchronizes the composer recipient and aut
   assert.match(workspace, /if \(counterpartyId && !other\) \{[\s\S]*return/);
 });
 
-test("OPEN participant routing skips controlled-stage release reads", () => {
+test("Exchange participant routing skips orientation and release reads", () => {
   const workspaceState = read("src/infrastructure/auth/participant-workspace-state.ts");
   assert.doesNotMatch(workspaceState, /FirestoreFirstValueSelectionRepository/);
-  assert.match(workspaceState, /lifecycle\.state === "controlled-platform"[\s\S]*orientations\.getById/);
-  assert.match(workspaceState, /workspace-state\.firestore-controlled-release-stage/);
+  assert.doesNotMatch(workspaceState, /FirestoreOrientationJourneyRepository|orientations\.getById/);
+  assert.doesNotMatch(workspaceState, /workspace-state\.firestore-controlled-release-stage/);
 });
 
 test("overlay-side changes update real Mapbox padding without recomposing the camera", () => {
@@ -286,20 +294,20 @@ test("Resource marker focus survives server revalidation independently of provid
   assert.match(workspace, /else \{[\s\S]*updateWorkspaceQuery\(\{ organization: null, provider: organizationId \}\)[\s\S]*organizationId: spatialScope\.organizationId[\s\S]*markerId: homeMarker\.id/);
 });
 
-test("completed orientation resolves to first value and permanent lenses use the same server stage", () => {
+test("controlled and OPEN participants resolve to the Exchange while protected lenses keep their gates", () => {
   const contract = loadBehavioralContract();
-  assert.deepEqual(contract.destinations, { incomplete: "/orientation", orientationComplete: "/first-value", open: "/exchange" });
-  for (const path of ["app/geography/canvas/page.tsx", "app/resources/page.tsx", "app/referrals/page.tsx", "app/quick-start/page.tsx", "app/provider-application/page.tsx"]) {
+  assert.deepEqual(contract.destinations, { incomplete: "/exchange", orientationComplete: "/exchange", open: "/exchange" });
+  assert.doesNotMatch(read("app/geography/canvas/page.tsx"), /lifecycleState !== "open-platform"/);
+  for (const path of ["app/resources/page.tsx", "app/referrals/page.tsx", "app/quick-start/page.tsx", "app/provider-application/page.tsx"]) {
     assert.match(read(path), /access\.state\.controlledPlatformUrl \?\? "\/join"/, path);
   }
   const activation = read("src/application/onboarding/activation-journey.ts");
-  const session = read("app/api/auth/session/route.ts");
   const continuation = read("app/acquisition/continue/page.tsx");
-  assert.match(activation, /orientationJourneyIdForAccessJourney\(journeyId\)/);
-  assert.match(activation, /orientationComplete[\s\S]*participantLifecycleDestination/);
-  assert.match(session, /state\.controlledPlatformUrl === "\/orientation"[\s\S]*context\.intent\.kind !== "direct"/);
-  assert.match(continuation, /access\.state\.controlledPlatformUrl \?\? "\/orientation"/);
-  assert.match(continuation, /mapUrl === "\/first-value" \? "Continue to first value"/);
+  assert.match(activation, /controlledPlatformUrl: participantLifecycleDestination/);
+  assert.doesNotMatch(activation, /orientations\.getById/);
+  assert.doesNotMatch(activation, /controlledPlatformUrl:[\s\S]*\? "\/acquisition\/continue"/);
+  assert.match(continuation, /access\.state\.controlledPlatformUrl \?\? "\/exchange"/);
+  assert.match(continuation, /mapUrl === "\/exchange" \? "Enter the Exchange"/);
 });
 
 test("warm routes have no segment takeover and corrected participant copy is localized", () => {
