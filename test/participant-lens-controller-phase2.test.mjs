@@ -13,6 +13,7 @@ test("the Exchange Room uses spatial activeLens instead of whole-lens unavailabi
   assert.doesNotMatch(workspace, /unavailableLensIds=/);
   assert.doesNotMatch(workspace, /const MAP_ONLY_UNAVAILABLE_LENSES/);
   assert.match(controller, /event\.preventDefault\(\)/);
+  assert.doesNotMatch(controller, /event\.stopPropagation\(\)/);
   assert.match(controller, /onLensSelect\(lens\)/);
   assert.match(controller, /data-active-lens=\{activeLens\}/);
 });
@@ -28,14 +29,30 @@ test("lens changes preserve the map, camera and selected organization substrate"
   assert.match(workspace, /selectedOrganizationId: selectedOrganizationQueryId/);
 });
 
-test("the primary four-lens Room control remains actionable at mobile widths", () => {
-  const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
-  assert.match(styles, /@media \(max-width: 760px\)/);
-  assert.match(styles, /\[data-participant-navigation\] > nav/);
-  assert.match(styles, /display: flex !important/);
-  assert.match(styles, /\[data-participant-navigation\] > details/);
-  assert.match(styles, /display: none !important/);
-  assert.match(styles, /overflow-x: auto/);
+test("the four-action controller is mounted once outside the closable detail branch", () => {
+  const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
+  const controllerMatches = workspace.match(/<ExchangeRoomActionController/g) ?? [];
+  assert.equal(controllerMatches.length, 1);
+  const controllerIndex = workspace.indexOf("<ExchangeRoomActionController");
+  const panelConditionalIndex = workspace.indexOf("{panelOpen ? (");
+  assert.ok(controllerIndex >= 0 && panelConditionalIndex >= 0 && controllerIndex < panelConditionalIndex);
+  assert.match(workspace, /onClick=\{\(\) => updatePanel\(false\)\}/);
+});
+
+test("390px uses the native mobile lens menu and ordinary selection can close it", () => {
+  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
+  const navigationStyles = read("src/components/participant/ParticipantTopNavigation.module.css");
+  const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
+  const controllerStyles = read("src/components/participant/ExchangeRoomActionController.module.css");
+
+  assert.match(navigation, /onNavigate=\{closeMobileLensMenu\}/);
+  assert.match(navigation, /if \(event\.key === "Escape"\)/);
+  assert.match(navigationStyles, /@media \(max-width: 760px\)[\s\S]*?\.desktopLenses \{\s*display: none;/);
+  assert.match(navigationStyles, /@media \(max-width: 760px\)[\s\S]*?\.mobileLensMenu \{\s*display: block;/);
+  assert.match(navigationStyles, /@media \(max-width: 390px\)/);
+  assert.doesNotMatch(controllerStyles, /\[data-participant-navigation\]/);
+  assert.doesNotMatch(controller, /stopPropagation/);
+  assert.match(controllerStyles, /@media \(max-width: 760px\)[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
 });
 
 test("disabled Phase 2 actions are non-actionable without visible status prose", () => {
