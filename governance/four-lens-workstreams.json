@@ -107,6 +107,15 @@
         "WP-RFX-42-ISS006-CORRECT-01"
       ],
       "purpose": "Authorize only the participant-directed ISS-006 corrective implementation while independent review capacity is unavailable; builder output remains Implemented — Not Verified."
+    },
+    {
+      "id": "exchange-room-phase1-2026-08-12",
+      "mainBaseSha": "4ca2a12f1d924ac559f87ebae0abc8fe42eac24b",
+      "controlPullRequest": 185,
+      "packetIds": [
+        "WP-EXCHANGE-ROOM-PHASE1-01"
+      ],
+      "purpose": "Authorize Lane 01 to converge PR #183 progressive Exchange shell with PR #174 selected-organization continuity into one Elevated release candidate under Build → Release → Verify."
     }
   ],
   "lanes": [
@@ -709,6 +718,125 @@
       ],
       "expectedOutput": "Correct RFX-FEATURE-ISS-006 only against its original requirement and Slice 4.2 authority; builder output may reach only Implemented — Not Verified.",
       "stopBoundary": "Do not implement ISS-007/ISS-009/ISS-011, Slice 4.4/4.5 corrections, alter PR #171, start Slice 4.7, promote tracker state, merge the correction or claim Verified. Exact-head independent review is externally blocked by Issue #181. RFX-FEATURE-ISS-001 remains independently unverified and therefore blocks final Verified/merge until resolved, but does not block this bounded corrective implementation."
+    },
+    {
+      "id": "WP-EXCHANGE-ROOM-PHASE1-01",
+      "lane": "shared-exchange",
+      "owner": "Exchange Room Foundation Phase 1",
+      "branch": "lane01/exchange-room-phase1",
+      "candidate": null,
+      "candidateHistory": [],
+      "sourceCandidates": [
+        {
+          "role": "canonical-convergence-target",
+          "pr": 183,
+          "sha": "b15d737bcf5292206f8d7119034c848aa3d8f73d"
+        },
+        {
+          "role": "selected-organization-continuity-source",
+          "pr": 174,
+          "sha": "bc6d4f6dea158c7cdd359cc7bb64fd262e9bd7c1"
+        }
+      ],
+      "exactBaseSha": "4ca2a12f1d924ac559f87ebae0abc8fe42eac24b",
+      "activationEpochId": "exchange-room-phase1-2026-08-12",
+      "basePolicy": "Post-amendment exact current-main successor convergence. PR #183 is the canonical Room target; preserve PR #174 SHARED-CONTINUITY-002 behavior and provenance while reconciling both onto current main.",
+      "status": "active",
+      "releaseClass": "Elevated",
+      "requirementIds": [
+        "SHARED-CONTINUITY-002"
+      ],
+      "sources": [
+        "docs/program/EXCHANGE_ROOM_PHASE1_CONTROL.md",
+        "docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md",
+        "docs/program/SHARED_EXCHANGE_CONTRACTS.md",
+        "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md",
+        "docs/slices/OPEN_EXCHANGE_PROGRESSIVE_AVAILABILITY_GATE.md",
+        "https://github.com/AccelAnalysis/RFxchange/pull/183",
+        "https://github.com/AccelAnalysis/RFxchange/pull/174"
+      ],
+      "dependencies": [
+        {
+          "packetId": "WP-CONTROL-AUTHORITY-SETUP",
+          "requiredStatuses": [
+            "completed",
+            "closed"
+          ]
+        },
+        {
+          "packetId": "WP-SHARED-COMPLETE-01",
+          "requiredStatuses": [
+            "implemented-not-verified"
+          ]
+        }
+      ],
+      "ownedPaths": [
+        "app/exchange/**",
+        "app/geography/canvas/**",
+        "app/acquisition/continue/page.tsx",
+        "app/api/auth/session/route.ts",
+        "app/api/first-value/route.ts",
+        "src/application/auth/participant-lifecycle-destination.ts",
+        "src/application/onboarding/activation-journey.ts",
+        "src/application/participant/organization-actions.ts",
+        "src/components/first-value/**",
+        "src/components/participant/**",
+        "src/infrastructure/auth/participant-workspace-state.ts",
+        "src/infrastructure/network-discovery/runtime.ts",
+        "src/i18n/messages/network/**",
+        "test/**",
+        "scripts/**",
+        "docs/slices/OPEN_EXCHANGE_PROGRESSIVE_AVAILABILITY_GATE.md",
+        "docs/program/evidence/**"
+      ],
+      "nonOwnedPaths": [
+        "docs/tracking/**",
+        "governance/four-lens-requirements.json status/Verified promotion",
+        "src/domain/rfx/**",
+        "src/application/rfx/**",
+        "src/domain/referrals/**",
+        "src/domain/resource-providers/**",
+        "Phase 2 Lens Controller + 16-Action Registry",
+        "new deployment architecture",
+        "Stabilization 2C completion claim"
+      ],
+      "acceptanceRequired": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "responsive",
+        "accessibility",
+        "copy",
+        "cross-lens",
+        "performance",
+        "exact-head-ci",
+        "configured-browser",
+        "independent-acceptance"
+      ],
+      "mergeGates": [
+        "reconcile PR #183 and PR #174 onto current main",
+        "exact-head production CI",
+        "controlled and OPEN lifecycle tests",
+        "negative unauthenticated/restricted/wrong-organization/unauthorized tests",
+        "tenant isolation evidence",
+        "geography release evidence",
+        "privacy/projection evidence",
+        "direct protected-domain-route negative tests",
+        "desktop/mobile configured-browser evidence",
+        "accessibility evidence",
+        "five-locale evidence for changed participant copy",
+        "SHARED-CONTINUITY-002 selected-organization regression coverage",
+        "no known material unsafe finding"
+      ],
+      "releaseGates": [
+        "successful post-merge production CI",
+        "canonical Firebase App Hosting deployment only",
+        "rollback/containment path recorded",
+        "explicit Control Room release authorization",
+        "legitimate production controlled and OPEN participant journey verification"
+      ],
+      "expectedOutput": "One reconciled Phase 1 Room candidate using PR #183 as the convergence target, preserving PR #174 selected-organization continuity, eligible to merge as Implemented — Not Verified and proceed through Elevated production release controls.",
+      "stopBoundary": "Do not build the Phase 2 16-action registry/lens controller except a tiny compatibility normalization strictly necessary for Phase 1. Do not implement missing RFx, Resources, Intelligence, Referrals, Teaming, messaging, notifications, billing/commercial functions, change tracker completion, claim Stabilization 2C complete, or mark any requirement Verified."
     }
   ]
 }
