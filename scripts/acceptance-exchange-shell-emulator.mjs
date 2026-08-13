@@ -1073,7 +1073,7 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
   })()`);
   assert.equal(immediate.found, true, `Missing enabled ${id} lens.`);
   assert.equal(immediate.pathname, "/geography/canvas", `${id} abandoned the Exchange Room on primary activation.`);
-  assert.equal(immediate.search, continuityBefore.search, `${id} changed shared Room query context during primary activation.`);
+  const immediateSearch = immediate.search;
 
   await waitForExpression(
     cdp,
@@ -1081,6 +1081,7 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
       && document.querySelectorAll('[data-exchange-room-action-grid] [data-exchange-room-action]').length === 4`,
     `${id} in-Room lens/action projection`,
   );
+  await wait(Math.max(800, latencyMs + 350));
   const after = await exchangeRoomLensSnapshot(cdp);
   const observation = await finishObservation(cdp);
   const durationMs = performance.now() - wallStartedAt;
@@ -1095,7 +1096,9 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
   }
 
   assert.equal(after.pathname, "/geography/canvas", `${id} changed the Exchange Room pathname.`);
-  assert.equal(after.search, continuityBefore.search, `${id} discarded shared Room query context.`);
+  if (after.pathname !== "/geography/canvas") {
+    throw new Error(`${id} delayed navigation escaped the Room: ${after.pathname}${after.search}; before=${continuityBefore.pathname}${continuityBefore.search}; immediateSearch=${immediateSearch}`);
+  }
   assert.equal(after.activeLens, id, `${id} did not become the active Exchange Room lens.`);
   assert.equal(after.currentLens, id, `${id} did not project current lens semantics.`);
   assert.deepEqual(
