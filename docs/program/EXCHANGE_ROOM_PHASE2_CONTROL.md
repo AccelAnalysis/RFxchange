@@ -53,7 +53,7 @@ The current explicit product-owner instruction intentionally changes the product
 
 This is not permission to create a fake standalone runtime for an unfinished domain. The real runtime for every permanent lens is the shared Exchange Room controller plus that lens's truthful action projection. Existing dedicated domain routes are handlers/deep links only when real and authorized.
 
-The old `SHARED-TRUTH-001` text remains preserved in `governance/four-lens-requirements.json`; Independent Acceptance for this packet must evaluate the current explicit task plus this successor authority rather than silently changing the historical requirement text.
+The old `SHARED-TRUTH-001` text remains preserved in `governance/four-lens-requirements.json` and is separately dispositioned. Phase 2 appends `SHARED-LENS-CONTEXT-001` as the immutable successor requirement for selectable lens containers and individual-action availability. Independent Acceptance for this packet evaluates that successor ID rather than repurposing or silently changing the historical requirement.
 
 ## Non-negotiable presentation rule
 

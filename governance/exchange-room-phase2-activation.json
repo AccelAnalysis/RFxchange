@@ -23,7 +23,7 @@
     "status": "active",
     "releaseClass": "Elevated",
     "requirementIds": [
-      "SHARED-TRUTH-001",
+      "SHARED-LENS-CONTEXT-001",
       "SHARED-SPATIAL-001",
       "SHARED-CAMERA-001",
       "SHARED-SELECTION-001",
@@ -46,7 +46,9 @@
         "requiredStatuses": [
           "implemented-not-verified",
           "acceptance-pending",
-          "verified"
+          "verified",
+          "completed",
+          "closed"
         ]
       }
     ],
@@ -57,7 +59,7 @@
       "src/i18n/messages/network/**",
       "test/**",
       "scripts/**",
-      "docs/program/**"
+      "docs/program/evidence/exchange-room-phase2/**"
     ],
     "nonOwnedPaths": [
       "src/domain/rfx/**",
