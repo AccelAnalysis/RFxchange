@@ -59,6 +59,7 @@ export function useExchangeRoomLensController(onLensSelect: (lens: ParticipantLe
 
 function privilegedPermission(actionId: string, authorization: ActionAuthorizationProjection): boolean | null {
   if (actionId === "opportunities.create-rfx") return authorization.openPlatform && authorization.rfxCreate;
+  if (actionId === "resources.my-requests") return authorization.openPlatform && authorization.referralManage;
   if (actionId === "resources.provider-status") return authorization.openPlatform && authorization.resourceManage;
   if (actionId === "referrals.new") return authorization.openPlatform && authorization.referralManage;
   return null;
@@ -66,6 +67,7 @@ function privilegedPermission(actionId: string, authorization: ActionAuthorizati
 
 function privilegedHref(actionId: string): string | null {
   if (actionId === "opportunities.create-rfx") return "/opportunities/manage";
+  if (actionId === "resources.my-requests") return "/resources";
   if (actionId === "resources.provider-status") return "/provider-application";
   if (actionId === "referrals.new") return participantSpatialLensHref("referrals");
   return null;
@@ -86,8 +88,11 @@ export function ExchangeRoomActionController({
   const [networkDiscoveryAvailable, setNetworkDiscoveryAvailable] = useState(false);
 
   useEffect(() => {
-    setNetworkDiscoveryAvailable(Boolean(document.querySelector('form[action="/geography/canvas"]')));
     let active = true;
+    const discoveryFrame = window.requestAnimationFrame(() => {
+      if (!active) return;
+      setNetworkDiscoveryAvailable(Boolean(document.querySelector('form[action="/geography/canvas"]')));
+    });
     void fetch("/geography/canvas/action-authorization", { cache: "no-store", credentials: "same-origin" })
       .then(async (response) => response.ok ? response.json() : DENIED_ACTION_AUTHORIZATION)
       .then((payload: Partial<ActionAuthorizationProjection>) => {
@@ -100,7 +105,10 @@ export function ExchangeRoomActionController({
         }));
       })
       .catch(() => active && setAuthorization(DENIED_ACTION_AUTHORIZATION));
-    return () => { active = false; };
+    return () => {
+      active = false;
+      window.cancelAnimationFrame(discoveryFrame);
+    };
   }, []);
 
   return (
@@ -120,10 +128,10 @@ export function ExchangeRoomActionController({
           const href = privilegedHref(action.id);
           if (href) return <Link key={action.id} className={styles.activeAction} href={href} data-exchange-room-action={action.id} data-action-state="active">{label}</Link>;
         }
-        if (action.availability === "active" && action.resolvedHandler?.kind === "href") {
+        if (permission === null && action.availability === "active" && action.resolvedHandler?.kind === "href") {
           return <Link key={action.id} className={styles.activeAction} href={action.resolvedHandler.href} data-exchange-room-action={action.id} data-action-state="active">{label}</Link>;
         }
-        if (action.availability === "active" && action.resolvedHandler?.kind === "network-focus") {
+        if (permission === null && action.availability === "active" && action.resolvedHandler?.kind === "network-focus") {
           const intent = action.resolvedHandler.intent;
           return <button key={action.id} type="button" className={styles.activeAction} data-exchange-room-action={action.id} data-action-state="active" onClick={() => onNetworkFocus(intent)}>{label}</button>;
         }
