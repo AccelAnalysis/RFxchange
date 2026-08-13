@@ -537,6 +537,12 @@ export function ExistingWorkspaceFoundation({
           </MapOverlaySurface>
         ) : null}
 
+        <ExchangeRoomActionController
+          activeLens={spatialContext.activeLens}
+          actions={exchangeRoomActions}
+          onNetworkFocus={focusNetwork}
+        />
+
         {panelOpen ? (
           <ResponsiveEdgeSheet ariaLabelledBy="organization-detail-title" side="right" width="standard">
             <div
@@ -695,12 +701,6 @@ export function ExistingWorkspaceFoundation({
                   </AlertBanner>
                 </>
               )}
-
-              <ExchangeRoomActionController
-                activeLens={spatialContext.activeLens}
-                actions={exchangeRoomActions}
-                onNetworkFocus={focusNetwork}
-              />
 
               <section className={styles.provenance} aria-labelledby="provenance-title">
                 <p className={styles.eyebrow}>{t("networkWorkspace.provenance.eyebrow")}</p>
