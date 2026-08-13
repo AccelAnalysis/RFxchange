@@ -2,6 +2,7 @@ import type { OrganizationAccount } from "../../domain/organizations/model.ts";
 import {
   commercialPlanKey,
   createOrganizationCommercialAccount,
+  evolveOrganizationCommercialAccount,
   type OrganizationCommercialAccount,
   type PaymentProviderReference,
 } from "../../domain/commercial/model.ts";
@@ -27,6 +28,31 @@ function required(value: string, field: string): string {
 
 function customerReference(account: OrganizationCommercialAccount): PaymentProviderReference | null {
   return account.providerReferences.find((reference) => reference.kind === "customer") ?? null;
+}
+
+function withCustomerReference(
+  current: OrganizationCommercialAccount,
+  customer: PaymentProviderReference,
+  now: string,
+): OrganizationCommercialAccount {
+  const providerReferences = Object.freeze([
+    ...current.providerReferences.filter((reference) => reference.kind !== "customer"),
+    customer,
+  ]);
+  return evolveOrganizationCommercialAccount(current, {
+    planKey: String(current.planKey),
+    entitlementKeys: current.entitlementKeys.map(String),
+    providerReferences,
+    subscription: {
+      status: current.subscription.status,
+      providerSubscriptionReference: current.subscription.providerSubscriptionReference,
+      currentPeriodEndsAt: current.subscription.currentPeriodEndsAt
+        ? String(current.subscription.currentPeriodEndsAt)
+        : null,
+      cancelAtPeriodEnd: current.subscription.cancelAtPeriodEnd,
+    },
+    now,
+  });
 }
 
 function assertCheckoutResult(result: PaymentProviderCheckoutResult): void {
@@ -81,7 +107,7 @@ export class OrganizationCommercialAccountService {
     idempotencyKey: string;
     now: string;
   }>): Promise<PaymentProviderCheckoutResult> {
-    const account = await this.ensureFreeAccount(input.organization, input.now);
+    let account = await this.ensureFreeAccount(input.organization, input.now);
     const email = normalizedEmail(input.billingEmail);
     const idempotencyKey = required(input.idempotencyKey, "Payment idempotency key");
     const requestedPlan = commercialPlanKey(input.planKey);
@@ -99,6 +125,8 @@ export class OrganizationCommercialAccountService {
       if (ensured.customerReference.providerKey !== ensured.providerKey) {
         throw new Error("Payment provider customer reference must belong to the reported provider.");
       }
+      account = withCustomerReference(account, ensured.customerReference, input.now);
+      await this.repository.save(account);
       customer = ensured.customerReference;
     }
 
