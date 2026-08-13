@@ -5,7 +5,7 @@ import { createServerFirestoreFoundationRepositories } from "@/src/infrastructur
 
 export async function GET() {
   const access = await resolveParticipantRoute({ sessionCookie: (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value });
-  if (access.kind !== "qualified" || access.state.lifecycleState !== "open-platform") {
+  if (access.kind !== "authorized" || access.state.lifecycleState !== "open-platform") {
     return NextResponse.json({ openPlatform: false, rfxCreate: false, referralManage: false, resourceManage: false }, { headers: { "Cache-Control": "private, no-store" } });
   }
   const authorization = await createServerFirestoreFoundationRepositories().organizationAuthorization.getByMembershipId(access.membership.id);
