@@ -42,7 +42,7 @@ test("disabled Phase 2 actions are non-actionable without visible status prose",
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
   assert.match(controller, /className=\{styles\.disabledAction\}/);
-  assert.match(controller, /disabled\n/);
+  assert.match(controller, /<button[^>]*className=\{styles\.disabledAction\}[^>]*\bdisabled\b[^>]*data-action-state="disabled"[^>]*>/s);
   assert.match(controller, /data-disabled-reason=\{reason\}/);
   assert.doesNotMatch(controller, /Coming soon|Unavailable|In development|Not yet available/i);
   assert.match(styles, /border-style: dashed/);
