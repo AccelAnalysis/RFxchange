@@ -19,12 +19,22 @@
     "candidateHistory": [],
     "exactBaseSha": "10150e66b4a1b37a0cda5381986c5599da96e632",
     "activationEpochId": "exchange-room-phase2-2026-08-13",
-    "basePolicy": "exact-current-main-at-activation",
+    "basePolicy": "Exact current-main activation after Phase 1 merge. Current explicit product-owner direction authorizes the permanent lens containers as selectable Room contexts while capability truthfulness is enforced at the individual action level.",
     "status": "active",
     "releaseClass": "Elevated",
-    "requirementIds": [],
+    "requirementIds": [
+      "SHARED-TRUTH-001",
+      "SHARED-SPATIAL-001",
+      "SHARED-CAMERA-001",
+      "SHARED-SELECTION-001",
+      "SHARED-CONTINUITY-001",
+      "SHARED-ACTIONS-001",
+      "SHARED-COPY-001",
+      "SHARED-A11Y-001"
+    ],
     "sources": [
       "docs/program/EXCHANGE_ROOM_PHASE2_CONTROL.md",
+      "docs/program/MARKET_READY_BASELINE.md",
       "docs/program/SHARED_EXCHANGE_CONTRACTS.md",
       "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md",
       "src/application/participant/participant-lens-registry.ts",
@@ -33,7 +43,11 @@
     "dependencies": [
       {
         "packetId": "WP-EXCHANGE-ROOM-PHASE1-01",
-        "requiredCondition": "Phase 1 implementation is merged and canonical App Hosting rollout succeeded; real-map production health evidence debt remains explicit and is not rewritten as passed."
+        "requiredStatuses": [
+          "implemented-not-verified",
+          "acceptance-pending",
+          "verified"
+        ]
       }
     ],
     "ownedPaths": [
@@ -54,21 +68,27 @@
       "docs/tracking/**"
     ],
     "acceptanceRequired": [
+      "functional",
+      "domain-security",
+      "browser-visual",
+      "responsive",
+      "accessibility",
+      "copy",
+      "cross-lens",
+      "performance",
       "four-visible-selectable-lenses",
       "exactly-four-actions-per-lens",
       "individual-action-disabled-state-only",
       "room-spatial-continuity",
       "selected-organization-continuity",
-      "domain-security-negatives",
       "tenant-geography-privacy",
-      "desktop-mobile",
-      "accessibility",
       "five-locales",
       "exact-head-ci",
+      "configured-browser",
       "configured-map-when-available",
-      "independent-acceptance-later"
+      "independent-acceptance"
     ],
-    "expectedOutput": "One shared current-main Phase 2 candidate implementing a persistent lens controller and canonical sixteen-action registry. All four lenses remain visible/selectable. Only individual inactive action controls are gray/disabled and non-actionable; no unavailable-status copy is added merely to explain the disabled state.",
+    "expectedOutput": "One shared current-main Phase 2 candidate implementing a persistent lens controller and canonical sixteen-action registry. All four lenses remain visible/selectable Room contexts. Only individual inactive action controls are gray/disabled and non-actionable; no visible unavailable-status copy is added merely to explain the disabled state.",
     "stopBoundary": "Do not implement missing domain features, Teaming, Intelligence datasets, Resource Provider workflows, referral lifecycle expansion, messaging, notifications, billing/payments, commercial policy, tracker completion, or Independent Verification."
   },
   "phase1EvidenceDebt": {
@@ -80,7 +100,8 @@
   },
   "productOwnerDirection": {
     "marketReadyBaseline": "register → organization → Exchange Room/real market → four permanent lenses/value architecture → Founding Membership → live payment → recognized paid member",
-    "lensRule": "Every permanent lens remains visible and selectable regardless of unfinished functions.",
-    "actionRule": "Only the individual function button that is not usable for the current participant/selection is gray/disabled. Preserve its normal label and do not add unavailable/coming-soon style status copy merely to explain the disabled state."
+    "lensRule": "Every permanent lens remains visible and selectable as a real context of the shared Exchange Room regardless of unfinished functions.",
+    "actionRule": "Only the individual function button that is not usable for the current participant/selection is gray/disabled. Preserve its normal label and do not add visible unavailable/coming-soon style status copy merely to explain the disabled state.",
+    "reasonSemantics": "The projection must still distinguish not-operational, not-applicable and not-authorized reasons internally and in non-color-only accessibility/state semantics without adding visible status prose to the action grid."
   }
 }
