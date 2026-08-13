@@ -30,11 +30,12 @@ Required foundations are the merged `COM-038` commercial boundary, current organ
 - `.env.example`
 - `package.json`
 - `package-lock.json`
+- `test/firestore-schema.test.mjs`
 - `test/market-ready-founding-commerce-*.test.mjs`
 - `scripts/validate-market-ready-founding-commerce-*.mjs`
 - `docs/program/evidence/market-ready-founding-commerce/**`
 
-The canonical Firestore schema file is owned only for the commercial registration required by existing schema conventions. Marketing locale files are owned only for bounded Founding-offer reconciliation.
+The canonical Firestore schema file and its existing exact-schema test are owned only for the commercial registration required by existing schema conventions. Marketing locale files are owned only for bounded Founding-offer reconciliation.
 
 No other path is implicitly owned. A newly discovered path requirement needs a Control Room scope amendment before edit.
 
