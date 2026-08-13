@@ -4,7 +4,7 @@
   "activationEpoch": {
     "id": "exchange-room-phase2-2026-08-13",
     "mainBaseSha": "10150e66b4a1b37a0cda5381986c5599da96e632",
-    "controlPullRequest": null,
+    "controlPullRequest": 187,
     "packetIds": [
       "WP-EXCHANGE-ROOM-PHASE2-01"
     ],
