@@ -6,7 +6,11 @@ Packet: `WP-EXCHANGE-ROOM-PHASE2-01`
 
 Implementation branch: `lane01/exchange-room-phase2`
 
-Read `docs/program/EXCHANGE_ROOM_PHASE2_CONTROL.md` and `docs/program/MARKET_READY_BASELINE.md` before changing production code.
+Read `docs/program/EXCHANGE_ROOM_PHASE2_CONTROL.md`, `docs/program/EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md`, and `docs/program/MARKET_READY_BASELINE.md` before changing production code.
+
+## Frozen sixteen-action identity
+
+Implement the exact IDs, visible labels and ordering in `EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md`. Do **not** select or rename the four actions per lens during implementation. Runtime inspection determines only whether each fixed action has a truthful real handler for the current context or must remain gray/disabled.
 
 ## Primary outcome
 
@@ -35,8 +39,8 @@ Only the individual function button that cannot currently be used is gray/disabl
 
 1. Fetch current `main` and confirm the activation packet is merged/current.
 2. Inspect the current Exchange Room, lens registry, selected-organization projection, spatial-context storage, participant navigation, and existing domain handlers.
-3. Read all four current lens/domain authorities before naming the four actions per lens. Do not invent domain semantics.
-4. Create the canonical sixteen-action registry.
+3. Read all four current lens/domain authorities to understand the frozen action meanings and handler boundaries; do not rename or reinterpret the sixteen actions.
+4. Implement the canonical sixteen-action registry exactly as frozen by Control Room.
 5. Implement the Room lens controller so lens switching does not abandon/reset the shared map workspace.
 6. Project the same registry against own organization and authorized selected external organization.
 7. Attach existing real handlers where already authorized/operational.

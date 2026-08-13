@@ -877,6 +877,7 @@
         "SHARED-A11Y-001"
       ],
       "sources": [
+        "docs/program/EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md",
         "docs/program/EXCHANGE_ROOM_PHASE2_CONTROL.md",
         "docs/program/MARKET_READY_BASELINE.md",
         "docs/program/SHARED_EXCHANGE_CONTRACTS.md",
@@ -901,8 +902,11 @@
         "src/components/participant/**",
         "app/geography/canvas/**",
         "src/i18n/messages/network/**",
-        "test/**",
-        "scripts/**",
+        "test/exchange-room-phase2-*.test.mjs",
+        "test/participant-lens-controller-phase2.test.mjs",
+        "test/participant-action-registry-phase2.test.mjs",
+        "scripts/acceptance-exchange-room-phase2*.mjs",
+        "scripts/validate-exchange-room-phase2*.mjs",
         "docs/program/evidence/exchange-room-phase2/**"
       ],
       "nonOwnedPaths": [
@@ -929,6 +933,7 @@
         "independent-acceptance"
       ],
       "mergeGates": [
+        "exact immutable sixteen-action IDs, labels and ordering match EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md",
         "exact-head production CI",
         "four permanent lenses visible/selectable as shared Room contexts",
         "exactly four action definitions per lens",

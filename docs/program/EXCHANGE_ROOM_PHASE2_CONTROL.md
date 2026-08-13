@@ -135,9 +135,11 @@ Stale or cross-scope client selection remains non-authorizing and must fail clos
 
 ## Sixteen-action registry
 
-Create one canonical registry containing exactly four governed action definitions for each permanent lens, for a total of sixteen stable action definitions.
+The immutable Phase 2 action identities, participant-visible labels, lens order, action order and source authorities are frozen by [`EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md`](EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md). Lane 01 must implement **exactly those sixteen definitions**. It may not choose, rename, reorder, substitute, split, merge or invent action identities. A later change to an ID or visible label requires a Control Room product-authority amendment.
 
-Action names and domain meaning must be sourced from current approved lens/domain authorities and current accepted product direction. Lane 01 must not invent missing RFx, Resource, Intelligence, or Referral domain behavior simply to make a button active.
+The production registry contains exactly four governed action definitions for each permanent lens, for a total of sixteen stable action definitions. Count alone is not acceptance: the exact IDs, labels and ordering in the canonical action registry are normative.
+
+Lane 01 must not invent missing RFx, Resource, Intelligence, or Referral domain behavior simply to make a button active.
 
 Where a governed action label/value proposition exists but its real handler is not yet operational, the registry still renders the stable labeled action in its disabled/gray state.
 
@@ -265,7 +267,7 @@ Do not create a second Exchange Room.
 Lane 01 must produce one current-main candidate and show, at minimum:
 
 - exactly four permanent lenses visible and selectable on desktop and mobile;
-- exactly four action positions per lens / sixteen registry definitions total;
+- exactly the sixteen immutable action IDs, labels and ordering in `EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md`, four per lens;
 - lens switching without ordinary map reset or selected-organization loss;
 - own versus external selected-organization projection from the same registry;
 - active action handler continuity for existing authorized functions;
