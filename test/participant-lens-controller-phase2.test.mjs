@@ -28,6 +28,16 @@ test("lens changes preserve the map, camera and selected organization substrate"
   assert.match(workspace, /selectedOrganizationId: selectedOrganizationQueryId/);
 });
 
+test("the primary four-lens Room control remains actionable at mobile widths", () => {
+  const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
+  assert.match(styles, /@media \(max-width: 760px\)/);
+  assert.match(styles, /\[data-participant-navigation\] > nav/);
+  assert.match(styles, /display: flex !important/);
+  assert.match(styles, /\[data-participant-navigation\] > details/);
+  assert.match(styles, /display: none !important/);
+  assert.match(styles, /overflow-x: auto/);
+});
+
 test("disabled Phase 2 actions are non-actionable without visible status prose", () => {
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
