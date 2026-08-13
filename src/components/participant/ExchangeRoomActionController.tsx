@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 
+import { exchangeRoomLocaleCatalog } from "../../application/participant/exchange-room-locale";
 import type { ExchangeRoomActionProjection } from "../../application/participant/exchange-room-actions";
 import {
   PARTICIPANT_LENS_IDS,
@@ -55,22 +56,18 @@ export function ExchangeRoomActionController({
   actions: readonly ExchangeRoomActionProjection[];
   onNetworkFocus(intent: "organizations" | "capabilities"): void;
 }>) {
-  const { t } = useI18n();
-  const disabledReasonKey = {
-    "not-operational": "networkWorkspace.exchangeRoom.disabledReasons.notOperational",
-    "not-applicable": "networkWorkspace.exchangeRoom.disabledReasons.notApplicable",
-    "not-authorized": "networkWorkspace.exchangeRoom.disabledReasons.notAuthorized",
-  } as const;
+  const { locale } = useI18n();
+  const messages = exchangeRoomLocaleCatalog(locale);
 
   return (
     <section
       className={styles.actionGrid}
-      aria-label={t("networkWorkspace.exchangeRoom.actionsLabel")}
+      aria-label={messages.actionsLabel}
       data-exchange-room-action-grid
       data-active-lens={activeLens}
     >
       {actions.map((action) => {
-        const label = t(action.labelKey);
+        const label = messages.actions[action.id];
         if (action.availability === "active" && action.resolvedHandler?.kind === "href") {
           return (
             <Link
@@ -106,7 +103,7 @@ export function ExchangeRoomActionController({
             type="button"
             className={styles.disabledAction}
             disabled
-            aria-label={`${label}. ${t(disabledReasonKey[reason])}`}
+            aria-label={`${label}. ${messages.disabledReasons[reason]}`}
             data-exchange-room-action={action.id}
             data-action-state="disabled"
             data-disabled-reason={reason}
