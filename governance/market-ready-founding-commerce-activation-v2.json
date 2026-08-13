@@ -25,7 +25,9 @@
       ]
     },
     "fourLensLedgerMembership": false,
-    "parallelWorkstreams": ["WP-EXCHANGE-ROOM-PHASE2-01"],
+    "parallelWorkstreams": [
+      "WP-EXCHANGE-ROOM-PHASE2-01"
+    ],
     "implementationDependencies": [
       "PR-188-MERGED",
       "POST_MERGE_IMPLEMENTATION_BASE_BOUND",
@@ -75,6 +77,7 @@
       ".env.example",
       "package.json",
       "package-lock.json",
+      "test/firestore-schema.test.mjs",
       "test/market-ready-founding-commerce-*.test.mjs",
       "scripts/validate-market-ready-founding-commerce-*.mjs",
       "docs/program/evidence/market-ready-founding-commerce/**"
