@@ -1,24 +1,12 @@
 # Market-Ready Founding Commerce — Scope Freeze
 
-Authoritative additive scope for `WP-MARKET-READY-FOUNDING-COMMERCE-01`.
+Authoritative scope for `WP-MARKET-READY-FOUNDING-COMMERCE-01`.
 
-This file supersedes the earlier statement that candidate paths would be narrowed later.
+## Base and dependencies
 
-## Dependencies
+PR #188's base SHA is Control Room provenance only. After #188 merges, Control Room must create `governance/market-ready-founding-commerce-implementation-activation.json` with the exact then-current merged `main` SHA before `commercial/founding-live-commerce` begins.
 
-Implementation may begin only after PR #188 merges. The builder starts from the then-current merged `main` and records the exact SHA.
-
-Required existing foundations:
-
-- `docs/architecture/WAVE_1_SLICE_1_30.md` / merged `COM-038` organization commercial state and provider-neutral payment boundary;
-- current authenticated participant, organization-membership, and organization-operation authorization;
-- current Founding acquisition and offer surfaces;
-- current packet-local MRFC requirements and amendments;
-- commercial-term reconciliation before production commercial activation.
-
-`WP-EXCHANGE-ROOM-PHASE2-01` runs in parallel and is not an implementation dependency. Final Market-Ready integration depends on both.
-
-`COM-039`, `COM-040`, and `COM-041` remain unresolved tracker IDs and are not redefined by this packet.
+Required foundations are the merged `COM-038` commercial boundary, current organization authorization, current Founding acquisition/offer surfaces, and the current MRFC registry. Phase 2 runs in parallel and is not a commercial implementation dependency. `COM-039`–`COM-041` remain unresolved and are not redefined here.
 
 ## Owned paths
 
@@ -26,6 +14,7 @@ Required existing foundations:
 - `src/application/commercial/**`
 - `src/infrastructure/commercial/**`
 - `src/infrastructure/firestore/commercial-*.ts`
+- `src/infrastructure/firestore/schema.ts`
 - `app/api/commercial/**`
 - `app/commercial/**`
 - `app/founding/**`
@@ -45,7 +34,7 @@ Required existing foundations:
 - `scripts/validate-market-ready-founding-commerce-*.mjs`
 - `docs/program/evidence/market-ready-founding-commerce/**`
 
-The marketing locale files are owned only for bounded reconciliation of the existing Founding offer. This packet does not authorize a marketing redesign.
+The canonical Firestore schema file is owned only for the commercial registration required by existing schema conventions. Marketing locale files are owned only for bounded Founding-offer reconciliation.
 
 No other path is implicitly owned. A newly discovered path requirement needs a Control Room scope amendment before edit.
 
@@ -55,13 +44,13 @@ No other path is implicitly owned. A newly discovered path requirement needs a C
 - `src/components/participant/**`
 - `app/geography/canvas/**`
 - `src/i18n/messages/network/**`
-- Phase 2 action/lens controller tests, scripts, and evidence
-- Opportunities/RFx domain/runtime paths
-- Resources domain/runtime paths
-- Intelligence analytical/runtime paths
-- Referrals domain/runtime paths
+- Phase 2 controller/evidence paths
+- Opportunities/RFx domain paths
+- Resources domain paths
+- Intelligence analytical paths
+- Referrals domain paths
 - `governance/four-lens-requirements.json`
 - `governance/four-lens-workstreams.json`
-- Independent Acceptance evidence/dispositions
+- Independent Acceptance dispositions/evidence
 
-If commerce needs a shared participant-shell or navigation seam, it must use a Shared Contract Request to Lane 01.
+Any needed shared participant-shell seam must be requested from Lane 01.
