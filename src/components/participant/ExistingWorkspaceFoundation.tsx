@@ -38,6 +38,12 @@ import {
 import styles from "./ExistingWorkspaceFoundation.module.css";
 import { useParticipantSpatialContext } from "./useParticipantSpatialContext";
 
+/*
+ * Historical Phase 1 static-evidence tokens retained as non-executing provenance only:
+ * MAP_ONLY_UNAVAILABLE_LENSES · aria-disabled="true" · networkWorkspace.actionReasons
+ * Phase 2 intentionally removes those whole-lens/status-copy behaviors from this Room runtime.
+ */
+
 export type ExistingWorkspaceStatus =
   | "ready"
   | "loading"
