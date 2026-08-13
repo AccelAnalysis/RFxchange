@@ -2,18 +2,33 @@
   "schemaVersion": 2,
   "id": "market-ready-founding-commerce-2026-08-13",
   "controlPullRequest": 188,
-  "mainBaseSha": "97b93f1d0f3405111b700e4d6ca9d443b9722833",
+  "controlPrBaseSha": "97b93f1d0f3405111b700e4d6ca9d443b9722833",
   "extendsHistoricalEnvelope": "governance/market-ready-founding-commerce-activation.json",
   "packet": {
     "id": "WP-MARKET-READY-FOUNDING-COMMERCE-01",
-    "status": "activation-pending-control-merge",
+    "status": "authority-pending-control-merge",
     "releaseClass": "Critical",
     "implementationRole": "Commercial Release Integrator — Founding Membership Baseline",
     "implementationBranch": "commercial/founding-live-commerce",
+    "implementationBaseSha": null,
+    "postMergeImplementationBinding": {
+      "required": true,
+      "record": "governance/market-ready-founding-commerce-implementation-activation.json",
+      "rule": "After PR #188 merges and before implementation begins, Control Room must bind the packet to the exact then-current merged main SHA. The implementation branch must be created from that same SHA.",
+      "requiredFields": [
+        "controlPullRequest",
+        "controlMergeSha",
+        "postMergeMainSha",
+        "implementationBaseSha",
+        "implementationBranch",
+        "status"
+      ]
+    },
     "fourLensLedgerMembership": false,
     "parallelWorkstreams": ["WP-EXCHANGE-ROOM-PHASE2-01"],
     "implementationDependencies": [
       "PR-188-MERGED",
+      "POST_MERGE_IMPLEMENTATION_BASE_BOUND",
       "WAVE_1_SLICE_1_30_COM-038_FOUNDATION",
       "CURRENT_AUTHENTICATED_ORGANIZATION_AUTHORITY",
       "CURRENT_FOUNDING_ACQUISITION_AND_OFFER_SURFACES",
@@ -44,6 +59,7 @@
       "src/application/commercial/**",
       "src/infrastructure/commercial/**",
       "src/infrastructure/firestore/commercial-*.ts",
+      "src/infrastructure/firestore/schema.ts",
       "app/api/commercial/**",
       "app/commercial/**",
       "app/founding/**",
