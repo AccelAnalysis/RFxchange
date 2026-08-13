@@ -13,12 +13,12 @@ The initial denominators are established by `governance/four-lens-requirements.j
 
 | Experience | Requirement denominator | Verified | In Progress | Implemented — Not Verified | Not Started | Blocked | Explicitly deferred/N/A |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Shared Exchange | 27 | 0 | 0 | 21 | 1 | 4 | 1 |
+| Shared Exchange | 27 | 0 | 0 | 22 | 1 | 3 | 1 |
 | Opportunities/RFx | 41 | 0 | 0 | 23 | 18 | 0 | 0 |
 | Resources | 12 | 0 | 0 | 8 | 2 | 2 | 0 |
 | Intelligence | 14 | 0 | 0 | 3 | 6 | 5 | 0 |
-| Referrals | 12 | 0 | 0 | 9 | 1 | 2 | 0 |
-| **Program total** | **106** | **0** | **0** | **64** | **28** | **13** | **1** |
+| Referrals | 12 | 0 | 0 | 10 | 1 | 1 | 0 |
+| **Program total** | **106** | **0** | **0** | **66** | **28** | **11** | **1** |
 
 No percentage is reported. This baseline deliberately distinguishes implementation/evidence from independent verification.
 
@@ -58,6 +58,7 @@ Exchange Room Phase 1 is merged and released through the canonical App Hosting p
 - Merge/current Phase 1 production source: `10150e66b4a1b37a0cda5381986c5599da96e632`.
 - Post-merge production CI #951 / run `31687342981` passed on that exact SHA.
 - Firebase App Hosting rollout for `rfxchange/us-east4/rfxchange` succeeded on that exact SHA.
+- `SHARED-CONTINUITY-002` and dependent `REF-LENS-011` are now `Implemented — Not Verified` from the PR #186 continuity correction; independent acceptance remains pending.
 - Authenticated real-Mapbox production health evidence remains explicit debt; this does not mark Phase 1 Verified or Stabilization 2C complete.
 
 ## Exchange Room Phase 2

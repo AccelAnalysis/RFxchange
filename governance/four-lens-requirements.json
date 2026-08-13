@@ -3,8 +3,17 @@
   "authority": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md",
   "historicalAdoption": {
     "baseSha": "21c4fc080a823ae03f33ae1e58dd2752f317dc67",
-    "tracker": { "total": 438, "done": 170, "notStarted": 268, "rfxDone": 18, "rfxTotal": 41 },
-    "frozenCandidate": { "pr": 171, "sha": "e70413e2e45db4b75517376acdc0700f9838a963" }
+    "tracker": {
+      "total": 438,
+      "done": 170,
+      "notStarted": 268,
+      "rfxDone": 18,
+      "rfxTotal": 41
+    },
+    "frozenCandidate": {
+      "pr": 171,
+      "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+    }
   },
   "adoptionBaseline": {
     "algorithm": "sha256-json-v1",
@@ -23,123 +32,3504 @@
     "Deferred — Explicitly Approved",
     "Not Applicable — Explicitly Approved"
   ],
-  "acceptanceDispositions": ["Verified", "Partial", "Not Implemented", "Blocked", "Deferred", "Decision Required"],
-  "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "motion", "accessibility", "copy", "cross-lens", "performance", "governance"],
+  "acceptanceDispositions": [
+    "Verified",
+    "Partial",
+    "Not Implemented",
+    "Blocked",
+    "Deferred",
+    "Decision Required"
+  ],
+  "acceptanceTypes": [
+    "functional",
+    "domain-security",
+    "browser-visual",
+    "responsive",
+    "motion",
+    "accessibility",
+    "copy",
+    "cross-lens",
+    "performance",
+    "governance"
+  ],
   "verifiedEvidenceSchema": {
-    "entry": { "type": "one declared acceptanceTypes value", "manifest": "docs/program/evidence/<candidate-sha>.json" },
+    "entry": {
+      "type": "one declared acceptanceTypes value",
+      "manifest": "docs/program/evidence/<candidate-sha>.json"
+    },
     "manifest": "A durable Lane 06 JSON manifest binding candidate SHA, base SHA, reviewer, GitHub Actions run, environment, and a passed timestamped check plus artifacts for every claimed type.",
     "coverage": "Verified requires at least one manifest-backed evidence entry for every acceptance type declared by the requirement."
   },
   "requirements": [
-    { "id": "SHARED-TRUTH-001", "originalRequirement": "The permanent participant lens sequence is Opportunities/RFx | Resources | Intelligence | Referrals; unavailable governed options remain structurally visible, explicit, non-actionable and non-current.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#2-governing-product-decision", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": [], "acceptanceTypes": ["functional", "browser-visual", "accessibility", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 159, "sha": "7e61fd94232ad72de32f4776befdb61d9e729cf6" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-TRANSITION-001", "originalRequirement": "For ordinary warm authenticated navigation, current usable content remains visible until the destination is ready; no spinner, progress UI, loading page, artificial hold or application-launch treatment appears.", "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": ["SHARED-TRUTH-001"], "acceptanceTypes": ["functional", "browser-visual", "motion", "accessibility", "performance"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md"] }, "deferral": null },
-    { "id": "SHARED-LIFECYCLE-001", "originalRequirement": "Resolve the current server-authoritative activation stage consistently across participant lenses: incomplete orientation to /orientation, completed orientation with incomplete first value/open work to /first-value, and open participants to the requested authorized Exchange destination.", "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix", "lane": "shared-exchange", "dependentLanes": ["resources", "intelligence", "referrals"], "dependencies": [], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-SPATIAL-001", "originalRequirement": "Use one typed, versioned, non-authorizing participant spatial context for camera, view, selected object, per-lens search/filter/result state, panel/list state, origin and return intent.", "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": [], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-SPATIAL-002", "originalRequirement": "Scope participant spatial state by participant, membership, organization and geography; clear or ignore it after session, authority, organization, geography, schema or selected-object invalidation.", "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": ["SHARED-SPATIAL-001"], "acceptanceTypes": ["functional", "domain-security"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["https://github.com/AccelAnalysis/RFxchange/pull/160#discussion_r3761518143"] }, "deferral": null },
-    { "id": "SHARED-VIEW-001", "originalRequirement": "Use one 2D/Perspective/3D contract and derive the selected Map view state from the settled Mapbox pitch so buttons, intended view and actual camera agree.", "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": ["SHARED-SPATIAL-001"], "acceptanceTypes": ["functional", "browser-visual", "motion", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-CAMERA-001", "originalRequirement": "Initial organization-home composition is separate from ordinary interaction; selection, drawers, search/filter changes and lens changes do not reassert 3D or overwrite a restored camera.", "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": ["SHARED-SPATIAL-001", "SHARED-VIEW-001"], "acceptanceTypes": ["functional", "browser-visual", "motion", "cross-lens"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["https://github.com/AccelAnalysis/RFxchange/pull/160#discussion_r3762160859"] }, "deferral": null },
-    { "id": "SHARED-MARKER-001", "originalRequirement": "The participant's own organization remains a fixed-coordinate standing marker and routes through the canonical organization selection/detail seam.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#51-own-organization", "lane": "shared-exchange", "dependentLanes": ["resources", "intelligence", "referrals"], "dependencies": ["SHARED-SELECTION-001"], "acceptanceTypes": ["functional", "browser-visual", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-MARKER-002", "originalRequirement": "External organizations are compact nodes by default; exactly one selected external organization rises to a standing marker without moving its geographic anchor, while the prior selection demotes.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#52-other-organizations", "lane": "shared-exchange", "dependentLanes": ["resources", "intelligence", "referrals"], "dependencies": ["SHARED-SELECTION-001"], "acceptanceTypes": ["functional", "browser-visual", "motion", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-CLUSTER-001", "originalRequirement": "At wider zooms, unselected organizations aggregate into real clusters; a cluster is not an organization, has no organization logo, expands truthfully, and never absorbs the selected standing marker.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#52-other-organizations", "lane": "shared-exchange", "dependentLanes": ["resources", "intelligence", "referrals"], "dependencies": ["SHARED-MARKER-002"], "acceptanceTypes": ["functional", "browser-visual", "motion"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["https://github.com/AccelAnalysis/RFxchange/pull/160#discussion_r3761656358"] }, "deferral": null },
-    { "id": "SHARED-SELECTION-001", "originalRequirement": "Marker, result-card, keyboard and cross-lens selection converge on exactly one selected organization and one synchronized map/list/detail state.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#53-selection-parity", "lane": "shared-exchange", "dependentLanes": ["resources", "intelligence", "referrals"], "dependencies": ["SHARED-SPATIAL-001"], "acceptanceTypes": ["functional", "accessibility", "cross-lens"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-DRAWER-001", "originalRequirement": "Desktop uses a synchronized edge drawer and mobile a bottom sheet while enough map remains visible; marker/card selection and list position remain coherent.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#6-map-popup-drawer-and-list-behavior", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": ["SHARED-SELECTION-001"], "acceptanceTypes": ["functional", "browser-visual", "responsive", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-RESULT-001", "originalRequirement": "Prefer continuous/cursor result exploration where the governing architecture calls for it, but do not fabricate backend cursor semantics that the existing discovery domain does not support.", "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#explicit-deferrals", "lane": "shared-exchange", "dependentLanes": ["resources", "intelligence", "referrals"], "dependencies": ["backend-network-cursor-contract"], "acceptanceTypes": ["functional", "performance"], "status": "Deferred — Explicitly Approved", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef", "result": "Deferred", "evidence": ["docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#explicit-deferrals"] }, "deferral": { "reason": "The current Network discovery domain exposes a bounded page contract and no cursor token; the approved correction explicitly forbade invented cursor semantics.", "missingDependency": "A separately authorized server cursor/detail contract.", "impact": "Result exploration remains page-based and cannot yet meet the mature continuous-list target.", "futureLane": "shared-exchange", "futureMilestone": null, "approvedBy": "Post-PR-#159 Experience Convergence authority" } },
-    { "id": "SHARED-SEARCH-001", "originalRequirement": "Provide one clear search and restrained filter grammar with lens-specific semantics, synchronized results, and preservation of safe query/filter state.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#6-map-popup-drawer-and-list-behavior", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": ["SHARED-DRAWER-001"], "acceptanceTypes": ["functional", "browser-visual", "responsive", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-CONTINUITY-001", "originalRequirement": "Preserve a valid selected organization, camera and view across Intelligence, Resources and Referrals while each destination revalidates its own permitted actions and data.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#43-lens-switch-behavior", "lane": "shared-exchange", "dependentLanes": ["resources", "intelligence", "referrals"], "dependencies": ["SHARED-SPATIAL-001", "SHARED-SELECTION-001"], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-CONTINUITY-002", "originalRequirement": "Intelligence search submission, Clear and pagination preserve a separately revalidated carried selected organization even when it is outside the filtered result page.", "source": "https://github.com/AccelAnalysis/RFxchange/pull/160", "lane": "shared-exchange", "dependentLanes": ["intelligence", "resources", "referrals"], "dependencies": ["SHARED-CONTINUITY-001", "SHARED-SEARCH-001"], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Blocked", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef", "result": "Partial", "evidence": ["https://github.com/AccelAnalysis/RFxchange/pull/160"] }, "deferral": null, "clarification": "PR #160 merged after the final exact-head Codex P2 finding. Current main still omits selectedOrganization from the search form, Clear link and pagination URLs." },
-    { "id": "SHARED-RETURN-001", "originalRequirement": "Cross-lens and operational completion/cancellation restore the safe originating lens, selected object, map position, search/filter and applicable result position without relying only on browser Back.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#9-spatial-to-operational-workflow-continuity", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": ["SHARED-SPATIAL-001"], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-ACCOUNT-001", "originalRequirement": "Account uses one approximately 30–36px circular avatar inside a 44px keyboard-operable target; its menu contains Organization Profile, Quick Start, authorized Administration and Sign out as applicable.", "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": [], "acceptanceTypes": ["functional", "browser-visual", "responsive", "accessibility", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-ACTIONS-001", "originalRequirement": "Use one reusable lens-aware organization action projection: real available actions route to authorized runtimes, governed unavailable actions may remain visibly disabled, and nonexistent features are not invented.", "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": ["SHARED-SELECTION-001"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-COPY-001", "originalRequirement": "Participant surfaces use natural language and suppress internal projection, coordinate-source, privacy-treatment, provider/participant projection and lifecycle implementation terminology.", "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": [], "acceptanceTypes": ["copy", "browser-visual", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-PRIVACY-001", "originalRequirement": "For approximate or locality-level visibility, prefer the locality/county/city name or no location sentence over an explanation such as Near Smithfield; never expose privacy mechanics.", "source": "Post-PR-#159 Experience Convergence authority section 36", "lane": "shared-exchange", "dependentLanes": ["intelligence", "resources", "referrals"], "dependencies": ["explicit-location-copy-policy-decision"], "acceptanceTypes": ["domain-security", "copy", "browser-visual"], "status": "Blocked", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef", "result": "Decision Required", "evidence": ["docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md"] }, "deferral": null, "clarification": "Current runtime and reconciliation record use Near {locality}/In {locality}, while the original authority explicitly preferred locality-only or no sentence over Near. Control Room must obtain an explicit policy reconciliation before implementation." },
-    { "id": "SHARED-PRIVACY-002", "originalRequirement": "A discoverable organization without permitted precise spatial placement remains in results/detail/actions without a fabricated exact marker; locality presence appears only when the governing privacy projection authorizes it.", "source": "Post-PR-#159 Experience Convergence authority section 37", "lane": "shared-exchange", "dependentLanes": ["intelligence", "resources", "referrals"], "dependencies": [], "acceptanceTypes": ["functional", "domain-security", "browser-visual"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-IDENTITY-001", "originalRequirement": "A standing organization marker uses an authorized public organization logo when available, then organization initials, then a neutral organization glyph; RFxchange branding is never substituted for organization identity.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#5-marker-and-selection-grammar", "lane": "shared-exchange", "dependentLanes": ["resources", "intelligence", "referrals"], "dependencies": ["public-organization-logo-projection-contract"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Blocked", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": "Blocked", "evidence": ["docs/architecture/INF-008-firebase-storage-foundation.md", "docs/slices/SLICE_3_4_EXECUTION_AUTHORITY.md"] }, "deferral": null, "clarification": "PR #160 removed the product RF glyph and implemented initials. The Network marker projection does not yet carry an independently accepted public-logo delivery contract; private source assets must not be exposed to satisfy the visual target." },
-    { "id": "SHARED-A11Y-001", "originalRequirement": "Touched participant controls and states preserve keyboard operation, visible focus, semantic current/unavailable state, reduced motion, 390px reflow, touch targets and assistive descriptions without color-only communication.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#12-implementation-acceptance-requirements", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": [], "acceptanceTypes": ["responsive", "motion", "accessibility", "browser-visual"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-I18N-001", "originalRequirement": "All changed participant-facing copy and state are rendered and accepted in en-US, es, fr, it and de without silent fallback or moved hard-coded English.", "source": "Post-PR-#159 Experience Convergence authority section 47", "lane": "shared-exchange", "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "referrals"], "dependencies": [], "acceptanceTypes": ["copy", "browser-visual", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "SHARED-EVIDENCE-001", "originalRequirement": "Merge only when exact-head CI and configured-browser evidence are green, review covers the final exact head, and no unresolved substantive finding remains.", "source": "Post-PR-#159 Experience Convergence authority sections 67-68", "lane": "independent-acceptance", "dependentLanes": ["shared-exchange", "integration"], "dependencies": [], "acceptanceTypes": ["governance"], "status": "Blocked", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef", "result": "Not Implemented", "evidence": ["https://github.com/AccelAnalysis/RFxchange/pull/160"] }, "deferral": null, "clarification": "PR #160 merged after a substantive final-head Codex P2 finding. The prior evidence remains implementation evidence but does not satisfy independent completion certification." },
-
-    { "id": "RFX-FEATURE-ISS-001", "originalRequirement": "One organization-owned RFx aggregate shared across issuer, responder and future evaluator views.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-41--rfx-kernel-and-request-families", "lane": "opportunities-rfx", "dependentLanes": ["intelligence"], "dependencies": [], "acceptanceTypes": ["functional", "domain-security"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 161, "sha": "10d1156d45ac90e9c10b4a2704c78fe30606a3b0" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_1.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ISS-002", "originalRequirement": "AMACS request-family configuration over the single aggregate; no parallel RFI/RFQ/RFP products.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-41--rfx-kernel-and-request-families", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-ISS-001"], "acceptanceTypes": ["functional", "domain-security"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 161, "sha": "10d1156d45ac90e9c10b4a2704c78fe30606a3b0" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_1.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ISS-003", "originalRequirement": "Create from blank; extensible seams for templates/prior RFxs without making paid/future sources mandatory.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-41--rfx-kernel-and-request-families", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-ISS-001"], "acceptanceTypes": ["functional", "domain-security", "accessibility"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 161, "sha": "10d1156d45ac90e9c10b4a2704c78fe30606a3b0" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_1.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ISS-005", "originalRequirement": "Modular operational builder organized by task, not a separate document editor.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-42--structured-need-and-requirement-foundation", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-ISS-001"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "accessibility"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 163, "sha": "d18986544881c9e81fb9a37858bccb35109724c4" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_2.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ISS-006", "originalRequirement": "Structured scope, outputs, requirements, quantities, performance locations, dates, value, term, credentials, insurance and evidence.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-42--structured-need-and-requirement-foundation", "lane": "opportunities-rfx", "dependentLanes": ["intelligence"], "dependencies": ["RFX-FEATURE-ISS-001"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 163, "sha": "d18986544881c9e81fb9a37858bccb35109724c4" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_2.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ISS-007", "originalRequirement": "AMACS-backed required/preferred capabilities and structured qualifiers beyond NAICS.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-43--amacs-requirements-response-and-evaluation-definition", "lane": "opportunities-rfx", "dependentLanes": ["intelligence"], "dependencies": ["RFX-FEATURE-ISS-006"], "acceptanceTypes": ["functional", "domain-security"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 165, "sha": "c07f45ffa451aafb80852e40384a5bb31cbec5cf" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_3.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ISS-009", "originalRequirement": "Evaluation method, gates and factors linked to requirements and response evidence; frozen at publication.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-43--amacs-requirements-response-and-evaluation-definition", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-ISS-006", "RFX-FEATURE-ISS-007"], "acceptanceTypes": ["functional", "domain-security"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 165, "sha": "c07f45ffa451aafb80852e40384a5bb31cbec5cf" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_3.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ISS-011", "originalRequirement": "Standardized, expandable response structure using AMACS sections/templates and issuer-added sections.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-43--amacs-requirements-response-and-evaluation-definition", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-ISS-007"], "acceptanceTypes": ["functional", "domain-security"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 165, "sha": "c07f45ffa451aafb80852e40384a5bb31cbec5cf" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_3.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ISS-016", "originalRequirement": "Server-authoritative publication checks with deep-linked findings and authority revalidation.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-44--readiness-and-publication", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-ISS-002", "RFX-FEATURE-ISS-005", "RFX-FEATURE-ISS-006", "RFX-FEATURE-ISS-007", "RFX-FEATURE-ISS-009", "RFX-FEATURE-ISS-011"], "acceptanceTypes": ["functional", "domain-security", "browser-visual"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 167, "sha": "8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_4.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ISS-018", "originalRequirement": "Preview from the same permitted projection used after publication.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-44--readiness-and-publication", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-ISS-016"], "acceptanceTypes": ["functional", "domain-security", "browser-visual"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 167, "sha": "8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_4.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ISS-019", "originalRequirement": "Atomic/idempotent publication, immutable version snapshot, opportunity projection, geography/index/timeline/events.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-44--readiness-and-publication", "lane": "opportunities-rfx", "dependentLanes": ["intelligence"], "dependencies": ["RFX-FEATURE-ISS-016", "RFX-FEATURE-ISS-018"], "acceptanceTypes": ["functional", "domain-security"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 167, "sha": "8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_4.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ISS-020", "originalRequirement": "Basic issuance available under approved commercial policy; advanced capabilities consume entitlement policy without changing match truth.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-44--readiness-and-publication", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-ISS-019"], "acceptanceTypes": ["functional", "domain-security", "copy"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 167, "sha": "8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_4.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-ACQ-009", "originalRequirement": "Controlled share link resolving through the permitted opportunity projection and existing acquisition context.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-44--readiness-and-publication", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-ISS-019"], "acceptanceTypes": ["functional", "domain-security"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 167, "sha": "8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_4.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-DSC-004", "originalRequirement": "Search permitted published RFxs and view substantive permitted requirements.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-45--opportunity-discovery-and-management", "lane": "opportunities-rfx", "dependentLanes": ["intelligence"], "dependencies": ["RFX-FEATURE-ISS-019"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "performance"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 169, "sha": "18bbcb56b4057927d2d7c8e57a2ca512cc60e231" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_5.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-DSC-005", "originalRequirement": "Save organization/user-scoped searches under commercial policy.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-45--opportunity-discovery-and-management", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-DSC-004"], "acceptanceTypes": ["functional", "domain-security"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 169, "sha": "18bbcb56b4057927d2d7c8e57a2ca512cc60e231" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_5.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-DSC-006", "originalRequirement": "Alerts/digests from saved-search matches through existing reliable communications.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-45--opportunity-discovery-and-management", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-DSC-005", "COMMS-003", "COMMS-004", "COMMS-005"], "acceptanceTypes": ["functional", "domain-security", "performance"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 169, "sha": "18bbcb56b4057927d2d7c8e57a2ca512cc60e231" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_5.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-DSC-007", "originalRequirement": "Watch an RFx through one relationship model; no duplicate opportunity.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-45--opportunity-discovery-and-management", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-DSC-004"], "acceptanceTypes": ["functional", "domain-security"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 169, "sha": "18bbcb56b4057927d2d7c8e57a2ca512cc60e231" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_5.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-DSC-008", "originalRequirement": "Surface canonical deadlines for saved/watched/pursued RFxs.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-45--opportunity-discovery-and-management", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-DSC-005", "RFX-FEATURE-DSC-007"], "acceptanceTypes": ["functional", "domain-security", "copy"], "status": "Implemented — Not Verified", "legacyClassification": "Previously accepted — independent assurance pending", "implementation": { "actor": "github:AccelAnalysis", "pr": 169, "sha": "18bbcb56b4057927d2d7c8e57a2ca512cc60e231" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_4_SLICE_4_5.md"] }, "deferral": null },
-    { "id": "RFX-FEATURE-RSP-001", "originalRequirement": "Distinguish Discovered, Potential Match and Invited; none means qualified or endorsed.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-46--fit-decision-and-pursuit", "lane": "opportunities-rfx", "dependentLanes": ["intelligence"], "dependencies": ["RFX-FEATURE-DSC-004"], "acceptanceTypes": ["functional", "domain-security", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 171, "sha": "e70413e2e45db4b75517376acdc0700f9838a963" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null, "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending." },
-    { "id": "RFX-FEATURE-RSP-002", "originalRequirement": "Explain AMACS capability/requirement alignment, confirmations, gaps, dates, value and location.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-46--fit-decision-and-pursuit", "lane": "opportunities-rfx", "dependentLanes": ["intelligence"], "dependencies": ["RFX-FEATURE-RSP-001", "RFX-FEATURE-ISS-007"], "acceptanceTypes": ["functional", "domain-security", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 171, "sha": "e70413e2e45db4b75517376acdc0700f9838a963" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null, "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending." },
-    { "id": "RFX-FEATURE-RSP-003", "originalRequirement": "Private responder Go/No-Go assessment for fit, eligibility, capacity, economics and gaps.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-46--fit-decision-and-pursuit", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-002"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 171, "sha": "e70413e2e45db4b75517376acdc0700f9838a963" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null, "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending." },
-    { "id": "RFX-FEATURE-RSP-004", "originalRequirement": "Persist Pursue/Watch/Decline and unlock response only after authorized Pursue.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-46--fit-decision-and-pursuit", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-003"], "acceptanceTypes": ["functional", "domain-security", "browser-visual"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 171, "sha": "e70413e2e45db4b75517376acdc0700f9838a963" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null, "clarification": "Frozen preserved implementation candidate; current PR has substantive stale-version reconfirmation and payload-digest review findings." },
-    { "id": "RFX-FEATURE-RSP-006", "originalRequirement": "Typed missing/unconfirmed capability, requirement and evidence gaps.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-46--fit-decision-and-pursuit", "lane": "opportunities-rfx", "dependentLanes": ["resources", "intelligence"], "dependencies": ["RFX-FEATURE-RSP-002"], "acceptanceTypes": ["functional", "domain-security", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 171, "sha": "e70413e2e45db4b75517376acdc0700f9838a963" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null, "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending." },
-    { "id": "RFX-FEATURE-DSC-010", "originalRequirement": "Reuse Wave 3 organization discovery for gap-scoped teammate candidates.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-006"], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-RSP-007", "originalRequirement": "Route an RFx gap to teammate discovery with context preserved.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-006", "RFX-FEATURE-DSC-010"], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-RSP-008", "originalRequirement": "Route an RFx readiness gap to approved resource-provider discovery; no duplicate provider directory.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming", "lane": "opportunities-rfx", "dependentLanes": ["resources"], "dependencies": ["RFX-FEATURE-RSP-006", "RES-LENS-007"], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-TEM-001", "originalRequirement": "RFx-scoped teammate search by missing capability, role, geography and need.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-006", "RFX-FEATURE-DSC-010"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-TEM-002", "originalRequirement": "Invite an organization in a defined proposed capacity with minimum necessary context.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-TEM-001"], "acceptanceTypes": ["functional", "domain-security", "copy"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-TEM-003", "originalRequirement": "Invitee reviews and accepts/declines without token possession granting authority.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-TEM-002"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-TEM-004", "originalRequirement": "Present/evidence the nonbinding legal boundary.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-TEM-002"], "acceptanceTypes": ["functional", "domain-security", "copy"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-ACQ-007", "originalRequirement": "Nonmember invitation survives account/organization activation and returns to the pending invite without auto-acceptance.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["ACQ-003", "RFX-FEATURE-TEM-002", "COMMS-003"], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-RSP-009", "originalRequirement": "Create an organization-owned response from the published requirement/section snapshot after Pursue.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-48--response-construction", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-004", "RFX-FEATURE-ISS-011"], "acceptanceTypes": ["functional", "domain-security"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-RSP-010", "originalRequirement": "Requirement/section-linked compliance matrix with stable IDs.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-48--response-construction", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-009"], "acceptanceTypes": ["functional", "domain-security", "browser-visual"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-RSP-017", "originalRequirement": "Continuous completeness checks for enabled requirements, sections, pricing, credentials, attachments and acknowledgments.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-48--response-construction", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-010"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-RSP-018", "originalRequirement": "Final server-side validation against current RFx version, deadline, permissions and submission mode.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-49--review-and-submission", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-017"], "acceptanceTypes": ["functional", "domain-security"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-RSP-019", "originalRequirement": "Human review of the assembled canonical response projection.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-49--review-and-submission", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-018"], "acceptanceTypes": ["functional", "browser-visual", "accessibility"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-RSP-020", "originalRequirement": "Atomic hosted submission, locked submitted version and immutable receipt.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-49--review-and-submission", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-018", "RFX-FEATURE-RSP-019"], "acceptanceTypes": ["functional", "domain-security"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-RSP-021", "originalRequirement": "Explicit external handoff/preparation without false receipt claim.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-49--review-and-submission", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-018", "RFX-FEATURE-RSP-019"], "acceptanceTypes": ["functional", "domain-security", "copy"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-EDU-011", "originalRequirement": "First-use issuer explanation inside the real builder, limited to enabled capabilities.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-410--contextual-education", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-ISS-005"], "acceptanceTypes": ["functional", "browser-visual", "accessibility", "copy"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-EDU-012", "originalRequirement": "First-use responder explanation inside the real response/submission mode.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-410--contextual-education", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-RSP-009"], "acceptanceTypes": ["functional", "browser-visual", "accessibility", "copy"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RFX-FEATURE-EDU-013", "originalRequirement": "First-use teaming explanation aligned with TEM-004; not a substitute for the legal boundary.", "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-410--contextual-education", "lane": "opportunities-rfx", "dependentLanes": [], "dependencies": ["RFX-FEATURE-TEM-004"], "acceptanceTypes": ["functional", "browser-visual", "accessibility", "copy"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-
-    { "id": "RES-LENS-001", "originalRequirement": "A non-provider organization can find approved providers and published resources through the permanent Resources lens.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens", "lane": "resources", "dependentLanes": ["intelligence", "opportunities-rfx"], "dependencies": [], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 137, "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_7.md"] }, "deferral": null },
-    { "id": "RES-LENS-002", "originalRequirement": "Own-organization Resources interaction projects the exact provider application lifecycle and authorized next action without invented states or remedies.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens", "lane": "resources", "dependentLanes": [], "dependencies": [], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 132, "sha": "81dd94f7e655b1854660e33c0a703dd37bb39a06" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_6.md"] }, "deferral": null },
-    { "id": "RES-LENS-003", "originalRequirement": "Only an approved Official Resource Provider receives the currently authorized provider profile, service/resource, geography, eligibility/intake, availability and request management actions.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens", "lane": "resources", "dependentLanes": ["intelligence"], "dependencies": ["RES-LENS-002"], "acceptanceTypes": ["functional", "domain-security", "browser-visual"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 137, "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_7.md"] }, "deferral": null },
-    { "id": "RES-LENS-004", "originalRequirement": "Provider discovery and detail show current approved/published provider state, eligibility, intake, availability and provenance without implying endorsement or acceptance.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens", "lane": "resources", "dependentLanes": ["intelligence", "opportunities-rfx"], "dependencies": ["RES-LENS-003"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 137, "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_7.md"] }, "deferral": null },
-    { "id": "RES-LENS-005", "originalRequirement": "Resources distinguishes provider service territory from office/base location and respects controlled geography and privacy-safe projection.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens", "lane": "resources", "dependentLanes": ["intelligence"], "dependencies": [], "acceptanceTypes": ["functional", "domain-security", "browser-visual"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 137, "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_7.md"] }, "deferral": null },
-    { "id": "RES-LENS-006", "originalRequirement": "A participant can inspect published provider resources and use only the authorized resource lifecycle/projection.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens", "lane": "resources", "dependentLanes": [], "dependencies": ["RES-LENS-003"], "acceptanceTypes": ["functional", "domain-security", "browser-visual"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 137, "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_7.md"] }, "deferral": null },
-    { "id": "RES-LENS-007", "originalRequirement": "A permitted participant can initiate a consented minimum-necessary provider connection/request and both parties see only their authorized request-scoped communication.", "source": "docs/context/PRODUCT_PRINCIPLES.md#contextual-consented-resource-routing", "lane": "resources", "dependentLanes": ["opportunities-rfx"], "dependencies": ["RES-LENS-003"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 137, "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_7.md"] }, "deferral": null },
-    { "id": "RES-LENS-008", "originalRequirement": "A selected organization and safe camera context persist into and out of Resources while provider-specific actions activate only for an eligible current projection.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#8-cross-lens-workflow-contract", "lane": "resources", "dependentLanes": ["shared-exchange", "intelligence", "referrals"], "dependencies": ["SHARED-CONTINUITY-001"], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RES-LENS-009", "originalRequirement": "A participant can save or star a resource without implying provider acceptance or service completion.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens", "lane": "resources", "dependentLanes": [], "dependencies": ["RES-LENS-006"], "acceptanceTypes": ["functional", "domain-security", "browser-visual"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RES-LENS-010", "originalRequirement": "A participant can track its own resource-related requests through truthful lifecycle/status presentation.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens", "lane": "resources", "dependentLanes": [], "dependencies": ["RES-LENS-007"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "RES-LENS-011", "originalRequirement": "Resources uses the accepted shared organization identity/marker contract, including authorized public-logo fallback behavior.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#5-marker-and-selection-grammar", "lane": "resources", "dependentLanes": ["shared-exchange"], "dependencies": ["SHARED-IDENTITY-001"], "acceptanceTypes": ["functional", "domain-security", "browser-visual"], "status": "Blocked", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": "Blocked", "evidence": [] }, "deferral": null },
-    { "id": "RES-LENS-012", "originalRequirement": "The complete Resources lens passes independent desktop/mobile, keyboard/accessibility, five-locale and cross-lens integration acceptance against current authoritative provider/resource data.", "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work", "lane": "resources", "dependentLanes": ["independent-acceptance", "integration"], "dependencies": ["RES-LENS-001", "RES-LENS-002", "RES-LENS-003", "RES-LENS-004", "RES-LENS-005", "RES-LENS-006", "RES-LENS-007", "RES-LENS-008", "RES-LENS-009", "RES-LENS-010", "RES-LENS-011"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "copy", "cross-lens", "performance"], "status": "Blocked", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": "Blocked", "evidence": [] }, "deferral": null },
-
-    { "id": "INTEL-LENS-001", "originalRequirement": "Intelligence is the permanent analytical lens; Network remains its current organization-network view/domain concept rather than a peer lens.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens", "lane": "intelligence", "dependentLanes": ["shared-exchange"], "dependencies": ["SHARED-TRUTH-001"], "acceptanceTypes": ["functional", "browser-visual", "accessibility", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 159, "sha": "7e61fd94232ad72de32f4776befdb61d9e729cf6" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "INTEL-ORG-001", "originalRequirement": "Intelligence exposes permitted organization and capability context over authoritative organization profiles and confirmed AMACS-backed capability claims.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens", "lane": "intelligence", "dependentLanes": [], "dependencies": ["ORG-013", "DSC-001", "DSC-003"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 120, "sha": "e483fb5abb4690c53257d189907bc4ab4c5594af" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_2.md"] }, "deferral": null },
-    { "id": "INTEL-MARKET-001", "originalRequirement": "The current Intelligence Network workspace keeps authoritative geography, synchronized map/list/detail results, selected-object continuity and truthful empty/restricted states.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens", "lane": "intelligence", "dependentLanes": [], "dependencies": ["INTEL-LENS-001", "SHARED-SELECTION-001"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "performance"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "INTEL-LAYER-001", "originalRequirement": "Provide configurable Intelligence layers without confusing layer, lens, appearance or workspace and without using client state as authority.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens", "lane": "intelligence", "dependentLanes": ["shared-exchange"], "dependencies": ["INTEL-LENS-001"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "INTEL-FIRSTPARTY-001", "originalRequirement": "Expose first-party RFxchange intelligence only from governed aggregates with truthful coverage, provenance and privacy suppression.", "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work", "lane": "intelligence", "dependentLanes": [], "dependencies": ["INTEL-PROVENANCE-001"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "copy"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "INTEL-PROPRIETARY-001", "originalRequirement": "Owned or proprietary intelligence layers identify their source, coverage, vintage, limitations and commercial neutrality without implying privileged market truth.", "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work", "lane": "intelligence", "dependentLanes": [], "dependencies": ["INTEL-PROVENANCE-001"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "copy"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "INTEL-LOCATION-001", "originalRequirement": "Location Intelligence connects authoritative geography, organization/capability concentrations, workforce, industry, infrastructure, access, demand, resources and network context without becoming a separate product identity.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#74-location-and-site-functionality-inside-intelligence", "lane": "intelligence", "dependentLanes": [], "dependencies": ["INTEL-LAYER-001"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "copy"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "INTEL-SITE-001", "originalRequirement": "Site and Facility Intelligence uses authoritative site/facility data, permissions and provenance and does not position RFxchange as a general commercial-real-estate listing marketplace.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#74-location-and-site-functionality-inside-intelligence", "lane": "intelligence", "dependentLanes": [], "dependencies": ["INTEL-LOCATION-001", "authoritative-site-data"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "copy"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "INTEL-CONTROLS-001", "originalRequirement": "Intelligence provides accessible analytical controls and appropriate map/list/data presentation while preserving selected-object and spatial continuity.", "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work", "lane": "intelligence", "dependentLanes": ["shared-exchange"], "dependencies": ["INTEL-LAYER-001", "SHARED-SPATIAL-001"], "acceptanceTypes": ["functional", "browser-visual", "responsive", "accessibility"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "INTEL-RFX-001", "originalRequirement": "RFx/demand intelligence consumes only independently accepted authoritative RFx records and governed aggregates; no private deliberation, qualification or fabricated demand is exposed.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens", "lane": "intelligence", "dependentLanes": ["opportunities-rfx"], "dependencies": ["RFX-FEATURE-ISS-019", "RFX-FEATURE-DSC-004", "wave4-independent-assurance"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "copy"], "status": "Blocked", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": "Blocked", "evidence": [] }, "deferral": null },
-    { "id": "INTEL-RESOURCE-001", "originalRequirement": "Resource/provider intelligence consumes only independently accepted permitted provider/resource data and preserves service-area, eligibility, availability and privacy meaning.", "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work", "lane": "intelligence", "dependentLanes": ["resources"], "dependencies": ["RES-LENS-012"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "copy"], "status": "Blocked", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": "Blocked", "evidence": [] }, "deferral": null },
-    { "id": "INTEL-REFERRAL-001", "originalRequirement": "Relationship/referral intelligence consumes only independently accepted permitted referral aggregates and privacy-minimized context.", "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work", "lane": "intelligence", "dependentLanes": ["referrals"], "dependencies": ["REF-LENS-012"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "copy"], "status": "Blocked", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": "Blocked", "evidence": [] }, "deferral": null },
-    { "id": "INTEL-OUTCOME-001", "originalRequirement": "Outcome and market-performance intelligence remains unavailable until authoritative outcome observations and their evidence/verification distinctions exist.", "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work", "lane": "intelligence", "dependentLanes": [], "dependencies": ["authoritative-outcome-domain"], "acceptanceTypes": ["functional", "domain-security", "copy"], "status": "Blocked", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": "Blocked", "evidence": [] }, "deferral": null },
-    { "id": "INTEL-PROVENANCE-001", "originalRequirement": "Every Intelligence projection uses permitted records, governed aggregates or approved external data with provenance, coverage limits, caveats and privacy suppression appropriate to the claim.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens", "lane": "intelligence", "dependentLanes": [], "dependencies": [], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "copy"], "status": "Blocked", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": "Blocked", "evidence": [] }, "deferral": null, "clarification": "A concrete data-source/provenance inventory is required before the first new analytical layer can be authorized." },
-
-    { "id": "REF-LENS-001", "originalRequirement": "Referrals uses one sending organization and one recipient organization or external intended recipient; copy identifies the participant organization as sender and selected organization as recipient.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens", "lane": "referrals", "dependentLanes": ["intelligence"], "dependencies": [], "acceptanceTypes": ["functional", "domain-security", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 130, "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_5.md"] }, "deferral": null },
-    { "id": "REF-LENS-002", "originalRequirement": "An authorized organization can create and send a referral to an exact existing or external intended recipient without client state granting authority.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens", "lane": "referrals", "dependentLanes": [], "dependencies": ["REF-LENS-001"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 130, "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_5.md"] }, "deferral": null },
-    { "id": "REF-LENS-003", "originalRequirement": "Referral lifecycle/status presentation follows the governed draft/sent/accepted/declined/contacted/closed/expired aggregate with expected-version and immutable history.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens", "lane": "referrals", "dependentLanes": [], "dependencies": ["REF-LENS-002"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 130, "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_5.md"] }, "deferral": null },
-    { "id": "REF-LENS-004", "originalRequirement": "Referral send requires explicit named-recipient consent and education for the exact minimum fields shared.", "source": "docs/context/PRODUCT_PRINCIPLES.md#contextual-consented-resource-routing", "lane": "referrals", "dependentLanes": [], "dependencies": ["REF-LENS-002"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility", "copy"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 130, "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_5.md"] }, "deferral": null },
-    { "id": "REF-LENS-005", "originalRequirement": "Referral projections suppress private fields and expose minimum necessary role-specific data with direct-client access denied.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens", "lane": "referrals", "dependentLanes": ["intelligence"], "dependencies": ["REF-LENS-002"], "acceptanceTypes": ["functional", "domain-security"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 130, "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_5.md"] }, "deferral": null },
-    { "id": "REF-LENS-006", "originalRequirement": "A real privacy-safe relationship path appears only for an organization-attached referral with two permitted endpoints; external referrals show a truthful no-path state.", "source": "docs/architecture/WAVE_3_SLICE_3_5.md", "lane": "referrals", "dependentLanes": [], "dependencies": ["REF-LENS-003", "SHARED-PRIVACY-002"], "acceptanceTypes": ["functional", "domain-security", "browser-visual"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 130, "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_5.md"] }, "deferral": null },
-    { "id": "REF-LENS-007", "originalRequirement": "Map marker, referral detail, relationship selection, URL state and composer recipient always describe the same selected organization/referral.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#53-selection-parity", "lane": "referrals", "dependentLanes": ["shared-exchange"], "dependencies": ["SHARED-SELECTION-001"], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "REF-LENS-008", "originalRequirement": "A selected organization carries into Referrals as the intended recipient only after current server revalidation; stale or unauthorized selection never substitutes another recipient.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#8-cross-lens-workflow-contract", "lane": "referrals", "dependentLanes": ["shared-exchange", "intelligence"], "dependencies": ["SHARED-CONTINUITY-001"], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 160, "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "REF-LENS-009", "originalRequirement": "Authorized participants can review their Sent and Received referral history and truthful current statuses.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens", "lane": "referrals", "dependentLanes": [], "dependencies": ["REF-LENS-003"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "accessibility"], "status": "Implemented — Not Verified", "implementation": { "actor": "github:AccelAnalysis", "pr": 130, "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244" }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": ["docs/architecture/WAVE_3_SLICE_3_5.md"] }, "deferral": null },
-    { "id": "REF-LENS-010", "originalRequirement": "Referrals provides a Starred view only when a governed private star relation exists and never implies acceptance, sale, award, endorsement or verified outcome.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens", "lane": "referrals", "dependentLanes": [], "dependencies": ["REF-LENS-003"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "copy"], "status": "Not Started", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] }, "deferral": null },
-    { "id": "REF-LENS-011", "originalRequirement": "Referral cross-lens continuity preserves focus through supported query/filter changes and safe return without the unresolved PR #160 selectedOrganization loss.", "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#8-cross-lens-workflow-contract", "lane": "referrals", "dependentLanes": ["shared-exchange", "intelligence"], "dependencies": ["SHARED-CONTINUITY-002"], "acceptanceTypes": ["functional", "domain-security", "cross-lens"], "status": "Blocked", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": "Blocked", "evidence": ["https://github.com/AccelAnalysis/RFxchange/pull/160"] }, "deferral": null },
-    { "id": "REF-LENS-012", "originalRequirement": "The complete Referrals lens passes independent desktop/mobile, keyboard/accessibility, five-locale and cross-lens integration acceptance against current authoritative referral data.", "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work", "lane": "referrals", "dependentLanes": ["independent-acceptance", "integration"], "dependencies": ["REF-LENS-001", "REF-LENS-002", "REF-LENS-003", "REF-LENS-004", "REF-LENS-005", "REF-LENS-006", "REF-LENS-007", "REF-LENS-008", "REF-LENS-009", "REF-LENS-010", "REF-LENS-011"], "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "copy", "cross-lens", "performance"], "status": "Blocked", "implementation": { "actor": null, "pr": null, "sha": null }, "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": "Blocked", "evidence": [] }, "deferral": null },
-    {"id":"SHARED-LENS-CONTEXT-001","originalRequirement":"The permanent Opportunities/RFx, Resources, Intelligence and Referrals lenses are always visible and selectable as contexts of the same Exchange Room; each lens exposes exactly four stable action positions, and function availability is expressed only at the individual action level so a non-usable action remains normally labeled, gray/disabled and non-actionable without granting domain authority.","source":"docs/program/EXCHANGE_ROOM_PHASE2_CONTROL.md#authority-reconciliation--lens-container-versus-function-availability","lane":"shared-exchange","dependentLanes":["opportunities-rfx","resources","intelligence","referrals"],"dependencies":["SHARED-SPATIAL-001","SHARED-ACTIONS-001"],"acceptanceTypes":["functional","domain-security","browser-visual","responsive","accessibility","copy","cross-lens"],"status":"Not Started","implementation":{"actor":null,"pr":null,"sha":null},"acceptance":{"lane":null,"reviewer":null,"sha":null,"result":null,"evidence":[]},"deferral":null,"clarification":"Phase 2 successor product decision for selectable lens containers. SHARED-TRUTH-001 remains immutable and separately dispositioned."}
+    {
+      "id": "SHARED-TRUTH-001",
+      "originalRequirement": "The permanent participant lens sequence is Opportunities/RFx | Resources | Intelligence | Referrals; unavailable governed options remain structurally visible, explicit, non-actionable and non-current.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#2-governing-product-decision",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "accessibility",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 159,
+        "sha": "7e61fd94232ad72de32f4776befdb61d9e729cf6"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-TRANSITION-001",
+      "originalRequirement": "For ordinary warm authenticated navigation, current usable content remains visible until the destination is ready; no spinner, progress UI, loading page, artificial hold or application-launch treatment appears.",
+      "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-TRUTH-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "motion",
+        "accessibility",
+        "performance"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-LIFECYCLE-001",
+      "originalRequirement": "Resolve the current server-authoritative activation stage consistently across participant lenses: incomplete orientation to /orientation, completed orientation with incomplete first value/open work to /first-value, and open participants to the requested authorized Exchange destination.",
+      "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-SPATIAL-001",
+      "originalRequirement": "Use one typed, versioned, non-authorizing participant spatial context for camera, view, selected object, per-lens search/filter/result state, panel/list state, origin and return intent.",
+      "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-SPATIAL-002",
+      "originalRequirement": "Scope participant spatial state by participant, membership, organization and geography; clear or ignore it after session, authority, organization, geography, schema or selected-object invalidation.",
+      "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-SPATIAL-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "https://github.com/AccelAnalysis/RFxchange/pull/160#discussion_r3761518143"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-VIEW-001",
+      "originalRequirement": "Use one 2D/Perspective/3D contract and derive the selected Map view state from the settled Mapbox pitch so buttons, intended view and actual camera agree.",
+      "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-SPATIAL-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "motion",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-CAMERA-001",
+      "originalRequirement": "Initial organization-home composition is separate from ordinary interaction; selection, drawers, search/filter changes and lens changes do not reassert 3D or overwrite a restored camera.",
+      "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-SPATIAL-001",
+        "SHARED-VIEW-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "motion",
+        "cross-lens"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "https://github.com/AccelAnalysis/RFxchange/pull/160#discussion_r3762160859"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-MARKER-001",
+      "originalRequirement": "The participant's own organization remains a fixed-coordinate standing marker and routes through the canonical organization selection/detail seam.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#51-own-organization",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-SELECTION-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-MARKER-002",
+      "originalRequirement": "External organizations are compact nodes by default; exactly one selected external organization rises to a standing marker without moving its geographic anchor, while the prior selection demotes.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#52-other-organizations",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-SELECTION-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "motion",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-CLUSTER-001",
+      "originalRequirement": "At wider zooms, unselected organizations aggregate into real clusters; a cluster is not an organization, has no organization logo, expands truthfully, and never absorbs the selected standing marker.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#52-other-organizations",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-MARKER-002"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "motion"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "https://github.com/AccelAnalysis/RFxchange/pull/160#discussion_r3761656358"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-SELECTION-001",
+      "originalRequirement": "Marker, result-card, keyboard and cross-lens selection converge on exactly one selected organization and one synchronized map/list/detail state.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#53-selection-parity",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-SPATIAL-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "accessibility",
+        "cross-lens"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-DRAWER-001",
+      "originalRequirement": "Desktop uses a synchronized edge drawer and mobile a bottom sheet while enough map remains visible; marker/card selection and list position remain coherent.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#6-map-popup-drawer-and-list-behavior",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-SELECTION-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "responsive",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-RESULT-001",
+      "originalRequirement": "Prefer continuous/cursor result exploration where the governing architecture calls for it, but do not fabricate backend cursor semantics that the existing discovery domain does not support.",
+      "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#explicit-deferrals",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "backend-network-cursor-contract"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "performance"
+      ],
+      "status": "Deferred — Explicitly Approved",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef",
+        "result": "Deferred",
+        "evidence": [
+          "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#explicit-deferrals"
+        ]
+      },
+      "deferral": {
+        "reason": "The current Network discovery domain exposes a bounded page contract and no cursor token; the approved correction explicitly forbade invented cursor semantics.",
+        "missingDependency": "A separately authorized server cursor/detail contract.",
+        "impact": "Result exploration remains page-based and cannot yet meet the mature continuous-list target.",
+        "futureLane": "shared-exchange",
+        "futureMilestone": null,
+        "approvedBy": "Post-PR-#159 Experience Convergence authority"
+      }
+    },
+    {
+      "id": "SHARED-SEARCH-001",
+      "originalRequirement": "Provide one clear search and restrained filter grammar with lens-specific semantics, synchronized results, and preservation of safe query/filter state.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#6-map-popup-drawer-and-list-behavior",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-DRAWER-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "responsive",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-CONTINUITY-001",
+      "originalRequirement": "Preserve a valid selected organization, camera and view across Intelligence, Resources and Referrals while each destination revalidates its own permitted actions and data.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#43-lens-switch-behavior",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-SPATIAL-001",
+        "SHARED-SELECTION-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-CONTINUITY-002",
+      "originalRequirement": "Intelligence search submission, Clear and pagination preserve a separately revalidated carried selected organization even when it is outside the filtered result page.",
+      "source": "https://github.com/AccelAnalysis/RFxchange/pull/160",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "intelligence",
+        "resources",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-CONTINUITY-001",
+        "SHARED-SEARCH-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 186,
+        "sha": "6f160d84dd0f702e8546cbb421c17b2f3ac56dbd"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "https://github.com/AccelAnalysis/RFxchange/pull/160",
+          "https://github.com/AccelAnalysis/RFxchange/pull/174",
+          "https://github.com/AccelAnalysis/RFxchange/pull/186",
+          "https://github.com/AccelAnalysis/RFxchange/actions/runs/31662605471",
+          "https://github.com/AccelAnalysis/RFxchange/actions/runs/31687342981"
+        ]
+      },
+      "deferral": null,
+      "clarification": "PR #160 left selectedOrganization continuity partial. PR #186 candidate 6f160d84dd0f702e8546cbb421c17b2f3ac56dbd incorporated PR #174 continuity, preserved selectedOrganization through Intelligence search submission, Clear, previous/next pagination and safe return with server revalidation, and merged as 10150e66b4a1b37a0cda5381986c5599da96e632. Exact-head candidate and post-merge CI passed. Independent acceptance remains pending."
+    },
+    {
+      "id": "SHARED-RETURN-001",
+      "originalRequirement": "Cross-lens and operational completion/cancellation restore the safe originating lens, selected object, map position, search/filter and applicable result position without relying only on browser Back.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#9-spatial-to-operational-workflow-continuity",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-SPATIAL-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-ACCOUNT-001",
+      "originalRequirement": "Account uses one approximately 30–36px circular avatar inside a 44px keyboard-operable target; its menu contains Organization Profile, Quick Start, authorized Administration and Sign out as applicable.",
+      "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "responsive",
+        "accessibility",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-ACTIONS-001",
+      "originalRequirement": "Use one reusable lens-aware organization action projection: real available actions route to authorized runtimes, governed unavailable actions may remain visibly disabled, and nonexistent features are not invented.",
+      "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-SELECTION-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-COPY-001",
+      "originalRequirement": "Participant surfaces use natural language and suppress internal projection, coordinate-source, privacy-treatment, provider/participant projection and lifecycle implementation terminology.",
+      "source": "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md#ux-runtime-reconciliation-matrix",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "copy",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-PRIVACY-001",
+      "originalRequirement": "For approximate or locality-level visibility, prefer the locality/county/city name or no location sentence over an explanation such as Near Smithfield; never expose privacy mechanics.",
+      "source": "Post-PR-#159 Experience Convergence authority section 36",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "intelligence",
+        "resources",
+        "referrals"
+      ],
+      "dependencies": [
+        "explicit-location-copy-policy-decision"
+      ],
+      "acceptanceTypes": [
+        "domain-security",
+        "copy",
+        "browser-visual"
+      ],
+      "status": "Blocked",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef",
+        "result": "Decision Required",
+        "evidence": [
+          "docs/architecture/POST_PR_159_PARTICIPANT_EXPERIENCE_CONVERGENCE.md"
+        ]
+      },
+      "deferral": null,
+      "clarification": "Current runtime and reconciliation record use Near {locality}/In {locality}, while the original authority explicitly preferred locality-only or no sentence over Near. Control Room must obtain an explicit policy reconciliation before implementation."
+    },
+    {
+      "id": "SHARED-PRIVACY-002",
+      "originalRequirement": "A discoverable organization without permitted precise spatial placement remains in results/detail/actions without a fabricated exact marker; locality presence appears only when the governing privacy projection authorizes it.",
+      "source": "Post-PR-#159 Experience Convergence authority section 37",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "intelligence",
+        "resources",
+        "referrals"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-IDENTITY-001",
+      "originalRequirement": "A standing organization marker uses an authorized public organization logo when available, then organization initials, then a neutral organization glyph; RFxchange branding is never substituted for organization identity.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#5-marker-and-selection-grammar",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "public-organization-logo-projection-contract"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Blocked",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": "Blocked",
+        "evidence": [
+          "docs/architecture/INF-008-firebase-storage-foundation.md",
+          "docs/slices/SLICE_3_4_EXECUTION_AUTHORITY.md"
+        ]
+      },
+      "deferral": null,
+      "clarification": "PR #160 removed the product RF glyph and implemented initials. The Network marker projection does not yet carry an independently accepted public-logo delivery contract; private source assets must not be exposed to satisfy the visual target."
+    },
+    {
+      "id": "SHARED-A11Y-001",
+      "originalRequirement": "Touched participant controls and states preserve keyboard operation, visible focus, semantic current/unavailable state, reduced motion, 390px reflow, touch targets and assistive descriptions without color-only communication.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#12-implementation-acceptance-requirements",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "responsive",
+        "motion",
+        "accessibility",
+        "browser-visual"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-I18N-001",
+      "originalRequirement": "All changed participant-facing copy and state are rendered and accepted in en-US, es, fr, it and de without silent fallback or moved hard-coded English.",
+      "source": "Post-PR-#159 Experience Convergence authority section 47",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "copy",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-EVIDENCE-001",
+      "originalRequirement": "Merge only when exact-head CI and configured-browser evidence are green, review covers the final exact head, and no unresolved substantive finding remains.",
+      "source": "Post-PR-#159 Experience Convergence authority sections 67-68",
+      "lane": "independent-acceptance",
+      "dependentLanes": [
+        "shared-exchange",
+        "integration"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "governance"
+      ],
+      "status": "Blocked",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef",
+        "result": "Not Implemented",
+        "evidence": [
+          "https://github.com/AccelAnalysis/RFxchange/pull/160"
+        ]
+      },
+      "deferral": null,
+      "clarification": "PR #160 merged after a substantive final-head Codex P2 finding. The prior evidence remains implementation evidence but does not satisfy independent completion certification."
+    },
+    {
+      "id": "RFX-FEATURE-ISS-001",
+      "originalRequirement": "One organization-owned RFx aggregate shared across issuer, responder and future evaluator views.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-41--rfx-kernel-and-request-families",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [
+        "intelligence"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 161,
+        "sha": "10d1156d45ac90e9c10b4a2704c78fe30606a3b0"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_1.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ISS-002",
+      "originalRequirement": "AMACS request-family configuration over the single aggregate; no parallel RFI/RFQ/RFP products.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-41--rfx-kernel-and-request-families",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-ISS-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 161,
+        "sha": "10d1156d45ac90e9c10b4a2704c78fe30606a3b0"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_1.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ISS-003",
+      "originalRequirement": "Create from blank; extensible seams for templates/prior RFxs without making paid/future sources mandatory.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-41--rfx-kernel-and-request-families",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-ISS-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 161,
+        "sha": "10d1156d45ac90e9c10b4a2704c78fe30606a3b0"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_1.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ISS-005",
+      "originalRequirement": "Modular operational builder organized by task, not a separate document editor.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-42--structured-need-and-requirement-foundation",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-ISS-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "responsive",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 163,
+        "sha": "d18986544881c9e81fb9a37858bccb35109724c4"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_2.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ISS-006",
+      "originalRequirement": "Structured scope, outputs, requirements, quantities, performance locations, dates, value, term, credentials, insurance and evidence.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-42--structured-need-and-requirement-foundation",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [
+        "intelligence"
+      ],
+      "dependencies": [
+        "RFX-FEATURE-ISS-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 163,
+        "sha": "d18986544881c9e81fb9a37858bccb35109724c4"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_2.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ISS-007",
+      "originalRequirement": "AMACS-backed required/preferred capabilities and structured qualifiers beyond NAICS.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-43--amacs-requirements-response-and-evaluation-definition",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [
+        "intelligence"
+      ],
+      "dependencies": [
+        "RFX-FEATURE-ISS-006"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 165,
+        "sha": "c07f45ffa451aafb80852e40384a5bb31cbec5cf"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_3.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ISS-009",
+      "originalRequirement": "Evaluation method, gates and factors linked to requirements and response evidence; frozen at publication.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-43--amacs-requirements-response-and-evaluation-definition",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-ISS-006",
+        "RFX-FEATURE-ISS-007"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 165,
+        "sha": "c07f45ffa451aafb80852e40384a5bb31cbec5cf"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_3.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ISS-011",
+      "originalRequirement": "Standardized, expandable response structure using AMACS sections/templates and issuer-added sections.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-43--amacs-requirements-response-and-evaluation-definition",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-ISS-007"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 165,
+        "sha": "c07f45ffa451aafb80852e40384a5bb31cbec5cf"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_3.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ISS-016",
+      "originalRequirement": "Server-authoritative publication checks with deep-linked findings and authority revalidation.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-44--readiness-and-publication",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-ISS-002",
+        "RFX-FEATURE-ISS-005",
+        "RFX-FEATURE-ISS-006",
+        "RFX-FEATURE-ISS-007",
+        "RFX-FEATURE-ISS-009",
+        "RFX-FEATURE-ISS-011"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 167,
+        "sha": "8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_4.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ISS-018",
+      "originalRequirement": "Preview from the same permitted projection used after publication.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-44--readiness-and-publication",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-ISS-016"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 167,
+        "sha": "8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_4.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ISS-019",
+      "originalRequirement": "Atomic/idempotent publication, immutable version snapshot, opportunity projection, geography/index/timeline/events.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-44--readiness-and-publication",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [
+        "intelligence"
+      ],
+      "dependencies": [
+        "RFX-FEATURE-ISS-016",
+        "RFX-FEATURE-ISS-018"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 167,
+        "sha": "8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_4.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ISS-020",
+      "originalRequirement": "Basic issuance available under approved commercial policy; advanced capabilities consume entitlement policy without changing match truth.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-44--readiness-and-publication",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-ISS-019"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 167,
+        "sha": "8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_4.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ACQ-009",
+      "originalRequirement": "Controlled share link resolving through the permitted opportunity projection and existing acquisition context.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-44--readiness-and-publication",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-ISS-019"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 167,
+        "sha": "8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_4.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-DSC-004",
+      "originalRequirement": "Search permitted published RFxs and view substantive permitted requirements.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-45--opportunity-discovery-and-management",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [
+        "intelligence"
+      ],
+      "dependencies": [
+        "RFX-FEATURE-ISS-019"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "responsive",
+        "accessibility",
+        "performance"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 169,
+        "sha": "18bbcb56b4057927d2d7c8e57a2ca512cc60e231"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-DSC-005",
+      "originalRequirement": "Save organization/user-scoped searches under commercial policy.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-45--opportunity-discovery-and-management",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-DSC-004"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 169,
+        "sha": "18bbcb56b4057927d2d7c8e57a2ca512cc60e231"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-DSC-006",
+      "originalRequirement": "Alerts/digests from saved-search matches through existing reliable communications.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-45--opportunity-discovery-and-management",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-DSC-005",
+        "COMMS-003",
+        "COMMS-004",
+        "COMMS-005"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "performance"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 169,
+        "sha": "18bbcb56b4057927d2d7c8e57a2ca512cc60e231"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-DSC-007",
+      "originalRequirement": "Watch an RFx through one relationship model; no duplicate opportunity.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-45--opportunity-discovery-and-management",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-DSC-004"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 169,
+        "sha": "18bbcb56b4057927d2d7c8e57a2ca512cc60e231"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-DSC-008",
+      "originalRequirement": "Surface canonical deadlines for saved/watched/pursued RFxs.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-45--opportunity-discovery-and-management",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-DSC-005",
+        "RFX-FEATURE-DSC-007"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "legacyClassification": "Previously accepted — independent assurance pending",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 169,
+        "sha": "18bbcb56b4057927d2d7c8e57a2ca512cc60e231"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_4_SLICE_4_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-RSP-001",
+      "originalRequirement": "Distinguish Discovered, Potential Match and Invited; none means qualified or endorsed.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-46--fit-decision-and-pursuit",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [
+        "intelligence"
+      ],
+      "dependencies": [
+        "RFX-FEATURE-DSC-004"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 171,
+        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null,
+      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+    },
+    {
+      "id": "RFX-FEATURE-RSP-002",
+      "originalRequirement": "Explain AMACS capability/requirement alignment, confirmations, gaps, dates, value and location.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-46--fit-decision-and-pursuit",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [
+        "intelligence"
+      ],
+      "dependencies": [
+        "RFX-FEATURE-RSP-001",
+        "RFX-FEATURE-ISS-007"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 171,
+        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null,
+      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+    },
+    {
+      "id": "RFX-FEATURE-RSP-003",
+      "originalRequirement": "Private responder Go/No-Go assessment for fit, eligibility, capacity, economics and gaps.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-46--fit-decision-and-pursuit",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-002"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 171,
+        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null,
+      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+    },
+    {
+      "id": "RFX-FEATURE-RSP-004",
+      "originalRequirement": "Persist Pursue/Watch/Decline and unlock response only after authorized Pursue.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-46--fit-decision-and-pursuit",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-003"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 171,
+        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null,
+      "clarification": "Frozen preserved implementation candidate; current PR has substantive stale-version reconfirmation and payload-digest review findings."
+    },
+    {
+      "id": "RFX-FEATURE-RSP-006",
+      "originalRequirement": "Typed missing/unconfirmed capability, requirement and evidence gaps.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-46--fit-decision-and-pursuit",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [
+        "resources",
+        "intelligence"
+      ],
+      "dependencies": [
+        "RFX-FEATURE-RSP-002"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 171,
+        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null,
+      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+    },
+    {
+      "id": "RFX-FEATURE-DSC-010",
+      "originalRequirement": "Reuse Wave 3 organization discovery for gap-scoped teammate candidates.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-006"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-RSP-007",
+      "originalRequirement": "Route an RFx gap to teammate discovery with context preserved.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-006",
+        "RFX-FEATURE-DSC-010"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-RSP-008",
+      "originalRequirement": "Route an RFx readiness gap to approved resource-provider discovery; no duplicate provider directory.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [
+        "resources"
+      ],
+      "dependencies": [
+        "RFX-FEATURE-RSP-006",
+        "RES-LENS-007"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-TEM-001",
+      "originalRequirement": "RFx-scoped teammate search by missing capability, role, geography and need.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-006",
+        "RFX-FEATURE-DSC-010"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-TEM-002",
+      "originalRequirement": "Invite an organization in a defined proposed capacity with minimum necessary context.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-TEM-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "copy"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-TEM-003",
+      "originalRequirement": "Invitee reviews and accepts/declines without token possession granting authority.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-TEM-002"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-TEM-004",
+      "originalRequirement": "Present/evidence the nonbinding legal boundary.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-TEM-002"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "copy"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-ACQ-007",
+      "originalRequirement": "Nonmember invitation survives account/organization activation and returns to the pending invite without auto-acceptance.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-47--gap-resolution-and-teaming",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "ACQ-003",
+        "RFX-FEATURE-TEM-002",
+        "COMMS-003"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-RSP-009",
+      "originalRequirement": "Create an organization-owned response from the published requirement/section snapshot after Pursue.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-48--response-construction",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-004",
+        "RFX-FEATURE-ISS-011"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-RSP-010",
+      "originalRequirement": "Requirement/section-linked compliance matrix with stable IDs.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-48--response-construction",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-009"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-RSP-017",
+      "originalRequirement": "Continuous completeness checks for enabled requirements, sections, pricing, credentials, attachments and acknowledgments.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-48--response-construction",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-010"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-RSP-018",
+      "originalRequirement": "Final server-side validation against current RFx version, deadline, permissions and submission mode.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-49--review-and-submission",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-017"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-RSP-019",
+      "originalRequirement": "Human review of the assembled canonical response projection.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-49--review-and-submission",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-018"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-RSP-020",
+      "originalRequirement": "Atomic hosted submission, locked submitted version and immutable receipt.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-49--review-and-submission",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-018",
+        "RFX-FEATURE-RSP-019"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-RSP-021",
+      "originalRequirement": "Explicit external handoff/preparation without false receipt claim.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-49--review-and-submission",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-018",
+        "RFX-FEATURE-RSP-019"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "copy"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-EDU-011",
+      "originalRequirement": "First-use issuer explanation inside the real builder, limited to enabled capabilities.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-410--contextual-education",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-ISS-005"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "accessibility",
+        "copy"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-EDU-012",
+      "originalRequirement": "First-use responder explanation inside the real response/submission mode.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-410--contextual-education",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-RSP-009"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "accessibility",
+        "copy"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RFX-FEATURE-EDU-013",
+      "originalRequirement": "First-use teaming explanation aligned with TEM-004; not a substitute for the legal boundary.",
+      "source": "docs/rfx/RFX_CORE_FEATURE_CROSSWALK.md#slice-410--contextual-education",
+      "lane": "opportunities-rfx",
+      "dependentLanes": [],
+      "dependencies": [
+        "RFX-FEATURE-TEM-004"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "accessibility",
+        "copy"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-001",
+      "originalRequirement": "A non-provider organization can find approved providers and published resources through the permanent Resources lens.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens",
+      "lane": "resources",
+      "dependentLanes": [
+        "intelligence",
+        "opportunities-rfx"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "responsive",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 137,
+        "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_7.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-002",
+      "originalRequirement": "Own-organization Resources interaction projects the exact provider application lifecycle and authorized next action without invented states or remedies.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens",
+      "lane": "resources",
+      "dependentLanes": [],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 132,
+        "sha": "81dd94f7e655b1854660e33c0a703dd37bb39a06"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_6.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-003",
+      "originalRequirement": "Only an approved Official Resource Provider receives the currently authorized provider profile, service/resource, geography, eligibility/intake, availability and request management actions.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens",
+      "lane": "resources",
+      "dependentLanes": [
+        "intelligence"
+      ],
+      "dependencies": [
+        "RES-LENS-002"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 137,
+        "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_7.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-004",
+      "originalRequirement": "Provider discovery and detail show current approved/published provider state, eligibility, intake, availability and provenance without implying endorsement or acceptance.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens",
+      "lane": "resources",
+      "dependentLanes": [
+        "intelligence",
+        "opportunities-rfx"
+      ],
+      "dependencies": [
+        "RES-LENS-003"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 137,
+        "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_7.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-005",
+      "originalRequirement": "Resources distinguishes provider service territory from office/base location and respects controlled geography and privacy-safe projection.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens",
+      "lane": "resources",
+      "dependentLanes": [
+        "intelligence"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 137,
+        "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_7.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-006",
+      "originalRequirement": "A participant can inspect published provider resources and use only the authorized resource lifecycle/projection.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens",
+      "lane": "resources",
+      "dependentLanes": [],
+      "dependencies": [
+        "RES-LENS-003"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 137,
+        "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_7.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-007",
+      "originalRequirement": "A permitted participant can initiate a consented minimum-necessary provider connection/request and both parties see only their authorized request-scoped communication.",
+      "source": "docs/context/PRODUCT_PRINCIPLES.md#contextual-consented-resource-routing",
+      "lane": "resources",
+      "dependentLanes": [
+        "opportunities-rfx"
+      ],
+      "dependencies": [
+        "RES-LENS-003"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 137,
+        "sha": "0776aaf59856dd5ab2ef5f8fe3b8e9eec5713cbe"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_7.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-008",
+      "originalRequirement": "A selected organization and safe camera context persist into and out of Resources while provider-specific actions activate only for an eligible current projection.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#8-cross-lens-workflow-contract",
+      "lane": "resources",
+      "dependentLanes": [
+        "shared-exchange",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-CONTINUITY-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-009",
+      "originalRequirement": "A participant can save or star a resource without implying provider acceptance or service completion.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens",
+      "lane": "resources",
+      "dependentLanes": [],
+      "dependencies": [
+        "RES-LENS-006"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-010",
+      "originalRequirement": "A participant can track its own resource-related requests through truthful lifecycle/status presentation.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#72-resources--approved-support-lens",
+      "lane": "resources",
+      "dependentLanes": [],
+      "dependencies": [
+        "RES-LENS-007"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-011",
+      "originalRequirement": "Resources uses the accepted shared organization identity/marker contract, including authorized public-logo fallback behavior.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#5-marker-and-selection-grammar",
+      "lane": "resources",
+      "dependentLanes": [
+        "shared-exchange"
+      ],
+      "dependencies": [
+        "SHARED-IDENTITY-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual"
+      ],
+      "status": "Blocked",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": "Blocked",
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "RES-LENS-012",
+      "originalRequirement": "The complete Resources lens passes independent desktop/mobile, keyboard/accessibility, five-locale and cross-lens integration acceptance against current authoritative provider/resource data.",
+      "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work",
+      "lane": "resources",
+      "dependentLanes": [
+        "independent-acceptance",
+        "integration"
+      ],
+      "dependencies": [
+        "RES-LENS-001",
+        "RES-LENS-002",
+        "RES-LENS-003",
+        "RES-LENS-004",
+        "RES-LENS-005",
+        "RES-LENS-006",
+        "RES-LENS-007",
+        "RES-LENS-008",
+        "RES-LENS-009",
+        "RES-LENS-010",
+        "RES-LENS-011"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "responsive",
+        "accessibility",
+        "copy",
+        "cross-lens",
+        "performance"
+      ],
+      "status": "Blocked",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": "Blocked",
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-LENS-001",
+      "originalRequirement": "Intelligence is the permanent analytical lens; Network remains its current organization-network view/domain concept rather than a peer lens.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens",
+      "lane": "intelligence",
+      "dependentLanes": [
+        "shared-exchange"
+      ],
+      "dependencies": [
+        "SHARED-TRUTH-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "accessibility",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 159,
+        "sha": "7e61fd94232ad72de32f4776befdb61d9e729cf6"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-ORG-001",
+      "originalRequirement": "Intelligence exposes permitted organization and capability context over authoritative organization profiles and confirmed AMACS-backed capability claims.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens",
+      "lane": "intelligence",
+      "dependentLanes": [],
+      "dependencies": [
+        "ORG-013",
+        "DSC-001",
+        "DSC-003"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 120,
+        "sha": "e483fb5abb4690c53257d189907bc4ab4c5594af"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_2.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-MARKET-001",
+      "originalRequirement": "The current Intelligence Network workspace keeps authoritative geography, synchronized map/list/detail results, selected-object continuity and truthful empty/restricted states.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens",
+      "lane": "intelligence",
+      "dependentLanes": [],
+      "dependencies": [
+        "INTEL-LENS-001",
+        "SHARED-SELECTION-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "responsive",
+        "accessibility",
+        "performance"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-LAYER-001",
+      "originalRequirement": "Provide configurable Intelligence layers without confusing layer, lens, appearance or workspace and without using client state as authority.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens",
+      "lane": "intelligence",
+      "dependentLanes": [
+        "shared-exchange"
+      ],
+      "dependencies": [
+        "INTEL-LENS-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-FIRSTPARTY-001",
+      "originalRequirement": "Expose first-party RFxchange intelligence only from governed aggregates with truthful coverage, provenance and privacy suppression.",
+      "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work",
+      "lane": "intelligence",
+      "dependentLanes": [],
+      "dependencies": [
+        "INTEL-PROVENANCE-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "copy"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-PROPRIETARY-001",
+      "originalRequirement": "Owned or proprietary intelligence layers identify their source, coverage, vintage, limitations and commercial neutrality without implying privileged market truth.",
+      "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work",
+      "lane": "intelligence",
+      "dependentLanes": [],
+      "dependencies": [
+        "INTEL-PROVENANCE-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "copy"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-LOCATION-001",
+      "originalRequirement": "Location Intelligence connects authoritative geography, organization/capability concentrations, workforce, industry, infrastructure, access, demand, resources and network context without becoming a separate product identity.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#74-location-and-site-functionality-inside-intelligence",
+      "lane": "intelligence",
+      "dependentLanes": [],
+      "dependencies": [
+        "INTEL-LAYER-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "responsive",
+        "accessibility",
+        "copy"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-SITE-001",
+      "originalRequirement": "Site and Facility Intelligence uses authoritative site/facility data, permissions and provenance and does not position RFxchange as a general commercial-real-estate listing marketplace.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#74-location-and-site-functionality-inside-intelligence",
+      "lane": "intelligence",
+      "dependentLanes": [],
+      "dependencies": [
+        "INTEL-LOCATION-001",
+        "authoritative-site-data"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "copy"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-CONTROLS-001",
+      "originalRequirement": "Intelligence provides accessible analytical controls and appropriate map/list/data presentation while preserving selected-object and spatial continuity.",
+      "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work",
+      "lane": "intelligence",
+      "dependentLanes": [
+        "shared-exchange"
+      ],
+      "dependencies": [
+        "INTEL-LAYER-001",
+        "SHARED-SPATIAL-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "browser-visual",
+        "responsive",
+        "accessibility"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-RFX-001",
+      "originalRequirement": "RFx/demand intelligence consumes only independently accepted authoritative RFx records and governed aggregates; no private deliberation, qualification or fabricated demand is exposed.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens",
+      "lane": "intelligence",
+      "dependentLanes": [
+        "opportunities-rfx"
+      ],
+      "dependencies": [
+        "RFX-FEATURE-ISS-019",
+        "RFX-FEATURE-DSC-004",
+        "wave4-independent-assurance"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "copy"
+      ],
+      "status": "Blocked",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": "Blocked",
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-RESOURCE-001",
+      "originalRequirement": "Resource/provider intelligence consumes only independently accepted permitted provider/resource data and preserves service-area, eligibility, availability and privacy meaning.",
+      "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work",
+      "lane": "intelligence",
+      "dependentLanes": [
+        "resources"
+      ],
+      "dependencies": [
+        "RES-LENS-012"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "copy"
+      ],
+      "status": "Blocked",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": "Blocked",
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-REFERRAL-001",
+      "originalRequirement": "Relationship/referral intelligence consumes only independently accepted permitted referral aggregates and privacy-minimized context.",
+      "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work",
+      "lane": "intelligence",
+      "dependentLanes": [
+        "referrals"
+      ],
+      "dependencies": [
+        "REF-LENS-012"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "copy"
+      ],
+      "status": "Blocked",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": "Blocked",
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-OUTCOME-001",
+      "originalRequirement": "Outcome and market-performance intelligence remains unavailable until authoritative outcome observations and their evidence/verification distinctions exist.",
+      "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work",
+      "lane": "intelligence",
+      "dependentLanes": [],
+      "dependencies": [
+        "authoritative-outcome-domain"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "copy"
+      ],
+      "status": "Blocked",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": "Blocked",
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "INTEL-PROVENANCE-001",
+      "originalRequirement": "Every Intelligence projection uses permitted records, governed aggregates or approved external data with provenance, coverage limits, caveats and privacy suppression appropriate to the claim.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#73-intelligence--analytical-lens",
+      "lane": "intelligence",
+      "dependentLanes": [],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "copy"
+      ],
+      "status": "Blocked",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": "Blocked",
+        "evidence": []
+      },
+      "deferral": null,
+      "clarification": "A concrete data-source/provenance inventory is required before the first new analytical layer can be authorized."
+    },
+    {
+      "id": "REF-LENS-001",
+      "originalRequirement": "Referrals uses one sending organization and one recipient organization or external intended recipient; copy identifies the participant organization as sender and selected organization as recipient.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens",
+      "lane": "referrals",
+      "dependentLanes": [
+        "intelligence"
+      ],
+      "dependencies": [],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 130,
+        "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "REF-LENS-002",
+      "originalRequirement": "An authorized organization can create and send a referral to an exact existing or external intended recipient without client state granting authority.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens",
+      "lane": "referrals",
+      "dependentLanes": [],
+      "dependencies": [
+        "REF-LENS-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 130,
+        "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "REF-LENS-003",
+      "originalRequirement": "Referral lifecycle/status presentation follows the governed draft/sent/accepted/declined/contacted/closed/expired aggregate with expected-version and immutable history.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens",
+      "lane": "referrals",
+      "dependentLanes": [],
+      "dependencies": [
+        "REF-LENS-002"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 130,
+        "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "REF-LENS-004",
+      "originalRequirement": "Referral send requires explicit named-recipient consent and education for the exact minimum fields shared.",
+      "source": "docs/context/PRODUCT_PRINCIPLES.md#contextual-consented-resource-routing",
+      "lane": "referrals",
+      "dependentLanes": [],
+      "dependencies": [
+        "REF-LENS-002"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility",
+        "copy"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 130,
+        "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "REF-LENS-005",
+      "originalRequirement": "Referral projections suppress private fields and expose minimum necessary role-specific data with direct-client access denied.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens",
+      "lane": "referrals",
+      "dependentLanes": [
+        "intelligence"
+      ],
+      "dependencies": [
+        "REF-LENS-002"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 130,
+        "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "REF-LENS-006",
+      "originalRequirement": "A real privacy-safe relationship path appears only for an organization-attached referral with two permitted endpoints; external referrals show a truthful no-path state.",
+      "source": "docs/architecture/WAVE_3_SLICE_3_5.md",
+      "lane": "referrals",
+      "dependentLanes": [],
+      "dependencies": [
+        "REF-LENS-003",
+        "SHARED-PRIVACY-002"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 130,
+        "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "REF-LENS-007",
+      "originalRequirement": "Map marker, referral detail, relationship selection, URL state and composer recipient always describe the same selected organization/referral.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#53-selection-parity",
+      "lane": "referrals",
+      "dependentLanes": [
+        "shared-exchange"
+      ],
+      "dependencies": [
+        "SHARED-SELECTION-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "REF-LENS-008",
+      "originalRequirement": "A selected organization carries into Referrals as the intended recipient only after current server revalidation; stale or unauthorized selection never substitutes another recipient.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#8-cross-lens-workflow-contract",
+      "lane": "referrals",
+      "dependentLanes": [
+        "shared-exchange",
+        "intelligence"
+      ],
+      "dependencies": [
+        "SHARED-CONTINUITY-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 160,
+        "sha": "6ad1fd0b6dfebe9d6013c4cca7901515810185ef"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "REF-LENS-009",
+      "originalRequirement": "Authorized participants can review their Sent and Received referral history and truthful current statuses.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens",
+      "lane": "referrals",
+      "dependentLanes": [],
+      "dependencies": [
+        "REF-LENS-003"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "accessibility"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 130,
+        "sha": "17e8e66fc11e29bc125bc739d5fad7141da14244"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "docs/architecture/WAVE_3_SLICE_3_5.md"
+        ]
+      },
+      "deferral": null
+    },
+    {
+      "id": "REF-LENS-010",
+      "originalRequirement": "Referrals provides a Starred view only when a governed private star relation exists and never implies acceptance, sale, award, endorsement or verified outcome.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#75-referrals--trusted-connection-lens",
+      "lane": "referrals",
+      "dependentLanes": [],
+      "dependencies": [
+        "REF-LENS-003"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "copy"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "REF-LENS-011",
+      "originalRequirement": "Referral cross-lens continuity preserves focus through supported query/filter changes and safe return without the unresolved PR #160 selectedOrganization loss.",
+      "source": "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md#8-cross-lens-workflow-contract",
+      "lane": "referrals",
+      "dependentLanes": [
+        "shared-exchange",
+        "intelligence"
+      ],
+      "dependencies": [
+        "SHARED-CONTINUITY-002"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "cross-lens"
+      ],
+      "status": "Implemented — Not Verified",
+      "implementation": {
+        "actor": "github:AccelAnalysis",
+        "pr": 186,
+        "sha": "6f160d84dd0f702e8546cbb421c17b2f3ac56dbd"
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": [
+          "https://github.com/AccelAnalysis/RFxchange/pull/160",
+          "https://github.com/AccelAnalysis/RFxchange/pull/174",
+          "https://github.com/AccelAnalysis/RFxchange/pull/186",
+          "https://github.com/AccelAnalysis/RFxchange/actions/runs/31662605471",
+          "https://github.com/AccelAnalysis/RFxchange/actions/runs/31687342981"
+        ]
+      },
+      "deferral": null,
+      "clarification": "This requirement was blocked only by the unresolved SHARED-CONTINUITY-002 selectedOrganization loss recorded after PR #160. PR #186 candidate 6f160d84dd0f702e8546cbb421c17b2f3ac56dbd corrected that shared continuity seam and merged as 10150e66b4a1b37a0cda5381986c5599da96e632. Existing Referrals selection/recipient semantics remain server-revalidated; independent acceptance remains pending."
+    },
+    {
+      "id": "REF-LENS-012",
+      "originalRequirement": "The complete Referrals lens passes independent desktop/mobile, keyboard/accessibility, five-locale and cross-lens integration acceptance against current authoritative referral data.",
+      "source": "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md#12-program-specific-work",
+      "lane": "referrals",
+      "dependentLanes": [
+        "independent-acceptance",
+        "integration"
+      ],
+      "dependencies": [
+        "REF-LENS-001",
+        "REF-LENS-002",
+        "REF-LENS-003",
+        "REF-LENS-004",
+        "REF-LENS-005",
+        "REF-LENS-006",
+        "REF-LENS-007",
+        "REF-LENS-008",
+        "REF-LENS-009",
+        "REF-LENS-010",
+        "REF-LENS-011"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "responsive",
+        "accessibility",
+        "copy",
+        "cross-lens",
+        "performance"
+      ],
+      "status": "Blocked",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": "Blocked",
+        "evidence": []
+      },
+      "deferral": null
+    },
+    {
+      "id": "SHARED-LENS-CONTEXT-001",
+      "originalRequirement": "The permanent Opportunities/RFx, Resources, Intelligence and Referrals lenses are always visible and selectable as contexts of the same Exchange Room; each lens exposes exactly four stable action positions, and function availability is expressed only at the individual action level so a non-usable action remains normally labeled, gray/disabled and non-actionable without granting domain authority.",
+      "source": "docs/program/EXCHANGE_ROOM_PHASE2_CONTROL.md#authority-reconciliation--lens-container-versus-function-availability",
+      "lane": "shared-exchange",
+      "dependentLanes": [
+        "opportunities-rfx",
+        "resources",
+        "intelligence",
+        "referrals"
+      ],
+      "dependencies": [
+        "SHARED-SPATIAL-001",
+        "SHARED-ACTIONS-001"
+      ],
+      "acceptanceTypes": [
+        "functional",
+        "domain-security",
+        "browser-visual",
+        "responsive",
+        "accessibility",
+        "copy",
+        "cross-lens"
+      ],
+      "status": "Not Started",
+      "implementation": {
+        "actor": null,
+        "pr": null,
+        "sha": null
+      },
+      "acceptance": {
+        "lane": null,
+        "reviewer": null,
+        "sha": null,
+        "result": null,
+        "evidence": []
+      },
+      "deferral": null,
+      "clarification": "Phase 2 successor product decision for selectable lens containers. SHARED-TRUTH-001 remains immutable and separately dispositioned."
+    }
   ]
 }
