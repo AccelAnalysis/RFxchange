@@ -10,19 +10,20 @@ Only `Verified` counts as experience completion. `Implemented — Not Verified` 
 
 | Experience | Stable range | Denominator | Current characterization |
 | --- | --- | ---: | --- |
-| Shared Exchange | `SHARED-*` | 26 | 21 implemented/not verified, four blocked, one explicitly deferred |
+| Shared Exchange | `SHARED-*` | 27 | 22 implemented/not verified, one not started, three blocked, one explicitly deferred |
 | Opportunities/RFx | `RFX-FEATURE-*` | 41 | 18 previously accepted/assurance pending, five Slice 4.6 candidate, 18 not started |
 | Resources | `RES-LENS-*` | 12 | eight implemented/not verified, two not started, two blocked |
 | Intelligence | `INTEL-*` | 14 | three implemented/not verified, six not started, five dependency-blocked |
-| Referrals | `REF-LENS-*` | 12 | nine implemented/not verified, one not started, two blocked |
+| Referrals | `REF-LENS-*` | 12 | ten implemented/not verified, one not started, one blocked |
 
-The program denominator is 105 requirements. The delivery matrix displays cross-cutting `SHARED-EVIDENCE-001` with Shared Exchange because that is the candidate where the procedural gap occurred.
+The program denominator is 106 requirements. The delivery matrix displays cross-cutting `SHARED-EVIDENCE-001` with Shared Exchange because that is the candidate where the procedural gap occurred.
 
 ## Shared Exchange register
 
 | Requirement | Status | Governing intent / disposition |
 | --- | --- | --- |
-| `SHARED-TRUTH-001` | Implemented — Not Verified | Exact permanent lens hierarchy and truthful unavailable state. |
+| `SHARED-TRUTH-001` | Implemented — Not Verified | Historical permanent lens hierarchy/unavailable-state requirement remains immutable and separately dispositioned. |
+| `SHARED-LENS-CONTEXT-001` | Not Started | Phase 2 successor requires all four permanent lenses to remain visible/selectable Room contexts with exactly four stable action positions and individual-action availability. |
 | `SHARED-TRANSITION-001` | Implemented — Not Verified | Current workspace remains through warm transition. |
 | `SHARED-LIFECYCLE-001` | Implemented — Not Verified | One stage-aware participant continuation resolver. |
 | `SHARED-SPATIAL-001`–`002` | Implemented — Not Verified | Versioned, scoped, non-authorizing continuity and invalidation. |
@@ -32,7 +33,7 @@ The program denominator is 105 requirements. The delivery matrix displays cross-
 | `SHARED-DRAWER-001`, `SHARED-SEARCH-001` | Implemented — Not Verified | Shared drawer/sheet and search/filter grammar. |
 | `SHARED-RESULT-001` | Deferred — Explicitly Approved | Current Network backend has a page contract; the post-#159 authority prohibited invented cursor semantics. |
 | `SHARED-CONTINUITY-001` | Implemented — Not Verified | Cross-lens selection/camera continuity. |
-| `SHARED-CONTINUITY-002` | Blocked | PR #160 final-head P2: search, Clear and pagination omit carried `selectedOrganization`. Bounded correction and fresh acceptance required. |
+| `SHARED-CONTINUITY-002` | Implemented — Not Verified | PR #186 candidate `6f160d84dd0f702e8546cbb421c17b2f3ac56dbd` corrected the PR #160 query-link loss and merged as `10150e66b4a1b37a0cda5381986c5599da96e632`; independent acceptance remains pending. |
 | `SHARED-RETURN-001` | Implemented — Not Verified | Explicit safe return context. |
 | `SHARED-ACCOUNT-001` | Implemented — Not Verified | Circular avatar trigger and authorized utility menu. |
 | `SHARED-ACTIONS-001` | Implemented — Not Verified | Shared lens-aware organization action projection. |
@@ -78,7 +79,7 @@ See [`INTELLIGENCE_PROGRAM_ROADMAP.md`](INTELLIGENCE_PROGRAM_ROADMAP.md).
 
 ## Referrals register
 
-`REF-LENS-001`–`009` retain existing referral implementation and PR #160 continuity work as unverified program evidence. `REF-LENS-010` Starred is Not Started. `REF-LENS-011` is blocked by the shared focus-link defect, and `REF-LENS-012` remains blocked until the complete lens is independently accepted.
+`REF-LENS-001`–`009` retain existing referral implementation as unverified program evidence. `REF-LENS-010` Starred is Not Started. `REF-LENS-011` is Implemented — Not Verified through the PR #186 shared selected-organization continuity correction; `REF-LENS-012` remains blocked until the complete lens is independently accepted.
 
 ## Ledger change rules
 
