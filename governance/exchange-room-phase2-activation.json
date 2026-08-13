@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "authority": "docs/program/EXCHANGE_ROOM_PHASE2_CONTROL.md",
+  "activationEpoch": {
+    "id": "exchange-room-phase2-2026-08-13",
+    "mainBaseSha": "10150e66b4a1b37a0cda5381986c5599da96e632",
+    "controlPullRequest": null,
+    "packetIds": [
+      "WP-EXCHANGE-ROOM-PHASE2-01"
+    ],
+    "purpose": "Authorize Lane 01 to implement the shared Exchange Room lens controller and canonical 16-action registry while keeping every permanent lens visible/selectable and disabling only individual unavailable action controls."
+  },
+  "workPacket": {
+    "id": "WP-EXCHANGE-ROOM-PHASE2-01",
+    "lane": "shared-exchange",
+    "owner": "Exchange Room Phase 2 — Lens Controller + 16-Action Registry",
+    "branch": "lane01/exchange-room-phase2",
+    "candidate": null,
+    "candidateHistory": [],
+    "exactBaseSha": "10150e66b4a1b37a0cda5381986c5599da96e632",
+    "activationEpochId": "exchange-room-phase2-2026-08-13",
+    "basePolicy": "exact-current-main-at-activation",
+    "status": "active",
+    "releaseClass": "Elevated",
+    "requirementIds": [],
+    "sources": [
+      "docs/program/EXCHANGE_ROOM_PHASE2_CONTROL.md",
+      "docs/program/SHARED_EXCHANGE_CONTRACTS.md",
+      "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md",
+      "src/application/participant/participant-lens-registry.ts",
+      "src/application/participant/organization-actions.ts"
+    ],
+    "dependencies": [
+      {
+        "packetId": "WP-EXCHANGE-ROOM-PHASE1-01",
+        "requiredCondition": "Phase 1 implementation is merged and canonical App Hosting rollout succeeded; real-map production health evidence debt remains explicit and is not rewritten as passed."
+      }
+    ],
+    "ownedPaths": [
+      "src/application/participant/**",
+      "src/components/participant/**",
+      "app/geography/canvas/**",
+      "src/i18n/messages/network/**",
+      "test/**",
+      "scripts/**",
+      "docs/program/**"
+    ],
+    "nonOwnedPaths": [
+      "src/domain/rfx/**",
+      "src/domain/referrals/**",
+      "src/domain/resource-providers/**",
+      "functions/**",
+      "firestore.rules",
+      "docs/tracking/**"
+    ],
+    "acceptanceRequired": [
+      "four-visible-selectable-lenses",
+      "exactly-four-actions-per-lens",
+      "individual-action-disabled-state-only",
+      "room-spatial-continuity",
+      "selected-organization-continuity",
+      "domain-security-negatives",
+      "tenant-geography-privacy",
+      "desktop-mobile",
+      "accessibility",
+      "five-locales",
+      "exact-head-ci",
+      "configured-map-when-available",
+      "independent-acceptance-later"
+    ],
+    "expectedOutput": "One shared current-main Phase 2 candidate implementing a persistent lens controller and canonical sixteen-action registry. All four lenses remain visible/selectable. Only individual inactive action controls are gray/disabled and non-actionable; no unavailable-status copy is added merely to explain the disabled state.",
+    "stopBoundary": "Do not implement missing domain features, Teaming, Intelligence datasets, Resource Provider workflows, referral lifecycle expansion, messaging, notifications, billing/payments, commercial policy, tracker completion, or Independent Verification."
+  },
+  "phase1EvidenceDebt": {
+    "mergeSha": "10150e66b4a1b37a0cda5381986c5599da96e632",
+    "appHostingRollout": "success",
+    "realAuthenticatedMapHealth": "pending",
+    "stabilization2C": "not-complete",
+    "certification": "pending"
+  },
+  "productOwnerDirection": {
+    "marketReadyBaseline": "register → organization → Exchange Room/real market → four permanent lenses/value architecture → Founding Membership → live payment → recognized paid member",
+    "lensRule": "Every permanent lens remains visible and selectable regardless of unfinished functions.",
+    "actionRule": "Only the individual function button that is not usable for the current participant/selection is gray/disabled. Preserve its normal label and do not add unavailable/coming-soon style status copy merely to explain the disabled state."
+  }
+}
