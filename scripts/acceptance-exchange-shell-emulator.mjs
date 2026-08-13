@@ -947,6 +947,33 @@ async function clickHref(cdp, href, expectedPath, { candidate = false, latencyMs
   return observation;
 }
 
+const EXCHANGE_ROOM_ACTION_IDS_BY_LENS = Object.freeze({
+  "opportunities-rfx": Object.freeze([
+    "opportunities.find",
+    "opportunities.create-rfx",
+    "opportunities.pursue-respond",
+    "opportunities.team",
+  ]),
+  resources: Object.freeze([
+    "resources.find-providers",
+    "resources.browse-resources",
+    "resources.my-requests",
+    "resources.provider-status",
+  ]),
+  intelligence: Object.freeze([
+    "intelligence.organizations",
+    "intelligence.capabilities",
+    "intelligence.locations",
+    "intelligence.layers",
+  ]),
+  referrals: Object.freeze([
+    "referrals.new",
+    "referrals.sent",
+    "referrals.received",
+    "referrals.starred",
+  ]),
+});
+
 let exchangeRoomReopenEvidenceCaptured = false;
 
 async function exchangeRoomLensSnapshot(cdp) {
@@ -960,16 +987,22 @@ async function exchangeRoomLensSnapshot(cdp) {
     }
     const grid = document.querySelector('[data-exchange-room-action-grid]');
     const currentLens = document.querySelector('[data-participant-navigation] a[data-participant-lens][aria-current="page"]');
+    const actions = [...(grid?.querySelectorAll('[data-exchange-room-action]') || [])]
+      .map((action) => ({
+        id: action.dataset.exchangeRoomAction || null,
+        state: action.dataset.actionState || null,
+        disabledReason: action.dataset.disabledReason || null,
+        tagName: action.tagName,
+        disabled: action.matches(':disabled') || action.getAttribute('aria-disabled') === 'true',
+        href: action.getAttribute('href'),
+      }));
     return {
       phase2: Boolean(grid),
       pathname: location.pathname,
       search: location.search,
       activeLens: grid?.dataset.activeLens || currentLens?.dataset.participantLens || null,
       currentLens: currentLens?.dataset.participantLens || null,
-      actionIds: [...(grid?.querySelectorAll('[data-exchange-room-action]') || [])]
-        .map((action) => action.dataset.exchangeRoomAction || null),
-      actionStates: [...(grid?.querySelectorAll('[data-exchange-room-action]') || [])]
-        .map((action) => action.dataset.actionState || null),
+      actions,
       panelOpen: spatial?.panelOpen ?? Boolean(document.querySelector('#organization-detail-panel')),
       selection: spatial?.selection ?? null,
       camera: spatial?.camera ?? null,
@@ -983,7 +1016,7 @@ async function exchangeRoomLensSnapshot(cdp) {
   })()`);
 }
 
-async function clickExchangeRoomLens(cdp, id, href, expectedPath) {
+async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 0 } = {}) {
   const deepLink = new URL(href, "https://participant.invalid");
   assert.equal(deepLink.pathname, expectedPath, `${id} lost its truthful dedicated-route deep link.`);
 
@@ -1012,6 +1045,15 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath) {
   }
 
   const continuityBefore = await exchangeRoomLensSnapshot(cdp);
+  if (latencyMs > 0) {
+    await cdp.send("Network.emulateNetworkConditions", {
+      offline: false,
+      latency: latencyMs,
+      downloadThroughput: 1_000_000,
+      uploadThroughput: 1_000_000,
+      connectionType: "wifi",
+    });
+  }
   const wallStartedAt = performance.now();
   await beginObservation(cdp);
   const immediate = await evaluate(cdp, `(async () => {
@@ -1042,14 +1084,42 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath) {
   const after = await exchangeRoomLensSnapshot(cdp);
   const observation = await finishObservation(cdp);
   const durationMs = performance.now() - wallStartedAt;
+  if (latencyMs > 0) {
+    await cdp.send("Network.emulateNetworkConditions", {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+      connectionType: "none",
+    });
+  }
 
   assert.equal(after.pathname, "/geography/canvas", `${id} changed the Exchange Room pathname.`);
   assert.equal(after.search, continuityBefore.search, `${id} discarded shared Room query context.`);
   assert.equal(after.activeLens, id, `${id} did not become the active Exchange Room lens.`);
   assert.equal(after.currentLens, id, `${id} did not project current lens semantics.`);
-  assert.equal(after.actionIds.length, 4, `${id} did not expose exactly four action positions.`);
-  assert.equal(new Set(after.actionIds).size, 4, `${id} exposed duplicate action identities.`);
-  assert.equal(after.actionStates.length, 4, `${id} did not expose four action states.`);
+  assert.deepEqual(
+    after.actions.map((action) => action.id),
+    EXCHANGE_ROOM_ACTION_IDS_BY_LENS[id],
+    `${id} did not expose the canonical ordered four-action identity contract.`,
+  );
+  for (const action of after.actions) {
+    assert.ok(action.state === "active" || action.state === "disabled", `${action.id} exposed an invalid action state.`);
+    if (action.state === "disabled") {
+      assert.equal(action.tagName, "BUTTON", `${action.id} disabled state was not rendered as a button.`);
+      assert.equal(action.disabled, true, `${action.id} disabled state remained actionable.`);
+      assert.equal(action.href, null, `${action.id} disabled state retained a usable href.`);
+      assert.ok(
+        ["not-operational", "not-applicable", "not-authorized"].includes(action.disabledReason),
+        `${action.id} disabled state lost its governed reason.`,
+      );
+    } else {
+      assert.equal(action.disabled, false, `${action.id} active state was disabled.`);
+      assert.equal(action.disabledReason, null, `${action.id} active state retained a disabled reason.`);
+      assert.ok(action.tagName === "A" || action.tagName === "BUTTON", `${action.id} active state used an invalid control.`);
+      if (action.tagName === "A") assert.ok(action.href, `${action.id} active link lost its href.`);
+    }
+  }
   assert.equal(after.panelOpen, true, `${id} did not leave/reopen the action surface.`);
   assert.equal(after.wholeLensDisabled, false, "A permanent lens became disabled as a whole.");
   assert.deepEqual(after.selection, continuityBefore.selection, `${id} changed the selected organization.`);
@@ -1069,8 +1139,8 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath) {
     immediateContentPreserved: true,
     phase2InRoom: true,
     lens: id,
-    actionIds: after.actionIds,
-    actionStates: after.actionStates,
+    actionIds: after.actions.map((action) => action.id),
+    actionStates: after.actions.map((action) => action.state),
     selectedOrganizationId: after.selection?.organizationId ?? null,
     geographyId: after.geographyId,
   };
@@ -1082,7 +1152,7 @@ async function clickLens(cdp, id, expectedPath, options = {}) {
   const phase2 = options.candidate === true
     && await evaluate(cdp, `Boolean(document.querySelector('[data-exchange-room-action-grid]'))`);
   return phase2
-    ? clickExchangeRoomLens(cdp, id, href, expectedPath)
+    ? clickExchangeRoomLens(cdp, id, href, expectedPath, options)
     : clickHref(cdp, href, expectedPath, options);
 }
 
