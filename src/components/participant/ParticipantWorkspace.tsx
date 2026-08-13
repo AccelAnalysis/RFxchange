@@ -2,6 +2,10 @@
 
 import { useEffect, type ReactNode } from "react";
 
+import type {
+  ParticipantLensId,
+  ParticipantUtilityId,
+} from "../../application/participant/participant-lens-registry";
 import {
   ControlGroup,
   OverlayPanel,
@@ -20,6 +24,8 @@ interface ParticipantShellProps {
   readonly activeItem?: ParticipantNavigationItem;
   readonly administrationHref?: string;
   readonly organizationName?: string;
+  readonly unavailableLensIds?: readonly ParticipantLensId[];
+  readonly unavailableUtilityIds?: readonly ParticipantUtilityId[];
   readonly children: ReactNode;
 }
 
@@ -54,11 +60,14 @@ export function ParticipantShell({
   activeItem,
   administrationHref,
   organizationName,
+  unavailableLensIds,
+  unavailableUtilityIds,
   children,
 }: ParticipantShellProps) {
   const {
     persistent,
     registerExplicitActiveItem,
+    registerUnavailableDestinations,
     reportAuthorizedOrganizationName,
     reportAuthorizedParticipant,
   } = usePersistentParticipantShellContext();
@@ -78,6 +87,19 @@ export function ParticipantShell({
     return registerExplicitActiveItem(activeItem);
   }, [activeItem, persistent, registerExplicitActiveItem]);
 
+  useEffect(() => {
+    if (!persistent || (!unavailableLensIds?.length && !unavailableUtilityIds?.length)) return;
+    return registerUnavailableDestinations({
+      lensIds: unavailableLensIds,
+      utilityIds: unavailableUtilityIds,
+    });
+  }, [
+    persistent,
+    registerUnavailableDestinations,
+    unavailableLensIds,
+    unavailableUtilityIds,
+  ]);
+
   if (persistent) return <>{children}</>;
 
   return (
@@ -90,6 +112,8 @@ export function ParticipantShell({
         activeItem={activeItem}
         administrationHref={administrationHref}
         organizationName={organizationName ?? null}
+        unavailableLensIds={unavailableLensIds}
+        unavailableUtilityIds={unavailableUtilityIds}
       />
       {children}
     </div>

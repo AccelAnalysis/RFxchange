@@ -59,13 +59,11 @@ import type {
 } from "../../domain/organization-location/repository.ts";
 import type { OrganizationMarkerActivation } from "../../domain/organization-markers/model.ts";
 import type { OrganizationMarkerActivationRepository } from "../../domain/organization-markers/repository.ts";
-import { orientationJourneyIdForAccessJourney } from "../../domain/orientation/model.ts";
 import type { OrientationJourneyRepository } from "../../domain/orientation/repository.ts";
 import type {
   OrganizationAccountRepository,
   OrganizationProfileRepository,
 } from "../../domain/organizations/repository.ts";
-import { organizationMembershipId } from "../../domain/users/model.ts";
 import type { OrganizationMembershipRepository } from "../../domain/users/repository.ts";
 
 export type ActivationJourneyStep =
@@ -833,7 +831,7 @@ export class ActivationJourneyService {
     }
 
     const resolvedOrganizationId = activation.organizationId ?? resolution?.organizationId ?? null;
-    const [selectedDefinition, organization, profile, location, completion, marker, orientation] = await Promise.all([
+    const [selectedDefinition, organization, profile, location, completion, marker] = await Promise.all([
       selection
         ? this.dependencies.definitions.getById(selection.geographyId)
         : Promise.resolve(null),
@@ -852,23 +850,12 @@ export class ActivationJourneyService {
       resolvedOrganizationId
         ? this.dependencies.markerActivations.getByOrganizationId(resolvedOrganizationId)
         : Promise.resolve(null),
-      lifecycle.state === "controlled-platform"
-        ? this.dependencies.orientations.getById(orientationJourneyIdForAccessJourney(journeyId))
-        : Promise.resolve(null),
     ]);
     const membership = activation.membershipId
       ? memberships.find((candidate) => candidate.id === activation.membershipId) ?? null
       : resolvedOrganizationId
         ? memberships.find((candidate) => candidate.organizationId === resolvedOrganizationId) ?? null
         : null;
-    const orientationComplete = Boolean(
-      orientation?.status === "completed" &&
-      orientation.completedThroughStep === 8 &&
-      orientation.userId === context.user.id &&
-      String(orientation.accessJourneyId) === String(activation.accessJourneyId) &&
-      (!resolvedOrganizationId || String(orientation.organizationId) === String(resolvedOrganizationId)),
-    );
-
     const nextStep = this.nextStep({
       activation,
       lifecycle,
@@ -916,18 +903,10 @@ export class ActivationJourneyService {
       marker: marker
         ? Object.freeze({ status: marker.status, geographyId: String(marker.geographyId) })
         : null,
-      controlledPlatformUrl:
-        lifecycle.state === "controlled-platform" &&
-        resolvedOrganizationId &&
-        !orientationComplete &&
-        activation.acquisitionContext &&
-        activation.acquisitionContext.intent.kind !== "direct"
-          ? "/acquisition/continue"
-          : participantLifecycleDestination(
-              lifecycle.state,
-              resolvedOrganizationId ? String(resolvedOrganizationId) : null,
-              orientationComplete,
-            ),
+      controlledPlatformUrl: participantLifecycleDestination(
+        lifecycle.state,
+        resolvedOrganizationId ? String(resolvedOrganizationId) : null,
+      ),
       orientationImplementationPending: false,
       acquisitionContext: activation.acquisitionContext
         ? Object.freeze({

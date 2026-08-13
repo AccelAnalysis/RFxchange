@@ -36,6 +36,21 @@
   background: var(--semantic-surface-subtle);
 }
 
+.unavailableAction {
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-hairline) solid var(--semantic-border-subtle);
+  border-radius: var(--radius-control);
+  color: var(--semantic-text-muted);
+  background: var(--semantic-surface-subtle);
+  cursor: not-allowed;
+  font-weight: 720;
+  opacity: 0.72;
+}
+
 .stateAction:focus-visible,
 .primaryAction:focus-visible,
 .secondaryAction:focus-visible,
@@ -207,6 +222,13 @@
 
 .cardActions {
   margin-top: var(--space-lg);
+}
+
+.actionAvailabilityNote {
+  margin: var(--space-sm) 0 0;
+  color: var(--semantic-text-muted);
+  font-size: var(--type-caption-size);
+  line-height: 1.45;
 }
 
 .provenance,

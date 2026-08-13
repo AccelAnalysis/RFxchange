@@ -27,14 +27,11 @@ test("login reuses one activation hydration and returning users skip geography s
   );
 });
 
-test("optimized login preserves an acquisition-aware controlled-platform destination", async () => {
+test("optimized login preserves acquisition context without replacing the map-first destination", async () => {
   const session = await source("app/api/auth/session/route.ts");
   assert.match(session, /function withBoundAcquisition/);
-  assert.match(
-    session,
-    /state\.lifecycleState === "controlled-platform"[\s\S]{0,80}state\.organization[\s\S]{0,80}context\.intent\.kind !== "direct"/,
-  );
-  assert.match(session, /"\/acquisition\/continue"/);
+  assert.match(session, /acquisitionContext: acquisitionState\(context\)/);
+  assert.doesNotMatch(session, /"\/acquisition\/continue"/);
   assert.match(session, /state = withBoundAcquisition\(state, boundAcquisition\)/);
 });
 
@@ -54,8 +51,8 @@ test("activation state hydrates independent persistence in parallel", async () =
   assert.match(stateFor, /this\.dependencies\.accountSecurity\.inspect/);
   assert.match(stateFor, /this\.dependencies\.resolutions\.getByAccessJourneyId/);
   assert.match(stateFor, /this\.dependencies\.memberships\.listActiveByUserId/);
-  assert.match(stateFor, /const \[selectedDefinition, organization, profile, location, completion, marker, orientation\] = await Promise\.all/);
-  assert.match(stateFor, /lifecycle\.state === "controlled-platform"[\s\S]*orientations\.getById/);
+  assert.match(stateFor, /const \[selectedDefinition, organization, profile, location, completion, marker\] = await Promise\.all/);
+  assert.doesNotMatch(stateFor, /orientations\.getById/);
 });
 
 test("activation actions use narrow preconditions instead of pre-hydrating full state", async () => {

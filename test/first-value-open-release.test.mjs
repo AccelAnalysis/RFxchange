@@ -163,7 +163,7 @@ test("selection plus OPEN transition is durable, idempotent and cross-scope fail
   );
 });
 
-test("server routes reject stale browser authority and preserve truthful destination boundaries", async () => {
+test("server routes reject stale browser authority while the Exchange entry remains map-first", async () => {
   const [api, client, exchange, firstValue] = await Promise.all([
     readFile(new URL("../app/api/first-value/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../src/components/first-value/FirstValueChoiceClient.tsx", import.meta.url), "utf8"),
@@ -174,7 +174,10 @@ test("server routes reject stale browser authority and preserve truthful destina
   assert.doesNotMatch(client, /JSON\.stringify\(\{[^}]*organizationId|JSON\.stringify\(\{[^}]*accessJourneyId|JSON\.stringify\(\{[^}]*lifecycle/);
   assert.match(api, /resolveParticipantRoute/);
   assert.match(api, /acquisitionIntentKind: access\.state\.acquisitionContext\?\.kind \?\? null/);
-  assert.match(exchange, /service\.evaluate\(scope\)/);
-  assert.match(exchange, /redirect\(gate\.remediation\)/);
+  assert.match(api, /nextUrl: "\/exchange"/);
+  assert.match(client, /if \(result\.nextUrl\)/);
+  assert.doesNotMatch(client, /OPEN remains safely closed|remediation/);
+  assert.match(exchange, /appendFoundingAcquisitionIntent\("\/geography\/canvas"\)/);
+  assert.doesNotMatch(exchange, /service\.evaluate\(scope\)|gate\.remediation/);
   assert.match(firstValue, /orientation\.status !== "completed"/);
 });

@@ -114,6 +114,7 @@ test("the persistent shell owns navigation while page-local shells collapse to c
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
   const accountPage = read("app/organization-profile/page.tsx");
   const exchangePage = read("app/exchange/page.tsx");
+  const intelligencePage = read("app/geography/canvas/page.tsx");
   const providerApplicationPage = read("app/provider-application/page.tsx");
 
   assert.match(layout, /<PersistentParticipantShell>\{children\}<\/PersistentParticipantShell>/);
@@ -132,7 +133,9 @@ test("the persistent shell owns navigation while page-local shells collapse to c
   assert.match(compatibility, /reportAuthorizedParticipant\(\)/);
   assert.match(compatibility, /registerExplicitActiveItem\(activeItem\)/);
   assert.match(accountPage, /<ParticipantShell activeItem="account" organizationName=\{profile\.displayName\}>/);
-  assert.match(exchangePage, /<ParticipantShell activeItem=\{destination\.workspace/);
+  assert.match(exchangePage, /redirect\(mapUrl\)/);
+  assert.match(intelligencePage, /<ExistingWorkspaceFoundation/);
+  assert.match(intelligencePage, /operationalActionsAvailable=\{authenticated\.access\.state\.lifecycleState === "open-platform"\}/);
   assert.match(providerApplicationPage, /<ParticipantShell activeItem="Account">/);
   assert.doesNotMatch(navigation, /fetch\("\/api\/participant-shell"/);
   assert.equal(
