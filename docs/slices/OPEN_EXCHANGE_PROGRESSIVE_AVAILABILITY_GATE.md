@@ -1,8 +1,8 @@
 # Open Exchange Progressive Availability Gate
 
-**Status:** IMPLEMENTED — NOT VERIFIED  
-**Source authority:** explicit participant-facing product direction in the current task  
-**Implementation base:** `69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068`  
+**Status:** IMPLEMENTED — NOT VERIFIED
+**Source authority:** explicit participant-facing product direction in the current task
+**Implementation base:** `69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068`
 **Owner:** Lane 01 shared participant experience
 
 ## Decision
