@@ -93,6 +93,10 @@ export const FIRESTORE_COLLECTIONS = {
   aiInterpretationUsageEvents: "aiInterpretationUsageEvents",
   aiInterpretationEvents: "aiInterpretationEvents",
   aiInterpretationQuotaBuckets: "aiInterpretationQuotaBuckets",
+  organizationCommercialAccounts: "organizationCommercialAccounts",
+  commercialFoundingCapacity: "commercialFoundingCapacity",
+  commercialProviderEvents: "commercialProviderEvents",
+  commercialSubscriptionReconciliations: "commercialSubscriptionReconciliations",
 } as const;
 
 export type FirestoreCollectionKey = keyof typeof FIRESTORE_COLLECTIONS;
@@ -107,16 +111,149 @@ export type FirestoreRecordScope =
 
 export interface FirestoreCollectionConvention {
   readonly collection: FirestoreCollectionName;
-  readonly documentIdSource:
-    | "id"
-    | "membershipId"
-    | "administratorId"
-    | "userId"
-    | "reference";
+  readonly documentIdSource: "id" | "membershipId" | "administratorId" | "userId" | "organizationId" | "reference";
   readonly scope: FirestoreRecordScope;
   readonly organizationIdRequired: boolean;
   readonly appendOnly: boolean;
   readonly mutable: boolean;
+}
+
+const PLATFORM_SCOPED_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
+  "geographies",
+  "accessJourneys",
+  "legalDocumentVersions",
+  "platformChangeDirectives",
+  "retentionPolicies",
+  "adminAuthorityContexts",
+  "adminPermissionGrants",
+  "backgroundJobs",
+  "backgroundJobEvents",
+  "commercialFoundingCapacity",
+]);
+
+const USER_SCOPED_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
+  "users",
+  "primaryGeographySelections",
+]);
+
+const MIXED_SCOPE_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
+  "geographyParticipationAuthorizations",
+  "accessRestrictions",
+  "retentionAssignments",
+  "acquisitionContexts",
+  "acquisitionContextEvents",
+  "providerRequestMessages",
+  "aiInterpretationQuotaBuckets",
+]);
+
+const PUBLIC_PROJECTION_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
+  "rfxOpportunityProjections",
+]);
+
+const ORGANIZATION_ROOT_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
+  "organizations",
+]);
+
+const ORGANIZATION_ID_OPTIONAL_ORG_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
+  "businessReferrals",
+  "businessReferralEvents",
+  "businessReferralCommands",
+  "rfxAggregates",
+  "rfxEvents",
+  "rfxCommands",
+  "rfxPublicationSnapshots",
+  "referralCommunicationIntents",
+]);
+
+const APPEND_ONLY_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
+  "organizationResolutions",
+  "organizationEntityKeys",
+  "organizationAuthorityClaimEvents",
+  "organizationAuthorityDecisions",
+  "organizationLocationEvents",
+  "organizationProfileEvents",
+  "organizationProvisionalTerms",
+  "organizationMarketProfileEvents",
+  "organizationMarketProfileCommands",
+  "organizationEnrichmentEvents",
+  "organizationEnrichmentCommands",
+  "organizationMarkerEvents",
+  "organizationAuditEvents",
+  "legalDocumentVersions",
+  "legalAcknowledgements",
+  "organizationAuthorityRepresentations",
+  "platformChangeDirectives",
+  "retentionPolicies",
+  "retentionAssignments",
+  "adminPermissionGrants",
+  "backgroundJobEvents",
+  "acquisitionContextEvents",
+  "businessReferralEvents",
+  "businessReferralCommands",
+  "rfxEvents",
+  "rfxCommands",
+  "rfxPublicationSnapshots",
+  "rfxOpportunityProjections",
+  "opportunitySavedSearchMatches",
+  "opportunityRelationCommands",
+  "opportunityRelationEvents",
+  "referralEducationAcknowledgements",
+  "providerApplicationVersions",
+  "providerApplicationEvents",
+  "providerApplicationCommands",
+  "providerNetworkEvents",
+  "providerNetworkCommands",
+  "providerRequestMessages",
+  "orientationJourneyEvents",
+  "activationReleaseEvents",
+  "aiInterpretationProvenance",
+  "aiInterpretationUsageEvents",
+  "aiInterpretationEvents",
+  "commercialProviderEvents",
+]);
+
+function scopeFor(key: FirestoreCollectionKey): FirestoreRecordScope {
+  if (ORGANIZATION_ROOT_COLLECTIONS.has(key)) return "organization-root";
+  if (USER_SCOPED_COLLECTIONS.has(key)) return "user-scoped";
+  if (PLATFORM_SCOPED_COLLECTIONS.has(key)) return "platform-scoped";
+  if (PUBLIC_PROJECTION_COLLECTIONS.has(key)) return "public-projection";
+  if (MIXED_SCOPE_COLLECTIONS.has(key)) return "mixed-scope";
+  return "organization-scoped";
+}
+
+function documentIdSourceFor(
+  key: FirestoreCollectionKey,
+): FirestoreCollectionConvention["documentIdSource"] {
+  switch (key) {
+    case "organizationAuthorizations":
+      return "membershipId";
+    case "adminAuthorityContexts":
+      return "administratorId";
+    case "primaryGeographySelections":
+      return "userId";
+    case "organizationCommercialAccounts":
+    case "commercialSubscriptionReconciliations":
+      return "organizationId";
+    case "rfxOpportunityProjections":
+    case "commercialFoundingCapacity":
+      return "reference";
+    default:
+      return "id";
+  }
+}
+
+function conventionFor(key: FirestoreCollectionKey): FirestoreCollectionConvention {
+  const scope = scopeFor(key);
+  const appendOnly = APPEND_ONLY_COLLECTIONS.has(key);
+  return Object.freeze({
+    collection: FIRESTORE_COLLECTIONS[key],
+    documentIdSource: documentIdSourceFor(key),
+    scope,
+    organizationIdRequired:
+      scope === "organization-scoped" && !ORGANIZATION_ID_OPTIONAL_ORG_COLLECTIONS.has(key),
+    appendOnly,
+    mutable: !appendOnly,
+  });
 }
 
 /**
@@ -125,394 +262,12 @@ export interface FirestoreCollectionConvention {
  */
 export const FIRESTORE_COLLECTION_CONVENTIONS: Readonly<
   Record<FirestoreCollectionKey, FirestoreCollectionConvention>
-> = Object.freeze({
-  organizations: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizations,
-    documentIdSource: "id",
-    scope: "organization-root",
-    organizationIdRequired: false,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationProfiles: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationProfiles,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationDiscoveryRecords: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationDiscoveryRecords,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationResolutions: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationResolutions,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  organizationEntityKeys: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationEntityKeys,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  organizationAuthorityClaims: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationAuthorityClaims,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationAuthorityClaimEvents: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationAuthorityClaimEvents,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  organizationAuthorityDecisions: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationAuthorityDecisions,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  organizationLocationDrafts: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationLocationDrafts,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationLocations: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationLocations,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationLocationEvents: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationLocationEvents,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  organizationServiceGeographies: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationServiceGeographies,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationProfileCompletions: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationProfileCompletions,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationProfileEvents: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationProfileEvents,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  organizationCapabilityClaims: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationCapabilityClaims, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  organizationIndustryProfiles: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationIndustryProfiles, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  organizationPastPerformance: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationPastPerformance, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  organizationMarketPreferences: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationMarketPreferences, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  organizationProvisionalTerms: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationProvisionalTerms, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  organizationMarketProfileEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationMarketProfileEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  organizationMarketProfileCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationMarketProfileCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  organizationCredentials: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationCredentials, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  organizationProfileAssets: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationProfileAssets, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  organizationAdditionalLocationDrafts: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationAdditionalLocationDrafts, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  organizationAdditionalLocations: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationAdditionalLocations, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  organizationEnrichmentEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationEnrichmentEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  organizationEnrichmentCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationEnrichmentCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  organizationMarkerActivations: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationMarkerActivations,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationMarkerEvents: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationMarkerEvents,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  users: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.users,
-    documentIdSource: "id",
-    scope: "user-scoped",
-    organizationIdRequired: false,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationMemberships: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationMemberships,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationAuthorizations: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationAuthorizations,
-    documentIdSource: "membershipId",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationUserInvitations: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationUserInvitations,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  organizationAuditEvents: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationAuditEvents,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  geographies: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.geographies,
-    documentIdSource: "id",
-    scope: "platform-scoped",
-    organizationIdRequired: false,
-    appendOnly: false,
-    mutable: true,
-  }),
-  primaryGeographySelections: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.primaryGeographySelections,
-    documentIdSource: "userId",
-    scope: "user-scoped",
-    organizationIdRequired: false,
-    appendOnly: false,
-    mutable: true,
-  }),
-  geographyParticipationAuthorizations: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.geographyParticipationAuthorizations,
-    documentIdSource: "id",
-    scope: "mixed-scope",
-    organizationIdRequired: false,
-    appendOnly: false,
-    mutable: true,
-  }),
-  accessJourneys: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.accessJourneys,
-    documentIdSource: "id",
-    scope: "platform-scoped",
-    organizationIdRequired: false,
-    appendOnly: false,
-    mutable: true,
-  }),
-  accessRestrictions: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.accessRestrictions,
-    documentIdSource: "id",
-    scope: "mixed-scope",
-    organizationIdRequired: false,
-    appendOnly: false,
-    mutable: true,
-  }),
-  legalDocumentVersions: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.legalDocumentVersions,
-    documentIdSource: "id",
-    scope: "platform-scoped",
-    organizationIdRequired: false,
-    appendOnly: true,
-    mutable: false,
-  }),
-  legalAcknowledgements: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.legalAcknowledgements,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  organizationAuthorityRepresentations: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.organizationAuthorityRepresentations,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  platformChangeDirectives: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.platformChangeDirectives,
-    documentIdSource: "id",
-    scope: "platform-scoped",
-    organizationIdRequired: false,
-    appendOnly: true,
-    mutable: false,
-  }),
-  retentionPolicies: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.retentionPolicies,
-    documentIdSource: "id",
-    scope: "platform-scoped",
-    organizationIdRequired: false,
-    appendOnly: true,
-    mutable: false,
-  }),
-  retentionAssignments: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.retentionAssignments,
-    documentIdSource: "id",
-    scope: "mixed-scope",
-    organizationIdRequired: false,
-    appendOnly: true,
-    mutable: false,
-  }),
-  adminAuthorityContexts: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.adminAuthorityContexts,
-    documentIdSource: "administratorId",
-    scope: "platform-scoped",
-    organizationIdRequired: false,
-    appendOnly: false,
-    mutable: true,
-  }),
-  adminPermissionGrants: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.adminPermissionGrants,
-    documentIdSource: "id",
-    scope: "platform-scoped",
-    organizationIdRequired: false,
-    appendOnly: true,
-    mutable: false,
-  }),
-  backgroundJobs: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.backgroundJobs,
-    documentIdSource: "id",
-    scope: "platform-scoped",
-    organizationIdRequired: false,
-    appendOnly: false,
-    mutable: true,
-  }),
-  backgroundJobEvents: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.backgroundJobEvents,
-    documentIdSource: "id",
-    scope: "platform-scoped",
-    organizationIdRequired: false,
-    appendOnly: true,
-    mutable: false,
-  }),
-  acquisitionContexts: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.acquisitionContexts,
-    documentIdSource: "id",
-    scope: "mixed-scope",
-    organizationIdRequired: false,
-    appendOnly: false,
-    mutable: true,
-  }),
-  acquisitionContextEvents: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.acquisitionContextEvents,
-    documentIdSource: "id",
-    scope: "mixed-scope",
-    organizationIdRequired: false,
-    appendOnly: true,
-    mutable: false,
-  }),
-  businessReferrals: Object.freeze({ collection: FIRESTORE_COLLECTIONS.businessReferrals, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: false, mutable: true }),
-  businessReferralEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.businessReferralEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
-  businessReferralCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.businessReferralCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
-  rfxAggregates: Object.freeze({ collection: FIRESTORE_COLLECTIONS.rfxAggregates, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: false, mutable: true }),
-  rfxEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.rfxEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
-  rfxCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.rfxCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
-  rfxPublicationSnapshots: Object.freeze({ collection: FIRESTORE_COLLECTIONS.rfxPublicationSnapshots, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
-  rfxOpportunityProjections: Object.freeze({ collection: FIRESTORE_COLLECTIONS.rfxOpportunityProjections, documentIdSource: "reference", scope: "public-projection", organizationIdRequired: false, appendOnly: true, mutable: false }),
-  opportunitySavedSearches: Object.freeze({ collection: FIRESTORE_COLLECTIONS.opportunitySavedSearches, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  opportunityWatches: Object.freeze({ collection: FIRESTORE_COLLECTIONS.opportunityWatches, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  opportunitySavedSearchMatches: Object.freeze({ collection: FIRESTORE_COLLECTIONS.opportunitySavedSearchMatches, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  opportunityAlertIntents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.opportunityAlertIntents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  opportunityRelationCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.opportunityRelationCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  opportunityRelationEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.opportunityRelationEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  referralEducationAcknowledgements: Object.freeze({ collection: FIRESTORE_COLLECTIONS.referralEducationAcknowledgements, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  referralCommunicationIntents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.referralCommunicationIntents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: false, mutable: true }),
-  providerApplications: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerApplications, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  providerApplicationVersions: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerApplicationVersions, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  providerApplicationEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerApplicationEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  providerApplicationCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerApplicationCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  officialResourceProviderStatuses: Object.freeze({ collection: FIRESTORE_COLLECTIONS.officialResourceProviderStatuses, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  providerServiceProfiles: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerServiceProfiles, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  providerDiscoveryPublications: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerDiscoveryPublications, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  providerResources: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerResources, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  providerNetworkEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerNetworkEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  providerNetworkCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerNetworkCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  providerRequestMessages: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerRequestMessages, documentIdSource: "id", scope: "mixed-scope", organizationIdRequired: false, appendOnly: true, mutable: false }),
-  providerAcquisitionInvitations: Object.freeze({ collection: FIRESTORE_COLLECTIONS.providerAcquisitionInvitations, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  networkEducationProgress: Object.freeze({ collection: FIRESTORE_COLLECTIONS.networkEducationProgress, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  networkEducationEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.networkEducationEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  networkEducationCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.networkEducationCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  orientationJourneys: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.orientationJourneys,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  orientationJourneyEvents: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.orientationJourneyEvents,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  firstValueSelections: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.firstValueSelections,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
-  }),
-  activationReleaseEvents: Object.freeze({
-    collection: FIRESTORE_COLLECTIONS.activationReleaseEvents,
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
-  }),
-  aiInterpretationRecords: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationRecords, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  aiInterpretationCandidates: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationCandidates, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
-  aiInterpretationProvenance: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationProvenance, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  aiInterpretationUsageEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationUsageEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  aiInterpretationEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
-  aiInterpretationQuotaBuckets: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationQuotaBuckets, documentIdSource: "id", scope: "mixed-scope", organizationIdRequired: false, appendOnly: false, mutable: true }),
-});
+> = Object.freeze(
+  Object.fromEntries(
+    (Object.keys(FIRESTORE_COLLECTIONS) as FirestoreCollectionKey[])
+      .map((key) => [key, conventionFor(key)]),
+  ) as Record<FirestoreCollectionKey, FirestoreCollectionConvention>,
+);
 
 export const FIRESTORE_SYSTEM_FIELDS = Object.freeze({
   schemaVersion: "schemaVersion",
@@ -553,7 +308,6 @@ export function assertOrganizationScopedFirestoreRecord(
 ): void {
   const convention = FIRESTORE_COLLECTION_CONVENTIONS[key];
   if (!convention.organizationIdRequired) return;
-
   if (!organizationId?.trim()) {
     throw new Error(`${convention.collection} records require an explicit organizationId.`);
   }
