@@ -30,7 +30,12 @@ export type ExchangeRoomActionHandler =
   | Readonly<{ kind: "network-focus"; intent: "organizations" | "capabilities" }>;
 
 type ApplicabilityRule = "any" | "viewer-organization" | "opportunity-context";
-type AuthorizationRule = "room-participant" | "open-platform";
+type AuthorizationRule =
+  | "room-participant"
+  | "open-platform"
+  | "open-platform-rfx-create"
+  | "open-platform-referral-manage"
+  | "open-platform-resource-manage";
 type HandlerRule =
   | "opportunity-discovery"
   | "rfx-issuer"
@@ -73,281 +78,93 @@ export interface ExchangeRoomActionProjectionInput {
   readonly selectedOrganizationId: string;
   readonly selectedOrganizationIsOfficialResourceProvider: boolean;
   readonly openPlatformActionsAuthorized: boolean;
+  readonly networkDiscoveryAvailable: boolean;
+  readonly actionAuthorization: Readonly<{
+    rfxCreate: boolean;
+    referralManage: boolean;
+    resourceManage: boolean;
+  }>;
   readonly currentOpportunityReference?: string | null;
 }
 
 const DEFINITIONS: readonly ExchangeRoomActionDefinition[] = Object.freeze([
-  Object.freeze({
-    id: "opportunities.find",
-    lens: "opportunities-rfx",
-    order: 1,
-    canonicalLabel: "Find Opportunities",
-    labelKey: "networkWorkspace.exchangeRoom.actions.opportunities.find",
-    operational: true,
-    applicability: "any",
-    authorization: "open-platform",
-    handler: "opportunity-discovery",
-  }),
-  Object.freeze({
-    id: "opportunities.create-rfx",
-    lens: "opportunities-rfx",
-    order: 2,
-    canonicalLabel: "Create RFx",
-    labelKey: "networkWorkspace.exchangeRoom.actions.opportunities.createRfx",
-    operational: true,
-    applicability: "viewer-organization",
-    authorization: "open-platform",
-    handler: "rfx-issuer",
-  }),
-  Object.freeze({
-    id: "opportunities.pursue-respond",
-    lens: "opportunities-rfx",
-    order: 3,
-    canonicalLabel: "Pursue / Respond",
-    labelKey: "networkWorkspace.exchangeRoom.actions.opportunities.pursueRespond",
-    operational: true,
-    applicability: "opportunity-context",
-    authorization: "open-platform",
-    handler: "opportunity-detail",
-  }),
-  Object.freeze({
-    id: "opportunities.team",
-    lens: "opportunities-rfx",
-    order: 4,
-    canonicalLabel: "Team",
-    labelKey: "networkWorkspace.exchangeRoom.actions.opportunities.team",
-    operational: false,
-    applicability: "opportunity-context",
-    authorization: "open-platform",
-    handler: null,
-  }),
-  Object.freeze({
-    id: "resources.find-providers",
-    lens: "resources",
-    order: 1,
-    canonicalLabel: "Find Providers",
-    labelKey: "networkWorkspace.exchangeRoom.actions.resources.findProviders",
-    operational: true,
-    applicability: "any",
-    authorization: "open-platform",
-    handler: "resource-discovery",
-  }),
-  Object.freeze({
-    id: "resources.browse-resources",
-    lens: "resources",
-    order: 2,
-    canonicalLabel: "Browse Resources",
-    labelKey: "networkWorkspace.exchangeRoom.actions.resources.browseResources",
-    operational: true,
-    applicability: "any",
-    authorization: "open-platform",
-    handler: "resource-browse",
-  }),
-  Object.freeze({
-    id: "resources.my-requests",
-    lens: "resources",
-    order: 3,
-    canonicalLabel: "My Requests",
-    labelKey: "networkWorkspace.exchangeRoom.actions.resources.myRequests",
-    operational: true,
-    applicability: "any",
-    authorization: "open-platform",
-    handler: "resource-requests",
-  }),
-  Object.freeze({
-    id: "resources.provider-status",
-    lens: "resources",
-    order: 4,
-    canonicalLabel: "Provider Status",
-    labelKey: "networkWorkspace.exchangeRoom.actions.resources.providerStatus",
-    operational: true,
-    applicability: "viewer-organization",
-    authorization: "open-platform",
-    handler: "provider-status",
-  }),
-  Object.freeze({
-    id: "intelligence.organizations",
-    lens: "intelligence",
-    order: 1,
-    canonicalLabel: "Organizations",
-    labelKey: "networkWorkspace.exchangeRoom.actions.intelligence.organizations",
-    operational: true,
-    applicability: "any",
-    authorization: "room-participant",
-    handler: "network-organizations",
-  }),
-  Object.freeze({
-    id: "intelligence.capabilities",
-    lens: "intelligence",
-    order: 2,
-    canonicalLabel: "Capabilities",
-    labelKey: "networkWorkspace.exchangeRoom.actions.intelligence.capabilities",
-    operational: true,
-    applicability: "any",
-    authorization: "room-participant",
-    handler: "network-capabilities",
-  }),
-  Object.freeze({
-    id: "intelligence.locations",
-    lens: "intelligence",
-    order: 3,
-    canonicalLabel: "Locations",
-    labelKey: "networkWorkspace.exchangeRoom.actions.intelligence.locations",
-    operational: false,
-    applicability: "any",
-    authorization: "room-participant",
-    handler: null,
-  }),
-  Object.freeze({
-    id: "intelligence.layers",
-    lens: "intelligence",
-    order: 4,
-    canonicalLabel: "Intelligence Layers",
-    labelKey: "networkWorkspace.exchangeRoom.actions.intelligence.layers",
-    operational: false,
-    applicability: "any",
-    authorization: "room-participant",
-    handler: null,
-  }),
-  Object.freeze({
-    id: "referrals.new",
-    lens: "referrals",
-    order: 1,
-    canonicalLabel: "New Referral",
-    labelKey: "networkWorkspace.exchangeRoom.actions.referrals.new",
-    operational: true,
-    applicability: "any",
-    authorization: "open-platform",
-    handler: "referral-new",
-  }),
-  Object.freeze({
-    id: "referrals.sent",
-    lens: "referrals",
-    order: 2,
-    canonicalLabel: "Sent",
-    labelKey: "networkWorkspace.exchangeRoom.actions.referrals.sent",
-    operational: true,
-    applicability: "any",
-    authorization: "open-platform",
-    handler: "referral-sent",
-  }),
-  Object.freeze({
-    id: "referrals.received",
-    lens: "referrals",
-    order: 3,
-    canonicalLabel: "Received",
-    labelKey: "networkWorkspace.exchangeRoom.actions.referrals.received",
-    operational: true,
-    applicability: "any",
-    authorization: "open-platform",
-    handler: "referral-received",
-  }),
-  Object.freeze({
-    id: "referrals.starred",
-    lens: "referrals",
-    order: 4,
-    canonicalLabel: "Starred",
-    labelKey: "networkWorkspace.exchangeRoom.actions.referrals.starred",
-    operational: false,
-    applicability: "any",
-    authorization: "open-platform",
-    handler: null,
-  }),
+  Object.freeze({ id: "opportunities.find", lens: "opportunities-rfx", order: 1, canonicalLabel: "Find Opportunities", labelKey: "networkWorkspace.exchangeRoom.actions.opportunities.find", operational: true, applicability: "any", authorization: "open-platform", handler: "opportunity-discovery" }),
+  Object.freeze({ id: "opportunities.create-rfx", lens: "opportunities-rfx", order: 2, canonicalLabel: "Create RFx", labelKey: "networkWorkspace.exchangeRoom.actions.opportunities.createRfx", operational: true, applicability: "viewer-organization", authorization: "open-platform-rfx-create", handler: "rfx-issuer" }),
+  Object.freeze({ id: "opportunities.pursue-respond", lens: "opportunities-rfx", order: 3, canonicalLabel: "Pursue / Respond", labelKey: "networkWorkspace.exchangeRoom.actions.opportunities.pursueRespond", operational: true, applicability: "opportunity-context", authorization: "open-platform", handler: "opportunity-detail" }),
+  Object.freeze({ id: "opportunities.team", lens: "opportunities-rfx", order: 4, canonicalLabel: "Team", labelKey: "networkWorkspace.exchangeRoom.actions.opportunities.team", operational: false, applicability: "opportunity-context", authorization: "open-platform", handler: null }),
+  Object.freeze({ id: "resources.find-providers", lens: "resources", order: 1, canonicalLabel: "Find Providers", labelKey: "networkWorkspace.exchangeRoom.actions.resources.findProviders", operational: true, applicability: "any", authorization: "open-platform", handler: "resource-discovery" }),
+  Object.freeze({ id: "resources.browse-resources", lens: "resources", order: 2, canonicalLabel: "Browse Resources", labelKey: "networkWorkspace.exchangeRoom.actions.resources.browseResources", operational: true, applicability: "any", authorization: "open-platform", handler: "resource-browse" }),
+  Object.freeze({ id: "resources.my-requests", lens: "resources", order: 3, canonicalLabel: "My Requests", labelKey: "networkWorkspace.exchangeRoom.actions.resources.myRequests", operational: true, applicability: "any", authorization: "open-platform", handler: "resource-requests" }),
+  Object.freeze({ id: "resources.provider-status", lens: "resources", order: 4, canonicalLabel: "Provider Status", labelKey: "networkWorkspace.exchangeRoom.actions.resources.providerStatus", operational: true, applicability: "viewer-organization", authorization: "open-platform-resource-manage", handler: "provider-status" }),
+  Object.freeze({ id: "intelligence.organizations", lens: "intelligence", order: 1, canonicalLabel: "Organizations", labelKey: "networkWorkspace.exchangeRoom.actions.intelligence.organizations", operational: true, applicability: "any", authorization: "room-participant", handler: "network-organizations" }),
+  Object.freeze({ id: "intelligence.capabilities", lens: "intelligence", order: 2, canonicalLabel: "Capabilities", labelKey: "networkWorkspace.exchangeRoom.actions.intelligence.capabilities", operational: true, applicability: "any", authorization: "room-participant", handler: "network-capabilities" }),
+  Object.freeze({ id: "intelligence.locations", lens: "intelligence", order: 3, canonicalLabel: "Locations", labelKey: "networkWorkspace.exchangeRoom.actions.intelligence.locations", operational: false, applicability: "any", authorization: "room-participant", handler: null }),
+  Object.freeze({ id: "intelligence.layers", lens: "intelligence", order: 4, canonicalLabel: "Intelligence Layers", labelKey: "networkWorkspace.exchangeRoom.actions.intelligence.layers", operational: false, applicability: "any", authorization: "room-participant", handler: null }),
+  Object.freeze({ id: "referrals.new", lens: "referrals", order: 1, canonicalLabel: "New Referral", labelKey: "networkWorkspace.exchangeRoom.actions.referrals.new", operational: true, applicability: "any", authorization: "open-platform-referral-manage", handler: "referral-new" }),
+  Object.freeze({ id: "referrals.sent", lens: "referrals", order: 2, canonicalLabel: "Sent", labelKey: "networkWorkspace.exchangeRoom.actions.referrals.sent", operational: true, applicability: "any", authorization: "open-platform", handler: "referral-sent" }),
+  Object.freeze({ id: "referrals.received", lens: "referrals", order: 3, canonicalLabel: "Received", labelKey: "networkWorkspace.exchangeRoom.actions.referrals.received", operational: true, applicability: "any", authorization: "open-platform", handler: "referral-received" }),
+  Object.freeze({ id: "referrals.starred", lens: "referrals", order: 4, canonicalLabel: "Starred", labelKey: "networkWorkspace.exchangeRoom.actions.referrals.starred", operational: false, applicability: "any", authorization: "open-platform", handler: null }),
 ]);
 
 export const EXCHANGE_ROOM_ACTION_REGISTRY = DEFINITIONS;
 
-function applicable(
-  definition: ExchangeRoomActionDefinition,
-  input: ExchangeRoomActionProjectionInput,
-): boolean {
-  if (definition.applicability === "viewer-organization") {
-    return input.viewerOrganizationId === input.selectedOrganizationId;
-  }
-  if (definition.applicability === "opportunity-context") {
-    return Boolean(input.currentOpportunityReference);
-  }
+function applicable(definition: ExchangeRoomActionDefinition, input: ExchangeRoomActionProjectionInput): boolean {
+  if (definition.applicability === "viewer-organization") return input.viewerOrganizationId === input.selectedOrganizationId;
+  if (definition.applicability === "opportunity-context") return Boolean(input.currentOpportunityReference);
   return true;
 }
 
-function authorized(
-  definition: ExchangeRoomActionDefinition,
-  input: ExchangeRoomActionProjectionInput,
-): boolean {
-  return definition.authorization === "room-participant"
-    ? true
-    : input.openPlatformActionsAuthorized;
+function authorized(definition: ExchangeRoomActionDefinition, input: ExchangeRoomActionProjectionInput): boolean {
+  if (definition.authorization === "room-participant") return true;
+  if (!input.openPlatformActionsAuthorized) return false;
+  if (definition.authorization === "open-platform-rfx-create") return input.actionAuthorization.rfxCreate;
+  if (definition.authorization === "open-platform-referral-manage") return input.actionAuthorization.referralManage;
+  if (definition.authorization === "open-platform-resource-manage") return input.actionAuthorization.resourceManage;
+  return true;
+}
+
+function runtimeOperational(definition: ExchangeRoomActionDefinition, input: ExchangeRoomActionProjectionInput): boolean {
+  if (!definition.operational) return false;
+  if ((definition.handler === "network-organizations" || definition.handler === "network-capabilities") && !input.networkDiscoveryAvailable) return false;
+  return true;
 }
 
 function resourceTarget(input: ExchangeRoomActionProjectionInput): string {
-  if (
-    input.selectedOrganizationId !== input.viewerOrganizationId
-    && input.selectedOrganizationIsOfficialResourceProvider
-  ) {
+  if (input.selectedOrganizationId !== input.viewerOrganizationId && input.selectedOrganizationIsOfficialResourceProvider) {
     const selected = encodeURIComponent(input.selectedOrganizationId);
     return `/resources?organization=${selected}&provider=${selected}`;
   }
   return "/resources";
 }
 
-function resolveHandler(
-  definition: ExchangeRoomActionDefinition,
-  input: ExchangeRoomActionProjectionInput,
-): ExchangeRoomActionHandler | null {
+function resolveHandler(definition: ExchangeRoomActionDefinition, input: ExchangeRoomActionProjectionInput): ExchangeRoomActionHandler | null {
   switch (definition.handler) {
-    case "opportunity-discovery":
-      return Object.freeze({ kind: "href", href: "/opportunities" });
-    case "rfx-issuer":
-      return Object.freeze({ kind: "href", href: "/opportunities/manage" });
-    case "opportunity-detail":
-      return input.currentOpportunityReference
-        ? Object.freeze({
-            kind: "href",
-            href: `/opportunities/${encodeURIComponent(input.currentOpportunityReference)}`,
-          })
-        : null;
+    case "opportunity-discovery": return Object.freeze({ kind: "href", href: "/opportunities" });
+    case "rfx-issuer": return Object.freeze({ kind: "href", href: "/opportunities/manage" });
+    case "opportunity-detail": return input.currentOpportunityReference ? Object.freeze({ kind: "href", href: `/opportunities/${encodeURIComponent(input.currentOpportunityReference)}` }) : null;
     case "resource-discovery":
-    case "resource-browse":
-      return Object.freeze({ kind: "href", href: resourceTarget(input) });
-    case "resource-requests":
-      return Object.freeze({ kind: "href", href: "/resources" });
-    case "provider-status":
-      return Object.freeze({ kind: "href", href: "/provider-application" });
-    case "network-organizations":
-      return Object.freeze({ kind: "network-focus", intent: "organizations" });
-    case "network-capabilities":
-      return Object.freeze({ kind: "network-focus", intent: "capabilities" });
-    case "referral-new":
-      return Object.freeze({
-        kind: "href",
-        href: input.selectedOrganizationId === input.viewerOrganizationId
-          ? "/referrals"
-          : `/referrals?organization=${encodeURIComponent(input.selectedOrganizationId)}`,
-      });
+    case "resource-browse": return Object.freeze({ kind: "href", href: resourceTarget(input) });
+    case "resource-requests": return Object.freeze({ kind: "href", href: "/resources" });
+    case "provider-status": return Object.freeze({ kind: "href", href: "/provider-application" });
+    case "network-organizations": return Object.freeze({ kind: "network-focus", intent: "organizations" });
+    case "network-capabilities": return Object.freeze({ kind: "network-focus", intent: "capabilities" });
+    case "referral-new": return Object.freeze({ kind: "href", href: input.selectedOrganizationId === input.viewerOrganizationId ? "/referrals" : `/referrals?organization=${encodeURIComponent(input.selectedOrganizationId)}` });
     case "referral-sent":
-    case "referral-received":
-      return Object.freeze({ kind: "href", href: "/referrals" });
-    default:
-      return null;
+    case "referral-received": return Object.freeze({ kind: "href", href: "/referrals" });
+    default: return null;
   }
 }
 
-export function exchangeRoomActionDefinitionsForLens(
-  lens: ParticipantLensId,
-): readonly ExchangeRoomActionDefinition[] {
+export function exchangeRoomActionDefinitionsForLens(lens: ParticipantLensId): readonly ExchangeRoomActionDefinition[] {
   return Object.freeze(DEFINITIONS.filter((definition) => definition.lens === lens));
 }
 
-export function projectExchangeRoomActions(
-  input: ExchangeRoomActionProjectionInput,
-): readonly ExchangeRoomActionProjection[] {
+export function projectExchangeRoomActions(input: ExchangeRoomActionProjectionInput): readonly ExchangeRoomActionProjection[] {
   return Object.freeze(exchangeRoomActionDefinitionsForLens(input.activeLens).map((definition) => {
-    const isOperational = definition.operational;
+    const isOperational = runtimeOperational(definition, input);
     const isApplicable = applicable(definition, input);
     const isAuthorized = authorized(definition, input);
-    const resolvedHandler = isOperational && isApplicable && isAuthorized
-      ? resolveHandler(definition, input)
-      : null;
+    const resolvedHandler = isOperational && isApplicable && isAuthorized ? resolveHandler(definition, input) : null;
     const disabledReason: ExchangeRoomActionDisabledReason | null = !isOperational
       ? "not-operational"
       : !isApplicable
