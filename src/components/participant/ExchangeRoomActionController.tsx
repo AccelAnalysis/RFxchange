@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { exchangeRoomLocaleCatalog } from "../../application/participant/exchange-room-locale";
-import { reopenExchangeRoomActionPanel } from "../../application/participant/exchange-room-spatial-controls";
 import type { ExchangeRoomActionProjection } from "../../application/participant/exchange-room-actions";
 import {
   PARTICIPANT_LENS_IDS,
@@ -47,9 +46,10 @@ export function useExchangeRoomLensController(onLensSelect: (lens: ParticipantLe
       if (!link) return;
       const lens = link.dataset.participantLens;
       if (!isParticipantLensId(lens)) return;
+      // Phase 2 keeps ordinary lens selection inside the existing Room. Prevent only the
+      // deep-link navigation; allow the event to continue so the native mobile menu's existing
+      // onNavigate/close handler still runs and keyboard-generated clicks retain normal semantics.
       event.preventDefault();
-      event.stopPropagation();
-      reopenExchangeRoomActionPanel();
       onLensSelect(lens);
     };
     document.addEventListener("click", handleLensActivation, true);
