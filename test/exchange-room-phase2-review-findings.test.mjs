@@ -10,7 +10,7 @@ test("Room authorization endpoint projects only required permission booleans",()
 test("shared controller hydrates authorization fail-closed and requires discovery UI",()=>{
   const source=read("src/components/participant/ExchangeRoomActionController.tsx");
   assert.match(source,/DENIED_ACTION_AUTHORIZATION/); assert.match(source,/action-authorization/);
-  assert.match(source,/form\[action=\\"\/geography\/canvas\\"\]/); assert.match(source,/reopenExchangeRoomActionPanel/);
+  assert.ok(source.includes('form[action="/geography/canvas"]')); assert.match(source,/reopenExchangeRoomActionPanel/);
 });
 test("lens recovery reopens the persisted panel without changing selection or camera",()=>{
   const source=read("src/application/participant/exchange-room-spatial-controls.ts");
