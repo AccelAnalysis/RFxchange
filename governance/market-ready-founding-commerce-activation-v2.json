@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 2,
+  "id": "market-ready-founding-commerce-2026-08-13",
+  "controlPullRequest": 188,
+  "mainBaseSha": "97b93f1d0f3405111b700e4d6ca9d443b9722833",
+  "extendsHistoricalEnvelope": "governance/market-ready-founding-commerce-activation.json",
+  "packet": {
+    "id": "WP-MARKET-READY-FOUNDING-COMMERCE-01",
+    "status": "activation-pending-control-merge",
+    "releaseClass": "Critical",
+    "implementationRole": "Commercial Release Integrator — Founding Membership Baseline",
+    "implementationBranch": "commercial/founding-live-commerce",
+    "fourLensLedgerMembership": false,
+    "parallelWorkstreams": ["WP-EXCHANGE-ROOM-PHASE2-01"],
+    "implementationDependencies": [
+      "PR-188-MERGED",
+      "WAVE_1_SLICE_1_30_COM-038_FOUNDATION",
+      "CURRENT_AUTHENTICATED_ORGANIZATION_AUTHORITY",
+      "CURRENT_FOUNDING_ACQUISITION_AND_OFFER_SURFACES",
+      "MRFC_REQUIREMENTS_V2"
+    ],
+    "preLiveDependencies": [
+      "APPROVED_COMMERCIAL_TERMS_RECONCILED_WITH_PRODUCTION_PROCESSOR_CATALOG",
+      "CRITICAL_RELEASE_EVIDENCE_FOR_EXACT_DEPLOYMENT"
+    ],
+    "notDependencies": [
+      "WP-EXCHANGE-ROOM-PHASE2-01 for commercial implementation",
+      "COM-039/040/041 inferred meanings"
+    ],
+    "requirementsRegistry": "governance/market-ready-founding-commerce-requirements-v2.json",
+    "requirementIds": [
+      "MRFC-OFFER-001",
+      "MRFC-AUTH-001",
+      "MRFC-CHECKOUT-001",
+      "MRFC-RECON-001",
+      "MRFC-CAP-001",
+      "MRFC-STATE-001",
+      "MRFC-SEC-001",
+      "MRFC-LIVE-001",
+      "MRFC-LIFECYCLE-001"
+    ],
+    "ownedPaths": [
+      "src/domain/commercial/**",
+      "src/application/commercial/**",
+      "src/infrastructure/commercial/**",
+      "src/infrastructure/firestore/commercial-*.ts",
+      "app/api/commercial/**",
+      "app/commercial/**",
+      "app/founding/**",
+      "app/acquisition/founding/**",
+      "src/components/commercial/**",
+      "src/i18n/messages/market-ready-founding-commerce/**",
+      "src/i18n/get-dictionary.ts",
+      "src/i18n/messages/marketing-pages/en-US.json",
+      "src/i18n/messages/marketing-pages/es.json",
+      "src/i18n/messages/marketing-pages/fr.json",
+      "src/i18n/messages/marketing-pages/it.json",
+      "src/i18n/messages/marketing-pages/de.json",
+      ".env.example",
+      "package.json",
+      "package-lock.json",
+      "test/market-ready-founding-commerce-*.test.mjs",
+      "scripts/validate-market-ready-founding-commerce-*.mjs",
+      "docs/program/evidence/market-ready-founding-commerce/**"
+    ],
+    "nonOwnedPaths": [
+      "src/application/participant/**",
+      "src/components/participant/**",
+      "app/geography/canvas/**",
+      "src/i18n/messages/network/**",
+      "opportunities/rfx domain runtime paths",
+      "resources domain runtime paths",
+      "intelligence analytical runtime paths",
+      "referrals domain runtime paths",
+      "governance/four-lens-requirements.json",
+      "governance/four-lens-workstreams.json",
+      "independent acceptance evidence/dispositions"
+    ],
+    "criticalReviewerCapacityException": {
+      "mayDeferCertificationOnly": true,
+      "requiresNoKnownMaterialCriticalDefect": true,
+      "requiresAllCriticalSafetyEvidence": true,
+      "requiresExplicitControlRoomAuthorization": true,
+      "requiresExactReleaseBoundProductOwnerRiskAcceptance": true,
+      "evidenceAuthority": "docs/program/MARKET_READY_FOUNDING_COMMERCE_CRITICAL_RISK_EVIDENCE.md"
+    },
+    "maximumBuilderDisposition": "Implemented — Not Verified"
+  }
+}
