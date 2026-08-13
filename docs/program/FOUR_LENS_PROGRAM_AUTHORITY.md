@@ -6,6 +6,8 @@ This authority changes delivery and acceptance governance only. It does not comp
 
 The adoption snapshot is historical: merged `main` was `21c4fc080a823ae03f33ae1e58dd2752f317dc67`, the tracker was **438 total · 170 Done · 268 Not Started**, RFx Core was **18/41**, and Slice 4.6 runtime PR #171 was open and unmerged. Current program state belongs in the current program artifacts, not in remembered chat state.
 
+The governing delivery amendment is [`BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`](BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md). Where earlier text in this authority treated independent exact-head review as a universal merge prerequisite, the amendment supersedes that merge interpretation while preserving all independent-certification requirements for `Verified`.
+
 ## 1. Governing principle
 
 The permanent authenticated participant lenses remain, in exact order:
@@ -23,6 +25,14 @@ They operate over one organization-centered Exchange and share substantial platf
 
 Build may proceed in parallel. Merge order remains dependency-aware. Completion remains independently certified.
 
+The operational sequence is:
+
+```text
+Build → Release → Verify
+```
+
+Merge, production release and independent certification are separate facts. A merged or live implementation may truthfully remain `Implemented — Not Verified`.
+
 ## 2. Supersession and scope
 
 For work packets governed by this authority, the former default single-active-slice or single-active-gate rule is superseded. Multiple lanes may execute concurrently only when immutable requirements, ownership, exact activation bases, dependencies, shared paths, acceptance obligations, and stop boundaries are explicit.
@@ -33,8 +43,10 @@ This supersession does not permit:
 - work against an assumed unmerged dependency;
 - a lane to redefine another lane's domain;
 - a builder to promote its own production work to `Verified`;
-- a feature or experience to be marked complete without the required independent disposition; or
-- documentation-only authority to be treated as runtime authority.
+- a feature or experience to be marked complete without the required independent disposition;
+- documentation-only authority to be treated as runtime authority;
+- merge or release over a known material security/privacy/integrity/authority finding; or
+- deployment to be reported as independent certification.
 
 Work outside this program retains the repository's ordinary sequencing rules unless separately authorized.
 
@@ -42,7 +54,7 @@ Work outside this program retains the repository's ordinary sequencing rules unl
 
 | Lane | Name | Owns | Must not do |
 | --- | --- | --- | --- |
-| 00 | Control Room | current-`main` coordination, dependency assignment, packets, activation epochs, branch ownership, merge order, shared-contract routing, status and reconciliation | normally implement domain runtime or certify production completion |
+| 00 | Control Room | current-`main` coordination, dependency assignment, packets, activation epochs, branch ownership, merge/release order, shared-contract routing, status and reconciliation | normally implement domain runtime or certify production completion |
 | 01 | Shared Exchange Platform | participant shell, spatial/selected-object contracts, map/list/detail primitives, marker grammar, search/filter grammar, cross-lens context, Account utility, loading, accessibility and participant truthfulness | privately redefine a lens domain |
 | 02 | Opportunities/RFx | Wave 4 and later authorized RFx transaction runtime | redefine Shared Exchange behavior or begin an ineligible slice |
 | 03 | Intelligence | organization, capability, market, location, site, RFx/demand, resource, referral and later outcome intelligence under real-data authority | fabricate market activity or consume unaccepted private projections |
@@ -60,6 +72,7 @@ Program state must not depend on one conversation remembering another. GitHub an
 The durable program artifacts are:
 
 - this authority;
+- [`BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`](BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md);
 - [`FOUR_LENS_EXPERIENCE_LEDGER.md`](FOUR_LENS_EXPERIENCE_LEDGER.md);
 - [`PARALLEL_DELIVERY_MATRIX.md`](PARALLEL_DELIVERY_MATRIX.md);
 - [`SHARED_EXCHANGE_CONTRACTS.md`](SHARED_EXCHANGE_CONTRACTS.md);
@@ -73,7 +86,7 @@ The Master Build Tracker remains the Feature-ID completion authority. The canoni
 
 ## 5. Layer 1 — Bootstrap Governance
 
-Layer 1 is the governance required to install and operate the Four-Lens model safely. It is required for PR #172.
+Layer 1 is the governance required to install and operate the Four-Lens model safely. It was required for PR #172 and remains the structural baseline.
 
 Layer 1 includes:
 
@@ -91,7 +104,7 @@ Layer 1 includes:
 - truthful matrix and tracker arithmetic; and
 - deterministic structural repository validation.
 
-Layer 1 validation must not require live GitHub API calls, retained Actions downloads, future acceptance workflows, or a certification system that does not yet exist merely to install the lanes.
+Layer 1 validation must not require live GitHub API calls, retained Actions downloads, future acceptance workflows, or a certification system that does not yet exist merely to permit normal development/merge activity.
 
 ### Immutable requirements
 
@@ -124,6 +137,8 @@ Allowed statuses are exactly:
 
 Only `Verified` satisfies experience completion.
 
+`Implemented — Not Verified` may represent an open candidate, a merged implementation, or a live production implementation whose independent certification is still pending.
+
 ## 6. Builder and acceptance separation
 
 Implementation and acceptance are separate stages:
@@ -139,7 +154,7 @@ Independent Acceptance evaluates in this order:
 original requirement
 → governing authority
 → expected participant/domain behavior
-→ exact candidate runtime
+→ exact implementation runtime
 → evidence appropriate to the requirement type
 → disposition
 ```
@@ -174,7 +189,9 @@ Control Room may also explicitly assign another exact GitHub human or App identi
 
 The implementation actor is always excluded from certifying its own production requirement, regardless of whether the independent reviewer is a human, Codex GitHub App, or another authorized App.
 
-Layer 1 structurally validates identity, authorization, SHA binding and separation. Live GitHub API reauthentication of review actors and historical provenance is Layer 2 hardening, not a bootstrap prerequisite.
+Reviewer unavailability blocks `Verified` certification. It does not, by itself, block ordinary bounded development/merge/release under the Build → Release → Verify amendment.
+
+Layer 1 structurally validates identity, authorization, SHA binding and separation. Live GitHub API reauthentication of review actors and historical provenance is Layer 2 hardening, not a prerequisite for normal integration.
 
 ## 8. Evidence and deferral discipline
 
@@ -182,7 +199,7 @@ Minimum evidence follows the declared requirement type:
 
 | Requirement type | Minimum evidence |
 | --- | --- |
-| Functional | candidate runtime behavior |
+| Functional | candidate/runtime behavior |
 | Domain/security | positive and negative runtime or emulator evidence |
 | Visual | browser-rendered evidence |
 | Responsive | applicable viewport evidence |
@@ -194,7 +211,7 @@ Minimum evidence follows the declared requirement type:
 
 Static/source evidence may supplement but not replace the required acceptance type.
 
-For `Verified`, each ledger evidence entry points to the exact candidate's tracked Lane 06 manifest under `docs/program/evidence/`. The manifest records the exact candidate/base SHAs, independent reviewer, GitHub Actions run reference, configured environment, checks and durable artifact references. Layer 1 validates structure, exact-SHA binding, reviewer separation and declared-type coverage.
+For `Verified`, each ledger evidence entry points to the exact implementation's tracked Lane 06 manifest under `docs/program/evidence/`. The manifest records the exact implementation/base SHAs, independent reviewer, GitHub Actions run reference, configured environment, checks and durable artifact references. Layer 1 validates structure, exact-SHA binding, reviewer separation and declared-type coverage.
 
 A new defer or N/A requires the exact requirement, reason, impact, future owner, independent authorized approver and exact GitHub approval signal. Builder-authored prose alone is not approval. The one adoption-time cursor deferral remains a frozen historical exception and may not be silently broadened.
 
@@ -212,21 +229,33 @@ Every packet dependency must name another declared packet and explicit admissibl
 
 Shared paths are controlled by Lane 01. A domain lane needing a new shared capability routes it through [`SHARED_EXCHANGE_CONTRACTS.md`](SHARED_EXCHANGE_CONTRACTS.md).
 
-## 10. Exact-head review rule without bootstrap self-invalidation
+For packets created after the Build → Release → Verify amendment, `acceptanceRequired` describes certification obligations unless an item is explicitly designated as a merge/release gate. Pre-amendment immutable packet stop boundaries remain binding until Control Room records a successor/reconciliation/reclassification; the amendment does not silently edit them away.
 
-Exact-head review remains a real merge gate: a substantive finding on candidate `X` fails `X`; a correction creates `Y`; `Y` requires full applicable CI and a fresh independent review before merge.
+## 10. Merge, release and exact-head change control
 
-The final review is external GitHub state. PR #172 does **not** commit the final review ID into the same candidate it is reviewing. Therefore the review does not invalidate itself merely because recording review provenance would otherwise require a new commit.
+Independent exact-head review is no longer a universal default merge gate.
 
-No material product, security, integrity, accessibility, privacy, authority, or P1/P2-equivalent finding may remain at merge. Green CI never overrides such a finding.
+A bounded candidate may merge as `Implemented — Not Verified` when the governing amendment's default merge rule is satisfied: authorized scope, dependency/ownership integrity, reconciliation with current `main`, applicable exact-head CI/evidence, no known unresolved material finding, and a durable Control Room merge disposition.
+
+If independent review is available before merge, use it. A substantive finding on candidate `X` fails `X`; a correction creates `Y`, and applicable evidence must be regenerated for `Y`. Green CI never overrides a known material product, security, privacy, integrity, accessibility, tenancy or authority finding.
+
+Production release is a separate risk-based decision under [`BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`](BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md):
+
+- Standard releases use ordinary post-merge/evidence controls;
+- Elevated releases add focused negative authority/security evidence, explicit Control Room release authorization and rollback/containment planning;
+- Critical releases add direct critical-boundary negative evidence and explicit participant/product-owner risk acceptance if independent reviewer capacity is unavailable.
+
+A review-capacity exception may waive only missing reviewer availability for release. It never waives required safety evidence or a known material security/privacy/integrity finding.
+
+Independent exact-head GitHub review remains mandatory where required to record `Verified`. The review signal is external GitHub state and is not committed back into the same implementation merely to prove that review occurred.
 
 ## 11. Bootstrap lifecycle and post-merge transition
 
 The setup lifecycle deliberately separates values knowable before merge from values knowable only afterward.
 
-### Before PR #172 merges
+### Before PR #172 merged
 
-`governance/four-lens-workstreams.json` records:
+`governance/four-lens-workstreams.json` recorded:
 
 - `programPhase = authority-setup`;
 - `WP-CONTROL-AUTHORITY-SETUP.status = in-progress`;
@@ -237,41 +266,29 @@ The setup lifecycle deliberately separates values knowable before merge from val
 - setup exact base `21c4fc080a823ae03f33ae1e58dd2752f317dc67` through the authority-setup activation epoch; and
 - every downstream packet pre-activation with null exact base and null activation epoch.
 
-`SELF` is not evidence of a production implementation and is valid only for the open authority-setup candidate. It prevents the program from pretending to know its final head or merge SHA before those facts exist.
+`SELF` was not evidence of a production implementation and was valid only while PR #172 was open and the setup packet was in-progress.
 
-### After PR #172 merges
+### After PR #172 merged
 
-Control Room must first wait for the `production-ci` push run on the authority merge in `main` to succeed. It then fetches current `main` and creates the post-merge Control Room transition based on that exact SHA.
+Control Room waited for the `production-ci` push run on the authority merge in `main` to succeed, fetched current `main`, and created the post-merge Control Room transition.
 
-That one transition:
+That transition:
 
-1. replaces setup `candidate.sha = SELF` with the exact final #172 head;
-2. records the exact authority `mergeSha`;
-3. records `postMergeMainSha` and the successful `production-ci` Actions URL for that merge;
-4. changes the setup packet to `completed` or `closed`;
-5. changes `programPhase` to `operational`;
-6. creates the initial operational activation epoch(s) using the exact current-main SHA observed for activation; and
-7. assigns that epoch/base to Shared Experience, Wave 4 Assurance, Intelligence, Resources and Referrals.
+1. replaced setup `candidate.sha = SELF` with the exact final #172 head;
+2. recorded the exact authority `mergeSha`;
+3. recorded `postMergeMainSha` and the successful `production-ci` Actions URL for that merge;
+4. closed setup;
+5. changed `programPhase` to operational;
+6. created the initial operational activation epoch(s); and
+7. assigned that epoch/base to Shared Experience, Wave 4 Assurance, Intelligence, Resources and Referrals.
 
-Slice 4.6 reconciliation and its Lane 06 acceptance packet remain dependency-aware and are not activated by that initial transition. PR #171 stays preserved until Control Room separately authorizes reconciliation against then-current `main`.
-
-This sequence is intentionally:
-
-```text
-merge governance authority
-→ successful main production-ci
-→ close authority setup
-→ switch operational
-→ activate independent packets from exact current-main
-```
-
-not a circular requirement that demands post-merge facts before merge.
+This historical bootstrap lifecycle remains preserved. It is not the normal merge/release process for later production candidates.
 
 ## 12. Layer 2 — Acceptance Integrity Hardening
 
 Planned packet: `WP-ACCEPTANCE-INTEGRITY-HARDENING-01`.
 
-It is non-blocking for governance bootstrap and is not activated by PR #172. Its intended scope includes:
+It is non-blocking for governance bootstrap, normal integration and normal release. Its intended scope includes:
 
 - long-term Actions artifact retention;
 - cryptographic/digest retention of acceptance artifacts and history;
@@ -290,9 +307,9 @@ The detailed bootstrap audit and historical P1/P2 disposition are recorded in [`
 
 Only `Verified` satisfies Four-Lens requirement completion.
 
-A canonical Feature ID may be promoted only through the canonical tracker protocol after its governing requirement has the required independent acceptance. Previously completed Wave 4 tracker records are not silently revoked by assurance work, and this governance-bootstrap PR does not add any tracker completion.
+A canonical Feature ID may be promoted only through the canonical tracker protocol after its governing requirement has the required independent acceptance. Previously completed Wave 4 tracker records are not silently revoked by assurance work.
 
-While `programPhase = authority-setup`, deterministic validation requires the canonical tracker to remain at the adoption completion counts: **438 total · 170 Done · 268 Not Started** and RFx Core **18/41**.
+Merge and production deployment do not change the Verified numerator or tracker completion by themselves.
 
 ## 14. Program-specific sequencing
 
@@ -306,18 +323,22 @@ Slices 4.1–4.5 remain `Previously accepted — independent assurance pending`.
 
 ### Slice 4.6
 
-PR #171 remains preserved and unmerged during authority setup. Its reconciliation and acceptance remain separate packets with explicit dependency ordering. This bootstrap does not merge PR #171, change its five Feature IDs, or begin Slice 4.7.
+PR #171 remains governed by its preserved pre-amendment packet and explicit stop boundary until Control Room creates a successor/reconciliation/reclassification under the current authority. The amendment does not silently erase that history or begin Slice 4.7.
 
 ### Intelligence, Resources and Referrals
 
-These permanent lenses receive their approved inventory/roadmap packets only after the post-merge Control Room transition supplies exact activation bases. Prior Feature-ID completion does not automatically prove a complete lens experience.
+These permanent lenses continue under their declared packet ownership and dependency boundaries. Prior Feature-ID completion does not automatically prove a complete lens experience.
 
 ## 15. Integration acceptance
 
-Lane 07 tests the combined Exchange only after applicable lane work is accepted and merged. Integration acceptance supplements rather than replaces Lane 06 requirement acceptance.
+Lane 07 tests the combined Exchange after relevant implementations merge or when Control Room activates an integration packet. Integration acceptance supplements rather than replaces Lane 06 requirement acceptance.
+
+Lane 07 may test merged `Implemented — Not Verified` work to identify integration defects; it must not convert integration evidence into `Verified`.
 
 ## 16. Stop boundary and truthfulness
 
-PR #172 must not implement missing Shared Exchange UX, modify RFx runtime, complete Slice 4.6, begin Slice 4.7, implement Intelligence layers, change Resources/Referrals domain behavior, or change Feature-ID completion.
+This program governance must not be used to implement missing domain runtime, fabricate data, broaden authorization, or silently mark Feature IDs complete.
 
-> **The interface and the development process must accurately communicate what exists, what is available, what is implemented, what is selected, what is verified, and what remains unavailable or incomplete—without implying capabilities, authority, data, outcomes, workflow states, or completion evidence that do not actually exist.**
+> **The interface and the development process must accurately communicate what exists, what is available, what is implemented, what is merged, what is live, what is selected, what is verified, and what remains unavailable or incomplete—without implying capabilities, authority, data, outcomes, workflow states, deployment provenance, or completion evidence that do not actually exist.**
+
+Governance is a control system for shipping the Exchange safely. It is not a substitute for shipping it.
