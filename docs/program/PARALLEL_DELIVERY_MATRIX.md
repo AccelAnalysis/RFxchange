@@ -2,7 +2,7 @@
 
 **Canonical volatile program-status source**
 
-**Snapshot basis:** operational Control Room transition `7d4deb37377c0ad7bd027dab64acd44a4d1d2e66`; initial operational activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`; Slice 4.6 reconciliation activation base `347015829d64cfc596cdef1010601d8bda447818`; ISS-006 correction activation base `69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068` through Control Room PR #182; Build → Release → Verify governance amendment pending on its current Control Room branch
+**Snapshot basis:** operational Control Room transition `7d4deb37377c0ad7bd027dab64acd44a4d1d2e66`; initial operational activation base `e2e2db0d199f1d10e54c597c581dcf9d8a36dbed`; Slice 4.6 reconciliation activation base `347015829d64cfc596cdef1010601d8bda447818`; ISS-006 correction activation base `69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068`; Build → Release → Verify delivery authority defined in `BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`
 **Update rule:** Control Room recalculates this document from merged `main` after every program merge.
 
 The Master Build Tracker remains the Feature-ID authority. This matrix reports independent experience verification and must not be used to rewrite tracker arithmetic.
