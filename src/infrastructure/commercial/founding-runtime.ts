@@ -1,15 +1,15 @@
 import { randomUUID } from "node:crypto";
 import { FieldValue, Timestamp, type DocumentData, type DocumentSnapshot, type Firestore, type Transaction } from "firebase-admin/firestore";
-import { OrganizationCommercialAccountService } from "../../application/commercial/organization-commercial-account";
-import { createOrganizationCommercialAccount, evolveOrganizationCommercialAccount, type OrganizationCommercialAccount, type PaymentProviderReference } from "../../domain/commercial/model";
-import { assertOrganizationPermission, organizationPermission, type OrganizationUserAuthorization } from "../../domain/authorization/model";
-import type { OrganizationAccount } from "../../domain/organizations/model";
-import type { OrganizationMembership } from "../../domain/users/model";
-import { resolveParticipantRoute } from "../auth/participant-route-runtime";
-import { getServerFirestore } from "../firestore/runtime";
-import { FIRESTORE_SCHEMA_VERSION, firestoreCollectionName } from "../firestore/schema";
-import { FirestoreOrganizationCommercialAccountRepository } from "../firestore/commercial-account-repository";
-import { assertFoundingStripeConfiguration, RFXCHANGE_FOUNDING_CAP, RFXCHANGE_FOUNDING_CURRENCY, RFXCHANGE_FOUNDING_INTERVAL, RFXCHANGE_FOUNDING_PRICE_CENTS, StripePaymentProvider } from "./stripe-payment-provider";
+import { OrganizationCommercialAccountService } from "../../application/commercial/organization-commercial-account.ts";
+import { createOrganizationCommercialAccount, evolveOrganizationCommercialAccount, type OrganizationCommercialAccount, type PaymentProviderReference } from "../../domain/commercial/model.ts";
+import { assertOrganizationPermission, organizationPermission, type OrganizationUserAuthorization } from "../../domain/authorization/model.ts";
+import type { OrganizationAccount } from "../../domain/organizations/model.ts";
+import type { OrganizationMembership } from "../../domain/users/model.ts";
+import { resolveParticipantRoute } from "../auth/participant-route-runtime.ts";
+import { getServerFirestore } from "../firestore/runtime.ts";
+import { FIRESTORE_SCHEMA_VERSION, firestoreCollectionName } from "../firestore/schema.ts";
+import { FirestoreOrganizationCommercialAccountRepository } from "../firestore/commercial-account-repository.ts";
+import { assertFoundingStripeConfiguration, RFXCHANGE_FOUNDING_CAP, RFXCHANGE_FOUNDING_CURRENCY, RFXCHANGE_FOUNDING_INTERVAL, RFXCHANGE_FOUNDING_PRICE_CENTS, StripePaymentProvider } from "./stripe-payment-provider.ts";
 
 const CAPACITY_COLLECTION = firestoreCollectionName("commercialFoundingCapacity");
 const CAPACITY_DOCUMENT = "current";
