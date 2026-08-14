@@ -1,5 +1,6 @@
 import { FieldValue, type Firestore } from "firebase-admin/firestore";
 
+import type { GeographyDefinition } from "../../domain/geography/model.ts";
 import type { ConfirmedOrganizationLocation } from "../../domain/organization-location/model.ts";
 import type { OrganizationId } from "../../domain/organizations/model.ts";
 import {
@@ -25,6 +26,10 @@ const AUDITS = "organizationAuditEvents";
 const GEOGRAPHIES = "geographies";
 const ORGANIZATION_LOCATIONS = "organizationLocations";
 
+type LocalityBoundItem = Extract<
+  PerformanceLocationItem,
+  Readonly<{ mode: "locality" }>
+>;
 type OrganizationLocationBoundItem = Exclude<
   PerformanceLocationItem,
   Readonly<{ mode: "locality" }>
@@ -73,6 +78,16 @@ function localityIds(location: PerformanceLocation | null): readonly string[] {
   ]);
 }
 
+function localitySnapshotItems(
+  location: PerformanceLocation | null,
+): readonly LocalityBoundItem[] {
+  return Object.freeze(
+    locationItems(location).filter(
+      (item): item is LocalityBoundItem => item.mode === "locality",
+    ),
+  );
+}
+
 function organizationLocationItems(
   location: PerformanceLocation | null,
 ): readonly OrganizationLocationBoundItem[] {
@@ -80,6 +95,30 @@ function organizationLocationItems(
     locationItems(location).filter(
       (item): item is OrganizationLocationBoundItem => item.mode !== "locality",
     ),
+  );
+}
+
+function sameBounds(
+  left: LocalityBoundItem["localityBounds"],
+  right: GeographyDefinition["bounds"],
+): boolean {
+  return (
+    left.west === right.west &&
+    left.south === right.south &&
+    left.east === right.east &&
+    left.north === right.north
+  );
+}
+
+function sameLocalityProjection(
+  item: LocalityBoundItem,
+  current: GeographyDefinition,
+): boolean {
+  return (
+    String(current.id) === item.localityId &&
+    current.releaseState === "released" &&
+    current.name === item.localityLabel &&
+    sameBounds(item.localityBounds, current.bounds)
   );
 }
 
@@ -119,11 +158,12 @@ function sameOrganizationLocationProjection(
  *
  * All non-package operations delegate unchanged to the canonical Firestore RFx
  * repository. Package persistence mirrors its existing atomic save semantics,
- * adding only current `released` geography reads and, when the package uses an
- * organization-derived performance location, a current organization-location
- * snapshot read in the same transaction. The command receipt is read first so
- * exact replay can return without consulting authority that may legitimately
- * have changed after the original commit.
+ * adding current `released` geography reads plus exact locality label/bounds
+ * binding and, when the package uses an organization-derived performance
+ * location, a current organization-location snapshot read in the same
+ * transaction. The command receipt is read first so exact replay can return
+ * without consulting authority that may legitimately have changed after the
+ * original commit.
  */
 export class Iss006GovernedRfxRepository implements RfxRepository {
   constructor(
@@ -172,6 +212,7 @@ export class Iss006GovernedRfxRepository implements RfxRepository {
     const geographyRefs = localityIds(performanceLocation).map((id) =>
       this.db.collection(GEOGRAPHIES).doc(id),
     );
+    const localityItems = localitySnapshotItems(performanceLocation);
     const boundLocationItems = organizationLocationItems(performanceLocation);
     const organizationLocationRef = boundLocationItems.length > 0
       ? this.db.collection(ORGANIZATION_LOCATIONS).doc(String(bundle.aggregate.issuerOrganizationId))
@@ -218,9 +259,7 @@ export class Iss006GovernedRfxRepository implements RfxRepository {
       }
 
       for (const geographySnapshot of geographySnapshots) {
-        const geography = geographySnapshot.data() as
-          | { releaseState?: string }
-          | undefined;
+        const geography = geographySnapshot.data() as GeographyDefinition | undefined;
         if (
           !geographySnapshot.exists ||
           !geography ||
@@ -228,6 +267,17 @@ export class Iss006GovernedRfxRepository implements RfxRepository {
         ) {
           throw new RfxPersistenceConflictError(
             "RFx package performance locality authority changed.",
+          );
+        }
+        const packageLocalities = localityItems.filter(
+          (item) => item.localityId === String(geography.id),
+        );
+        if (
+          packageLocalities.length > 0 &&
+          !packageLocalities.every((item) => sameLocalityProjection(item, geography))
+        ) {
+          throw new RfxPersistenceConflictError(
+            "RFx package performance locality snapshot changed.",
           );
         }
       }
