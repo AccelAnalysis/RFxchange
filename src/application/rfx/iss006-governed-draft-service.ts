@@ -109,6 +109,20 @@ export class RfxIss006GovernedDraftService extends RfxDraftService {
         throw new RfxDraftError("invalid", "Multiple performance locations are invalid.");
       }
       for (const item of selection.locations) {
+        if (
+          !item ||
+          typeof item !== "object" ||
+          Array.isArray(item) ||
+          typeof item.mode !== "string" ||
+          ![
+            "issuer-primary-location",
+            "organization-location",
+            "exact-address",
+            "locality",
+          ].includes(item.mode)
+        ) {
+          throw new RfxDraftError("invalid", "Multiple performance locations are invalid.");
+        }
         await this.validateSingleLocation(item, issuerOrganizationId);
       }
       return;
