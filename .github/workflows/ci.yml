@@ -98,7 +98,7 @@ jobs:
           RFXCHANGE_CONFIGURED_MAP_ACCEPTANCE: ${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN != '' && '1' || '0' }}
         run: |
           ./node_modules/.bin/firebase emulators:exec --only auth,firestore --project demo-rfxchange \
-            "node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/acceptance-exchange-shell-emulator.mjs"
+            "node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/run-configured-exchange-shell-acceptance.mjs"
           cat artifacts/exchange-shell-transition-evidence.json
       - name: Upload participant shell transition evidence
         if: always()
