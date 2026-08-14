@@ -974,6 +974,7 @@ const EXCHANGE_ROOM_ACTION_IDS_BY_LENS = Object.freeze({
   ]),
 });
 
+let exchangeRoomPhase2RuntimeDetected = false;
 let exchangeRoomReopenEvidenceCaptured = false;
 
 async function exchangeRoomLensSnapshot(cdp) {
@@ -1061,6 +1062,7 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
     if (!link) return { found: false };
     const shell = document.querySelector('[data-participant-shell="persistent"]');
     const shellInstance = shell?.dataset.participantShellInstance || null;
+    const contentBefore = window.__rfxAcceptance.contentBefore;
     link.click();
     await new Promise((resolve) => requestAnimationFrame(resolve));
     return {
@@ -1069,11 +1071,13 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
       search: location.search,
       shellInstance,
       navigationEntries: performance.getEntriesByType("navigation").length,
+      contentPreserved: Boolean(contentBefore && contentBefore.isConnected),
     };
   })()`);
   assert.equal(immediate.found, true, `Missing enabled ${id} lens.`);
   assert.equal(immediate.pathname, "/geography/canvas", `${id} abandoned the Exchange Room on primary activation.`);
   assert.equal(immediate.search, continuityBefore.search, `${id} changed shared Room query context during primary activation.`);
+  assert.equal(immediate.contentPreserved, true, `${id} replaced the current Exchange Room content during primary activation.`);
 
   await waitForExpression(
     cdp,
@@ -1129,6 +1133,7 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
   assert.equal(after.shellInstance, continuityBefore.shellInstance, `${id} remounted the persistent Exchange shell.`);
   assert.equal(after.navigationEntries, continuityBefore.navigationEntries, `${id} caused a document navigation.`);
   assert.equal(observation.takeover, false, `${id} triggered a root takeover.`);
+  assert.equal(observation.contentReplaced, false, `${id} replaced the Exchange Room workspace during lens activation.`);
 
   return {
     ...observation,
@@ -1136,7 +1141,7 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
     contentSettlementMs: durationMs,
     immediatePendingFeedback: false,
     immediateRouteCommitted: false,
-    immediateContentPreserved: true,
+    immediateContentPreserved: immediate.contentPreserved,
     phase2InRoom: true,
     lens: id,
     actionIds: after.actions.map((action) => action.id),
@@ -1149,8 +1154,10 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
 async function clickLens(cdp, id, expectedPath, options = {}) {
   const href = await evaluate(cdp, `document.querySelector('[data-participant-navigation] a[data-participant-lens="${id}"]')?.getAttribute("href") || null`);
   assert.ok(href, `Missing enabled ${id} lens.`);
-  const phase2 = options.candidate === true
-    && await evaluate(cdp, `Boolean(document.querySelector('[data-exchange-room-action-grid]'))`);
+  const phase2SurfacePresent = await evaluate(cdp, `Boolean(document.querySelector('[data-exchange-room-action-grid]'))`);
+  if (phase2SurfacePresent) exchangeRoomPhase2RuntimeDetected = true;
+  const phase2 = exchangeRoomPhase2RuntimeDetected
+    && await evaluate(cdp, `location.pathname === "/geography/canvas"`);
   return phase2
     ? clickExchangeRoomLens(cdp, id, href, expectedPath, options)
     : clickHref(cdp, href, expectedPath, options);
