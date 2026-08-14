@@ -1,6 +1,6 @@
 import type { Firestore } from "firebase-admin/firestore";
 
-import { RfxDraftService } from "../../application/rfx/rfx-draft-service.ts";
+import { RfxIss006GovernedDraftService } from "../../application/rfx/iss006-governed-draft-service.ts";
 import { RfxPublicationService } from "../../application/rfx/rfx-publication-service.ts";
 import { loadImmutableAmacsCatalog } from "../amacs/runtime.ts";
 import { createServerFirebaseAccountSecurityService } from "../auth/firebase-account-security-runtime.ts";
@@ -10,6 +10,7 @@ import { createFirestoreOrganizationLocationRepositories } from "../firestore/or
 import { FirestoreRfxRepository } from "../firestore/rfx.ts";
 import { FirestoreAiInterpretationRepository } from "../firestore/ai-interpretation-repository.ts";
 import { getServerFirestore } from "../firestore/runtime.ts";
+import { Iss006GovernedRfxRepository } from "./iss006-governed-rfx-repository.ts";
 
 export async function createServerRfxDraftService(
   db: Firestore = getServerFirestore(),
@@ -18,7 +19,8 @@ export async function createServerRfxDraftService(
   const geography = createFirestoreGeographyRepositories(db);
   const organizationLocation =
     createFirestoreOrganizationLocationRepositories(db);
-  return new RfxDraftService({
+  const baseRepository = new FirestoreRfxRepository(db);
+  return new RfxIss006GovernedDraftService({
     authorization: {
       accountSecurity: createServerFirebaseAccountSecurityService(),
       organizations: foundation.organizations.accounts,
@@ -27,7 +29,7 @@ export async function createServerRfxDraftService(
       restrictions: foundation.lifecycle.restrictions,
     },
     catalog: await loadImmutableAmacsCatalog(),
-    repository: new FirestoreRfxRepository(db),
+    repository: new Iss006GovernedRfxRepository(db, baseRepository),
     locations: organizationLocation.locations,
     geographies: geography.definitions,
     interpretations: new FirestoreAiInterpretationRepository(db),
