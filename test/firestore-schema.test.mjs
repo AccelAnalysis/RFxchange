@@ -101,9 +101,9 @@ test("append-only domain and operational history remains non-mutable", () => {
     "rfxPublicationSnapshots", "rfxOpportunityProjections", "opportunitySavedSearchMatches",
     "opportunityRelationCommands", "opportunityRelationEvents", "referralEducationAcknowledgements",
     "providerApplicationVersions", "providerApplicationEvents", "providerApplicationCommands",
-    "providerNetworkEvents", "providerNetworkCommands", "providerRequestMessages", "orientationJourneyEvents",
-    "activationReleaseEvents", "aiInterpretationProvenance", "aiInterpretationUsageEvents",
-    "aiInterpretationEvents", "commercialProviderEvents",
+    "providerNetworkEvents", "providerNetworkCommands", "providerRequestMessages", "networkEducationEvents",
+    "networkEducationCommands", "orientationJourneyEvents", "activationReleaseEvents", "aiInterpretationProvenance",
+    "aiInterpretationUsageEvents", "aiInterpretationEvents", "commercialProviderEvents",
   ]);
   for (const key of EXPECTED_COLLECTION_KEYS) {
     const convention = FIRESTORE_COLLECTION_CONVENTIONS[key];
