@@ -68,8 +68,8 @@ async function revalidateBoundActivationRestriction(
 ): Promise<ParticipantRouteResolution> {
   if (resolution.kind !== "activation-required") return resolution;
   const activationState = resolution.state;
-  const membershipId = activationState?.membershipId;
-  if (!membershipId) return resolution;
+  if (!activationState || !activationState.membershipId) return resolution;
+  const membershipId = activationState.membershipId;
 
   const foundation = createServerFirestoreFoundationRepositories(getServerFirestore());
   let membership;
