@@ -13,55 +13,24 @@ jobs:
         with:
           ref: lane01/exchange-room-phase2
           fetch-depth: 0
-      - name: Patch navigation projection and focused test
+      - name: Normalize atomic href block formatting
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-
-          nav = Path('src/components/participant/ParticipantTopNavigation.tsx')
-          source = nav.read_text()
-          marker = '''function storedOpportunityHref(): string {
-            return participantSpatialLensHref("opportunities-rfx");
-          }
-          '''
-          insert = '''function storedOpportunityHref(): string {
-            return participantSpatialLensHref("opportunities-rfx");
-          }
-
-          interface ParticipantLensHrefSnapshot {
-            readonly intelligenceHref: string;
-            readonly opportunityHref: string;
-            readonly resourceHref: string;
-            readonly referralHref: string;
-          }
-
-          const DEFAULT_LENS_HREF_SNAPSHOT = JSON.stringify({
-            intelligenceHref: CANONICAL_INTELLIGENCE_HREF,
-            opportunityHref: "/opportunities",
-            resourceHref: "/resources",
-            referralHref: "/referrals",
-          } satisfies ParticipantLensHrefSnapshot);
-
-          function storedLensHrefSnapshot(): string {
-            return JSON.stringify({
-              intelligenceHref: storedIntelligenceHref(),
-              opportunityHref: storedOpportunityHref(),
-              resourceHref: storedResourceHref(),
-              referralHref: storedReferralHref(),
-            } satisfies ParticipantLensHrefSnapshot);
-          }
-          '''
-          if source.count(marker) != 1:
-              raise SystemExit(f'expected one storedOpportunityHref block, found {source.count(marker)}')
-          source = source.replace(marker, insert, 1)
-
-          start_marker = '  const intelligenceHref = useSyncExternalStore('
-          end_marker = '\n\n  useEffect(() => {'
-          if source.count(start_marker) != 1:
-              raise SystemExit(f'expected one href snapshot start marker, found {source.count(start_marker)}')
-          start = source.index(start_marker)
-          end = source.index(end_marker, start)
+          p = Path('src/components/participant/ParticipantTopNavigation.tsx')
+          s = p.read_text()
+          old = '''  const serializedLensHrefs = useSyncExternalStore(
+          subscribeIntelligenceHref,
+          storedLensHrefSnapshot,
+          () => DEFAULT_LENS_HREF_SNAPSHOT,
+        );
+        const {
+          intelligenceHref,
+          opportunityHref,
+          resourceHref,
+          referralHref,
+        } = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;'''
           new = '''  const serializedLensHrefs = useSyncExternalStore(
             subscribeIntelligenceHref,
             storedLensHrefSnapshot,
@@ -73,34 +42,34 @@ jobs:
             resourceHref,
             referralHref,
           } = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;'''
-          source = source[:start] + new + source[end:]
-          nav.write_text(source)
-
-          test = Path('test/participant-lens-controller-phase2.test.mjs')
-          tests = test.read_text()
-          anchor = 'test("lens changes preserve the map, camera and selected organization substrate", () => {'
-          regression = '''test("permanent lens deep links are projected atomically from one spatial-store snapshot", () => {
-            const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
-            assert.match(navigation, /function storedLensHrefSnapshot\\(\\): string/);
-            assert.match(navigation, /intelligenceHref: storedIntelligenceHref\\(\\)/);
-            assert.match(navigation, /opportunityHref: storedOpportunityHref\\(\\)/);
-            assert.match(navigation, /resourceHref: storedResourceHref\\(\\)/);
-            assert.match(navigation, /referralHref: storedReferralHref\\(\\)/);
-            assert.match(navigation, /const serializedLensHrefs = useSyncExternalStore\\([\\s\\S]*storedLensHrefSnapshot[\\s\\S]*DEFAULT_LENS_HREF_SNAPSHOT/);
-            assert.equal((navigation.match(/useSyncExternalStore\\(/g) ?? []).length, 1);
-          });
-
-          test("lens changes preserve the map, camera and selected organization substrate", () => {'''
-          if tests.count(anchor) != 1:
-              raise SystemExit(f'expected one lens-change test anchor, found {tests.count(anchor)}')
-          test.write_text(tests.replace(anchor, regression, 1))
+          # Python heredoc indentation strips eight YAML spaces but preserves code indentation above.
+          old = old.replace('\n        ', '\n')
+          new = new.replace('\n          ', '\n  ').replace('\n            ', '\n    ')
+          if old not in s:
+              # Use exact current block from source when YAML indentation normalization differs.
+              start = s.index('  const serializedLensHrefs = useSyncExternalStore(')
+              end = s.index('\n\n  useEffect(() => {', start)
+              replacement = '''  const serializedLensHrefs = useSyncExternalStore(
+    subscribeIntelligenceHref,
+    storedLensHrefSnapshot,
+    () => DEFAULT_LENS_HREF_SNAPSHOT,
+  );
+  const {
+    intelligenceHref,
+    opportunityHref,
+    resourceHref,
+    referralHref,
+  } = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;'''
+              s = s[:start] + replacement + s[end:]
+          else:
+              s = s.replace(old, new, 1)
+          p.write_text(s)
           PY
           git diff --check
-      - name: Commit Lane 01 correction
-        shell: bash
+      - name: Commit formatting correction
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/components/participant/ParticipantTopNavigation.tsx test/participant-lens-controller-phase2.test.mjs
-          git commit -m "Project Phase 2 lens deep links atomically"
+          git add src/components/participant/ParticipantTopNavigation.tsx
+          git commit -m "Normalize atomic lens href projection"
           git push origin HEAD:lane01/exchange-room-phase2
