@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-import { resolveFoundingCheckoutReleaseDecision } from "../src/infrastructure/commercial/founding-runtime.ts";
+import { resolveFoundingCheckoutReleaseDecision } from "../src/infrastructure/commercial/founding-release-policy.ts";
 
 const checkoutRoute = await readFile(new URL("../app/api/commercial/founding/checkout/route.ts", import.meta.url), "utf8");
 const statusRoute = await readFile(new URL("../app/api/commercial/founding/status/route.ts", import.meta.url), "utf8");
@@ -30,6 +30,7 @@ test("browser cannot supply commercial authority or payment terms", () => {
   assert.ok(checkoutRoute.includes("RFXCHANGE_SESSION_COOKIE_NAME"));
   assert.ok(checkoutRoute.includes("resolveFoundingOrganizationContext"));
   assert.ok(checkoutRoute.includes("RFXCHANGE_PUBLIC_ORIGIN"));
+  assert.ok(runtime.includes("resolveFoundingCheckoutReleaseDecision"));
   assert.ok(runtime.indexOf("assertRelease(organizationId)") < runtime.indexOf("reserveFoundingCheckout"), "release policy must be evaluated before capacity/provider mutation");
   assert.ok(runtime.includes('organizationPermission("billing.manage")'));
   assert.ok(provider.includes('planKey: "founding"'));
