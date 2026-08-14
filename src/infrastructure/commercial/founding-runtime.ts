@@ -9,13 +9,23 @@ import { resolveParticipantRoute } from "../auth/participant-route-runtime.ts";
 import { getServerFirestore } from "../firestore/runtime.ts";
 import { FIRESTORE_SCHEMA_VERSION, firestoreCollectionName } from "../firestore/schema.ts";
 import { FirestoreOrganizationCommercialAccountRepository } from "../firestore/commercial-account-repository.ts";
+import {
+  resolveFoundingCheckoutReleaseDecision,
+  type FoundingCheckoutReleaseDecision,
+  type FoundingCheckoutReleaseMode,
+  type FoundingCheckoutReleaseReason,
+} from "./founding-release-policy.ts";
 import { assertFoundingStripeConfiguration, RFXCHANGE_FOUNDING_CAP, RFXCHANGE_FOUNDING_CURRENCY, RFXCHANGE_FOUNDING_INTERVAL, RFXCHANGE_FOUNDING_PRICE_CENTS, StripePaymentProvider } from "./stripe-payment-provider.ts";
+
+export {
+  resolveFoundingCheckoutReleaseDecision,
+  type FoundingCheckoutReleaseDecision,
+  type FoundingCheckoutReleaseMode,
+  type FoundingCheckoutReleaseReason,
+} from "./founding-release-policy.ts";
 
 const CAPACITY_COLLECTION = firestoreCollectionName("commercialFoundingCapacity");
 const CAPACITY_DOCUMENT = "current";
-export type FoundingCheckoutReleaseMode = "closed" | "proof" | "open";
-export type FoundingCheckoutReleaseReason = "available" | "checkout-closed" | "proof-organization-only" | "release-configuration-invalid";
-export interface FoundingCheckoutReleaseDecision { readonly allowed: boolean; readonly reason: FoundingCheckoutReleaseReason; }
 export class FoundingCommerceError extends Error { readonly status: number; readonly code: string; constructor(status: number, code: string, message: string) { super(message); this.name = "FoundingCommerceError"; this.status = status; this.code = code; } }
 interface CapacityReservation { readonly reservationId: string; readonly organizationId: string; readonly checkoutSessionId: string | null; readonly checkoutUrl: string | null; }
 interface CapacityDocument { readonly limit: number; readonly committedOrganizationIds: readonly string[]; readonly reservations: readonly CapacityReservation[]; }
@@ -61,14 +71,7 @@ async function ensureAccount(db: Firestore, organization: OrganizationAccount): 
   try { await repository.create(account); return (await repository.getByOrganizationId(organization.id)) ?? account; } catch { const raced = await repository.getByOrganizationId(organization.id); if (raced) return raced; throw new FoundingCommerceError(503, "commercial-account-unavailable", "Commercial account state is unavailable."); }
 }
 
-export function resolveFoundingCheckoutReleaseDecision(organizationId: string, input: Readonly<{ mode?: string | null; proofOrganizationId?: string | null }> = { mode: process.env.RFXCHANGE_FOUNDING_CHECKOUT_RELEASE_MODE, proofOrganizationId: process.env.RFXCHANGE_FOUNDING_PROOF_ORGANIZATION_ID }): FoundingCheckoutReleaseDecision {
-  const mode = input.mode?.trim() ?? "";
-  if (!mode || mode === "closed") return Object.freeze({ allowed: false, reason: "checkout-closed" as const });
-  if (mode !== "proof" && mode !== "open") return Object.freeze({ allowed: false, reason: "release-configuration-invalid" as const });
-  if (mode === "proof") { const proof = input.proofOrganizationId?.trim() ?? ""; if (!proof) return Object.freeze({ allowed: false, reason: "release-configuration-invalid" as const }); if (proof !== organizationId) return Object.freeze({ allowed: false, reason: "proof-organization-only" as const }); }
-  return Object.freeze({ allowed: true, reason: "available" as const });
-}
-function assertRelease(organizationId: string): void { const d = resolveFoundingCheckoutReleaseDecision(organizationId); if (d.allowed) return; if (d.reason === "proof-organization-only") throw new FoundingCommerceError(403, d.reason, "Founding checkout is not open for this organization."); throw new FoundingCommerceError(503, d.reason, "Founding checkout remains closed."); }
+function assertRelease(organizationId: string): void { const d: FoundingCheckoutReleaseDecision = resolveFoundingCheckoutReleaseDecision(organizationId); if (d.allowed) return; if (d.reason === "proof-organization-only") throw new FoundingCommerceError(403, d.reason, "Founding checkout is not open for this organization."); throw new FoundingCommerceError(503, d.reason, "Founding checkout remains closed."); }
 
 export async function resolveFoundingOrganizationContext(input: Readonly<{ sessionCookie?: string | null }>): Promise<FoundingOrganizationContext> {
   const access = await resolveParticipantRoute({ sessionCookie: input.sessionCookie });
@@ -94,7 +97,7 @@ export async function beginFoundingCheckout(input: Readonly<{ context: FoundingO
   if (!input.context.canManageBilling) throw new FoundingCommerceError(403, "billing-authority-required", "Billing authority is required.");
   const organizationId = String(input.context.organization.id); assertRelease(organizationId); if (hasNonTerminalSubscription(input.context.commercialAccount)) throw new FoundingCommerceError(409, "subscription-exists", "A non-terminal Founding subscription already exists.");
   const commandId = input.commandId?.trim() ?? ""; if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{7,190}$/.test(commandId)) throw new FoundingCommerceError(400, "invalid-command-id", "Checkout command identity is invalid.");
-  let origin: URL; try { origin = new URL(input.publicOrigin); } catch { throw new FoundingCommerceError(503, "public-origin-invalid", "RFxchange public origin is invalid."); } if (! ["http:", "https:"].includes(origin.protocol) || origin.pathname !== "/" || origin.search || origin.hash) throw new FoundingCommerceError(503, "public-origin-invalid", "RFxchange public origin is invalid.");
+  let origin: URL; try { origin = new URL(input.publicOrigin); } catch { throw new FoundingCommerceError(503, "public-origin-invalid", "RFxchange public origin is invalid."); } if (!["http:", "https:"].includes(origin.protocol) || origin.pathname !== "/" || origin.search || origin.hash) throw new FoundingCommerceError(503, "public-origin-invalid", "RFxchange public origin is invalid.");
   assertFoundingStripeConfiguration(); const reservation = await reserveFoundingCheckout(input.context.db, organizationId); if (reservation.kind === "reused") return Object.freeze({ checkoutUrl: reservation.checkoutUrl, checkoutSessionId: reservation.checkoutSessionId, reused: true });
   const repository = new FirestoreOrganizationCommercialAccountRepository(input.context.db); const service = new OrganizationCommercialAccountService({ repository, paymentProvider: new StripePaymentProvider() });
   const result = await service.beginSubscriptionCheckout({ organization: input.context.organization, planKey: "founding", billingEmail: input.context.billingEmail, successUrl: new URL("/commercial/founding?checkout=return", origin).toString(), cancelUrl: new URL("/commercial/founding?checkout=cancel", origin).toString(), idempotencyKey: `founding:${organizationId}:${reservation.reservationId}`, now: isoNow() });
