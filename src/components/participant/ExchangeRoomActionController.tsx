@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { exchangeRoomLocaleCatalog } from "../../application/participant/exchange-room-locale";
 import type { ExchangeRoomActionProjection } from "../../application/participant/exchange-room-actions";
@@ -9,7 +9,13 @@ import {
   PARTICIPANT_LENS_IDS,
   type ParticipantLensId,
 } from "../../application/participant/participant-lens-registry";
-import { participantSpatialLensHref } from "../../application/participant/participant-spatial-context";
+import {
+  PARTICIPANT_SPATIAL_ACTIVE_KEY,
+  PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT,
+  participantSpatialLensHref,
+  readActiveParticipantSpatialContext,
+  serializeParticipantSpatialContext,
+} from "../../application/participant/participant-spatial-context";
 import { useI18n } from "../i18n/I18nProvider";
 
 import styles from "./ExchangeRoomActionController.module.css";
@@ -36,6 +42,35 @@ function isOrdinaryPrimaryActivation(event: globalThis.MouseEvent): boolean {
   return event.button === 0 && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey;
 }
 
+function exchangeRoomSurfaceSnapshot(): "open" | "closed" {
+  const context = readActiveParticipantSpatialContext();
+  return context?.panelOpen === false ? "closed" : "open";
+}
+
+function subscribeExchangeRoomSurface(notify: () => void): () => void {
+  const handle = () => notify();
+  window.addEventListener("storage", handle);
+  window.addEventListener(PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT, handle);
+  return () => {
+    window.removeEventListener("storage", handle);
+    window.removeEventListener(PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT, handle);
+  };
+}
+
+function reopenActiveExchangeRoomSurface(): void {
+  const current = readActiveParticipantSpatialContext();
+  if (!current || current.panelOpen) return;
+  try {
+    const storageKey = window.sessionStorage.getItem(PARTICIPANT_SPATIAL_ACTIVE_KEY);
+    if (!storageKey) return;
+    const reopened = Object.freeze({ ...current, panelOpen: true });
+    window.sessionStorage.setItem(storageKey, serializeParticipantSpatialContext(reopened));
+    window.dispatchEvent(new CustomEvent(PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT, { detail: storageKey }));
+  } catch {
+    // Optional browser continuity state is non-authorizing; a storage failure must not invent Room state.
+  }
+}
+
 export function useExchangeRoomLensController(onLensSelect: (lens: ParticipantLensId) => void): void {
   useEffect(() => {
     const handleLensActivation = (event: globalThis.MouseEvent) => {
@@ -49,7 +84,10 @@ export function useExchangeRoomLensController(onLensSelect: (lens: ParticipantLe
       // Phase 2 keeps ordinary lens selection inside the existing Room. Prevent only the
       // deep-link navigation; allow the event to continue so the native mobile menu's existing
       // onNavigate/close handler still runs and keyboard-generated clicks retain normal semantics.
+      // A previously dismissed Room action surface is presentation state only; reopening it here
+      // preserves the same validated spatial context before the active lens projection changes.
       event.preventDefault();
+      reopenActiveExchangeRoomSurface();
       onLensSelect(lens);
     };
     document.addEventListener("click", handleLensActivation, true);
@@ -86,6 +124,11 @@ export function ExchangeRoomActionController({
   const messages = exchangeRoomLocaleCatalog(locale);
   const [authorization, setAuthorization] = useState<ActionAuthorizationProjection>(DENIED_ACTION_AUTHORIZATION);
   const [networkDiscoveryAvailable, setNetworkDiscoveryAvailable] = useState(false);
+  const surfaceOpen = useSyncExternalStore(
+    subscribeExchangeRoomSurface,
+    exchangeRoomSurfaceSnapshot,
+    () => "open" as const,
+  ) === "open";
 
   useEffect(() => {
     let active = true;
@@ -110,6 +153,8 @@ export function ExchangeRoomActionController({
       window.cancelAnimationFrame(discoveryFrame);
     };
   }, []);
+
+  if (!surfaceOpen) return null;
 
   return (
     <section className={styles.actionGrid} aria-label={messages.actionsLabel} data-exchange-room-action-grid data-active-lens={activeLens}>
