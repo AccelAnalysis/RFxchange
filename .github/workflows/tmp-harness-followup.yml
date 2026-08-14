@@ -1,0 +1,43 @@
+name: temporary-harness-followup
+on:
+  push:
+    branches: [control/phase2-configured-browser-harness]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: control/phase2-configured-browser-harness
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+      - name: Apply closed-surface correction
+        run: python scripts/tmp-harness-fix-closed-surface.py
+      - name: Measure content preservation
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/acceptance-exchange-shell-emulator.mjs')
+          s=p.read_text()
+          s=s.replace('    const shellInstance = shell?.dataset.participantShellInstance || null;\n    link.click();','    const shellInstance = shell?.dataset.participantShellInstance || null;\n    const contentBefore = window.__rfxAcceptance.contentBefore;\n    link.click();',1)
+          s=s.replace('      shellInstance,\n      navigationEntries: performance.getEntriesByType("navigation").length,\n    };','      shellInstance,\n      navigationEntries: performance.getEntriesByType("navigation").length,\n      contentPreserved: Boolean(contentBefore && contentBefore.isConnected),\n    };',1)
+          s=s.replace('  assert.equal(immediate.search, continuityBefore.search, `${id} changed shared Room query context during primary activation.`);','  assert.equal(immediate.search, continuityBefore.search, `${id} changed shared Room query context during primary activation.`);\n  assert.equal(immediate.contentPreserved, true, `${id} replaced the current Exchange Room content during primary activation.`);',1)
+          s=s.replace('  assert.equal(observation.takeover, false, `${id} triggered a root takeover.`);','  assert.equal(observation.takeover, false, `${id} triggered a root takeover.`);\n  assert.equal(observation.contentReplaced, false, `${id} replaced the Exchange Room workspace during lens activation.`);',1)
+          s=s.replace('    immediateContentPreserved: true,\n    phase2InRoom: true,','    immediateContentPreserved: immediate.contentPreserved,\n    phase2InRoom: true,',1)
+          p.write_text(s)
+          PY
+          node --check scripts/acceptance-exchange-shell-emulator.mjs
+          git diff --check
+      - name: Commit harness correction
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/acceptance-exchange-shell-emulator.mjs
+          git commit -m "Harden Phase 2 harness continuity evidence"
+          git push origin HEAD:control/phase2-configured-browser-harness
