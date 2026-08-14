@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { authenticatedServerContext } from "../src/application/auth/server-session.ts";
@@ -169,6 +170,24 @@ async function expectInvalid(promise, messagePattern) {
       messagePattern.test(error.message),
   );
 }
+
+test("ISS-006 governed currency projection exactly matches pinned AMACS 0.5.0", async () => {
+  const registries = JSON.parse(
+    await readFile(
+      new URL("../src/generated/amacs/0.5.0/registries.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const currentCurrencyCodes = registries.registries.units
+    .filter(
+      (unit) =>
+        unit.status === "active" &&
+        unit.unit_family === "currency" &&
+        unit.data_type === "currency",
+    )
+    .map((unit) => unit.code);
+  assert.deepEqual(currentCurrencyCodes, RFX_ISS006_GOVERNED_CURRENCY_CODES);
+});
 
 test("ISS-006 accepts a current released governed locality", async () => {
   const f = fixture();
