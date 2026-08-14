@@ -144,6 +144,29 @@ function storedOpportunityHref(): string {
   return participantSpatialLensHref("opportunities-rfx");
 }
 
+interface ParticipantLensHrefSnapshot {
+  readonly intelligenceHref: string;
+  readonly opportunityHref: string;
+  readonly resourceHref: string;
+  readonly referralHref: string;
+}
+
+const DEFAULT_LENS_HREF_SNAPSHOT = JSON.stringify({
+  intelligenceHref: CANONICAL_INTELLIGENCE_HREF,
+  opportunityHref: "/opportunities",
+  resourceHref: "/resources",
+  referralHref: "/referrals",
+} satisfies ParticipantLensHrefSnapshot);
+
+function storedLensHrefSnapshot(): string {
+  return JSON.stringify({
+    intelligenceHref: storedIntelligenceHref(),
+    opportunityHref: storedOpportunityHref(),
+    resourceHref: storedResourceHref(),
+    referralHref: storedReferralHref(),
+  } satisfies ParticipantLensHrefSnapshot);
+}
+
 function useTransitionFeedback(pathname: string) {
   const searchParams = useSearchParams();
   const serializedSearchParams = searchParams.toString();
@@ -153,26 +176,17 @@ function useTransitionFeedback(pathname: string) {
     fromPathname: string;
   }> | null>(null);
   const nextTransitionId = useRef(0);
-  const intelligenceHref = useSyncExternalStore(
-    subscribeIntelligenceHref,
-    storedIntelligenceHref,
-    () => CANONICAL_INTELLIGENCE_HREF,
-  );
-  const resourceHref = useSyncExternalStore(
-    subscribeIntelligenceHref,
-    storedResourceHref,
-    () => "/resources",
-  );
-  const referralHref = useSyncExternalStore(
-    subscribeIntelligenceHref,
-    storedReferralHref,
-    () => "/referrals",
-  );
-  const opportunityHref = useSyncExternalStore(
-    subscribeIntelligenceHref,
-    storedOpportunityHref,
-    () => "/opportunities",
-  );
+  const serializedLensHrefs = useSyncExternalStore(
+  subscribeIntelligenceHref,
+  storedLensHrefSnapshot,
+  () => DEFAULT_LENS_HREF_SNAPSHOT,
+);
+const {
+  intelligenceHref,
+  opportunityHref,
+  resourceHref,
+  referralHref,
+} = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;
 
   useEffect(() => {
     if (participantNavigationState(pathname) !== "intelligence") return;

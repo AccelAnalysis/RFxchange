@@ -18,6 +18,17 @@ test("the Exchange Room uses spatial activeLens instead of whole-lens unavailabi
   assert.match(controller, /data-active-lens=\{activeLens\}/);
 });
 
+test("permanent lens deep links are projected atomically from one spatial-store snapshot", () => {
+  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
+  assert.match(navigation, /function storedLensHrefSnapshot\(\): string/);
+  assert.match(navigation, /intelligenceHref: storedIntelligenceHref\(\)/);
+  assert.match(navigation, /opportunityHref: storedOpportunityHref\(\)/);
+  assert.match(navigation, /resourceHref: storedResourceHref\(\)/);
+  assert.match(navigation, /referralHref: storedReferralHref\(\)/);
+  assert.match(navigation, /const serializedLensHrefs = useSyncExternalStore\([\s\S]*storedLensHrefSnapshot[\s\S]*DEFAULT_LENS_HREF_SNAPSHOT/);
+  assert.equal((navigation.match(/useSyncExternalStore\(/g) ?? []).length, 1);
+});
+
 test("lens changes preserve the map, camera and selected organization substrate", () => {
   const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
   assert.match(workspace, /activeLens: lens/);
