@@ -133,6 +133,7 @@ export const marketReadyFoundingCommerceWebhook = onRequest(
               db,
               eventId: event.id,
               organizationId,
+              customerId,
               eventCreatedAt: event.createdAt,
             });
             return { organizationId, recognitionGranted: false, duplicateProviderEvent: recorded.duplicate };
@@ -147,6 +148,7 @@ export const marketReadyFoundingCommerceWebhook = onRequest(
             db,
             eventId: event.id,
             organizationId,
+            customerId,
             eventCreatedAt: event.createdAt,
             providerHasNonTerminalFoundingSubscription: hasSubscription,
           });
