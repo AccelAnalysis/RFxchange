@@ -1,0 +1,64 @@
+name: temporary-issue196-harness-fix2
+on:
+  push:
+    branches:
+      - control/phase2-configured-browser-harness-followup
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: control/phase2-configured-browser-harness-followup
+          fetch-depth: 0
+      - name: Apply Issue 196 shared-harness correction
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/acceptance-exchange-shell-emulator.mjs')
+          s = p.read_text()
+          s = s.replace('});\n\nasync function exchangeRoomLensSnapshot(cdp) {','});\n\nlet exchangeRoomPhase2RuntimeDetected = false;\nlet exchangeRoomReopenEvidenceCaptured = false;\n\nasync function exchangeRoomLensSnapshot(cdp) {',1)
+          s = s.replace('  assert.equal(before.phase2, true, `${id} did not expose the Phase 2 Exchange Room controller.`);','  assert.equal(exchangeRoomPhase2RuntimeDetected, true, `${id} did not establish the Phase 2 Exchange Room controller.`);',1)
+          s = s.replace('  const continuityBefore = await exchangeRoomLensSnapshot(cdp);','''  if (!exchangeRoomReopenEvidenceCaptured) {
+    if (before.panelOpen) {
+      const closed = await evaluate(cdp, `(() => {
+        const close = [...document.querySelectorAll('#organization-detail-panel button[type="button"]')]
+          .find((button) => button.textContent?.includes('×'));
+        if (!close) return false;
+        close.click();
+        return true;
+      })()`);
+      assert.equal(closed, true, "Could not close the Exchange Room action surface before reopen acceptance.");
+      await waitForExpression(cdp, `!document.querySelector('[data-exchange-room-action-grid]')`, "closed Exchange Room action surface");
+    }
+    exchangeRoomReopenEvidenceCaptured = true;
+  }
+
+  const continuityBefore = await exchangeRoomLensSnapshot(cdp);''',1)
+          s = s.replace('  assert.equal(after.panelOpen, continuityBefore.panelOpen, `${id} changed the organization detail-panel state during lens activation.`);','  assert.equal(after.panelOpen, true, `${id} did not leave/reopen the action surface.`);',1)
+          s = s.replace('''  const phase2 = await evaluate(cdp, `Boolean(document.querySelector('[data-exchange-room-action-grid]'))`);
+  return phase2
+    ? clickExchangeRoomLens(cdp, id, href, expectedPath, options)
+    : clickHref(cdp, href, expectedPath, options);''','''  const phase2SurfacePresent = await evaluate(cdp, `Boolean(document.querySelector('[data-exchange-room-action-grid]'))`);
+  if (phase2SurfacePresent) exchangeRoomPhase2RuntimeDetected = true;
+  const phase2 = exchangeRoomPhase2RuntimeDetected
+    && await evaluate(cdp, `location.pathname === "/geography/canvas"`);
+  return phase2
+    ? clickExchangeRoomLens(cdp, id, href, expectedPath, options)
+    : clickHref(cdp, href, expectedPath, options);''',1)
+          p.write_text(s)
+          PY
+          node --check scripts/acceptance-exchange-shell-emulator.mjs
+          git diff --check
+      - name: Commit correction and remove temporary workflows
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -f .github/workflows/tmp-issue196-harness-fix.yml .github/workflows/tmp-issue196-harness-fix2.yml
+          git add scripts/acceptance-exchange-shell-emulator.mjs
+          git commit -m "Fix Phase 2 closed-surface harness dispatch"
+          git push origin HEAD:control/phase2-configured-browser-harness-followup
