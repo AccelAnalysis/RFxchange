@@ -51,18 +51,28 @@ interface ExistingWorkspaceFoundationProps {
   readonly focusedOrganization?: NetworkDiscoveryOrganization | null;
   readonly serviceAreaOptions?: readonly NetworkServiceAreaOption[];
   readonly officialResourceProviderOrganizationIds?: readonly string[];
+  readonly operationalActionsAvailable?: boolean;
   readonly status?: ExistingWorkspaceStatus;
 }
+
+const MAP_ONLY_UNAVAILABLE_LENSES = Object.freeze([
+  "opportunities-rfx",
+  "resources",
+  "referrals",
+] as const);
+const MAP_ONLY_UNAVAILABLE_UTILITIES = Object.freeze(["quick-start"] as const);
 
 function buildDiscoveryUrl(input: Readonly<{
   organizationId: string;
   capability: string;
   serviceAreaId: string | null;
+  selectedOrganizationId?: string | null;
   page?: number;
 }>): string {
   const params = new URLSearchParams({ organizationId: input.organizationId });
   if (input.capability) params.set("q", input.capability);
   if (input.serviceAreaId) params.set("serviceArea", input.serviceAreaId);
+  if (input.selectedOrganizationId) params.set("selectedOrganization", input.selectedOrganizationId);
   if (input.page && input.page > 1) params.set("page", String(input.page));
   return `/geography/canvas?${params.toString()}`;
 }
@@ -89,7 +99,13 @@ function visibleLocation(
   return labels.inLocality.replace("{locality}", location.localityName);
 }
 
-function WorkspaceBoundary({ status }: Readonly<{ status: Exclude<ExistingWorkspaceStatus, "ready"> }>) {
+function WorkspaceBoundary({
+  status,
+  operationalActionsAvailable,
+}: Readonly<{
+  status: Exclude<ExistingWorkspaceStatus, "ready">;
+  operationalActionsAvailable: boolean;
+}>) {
   const { t } = useI18n();
   const actionHref: Partial<Record<Exclude<ExistingWorkspaceStatus, "ready">, string>> = {
     empty: "/join",
@@ -100,7 +116,11 @@ function WorkspaceBoundary({ status }: Readonly<{ status: Exclude<ExistingWorksp
   };
   const href = actionHref[status];
   return (
-    <ParticipantShell activeItem="Network">
+    <ParticipantShell
+      activeItem="Network"
+      unavailableLensIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_LENSES}
+      unavailableUtilityIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_UTILITIES}
+    >
       <main className={styles.stateWorkspace} aria-label={t("networkWorkspace.status.ariaLabel")}>
         <StatePanel
           state={status}
@@ -125,6 +145,7 @@ export function ExistingWorkspaceFoundation({
   focusedOrganization = null,
   serviceAreaOptions = [],
   officialResourceProviderOrganizationIds = [],
+  operationalActionsAvailable = true,
   status = "ready",
 }: ExistingWorkspaceFoundationProps) {
   const { locale, t } = useI18n();
@@ -185,10 +206,12 @@ export function ExistingWorkspaceFoundation({
   const selectedHome = selectedObjectId === homeMarker.id;
   const selectedOrganization = organizationsByMarkerId.get(selectedObjectId) ?? null;
   const selectedOrganizationId = selectedOrganization ? String(selectedOrganization.organizationId) : organizationId;
+  const selectedOrganizationQueryId = selectedHome ? null : selectedOrganizationId;
   const organizationActions = projectOrganizationActions({
     viewerOrganizationId: organizationId,
     selectedOrganizationId,
     officialResourceProvider: officialResourceProviderOrganizationIds.includes(selectedOrganizationId),
+    operationalActionsAvailable,
   });
   const locality = model.selectedGeography.name;
   const locationLabel = homeMarker.accessibleLocationLabel ?? `${locality} organization location`;
@@ -220,7 +243,13 @@ export function ExistingWorkspaceFoundation({
   const serviceAreaId = query?.serviceGeographyId ?? null;
   useEffect(() => {
     const page = query?.page ?? 1;
-    const returnHref = buildDiscoveryUrl({ organizationId, capability, serviceAreaId, page });
+    const returnHref = buildDiscoveryUrl({
+      organizationId,
+      capability,
+      serviceAreaId,
+      selectedOrganizationId: selectedOrganizationQueryId,
+      page,
+    });
     const nextFilterValues: Record<string, string> = {};
     if (serviceAreaId) nextFilterValues.serviceArea = serviceAreaId;
     const nextFilters: Readonly<Record<string, string>> = Object.freeze(nextFilterValues);
@@ -250,20 +279,36 @@ export function ExistingWorkspaceFoundation({
         }),
       });
     });
-  }, [capability, organizationId, query?.page, serviceAreaId, updateSpatialContext]);
+  }, [capability, organizationId, query?.page, selectedOrganizationQueryId, serviceAreaId, updateSpatialContext]);
   useEffect(() => {
     if (resultListRef.current) resultListRef.current.scrollTop = spatialContext.lensState.intelligence.listScrollTop;
   }, [spatialContext.lensState.intelligence.listScrollTop]);
-  const clearHref = buildDiscoveryUrl({ organizationId, capability: "", serviceAreaId: null });
+  const clearHref = buildDiscoveryUrl({
+    organizationId,
+    capability: "",
+    serviceAreaId: null,
+    selectedOrganizationId: selectedOrganizationQueryId,
+  });
   const locationLabels = {
     near: t("networkWorkspace.detail.nearLocation", { locality }),
     inLocality: t("networkWorkspace.detail.inLocality", { locality }),
   };
 
-  if (status !== "ready") return <WorkspaceBoundary status={status} />;
+  if (status !== "ready") {
+    return (
+      <WorkspaceBoundary
+        status={status}
+        operationalActionsAvailable={operationalActionsAvailable}
+      />
+    );
+  }
 
   return (
-    <ParticipantShell activeItem="Network">
+    <ParticipantShell
+      activeItem="Network"
+      unavailableLensIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_LENSES}
+      unavailableUtilityIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_UTILITIES}
+    >
       <SpatialWorkspace ariaLabel={t("networkWorkspace.ariaLabel")}>
         <ExchangeSpatialScene
           model={model}
@@ -288,6 +333,9 @@ export function ExistingWorkspaceFoundation({
             <section className={styles.networkSearch} aria-label={t("networkWorkspace.search.ariaLabel")}>
               <form className={styles.networkForm} role="search" method="get" action="/geography/canvas">
                 <input type="hidden" name="organizationId" value={organizationId} />
+                {selectedOrganizationQueryId ? (
+                  <input type="hidden" name="selectedOrganization" value={selectedOrganizationQueryId} />
+                ) : null}
                 <label className={styles.networkField}>
                   <span>{t("networkWorkspace.search.capabilityLabel")}</span>
                   <input
@@ -399,6 +447,7 @@ export function ExistingWorkspaceFoundation({
                       organizationId,
                       capability,
                       serviceAreaId,
+                      selectedOrganizationId: selectedOrganizationQueryId,
                       page: discovery.page - 1,
                     })}>{t("networkWorkspace.search.previous")}</Link>
                   ) : <span />}
@@ -408,6 +457,7 @@ export function ExistingWorkspaceFoundation({
                       organizationId,
                       capability,
                       serviceAreaId,
+                      selectedOrganizationId: selectedOrganizationQueryId,
                       page: discovery.page + 1,
                     })}>{t("networkWorkspace.search.next")}</Link>
                   ) : <span />}
@@ -573,11 +623,23 @@ export function ExistingWorkspaceFoundation({
                     {t(`networkWorkspace.actions.${action.id}`)}
                   </Link>
                 ) : (
-                  <span key={action.id} aria-disabled="true" data-organization-action={action.id} title={t(`networkWorkspace.actionReasons.${action.reason}`)}>
+                  <span
+                    key={action.id}
+                    className={styles.unavailableAction}
+                    aria-disabled="true"
+                    aria-label={`${t(`networkWorkspace.actions.${action.id}`)}: ${t(`networkWorkspace.actionReasons.${action.reason}`)}`}
+                    data-organization-action={action.id}
+                    title={t(`networkWorkspace.actionReasons.${action.reason}`)}
+                  >
                     {t(`networkWorkspace.actions.${action.id}`)}
                   </span>
                 ))}
               </section>
+              {!operationalActionsAvailable ? (
+                <p className={styles.actionAvailabilityNote} role="status">
+                  {t("networkWorkspace.actionReasons.exchange-action-unavailable")}
+                </p>
+              ) : null}
 
               <section className={styles.provenance} aria-labelledby="provenance-title">
                 <p className={styles.eyebrow}>{t("networkWorkspace.provenance.eyebrow")}</p>

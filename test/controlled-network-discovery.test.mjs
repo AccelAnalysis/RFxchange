@@ -13,10 +13,11 @@ const workspaceStyles = await read("src/components/participant/ExistingWorkspace
 const map = await read("src/components/map/ExchangeSpatialScene.tsx");
 const state = await read("src/application/participant/participant-spatial-context.ts");
 
-test("Slice 3.2 revalidates current participant and geography authority on the server", () => {
+test("Slice 3.2 revalidates controlled and OPEN participants plus geography authority on the server", () => {
   assert.match(route, /resolveParticipantRoute/);
   assert.match(route, /loadAuthorizedNetworkDiscovery/);
-  assert.match(runtime, /open-platform/);
+  assert.doesNotMatch(route, /lifecycleState !== "open-platform"/);
+  assert.doesNotMatch(runtime, /open-required/);
   assert.match(runtime, /evaluateGeographyParticipation/);
   assert.match(runtime, /network-participation/);
   assert.match(runtime, /listByUserAndGeography/);

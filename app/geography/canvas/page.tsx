@@ -81,10 +81,6 @@ async function resolveAuthenticatedMapProjection(
   if (access.kind === "restricted") {
     redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   }
-  if (access.state.lifecycleState !== "open-platform") {
-    redirect(access.state.controlledPlatformUrl ?? "/join");
-  }
-
   const mapProjection = await loadAuthorizedParticipantMapProjection(access);
   if (!mapProjection) {
     throw new ParticipantRouteDependencyUnavailableError(
@@ -165,6 +161,7 @@ export default async function GeographyCanvasPage({
         focusedOrganization={focusedOrganization}
         serviceAreaOptions={discovery.available ? discovery.serviceAreaOptions : []}
         officialResourceProviderOrganizationIds={officialResourceProviderOrganizationIds}
+        operationalActionsAvailable={authenticated.access.state.lifecycleState === "open-platform"}
       />
     </>
   );

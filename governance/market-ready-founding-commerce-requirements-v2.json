@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "packetId": "WP-MARKET-READY-FOUNDING-COMMERCE-01",
+  "activationId": "market-ready-founding-commerce-2026-08-13",
+  "controlPullRequest": 188,
+  "extends": "governance/market-ready-founding-commerce-requirements.json",
+  "authorities": [
+    "docs/program/MARKET_READY_FOUNDING_COMMERCE_REQUIREMENTS.md",
+    "docs/program/MARKET_READY_FOUNDING_COMMERCE_REQUIREMENTS_AMENDMENT_1.md",
+    "docs/program/MARKET_READY_FOUNDING_COMMERCE_SCOPE_FREEZE.md",
+    "docs/program/MARKET_READY_FOUNDING_COMMERCE_CRITICAL_RISK_EVIDENCE.md"
+  ],
+  "preservedUnresolvedFeatureIds": ["COM-039", "COM-040", "COM-041"],
+  "requirements": [
+    {"id":"MRFC-OFFER-001","acceptanceTypes":["functional","copy","browser-visual","domain-security"]},
+    {"id":"MRFC-AUTH-001","acceptanceTypes":["functional","domain-security"]},
+    {"id":"MRFC-CHECKOUT-001","acceptanceTypes":["functional","domain-security"]},
+    {"id":"MRFC-RECON-001","acceptanceTypes":["functional","domain-security","governance"]},
+    {"id":"MRFC-CAP-001","acceptanceTypes":["functional","domain-security"]},
+    {"id":"MRFC-STATE-001","acceptanceTypes":["functional","domain-security","cross-lens"]},
+    {"id":"MRFC-SEC-001","acceptanceTypes":["domain-security","governance"]},
+    {"id":"MRFC-LIVE-001","acceptanceTypes":["functional","domain-security","browser-visual","governance"]},
+    {"id":"MRFC-LIFECYCLE-001","acceptanceTypes":["functional","domain-security","governance"]}
+  ],
+  "scopeAuthority": "docs/program/MARKET_READY_FOUNDING_COMMERCE_SCOPE_FREEZE.md",
+  "criticalRiskEvidenceAuthority": "docs/program/MARKET_READY_FOUNDING_COMMERCE_CRITICAL_RISK_EVIDENCE.md",
+  "maximumBuilderDisposition": "Implemented — Not Verified"
+}

@@ -12,7 +12,11 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 
-import { isPersistentParticipantPath } from "../../application/participant/participant-lens-registry";
+import {
+  isPersistentParticipantPath,
+  type ParticipantLensId,
+  type ParticipantUtilityId,
+} from "../../application/participant/participant-lens-registry";
 import { clearParticipantSpatialContexts } from "../../application/participant/participant-spatial-context";
 import {
   ParticipantTopNavigation,
@@ -27,11 +31,21 @@ interface PersistentParticipantShellContextValue {
   readonly reportAuthorizedParticipant: () => void;
   readonly reportAuthorizedOrganizationName: (organizationName: string) => void;
   readonly registerExplicitActiveItem: (activeItem: ParticipantNavigationItem) => () => void;
+  readonly registerUnavailableDestinations: (input: Readonly<{
+    lensIds?: readonly ParticipantLensId[];
+    utilityIds?: readonly ParticipantUtilityId[];
+  }>) => () => void;
 }
 
 interface ExplicitActiveItemRegistration {
   readonly token: symbol;
   readonly activeItem: ParticipantNavigationItem;
+}
+
+interface UnavailableDestinationRegistration {
+  readonly token: symbol;
+  readonly lensIds: readonly ParticipantLensId[];
+  readonly utilityIds: readonly ParticipantUtilityId[];
 }
 
 const EMPTY_SHELL_CONTEXT: PersistentParticipantShellContextValue = Object.freeze({
@@ -40,6 +54,7 @@ const EMPTY_SHELL_CONTEXT: PersistentParticipantShellContextValue = Object.freez
   reportAuthorizedParticipant: () => undefined,
   reportAuthorizedOrganizationName: () => undefined,
   registerExplicitActiveItem: () => () => undefined,
+  registerUnavailableDestinations: () => () => undefined,
 });
 
 const PersistentParticipantShellContext = createContext<PersistentParticipantShellContextValue>(
@@ -59,6 +74,7 @@ function MountedPersistentParticipantShell({ children }: Readonly<{ children: Re
   const [authorizedParticipant, setAuthorizedParticipant] = useState(false);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
   const [explicitActiveItem, setExplicitActiveItem] = useState<ExplicitActiveItemRegistration>();
+  const [unavailableDestinations, setUnavailableDestinations] = useState<UnavailableDestinationRegistration>();
   const reportAuthorizedParticipant = useCallback(() => {
     setAuthorizedParticipant(true);
   }, []);
@@ -74,6 +90,21 @@ function MountedPersistentParticipantShell({ children }: Readonly<{ children: Re
       setExplicitActiveItem((current) => current?.token === token ? undefined : current);
     };
   }, []);
+  const registerUnavailableDestinations = useCallback((input: Readonly<{
+    lensIds?: readonly ParticipantLensId[];
+    utilityIds?: readonly ParticipantUtilityId[];
+  }>) => {
+    const token = Symbol("participant-unavailable-destinations");
+    setUnavailableDestinations({
+      token,
+      lensIds: Object.freeze([...(input.lensIds ?? [])]),
+      utilityIds: Object.freeze([...(input.utilityIds ?? [])]),
+    });
+
+    return () => {
+      setUnavailableDestinations((current) => current?.token === token ? undefined : current);
+    };
+  }, []);
 
   const context = useMemo<PersistentParticipantShellContextValue>(() => Object.freeze({
     persistent: true,
@@ -81,11 +112,13 @@ function MountedPersistentParticipantShell({ children }: Readonly<{ children: Re
     reportAuthorizedParticipant,
     reportAuthorizedOrganizationName,
     registerExplicitActiveItem,
+    registerUnavailableDestinations,
   }), [
     organizationName,
     registerExplicitActiveItem,
     reportAuthorizedOrganizationName,
     reportAuthorizedParticipant,
+    registerUnavailableDestinations,
   ]);
 
   return (
@@ -100,6 +133,8 @@ function MountedPersistentParticipantShell({ children }: Readonly<{ children: Re
           <ParticipantTopNavigation
             activeItem={explicitActiveItem?.activeItem}
             organizationName={organizationName}
+            unavailableLensIds={unavailableDestinations?.lensIds}
+            unavailableUtilityIds={unavailableDestinations?.utilityIds}
           />
         ) : null}
         <div
