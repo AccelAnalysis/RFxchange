@@ -1,11 +1,14 @@
 import { FieldValue, type Firestore } from "firebase-admin/firestore";
 
+import type { ConfirmedOrganizationLocation } from "../../domain/organization-location/model.ts";
 import type { OrganizationId } from "../../domain/organizations/model.ts";
-import type {
-  PerformanceLocation,
-  RfxAggregate,
-  RfxCommandReceipt,
-  RfxId,
+import {
+  performanceLocationFromConfirmed,
+  type PerformanceLocation,
+  type PerformanceLocationItem,
+  type RfxAggregate,
+  type RfxCommandReceipt,
+  type RfxId,
 } from "../../domain/rfx/model.ts";
 import {
   RfxPersistenceConflictError,
@@ -20,6 +23,12 @@ const EVENTS = "rfxEvents";
 const COMMANDS = "rfxCommands";
 const AUDITS = "organizationAuditEvents";
 const GEOGRAPHIES = "geographies";
+const ORGANIZATION_LOCATIONS = "organizationLocations";
+
+type OrganizationLocationBoundItem = Exclude<
+  PerformanceLocationItem,
+  Readonly<{ mode: "locality" }>
+>;
 
 function immutable(value: object) {
   return Object.freeze({
@@ -51,14 +60,58 @@ function exactReplay(
   );
 }
 
-function localityIds(location: PerformanceLocation | null): readonly string[] {
+function locationItems(location: PerformanceLocation | null): readonly PerformanceLocationItem[] {
   if (!location) return Object.freeze([]);
-  if (location.mode === "multiple") {
-    return Object.freeze([
-      ...new Set(location.locations.map((item) => item.localityId)),
-    ]);
+  return location.mode === "multiple"
+    ? location.locations
+    : Object.freeze([location]);
+}
+
+function localityIds(location: PerformanceLocation | null): readonly string[] {
+  return Object.freeze([
+    ...new Set(locationItems(location).map((item) => item.localityId)),
+  ]);
+}
+
+function organizationLocationItems(
+  location: PerformanceLocation | null,
+): readonly OrganizationLocationBoundItem[] {
+  return Object.freeze(
+    locationItems(location).filter(
+      (item): item is OrganizationLocationBoundItem => item.mode !== "locality",
+    ),
+  );
+}
+
+function sameOrganizationLocationProjection(
+  item: OrganizationLocationBoundItem,
+  current: ConfirmedOrganizationLocation,
+): boolean {
+  const expected = performanceLocationFromConfirmed({
+    mode: item.mode,
+    organizationLocationId: String(current.id),
+    geographyId: String(current.geographyId),
+    coordinate: current.coordinate,
+    physicalAddress: current.physicalAddress,
+    provenance: current.geocodeProvenance,
+  });
+  if (
+    expected.mode !== item.mode ||
+    expected.localityId !== item.localityId ||
+    expected.point.longitude !== item.point.longitude ||
+    expected.point.latitude !== item.point.latitude ||
+    expected.geocodeProvenance.provider !== item.geocodeProvenance.provider ||
+    expected.geocodeProvenance.providerReference !== item.geocodeProvenance.providerReference ||
+    expected.geocodeProvenance.benchmark !== item.geocodeProvenance.benchmark ||
+    expected.geocodeProvenance.retrievedAt !== item.geocodeProvenance.retrievedAt
+  ) return false;
+  if (expected.mode === "exact-address" && item.mode === "exact-address") {
+    return expected.normalizedAddress === item.normalizedAddress;
   }
-  return Object.freeze([location.localityId]);
+  if (expected.mode !== "exact-address" && item.mode !== "exact-address") {
+    return expected.organizationLocationId === item.organizationLocationId;
+  }
+  return false;
 }
 
 /**
@@ -66,9 +119,11 @@ function localityIds(location: PerformanceLocation | null): readonly string[] {
  *
  * All non-package operations delegate unchanged to the canonical Firestore RFx
  * repository. Package persistence mirrors its existing atomic save semantics,
- * adding only current `released` geography reads in the same transaction. The
- * command receipt is read first so exact replay can return without consulting
- * geography that may legitimately have changed after the original commit.
+ * adding only current `released` geography reads and, when the package uses an
+ * organization-derived performance location, a current organization-location
+ * snapshot read in the same transaction. The command receipt is read first so
+ * exact replay can return without consulting authority that may legitimately
+ * have changed after the original commit.
  */
 export class Iss006GovernedRfxRepository implements RfxRepository {
   constructor(
@@ -113,12 +168,17 @@ export class Iss006GovernedRfxRepository implements RfxRepository {
     const eventRef = this.db.collection(EVENTS).doc(bundle.event.id);
     const commandRef = this.db.collection(COMMANDS).doc(bundle.command.id);
     const auditRef = this.db.collection(AUDITS).doc(bundle.audit.id);
-    const geographyRefs = localityIds(
-      bundle.aggregate.package?.performanceLocation ?? null,
-    ).map((id) => this.db.collection(GEOGRAPHIES).doc(id));
+    const performanceLocation = bundle.aggregate.package?.performanceLocation ?? null;
+    const geographyRefs = localityIds(performanceLocation).map((id) =>
+      this.db.collection(GEOGRAPHIES).doc(id),
+    );
+    const boundLocationItems = organizationLocationItems(performanceLocation);
+    const organizationLocationRef = boundLocationItems.length > 0
+      ? this.db.collection(ORGANIZATION_LOCATIONS).doc(String(bundle.aggregate.issuerOrganizationId))
+      : null;
 
     return this.db.runTransaction(async (transaction) => {
-      // Replay recovery intentionally precedes current geography reads.
+      // Replay recovery intentionally precedes current geography/location reads.
       const commandSnapshot = await transaction.get(commandRef);
       if (commandSnapshot.exists) {
         const prior = commandSnapshot.data() as RfxCommandReceipt;
@@ -126,6 +186,9 @@ export class Iss006GovernedRfxRepository implements RfxRepository {
         throw new RfxPersistenceConflictError("RFx command identity collision.");
       }
 
+      const organizationLocationSnapshot = organizationLocationRef
+        ? await transaction.get(organizationLocationRef)
+        : null;
       const records = await transaction.getAll(
         aggregateRef,
         eventRef,
@@ -165,6 +228,25 @@ export class Iss006GovernedRfxRepository implements RfxRepository {
         ) {
           throw new RfxPersistenceConflictError(
             "RFx package performance locality authority changed.",
+          );
+        }
+      }
+
+      if (boundLocationItems.length > 0) {
+        if (!organizationLocationSnapshot?.exists) {
+          throw new RfxPersistenceConflictError(
+            "RFx package organization location authority changed.",
+          );
+        }
+        const currentLocation = organizationLocationSnapshot.data() as ConfirmedOrganizationLocation;
+        if (
+          String(currentLocation.organizationId) !== String(bundle.aggregate.issuerOrganizationId) ||
+          !boundLocationItems.every((item) =>
+            sameOrganizationLocationProjection(item, currentLocation),
+          )
+        ) {
+          throw new RfxPersistenceConflictError(
+            "RFx package organization location authority changed.",
           );
         }
       }
