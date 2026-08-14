@@ -13,9 +13,10 @@ test("dismissed Phase 2 action surface follows validated spatial panel state", (
   assert.match(controller, /if \(!surfaceOpen\) return null/);
 });
 
-test("ordinary permanent-lens activation reopens the existing Room surface before changing lens", () => {
+test("ordinary permanent-lens activation reopens the existing Room surface after the lens transaction", () => {
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
-  assert.match(controller, /reopenActiveExchangeRoomSurface\(\);\s*onLensSelect\(lens\);/);
+  assert.match(controller, /onLensSelect\(lens\);\s*reopenActiveExchangeRoomSurface\(\);/);
+  assert.doesNotMatch(controller, /reopenActiveExchangeRoomSurface\(\);\s*onLensSelect\(lens\);/);
   assert.match(controller, /Object\.freeze\(\{ \.\.\.current, panelOpen: true \}\)/);
   assert.match(controller, /serializeParticipantSpatialContext\(reopened\)/);
   assert.match(controller, /PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT/);
