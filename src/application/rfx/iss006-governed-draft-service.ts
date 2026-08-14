@@ -105,7 +105,11 @@ export class RfxIss006GovernedDraftService extends RfxDraftService {
       throw new RfxDraftError("invalid", "Performance location is invalid.");
     }
     if (selection.mode === "multiple") {
-      if (!Array.isArray(selection.locations)) {
+      if (
+        !Array.isArray(selection.locations) ||
+        selection.locations.length < 2 ||
+        selection.locations.length > 8
+      ) {
         throw new RfxDraftError("invalid", "Multiple performance locations are invalid.");
       }
       for (const item of selection.locations) {
