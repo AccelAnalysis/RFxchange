@@ -13,7 +13,6 @@ import {
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
 import { apiProblem } from "@/src/infrastructure/http/api-problem";
-import { assertServerRfxIss006AuthoritativeBoundary } from "@/src/infrastructure/rfx/iss006-validation-runtime";
 import {
   createServerRfxDraftService,
   createServerRfxPublicationService,
@@ -174,17 +173,10 @@ export async function POST(request: NextRequest) {
           { status: 400 },
         );
       }
-      const packageInput = body.package as RfxPackageInput;
-      await assertServerRfxIss006AuthoritativeBoundary({
-        context: scope.context,
-        organizationId: scope.organizationId,
-        membershipId: scope.membershipId,
-        package: packageInput,
-      });
       const result = await service.savePackage(scope, {
         rfxId: String(body.rfxId ?? ""),
         expectedVersion: Number(body.expectedVersion),
-        package: packageInput,
+        package: body.package as RfxPackageInput,
       });
       return NextResponse.json(result);
     }
