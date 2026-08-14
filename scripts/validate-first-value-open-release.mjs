@@ -2,12 +2,13 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
-const [model, service, runtime, api, firstValuePage, exchangePage, repository, rules, workflow, architecture] = await Promise.all([
+const [model, service, runtime, api, firstValuePage, joinPage, exchangePage, repository, rules, workflow, architecture] = await Promise.all([
   read("src/domain/first-value/model.ts"),
   read("src/application/activation/open-release.ts"),
   read("src/infrastructure/activation-release/runtime.ts"),
   read("app/api/first-value/route.ts"),
   read("app/first-value/page.tsx"),
+  read("app/join/page.tsx"),
   read("app/exchange/page.tsx"),
   read("src/infrastructure/firestore/first-value.ts"),
   read("firestore.rules"),
@@ -32,6 +33,15 @@ for (const required of ["accountSecurity.inspect", "getForMembership", "isCurren
 assert.ok(api.includes('Readonly<{ selectedIntent?: unknown }>'));
 assert.ok(api.includes("resolveParticipantRoute") && !api.includes("organizationId?: unknown"));
 assert.ok(firstValuePage.includes('orientation.status !== "completed"'));
+assert.ok(service.includes('"current-policies": "/join?step=legal"'), "Current-policy OPEN remediation must point to the legal remediation route.");
+for (const required of [
+  'requestedStep === "legal"',
+  'access.state.lifecycleState === "controlled-platform"',
+  "createServerActivationJourneyService().state(access.context)",
+  'activationState.nextStep !== "legal"',
+  "activationUserId = access.context.user.id",
+]) assert.ok(joinPage.includes(required), `Legal remediation routing is missing server-authorized guard: ${required}`);
+assert.ok(!joinPage.includes("acceptLegal("), "The remediation route must never auto-accept policy terms.");
 assert.ok(api.includes('nextUrl: "/exchange"'));
 assert.ok(exchangePage.includes('appendFoundingAcquisitionIntent("/geography/canvas")'));
 assert.ok(!exchangePage.includes("service.evaluate(scope)") && !exchangePage.includes("gate.remediation"));
@@ -40,4 +50,4 @@ assert.ok(rules.includes("match /firstValueSelections/{documentId}") && rules.in
 assert.ok(workflow.includes("smoke-first-value-open-emulator.mjs"));
 assert.ok(architecture.includes("EDU-009") && architecture.includes("EDU-010"));
 
-console.log("EDU-009/010 first-value and server-authoritative OPEN architecture validated.");
+console.log("EDU-009/010 first-value, policy remediation, and server-authoritative OPEN architecture validated.");
