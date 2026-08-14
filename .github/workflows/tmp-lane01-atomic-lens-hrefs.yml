@@ -1,0 +1,123 @@
+name: temporary-lane01-atomic-lens-hrefs
+on:
+  push:
+    branches: [lane01/exchange-room-phase2]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: lane01/exchange-room-phase2
+          fetch-depth: 0
+      - name: Patch navigation projection and focused test
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          nav = Path('src/components/participant/ParticipantTopNavigation.tsx')
+          source = nav.read_text()
+          marker = '''function storedOpportunityHref(): string {
+            return participantSpatialLensHref("opportunities-rfx");
+          }
+          '''
+          insert = '''function storedOpportunityHref(): string {
+            return participantSpatialLensHref("opportunities-rfx");
+          }
+
+          interface ParticipantLensHrefSnapshot {
+            readonly intelligenceHref: string;
+            readonly opportunityHref: string;
+            readonly resourceHref: string;
+            readonly referralHref: string;
+          }
+
+          const DEFAULT_LENS_HREF_SNAPSHOT = JSON.stringify({
+            intelligenceHref: CANONICAL_INTELLIGENCE_HREF,
+            opportunityHref: "/opportunities",
+            resourceHref: "/resources",
+            referralHref: "/referrals",
+          } satisfies ParticipantLensHrefSnapshot);
+
+          function storedLensHrefSnapshot(): string {
+            return JSON.stringify({
+              intelligenceHref: storedIntelligenceHref(),
+              opportunityHref: storedOpportunityHref(),
+              resourceHref: storedResourceHref(),
+              referralHref: storedReferralHref(),
+            } satisfies ParticipantLensHrefSnapshot);
+          }
+          '''
+          if source.count(marker) != 1:
+              raise SystemExit(f'expected one storedOpportunityHref block, found {source.count(marker)}')
+          source = source.replace(marker, insert, 1)
+
+          old = '''  const intelligenceHref = useSyncExternalStore(
+            subscribeIntelligenceHref,
+            storedIntelligenceHref,
+            () => CANONICAL_INTELLIGENCE_HREF,
+          );
+          const resourceHref = useSyncExternalStore(
+            subscribeIntelligenceHref,
+            storedResourceHref,
+            () => "/resources",
+          );
+          const referralHref = useSyncExternalStore(
+            subscribeIntelligenceHref,
+            storedReferralHref,
+            () => "/referrals",
+          );
+          const opportunityHref = useSyncExternalStore(
+            subscribeIntelligenceHref,
+            storedOpportunityHref,
+            () => "/opportunities",
+          );
+          '''
+          new = '''  const serializedLensHrefs = useSyncExternalStore(
+            subscribeIntelligenceHref,
+            storedLensHrefSnapshot,
+            () => DEFAULT_LENS_HREF_SNAPSHOT,
+          );
+          const {
+            intelligenceHref,
+            opportunityHref,
+            resourceHref,
+            referralHref,
+          } = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;
+          '''
+          if source.count(old) != 1:
+              raise SystemExit(f'expected one four-hook href block, found {source.count(old)}')
+          nav.write_text(source.replace(old, new, 1))
+
+          test = Path('test/participant-lens-controller-phase2.test.mjs')
+          tests = test.read_text()
+          anchor = '''test("lens changes preserve the map, camera and selected organization substrate", () => {'''
+          regression = '''test("permanent lens deep links are projected atomically from one spatial-store snapshot", () => {
+            const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
+            assert.match(navigation, /function storedLensHrefSnapshot\(\): string/);
+            assert.match(navigation, /intelligenceHref: storedIntelligenceHref\(\)/);
+            assert.match(navigation, /opportunityHref: storedOpportunityHref\(\)/);
+            assert.match(navigation, /resourceHref: storedResourceHref\(\)/);
+            assert.match(navigation, /referralHref: storedReferralHref\(\)/);
+            assert.match(navigation, /const serializedLensHrefs = useSyncExternalStore\([\s\S]*storedLensHrefSnapshot[\s\S]*DEFAULT_LENS_HREF_SNAPSHOT/);
+            assert.equal((navigation.match(/useSyncExternalStore\(/g) ?? []).length, 1);
+          });
+
+          test("lens changes preserve the map, camera and selected organization substrate", () => {'''
+          if tests.count(anchor) != 1:
+              raise SystemExit(f'expected one lens-change test anchor, found {tests.count(anchor)}')
+          test.write_text(tests.replace(anchor, regression, 1))
+          PY
+          git diff --check
+      - name: Commit Lane 01 correction
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/components/participant/ParticipantTopNavigation.tsx test/participant-lens-controller-phase2.test.mjs
+          git commit -m "Project Phase 2 lens deep links atomically"
+          git push origin HEAD:lane01/exchange-room-phase2
