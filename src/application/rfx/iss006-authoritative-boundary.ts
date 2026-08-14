@@ -11,9 +11,16 @@ import type {
   RfxPerformanceLocationSelection,
   RfxSinglePerformanceLocationSelection,
 } from "../../domain/rfx/model.ts";
+import type { OrganizationMembershipId } from "../../domain/users/model.ts";
+import {
+  authorizeOrganizationOperation,
+  type OrganizationOperationAuthorizationDependencies,
+} from "../auth/authorize-organization-operation.ts";
+import type { AuthenticatedServerContext } from "../auth/server-session.ts";
 import { RfxDraftError } from "./rfx-draft-service.ts";
 
 export interface RfxIss006AuthorityDependencies {
+  readonly authorization: OrganizationOperationAuthorizationDependencies;
   readonly geographies: GeographyDefinitionRepository;
   readonly locations: ConfirmedOrganizationLocationRepository;
 }
@@ -44,7 +51,10 @@ async function requireReleasedLocality(
 
 async function requireCurrentOrganizationLocation(
   organizationIdValue: string,
-  selection: Exclude<RfxSinglePerformanceLocationSelection, Readonly<{ mode: "locality"; localityId: string }>>,
+  selection: Exclude<
+    RfxSinglePerformanceLocationSelection,
+    Readonly<{ mode: "locality"; localityId: string }>
+  >,
   dependencies: RfxIss006AuthorityDependencies,
 ): Promise<void> {
   let issuerOrganizationId;
@@ -110,11 +120,36 @@ async function validatePerformanceLocation(
  */
 export async function assertRfxIss006AuthoritativeBoundary(
   input: Readonly<{
+    context: AuthenticatedServerContext | null;
     organizationId: string;
+    membershipId: string;
     package: RfxPackageInput;
   }>,
   dependencies: RfxIss006AuthorityDependencies,
 ): Promise<void> {
+  let issuerOrganizationId;
+  try {
+    issuerOrganizationId = organizationId(input.organizationId);
+  } catch {
+    throw new RfxDraftError("forbidden", "RFx workspace access is unavailable.");
+  }
+
+  const authorization = await authorizeOrganizationOperation(
+    {
+      context: input.context,
+      organizationId: issuerOrganizationId,
+      membershipId: input.membershipId as OrganizationMembershipId,
+      permission: "rfx.create",
+    },
+    dependencies.authorization,
+  );
+  if (!authorization.allowed) {
+    throw new RfxDraftError(
+      "forbidden",
+      `RFx workspace access is unavailable (${authorization.reason}).`,
+    );
+  }
+
   try {
     assertRfxIss006StructuredValueAuthority(input.package);
     await validatePerformanceLocation(
