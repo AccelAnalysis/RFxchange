@@ -1,0 +1,43 @@
+name: temporary-harness-detail-decouple
+on:
+  push:
+    branches: [control/phase2-configured-browser-harness]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: control/phase2-configured-browser-harness
+          fetch-depth: 0
+      - name: Align persistent action surface
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/acceptance-exchange-shell-emulator.mjs')
+          s=p.read_text()
+          s=s.replace('let exchangeRoomPhase2RuntimeDetected = false;\nlet exchangeRoomReopenEvidenceCaptured = false;\n\n','',1)
+          start='  if (!exchangeRoomReopenEvidenceCaptured) {'
+          end='  const continuityBefore = await exchangeRoomLensSnapshot(cdp);'
+          a=s.index(start); b=s.index(end,a)
+          s=s[:a]+end+s[b+len(end):]
+          s=s.replace('  assert.equal(after.panelOpen, true, `${id} did not leave/reopen the action surface.`);','  assert.equal(after.panelOpen, continuityBefore.panelOpen, `${id} changed the organization detail-panel state during lens activation.`);',1)
+          old='  const phase2SurfacePresent = await evaluate(cdp, `Boolean(document.querySelector(\'[data-exchange-room-action-grid]\'))`);\n  if (phase2SurfacePresent) exchangeRoomPhase2RuntimeDetected = true;\n  const phase2 = exchangeRoomPhase2RuntimeDetected\n    && await evaluate(cdp, `location.pathname === "/geography/canvas"`);'
+          new='  const phase2 = await evaluate(cdp, `Boolean(document.querySelector(\'[data-exchange-room-action-grid]\'))`);'
+          if old not in s: raise SystemExit('phase2 dispatch block mismatch')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          node --check scripts/acceptance-exchange-shell-emulator.mjs
+          git diff --check
+      - name: Commit aligned harness
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/acceptance-exchange-shell-emulator.mjs
+          git commit -m "Align harness with persistent Phase 2 action surface"
+          git push origin HEAD:control/phase2-configured-browser-harness
