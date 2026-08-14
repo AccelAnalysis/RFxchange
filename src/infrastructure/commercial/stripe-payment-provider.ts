@@ -26,7 +26,13 @@ interface StripeRuntimeConfiguration { readonly mode: StripeMode; readonly secre
 interface StripeCustomer { readonly id: string; readonly deleted?: boolean; readonly metadata?: Readonly<Record<string, string>>; }
 interface StripeCheckoutSession { readonly id: string; readonly url: string | null; readonly customer: string | null; }
 interface StripePortalSession { readonly id: string; readonly url: string; }
-interface StripeSubscription { readonly id: string; readonly status: string; }
+interface StripeSubscriptionItem { readonly quantity?: number | null; readonly price?: Readonly<{ readonly id?: string | null }> | null; }
+interface StripeSubscription {
+  readonly id: string;
+  readonly status: string;
+  readonly metadata?: Readonly<Record<string, string>>;
+  readonly items?: Readonly<{ readonly data?: readonly StripeSubscriptionItem[] }>;
+}
 interface StripeList<T> { readonly data: readonly T[]; }
 
 function required(value: string | undefined, label: string): string {
@@ -88,11 +94,32 @@ async function findCorrelatedCustomer(organizationId: string): Promise<StripeCus
   return exact[0] ?? null;
 }
 
-async function assertNoProviderSubscription(customerReference: string): Promise<void> {
+function subscriptionItems(subscription: StripeSubscription): readonly StripeSubscriptionItem[] {
+  return subscription.items?.data ?? [];
+}
+
+async function assertNoProviderSubscription(customerReference: string, organizationId: string): Promise<void> {
   const query = new URLSearchParams({ customer: customerReference, status: "all", limit: "100" });
   const subscriptions = await stripeRequest<StripeList<StripeSubscription>>(`/subscriptions?${query.toString()}`);
-  const blocking = subscriptions.data.find((subscription) => !["canceled", "incomplete_expired"].includes(subscription.status));
-  if (blocking) throw new Error("This organization already has a non-terminal Founding subscription at the payment provider.");
+  const config = configuration();
+
+  for (const subscription of subscriptions.data) {
+    if (["canceled", "incomplete_expired"].includes(subscription.status)) continue;
+    const items = subscriptionItems(subscription);
+    const usesApprovedFoundingPrice = items.some((item) => item.price?.id === config.priceId);
+    const correlated = subscription.metadata?.organizationId === organizationId && subscription.metadata?.rfxchangePlan === "founding";
+
+    if (correlated) {
+      if (items.length !== 1 || items[0]?.price?.id !== config.priceId || Number(items[0]?.quantity) !== 1) {
+        throw new Error("Existing correlated Founding subscription does not match the approved Price and quantity; checkout fails closed.");
+      }
+      throw new Error("This organization already has a non-terminal Founding subscription at the payment provider.");
+    }
+
+    if (usesApprovedFoundingPrice) {
+      throw new Error("A non-terminal subscription uses the approved Founding Price without exact organization correlation; checkout fails closed.");
+    }
+  }
 }
 
 export class StripePaymentProvider implements PaymentProvider {
@@ -115,7 +142,8 @@ export class StripePaymentProvider implements PaymentProvider {
     if (!request.customerReference || request.customerReference.kind !== "customer") throw new Error("Founding checkout requires an existing provider customer reference.");
     if (request.customerReference.providerKey !== PROVIDER_KEY) throw new Error("Founding checkout customer belongs to a different payment provider.");
     const customerId = String(request.customerReference.externalReference);
-    await assertNoProviderSubscription(customerId);
+    const organizationId = String(request.organizationId);
+    await assertNoProviderSubscription(customerId, organizationId);
     const config = configuration();
     const checkout = await stripeRequest<StripeCheckoutSession>("/checkout/sessions", {
       method: "POST",
@@ -127,11 +155,11 @@ export class StripePaymentProvider implements PaymentProvider {
         "line_items[0][quantity]": 1,
         success_url: request.successUrl,
         cancel_url: request.cancelUrl,
-        client_reference_id: String(request.organizationId),
+        client_reference_id: organizationId,
         expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
-        "metadata[organizationId]": String(request.organizationId),
+        "metadata[organizationId]": organizationId,
         "metadata[rfxchangePlan]": "founding",
-        "subscription_data[metadata][organizationId]": String(request.organizationId),
+        "subscription_data[metadata][organizationId]": organizationId,
         "subscription_data[metadata][rfxchangePlan]": "founding",
       }),
     });
