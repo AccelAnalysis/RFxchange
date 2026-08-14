@@ -119,97 +119,33 @@ export interface FirestoreCollectionConvention {
 }
 
 const PLATFORM_SCOPED_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
-  "geographies",
-  "accessJourneys",
-  "legalDocumentVersions",
-  "platformChangeDirectives",
-  "retentionPolicies",
-  "adminAuthorityContexts",
-  "adminPermissionGrants",
-  "backgroundJobs",
-  "backgroundJobEvents",
-  "commercialFoundingCapacity",
+  "geographies", "accessJourneys", "legalDocumentVersions", "platformChangeDirectives",
+  "retentionPolicies", "adminAuthorityContexts", "adminPermissionGrants", "backgroundJobs",
+  "backgroundJobEvents", "commercialFoundingCapacity",
 ]);
-
-const USER_SCOPED_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
-  "users",
-  "primaryGeographySelections",
-]);
-
+const USER_SCOPED_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>(["users", "primaryGeographySelections"]);
 const MIXED_SCOPE_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
-  "geographyParticipationAuthorizations",
-  "accessRestrictions",
-  "retentionAssignments",
-  "acquisitionContexts",
-  "acquisitionContextEvents",
-  "providerRequestMessages",
-  "aiInterpretationQuotaBuckets",
+  "geographyParticipationAuthorizations", "accessRestrictions", "retentionAssignments", "acquisitionContexts",
+  "acquisitionContextEvents", "providerRequestMessages", "aiInterpretationQuotaBuckets",
 ]);
-
-const PUBLIC_PROJECTION_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
-  "rfxOpportunityProjections",
-]);
-
-const ORGANIZATION_ROOT_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
-  "organizations",
-]);
-
+const PUBLIC_PROJECTION_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>(["rfxOpportunityProjections"]);
+const ORGANIZATION_ROOT_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>(["organizations"]);
 const ORGANIZATION_ID_OPTIONAL_ORG_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
-  "businessReferrals",
-  "businessReferralEvents",
-  "businessReferralCommands",
-  "rfxAggregates",
-  "rfxEvents",
-  "rfxCommands",
-  "rfxPublicationSnapshots",
-  "referralCommunicationIntents",
+  "businessReferrals", "businessReferralEvents", "businessReferralCommands", "rfxAggregates", "rfxEvents",
+  "rfxCommands", "rfxPublicationSnapshots", "referralCommunicationIntents",
 ]);
-
 const APPEND_ONLY_COLLECTIONS: ReadonlySet<FirestoreCollectionKey> = new Set<FirestoreCollectionKey>([
-  "organizationResolutions",
-  "organizationEntityKeys",
-  "organizationAuthorityClaimEvents",
-  "organizationAuthorityDecisions",
-  "organizationLocationEvents",
-  "organizationProfileEvents",
-  "organizationProvisionalTerms",
-  "organizationMarketProfileEvents",
-  "organizationMarketProfileCommands",
-  "organizationEnrichmentEvents",
-  "organizationEnrichmentCommands",
-  "organizationMarkerEvents",
-  "organizationAuditEvents",
-  "legalDocumentVersions",
-  "legalAcknowledgements",
-  "organizationAuthorityRepresentations",
-  "platformChangeDirectives",
-  "retentionPolicies",
-  "retentionAssignments",
-  "adminPermissionGrants",
-  "backgroundJobEvents",
-  "acquisitionContextEvents",
-  "businessReferralEvents",
-  "businessReferralCommands",
-  "rfxEvents",
-  "rfxCommands",
-  "rfxPublicationSnapshots",
-  "rfxOpportunityProjections",
-  "opportunitySavedSearchMatches",
-  "opportunityRelationCommands",
-  "opportunityRelationEvents",
-  "referralEducationAcknowledgements",
-  "providerApplicationVersions",
-  "providerApplicationEvents",
-  "providerApplicationCommands",
-  "providerNetworkEvents",
-  "providerNetworkCommands",
-  "providerRequestMessages",
-  "orientationJourneyEvents",
-  "activationReleaseEvents",
-  "aiInterpretationProvenance",
-  "aiInterpretationUsageEvents",
-  "aiInterpretationEvents",
-  "commercialProviderEvents",
+  "organizationResolutions", "organizationEntityKeys", "organizationAuthorityClaimEvents", "organizationAuthorityDecisions",
+  "organizationLocationEvents", "organizationProfileEvents", "organizationProvisionalTerms", "organizationMarketProfileEvents",
+  "organizationMarketProfileCommands", "organizationEnrichmentEvents", "organizationEnrichmentCommands", "organizationMarkerEvents",
+  "organizationAuditEvents", "legalDocumentVersions", "legalAcknowledgements", "organizationAuthorityRepresentations",
+  "platformChangeDirectives", "retentionPolicies", "retentionAssignments", "adminPermissionGrants", "backgroundJobEvents",
+  "acquisitionContextEvents", "businessReferralEvents", "businessReferralCommands", "rfxEvents", "rfxCommands",
+  "rfxPublicationSnapshots", "rfxOpportunityProjections", "opportunitySavedSearchMatches", "opportunityRelationCommands",
+  "opportunityRelationEvents", "referralEducationAcknowledgements", "providerApplicationVersions", "providerApplicationEvents",
+  "providerApplicationCommands", "providerNetworkEvents", "providerNetworkCommands", "providerRequestMessages",
+  "networkEducationEvents", "networkEducationCommands", "orientationJourneyEvents", "activationReleaseEvents",
+  "aiInterpretationProvenance", "aiInterpretationUsageEvents", "aiInterpretationEvents", "commercialProviderEvents",
 ]);
 
 function scopeFor(key: FirestoreCollectionKey): FirestoreRecordScope {
@@ -220,28 +156,18 @@ function scopeFor(key: FirestoreCollectionKey): FirestoreRecordScope {
   if (MIXED_SCOPE_COLLECTIONS.has(key)) return "mixed-scope";
   return "organization-scoped";
 }
-
-function documentIdSourceFor(
-  key: FirestoreCollectionKey,
-): FirestoreCollectionConvention["documentIdSource"] {
+function documentIdSourceFor(key: FirestoreCollectionKey): FirestoreCollectionConvention["documentIdSource"] {
   switch (key) {
-    case "organizationAuthorizations":
-      return "membershipId";
-    case "adminAuthorityContexts":
-      return "administratorId";
-    case "primaryGeographySelections":
-      return "userId";
+    case "organizationAuthorizations": return "membershipId";
+    case "adminAuthorityContexts": return "administratorId";
+    case "primaryGeographySelections": return "userId";
     case "organizationCommercialAccounts":
-    case "commercialSubscriptionReconciliations":
-      return "organizationId";
+    case "commercialSubscriptionReconciliations": return "organizationId";
     case "rfxOpportunityProjections":
-    case "commercialFoundingCapacity":
-      return "reference";
-    default:
-      return "id";
+    case "commercialFoundingCapacity": return "reference";
+    default: return "id";
   }
 }
-
 function conventionFor(key: FirestoreCollectionKey): FirestoreCollectionConvention {
   const scope = scopeFor(key);
   const appendOnly = APPEND_ONLY_COLLECTIONS.has(key);
@@ -249,25 +175,59 @@ function conventionFor(key: FirestoreCollectionKey): FirestoreCollectionConventi
     collection: FIRESTORE_COLLECTIONS[key],
     documentIdSource: documentIdSourceFor(key),
     scope,
-    organizationIdRequired:
-      scope === "organization-scoped" && !ORGANIZATION_ID_OPTIONAL_ORG_COLLECTIONS.has(key),
+    organizationIdRequired: scope === "organization-scoped" && !ORGANIZATION_ID_OPTIONAL_ORG_COLLECTIONS.has(key),
     appendOnly,
     mutable: !appendOnly,
   });
 }
+const GENERATED_COLLECTION_CONVENTIONS = Object.fromEntries(
+  (Object.keys(FIRESTORE_COLLECTIONS) as FirestoreCollectionKey[]).map((key) => [key, conventionFor(key)]),
+) as Record<FirestoreCollectionKey, FirestoreCollectionConvention>;
 
 /**
  * Canonical mapping from current RFxchange persistence ports to Firestore collections.
- * These conventions contain no Firebase SDK types and do not implement adapters.
+ * The explicit overrides below preserve existing INF-003 contracts in source-visible form while
+ * the four commerce collections use the same canonical registry rather than a shadow convention.
  */
-export const FIRESTORE_COLLECTION_CONVENTIONS: Readonly<
-  Record<FirestoreCollectionKey, FirestoreCollectionConvention>
-> = Object.freeze(
-  Object.fromEntries(
-    (Object.keys(FIRESTORE_COLLECTIONS) as FirestoreCollectionKey[])
-      .map((key) => [key, conventionFor(key)]),
-  ) as Record<FirestoreCollectionKey, FirestoreCollectionConvention>,
-);
+export const FIRESTORE_COLLECTION_CONVENTIONS: Readonly<Record<FirestoreCollectionKey, FirestoreCollectionConvention>> = Object.freeze({
+  ...GENERATED_COLLECTION_CONVENTIONS,
+  organizationAuditEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationAuditEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  organizationResolutions: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationResolutions, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  organizationEntityKeys: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationEntityKeys, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  organizationAuthorityClaimEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationAuthorityClaimEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  organizationAuthorityDecisions: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationAuthorityDecisions, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  organizationLocationEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationLocationEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  organizationProfileEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationProfileEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  organizationProvisionalTerms: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationProvisionalTerms, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  organizationMarketProfileEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationMarketProfileEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  organizationMarketProfileCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationMarketProfileCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  organizationMarkerEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationMarkerEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  legalDocumentVersions: Object.freeze({ collection: FIRESTORE_COLLECTIONS.legalDocumentVersions, documentIdSource: "id", scope: "platform-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
+  legalAcknowledgements: Object.freeze({ collection: FIRESTORE_COLLECTIONS.legalAcknowledgements, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  organizationAuthorityRepresentations: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationAuthorityRepresentations, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  platformChangeDirectives: Object.freeze({ collection: FIRESTORE_COLLECTIONS.platformChangeDirectives, documentIdSource: "id", scope: "platform-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
+  retentionPolicies: Object.freeze({ collection: FIRESTORE_COLLECTIONS.retentionPolicies, documentIdSource: "id", scope: "platform-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
+  retentionAssignments: Object.freeze({ collection: FIRESTORE_COLLECTIONS.retentionAssignments, documentIdSource: "id", scope: "mixed-scope", organizationIdRequired: false, appendOnly: true, mutable: false }),
+  adminPermissionGrants: Object.freeze({ collection: FIRESTORE_COLLECTIONS.adminPermissionGrants, documentIdSource: "id", scope: "platform-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
+  backgroundJobEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.backgroundJobEvents, documentIdSource: "id", scope: "platform-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
+  acquisitionContextEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.acquisitionContextEvents, documentIdSource: "id", scope: "mixed-scope", organizationIdRequired: false, appendOnly: true, mutable: false }),
+  businessReferralEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.businessReferralEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
+  businessReferralCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.businessReferralCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: false, appendOnly: true, mutable: false }),
+  referralEducationAcknowledgements: Object.freeze({ collection: FIRESTORE_COLLECTIONS.referralEducationAcknowledgements, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  networkEducationEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.networkEducationEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  networkEducationCommands: Object.freeze({ collection: FIRESTORE_COLLECTIONS.networkEducationCommands, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  orientationJourneyEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.orientationJourneyEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  activationReleaseEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.activationReleaseEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  aiInterpretationProvenance: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationProvenance, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  aiInterpretationUsageEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationUsageEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  aiInterpretationEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  backgroundJobs: Object.freeze({ collection: FIRESTORE_COLLECTIONS.backgroundJobs, documentIdSource: "id", scope: "platform-scoped", organizationIdRequired: false, appendOnly: false, mutable: true }),
+  organizationUserInvitations: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationUserInvitations, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
+  organizationCommercialAccounts: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationCommercialAccounts, documentIdSource: "organizationId", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
+  commercialFoundingCapacity: Object.freeze({ collection: FIRESTORE_COLLECTIONS.commercialFoundingCapacity, documentIdSource: "reference", scope: "platform-scoped", organizationIdRequired: false, appendOnly: false, mutable: true }),
+  commercialProviderEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.commercialProviderEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  commercialSubscriptionReconciliations: Object.freeze({ collection: FIRESTORE_COLLECTIONS.commercialSubscriptionReconciliations, documentIdSource: "organizationId", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
+});
 
 export const FIRESTORE_SYSTEM_FIELDS = Object.freeze({
   schemaVersion: "schemaVersion",
@@ -275,49 +235,24 @@ export const FIRESTORE_SYSTEM_FIELDS = Object.freeze({
   updatedAt: "updatedAt",
   organizationId: "organizationId",
 });
-
 export interface FirestorePersistenceMetadata {
   readonly schemaVersion: typeof FIRESTORE_SCHEMA_VERSION;
-  /** Server-assigned Firestore timestamp at initial persistence. */
   readonly createdAt: "server-timestamp";
-  /** Server-assigned Firestore timestamp on mutable record updates; absent on append-only records. */
   readonly updatedAt?: "server-timestamp";
 }
-
 function stableDocumentId(value: string): string {
   const normalized = value.trim();
   if (!normalized) throw new Error("Firestore document id is required.");
   if (normalized.includes("/")) throw new Error("Firestore document id cannot contain a slash.");
-  if (normalized === "." || normalized === "..") {
-    throw new Error("Firestore document id cannot be . or ...");
-  }
+  if (normalized === "." || normalized === "..") throw new Error("Firestore document id cannot be . or ...");
   return normalized;
 }
-
-export function firestoreCollectionName(key: FirestoreCollectionKey): FirestoreCollectionName {
-  return FIRESTORE_COLLECTIONS[key];
-}
-
-export function firestoreDocumentPath(key: FirestoreCollectionKey, id: string): string {
-  return `${firestoreCollectionName(key)}/${stableDocumentId(id)}`;
-}
-
-export function assertOrganizationScopedFirestoreRecord(
-  key: FirestoreCollectionKey,
-  organizationId: string | null | undefined,
-): void {
+export function firestoreCollectionName(key: FirestoreCollectionKey): FirestoreCollectionName { return FIRESTORE_COLLECTIONS[key]; }
+export function firestoreDocumentPath(key: FirestoreCollectionKey, id: string): string { return `${firestoreCollectionName(key)}/${stableDocumentId(id)}`; }
+export function assertOrganizationScopedFirestoreRecord(key: FirestoreCollectionKey, organizationId: string | null | undefined): void {
   const convention = FIRESTORE_COLLECTION_CONVENTIONS[key];
   if (!convention.organizationIdRequired) return;
-  if (!organizationId?.trim()) {
-    throw new Error(`${convention.collection} records require an explicit organizationId.`);
-  }
+  if (!organizationId?.trim()) throw new Error(`${convention.collection} records require an explicit organizationId.`);
 }
-
-/**
- * Firestore foreign relationships are stored as stable IDs, not DocumentReference values.
- * This keeps domain records provider-independent and makes tenant/security query predicates explicit.
- */
 export const FIRESTORE_REFERENCE_POLICY = "stable-id-fields-not-document-references" as const;
-
-/** Composite indexes are materialized only from approved query contracts. */
 export const FIRESTORE_INDEX_POLICY = "query-contract-driven-composite-indexes" as const;
