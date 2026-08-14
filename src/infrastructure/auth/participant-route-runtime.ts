@@ -66,17 +66,17 @@ async function revalidateBoundActivationRestriction(
   resolution: ParticipantRouteResolution,
   dependencies: ParticipantRouteRuntimeDependencies,
 ): Promise<ParticipantRouteResolution> {
-  if (
-    resolution.kind !== "activation-required" ||
-    !resolution.state?.membershipId
-  ) return resolution;
+  if (resolution.kind !== "activation-required") return resolution;
+  const activationState = resolution.state;
+  const membershipId = activationState?.membershipId;
+  if (!membershipId) return resolution;
 
   const foundation = createServerFirestoreFoundationRepositories(getServerFirestore());
   let membership;
   try {
     membership = await measureServerOperation(
       "participant-route.activation-binding",
-      () => foundation.users.memberships.getById(resolution.state!.membershipId!),
+      () => foundation.users.memberships.getById(membershipId),
       "revalidate incomplete activation membership binding",
     );
   } catch (error) {
@@ -86,8 +86,8 @@ async function revalidateBoundActivationRestriction(
     !membership ||
     membership.status !== "active" ||
     membership.userId !== resolution.context.user.id ||
-    !resolution.state.organization ||
-    String(membership.organizationId) !== resolution.state.organization.id
+    !activationState.organization ||
+    String(membership.organizationId) !== activationState.organization.id
   ) {
     throw new ParticipantRouteDependencyUnavailableError(
       "workspace-state",
@@ -112,7 +112,7 @@ async function revalidateBoundActivationRestriction(
   return Object.freeze({
     kind: "restricted" as const,
     context: resolution.context,
-    state: resolution.state,
+    state: activationState,
     membership,
     restrictionState,
   });
