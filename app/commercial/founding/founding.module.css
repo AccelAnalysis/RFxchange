@@ -1,0 +1,106 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.25rem, 4vw, 4rem);
+  background: var(--surface-page, #f7f3ea);
+  color: var(--text-primary, #0b0b0d);
+}
+
+.shell :global(.commerce-card) {
+  width: min(100%, 46rem);
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  border-radius: 1.25rem;
+  background: var(--surface-card, #fffdf8);
+  box-shadow: 0 1.25rem 3.5rem rgb(11 11 13 / 8%);
+}
+
+.shell :global(.commerce-card h1),
+.shell :global(.commerce-card h2),
+.shell :global(.commerce-card p) {
+  margin: 0;
+}
+
+.shell :global(.commerce-card h1) {
+  max-width: 18ch;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.02;
+}
+
+.shell :global(.commerce-card p) {
+  max-width: 65ch;
+  line-height: 1.6;
+}
+
+.shell :global(.commerce-eyebrow) {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.shell :global(.commerce-plan) {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-block: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.shell :global(.commerce-plan strong) {
+  font-size: 1.2rem;
+}
+
+.shell :global(.commerce-plan span) {
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.shell :global(.commerce-actions) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.shell :global(.commerce-actions button),
+.shell :global(.commerce-actions a),
+.shell :global(.commerce-card > button) {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 750;
+}
+
+.shell :global(.commerce-actions button),
+.shell :global(.commerce-card > button) {
+  border: 1px solid #0b0b0d;
+  background: #0b0b0d;
+  color: #f7f3ea;
+  cursor: pointer;
+}
+
+.shell :global(.commerce-actions button:disabled) {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.shell :global(.commerce-actions a) {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+.shell :global(button:focus-visible),
+.shell :global(a:focus-visible) {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
