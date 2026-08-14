@@ -47,6 +47,9 @@ export default async function JoinPage({ searchParams }: Props) {
     if (access.kind === "access-resolution-required") {
       redirect(participantEntryDestination(access));
     }
+    if (access.kind === "restricted") {
+      redirect(`/?access=${encodeURIComponent(access.restrictionState)}`);
+    }
     if (access.kind === "authorized") {
       const destination = access.state.controlledPlatformUrl ??
         (access.state.lifecycleState === "open-platform" ? "/exchange" : "/geography/canvas");
