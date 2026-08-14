@@ -56,27 +56,12 @@ jobs:
               raise SystemExit(f'expected one storedOpportunityHref block, found {source.count(marker)}')
           source = source.replace(marker, insert, 1)
 
-          old = '''  const intelligenceHref = useSyncExternalStore(
-            subscribeIntelligenceHref,
-            storedIntelligenceHref,
-            () => CANONICAL_INTELLIGENCE_HREF,
-          );
-          const resourceHref = useSyncExternalStore(
-            subscribeIntelligenceHref,
-            storedResourceHref,
-            () => "/resources",
-          );
-          const referralHref = useSyncExternalStore(
-            subscribeIntelligenceHref,
-            storedReferralHref,
-            () => "/referrals",
-          );
-          const opportunityHref = useSyncExternalStore(
-            subscribeIntelligenceHref,
-            storedOpportunityHref,
-            () => "/opportunities",
-          );
-          '''
+          start_marker = '  const intelligenceHref = useSyncExternalStore('
+          end_marker = '\n\n  useEffect(() => {'
+          if source.count(start_marker) != 1:
+              raise SystemExit(f'expected one href snapshot start marker, found {source.count(start_marker)}')
+          start = source.index(start_marker)
+          end = source.index(end_marker, start)
           new = '''  const serializedLensHrefs = useSyncExternalStore(
             subscribeIntelligenceHref,
             storedLensHrefSnapshot,
@@ -87,24 +72,22 @@ jobs:
             opportunityHref,
             resourceHref,
             referralHref,
-          } = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;
-          '''
-          if source.count(old) != 1:
-              raise SystemExit(f'expected one four-hook href block, found {source.count(old)}')
-          nav.write_text(source.replace(old, new, 1))
+          } = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;'''
+          source = source[:start] + new + source[end:]
+          nav.write_text(source)
 
           test = Path('test/participant-lens-controller-phase2.test.mjs')
           tests = test.read_text()
-          anchor = '''test("lens changes preserve the map, camera and selected organization substrate", () => {'''
+          anchor = 'test("lens changes preserve the map, camera and selected organization substrate", () => {'
           regression = '''test("permanent lens deep links are projected atomically from one spatial-store snapshot", () => {
             const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
-            assert.match(navigation, /function storedLensHrefSnapshot\(\): string/);
-            assert.match(navigation, /intelligenceHref: storedIntelligenceHref\(\)/);
-            assert.match(navigation, /opportunityHref: storedOpportunityHref\(\)/);
-            assert.match(navigation, /resourceHref: storedResourceHref\(\)/);
-            assert.match(navigation, /referralHref: storedReferralHref\(\)/);
-            assert.match(navigation, /const serializedLensHrefs = useSyncExternalStore\([\s\S]*storedLensHrefSnapshot[\s\S]*DEFAULT_LENS_HREF_SNAPSHOT/);
-            assert.equal((navigation.match(/useSyncExternalStore\(/g) ?? []).length, 1);
+            assert.match(navigation, /function storedLensHrefSnapshot\\(\\): string/);
+            assert.match(navigation, /intelligenceHref: storedIntelligenceHref\\(\\)/);
+            assert.match(navigation, /opportunityHref: storedOpportunityHref\\(\\)/);
+            assert.match(navigation, /resourceHref: storedResourceHref\\(\\)/);
+            assert.match(navigation, /referralHref: storedReferralHref\\(\\)/);
+            assert.match(navigation, /const serializedLensHrefs = useSyncExternalStore\\([\\s\\S]*storedLensHrefSnapshot[\\s\\S]*DEFAULT_LENS_HREF_SNAPSHOT/);
+            assert.equal((navigation.match(/useSyncExternalStore\\(/g) ?? []).length, 1);
           });
 
           test("lens changes preserve the map, camera and selected organization substrate", () => {'''
