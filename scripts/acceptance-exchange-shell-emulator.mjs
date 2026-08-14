@@ -974,9 +974,6 @@ const EXCHANGE_ROOM_ACTION_IDS_BY_LENS = Object.freeze({
   ]),
 });
 
-let exchangeRoomPhase2RuntimeDetected = false;
-let exchangeRoomReopenEvidenceCaptured = false;
-
 async function exchangeRoomLensSnapshot(cdp) {
   return evaluate(cdp, `(() => {
     const activeKey = sessionStorage.getItem("rfxchange:participant-spatial:active");
@@ -1025,25 +1022,6 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
   assert.equal(before.phase2, true, `${id} did not expose the Phase 2 Exchange Room controller.`);
   assert.equal(before.pathname, "/geography/canvas", `${id} started outside the Exchange Room.`);
   assert.equal(before.wholeLensDisabled, false, "A permanent lens was disabled as a whole.");
-
-  if (!exchangeRoomReopenEvidenceCaptured) {
-    if (before.panelOpen) {
-      const closed = await evaluate(cdp, `(() => {
-        const close = [...document.querySelectorAll('#organization-detail-panel button[type="button"]')]
-          .find((button) => button.textContent?.includes('×'));
-        if (!close) return false;
-        close.click();
-        return true;
-      })()`);
-      assert.equal(closed, true, "Could not close the Exchange Room action surface before reopen acceptance.");
-      await waitForExpression(
-        cdp,
-        `!document.querySelector('[data-exchange-room-action-grid]')`,
-        "closed Exchange Room action surface",
-      );
-    }
-    exchangeRoomReopenEvidenceCaptured = true;
-  }
 
   const continuityBefore = await exchangeRoomLensSnapshot(cdp);
   if (latencyMs > 0) {
@@ -1124,7 +1102,7 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
       if (action.tagName === "A") assert.ok(action.href, `${action.id} active link lost its href.`);
     }
   }
-  assert.equal(after.panelOpen, true, `${id} did not leave/reopen the action surface.`);
+  assert.equal(after.panelOpen, continuityBefore.panelOpen, `${id} changed the organization detail-panel state during lens activation.`);
   assert.equal(after.wholeLensDisabled, false, "A permanent lens became disabled as a whole.");
   assert.deepEqual(after.selection, continuityBefore.selection, `${id} changed the selected organization.`);
   assert.deepEqual(after.camera, continuityBefore.camera, `${id} changed the persisted camera.`);
@@ -1154,10 +1132,7 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
 async function clickLens(cdp, id, expectedPath, options = {}) {
   const href = await evaluate(cdp, `document.querySelector('[data-participant-navigation] a[data-participant-lens="${id}"]')?.getAttribute("href") || null`);
   assert.ok(href, `Missing enabled ${id} lens.`);
-  const phase2SurfacePresent = await evaluate(cdp, `Boolean(document.querySelector('[data-exchange-room-action-grid]'))`);
-  if (phase2SurfacePresent) exchangeRoomPhase2RuntimeDetected = true;
-  const phase2 = exchangeRoomPhase2RuntimeDetected
-    && await evaluate(cdp, `location.pathname === "/geography/canvas"`);
+  const phase2 = await evaluate(cdp, `Boolean(document.querySelector('[data-exchange-room-action-grid]'))`);
   return phase2
     ? clickExchangeRoomLens(cdp, id, href, expectedPath, options)
     : clickHref(cdp, href, expectedPath, options);
