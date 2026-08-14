@@ -31,7 +31,9 @@ test("browser cannot supply commercial authority or payment terms", () => {
   assert.ok(checkoutRoute.includes("resolveFoundingOrganizationContext"));
   assert.ok(checkoutRoute.includes("RFXCHANGE_PUBLIC_ORIGIN"));
   assert.ok(runtime.includes("resolveFoundingCheckoutReleaseDecision"));
-  assert.ok(runtime.indexOf("assertRelease(organizationId)") < runtime.indexOf("reserveFoundingCheckout"), "release policy must be evaluated before capacity/provider mutation");
+  const beginCheckout = runtime.slice(runtime.indexOf("export async function beginFoundingCheckout"));
+  assert.ok(beginCheckout.indexOf("assertRelease(organizationId)") >= 0, "checkout must evaluate the release policy");
+  assert.ok(beginCheckout.indexOf("assertRelease(organizationId)") < beginCheckout.indexOf("reserveFoundingCheckout"), "release policy must be evaluated before capacity/provider mutation");
   assert.ok(runtime.includes('organizationPermission("billing.manage")'));
   assert.ok(provider.includes('planKey: "founding"'));
   assert.ok(provider.includes("priceId: config.priceId"));
