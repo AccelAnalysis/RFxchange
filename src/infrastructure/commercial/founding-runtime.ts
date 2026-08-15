@@ -117,6 +117,25 @@ export async function releaseUnattachedFoundingReservation(db: Firestore, input:
   });
 }
 
+/** Release only provider-confirmed expiry for the exact currently attached Checkout reservation. */
+export async function releaseExpiredAttachedFoundingReservation(db: Firestore, input: Readonly<{ organizationId: string; reservationId: string; checkoutSessionId: string }>): Promise<boolean> {
+  const ref = db.collection(CAPACITY_COLLECTION).doc(CAPACITY_DOCUMENT);
+  return db.runTransaction(async (transaction) => {
+    const snap = await transaction.get(ref);
+    const state = capacityFromData(snap.data());
+    if (state.committedOrganizationIds.includes(input.organizationId)) return false;
+    const index = state.reservations.findIndex((reservation) =>
+      reservation.organizationId === input.organizationId &&
+      reservation.reservationId === input.reservationId &&
+      reservation.checkoutSessionId === input.checkoutSessionId
+    );
+    if (index < 0) return false;
+    const reservations = state.reservations.filter((_, candidateIndex) => candidateIndex !== index);
+    writeCapacity(transaction, snap, Object.freeze({ ...state, reservations: Object.freeze(reservations) }));
+    return true;
+  });
+}
+
 function stripeCustomerId(account: OrganizationCommercialAccount): string | null {
   const customers = account.providerReferences.filter((reference) => reference.providerKey === "stripe" && reference.kind === "customer");
   if (customers.length > 1) throw new FoundingCommerceError(503, "provider-customer-state-invalid", "Commercial account contains conflicting Stripe Customer references.");
@@ -129,8 +148,6 @@ async function reconcileAmbiguousFoundingReservations(db: Firestore, currentOrga
   const state = capacityFromData(snapshot.data());
   const cutoff = Date.now() - RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS;
   const candidates = state.reservations.filter((reservation) =>
-    !reservation.checkoutSessionId &&
-    !reservation.checkoutUrl &&
     reservation.reservedAt !== null &&
     Date.parse(reservation.reservedAt) <= cutoff
   );
@@ -141,8 +158,13 @@ async function reconcileAmbiguousFoundingReservations(db: Firestore, currentOrga
     const account = await repository.getByOrganizationId(reservation.organizationId as OrganizationAccount["id"]);
     if (!account) continue;
     const customerId = stripeCustomerId(account);
+    const attached = Boolean(reservation.checkoutSessionId || reservation.checkoutUrl);
     if (!customerId) {
-      await releaseUnattachedFoundingReservation(db, { organizationId: reservation.organizationId, reservationId: reservation.reservationId });
+      if (!attached) {
+        await releaseUnattachedFoundingReservation(db, { organizationId: reservation.organizationId, reservationId: reservation.reservationId });
+      } else if (reservation.organizationId === currentOrganizationId) {
+        throw new FoundingCommerceError(503, "provider-state-unavailable", "Stripe state for the attached Founding reservation could not be established safely.");
+      }
       continue;
     }
     try {
@@ -156,9 +178,26 @@ async function reconcileAmbiguousFoundingReservations(db: Firestore, currentOrga
         if (reservation.organizationId === currentOrganizationId) throw new FoundingCommerceError(409, "provider-subscription-exists", "A non-terminal Founding subscription already exists at the payment provider.");
         continue;
       }
-      if (providerState.reclaimable) {
+      if (!providerState.reclaimable) continue;
+
+      if (!attached) {
         await releaseUnattachedFoundingReservation(db, { organizationId: reservation.organizationId, reservationId: reservation.reservationId });
+        continue;
       }
+
+      const exactExpiredAttachedSession =
+        reservation.checkoutSessionId !== null &&
+        providerState.matchingCheckoutStatus === "expired" &&
+        providerState.matchingCheckoutSessionId === reservation.checkoutSessionId;
+      if (!exactExpiredAttachedSession) {
+        if (reservation.organizationId === currentOrganizationId) throw new FoundingCommerceError(503, "provider-state-unavailable", "Stripe did not confirm expiry of the exact attached Founding Checkout Session.");
+        continue;
+      }
+      await releaseExpiredAttachedFoundingReservation(db, {
+        organizationId: reservation.organizationId,
+        reservationId: reservation.reservationId,
+        checkoutSessionId: reservation.checkoutSessionId!,
+      });
     } catch (error) {
       if (error instanceof FoundingCommerceError) throw error;
       if (reservation.organizationId === currentOrganizationId) throw new FoundingCommerceError(503, "provider-state-unavailable", "Stripe state for the existing Founding reservation could not be reconciled safely.");
