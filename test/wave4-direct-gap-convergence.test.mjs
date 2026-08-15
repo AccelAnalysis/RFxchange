@@ -52,12 +52,22 @@ test("ISS-007 and ISS-011 preserve the correct draft and support lossless struct
   );
   assert.match(
     definitionBuilder,
-    /if \(!authoritative \|\| requirement\.qualifierDirty\) return requirement;/,
-    "Dirty qualifier input must retain both its local value and the original authoritative baseline.",
+    /const acknowledgedCommit =[\s\S]{0,240}acknowledgedDefinitionCommit\.current/,
+    "Only the exact aggregate returned by this editor's save may advance its qualifier baseline.",
   );
   assert.match(
     definitionBuilder,
-    /qualifier: authoritative\.qualifier,[\s\S]{0,80}qualifierBase: authoritative\.qualifier/,
+    /submittedQualifier === undefined \|\|[\s\S]{0,100}authoritative\.qualifier !== submittedQualifier[\s\S]{0,80}return requirement/,
+    "Dirty qualifier input must retain its original baseline for unrelated or mismatched aggregate refreshes.",
+  );
+  assert.match(
+    definitionBuilder,
+    /qualifierBase: authoritative\.qualifier,[\s\S]{0,100}qualifierDirty: requirement\.qualifier !== submittedQualifier/,
+    "An acknowledged editor save must advance the baseline while preserving edits made during the request.",
+  );
+  assert.match(
+    definitionBuilder,
+    /if \(!requirement\.qualifierDirty\)[\s\S]{0,180}qualifier: authoritative\.qualifier,[\s\S]{0,80}qualifierBase: authoritative\.qualifier/,
     "Clean qualifier fields must absorb the latest authoritative value and baseline.",
   );
   assert.match(
