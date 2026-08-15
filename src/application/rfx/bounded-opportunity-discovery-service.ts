@@ -22,7 +22,12 @@ interface ProjectionPage {
 }
 
 interface BoundedProjectionRepository extends OpportunityDiscoveryRepository {
-  listProjectionPage(cursor: string | null, pageSize?: number): Promise<ProjectionPage>;
+  listProjectionPage(
+    cursor: string | null,
+    pageSize?: number,
+    minimumDeadline?: string | null,
+  ): Promise<ProjectionPage>;
+  cursorAfterProjection(projection: ResponderOpportunityProjection): string;
 }
 
 function queryWithoutCursor(query: OpportunityDiscoveryQuery): Omit<OpportunityDiscoveryQuery, "cursor"> {
@@ -37,23 +42,28 @@ function queryWithoutCursor(query: OpportunityDiscoveryQuery): Omit<OpportunityD
   });
 }
 
-function participantOffset(cursor: string | null, fingerprint: string): number {
-  if (!cursor) return 0;
+function participantDatastoreCursor(cursor: string | null, fingerprint: string): string | null {
+  if (!cursor) return null;
   try {
-    const decoded = Buffer.from(cursor, "base64url").toString("utf8");
-    const [storedFingerprint, rawOffset] = decoded.split(":");
-    const offset = Number.parseInt(rawOffset ?? "", 10);
-    if (storedFingerprint !== fingerprint || !Number.isSafeInteger(offset) || offset < 0) {
+    const parsed = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8")) as Record<string, unknown>;
+    if (
+      parsed.queryFingerprint !== fingerprint ||
+      typeof parsed.datastoreCursor !== "string" ||
+      !/^[A-Za-z0-9_-]{8,220}$/.test(parsed.datastoreCursor)
+    ) {
       throw new Error("stale");
     }
-    return offset;
+    return parsed.datastoreCursor;
   } catch {
     throw new OpportunityDiscoveryError("invalid", "Opportunity search cursor is stale or malformed.");
   }
 }
 
-function participantCursor(fingerprint: string, offset: number): string {
-  return Buffer.from(`${fingerprint}:${offset}`, "utf8").toString("base64url");
+function participantCursor(fingerprint: string, datastoreCursor: string): string {
+  return Buffer.from(JSON.stringify({
+    queryFingerprint: fingerprint,
+    datastoreCursor,
+  }), "utf8").toString("base64url");
 }
 
 function permitted(projection: ResponderOpportunityProjection): boolean {
@@ -109,9 +119,9 @@ export class BoundedOpportunityDiscoveryService extends Wave4GapOpportunityDisco
     }
     const withoutCursor = queryWithoutCursor(query);
     const queryHash = opportunityQueryFingerprint(withoutCursor);
-    const offset = participantOffset(query.cursor, queryHash);
-    const targetMatchCount = offset + query.limit + 1;
     const now = this.boundedNow();
+    const minimumDeadline = now.slice(0, 10);
+    let datastoreCursor = participantDatastoreCursor(query.cursor, queryHash);
     const [watches, savedSearches] = await Promise.all([
       this.boundedRepository.listWatches(scope.organizationId, scope.userId),
       this.boundedRepository.listSavedSearches(scope.organizationId, scope.userId),
@@ -122,9 +132,12 @@ export class BoundedOpportunityDiscoveryService extends Wave4GapOpportunityDisco
     const watched = new Set(watchedReferences);
 
     const matching: ResponderOpportunityProjection[] = [];
-    let datastoreCursor: string | null = null;
     do {
-      const page = await this.boundedRepository.listProjectionPage(datastoreCursor, 120);
+      const page = await this.boundedRepository.listProjectionPage(
+        datastoreCursor,
+        120,
+        minimumDeadline,
+      );
       for (const projection of page.items) {
         if (!permitted(projection)) continue;
         if (opportunityMatchesQuery({
@@ -134,13 +147,13 @@ export class BoundedOpportunityDiscoveryService extends Wave4GapOpportunityDisco
           now,
         })) {
           matching.push(projection);
-          if (matching.length >= targetMatchCount) break;
+          if (matching.length >= query.limit + 1) break;
         }
       }
       datastoreCursor = page.nextCursor;
-    } while (datastoreCursor && matching.length < targetMatchCount);
+    } while (datastoreCursor && matching.length < query.limit + 1);
 
-    const selected = matching.slice(offset, offset + query.limit);
+    const selected = matching.slice(0, query.limit);
     const items = Object.freeze(
       selected.flatMap((projection) => {
         const value = item(projection, watched.has(projection.reference), now);
@@ -165,11 +178,15 @@ export class BoundedOpportunityDiscoveryService extends Wave4GapOpportunityDisco
     const days = (value: OpportunityDiscoveryItem) =>
       (Date.parse(`${value.responseDeadline}T23:59:59.999Z`) - nowValue) / 86_400_000;
 
+    const lastSelected = selected.at(-1) ?? null;
     return Object.freeze({
       query,
       items,
-      nextCursor: matching.length > offset + query.limit
-        ? participantCursor(queryHash, offset + query.limit)
+      nextCursor: matching.length > query.limit && lastSelected
+        ? participantCursor(
+            queryHash,
+            this.boundedRepository.cursorAfterProjection(lastSelected),
+          )
         : null,
       savedSearches: Object.freeze(savedSearches.filter((saved) => saved.status !== "deleted")),
       deadlines: Object.freeze({
