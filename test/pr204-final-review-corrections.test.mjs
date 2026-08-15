@@ -50,7 +50,7 @@ test("structured qualifier input survives unrelated same-draft version refreshes
   );
 });
 
-test("text qualifier saves distinguish preservation, replacement, and explicit removal", async () => {
+test("text qualifier saves distinguish preservation, replacement, explicit removal, and acknowledged autosave baselines", async () => {
   const [builder, service] = await Promise.all([
     read("src/components/rfx/RFxDefinitionBuilder.tsx"),
     read("src/application/rfx/wave4-gap-governed-draft-service.ts"),
@@ -69,15 +69,32 @@ test("text qualifier saves distinguish preservation, replacement, and explicit r
     /qualifier: event\.target\.value,[\s\S]{0,60}qualifierDirty: true/,
     "Only an explicit participant edit may authorize replacement or removal of a text qualifier.",
   );
+  assert.match(builder, /interface AcknowledgedDefinitionCommit/);
+  assert.match(builder, /const submittedQualifierValues = new Map/);
   assert.match(
     builder,
-    /if \(!authoritative \|\| requirement\.qualifierDirty\) return requirement;/,
-    "A dirty qualifier must retain the exact value and baseline the participant edited against.",
+    /acknowledgedDefinitionCommit\.current = Object\.freeze\([\s\S]{0,180}qualifierValues: submittedQualifierValues/,
+    "A successful definition save must retain the exact qualifier values acknowledged by that aggregate version.",
   );
   assert.match(
     builder,
-    /qualifier: authoritative\.qualifier,[\s\S]{0,80}qualifierBase: authoritative\.qualifier/,
-    "Only a clean qualifier field may absorb the latest authoritative value and baseline.",
+    /const acknowledgedCommit =[\s\S]{0,220}acknowledgedDefinitionCommit\.current/,
+    "Only the exact aggregate returned by this editor's save may advance its edit baseline.",
+  );
+  assert.match(
+    builder,
+    /submittedQualifier === undefined \|\|[\s\S]{0,100}authoritative\.qualifier !== submittedQualifier[\s\S]{0,80}return requirement/,
+    "Unrelated or mismatched aggregate refreshes must preserve the original dirty qualifier baseline.",
+  );
+  assert.match(
+    builder,
+    /qualifierBase: authoritative\.qualifier,[\s\S]{0,100}qualifierDirty: requirement\.qualifier !== submittedQualifier/,
+    "The editor's own acknowledged save must advance the baseline while retaining later in-flight edits.",
+  );
+  assert.match(
+    builder,
+    /if \(!requirement\.qualifierDirty\)[\s\S]{0,180}qualifier: authoritative\.qualifier,[\s\S]{0,80}qualifierBase: authoritative\.qualifier/,
+    "Untouched qualifier fields must absorb the latest authoritative value and baseline.",
   );
 
   assert.match(service, /type TextQualifierIntent = "preserve" \| "set" \| "remove"/);
