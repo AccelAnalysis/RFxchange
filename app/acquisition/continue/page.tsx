@@ -72,9 +72,6 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
     });
     resumeStatus = resumed.resumeStatus;
   } catch {
-    // Expired, mismatched, or otherwise invalid acquisition metadata never controls navigation.
-    // Fall back to the participant's canonical server-derived workspace and disclose no protected
-    // opportunity state from the stale subject reference.
     redirect(canonicalWorkspace);
   }
 
@@ -86,21 +83,23 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
         )
       : null;
   if (participantOpportunity) {
-    redirect(
-      `/opportunities/${encodeURIComponent(participantOpportunity.reference)}`,
-    );
+    redirect(`/opportunities/${encodeURIComponent(participantOpportunity.reference)}`);
+  }
+  if (acquisition.kind === "opportunity") {
+    // A syntactically valid opaque candidate can intentionally represent a missing, unpublished,
+    // or wrong-audience reference. Once current authority is available, unresolved candidates fail
+    // closed to the canonical workspace rather than being presented as recovered opportunities.
+    redirect(canonicalWorkspace);
   }
 
   if (
     access.state.lifecycleState === "open-platform" &&
-    !["referral", "provider", "opportunity"].includes(acquisition.kind)
+    !["referral", "provider"].includes(acquisition.kind)
   ) {
     redirect("/exchange");
   }
 
-  const opportunity = acquisition.kind === "opportunity" && acquisition.subjectReference
-    ? await resolvePublicOpportunityProjection(acquisition.subjectReference)
-    : null;
+  const opportunity = null;
   const mapUrl = access.state.lifecycleState === "open-platform"
     ? acquisition.kind === "provider"
       ? "/resources"
@@ -117,7 +116,7 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
     : mapUrl === "/exchange" ? "Enter the Exchange" : "Continue setup";
 
   return (
-    <ParticipantShell activeItem={acquisition.kind === "opportunity" ? undefined : acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Network"}>
+    <ParticipantShell activeItem={acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Network"}>
       <OperationalWorkspace ariaLabel="Saved acquisition context">
         <section className={styles.wrap}>
           <p className={styles.eyebrow}>Context recovered</p>
@@ -138,21 +137,14 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
 
           <article className={styles.card}>
             <span>{INTENT_LABELS[acquisition.kind]}</span>
-            <h2>{opportunity?.payload.title ?? "Your saved next step"}</h2>
+            <h2>Your saved next step</h2>
             <p>
-              {opportunity?.payload.summary ?? (acquisition.kind === "referral"
+              {acquisition.kind === "referral"
                 ? "Your invitation points to one real business referral. Attaching it makes the minimum referral context available to your organization; it does not accept the referral."
                 : acquisition.kind === "provider"
                   ? "A provider invited your organization to complete its own profile. The invitation preserves that context; it does not grant organization authority, provider status, eligibility, or verification."
-                  : "Your saved context is preserved without claiming that the originating action was completed or accepted.")}
+                  : "Your saved context is preserved without claiming that the originating action was completed or accepted."}
             </p>
-            {opportunity ? (
-              <dl>
-                <div><dt>Issued by</dt><dd>{opportunity.payload.issuerDisplayName}</dd></div>
-                <div><dt>Geography</dt><dd>{opportunity.payload.localities.map((item) => item.label).join(", ")}</dd></div>
-                <div><dt>Status</dt><dd>Published</dd></div>
-              </dl>
-            ) : null}
             <small>Reference: {acquisition.subjectReference}</small>
             <small>Resume status: {resumeStatus}</small>
           </article>
