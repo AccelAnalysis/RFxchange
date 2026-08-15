@@ -139,6 +139,26 @@ test("subscription inspection paginates before deciding an ambiguous reservation
   assert.equal(result.reclaimable, false);
 });
 
+test("malformed application subscription pagination fails closed", async () => {
+  configureTestStripe();
+  for (const payload of [
+    { has_more: false },
+    { data: [], has_more: "yes" },
+  ]) {
+    globalThis.fetch = async (url) => {
+      if (String(url).includes("/subscriptions?")) return ok(payload);
+      throw new Error("Checkout Session lookup must not run after malformed subscription provider truth");
+    };
+    await assert.rejects(
+      inspectAmbiguousFoundingReservation({
+        ...baseInput,
+        now: new Date(Date.parse(RESERVED_AT) + RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS + 1).toISOString(),
+      }),
+      /list payload is malformed|pagination state is malformed/,
+    );
+  }
+});
+
 test("expired matching Checkout Session permits reclamation only when no non-terminal subscription exists", async () => {
   configureTestStripe();
   globalThis.fetch = async (url) => {
@@ -197,6 +217,22 @@ test("open or completed matching Checkout Session remains fail-closed", async ()
     assert.equal(result.matchingCheckoutStatus, status);
     assert.equal(result.reclaimable, false);
   }
+});
+
+test("malformed Checkout Session pagination fails closed before an ambiguous reservation can be released", async () => {
+  configureTestStripe();
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("/subscriptions?")) return ok({ data: [], has_more: false });
+    if (String(url).includes("/checkout/sessions?")) return ok({ data: [], has_more: "yes" });
+    throw new Error(`unexpected Stripe request: ${url}`);
+  };
+  await assert.rejects(
+    inspectAmbiguousFoundingReservation({
+      ...baseInput,
+      now: new Date(Date.parse(RESERVED_AT) + RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS + 1).toISOString(),
+    }),
+    /pagination state is malformed/,
+  );
 });
 
 test("Founding Checkout requests a Session lifetime with margin above Stripe's 30-minute minimum", async () => {
