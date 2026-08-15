@@ -42,28 +42,30 @@ function queryWithoutCursor(query: OpportunityDiscoveryQuery): Omit<OpportunityD
   });
 }
 
+const PARTICIPANT_CURSOR_FINGERPRINT_LENGTH = 24;
+
 function participantDatastoreCursor(cursor: string | null, fingerprint: string): string | null {
   if (!cursor) return null;
   try {
-    const parsed = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8")) as Record<string, unknown>;
+    const expectedFingerprint = fingerprint.slice(0, PARTICIPANT_CURSOR_FINGERPRINT_LENGTH);
+    const storedFingerprint = cursor.slice(0, PARTICIPANT_CURSOR_FINGERPRINT_LENGTH);
+    const separator = cursor.at(PARTICIPANT_CURSOR_FINGERPRINT_LENGTH);
+    const datastoreCursor = cursor.slice(PARTICIPANT_CURSOR_FINGERPRINT_LENGTH + 1);
     if (
-      parsed.queryFingerprint !== fingerprint ||
-      typeof parsed.datastoreCursor !== "string" ||
-      !/^[A-Za-z0-9_-]{8,220}$/.test(parsed.datastoreCursor)
+      storedFingerprint !== expectedFingerprint ||
+      separator !== "-" ||
+      !/^[A-Za-z0-9_-]{8,150}$/.test(datastoreCursor)
     ) {
       throw new Error("stale");
     }
-    return parsed.datastoreCursor;
+    return datastoreCursor;
   } catch {
     throw new OpportunityDiscoveryError("invalid", "Opportunity search cursor is stale or malformed.");
   }
 }
 
 function participantCursor(fingerprint: string, datastoreCursor: string): string {
-  return Buffer.from(JSON.stringify({
-    queryFingerprint: fingerprint,
-    datastoreCursor,
-  }), "utf8").toString("base64url");
+  return `${fingerprint.slice(0, PARTICIPANT_CURSOR_FINGERPRINT_LENGTH)}-${datastoreCursor}`;
 }
 
 function permitted(projection: ResponderOpportunityProjection): boolean {
