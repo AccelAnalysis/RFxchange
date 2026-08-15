@@ -174,9 +174,9 @@ async function listAllCustomerSubscriptions(secretKey: string, customerId: strin
     if (startingAfter) query.set("starting_after", startingAfter);
     const result = await stripeGet<StripeList<StripeSubscription>>(secretKey, `/subscriptions?${query.toString()}`);
     if (!Array.isArray(result.data)) throw new Error("Stripe subscription list payload is malformed; provider inspection fails closed.");
+    if (typeof result.has_more !== "boolean") throw new Error("Stripe subscription pagination state is malformed; provider inspection fails closed.");
     values.push(...result.data);
-    if (result.has_more === false || result.has_more === undefined) break;
-    if (result.has_more !== true) throw new Error("Stripe subscription pagination state is malformed; provider inspection fails closed.");
+    if (!result.has_more) break;
     const last = result.data.at(-1);
     const lastId = last ? required(last.id, "Stripe subscription pagination id") : "";
     if (!lastId) throw new Error("Stripe subscription pagination is malformed; provider inspection fails closed.");
