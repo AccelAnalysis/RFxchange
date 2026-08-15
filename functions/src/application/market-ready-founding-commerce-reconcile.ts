@@ -29,6 +29,7 @@ export interface ProviderSubscriptionSnapshot {
   readonly quantity: number;
   readonly currentPeriodEndsAt: string | null;
   readonly cancelAtPeriodEnd: boolean;
+  readonly checkoutReservationId?: string | null;
 }
 
 export interface FoundingCapacitySnapshot {
