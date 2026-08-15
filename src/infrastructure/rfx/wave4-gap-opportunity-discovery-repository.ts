@@ -116,12 +116,16 @@ export class Wave4GapOpportunityDiscoveryRepository extends FirestoreOpportunity
     const permitted = await released(this.gapDb, projections);
     const last = page.docs.at(-1)!;
     const lastData = last.data() as ResponderOpportunityProjection;
+    const lastDeadline = lastData.payload.timing.responseDeadline;
+    if (!lastDeadline || !/^\d{4}-\d{2}-\d{2}$/.test(lastDeadline)) {
+      throw new Error("Opportunity projection deadline is unavailable for paging.");
+    }
     return Object.freeze({
       items: permitted,
       nextCursor: page.size < pageSize
         ? null
         : encodeCursor(Object.freeze({
-            deadline: lastData.payload.timing.responseDeadline,
+            deadline: lastDeadline,
             reference: last.id,
           })),
     });
