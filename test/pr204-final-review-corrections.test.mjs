@@ -71,8 +71,13 @@ test("text qualifier saves distinguish preservation, replacement, and explicit r
   );
   assert.match(
     builder,
-    /requirement\.qualifierDirty[\s\S]{0,180}qualifierBase: authoritative\.qualifier[\s\S]{0,180}qualifier: authoritative\.qualifier/,
-    "A dirty form must absorb the latest authoritative qualifier baseline without discarding unrelated local edits.",
+    /if \(!authoritative \|\| requirement\.qualifierDirty\) return requirement;/,
+    "A dirty qualifier must retain the exact value and baseline the participant edited against.",
+  );
+  assert.match(
+    builder,
+    /qualifier: authoritative\.qualifier,[\s\S]{0,80}qualifierBase: authoritative\.qualifier/,
+    "Only a clean qualifier field may absorb the latest authoritative value and baseline.",
   );
 
   assert.match(service, /type TextQualifierIntent = "preserve" \| "set" \| "remove"/);
