@@ -10,7 +10,7 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import {
   RFXCHANGE_FUNCTIONS_REGION,
 } from "./runtime/environment.js";
-import { getFunctionsFirestore } from "./runtime/firebase-admin.js";
+import { getFunctionsAuth, getFunctionsFirestore } from "./runtime/firebase-admin.js";
 
 const EVALUATIONS = "opportunityDiscoveryEvaluations";
 const PROJECTIONS = "rfxOpportunityProjections";
@@ -82,6 +82,16 @@ interface EvaluationRecord {
   readonly leaseUntil?: Timestamp | null;
   readonly nextAttemptAt?: Timestamp | null;
   readonly savedSearchCursorId?: string | null;
+}
+
+interface ParticipantUser {
+  readonly id?: string;
+  readonly name?: string;
+  readonly primaryEmail?: string;
+  readonly login?: Readonly<{
+    readonly provider?: string;
+    readonly subject?: string;
+  }>;
 }
 
 class SavedSearchAuthorityChangedError extends Error {
@@ -219,6 +229,32 @@ function unrestricted(records: readonly FirebaseFirestore.QueryDocumentSnapshot[
   return records.every((record) => record.get("state") === "none");
 }
 
+function firebaseErrorCode(error: unknown): string | null {
+  if (!error || typeof error !== "object" || !("code" in error)) return null;
+  const code = (error as { code?: unknown }).code;
+  return typeof code === "string" ? code : null;
+}
+
+async function providerAccountAuthoritative(user: ParticipantUser): Promise<boolean> {
+  const providerSubject = user.login?.provider === "firebase"
+    ? user.login.subject?.trim() ?? ""
+    : "";
+  const primaryEmail = user.primaryEmail?.trim() ?? "";
+  if (!providerSubject || !primaryEmail) return false;
+  try {
+    const account = await getFunctionsAuth().getUser(providerSubject);
+    return Boolean(
+      !account.disabled &&
+      account.emailVerified &&
+      account.email?.trim() &&
+      account.email.trim().toLowerCase() === primaryEmail.toLowerCase()
+    );
+  } catch (error) {
+    if (firebaseErrorCode(error) === "auth/user-not-found") return false;
+    throw error;
+  }
+}
+
 async function saveMatch(
   db: Firestore,
   search: SavedSearch,
@@ -256,9 +292,7 @@ async function saveMatch(
     const membership = membershipSnapshot.data() as
       | { userId?: string; organizationId?: string; status?: string }
       | undefined;
-    const user = userSnapshot.data() as
-      | { id?: string; name?: string; primaryEmail?: string }
-      | undefined;
+    const user = userSnapshot.data() as ParticipantUser | undefined;
 
     const geographyRefs = currentProjection?.payload.localities.map(
       (item) => db.collection(GEOGRAPHIES).doc(item.id),
@@ -277,6 +311,11 @@ async function saveMatch(
       ...geographyRefs.map((reference) => transaction.get(reference)),
     ]);
     const alertSnapshot = alertRef ? await transaction.get(alertRef) : null;
+    const providerAccountValid = Boolean(
+      userSnapshot.exists &&
+      user &&
+      await providerAccountAuthoritative(user)
+    );
 
     if (
       !savedSearchSnapshot.exists ||
@@ -298,6 +337,10 @@ async function saveMatch(
       membership.userId !== search.userId ||
       membership.organizationId !== search.organizationId ||
       membership.status !== "active" ||
+      !userSnapshot.exists ||
+      !user ||
+      user.id !== search.userId ||
+      !providerAccountValid ||
       !unrestricted(organizationRestrictions.docs) ||
       !unrestricted(membershipRestrictions.docs) ||
       geographyRefs.length === 0 ||
@@ -311,9 +354,6 @@ async function saveMatch(
     let request: ReturnType<typeof emailRequest> | null = null;
     if (currentSearch.alertPolicy !== "off") {
       if (
-        !userSnapshot.exists ||
-        !user ||
-        user.id !== currentSearch.userId ||
         !user.name?.trim() ||
         !user.primaryEmail?.trim()
       ) {
