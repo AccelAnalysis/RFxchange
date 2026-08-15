@@ -43,7 +43,7 @@ export class Wave4GapOpportunityDiscoveryRepository extends FirestoreOpportunity
     super(gapDb);
   }
 
-  override async listProjections(_limit: number) {
+  override async listProjections() {
     const permitted: ResponderOpportunityProjection[] = [];
     let cursor: FirebaseFirestore.QueryDocumentSnapshot | null = null;
 
