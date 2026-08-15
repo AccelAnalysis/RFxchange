@@ -35,6 +35,18 @@ interface StripeSubscription {
 }
 interface StripeList<T> { readonly data: readonly T[]; }
 
+/**
+ * The Checkout POST may have reached Stripe even when RFxchange cannot observe its result.
+ * Callers must retain the Founding capacity reservation for these outcomes until Stripe expiry or
+ * later provider truth resolves it; releasing the slot here could oversubscribe the 250-org cap.
+ */
+export class StripeCheckoutOutcomeUnknownError extends Error {
+  constructor(message = "Stripe Checkout outcome is unknown.") {
+    super(message);
+    this.name = "StripeCheckoutOutcomeUnknownError";
+  }
+}
+
 function required(value: string | undefined, label: string): string {
   const normalized = value?.trim() ?? "";
   if (!normalized) throw new Error(`${label} is not configured.`);
@@ -65,15 +77,45 @@ function formBody(entries: Readonly<Record<string, string | number | boolean>>):
   return params;
 }
 
-async function stripeRequest<T>(path: string, input: Readonly<{ method?: "GET" | "POST"; body?: URLSearchParams; idempotencyKey?: string; }> = {}): Promise<T> {
+async function stripeRequest<T>(path: string, input: Readonly<{
+  method?: "GET" | "POST";
+  body?: URLSearchParams;
+  idempotencyKey?: string;
+  checkoutPost?: boolean;
+}> = {}): Promise<T> {
   const config = configuration();
   const method = input.method ?? "GET";
   const headers: Record<string, string> = { Authorization: `Bearer ${config.secretKey}` };
   if (input.idempotencyKey) headers["Idempotency-Key"] = input.idempotencyKey;
   if (method === "POST") headers["Content-Type"] = "application/x-www-form-urlencoded";
-  const response = await fetch(`${STRIPE_API_BASE}${path}`, { method, headers, body: method === "POST" ? input.body : undefined, cache: "no-store" });
-  const payload = await response.json() as Record<string, unknown>;
+
+  let response: Response;
+  try {
+    response = await fetch(`${STRIPE_API_BASE}${path}`, {
+      method,
+      headers,
+      body: method === "POST" ? input.body : undefined,
+      cache: "no-store",
+    });
+  } catch {
+    if (input.checkoutPost) throw new StripeCheckoutOutcomeUnknownError();
+    throw new Error("Stripe request failed before RFxchange received a provider response.");
+  }
+
+  let payload: Record<string, unknown>;
+  try {
+    payload = await response.json() as Record<string, unknown>;
+  } catch {
+    if (input.checkoutPost && response.ok) {
+      throw new StripeCheckoutOutcomeUnknownError("Stripe Checkout returned an unreadable successful response.");
+    }
+    payload = {};
+  }
+
   if (!response.ok) {
+    if (input.checkoutPost && response.status >= 500) {
+      throw new StripeCheckoutOutcomeUnknownError("Stripe Checkout returned an indeterminate server response.");
+    }
     const error = payload.error as { message?: unknown } | undefined;
     throw new Error(typeof error?.message === "string" ? error.message : "Stripe request failed.");
   }
@@ -147,6 +189,7 @@ export class StripePaymentProvider implements PaymentProvider {
     const config = configuration();
     const checkout = await stripeRequest<StripeCheckoutSession>("/checkout/sessions", {
       method: "POST",
+      checkoutPost: true,
       idempotencyKey: request.idempotencyKey,
       body: formBody({
         mode: "subscription",
@@ -163,8 +206,8 @@ export class StripePaymentProvider implements PaymentProvider {
         "subscription_data[metadata][rfxchangePlan]": "founding",
       }),
     });
-    if (!checkout.url) throw new Error("Stripe did not return a Checkout URL.");
-    if (checkout.customer && checkout.customer !== customerId) throw new Error("Stripe Checkout returned a different customer than RFxchange requested.");
+    if (!checkout.url) throw new StripeCheckoutOutcomeUnknownError("Stripe created a Checkout Session without a usable redirect URL.");
+    if (checkout.customer && checkout.customer !== customerId) throw new StripeCheckoutOutcomeUnknownError("Stripe created a Checkout Session for a different Customer.");
     return Object.freeze({ providerKey: PROVIDER_KEY, checkoutReference: providerReference("checkout-session", checkout.id), customerReference: request.customerReference, redirectUrl: checkout.url });
   }
 
