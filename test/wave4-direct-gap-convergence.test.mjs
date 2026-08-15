@@ -281,14 +281,19 @@ test("DSC-006 has durable, resumable, authority-revalidated discovery evaluation
   assert.match(evaluationWorker, /referenceAlreadyPresent\s*\?\s*existingSummary/);
   assert.match(evaluationWorker, /opportunity_summary:\s*nextSummary/);
   assert.match(evaluationWorker, /class SavedSearchAuthorityChangedError/);
-  assert.match(evaluationWorker, /error instanceof SavedSearchAuthorityChangedError\) continue/);
+  assert.match(evaluationWorker, /error instanceof SavedSearchAuthorityChangedError/);
   assert.match(evaluationWorker, /savedSearchCursorId/);
   assert.match(evaluationWorker, /async function checkpointEvaluation/);
   assert.match(evaluationWorker, /query = query\.startAfter\(cursorId\)/);
   assert.match(
     evaluationWorker,
+    /for \(const document of page\.docs\) \{[\s\S]{0,600}await checkpointEvaluation\(db, evaluationId, claimId, document\.id\)[\s\S]{0,80}cursorId = document\.id/,
+    "Every completed saved-search record must persist its continuation cursor before the worker advances.",
+  );
+  assert.doesNotMatch(
+    evaluationWorker,
     /await checkpointEvaluation\(db, evaluationId, claimId, nextCursorId\)/,
-    "Every fully processed saved-search page must persist its continuation cursor before the worker advances.",
+    "A page-boundary-only checkpoint can replay the same page indefinitely after a timeout.",
   );
   assert.match(
     evaluationWorker,

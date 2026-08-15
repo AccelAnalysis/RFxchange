@@ -634,18 +634,16 @@ async function processAllActiveSearches(
     if (page.empty) break;
     for (const document of page.docs) {
       const search = document.data() as SavedSearch;
-      if (search.status !== "active" || !matches(projection, search, now)) continue;
-      try {
-        await saveMatch(db, search, projection, now);
-      } catch (error) {
-        if (error instanceof SavedSearchAuthorityChangedError) continue;
-        throw error;
+      if (search.status === "active" && matches(projection, search, now)) {
+        try {
+          await saveMatch(db, search, projection, now);
+        } catch (error) {
+          if (!(error instanceof SavedSearchAuthorityChangedError)) throw error;
+        }
       }
+      await checkpointEvaluation(db, evaluationId, claimId, document.id);
+      cursorId = document.id;
     }
-    const nextCursorId = page.docs.at(-1)?.id ?? null;
-    if (!nextCursorId) break;
-    await checkpointEvaluation(db, evaluationId, claimId, nextCursorId);
-    cursorId = nextCursorId;
     if (page.size < PAGE_SIZE) break;
   }
 }
