@@ -1,0 +1,44 @@
+name: PR 204 per-search checkpoint finalization
+
+on:
+  push:
+    branches:
+      - fix/wave4-gap-convergence-remaining
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/wave4-gap-convergence-remaining
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Apply deterministic patch
+        run: python3 scripts/pr204-checkpoint-search-progress.py
+
+      - name: Validate focused correction
+        run: |
+          npm ci
+          npm run build:functions
+          node --test test/wave4-direct-gap-convergence.test.mjs
+          git diff --check
+
+      - name: Commit focused correction
+        run: |
+          git config user.name "RFxchange Control Room"
+          git config user.email "actions@users.noreply.github.com"
+          git add \
+            functions/src/opportunity-discovery-evaluation-functions.ts \
+            test/wave4-direct-gap-convergence.test.mjs
+          git commit -m "Checkpoint durable discovery after each search"
+          git push origin HEAD:fix/wave4-gap-convergence-remaining
