@@ -61,9 +61,18 @@ function mergeDailyAlert(current: OpportunityAlertIntent, next: OpportunityAlert
   if (current.deliveryMode !== "daily-digest" || next.deliveryMode !== "daily-digest" || current.windowKey !== next.windowKey || current.status !== "queued" || current.request.metadata.idempotencyKey !== next.request.metadata.idempotencyKey) {
     throw new Error("Opportunity daily digest identity collision.");
   }
-  const summaries = [current.request.variables.opportunity_summary, next.request.variables.opportunity_summary]
-    .filter((value): value is string => typeof value === "string" && Boolean(value.trim()));
-  const opportunityReferences = Object.freeze([...new Set([...current.opportunityReferences, ...next.opportunityReferences])]);
+  const currentReferences = [...current.opportunityReferences];
+  const nextUniqueReferences = next.opportunityReferences.filter((reference) => !currentReferences.includes(reference));
+  const opportunityReferences = Object.freeze([...new Set([...currentReferences, ...next.opportunityReferences])]);
+  const currentSummary = typeof current.request.variables.opportunity_summary === "string"
+    ? current.request.variables.opportunity_summary.trim()
+    : "";
+  const nextSummary = typeof next.request.variables.opportunity_summary === "string"
+    ? next.request.variables.opportunity_summary.trim()
+    : "";
+  const opportunitySummary = nextUniqueReferences.length && nextSummary
+    ? `${currentSummary}\n${nextSummary}`.trim().slice(0, 1800)
+    : currentSummary.slice(0, 1800);
   return Object.freeze({
     ...current,
     matchEventIds: Object.freeze([...new Set([...current.matchEventIds, ...next.matchEventIds])]),
@@ -74,7 +83,7 @@ function mergeDailyAlert(current: OpportunityAlertIntent, next: OpportunityAlert
       variables: Object.freeze({
         ...current.request.variables,
         opportunity_count: opportunityReferences.length,
-        opportunity_summary: summaries.join("\n").slice(0, 1800),
+        opportunity_summary: opportunitySummary,
       }),
     }),
     updatedAt: next.updatedAt,
