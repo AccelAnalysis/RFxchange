@@ -52,8 +52,13 @@ test("ISS-007 and ISS-011 preserve the correct draft and support lossless struct
   );
   assert.match(
     definitionBuilder,
-    /requirement\.qualifierDirty[\s\S]{0,220}qualifierBase: authoritative\.qualifier[\s\S]{0,220}qualifier: authoritative\.qualifier/,
-    "Dirty qualifier input must retain the local value while clean qualifier fields absorb the authoritative value and baseline.",
+    /if \(!authoritative \|\| requirement\.qualifierDirty\) return requirement;/,
+    "Dirty qualifier input must retain both its local value and the original authoritative baseline.",
+  );
+  assert.match(
+    definitionBuilder,
+    /qualifier: authoritative\.qualifier,[\s\S]{0,80}qualifierBase: authoritative\.qualifier/,
+    "Clean qualifier fields must absorb the latest authoritative value and baseline.",
   );
   assert.match(
     definitionBuilder,
