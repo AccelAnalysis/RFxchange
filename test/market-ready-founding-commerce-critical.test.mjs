@@ -9,6 +9,9 @@ const statusRoute = await readFile(new URL("../app/api/commercial/founding/statu
 const runtime = await readFile(new URL("../src/infrastructure/commercial/founding-runtime.ts", import.meta.url), "utf8");
 const provider = await readFile(new URL("../src/infrastructure/commercial/stripe-payment-provider.ts", import.meta.url), "utf8");
 const component = await readFile(new URL("../src/components/commercial/FoundingMembershipCard.tsx", import.meta.url), "utf8");
+const functionsWebhook = await readFile(new URL("../functions/src/market-ready-founding-commerce-functions.ts", import.meta.url), "utf8");
+const functionsStripe = await readFile(new URL("../functions/src/runtime/market-ready-founding-commerce-stripe.ts", import.meta.url), "utf8");
+const functionsReconcile = await readFile(new URL("../functions/src/application/market-ready-founding-commerce-reconcile.ts", import.meta.url), "utf8");
 
 const localeNames = ["en-US", "es", "fr", "it", "de"];
 const localeMessages = await Promise.all(localeNames.map(async (locale) => JSON.parse(await readFile(new URL(`../src/i18n/messages/market-ready-founding-commerce/${locale}.json`, import.meta.url), "utf8"))));
@@ -41,6 +44,29 @@ test("browser cannot supply commercial authority or payment terms", () => {
   assert.ok(provider.includes('"line_items[0][quantity]": 1'), "Stripe provider must bind quantity to one subscription");
 });
 
+test("definitive pre-session failure releases only an unattached reservation while ambiguous Checkout retains it", () => {
+  assert.match(runtime, /releaseUnattachedFoundingReservation/);
+  assert.match(runtime, /reservation\.checkoutSessionId \|\| reservation\.checkoutUrl/);
+  assert.match(runtime, /error instanceof StripeCheckoutOutcomeUnknownError/);
+  const catchBlock = runtime.slice(runtime.indexOf("} catch (error) {"), runtime.indexOf("const latest = await repository.getByOrganizationId"));
+  assert.ok(catchBlock.includes("releaseUnattachedFoundingReservation"));
+  assert.ok(catchBlock.includes("!(error instanceof StripeCheckoutOutcomeUnknownError)"));
+  assert.match(provider, /checkoutPost: true/);
+  assert.match(provider, /input\.checkoutPost && response\.status >= 500/);
+  assert.match(provider, /catch \{[\s\S]*?input\.checkoutPost[\s\S]*?StripeCheckoutOutcomeUnknownError/);
+});
+
+test("webhook subscription correlation uses the trusted mode-specific Price", () => {
+  assert.match(functionsReconcile, /foundingPriceIdForMode/);
+  assert.match(functionsReconcile, /if \(mode === "live"\) return FOUNDING_PRICE_ID/);
+  assert.match(functionsReconcile, /expectedPriceId/);
+  assert.match(functionsWebhook, /foundingPriceIdForMode\(/[\s\S]*?RFXCHANGE_FOUNDING_STRIPE_TEST_PRICE_ID/);
+  assert.match(functionsWebhook, /retrieveCurrentFoundingSubscription\([\s\S]*?expectedPriceId/);
+  assert.match(functionsWebhook, /providerHasNonTerminalFoundingSubscription\([\s\S]*?expectedPriceId/);
+  assert.match(functionsStripe, /assertFoundingSubscriptionCorrelation\(\{ snapshot, organizationId, customerId, expectedPriceId \}\)/);
+  assert.equal(functionsStripe.includes("snapshot.priceId === FOUNDING_PRICE_ID"), false);
+});
+
 test("five commerce locales expose one complete participant message contract", () => {
   const expectedKeys = Object.keys(localeMessages[0]).sort();
   assert.ok(expectedKeys.length >= 30);
@@ -61,7 +87,7 @@ test("browser return and Checkout completion cannot assert paid recognition", ()
 });
 
 test("commerce sources do not persist or expose provider secrets or card data", () => {
-  const sources = [checkoutRoute, statusRoute, runtime, provider, component].join("\n");
+  const sources = [checkoutRoute, statusRoute, runtime, provider, component, functionsWebhook, functionsStripe].join("\n");
   for (const forbidden of ["card_number", "cardNumber", "cvc", "cvv", "STRIPE_SECRET_KEY=", "WEBHOOK_SECRET="]) {
     assert.equal(sources.includes(forbidden), false, `commercial source must not contain ${forbidden}`);
   }
