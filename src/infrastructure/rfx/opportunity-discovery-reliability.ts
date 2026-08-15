@@ -35,18 +35,22 @@ function errorCode(error: unknown): string {
   return value.trim().toLowerCase().replace(/[^a-z0-9._-]+/g, "-").slice(0, 96) || "unknown";
 }
 
-function evaluationTimestamp(projection: ResponderOpportunityProjection): string {
-  if (projection.publishedAt) return new Date(projection.publishedAt).toISOString();
-  return new Date().toISOString();
+function normalizedEvaluationAt(value: string): string {
+  const parsed = Date.parse(value);
+  if (!Number.isFinite(parsed)) {
+    throw new Error("Opportunity discovery evaluation time is invalid.");
+  }
+  return new Date(parsed).toISOString();
 }
 
-export async function queueOpportunityDiscoveryEvaluation(
+async function queueEvaluation(
   projection: ResponderOpportunityProjection,
-  error: unknown = null,
-  db: Firestore = getServerFirestore(),
+  evaluationAtInput: string,
+  error: unknown,
+  db: Firestore,
 ): Promise<string> {
   const id = evaluationId(projection);
-  const evaluationAt = evaluationTimestamp(projection);
+  const evaluationAt = normalizedEvaluationAt(evaluationAtInput);
   const ref = db.collection(OPPORTUNITY_DISCOVERY_EVALUATIONS_COLLECTION).doc(id);
   await db.runTransaction(async (transaction) => {
     const snapshot = await transaction.get(ref);
@@ -88,6 +92,23 @@ export async function queueOpportunityDiscoveryEvaluation(
     });
   });
   return id;
+}
+
+export function queueOpportunityDiscoveryEvaluationAt(
+  projection: ResponderOpportunityProjection,
+  evaluationAt: string,
+  error: unknown = null,
+  db: Firestore = getServerFirestore(),
+): Promise<string> {
+  return queueEvaluation(projection, evaluationAt, error, db);
+}
+
+export function queueOpportunityDiscoveryEvaluation(
+  projection: ResponderOpportunityProjection,
+  error: unknown = null,
+  db: Firestore = getServerFirestore(),
+): Promise<string> {
+  return queueEvaluation(projection, new Date().toISOString(), error, db);
 }
 
 export async function completeOpportunityDiscoveryEvaluation(
