@@ -60,7 +60,7 @@ test("webhook subscription correlation uses the trusted mode-specific Price", ()
   assert.match(functionsReconcile, /foundingPriceIdForMode/);
   assert.match(functionsReconcile, /if \(mode === "live"\) return FOUNDING_PRICE_ID/);
   assert.match(functionsReconcile, /expectedPriceId/);
-  assert.match(functionsWebhook, /foundingPriceIdForMode\(/[\s\S]*?RFXCHANGE_FOUNDING_STRIPE_TEST_PRICE_ID/);
+  assert.match(functionsWebhook, /foundingPriceIdForMode\([\s\S]*?RFXCHANGE_FOUNDING_STRIPE_TEST_PRICE_ID/);
   assert.match(functionsWebhook, /retrieveCurrentFoundingSubscription\([\s\S]*?expectedPriceId/);
   assert.match(functionsWebhook, /providerHasNonTerminalFoundingSubscription\([\s\S]*?expectedPriceId/);
   assert.match(functionsStripe, /assertFoundingSubscriptionCorrelation\(\{ snapshot, organizationId, customerId, expectedPriceId \}\)/);
