@@ -20,7 +20,7 @@ async function validateCapabilityIds(ids: readonly string[] | null | undefined):
   if (!ids?.length) return;
   const catalog = await loadImmutableAmacsCatalog();
   for (const rawId of ids) {
-    const capabilityId = rawId.trim();
+    const capabilityId = rawId.trim().toUpperCase();
     if (!capabilityId || !(await catalog.hasCanonicalCapability(capabilityId))) {
       throw new OpportunityDiscoveryError("invalid", `Capability filter ${capabilityId || "(blank)"} is not in the pinned AMACS 0.5.0 catalog.`);
     }
