@@ -25,21 +25,32 @@ test("opportunity alert delivery revalidates Firebase provider account before pr
   assert.match(worker, /account\.emailVerified/);
   assert.match(worker, /auth\/user-not-found/);
   assert.match(worker, /suppressionReason: reason/);
-  const accountCheck = worker.indexOf("providerAccountAuthoritative(claimed.providerSubject, request)");
-  const delivery = worker.indexOf("const result = await executeReliableTransactionalEmailJob", accountCheck);
-  assert.ok(accountCheck >= 0 && delivery > accountCheck,
+  const processAlert = worker.indexOf("async function processAlert");
+  const accountCheck = worker.indexOf(
+    "providerAccountAuthoritative(claimed.providerSubject, request)",
+    processAlert,
+  );
+  const delivery = worker.indexOf(
+    "const result = await executeReliableTransactionalEmailJob",
+    processAlert,
+  );
+  assert.ok(processAlert >= 0 && accountCheck > processAlert && delivery > accountCheck,
     "Firebase provider-account authority must be revalidated before transactional email delivery begins.");
 });
 
-test("opportunity evaluation freezes one time and digest window across retries", async () => {
-  const [reliability, worker, service] = await Promise.all([
+test("opportunity evaluation freezes one time and digest window across sync and durable retries", async () => {
+  const [api, reliability, worker, service] = await Promise.all([
+    read("app/api/rfx/route.ts"),
     read("src/infrastructure/rfx/opportunity-discovery-reliability.ts"),
     read("functions/src/opportunity-discovery-evaluation-functions.ts"),
     read("src/application/rfx/opportunity-discovery-service.ts"),
   ]);
+  assert.match(api, /const discoveryEvaluationAt = new Date\(\)\.toISOString\(\)/);
+  assert.match(api, /queueOpportunityDiscoveryEvaluationAt\([\s\S]{0,100}discoveryEvaluationAt/);
+  assert.match(api, /evaluatePublishedProjection\(result\.projection, discoveryEvaluationAt\)/);
   assert.match(reliability, /readonly evaluationAt: string/);
   assert.match(reliability, /evaluationAt: current\.evaluationAt \?\? evaluationAt/);
-  assert.match(reliability, /evaluationAt,/);
+  assert.match(reliability, /queueOpportunityDiscoveryEvaluationAt/);
   assert.match(worker, /readonly evaluationAt\?: string/);
   assert.match(worker, /const evaluationAt = claimed\.record\.evaluationAt \?\? projection\.publishedAt/);
   assert.match(worker, /new Date\(evaluationAt\)\.toISOString\(\)/);
@@ -48,8 +59,9 @@ test("opportunity evaluation freezes one time and digest window across retries",
     /processAllActiveSearches\([\s\S]{0,260}new Date\(\)\.toISOString\(\)/,
     "Durable retry must not recalculate the digest window from invocation time.",
   );
-  assert.match(service, /const now = projection\.publishedAt \?\? this\.now\(\)/,
-    "The synchronous publication pass must use the same frozen publication time as durable evaluation.");
+  assert.match(service, /evaluationAt: string = this\.now\(\)/,
+    "Direct callers retain injected-clock semantics while production may supply the shared frozen evaluation time.");
+  assert.match(service, /const now = new Date\(parsedEvaluationAt\)\.toISOString\(\)/);
 });
 
 test("opportunity cursor parser has no artificial ten-thousand offset ceiling", async () => {
