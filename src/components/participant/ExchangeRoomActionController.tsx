@@ -27,6 +27,11 @@ interface ActionAuthorizationProjection {
   readonly resourceManage: boolean;
 }
 
+interface LensAuthorizationProjection {
+  readonly lens: ParticipantLensId;
+  readonly authorization: ActionAuthorizationProjection;
+}
+
 const DENIED_ACTION_AUTHORIZATION: ActionAuthorizationProjection = Object.freeze({
   openPlatform: false,
   rfxCreate: false,
@@ -124,8 +129,14 @@ export function ExchangeRoomActionController({
 }>) {
   const { locale } = useI18n();
   const messages = exchangeRoomLocaleCatalog(locale);
-  const [authorization, setAuthorization] = useState<ActionAuthorizationProjection>(DENIED_ACTION_AUTHORIZATION);
+  const [authorizationState, setAuthorizationState] = useState<LensAuthorizationProjection>(() => Object.freeze({
+    lens: activeLens,
+    authorization: DENIED_ACTION_AUTHORIZATION,
+  }));
   const [networkDiscoveryAvailable, setNetworkDiscoveryAvailable] = useState(false);
+  const authorization = authorizationState.lens === activeLens
+    ? authorizationState.authorization
+    : DENIED_ACTION_AUTHORIZATION;
   const surfaceOpen = useSyncExternalStore(
     subscribeExchangeRoomSurface,
     exchangeRoomSurfaceSnapshot,
@@ -134,7 +145,6 @@ export function ExchangeRoomActionController({
 
   useEffect(() => {
     let active = true;
-    setAuthorization(DENIED_ACTION_AUTHORIZATION);
     const discoveryFrame = window.requestAnimationFrame(() => {
       if (!active) return;
       setNetworkDiscoveryAvailable(Boolean(document.querySelector('form[action="/geography/canvas"]')));
@@ -143,14 +153,23 @@ export function ExchangeRoomActionController({
       .then(async (response) => response.ok ? response.json() : DENIED_ACTION_AUTHORIZATION)
       .then((payload: Partial<ActionAuthorizationProjection>) => {
         if (!active) return;
-        setAuthorization(Object.freeze({
-          openPlatform: payload.openPlatform === true,
-          rfxCreate: payload.rfxCreate === true,
-          referralManage: payload.referralManage === true,
-          resourceManage: payload.resourceManage === true,
+        setAuthorizationState(Object.freeze({
+          lens: activeLens,
+          authorization: Object.freeze({
+            openPlatform: payload.openPlatform === true,
+            rfxCreate: payload.rfxCreate === true,
+            referralManage: payload.referralManage === true,
+            resourceManage: payload.resourceManage === true,
+          }),
         }));
       })
-      .catch(() => active && setAuthorization(DENIED_ACTION_AUTHORIZATION));
+      .catch(() => {
+        if (!active) return;
+        setAuthorizationState(Object.freeze({
+          lens: activeLens,
+          authorization: DENIED_ACTION_AUTHORIZATION,
+        }));
+      });
     return () => {
       active = false;
       window.cancelAnimationFrame(discoveryFrame);
