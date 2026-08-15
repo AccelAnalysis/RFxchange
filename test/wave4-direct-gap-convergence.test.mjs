@@ -33,7 +33,11 @@ test("ISS-007 and ISS-011 preserve the correct draft and support lossless struct
     ...["en-US", "es", "fr", "it", "de"].map((locale) =>
       read(`src/i18n/messages/rfx-qualifier/${locale}.json`)),
   ]);
-  assert.match(workspace, /<RFxDefinitionBuilder[\s\S]{0,220}key=\{selectedDraft\.id\}/);
+  assert.match(
+    workspace,
+    /<RFxDefinitionBuilder[\s\S]{0,220}key=\{`\$\{selectedDraft\.id\}:\$\{selectedDraft\.version\}:definition`\}/,
+    "The main definition editor must remount from the committed aggregate whenever the RFx version changes.",
+  );
   assert.match(qualifierEditor, /qualifierKind/);
   for (const kind of ["text", "quantity", "boolean", "geography"])
     assert.match(qualifierEditor, new RegExp(`"${kind}"`));
@@ -62,7 +66,7 @@ test("ISS-007 and ISS-011 preserve the correct draft and support lossless struct
   assert.match(
     baseRepository,
     /publish\([\s\S]*qualifierGeographyRefs[\s\S]*assertReleasedQualifierGeographies\(qualifierGeographySnapshots\)/,
-    "Geography qualifiers must be revalidated again in the publication transaction.",
+    "Geography qualifiers must be revalidated again in the base publication transaction.",
   );
 });
 
@@ -124,6 +128,15 @@ test("ISS-019 revalidates publication inputs transactionally and reloads concurr
   assert.match(repository, /organizationProfiles/);
   assert.match(repository, /organizationLocations/);
   assert.match(repository, /runTransaction/);
+  assert.match(repository, /definitionGeographyQualifierIds/);
+  assert.match(repository, /qualifierGeographyRefs/);
+  assert.match(repository, /currentQualifierGeographyIds/);
+  assert.match(repository, /sameStringList\(currentQualifierGeographyIds, qualifierGeographyIds\)/);
+  assert.match(
+    repository,
+    /qualifierGeographySnapshots\.some\([\s\S]{0,180}releaseState[\s\S]{0,100}released/,
+    "The active Wave 4 publication transaction must fail closed if qualifier locality authority changes.",
+  );
   assert.match(service, /if \(!result\.replayed\)/);
   assert.match(service, /getPublicationSnapshot/);
   assert.match(service, /getProjection/);
@@ -140,14 +153,18 @@ test("ACQ-009 preserves an authenticated-participant opportunity through sign-in
 });
 
 test("DSC-004 has no fixed discovery horizon, handles legacy projections, and exposes structured filters", async () => {
-  const [repository, domain, workspace] = await Promise.all([
+  const [repository, service, domain, workspace] = await Promise.all([
     read("src/infrastructure/rfx/wave4-gap-opportunity-discovery-repository.ts"),
+    read("src/application/rfx/wave4-gap-opportunity-discovery-service.ts"),
     read("src/domain/rfx/discovery.ts"),
     read("src/components/rfx/OpportunityDiscoveryWorkspace.tsx"),
   ]);
   assert.match(repository, /startAfter/);
   assert.match(repository, /while \(true\)/);
   assert.doesNotMatch(repository, /MAX_DISCOVERY_SCAN|10_000|Math\.min\(250,\s*limit\)/);
+  assert.match(service, /override async discover/);
+  assert.match(service, /Number\.isSafeInteger\(offset\)/);
+  assert.doesNotMatch(service, /offset > 10_000|10_000/);
   assert.match(domain, /requestFamilyIndexKeyForProjection/);
   assert.doesNotMatch(domain, /input\.projection\.requestFamilyIndexKey\.toLocaleLowerCase/);
   for (const attr of [
