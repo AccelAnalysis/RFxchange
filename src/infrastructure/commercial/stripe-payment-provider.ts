@@ -185,6 +185,7 @@ export class StripePaymentProvider implements PaymentProvider {
     if (request.customerReference.providerKey !== PROVIDER_KEY) throw new Error("Founding checkout customer belongs to a different payment provider.");
     const customerId = String(request.customerReference.externalReference);
     const organizationId = String(request.organizationId);
+    const checkoutCorrelationId = required(request.checkoutCorrelationId, "Checkout correlation id");
     await assertNoProviderSubscription(customerId, organizationId);
     const config = configuration();
     const checkout = await stripeRequest<StripeCheckoutSession>("/checkout/sessions", {
@@ -202,6 +203,7 @@ export class StripePaymentProvider implements PaymentProvider {
         expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
         "metadata[organizationId]": organizationId,
         "metadata[rfxchangePlan]": "founding",
+        "metadata[rfxchangeReservationId]": checkoutCorrelationId,
         "subscription_data[metadata][organizationId]": organizationId,
         "subscription_data[metadata][rfxchangePlan]": "founding",
       }),
