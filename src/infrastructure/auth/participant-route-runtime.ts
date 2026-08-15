@@ -1,6 +1,8 @@
+import { organizationMembershipId } from "../../domain/users/model.ts";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "./firebase-server-session.ts";
 import { createServerAuthenticationBoundary } from "./firebase-session-runtime.ts";
 import {
+  ParticipantRouteDependencyUnavailableError,
   resolveParticipantRouteWithDependencies,
   type ParticipantRouteResolution,
   type ParticipantRouteRuntimeDependencies,
@@ -54,6 +56,70 @@ function createParticipantRouteRuntimeDependencies(): ParticipantRouteRuntimeDep
 }
 
 /**
+ * `activation-required` is normally pre-workspace, but an incomplete activation
+ * may already have a persisted organization/membership binding. The semantic
+ * classifier intentionally returns before ordinary workspace restriction reads
+ * in that lifecycle. Any server surface that can perform a consequential
+ * activation write therefore needs this narrow overlay so a bound restricted
+ * participant cannot use an activation endpoint to bypass ARC-008.
+ */
+async function revalidateBoundActivationRestriction(
+  resolution: ParticipantRouteResolution,
+  dependencies: ParticipantRouteRuntimeDependencies,
+): Promise<ParticipantRouteResolution> {
+  if (resolution.kind !== "activation-required") return resolution;
+  const activationState = resolution.state;
+  if (!activationState || !activationState.membershipId) return resolution;
+  const membershipId = organizationMembershipId(activationState.membershipId);
+
+  const foundation = createServerFirestoreFoundationRepositories(getServerFirestore());
+  let membership;
+  try {
+    membership = await measureServerOperation(
+      "participant-route.activation-binding",
+      () => foundation.users.memberships.getById(membershipId),
+      "revalidate incomplete activation membership binding",
+    );
+  } catch (error) {
+    throw new ParticipantRouteDependencyUnavailableError("workspace-state", error);
+  }
+  if (
+    !membership ||
+    membership.status !== "active" ||
+    membership.userId !== resolution.context.user.id ||
+    !activationState.organization ||
+    String(membership.organizationId) !== activationState.organization.id
+  ) {
+    throw new ParticipantRouteDependencyUnavailableError(
+      "workspace-state",
+      new Error("Incomplete activation membership binding is unavailable or inconsistent."),
+    );
+  }
+
+  let restrictions;
+  try {
+    restrictions = await dependencies.loadRestrictions(membership);
+  } catch (error) {
+    throw new ParticipantRouteDependencyUnavailableError("restriction-state", error);
+  }
+  const restrictionState =
+    restrictions.membershipState && restrictions.membershipState !== "none"
+      ? restrictions.membershipState
+      : restrictions.organizationState && restrictions.organizationState !== "none"
+        ? restrictions.organizationState
+        : null;
+  if (!restrictionState) return resolution;
+
+  return Object.freeze({
+    kind: "restricted" as const,
+    context: resolution.context,
+    state: activationState,
+    membership,
+    restrictionState,
+  });
+}
+
+/**
  * Server-only participant route resolver.
  *
  * Production provider wiring stays in this module while the semantic classification policy lives
@@ -66,8 +132,10 @@ export async function resolveParticipantRoute(input: Readonly<{
   sessionCookie?: string | null;
   requestedOrganizationId?: string | null;
 }>): Promise<ParticipantRouteResolution> {
-  return resolveParticipantRouteWithDependencies(
+  const dependencies = createParticipantRouteRuntimeDependencies();
+  const resolution = await resolveParticipantRouteWithDependencies(
     input,
-    createParticipantRouteRuntimeDependencies(),
+    dependencies,
   );
+  return revalidateBoundActivationRestriction(resolution, dependencies);
 }
