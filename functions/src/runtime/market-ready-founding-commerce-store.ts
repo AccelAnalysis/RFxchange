@@ -214,7 +214,26 @@ export async function reconcileCurrentFoundingSubscription(input: Readonly<{
     if (!canReplaceSubscription(accountData, input.snapshot.id)) throw new Error("Provider subscription does not match the authoritative organization subscription.");
 
     const currentCapacity = persistedCapacity(capacity.data());
-    const nextSnapshot = reconcileFoundingCapacity(capacitySnapshot(currentCapacity), organizationId, input.snapshot.status);
+    const currentSnapshot = capacitySnapshot(currentCapacity);
+    let nextSnapshot: FoundingCapacitySnapshot;
+    if (subscriptionRetainsCapacity(input.snapshot.status)) {
+      nextSnapshot = reconcileFoundingCapacity(currentSnapshot, organizationId, input.snapshot.status);
+    } else {
+      const currentReservation = currentCapacity.reservations.find((reservation) => reservation.organizationId === organizationId);
+      const incomingReservationId = input.snapshot.checkoutReservationId == null
+        ? null
+        : required(input.snapshot.checkoutReservationId, "Checkout reservation id");
+      const releasesCurrentReservation = Boolean(
+        currentReservation && incomingReservationId && currentReservation.reservationId === incomingReservationId,
+      );
+      nextSnapshot = normalizeFoundingCapacity({
+        ...currentSnapshot,
+        committedOrganizationIds: currentSnapshot.committedOrganizationIds.filter((id) => id !== organizationId),
+        reservedOrganizationIds: releasesCurrentReservation
+          ? currentSnapshot.reservedOrganizationIds.filter((id) => id !== organizationId)
+          : currentSnapshot.reservedOrganizationIds,
+      });
+    }
     const nextCapacity = capacityRecordFrom(currentCapacity, nextSnapshot);
     const recognized = hasActiveFoundingRecognition(input.snapshot.status);
     const projectedStatus = commercialProjectionStatus(input.snapshot.status);
@@ -245,6 +264,7 @@ export async function reconcileCurrentFoundingSubscription(input: Readonly<{
       providerKey: "stripe",
       eventType,
       providerSubscriptionId: input.snapshot.id,
+      checkoutReservationId: input.snapshot.checkoutReservationId ?? null,
       observedStatus: input.snapshot.status,
       eventCreatedAt: input.eventCreatedAt,
       ignoredAsStale: false,
