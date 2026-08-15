@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { serializeAcquisitionContextToken } from "@/src/application/acquisition/acquisition-context";
+import {
+  serializeAcquisitionContextToken,
+  type AcquisitionContextToken,
+} from "@/src/application/acquisition/acquisition-context";
 import { serializeOpaqueOpportunityCandidate } from "@/src/application/acquisition/opaque-opportunity-candidate";
 import { accessJourneyId } from "@/src/domain/lifecycle/model";
 import { activationJourneyIdForUser } from "@/src/domain/onboarding/model";
@@ -29,7 +32,7 @@ function setAcquisitionCookie(response: NextResponse, value: string): NextRespon
 
 function withPersistentAcquisitionCookie(
   response: NextResponse,
-  token: Parameters<typeof serializeAcquisitionContextToken>[0],
+  token: AcquisitionContextToken,
 ): NextResponse {
   return setAcquisitionCookie(response, serializeAcquisitionContextToken(token));
 }
@@ -45,10 +48,7 @@ async function persistAndBindCandidate(
   request: NextRequest,
   reference: string,
   userId: string,
-): Promise<Readonly<{
-  token: Awaited<ReturnType<ReturnType<typeof createServerAcquisitionContextService>["issueOpaqueOpportunityCandidate"]>>;
-  attached: boolean;
-}>> {
+): Promise<Readonly<{ token: AcquisitionContextToken; attached: boolean }>> {
   const service = createServerAcquisitionContextService();
   const token = await service.issueOpaqueOpportunityCandidate({
     reference,
