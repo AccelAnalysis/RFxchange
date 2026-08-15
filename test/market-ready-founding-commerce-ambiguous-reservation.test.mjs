@@ -4,6 +4,8 @@ import test from "node:test";
 import {
   inspectAmbiguousFoundingReservation,
   RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS,
+  RFXCHANGE_FOUNDING_CHECKOUT_SESSION_LIFETIME_SECONDS,
+  StripePaymentProvider,
 } from "../src/infrastructure/commercial/stripe-payment-provider.ts";
 
 const ORIGINAL_FETCH = globalThis.fetch;
@@ -65,7 +67,7 @@ test("stale ambiguous reservation is reclaimable only after provider truth shows
   const requests = [];
   globalThis.fetch = async (url) => {
     requests.push(String(url));
-    if (String(url).includes("/subscriptions?")) return ok({ data: [] });
+    if (String(url).includes("/subscriptions?")) return ok({ data: [], has_more: false });
     if (String(url).includes("/checkout/sessions?")) return ok({ data: [], has_more: false });
     throw new Error(`unexpected Stripe request: ${url}`);
   };
@@ -85,6 +87,7 @@ test("provider-authoritative non-terminal subscription prevents reclamation", as
   configureTestStripe();
   globalThis.fetch = async (url) => {
     if (String(url).includes("/subscriptions?")) return ok({
+      has_more: false,
       data: [{
         id: "sub_founding",
         status: "active",
@@ -102,10 +105,44 @@ test("provider-authoritative non-terminal subscription prevents reclamation", as
   assert.equal(result.reclaimable, false);
 });
 
+test("subscription inspection paginates before deciding an ambiguous reservation is reclaimable", async () => {
+  configureTestStripe();
+  const subscriptionRequests = [];
+  const firstPage = Array.from({ length: 100 }, (_, index) => ({
+    id: `sub_history_${String(index + 1).padStart(3, "0")}`,
+    status: "canceled",
+  }));
+  globalThis.fetch = async (url) => {
+    const requestUrl = new URL(String(url));
+    if (requestUrl.pathname.endsWith("/subscriptions")) {
+      subscriptionRequests.push(requestUrl);
+      if (!requestUrl.searchParams.has("starting_after")) return ok({ data: firstPage, has_more: true });
+      assert.equal(requestUrl.searchParams.get("starting_after"), "sub_history_100");
+      return ok({
+        has_more: false,
+        data: [{
+          id: "sub_founding_later_page",
+          status: "active",
+          metadata: { organizationId: "org-founding", rfxchangePlan: "founding" },
+          items: { data: [{ quantity: 1, price: { id: TEST_PRICE } }] },
+        }],
+      });
+    }
+    throw new Error("Checkout Session lookup must not run when a later subscription page retains capacity");
+  };
+  const result = await inspectAmbiguousFoundingReservation({
+    ...baseInput,
+    now: new Date(Date.parse(RESERVED_AT) + RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS + 1).toISOString(),
+  });
+  assert.equal(subscriptionRequests.length, 2);
+  assert.equal(result.hasNonTerminalSubscription, true);
+  assert.equal(result.reclaimable, false);
+});
+
 test("expired matching Checkout Session permits reclamation only when no non-terminal subscription exists", async () => {
   configureTestStripe();
   globalThis.fetch = async (url) => {
-    if (String(url).includes("/subscriptions?")) return ok({ data: [] });
+    if (String(url).includes("/subscriptions?")) return ok({ data: [], has_more: false });
     if (String(url).includes("/checkout/sessions?")) return ok({
       has_more: false,
       data: [{
@@ -135,7 +172,7 @@ test("open or completed matching Checkout Session remains fail-closed", async ()
   configureTestStripe();
   for (const status of ["open", "complete"]) {
     globalThis.fetch = async (url) => {
-      if (String(url).includes("/subscriptions?")) return ok({ data: [] });
+      if (String(url).includes("/subscriptions?")) return ok({ data: [], has_more: false });
       if (String(url).includes("/checkout/sessions?")) return ok({
         has_more: false,
         data: [{
@@ -160,4 +197,44 @@ test("open or completed matching Checkout Session remains fail-closed", async ()
     assert.equal(result.matchingCheckoutStatus, status);
     assert.equal(result.reclaimable, false);
   }
+});
+
+test("Founding Checkout requests a Session lifetime with margin above Stripe's 30-minute minimum", async () => {
+  configureTestStripe();
+  let checkoutBody = null;
+  globalThis.fetch = async (url, init = {}) => {
+    if (String(url).includes("/subscriptions?")) return ok({ data: [], has_more: false });
+    if (String(url).endsWith("/checkout/sessions") && init.method === "POST") {
+      checkoutBody = init.body;
+      return ok({
+        id: "cs_margin",
+        url: "https://checkout.stripe.test/session/cs_margin",
+        customer: "cus_founding",
+        status: "open",
+      });
+    }
+    throw new Error(`unexpected Stripe request: ${url}`);
+  };
+  const startedAt = Math.floor(Date.now() / 1000);
+  const provider = new StripePaymentProvider();
+  await provider.beginSubscriptionCheckout({
+    organizationId: "org-founding",
+    planKey: "founding",
+    customerReference: { providerKey: "stripe", kind: "customer", externalReference: "cus_founding" },
+    successUrl: "https://example.test/commercial/founding?checkout=return",
+    cancelUrl: "https://example.test/commercial/founding?checkout=cancel",
+    idempotencyKey: "founding-checkout-margin-test",
+    checkoutCorrelationId: "reservation-margin-test",
+  });
+  assert.ok(checkoutBody instanceof URLSearchParams);
+  const expiresAt = Number(checkoutBody.get("expires_at"));
+  assert.ok(Number.isFinite(expiresAt));
+  assert.ok(
+    expiresAt >= startedAt + RFXCHANGE_FOUNDING_CHECKOUT_SESSION_LIFETIME_SECONDS - 1,
+    "Checkout Session expiry must retain the configured safety margin above Stripe's minimum",
+  );
+  assert.ok(
+    RFXCHANGE_FOUNDING_CHECKOUT_SESSION_LIFETIME_SECONDS >= 35 * 60,
+    "Founding Checkout Session lifetime must not sit on Stripe's exact 30-minute minimum boundary",
+  );
 });
