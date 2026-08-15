@@ -11,6 +11,7 @@ import {
   reconcileFoundingCapacity,
   releaseExpiredCheckoutReservation,
   reserveFoundingCapacity,
+  shouldApplyProviderLifecycleObservation,
   subscriptionRetainsCapacity,
 } from "../lib/application/market-ready-founding-commerce-reconcile.js";
 
@@ -47,6 +48,43 @@ test("recognition and capacity are intentionally separate", () => {
   }
   assert.equal(commercialProjectionStatus("past_due"), "past-due");
   assert.equal(commercialProjectionStatus("unpaid"), "suspended");
+});
+
+test("provider lifecycle ordering rejects older observations before they can restore recognition", () => {
+  assert.equal(shouldApplyProviderLifecycleObservation({
+    incomingCreatedAt: "2026-08-15T00:00:01.000Z",
+    incomingStatus: "active",
+    previousCreatedAt: "2026-08-15T00:00:02.000Z",
+    previousStatus: "canceled",
+  }), false);
+  assert.equal(shouldApplyProviderLifecycleObservation({
+    incomingCreatedAt: "2026-08-15T00:00:03.000Z",
+    incomingStatus: "active",
+    previousCreatedAt: "2026-08-15T00:00:02.000Z",
+    previousStatus: "past_due",
+  }), true);
+});
+
+test("same-second lifecycle ties fail closed toward less recognition authority", () => {
+  const timestamp = "2026-08-15T00:00:02.000Z";
+  assert.equal(shouldApplyProviderLifecycleObservation({
+    incomingCreatedAt: timestamp,
+    incomingStatus: "active",
+    previousCreatedAt: timestamp,
+    previousStatus: "canceled",
+  }), false);
+  assert.equal(shouldApplyProviderLifecycleObservation({
+    incomingCreatedAt: timestamp,
+    incomingStatus: "canceled",
+    previousCreatedAt: timestamp,
+    previousStatus: "active",
+  }), true);
+  assert.equal(shouldApplyProviderLifecycleObservation({
+    incomingCreatedAt: timestamp,
+    incomingStatus: "past_due",
+    previousCreatedAt: timestamp,
+    previousStatus: "active",
+  }), true);
 });
 
 test("reserved organization first observed delinquent becomes committed and later active consumes no second slot", () => {
