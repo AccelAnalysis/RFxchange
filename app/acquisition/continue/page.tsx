@@ -61,7 +61,7 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
   if (!acquisition || acquisition.kind === "direct") {
     redirect(access.state.controlledPlatformUrl ?? "/geography/canvas");
   }
-  if (access.state.lifecycleState === "open-platform" && !["referral", "provider"].includes(acquisition.kind)) redirect("/exchange");
+
   let resumeStatus: "resumed" | "pending" = "pending";
   try {
     const resumed = await createServerAcquisitionContextService().resume({
@@ -73,14 +73,45 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
   } catch {
     // The saved context never blocks access to the participant's canonical Exchange workspace.
   }
+
+  const participantOpportunity =
+    acquisition.kind === "opportunity" &&
+    acquisition.subjectReference &&
+    access.state.lifecycleState === "open-platform"
+      ? await resolvePublicOpportunityProjection(
+          acquisition.subjectReference,
+          true,
+        )
+      : null;
+  if (participantOpportunity) {
+    redirect(
+      `/opportunities/${encodeURIComponent(participantOpportunity.reference)}`,
+    );
+  }
+
+  if (
+    access.state.lifecycleState === "open-platform" &&
+    !["referral", "provider", "opportunity"].includes(acquisition.kind)
+  ) {
+    redirect("/exchange");
+  }
+
   const opportunity = acquisition.kind === "opportunity" && acquisition.subjectReference
     ? await resolvePublicOpportunityProjection(acquisition.subjectReference)
     : null;
   const mapUrl = access.state.lifecycleState === "open-platform"
-    ? acquisition.kind === "provider" ? "/resources" : "/referrals"
+    ? acquisition.kind === "provider"
+      ? "/resources"
+      : acquisition.kind === "referral"
+        ? "/referrals"
+        : "/exchange"
     : access.state.controlledPlatformUrl ?? "/exchange";
   const continuationLabel = access.state.lifecycleState === "open-platform"
-    ? acquisition.kind === "provider" ? "Continue to Resources" : "Continue to referrals"
+    ? acquisition.kind === "provider"
+      ? "Continue to Resources"
+      : acquisition.kind === "referral"
+        ? "Continue to referrals"
+        : "Enter the Exchange"
     : mapUrl === "/exchange" ? "Enter the Exchange" : "Continue setup";
 
   return (

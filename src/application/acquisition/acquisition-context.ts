@@ -104,6 +104,29 @@ export class AcquisitionContextService {
   }
 
   /**
+   * Server-internal seam for an opportunity reference whose current publication
+   * authority has already been validated by the calling route. This preserves
+   * the same acquisition envelope/cookie contract for authenticated-participant
+   * shares without making those projections public.
+   */
+  async issueValidatedOpportunity(input: Readonly<{
+    reference: string;
+    referrer?: string | null;
+  }>): Promise<AcquisitionContextToken> {
+    const reference = input.reference.trim();
+    if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,190}$/.test(reference)) {
+      throw new Error("Opportunity reference is invalid.");
+    }
+    return this.issue({
+      kind: "opportunity",
+      subjectReference: reference,
+      channel: "public-opportunity",
+      sourceReference: reference,
+      referrer: input.referrer,
+    });
+  }
+
+  /**
    * Server-internal issuance seam for approved claim/referral/team/provider/buyer workflows.
    */
   async issueTrusted(input: TrustedAcquisitionInput): Promise<AcquisitionContextToken> {
