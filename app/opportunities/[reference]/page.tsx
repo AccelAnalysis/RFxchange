@@ -52,6 +52,12 @@ export default async function PublicOpportunityPage({ params }: PublicOpportunit
   if (access.kind === "restricted") {
     redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   }
+  if (
+    access.kind === "authorized" &&
+    access.state.lifecycleState !== "open-platform"
+  ) {
+    redirect(access.state.controlledPlatformUrl ?? "/join");
+  }
 
   const participantAuthorized =
     access.kind === "authorized" && access.state.lifecycleState === "open-platform";
