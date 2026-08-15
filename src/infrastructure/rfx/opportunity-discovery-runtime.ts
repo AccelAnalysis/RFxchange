@@ -1,10 +1,10 @@
 import type { Firestore } from "firebase-admin/firestore";
 
+import { BoundedOpportunityDiscoveryService } from "../../application/rfx/bounded-opportunity-discovery-service.ts";
 import {
   OpportunityDiscoveryError,
   type OpportunityParticipantScope,
 } from "../../application/rfx/opportunity-discovery-service.ts";
-import { Wave4GapOpportunityDiscoveryService } from "../../application/rfx/wave4-gap-opportunity-discovery-service.ts";
 import { loadImmutableAmacsCatalog } from "../amacs/runtime.ts";
 import { getServerFirestore } from "../firestore/runtime.ts";
 import { Wave4GapOpportunityDiscoveryRepository } from "./wave4-gap-opportunity-discovery-repository.ts";
@@ -27,10 +27,10 @@ async function validateCapabilityIds(ids: readonly string[] | null | undefined):
   }
 }
 
-class GovernedOpportunityDiscoveryService extends Wave4GapOpportunityDiscoveryService {
+class GovernedOpportunityDiscoveryService extends BoundedOpportunityDiscoveryService {
   override async discover(
     scope: OpportunityParticipantScope,
-    input: Parameters<Wave4GapOpportunityDiscoveryService["discover"]>[1],
+    input: Parameters<BoundedOpportunityDiscoveryService["discover"]>[1],
   ) {
     await validateCapabilityIds(input.capabilityIds);
     return super.discover(scope, input);
@@ -38,7 +38,7 @@ class GovernedOpportunityDiscoveryService extends Wave4GapOpportunityDiscoverySe
 
   override async saveSearch(
     scope: OpportunityParticipantScope,
-    input: Parameters<Wave4GapOpportunityDiscoveryService["saveSearch"]>[1],
+    input: Parameters<BoundedOpportunityDiscoveryService["saveSearch"]>[1],
   ) {
     await validateCapabilityIds(input.query.capabilityIds);
     return super.saveSearch(scope, input);
