@@ -42,8 +42,15 @@ interface PersistedCapacity {
 
 function required(value: string, label: string): string {
   const normalized = value.trim();
-  if (!normalized || normalized.includes("/")) throw new Error(`${label} is invalid.`);
+  if (!normalized || normalized !== value || normalized.includes("/")) throw new Error(`${label} is invalid.`);
   return normalized;
+}
+
+function exactPersistedString(value: unknown, label: string): string {
+  if (typeof value !== "string" || !value.trim() || value !== value.trim()) {
+    throw new Error(`${label} is invalid.`);
+  }
+  return value;
 }
 
 function persistedCapacity(data: DocumentData | undefined): PersistedCapacity {
@@ -51,37 +58,49 @@ function persistedCapacity(data: DocumentData | undefined): PersistedCapacity {
   if (data.schemaVersion !== COMMERCIAL_SCHEMA_VERSION || data.limit !== FOUNDING_CAP) {
     throw new Error("Founding capacity persistence is malformed or unsupported.");
   }
-  const committedOrganizationIds = Array.isArray(data.committedOrganizationIds)
-    ? data.committedOrganizationIds.filter((value): value is string => typeof value === "string" && Boolean(value.trim()))
-    : [];
-  const reservations = Array.isArray(data.reservations)
-    ? data.reservations.map((value): CapacityReservation => {
-        if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Founding capacity reservation is malformed.");
-        const record = value as Record<string, unknown>;
-        if (
-          typeof record.reservationId !== "string" ||
-          typeof record.organizationId !== "string" ||
-          (record.checkoutSessionId !== null && typeof record.checkoutSessionId !== "string") ||
-          (record.checkoutUrl !== null && typeof record.checkoutUrl !== "string")
-        ) throw new Error("Founding capacity reservation is malformed.");
-        const reservedAt = record.reservedAt == null
-          ? null
-          : typeof record.reservedAt === "string" && Number.isFinite(Date.parse(record.reservedAt))
-            ? record.reservedAt
-            : (() => { throw new Error("Founding capacity reservation timestamp is malformed."); })();
-        return Object.freeze({
-          reservationId: record.reservationId,
-          organizationId: record.organizationId,
-          checkoutSessionId: record.checkoutSessionId as string | null,
-          checkoutUrl: record.checkoutUrl as string | null,
-          reservedAt,
-        });
-      })
-    : [];
+  if (!Array.isArray(data.committedOrganizationIds) || !Array.isArray(data.reservations)) {
+    throw new Error("Founding capacity persistence arrays are malformed.");
+  }
+  const committedOrganizationIds = data.committedOrganizationIds.map((value) =>
+    required(exactPersistedString(value, "Committed organization identity"), "Committed organization identity"),
+  );
+  if (new Set(committedOrganizationIds).size !== committedOrganizationIds.length) {
+    throw new Error("Founding capacity contains duplicate committed organizations.");
+  }
+  const reservations = data.reservations.map((value): CapacityReservation => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Founding capacity reservation is malformed.");
+    const record = value as Record<string, unknown>;
+    const reservationId = required(
+      exactPersistedString(record.reservationId, "Founding reservation identity"),
+      "Founding reservation identity",
+    );
+    const organizationId = required(
+      exactPersistedString(record.organizationId, "Founding reservation organization identity"),
+      "Founding reservation organization identity",
+    );
+    const checkoutSessionId = record.checkoutSessionId === null
+      ? null
+      : required(
+          exactPersistedString(record.checkoutSessionId, "Founding Checkout Session identity"),
+          "Founding Checkout Session identity",
+        );
+    const checkoutUrl = record.checkoutUrl === null
+      ? null
+      : exactPersistedString(record.checkoutUrl, "Founding Checkout URL");
+    const reservedAt = record.reservedAt == null
+      ? null
+      : typeof record.reservedAt === "string" && record.reservedAt === record.reservedAt.trim() && Number.isFinite(Date.parse(record.reservedAt))
+        ? record.reservedAt
+        : (() => { throw new Error("Founding capacity reservation timestamp is malformed."); })();
+    return Object.freeze({ reservationId, organizationId, checkoutSessionId, checkoutUrl, reservedAt });
+  });
   if (new Set(reservations.map((value) => value.organizationId)).size !== reservations.length) {
     throw new Error("Founding capacity contains duplicate organization reservations.");
   }
-  return Object.freeze({ committedOrganizationIds: Object.freeze([...new Set(committedOrganizationIds)]), reservations: Object.freeze(reservations) });
+  if (new Set(reservations.map((value) => value.reservationId)).size !== reservations.length) {
+    throw new Error("Founding capacity contains duplicate reservation identities.");
+  }
+  return Object.freeze({ committedOrganizationIds: Object.freeze(committedOrganizationIds), reservations: Object.freeze(reservations) });
 }
 
 function capacitySnapshot(value: PersistedCapacity): FoundingCapacitySnapshot {
