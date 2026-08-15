@@ -14,7 +14,6 @@ import {
 } from "@/src/infrastructure/auth/participant-route-runtime";
 import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import {
-  completeOpportunityDiscoveryEvaluation,
   queueOpportunityDiscoveryEvaluation,
 } from "@/src/infrastructure/rfx/opportunity-discovery-reliability";
 import { createServerOpportunityDiscoveryService } from "@/src/infrastructure/rfx/opportunity-discovery-runtime";
@@ -217,12 +216,14 @@ export async function POST(request: NextRequest) {
 
       // Persist the exact publication identity before the synchronous attempt so
       // a process failure can never turn discovery evaluation into a log-only loss.
+      // The synchronous pass is a first-value optimization only: it is intentionally
+      // left queued because the durable worker owns exhaustive pagination of every
+      // active saved search before the evaluation can be marked complete.
       await queueOpportunityDiscoveryEvaluation(result.projection);
       try {
         const evaluated = await createServerOpportunityDiscoveryService()
           .evaluatePublishedProjection(result.projection);
-        await completeOpportunityDiscoveryEvaluation(result.projection);
-        discoveryEvaluation = Object.freeze({ status: "completed", ...evaluated });
+        discoveryEvaluation = Object.freeze({ status: "pending", ...evaluated });
       } catch (error) {
         await queueOpportunityDiscoveryEvaluation(result.projection, error);
         console.error(JSON.stringify({
