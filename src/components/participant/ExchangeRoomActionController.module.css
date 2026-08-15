@@ -54,6 +54,16 @@
   opacity: 0.56;
 }
 
+/* The right-side detail sheet and left action tray can geometrically overlap until the viewport
+   is wider than their combined fixed-width footprints. Reserve vertical scroll clearance through
+   that collision range so sheet controls and focused content can always scroll above the tray. */
+@media (max-width: 1024px) {
+  :global([data-participant-workspace="spatial"] [data-ui-sheet]) {
+    padding-bottom: calc(116px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(116px + env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 760px) {
   .actionGrid {
     right: 10px;
@@ -68,13 +78,6 @@
     min-height: 44px;
     padding-inline: var(--space-xs);
     font-size: 0.78rem;
-  }
-
-  /* The mobile detail sheet remains above map content, while its scrollable footprint reserves
-     enough room for the persistent two-row action tray so focused controls cannot be obscured. */
-  :global([data-participant-workspace="spatial"] [data-ui-sheet]) {
-    padding-bottom: calc(116px + env(safe-area-inset-bottom));
-    scroll-padding-bottom: calc(116px + env(safe-area-inset-bottom));
   }
 }
 
