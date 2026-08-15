@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { usePersistentParticipantShellContext } from "../participant/PersistentParticipantShell";
+
 type Copy = Readonly<Record<string, string>>;
 type StatusPayload = Readonly<{
   offer: Readonly<{ amount: number; currency: string; interval: string; cap: number }>;
@@ -59,6 +61,7 @@ async function fetchFoundingStatus(signal?: AbortSignal): Promise<StatusPayload>
 }
 
 export function FoundingMembershipCard({ copy }: Readonly<{ copy: Copy }>) {
+  const { persistent, reportAuthorizedParticipant } = usePersistentParticipantShellContext();
   const [payload, setPayload] = useState<StatusPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -95,6 +98,10 @@ export function FoundingMembershipCard({ copy }: Readonly<{ copy: Copy }>) {
       });
     return () => controller.abort();
   }, [copy.statusUnavailable]);
+
+  useEffect(() => {
+    if (persistent && payload) reportAuthorizedParticipant();
+  }, [payload, persistent, reportAuthorizedParticipant]);
 
   async function beginCheckout() {
     setSubmitting(true);
