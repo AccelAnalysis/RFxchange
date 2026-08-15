@@ -134,6 +134,7 @@ export function ExchangeRoomActionController({
 
   useEffect(() => {
     let active = true;
+    setAuthorization(DENIED_ACTION_AUTHORIZATION);
     const discoveryFrame = window.requestAnimationFrame(() => {
       if (!active) return;
       setNetworkDiscoveryAvailable(Boolean(document.querySelector('form[action="/geography/canvas"]')));
@@ -154,7 +155,7 @@ export function ExchangeRoomActionController({
       active = false;
       window.cancelAnimationFrame(discoveryFrame);
     };
-  }, []);
+  }, [activeLens]);
 
   if (!surfaceOpen) return null;
 
