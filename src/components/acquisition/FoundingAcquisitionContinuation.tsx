@@ -14,7 +14,7 @@ export async function FoundingAcquisitionContinuation() {
         <strong id="founding-continuation-title">{content.title}</strong>
         <p>{content.description}</p>
       </div>
-      <Link href="/founding">{content.primary}</Link>
+      <Link href="/commercial/founding">{content.primary}</Link>
     </aside>
   );
 }
