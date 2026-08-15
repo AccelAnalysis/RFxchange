@@ -11,6 +11,7 @@ import {
   RFXCHANGE_SESSION_COOKIE_NAME,
 } from "@/src/infrastructure/auth/firebase-server-session";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
+import { resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
 import { FirebaseAccountSecurityService } from "@/src/infrastructure/auth/firebase-account-security";
 import { getServerFirebaseAuth } from "@/src/infrastructure/auth/firebase-server";
 import { FirestoreActivationJourneyContextRepository } from "@/src/infrastructure/firestore/activation-journey";
@@ -191,6 +192,41 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case "accept-legal": {
+        const sessionCookie = request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
+        const access = await timing.measure(
+          "legal-access",
+          () => resolveParticipantRoute({ sessionCookie }),
+          "revalidate current legal-acceptance access",
+        );
+        if (access.kind === "restricted") {
+          return timing.apply(apiProblem(request, {
+            status: 403,
+            participantMessage: "Account access must be restored before participation policies can be accepted.",
+            code: "access-restricted",
+          }));
+        }
+        const permittedLifecycle =
+          access.kind === "activation-required" ||
+          (access.kind === "authorized" && access.state.lifecycleState === "controlled-platform");
+        if (!permittedLifecycle) {
+          return timing.apply(apiProblem(request, {
+            status: 409,
+            participantMessage: "The participation-policy step is not available from the current account state.",
+            code: "legal-step-unavailable",
+          }));
+        }
+        const currentState = await timing.measure(
+          "legal-state",
+          () => service.state(context),
+          "revalidate current legal-acceptance step",
+        );
+        if (currentState.nextStep !== "legal") {
+          return timing.apply(apiProblem(request, {
+            status: 409,
+            participantMessage: "The participation-policy step is not currently required.",
+            code: "legal-step-unavailable",
+          }));
+        }
         const state = await timing.measure("activation-action", () => service.acceptLegal(context), action);
         return timing.apply(NextResponse.json({ state }));
       }
