@@ -58,8 +58,9 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
   if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   const acquisition = access.state.acquisitionContext;
+  const canonicalWorkspace = access.state.controlledPlatformUrl ?? "/geography/canvas";
   if (!acquisition || acquisition.kind === "direct") {
-    redirect(access.state.controlledPlatformUrl ?? "/geography/canvas");
+    redirect(canonicalWorkspace);
   }
 
   let resumeStatus: "resumed" | "pending" = "pending";
@@ -71,13 +72,14 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
     });
     resumeStatus = resumed.resumeStatus;
   } catch {
-    // The saved context never blocks access to the participant's canonical Exchange workspace.
+    // Expired, mismatched, or otherwise invalid acquisition metadata never controls navigation.
+    // Fall back to the participant's canonical server-derived workspace and disclose no protected
+    // opportunity state from the stale subject reference.
+    redirect(canonicalWorkspace);
   }
 
   const participantOpportunity =
-    acquisition.kind === "opportunity" &&
-    acquisition.subjectReference &&
-    access.state.lifecycleState === "open-platform"
+    acquisition.kind === "opportunity" && acquisition.subjectReference
       ? await resolvePublicOpportunityProjection(
           acquisition.subjectReference,
           true,
@@ -105,7 +107,7 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
       : acquisition.kind === "referral"
         ? "/referrals"
         : "/exchange"
-    : access.state.controlledPlatformUrl ?? "/exchange";
+    : canonicalWorkspace;
   const continuationLabel = access.state.lifecycleState === "open-platform"
     ? acquisition.kind === "provider"
       ? "Continue to Resources"
