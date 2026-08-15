@@ -18,6 +18,8 @@ export interface PaymentProviderCheckoutRequest {
   readonly successUrl: string;
   readonly cancelUrl: string;
   readonly idempotencyKey: string;
+  /** Server-issued opaque correlation; never accepted from browser payment terms. */
+  readonly checkoutCorrelationId: string;
 }
 
 export interface PaymentProviderPortalRequest {
