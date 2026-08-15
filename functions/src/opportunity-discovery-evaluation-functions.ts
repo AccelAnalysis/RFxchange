@@ -161,7 +161,7 @@ function opportunitySummary(projection: Projection): string {
   return `${projection.payload.title} — ${projection.payload.timing.responseDeadline ?? ""} — ${projection.payload.localities.map((item) => item.label).join(", ")}`.slice(0, 1800);
 }
 
-function alertIdentity(search: SavedSearch, projection: Projection, matchId: string, now: string) {
+function alertIdentity(search: SavedSearch, matchId: string, now: string) {
   const windowKey = search.alertPolicy === "daily-digest" ? now.slice(0, 10) : matchId;
   const alertId = search.alertPolicy === "daily-digest"
     ? stableId("oppalert", search.organizationId, search.userId, windowKey)
@@ -224,7 +224,7 @@ async function saveMatch(
     String(projection.aggregateVersion),
     projection.digest,
   );
-  const identity = alertIdentity(search, projection, matchId, now);
+  const identity = alertIdentity(search, matchId, now);
   const matchRef = db.collection(MATCHES).doc(matchId);
   const searchRef = db.collection(SEARCHES).doc(search.id);
   const projectionRef = db.collection(PROJECTIONS).doc(projection.reference);
