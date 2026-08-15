@@ -47,9 +47,10 @@ test("delivered opportunity-alert framing is localized and the chosen locale is 
 });
 
 test("claimed or delivered daily digests are frozen and late matches use a deterministic follow-up intent", async () => {
-  const durable = await read(
-    "functions/src/opportunity-discovery-evaluation-functions.ts",
-  );
+  const [durable, synchronousRepository] = await Promise.all([
+    read("functions/src/opportunity-discovery-evaluation-functions.ts"),
+    read("src/infrastructure/firestore/opportunity-discovery.ts"),
+  ]);
   assert.match(durable, /function alertFrozen/);
   assert.match(durable, /existing\.status !== "queued"/);
   assert.match(durable, /existing\.deliveryClaimId/);
@@ -64,5 +65,25 @@ test("claimed or delivered daily digests are frozen and late matches use a deter
   assert.match(
     durable,
     /if \(frozen\) \{[\s\S]{0,100}if \(referenceAlreadyPresent\) return/,
+  );
+
+  assert.match(synchronousRepository, /function alertFrozen/);
+  assert.match(synchronousRepository, /current\.status !== "queued"/);
+  assert.match(synchronousRepository, /current\.deliveryClaimId/);
+  assert.match(synchronousRepository, /Number\(current\.attemptCount \?\? 0\) > 0/);
+  assert.match(synchronousRepository, /function followUpDailyAlert/);
+  assert.match(synchronousRepository, /projection\.aggregateVersion/);
+  assert.match(synchronousRepository, /projection\.digest/);
+  assert.match(
+    synchronousRepository,
+    /baseAlertSnapshot\?\.exists[\s\S]{0,220}alertFrozen\(baseAlert\)[\s\S]{0,300}transaction\.get\(targetAlertRef\)/,
+  );
+  assert.match(
+    synchronousRepository,
+    /if \(alertFrozen\(targetCurrent\)\) \{[\s\S]{0,240}alreadyRepresented[\s\S]{0,160}return "created" as const/,
+  );
+  assert.match(
+    synchronousRepository,
+    /function mergeDailyAlert[\s\S]{0,360}alertFrozen\(current\)/,
   );
 });
