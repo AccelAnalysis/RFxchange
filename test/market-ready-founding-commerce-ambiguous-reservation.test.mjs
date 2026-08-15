@@ -59,6 +59,7 @@ test("ambiguous reservation remains held before the conservative reconciliation 
   });
   assert.equal(result.eligibleForReconciliation, false);
   assert.equal(result.reclaimable, false);
+  assert.equal(result.matchingCheckoutSessionId, null);
   assert.equal(calls, 0);
 });
 
@@ -77,6 +78,7 @@ test("stale ambiguous reservation is reclaimable only after provider truth shows
   });
   assert.equal(result.eligibleForReconciliation, true);
   assert.equal(result.hasNonTerminalSubscription, false);
+  assert.equal(result.matchingCheckoutSessionId, null);
   assert.equal(result.matchingCheckoutStatus, null);
   assert.equal(result.reclaimable, true);
   assert.equal(requests.some((url) => url.includes("/subscriptions?")), true);
@@ -102,6 +104,7 @@ test("provider-authoritative non-terminal subscription prevents reclamation", as
     now: new Date(Date.parse(RESERVED_AT) + RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS + 1).toISOString(),
   });
   assert.equal(result.hasNonTerminalSubscription, true);
+  assert.equal(result.matchingCheckoutSessionId, null);
   assert.equal(result.reclaimable, false);
 });
 
@@ -159,7 +162,7 @@ test("malformed application subscription pagination fails closed", async () => {
   }
 });
 
-test("expired matching Checkout Session permits reclamation only when no non-terminal subscription exists", async () => {
+test("expired matching Checkout Session returns exact identity and permits reclamation only when no non-terminal subscription exists", async () => {
   configureTestStripe();
   globalThis.fetch = async (url) => {
     if (String(url).includes("/subscriptions?")) return ok({ data: [], has_more: false });
@@ -184,11 +187,12 @@ test("expired matching Checkout Session permits reclamation only when no non-ter
     ...baseInput,
     now: new Date(Date.parse(RESERVED_AT) + RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS + 1).toISOString(),
   });
+  assert.equal(result.matchingCheckoutSessionId, "cs_expired");
   assert.equal(result.matchingCheckoutStatus, "expired");
   assert.equal(result.reclaimable, true);
 });
 
-test("open or completed matching Checkout Session remains fail-closed", async () => {
+test("open or completed matching Checkout Session returns exact identity and remains fail-closed", async () => {
   configureTestStripe();
   for (const status of ["open", "complete"]) {
     globalThis.fetch = async (url) => {
@@ -214,9 +218,22 @@ test("open or completed matching Checkout Session remains fail-closed", async ()
       ...baseInput,
       now: new Date(Date.parse(RESERVED_AT) + RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS + 1).toISOString(),
     });
+    assert.equal(result.matchingCheckoutSessionId, `cs_${status}`);
     assert.equal(result.matchingCheckoutStatus, status);
     assert.equal(result.reclaimable, false);
   }
+});
+
+test("provider failure remains fail-closed for stale reservation reconciliation", async () => {
+  configureTestStripe();
+  globalThis.fetch = async () => { throw new Error("provider unavailable"); };
+  await assert.rejects(
+    inspectAmbiguousFoundingReservation({
+      ...baseInput,
+      now: new Date(Date.parse(RESERVED_AT) + RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS + 1).toISOString(),
+    }),
+    /Stripe request failed/,
+  );
 });
 
 test("malformed Checkout Session pagination fails closed before an ambiguous reservation can be released", async () => {
