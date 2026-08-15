@@ -68,45 +68,58 @@ function authenticatedDestination(
   return `/opportunities/${encodeURIComponent(reference)}`;
 }
 
+async function opaqueCandidate(request: NextRequest, reference: string) {
+  return createServerAcquisitionContextService().issueOpaqueOpportunityCandidate({
+    reference,
+    referrer: request.headers.get("referer"),
+  });
+}
+
+function signInResponse(request: NextRequest, reference: string) {
+  const returnTo = `/opportunities/${encodeURIComponent(reference)}`;
+  return NextResponse.redirect(
+    new URL(`/signin?returnTo=${encodeURIComponent(returnTo)}`, request.url),
+    303,
+  );
+}
+
 export async function GET(request: NextRequest) {
   try {
     const reference = request.nextUrl.searchParams.get("opportunityReference")?.trim() ?? "";
     if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,190}$/.test(reference)) {
       throw new Error("Opportunity reference is invalid.");
     }
-    const audience = await resolveOpportunityPublicationAudience(reference);
-    if (audience !== "authenticated-participants") {
-      throw new Error("Authenticated-participant opportunity is unavailable.");
-    }
 
-    const token = await createServerAcquisitionContextService().issueValidatedOpportunity({
-      reference,
-      referrer: request.headers.get("referer"),
-    });
-    const returnTo = `/opportunities/${encodeURIComponent(reference)}`;
     const sessionCookie = request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
-
     if (!sessionCookie) {
+      // Do not inspect protected publication state for an anonymous caller. Every syntactically
+      // valid reference receives the same non-authorizing acquisition/sign-in response.
       return withAcquisitionCookie(
-        NextResponse.redirect(
-          new URL(`/signin?returnTo=${encodeURIComponent(returnTo)}`, request.url),
-          303,
-        ),
-        token,
+        signInResponse(request, reference),
+        await opaqueCandidate(request, reference),
       );
     }
 
     const access = await resolveParticipantRoute({ sessionCookie });
     if (access.kind === "unauthenticated") {
       return withAcquisitionCookie(
-        NextResponse.redirect(
-          new URL(`/signin?returnTo=${encodeURIComponent(returnTo)}`, request.url),
-          303,
-        ),
-        token,
+        signInResponse(request, reference),
+        await opaqueCandidate(request, reference),
       );
     }
 
+    // Before current participant authorization, preserve the opaque candidate without asking
+    // Firestore whether the protected reference exists. Resolution/activation therefore cannot
+    // become an existence oracle. Actual opportunity authority is checked only for an authorized
+    // participant and again by the opportunity/continuation route before payload disclosure.
+    if (access.kind === "authorized") {
+      const audience = await resolveOpportunityPublicationAudience(reference);
+      if (audience !== "authenticated-participants") {
+        throw new Error("Authenticated-participant opportunity is unavailable.");
+      }
+    }
+
+    const token = await opaqueCandidate(request, reference);
     const userId = "context" in access ? access.context.user.id : null;
     const attached = userId ? await bindExistingActivation(token, userId) : false;
     const response = NextResponse.redirect(
