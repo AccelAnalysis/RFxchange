@@ -180,7 +180,10 @@ function mergeLosslessQualifiers(
       (item) => item.kind === "text",
     );
     const firstExistingText = firstExistingTextIndex >= 0
-      ? existing.qualifiers[firstExistingTextIndex]
+      ? (existing.qualifiers[firstExistingTextIndex] as Extract<
+          (typeof existing.qualifiers)[number],
+          { kind: "text" }
+        >)
       : null;
     const preserved = existing.qualifiers.filter(
       (_item, index) => index !== firstExistingTextIndex,
