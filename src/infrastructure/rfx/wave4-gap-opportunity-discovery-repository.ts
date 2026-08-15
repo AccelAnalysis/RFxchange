@@ -1,11 +1,32 @@
 import { FieldPath, type Firestore } from "firebase-admin/firestore";
 
+import type {
+  OpportunityMatchBundle,
+  SavedOpportunitySearch,
+} from "../../domain/rfx/discovery.ts";
 import type { ResponderOpportunityProjection } from "../../domain/rfx/publication.ts";
+import { getServerFirebaseAuth } from "../auth/firebase-server.ts";
 import { FirestoreOpportunityDiscoveryRepository } from "../firestore/opportunity-discovery.ts";
 
 const PROJECTIONS = "rfxOpportunityProjections";
 const GEOGRAPHIES = "geographies";
+const USERS = "users";
 const PAGE_SIZE = 200;
+
+interface ParticipantUser {
+  readonly id?: string;
+  readonly primaryEmail?: string;
+  readonly login?: Readonly<{
+    readonly provider?: string;
+    readonly subject?: string;
+  }>;
+}
+
+function firebaseErrorCode(error: unknown): string | null {
+  if (!error || typeof error !== "object" || !("code" in error)) return null;
+  const code = (error as { code?: unknown }).code;
+  return typeof code === "string" ? code : null;
+}
 
 async function released(
   db: Firestore,
@@ -64,5 +85,53 @@ export class Wave4GapOpportunityDiscoveryRepository extends FirestoreOpportunity
     }
 
     return Object.freeze(permitted);
+  }
+
+  private async providerAccountAuthoritative(
+    search: SavedOpportunitySearch,
+  ): Promise<boolean> {
+    const snapshot = await this.gapDb.collection(USERS).doc(search.userId).get();
+    const user = snapshot.data() as ParticipantUser | undefined;
+    const providerSubject = user?.login?.provider === "firebase"
+      ? user.login.subject?.trim() ?? ""
+      : "";
+    const primaryEmail = user?.primaryEmail?.trim() ?? "";
+    if (
+      !snapshot.exists ||
+      !user ||
+      user.id !== search.userId ||
+      !providerSubject ||
+      !primaryEmail
+    ) {
+      return false;
+    }
+    try {
+      const account = await getServerFirebaseAuth().getUser(providerSubject);
+      return Boolean(
+        !account.disabled &&
+        account.emailVerified &&
+        account.email?.trim() &&
+        account.email.trim().toLowerCase() === primaryEmail.toLowerCase()
+      );
+    } catch (error) {
+      if (firebaseErrorCode(error) === "auth/user-not-found") return false;
+      throw error;
+    }
+  }
+
+  override async saveMatch(bundle: OpportunityMatchBundle) {
+    const search = await this.getSavedSearch(bundle.match.savedSearchId);
+    if (
+      !search ||
+      search.id !== bundle.match.savedSearchId ||
+      search.version !== bundle.match.savedSearchVersion ||
+      search.organizationId !== bundle.match.organizationId ||
+      search.userId !== bundle.match.userId ||
+      search.membershipId !== bundle.match.membershipId ||
+      !(await this.providerAccountAuthoritative(search))
+    ) {
+      throw new Error("Opportunity saved-search provider authority changed.");
+    }
+    return super.saveMatch(bundle);
   }
 }
