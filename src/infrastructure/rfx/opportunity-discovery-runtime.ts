@@ -18,6 +18,14 @@ function publicOrigin(): string {
   return url.origin;
 }
 
+function stableIdentifier(value: string, label: string): string {
+  const normalized = value.trim();
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,190}$/.test(normalized)) {
+    throw new OpportunityDiscoveryError("invalid", `${label} is invalid.`);
+  }
+  return normalized;
+}
+
 function normalizedQuery(input: Parameters<typeof createOpportunityDiscoveryQuery>[0]) {
   try {
     return createOpportunityDiscoveryQuery(input);
@@ -35,28 +43,30 @@ async function validateGovernedFilters(
 ): Promise<void> {
   // Normalize and bound every caller-controlled collection before authority fan-out.
   const query = normalizedQuery(input);
-  const catalog = await loadImmutableAmacsCatalog();
 
-  for (const rawId of query.capabilityIds) {
-    const capabilityId = rawId.trim().toUpperCase();
-    if (!capabilityId || !(await catalog.hasCanonicalCapability(capabilityId))) {
-      throw new OpportunityDiscoveryError(
-        "invalid",
-        `Capability filter ${capabilityId || "(blank)"} is not in the pinned AMACS 0.5.0 catalog.`,
-      );
+  if (query.capabilityIds.length || query.requestFamilyKeys.length) {
+    const catalog = await loadImmutableAmacsCatalog();
+    for (const rawId of query.capabilityIds) {
+      const capabilityId = rawId.trim().toUpperCase();
+      if (!capabilityId || !(await catalog.hasCanonicalCapability(capabilityId))) {
+        throw new OpportunityDiscoveryError(
+          "invalid",
+          `Capability filter ${capabilityId || "(blank)"} is not in the pinned AMACS 0.5.0 catalog.`,
+        );
+      }
     }
-  }
 
-  for (const rawId of query.requestFamilyKeys) {
-    const requestFamilyId = rawId.trim().toUpperCase();
-    const requestFamily = requestFamilyId
-      ? await catalog.getRequestFamily(requestFamilyId)
-      : null;
-    if (!requestFamily || requestFamily.status !== "active") {
-      throw new OpportunityDiscoveryError(
-        "invalid",
-        `Request-family filter ${requestFamilyId || "(blank)"} is not in the pinned AMACS 0.5.0 catalog.`,
-      );
+    for (const rawId of query.requestFamilyKeys) {
+      const requestFamilyId = rawId.trim().toUpperCase();
+      const requestFamily = requestFamilyId
+        ? await catalog.getRequestFamily(requestFamilyId)
+        : null;
+      if (!requestFamily || requestFamily.status !== "active") {
+        throw new OpportunityDiscoveryError(
+          "invalid",
+          `Request-family filter ${requestFamilyId || "(blank)"} is not in the pinned AMACS 0.5.0 catalog.`,
+        );
+      }
     }
   }
 
@@ -87,8 +97,14 @@ async function validateGovernedFilters(
 }
 
 class GovernedOpportunityDiscoveryService extends BoundedOpportunityDiscoveryService {
-  constructor(private readonly governedDb: Firestore, origin: string) {
-    super(new Wave4GapOpportunityDiscoveryRepository(governedDb), undefined, origin);
+  private readonly governedDb: Firestore;
+  private readonly governedRepository: Wave4GapOpportunityDiscoveryRepository;
+
+  constructor(governedDb: Firestore, origin: string) {
+    const repository = new Wave4GapOpportunityDiscoveryRepository(governedDb);
+    super(repository, undefined, origin);
+    this.governedDb = governedDb;
+    this.governedRepository = repository;
   }
 
   override async discover(
@@ -103,6 +119,29 @@ class GovernedOpportunityDiscoveryService extends BoundedOpportunityDiscoverySer
     scope: OpportunityParticipantScope,
     input: Parameters<BoundedOpportunityDiscoveryService["saveSearch"]>[1],
   ) {
+    const commandId = stableIdentifier(input.commandId, "Command identity");
+
+    // Exact retries remain recoverable even if a previously valid filter later becomes stale.
+    // The superclass rechecks the stored fingerprint before returning the committed record.
+    if (await this.governedRepository.getCommand(commandId)) {
+      return super.saveSearch(scope, input);
+    }
+
+    // Pause/delete are status-only corrections in the participant UI. Preserve the authoritative
+    // stored query so cleanup remains reachable after an AMACS or geography authority change.
+    if (input.savedSearchId && (input.status === "paused" || input.status === "deleted")) {
+      const savedSearchId = stableIdentifier(input.savedSearchId, "Saved search identity");
+      const existing = await this.governedRepository.getSavedSearch(savedSearchId);
+      if (
+        existing &&
+        existing.organizationId === scope.organizationId &&
+        existing.userId === scope.userId
+      ) {
+        return super.saveSearch(scope, Object.freeze({ ...input, query: existing.query }));
+      }
+      return super.saveSearch(scope, input);
+    }
+
     await validateGovernedFilters(this.governedDb, input.query);
     return super.saveSearch(scope, input);
   }
