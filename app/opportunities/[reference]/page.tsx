@@ -4,9 +4,12 @@ import { notFound, redirect } from "next/navigation";
 
 import { MarketingFooter, MarketingHeader } from "@/src/components/marketing/MarketingChrome";
 import { PublicOpportunityView } from "@/src/components/rfx/PublicOpportunityView";
-import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/participant-route-runtime";
+import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
-  resolveOptionalOpportunityParticipant,
+  RFXCHANGE_SESSION_COOKIE_NAME,
+  resolveParticipantRoute,
+} from "@/src/infrastructure/auth/participant-route-runtime";
+import {
   resolveOpportunityPublicationAudience,
   resolvePublicOpportunityProjection,
 } from "@/src/infrastructure/acquisition/runtime";
@@ -33,11 +36,28 @@ export default async function PublicOpportunityPage({ params }: PublicOpportunit
   // The opportunity reference is continuity context only; current participant authority is resolved server-side.
   const { reference } = await params;
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
-  const participantAuthorized = await resolveOptionalOpportunityParticipant(sessionCookie);
+  const access = await resolveParticipantRoute({
+    sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
+  });
 
+  if (access.kind === "access-resolution-required") {
+    redirect(participantEntryDestination(access));
+  }
+  if (access.kind === "activation-required") {
+    redirect(participantEntryDestination(access));
+  }
+  if (access.kind === "wrong-organization") {
+    redirect(access.state.controlledPlatformUrl ?? "/join");
+  }
+  if (access.kind === "restricted") {
+    redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
+  }
+
+  const participantAuthorized =
+    access.kind === "authorized" && access.state.lifecycleState === "open-platform";
   const opportunity = await resolvePublicOpportunityProjection(reference, participantAuthorized);
-  if (!opportunity && !participantAuthorized) {
+
+  if (!opportunity && access.kind === "unauthenticated") {
     const audience = await resolveOpportunityPublicationAudience(reference);
     if (audience === "authenticated-participants") {
       // The route handler issues the durable acquisition envelope/cookie before
