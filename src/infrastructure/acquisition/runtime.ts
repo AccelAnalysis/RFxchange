@@ -54,5 +54,5 @@ export async function resolveOptionalOpportunityParticipant(
   sessionCookie: string | null | undefined,
 ): Promise<boolean> {
   const access = await resolveParticipantRoute({ sessionCookie });
-  return access.kind === "authorized" && access.state.lifecycleState === "open-platform";
+  return access.kind === "authorized";
 }
