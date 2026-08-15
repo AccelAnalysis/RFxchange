@@ -229,6 +229,9 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
                   defaultValue={result.query.requestFamilyKeys[0] ?? ""}
                   placeholder="AMACS request family ID"
                 />
+                {result.query.requestFamilyKeys.slice(1).map((value) => (
+                  <input key={`requestFamily:${value}`} type="hidden" name="requestFamily" value={value} />
+                ))}
               </label>
               <label>
                 <span>AMACS capability</span>
@@ -238,6 +241,9 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
                   defaultValue={result.query.capabilityIds[0] ?? ""}
                   placeholder="AMACS capability ID"
                 />
+                {result.query.capabilityIds.slice(1).map((value) => (
+                  <input key={`capability:${value}`} type="hidden" name="capability" value={value} />
+                ))}
               </label>
               <label>
                 <span>{t("rfxWorkspace.discovery.detail.location")}</span>
@@ -247,6 +253,9 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
                   defaultValue={result.query.localityIds[0] ?? ""}
                   placeholder={spatialScope.geographyId}
                 />
+                {result.query.localityIds.slice(1).map((value) => (
+                  <input key={`locality:${value}`} type="hidden" name="locality" value={value} />
+                ))}
               </label>
               <label><span>{t("rfxWorkspace.discovery.search.deadline")}</span><select name="deadline" defaultValue={result.query.deadlineWindow}><option value="all-open">{t("rfxWorkspace.discovery.search.allOpen")}</option><option value="next-7-days">{t("rfxWorkspace.discovery.search.next7")}</option><option value="next-30-days">{t("rfxWorkspace.discovery.search.next30")}</option></select></label>
               <label className={styles.check}><input name="watched" type="checkbox" value="true" defaultChecked={result.query.watched === true} /><span>{t("rfxWorkspace.discovery.search.watched")}</span></label>
