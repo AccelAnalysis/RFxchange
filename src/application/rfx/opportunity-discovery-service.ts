@@ -332,9 +332,16 @@ export class OpportunityDiscoveryService {
     }
   }
 
-  async evaluatePublishedProjection(projection: ResponderOpportunityProjection): Promise<Readonly<{ matches: number; alerts: number }>> {
+  async evaluatePublishedProjection(
+    projection: ResponderOpportunityProjection,
+    evaluationAt: string = this.now(),
+  ): Promise<Readonly<{ matches: number; alerts: number }>> {
     if (!projectionPermitted(projection)) return Object.freeze({ matches: 0, alerts: 0 });
-    const now = projection.publishedAt ?? this.now();
+    const parsedEvaluationAt = Date.parse(evaluationAt);
+    if (!Number.isFinite(parsedEvaluationAt)) {
+      throw new OpportunityDiscoveryError("invalid", "Opportunity evaluation time is invalid.");
+    }
+    const now = new Date(parsedEvaluationAt).toISOString();
     const searches = await this.repository.listActiveSavedSearches();
     let matches = 0;
     let alerts = 0;
