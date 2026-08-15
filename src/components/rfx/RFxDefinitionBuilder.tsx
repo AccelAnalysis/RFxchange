@@ -512,17 +512,12 @@ export function RFxDefinitionBuilder({
         ...current,
         requirements: current.requirements.map((requirement) => {
           const authoritative = authoritativeRequirements.get(requirement.id);
-          if (!authoritative) return requirement;
-          return requirement.qualifierDirty
-            ? {
-                ...requirement,
-                qualifierBase: authoritative.qualifier,
-              }
-            : {
-                ...requirement,
-                qualifier: authoritative.qualifier,
-                qualifierBase: authoritative.qualifier,
-              };
+          if (!authoritative || requirement.qualifierDirty) return requirement;
+          return {
+            ...requirement,
+            qualifier: authoritative.qualifier,
+            qualifierBase: authoritative.qualifier,
+          };
         }),
       }));
       return;
