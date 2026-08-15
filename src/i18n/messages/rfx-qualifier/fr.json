@@ -1,0 +1,32 @@
+{
+  "title": "Qualificateurs structurés",
+  "intro": "Ajoutez des conditions régies de texte, de quantité, booléennes ou géographiques à une exigence RFx.",
+  "requirement": "Exigence",
+  "qualifierType": "Type de qualificateur",
+  "type": {
+    "text": "Texte",
+    "quantity": "Quantité",
+    "boolean": "Booléen",
+    "geography": "Géographie"
+  },
+  "defaultLabel": "Condition",
+  "label": "Libellé",
+  "requiredText": "Texte requis",
+  "amount": "Quantité",
+  "unit": "Unité",
+  "requiredValue": "Valeur requise",
+  "yesTrue": "Oui / vrai",
+  "noFalse": "Non / faux",
+  "localityIds": "Identifiants de localité régis",
+  "localityPlaceholder": "identifiants de localité séparés par des virgules",
+  "saving": "Enregistrement…",
+  "addQualifier": "Ajouter le qualificateur",
+  "saved": "Qualificateur structuré enregistré.",
+  "error": {
+    "labelRequired": "Le libellé du qualificateur est requis.",
+    "valueRequired": "La valeur du qualificateur est requise.",
+    "quantityRequired": "Une quantité positive et une unité sont requises.",
+    "localityRequired": "Au moins un identifiant de localité régi est requis.",
+    "save": "Le qualificateur n’a pas pu être enregistré."
+  }
+}
