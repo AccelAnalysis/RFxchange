@@ -48,6 +48,16 @@ function lifecycleMessage(copy: Copy, payload: StatusPayload): string | null {
   return null;
 }
 
+async function fetchFoundingStatus(signal?: AbortSignal): Promise<StatusPayload> {
+  const response = await fetch("/api/commercial/founding/status", {
+    cache: "no-store",
+    signal,
+  });
+  const body = await response.json() as StatusPayload & { error?: string };
+  if (!response.ok) throw new Error(body.error ?? "commercial-status-unavailable");
+  return body;
+}
+
 export function FoundingMembershipCard({ copy }: Readonly<{ copy: Copy }>) {
   const [payload, setPayload] = useState<StatusPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,10 +69,7 @@ export function FoundingMembershipCard({ copy }: Readonly<{ copy: Copy }>) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/commercial/founding/status", { cache: "no-store" });
-      const body = await response.json() as StatusPayload & { error?: string };
-      if (!response.ok) throw new Error(body.error ?? "commercial-status-unavailable");
-      setPayload(body);
+      setPayload(await fetchFoundingStatus());
     } catch {
       setPayload(null);
       setError(copy.statusUnavailable);
@@ -71,7 +78,23 @@ export function FoundingMembershipCard({ copy }: Readonly<{ copy: Copy }>) {
     }
   }, [copy.statusUnavailable]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchFoundingStatus(controller.signal)
+      .then((status) => {
+        setPayload(status);
+        setError(null);
+      })
+      .catch((cause: unknown) => {
+        if (cause instanceof DOMException && cause.name === "AbortError") return;
+        setPayload(null);
+        setError(copy.statusUnavailable);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [copy.statusUnavailable]);
 
   async function beginCheckout() {
     setSubmitting(true);
