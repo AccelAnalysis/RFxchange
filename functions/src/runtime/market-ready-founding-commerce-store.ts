@@ -8,14 +8,17 @@ import {
 
 import {
   FOUNDING_CAP,
+  PROVIDER_SUBSCRIPTION_STATUSES,
   commercialProjectionStatus,
   hasActiveFoundingRecognition,
   normalizeFoundingCapacity,
   reconcileFoundingCapacity,
   releaseExpiredCheckoutReservation,
+  shouldApplyProviderLifecycleObservation,
   subscriptionRetainsCapacity,
   type FoundingCapacitySnapshot,
   type ProviderSubscriptionSnapshot,
+  type ProviderSubscriptionStatus,
 } from "../application/market-ready-founding-commerce-reconcile.js";
 
 export const COMMERCIAL_ACCOUNT_COLLECTION = "organizationCommercialAccounts" as const;
@@ -130,6 +133,30 @@ function assertCheckoutCustomer(account: DocumentData, customerId: string): void
   if (accountCustomerReference(account) !== customerId) throw new Error("Stripe Checkout Customer does not match the commercial account.");
 }
 
+function previousLifecycleState(data: DocumentData | undefined): Readonly<{
+  createdAt: string | null;
+  status: ProviderSubscriptionStatus | null;
+  recognized: boolean;
+  retainsCapacity: boolean;
+}> {
+  if (!data) return Object.freeze({ createdAt: null, status: null, recognized: false, retainsCapacity: false });
+  const createdAt = data.lastProviderEventCreatedAt;
+  if (createdAt != null && typeof createdAt !== "string") throw new Error("Subscription reconciliation event ordering metadata is malformed.");
+  const status = data.observedStatus;
+  if (status != null && (typeof status !== "string" || !(PROVIDER_SUBSCRIPTION_STATUSES as readonly string[]).includes(status))) {
+    throw new Error("Subscription reconciliation provider status is malformed.");
+  }
+  if (typeof data.activeRecognition !== "boolean" || typeof data.retainsCapacity !== "boolean") {
+    throw new Error("Subscription reconciliation authority state is malformed.");
+  }
+  return Object.freeze({
+    createdAt: createdAt ?? null,
+    status: (status ?? null) as ProviderSubscriptionStatus | null,
+    recognized: data.activeRecognition,
+    retainsCapacity: data.retainsCapacity,
+  });
+}
+
 export async function reconcileCurrentFoundingSubscription(input: Readonly<{
   db: Firestore;
   eventId: string;
@@ -138,6 +165,7 @@ export async function reconcileCurrentFoundingSubscription(input: Readonly<{
   snapshot: ProviderSubscriptionSnapshot;
 }>): Promise<Readonly<{ duplicate: boolean; recognized: boolean; retainsCapacity: boolean }>> {
   const eventId = required(input.eventId, "Provider event id");
+  const eventType = required(input.eventType, "Provider event type");
   const organizationId = required(input.snapshot.organizationId, "Organization id");
   const eventRef = input.db.collection(PROVIDER_EVENTS_COLLECTION).doc(eventId);
   const accountRef = input.db.collection(COMMERCIAL_ACCOUNT_COLLECTION).doc(organizationId);
@@ -152,6 +180,30 @@ export async function reconcileCurrentFoundingSubscription(input: Readonly<{
     if (!account.exists || account.data()?.schemaVersion !== COMMERCIAL_SCHEMA_VERSION) throw new Error("Authoritative organization commercial account is unavailable.");
     const accountData = account.data()!;
     assertCheckoutCustomer(accountData, input.snapshot.customerId);
+
+    const previous = previousLifecycleState(reconciliation.data());
+    const shouldApply = shouldApplyProviderLifecycleObservation({
+      incomingCreatedAt: input.eventCreatedAt,
+      incomingStatus: input.snapshot.status,
+      previousCreatedAt: previous.createdAt,
+      previousStatus: previous.status,
+    });
+    if (!shouldApply) {
+      transaction.create(eventRef, {
+        id: eventId,
+        organizationId,
+        providerKey: "stripe",
+        eventType,
+        providerSubscriptionId: input.snapshot.id,
+        observedStatus: input.snapshot.status,
+        eventCreatedAt: input.eventCreatedAt,
+        ignoredAsStale: true,
+        schemaVersion: COMMERCIAL_SCHEMA_VERSION,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      return Object.freeze({ duplicate: false, recognized: previous.recognized, retainsCapacity: previous.retainsCapacity });
+    }
+
     if (!canReplaceSubscription(accountData, input.snapshot.id)) throw new Error("Provider subscription does not match the authoritative organization subscription.");
 
     const currentCapacity = persistedCapacity(capacity.data());
@@ -184,10 +236,11 @@ export async function reconcileCurrentFoundingSubscription(input: Readonly<{
       id: eventId,
       organizationId,
       providerKey: "stripe",
-      eventType: required(input.eventType, "Provider event type"),
+      eventType,
       providerSubscriptionId: input.snapshot.id,
       observedStatus: input.snapshot.status,
       eventCreatedAt: input.eventCreatedAt,
+      ignoredAsStale: false,
       schemaVersion: COMMERCIAL_SCHEMA_VERSION,
       createdAt: FieldValue.serverTimestamp(),
     });
