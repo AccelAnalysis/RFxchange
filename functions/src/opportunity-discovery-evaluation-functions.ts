@@ -188,6 +188,39 @@ function alertIdentity(search: SavedSearch, matchId: string, now: string) {
   return Object.freeze({ alertId, windowKey });
 }
 
+function followUpDailyAlertIdentity(
+  search: SavedSearch,
+  projection: Projection,
+  now: string,
+) {
+  const followUpKey = stableId(
+    "followup",
+    projection.reference,
+    String(projection.aggregateVersion),
+    projection.digest,
+  ).slice(-16);
+  const windowKey = `${now.slice(0, 10)}:follow-up:${followUpKey}`;
+  return Object.freeze({
+    alertId: stableId(
+      "oppalert",
+      search.organizationId,
+      search.userId,
+      windowKey,
+    ),
+    windowKey,
+  });
+}
+
+function alertFrozen(existing: Record<string, unknown> | undefined): boolean {
+  if (!existing) return false;
+  const claimId = existing.deliveryClaimId;
+  return (
+    existing.status !== "queued" ||
+    (typeof claimId === "string" && Boolean(claimId.trim())) ||
+    Number(existing.attemptCount ?? 0) > 0
+  );
+}
+
 function emailRequest(
   search: SavedSearch,
   projection: Projection,
@@ -197,7 +230,7 @@ function emailRequest(
   now: string,
 ) {
   const origin = process.env.RFXCHANGE_PUBLIC_ORIGIN?.trim() || "http://localhost:3000";
-  const continueUrl = `${new URL(origin).origin}/opportunities?selected=${encodeURIComponent(projection.reference)}`;
+  const continueUrl = `${new URL(origin).origin}/opportunities/${encodeURIComponent(projection.reference)}`;
   return Object.freeze({
     id: alertId,
     purpose: "transactional" as const,
@@ -269,15 +302,15 @@ async function saveMatch(
     String(projection.aggregateVersion),
     projection.digest,
   );
-  const identity = alertIdentity(search, matchId, now);
+  const baseIdentity = alertIdentity(search, matchId, now);
   const matchRef = db.collection(MATCHES).doc(matchId);
   const searchRef = db.collection(SEARCHES).doc(search.id);
   const projectionRef = db.collection(PROJECTIONS).doc(projection.reference);
   const membershipRef = db.collection(MEMBERSHIPS).doc(search.membershipId);
   const userRef = db.collection(USERS).doc(search.userId);
-  const alertRef = search.alertPolicy === "off"
+  const baseAlertRef = search.alertPolicy === "off"
     ? null
-    : db.collection(ALERTS).doc(identity.alertId);
+    : db.collection(ALERTS).doc(baseIdentity.alertId);
 
   await db.runTransaction(async (transaction) => {
     const matchSnapshot = await transaction.get(matchRef);
@@ -310,7 +343,7 @@ async function saveMatch(
       ),
       ...geographyRefs.map((reference) => transaction.get(reference)),
     ]);
-    const alertSnapshot = alertRef ? await transaction.get(alertRef) : null;
+    const baseAlertSnapshot = baseAlertRef ? await transaction.get(baseAlertRef) : null;
     const providerAccountValid = Boolean(
       userSnapshot.exists &&
       user &&
@@ -349,6 +382,23 @@ async function saveMatch(
       )
     ) {
       throw new SavedSearchAuthorityChangedError();
+    }
+
+    let identity = baseIdentity;
+    let alertRef = baseAlertRef;
+    let alertSnapshot = baseAlertSnapshot;
+    const baseExisting = baseAlertSnapshot?.data() as
+      | Record<string, unknown>
+      | undefined;
+    if (
+      currentSearch.alertPolicy === "daily-digest" &&
+      baseAlertSnapshot?.exists &&
+      alertFrozen(baseExisting)
+    ) {
+      identity = followUpDailyAlertIdentity(currentSearch, currentProjection, now);
+      const followUpRef = db.collection(ALERTS).doc(identity.alertId);
+      alertRef = followUpRef;
+      alertSnapshot = await transaction.get(followUpRef);
     }
 
     let request: ReturnType<typeof emailRequest> | null = null;
@@ -394,7 +444,6 @@ async function saveMatch(
         | undefined;
       if (
         currentSearch.alertPolicy !== "daily-digest" ||
-        existing?.status !== "queued" ||
         existing?.deliveryMode !== "daily-digest" ||
         existing?.windowKey !== identity.windowKey ||
         existingRequest?.metadata?.idempotencyKey !== request.metadata.idempotencyKey
@@ -403,6 +452,11 @@ async function saveMatch(
       }
       const existingReferences = (existing.opportunityReferences as string[] | undefined) ?? [];
       const referenceAlreadyPresent = existingReferences.includes(currentProjection.reference);
+      const frozen = alertFrozen(existing);
+      if (frozen) {
+        if (referenceAlreadyPresent) return;
+        throw new Error("Opportunity alert identity collision.");
+      }
       const references = [...new Set([
         ...existingReferences,
         currentProjection.reference,
@@ -432,6 +486,10 @@ async function saveMatch(
             ...request.variables,
             opportunity_count: references.length,
             opportunity_summary: nextSummary,
+            continue_url: String(
+              existingRequest?.variables?.continue_url ??
+              request.variables.continue_url,
+            ),
           },
         },
         updatedAt: now,

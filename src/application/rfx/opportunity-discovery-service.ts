@@ -358,7 +358,7 @@ export class OpportunityDiscoveryService {
           const alertId = search.alertPolicy === "daily-digest"
             ? id("oppalert", String(search.organizationId), String(search.userId), windowKey)
             : id("oppalert", matchId, search.alertPolicy);
-          const continueUrl = `${new URL(this.publicOrigin).origin}/opportunities?selected=${encodeURIComponent(projection.reference)}`;
+          const continueUrl = `${new URL(this.publicOrigin).origin}/opportunities/${encodeURIComponent(projection.reference)}`;
           const opportunitySummary = `${projection.payload.title} — ${opportunityDeadline(projection)} — ${projection.payload.localities.map((item) => item.label).join(", ")}`.slice(0, 1800);
           const request = createTransactionalEmailRequest({
             id: alertId,

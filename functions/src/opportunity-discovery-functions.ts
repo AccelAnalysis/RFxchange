@@ -25,6 +25,10 @@ import {
 import { getFunctionsAuth, getFunctionsFirestore } from "./runtime/firebase-admin.js";
 import { FirestoreBackgroundJobStore } from "./runtime/firestore-background-job-store.js";
 import { FirestoreTransactionalEmailDeliveryAuditStore } from "./runtime/firestore-transactional-email-delivery-audit-store.js";
+import {
+  normalizeOpportunityAlertLocale,
+  renderOpportunityAlertMessage,
+} from "./opportunity-alert-locales.js";
 
 const ALERTS = "opportunityAlertIntents";
 const MATCHES = "opportunitySavedSearchMatches";
@@ -118,6 +122,8 @@ interface ParticipantUser {
   readonly id?: string;
   readonly name?: string;
   readonly primaryEmail?: string;
+  readonly preferredLocale?: string;
+  readonly locale?: string;
   readonly login?: Readonly<{
     readonly provider?: string;
     readonly subject?: string;
@@ -210,10 +216,10 @@ function renderedAlert(request: TransactionalEmailRequest): Readonly<{ subject: 
       deliveryOutcome: "known-failure",
     });
   }
-  return Object.freeze({
-    subject: `${count} RFx opportunity update`,
-    text: `Hello ${recipient},\n\nA saved RFx search found ${count} currently permitted opportunity update(s):\n\n${summary}\n\nReview the current details securely: ${continueUrl}\n\nA saved-search match is not qualification, eligibility, endorsement, or an award prediction.`,
-  });
+  return renderOpportunityAlertMessage(
+    normalizeOpportunityAlertLocale(request.variables.locale),
+    Object.freeze({ recipient, count, summary, continueUrl }),
+  );
 }
 
 async function graphToken(): Promise<string> {
@@ -434,6 +440,9 @@ async function claimAlert(
     const providerSubject = user?.login?.provider === "firebase"
       ? user.login.subject?.trim() ?? ""
       : "";
+    const deliveryLocale = normalizeOpportunityAlertLocale(
+      intent.request.variables.locale ?? user?.preferredLocale ?? user?.locale,
+    );
     const searches = searchSnapshots
       .map((item) => item.data() as SavedSearch | undefined)
       .filter((item): item is SavedSearch => Boolean(item));
@@ -525,14 +534,29 @@ async function claimAlert(
       return null;
     }
 
-    transaction.set(ref, {
+    const claimedRequest = Object.freeze({
+      ...intent.request,
+      variables: Object.freeze({
+        ...intent.request.variables,
+        locale: deliveryLocale,
+      }),
+    });
+    const claimedIntent = Object.freeze({
       ...intent,
+      request: claimedRequest,
+    });
+    transaction.set(ref, {
+      ...claimedIntent,
       deliveryClaimId: claimId,
       deliveryLeaseUntil: Timestamp.fromMillis(now.toMillis() + 5 * 60_000),
       attemptCount: (intent.attemptCount ?? 0) + 1,
       updatedAt: FieldValue.serverTimestamp(),
     });
-    return Object.freeze({ intent, claimId, providerSubject });
+    return Object.freeze({
+      intent: claimedIntent,
+      claimId,
+      providerSubject,
+    });
   });
 }
 
