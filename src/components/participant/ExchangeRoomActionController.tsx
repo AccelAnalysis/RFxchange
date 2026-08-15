@@ -183,11 +183,15 @@ export function ExchangeRoomActionController({
           const intent = action.resolvedHandler.intent;
           return <button key={action.id} type="button" className={styles.activeAction} data-exchange-room-action={action.id} data-action-state="active" onClick={() => onNetworkFocus(intent)}>{label}</button>;
         }
-        const reason = permission === false && action.applicable
-          ? "not-authorized" as const
-          : networkIntent && !networkDiscoveryAvailable
-            ? "not-operational" as const
-            : action.disabledReason ?? "not-operational";
+        const reason = !action.operational
+          ? "not-operational" as const
+          : !action.applicable
+            ? "not-applicable" as const
+            : networkIntent && !networkDiscoveryAvailable
+              ? "not-operational" as const
+              : permission === false
+                ? "not-authorized" as const
+                : action.disabledReason ?? "not-operational";
         return <button key={action.id} type="button" className={styles.disabledAction} disabled aria-label={`${label}. ${messages.disabledReasons[reason]}`} data-exchange-room-action={action.id} data-action-state="disabled" data-disabled-reason={reason}>{label}</button>;
       })}
     </section>
