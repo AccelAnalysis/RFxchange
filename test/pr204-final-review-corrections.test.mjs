@@ -49,3 +49,40 @@ test("structured qualifier input survives unrelated same-draft version refreshes
     "Unrelated aggregate version commits must not erase in-progress qualifier input.",
   );
 });
+
+test("a stale partial definition save cannot remove a concurrently committed first text qualifier", async () => {
+  const service = await read("src/application/rfx/wave4-gap-governed-draft-service.ts");
+
+  assert.match(service, /const firstExistingText = firstExistingTextIndex >= 0/);
+  assert.match(
+    service,
+    /const effectiveIncoming = incoming\.length === 0 && firstExistingText[\s\S]{0,100}\? \[firstExistingText\][\s\S]{0,40}: incoming/,
+    "An empty partial text-qualifier payload must retain the current committed first text qualifier.",
+  );
+  assert.match(
+    service,
+    /qualifiers: Object\.freeze\(\[\.\.\.effectiveIncoming, \.\.\.preserved\]\)/,
+    "Lossless qualifier merging must combine the effective text state with every other structured qualifier.",
+  );
+});
+
+test("durable discovery evaluation checks Firebase provider authority before creating a match", async () => {
+  const worker = await read("functions/src/opportunity-discovery-evaluation-functions.ts");
+  const providerCheck = worker.indexOf("await providerAccountAuthoritative(user)");
+  const matchWrite = worker.indexOf("transaction.create(matchRef");
+
+  assert.match(worker, /getFunctionsAuth/);
+  assert.match(worker, /async function providerAccountAuthoritative/);
+  assert.match(worker, /!account\.disabled/);
+  assert.match(worker, /account\.emailVerified/);
+  assert.match(worker, /auth\/user-not-found/);
+  assert.ok(
+    providerCheck >= 0 && matchWrite > providerCheck,
+    "Firebase account status must be inspected before the immutable match tuple is persisted.",
+  );
+  assert.match(
+    worker,
+    /user\.id !== search\.userId \|\|[\s\S]{0,80}!providerAccountValid/,
+    "Provider authority must be part of the fail-closed match authorization decision.",
+  );
+});
