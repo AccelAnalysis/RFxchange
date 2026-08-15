@@ -28,8 +28,8 @@ test("fresh server authorization revokes every open-platform action and Resource
   const rfxPermission = controller.indexOf('action.authorization === "open-platform-rfx-create"');
   const referralPermission = controller.indexOf('action.authorization === "open-platform-referral-manage"');
   assert.ok(openPlatformGuard >= 0 && rfxPermission > openPlatformGuard && referralPermission > openPlatformGuard);
-  assert.match(controller, /resources\.find-providers" \|\| action\.id === "resources\.browse-resources/);
-  assert.match(controller, /return authorization\.referralManage \? null : false/);
+  assert.match(controller, /open-platform-referral-manage"\) return authorization\.referralManage/);
+  assert.match(controller, /resources\.find-providers" \|\| actionId === "resources\.browse-resources" \|\| actionId === "resources\.my-requests"\) return "\/resources"/);
   assert.match(registry, /id: "resources\.find-providers"[^\n]*authorization: "open-platform-referral-manage"/);
   assert.match(registry, /id: "resources\.browse-resources"[^\n]*authorization: "open-platform-referral-manage"/);
 });
