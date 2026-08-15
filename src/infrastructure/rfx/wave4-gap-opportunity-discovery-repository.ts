@@ -5,7 +5,38 @@ import { FirestoreOpportunityDiscoveryRepository } from "../firestore/opportunit
 
 const PROJECTIONS = "rfxOpportunityProjections";
 const GEOGRAPHIES = "geographies";
-const PAGE_SIZE = 200;
+const PAGE_SIZE = 120;
+
+export interface OpportunityProjectionPage {
+  readonly items: readonly ResponderOpportunityProjection[];
+  readonly nextCursor: string | null;
+}
+
+interface ProjectionCursor {
+  readonly deadline: string | null;
+  readonly reference: string;
+}
+
+function encodeCursor(cursor: ProjectionCursor): string {
+  return Buffer.from(JSON.stringify(cursor), "utf8").toString("base64url");
+}
+
+function decodeCursor(value: string): ProjectionCursor {
+  try {
+    const parsed = JSON.parse(Buffer.from(value, "base64url").toString("utf8")) as Record<string, unknown>;
+    if (
+      (parsed.deadline !== null && typeof parsed.deadline !== "string") ||
+      typeof parsed.reference !== "string" ||
+      !parsed.reference
+    ) throw new Error("invalid");
+    return Object.freeze({
+      deadline: parsed.deadline as string | null,
+      reference: parsed.reference,
+    });
+  } catch {
+    throw new Error("Opportunity projection page cursor is invalid.");
+  }
+}
 
 async function released(
   db: Firestore,
@@ -33,36 +64,51 @@ async function released(
 }
 
 /**
- * DSC-004 removes the old fixed visibility horizon. The service's `limit`
- * remains a presentation-page hint; authoritative discovery walks every
- * deterministic document-id page before the service applies governed filters
- * and its participant cursor.
+ * DSC-004 uses a datastore cursor ordered exactly as participant discovery is
+ * presented: response deadline, then projection/reference document identity.
+ * Each call is bounded; the service asks for additional pages only until its
+ * requested result window is complete.
  */
 export class Wave4GapOpportunityDiscoveryRepository extends FirestoreOpportunityDiscoveryRepository {
   constructor(private readonly gapDb: Firestore) {
     super(gapDb);
   }
 
-  override async listProjections() {
-    const permitted: ResponderOpportunityProjection[] = [];
-    let cursor: FirebaseFirestore.QueryDocumentSnapshot | null = null;
-
-    while (true) {
-      let query: FirebaseFirestore.Query = this.gapDb
-        .collection(PROJECTIONS)
-        .orderBy(FieldPath.documentId())
-        .limit(PAGE_SIZE);
-      if (cursor) query = query.startAfter(cursor);
-      const page = await query.get();
-      if (page.empty) break;
-      const projections = page.docs.map(
-        (document) => document.data() as ResponderOpportunityProjection,
-      );
-      permitted.push(...await released(this.gapDb, projections));
-      cursor = page.docs.at(-1) ?? null;
-      if (page.size < PAGE_SIZE) break;
+  async listProjectionPage(
+    cursor: string | null,
+    requestedPageSize = PAGE_SIZE,
+  ): Promise<OpportunityProjectionPage> {
+    const pageSize = Math.max(1, Math.min(PAGE_SIZE, Math.floor(requestedPageSize)));
+    let query: FirebaseFirestore.Query = this.gapDb
+      .collection(PROJECTIONS)
+      .orderBy("payload.timing.responseDeadline", "asc")
+      .orderBy(FieldPath.documentId(), "asc")
+      .limit(pageSize);
+    if (cursor) {
+      const decoded = decodeCursor(cursor);
+      query = query.startAfter(decoded.deadline, decoded.reference);
     }
+    const page = await query.get();
+    if (page.empty) return Object.freeze({ items: Object.freeze([]), nextCursor: null });
+    const projections = page.docs.map(
+      (document) => document.data() as ResponderOpportunityProjection,
+    );
+    const permitted = await released(this.gapDb, projections);
+    const last = page.docs.at(-1)!;
+    const lastData = last.data() as ResponderOpportunityProjection;
+    return Object.freeze({
+      items: permitted,
+      nextCursor: page.size < pageSize
+        ? null
+        : encodeCursor(Object.freeze({
+            deadline: lastData.payload.timing.responseDeadline,
+            reference: last.id,
+          })),
+    });
+  }
 
-    return Object.freeze(permitted);
+  override async listProjections(limit: number) {
+    const page = await this.listProjectionPage(null, limit);
+    return page.items;
   }
 }
