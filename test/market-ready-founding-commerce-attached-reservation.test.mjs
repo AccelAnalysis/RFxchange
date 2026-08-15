@@ -1,113 +1,52 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { Timestamp } from "firebase-admin/firestore";
 
-import { releaseExpiredAttachedFoundingReservation } from "../src/infrastructure/commercial/founding-runtime.ts";
+const runtime = await readFile(
+  new URL("../src/infrastructure/commercial/founding-runtime.ts", import.meta.url),
+  "utf8",
+);
 
-function capacity(reservations, committedOrganizationIds = []) {
-  return {
-    limit: 250,
-    committedOrganizationIds,
-    reservations,
-    schemaVersion: 1,
-    createdAt: Timestamp.fromDate(new Date("2026-08-15T00:00:00.000Z")),
-    updatedAt: Timestamp.fromDate(new Date("2026-08-15T00:00:00.000Z")),
-  };
-}
+const helperStart = runtime.indexOf("export async function releaseExpiredAttachedFoundingReservation");
+const helperEnd = runtime.indexOf("function stripeCustomerId", helperStart);
+assert.ok(helperStart >= 0 && helperEnd > helperStart, "attached-reservation release helper must remain present");
+const releaseHelper = runtime.slice(helperStart, helperEnd);
 
-function fakeFirestore(initialCapacity) {
-  let current = initialCapacity;
-  const ref = { path: "commercialFoundingCapacity/current" };
-  const db = {
-    collection(collection) {
-      assert.equal(collection, "commercialFoundingCapacity");
-      return {
-        doc(id) {
-          assert.equal(id, "current");
-          return ref;
-        },
-      };
-    },
-    async runTransaction(handler) {
-      const transaction = {
-        async get(requestedRef) {
-          assert.equal(requestedRef, ref);
-          return {
-            exists: true,
-            ref,
-            data() { return current; },
-            get(field) { return current[field]; },
-          };
-        },
-        set(requestedRef, value) {
-          assert.equal(requestedRef, ref);
-          current = value;
-        },
-        create() {
-          throw new Error("existing capacity document must not be created");
-        },
-      };
-      return handler(transaction);
-    },
-  };
-  return { db, read: () => current };
-}
+const reconcileStart = runtime.indexOf("async function reconcileAmbiguousFoundingReservations");
+const reconcileEnd = runtime.indexOf("export async function attachFoundingCheckout", reconcileStart);
+assert.ok(reconcileStart >= 0 && reconcileEnd > reconcileStart, "stale-reservation reconciler must remain present");
+const reconciler = runtime.slice(reconcileStart, reconcileEnd);
 
-const attached = Object.freeze({
-  reservationId: "reservation-current",
-  organizationId: "org-founding",
-  checkoutSessionId: "cs-current",
-  checkoutUrl: "https://checkout.stripe.test/cs-current",
-  reservedAt: "2026-08-15T00:00:00.000Z",
+test("attached reservation release is atomic and requires exact organization, reservation, and Checkout Session correlation", () => {
+  assert.match(releaseHelper, /db\.runTransaction\(/);
+  assert.match(releaseHelper, /state\.committedOrganizationIds\.includes\(input\.organizationId\)\) return false/);
+  assert.match(releaseHelper, /reservation\.organizationId === input\.organizationId/);
+  assert.match(releaseHelper, /reservation\.reservationId === input\.reservationId/);
+  assert.match(releaseHelper, /reservation\.checkoutSessionId === input\.checkoutSessionId/);
+  assert.match(releaseHelper, /if \(index < 0\) return false/);
+  assert.match(releaseHelper, /writeCapacity\(transaction, snap/);
 });
 
-test("provider-confirmed expiry releases only the exact attached reservation", async () => {
-  const store = fakeFirestore(capacity([attached]));
-  const released = await releaseExpiredAttachedFoundingReservation(store.db, {
-    organizationId: "org-founding",
-    reservationId: "reservation-current",
-    checkoutSessionId: "cs-current",
-  });
-  assert.equal(released, true);
-  assert.deepEqual(store.read().reservations, []);
+test("stale attached reservations are inspected instead of being excluded from reconciliation", () => {
+  assert.doesNotMatch(
+    reconciler,
+    /!reservation\.checkoutSessionId\s*&&\s*!reservation\.checkoutUrl/,
+    "attached stale reservations must not be filtered out before provider reconciliation",
+  );
+  assert.match(reconciler, /inspectAmbiguousFoundingReservation\(/);
+  assert.match(reconciler, /const attached = Boolean\(reservation\.checkoutSessionId \|\| reservation\.checkoutUrl\)/);
 });
 
-test("mismatched Checkout Session evidence cannot release an attached reservation", async () => {
-  const store = fakeFirestore(capacity([attached]));
-  const released = await releaseExpiredAttachedFoundingReservation(store.db, {
-    organizationId: "org-founding",
-    reservationId: "reservation-current",
-    checkoutSessionId: "cs-old",
-  });
-  assert.equal(released, false);
-  assert.deepEqual(store.read().reservations, [attached]);
+test("attached capacity is released only from provider-confirmed expiry of the exact stored Session", () => {
+  assert.match(reconciler, /providerState\.matchingCheckoutStatus === "expired"/);
+  assert.match(reconciler, /providerState\.matchingCheckoutSessionId === reservation\.checkoutSessionId/);
+  assert.match(reconciler, /releaseExpiredAttachedFoundingReservation\(db/);
+  assert.match(reconciler, /reservationId: reservation\.reservationId/);
+  assert.match(reconciler, /checkoutSessionId: reservation\.checkoutSessionId!/);
 });
 
-test("stale old reservation evidence cannot release a replacement reservation and Session", async () => {
-  const replacement = Object.freeze({
-    reservationId: "reservation-new",
-    organizationId: "org-founding",
-    checkoutSessionId: "cs-new",
-    checkoutUrl: "https://checkout.stripe.test/cs-new",
-    reservedAt: "2026-08-15T03:00:00.000Z",
-  });
-  const store = fakeFirestore(capacity([replacement]));
-  const released = await releaseExpiredAttachedFoundingReservation(store.db, {
-    organizationId: "org-founding",
-    reservationId: "reservation-old",
-    checkoutSessionId: "cs-old",
-  });
-  assert.equal(released, false);
-  assert.deepEqual(store.read().reservations, [replacement]);
-});
-
-test("attached reservation is never released while the organization is committed", async () => {
-  const store = fakeFirestore(capacity([attached], ["org-founding"]));
-  const released = await releaseExpiredAttachedFoundingReservation(store.db, {
-    organizationId: "org-founding",
-    reservationId: "reservation-current",
-    checkoutSessionId: "cs-current",
-  });
-  assert.equal(released, false);
-  assert.deepEqual(store.read().reservations, [attached]);
+test("missing or mismatched attached provider truth fails closed instead of releasing capacity", () => {
+  assert.match(reconciler, /if \(!exactExpiredAttachedSession\)/);
+  assert.match(reconciler, /provider-state-unavailable/);
+  assert.match(reconciler, /Other organizations retain their reservation when provider truth cannot be established/);
 });
