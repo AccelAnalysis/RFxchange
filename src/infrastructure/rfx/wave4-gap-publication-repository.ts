@@ -74,6 +74,23 @@ function currentAggregate(record: RfxAggregate): RfxAggregate {
     : record;
 }
 
+function definitionGeographyQualifierIds(aggregate: RfxAggregate): readonly string[] {
+  if (!aggregate.definition) return Object.freeze([]);
+  return Object.freeze(
+    [...new Set(
+      aggregate.definition.requirements.flatMap((requirement) =>
+        requirement.qualifiers.flatMap((qualifier) =>
+          qualifier.kind === "geography" ? [...qualifier.localityIds] : [],
+        ),
+      ),
+    )].sort(),
+  );
+}
+
+function sameStringList(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
 function comparableTimestamp(value: unknown): string | null {
   if (typeof value === "string") {
     const parsed = new Date(value);
@@ -178,6 +195,10 @@ export class Wave4GapPublicationRepository implements RfxRepository {
     const geographyRefs = bundle.expectedGeographies.map((item) =>
       this.db.collection(GEOGRAPHIES).doc(item.id),
     );
+    const qualifierGeographyIds = definitionGeographyQualifierIds(bundle.aggregate);
+    const qualifierGeographyRefs = qualifierGeographyIds.map((id) =>
+      this.db.collection(GEOGRAPHIES).doc(id),
+    );
     const organizationRef = this.db
       .collection(ORGANIZATIONS)
       .doc(bundle.aggregate.issuerOrganizationId);
@@ -219,7 +240,9 @@ export class Wave4GapPublicationRepository implements RfxRepository {
         membershipRef,
         authorizationRef,
         ...geographyRefs,
+        ...qualifierGeographyRefs,
       );
+      const coreCount = 8;
       const [
         aggregateSnapshot,
         eventSnapshot,
@@ -229,8 +252,14 @@ export class Wave4GapPublicationRepository implements RfxRepository {
         organizationSnapshot,
         membershipSnapshot,
         authorizationSnapshot,
-        ...geographySnapshots
-      ] = records;
+      ] = records.slice(0, coreCount);
+      const geographySnapshots = records.slice(
+        coreCount,
+        coreCount + geographyRefs.length,
+      );
+      const qualifierGeographySnapshots = records.slice(
+        coreCount + geographyRefs.length,
+      );
       const [
         organizationRestrictions,
         membershipRestrictions,
@@ -270,6 +299,7 @@ export class Wave4GapPublicationRepository implements RfxRepository {
       }
 
       const current = currentAggregate(aggregateSnapshot.data() as RfxAggregate);
+      const currentQualifierGeographyIds = definitionGeographyQualifierIds(current);
       const membership = membershipSnapshot.data() as
         | { id?: string; userId?: string; organizationId?: string; status?: string }
         | undefined;
@@ -307,7 +337,8 @@ export class Wave4GapPublicationRepository implements RfxRepository {
         current.lifecycleState !== "draft" ||
         current.version !== bundle.expectedVersion ||
         bundle.aggregate.lifecycleState !== "published" ||
-        bundle.aggregate.version !== bundle.expectedVersion + 1
+        bundle.aggregate.version !== bundle.expectedVersion + 1 ||
+        !sameStringList(currentQualifierGeographyIds, qualifierGeographyIds)
       ) {
         throw new RfxPersistenceConflictError(
           `RFx changed; current version is ${current.version}.`,
@@ -356,6 +387,16 @@ export class Wave4GapPublicationRepository implements RfxRepository {
         ) {
           throw new RfxPersistenceConflictError("RFx publication geography changed.");
         }
+      }
+
+      if (
+        qualifierGeographySnapshots.some(
+          (snapshot) => !snapshot.exists || snapshot.get("releaseState") !== "released",
+        )
+      ) {
+        throw new RfxPersistenceConflictError(
+          "RFx definition geography qualifier authority changed.",
+        );
       }
 
       transaction.set(aggregateRef, mutable(bundle.aggregate));
