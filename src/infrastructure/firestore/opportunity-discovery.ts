@@ -1,4 +1,4 @@
-import { FieldValue, type Firestore, type Transaction } from "firebase-admin/firestore";
+import { FieldPath, FieldValue, type Firestore, type Transaction } from "firebase-admin/firestore";
 
 import type { OrganizationActionAuditEvent } from "../../domain/audit/model.ts";
 import type { OrganizationId } from "../../domain/organizations/model.ts";
@@ -99,11 +99,25 @@ export class FirestoreOpportunityDiscoveryRepository implements OpportunityDisco
   constructor(private readonly db: Firestore) {}
 
   async listProjections(limit: number) {
-    const projections = await listFirestoreRecords<ResponderOpportunityProjection>(
-      this.db.collection(PROJECTIONS).limit(Math.max(1, Math.min(250, limit))),
-      PROJECTIONS,
-    );
-    return releasedProjections(this.db, projections);
+    const requested = Math.max(1, limit);
+    const pageSize = Math.min(200, requested);
+    const permitted: ResponderOpportunityProjection[] = [];
+    let cursor: FirebaseFirestore.QueryDocumentSnapshot | null = null;
+
+    while (permitted.length < requested) {
+      let query: FirebaseFirestore.Query = this.db
+        .collection(PROJECTIONS)
+        .orderBy(FieldPath.documentId())
+        .limit(pageSize);
+      if (cursor) query = query.startAfter(cursor);
+      const page = await query.get();
+      if (page.empty) break;
+      const projections = page.docs.map((document) => document.data() as ResponderOpportunityProjection);
+      permitted.push(...await releasedProjections(this.db, projections));
+      cursor = page.docs.at(-1) ?? null;
+      if (page.size < pageSize) break;
+    }
+    return Object.freeze(permitted.slice(0, requested));
   }
 
   async getProjection(reference: string) {
