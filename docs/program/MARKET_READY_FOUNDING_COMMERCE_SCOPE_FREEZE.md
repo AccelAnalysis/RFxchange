@@ -59,6 +59,7 @@ Control Room authorizes these additional **exact files only** for the remaining 
 - `test/commercial-payment-boundary.test.mjs`
 - `src/components/acquisition/FoundingAcquisitionContinuation.tsx`
 - `scripts/validate-post-wave3-marketing-surfaces.mjs`
+- `src/application/participant/participant-lens-registry.ts`
 
 This amendment is narrow and does not transfer general ownership of their parent directories.
 
@@ -68,11 +69,13 @@ The first four files are owned only for the Issue #192 commercial-authority pers
 
 `scripts/validate-post-wave3-marketing-surfaces.mjs` is owned only to reconcile its existing preserved-intent assertion with that same one-file continuation change. It must continue to require the public `/founding` conversion actions to enter `/acquisition/founding`; only the already-qualified post-value continuation assertion may point to `/commercial/founding`.
 
+`src/application/participant/participant-lens-registry.ts` is owned only to classify the exact `/commercial/founding` participant destination as part of the already-mounted persistent authenticated participant route family. This amendment does not authorize changing lens identities, lens destinations, availability, active navigation state, utilities, shared-shell rendering, or any other participant route. The commerce component may report an authorized participant only after its protected status request succeeds, so signed-out, loading, and failed authorization states remain without participant navigation.
+
 Shared background-job runner/store files remain read-only dependencies. This amendment does not authorize Phase 2, Opportunities/RFx, Resources, Intelligence, Referrals, Independent Acceptance, merge, deployment, or live Checkout work.
 
 ## Non-owned paths
 
-- `src/application/participant/**`
+- `src/application/participant/**` except the exact amended `src/application/participant/participant-lens-registry.ts`
 - `src/components/participant/**`
 - `app/geography/canvas/**`
 - `src/i18n/messages/network/**`
