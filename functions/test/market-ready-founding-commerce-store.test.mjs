@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  reconcileCurrentFoundingSubscription,
   reconcileExpiredFoundingCheckout,
 } from "../lib/runtime/market-ready-founding-commerce-store.js";
 
@@ -53,11 +54,23 @@ function commercialAccount(organizationId, customerId) {
   };
 }
 
-function capacity(reservations) {
+function canceledCommercialAccount(organizationId, customerId, subscriptionId) {
+  const subscriptionReference = { providerKey: "stripe", kind: "subscription", externalReference: subscriptionId };
+  return {
+    ...commercialAccount(organizationId, customerId),
+    providerReferences: [
+      { providerKey: "stripe", kind: "customer", externalReference: customerId },
+      subscriptionReference,
+    ],
+    subscription: { status: "canceled", providerSubscriptionReference: subscriptionReference },
+  };
+}
+
+function capacity(reservations, committedOrganizationIds = []) {
   return {
     id: "current",
     limit: 250,
-    committedOrganizationIds: [],
+    committedOrganizationIds,
     reservations,
     schemaVersion: 1,
     createdAt: "server-created-at",
@@ -142,4 +155,70 @@ test("late expiry for an old Checkout reservation cannot release a newer live re
   assert.ok(recordedEvent, "late expiry must still be durably recorded for replay safety");
   assert.equal(recordedEvent.value.checkoutReservationId, "reservation-old");
   assert.equal(recordedEvent.value.reservationCorrelationMatched, false);
+});
+
+test("later terminal lifecycle for an old subscription preserves a newer Checkout reservation", async () => {
+  const organizationId = "org-replacement";
+  const customerId = "cus-replacement";
+  const oldSubscriptionId = "sub-old";
+  const newReservation = {
+    reservationId: "reservation-new",
+    organizationId,
+    checkoutSessionId: "cs-new",
+    checkoutUrl: "https://checkout.stripe.test/cs-new",
+    reservedAt: "2026-08-15T04:00:00.000Z",
+  };
+  const store = fakeFirestore([
+    [
+      `organizationCommercialAccounts/${organizationId}`,
+      canceledCommercialAccount(organizationId, customerId, oldSubscriptionId),
+    ],
+    ["commercialFoundingCapacity/current", capacity([newReservation])],
+    [
+      `commercialSubscriptionReconciliations/${organizationId}`,
+      {
+        id: organizationId,
+        organizationId,
+        providerKey: "stripe",
+        providerCustomerId: customerId,
+        providerSubscriptionId: oldSubscriptionId,
+        observedStatus: "canceled",
+        activeRecognition: false,
+        retainsCapacity: false,
+        lastProviderEventId: "evt-old-canceled",
+        lastProviderEventCreatedAt: "2026-08-15T03:55:00.000Z",
+        schemaVersion: 1,
+        createdAt: "server-created-at",
+        updatedAt: "server-updated-at",
+      },
+    ],
+  ]);
+
+  const result = await reconcileCurrentFoundingSubscription({
+    db: store.db,
+    eventId: "evt-old-deleted-late",
+    eventType: "customer.subscription.deleted",
+    eventCreatedAt: "2026-08-15T04:05:00.000Z",
+    snapshot: {
+      id: oldSubscriptionId,
+      customerId,
+      organizationId,
+      status: "canceled",
+      priceId: "price_test_founding",
+      quantity: 1,
+      currentPeriodEndsAt: null,
+      cancelAtPeriodEnd: false,
+      checkoutReservationId: "reservation-old",
+    },
+  });
+
+  assert.equal(result.recognized, false);
+  assert.equal(result.retainsCapacity, false);
+  const capacityWrite = store.sets.find((write) => write.path === "commercialFoundingCapacity/current");
+  assert.ok(capacityWrite, "terminal lifecycle should still persist committed-capacity release");
+  assert.deepEqual(capacityWrite.value.committedOrganizationIds, []);
+  assert.deepEqual(capacityWrite.value.reservations, [newReservation]);
+  const recordedEvent = store.creates.find((write) => write.path === "commercialProviderEvents/evt-old-deleted-late");
+  assert.ok(recordedEvent, "late terminal lifecycle must remain replay-safe");
+  assert.equal(recordedEvent.value.checkoutReservationId, "reservation-old");
 });
