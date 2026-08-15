@@ -59,9 +59,7 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   const acquisition = access.state.acquisitionContext;
   const canonicalWorkspace = access.state.controlledPlatformUrl ?? "/geography/canvas";
-  if (!acquisition || acquisition.kind === "direct") {
-    redirect(canonicalWorkspace);
-  }
+  if (!acquisition || acquisition.kind === "direct") redirect(canonicalWorkspace);
 
   let resumeStatus: "resumed" | "pending" = "pending";
   try {
@@ -77,18 +75,12 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
 
   const participantOpportunity =
     acquisition.kind === "opportunity" && acquisition.subjectReference
-      ? await resolvePublicOpportunityProjection(
-          acquisition.subjectReference,
-          true,
-        )
+      ? await resolvePublicOpportunityProjection(acquisition.subjectReference, true)
       : null;
   if (participantOpportunity) {
     redirect(`/opportunities/${encodeURIComponent(participantOpportunity.reference)}`);
   }
   if (acquisition.kind === "opportunity") {
-    // A syntactically valid opaque candidate can intentionally represent a missing, unpublished,
-    // or wrong-audience reference. Once current authority is available, unresolved candidates fail
-    // closed to the canonical workspace rather than being presented as recovered opportunities.
     redirect(canonicalWorkspace);
   }
 
@@ -99,7 +91,6 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
     redirect("/exchange");
   }
 
-  const opportunity = null;
   const mapUrl = access.state.lifecycleState === "open-platform"
     ? acquisition.kind === "provider"
       ? "/resources"
@@ -154,11 +145,6 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
               <form action="/api/referrals/attach" method="post">
                 <button className={styles.primary} type="submit">Attach and review referral</button>
               </form>
-            ) : null}
-            {opportunity ? (
-              <Link className={styles.primary} href={`/opportunities/${encodeURIComponent(opportunity.reference)}`}>
-                Review public opportunity
-              </Link>
             ) : null}
             <Link className={styles.secondary} href={mapUrl}>{continuationLabel}</Link>
           </div>
