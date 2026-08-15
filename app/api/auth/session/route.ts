@@ -120,9 +120,6 @@ export async function POST(request: NextRequest) {
       "verify Firebase token + issue RFxchange session",
     );
 
-    // Authentication/session establishment is independent from participant activation. Returning
-    // users sign in with email and password only. An authenticated account without an activation
-    // context receives state=null and begins organization setup on /join.
     const db = getServerFirestore();
     const contexts = new FirestoreActivationJourneyContextRepository(db);
     const existingContext = await timing.measure(
@@ -152,9 +149,6 @@ export async function POST(request: NextRequest) {
           );
           acquisitionStatus = "bound";
         } catch (error) {
-          // Acquisition context is navigation metadata, never a reason to deny legitimate sign-in.
-          // Permanently invalid contexts are rejected and removed. Only an unclassified dependency
-          // failure keeps the cookie so a later sign-in can retry without losing valid entry context.
           acquisitionStatus = error instanceof AcquisitionContextBindingError
             ? "rejected"
             : "unavailable";
@@ -162,10 +156,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (existingContext || provisionalOrganizationName) {
+    // A bound acquisition candidate is sufficient reason to bootstrap the participant's normal
+    // activation journey even when this is their first authenticated session. The acquisition is
+    // navigation metadata only; bootstrap still starts at the canonical activation steps and does
+    // not grant organization, geography, or opportunity authority.
+    if (existingContext || provisionalOrganizationName || boundAcquisition) {
       const activation = createServerActivationJourneyService();
-      // bootstrap() already returns the canonical activation state. Reuse it instead of hydrating
-      // the same graph a second time during the same sign-in request.
       state = await timing.measure(
         "activation-state",
         () => activation.bootstrap(issued.context, provisionalOrganizationName),
