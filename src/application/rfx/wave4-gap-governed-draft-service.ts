@@ -170,12 +170,18 @@ function mergeLosslessQualifiers(
     const firstExistingTextIndex = existing.qualifiers.findIndex(
       (item) => item.kind === "text",
     );
+    const firstExistingText = firstExistingTextIndex >= 0
+      ? existing.qualifiers[firstExistingTextIndex]
+      : null;
+    const effectiveIncoming = incoming.length === 0 && firstExistingText
+      ? [firstExistingText]
+      : incoming;
     const preserved = existing.qualifiers.filter(
       (_item, index) => index !== firstExistingTextIndex,
     );
     return Object.freeze({
       ...requirement,
-      qualifiers: Object.freeze([...incoming, ...preserved]),
+      qualifiers: Object.freeze([...effectiveIncoming, ...preserved]),
     });
   });
   return Object.freeze({
