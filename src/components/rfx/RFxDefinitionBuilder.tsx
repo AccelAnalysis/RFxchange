@@ -43,6 +43,8 @@ interface RequirementRow {
   decisionTreatment: RfxDecisionTreatment;
   satisfyingParty: RfxSatisfyingParty;
   qualifier: string;
+  qualifierBase: string;
+  qualifierDirty: boolean;
   evidenceRequirementIds: string[];
   linkedFoundationRequirementIds: string[];
 }
@@ -115,25 +117,30 @@ function initialForm(aggregate: RfxAggregate): FormState {
   const definition = aggregate.definition;
   return {
     requirements:
-      definition?.requirements.map((item) => ({
-        id: item.id,
-        requirementTypeId: item.requirementType.id,
-        capabilityId: item.capability?.id ?? "",
-        capabilityLabel: item.capability?.labelSnapshot ?? "",
-        capabilityBreadcrumb: item.capabilityBreadcrumb ?? "",
-        title: item.title,
-        description: item.description,
-        level: item.level,
-        decisionTreatment: item.decisionTreatment,
-        satisfyingParty: item.satisfyingParty,
-        qualifier:
+      definition?.requirements.map((item) => {
+        const textQualifier =
           item.qualifiers.find((qualifier) => qualifier.kind === "text")?.value ??
-          "",
-        evidenceRequirementIds: [...item.evidenceRequirementIds],
-        linkedFoundationRequirementIds: [
-          ...item.linkedFoundationRequirementIds,
-        ],
-      })) ?? [],
+          "";
+        return {
+          id: item.id,
+          requirementTypeId: item.requirementType.id,
+          capabilityId: item.capability?.id ?? "",
+          capabilityLabel: item.capability?.labelSnapshot ?? "",
+          capabilityBreadcrumb: item.capabilityBreadcrumb ?? "",
+          title: item.title,
+          description: item.description,
+          level: item.level,
+          decisionTreatment: item.decisionTreatment,
+          satisfyingParty: item.satisfyingParty,
+          qualifier: textQualifier,
+          qualifierBase: textQualifier,
+          qualifierDirty: false,
+          evidenceRequirementIds: [...item.evidenceRequirementIds],
+          linkedFoundationRequirementIds: [
+            ...item.linkedFoundationRequirementIds,
+          ],
+        };
+      }) ?? [],
     responseTemplateId:
       definition?.responseStructure.sourceTemplate?.id ?? "",
     sections:
@@ -189,8 +196,14 @@ function definitionPayload(form: FormState) {
       level: item.level,
       decisionTreatment: item.decisionTreatment,
       satisfyingParty: item.satisfyingParty,
-      qualifiers: item.qualifier
-        ? [{ kind: "text", label: "Condition", value: item.qualifier }]
+      textQualifierIntent: item.qualifierDirty
+        ? item.qualifier.trim()
+          ? "set"
+          : "remove"
+        : "preserve",
+      textQualifierBaseValue: item.qualifierBase,
+      qualifiers: item.qualifier.trim()
+        ? [{ kind: "text", label: "Condition", value: item.qualifier.trim() }]
         : [],
       evidenceRequirementIds: item.evidenceRequirementIds,
       linkedFoundationRequirementIds: item.linkedFoundationRequirementIds,
@@ -312,6 +325,8 @@ export function RFxDefinitionBuilder({
             "gate_only") as RfxDecisionTreatment,
           satisfyingParty: "lead-organization",
           qualifier: "",
+          qualifierBase: "",
+          qualifierDirty: false,
           evidenceRequirementIds: [],
           linkedFoundationRequirementIds: [],
         },
@@ -481,12 +496,38 @@ export function RFxDefinitionBuilder({
     ) {
       return;
     }
-    if (dirty || saving || saveInFlight.current) return;
+    const authoritativeForm = initialForm(aggregate);
+    const authoritativeRequirements = new Map(
+      authoritativeForm.requirements.map((requirement) => [
+        requirement.id,
+        requirement,
+      ]),
+    );
     synchronizedAggregate.current = {
       id: aggregate.id,
       version: aggregate.version,
     };
-    setForm(initialForm(aggregate));
+    if (dirty || saving || saveInFlight.current) {
+      setForm((current) => ({
+        ...current,
+        requirements: current.requirements.map((requirement) => {
+          const authoritative = authoritativeRequirements.get(requirement.id);
+          if (!authoritative) return requirement;
+          return requirement.qualifierDirty
+            ? {
+                ...requirement,
+                qualifierBase: authoritative.qualifier,
+              }
+            : {
+                ...requirement,
+                qualifier: authoritative.qualifier,
+                qualifierBase: authoritative.qualifier,
+              };
+        }),
+      }));
+      return;
+    }
+    setForm(authoritativeForm);
   }, [aggregate, dirty, saving]);
 
   useEffect(() => {
@@ -660,7 +701,13 @@ export function RFxDefinitionBuilder({
                   </label>
                   <label>
                     <span>{t("rfxWorkspace.condition")}</span>
-                    <input value={item.qualifier} onChange={(event) => updateRequirement(item.id, { qualifier: event.target.value })} />
+                    <input
+                      value={item.qualifier}
+                      onChange={(event) => updateRequirement(item.id, {
+                        qualifier: event.target.value,
+                        qualifierDirty: true,
+                      })}
+                    />
                   </label>
                 </div>
                 {type?.code === "CAPABILITY" ? (
