@@ -95,11 +95,30 @@ export function useExchangeRoomLensController(onLensSelect: (lens: ParticipantLe
   }, [onLensSelect]);
 }
 
-function privilegedPermission(actionId: string, authorization: ActionAuthorizationProjection): boolean | null {
-  if (actionId === "opportunities.create-rfx") return authorization.openPlatform && authorization.rfxCreate;
-  if (actionId === "resources.my-requests") return authorization.openPlatform && authorization.referralManage;
-  if (actionId === "resources.provider-status") return authorization.openPlatform && authorization.resourceManage;
-  if (actionId === "referrals.new") return authorization.openPlatform && authorization.referralManage;
+/**
+ * Reconcile the SSR action projection with a fresh server decision. Returning null means the
+ * current decision does not need to replace an already fail-closed SSR action projection.
+ * Returning false always disables the action. Permission-specific actions may return true so a
+ * current server grant can activate their canonical protected route.
+ */
+function refreshedPermission(
+  action: ExchangeRoomActionProjection,
+  authorization: ActionAuthorizationProjection,
+): boolean | null {
+  if (action.authorization === "room-participant") return null;
+  if (!authorization.openPlatform) return false;
+  if (action.authorization === "open-platform-rfx-create") return authorization.rfxCreate;
+  if (action.authorization === "open-platform-resource-manage") return authorization.resourceManage;
+  if (action.authorization === "open-platform-referral-manage") {
+    // Find/Browse currently share the /resources handler, whose server runtime also hydrates
+    // referral-managed request state. Never advertise those handlers to a participant the route
+    // itself will reject; a newly granted permission can become active on the next authoritative
+    // projection rather than being inferred client-side.
+    if (action.id === "resources.find-providers" || action.id === "resources.browse-resources") {
+      return authorization.referralManage ? null : false;
+    }
+    return authorization.referralManage;
+  }
   return null;
 }
 
@@ -160,7 +179,7 @@ export function ExchangeRoomActionController({
     <section className={styles.actionGrid} aria-label={messages.actionsLabel} data-exchange-room-action-grid data-active-lens={activeLens}>
       {actions.map((action) => {
         const label = messages.actions[action.id];
-        const permission = privilegedPermission(action.id, authorization);
+        const permission = refreshedPermission(action, authorization);
         const networkIntent = action.id === "intelligence.organizations"
           ? "organizations" as const
           : action.id === "intelligence.capabilities"
