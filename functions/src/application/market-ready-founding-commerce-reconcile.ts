@@ -47,6 +47,15 @@ function unique(values: readonly string[]): readonly string[] {
   return Object.freeze([...new Set(values.map((value) => required(value, "Organization id")))]);
 }
 
+/**
+ * Resolve the only Price that webhook reconciliation may accept for the configured provider mode.
+ * Production is immutable. Test mode is still server-configured and never chosen by webhook data.
+ */
+export function foundingPriceIdForMode(mode: "live" | "test", testPriceId?: string): string {
+  if (mode === "live") return FOUNDING_PRICE_ID;
+  return required(testPriceId ?? "", "Test Founding Price id");
+}
+
 export function hasActiveFoundingRecognition(status: ProviderSubscriptionStatus): boolean {
   return status === "active" || status === "trialing";
 }
@@ -66,17 +75,19 @@ export function assertFoundingSubscriptionCorrelation(input: Readonly<{
   snapshot: ProviderSubscriptionSnapshot;
   organizationId: string;
   customerId: string;
+  expectedPriceId: string;
 }>): void {
   const organizationId = required(input.organizationId, "Expected organization id");
   const customerId = required(input.customerId, "Expected customer id");
+  const expectedPriceId = required(input.expectedPriceId, "Expected Founding Price id");
   if (input.snapshot.organizationId !== organizationId) {
     throw new Error("Provider subscription organization metadata does not match RFxchange authority.");
   }
   if (input.snapshot.customerId !== customerId) {
     throw new Error("Provider subscription Customer does not match RFxchange authority.");
   }
-  if (input.snapshot.priceId !== FOUNDING_PRICE_ID) {
-    throw new Error("Provider subscription Price does not match the approved Founding Price.");
+  if (input.snapshot.priceId !== expectedPriceId) {
+    throw new Error("Provider subscription Price does not match the approved Founding Price for the configured mode.");
   }
   if (input.snapshot.quantity !== 1) {
     throw new Error("Provider subscription quantity must be exactly one organization.");
