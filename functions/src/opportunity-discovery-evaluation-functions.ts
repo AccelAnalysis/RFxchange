@@ -238,17 +238,10 @@ async function saveMatch(
     const matchSnapshot = await transaction.get(matchRef);
     if (matchSnapshot.exists) return;
 
-    const [
-      savedSearchSnapshot,
-      projectionSnapshot,
-      membershipSnapshot,
-      userSnapshot,
-    ] = await transaction.getAll(
-      searchRef,
-      projectionRef,
-      membershipRef,
-      userRef,
-    );
+    const savedSearchSnapshot = await transaction.get(searchRef);
+    const projectionSnapshot = await transaction.get(projectionRef);
+    const membershipSnapshot = await transaction.get(membershipRef);
+    const userSnapshot = await transaction.get(userRef);
     const currentSearch = savedSearchSnapshot.data() as SavedSearch | undefined;
     const currentProjection = projectionSnapshot.data() as Projection | undefined;
     const membership = membershipSnapshot.data() as
