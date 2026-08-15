@@ -2,7 +2,7 @@ import {
   createPaymentProviderReference,
   paymentProviderKey,
   type PaymentProviderReference,
-} from "../../domain/commercial/model";
+} from "../../domain/commercial/model.ts";
 import type {
   PaymentProvider,
   PaymentProviderCheckoutRequest,
@@ -11,7 +11,7 @@ import type {
   PaymentProviderCustomerResult,
   PaymentProviderPortalRequest,
   PaymentProviderPortalResult,
-} from "../../domain/commercial/payment-provider";
+} from "../../domain/commercial/payment-provider.ts";
 
 const STRIPE_API_BASE = "https://api.stripe.com/v1";
 export const RFXCHANGE_FOUNDING_LIVE_PRICE_ID = "price_1U44szPNrfGaFz2qxcWEKKRl";
