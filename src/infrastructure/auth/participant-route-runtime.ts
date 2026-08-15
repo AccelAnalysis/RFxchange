@@ -1,3 +1,4 @@
+import { organizationMembershipId } from "../../domain/users/model.ts";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "./firebase-server-session.ts";
 import { createServerAuthenticationBoundary } from "./firebase-session-runtime.ts";
 import {
@@ -69,7 +70,7 @@ async function revalidateBoundActivationRestriction(
   if (resolution.kind !== "activation-required") return resolution;
   const activationState = resolution.state;
   if (!activationState || !activationState.membershipId) return resolution;
-  const membershipId = activationState.membershipId;
+  const membershipId = organizationMembershipId(activationState.membershipId);
 
   const foundation = createServerFirestoreFoundationRepositories(getServerFirestore());
   let membership;
