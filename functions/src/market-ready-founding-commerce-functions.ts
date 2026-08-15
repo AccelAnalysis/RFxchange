@@ -49,6 +49,8 @@ export const marketReadyFoundingCommerceWebhook = onRequest(
     secrets: [stripeSecretKey, stripeWebhookSecret],
     timeoutSeconds: 60,
     memory: "256MiB",
+    maxInstances: 1,
+    concurrency: 1,
   },
   async (request, response) => {
     response.set("cache-control", "no-store");
