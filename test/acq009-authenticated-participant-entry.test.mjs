@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("ACQ-009 sends authenticated incomplete participants to canonical entry instead of sign-in", async () => {
+test("ACQ-009 sends authenticated incomplete participants to canonical entry instead of sign-in or 404", async () => {
   const page = await read("app/opportunities/[reference]/page.tsx");
 
   assert.match(page, /resolveParticipantRoute/);
@@ -19,6 +19,11 @@ test("ACQ-009 sends authenticated incomplete participants to canonical entry ins
   );
   assert.match(page, /access\.kind === "wrong-organization"/);
   assert.match(page, /access\.kind === "restricted"/);
+  assert.match(
+    page,
+    /access\.kind === "authorized"[\s\S]{0,120}access\.state\.lifecycleState !== "open-platform"[\s\S]{0,120}access\.state\.controlledPlatformUrl/,
+    "Authorized controlled-platform participants must continue to their server-derived activation destination.",
+  );
   assert.match(
     page,
     /access\.kind === "authorized" && access\.state\.lifecycleState === "open-platform"/,
