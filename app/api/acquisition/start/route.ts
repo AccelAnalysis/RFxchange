@@ -7,6 +7,7 @@ import {
 import { serializeOpaqueOpportunityCandidate } from "@/src/application/acquisition/opaque-opportunity-candidate";
 import { accessJourneyId } from "@/src/domain/lifecycle/model";
 import { activationJourneyIdForUser } from "@/src/domain/onboarding/model";
+import type { UserId } from "@/src/domain/users/model";
 import {
   acquisitionCookieOptions,
   createServerAcquisitionContextService,
@@ -47,7 +48,7 @@ function withOpaqueCandidateCookie(
 async function persistAndBindCandidate(
   request: NextRequest,
   reference: string,
-  userId: string,
+  userId: UserId,
 ): Promise<Readonly<{ token: AcquisitionContextToken; attached: boolean }>> {
   const service = createServerAcquisitionContextService();
   const token = await service.issueOpaqueOpportunityCandidate({
@@ -97,7 +98,6 @@ export async function GET(request: NextRequest) {
 
     const sessionCookie = request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
     if (!sessionCookie) {
-      // Opaque candidate only: no protected lookup and no persistent write before authentication.
       return withOpaqueCandidateCookie(signInResponse(request, reference), reference);
     }
 
