@@ -58,8 +58,16 @@ export function RFxPublicationPanel({
   ) ?? false;
 
   useEffect(() => {
+    setReadiness(null);
+    setPreview(null);
+    setError(null);
+    if (aggregate.lifecycleState === "draft") setPublished(null);
+  }, [aggregate.id, aggregate.version, aggregate.lifecycleState]);
+
+  useEffect(() => {
     if (aggregate.lifecycleState !== "published") return;
     const controller = new AbortController();
+    setBusy("reload");
     void fetch(`/api/rfx?action=publication&rfxId=${encodeURIComponent(aggregate.id)}`, {
       credentials: "same-origin",
       signal: controller.signal,
@@ -82,7 +90,7 @@ export function RFxPublicationPanel({
         if (!controller.signal.aborted) setBusy(null);
       });
     return () => controller.abort();
-  }, [aggregate.id, aggregate.lifecycleState, t]);
+  }, [aggregate.id, aggregate.version, aggregate.lifecycleState, t]);
 
   async function checkReadiness() {
     setBusy("readiness");
@@ -97,6 +105,9 @@ export function RFxPublicationPanel({
       const payload = await response.json() as ReadinessResponse & { detail?: string };
       if (!response.ok)
         throw new Error((payload as ReadinessResponse & { error?: string }).error ?? payload.detail ?? t("rfxWorkspace.readinessError"));
+      if (payload.readiness.aggregateVersion !== aggregate.version) {
+        throw new Error(t("rfxWorkspace.readinessError"));
+      }
       setReadiness(payload.readiness);
       setPreview(payload.preview);
     } catch (cause) {
