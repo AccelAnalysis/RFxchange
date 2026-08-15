@@ -109,22 +109,13 @@ function refreshedPermission(
   if (!authorization.openPlatform) return false;
   if (action.authorization === "open-platform-rfx-create") return authorization.rfxCreate;
   if (action.authorization === "open-platform-resource-manage") return authorization.resourceManage;
-  if (action.authorization === "open-platform-referral-manage") {
-    // Find/Browse currently share the /resources handler, whose server runtime also hydrates
-    // referral-managed request state. Never advertise those handlers to a participant the route
-    // itself will reject; a newly granted permission can become active on the next authoritative
-    // projection rather than being inferred client-side.
-    if (action.id === "resources.find-providers" || action.id === "resources.browse-resources") {
-      return authorization.referralManage ? null : false;
-    }
-    return authorization.referralManage;
-  }
+  if (action.authorization === "open-platform-referral-manage") return authorization.referralManage;
   return null;
 }
 
 function privilegedHref(actionId: string): string | null {
   if (actionId === "opportunities.create-rfx") return "/opportunities/manage";
-  if (actionId === "resources.my-requests") return "/resources";
+  if (actionId === "resources.find-providers" || actionId === "resources.browse-resources" || actionId === "resources.my-requests") return "/resources";
   if (actionId === "resources.provider-status") return "/provider-application";
   if (actionId === "referrals.new") return participantSpatialLensHref("referrals");
   return null;
