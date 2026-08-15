@@ -58,6 +58,9 @@ test("DSC-004 scans bounded canonical pages and continues without a fixed visibi
   assert.doesNotMatch(workspace, /type="hidden" name="requestFamily"/);
   assert.doesNotMatch(workspace, /type="hidden" name="capability"/);
   assert.doesNotMatch(workspace, /type="hidden" name="locality"/);
+  assert.match(workspace, /result\.items\.length[\s\S]{0,900}result\.nextCursor/);
+  assert.match(workspace, /data-opportunity-scan-incomplete/);
+  assert.match(workspace, /state="loading" title=\{t\("rfxWorkspace\.discovery\.more"\)\}/);
 });
 
 test("DSC-005 replays before version conflict and validates all governed filters", async () => {
@@ -71,7 +74,13 @@ test("DSC-005 replays before version conflict and validates all governed filters
   const versionConflict = service.indexOf("existing.version !== expectedVersion");
   assert.ok(commandRead >= 0 && currentRead > commandRead && versionConflict > commandRead);
   assert.doesNotMatch(service.slice(0, commandRead), /createdAt|updatedAt/);
-  assert.match(runtime, /loadImmutableAmacsCatalog/);
+
+  const runtimeCommandRead = runtime.indexOf("getCommand(commandId)");
+  const runtimeValidation = runtime.lastIndexOf("validateGovernedFilters(this.governedDb, input.query)");
+  assert.ok(runtimeCommandRead >= 0 && runtimeValidation > runtimeCommandRead);
+  assert.match(runtime, /input\.status === "paused" \|\| input\.status === "deleted"/);
+  assert.match(runtime, /query: existing\.query/);
+  assert.match(runtime, /if \(query\.capabilityIds\.length \|\| query\.requestFamilyKeys\.length\)[\s\S]{0,120}loadImmutableAmacsCatalog/);
   assert.match(runtime, /hasCanonicalCapability/);
   assert.match(runtime, /getRequestFamily/);
   assert.match(runtime, /geographyId/);
