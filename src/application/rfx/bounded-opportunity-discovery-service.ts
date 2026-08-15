@@ -43,6 +43,8 @@ function queryWithoutCursor(query: OpportunityDiscoveryQuery): Omit<OpportunityD
 }
 
 const PARTICIPANT_CURSOR_FINGERPRINT_LENGTH = 24;
+const PROJECTION_PAGE_SIZE = 120;
+const MAX_PROJECTION_PAGES_PER_REQUEST = 4;
 
 function participantDatastoreCursor(cursor: string | null, fingerprint: string): string | null {
   if (!cursor) return null;
@@ -134,12 +136,14 @@ export class BoundedOpportunityDiscoveryService extends Wave4GapOpportunityDisco
     const watched = new Set(watchedReferences);
 
     const matching: ResponderOpportunityProjection[] = [];
+    let scannedPages = 0;
     do {
       const page = await this.boundedRepository.listProjectionPage(
         datastoreCursor,
-        120,
+        PROJECTION_PAGE_SIZE,
         minimumDeadline,
       );
+      scannedPages += 1;
       for (const projection of page.items) {
         if (!permitted(projection)) continue;
         if (opportunityMatchesQuery({
@@ -153,7 +157,11 @@ export class BoundedOpportunityDiscoveryService extends Wave4GapOpportunityDisco
         }
       }
       datastoreCursor = page.nextCursor;
-    } while (datastoreCursor && matching.length < query.limit + 1);
+    } while (
+      datastoreCursor &&
+      matching.length < query.limit + 1 &&
+      scannedPages < MAX_PROJECTION_PAGES_PER_REQUEST
+    );
 
     const selected = matching.slice(0, query.limit);
     const items = Object.freeze(
@@ -181,15 +189,26 @@ export class BoundedOpportunityDiscoveryService extends Wave4GapOpportunityDisco
       (Date.parse(`${value.responseDeadline}T23:59:59.999Z`) - nowValue) / 86_400_000;
 
     const lastSelected = selected.at(-1) ?? null;
+    const bufferedResultCursor = matching.length > query.limit && lastSelected
+      ? this.boundedRepository.cursorAfterProjection(lastSelected)
+      : null;
+    // A selective query may exhaust its per-request scan budget before filling a result page.
+    // Continue from the datastore boundary already scanned instead of hiding later records or
+    // allowing one request to walk the entire open corpus.
+    const boundedScanCursor = !bufferedResultCursor &&
+      datastoreCursor &&
+      scannedPages >= MAX_PROJECTION_PAGES_PER_REQUEST
+      ? datastoreCursor
+      : null;
+
     return Object.freeze({
       query,
       items,
-      nextCursor: matching.length > query.limit && lastSelected
-        ? participantCursor(
-            queryHash,
-            this.boundedRepository.cursorAfterProjection(lastSelected),
-          )
-        : null,
+      nextCursor: bufferedResultCursor
+        ? participantCursor(queryHash, bufferedResultCursor)
+        : boundedScanCursor
+          ? participantCursor(queryHash, boundedScanCursor)
+          : null,
       savedSearches: Object.freeze(savedSearches.filter((saved) => saved.status !== "deleted")),
       deadlines: Object.freeze({
         next7Days: Object.freeze(allOpenWatched.filter((value) => days(value) <= 7)),

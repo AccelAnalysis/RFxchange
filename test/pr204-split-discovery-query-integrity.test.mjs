@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("DSC-004 scans bounded canonical pages only until the requested governed result window is complete", async () => {
+test("DSC-004 scans bounded canonical pages and continues without a fixed visibility horizon", async () => {
   const [repository, boundedService, domain, workspace, runtime, requestFamilySource] = await Promise.all([
     read("src/infrastructure/rfx/wave4-gap-opportunity-discovery-repository.ts"),
     read("src/application/rfx/bounded-opportunity-discovery-service.ts"),
@@ -27,15 +27,16 @@ test("DSC-004 scans bounded canonical pages only until the requested governed re
 
   assert.match(boundedService, /participantDatastoreCursor/);
   assert.match(boundedService, /minimumDeadline = now\.slice\(0, 10\)/);
-  assert.match(boundedService, /listProjectionPage\([\s\S]{0,120}minimumDeadline/);
+  assert.match(boundedService, /MAX_PROJECTION_PAGES_PER_REQUEST = 4/);
+  assert.match(boundedService, /scannedPages < MAX_PROJECTION_PAGES_PER_REQUEST/);
+  assert.match(boundedService, /boundedScanCursor/);
+  assert.match(boundedService, /participantCursor\(queryHash, boundedScanCursor\)/);
   assert.match(boundedService, /matching\.length < query\.limit \+ 1/);
   assert.match(boundedService, /cursorAfterProjection\(lastSelected\)/);
   assert.doesNotMatch(boundedService, /targetMatchCount|rawOffset|offset \+ query\.limit/);
   assert.match(boundedService, /watchedReferences\.map\(\(reference\) => this\.boundedRepository\.getProjection\(reference\)\)/);
   assert.doesNotMatch(boundedService, /listProjections\(/);
   assert.doesNotMatch(boundedService, /10_000/);
-  assert.match(runtime, /rawId\.trim\(\)\.toUpperCase\(\)/);
-  assert.match(runtime, /BoundedOpportunityDiscoveryService/);
 
   assert.match(domain, /requestFamilyIndexKeyForProjection/);
   assert.match(domain, /LEGACY_REQUEST_FAMILY_LABEL_TO_CANONICAL_KEY/);
@@ -51,15 +52,18 @@ test("DSC-004 scans bounded canonical pages only until the requested governed re
     "data-opportunity-capability-filter",
     "data-opportunity-locality-filter",
   ]) assert.match(workspace, new RegExp(attr));
-  assert.match(workspace, /requestFamilyKeys\.slice\(1\)\.map/);
-  assert.match(workspace, /capabilityIds\.slice\(1\)\.map/);
-  assert.match(workspace, /localityIds\.slice\(1\)\.map/);
-  assert.match(workspace, /type="hidden" name="requestFamily"/);
-  assert.match(workspace, /type="hidden" name="capability"/);
-  assert.match(workspace, /type="hidden" name="locality"/);
+  assert.match(workspace, /requestFamilyKeys\.length \? result\.query\.requestFamilyKeys : \[""\]/);
+  assert.match(workspace, /capabilityIds\.length \? result\.query\.capabilityIds : \[""\]/);
+  assert.match(workspace, /localityIds\.length \? result\.query\.localityIds : \[""\]/);
+  assert.doesNotMatch(workspace, /type="hidden" name="requestFamily"/);
+  assert.doesNotMatch(workspace, /type="hidden" name="capability"/);
+  assert.doesNotMatch(workspace, /type="hidden" name="locality"/);
+  assert.match(workspace, /result\.items\.length[\s\S]{0,900}result\.nextCursor/);
+  assert.match(workspace, /data-opportunity-scan-incomplete/);
+  assert.match(workspace, /state="loading" title=\{t\("rfxWorkspace\.discovery\.more"\)\}/);
 });
 
-test("DSC-005 replays before version conflict and validates capability filters against pinned AMACS", async () => {
+test("DSC-005 replays before version conflict and validates all governed filters", async () => {
   const [service, runtime] = await Promise.all([
     read("src/application/rfx/wave4-gap-opportunity-discovery-service.ts"),
     read("src/infrastructure/rfx/opportunity-discovery-runtime.ts"),
@@ -70,8 +74,19 @@ test("DSC-005 replays before version conflict and validates capability filters a
   const versionConflict = service.indexOf("existing.version !== expectedVersion");
   assert.ok(commandRead >= 0 && currentRead > commandRead && versionConflict > commandRead);
   assert.doesNotMatch(service.slice(0, commandRead), /createdAt|updatedAt/);
-  assert.match(runtime, /loadImmutableAmacsCatalog/);
-  assert.match(runtime, /validateCapabilityIds/);
+
+  const runtimeCommandRead = runtime.indexOf("getCommand(commandId)");
+  const runtimeValidation = runtime.lastIndexOf("validateGovernedFilters(this.governedDb, input.query)");
+  assert.ok(runtimeCommandRead >= 0 && runtimeValidation > runtimeCommandRead);
+  assert.match(runtime, /input\.status === "paused" \|\| input\.status === "deleted"/);
+  assert.match(runtime, /query: existing\.query/);
+  assert.match(runtime, /if \(query\.capabilityIds\.length \|\| query\.requestFamilyKeys\.length\)[\s\S]{0,120}loadImmutableAmacsCatalog/);
+  assert.match(runtime, /hasCanonicalCapability/);
+  assert.match(runtime, /getRequestFamily/);
+  assert.match(runtime, /geographyId/);
+  assert.match(runtime, /db\.getAll/);
+  assert.match(runtime, /releaseState/);
+  assert.match(runtime, /validateGovernedFilters/);
   assert.match(runtime, /BoundedOpportunityDiscoveryService/);
 });
 
