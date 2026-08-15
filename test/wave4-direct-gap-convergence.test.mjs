@@ -23,11 +23,12 @@ test("remaining Wave 4 corrections do not re-gate the map-first Exchange", async
 });
 
 test("ISS-007 and ISS-011 preserve the correct draft and support lossless structured/partial definition authoring", async () => {
-  const [workspace, qualifierEditor, service, repository, dictionary, ...qualifierCatalogText] = await Promise.all([
+  const [workspace, qualifierEditor, service, repository, baseRepository, dictionary, ...qualifierCatalogText] = await Promise.all([
     read("src/components/rfx/RFxDraftWorkspace.tsx"),
     read("src/components/rfx/RFxStructuredQualifierEditor.tsx"),
     read("src/application/rfx/wave4-gap-governed-draft-service.ts"),
     read("src/infrastructure/rfx/iss006-governed-rfx-repository.ts"),
+    read("src/infrastructure/firestore/rfx.ts"),
     read("src/i18n/get-dictionary.ts"),
     ...["en-US", "es", "fr", "it", "de"].map((locale) =>
       read(`src/i18n/messages/rfx-qualifier/${locale}.json`)),
@@ -53,6 +54,16 @@ test("ISS-007 and ISS-011 preserve the correct draft and support lossless struct
     assert.deepEqual(leafKeys(catalog), expectedQualifierKeys);
   }
   assert.equal(new Set(qualifierCatalogs.map((catalog) => catalog.title)).size, 5);
+
+  assert.match(baseRepository, /definitionGeographyQualifierIds/);
+  assert.match(baseRepository, /assertReleasedQualifierGeographies/);
+  assert.match(baseRepository, /qualifierGeographyRefs/);
+  assert.match(baseRepository, /snapshot\.get\("releaseState"\) !== "released"/);
+  assert.match(
+    baseRepository,
+    /publish\([\s\S]*qualifierGeographyRefs[\s\S]*assertReleasedQualifierGeographies\(qualifierGeographySnapshots\)/,
+    "Geography qualifiers must be revalidated again in the publication transaction.",
+  );
 });
 
 test("ISS-009 rejects semantically incompatible evaluation links", async () => {
@@ -150,6 +161,12 @@ test("DSC-004 has no fixed discovery horizon, handles legacy projections, and ex
   assert.match(workspace, /type="hidden" name="requestFamily"/);
   assert.match(workspace, /type="hidden" name="capability"/);
   assert.match(workspace, /type="hidden" name="locality"/);
+  assert.match(workspace, /t\("rfxWorkspace\.capabilitySearch"\)/);
+  assert.doesNotMatch(
+    workspace,
+    /AMACS request family ID|AMACS capability ID|>AMACS capability</,
+    "New discovery-filter copy must not bypass the five-locale catalog.",
+  );
 });
 
 test("DSC-005 exact replay precedes version conflict and capability IDs use the pinned AMACS catalog", async () => {
@@ -173,11 +190,12 @@ test("DSC-005 exact replay precedes version conflict and capability IDs use the 
 });
 
 test("DSC-006 has durable, authority-revalidated discovery evaluation and alert delivery", async () => {
-  const [api, reliability, evaluationWorker, alertWorker, functionsIndex] = await Promise.all([
+  const [api, reliability, evaluationWorker, alertWorker, canonicalDiscoveryRepository, functionsIndex] = await Promise.all([
     read("app/api/rfx/route.ts"),
     read("src/infrastructure/rfx/opportunity-discovery-reliability.ts"),
     read("functions/src/opportunity-discovery-evaluation-functions.ts"),
     read("functions/src/opportunity-discovery-functions.ts"),
+    read("src/infrastructure/firestore/opportunity-discovery.ts"),
     read("functions/src/index.ts"),
   ]);
   assert.match(api, /queueOpportunityDiscoveryEvaluation/);
@@ -193,6 +211,11 @@ test("DSC-006 has durable, authority-revalidated discovery evaluation and alert 
   assert.match(evaluationWorker, /referenceAlreadyPresent/);
   assert.match(evaluationWorker, /referenceAlreadyPresent\s*\?\s*existingSummary/);
   assert.match(evaluationWorker, /opportunity_summary:\s*nextSummary/);
+  assert.match(evaluationWorker, /class SavedSearchAuthorityChangedError/);
+  assert.match(evaluationWorker, /error instanceof SavedSearchAuthorityChangedError\) continue/);
+  assert.match(canonicalDiscoveryRepository, /nextUniqueReferences/);
+  assert.match(canonicalDiscoveryRepository, /nextUniqueReferences\.length && nextSummary/);
+  assert.match(canonicalDiscoveryRepository, /opportunity_summary:\s*opportunitySummary/);
   assert.match(alertWorker, /opportunityAlertIntents/);
   assert.match(alertWorker, /executeReliableTransactionalEmailJob/);
   assert.match(alertWorker, /FirestoreBackgroundJobStore/);
