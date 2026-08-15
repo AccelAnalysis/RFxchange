@@ -638,6 +638,7 @@ export const scheduledOpportunityAlertDelivery = onSchedule(
     retryCount: 3,
     minBackoffSeconds: 30,
     maxBackoffSeconds: 300,
+    secrets: ["RFXCHANGE_MICROSOFT_CLIENT_SECRET"],
   },
   async () => {
     const db = getFunctionsFirestore();
