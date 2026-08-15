@@ -6,6 +6,7 @@ import type {
   RfxAggregate,
   RfxRequirementQualifier,
 } from "../../domain/rfx/model";
+import { useI18n } from "../i18n/I18nProvider";
 import {
   clearRetryStableCommand,
   resolveRetryStableCommand,
@@ -33,7 +34,7 @@ function selectionInput(aggregate: RfxAggregate, requirements: readonly Readonly
   id: string;
   qualifiers: readonly RfxRequirementQualifier[];
 }>[]) {
-  if (!aggregate.definition) throw new Error("RFx definition is unavailable.");
+  if (!aggregate.definition) throw new Error("rfx-definition-unavailable");
   const qualifierByRequirement = new Map(
     requirements.map((requirement) => [requirement.id, requirement.qualifiers]),
   );
@@ -90,10 +91,11 @@ export function RFxStructuredQualifierEditor({
   commandRecoveryScope,
   onCommitted,
 }: Props) {
+  const { t } = useI18n();
   const definition = aggregate.definition;
   const [requirementId, setRequirementId] = useState(definition?.requirements[0]?.id ?? "");
   const [qualifierKind, setQualifierKind] = useState<QualifierKind>("text");
-  const [label, setLabel] = useState("Condition");
+  const [label, setLabel] = useState(() => t("rfxQualifier.defaultLabel"));
   const [textValue, setTextValue] = useState("");
   const [amount, setAmount] = useState("");
   const [unit, setUnit] = useState("");
@@ -110,15 +112,15 @@ export function RFxStructuredQualifierEditor({
   if (!definition || !definition.requirements.length) return null;
 
   function qualifier(): RfxRequirementQualifier {
-    if (!label.trim()) throw new Error("Qualifier label is required.");
+    if (!label.trim()) throw new Error(t("rfxQualifier.error.labelRequired"));
     if (qualifierKind === "text") {
-      if (!textValue.trim()) throw new Error("Qualifier value is required.");
+      if (!textValue.trim()) throw new Error(t("rfxQualifier.error.valueRequired"));
       return Object.freeze({ kind: "text", label: label.trim(), value: textValue.trim() });
     }
     if (qualifierKind === "quantity") {
       const parsed = Number(amount);
       if (!Number.isFinite(parsed) || parsed <= 0 || !unit.trim()) {
-        throw new Error("A positive quantity and unit are required.");
+        throw new Error(t("rfxQualifier.error.quantityRequired"));
       }
       return Object.freeze({ kind: "quantity", label: label.trim(), amount: parsed, unit: unit.trim() });
     }
@@ -129,7 +131,7 @@ export function RFxStructuredQualifierEditor({
       .split(/[\s,]+/)
       .map((value) => value.trim())
       .filter(Boolean);
-    if (!ids.length) throw new Error("At least one governed locality ID is required.");
+    if (!ids.length) throw new Error(t("rfxQualifier.error.localityRequired"));
     return Object.freeze({ kind: "geography", label: label.trim(), localityIds: Object.freeze(ids) });
   }
 
@@ -169,9 +171,9 @@ export function RFxStructuredQualifierEditor({
           definition: definitionInput,
         }),
       });
-      const payload = await response.json() as { aggregate?: RfxAggregate; detail?: string; error?: string };
+      const payload = await response.json() as { aggregate?: RfxAggregate };
       if (!response.ok || !payload.aggregate) {
-        throw new Error(payload.detail ?? payload.error ?? "Qualifier could not be saved.");
+        throw new Error(t("rfxQualifier.error.save"));
       }
       clearRetryStableCommand({ storage: commandStorage, storageKey, commandId });
       onCommitted(payload.aggregate);
@@ -179,9 +181,9 @@ export function RFxStructuredQualifierEditor({
       setAmount("");
       setUnit("");
       setLocalityIds("");
-      setMessage("Structured qualifier saved.");
+      setMessage(t("rfxQualifier.saved"));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Qualifier could not be saved.");
+      setMessage(error instanceof Error ? error.message : t("rfxQualifier.error.save"));
     } finally {
       setBusy(false);
     }
@@ -189,10 +191,10 @@ export function RFxStructuredQualifierEditor({
 
   return (
     <section className={styles.definitionModule} data-rfx-structured-qualifiers>
-      <h3>Structured qualifiers</h3>
-      <p>Add governed text, quantity, boolean, or geography conditions to an RFx requirement.</p>
+      <h3>{t("rfxQualifier.title")}</h3>
+      <p>{t("rfxQualifier.intro")}</p>
       <label className={styles.field}>
-        <span>Requirement</span>
+        <span>{t("rfxQualifier.requirement")}</span>
         <select value={requirementId} onChange={(event) => setRequirementId(event.target.value)} disabled={busy}>
           {definition.requirements.map((requirement) => (
             <option key={requirement.id} value={requirement.id}>{requirement.title}</option>
@@ -200,32 +202,32 @@ export function RFxStructuredQualifierEditor({
         </select>
       </label>
       <label className={styles.field}>
-        <span>Qualifier type</span>
+        <span>{t("rfxQualifier.qualifierType")}</span>
         <select data-rfx-qualifier-kind value={qualifierKind} onChange={(event) => setQualifierKind(event.target.value as QualifierKind)} disabled={busy}>
-          <option value="text">Text</option>
-          <option value="quantity">Quantity</option>
-          <option value="boolean">Boolean</option>
-          <option value="geography">Geography</option>
+          <option value="text">{t("rfxQualifier.type.text")}</option>
+          <option value="quantity">{t("rfxQualifier.type.quantity")}</option>
+          <option value="boolean">{t("rfxQualifier.type.boolean")}</option>
+          <option value="geography">{t("rfxQualifier.type.geography")}</option>
         </select>
       </label>
-      <label className={styles.field}><span>Label</span><input value={label} onChange={(event) => setLabel(event.target.value)} disabled={busy} /></label>
+      <label className={styles.field}><span>{t("rfxQualifier.label")}</span><input value={label} onChange={(event) => setLabel(event.target.value)} disabled={busy} /></label>
       {qualifierKind === "text" ? (
-        <label className={styles.field}><span>Required text</span><input value={textValue} onChange={(event) => setTextValue(event.target.value)} disabled={busy} /></label>
+        <label className={styles.field}><span>{t("rfxQualifier.requiredText")}</span><input value={textValue} onChange={(event) => setTextValue(event.target.value)} disabled={busy} /></label>
       ) : null}
       {qualifierKind === "quantity" ? (
         <div>
-          <label className={styles.field}><span>Amount</span><input type="number" min="0" step="any" value={amount} onChange={(event) => setAmount(event.target.value)} disabled={busy} /></label>
-          <label className={styles.field}><span>Unit</span><input value={unit} onChange={(event) => setUnit(event.target.value)} disabled={busy} /></label>
+          <label className={styles.field}><span>{t("rfxQualifier.amount")}</span><input type="number" min="0" step="any" value={amount} onChange={(event) => setAmount(event.target.value)} disabled={busy} /></label>
+          <label className={styles.field}><span>{t("rfxQualifier.unit")}</span><input value={unit} onChange={(event) => setUnit(event.target.value)} disabled={busy} /></label>
         </div>
       ) : null}
       {qualifierKind === "boolean" ? (
-        <label className={styles.field}><span>Required value</span><select value={requiredValue ? "true" : "false"} onChange={(event) => setRequiredValue(event.target.value === "true")} disabled={busy}><option value="true">Yes / true</option><option value="false">No / false</option></select></label>
+        <label className={styles.field}><span>{t("rfxQualifier.requiredValue")}</span><select value={requiredValue ? "true" : "false"} onChange={(event) => setRequiredValue(event.target.value === "true")} disabled={busy}><option value="true">{t("rfxQualifier.yesTrue")}</option><option value="false">{t("rfxQualifier.noFalse")}</option></select></label>
       ) : null}
       {qualifierKind === "geography" ? (
-        <label className={styles.field}><span>Governed locality IDs</span><input value={localityIds} onChange={(event) => setLocalityIds(event.target.value)} placeholder="comma-separated locality IDs" disabled={busy} /></label>
+        <label className={styles.field}><span>{t("rfxQualifier.localityIds")}</span><input value={localityIds} onChange={(event) => setLocalityIds(event.target.value)} placeholder={t("rfxQualifier.localityPlaceholder")} disabled={busy} /></label>
       ) : null}
       <button className={styles.secondary} type="button" onClick={() => void addQualifier()} disabled={busy || !selected}>
-        {busy ? "Saving…" : "Add qualifier"}
+        {busy ? t("rfxQualifier.saving") : t("rfxQualifier.addQualifier")}
       </button>
       {message ? <p role="status">{message}</p> : null}
     </section>
