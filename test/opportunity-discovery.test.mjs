@@ -138,7 +138,7 @@ test("recipient unavailability suppresses only delivery and preserves the author
   assert.equal(repository.alerts.size, 0);
 });
 
-test("daily digest matches share one deterministic recipient-day intent", async () => {
+test("daily digest matches share one deterministic publication-day intent", async () => {
   const repository = new MemoryRepository([projection("opp-a", "2026-08-30"), projection("opp-b", "2026-09-01")]);
   const service = new OpportunityDiscoveryService(repository, () => NOW, "https://example.test");
   await service.saveSearch(scope, { commandId: "command-save-digest", label: "All", alertPolicy: "daily-digest", query: { localityIds: ["locality-alpha"] } });
@@ -147,6 +147,6 @@ test("daily digest matches share one deterministic recipient-day intent", async 
   assert.equal(repository.matches.size, 2);
   assert.equal(repository.alerts.size, 1);
   const alert = [...repository.alerts.values()][0];
-  assert.equal(alert.windowKey, "2026-08-12");
+  assert.equal(alert.windowKey, "2026-08-10");
   assert.equal(alert.opportunityReferences.length, 2);
 });
