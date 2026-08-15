@@ -80,6 +80,7 @@ interface EvaluationRecord {
   readonly claimId?: string | null;
   readonly leaseUntil?: Timestamp | null;
   readonly nextAttemptAt?: Timestamp | null;
+  readonly savedSearchCursorId?: string | null;
 }
 
 class SavedSearchAuthorityChangedError extends Error {
@@ -444,6 +445,32 @@ async function claimEvaluation(
   });
 }
 
+async function checkpointEvaluation(
+  db: Firestore,
+  id: string,
+  claimId: string,
+  savedSearchCursorId: string,
+): Promise<void> {
+  const ref = db.collection(EVALUATIONS).doc(id);
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists) {
+      throw new Error("Opportunity discovery evaluation disappeared during checkpoint.");
+    }
+    const record = snapshot.data() as EvaluationRecord;
+    if (record.claimId !== claimId) {
+      throw new Error("Opportunity discovery evaluation claim changed during checkpoint.");
+    }
+    const now = Timestamp.now();
+    transaction.set(ref, {
+      ...record,
+      savedSearchCursorId,
+      leaseUntil: Timestamp.fromMillis(now.toMillis() + 5 * 60_000),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  });
+}
+
 async function completeEvaluation(
   db: Firestore,
   id: string,
@@ -463,6 +490,7 @@ async function completeEvaluation(
         claimId: null,
         leaseUntil: null,
         nextAttemptAt: null,
+        savedSearchCursorId: null,
         lastErrorCode: null,
         completedAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
@@ -490,16 +518,19 @@ async function completeEvaluation(
 
 async function processAllActiveSearches(
   db: Firestore,
+  evaluationId: string,
+  claimId: string,
   projection: Projection,
   now: string,
+  initialCursorId: string | null,
 ): Promise<void> {
-  let cursor: FirebaseFirestore.QueryDocumentSnapshot | null = null;
+  let cursorId = initialCursorId;
   while (true) {
     let query: FirebaseFirestore.Query = db.collection(SEARCHES)
       .where("status", "==", "active")
       .orderBy(FieldPath.documentId())
       .limit(PAGE_SIZE);
-    if (cursor) query = query.startAfter(cursor);
+    if (cursorId) query = query.startAfter(cursorId);
     const page = await query.get();
     if (page.empty) break;
     for (const document of page.docs) {
@@ -512,7 +543,10 @@ async function processAllActiveSearches(
         throw error;
       }
     }
-    cursor = page.docs.at(-1) ?? null;
+    const nextCursorId = page.docs.at(-1)?.id ?? null;
+    if (!nextCursorId) break;
+    await checkpointEvaluation(db, evaluationId, claimId, nextCursorId);
+    cursorId = nextCursorId;
     if (page.size < PAGE_SIZE) break;
   }
 }
@@ -536,7 +570,14 @@ async function processEvaluation(db: Firestore, id: string): Promise<boolean> {
     ) {
       throw new Error("Opportunity projection changed before durable evaluation.");
     }
-    await processAllActiveSearches(db, current, new Date().toISOString());
+    await processAllActiveSearches(
+      db,
+      id,
+      claimed.claimId,
+      current,
+      new Date().toISOString(),
+      claimed.record.savedSearchCursorId ?? null,
+    );
     await completeEvaluation(db, id, claimed.claimId);
   } catch (error) {
     await completeEvaluation(db, id, claimed.claimId, error);
