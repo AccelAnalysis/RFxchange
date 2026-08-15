@@ -40,9 +40,11 @@ export default async function PublicOpportunityPage({ params }: PublicOpportunit
   if (!opportunity && !participantAuthorized) {
     const audience = await resolveOpportunityPublicationAudience(reference);
     if (audience === "authenticated-participants") {
-      const returnTo = `/opportunities/${encodeURIComponent(reference)}`;
-      // Preserve the exact shared RFx through the existing authenticated-participant acquisition/sign-in path.
-      redirect(`/signin?returnTo=${encodeURIComponent(returnTo)}&acquisition=${encodeURIComponent(reference)}`);
+      // The route handler issues the durable acquisition envelope/cookie before
+      // sign-in, preserving this exact RFx through activation for new participants.
+      redirect(
+        `/api/acquisition/start?opportunityReference=${encodeURIComponent(reference)}`,
+      );
     }
   }
   if (!opportunity) notFound();
