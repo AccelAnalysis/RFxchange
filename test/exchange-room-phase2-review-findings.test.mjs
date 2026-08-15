@@ -24,12 +24,17 @@ test("shared controller hydrates authorization fail-closed and requires discover
 test("fresh server authorization revokes every open-platform action and Resource handlers match route authority", () => {
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   const registry = read("src/application/participant/exchange-room-actions.ts");
+  const spatial = read("src/application/participant/participant-spatial-context.ts");
   const openPlatformGuard = controller.indexOf("if (!authorization.openPlatform) return false;");
   const rfxPermission = controller.indexOf('action.authorization === "open-platform-rfx-create"');
   const referralPermission = controller.indexOf('action.authorization === "open-platform-referral-manage"');
   assert.ok(openPlatformGuard >= 0 && rfxPermission > openPlatformGuard && referralPermission > openPlatformGuard);
   assert.match(controller, /open-platform-referral-manage"\) return authorization\.referralManage/);
-  assert.match(controller, /resources\.find-providers" \|\| actionId === "resources\.browse-resources" \|\| actionId === "resources\.my-requests"\) return "\/resources"/);
+  assert.match(controller, /resources\.find-providers" \|\| actionId === "resources\.browse-resources"/);
+  assert.match(controller, /participantSpatialLensHref\("resources"\)/);
+  assert.match(spatial, /params\.set\("organization", context\.selection\.organizationId\)/);
+  assert.match(spatial, /params\.set\("provider", context\.selection\.organizationId\)/);
+  assert.match(spatial, /serverRevalidatesSelectedObjectsAndActions: true/);
   assert.match(registry, /id: "resources\.find-providers"[^\n]*authorization: "open-platform-referral-manage"/);
   assert.match(registry, /id: "resources\.browse-resources"[^\n]*authorization: "open-platform-referral-manage"/);
 });
