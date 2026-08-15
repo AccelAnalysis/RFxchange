@@ -26,7 +26,7 @@ test("opportunity alert delivery revalidates Firebase provider account before pr
   assert.match(worker, /auth\/user-not-found/);
   assert.match(worker, /suppressionReason: reason/);
   const accountCheck = worker.indexOf("providerAccountAuthoritative(claimed.providerSubject, request)");
-  const delivery = worker.indexOf("executeReliableTransactionalEmailJob");
+  const delivery = worker.indexOf("const result = await executeReliableTransactionalEmailJob", accountCheck);
   assert.ok(accountCheck >= 0 && delivery > accountCheck,
     "Firebase provider-account authority must be revalidated before transactional email delivery begins.");
 });
