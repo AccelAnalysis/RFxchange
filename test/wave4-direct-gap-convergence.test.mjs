@@ -4,6 +4,15 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
+function leafKeys(value, prefix = "") {
+  return Object.entries(value).flatMap(([key, child]) => {
+    const path = prefix ? `${prefix}.${key}` : key;
+    return child && typeof child === "object" && !Array.isArray(child)
+      ? leafKeys(child, path)
+      : [path];
+  }).sort();
+}
+
 test("remaining Wave 4 corrections do not re-gate the map-first Exchange", async () => {
   const [exchange, canvas] = await Promise.all([
     read("app/exchange/page.tsx"),
@@ -14,11 +23,14 @@ test("remaining Wave 4 corrections do not re-gate the map-first Exchange", async
 });
 
 test("ISS-007 and ISS-011 preserve the correct draft and support lossless structured/partial definition authoring", async () => {
-  const [workspace, qualifierEditor, service, repository] = await Promise.all([
+  const [workspace, qualifierEditor, service, repository, dictionary, ...qualifierCatalogText] = await Promise.all([
     read("src/components/rfx/RFxDraftWorkspace.tsx"),
     read("src/components/rfx/RFxStructuredQualifierEditor.tsx"),
     read("src/application/rfx/wave4-gap-governed-draft-service.ts"),
     read("src/infrastructure/rfx/iss006-governed-rfx-repository.ts"),
+    read("src/i18n/get-dictionary.ts"),
+    ...["en-US", "es", "fr", "it", "de"].map((locale) =>
+      read(`src/i18n/messages/rfx-qualifier/${locale}.json`)),
   ]);
   assert.match(workspace, /<RFxDefinitionBuilder[\s\S]{0,220}key=\{selectedDraft\.id\}/);
   assert.match(qualifierEditor, /qualifierKind/);
@@ -29,6 +41,18 @@ test("ISS-007 and ISS-011 preserve the correct draft and support lossless struct
   assert.match(service, /mergeLosslessQualifiers/);
   assert.match(service, /getById\(result\.aggregate\.id\)/);
   assert.match(repository, /reconcileDefinitionForPackage/);
+
+  assert.match(qualifierEditor, /useI18n/);
+  assert.match(qualifierEditor, /t\("rfxQualifier\.title"\)/);
+  assert.match(qualifierEditor, /t\("rfxQualifier\.error\.save"\)/);
+  assert.doesNotMatch(qualifierEditor, />Structured qualifiers</);
+  assert.match(dictionary, /rfxQualifier/);
+  const qualifierCatalogs = qualifierCatalogText.map((text) => JSON.parse(text));
+  const expectedQualifierKeys = leafKeys(qualifierCatalogs[0]);
+  for (const catalog of qualifierCatalogs) {
+    assert.deepEqual(leafKeys(catalog), expectedQualifierKeys);
+  }
+  assert.equal(new Set(qualifierCatalogs.map((catalog) => catalog.title)).size, 5);
 });
 
 test("ISS-009 rejects semantically incompatible evaluation links", async () => {
@@ -120,6 +144,12 @@ test("DSC-004 has no fixed discovery horizon, handles legacy projections, and ex
     "data-opportunity-capability-filter",
     "data-opportunity-locality-filter",
   ]) assert.match(workspace, new RegExp(attr));
+  assert.match(workspace, /requestFamilyKeys\.slice\(1\)\.map/);
+  assert.match(workspace, /capabilityIds\.slice\(1\)\.map/);
+  assert.match(workspace, /localityIds\.slice\(1\)\.map/);
+  assert.match(workspace, /type="hidden" name="requestFamily"/);
+  assert.match(workspace, /type="hidden" name="capability"/);
+  assert.match(workspace, /type="hidden" name="locality"/);
 });
 
 test("DSC-005 exact replay precedes version conflict and capability IDs use the pinned AMACS catalog", async () => {
@@ -151,7 +181,8 @@ test("DSC-006 has durable, authority-revalidated discovery evaluation and alert 
     read("functions/src/index.ts"),
   ]);
   assert.match(api, /queueOpportunityDiscoveryEvaluation/);
-  assert.match(api, /completeOpportunityDiscoveryEvaluation/);
+  assert.doesNotMatch(api, /completeOpportunityDiscoveryEvaluation/);
+  assert.match(api, /status:\s*"pending",\s*\.\.\.evaluated/);
   assert.match(reliability, /opportunityDiscoveryEvaluations/);
   assert.match(evaluationWorker, /opportunityDiscoveryEvaluations/);
   assert.match(evaluationWorker, /runTransaction/);
@@ -159,6 +190,9 @@ test("DSC-006 has durable, authority-revalidated discovery evaluation and alert 
   assert.match(evaluationWorker, /accessRestrictions/);
   assert.match(evaluationWorker, /orderBy\(FieldPath\.documentId\(\)\)/);
   assert.doesNotMatch(evaluationWorker, /where\("status", "==", "active"\)\.limit\(500\)/);
+  assert.match(evaluationWorker, /referenceAlreadyPresent/);
+  assert.match(evaluationWorker, /referenceAlreadyPresent\s*\?\s*existingSummary/);
+  assert.match(evaluationWorker, /opportunity_summary:\s*nextSummary/);
   assert.match(alertWorker, /opportunityAlertIntents/);
   assert.match(alertWorker, /executeReliableTransactionalEmailJob/);
   assert.match(alertWorker, /FirestoreBackgroundJobStore/);
