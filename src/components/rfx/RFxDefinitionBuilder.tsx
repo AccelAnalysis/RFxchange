@@ -257,6 +257,10 @@ export function RFxDefinitionBuilder({
   const [sheet, setSheet] = useState<"section" | "factor" | null>(null);
   const saveInFlight = useRef(false);
   const revision = useRef(0);
+  const synchronizedAggregate = useRef({
+    id: aggregate.id,
+    version: aggregate.version,
+  });
   const sheetInvoker = useRef<HTMLButtonElement | null>(null);
   const sheetDialog = useRef<HTMLDivElement | null>(null);
   const payload = useMemo(() => definitionPayload(form), [form]);
@@ -469,6 +473,21 @@ export function RFxDefinitionBuilder({
     payload,
     t,
   ]);
+
+  useEffect(() => {
+    if (
+      synchronizedAggregate.current.id === aggregate.id &&
+      synchronizedAggregate.current.version === aggregate.version
+    ) {
+      return;
+    }
+    if (dirty || saving || saveInFlight.current) return;
+    synchronizedAggregate.current = {
+      id: aggregate.id,
+      version: aggregate.version,
+    };
+    setForm(initialForm(aggregate));
+  }, [aggregate, dirty, saving]);
 
   useEffect(() => {
     if (!dirty) return;
