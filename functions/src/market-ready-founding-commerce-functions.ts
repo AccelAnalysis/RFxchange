@@ -2,6 +2,7 @@ import { defineSecret } from "firebase-functions/params";
 import { onRequest } from "firebase-functions/v2/https";
 
 import { createBackgroundJobRequest, executeBackgroundJob, terminalBackgroundJobError } from "./application/background-jobs.js";
+import { foundingPriceIdForMode } from "./application/market-ready-founding-commerce-reconcile.js";
 import { functionsRuntimeContextFromEnvironment } from "./runtime/environment.js";
 import { FirestoreBackgroundJobStore } from "./runtime/firestore-background-job-store.js";
 import { backgroundJobPayloadFingerprint } from "./runtime/background-job-identifiers.js";
@@ -64,11 +65,16 @@ export const marketReadyFoundingCommerceWebhook = onRequest(
       }
       const rawBody = request.rawBody;
       if (!Buffer.isBuffer(rawBody)) throw new Error("Stripe webhook raw body is unavailable.");
+      const mode = stripeMode();
+      const expectedPriceId = foundingPriceIdForMode(
+        mode,
+        process.env.RFXCHANGE_FOUNDING_STRIPE_TEST_PRICE_ID,
+      );
       const event = parseVerifiedStripeEvent({
         rawBody,
         signatureHeader: signature,
         webhookSecret: stripeWebhookSecret.value(),
-        expectedMode: stripeMode(),
+        expectedMode: mode,
       });
       if (!SUPPORTED_EVENTS.has(event.type)) {
         response.status(200).json({ received: true, ignored: true });
@@ -106,7 +112,11 @@ export const marketReadyFoundingCommerceWebhook = onRequest(
           if (event.type.startsWith("customer.subscription.")) {
             const subscriptionId = stripeObjectReference(event.object, "id");
             if (!subscriptionId) throw terminalBackgroundJobError("subscription-id-missing", "Stripe subscription event is missing its id.");
-            const snapshot = await retrieveCurrentFoundingSubscription(stripeSecretKey.value(), subscriptionId);
+            const snapshot = await retrieveCurrentFoundingSubscription(
+              stripeSecretKey.value(),
+              subscriptionId,
+              expectedPriceId,
+            );
             const reconciled = await reconcileCurrentFoundingSubscription({
               db,
               eventId: event.id,
@@ -143,6 +153,7 @@ export const marketReadyFoundingCommerceWebhook = onRequest(
             secretKey: stripeSecretKey.value(),
             customerId,
             organizationId,
+            expectedPriceId,
           });
           const reconciled = await reconcileExpiredFoundingCheckout({
             db,
