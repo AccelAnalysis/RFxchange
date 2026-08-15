@@ -5,35 +5,46 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("DSC-004 scans bounded canonical pages only until the requested governed result window is complete", async () => {
-  const [repository, boundedService, wave4Service, domain, workspace, runtime] = await Promise.all([
+  const [repository, boundedService, domain, workspace, runtime, requestFamilySource] = await Promise.all([
     read("src/infrastructure/rfx/wave4-gap-opportunity-discovery-repository.ts"),
     read("src/application/rfx/bounded-opportunity-discovery-service.ts"),
-    read("src/application/rfx/wave4-gap-opportunity-discovery-service.ts"),
     read("src/domain/rfx/discovery.ts"),
     read("src/components/rfx/OpportunityDiscoveryWorkspace.tsx"),
     read("src/infrastructure/rfx/opportunity-discovery-runtime.ts"),
+    read("standards/amacs/releases/0.5.0/source/request-families.jsonl"),
   ]);
 
   assert.match(repository, /listProjectionPage/);
+  assert.match(repository, /where\("payload\.timing\.responseDeadline", ">=", minimumDeadline\)/);
   assert.match(repository, /orderBy\("payload\.timing\.responseDeadline", "asc"\)/);
   assert.match(repository, /orderBy\(FieldPath\.documentId\(\), "asc"\)/);
   assert.match(repository, /startAfter\(decoded\.deadline, decoded\.reference\)/);
+  assert.match(repository, /cursorAfterProjection/);
   assert.match(repository, /\.limit\(pageSize\)/);
   assert.doesNotMatch(repository, /while \(true\)|MAX_DISCOVERY_SCAN|10_000/);
   assert.doesNotMatch(repository, /providerAccountAuthoritative|saveMatch\(/,
     "DSC-006 match-authority behavior must remain outside this split.");
 
-  assert.match(boundedService, /targetMatchCount = offset \+ query\.limit \+ 1/);
-  assert.match(boundedService, /listProjectionPage\(datastoreCursor, 120\)/);
-  assert.match(boundedService, /while \(datastoreCursor && matching\.length < targetMatchCount\)/);
+  assert.match(boundedService, /participantDatastoreCursor/);
+  assert.match(boundedService, /minimumDeadline = now\.slice\(0, 10\)/);
+  assert.match(boundedService, /listProjectionPage\([\s\S]{0,120}minimumDeadline/);
+  assert.match(boundedService, /matching\.length < query\.limit \+ 1/);
+  assert.match(boundedService, /cursorAfterProjection\(lastSelected\)/);
+  assert.doesNotMatch(boundedService, /targetMatchCount|rawOffset|offset \+ query\.limit/);
   assert.match(boundedService, /watchedReferences\.map\(\(reference\) => this\.boundedRepository\.getProjection\(reference\)\)/);
   assert.doesNotMatch(boundedService, /listProjections\(/);
-  assert.match(wave4Service, /Number\.isSafeInteger\(offset\)/);
-  assert.doesNotMatch(wave4Service, /offset > 10_000|10_000/);
+  assert.doesNotMatch(boundedService, /10_000/);
+  assert.match(runtime, /rawId\.trim\(\)\.toUpperCase\(\)/);
   assert.match(runtime, /BoundedOpportunityDiscoveryService/);
 
   assert.match(domain, /requestFamilyIndexKeyForProjection/);
+  assert.match(domain, /LEGACY_REQUEST_FAMILY_LABEL_TO_CANONICAL_KEY/);
   assert.doesNotMatch(domain, /input\.projection\.requestFamilyIndexKey\.toLocaleLowerCase/);
+  for (const line of requestFamilySource.trim().split("\n")) {
+    const record = JSON.parse(line);
+    assert.match(domain, new RegExp(record.preferred_label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.match(domain, new RegExp(record.request_family_id.toLowerCase()));
+  }
 
   for (const attr of [
     "data-opportunity-request-family-filter",
