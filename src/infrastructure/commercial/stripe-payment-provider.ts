@@ -149,15 +149,22 @@ function subscriptionItems(subscription: StripeSubscription): readonly StripeSub
   return subscription.items?.data ?? [];
 }
 
+function strictStripeListPage<T>(value: Record<string, unknown>, label: string): Readonly<{ data: readonly T[]; hasMore: boolean }> {
+  if (!Array.isArray(value.data)) throw new Error(`${label} list payload is malformed; provider inspection fails closed.`);
+  if (typeof value.has_more !== "boolean") throw new Error(`${label} pagination state is malformed; provider inspection fails closed.`);
+  return Object.freeze({ data: Object.freeze(value.data as T[]), hasMore: value.has_more });
+}
+
 async function listAllCustomerSubscriptions(customerReference: string): Promise<readonly StripeSubscription[]> {
   const subscriptions: StripeSubscription[] = [];
   let startingAfter: string | null = null;
   do {
     const query = new URLSearchParams({ customer: customerReference, status: "all", limit: "100" });
     if (startingAfter) query.set("starting_after", startingAfter);
-    const page = await stripeRequest<StripeList<StripeSubscription>>(`/subscriptions?${query.toString()}`);
+    const rawPage = await stripeRequest<Record<string, unknown>>(`/subscriptions?${query.toString()}`);
+    const page = strictStripeListPage<StripeSubscription>(rawPage, "Stripe subscription");
     subscriptions.push(...page.data);
-    if (!page.has_more) break;
+    if (!page.hasMore) break;
     const last = page.data.at(-1);
     if (!last?.id) throw new Error("Stripe subscription pagination is malformed; provider inspection fails closed.");
     startingAfter = last.id;
@@ -235,7 +242,8 @@ export async function inspectAmbiguousFoundingReservation(input: Readonly<{
       limit: "100",
     });
     if (startingAfter) params.set("starting_after", startingAfter);
-    const page = await stripeRequest<StripeList<StripeCheckoutSession>>(`/checkout/sessions?${params.toString()}`);
+    const rawPage = await stripeRequest<Record<string, unknown>>(`/checkout/sessions?${params.toString()}`);
+    const page = strictStripeListPage<StripeCheckoutSession>(rawPage, "Stripe Checkout Session");
     for (const session of page.data) {
       if (
         session.customer === customerId &&
@@ -244,9 +252,9 @@ export async function inspectAmbiguousFoundingReservation(input: Readonly<{
         session.metadata?.rfxchangeReservationId === reservationId
       ) exactSessions.push(session);
     }
-    if (!page.has_more) break;
+    if (!page.hasMore) break;
     const last = page.data.at(-1);
-    if (!last?.id) throw new Error("Stripe Checkout pagination is malformed.");
+    if (!last?.id) throw new Error("Stripe Checkout pagination is malformed; provider inspection fails closed.");
     startingAfter = last.id;
   } while (true);
 
