@@ -34,7 +34,7 @@ for (const [name, surface] of Object.entries({ geographyCanvas, orientation })) 
 }
 assert.match(exchange, /resolveFoundingAcquisitionIntent/, "Exchange entry must parse the bounded Founding acquisition query");
 assert.match(exchange, /appendFoundingAcquisitionIntent\("\/geography\/canvas"\)/, "Exchange entry must carry Founding intent to the map shell");
-assert.match(continuation, /href="\/founding"/, "Preserved Founding intent must return to the campaign offer");
+assert.match(continuation, /href="\/commercial\/founding"/, "Preserved post-value Founding intent must continue directly to the governed commerce surface");
 assert.match(chrome, /MarketingChromeResponsive/, "Marketing navigation must consume the responsive collapse contract");
 assert.match(chrome, /<details className=\{responsive\.navMenu\}/, "Long localized marketing navigation must have an accessible collapsed menu");
 assert.match(chrome, /responsive\.mobileActions/, "Marketing actions must participate in the mobile layout contract");
