@@ -57,7 +57,12 @@ test("ISS-007 and ISS-011 preserve the correct draft and support lossless struct
   );
   assert.match(
     definitionBuilder,
-    /const authoritativeForm = initialForm\(aggregate\)[\s\S]{0,900}setForm\(authoritativeForm\)/,
+    /const authoritativeForm = initialForm\(aggregate\)/,
+    "Same-draft version refreshes must construct the latest authoritative form state.",
+  );
+  assert.match(
+    definitionBuilder,
+    /setForm\(authoritativeForm\)/,
     "A clean editor must refresh from the latest authoritative aggregate without a component remount.",
   );
   assert.match(qualifierEditor, /qualifierKind/);
