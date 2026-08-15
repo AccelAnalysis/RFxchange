@@ -198,6 +198,35 @@ export function opportunityDeadline(projection: ResponderOpportunityProjection):
   return projection.payload.timing.responseDeadline ?? "";
 }
 
+// Pinned AMACS 0.5.0 request-family compatibility for projections created before
+// requestFamilyIndexKey was persisted. This map mirrors the immutable 0.5.0 request-family
+// registry so old label-only projections compare against the same canonical IDs as new records.
+const LEGACY_REQUEST_FAMILY_LABEL_TO_CANONICAL_KEY = Object.freeze({
+  "request for information": "amacs-req-000001",
+  "sources sought or capability request": "amacs-req-000002",
+  "request for quotation": "amacs-req-000003",
+  "request for proposals": "amacs-req-000004",
+  "invitation for bids or tenders": "amacs-req-000005",
+  "request for qualifications or statement of qualifications": "amacs-req-000006",
+  "supplier or subcontractor request": "amacs-req-000007",
+  "teaming or partner request": "amacs-req-000008",
+  "product or service request": "amacs-req-000009",
+  "site selection or location project rfi": "amacs-req-000010",
+} as const);
+
+export function requestFamilyIndexKeyForProjection(projection: ResponderOpportunityProjection): string {
+  const indexed = typeof projection.requestFamilyIndexKey === "string"
+    ? projection.requestFamilyIndexKey.trim()
+    : "";
+  if (indexed) return indexed.toLocaleLowerCase("en-US");
+  const legacyLabel = (projection.payload.requestFamilyLabel || "")
+    .trim()
+    .toLocaleLowerCase("en-US");
+  return LEGACY_REQUEST_FAMILY_LABEL_TO_CANONICAL_KEY[
+    legacyLabel as keyof typeof LEGACY_REQUEST_FAMILY_LABEL_TO_CANONICAL_KEY
+  ] ?? legacyLabel;
+}
+
 function terms(value: string): readonly string[] {
   return Object.freeze(value.toLocaleLowerCase("en-US").split(/[^\p{L}\p{N}]+/u).filter((item) => item.length >= 2));
 }
@@ -217,7 +246,7 @@ export function opportunityMatchesQuery(input: Readonly<{
   if (input.query.watched !== null && input.query.watched !== input.watched) return false;
   if (input.query.localityIds.length && !input.query.localityIds.some((id) => input.projection.payload.localities.some((item) => item.id.toLocaleLowerCase("en-US") === id))) return false;
   if (input.query.capabilityIds.length && !input.query.capabilityIds.some((id) => input.projection.capabilityIndexKeys.some((key) => key.toLocaleLowerCase("en-US") === id))) return false;
-  if (input.query.requestFamilyKeys.length && !input.query.requestFamilyKeys.includes(input.projection.requestFamilyIndexKey.toLocaleLowerCase("en-US"))) return false;
+  if (input.query.requestFamilyKeys.length && !input.query.requestFamilyKeys.includes(requestFamilyIndexKeyForProjection(input.projection))) return false;
   const searchTerms = terms(input.query.text);
   if (!searchTerms.length) return true;
   const corpus = [
