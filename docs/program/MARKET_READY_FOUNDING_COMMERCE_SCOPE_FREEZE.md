@@ -49,6 +49,24 @@ The canonical Firestore schema file and its existing exact-schema test are owned
 
 No other path is implicitly owned. A newly discovered path requirement needs a Control Room scope amendment before edit.
 
+## Control Room scope amendment — 2026-08-15
+
+Control Room authorizes these additional **exact files only** for the remaining Critical convergence of `WP-MARKET-READY-FOUNDING-COMMERCE-01`:
+
+- `firestore.rules`
+- `src/infrastructure/auth/firebase-server.ts`
+- `src/infrastructure/firestore/support.ts`
+- `test/commercial-payment-boundary.test.mjs`
+- `src/components/acquisition/FoundingAcquisitionContinuation.tsx`
+
+This amendment is narrow and does not transfer general ownership of their parent directories.
+
+The first four files are owned only for the Issue #192 commercial-authority persistence/security boundary already required by this packet: server-only commercial authority, canonical Firestore support, and direct-client denial evidence. They may not be used to redesign unrelated authorization, persistence, or participant behavior.
+
+`src/components/acquisition/FoundingAcquisitionContinuation.tsx` is a one-file Lane 01 shared-contract seam owned only to connect the already-governed post-value Founding continuation to the packet-owned `/commercial/founding` surface. Its localized copy, eligibility semantics, and surrounding participant-shell behavior remain unchanged. No other `src/components/acquisition/**`, participant-shell, orientation, or Exchange Room path is authorized by this amendment.
+
+Shared background-job runner/store files remain read-only dependencies. This amendment does not authorize Phase 2, Opportunities/RFx, Resources, Intelligence, Referrals, Independent Acceptance, merge, deployment, or live Checkout work.
+
 ## Non-owned paths
 
 - `src/application/participant/**`
@@ -67,4 +85,4 @@ No other path is implicitly owned. A newly discovered path requirement needs a C
 - `governance/four-lens-workstreams.json`
 - Independent Acceptance dispositions/evidence
 
-Any needed shared participant-shell seam must be requested from Lane 01.
+Any needed shared participant-shell seam beyond the exact amended file above must be requested from Lane 01.
