@@ -122,6 +122,24 @@ test("checkout-expiry provider inspection paginates before deciding a Founding s
   assert.equal(retainsCapacity, true);
 });
 
+test("uncorrelated non-terminal use of the approved Founding Price fails closed instead of releasing capacity", async () => {
+  const anomalous = {
+    ...foundingSubscription("sub_founding_uncorrelated"),
+    metadata: { organizationId: "wrong-org", rfxchangePlan: "founding" },
+  };
+  globalThis.fetch = async () => ok({ data: [anomalous], has_more: false });
+
+  await assert.rejects(
+    providerHasNonTerminalFoundingSubscription({
+      secretKey: "sk_test_functions_only",
+      customerId: "cus_founding",
+      organizationId: "org-founding",
+      expectedPriceId: "price_test_founding",
+    }),
+    /approved Founding Price without exact organization correlation/,
+  );
+});
+
 test("malformed webhook subscription pagination fails closed instead of releasing capacity", async () => {
   globalThis.fetch = async () => ok({ data: [foundingSubscription("sub_history_malformed", "canceled")], has_more: "yes" });
   await assert.rejects(
