@@ -57,6 +57,15 @@ test("closing organization detail cannot remove the shared four-action architect
   assert.match(styles, /\.actionGrid \{[\s\S]*?position: absolute;[\s\S]*?z-index: 40;/);
 });
 
+test("action tray reserves sheet clearance through tablet collision range", () => {
+  const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
+  assert.match(
+    styles,
+    /@media \(max-width: 1024px\) \{[\s\S]*?data-ui-sheet[\s\S]*?padding-bottom: calc\(116px \+ env\(safe-area-inset-bottom\)\);[\s\S]*?scroll-padding-bottom: calc\(116px \+ env\(safe-area-inset-bottom\)\);/,
+  );
+  assert.match(styles, /@media \(max-width: 760px\) \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
+});
+
 test("ordinary mobile lens selection is in-place without swallowing the menu close handler", () => {
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
