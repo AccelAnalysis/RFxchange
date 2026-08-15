@@ -43,6 +43,14 @@ function checkoutPlan(object: Readonly<Record<string, unknown>>): void {
   }
 }
 
+function checkoutReservationId(object: Readonly<Record<string, unknown>>): string {
+  const metadata = object.metadata;
+  if (!metadata || typeof metadata !== "object") throw new Error("Stripe Checkout metadata is missing.");
+  const value = (metadata as Record<string, unknown>).rfxchangeReservationId;
+  if (typeof value !== "string" || !value.trim()) throw new Error("Stripe Checkout reservation metadata is missing.");
+  return value.trim();
+}
+
 export const marketReadyFoundingCommerceWebhook = onRequest(
   {
     invoker: "public",
@@ -151,6 +159,7 @@ export const marketReadyFoundingCommerceWebhook = onRequest(
             return { organizationId, recognitionGranted: false, duplicateProviderEvent: recorded.duplicate };
           }
 
+          const reservationId = checkoutReservationId(event.object);
           const hasSubscription = await providerHasNonTerminalFoundingSubscription({
             secretKey: stripeSecretKey.value(),
             customerId,
@@ -162,10 +171,16 @@ export const marketReadyFoundingCommerceWebhook = onRequest(
             eventId: event.id,
             organizationId,
             customerId,
+            reservationId,
             eventCreatedAt: event.createdAt,
             providerHasNonTerminalFoundingSubscription: hasSubscription,
           });
-          return { organizationId, providerHasNonTerminalSubscription: hasSubscription, duplicateProviderEvent: reconciled.duplicate };
+          return {
+            organizationId,
+            providerHasNonTerminalSubscription: hasSubscription,
+            reservationCorrelationMatched: reconciled.reservationCorrelationMatched,
+            duplicateProviderEvent: reconciled.duplicate,
+          };
         },
       });
 
