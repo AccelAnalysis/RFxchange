@@ -13,7 +13,7 @@ test("remaining Wave 4 corrections do not re-gate the map-first Exchange", async
   assert.doesNotMatch(canvas, /lifecycleState !== "open-platform"/);
 });
 
-test("ISS-007 and ISS-011 preserve the correct draft and support structured/partial definition authoring", async () => {
+test("ISS-007 and ISS-011 preserve the correct draft and support lossless structured/partial definition authoring", async () => {
   const [workspace, qualifierEditor, service, repository] = await Promise.all([
     read("src/components/rfx/RFxDraftWorkspace.tsx"),
     read("src/components/rfx/RFxStructuredQualifierEditor.tsx"),
@@ -26,6 +26,8 @@ test("ISS-007 and ISS-011 preserve the correct draft and support structured/part
     assert.match(qualifierEditor, new RegExp(`"${kind}"`));
   assert.match(service, /optionalStable\([\s\S]{0,120}responseInput\.responseTemplateId/);
   assert.match(service, /optionalStable\([\s\S]{0,120}evaluationInput\.decisionTemplateId/);
+  assert.match(service, /mergeLosslessQualifiers/);
+  assert.match(service, /getById\(result\.aggregate\.id\)/);
   assert.match(repository, /reconcileDefinitionForPackage/);
 });
 
@@ -80,15 +82,15 @@ test("ACQ-009 preserves an authenticated-participant opportunity through sign-in
   assert.match(page, /acquisition/i);
 });
 
-test("DSC-004 discovers beyond the old 250-record horizon, handles legacy projections, and exposes structured filters", async () => {
+test("DSC-004 has no fixed discovery horizon, handles legacy projections, and exposes structured filters", async () => {
   const [repository, domain, workspace] = await Promise.all([
     read("src/infrastructure/rfx/wave4-gap-opportunity-discovery-repository.ts"),
     read("src/domain/rfx/discovery.ts"),
     read("src/components/rfx/OpportunityDiscoveryWorkspace.tsx"),
   ]);
   assert.match(repository, /startAfter/);
-  assert.match(repository, /MAX_DISCOVERY_SCAN/);
-  assert.doesNotMatch(repository, /Math\.min\(250,\s*limit\)/);
+  assert.match(repository, /while \(true\)/);
+  assert.doesNotMatch(repository, /MAX_DISCOVERY_SCAN|10_000|Math\.min\(250,\s*limit\)/);
   assert.match(domain, /requestFamilyIndexKeyForProjection/);
   assert.doesNotMatch(domain, /input\.projection\.requestFamilyIndexKey\.toLocaleLowerCase/);
   for (const attr of [
@@ -118,7 +120,7 @@ test("DSC-005 exact replay precedes version conflict and capability IDs use the 
   assert.match(runtime, /Wave4GapOpportunityDiscoveryService/);
 });
 
-test("DSC-006 has durable discovery-evaluation retry and a real alert delivery consumer", async () => {
+test("DSC-006 has durable, authority-revalidated discovery evaluation and alert delivery", async () => {
   const [api, reliability, evaluationWorker, alertWorker, functionsIndex] = await Promise.all([
     read("app/api/rfx/route.ts"),
     read("src/infrastructure/rfx/opportunity-discovery-reliability.ts"),
@@ -130,12 +132,19 @@ test("DSC-006 has durable discovery-evaluation retry and a real alert delivery c
   assert.match(api, /completeOpportunityDiscoveryEvaluation/);
   assert.match(reliability, /opportunityDiscoveryEvaluations/);
   assert.match(evaluationWorker, /opportunityDiscoveryEvaluations/);
-  assert.match(evaluationWorker, /onSchedule/);
+  assert.match(evaluationWorker, /runTransaction/);
+  assert.match(evaluationWorker, /organizationMemberships/);
+  assert.match(evaluationWorker, /accessRestrictions/);
+  assert.match(evaluationWorker, /orderBy\(FieldPath\.documentId\(\)\)/);
+  assert.doesNotMatch(evaluationWorker, /where\("status", "==", "active"\)\.limit\(500\)/);
   assert.match(alertWorker, /opportunityAlertIntents/);
   assert.match(alertWorker, /executeReliableTransactionalEmailJob/);
   assert.match(alertWorker, /FirestoreBackgroundJobStore/);
   assert.match(alertWorker, /FirestoreTransactionalEmailDeliveryAuditStore/);
-  assert.match(alertWorker, /onSchedule/);
+  assert.match(alertWorker, /organizationMemberships/);
+  assert.match(alertWorker, /accessRestrictions/);
+  assert.match(alertWorker, /orderBy\(FieldPath\.documentId\(\)\)/);
+  assert.doesNotMatch(alertWorker, /where\("status", "==", "queued"\)\.limit\(25\)/);
   assert.match(functionsIndex, /scheduledOpportunityDiscoveryEvaluation/);
   assert.match(functionsIndex, /scheduledOpportunityAlertDelivery/);
 });
