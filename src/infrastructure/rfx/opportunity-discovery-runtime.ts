@@ -2,12 +2,12 @@ import type { Firestore } from "firebase-admin/firestore";
 
 import {
   OpportunityDiscoveryError,
-  OpportunityDiscoveryService,
   type OpportunityParticipantScope,
 } from "../../application/rfx/opportunity-discovery-service.ts";
+import { Wave4GapOpportunityDiscoveryService } from "../../application/rfx/wave4-gap-opportunity-discovery-service.ts";
 import { loadImmutableAmacsCatalog } from "../amacs/runtime.ts";
-import { FirestoreOpportunityDiscoveryRepository } from "../firestore/opportunity-discovery.ts";
 import { getServerFirestore } from "../firestore/runtime.ts";
+import { Wave4GapOpportunityDiscoveryRepository } from "./wave4-gap-opportunity-discovery-repository.ts";
 
 function publicOrigin(): string {
   const value = process.env.RFXCHANGE_PUBLIC_ORIGIN?.trim() || "http://localhost:3000";
@@ -27,10 +27,10 @@ async function validateCapabilityIds(ids: readonly string[] | null | undefined):
   }
 }
 
-class GovernedOpportunityDiscoveryService extends OpportunityDiscoveryService {
+class GovernedOpportunityDiscoveryService extends Wave4GapOpportunityDiscoveryService {
   override async discover(
     scope: OpportunityParticipantScope,
-    input: Parameters<OpportunityDiscoveryService["discover"]>[1],
+    input: Parameters<Wave4GapOpportunityDiscoveryService["discover"]>[1],
   ) {
     await validateCapabilityIds(input.capabilityIds);
     return super.discover(scope, input);
@@ -38,7 +38,7 @@ class GovernedOpportunityDiscoveryService extends OpportunityDiscoveryService {
 
   override async saveSearch(
     scope: OpportunityParticipantScope,
-    input: Parameters<OpportunityDiscoveryService["saveSearch"]>[1],
+    input: Parameters<Wave4GapOpportunityDiscoveryService["saveSearch"]>[1],
   ) {
     await validateCapabilityIds(input.query.capabilityIds);
     return super.saveSearch(scope, input);
@@ -49,7 +49,7 @@ export function createServerOpportunityDiscoveryService(
   db: Firestore = getServerFirestore(),
 ) {
   return new GovernedOpportunityDiscoveryService(
-    new FirestoreOpportunityDiscoveryRepository(db),
+    new Wave4GapOpportunityDiscoveryRepository(db),
     undefined,
     publicOrigin(),
   );
