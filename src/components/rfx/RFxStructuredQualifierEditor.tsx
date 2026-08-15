@@ -139,26 +139,26 @@ export function RFxStructuredQualifierEditor({
     if (!selected) return;
     setBusy(true);
     setMessage(null);
-    const commandStorage = storage();
-    const nextQualifier = qualifier();
-    const definitionInput = selectionInput(aggregate, [{
-      id: selected.id,
-      qualifiers: Object.freeze([...selected.qualifiers, nextQualifier]),
-    }]);
-    const fingerprint = JSON.stringify({
-      rfxId: aggregate.id,
-      version: aggregate.version,
-      requirementId: selected.id,
-      qualifier: nextQualifier,
-    });
-    const storageKey = `rfxchange:rfx-qualifier:${commandRecoveryScope}:${aggregate.id}:${selected.id}`;
-    const commandId = resolveRetryStableCommand({
-      storage: commandStorage,
-      storageKey,
-      fingerprint,
-      prefix: "rfx-qualifier",
-    });
     try {
+      const commandStorage = storage();
+      const nextQualifier = qualifier();
+      const definitionInput = selectionInput(aggregate, [{
+        id: selected.id,
+        qualifiers: Object.freeze([...selected.qualifiers, nextQualifier]),
+      }]);
+      const fingerprint = JSON.stringify({
+        rfxId: aggregate.id,
+        version: aggregate.version,
+        requirementId: selected.id,
+        qualifier: nextQualifier,
+      });
+      const storageKey = `rfxchange:rfx-qualifier:${commandRecoveryScope}:${aggregate.id}:${selected.id}`;
+      const commandId = resolveRetryStableCommand({
+        storage: commandStorage,
+        storageKey,
+        fingerprint,
+        prefix: "rfx-qualifier",
+      });
       const response = await fetch("/api/rfx", {
         method: "POST",
         credentials: "same-origin",
