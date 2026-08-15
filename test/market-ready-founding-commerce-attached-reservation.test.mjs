@@ -7,7 +7,7 @@ const runtime = await readFile(
   "utf8",
 );
 
-const helperStart = runtime.indexOf("export async function releaseExpiredAttachedFoundingReservation");
+const helperStart = runtime.indexOf("export async function releaseReclaimableAttachedFoundingReservation");
 const helperEnd = runtime.indexOf("function stripeCustomerId", helperStart);
 assert.ok(helperStart >= 0 && helperEnd > helperStart, "attached-reservation release helper must remain present");
 const releaseHelper = runtime.slice(helperStart, helperEnd);
@@ -37,16 +37,20 @@ test("stale attached reservations are inspected instead of being excluded from r
   assert.match(reconciler, /const attached = Boolean\(reservation\.checkoutSessionId \|\| reservation\.checkoutUrl\)/);
 });
 
-test("attached capacity is released only from provider-confirmed expiry of the exact stored Session", () => {
-  assert.match(reconciler, /providerState\.matchingCheckoutStatus === "expired"/);
+test("attached capacity is released only for an exact expired Session or an exact completed Session with a terminal subscription", () => {
   assert.match(reconciler, /providerState\.matchingCheckoutSessionId === reservation\.checkoutSessionId/);
-  assert.match(reconciler, /releaseExpiredAttachedFoundingReservation\(db/);
+  assert.match(reconciler, /providerState\.matchingCheckoutStatus === "expired"/);
+  assert.match(reconciler, /providerState\.matchingCheckoutStatus === "complete"/);
+  assert.match(reconciler, /providerState\.matchingSubscriptionId !== null/);
+  assert.match(reconciler, /providerState\.matchingSubscriptionStatus === "canceled"/);
+  assert.match(reconciler, /providerState\.matchingSubscriptionStatus === "incomplete_expired"/);
+  assert.match(reconciler, /releaseReclaimableAttachedFoundingReservation\(db/);
   assert.match(reconciler, /reservationId: reservation\.reservationId/);
   assert.match(reconciler, /checkoutSessionId: reservation\.checkoutSessionId!/);
 });
 
 test("missing or mismatched attached provider truth fails closed instead of releasing capacity", () => {
-  assert.match(reconciler, /if \(!exactExpiredAttachedSession\)/);
+  assert.match(reconciler, /if \(!exactProviderReclaimableAttachedSession\)/);
   assert.match(reconciler, /provider-state-unavailable/);
   assert.match(reconciler, /Other organizations retain their reservation when provider truth cannot be established/);
 });
