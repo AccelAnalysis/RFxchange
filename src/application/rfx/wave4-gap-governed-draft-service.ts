@@ -149,7 +149,7 @@ export class Wave4GapGovernedDraftService extends RfxIss006GovernedDraftService 
     this.currentTime = dependencies.now ?? (() => new Date().toISOString());
   }
 
-  private async canonicalDefinitionInput(
+  private async canonicalDefinitionInputWithPartialTemplates(
     input: RfxDefinitionSelectionInput,
   ): Promise<RfxDefinitionInput> {
     if (!Array.isArray(input.requirements) || input.requirements.length > 100) {
@@ -417,7 +417,7 @@ export class Wave4GapGovernedDraftService extends RfxIss006GovernedDraftService 
 
     let definition: RfxDefinition;
     try {
-      const canonical = await this.canonicalDefinitionInput(input.definition);
+      const canonical = await this.canonicalDefinitionInputWithPartialTemplates(input.definition);
       definition = normalizeRfxDefinition(
         canonical,
         current.package?.requirements.map((requirement) => requirement.id) ?? [],
