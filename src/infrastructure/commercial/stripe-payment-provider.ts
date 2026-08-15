@@ -22,6 +22,17 @@ export const RFXCHANGE_FOUNDING_CAP = 250;
 export const RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS = 45 * 60 * 1000;
 export const RFXCHANGE_FOUNDING_CHECKOUT_SESSION_LIFETIME_SECONDS = 35 * 60;
 const PROVIDER_KEY = paymentProviderKey("stripe");
+const GOVERNED_STRIPE_SUBSCRIPTION_STATUSES = Object.freeze([
+  "trialing",
+  "active",
+  "past_due",
+  "unpaid",
+  "paused",
+  "incomplete",
+  "canceled",
+  "incomplete_expired",
+] as const);
+const TERMINAL_STRIPE_SUBSCRIPTION_STATUSES = new Set<string>(["canceled", "incomplete_expired"]);
 
 type StripeMode = "live" | "test";
 interface StripeRuntimeConfiguration { readonly mode: StripeMode; readonly secretKey: string; readonly priceId: string; }
@@ -38,6 +49,7 @@ interface StripePortalSession { readonly id: string; readonly url: string; }
 interface StripeSubscriptionItem { readonly quantity?: number | null; readonly price?: Readonly<{ readonly id?: string | null }> | null; }
 interface StripeSubscription {
   readonly id: string;
+  readonly customer?: string | null;
   readonly status: string;
   readonly metadata?: Readonly<Record<string, string>>;
   readonly items?: Readonly<{ readonly data?: readonly StripeSubscriptionItem[] }>;
@@ -149,6 +161,14 @@ function subscriptionItems(subscription: StripeSubscription): readonly StripeSub
   return subscription.items?.data ?? [];
 }
 
+function isGovernedStripeSubscriptionStatus(status: string): boolean {
+  return GOVERNED_STRIPE_SUBSCRIPTION_STATUSES.includes(status as (typeof GOVERNED_STRIPE_SUBSCRIPTION_STATUSES)[number]);
+}
+
+function isTerminalStripeSubscriptionStatus(status: string): boolean {
+  return TERMINAL_STRIPE_SUBSCRIPTION_STATUSES.has(status);
+}
+
 function strictStripeListPage<T>(value: Record<string, unknown>, label: string): Readonly<{ data: readonly T[]; hasMore: boolean }> {
   if (!Array.isArray(value.data)) throw new Error(`${label} list payload is malformed; provider inspection fails closed.`);
   if (typeof value.has_more !== "boolean") throw new Error(`${label} pagination state is malformed; provider inspection fails closed.`);
@@ -178,7 +198,7 @@ async function hasCorrelatedNonTerminalFoundingSubscription(customerReference: s
   let correlatedCount = 0;
 
   for (const subscription of subscriptions) {
-    if (["canceled", "incomplete_expired"].includes(subscription.status)) continue;
+    if (isTerminalStripeSubscriptionStatus(subscription.status)) continue;
     const items = subscriptionItems(subscription);
     const usesApprovedFoundingPrice = items.some((item) => item.price?.id === config.priceId);
     const correlated = subscription.metadata?.organizationId === organizationId && subscription.metadata?.rfxchangePlan === "founding";
@@ -200,6 +220,42 @@ async function hasCorrelatedNonTerminalFoundingSubscription(customerReference: s
   return correlatedCount === 1;
 }
 
+async function inspectCompletedCheckoutSubscription(input: Readonly<{
+  subscriptionId: string;
+  customerId: string;
+  organizationId: string;
+  reservationId: string;
+}>): Promise<Readonly<{ id: string; status: string; terminal: boolean }>> {
+  const subscriptionId = required(input.subscriptionId, "Completed Checkout subscription id");
+  const subscription = await stripeRequest<StripeSubscription>(`/subscriptions/${encodeURIComponent(subscriptionId)}`);
+  if (subscription.id !== subscriptionId) {
+    throw new Error("Completed Checkout subscription identity is inconsistent; reservation reconciliation fails closed.");
+  }
+  if (subscription.customer !== input.customerId) {
+    throw new Error("Completed Checkout subscription Customer does not match the exact reservation; reconciliation fails closed.");
+  }
+  if (
+    subscription.metadata?.organizationId !== input.organizationId ||
+    subscription.metadata?.rfxchangePlan !== "founding" ||
+    subscription.metadata?.rfxchangeReservationId !== input.reservationId
+  ) {
+    throw new Error("Completed Checkout subscription metadata does not match the exact Founding reservation; reconciliation fails closed.");
+  }
+  if (!isGovernedStripeSubscriptionStatus(subscription.status)) {
+    throw new Error("Completed Checkout subscription lifecycle state is not recognized; reconciliation fails closed.");
+  }
+  const config = configuration();
+  const items = subscriptionItems(subscription);
+  if (items.length !== 1 || items[0]?.price?.id !== config.priceId || Number(items[0]?.quantity) !== 1) {
+    throw new Error("Completed Checkout subscription does not match the approved Founding Price and quantity; reconciliation fails closed.");
+  }
+  return Object.freeze({
+    id: subscription.id,
+    status: subscription.status,
+    terminal: isTerminalStripeSubscriptionStatus(subscription.status),
+  });
+}
+
 async function assertNoProviderSubscription(customerReference: string, organizationId: string): Promise<void> {
   if (await hasCorrelatedNonTerminalFoundingSubscription(customerReference, organizationId)) {
     throw new Error("This organization already has a non-terminal Founding subscription at the payment provider.");
@@ -218,6 +274,8 @@ export async function inspectAmbiguousFoundingReservation(input: Readonly<{
   hasNonTerminalSubscription: boolean;
   matchingCheckoutSessionId: string | null;
   matchingCheckoutStatus: string | null;
+  matchingSubscriptionId: string | null;
+  matchingSubscriptionStatus: string | null;
 }>> {
   const customerId = required(input.customerId, "Stripe Customer id");
   const organizationId = required(input.organizationId, "RFxchange organization id");
@@ -226,12 +284,12 @@ export async function inspectAmbiguousFoundingReservation(input: Readonly<{
   const now = input.now ? Date.parse(required(input.now, "Reconciliation time")) : Date.now();
   if (!Number.isFinite(reservedAt) || !Number.isFinite(now)) throw new Error("Founding reservation reconciliation timestamp is invalid.");
   if (now - reservedAt < RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS) {
-    return Object.freeze({ eligibleForReconciliation: false, reclaimable: false, hasNonTerminalSubscription: false, matchingCheckoutSessionId: null, matchingCheckoutStatus: null });
+    return Object.freeze({ eligibleForReconciliation: false, reclaimable: false, hasNonTerminalSubscription: false, matchingCheckoutSessionId: null, matchingCheckoutStatus: null, matchingSubscriptionId: null, matchingSubscriptionStatus: null });
   }
 
   const hasNonTerminalSubscription = await hasCorrelatedNonTerminalFoundingSubscription(customerId, organizationId);
   if (hasNonTerminalSubscription) {
-    return Object.freeze({ eligibleForReconciliation: true, reclaimable: false, hasNonTerminalSubscription: true, matchingCheckoutSessionId: null, matchingCheckoutStatus: null });
+    return Object.freeze({ eligibleForReconciliation: true, reclaimable: false, hasNonTerminalSubscription: true, matchingCheckoutSessionId: null, matchingCheckoutStatus: null, matchingSubscriptionId: null, matchingSubscriptionStatus: null });
   }
 
   const exactSessions: StripeCheckoutSession[] = [];
@@ -262,15 +320,39 @@ export async function inspectAmbiguousFoundingReservation(input: Readonly<{
   if (exactSessions.length > 1) throw new Error("Multiple Stripe Checkout Sessions are correlated to one Founding reservation; reconciliation fails closed.");
   const exact = exactSessions[0] ?? null;
   if (!exact) {
-    return Object.freeze({ eligibleForReconciliation: true, reclaimable: true, hasNonTerminalSubscription: false, matchingCheckoutSessionId: null, matchingCheckoutStatus: null });
+    return Object.freeze({ eligibleForReconciliation: true, reclaimable: true, hasNonTerminalSubscription: false, matchingCheckoutSessionId: null, matchingCheckoutStatus: null, matchingSubscriptionId: null, matchingSubscriptionStatus: null });
   }
   const status = exact.status ?? null;
+  if (status !== "open" && status !== "complete" && status !== "expired") {
+    throw new Error("Stripe Checkout Session lifecycle state is malformed; reservation reconciliation fails closed.");
+  }
+
+  let reclaimable = status === "expired";
+  let matchingSubscriptionId: string | null = null;
+  let matchingSubscriptionStatus: string | null = null;
+  if (status === "complete") {
+    if (!exact.subscription) {
+      throw new Error("Completed Stripe Checkout Session is missing its subscription identity; reconciliation fails closed.");
+    }
+    const subscription = await inspectCompletedCheckoutSubscription({
+      subscriptionId: exact.subscription,
+      customerId,
+      organizationId,
+      reservationId,
+    });
+    matchingSubscriptionId = subscription.id;
+    matchingSubscriptionStatus = subscription.status;
+    reclaimable = subscription.terminal;
+  }
+
   return Object.freeze({
     eligibleForReconciliation: true,
-    reclaimable: status === "expired",
+    reclaimable,
     hasNonTerminalSubscription: false,
     matchingCheckoutSessionId: exact.id,
     matchingCheckoutStatus: status,
+    matchingSubscriptionId,
+    matchingSubscriptionStatus,
   });
 }
 
