@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { serializeAcquisitionContextToken } from "@/src/application/acquisition/acquisition-context";
+import { serializeOpaqueOpportunityCandidate } from "@/src/application/acquisition/opaque-opportunity-candidate";
 import { accessJourneyId } from "@/src/domain/lifecycle/model";
-import {
-  activationJourneyIdForUser,
-  updateActivationJourneyContext,
-} from "@/src/domain/onboarding/model";
+import { activationJourneyIdForUser } from "@/src/domain/onboarding/model";
 import {
   acquisitionCookieOptions,
   createServerAcquisitionContextService,
@@ -20,36 +18,50 @@ import {
 import { FirestoreActivationJourneyContextRepository } from "@/src/infrastructure/firestore/activation-journey";
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 
-function withAcquisitionCookie(
-  response: NextResponse,
-  token: Parameters<typeof serializeAcquisitionContextToken>[0],
-): NextResponse {
+function setAcquisitionCookie(response: NextResponse, value: string): NextResponse {
   response.cookies.set(
     RFXCHANGE_ACQUISITION_COOKIE_NAME,
-    serializeAcquisitionContextToken(token),
+    value,
     acquisitionCookieOptions(),
   );
   return response;
 }
 
-async function bindExistingActivation(
+function withPersistentAcquisitionCookie(
+  response: NextResponse,
   token: Parameters<typeof serializeAcquisitionContextToken>[0],
-  userId: string,
-): Promise<boolean> {
-  const contexts = new FirestoreActivationJourneyContextRepository(getServerFirestore());
-  const current = await contexts.getByUserId(userId);
-  if (!current) return false;
+): NextResponse {
+  return setAcquisitionCookie(response, serializeAcquisitionContextToken(token));
+}
 
-  const bound = await createServerAcquisitionContextService().bind({
+function withOpaqueCandidateCookie(
+  response: NextResponse,
+  reference: string,
+): NextResponse {
+  return setAcquisitionCookie(response, serializeOpaqueOpportunityCandidate(reference));
+}
+
+async function persistAndBindCandidate(
+  request: NextRequest,
+  reference: string,
+  userId: string,
+): Promise<Readonly<{
+  token: Awaited<ReturnType<ReturnType<typeof createServerAcquisitionContextService>["issueOpaqueOpportunityCandidate"]>>;
+  attached: boolean;
+}>> {
+  const service = createServerAcquisitionContextService();
+  const token = await service.issueOpaqueOpportunityCandidate({
+    reference,
+    referrer: request.headers.get("referer"),
+  });
+  const bound = await service.bind({
     token,
     userId,
     accessJourneyId: accessJourneyId(activationJourneyIdForUser(userId)),
   });
-  await contexts.save(updateActivationJourneyContext(current, {
-    acquisitionContext: bound,
-    now: new Date().toISOString(),
-  }));
-  return true;
+  const contexts = new FirestoreActivationJourneyContextRepository(getServerFirestore());
+  const attached = await contexts.attachAcquisitionContext(userId, bound);
+  return Object.freeze({ token, attached });
 }
 
 function authenticatedDestination(
@@ -66,13 +78,6 @@ function authenticatedDestination(
     return `/join?access=${encodeURIComponent(access.restrictionState)}`;
   }
   return `/opportunities/${encodeURIComponent(reference)}`;
-}
-
-async function opaqueCandidate(request: NextRequest, reference: string) {
-  return createServerAcquisitionContextService().issueOpaqueOpportunityCandidate({
-    reference,
-    referrer: request.headers.get("referer"),
-  });
 }
 
 function signInResponse(request: NextRequest, reference: string) {
@@ -92,26 +97,15 @@ export async function GET(request: NextRequest) {
 
     const sessionCookie = request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
     if (!sessionCookie) {
-      // Do not inspect protected publication state for an anonymous caller. Every syntactically
-      // valid reference receives the same non-authorizing acquisition/sign-in response.
-      return withAcquisitionCookie(
-        signInResponse(request, reference),
-        await opaqueCandidate(request, reference),
-      );
+      // Opaque candidate only: no protected lookup and no persistent write before authentication.
+      return withOpaqueCandidateCookie(signInResponse(request, reference), reference);
     }
 
     const access = await resolveParticipantRoute({ sessionCookie });
     if (access.kind === "unauthenticated") {
-      return withAcquisitionCookie(
-        signInResponse(request, reference),
-        await opaqueCandidate(request, reference),
-      );
+      return withOpaqueCandidateCookie(signInResponse(request, reference), reference);
     }
 
-    // Before current participant authorization, preserve the opaque candidate without asking
-    // Firestore whether the protected reference exists. Resolution/activation therefore cannot
-    // become an existence oracle. Actual opportunity authority is checked only for an authorized
-    // participant and again by the opportunity/continuation route before payload disclosure.
     if (access.kind === "authorized") {
       const audience = await resolveOpportunityPublicationAudience(reference);
       if (audience !== "authenticated-participants") {
@@ -119,14 +113,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const token = await opaqueCandidate(request, reference);
     const userId = "context" in access ? access.context.user.id : null;
-    const attached = userId ? await bindExistingActivation(token, userId) : false;
+    const persisted = userId
+      ? await persistAndBindCandidate(request, reference, userId)
+      : null;
     const response = NextResponse.redirect(
       new URL(authenticatedDestination(access, reference), request.url),
       303,
     );
-    return attached ? response : withAcquisitionCookie(response, token);
+    return persisted && !persisted.attached
+      ? withPersistentAcquisitionCookie(response, persisted.token)
+      : response;
   } catch {
     return NextResponse.json(
       { error: "This authenticated opportunity is unavailable." },
@@ -145,7 +142,7 @@ export async function POST(request: NextRequest) {
       reference,
       referrer: request.headers.get("referer"),
     });
-    return withAcquisitionCookie(
+    return withPersistentAcquisitionCookie(
       NextResponse.redirect(new URL("/join?entry=opportunity", request.url), 303),
       issued.token,
     );
