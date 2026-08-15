@@ -35,9 +35,10 @@ test("browser cannot supply commercial authority or payment terms", () => {
   assert.ok(beginCheckout.indexOf("assertRelease(organizationId)") >= 0, "checkout must evaluate the release policy");
   assert.ok(beginCheckout.indexOf("assertRelease(organizationId)") < beginCheckout.indexOf("reserveFoundingCheckout"), "release policy must be evaluated before capacity/provider mutation");
   assert.ok(runtime.includes('organizationPermission("billing.manage")'));
-  assert.ok(provider.includes('planKey: "founding"'));
-  assert.ok(provider.includes("priceId: config.priceId"));
-  assert.ok(provider.includes("quantity: 1"));
+  assert.ok(beginCheckout.includes('planKey: "founding"'), "server runtime must bind the approved Founding plan");
+  assert.ok(provider.includes('String(request.planKey) !== "founding"'), "Stripe provider must reject any non-Founding plan");
+  assert.ok(provider.includes('"line_items[0][price]": config.priceId'), "Stripe provider must use the server-configured approved Price");
+  assert.ok(provider.includes('"line_items[0][quantity]": 1'), "Stripe provider must bind quantity to one subscription");
 });
 
 test("five commerce locales expose one complete participant message contract", () => {
