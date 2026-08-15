@@ -71,6 +71,34 @@ export function commercialProjectionStatus(status: ProviderSubscriptionStatus): 
   return "suspended";
 }
 
+function lifecycleSafetyRank(status: ProviderSubscriptionStatus): number {
+  if (status === "canceled" || status === "incomplete_expired") return 3;
+  if (status === "past_due" || status === "unpaid" || status === "paused" || status === "incomplete") return 2;
+  return 1;
+}
+
+/**
+ * Decide whether a provider lifecycle observation may replace the persisted projection.
+ * Stripe event creation time is the ordering token. When two lifecycle events share Stripe's
+ * second-level timestamp, fail closed toward the observation that grants less recognition/capacity
+ * authority so an overlapping older active snapshot cannot resurrect paid state after cancellation.
+ */
+export function shouldApplyProviderLifecycleObservation(input: Readonly<{
+  incomingCreatedAt: string;
+  incomingStatus: ProviderSubscriptionStatus;
+  previousCreatedAt?: string | null;
+  previousStatus?: ProviderSubscriptionStatus | null;
+}>): boolean {
+  const incoming = Date.parse(required(input.incomingCreatedAt, "Incoming provider event timestamp"));
+  if (!Number.isFinite(incoming)) throw new Error("Incoming provider event timestamp is invalid.");
+  if (!input.previousCreatedAt || !input.previousStatus) return true;
+  const previous = Date.parse(required(input.previousCreatedAt, "Previous provider event timestamp"));
+  if (!Number.isFinite(previous)) throw new Error("Previous provider event timestamp is invalid.");
+  if (incoming > previous) return true;
+  if (incoming < previous) return false;
+  return lifecycleSafetyRank(input.incomingStatus) >= lifecycleSafetyRank(input.previousStatus);
+}
+
 export function assertFoundingSubscriptionCorrelation(input: Readonly<{
   snapshot: ProviderSubscriptionSnapshot;
   organizationId: string;
