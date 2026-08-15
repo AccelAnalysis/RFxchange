@@ -14,50 +14,62 @@ test("remaining Wave 4 corrections do not re-gate the map-first Exchange", async
 });
 
 test("ISS-007 and ISS-011 preserve the correct draft and support structured/partial definition authoring", async () => {
-  const [workspace, builder, service] = await Promise.all([
+  const [workspace, qualifierEditor, service, repository] = await Promise.all([
     read("src/components/rfx/RFxDraftWorkspace.tsx"),
-    read("src/components/rfx/RFxDefinitionBuilder.tsx"),
-    read("src/application/rfx/rfx-draft-service.ts"),
+    read("src/components/rfx/RFxStructuredQualifierEditor.tsx"),
+    read("src/application/rfx/wave4-gap-governed-draft-service.ts"),
+    read("src/infrastructure/rfx/iss006-governed-rfx-repository.ts"),
   ]);
-  assert.match(workspace, /<RFxDefinitionBuilder[\s\S]{0,180}key=\{selectedDraft\.id\}/);
-  assert.match(builder, /qualifierKind/);
-  for (const kind of ["quantity", "boolean", "geography"]) assert.match(builder, new RegExp(`"${kind}"`));
-  assert.doesNotMatch(service, /stable\(\s*String\(responseInput\.responseTemplateId/);
-  assert.doesNotMatch(service, /stable\(\s*String\(evaluationInput\.decisionTemplateId/);
-  assert.match(service, /reconcileDefinitionForPackage/);
+  assert.match(workspace, /<RFxDefinitionBuilder[\s\S]{0,220}key=\{selectedDraft\.id\}/);
+  assert.match(qualifierEditor, /qualifierKind/);
+  for (const kind of ["text", "quantity", "boolean", "geography"])
+    assert.match(qualifierEditor, new RegExp(`"${kind}"`));
+  assert.match(service, /optionalStable\([\s\S]{0,120}responseInput\.responseTemplateId/);
+  assert.match(service, /optionalStable\([\s\S]{0,120}evaluationInput\.decisionTemplateId/);
+  assert.match(repository, /reconcileDefinitionForPackage/);
 });
 
 test("ISS-009 rejects semantically incompatible evaluation links", async () => {
-  const model = await read("src/domain/rfx/model.ts");
-  assert.match(model, /factorRequirementTreatmentCompatible/);
-  assert.match(model, /linked requirement treatment is incompatible/i);
+  const service = await read("src/application/rfx/wave4-gap-governed-draft-service.ts");
+  assert.match(service, /factorRequirementTreatmentCompatible/);
+  assert.match(service, /linked requirement treatment is incompatible/i);
+  assert.match(service, /assertFactorRequirementTreatmentCompatibility\(definition\)/);
 });
 
 test("ISS-016 and ISS-018 readiness targets are real and stale previews are cleared", async () => {
-  const [publication, definitionBuilder, panel] = await Promise.all([
+  const [publication, workspace, panel] = await Promise.all([
     read("src/domain/rfx/publication.ts"),
-    read("src/components/rfx/RFxDefinitionBuilder.tsx"),
+    read("src/components/rfx/RFxDraftWorkspace.tsx"),
     read("src/components/rfx/RFxPublicationPanel.tsx"),
   ]);
   assert.doesNotMatch(publication, /#rfx-package-/);
-  for (const anchor of ["#rfx-need", "#rfx-timing", "#rfx-performance-location"]) assert.match(publication, new RegExp(anchor));
-  for (const id of ["rfx-definition-requirements", "rfx-definition-responseStructure", "rfx-definition-evaluationDefinition"]) assert.match(definitionBuilder, new RegExp(`id="${id}"`));
+  for (const anchor of ["#rfx-need", "#rfx-timing", "#rfx-performance-location"])
+    assert.match(publication, new RegExp(anchor));
+  for (const id of [
+    "rfx-definition-requirements",
+    "rfx-definition-responseStructure",
+    "rfx-definition-evaluationDefinition",
+  ]) assert.match(workspace, new RegExp(`id="${id}"`));
   const versionEffect = panel.indexOf("aggregate.version");
   assert.ok(versionEffect >= 0);
-  assert.match(panel.slice(Math.max(0, versionEffect - 900), versionEffect + 1500), /setReadiness\(null\)/);
-  assert.match(panel.slice(Math.max(0, versionEffect - 900), versionEffect + 1500), /setPreview\(null\)/);
+  assert.match(panel.slice(Math.max(0, versionEffect - 1200), versionEffect + 1800), /setReadiness\(null\)/);
+  assert.match(panel.slice(Math.max(0, versionEffect - 1200), versionEffect + 1800), /setPreview\(null\)/);
 });
 
 test("ISS-019 revalidates publication inputs transactionally and reloads concurrent replay", async () => {
-  const [repository, service] = await Promise.all([
-    read("src/infrastructure/firestore/rfx.ts"),
-    read("src/application/rfx/rfx-publication-service.ts"),
+  const [repository, service, runtime] = await Promise.all([
+    read("src/infrastructure/rfx/wave4-gap-publication-repository.ts"),
+    read("src/application/rfx/wave4-gap-publication-service.ts"),
+    read("src/infrastructure/rfx/runtime.ts"),
   ]);
   assert.match(repository, /organizationProfiles/);
   assert.match(repository, /organizationLocations/);
-  assert.match(service, /if \(result === "replayed"\)/);
+  assert.match(repository, /runTransaction/);
+  assert.match(service, /if \(!result\.replayed\)/);
   assert.match(service, /getPublicationSnapshot/);
   assert.match(service, /getProjection/);
+  assert.match(runtime, /Wave4GapPublicationRepository/);
+  assert.match(runtime, /Wave4GapPublicationService/);
 });
 
 test("ACQ-009 preserves an authenticated-participant opportunity through sign-in", async () => {
@@ -70,11 +82,12 @@ test("ACQ-009 preserves an authenticated-participant opportunity through sign-in
 
 test("DSC-004 discovers beyond the old 250-record horizon, handles legacy projections, and exposes structured filters", async () => {
   const [repository, domain, workspace] = await Promise.all([
-    read("src/infrastructure/firestore/opportunity-discovery.ts"),
+    read("src/infrastructure/rfx/wave4-gap-opportunity-discovery-repository.ts"),
     read("src/domain/rfx/discovery.ts"),
     read("src/components/rfx/OpportunityDiscoveryWorkspace.tsx"),
   ]);
   assert.match(repository, /startAfter/);
+  assert.match(repository, /MAX_DISCOVERY_SCAN/);
   assert.doesNotMatch(repository, /Math\.min\(250,\s*limit\)/);
   assert.match(domain, /requestFamilyIndexKeyForProjection/);
   assert.doesNotMatch(domain, /input\.projection\.requestFamilyIndexKey\.toLocaleLowerCase/);
@@ -87,24 +100,42 @@ test("DSC-004 discovers beyond the old 250-record horizon, handles legacy projec
 
 test("DSC-005 exact replay precedes version conflict and capability IDs use the pinned AMACS catalog", async () => {
   const [service, runtime] = await Promise.all([
-    read("src/application/rfx/opportunity-discovery-service.ts"),
+    read("src/application/rfx/wave4-gap-opportunity-discovery-service.ts"),
     read("src/infrastructure/rfx/opportunity-discovery-runtime.ts"),
   ]);
   const commandRead = service.indexOf("getCommand(commandId)");
+  const currentRead = service.indexOf("getSavedSearch(savedSearchId)");
   const versionConflict = service.indexOf("existing.version !== expectedVersion");
-  assert.ok(commandRead >= 0 && versionConflict > commandRead, "Saved-search exact replay must precede current-version conflict handling.");
+  assert.ok(commandRead >= 0 && currentRead > commandRead && versionConflict > commandRead,
+    "Saved-search exact replay must precede current record/version handling.");
+  assert.doesNotMatch(
+    service.slice(0, commandRead),
+    /createdAt|updatedAt/,
+    "Retry fingerprint construction must not depend on retry-time timestamps.",
+  );
   assert.match(runtime, /loadImmutableAmacsCatalog/);
-  assert.match(service, /validateCapabilityIds/);
+  assert.match(runtime, /validateCapabilityIds/);
+  assert.match(runtime, /Wave4GapOpportunityDiscoveryService/);
 });
 
 test("DSC-006 has durable discovery-evaluation retry and a real alert delivery consumer", async () => {
-  const [api, functions] = await Promise.all([
+  const [api, reliability, evaluationWorker, alertWorker, functionsIndex] = await Promise.all([
     read("app/api/rfx/route.ts"),
-    read("functions/src/background-job-functions.ts"),
+    read("src/infrastructure/rfx/opportunity-discovery-reliability.ts"),
+    read("functions/src/opportunity-discovery-evaluation-functions.ts"),
+    read("functions/src/opportunity-discovery-functions.ts"),
+    read("functions/src/index.ts"),
   ]);
   assert.match(api, /queueOpportunityDiscoveryEvaluation/);
-  assert.match(functions, /opportunityAlertIntents/);
-  assert.match(functions, /opportunityDiscoveryEvaluations/);
-  assert.match(functions, /transactional/i);
-  assert.match(functions, /onSchedule/);
+  assert.match(api, /completeOpportunityDiscoveryEvaluation/);
+  assert.match(reliability, /opportunityDiscoveryEvaluations/);
+  assert.match(evaluationWorker, /opportunityDiscoveryEvaluations/);
+  assert.match(evaluationWorker, /onSchedule/);
+  assert.match(alertWorker, /opportunityAlertIntents/);
+  assert.match(alertWorker, /executeReliableTransactionalEmailJob/);
+  assert.match(alertWorker, /FirestoreBackgroundJobStore/);
+  assert.match(alertWorker, /FirestoreTransactionalEmailDeliveryAuditStore/);
+  assert.match(alertWorker, /onSchedule/);
+  assert.match(functionsIndex, /scheduledOpportunityDiscoveryEvaluation/);
+  assert.match(functionsIndex, /scheduledOpportunityAlertDelivery/);
 });
