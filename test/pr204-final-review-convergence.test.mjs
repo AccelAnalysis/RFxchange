@@ -47,7 +47,10 @@ test("opportunity evaluation freezes one time and digest window across sync and 
   ]);
   assert.match(api, /const discoveryEvaluationAt = new Date\(\)\.toISOString\(\)/);
   assert.match(api, /queueOpportunityDiscoveryEvaluationAt\([\s\S]{0,100}discoveryEvaluationAt/);
-  assert.match(api, /evaluatePublishedProjection\(result\.projection, discoveryEvaluationAt\)/);
+  assert.match(
+    api,
+    /evaluatePublishedProjection\([\s\S]{0,100}result\.projection,[\s\S]{0,100}discoveryEvaluationAt/,
+  );
   assert.match(reliability, /readonly evaluationAt: string/);
   assert.match(reliability, /evaluationAt: current\.evaluationAt \?\? evaluationAt/);
   assert.match(reliability, /queueOpportunityDiscoveryEvaluationAt/);
