@@ -74,6 +74,14 @@ function hostFromReferrer(value: string | null | undefined): string | null {
   }
 }
 
+function stableOpportunityReference(value: string): string {
+  const reference = value.trim();
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,190}$/.test(reference)) {
+    throw new Error("Opportunity reference is invalid.");
+  }
+  return reference;
+}
+
 export class AcquisitionContextService {
   private readonly dependencies: AcquisitionContextServiceDependencies;
 
@@ -104,19 +112,18 @@ export class AcquisitionContextService {
   }
 
   /**
-   * Server-internal seam for an opportunity reference whose current publication
-   * authority has already been validated by the calling route. This preserves
-   * the same acquisition envelope/cookie contract for authenticated-participant
-   * shares without making those projections public.
+   * Creates opaque navigation metadata for a syntactically valid opportunity reference without
+   * asserting that the opportunity exists, is published, or is visible to the browser. This is
+   * intentionally non-authorizing: protected publication authority must be revalidated only after
+   * the participant has current server-derived access, before any opportunity payload is returned.
+   * Issuing the same envelope for valid-but-nonexistent references prevents anonymous callers from
+   * using acquisition continuity as a protected-reference existence oracle.
    */
-  async issueValidatedOpportunity(input: Readonly<{
+  async issueOpaqueOpportunityCandidate(input: Readonly<{
     reference: string;
     referrer?: string | null;
   }>): Promise<AcquisitionContextToken> {
-    const reference = input.reference.trim();
-    if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,190}$/.test(reference)) {
-      throw new Error("Opportunity reference is invalid.");
-    }
+    const reference = stableOpportunityReference(input.reference);
     return this.issue({
       kind: "opportunity",
       subjectReference: reference,
