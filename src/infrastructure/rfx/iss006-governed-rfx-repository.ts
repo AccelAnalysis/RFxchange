@@ -335,7 +335,7 @@ export class Iss006GovernedRfxRepository implements RfxRepository {
         }
         const currentLocation = organizationLocationSnapshot.data() as ConfirmedOrganizationLocation;
         if (
-          String(currentLocation.organizationId) !== String(governedAggregate.issuerOrganizationId) ||
+          String(currentLocation.organizationId) !== String(bundle.aggregate.issuerOrganizationId) ||
           !boundLocationItems.every((item) =>
             sameOrganizationLocationProjection(item, currentLocation),
           )
