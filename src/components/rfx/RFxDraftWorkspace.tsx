@@ -334,7 +334,7 @@ export function RFxDraftWorkspace({
                         <span id="rfx-definition-responseStructure" aria-hidden="true" />
                         <span id="rfx-definition-evaluationDefinition" aria-hidden="true" />
                         <RFxDefinitionBuilder
-                          key={`${selectedDraft.id}:${selectedDraft.version}:definition`}
+                          key={`${selectedDraft.id}:definition`}
                           aggregate={selectedDraft}
                           catalog={definitionCatalog}
                           organizationId={organizationId}
