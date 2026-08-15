@@ -19,6 +19,7 @@ interface PublicOpportunityPageProps {
 
 export async function generateMetadata({ params }: PublicOpportunityPageProps): Promise<Metadata> {
   const { reference } = await params;
+  // Anonymous metadata is derived only from the approved public projection.
   const projection = await resolvePublicOpportunityProjection(reference);
   return projection
     ? {
@@ -35,7 +36,7 @@ export default async function PublicOpportunityPage({ params }: PublicOpportunit
   const sessionCookie = cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
   const participantAuthorized = await resolveOptionalOpportunityParticipant(sessionCookie);
 
-  let opportunity = await resolvePublicOpportunityProjection(reference, participantAuthorized);
+  const opportunity = await resolvePublicOpportunityProjection(reference, participantAuthorized);
   if (!opportunity && !participantAuthorized) {
     const audience = await resolveOpportunityPublicationAudience(reference);
     if (audience === "authenticated-participants") {
