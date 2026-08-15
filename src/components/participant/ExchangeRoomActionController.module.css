@@ -69,6 +69,13 @@
     padding-inline: var(--space-xs);
     font-size: 0.78rem;
   }
+
+  /* The mobile detail sheet remains above map content, while its scrollable footprint reserves
+     enough room for the persistent two-row action tray so focused controls cannot be obscured. */
+  :global([data-participant-workspace="spatial"] [data-ui-sheet]) {
+    padding-bottom: calc(116px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(116px + env(safe-area-inset-bottom));
+  }
 }
 
 @media (prefers-reduced-transparency: reduce) {
