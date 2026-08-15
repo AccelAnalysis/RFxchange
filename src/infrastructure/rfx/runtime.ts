@@ -1,6 +1,6 @@
 import type { Firestore } from "firebase-admin/firestore";
 
-import { RfxIss006GovernedDraftService } from "../../application/rfx/iss006-governed-draft-service.ts";
+import { Wave4GapGovernedDraftService } from "../../application/rfx/wave4-gap-governed-draft-service.ts";
 import { RfxPublicationService } from "../../application/rfx/rfx-publication-service.ts";
 import { loadImmutableAmacsCatalog } from "../amacs/runtime.ts";
 import { createServerFirebaseAccountSecurityService } from "../auth/firebase-account-security-runtime.ts";
@@ -20,7 +20,7 @@ export async function createServerRfxDraftService(
   const organizationLocation =
     createFirestoreOrganizationLocationRepositories(db);
   const baseRepository = new FirestoreRfxRepository(db);
-  return new RfxIss006GovernedDraftService({
+  return new Wave4GapGovernedDraftService({
     authorization: {
       accountSecurity: createServerFirebaseAccountSecurityService(),
       organizations: foundation.organizations.accounts,
