@@ -21,9 +21,12 @@ test("shared controller hydrates authorization fail-closed and requires discover
   assert.ok(source.includes('form[action="/geography/canvas"]'));
 });
 
-test("persistent Room revalidates action authority on every in-place lens transition", () => {
+test("persistent Room revalidates action authority fail-closed on every in-place lens transition", () => {
   const source = read("src/components/participant/ExchangeRoomActionController.tsx");
-  assert.match(source, /setAuthorization\(DENIED_ACTION_AUTHORIZATION\);/);
+  assert.match(source, /interface LensAuthorizationProjection/);
+  assert.match(source, /authorizationState\.lens === activeLens/);
+  assert.match(source, /: DENIED_ACTION_AUTHORIZATION;/);
+  assert.match(source, /lens: activeLens,[\s\S]*authorization: Object\.freeze/);
   assert.match(source, /\}, \[activeLens\]\);/);
 });
 
