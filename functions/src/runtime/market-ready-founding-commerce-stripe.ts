@@ -22,7 +22,7 @@ interface StripeSubscription {
   readonly current_period_end?: unknown;
   readonly cancel_at_period_end?: unknown;
 }
-interface StripeList<T> { readonly data?: readonly T[]; }
+interface StripeList<T> { readonly data?: readonly T[]; readonly has_more?: unknown; }
 
 export interface VerifiedStripeEvent {
   readonly id: string;
@@ -166,6 +166,25 @@ function belongsToFoundingOrganization(value: StripeSubscription, organizationId
   return value.metadata?.rfxchangePlan === "founding" && value.metadata?.organizationId === organizationId;
 }
 
+async function listAllCustomerSubscriptions(secretKey: string, customerId: string): Promise<readonly StripeSubscription[]> {
+  const values: StripeSubscription[] = [];
+  let startingAfter: string | null = null;
+  do {
+    const query = new URLSearchParams({ customer: customerId, status: "all", limit: "100" });
+    if (startingAfter) query.set("starting_after", startingAfter);
+    const result = await stripeGet<StripeList<StripeSubscription>>(secretKey, `/subscriptions?${query.toString()}`);
+    if (!Array.isArray(result.data)) throw new Error("Stripe subscription list payload is malformed; provider inspection fails closed.");
+    values.push(...result.data);
+    if (result.has_more === false || result.has_more === undefined) break;
+    if (result.has_more !== true) throw new Error("Stripe subscription pagination state is malformed; provider inspection fails closed.");
+    const last = result.data.at(-1);
+    const lastId = last ? required(last.id, "Stripe subscription pagination id") : "";
+    if (!lastId) throw new Error("Stripe subscription pagination is malformed; provider inspection fails closed.");
+    startingAfter = lastId;
+  } while (true);
+  return Object.freeze(values);
+}
+
 export async function providerHasNonTerminalFoundingSubscription(input: Readonly<{
   secretKey: string;
   customerId: string;
@@ -175,9 +194,8 @@ export async function providerHasNonTerminalFoundingSubscription(input: Readonly
   const customerId = required(input.customerId, "Stripe Customer id");
   const organizationId = required(input.organizationId, "RFxchange organization id");
   const expectedPriceId = required(input.expectedPriceId, "Expected Founding Price id");
-  const query = new URLSearchParams({ customer: customerId, status: "all", limit: "100" });
-  const result = await stripeGet<StripeList<StripeSubscription>>(input.secretKey, `/subscriptions?${query.toString()}`);
-  const exact = (result.data ?? [])
+  const subscriptions = await listAllCustomerSubscriptions(input.secretKey, customerId);
+  const exact = subscriptions
     .filter((value) => belongsToFoundingOrganization(value, organizationId))
     .map((value) => subscriptionSnapshot(value, expectedPriceId))
     .filter((snapshot) => snapshot.customerId === customerId);
