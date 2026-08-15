@@ -216,6 +216,7 @@ export async function inspectAmbiguousFoundingReservation(input: Readonly<{
   eligibleForReconciliation: boolean;
   reclaimable: boolean;
   hasNonTerminalSubscription: boolean;
+  matchingCheckoutSessionId: string | null;
   matchingCheckoutStatus: string | null;
 }>> {
   const customerId = required(input.customerId, "Stripe Customer id");
@@ -225,12 +226,12 @@ export async function inspectAmbiguousFoundingReservation(input: Readonly<{
   const now = input.now ? Date.parse(required(input.now, "Reconciliation time")) : Date.now();
   if (!Number.isFinite(reservedAt) || !Number.isFinite(now)) throw new Error("Founding reservation reconciliation timestamp is invalid.");
   if (now - reservedAt < RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS) {
-    return Object.freeze({ eligibleForReconciliation: false, reclaimable: false, hasNonTerminalSubscription: false, matchingCheckoutStatus: null });
+    return Object.freeze({ eligibleForReconciliation: false, reclaimable: false, hasNonTerminalSubscription: false, matchingCheckoutSessionId: null, matchingCheckoutStatus: null });
   }
 
   const hasNonTerminalSubscription = await hasCorrelatedNonTerminalFoundingSubscription(customerId, organizationId);
   if (hasNonTerminalSubscription) {
-    return Object.freeze({ eligibleForReconciliation: true, reclaimable: false, hasNonTerminalSubscription: true, matchingCheckoutStatus: null });
+    return Object.freeze({ eligibleForReconciliation: true, reclaimable: false, hasNonTerminalSubscription: true, matchingCheckoutSessionId: null, matchingCheckoutStatus: null });
   }
 
   const exactSessions: StripeCheckoutSession[] = [];
@@ -261,13 +262,14 @@ export async function inspectAmbiguousFoundingReservation(input: Readonly<{
   if (exactSessions.length > 1) throw new Error("Multiple Stripe Checkout Sessions are correlated to one Founding reservation; reconciliation fails closed.");
   const exact = exactSessions[0] ?? null;
   if (!exact) {
-    return Object.freeze({ eligibleForReconciliation: true, reclaimable: true, hasNonTerminalSubscription: false, matchingCheckoutStatus: null });
+    return Object.freeze({ eligibleForReconciliation: true, reclaimable: true, hasNonTerminalSubscription: false, matchingCheckoutSessionId: null, matchingCheckoutStatus: null });
   }
   const status = exact.status ?? null;
   return Object.freeze({
     eligibleForReconciliation: true,
     reclaimable: status === "expired",
     hasNonTerminalSubscription: false,
+    matchingCheckoutSessionId: exact.id,
     matchingCheckoutStatus: status,
   });
 }
