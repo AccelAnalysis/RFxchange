@@ -6,6 +6,7 @@ import {
   FOUNDING_PRICE_ID,
   assertFoundingSubscriptionCorrelation,
   commercialProjectionStatus,
+  foundingPriceIdForMode,
   hasActiveFoundingRecognition,
   reconcileFoundingCapacity,
   releaseExpiredCheckoutReservation,
@@ -108,9 +109,35 @@ test("organization 250 can commit its own reservation while unrelated organizati
   );
 });
 
+test("live and test modes bind reconciliation to server-approved Price identity", () => {
+  const testPrice = "price_test_founding";
+  assert.equal(foundingPriceIdForMode("live", "price_attacker"), FOUNDING_PRICE_ID);
+  assert.equal(foundingPriceIdForMode("test", testPrice), testPrice);
+  assert.throws(() => foundingPriceIdForMode("test", ""), /Test Founding Price id/);
+
+  assert.doesNotThrow(() => assertFoundingSubscriptionCorrelation({
+    snapshot: subscription(),
+    organizationId: "org-founding",
+    customerId: "cus_founding",
+    expectedPriceId: foundingPriceIdForMode("live"),
+  }));
+  assert.doesNotThrow(() => assertFoundingSubscriptionCorrelation({
+    snapshot: subscription({ priceId: testPrice }),
+    organizationId: "org-founding",
+    customerId: "cus_founding",
+    expectedPriceId: foundingPriceIdForMode("test", testPrice),
+  }));
+  assert.throws(() => assertFoundingSubscriptionCorrelation({
+    snapshot: subscription({ priceId: testPrice }),
+    organizationId: "org-founding",
+    customerId: "cus_founding",
+    expectedPriceId: FOUNDING_PRICE_ID,
+  }), /Price/);
+});
+
 test("exact Customer, organization, Price and quantity correlation fails closed", () => {
   assert.doesNotThrow(() => assertFoundingSubscriptionCorrelation({
-    snapshot: subscription(), organizationId: "org-founding", customerId: "cus_founding",
+    snapshot: subscription(), organizationId: "org-founding", customerId: "cus_founding", expectedPriceId: FOUNDING_PRICE_ID,
   }));
   for (const [field, value, pattern] of [
     ["organizationId", "org-wrong", /organization metadata/],
@@ -120,7 +147,7 @@ test("exact Customer, organization, Price and quantity correlation fails closed"
   ]) {
     const snapshot = subscription({ [field]: value });
     assert.throws(() => assertFoundingSubscriptionCorrelation({
-      snapshot, organizationId: "org-founding", customerId: "cus_founding",
+      snapshot, organizationId: "org-founding", customerId: "cus_founding", expectedPriceId: FOUNDING_PRICE_ID,
     }), pattern);
   }
 });
