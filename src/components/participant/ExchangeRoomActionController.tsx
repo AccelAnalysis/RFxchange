@@ -102,19 +102,10 @@ function refreshedPermission(
   return null;
 }
 
-function resourceHref(selectedResourceProviderOrganizationId: string | null): string {
-  if (!selectedResourceProviderOrganizationId) return "/resources";
-  const selected = encodeURIComponent(selectedResourceProviderOrganizationId);
-  return `/resources?organization=${selected}&provider=${selected}`;
-}
-
-function privilegedHref(
-  actionId: string,
-  selectedResourceProviderOrganizationId: string | null,
-): string | null {
+function privilegedHref(actionId: string): string | null {
   if (actionId === "opportunities.create-rfx") return "/opportunities/manage";
   if (actionId === "resources.find-providers" || actionId === "resources.browse-resources") {
-    return resourceHref(selectedResourceProviderOrganizationId);
+    return participantSpatialLensHref("resources");
   }
   if (actionId === "resources.my-requests") return "/resources";
   if (actionId === "resources.provider-status") return "/provider-application";
@@ -125,12 +116,10 @@ function privilegedHref(
 export function ExchangeRoomActionController({
   activeLens,
   actions,
-  selectedResourceProviderOrganizationId = null,
   onNetworkFocus,
 }: Readonly<{
   activeLens: ParticipantLensId;
   actions: readonly ExchangeRoomActionProjection[];
-  selectedResourceProviderOrganizationId?: string | null;
   onNetworkFocus(intent: "organizations" | "capabilities"): void;
 }>) {
   const { locale } = useI18n();
@@ -183,7 +172,7 @@ export function ExchangeRoomActionController({
           return <button key={action.id} type="button" className={styles.activeAction} data-exchange-room-action={action.id} data-action-state="active" onClick={() => onNetworkFocus(networkIntent)}>{label}</button>;
         }
         if (permission === true && action.applicable) {
-          const href = privilegedHref(action.id, selectedResourceProviderOrganizationId);
+          const href = privilegedHref(action.id);
           if (href) return <Link key={action.id} className={styles.activeAction} href={href} data-exchange-room-action={action.id} data-action-state="active">{label}</Link>;
         }
         if (permission === null && action.availability === "active" && action.resolvedHandler?.kind === "href") {
