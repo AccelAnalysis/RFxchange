@@ -227,19 +227,17 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
                   data-opportunity-request-family-filter
                   name="requestFamily"
                   defaultValue={result.query.requestFamilyKeys[0] ?? ""}
-                  placeholder="AMACS request family ID"
                 />
                 {result.query.requestFamilyKeys.slice(1).map((value) => (
                   <input key={`requestFamily:${value}`} type="hidden" name="requestFamily" value={value} />
                 ))}
               </label>
               <label>
-                <span>AMACS capability</span>
+                <span>{t("rfxWorkspace.capabilitySearch")}</span>
                 <input
                   data-opportunity-capability-filter
                   name="capability"
                   defaultValue={result.query.capabilityIds[0] ?? ""}
-                  placeholder="AMACS capability ID"
                 />
                 {result.query.capabilityIds.slice(1).map((value) => (
                   <input key={`capability:${value}`} type="hidden" name="capability" value={value} />
