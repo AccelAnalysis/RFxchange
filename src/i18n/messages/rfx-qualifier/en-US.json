@@ -1,0 +1,32 @@
+{
+  "title": "Structured qualifiers",
+  "intro": "Add governed text, quantity, boolean, or geography conditions to an RFx requirement.",
+  "requirement": "Requirement",
+  "qualifierType": "Qualifier type",
+  "type": {
+    "text": "Text",
+    "quantity": "Quantity",
+    "boolean": "Boolean",
+    "geography": "Geography"
+  },
+  "defaultLabel": "Condition",
+  "label": "Label",
+  "requiredText": "Required text",
+  "amount": "Amount",
+  "unit": "Unit",
+  "requiredValue": "Required value",
+  "yesTrue": "Yes / true",
+  "noFalse": "No / false",
+  "localityIds": "Governed locality IDs",
+  "localityPlaceholder": "comma-separated locality IDs",
+  "saving": "Saving…",
+  "addQualifier": "Add qualifier",
+  "saved": "Structured qualifier saved.",
+  "error": {
+    "labelRequired": "Qualifier label is required.",
+    "valueRequired": "Qualifier value is required.",
+    "quantityRequired": "A positive quantity and unit are required.",
+    "localityRequired": "At least one governed locality ID is required.",
+    "save": "Qualifier could not be saved."
+  }
+}
