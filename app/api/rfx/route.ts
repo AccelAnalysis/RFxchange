@@ -14,7 +14,7 @@ import {
 } from "@/src/infrastructure/auth/participant-route-runtime";
 import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import {
-  queueOpportunityDiscoveryEvaluation,
+  queueOpportunityDiscoveryEvaluationAt,
 } from "@/src/infrastructure/rfx/opportunity-discovery-reliability";
 import { createServerOpportunityDiscoveryService } from "@/src/infrastructure/rfx/opportunity-discovery-runtime";
 import {
@@ -214,18 +214,28 @@ export async function POST(request: NextRequest) {
         alerts: number;
       }>;
 
+      // One evaluation timestamp owns matching/deadline/digest-window semantics for
+      // both the fast synchronous pass and every durable retry/page.
+      const discoveryEvaluationAt = new Date().toISOString();
       // Persist the exact publication identity before the synchronous attempt so
       // a process failure can never turn discovery evaluation into a log-only loss.
       // The synchronous pass is a first-value optimization only: it is intentionally
       // left queued because the durable worker owns exhaustive pagination of every
       // active saved search before the evaluation can be marked complete.
-      await queueOpportunityDiscoveryEvaluation(result.projection);
+      await queueOpportunityDiscoveryEvaluationAt(
+        result.projection,
+        discoveryEvaluationAt,
+      );
       try {
         const evaluated = await createServerOpportunityDiscoveryService()
-          .evaluatePublishedProjection(result.projection);
+          .evaluatePublishedProjection(result.projection, discoveryEvaluationAt);
         discoveryEvaluation = Object.freeze({ status: "pending", ...evaluated });
       } catch (error) {
-        await queueOpportunityDiscoveryEvaluation(result.projection, error);
+        await queueOpportunityDiscoveryEvaluationAt(
+          result.projection,
+          discoveryEvaluationAt,
+          error,
+        );
         console.error(JSON.stringify({
           type: "rfx.opportunity-discovery-evaluation-pending",
           reference: result.projection.reference,
