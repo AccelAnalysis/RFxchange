@@ -17,6 +17,7 @@ import {
   type RfxDecisionTreatment,
   type RfxEvaluationFactorTreatment,
   type RfxEvent,
+  type RfxPackageInput,
 } from "../../domain/rfx/model.ts";
 import {
   RfxPersistenceConflictError,
@@ -137,6 +138,50 @@ function assertFactorRequirementTreatmentCompatibility(definition: RfxDefinition
       }
     }
   }
+}
+
+function qualifierKind(value: unknown): string | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const kind = (value as Record<string, unknown>).kind;
+  return typeof kind === "string" ? kind : null;
+}
+
+function mergeLosslessQualifiers(
+  current: RfxDefinition | null,
+  input: RfxDefinitionSelectionInput,
+): RfxDefinitionSelectionInput {
+  if (!current || !Array.isArray(input.requirements)) return input;
+  const currentRequirements = new Map(
+    current.requirements.map((requirement) => [requirement.id, requirement]),
+  );
+  const requirements = input.requirements.map((raw) => {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return raw;
+    const requirement = raw as Record<string, unknown>;
+    const id = typeof requirement.id === "string" ? requirement.id : "";
+    const existing = currentRequirements.get(id);
+    if (!existing) return raw;
+    const incoming = Array.isArray(requirement.qualifiers)
+      ? requirement.qualifiers
+      : [];
+    const incomingIsFullStructuredState =
+      incoming.length > 1 || incoming.some((item) => qualifierKind(item) !== "text");
+    if (incomingIsFullStructuredState) return raw;
+
+    const firstExistingTextIndex = existing.qualifiers.findIndex(
+      (item) => item.kind === "text",
+    );
+    const preserved = existing.qualifiers.filter(
+      (_item, index) => index !== firstExistingTextIndex,
+    );
+    return Object.freeze({
+      ...requirement,
+      qualifiers: Object.freeze([...incoming, ...preserved]),
+    });
+  });
+  return Object.freeze({
+    ...input,
+    requirements: Object.freeze(requirements),
+  });
 }
 
 export class Wave4GapGovernedDraftService extends RfxIss006GovernedDraftService {
@@ -337,6 +382,33 @@ export class Wave4GapGovernedDraftService extends RfxIss006GovernedDraftService 
     });
   }
 
+  override async savePackage(
+    scope: RfxCommandScope,
+    input: Readonly<{
+      rfxId: string;
+      expectedVersion: number;
+      package: RfxPackageInput;
+    }>,
+  ) {
+    const result = await super.savePackage(scope, input);
+    if (result.replayed) return result;
+    const committed = await this.gapDependencies.repository.getById(result.aggregate.id);
+    if (
+      !committed ||
+      committed.issuerOrganizationId !== result.aggregate.issuerOrganizationId ||
+      committed.version !== result.aggregate.version
+    ) {
+      throw new RfxDraftError(
+        "dependency-unavailable",
+        "The committed RFx package is temporarily unavailable.",
+      );
+    }
+    return Object.freeze({
+      ...result,
+      aggregate: committed,
+    });
+  }
+
   override async saveDefinition(
     scope: RfxCommandScope,
     input: Readonly<{
@@ -417,7 +489,11 @@ export class Wave4GapGovernedDraftService extends RfxIss006GovernedDraftService 
 
     let definition: RfxDefinition;
     try {
-      const canonical = await this.canonicalDefinitionInputWithPartialTemplates(input.definition);
+      const losslessInput = mergeLosslessQualifiers(
+        current.definition,
+        input.definition,
+      );
+      const canonical = await this.canonicalDefinitionInputWithPartialTemplates(losslessInput);
       definition = normalizeRfxDefinition(
         canonical,
         current.package?.requirements.map((requirement) => requirement.id) ?? [],
