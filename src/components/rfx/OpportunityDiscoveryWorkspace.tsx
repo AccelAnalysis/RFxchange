@@ -223,36 +223,36 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
               </label>
               <label>
                 <span>{t("rfxWorkspace.discovery.detail.requestType")}</span>
-                <input
-                  data-opportunity-request-family-filter
-                  name="requestFamily"
-                  defaultValue={result.query.requestFamilyKeys[0] ?? ""}
-                />
-                {result.query.requestFamilyKeys.slice(1).map((value) => (
-                  <input key={`requestFamily:${value}`} type="hidden" name="requestFamily" value={value} />
+                {(result.query.requestFamilyKeys.length ? result.query.requestFamilyKeys : [""]).map((value, index) => (
+                  <input
+                    key={`requestFamily:${index}:${value}`}
+                    data-opportunity-request-family-filter
+                    name="requestFamily"
+                    defaultValue={value}
+                  />
                 ))}
               </label>
               <label>
                 <span>{t("rfxWorkspace.capabilitySearch")}</span>
-                <input
-                  data-opportunity-capability-filter
-                  name="capability"
-                  defaultValue={result.query.capabilityIds[0] ?? ""}
-                />
-                {result.query.capabilityIds.slice(1).map((value) => (
-                  <input key={`capability:${value}`} type="hidden" name="capability" value={value} />
+                {(result.query.capabilityIds.length ? result.query.capabilityIds : [""]).map((value, index) => (
+                  <input
+                    key={`capability:${index}:${value}`}
+                    data-opportunity-capability-filter
+                    name="capability"
+                    defaultValue={value}
+                  />
                 ))}
               </label>
               <label>
                 <span>{t("rfxWorkspace.discovery.detail.location")}</span>
-                <input
-                  data-opportunity-locality-filter
-                  name="locality"
-                  defaultValue={result.query.localityIds[0] ?? ""}
-                  placeholder={spatialScope.geographyId}
-                />
-                {result.query.localityIds.slice(1).map((value) => (
-                  <input key={`locality:${value}`} type="hidden" name="locality" value={value} />
+                {(result.query.localityIds.length ? result.query.localityIds : [""]).map((value, index) => (
+                  <input
+                    key={`locality:${index}:${value}`}
+                    data-opportunity-locality-filter
+                    name="locality"
+                    defaultValue={value}
+                    placeholder={index === 0 ? spatialScope.geographyId : undefined}
+                  />
                 ))}
               </label>
               <label><span>{t("rfxWorkspace.discovery.search.deadline")}</span><select name="deadline" defaultValue={result.query.deadlineWindow}><option value="all-open">{t("rfxWorkspace.discovery.search.allOpen")}</option><option value="next-7-days">{t("rfxWorkspace.discovery.search.next7")}</option><option value="next-30-days">{t("rfxWorkspace.discovery.search.next30")}</option></select></label>
