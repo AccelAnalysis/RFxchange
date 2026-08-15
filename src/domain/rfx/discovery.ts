@@ -198,6 +198,15 @@ export function opportunityDeadline(projection: ResponderOpportunityProjection):
   return projection.payload.timing.responseDeadline ?? "";
 }
 
+export function requestFamilyIndexKeyForProjection(projection: ResponderOpportunityProjection): string {
+  const indexed = typeof projection.requestFamilyIndexKey === "string"
+    ? projection.requestFamilyIndexKey.trim()
+    : "";
+  return (indexed || projection.payload.requestFamilyLabel || "")
+    .trim()
+    .toLocaleLowerCase("en-US");
+}
+
 function terms(value: string): readonly string[] {
   return Object.freeze(value.toLocaleLowerCase("en-US").split(/[^\p{L}\p{N}]+/u).filter((item) => item.length >= 2));
 }
@@ -217,7 +226,7 @@ export function opportunityMatchesQuery(input: Readonly<{
   if (input.query.watched !== null && input.query.watched !== input.watched) return false;
   if (input.query.localityIds.length && !input.query.localityIds.some((id) => input.projection.payload.localities.some((item) => item.id.toLocaleLowerCase("en-US") === id))) return false;
   if (input.query.capabilityIds.length && !input.query.capabilityIds.some((id) => input.projection.capabilityIndexKeys.some((key) => key.toLocaleLowerCase("en-US") === id))) return false;
-  if (input.query.requestFamilyKeys.length && !input.query.requestFamilyKeys.includes(input.projection.requestFamilyIndexKey.toLocaleLowerCase("en-US"))) return false;
+  if (input.query.requestFamilyKeys.length && !input.query.requestFamilyKeys.includes(requestFamilyIndexKeyForProjection(input.projection))) return false;
   const searchTerms = terms(input.query.text);
   if (!searchTerms.length) return true;
   const corpus = [
