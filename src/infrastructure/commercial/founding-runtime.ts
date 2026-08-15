@@ -15,7 +15,15 @@ import {
   type FoundingCheckoutReleaseMode,
   type FoundingCheckoutReleaseReason,
 } from "./founding-release-policy.ts";
-import { assertFoundingStripeConfiguration, RFXCHANGE_FOUNDING_CAP, RFXCHANGE_FOUNDING_CURRENCY, RFXCHANGE_FOUNDING_INTERVAL, RFXCHANGE_FOUNDING_PRICE_CENTS, StripePaymentProvider } from "./stripe-payment-provider.ts";
+import {
+  assertFoundingStripeConfiguration,
+  RFXCHANGE_FOUNDING_CAP,
+  RFXCHANGE_FOUNDING_CURRENCY,
+  RFXCHANGE_FOUNDING_INTERVAL,
+  RFXCHANGE_FOUNDING_PRICE_CENTS,
+  StripeCheckoutOutcomeUnknownError,
+  StripePaymentProvider,
+} from "./stripe-payment-provider.ts";
 
 export {
   resolveFoundingCheckoutReleaseDecision,
@@ -88,6 +96,24 @@ export async function reserveFoundingCheckout(db: Firestore, organizationId: str
   const ref = db.collection(CAPACITY_COLLECTION).doc(CAPACITY_DOCUMENT);
   return db.runTransaction(async (transaction) => { const snap = await transaction.get(ref); const state = capacityFromData(snap.data()); if (state.committedOrganizationIds.includes(organizationId)) throw new FoundingCommerceError(409, "already-founding", "This organization already occupies a Founding position."); const existing = state.reservations.find((r) => r.organizationId === organizationId); if (existing?.checkoutSessionId && existing.checkoutUrl) return Object.freeze({ kind: "reused" as const, reservationId: existing.reservationId, checkoutSessionId: existing.checkoutSessionId, checkoutUrl: existing.checkoutUrl }); if (existing) return Object.freeze({ kind: "reserved" as const, reservationId: existing.reservationId }); if (capacitySnapshot(state).remaining <= 0) throw new FoundingCommerceError(409, "founding-capacity-full", "Founding Membership has reached capacity."); const reservation = Object.freeze({ reservationId: randomUUID(), organizationId, checkoutSessionId: null, checkoutUrl: null }); writeCapacity(transaction, snap, Object.freeze({ ...state, reservations: Object.freeze([...state.reservations, reservation]) })); return Object.freeze({ kind: "reserved" as const, reservationId: reservation.reservationId }); });
 }
+
+/** Release only the exact still-unattached reservation after a definitive pre-session failure. */
+export async function releaseUnattachedFoundingReservation(db: Firestore, input: Readonly<{ organizationId: string; reservationId: string }>): Promise<boolean> {
+  const ref = db.collection(CAPACITY_COLLECTION).doc(CAPACITY_DOCUMENT);
+  return db.runTransaction(async (transaction) => {
+    const snap = await transaction.get(ref);
+    const state = capacityFromData(snap.data());
+    if (state.committedOrganizationIds.includes(input.organizationId)) return false;
+    const index = state.reservations.findIndex((reservation) => reservation.organizationId === input.organizationId && reservation.reservationId === input.reservationId);
+    if (index < 0) return false;
+    const reservation = state.reservations[index]!;
+    if (reservation.checkoutSessionId || reservation.checkoutUrl) return false;
+    const reservations = state.reservations.filter((_, candidateIndex) => candidateIndex !== index);
+    writeCapacity(transaction, snap, Object.freeze({ ...state, reservations: Object.freeze(reservations) }));
+    return true;
+  });
+}
+
 export async function attachFoundingCheckout(db: Firestore, input: Readonly<{ organizationId: string; reservationId: string; checkoutSessionId: string; checkoutUrl: string }>): Promise<void> {
   const ref = db.collection(CAPACITY_COLLECTION).doc(CAPACITY_DOCUMENT); await db.runTransaction(async (transaction) => { const snap = await transaction.get(ref); const state = capacityFromData(snap.data()); const index = state.reservations.findIndex((r) => r.organizationId === input.organizationId && r.reservationId === input.reservationId); if (index < 0) throw new FoundingCommerceError(409, "capacity-reservation-lost", "Founding reservation is unavailable."); const reservations = [...state.reservations]; const current = reservations[index]!; if (current.checkoutSessionId && current.checkoutSessionId !== input.checkoutSessionId) throw new FoundingCommerceError(409, "checkout-correlation-conflict", "Checkout correlation conflicts with the reservation."); reservations[index] = Object.freeze({ ...current, checkoutSessionId: input.checkoutSessionId, checkoutUrl: input.checkoutUrl }); writeCapacity(transaction, snap, Object.freeze({ ...state, reservations: Object.freeze(reservations) })); });
 }
@@ -100,7 +126,19 @@ export async function beginFoundingCheckout(input: Readonly<{ context: FoundingO
   let origin: URL; try { origin = new URL(input.publicOrigin); } catch { throw new FoundingCommerceError(503, "public-origin-invalid", "RFxchange public origin is invalid."); } if (!["http:", "https:"].includes(origin.protocol) || origin.pathname !== "/" || origin.search || origin.hash) throw new FoundingCommerceError(503, "public-origin-invalid", "RFxchange public origin is invalid.");
   assertFoundingStripeConfiguration(); const reservation = await reserveFoundingCheckout(input.context.db, organizationId); if (reservation.kind === "reused") return Object.freeze({ checkoutUrl: reservation.checkoutUrl, checkoutSessionId: reservation.checkoutSessionId, reused: true });
   const repository = new FirestoreOrganizationCommercialAccountRepository(input.context.db); const service = new OrganizationCommercialAccountService({ repository, paymentProvider: new StripePaymentProvider() });
-  const result = await service.beginSubscriptionCheckout({ organization: input.context.organization, planKey: "founding", billingEmail: input.context.billingEmail, successUrl: new URL("/commercial/founding?checkout=return", origin).toString(), cancelUrl: new URL("/commercial/founding?checkout=cancel", origin).toString(), idempotencyKey: `founding:${organizationId}:${reservation.reservationId}`, now: isoNow() });
+  let result;
+  try {
+    result = await service.beginSubscriptionCheckout({ organization: input.context.organization, planKey: "founding", billingEmail: input.context.billingEmail, successUrl: new URL("/commercial/founding?checkout=return", origin).toString(), cancelUrl: new URL("/commercial/founding?checkout=cancel", origin).toString(), idempotencyKey: `founding:${organizationId}:${reservation.reservationId}`, now: isoNow() });
+  } catch (error) {
+    if (!(error instanceof StripeCheckoutOutcomeUnknownError)) {
+      try {
+        await releaseUnattachedFoundingReservation(input.context.db, { organizationId, reservationId: reservation.reservationId });
+      } catch (cleanupError) {
+        throw new AggregateError([error, cleanupError], "Founding Checkout failed and its unattached capacity reservation could not be safely released.");
+      }
+    }
+    throw error;
+  }
   const latest = await repository.getByOrganizationId(input.context.organization.id); if (!latest) throw new Error("Commercial account disappeared during checkout."); await repository.save(withCheckout(latest, result.customerReference, result.checkoutReference)); await attachFoundingCheckout(input.context.db, { organizationId, reservationId: reservation.reservationId, checkoutSessionId: String(result.checkoutReference.externalReference), checkoutUrl: result.redirectUrl }); return Object.freeze({ checkoutUrl: result.redirectUrl, checkoutSessionId: String(result.checkoutReference.externalReference), reused: false });
 }
 export function publicFoundingOffer() { return Object.freeze({ planKey: "founding", amount: RFXCHANGE_FOUNDING_PRICE_CENTS, currency: RFXCHANGE_FOUNDING_CURRENCY, interval: RFXCHANGE_FOUNDING_INTERVAL, cap: RFXCHANGE_FOUNDING_CAP }); }
