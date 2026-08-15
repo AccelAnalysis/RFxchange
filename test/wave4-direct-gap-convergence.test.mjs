@@ -38,7 +38,7 @@ test("ISS-009 rejects semantically incompatible evaluation links", async () => {
   assert.match(service, /assertFactorRequirementTreatmentCompatibility\(definition\)/);
 });
 
-test("ISS-016 and ISS-018 readiness targets are real and stale previews are cleared", async () => {
+test("ISS-016 and ISS-018 readiness targets are real and stale previews are version-bound", async () => {
   const [publication, workspace, panel] = await Promise.all([
     read("src/domain/rfx/publication.ts"),
     read("src/components/rfx/RFxDraftWorkspace.tsx"),
@@ -52,10 +52,32 @@ test("ISS-016 and ISS-018 readiness targets are real and stale previews are clea
     "rfx-definition-responseStructure",
     "rfx-definition-evaluationDefinition",
   ]) assert.match(workspace, new RegExp(`id="${id}"`));
-  const versionEffect = panel.indexOf("aggregate.version");
-  assert.ok(versionEffect >= 0);
-  assert.match(panel.slice(Math.max(0, versionEffect - 1200), versionEffect + 1800), /setReadiness\(null\)/);
-  assert.match(panel.slice(Math.max(0, versionEffect - 1200), versionEffect + 1800), /setPreview\(null\)/);
+
+  assert.match(
+    panel,
+    /const draftStateKey = `\$\{aggregate\.id\}:\$\{aggregate\.version\}:\$\{audience\}`/,
+    "Readiness and preview identity must include the RFx id, exact aggregate version, and audience.",
+  );
+  assert.match(
+    panel,
+    /readinessState\?\.key === draftStateKey \? readinessState\.value : null/,
+    "Stale readiness must not render after RFx identity/version/audience changes.",
+  );
+  assert.match(
+    panel,
+    /previewState\?\.key === draftStateKey \? previewState\.value : null/,
+    "Stale preview must not render after RFx identity/version/audience changes.",
+  );
+  assert.match(
+    panel,
+    /const aggregateStateKey = `\$\{aggregate\.id\}:\$\{aggregate\.version\}:\$\{aggregate\.lifecycleState\}`/,
+    "Published projection state must be bound to the exact RFx aggregate identity and lifecycle.",
+  );
+  assert.doesNotMatch(
+    panel,
+    /useEffect\([\s\S]{0,500}set(?:Readiness|Preview|Busy)\([^)]*\)/,
+    "ISS-018 invalidation must not depend on synchronous state resets inside an effect.",
+  );
 });
 
 test("ISS-019 revalidates publication inputs transactionally and reloads concurrent replay", async () => {
