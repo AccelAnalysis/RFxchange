@@ -33,6 +33,7 @@ interface CapacityReservation {
   readonly organizationId: string;
   readonly checkoutSessionId: string | null;
   readonly checkoutUrl: string | null;
+  readonly reservedAt: string | null;
 }
 interface PersistedCapacity {
   readonly committedOrganizationIds: readonly string[];
@@ -63,11 +64,17 @@ function persistedCapacity(data: DocumentData | undefined): PersistedCapacity {
           (record.checkoutSessionId !== null && typeof record.checkoutSessionId !== "string") ||
           (record.checkoutUrl !== null && typeof record.checkoutUrl !== "string")
         ) throw new Error("Founding capacity reservation is malformed.");
+        const reservedAt = record.reservedAt == null
+          ? null
+          : typeof record.reservedAt === "string" && Number.isFinite(Date.parse(record.reservedAt))
+            ? record.reservedAt
+            : (() => { throw new Error("Founding capacity reservation timestamp is malformed."); })();
         return Object.freeze({
           reservationId: record.reservationId,
           organizationId: record.organizationId,
           checkoutSessionId: record.checkoutSessionId as string | null,
           checkoutUrl: record.checkoutUrl as string | null,
+          reservedAt,
         });
       })
     : [];
@@ -268,30 +275,57 @@ export async function reconcileExpiredFoundingCheckout(input: Readonly<{
   eventId: string;
   organizationId: string;
   customerId: string;
+  reservationId: string;
   eventCreatedAt: string;
   providerHasNonTerminalFoundingSubscription: boolean;
-}>): Promise<Readonly<{ duplicate: boolean }>> {
+}>): Promise<Readonly<{ duplicate: boolean; reservationCorrelationMatched: boolean }>> {
   const eventId = required(input.eventId, "Provider event id");
   const organizationId = required(input.organizationId, "Organization id");
+  const reservationId = required(input.reservationId, "Founding reservation id");
   const eventRef = input.db.collection(PROVIDER_EVENTS_COLLECTION).doc(eventId);
   const accountRef = input.db.collection(COMMERCIAL_ACCOUNT_COLLECTION).doc(organizationId);
   const capacityRef = input.db.collection(FOUNDING_CAPACITY_COLLECTION).doc(FOUNDING_CAPACITY_DOCUMENT_ID);
   return input.db.runTransaction(async (transaction) => {
     const [event, account, capacity] = await Promise.all([transaction.get(eventRef), transaction.get(accountRef), transaction.get(capacityRef)]);
-    if (event.exists) return Object.freeze({ duplicate: true });
+    if (event.exists) return Object.freeze({ duplicate: true, reservationCorrelationMatched: false });
     if (!account.exists || account.data()?.schemaVersion !== COMMERCIAL_SCHEMA_VERSION) throw new Error("Authoritative organization commercial account is unavailable.");
     assertCheckoutCustomer(account.data()!, input.customerId);
     const currentCapacity = persistedCapacity(capacity.data());
+    const currentReservation = currentCapacity.reservations.find((reservation) => reservation.organizationId === organizationId);
+    const correlationMatched = currentReservation?.reservationId === reservationId;
+
+    if (!correlationMatched) {
+      transaction.create(eventRef, {
+        id: eventId,
+        organizationId,
+        providerKey: "stripe",
+        eventType: "checkout.session.expired",
+        checkoutReservationId: reservationId,
+        reservationCorrelationMatched: false,
+        eventCreatedAt: input.eventCreatedAt,
+        schemaVersion: COMMERCIAL_SCHEMA_VERSION,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      return Object.freeze({ duplicate: false, reservationCorrelationMatched: false });
+    }
+
     const nextSnapshot = releaseExpiredCheckoutReservation({
       current: capacitySnapshot(currentCapacity), organizationId,
       providerHasNonTerminalFoundingSubscription: input.providerHasNonTerminalFoundingSubscription,
     });
     writeCapacity(transaction, capacityRef, capacityRecordFrom(currentCapacity, nextSnapshot), capacity.data());
     transaction.create(eventRef, {
-      id: eventId, organizationId, providerKey: "stripe", eventType: "checkout.session.expired",
-      eventCreatedAt: input.eventCreatedAt, schemaVersion: COMMERCIAL_SCHEMA_VERSION, createdAt: FieldValue.serverTimestamp(),
+      id: eventId,
+      organizationId,
+      providerKey: "stripe",
+      eventType: "checkout.session.expired",
+      checkoutReservationId: reservationId,
+      reservationCorrelationMatched: true,
+      eventCreatedAt: input.eventCreatedAt,
+      schemaVersion: COMMERCIAL_SCHEMA_VERSION,
+      createdAt: FieldValue.serverTimestamp(),
     });
-    return Object.freeze({ duplicate: false });
+    return Object.freeze({ duplicate: false, reservationCorrelationMatched: true });
   });
 }
 
