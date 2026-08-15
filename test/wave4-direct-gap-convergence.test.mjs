@@ -144,12 +144,22 @@ test("ISS-019 revalidates publication inputs transactionally and reloads concurr
   assert.match(runtime, /Wave4GapPublicationService/);
 });
 
-test("ACQ-009 preserves an authenticated-participant opportunity through sign-in", async () => {
-  const page = await read("app/opportunities/[reference]/page.tsx");
+test("ACQ-009 issues acquisition context before authenticated-participant sign-in", async () => {
+  const [page, startRoute, acquisitionService] = await Promise.all([
+    read("app/opportunities/[reference]/page.tsx"),
+    read("app/api/acquisition/start/route.ts"),
+    read("src/application/acquisition/acquisition-context.ts"),
+  ]);
   assert.match(page, /authenticated-participants/);
-  assert.match(page, /signin/);
-  assert.match(page, /returnTo/);
-  assert.match(page, /acquisition/i);
+  assert.match(page, /api\/acquisition\/start\?opportunityReference=/);
+  assert.doesNotMatch(page, /signin\?returnTo=.*acquisition=/);
+  assert.match(startRoute, /export async function GET/);
+  assert.match(startRoute, /resolveOpportunityPublicationAudience/);
+  assert.match(startRoute, /audience !== "authenticated-participants"/);
+  assert.match(startRoute, /issueValidatedOpportunity/);
+  assert.match(startRoute, /RFXCHANGE_ACQUISITION_COOKIE_NAME/);
+  assert.match(startRoute, /signin\?returnTo=/);
+  assert.match(acquisitionService, /async issueValidatedOpportunity/);
 });
 
 test("DSC-004 has no fixed discovery horizon, handles legacy projections, and exposes structured filters", async () => {
@@ -206,7 +216,7 @@ test("DSC-005 exact replay precedes version conflict and capability IDs use the 
   assert.match(runtime, /Wave4GapOpportunityDiscoveryService/);
 });
 
-test("DSC-006 has durable, authority-revalidated discovery evaluation and alert delivery", async () => {
+test("DSC-006 has durable, resumable, authority-revalidated discovery evaluation and alert delivery", async () => {
   const [api, reliability, evaluationWorker, alertWorker, canonicalDiscoveryRepository, functionsIndex] = await Promise.all([
     read("app/api/rfx/route.ts"),
     read("src/infrastructure/rfx/opportunity-discovery-reliability.ts"),
@@ -230,6 +240,19 @@ test("DSC-006 has durable, authority-revalidated discovery evaluation and alert 
   assert.match(evaluationWorker, /opportunity_summary:\s*nextSummary/);
   assert.match(evaluationWorker, /class SavedSearchAuthorityChangedError/);
   assert.match(evaluationWorker, /error instanceof SavedSearchAuthorityChangedError\) continue/);
+  assert.match(evaluationWorker, /savedSearchCursorId/);
+  assert.match(evaluationWorker, /async function checkpointEvaluation/);
+  assert.match(evaluationWorker, /query = query\.startAfter\(cursorId\)/);
+  assert.match(
+    evaluationWorker,
+    /await checkpointEvaluation\(db, evaluationId, claimId, nextCursorId\)/,
+    "Every fully processed saved-search page must persist its continuation cursor before the worker advances.",
+  );
+  assert.match(
+    evaluationWorker,
+    /leaseUntil: Timestamp\.fromMillis\(now\.toMillis\(\) \+ 5 \* 60_000\)/,
+    "Checkpointing must renew the evaluation lease while exhaustive work continues.",
+  );
   assert.match(canonicalDiscoveryRepository, /nextUniqueReferences/);
   assert.match(canonicalDiscoveryRepository, /nextUniqueReferences\.length && nextSummary/);
   assert.match(canonicalDiscoveryRepository, /opportunity_summary:\s*opportunitySummary/);
@@ -241,6 +264,11 @@ test("DSC-006 has durable, authority-revalidated discovery evaluation and alert 
   assert.match(alertWorker, /accessRestrictions/);
   assert.match(alertWorker, /orderBy\(FieldPath\.documentId\(\)\)/);
   assert.doesNotMatch(alertWorker, /where\("status", "==", "queued"\)\.limit\(25\)/);
+  assert.match(
+    alertWorker,
+    /secrets:\s*\["RFXCHANGE_MICROSOFT_CLIENT_SECRET"\]/,
+    "The deployed opportunity-alert scheduler must bind the managed Microsoft client secret.",
+  );
   assert.match(functionsIndex, /scheduledOpportunityDiscoveryEvaluation/);
   assert.match(functionsIndex, /scheduledOpportunityAlertDelivery/);
 });
