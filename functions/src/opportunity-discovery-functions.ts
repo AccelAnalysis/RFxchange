@@ -22,7 +22,7 @@ import {
   functionsRuntimeContextFromEnvironment,
   RFXCHANGE_FUNCTIONS_REGION,
 } from "./runtime/environment.js";
-import { getFunctionsFirestore } from "./runtime/firebase-admin.js";
+import { getFunctionsAuth, getFunctionsFirestore } from "./runtime/firebase-admin.js";
 import { FirestoreBackgroundJobStore } from "./runtime/firestore-background-job-store.js";
 import { FirestoreTransactionalEmailDeliveryAuditStore } from "./runtime/firestore-transactional-email-delivery-audit-store.js";
 
@@ -111,6 +111,16 @@ interface Projection {
     title: string;
     timing: Readonly<{ responseDeadline: string | null }>;
     localities: readonly Readonly<{ id: string; label: string }>[];
+  }>;
+}
+
+interface ParticipantUser {
+  readonly id?: string;
+  readonly name?: string;
+  readonly primaryEmail?: string;
+  readonly login?: Readonly<{
+    readonly provider?: string;
+    readonly subject?: string;
   }>;
 }
 
@@ -383,7 +393,11 @@ async function claimAlert(
   db: Firestore,
   id: string,
   now: Timestamp,
-): Promise<Readonly<{ intent: OpportunityAlertIntent; claimId: string }> | null> {
+): Promise<Readonly<{
+  intent: OpportunityAlertIntent;
+  claimId: string;
+  providerSubject: string;
+}> | null> {
   const ref = db.collection(ALERTS).doc(id);
   const claimId = randomUUID();
   return db.runTransaction(async (transaction) => {
@@ -416,9 +430,10 @@ async function claimAlert(
     const membership = membershipSnapshot.data() as
       | { userId?: string; organizationId?: string; status?: string }
       | undefined;
-    const user = userSnapshot.data() as
-      | { id?: string; name?: string; primaryEmail?: string }
-      | undefined;
+    const user = userSnapshot.data() as ParticipantUser | undefined;
+    const providerSubject = user?.login?.provider === "firebase"
+      ? user.login.subject?.trim() ?? ""
+      : "";
     const searches = searchSnapshots
       .map((item) => item.data() as SavedSearch | undefined)
       .filter((item): item is SavedSearch => Boolean(item));
@@ -467,6 +482,7 @@ async function claimAlert(
       user.id === intent.userId &&
       user.name?.trim() &&
       user.primaryEmail?.trim() &&
+      providerSubject &&
       user.primaryEmail.trim() === intent.request.recipient.email.trim() &&
       (intent.request.recipient.displayName === null ||
         user.name.trim() === intent.request.recipient.displayName.trim()) &&
@@ -516,7 +532,55 @@ async function claimAlert(
       attemptCount: (intent.attemptCount ?? 0) + 1,
       updatedAt: FieldValue.serverTimestamp(),
     });
-    return Object.freeze({ intent, claimId });
+    return Object.freeze({ intent, claimId, providerSubject });
+  });
+}
+
+function firebaseErrorCode(error: unknown): string | null {
+  if (!error || typeof error !== "object" || !("code" in error)) return null;
+  const code = (error as { code?: unknown }).code;
+  return typeof code === "string" ? code : null;
+}
+
+async function providerAccountAuthoritative(
+  providerSubject: string,
+  request: TransactionalEmailRequest,
+): Promise<boolean> {
+  try {
+    const account = await getFunctionsAuth().getUser(providerSubject);
+    return Boolean(
+      !account.disabled &&
+      account.emailVerified &&
+      account.email?.trim() &&
+      account.email.trim().toLowerCase() === request.recipient.email.trim().toLowerCase()
+    );
+  } catch (error) {
+    if (firebaseErrorCode(error) === "auth/user-not-found") return false;
+    throw error;
+  }
+}
+
+async function suppressClaimedAlert(
+  db: Firestore,
+  id: string,
+  claimId: string,
+  reason: string,
+): Promise<void> {
+  const ref = db.collection(ALERTS).doc(id);
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists) return;
+    const current = snapshot.data() as OpportunityAlertIntent;
+    if (current.deliveryClaimId !== claimId) return;
+    transaction.set(ref, {
+      ...current,
+      status: "suppressed",
+      suppressionReason: reason,
+      deliveryClaimId: null,
+      deliveryLeaseUntil: null,
+      nextAttemptAt: null,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
   });
 }
 
@@ -577,6 +641,10 @@ async function processAlert(db: Firestore, id: string): Promise<boolean> {
   const claimed = await claimAlert(db, id, now);
   if (!claimed) return false;
   const request = claimed.intent.request;
+  if (!await providerAccountAuthoritative(claimed.providerSubject, request)) {
+    await suppressClaimedAlert(db, id, claimed.claimId, "provider-account-changed");
+    return true;
+  }
   const payloadFingerprint = backgroundJobPayloadFingerprint(request);
   const jobRequest = createBackgroundJobRequest({
     jobName: "communications.transactional-email.opportunity-alert",
