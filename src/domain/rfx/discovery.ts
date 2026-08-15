@@ -198,13 +198,33 @@ export function opportunityDeadline(projection: ResponderOpportunityProjection):
   return projection.payload.timing.responseDeadline ?? "";
 }
 
+// Pinned AMACS 0.5.0 request-family compatibility for projections created before
+// requestFamilyIndexKey was persisted. This map mirrors the immutable 0.5.0 request-family
+// registry so old label-only projections compare against the same canonical IDs as new records.
+const LEGACY_REQUEST_FAMILY_LABEL_TO_CANONICAL_KEY = Object.freeze({
+  "request for information": "amacs-req-000001",
+  "sources sought or capability request": "amacs-req-000002",
+  "request for quotation": "amacs-req-000003",
+  "request for proposals": "amacs-req-000004",
+  "invitation for bids or tenders": "amacs-req-000005",
+  "request for qualifications or statement of qualifications": "amacs-req-000006",
+  "supplier or subcontractor request": "amacs-req-000007",
+  "teaming or partner request": "amacs-req-000008",
+  "product or service request": "amacs-req-000009",
+  "site selection or location project rfi": "amacs-req-000010",
+} as const);
+
 export function requestFamilyIndexKeyForProjection(projection: ResponderOpportunityProjection): string {
   const indexed = typeof projection.requestFamilyIndexKey === "string"
     ? projection.requestFamilyIndexKey.trim()
     : "";
-  return (indexed || projection.payload.requestFamilyLabel || "")
+  if (indexed) return indexed.toLocaleLowerCase("en-US");
+  const legacyLabel = (projection.payload.requestFamilyLabel || "")
     .trim()
     .toLocaleLowerCase("en-US");
+  return LEGACY_REQUEST_FAMILY_LABEL_TO_CANONICAL_KEY[
+    legacyLabel as keyof typeof LEGACY_REQUEST_FAMILY_LABEL_TO_CANONICAL_KEY
+  ] ?? legacyLabel;
 }
 
 function terms(value: string): readonly string[] {
