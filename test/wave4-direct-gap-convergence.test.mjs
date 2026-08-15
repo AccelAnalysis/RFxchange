@@ -23,8 +23,9 @@ test("remaining Wave 4 corrections do not re-gate the map-first Exchange", async
 });
 
 test("ISS-007 and ISS-011 preserve the correct draft and support lossless structured/partial definition authoring", async () => {
-  const [workspace, qualifierEditor, service, repository, baseRepository, dictionary, ...qualifierCatalogText] = await Promise.all([
+  const [workspace, definitionBuilder, qualifierEditor, service, repository, baseRepository, dictionary, ...qualifierCatalogText] = await Promise.all([
     read("src/components/rfx/RFxDraftWorkspace.tsx"),
+    read("src/components/rfx/RFxDefinitionBuilder.tsx"),
     read("src/components/rfx/RFxStructuredQualifierEditor.tsx"),
     read("src/application/rfx/wave4-gap-governed-draft-service.ts"),
     read("src/infrastructure/rfx/iss006-governed-rfx-repository.ts"),
@@ -35,8 +36,24 @@ test("ISS-007 and ISS-011 preserve the correct draft and support lossless struct
   ]);
   assert.match(
     workspace,
-    /<RFxDefinitionBuilder[\s\S]{0,220}key=\{`\$\{selectedDraft\.id\}:\$\{selectedDraft\.version\}:definition`\}/,
-    "The main definition editor must remount from the committed aggregate whenever the RFx version changes.",
+    /<RFxDefinitionBuilder[\s\S]{0,220}key=\{`\$\{selectedDraft\.id\}:definition`\}/,
+    "The main definition editor must reset by RFx draft identity without remounting on same-draft version refreshes.",
+  );
+  assert.doesNotMatch(
+    workspace,
+    /key=\{`\$\{selectedDraft\.id\}:\$\{selectedDraft\.version\}:definition`\}/,
+    "A committed same-draft version refresh must not discard dirty or in-flight definition edits.",
+  );
+  assert.match(definitionBuilder, /const synchronizedAggregate = useRef\(\{/);
+  assert.match(
+    definitionBuilder,
+    /if \(dirty \|\| saving \|\| saveInFlight\.current\) return;/,
+    "Authoritative aggregate refreshes must wait until no local definition edit or save is active.",
+  );
+  assert.match(
+    definitionBuilder,
+    /synchronizedAggregate\.current = \{[\s\S]{0,160}setForm\(initialForm\(aggregate\)\)/,
+    "A clean editor must refresh from the latest authoritative aggregate without a component remount.",
   );
   assert.match(qualifierEditor, /qualifierKind/);
   for (const kind of ["text", "quantity", "boolean", "geography"])
