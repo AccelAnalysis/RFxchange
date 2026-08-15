@@ -352,8 +352,10 @@ async function saveMatch(
       ) {
         throw new Error("Opportunity alert identity collision.");
       }
+      const existingReferences = (existing.opportunityReferences as string[] | undefined) ?? [];
+      const referenceAlreadyPresent = existingReferences.includes(currentProjection.reference);
       const references = [...new Set([
-        ...((existing.opportunityReferences as string[] | undefined) ?? []),
+        ...existingReferences,
         currentProjection.reference,
       ])];
       const matchIds = [...new Set([
@@ -365,6 +367,9 @@ async function saveMatch(
         currentSearch.id,
       ])];
       const existingSummary = String(existingRequest?.variables?.opportunity_summary ?? "");
+      const nextSummary = referenceAlreadyPresent
+        ? existingSummary
+        : `${existingSummary}\n${opportunitySummary(currentProjection)}`.trim().slice(0, 1800);
       transaction.set(alertRef, {
         ...existing,
         userId: currentSearch.userId,
@@ -377,9 +382,7 @@ async function saveMatch(
           variables: {
             ...request.variables,
             opportunity_count: references.length,
-            opportunity_summary: `${existingSummary}\n${opportunitySummary(currentProjection)}`
-              .trim()
-              .slice(0, 1800),
+            opportunity_summary: nextSummary,
           },
         },
         updatedAt: now,
