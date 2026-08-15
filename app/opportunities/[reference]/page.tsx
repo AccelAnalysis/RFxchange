@@ -4,7 +4,6 @@ import { notFound, redirect } from "next/navigation";
 
 import { MarketingFooter, MarketingHeader } from "@/src/components/marketing/MarketingChrome";
 import { PublicOpportunityView } from "@/src/components/rfx/PublicOpportunityView";
-import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
@@ -57,28 +56,28 @@ export default async function PublicOpportunityPage({ params }: PublicOpportunit
   const publicOpportunity = await resolvePublicOpportunityProjection(reference);
   if (publicOpportunity) return opportunityView(publicOpportunity);
 
-  const audience = await resolveOpportunityPublicationAudience(reference);
-  if (audience !== "authenticated-participants") notFound();
-
   const cookieStore = await cookies();
   const access = await resolveParticipantRoute({
     sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
   });
 
-  if (access.kind === "unauthenticated") {
-    redirect(`/api/acquisition/start?opportunityReference=${encodeURIComponent(reference)}`);
-  }
-  if (access.kind === "access-resolution-required") {
-    redirect(participantEntryDestination(access));
-  }
-  if (access.kind === "activation-required" || access.kind === "wrong-organization") {
-    // Issue and bind the non-authorizing acquisition context before sending an
-    // incomplete authenticated participant to their canonical server-derived setup path.
+  // A non-public reference is opaque until current participant authorization exists. The
+  // acquisition handler preserves the syntactic reference as non-authorizing navigation metadata
+  // and deliberately gives valid-looking missing/private references the same pre-auth response.
+  if (
+    access.kind === "unauthenticated" ||
+    access.kind === "access-resolution-required" ||
+    access.kind === "activation-required" ||
+    access.kind === "wrong-organization"
+  ) {
     redirect(`/api/acquisition/start?opportunityReference=${encodeURIComponent(reference)}`);
   }
   if (access.kind === "restricted") {
     redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   }
+
+  const audience = await resolveOpportunityPublicationAudience(reference);
+  if (audience !== "authenticated-participants") notFound();
 
   // Current unrestricted participant authority is sufficient for an
   // authenticated-participants projection. OPEN/first-value lifecycle state is
