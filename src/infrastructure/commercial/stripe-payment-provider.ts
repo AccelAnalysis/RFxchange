@@ -19,12 +19,20 @@ export const RFXCHANGE_FOUNDING_PRICE_CENTS = 4_900;
 export const RFXCHANGE_FOUNDING_CURRENCY = "usd";
 export const RFXCHANGE_FOUNDING_INTERVAL = "month";
 export const RFXCHANGE_FOUNDING_CAP = 250;
+export const RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS = 45 * 60 * 1000;
 const PROVIDER_KEY = paymentProviderKey("stripe");
 
 type StripeMode = "live" | "test";
 interface StripeRuntimeConfiguration { readonly mode: StripeMode; readonly secretKey: string; readonly priceId: string; }
 interface StripeCustomer { readonly id: string; readonly deleted?: boolean; readonly metadata?: Readonly<Record<string, string>>; }
-interface StripeCheckoutSession { readonly id: string; readonly url: string | null; readonly customer: string | null; }
+interface StripeCheckoutSession {
+  readonly id: string;
+  readonly url: string | null;
+  readonly customer: string | null;
+  readonly status?: string | null;
+  readonly subscription?: string | null;
+  readonly metadata?: Readonly<Record<string, string>>;
+}
 interface StripePortalSession { readonly id: string; readonly url: string; }
 interface StripeSubscriptionItem { readonly quantity?: number | null; readonly price?: Readonly<{ readonly id?: string | null }> | null; }
 interface StripeSubscription {
@@ -33,7 +41,7 @@ interface StripeSubscription {
   readonly metadata?: Readonly<Record<string, string>>;
   readonly items?: Readonly<{ readonly data?: readonly StripeSubscriptionItem[] }>;
 }
-interface StripeList<T> { readonly data: readonly T[]; }
+interface StripeList<T> { readonly data: readonly T[]; readonly has_more?: boolean; }
 
 /**
  * The Checkout POST may have reached Stripe even when RFxchange cannot observe its result.
@@ -140,10 +148,11 @@ function subscriptionItems(subscription: StripeSubscription): readonly StripeSub
   return subscription.items?.data ?? [];
 }
 
-async function assertNoProviderSubscription(customerReference: string, organizationId: string): Promise<void> {
+async function hasCorrelatedNonTerminalFoundingSubscription(customerReference: string, organizationId: string): Promise<boolean> {
   const query = new URLSearchParams({ customer: customerReference, status: "all", limit: "100" });
   const subscriptions = await stripeRequest<StripeList<StripeSubscription>>(`/subscriptions?${query.toString()}`);
   const config = configuration();
+  let correlatedCount = 0;
 
   for (const subscription of subscriptions.data) {
     if (["canceled", "incomplete_expired"].includes(subscription.status)) continue;
@@ -155,13 +164,88 @@ async function assertNoProviderSubscription(customerReference: string, organizat
       if (items.length !== 1 || items[0]?.price?.id !== config.priceId || Number(items[0]?.quantity) !== 1) {
         throw new Error("Existing correlated Founding subscription does not match the approved Price and quantity; checkout fails closed.");
       }
-      throw new Error("This organization already has a non-terminal Founding subscription at the payment provider.");
+      correlatedCount += 1;
+      continue;
     }
 
     if (usesApprovedFoundingPrice) {
       throw new Error("A non-terminal subscription uses the approved Founding Price without exact organization correlation; checkout fails closed.");
     }
   }
+
+  if (correlatedCount > 1) throw new Error("Multiple non-terminal Founding subscriptions exist for one RFxchange organization; checkout fails closed.");
+  return correlatedCount === 1;
+}
+
+async function assertNoProviderSubscription(customerReference: string, organizationId: string): Promise<void> {
+  if (await hasCorrelatedNonTerminalFoundingSubscription(customerReference, organizationId)) {
+    throw new Error("This organization already has a non-terminal Founding subscription at the payment provider.");
+  }
+}
+
+export async function inspectAmbiguousFoundingReservation(input: Readonly<{
+  customerId: string;
+  organizationId: string;
+  reservationId: string;
+  reservedAt: string;
+  now?: string;
+}>): Promise<Readonly<{
+  eligibleForReconciliation: boolean;
+  reclaimable: boolean;
+  hasNonTerminalSubscription: boolean;
+  matchingCheckoutStatus: string | null;
+}>> {
+  const customerId = required(input.customerId, "Stripe Customer id");
+  const organizationId = required(input.organizationId, "RFxchange organization id");
+  const reservationId = required(input.reservationId, "Founding reservation id");
+  const reservedAt = Date.parse(required(input.reservedAt, "Founding reservation timestamp"));
+  const now = input.now ? Date.parse(required(input.now, "Reconciliation time")) : Date.now();
+  if (!Number.isFinite(reservedAt) || !Number.isFinite(now)) throw new Error("Founding reservation reconciliation timestamp is invalid.");
+  if (now - reservedAt < RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS) {
+    return Object.freeze({ eligibleForReconciliation: false, reclaimable: false, hasNonTerminalSubscription: false, matchingCheckoutStatus: null });
+  }
+
+  const hasNonTerminalSubscription = await hasCorrelatedNonTerminalFoundingSubscription(customerId, organizationId);
+  if (hasNonTerminalSubscription) {
+    return Object.freeze({ eligibleForReconciliation: true, reclaimable: false, hasNonTerminalSubscription: true, matchingCheckoutStatus: null });
+  }
+
+  const exactSessions: StripeCheckoutSession[] = [];
+  let startingAfter: string | null = null;
+  do {
+    const params = new URLSearchParams({
+      customer: customerId,
+      "created[gte]": String(Math.max(0, Math.floor(reservedAt / 1000) - 60)),
+      limit: "100",
+    });
+    if (startingAfter) params.set("starting_after", startingAfter);
+    const page = await stripeRequest<StripeList<StripeCheckoutSession>>(`/checkout/sessions?${params.toString()}`);
+    for (const session of page.data) {
+      if (
+        session.customer === customerId &&
+        session.metadata?.organizationId === organizationId &&
+        session.metadata?.rfxchangePlan === "founding" &&
+        session.metadata?.rfxchangeReservationId === reservationId
+      ) exactSessions.push(session);
+    }
+    if (!page.has_more) break;
+    const last = page.data.at(-1);
+    if (!last?.id) throw new Error("Stripe Checkout pagination is malformed.");
+    startingAfter = last.id;
+  } while (true);
+
+  if (exactSessions.length > 1) throw new Error("Multiple Stripe Checkout Sessions are correlated to one Founding reservation; reconciliation fails closed.");
+  const exact = exactSessions[0] ?? null;
+  if (!exact) {
+    return Object.freeze({ eligibleForReconciliation: true, reclaimable: true, hasNonTerminalSubscription: false, matchingCheckoutStatus: null });
+  }
+  const status = exact.status ?? null;
+  return Object.freeze({
+    eligibleForReconciliation: true,
+    reclaimable: status === "expired",
+    hasNonTerminalSubscription: false,
+    matchingCheckoutStatus: status,
+  });
 }
 
 export class StripePaymentProvider implements PaymentProvider {
