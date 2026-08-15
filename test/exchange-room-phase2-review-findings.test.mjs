@@ -21,6 +21,19 @@ test("shared controller hydrates authorization fail-closed and requires discover
   assert.ok(source.includes('form[action="/geography/canvas"]'));
 });
 
+test("fresh server authorization revokes every open-platform action and Resource handlers match route authority", () => {
+  const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
+  const registry = read("src/application/participant/exchange-room-actions.ts");
+  const openPlatformGuard = controller.indexOf("if (!authorization.openPlatform) return false;");
+  const rfxPermission = controller.indexOf('action.authorization === "open-platform-rfx-create"');
+  const referralPermission = controller.indexOf('action.authorization === "open-platform-referral-manage"');
+  assert.ok(openPlatformGuard >= 0 && rfxPermission > openPlatformGuard && referralPermission > openPlatformGuard);
+  assert.match(controller, /resources\.find-providers" \|\| action\.id === "resources\.browse-resources/);
+  assert.match(controller, /return authorization\.referralManage \? null : false/);
+  assert.match(registry, /id: "resources\.find-providers"[^\n]*authorization: "open-platform-referral-manage"/);
+  assert.match(registry, /id: "resources\.browse-resources"[^\n]*authorization: "open-platform-referral-manage"/);
+});
+
 test("closing organization detail cannot remove the shared four-action architecture", () => {
   const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
   const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
