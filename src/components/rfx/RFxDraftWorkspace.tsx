@@ -324,6 +324,7 @@ export function RFxDraftWorkspace({
                       }
                     /> : null}
                     {selectedDraft.lifecycleState === "draft" ? <RFxDefinitionBuilder
+                      key={selectedDraft.id}
                       aggregate={selectedDraft}
                       catalog={definitionCatalog}
                       organizationId={organizationId}
