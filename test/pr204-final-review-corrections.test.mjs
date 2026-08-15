@@ -50,20 +50,49 @@ test("structured qualifier input survives unrelated same-draft version refreshes
   );
 });
 
-test("a stale partial definition save cannot remove a concurrently committed first text qualifier", async () => {
-  const service = await read("src/application/rfx/wave4-gap-governed-draft-service.ts");
+test("text qualifier saves distinguish preservation, replacement, and explicit removal", async () => {
+  const [builder, service] = await Promise.all([
+    read("src/components/rfx/RFxDefinitionBuilder.tsx"),
+    read("src/application/rfx/wave4-gap-governed-draft-service.ts"),
+  ]);
 
-  assert.match(service, /const firstExistingText = firstExistingTextIndex >= 0/);
+  assert.match(builder, /qualifierBase: string/);
+  assert.match(builder, /qualifierDirty: boolean/);
+  assert.match(
+    builder,
+    /textQualifierIntent: item\.qualifierDirty[\s\S]{0,120}\? "set"[\s\S]{0,60}: "remove"[\s\S]{0,60}: "preserve"/,
+    "The editor must send explicit preserve, set, or remove intent rather than overloading an empty array.",
+  );
+  assert.match(builder, /textQualifierBaseValue: item\.qualifierBase/);
+  assert.match(
+    builder,
+    /qualifier: event\.target\.value,[\s\S]{0,60}qualifierDirty: true/,
+    "Only an explicit participant edit may authorize replacement or removal of a text qualifier.",
+  );
+  assert.match(
+    builder,
+    /requirement\.qualifierDirty[\s\S]{0,180}qualifierBase: authoritative\.qualifier[\s\S]{0,180}qualifier: authoritative\.qualifier/,
+    "A dirty form must absorb the latest authoritative qualifier baseline without discarding unrelated local edits.",
+  );
+
+  assert.match(service, /type TextQualifierIntent = "preserve" \| "set" \| "remove"/);
+  assert.match(service, /function textQualifierIntent/);
   assert.match(
     service,
-    /const effectiveIncoming = incoming\.length === 0 && firstExistingText[\s\S]{0,100}\? \[firstExistingText\][\s\S]{0,40}: incoming/,
-    "An empty partial text-qualifier payload must retain the current committed first text qualifier.",
+    /if \(intent !== "preserve" && currentValue !== baseValue\)[\s\S]{0,180}The text qualifier changed before this definition save/,
+    "Replacement and removal must conflict when the committed qualifier changed after the editor baseline.",
   );
   assert.match(
     service,
-    /qualifiers: Object\.freeze\(\[\.\.\.effectiveIncoming, \.\.\.preserved\]\)/,
-    "Lossless qualifier merging must combine the effective text state with every other structured qualifier.",
+    /intent === "preserve"[\s\S]{0,100}\[firstExistingText\][\s\S]{0,120}intent === "set"[\s\S]{0,80}\[incomingText\][\s\S]{0,60}: \[\]/,
+    "Preserve must retain the committed text, set must use the submitted text, and remove must emit no text qualifier.",
   );
+  assert.match(
+    service,
+    /qualifiers: Object\.freeze\(\[\.\.\.effectiveText, \.\.\.preserved\]\)/,
+    "Every non-first structured qualifier must survive all text-qualifier intents.",
+  );
+  assert.match(service, /const \{[\s\S]{0,120}textQualifierIntent: rawIntent,[\s\S]{0,120}textQualifierBaseValue: rawBaseValue,[\s\S]{0,120}\.\.\.canonicalRequirement/);
 });
 
 test("durable discovery evaluation checks Firebase provider authority before creating a match", async () => {
@@ -84,5 +113,27 @@ test("durable discovery evaluation checks Firebase provider authority before cre
     worker,
     /user\.id !== search\.userId \|\|[\s\S]{0,80}!providerAccountValid/,
     "Provider authority must be part of the fail-closed match authorization decision.",
+  );
+});
+
+test("synchronous publication discovery also validates Firebase provider authority before saving a match", async () => {
+  const repository = await read("src/infrastructure/rfx/wave4-gap-opportunity-discovery-repository.ts");
+  const providerCheck = repository.indexOf("await this.providerAccountAuthoritative(search)");
+  const baseSave = repository.indexOf("return super.saveMatch(bundle)");
+
+  assert.match(repository, /getServerFirebaseAuth/);
+  assert.match(repository, /private async providerAccountAuthoritative/);
+  assert.match(repository, /override async saveMatch\(bundle: OpportunityMatchBundle\)/);
+  assert.match(repository, /!account\.disabled/);
+  assert.match(repository, /account\.emailVerified/);
+  assert.match(repository, /auth\/user-not-found/);
+  assert.ok(
+    providerCheck >= 0 && baseSave > providerCheck,
+    "The synchronous publication path must fail closed before delegating the match write.",
+  );
+  assert.match(
+    repository,
+    /search\.membershipId !== bundle\.match\.membershipId \|\|[\s\S]{0,80}!\(await this\.providerAccountAuthoritative\(search\)\)/,
+    "The validated account must belong to the exact saved-search match tuple.",
   );
 });
