@@ -314,6 +314,7 @@ export class StripePaymentProvider implements PaymentProvider {
         "metadata[rfxchangeReservationId]": checkoutCorrelationId,
         "subscription_data[metadata][organizationId]": organizationId,
         "subscription_data[metadata][rfxchangePlan]": "founding",
+        "subscription_data[metadata][rfxchangeReservationId]": checkoutCorrelationId,
       }),
     });
     if (!checkout.url) throw new StripeCheckoutOutcomeUnknownError("Stripe created a Checkout Session without a usable redirect URL.");
