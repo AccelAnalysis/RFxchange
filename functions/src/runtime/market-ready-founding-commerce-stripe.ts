@@ -195,13 +195,31 @@ export async function providerHasNonTerminalFoundingSubscription(input: Readonly
   const organizationId = required(input.organizationId, "RFxchange organization id");
   const expectedPriceId = required(input.expectedPriceId, "Expected Founding Price id");
   const subscriptions = await listAllCustomerSubscriptions(input.secretKey, customerId);
-  const exact = subscriptions
-    .filter((value) => belongsToFoundingOrganization(value, organizationId))
-    .map((value) => subscriptionSnapshot(value, expectedPriceId))
-    .filter((snapshot) => snapshot.customerId === customerId);
-  const nonTerminal = exact.filter((snapshot) => subscriptionRetainsCapacity(snapshot.status));
-  if (nonTerminal.length > 1) throw new Error("Multiple non-terminal Founding subscriptions exist for one RFxchange organization.");
-  return nonTerminal.length === 1;
+  let correlatedCount = 0;
+
+  for (const subscription of subscriptions) {
+    const status = providerStatus(subscription.status);
+    if (!subscriptionRetainsCapacity(status)) continue;
+    const items = subscription.items?.data ?? [];
+    const usesApprovedFoundingPrice = items.some((item) => item.price?.id === expectedPriceId);
+    const correlated = belongsToFoundingOrganization(subscription, organizationId);
+
+    if (correlated) {
+      const snapshot = subscriptionSnapshot(subscription, expectedPriceId);
+      if (snapshot.customerId !== customerId) {
+        throw new Error("Correlated Founding subscription Customer does not match the inspected Stripe Customer.");
+      }
+      correlatedCount += 1;
+      continue;
+    }
+
+    if (usesApprovedFoundingPrice) {
+      throw new Error("A non-terminal subscription uses the approved Founding Price without exact organization correlation; provider inspection fails closed.");
+    }
+  }
+
+  if (correlatedCount > 1) throw new Error("Multiple non-terminal Founding subscriptions exist for one RFxchange organization.");
+  return correlatedCount === 1;
 }
 
 export function stripeObjectReference(object: Readonly<Record<string, unknown>>, field: string): string | null {
