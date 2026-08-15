@@ -9,6 +9,8 @@ const statusRoute = await readFile(new URL("../app/api/commercial/founding/statu
 const runtime = await readFile(new URL("../src/infrastructure/commercial/founding-runtime.ts", import.meta.url), "utf8");
 const provider = await readFile(new URL("../src/infrastructure/commercial/stripe-payment-provider.ts", import.meta.url), "utf8");
 const component = await readFile(new URL("../src/components/commercial/FoundingMembershipCard.tsx", import.meta.url), "utf8");
+const foundingContinuation = await readFile(new URL("../src/components/acquisition/FoundingAcquisitionContinuation.tsx", import.meta.url), "utf8");
+const publicFoundingPage = await readFile(new URL("../app/founding/page.tsx", import.meta.url), "utf8");
 const functionsWebhook = await readFile(new URL("../functions/src/market-ready-founding-commerce-functions.ts", import.meta.url), "utf8");
 const functionsStripe = await readFile(new URL("../functions/src/runtime/market-ready-founding-commerce-stripe.ts", import.meta.url), "utf8");
 const functionsReconcile = await readFile(new URL("../functions/src/application/market-ready-founding-commerce-reconcile.ts", import.meta.url), "utf8");
@@ -42,6 +44,12 @@ test("browser cannot supply commercial authority or payment terms", () => {
   assert.ok(provider.includes('String(request.planKey) !== "founding"'), "Stripe provider must reject any non-Founding plan");
   assert.ok(provider.includes('"line_items[0][price]": config.priceId'), "Stripe provider must use the server-configured approved Price");
   assert.ok(provider.includes('"line_items[0][quantity]": 1'), "Stripe provider must bind quantity to one subscription");
+});
+
+test("post-value Founding continuation reaches commerce while public acquisition remains acquisition-oriented", () => {
+  assert.match(foundingContinuation, /<Link href="\/commercial\/founding">/);
+  assert.match(publicFoundingPage, /const foundingActivationHref = "\/acquisition\/founding"/);
+  assert.equal(publicFoundingPage.includes('const foundingActivationHref = "/commercial/founding"'), false);
 });
 
 test("definitive pre-session failure releases only an unattached reservation while ambiguous Checkout retains it", () => {
