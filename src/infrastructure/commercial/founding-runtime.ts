@@ -138,7 +138,7 @@ async function reconcileAmbiguousFoundingReservations(db: Firestore, currentOrga
 
   const repository = new FirestoreOrganizationCommercialAccountRepository(db);
   for (const reservation of candidates) {
-    const account = await repository.getByOrganizationId(reservation.organizationId);
+    const account = await repository.getByOrganizationId(reservation.organizationId as OrganizationAccount["id"]);
     if (!account) continue;
     const customerId = stripeCustomerId(account);
     if (!customerId) {
