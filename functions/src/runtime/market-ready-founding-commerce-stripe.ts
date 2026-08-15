@@ -37,6 +37,12 @@ function required(value: unknown, label: string): string {
   return value.trim();
 }
 
+function optionalString(value: unknown, label: string): string | null {
+  if (value == null) return null;
+  if (typeof value !== "string" || !value.trim()) throw new Error(`${label} is malformed.`);
+  return value.trim();
+}
+
 function safeEqualHex(left: string, right: string): boolean {
   if (!/^[a-f0-9]+$/i.test(left) || !/^[a-f0-9]+$/i.test(right) || left.length !== right.length) return false;
   const a = Buffer.from(left, "hex");
@@ -145,6 +151,7 @@ function subscriptionSnapshot(value: StripeSubscription, expectedPriceIdValue: s
     quantity,
     currentPeriodEndsAt,
     cancelAtPeriodEnd: value.cancel_at_period_end === true,
+    checkoutReservationId: optionalString(value.metadata?.rfxchangeReservationId, "Stripe subscription reservation metadata"),
   });
   assertFoundingSubscriptionCorrelation({ snapshot, organizationId, customerId, expectedPriceId });
   return snapshot;
