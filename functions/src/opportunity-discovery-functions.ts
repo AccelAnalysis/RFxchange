@@ -1,5 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { FieldValue, Timestamp, type Firestore } from "firebase-admin/firestore";
+import {
+  FieldPath,
+  FieldValue,
+  Timestamp,
+  type Firestore,
+} from "firebase-admin/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
 import {
@@ -22,9 +27,17 @@ import { FirestoreBackgroundJobStore } from "./runtime/firestore-background-job-
 import { FirestoreTransactionalEmailDeliveryAuditStore } from "./runtime/firestore-transactional-email-delivery-audit-store.js";
 
 const ALERTS = "opportunityAlertIntents";
+const SEARCHES = "opportunitySavedSearches";
+const PROJECTIONS = "rfxOpportunityProjections";
+const MEMBERSHIPS = "organizationMemberships";
+const RESTRICTIONS = "accessRestrictions";
+const USERS = "users";
+const GEOGRAPHIES = "geographies";
 const PROVIDER_KEY = "microsoft-graph";
 const ALERT_EVENT = "rfx.opportunity-alert";
 const ALERT_TEMPLATE = "rfx-opportunity-alert";
+const PAGE_SIZE = 200;
+const WORK_BATCH = 25;
 
 interface TransactionalEmailRequest {
   readonly id: string;
@@ -49,6 +62,11 @@ interface TransactionalEmailRequest {
 
 interface OpportunityAlertIntent {
   readonly id: string;
+  readonly organizationId: string;
+  readonly userId: string;
+  readonly membershipId: string;
+  readonly savedSearchIds: readonly string[];
+  readonly opportunityReferences: readonly string[];
   readonly deliveryMode: "immediate" | "daily-digest";
   readonly windowKey: string;
   readonly request: TransactionalEmailRequest;
@@ -57,6 +75,26 @@ interface OpportunityAlertIntent {
   readonly deliveryClaimId?: string | null;
   readonly deliveryLeaseUntil?: Timestamp | null;
   readonly nextAttemptAt?: Timestamp | null;
+}
+
+interface SavedSearch {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly userId: string;
+  readonly membershipId: string;
+  readonly status: string;
+}
+
+interface Projection {
+  readonly reference: string;
+  readonly mode: string;
+  readonly audience: string;
+  readonly publishedAt: string | null;
+  readonly payload: Readonly<{
+    title: string;
+    timing: Readonly<{ responseDeadline: string | null }>;
+    localities: readonly Readonly<{ id: string; label: string }>[];
+  }>;
 }
 
 class ProviderFailure extends Error {
@@ -276,6 +314,26 @@ function due(intent: OpportunityAlertIntent, now: Timestamp): boolean {
   return true;
 }
 
+function projectionOpen(projection: Projection, now: Timestamp): boolean {
+  if (
+    projection.mode !== "published" ||
+    !projection.publishedAt ||
+    (projection.audience !== "public" && projection.audience !== "authenticated-participants")
+  ) return false;
+  const deadline = projection.payload.timing.responseDeadline;
+  return Boolean(
+    deadline && Date.parse(`${deadline}T23:59:59.999Z`) > now.toMillis(),
+  );
+}
+
+function projectionSummary(projection: Projection): string {
+  return `${projection.payload.title} — ${projection.payload.timing.responseDeadline ?? ""} — ${projection.payload.localities.map((item) => item.label).join(", ")}`;
+}
+
+function unrestricted(records: readonly FirebaseFirestore.QueryDocumentSnapshot[]): boolean {
+  return records.every((record) => record.get("state") === "none");
+}
+
 async function claimAlert(
   db: Firestore,
   id: string,
@@ -288,6 +346,119 @@ async function claimAlert(
     if (!snapshot.exists) return null;
     const intent = snapshot.data() as OpportunityAlertIntent;
     if (!due(intent, now)) return null;
+
+    const membershipRef = db.collection(MEMBERSHIPS).doc(intent.membershipId);
+    const userRef = db.collection(USERS).doc(intent.userId);
+    const searchRefs = intent.savedSearchIds.map((savedSearchId) =>
+      db.collection(SEARCHES).doc(savedSearchId),
+    );
+    const projectionRefs = intent.opportunityReferences.map((reference) =>
+      db.collection(PROJECTIONS).doc(reference),
+    );
+    if (!searchRefs.length || !projectionRefs.length) {
+      transaction.set(ref, {
+        ...intent,
+        status: "suppressed",
+        suppressionReason: "authority-changed",
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      return null;
+    }
+
+    const records = await transaction.getAll(
+      membershipRef,
+      userRef,
+      ...searchRefs,
+      ...projectionRefs,
+    );
+    const membershipSnapshot = records[0];
+    const userSnapshot = records[1];
+    const searchSnapshots = records.slice(2, 2 + searchRefs.length);
+    const projectionSnapshots = records.slice(2 + searchRefs.length);
+    const membership = membershipSnapshot?.data() as
+      | { userId?: string; organizationId?: string; status?: string }
+      | undefined;
+    const user = userSnapshot?.data() as
+      | { id?: string; name?: string; primaryEmail?: string }
+      | undefined;
+    const searches = searchSnapshots.map((item) => item.data() as SavedSearch | undefined);
+    const projections = projectionSnapshots.map((item) => item.data() as Projection | undefined);
+    const geographyRefs = projections.flatMap((projection) =>
+      projection?.payload.localities.map((locality) =>
+        db.collection(GEOGRAPHIES).doc(locality.id),
+      ) ?? [],
+    );
+    const [organizationRestrictions, membershipRestrictions, ...geographies] = await Promise.all([
+      transaction.get(
+        db.collection(RESTRICTIONS)
+          .where("target.kind", "==", "organization")
+          .where("target.organizationId", "==", intent.organizationId),
+      ),
+      transaction.get(
+        db.collection(RESTRICTIONS)
+          .where("target.kind", "==", "membership")
+          .where("target.membershipId", "==", intent.membershipId),
+      ),
+      ...geographyRefs.map((reference) => transaction.get(reference)),
+    ]);
+
+    const currentSummary = projections
+      .filter((projection): projection is Projection => Boolean(projection))
+      .map(projectionSummary)
+      .join("\n")
+      .slice(0, 1800);
+    const capturedSummary = String(intent.request.variables.opportunity_summary ?? "").trim();
+    const capturedCount = Number(intent.request.variables.opportunity_count ?? 0);
+    const authorityValid = Boolean(
+      membershipSnapshot?.exists &&
+      membership &&
+      membership.userId === intent.userId &&
+      membership.organizationId === intent.organizationId &&
+      membership.status === "active" &&
+      userSnapshot?.exists &&
+      user &&
+      user.id === intent.userId &&
+      user.name?.trim() &&
+      user.primaryEmail?.trim() &&
+      user.primaryEmail.trim() === intent.request.recipient.email.trim() &&
+      (intent.request.recipient.displayName === null ||
+        user.name.trim() === intent.request.recipient.displayName.trim()) &&
+      searchSnapshots.every((item) => item.exists) &&
+      searches.every((search) =>
+        Boolean(
+          search &&
+          search.organizationId === intent.organizationId &&
+          search.userId === intent.userId &&
+          search.membershipId === intent.membershipId &&
+          search.status === "active",
+        )
+      ) &&
+      projectionSnapshots.every((item) => item.exists) &&
+      projections.every((projection) => Boolean(projection && projectionOpen(projection, now))) &&
+      projections.length === intent.opportunityReferences.length &&
+      geographyRefs.length > 0 &&
+      geographies.every((geography) =>
+        geography.exists && geography.get("releaseState") === "released"
+      ) &&
+      unrestricted(organizationRestrictions.docs) &&
+      unrestricted(membershipRestrictions.docs) &&
+      capturedCount === projections.length &&
+      capturedSummary === currentSummary
+    );
+
+    if (!authorityValid) {
+      transaction.set(ref, {
+        ...intent,
+        status: "suppressed",
+        suppressionReason: "authority-changed",
+        deliveryClaimId: null,
+        deliveryLeaseUntil: null,
+        nextAttemptAt: null,
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      return null;
+    }
+
     transaction.set(ref, {
       ...intent,
       deliveryClaimId: claimId,
@@ -350,11 +521,11 @@ async function completeAlert(
   });
 }
 
-async function processAlert(db: Firestore, id: string): Promise<void> {
+async function processAlert(db: Firestore, id: string): Promise<boolean> {
   const runtime = functionsRuntimeContextFromEnvironment();
   const now = Timestamp.now();
   const claimed = await claimAlert(db, id, now);
-  if (!claimed) return;
+  if (!claimed) return false;
   const request = claimed.intent.request;
   const payloadFingerprint = backgroundJobPayloadFingerprint(request);
   const jobRequest = createBackgroundJobRequest({
@@ -370,7 +541,7 @@ async function processAlert(db: Firestore, id: string): Promise<void> {
     retryBackoffSeconds: 60,
     leaseSeconds: 300,
   });
-  const intent = createTransactionalEmailDeliveryIntent({
+  const deliveryIntent = createTransactionalEmailDeliveryIntent({
     messageId: request.id,
     idempotencyKey: request.metadata.idempotencyKey,
     payloadFingerprint,
@@ -391,7 +562,7 @@ async function processAlert(db: Firestore, id: string): Promise<void> {
     requestedAt: request.metadata.requestedAt,
   });
   const result = await executeReliableTransactionalEmailJob({
-    intent,
+    intent: deliveryIntent,
     request: jobRequest,
     runtime,
     backgroundJobStore: new FirestoreBackgroundJobStore(db),
@@ -400,12 +571,14 @@ async function processAlert(db: Firestore, id: string): Promise<void> {
     now: new Date().toISOString(),
   });
   await completeAlert(db, id, claimed.claimId, result);
+  return true;
 }
 
 /**
  * DSC-006 consumes authoritative opportunityAlertIntents through COMMS-003/004/005
- * and INF-007. Immediate alerts run promptly; daily digests remain mergeable until
- * their UTC window closes, then use the same idempotent delivery path.
+ * and INF-007. Due records are selected across deterministic pages before the
+ * worker batch cap is applied, preventing not-yet-due digests or leased retries
+ * from starving later immediate alerts.
  */
 export const scheduledOpportunityAlertDelivery = onSchedule(
   {
@@ -418,9 +591,24 @@ export const scheduledOpportunityAlertDelivery = onSchedule(
   },
   async () => {
     const db = getFunctionsFirestore();
-    const snapshot = await db.collection(ALERTS).where("status", "==", "queued").limit(25).get();
-    for (const document of snapshot.docs) {
-      await processAlert(db, document.id);
+    let cursor: FirebaseFirestore.QueryDocumentSnapshot | null = null;
+    let claimedCount = 0;
+    while (claimedCount < WORK_BATCH) {
+      let query: FirebaseFirestore.Query = db.collection(ALERTS)
+        .where("status", "==", "queued")
+        .orderBy(FieldPath.documentId())
+        .limit(PAGE_SIZE);
+      if (cursor) query = query.startAfter(cursor);
+      const page = await query.get();
+      if (page.empty) break;
+      for (const document of page.docs) {
+        if (await processAlert(db, document.id)) {
+          claimedCount += 1;
+          if (claimedCount >= WORK_BATCH) break;
+        }
+      }
+      cursor = page.docs.at(-1) ?? null;
+      if (page.size < PAGE_SIZE) break;
     }
   },
 );
