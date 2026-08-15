@@ -22,6 +22,7 @@ import styles from "./RFxDraftWorkspace.module.css";
 import { RFxPackageBuilder } from "./RFxPackageBuilder";
 import { RFxDefinitionBuilder } from "./RFxDefinitionBuilder";
 import { RFxPublicationPanel } from "./RFxPublicationPanel";
+import { RFxStructuredQualifierEditor } from "./RFxStructuredQualifierEditor";
 
 interface Props {
   readonly canCreate: boolean;
@@ -181,6 +182,14 @@ export function RFxDraftWorkspace({
     }
   }
 
+  function commitAggregate(aggregate: RfxAggregate) {
+    setDrafts((current) =>
+      current.map((draft) =>
+        draft.id === aggregate.id ? aggregate : draft,
+      ),
+    );
+  }
+
   return (
     <ParticipantShell activeItem="opportunities-rfx">
       <OperationalWorkspace
@@ -231,8 +240,8 @@ export function RFxDraftWorkspace({
                             {draft.lifecycleState === "published"
                               ? t("rfxWorkspace.publishedState")
                               : t("rfxWorkspace.version", {
-                              version: draft.version,
-                            })}
+                                  version: draft.version,
+                                })}
                           </span>
                         </button>
                       </li>
@@ -292,61 +301,58 @@ export function RFxDraftWorkspace({
                         <dd>{selectedDraft.version}</dd>
                       </div>
                     </dl>
-                    {selectedDraft.lifecycleState === "draft" ? <label className={styles.field}>
-                      <span>{t("rfxWorkspace.changeType")}</span>
-                      <select
-                        data-rfx-family-select
-                        value={selectedDraft.requestFamily.requestFamilyId}
-                        disabled={busy}
-                        onChange={(event) =>
-                          void changeFamily(event.target.value)
-                        }
-                      >
-                        {requestFamilies.map((family) => (
-                          <option key={family.id} value={family.id}>
-                            {family.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label> : null}
-                    {selectedDraft.lifecycleState === "draft" ? <RFxPackageBuilder
-                      key={selectedDraft.id}
-                      aggregate={selectedDraft}
-                      organizationId={organizationId}
-                      commandRecoveryScope={commandRecoveryScope}
-                      performanceLocationOption={performanceLocationOption}
-                      onCommitted={(aggregate) =>
-                        setDrafts((current) =>
-                          current.map((draft) =>
-                            draft.id === aggregate.id ? aggregate : draft,
-                          ),
-                        )
-                      }
-                    /> : null}
-                    {selectedDraft.lifecycleState === "draft" ? <RFxDefinitionBuilder
-                      key={selectedDraft.id}
-                      aggregate={selectedDraft}
-                      catalog={definitionCatalog}
-                      organizationId={organizationId}
-                      commandRecoveryScope={commandRecoveryScope}
-                      onCommitted={(aggregate) =>
-                        setDrafts((current) =>
-                          current.map((draft) =>
-                            draft.id === aggregate.id ? aggregate : draft,
-                          ),
-                        )
-                      }
-                    /> : null}
+                    {selectedDraft.lifecycleState === "draft" ? (
+                      <label className={styles.field}>
+                        <span>{t("rfxWorkspace.changeType")}</span>
+                        <select
+                          data-rfx-family-select
+                          value={selectedDraft.requestFamily.requestFamilyId}
+                          disabled={busy}
+                          onChange={(event) => void changeFamily(event.target.value)}
+                        >
+                          {requestFamilies.map((family) => (
+                            <option key={family.id} value={family.id}>
+                              {family.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ) : null}
+                    {selectedDraft.lifecycleState === "draft" ? (
+                      <RFxPackageBuilder
+                        key={selectedDraft.id}
+                        aggregate={selectedDraft}
+                        organizationId={organizationId}
+                        commandRecoveryScope={commandRecoveryScope}
+                        performanceLocationOption={performanceLocationOption}
+                        onCommitted={commitAggregate}
+                      />
+                    ) : null}
+                    {selectedDraft.lifecycleState === "draft" ? (
+                      <>
+                        <span id="rfx-definition-requirements" aria-hidden="true" />
+                        <span id="rfx-definition-responseStructure" aria-hidden="true" />
+                        <span id="rfx-definition-evaluationDefinition" aria-hidden="true" />
+                        <RFxDefinitionBuilder
+                          key={selectedDraft.id}
+                          aggregate={selectedDraft}
+                          catalog={definitionCatalog}
+                          organizationId={organizationId}
+                          commandRecoveryScope={commandRecoveryScope}
+                          onCommitted={commitAggregate}
+                        />
+                        <RFxStructuredQualifierEditor
+                          key={`${selectedDraft.id}:${selectedDraft.version}:qualifiers`}
+                          aggregate={selectedDraft}
+                          commandRecoveryScope={commandRecoveryScope}
+                          onCommitted={commitAggregate}
+                        />
+                      </>
+                    ) : null}
                     <RFxPublicationPanel
                       aggregate={selectedDraft}
                       commandRecoveryScope={commandRecoveryScope}
-                      onCommitted={(aggregate) =>
-                        setDrafts((current) =>
-                          current.map((draft) =>
-                            draft.id === aggregate.id ? aggregate : draft,
-                          ),
-                        )
-                      }
+                      onCommitted={commitAggregate}
                     />
                   </>
                 ) : (
