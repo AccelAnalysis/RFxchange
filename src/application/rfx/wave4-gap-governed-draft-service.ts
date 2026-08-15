@@ -146,6 +146,14 @@ function qualifierKind(value: unknown): string | null {
   return typeof kind === "string" ? kind : null;
 }
 
+type TextQualifierIntent = "preserve" | "set" | "remove";
+
+function textQualifierIntent(value: unknown): TextQualifierIntent | null {
+  if (value === undefined || value === null) return null;
+  if (value === "preserve" || value === "set" || value === "remove") return value;
+  throw new RfxDraftError("invalid", "Text qualifier intent is invalid.");
+}
+
 function mergeLosslessQualifiers(
   current: RfxDefinition | null,
   input: RfxDefinitionSelectionInput,
@@ -157,30 +165,64 @@ function mergeLosslessQualifiers(
   const requirements = input.requirements.map((raw) => {
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return raw;
     const requirement = raw as Record<string, unknown>;
+    const {
+      textQualifierIntent: rawIntent,
+      textQualifierBaseValue: rawBaseValue,
+      ...canonicalRequirement
+    } = requirement;
     const id = typeof requirement.id === "string" ? requirement.id : "";
     const existing = currentRequirements.get(id);
-    if (!existing) return raw;
+    if (!existing) return Object.freeze(canonicalRequirement);
     const incoming = Array.isArray(requirement.qualifiers)
       ? requirement.qualifiers
       : [];
-    const incomingIsFullStructuredState =
-      incoming.length > 1 || incoming.some((item) => qualifierKind(item) !== "text");
-    if (incomingIsFullStructuredState) return raw;
-
     const firstExistingTextIndex = existing.qualifiers.findIndex(
       (item) => item.kind === "text",
     );
     const firstExistingText = firstExistingTextIndex >= 0
       ? existing.qualifiers[firstExistingTextIndex]
       : null;
-    const effectiveIncoming = incoming.length === 0 && firstExistingText
-      ? [firstExistingText]
-      : incoming;
     const preserved = existing.qualifiers.filter(
       (_item, index) => index !== firstExistingTextIndex,
     );
+    const intent = textQualifierIntent(rawIntent);
+
+    if (intent) {
+      const currentValue = firstExistingText?.value ?? "";
+      const baseValue = typeof rawBaseValue === "string" ? rawBaseValue : "";
+      if (intent !== "preserve" && currentValue !== baseValue) {
+        throw new RfxDraftError(
+          "conflict",
+          "The text qualifier changed before this definition save.",
+        );
+      }
+      const incomingText = incoming.find((item) => qualifierKind(item) === "text");
+      if (intent === "set" && !incomingText) {
+        throw new RfxDraftError("invalid", "Text qualifier value is required.");
+      }
+      const effectiveText = intent === "preserve"
+        ? firstExistingText
+          ? [firstExistingText]
+          : []
+        : intent === "set"
+          ? [incomingText]
+          : [];
+      return Object.freeze({
+        ...canonicalRequirement,
+        qualifiers: Object.freeze([...effectiveText, ...preserved]),
+      });
+    }
+
+    const incomingIsFullStructuredState =
+      incoming.length > 1 || incoming.some((item) => qualifierKind(item) !== "text");
+    if (incomingIsFullStructuredState) {
+      return Object.freeze(canonicalRequirement);
+    }
+    const effectiveIncoming = incoming.length === 0 && firstExistingText
+      ? [firstExistingText]
+      : incoming;
     return Object.freeze({
-      ...requirement,
+      ...canonicalRequirement,
       qualifiers: Object.freeze([...effectiveIncoming, ...preserved]),
     });
   });
