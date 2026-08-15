@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { MarketingFooter, MarketingHeader } from "@/src/components/marketing/MarketingChrome";
 import { PublicOpportunityView } from "@/src/components/rfx/PublicOpportunityView";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/participant-route-runtime";
 import {
   resolveOptionalOpportunityParticipant,
+  resolveOpportunityPublicationAudience,
   resolvePublicOpportunityProjection,
 } from "@/src/infrastructure/acquisition/runtime";
 
@@ -28,18 +29,23 @@ export async function generateMetadata({ params }: PublicOpportunityPageProps): 
 }
 
 export default async function PublicOpportunityPage({ params }: PublicOpportunityPageProps) {
-  // This trusted route returns only the approved public projection or an authorized participant projection.
+  // The opportunity reference is continuity context only; current participant authority is resolved server-side.
   const { reference } = await params;
-  let opportunity = await resolvePublicOpportunityProjection(reference);
-  if (!opportunity) {
-    opportunity = await resolvePublicOpportunityProjection(
-      reference,
-      await resolveOptionalOpportunityParticipant(
-        (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
-      ),
-    );
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
+  const participantAuthorized = await resolveOptionalOpportunityParticipant(sessionCookie);
+
+  let opportunity = await resolvePublicOpportunityProjection(reference, participantAuthorized);
+  if (!opportunity && !participantAuthorized) {
+    const audience = await resolveOpportunityPublicationAudience(reference);
+    if (audience === "authenticated-participants") {
+      const returnTo = `/opportunities/${encodeURIComponent(reference)}`;
+      // Preserve the exact shared RFx through the existing authenticated-participant acquisition/sign-in path.
+      redirect(`/signin?returnTo=${encodeURIComponent(returnTo)}&acquisition=${encodeURIComponent(reference)}`);
+    }
   }
   if (!opportunity) notFound();
+
   const viewModel = Object.freeze({
     reference: opportunity.reference,
     audience: opportunity.audience,
