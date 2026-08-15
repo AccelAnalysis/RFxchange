@@ -342,7 +342,7 @@ export function RFxDraftWorkspace({
                           onCommitted={commitAggregate}
                         />
                         <RFxStructuredQualifierEditor
-                          key={`${selectedDraft.id}:${selectedDraft.version}:qualifiers`}
+                          key={`${selectedDraft.id}:qualifiers`}
                           aggregate={selectedDraft}
                           commandRecoveryScope={commandRecoveryScope}
                           onCommitted={commitAggregate}
