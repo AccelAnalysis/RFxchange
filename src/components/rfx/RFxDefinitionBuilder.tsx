@@ -43,6 +43,8 @@ interface RequirementRow {
   decisionTreatment: RfxDecisionTreatment;
   satisfyingParty: RfxSatisfyingParty;
   qualifier: string;
+  qualifierBase: string;
+  qualifierDirty: boolean;
   evidenceRequirementIds: string[];
   linkedFoundationRequirementIds: string[];
 }
@@ -83,6 +85,12 @@ interface FormState {
   interpretationRecordIds: string[];
 }
 
+interface AcknowledgedDefinitionCommit {
+  readonly id: string;
+  readonly version: number;
+  readonly qualifierValues: ReadonlyMap<string, string>;
+}
+
 function identifier(prefix: string): string {
   return `${prefix}-${crypto.randomUUID()}`;
 }
@@ -115,25 +123,30 @@ function initialForm(aggregate: RfxAggregate): FormState {
   const definition = aggregate.definition;
   return {
     requirements:
-      definition?.requirements.map((item) => ({
-        id: item.id,
-        requirementTypeId: item.requirementType.id,
-        capabilityId: item.capability?.id ?? "",
-        capabilityLabel: item.capability?.labelSnapshot ?? "",
-        capabilityBreadcrumb: item.capabilityBreadcrumb ?? "",
-        title: item.title,
-        description: item.description,
-        level: item.level,
-        decisionTreatment: item.decisionTreatment,
-        satisfyingParty: item.satisfyingParty,
-        qualifier:
+      definition?.requirements.map((item) => {
+        const textQualifier =
           item.qualifiers.find((qualifier) => qualifier.kind === "text")?.value ??
-          "",
-        evidenceRequirementIds: [...item.evidenceRequirementIds],
-        linkedFoundationRequirementIds: [
-          ...item.linkedFoundationRequirementIds,
-        ],
-      })) ?? [],
+          "";
+        return {
+          id: item.id,
+          requirementTypeId: item.requirementType.id,
+          capabilityId: item.capability?.id ?? "",
+          capabilityLabel: item.capability?.labelSnapshot ?? "",
+          capabilityBreadcrumb: item.capabilityBreadcrumb ?? "",
+          title: item.title,
+          description: item.description,
+          level: item.level,
+          decisionTreatment: item.decisionTreatment,
+          satisfyingParty: item.satisfyingParty,
+          qualifier: textQualifier,
+          qualifierBase: textQualifier,
+          qualifierDirty: false,
+          evidenceRequirementIds: [...item.evidenceRequirementIds],
+          linkedFoundationRequirementIds: [
+            ...item.linkedFoundationRequirementIds,
+          ],
+        };
+      }) ?? [],
     responseTemplateId:
       definition?.responseStructure.sourceTemplate?.id ?? "",
     sections:
@@ -189,8 +202,14 @@ function definitionPayload(form: FormState) {
       level: item.level,
       decisionTreatment: item.decisionTreatment,
       satisfyingParty: item.satisfyingParty,
-      qualifiers: item.qualifier
-        ? [{ kind: "text", label: "Condition", value: item.qualifier }]
+      textQualifierIntent: item.qualifierDirty
+        ? item.qualifier.trim()
+          ? "set"
+          : "remove"
+        : "preserve",
+      textQualifierBaseValue: item.qualifierBase,
+      qualifiers: item.qualifier.trim()
+        ? [{ kind: "text", label: "Condition", value: item.qualifier.trim() }]
         : [],
       evidenceRequirementIds: item.evidenceRequirementIds,
       linkedFoundationRequirementIds: item.linkedFoundationRequirementIds,
@@ -257,6 +276,13 @@ export function RFxDefinitionBuilder({
   const [sheet, setSheet] = useState<"section" | "factor" | null>(null);
   const saveInFlight = useRef(false);
   const revision = useRef(0);
+  const synchronizedAggregate = useRef({
+    id: aggregate.id,
+    version: aggregate.version,
+  });
+  const acknowledgedDefinitionCommit = useRef<AcknowledgedDefinitionCommit | null>(
+    null,
+  );
   const sheetInvoker = useRef<HTMLButtonElement | null>(null);
   const sheetDialog = useRef<HTMLDivElement | null>(null);
   const payload = useMemo(() => definitionPayload(form), [form]);
@@ -308,6 +334,8 @@ export function RFxDefinitionBuilder({
             "gate_only") as RfxDecisionTreatment,
           satisfyingParty: "lead-organization",
           qualifier: "",
+          qualifierBase: "",
+          qualifierDirty: false,
           evidenceRequirementIds: [],
           linkedFoundationRequirementIds: [],
         },
@@ -406,6 +434,12 @@ export function RFxDefinitionBuilder({
     setSaving(true);
     setError(null);
     const savingRevision = revision.current;
+    const submittedQualifierValues = new Map(
+      payload.requirements.map((requirement) => [
+        requirement.id,
+        requirement.qualifiers[0]?.value ?? "",
+      ]),
+    );
     const storage = browserStorage();
     const storageKey = `rfxchange:rfx-definition:${commandRecoveryScope}:${aggregate.id}`;
     const fingerprint = JSON.stringify({ version: aggregate.version, payload });
@@ -441,6 +475,11 @@ export function RFxDefinitionBuilder({
             result.error ??
             t("rfxWorkspace.definitionSaveError"),
         );
+      acknowledgedDefinitionCommit.current = Object.freeze({
+        id: result.aggregate.id,
+        version: result.aggregate.version,
+        qualifierValues: submittedQualifierValues,
+      });
       onCommitted(result.aggregate);
       clearRetryStableCommand({ storage, storageKey, commandId });
       if (revision.current === savingRevision) setDirty(false);
@@ -469,6 +508,64 @@ export function RFxDefinitionBuilder({
     payload,
     t,
   ]);
+
+  useEffect(() => {
+    if (
+      synchronizedAggregate.current.id === aggregate.id &&
+      synchronizedAggregate.current.version === aggregate.version
+    ) {
+      return;
+    }
+    const authoritativeForm = initialForm(aggregate);
+    const authoritativeRequirements = new Map(
+      authoritativeForm.requirements.map((requirement) => [
+        requirement.id,
+        requirement,
+      ]),
+    );
+    const acknowledgedCommit =
+      acknowledgedDefinitionCommit.current?.id === aggregate.id &&
+      acknowledgedDefinitionCommit.current.version === aggregate.version
+        ? acknowledgedDefinitionCommit.current
+        : null;
+    synchronizedAggregate.current = {
+      id: aggregate.id,
+      version: aggregate.version,
+    };
+    if (dirty || saving || saveInFlight.current) {
+      setForm((current) => ({
+        ...current,
+        requirements: current.requirements.map((requirement) => {
+          const authoritative = authoritativeRequirements.get(requirement.id);
+          if (!authoritative) return requirement;
+          if (!requirement.qualifierDirty) {
+            return {
+              ...requirement,
+              qualifier: authoritative.qualifier,
+              qualifierBase: authoritative.qualifier,
+            };
+          }
+          const submittedQualifier =
+            acknowledgedCommit?.qualifierValues.get(requirement.id);
+          if (
+            submittedQualifier === undefined ||
+            authoritative.qualifier !== submittedQualifier
+          ) {
+            return requirement;
+          }
+          return {
+            ...requirement,
+            qualifierBase: authoritative.qualifier,
+            qualifierDirty: requirement.qualifier !== submittedQualifier,
+          };
+        }),
+      }));
+      if (acknowledgedCommit) acknowledgedDefinitionCommit.current = null;
+      return;
+    }
+    setForm(authoritativeForm);
+    if (acknowledgedCommit) acknowledgedDefinitionCommit.current = null;
+  }, [aggregate, dirty, saving]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -641,7 +738,13 @@ export function RFxDefinitionBuilder({
                   </label>
                   <label>
                     <span>{t("rfxWorkspace.condition")}</span>
-                    <input value={item.qualifier} onChange={(event) => updateRequirement(item.id, { qualifier: event.target.value })} />
+                    <input
+                      value={item.qualifier}
+                      onChange={(event) => updateRequirement(item.id, {
+                        qualifier: event.target.value,
+                        qualifierDirty: true,
+                      })}
+                    />
                   </label>
                 </div>
                 {type?.code === "CAPABILITY" ? (
