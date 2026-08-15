@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
     );
     const provisionalOrganizationName = body.provisionalOrganizationName?.trim() || "";
     const canBootstrapActivation = Boolean(existingContext || provisionalOrganizationName);
-    let state: ActivationJourneyState | null = null;
+    let state = null as ActivationJourneyState | null;
     let acquisitionStatus: "none" | "bound" | "rejected" | "unavailable" = "none";
     let boundAcquisition: BoundAcquisitionContext | null = null;
     let acquisitionAttached = false;
