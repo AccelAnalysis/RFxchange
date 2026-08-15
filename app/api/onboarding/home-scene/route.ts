@@ -97,7 +97,10 @@ export async function GET(request: NextRequest) {
     const hasFoundingIntent = cookieStore.get(
       RFXCHANGE_FOUNDING_ACQUISITION_COOKIE_NAME,
     )?.value === RFXCHANGE_FOUNDING_ACQUISITION_INTENT;
-    const controlledPlatformUrl = access.state.controlledPlatformUrl ?? "/geography/canvas";
+    const savedAcquisition = access.state.acquisitionContext;
+    const controlledPlatformUrl = savedAcquisition && savedAcquisition.kind !== "direct"
+      ? "/acquisition/continue"
+      : access.state.controlledPlatformUrl ?? "/geography/canvas";
     const response = NextResponse.json({
       marker: {
         id: marker.id,

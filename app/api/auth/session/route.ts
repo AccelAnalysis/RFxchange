@@ -5,7 +5,9 @@ import { ServerSessionError } from "@/src/application/auth/server-session";
 import type { ActivationJourneyState } from "@/src/application/onboarding/activation-journey";
 import {
   parseAcquisitionContextToken,
+  type AcquisitionContextToken,
 } from "@/src/application/acquisition/acquisition-context";
+import { parseOpaqueOpportunityCandidate } from "@/src/application/acquisition/opaque-opportunity-candidate";
 import { accessJourneyId } from "@/src/domain/lifecycle/model";
 import {
   AcquisitionContextBindingError,
@@ -120,9 +122,6 @@ export async function POST(request: NextRequest) {
       "verify Firebase token + issue RFxchange session",
     );
 
-    // Authentication/session establishment is independent from participant activation. Returning
-    // users sign in with email and password only. An authenticated account without an activation
-    // context receives state=null and begins organization setup on /join.
     const db = getServerFirestore();
     const contexts = new FirestoreActivationJourneyContextRepository(db);
     const existingContext = await timing.measure(
@@ -131,17 +130,27 @@ export async function POST(request: NextRequest) {
       "activation context lookup",
     );
     const provisionalOrganizationName = body.provisionalOrganizationName?.trim() || "";
-    let state = null;
+    const canBootstrapActivation = Boolean(existingContext || provisionalOrganizationName);
+    let state = null as ActivationJourneyState | null;
     let acquisitionStatus: "none" | "bound" | "rejected" | "unavailable" = "none";
     let boundAcquisition: BoundAcquisitionContext | null = null;
     let acquisitionAttached = false;
     const acquisitionCookie = request.cookies.get(RFXCHANGE_ACQUISITION_COOKIE_NAME)?.value;
-    if (acquisitionCookie) {
-      const token = parseAcquisitionContextToken(acquisitionCookie);
-      if (!token) {
-        acquisitionStatus = "rejected";
-      } else {
-        try {
+
+    if (acquisitionCookie && canBootstrapActivation) {
+      const persistentToken = parseAcquisitionContextToken(acquisitionCookie);
+      const candidate = parseOpaqueOpportunityCandidate(acquisitionCookie);
+      try {
+        let token: AcquisitionContextToken | null = persistentToken;
+        if (!token && candidate) {
+          token = await createServerAcquisitionContextService().issueOpaqueOpportunityCandidate({
+            reference: candidate.reference,
+            referrer: request.headers.get("referer"),
+          });
+        }
+        if (!token) {
+          acquisitionStatus = "rejected";
+        } else {
           boundAcquisition = await timing.measure(
             "acquisition-bind",
             () => createServerAcquisitionContextService().bind({
@@ -151,21 +160,18 @@ export async function POST(request: NextRequest) {
             }),
           );
           acquisitionStatus = "bound";
-        } catch (error) {
-          // Acquisition context is navigation metadata, never a reason to deny legitimate sign-in.
-          // Permanently invalid contexts are rejected and removed. Only an unclassified dependency
-          // failure keeps the cookie so a later sign-in can retry without losing valid entry context.
-          acquisitionStatus = error instanceof AcquisitionContextBindingError
-            ? "rejected"
-            : "unavailable";
         }
+      } catch (error) {
+        acquisitionStatus = error instanceof AcquisitionContextBindingError
+          ? "rejected"
+          : "unavailable";
       }
+    } else if (acquisitionCookie && !parseAcquisitionContextToken(acquisitionCookie) && !parseOpaqueOpportunityCandidate(acquisitionCookie)) {
+      acquisitionStatus = "rejected";
     }
 
-    if (existingContext || provisionalOrganizationName) {
+    if (canBootstrapActivation) {
       const activation = createServerActivationJourneyService();
-      // bootstrap() already returns the canonical activation state. Reuse it instead of hydrating
-      // the same graph a second time during the same sign-in request.
       state = await timing.measure(
         "activation-state",
         () => activation.bootstrap(issued.context, provisionalOrganizationName),
@@ -182,15 +188,11 @@ export async function POST(request: NextRequest) {
         }
       }
       if (boundAcquisition) {
-        const current = await contexts.getByUserId(issued.context.user.id);
-        if (current) {
-          await contexts.save(updateActivationJourneyContext(current, {
-            acquisitionContext: boundAcquisition,
-            now: new Date().toISOString(),
-          }));
-          acquisitionAttached = true;
-          state = withBoundAcquisition(state, boundAcquisition);
-        }
+        acquisitionAttached = await contexts.attachAcquisitionContext(
+          issued.context.user.id,
+          boundAcquisition,
+        );
+        if (acquisitionAttached) state = withBoundAcquisition(state, boundAcquisition);
       }
     }
 

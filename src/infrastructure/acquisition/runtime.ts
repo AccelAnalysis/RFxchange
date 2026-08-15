@@ -44,9 +44,15 @@ export async function resolvePublicOpportunityProjection(
   ).getResponderProjection(reference, participantAuthorized);
 }
 
+export async function resolveOpportunityPublicationAudience(reference: string) {
+  return new FirestorePublishedOpportunityRepository(
+    getServerFirestore(),
+  ).getPublicationAudience(reference);
+}
+
 export async function resolveOptionalOpportunityParticipant(
   sessionCookie: string | null | undefined,
 ): Promise<boolean> {
   const access = await resolveParticipantRoute({ sessionCookie });
-  return access.kind === "authorized" && access.state.lifecycleState === "open-platform";
+  return access.kind === "authorized";
 }
