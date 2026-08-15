@@ -43,7 +43,6 @@ function opportunityView(opportunity: OpportunityProjection) {
 
 export async function generateMetadata({ params }: PublicOpportunityPageProps): Promise<Metadata> {
   const { reference } = await params;
-  // Anonymous metadata is derived only from the approved public projection.
   const projection = await resolvePublicOpportunityProjection(reference);
   return projection
     ? {
@@ -54,53 +53,37 @@ export async function generateMetadata({ params }: PublicOpportunityPageProps): 
 }
 
 export default async function PublicOpportunityPage({ params }: PublicOpportunityPageProps) {
-  // A public publication remains available through its minimized public projection
-  // regardless of whether a signed-in visitor is still completing activation.
   const { reference } = await params;
   const publicOpportunity = await resolvePublicOpportunityProjection(reference);
   if (publicOpportunity) return opportunityView(publicOpportunity);
 
-  // Participant-only publications require current server-derived participant authority.
-  // The opportunity reference remains continuity context only and grants no authority.
+  const audience = await resolveOpportunityPublicationAudience(reference);
+  if (audience !== "authenticated-participants") notFound();
+
   const cookieStore = await cookies();
   const access = await resolveParticipantRoute({
     sessionCookie: cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
   });
 
+  if (access.kind === "unauthenticated") {
+    redirect(`/api/acquisition/start?opportunityReference=${encodeURIComponent(reference)}`);
+  }
   if (access.kind === "access-resolution-required") {
     redirect(participantEntryDestination(access));
   }
-  if (access.kind === "activation-required") {
-    redirect(participantEntryDestination(access));
-  }
-  if (access.kind === "wrong-organization") {
-    redirect(access.state.controlledPlatformUrl ?? "/join");
+  if (access.kind === "activation-required" || access.kind === "wrong-organization") {
+    // Issue and bind the non-authorizing acquisition context before sending an
+    // incomplete authenticated participant to their canonical server-derived setup path.
+    redirect(`/api/acquisition/start?opportunityReference=${encodeURIComponent(reference)}`);
   }
   if (access.kind === "restricted") {
     redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   }
-  if (
-    access.kind === "authorized" &&
-    access.state.lifecycleState !== "open-platform"
-  ) {
-    redirect(access.state.controlledPlatformUrl ?? "/join");
-  }
 
-  const participantAuthorized =
-    access.kind === "authorized" && access.state.lifecycleState === "open-platform";
-  const opportunity = await resolvePublicOpportunityProjection(reference, participantAuthorized);
-
-  if (!opportunity && access.kind === "unauthenticated") {
-    const audience = await resolveOpportunityPublicationAudience(reference);
-    if (audience === "authenticated-participants") {
-      // The route handler issues the durable acquisition envelope/cookie before
-      // sign-in, preserving this exact RFx through activation for new participants.
-      redirect(
-        `/api/acquisition/start?opportunityReference=${encodeURIComponent(reference)}`,
-      );
-    }
-  }
+  // Current unrestricted participant authority is sufficient for an
+  // authenticated-participants projection. OPEN/first-value lifecycle state is
+  // intentionally not an additional viewing gate.
+  const opportunity = await resolvePublicOpportunityProjection(reference, true);
   if (!opportunity) notFound();
-
   return opportunityView(opportunity);
 }
