@@ -5,7 +5,9 @@ import { ServerSessionError } from "@/src/application/auth/server-session";
 import type { ActivationJourneyState } from "@/src/application/onboarding/activation-journey";
 import {
   parseAcquisitionContextToken,
+  type AcquisitionContextToken,
 } from "@/src/application/acquisition/acquisition-context";
+import { parseOpaqueOpportunityCandidate } from "@/src/application/acquisition/opaque-opportunity-candidate";
 import { accessJourneyId } from "@/src/domain/lifecycle/model";
 import {
   AcquisitionContextBindingError,
@@ -128,17 +130,27 @@ export async function POST(request: NextRequest) {
       "activation context lookup",
     );
     const provisionalOrganizationName = body.provisionalOrganizationName?.trim() || "";
-    let state = null;
+    const canBootstrapActivation = Boolean(existingContext || provisionalOrganizationName);
+    let state: ActivationJourneyState | null = null;
     let acquisitionStatus: "none" | "bound" | "rejected" | "unavailable" = "none";
     let boundAcquisition: BoundAcquisitionContext | null = null;
     let acquisitionAttached = false;
     const acquisitionCookie = request.cookies.get(RFXCHANGE_ACQUISITION_COOKIE_NAME)?.value;
-    if (acquisitionCookie) {
-      const token = parseAcquisitionContextToken(acquisitionCookie);
-      if (!token) {
-        acquisitionStatus = "rejected";
-      } else {
-        try {
+
+    if (acquisitionCookie && canBootstrapActivation) {
+      const persistentToken = parseAcquisitionContextToken(acquisitionCookie);
+      const candidate = parseOpaqueOpportunityCandidate(acquisitionCookie);
+      try {
+        let token: AcquisitionContextToken | null = persistentToken;
+        if (!token && candidate) {
+          token = await createServerAcquisitionContextService().issueOpaqueOpportunityCandidate({
+            reference: candidate.reference,
+            referrer: request.headers.get("referer"),
+          });
+        }
+        if (!token) {
+          acquisitionStatus = "rejected";
+        } else {
           boundAcquisition = await timing.measure(
             "acquisition-bind",
             () => createServerAcquisitionContextService().bind({
@@ -148,19 +160,17 @@ export async function POST(request: NextRequest) {
             }),
           );
           acquisitionStatus = "bound";
-        } catch (error) {
-          acquisitionStatus = error instanceof AcquisitionContextBindingError
-            ? "rejected"
-            : "unavailable";
         }
+      } catch (error) {
+        acquisitionStatus = error instanceof AcquisitionContextBindingError
+          ? "rejected"
+          : "unavailable";
       }
+    } else if (acquisitionCookie && !parseAcquisitionContextToken(acquisitionCookie) && !parseOpaqueOpportunityCandidate(acquisitionCookie)) {
+      acquisitionStatus = "rejected";
     }
 
-    // A bound acquisition candidate is sufficient reason to bootstrap the participant's normal
-    // activation journey even when this is their first authenticated session. The acquisition is
-    // navigation metadata only; bootstrap still starts at the canonical activation steps and does
-    // not grant organization, geography, or opportunity authority.
-    if (existingContext || provisionalOrganizationName || boundAcquisition) {
+    if (canBootstrapActivation) {
       const activation = createServerActivationJourneyService();
       state = await timing.measure(
         "activation-state",
@@ -178,15 +188,11 @@ export async function POST(request: NextRequest) {
         }
       }
       if (boundAcquisition) {
-        const current = await contexts.getByUserId(issued.context.user.id);
-        if (current) {
-          await contexts.save(updateActivationJourneyContext(current, {
-            acquisitionContext: boundAcquisition,
-            now: new Date().toISOString(),
-          }));
-          acquisitionAttached = true;
-          state = withBoundAcquisition(state, boundAcquisition);
-        }
+        acquisitionAttached = await contexts.attachAcquisitionContext(
+          issued.context.user.id,
+          boundAcquisition,
+        );
+        if (acquisitionAttached) state = withBoundAcquisition(state, boundAcquisition);
       }
     }
 
