@@ -82,6 +82,13 @@ interface EvaluationRecord {
   readonly nextAttemptAt?: Timestamp | null;
 }
 
+class SavedSearchAuthorityChangedError extends Error {
+  constructor() {
+    super("Opportunity saved-search match authority changed.");
+    this.name = "SavedSearchAuthorityChangedError";
+  }
+}
+
 function stableId(prefix: string, ...values: readonly string[]): string {
   return `${prefix}_${createHash("sha256")
     .update(values.join(":"), "utf8")
@@ -296,7 +303,7 @@ async function saveMatch(
         !geography.exists || geography.get("releaseState") !== "released"
       )
     ) {
-      throw new Error("Opportunity saved-search match authority changed.");
+      throw new SavedSearchAuthorityChangedError();
     }
 
     let request: ReturnType<typeof emailRequest> | null = null;
@@ -498,7 +505,12 @@ async function processAllActiveSearches(
     for (const document of page.docs) {
       const search = document.data() as SavedSearch;
       if (search.status !== "active" || !matches(projection, search, now)) continue;
-      await saveMatch(db, search, projection, now);
+      try {
+        await saveMatch(db, search, projection, now);
+      } catch (error) {
+        if (error instanceof SavedSearchAuthorityChangedError) continue;
+        throw error;
+      }
     }
     cursor = page.docs.at(-1) ?? null;
     if (page.size < PAGE_SIZE) break;
