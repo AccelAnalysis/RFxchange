@@ -141,12 +141,17 @@ function assertCheckoutCustomer(account: DocumentData, customerId: string): void
 }
 
 function previousLifecycleState(data: DocumentData | undefined): Readonly<{
+  subscriptionId: string | null;
   createdAt: string | null;
   status: ProviderSubscriptionStatus | null;
   recognized: boolean;
   retainsCapacity: boolean;
 }> {
-  if (!data) return Object.freeze({ createdAt: null, status: null, recognized: false, retainsCapacity: false });
+  if (!data) return Object.freeze({ subscriptionId: null, createdAt: null, status: null, recognized: false, retainsCapacity: false });
+  const subscriptionId = data.providerSubscriptionId;
+  if (subscriptionId != null && (typeof subscriptionId !== "string" || !subscriptionId.trim())) {
+    throw new Error("Subscription reconciliation provider identity is malformed.");
+  }
   const createdAt = data.lastProviderEventCreatedAt;
   if (createdAt != null && typeof createdAt !== "string") throw new Error("Subscription reconciliation event ordering metadata is malformed.");
   const status = data.observedStatus;
@@ -157,6 +162,7 @@ function previousLifecycleState(data: DocumentData | undefined): Readonly<{
     throw new Error("Subscription reconciliation authority state is malformed.");
   }
   return Object.freeze({
+    subscriptionId: subscriptionId?.trim() ?? null,
     createdAt: createdAt ?? null,
     status: (status ?? null) as ProviderSubscriptionStatus | null,
     recognized: data.activeRecognition,
@@ -189,11 +195,41 @@ export async function reconcileCurrentFoundingSubscription(input: Readonly<{
     assertCheckoutCustomer(accountData, input.snapshot.customerId);
 
     const previous = previousLifecycleState(reconciliation.data());
+    const accountSubscriptionId = existingSubscriptionReference(accountData);
+    const accountStatus = accountSubscriptionStatus(accountData);
+    const previousIsDifferentSubscription = Boolean(previous.subscriptionId && previous.subscriptionId !== input.snapshot.id);
+    const incomingIsSupersededSubscription = Boolean(
+      previousIsDifferentSubscription &&
+      accountSubscriptionId &&
+      accountSubscriptionId !== input.snapshot.id &&
+      accountStatus !== "canceled" &&
+      accountStatus !== "not-subscribed",
+    );
+
+    if (incomingIsSupersededSubscription) {
+      transaction.create(eventRef, {
+        id: eventId,
+        organizationId,
+        providerKey: "stripe",
+        eventType,
+        providerSubscriptionId: input.snapshot.id,
+        checkoutReservationId: input.snapshot.checkoutReservationId ?? null,
+        observedStatus: input.snapshot.status,
+        eventCreatedAt: input.eventCreatedAt,
+        ignoredAsStale: true,
+        ignoredReason: "superseded-subscription",
+        schemaVersion: COMMERCIAL_SCHEMA_VERSION,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      return Object.freeze({ duplicate: false, recognized: previous.recognized, retainsCapacity: previous.retainsCapacity });
+    }
+
+    const sameSubscription = previous.subscriptionId === input.snapshot.id;
     const shouldApply = shouldApplyProviderLifecycleObservation({
       incomingCreatedAt: input.eventCreatedAt,
       incomingStatus: input.snapshot.status,
-      previousCreatedAt: previous.createdAt,
-      previousStatus: previous.status,
+      previousCreatedAt: sameSubscription ? previous.createdAt : null,
+      previousStatus: sameSubscription ? previous.status : null,
     });
     if (!shouldApply) {
       transaction.create(eventRef, {
@@ -202,9 +238,11 @@ export async function reconcileCurrentFoundingSubscription(input: Readonly<{
         providerKey: "stripe",
         eventType,
         providerSubscriptionId: input.snapshot.id,
+        checkoutReservationId: input.snapshot.checkoutReservationId ?? null,
         observedStatus: input.snapshot.status,
         eventCreatedAt: input.eventCreatedAt,
         ignoredAsStale: true,
+        ignoredReason: "older-lifecycle-observation",
         schemaVersion: COMMERCIAL_SCHEMA_VERSION,
         createdAt: FieldValue.serverTimestamp(),
       });
