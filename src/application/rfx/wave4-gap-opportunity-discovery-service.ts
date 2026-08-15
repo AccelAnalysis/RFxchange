@@ -7,15 +7,23 @@ import {
 } from "../../domain/audit/model.ts";
 import {
   createOpportunityDiscoveryQuery,
+  opportunityDeadline,
+  opportunityDeadlineState,
+  opportunityMatchesQuery,
+  opportunityQueryFingerprint,
+  type OpportunityDiscoveryQuery,
   type OpportunityDiscoveryRepository,
   type OpportunityRelationCommandReceipt,
   type OpportunityRelationEvent,
   type SavedOpportunityAlertPolicy,
   type SavedOpportunitySearch,
 } from "../../domain/rfx/discovery.ts";
+import type { ResponderOpportunityProjection } from "../../domain/rfx/publication.ts";
 import {
   OpportunityDiscoveryError,
   OpportunityDiscoveryService,
+  type OpportunityDiscoveryItem,
+  type OpportunityDiscoveryResult,
   type OpportunityParticipantScope,
 } from "./opportunity-discovery-service.ts";
 
@@ -62,24 +70,97 @@ function audit(
   });
 }
 
-function normalizedQuery(input: Parameters<typeof createOpportunityDiscoveryQuery>[0]) {
+function discoveryQuery(
+  input: Parameters<typeof createOpportunityDiscoveryQuery>[0],
+): OpportunityDiscoveryQuery {
   try {
-    const query = createOpportunityDiscoveryQuery({ ...input, cursor: null });
-    return Object.freeze({
-      text: query.text,
-      requestFamilyKeys: query.requestFamilyKeys,
-      capabilityIds: query.capabilityIds,
-      localityIds: query.localityIds,
-      deadlineWindow: query.deadlineWindow,
-      watched: query.watched,
-      limit: query.limit,
-    });
+    return createOpportunityDiscoveryQuery(input);
   } catch (error) {
     throw new OpportunityDiscoveryError(
       "invalid",
       error instanceof Error ? error.message : "Opportunity query is invalid.",
     );
   }
+}
+
+function normalizedQuery(input: Parameters<typeof createOpportunityDiscoveryQuery>[0]) {
+  const query = discoveryQuery({ ...input, cursor: null });
+  return Object.freeze({
+    text: query.text,
+    requestFamilyKeys: query.requestFamilyKeys,
+    capabilityIds: query.capabilityIds,
+    localityIds: query.localityIds,
+    deadlineWindow: query.deadlineWindow,
+    watched: query.watched,
+    limit: query.limit,
+  });
+}
+
+function queryWithoutCursor(query: OpportunityDiscoveryQuery): Omit<OpportunityDiscoveryQuery, "cursor"> {
+  return Object.freeze({
+    text: query.text,
+    requestFamilyKeys: query.requestFamilyKeys,
+    capabilityIds: query.capabilityIds,
+    localityIds: query.localityIds,
+    deadlineWindow: query.deadlineWindow,
+    watched: query.watched,
+    limit: query.limit,
+  });
+}
+
+function cursorOffset(cursor: string | null, queryFingerprint: string): number {
+  if (!cursor) return 0;
+  try {
+    const decoded = Buffer.from(cursor, "base64url").toString("utf8");
+    const [fingerprintValue, offsetValue] = decoded.split(":");
+    const offset = Number.parseInt(offsetValue ?? "", 10);
+    if (
+      fingerprintValue !== queryFingerprint ||
+      !Number.isSafeInteger(offset) ||
+      offset < 0
+    ) {
+      throw new Error("stale");
+    }
+    return offset;
+  } catch {
+    throw new OpportunityDiscoveryError(
+      "invalid",
+      "Opportunity search cursor is stale or malformed.",
+    );
+  }
+}
+
+function nextCursor(queryFingerprint: string, offset: number): string {
+  return Buffer.from(`${queryFingerprint}:${offset}`, "utf8").toString("base64url");
+}
+
+function projectionPermitted(projection: ResponderOpportunityProjection): boolean {
+  return projection.mode === "published" &&
+    Boolean(projection.publishedAt) &&
+    (projection.audience === "public" || projection.audience === "authenticated-participants");
+}
+
+function toItem(
+  projection: ResponderOpportunityProjection,
+  watched: boolean,
+  now: string,
+): OpportunityDiscoveryItem | null {
+  const deadlineState = opportunityDeadlineState(projection, now);
+  if (deadlineState === "passed") return null;
+  return Object.freeze({
+    reference: projection.reference,
+    aggregateVersion: projection.aggregateVersion,
+    digest: projection.digest,
+    title: projection.payload.title,
+    summary: projection.payload.summary,
+    issuerDisplayName: projection.payload.issuerDisplayName,
+    requestFamilyLabel: projection.payload.requestFamilyLabel,
+    localities: projection.payload.localities,
+    responseDeadline: opportunityDeadline(projection),
+    deadlineState,
+    watched,
+    projection: Object.freeze({ payload: projection.payload }),
+  });
 }
 
 export class Wave4GapOpportunityDiscoveryService extends OpportunityDiscoveryService {
@@ -94,6 +175,77 @@ export class Wave4GapOpportunityDiscoveryService extends OpportunityDiscoverySer
     super(repository, now, publicOrigin);
     this.gapRepository = repository;
     this.gapNow = now;
+  }
+
+  override async discover(
+    scope: OpportunityParticipantScope,
+    input: Parameters<typeof createOpportunityDiscoveryQuery>[0],
+  ): Promise<OpportunityDiscoveryResult> {
+    const query = discoveryQuery(input);
+    const withoutCursor = queryWithoutCursor(query);
+    const queryHash = opportunityQueryFingerprint(withoutCursor);
+    const offset = cursorOffset(query.cursor, queryHash);
+    const now = this.gapNow();
+    const [projections, watches, savedSearches] = await Promise.all([
+      // The Wave 4 repository intentionally ignores this presentation hint and
+      // walks the complete deterministic projection set before filtering.
+      this.gapRepository.listProjections(250),
+      this.gapRepository.listWatches(scope.organizationId, scope.userId),
+      this.gapRepository.listSavedSearches(scope.organizationId, scope.userId),
+    ]);
+    const watched = new Set(
+      watches
+        .filter((item) => item.status === "watching")
+        .map((item) => item.opportunityReference),
+    );
+    const matching = projections
+      .filter(projectionPermitted)
+      .filter((projection) => opportunityMatchesQuery({
+        projection,
+        query: withoutCursor,
+        watched: watched.has(projection.reference),
+        now,
+      }))
+      .sort(
+        (left, right) =>
+          opportunityDeadline(left).localeCompare(opportunityDeadline(right)) ||
+          left.reference.localeCompare(right.reference),
+      );
+    const selected = matching.slice(offset, offset + query.limit);
+    const items = Object.freeze(
+      selected.flatMap((projection) => {
+        const item = toItem(projection, watched.has(projection.reference), now);
+        return item ? [item] : [];
+      }),
+    );
+    const allOpenItems = projections
+      .filter(projectionPermitted)
+      .flatMap((projection) => {
+        const item = toItem(projection, watched.has(projection.reference), now);
+        return item?.watched ? [item] : [];
+      })
+      .sort((left, right) => left.responseDeadline.localeCompare(right.responseDeadline));
+    const nowValue = Date.parse(now);
+    const days = (item: OpportunityDiscoveryItem) =>
+      (Date.parse(`${item.responseDeadline}T23:59:59.999Z`) - nowValue) / 86_400_000;
+    return Object.freeze({
+      query,
+      items,
+      nextCursor:
+        offset + query.limit < matching.length
+          ? nextCursor(queryHash, offset + query.limit)
+          : null,
+      savedSearches: Object.freeze(
+        savedSearches.filter((item) => item.status !== "deleted"),
+      ),
+      deadlines: Object.freeze({
+        next7Days: Object.freeze(allOpenItems.filter((item) => days(item) <= 7)),
+        next30Days: Object.freeze(
+          allOpenItems.filter((item) => days(item) > 7 && days(item) <= 30),
+        ),
+        later: Object.freeze(allOpenItems.filter((item) => days(item) > 30)),
+      }),
+    });
   }
 
   override async saveSearch(
