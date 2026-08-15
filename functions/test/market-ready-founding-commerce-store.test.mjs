@@ -54,7 +54,7 @@ function commercialAccount(organizationId, customerId) {
   };
 }
 
-function canceledCommercialAccount(organizationId, customerId, subscriptionId) {
+function subscriptionCommercialAccount(organizationId, customerId, subscriptionId, status) {
   const subscriptionReference = { providerKey: "stripe", kind: "subscription", externalReference: subscriptionId };
   return {
     ...commercialAccount(organizationId, customerId),
@@ -62,8 +62,12 @@ function canceledCommercialAccount(organizationId, customerId, subscriptionId) {
       { providerKey: "stripe", kind: "customer", externalReference: customerId },
       subscriptionReference,
     ],
-    subscription: { status: "canceled", providerSubscriptionReference: subscriptionReference },
+    subscription: { status, providerSubscriptionReference: subscriptionReference },
   };
+}
+
+function canceledCommercialAccount(organizationId, customerId, subscriptionId) {
+  return subscriptionCommercialAccount(organizationId, customerId, subscriptionId, "canceled");
 }
 
 function capacity(reservations, committedOrganizationIds = []) {
@@ -72,6 +76,26 @@ function capacity(reservations, committedOrganizationIds = []) {
     limit: 250,
     committedOrganizationIds,
     reservations,
+    schemaVersion: 1,
+    createdAt: "server-created-at",
+    updatedAt: "server-updated-at",
+  };
+}
+
+function reconciliation(organizationId, customerId, subscriptionId, status, createdAt) {
+  const recognized = status === "active" || status === "trialing";
+  const retainsCapacity = status !== "canceled" && status !== "incomplete_expired";
+  return {
+    id: organizationId,
+    organizationId,
+    providerKey: "stripe",
+    providerCustomerId: customerId,
+    providerSubscriptionId: subscriptionId,
+    observedStatus: status,
+    activeRecognition: recognized,
+    retainsCapacity,
+    lastProviderEventId: `evt-${subscriptionId}-${status}`,
+    lastProviderEventCreatedAt: createdAt,
     schemaVersion: 1,
     createdAt: "server-created-at",
     updatedAt: "server-updated-at",
@@ -169,29 +193,9 @@ test("later terminal lifecycle for an old subscription preserves a newer Checkou
     reservedAt: "2026-08-15T04:00:00.000Z",
   };
   const store = fakeFirestore([
-    [
-      `organizationCommercialAccounts/${organizationId}`,
-      canceledCommercialAccount(organizationId, customerId, oldSubscriptionId),
-    ],
+    [`organizationCommercialAccounts/${organizationId}`, canceledCommercialAccount(organizationId, customerId, oldSubscriptionId)],
     ["commercialFoundingCapacity/current", capacity([newReservation])],
-    [
-      `commercialSubscriptionReconciliations/${organizationId}`,
-      {
-        id: organizationId,
-        organizationId,
-        providerKey: "stripe",
-        providerCustomerId: customerId,
-        providerSubscriptionId: oldSubscriptionId,
-        observedStatus: "canceled",
-        activeRecognition: false,
-        retainsCapacity: false,
-        lastProviderEventId: "evt-old-canceled",
-        lastProviderEventCreatedAt: "2026-08-15T03:55:00.000Z",
-        schemaVersion: 1,
-        createdAt: "server-created-at",
-        updatedAt: "server-updated-at",
-      },
-    ],
+    [`commercialSubscriptionReconciliations/${organizationId}`, reconciliation(organizationId, customerId, oldSubscriptionId, "canceled", "2026-08-15T03:55:00.000Z")],
   ]);
 
   const result = await reconcileCurrentFoundingSubscription({
@@ -221,4 +225,93 @@ test("later terminal lifecycle for an old subscription preserves a newer Checkou
   const recordedEvent = store.creates.find((write) => write.path === "commercialProviderEvents/evt-old-deleted-late");
   assert.ok(recordedEvent, "late terminal lifecycle must remain replay-safe");
   assert.equal(recordedEvent.value.checkoutReservationId, "reservation-old");
+});
+
+test("replacement subscription establishes its own lifecycle ordering baseline", async () => {
+  const organizationId = "org-order-replacement";
+  const customerId = "cus-order-replacement";
+  const oldSubscriptionId = "sub-order-old";
+  const newSubscriptionId = "sub-order-new";
+  const newReservation = {
+    reservationId: "reservation-order-new",
+    organizationId,
+    checkoutSessionId: "cs-order-new",
+    checkoutUrl: "https://checkout.stripe.test/cs-order-new",
+    reservedAt: "2026-08-15T04:00:00.000Z",
+  };
+  const store = fakeFirestore([
+    [`organizationCommercialAccounts/${organizationId}`, canceledCommercialAccount(organizationId, customerId, oldSubscriptionId)],
+    ["commercialFoundingCapacity/current", capacity([newReservation])],
+    [`commercialSubscriptionReconciliations/${organizationId}`, reconciliation(organizationId, customerId, oldSubscriptionId, "canceled", "2026-08-15T04:05:00.000Z")],
+  ]);
+
+  const result = await reconcileCurrentFoundingSubscription({
+    db: store.db,
+    eventId: "evt-new-active-created-earlier",
+    eventType: "customer.subscription.updated",
+    eventCreatedAt: "2026-08-15T04:03:00.000Z",
+    snapshot: {
+      id: newSubscriptionId,
+      customerId,
+      organizationId,
+      status: "active",
+      priceId: "price_test_founding",
+      quantity: 1,
+      currentPeriodEndsAt: "2026-09-15T04:03:00.000Z",
+      cancelAtPeriodEnd: false,
+      checkoutReservationId: "reservation-order-new",
+    },
+  });
+
+  assert.equal(result.recognized, true);
+  assert.equal(result.retainsCapacity, true);
+  const capacityWrite = store.sets.find((write) => write.path === "commercialFoundingCapacity/current");
+  assert.ok(capacityWrite, "replacement subscription must reconcile capacity despite the old subscription's later event timestamp");
+  assert.deepEqual(capacityWrite.value.committedOrganizationIds, [organizationId]);
+  assert.deepEqual(capacityWrite.value.reservations, []);
+  const accountWrite = store.sets.find((write) => write.path === `organizationCommercialAccounts/${organizationId}`);
+  assert.equal(accountWrite.value.subscription.status, "active");
+  assert.equal(accountWrite.value.subscription.providerSubscriptionReference.externalReference, newSubscriptionId);
+  const reconciliationWrite = store.sets.find((write) => write.path === `commercialSubscriptionReconciliations/${organizationId}`);
+  assert.equal(reconciliationWrite.value.providerSubscriptionId, newSubscriptionId);
+  assert.equal(reconciliationWrite.value.lastProviderEventCreatedAt, "2026-08-15T04:03:00.000Z");
+});
+
+test("superseded old subscription cannot overwrite an active replacement", async () => {
+  const organizationId = "org-order-current";
+  const customerId = "cus-order-current";
+  const oldSubscriptionId = "sub-order-old-current";
+  const newSubscriptionId = "sub-order-new-current";
+  const store = fakeFirestore([
+    [`organizationCommercialAccounts/${organizationId}`, subscriptionCommercialAccount(organizationId, customerId, newSubscriptionId, "active")],
+    ["commercialFoundingCapacity/current", capacity([], [organizationId])],
+    [`commercialSubscriptionReconciliations/${organizationId}`, reconciliation(organizationId, customerId, newSubscriptionId, "active", "2026-08-15T04:03:00.000Z")],
+  ]);
+
+  const result = await reconcileCurrentFoundingSubscription({
+    db: store.db,
+    eventId: "evt-old-terminal-after-replacement",
+    eventType: "customer.subscription.deleted",
+    eventCreatedAt: "2026-08-15T04:06:00.000Z",
+    snapshot: {
+      id: oldSubscriptionId,
+      customerId,
+      organizationId,
+      status: "canceled",
+      priceId: "price_test_founding",
+      quantity: 1,
+      currentPeriodEndsAt: null,
+      cancelAtPeriodEnd: false,
+      checkoutReservationId: "reservation-order-old",
+    },
+  });
+
+  assert.equal(result.recognized, true);
+  assert.equal(result.retainsCapacity, true);
+  assert.equal(store.sets.length, 0, "superseded lifecycle must not rewrite account, capacity, or reconciliation state");
+  assert.deepEqual(store.documents.get("commercialFoundingCapacity/current").committedOrganizationIds, [organizationId]);
+  const recordedEvent = store.creates.find((write) => write.path === "commercialProviderEvents/evt-old-terminal-after-replacement");
+  assert.ok(recordedEvent, "superseded lifecycle must still be durably recorded for replay safety");
+  assert.equal(recordedEvent.value.ignoredAsStale, true);
+  assert.equal(recordedEvent.value.ignoredReason, "superseded-subscription");
 });
