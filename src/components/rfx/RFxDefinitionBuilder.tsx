@@ -85,6 +85,12 @@ interface FormState {
   interpretationRecordIds: string[];
 }
 
+interface AcknowledgedDefinitionCommit {
+  readonly id: string;
+  readonly version: number;
+  readonly qualifierValues: ReadonlyMap<string, string>;
+}
+
 function identifier(prefix: string): string {
   return `${prefix}-${crypto.randomUUID()}`;
 }
@@ -274,6 +280,9 @@ export function RFxDefinitionBuilder({
     id: aggregate.id,
     version: aggregate.version,
   });
+  const acknowledgedDefinitionCommit = useRef<AcknowledgedDefinitionCommit | null>(
+    null,
+  );
   const sheetInvoker = useRef<HTMLButtonElement | null>(null);
   const sheetDialog = useRef<HTMLDivElement | null>(null);
   const payload = useMemo(() => definitionPayload(form), [form]);
@@ -425,6 +434,12 @@ export function RFxDefinitionBuilder({
     setSaving(true);
     setError(null);
     const savingRevision = revision.current;
+    const submittedQualifierValues = new Map(
+      payload.requirements.map((requirement) => [
+        requirement.id,
+        requirement.qualifiers[0]?.value ?? "",
+      ]),
+    );
     const storage = browserStorage();
     const storageKey = `rfxchange:rfx-definition:${commandRecoveryScope}:${aggregate.id}`;
     const fingerprint = JSON.stringify({ version: aggregate.version, payload });
@@ -460,6 +475,11 @@ export function RFxDefinitionBuilder({
             result.error ??
             t("rfxWorkspace.definitionSaveError"),
         );
+      acknowledgedDefinitionCommit.current = Object.freeze({
+        id: result.aggregate.id,
+        version: result.aggregate.version,
+        qualifierValues: submittedQualifierValues,
+      });
       onCommitted(result.aggregate);
       clearRetryStableCommand({ storage, storageKey, commandId });
       if (revision.current === savingRevision) setDirty(false);
@@ -503,6 +523,11 @@ export function RFxDefinitionBuilder({
         requirement,
       ]),
     );
+    const acknowledgedCommit =
+      acknowledgedDefinitionCommit.current?.id === aggregate.id &&
+      acknowledgedDefinitionCommit.current.version === aggregate.version
+        ? acknowledgedDefinitionCommit.current
+        : null;
     synchronizedAggregate.current = {
       id: aggregate.id,
       version: aggregate.version,
@@ -512,17 +537,34 @@ export function RFxDefinitionBuilder({
         ...current,
         requirements: current.requirements.map((requirement) => {
           const authoritative = authoritativeRequirements.get(requirement.id);
-          if (!authoritative || requirement.qualifierDirty) return requirement;
+          if (!authoritative) return requirement;
+          if (!requirement.qualifierDirty) {
+            return {
+              ...requirement,
+              qualifier: authoritative.qualifier,
+              qualifierBase: authoritative.qualifier,
+            };
+          }
+          const submittedQualifier =
+            acknowledgedCommit?.qualifierValues.get(requirement.id);
+          if (
+            submittedQualifier === undefined ||
+            authoritative.qualifier !== submittedQualifier
+          ) {
+            return requirement;
+          }
           return {
             ...requirement,
-            qualifier: authoritative.qualifier,
             qualifierBase: authoritative.qualifier,
+            qualifierDirty: requirement.qualifier !== submittedQualifier,
           };
         }),
       }));
+      if (acknowledgedCommit) acknowledgedDefinitionCommit.current = null;
       return;
     }
     setForm(authoritativeForm);
+    if (acknowledgedCommit) acknowledgedDefinitionCommit.current = null;
   }, [aggregate, dirty, saving]);
 
   useEffect(() => {
