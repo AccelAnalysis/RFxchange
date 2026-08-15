@@ -1,0 +1,32 @@
+{
+  "title": "Calificadores estructurados",
+  "intro": "Añada condiciones regidas de texto, cantidad, booleanas o geográficas a un requisito de RFx.",
+  "requirement": "Requisito",
+  "qualifierType": "Tipo de calificador",
+  "type": {
+    "text": "Texto",
+    "quantity": "Cantidad",
+    "boolean": "Booleano",
+    "geography": "Geografía"
+  },
+  "defaultLabel": "Condición",
+  "label": "Etiqueta",
+  "requiredText": "Texto requerido",
+  "amount": "Cantidad",
+  "unit": "Unidad",
+  "requiredValue": "Valor requerido",
+  "yesTrue": "Sí / verdadero",
+  "noFalse": "No / falso",
+  "localityIds": "ID de localidades regidas",
+  "localityPlaceholder": "ID de localidad separados por comas",
+  "saving": "Guardando…",
+  "addQualifier": "Añadir calificador",
+  "saved": "Calificador estructurado guardado.",
+  "error": {
+    "labelRequired": "La etiqueta del calificador es obligatoria.",
+    "valueRequired": "El valor del calificador es obligatorio.",
+    "quantityRequired": "Se requieren una cantidad positiva y una unidad.",
+    "localityRequired": "Se requiere al menos un ID de localidad regida.",
+    "save": "No se pudo guardar el calificador."
+  }
+}
