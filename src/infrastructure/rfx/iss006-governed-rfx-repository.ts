@@ -9,6 +9,7 @@ import {
   type PerformanceLocationItem,
   type RfxAggregate,
   type RfxCommandReceipt,
+  type RfxDefinition,
   type RfxId,
 } from "../../domain/rfx/model.ts";
 import {
@@ -153,17 +154,46 @@ function sameOrganizationLocationProjection(
   return false;
 }
 
+export function reconcileDefinitionForPackage(
+  definition: RfxDefinition | null,
+  aggregate: RfxAggregate,
+): RfxDefinition | null {
+  if (!definition || !aggregate.package) return definition;
+  const availableFoundationIds = new Set(
+    aggregate.package.requirements.map((requirement) => requirement.id),
+  );
+  let changed = false;
+  const requirements = definition.requirements.map((requirement) => {
+    const linkedFoundationRequirementIds = requirement.linkedFoundationRequirementIds.filter(
+      (id) => availableFoundationIds.has(id),
+    );
+    if (linkedFoundationRequirementIds.length === requirement.linkedFoundationRequirementIds.length) {
+      return requirement;
+    }
+    changed = true;
+    return Object.freeze({
+      ...requirement,
+      linkedFoundationRequirementIds: Object.freeze(linkedFoundationRequirementIds),
+    });
+  });
+  return changed
+    ? Object.freeze({ ...definition, requirements: Object.freeze(requirements) })
+    : definition;
+}
+
 /**
- * Packet-owned repository adapter for ISS-006 package saves.
+ * Packet-owned repository adapter for ISS-006 package saves plus ISS-011
+ * package/definition link convergence.
  *
  * All non-package operations delegate unchanged to the canonical Firestore RFx
  * repository. Package persistence mirrors its existing atomic save semantics,
  * adding current `released` geography reads plus exact locality label/bounds
  * binding and, when the package uses an organization-derived performance
  * location, a current organization-location snapshot read in the same
- * transaction. The command receipt is read first so exact replay can return
- * without consulting authority that may legitimately have changed after the
- * original commit.
+ * transaction. It also removes definition links to foundation requirements
+ * that no longer exist in the newly saved package. The command receipt is read
+ * first so exact replay can return without consulting authority that may have
+ * legitimately changed after the original commit.
  */
 export class Iss006GovernedRfxRepository implements RfxRepository {
   constructor(
@@ -204,26 +234,41 @@ export class Iss006GovernedRfxRepository implements RfxRepository {
       return this.base.save(bundle);
     }
 
-    const aggregateRef = this.db.collection(AGGREGATES).doc(bundle.aggregate.id);
-    const eventRef = this.db.collection(EVENTS).doc(bundle.event.id);
-    const commandRef = this.db.collection(COMMANDS).doc(bundle.command.id);
-    const auditRef = this.db.collection(AUDITS).doc(bundle.audit.id);
-    const performanceLocation = bundle.aggregate.package?.performanceLocation ?? null;
+    const reconciledDefinition = reconcileDefinitionForPackage(
+      bundle.aggregate.definition,
+      bundle.aggregate,
+    );
+    const governedAggregate = reconciledDefinition === bundle.aggregate.definition
+      ? bundle.aggregate
+      : Object.freeze({ ...bundle.aggregate, definition: reconciledDefinition });
+    const governedEvent = reconciledDefinition === bundle.aggregate.definition
+      ? bundle.event
+      : Object.freeze({ ...bundle.event, definition: reconciledDefinition });
+    const governedBundle = Object.freeze({
+      ...bundle,
+      aggregate: governedAggregate,
+      event: governedEvent,
+    });
+
+    const aggregateRef = this.db.collection(AGGREGATES).doc(governedAggregate.id);
+    const eventRef = this.db.collection(EVENTS).doc(governedEvent.id);
+    const commandRef = this.db.collection(COMMANDS).doc(governedBundle.command.id);
+    const auditRef = this.db.collection(AUDITS).doc(governedBundle.audit.id);
+    const performanceLocation = governedAggregate.package?.performanceLocation ?? null;
     const geographyRefs = localityIds(performanceLocation).map((id) =>
       this.db.collection(GEOGRAPHIES).doc(id),
     );
     const localityItems = localitySnapshotItems(performanceLocation);
     const boundLocationItems = organizationLocationItems(performanceLocation);
     const organizationLocationRef = boundLocationItems.length > 0
-      ? this.db.collection(ORGANIZATION_LOCATIONS).doc(String(bundle.aggregate.issuerOrganizationId))
+      ? this.db.collection(ORGANIZATION_LOCATIONS).doc(String(governedAggregate.issuerOrganizationId))
       : null;
 
     return this.db.runTransaction(async (transaction) => {
-      // Replay recovery intentionally precedes current geography/location reads.
       const commandSnapshot = await transaction.get(commandRef);
       if (commandSnapshot.exists) {
         const prior = commandSnapshot.data() as RfxCommandReceipt;
-        if (exactReplay(prior, bundle.command)) return "replayed" as const;
+        if (exactReplay(prior, governedBundle.command)) return "replayed" as const;
         throw new RfxPersistenceConflictError("RFx command identity collision.");
       }
 
@@ -249,9 +294,9 @@ export class Iss006GovernedRfxRepository implements RfxRepository {
       }
       const current = aggregateSnapshot.data() as RfxAggregate;
       if (
-        current.issuerOrganizationId !== bundle.aggregate.issuerOrganizationId ||
-        current.version !== bundle.expectedVersion ||
-        bundle.aggregate.version !== bundle.expectedVersion + 1
+        current.issuerOrganizationId !== governedAggregate.issuerOrganizationId ||
+        current.version !== governedBundle.expectedVersion ||
+        governedAggregate.version !== governedBundle.expectedVersion + 1
       ) {
         throw new RfxPersistenceConflictError(
           `RFx changed; current version is ${current.version}.`,
@@ -290,7 +335,7 @@ export class Iss006GovernedRfxRepository implements RfxRepository {
         }
         const currentLocation = organizationLocationSnapshot.data() as ConfirmedOrganizationLocation;
         if (
-          String(currentLocation.organizationId) !== String(bundle.aggregate.issuerOrganizationId) ||
+          String(currentLocation.organizationId) !== String(governedAggregate.issuerOrganizationId) ||
           !boundLocationItems.every((item) =>
             sameOrganizationLocationProjection(item, currentLocation),
           )
@@ -301,10 +346,10 @@ export class Iss006GovernedRfxRepository implements RfxRepository {
         }
       }
 
-      transaction.set(aggregateRef, mutable(bundle.aggregate));
-      transaction.create(eventRef, immutable(bundle.event));
-      transaction.create(commandRef, immutable(bundle.command));
-      transaction.create(auditRef, immutable(bundle.audit));
+      transaction.set(aggregateRef, mutable(governedAggregate));
+      transaction.create(eventRef, immutable(governedEvent));
+      transaction.create(commandRef, immutable(governedBundle.command));
+      transaction.create(auditRef, immutable(governedBundle.audit));
       return "created" as const;
     });
   }
