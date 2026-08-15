@@ -117,8 +117,8 @@ export async function releaseUnattachedFoundingReservation(db: Firestore, input:
   });
 }
 
-/** Release only provider-confirmed expiry for the exact currently attached Checkout reservation. */
-export async function releaseExpiredAttachedFoundingReservation(db: Firestore, input: Readonly<{ organizationId: string; reservationId: string; checkoutSessionId: string }>): Promise<boolean> {
+/** Release only provider-confirmed reclaimability for the exact currently attached Checkout reservation. */
+export async function releaseReclaimableAttachedFoundingReservation(db: Firestore, input: Readonly<{ organizationId: string; reservationId: string; checkoutSessionId: string }>): Promise<boolean> {
   const ref = db.collection(CAPACITY_COLLECTION).doc(CAPACITY_DOCUMENT);
   return db.runTransaction(async (transaction) => {
     const snap = await transaction.get(ref);
@@ -185,15 +185,22 @@ async function reconcileAmbiguousFoundingReservations(db: Firestore, currentOrga
         continue;
       }
 
-      const exactExpiredAttachedSession =
+      const exactProviderReclaimableAttachedSession =
         reservation.checkoutSessionId !== null &&
-        providerState.matchingCheckoutStatus === "expired" &&
-        providerState.matchingCheckoutSessionId === reservation.checkoutSessionId;
-      if (!exactExpiredAttachedSession) {
-        if (reservation.organizationId === currentOrganizationId) throw new FoundingCommerceError(503, "provider-state-unavailable", "Stripe did not confirm expiry of the exact attached Founding Checkout Session.");
+        providerState.matchingCheckoutSessionId === reservation.checkoutSessionId &&
+        (
+          providerState.matchingCheckoutStatus === "expired" ||
+          (
+            providerState.matchingCheckoutStatus === "complete" &&
+            providerState.matchingSubscriptionId !== null &&
+            (providerState.matchingSubscriptionStatus === "canceled" || providerState.matchingSubscriptionStatus === "incomplete_expired")
+          )
+        );
+      if (!exactProviderReclaimableAttachedSession) {
+        if (reservation.organizationId === currentOrganizationId) throw new FoundingCommerceError(503, "provider-state-unavailable", "Stripe did not confirm safe reclamation of the exact attached Founding Checkout Session.");
         continue;
       }
-      await releaseExpiredAttachedFoundingReservation(db, {
+      await releaseReclaimableAttachedFoundingReservation(db, {
         organizationId: reservation.organizationId,
         reservationId: reservation.reservationId,
         checkoutSessionId: reservation.checkoutSessionId!,
