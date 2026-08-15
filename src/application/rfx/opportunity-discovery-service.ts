@@ -147,7 +147,12 @@ function cursorOffset(cursor: string | null, queryFingerprint: string): number {
     const decoded = Buffer.from(cursor, "base64url").toString("utf8");
     const [fingerprintValue, offsetValue] = decoded.split(":");
     const offset = Number.parseInt(offsetValue ?? "", 10);
-    if (fingerprintValue !== queryFingerprint || !Number.isInteger(offset) || offset < 0 || offset > 10_000) {
+    if (
+      fingerprintValue !== queryFingerprint ||
+      !Number.isSafeInteger(offset) ||
+      offset < 0 ||
+      offset > Number.MAX_SAFE_INTEGER
+    ) {
       throw new Error("stale");
     }
     return offset;
@@ -329,7 +334,7 @@ export class OpportunityDiscoveryService {
 
   async evaluatePublishedProjection(projection: ResponderOpportunityProjection): Promise<Readonly<{ matches: number; alerts: number }>> {
     if (!projectionPermitted(projection)) return Object.freeze({ matches: 0, alerts: 0 });
-    const now = this.now();
+    const now = projection.publishedAt ?? this.now();
     const searches = await this.repository.listActiveSavedSearches();
     let matches = 0;
     let alerts = 0;
