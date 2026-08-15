@@ -273,7 +273,13 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
               <ul className={styles.results} aria-label={t("rfxWorkspace.discovery.resultsLabel")}>
                 {result.items.map((item) => <li key={item.reference}><button type="button" aria-pressed={selected?.reference === item.reference} data-opportunity-reference={item.reference} onClick={() => select(item)}><span><strong>{item.title}</strong><small>{item.issuerDisplayName}</small></span><span>{item.localities.map((locality) => locality.label).join(" · ")}</span><span>{t("rfxWorkspace.discovery.deadline", { date: item.responseDeadline })}</span></button></li>)}
               </ul>
-            ) : <StatePanel state="empty" title={t("rfxWorkspace.discovery.emptyTitle")}>{t("rfxWorkspace.discovery.emptyBody")}</StatePanel>}
+            ) : result.nextCursor ? (
+              <StatePanel state="loading" title={t("rfxWorkspace.discovery.more")}>
+                <span data-opportunity-scan-incomplete>{t("rfxWorkspace.discovery.search.truth")}</span>
+              </StatePanel>
+            ) : (
+              <StatePanel state="empty" title={t("rfxWorkspace.discovery.emptyTitle")}>{t("rfxWorkspace.discovery.emptyBody")}</StatePanel>
+            )}
             {result.nextCursor ? <Link className={styles.more} href={`${queryHref(result)}${queryHref(result).includes("?") ? "&" : "?"}cursor=${encodeURIComponent(result.nextCursor)}`}>{t("rfxWorkspace.discovery.more")}</Link> : null}
             <details className={styles.save}>
               <summary>{t("rfxWorkspace.discovery.saved.action")}</summary>
