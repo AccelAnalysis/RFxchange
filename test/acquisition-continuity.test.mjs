@@ -333,7 +333,11 @@ test("ACQ-002/003 UI and route boundaries remain responsive and server-authorita
     readFile(new URL("../app/acquisition/continue/page.module.css", import.meta.url), "utf8"),
     readFile(new URL("../src/application/onboarding/activation-journey.ts", import.meta.url), "utf8"),
   ]);
-  assert.match(publicPage, /approved public projection/);
+  const publicLookup = publicPage.indexOf("const publicOpportunity = await resolvePublicOpportunityProjection(reference)");
+  const publicRender = publicPage.indexOf("if (publicOpportunity) return opportunityView(publicOpportunity)");
+  const participantRoute = publicPage.indexOf("const access = await resolveParticipantRoute");
+  assert.ok(publicLookup >= 0 && publicRender > publicLookup && participantRoute > publicRender,
+    "Public opportunities must render before participant lifecycle routing.");
   assert.doesNotMatch(publicPage, /responseInstructions|evaluationCriteria|issuerEmail/);
   assert.match(publicCss, /@media \(max-width: 760px\)/);
   assert.match(publicCss, /grid-template-columns: 1fr/);
