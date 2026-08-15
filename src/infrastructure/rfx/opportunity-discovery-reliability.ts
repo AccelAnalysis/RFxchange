@@ -14,6 +14,7 @@ interface OpportunityDiscoveryEvaluationQueueRecord {
   readonly projectionVersion: number;
   readonly projectionDigest: string;
   readonly projection: ResponderOpportunityProjection;
+  readonly evaluationAt: string;
   readonly status: "queued" | "completed";
   readonly attemptCount: number;
   readonly lastErrorCode: string | null;
@@ -34,17 +35,25 @@ function errorCode(error: unknown): string {
   return value.trim().toLowerCase().replace(/[^a-z0-9._-]+/g, "-").slice(0, 96) || "unknown";
 }
 
+function evaluationTimestamp(projection: ResponderOpportunityProjection): string {
+  if (projection.publishedAt) return new Date(projection.publishedAt).toISOString();
+  return new Date().toISOString();
+}
+
 export async function queueOpportunityDiscoveryEvaluation(
   projection: ResponderOpportunityProjection,
   error: unknown = null,
   db: Firestore = getServerFirestore(),
 ): Promise<string> {
   const id = evaluationId(projection);
+  const evaluationAt = evaluationTimestamp(projection);
   const ref = db.collection(OPPORTUNITY_DISCOVERY_EVALUATIONS_COLLECTION).doc(id);
   await db.runTransaction(async (transaction) => {
     const snapshot = await transaction.get(ref);
     if (snapshot.exists) {
-      const current = snapshot.data() as OpportunityDiscoveryEvaluationQueueRecord;
+      const current = snapshot.data() as OpportunityDiscoveryEvaluationQueueRecord & {
+        evaluationAt?: string;
+      };
       if (
         current.reference !== projection.reference ||
         current.projectionVersion !== projection.aggregateVersion ||
@@ -56,6 +65,7 @@ export async function queueOpportunityDiscoveryEvaluation(
       transaction.set(ref, {
         ...current,
         projection,
+        evaluationAt: current.evaluationAt ?? evaluationAt,
         lastErrorCode: error ? errorCode(error) : current.lastErrorCode,
         updatedAt: FieldValue.serverTimestamp(),
       });
@@ -68,6 +78,7 @@ export async function queueOpportunityDiscoveryEvaluation(
       projectionVersion: projection.aggregateVersion,
       projectionDigest: projection.digest,
       projection,
+      evaluationAt,
       status: "queued",
       attemptCount: 0,
       lastErrorCode: error ? errorCode(error) : null,
