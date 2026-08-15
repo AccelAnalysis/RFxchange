@@ -47,12 +47,17 @@ test("ISS-007 and ISS-011 preserve the correct draft and support lossless struct
   assert.match(definitionBuilder, /const synchronizedAggregate = useRef\(\{/);
   assert.match(
     definitionBuilder,
-    /if \(dirty \|\| saving \|\| saveInFlight\.current\) return;/,
-    "Authoritative aggregate refreshes must wait until no local definition edit or save is active.",
+    /if \(dirty \|\| saving \|\| saveInFlight\.current\) \{[\s\S]{0,160}setForm\(\(current\) => \(\{/,
+    "A dirty or in-flight editor must reconcile authoritative state without remounting or replacing unrelated local edits.",
   );
   assert.match(
     definitionBuilder,
-    /synchronizedAggregate\.current = \{[\s\S]{0,160}setForm\(initialForm\(aggregate\)\)/,
+    /requirement\.qualifierDirty[\s\S]{0,220}qualifierBase: authoritative\.qualifier[\s\S]{0,220}qualifier: authoritative\.qualifier/,
+    "Dirty qualifier input must retain the local value while clean qualifier fields absorb the authoritative value and baseline.",
+  );
+  assert.match(
+    definitionBuilder,
+    /const authoritativeForm = initialForm\(aggregate\)[\s\S]{0,900}setForm\(authoritativeForm\)/,
     "A clean editor must refresh from the latest authoritative aggregate without a component remount.",
   );
   assert.match(qualifierEditor, /qualifierKind/);
