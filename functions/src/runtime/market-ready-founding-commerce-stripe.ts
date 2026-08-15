@@ -1,7 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import {
-  FOUNDING_PRICE_ID,
   PROVIDER_SUBSCRIPTION_STATUSES,
   assertFoundingSubscriptionCorrelation,
   subscriptionRetainsCapacity,
@@ -122,7 +121,8 @@ function providerStatus(value: unknown): ProviderSubscriptionStatus {
   return status as ProviderSubscriptionStatus;
 }
 
-function subscriptionSnapshot(value: StripeSubscription): ProviderSubscriptionSnapshot {
+function subscriptionSnapshot(value: StripeSubscription, expectedPriceIdValue: string): ProviderSubscriptionSnapshot {
+  const expectedPriceId = required(expectedPriceIdValue, "Expected Founding Price id");
   const items = value.items?.data ?? [];
   if (items.length !== 1) throw new Error("Founding subscription must contain exactly one line item.");
   const item = items[0]!;
@@ -146,13 +146,20 @@ function subscriptionSnapshot(value: StripeSubscription): ProviderSubscriptionSn
     currentPeriodEndsAt,
     cancelAtPeriodEnd: value.cancel_at_period_end === true,
   });
-  assertFoundingSubscriptionCorrelation({ snapshot, organizationId, customerId });
+  assertFoundingSubscriptionCorrelation({ snapshot, organizationId, customerId, expectedPriceId });
   return snapshot;
 }
 
-export async function retrieveCurrentFoundingSubscription(secretKey: string, subscriptionId: string): Promise<ProviderSubscriptionSnapshot> {
+export async function retrieveCurrentFoundingSubscription(
+  secretKey: string,
+  subscriptionId: string,
+  expectedPriceId: string,
+): Promise<ProviderSubscriptionSnapshot> {
   const encoded = encodeURIComponent(required(subscriptionId, "Stripe subscription id"));
-  return subscriptionSnapshot(await stripeGet<StripeSubscription>(secretKey, `/subscriptions/${encoded}`));
+  return subscriptionSnapshot(
+    await stripeGet<StripeSubscription>(secretKey, `/subscriptions/${encoded}`),
+    expectedPriceId,
+  );
 }
 
 function belongsToFoundingOrganization(value: StripeSubscription, organizationId: string): boolean {
@@ -163,15 +170,17 @@ export async function providerHasNonTerminalFoundingSubscription(input: Readonly
   secretKey: string;
   customerId: string;
   organizationId: string;
+  expectedPriceId: string;
 }>): Promise<boolean> {
   const customerId = required(input.customerId, "Stripe Customer id");
   const organizationId = required(input.organizationId, "RFxchange organization id");
+  const expectedPriceId = required(input.expectedPriceId, "Expected Founding Price id");
   const query = new URLSearchParams({ customer: customerId, status: "all", limit: "100" });
   const result = await stripeGet<StripeList<StripeSubscription>>(input.secretKey, `/subscriptions?${query.toString()}`);
   const exact = (result.data ?? [])
     .filter((value) => belongsToFoundingOrganization(value, organizationId))
-    .map(subscriptionSnapshot)
-    .filter((snapshot) => snapshot.customerId === customerId && snapshot.priceId === FOUNDING_PRICE_ID);
+    .map((value) => subscriptionSnapshot(value, expectedPriceId))
+    .filter((snapshot) => snapshot.customerId === customerId);
   const nonTerminal = exact.filter((snapshot) => subscriptionRetainsCapacity(snapshot.status));
   if (nonTerminal.length > 1) throw new Error("Multiple non-terminal Founding subscriptions exist for one RFxchange organization.");
   return nonTerminal.length === 1;
