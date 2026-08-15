@@ -30,6 +30,11 @@ export interface RfxPublicationPersistenceBundle {
     id: string;
     authorityUpdatedAt: string;
   }>[];
+  readonly authentication: Readonly<{
+    provider: string;
+    subject: string;
+    authenticatedAt: string;
+  }>;
   readonly event: RfxEvent;
   readonly command: RfxCommandReceipt;
   readonly audit: OrganizationActionAuditEvent;

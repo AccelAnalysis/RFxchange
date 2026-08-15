@@ -287,6 +287,27 @@ function finding(
   return Object.freeze({ code, severity, sourcePath, workspaceTarget, relatedRecordId });
 }
 
+function packageWorkspaceTarget(key: string): string {
+  switch (key) {
+    case "marketNeed": return "#rfx-need";
+    case "scopeOutputs": return "#rfx-scope-outputs";
+    case "timing": return "#rfx-timing";
+    case "performanceLocation": return "#rfx-performance-location";
+    case "valueTerm": return "#rfx-value-term";
+    case "requirements": return "#rfx-requirements";
+    default: return "#rfx-package";
+  }
+}
+
+function definitionWorkspaceTarget(key: string): string {
+  switch (key) {
+    case "requirements": return "#rfx-definition-requirements";
+    case "responseStructure": return "#rfx-definition-responseStructure";
+    case "evaluationDefinition": return "#rfx-definition-evaluationDefinition";
+    default: return "#rfx-definition";
+  }
+}
+
 export function evaluatePublicationReadiness(input: Readonly<{
   aggregate: RfxAggregate;
   audience: RfxPublicationAudience;
@@ -308,34 +329,34 @@ export function evaluatePublicationReadiness(input: Readonly<{
   } else {
     for (const [key, state] of Object.entries(aggregate.package.moduleStatus)) {
       if (state !== "complete")
-        findings.push(finding(`package.${key}.incomplete`, `package.moduleStatus.${key}`, `#rfx-package-${key}`));
+        findings.push(finding(`package.${key}.incomplete`, `package.moduleStatus.${key}`, packageWorkspaceTarget(key)));
     }
     const now = Date.parse(input.evaluatedAt);
     const deadline = aggregate.package.timing.responseDeadline;
     if (!deadline || Date.parse(`${deadline}T23:59:59.999Z`) <= now)
-      findings.push(finding("timing.response-deadline-invalid", "package.timing.responseDeadline", "#rfx-package-timing"));
+      findings.push(finding("timing.response-deadline-invalid", "package.timing.responseDeadline", "#rfx-timing"));
     const start = aggregate.package.timing.anticipatedStartDate;
     const completion = aggregate.package.timing.anticipatedCompletionDate;
     if (start && completion && start > completion)
-      findings.push(finding("timing.sequence-invalid", "package.timing", "#rfx-package-timing"));
+      findings.push(finding("timing.sequence-invalid", "package.timing", "#rfx-timing"));
     if (!aggregate.package.performanceLocation)
-      findings.push(finding("geography.performance-location-missing", "package.performanceLocation", "#rfx-package-performance-location"));
+      findings.push(finding("geography.performance-location-missing", "package.performanceLocation", "#rfx-performance-location"));
     else if (!input.localities.length)
-      findings.push(finding("geography.authority-unavailable", "package.performanceLocation", "#rfx-package-performance-location"));
+      findings.push(finding("geography.authority-unavailable", "package.performanceLocation", "#rfx-performance-location"));
   }
   if (!aggregate.definition) {
     findings.push(finding("definition.missing", "definition", "#rfx-definition"));
   } else {
     for (const [key, state] of Object.entries(aggregate.definition.moduleStatus)) {
       if (state !== "complete")
-        findings.push(finding(`definition.${key}.incomplete`, `definition.moduleStatus.${key}`, `#rfx-definition-${key}`));
+        findings.push(finding(`definition.${key}.incomplete`, `definition.moduleStatus.${key}`, definitionWorkspaceTarget(key)));
     }
     if (
       aggregate.definition.evaluationDefinition.weightingRequired &&
       aggregate.definition.evaluationDefinition.factors
         .filter((item) => item.weightBasisPoints !== null)
         .reduce((sum, item) => sum + (item.weightBasisPoints ?? 0), 0) !== 10_000
-    ) findings.push(finding("evaluation.weights-not-10000", "definition.evaluationDefinition.factors", "#rfx-definition-evaluation"));
+    ) findings.push(finding("evaluation.weights-not-10000", "definition.evaluationDefinition.factors", "#rfx-definition-evaluationDefinition"));
   }
   if (!input.issuerDisplayNameAvailable)
     findings.push(finding("issuer.display-identity-unavailable", "issuerOrganizationId", "#rfx-readiness"));
