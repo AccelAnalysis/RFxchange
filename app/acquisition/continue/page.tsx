@@ -58,7 +58,7 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
   if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   const acquisition = access.state.acquisitionContext;
-  const canonicalWorkspace = access.state.controlledPlatformUrl ?? "/geography/canvas";
+  const canonicalWorkspace = access.state.controlledPlatformUrl ?? "/exchange";
   if (!acquisition || acquisition.kind === "direct") redirect(canonicalWorkspace);
 
   let resumeStatus: "resumed" | "pending" = "pending";
