@@ -27,6 +27,7 @@ import { FirestoreBackgroundJobStore } from "./runtime/firestore-background-job-
 import { FirestoreTransactionalEmailDeliveryAuditStore } from "./runtime/firestore-transactional-email-delivery-audit-store.js";
 
 const ALERTS = "opportunityAlertIntents";
+const MATCHES = "opportunitySavedSearchMatches";
 const SEARCHES = "opportunitySavedSearches";
 const PROJECTIONS = "rfxOpportunityProjections";
 const MEMBERSHIPS = "organizationMemberships";
@@ -65,6 +66,7 @@ interface OpportunityAlertIntent {
   readonly organizationId: string;
   readonly userId: string;
   readonly membershipId: string;
+  readonly matchEventIds: readonly string[];
   readonly savedSearchIds: readonly string[];
   readonly opportunityReferences: readonly string[];
   readonly deliveryMode: "immediate" | "daily-digest";
@@ -83,10 +85,25 @@ interface SavedSearch {
   readonly userId: string;
   readonly membershipId: string;
   readonly status: string;
+  readonly version: number;
+}
+
+interface SavedSearchMatch {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly userId: string;
+  readonly membershipId: string;
+  readonly savedSearchId: string;
+  readonly savedSearchVersion: number;
+  readonly opportunityReference: string;
+  readonly projectionVersion: number;
+  readonly projectionDigest: string;
 }
 
 interface Projection {
   readonly reference: string;
+  readonly aggregateVersion: number;
+  readonly digest: string;
   readonly mode: string;
   readonly audience: string;
   readonly publishedAt: string | null;
@@ -334,6 +351,34 @@ function unrestricted(records: readonly FirebaseFirestore.QueryDocumentSnapshot[
   return records.every((record) => record.get("state") === "none");
 }
 
+function matchStillAuthoritative(
+  match: SavedSearchMatch,
+  intent: OpportunityAlertIntent,
+  searches: readonly SavedSearch[],
+  projections: readonly Projection[],
+): boolean {
+  if (
+    match.organizationId !== intent.organizationId ||
+    match.userId !== intent.userId ||
+    match.membershipId !== intent.membershipId
+  ) return false;
+  const search = searches.find((item) => item.id === match.savedSearchId);
+  const projection = projections.find(
+    (item) => item.reference === match.opportunityReference,
+  );
+  return Boolean(
+    search &&
+    search.status === "active" &&
+    search.organizationId === intent.organizationId &&
+    search.userId === intent.userId &&
+    search.membershipId === intent.membershipId &&
+    search.version === match.savedSearchVersion &&
+    projection &&
+    projection.aggregateVersion === match.projectionVersion &&
+    projection.digest === match.projectionDigest,
+  );
+}
+
 async function claimAlert(
   db: Firestore,
   id: string,
@@ -347,46 +392,46 @@ async function claimAlert(
     const intent = snapshot.data() as OpportunityAlertIntent;
     if (!due(intent, now)) return null;
 
-    const membershipRef = db.collection(MEMBERSHIPS).doc(intent.membershipId);
-    const userRef = db.collection(USERS).doc(intent.userId);
-    const searchRefs = intent.savedSearchIds.map((savedSearchId) =>
-      db.collection(SEARCHES).doc(savedSearchId),
+    const membershipSnapshot = await transaction.get(
+      db.collection(MEMBERSHIPS).doc(intent.membershipId),
     );
-    const projectionRefs = intent.opportunityReferences.map((reference) =>
-      db.collection(PROJECTIONS).doc(reference),
+    const userSnapshot = await transaction.get(
+      db.collection(USERS).doc(intent.userId),
     );
-    if (!searchRefs.length || !projectionRefs.length) {
-      transaction.set(ref, {
-        ...intent,
-        status: "suppressed",
-        suppressionReason: "authority-changed",
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-      return null;
-    }
-
-    const records = await transaction.getAll(
-      membershipRef,
-      userRef,
-      ...searchRefs,
-      ...projectionRefs,
+    const searchSnapshots = await Promise.all(
+      intent.savedSearchIds.map((savedSearchId) =>
+        transaction.get(db.collection(SEARCHES).doc(savedSearchId)),
+      ),
     );
-    const membershipSnapshot = records[0];
-    const userSnapshot = records[1];
-    const searchSnapshots = records.slice(2, 2 + searchRefs.length);
-    const projectionSnapshots = records.slice(2 + searchRefs.length);
-    const membership = membershipSnapshot?.data() as
+    const projectionSnapshots = await Promise.all(
+      intent.opportunityReferences.map((reference) =>
+        transaction.get(db.collection(PROJECTIONS).doc(reference)),
+      ),
+    );
+    const matchSnapshots = await Promise.all(
+      intent.matchEventIds.map((matchId) =>
+        transaction.get(db.collection(MATCHES).doc(matchId)),
+      ),
+    );
+    const membership = membershipSnapshot.data() as
       | { userId?: string; organizationId?: string; status?: string }
       | undefined;
-    const user = userSnapshot?.data() as
+    const user = userSnapshot.data() as
       | { id?: string; name?: string; primaryEmail?: string }
       | undefined;
-    const searches = searchSnapshots.map((item) => item.data() as SavedSearch | undefined);
-    const projections = projectionSnapshots.map((item) => item.data() as Projection | undefined);
+    const searches = searchSnapshots
+      .map((item) => item.data() as SavedSearch | undefined)
+      .filter((item): item is SavedSearch => Boolean(item));
+    const projections = projectionSnapshots
+      .map((item) => item.data() as Projection | undefined)
+      .filter((item): item is Projection => Boolean(item));
+    const matches = matchSnapshots
+      .map((item) => item.data() as SavedSearchMatch | undefined)
+      .filter((item): item is SavedSearchMatch => Boolean(item));
     const geographyRefs = projections.flatMap((projection) =>
-      projection?.payload.localities.map((locality) =>
+      projection.payload.localities.map((locality) =>
         db.collection(GEOGRAPHIES).doc(locality.id),
-      ) ?? [],
+      ),
     );
     const [organizationRestrictions, membershipRestrictions, ...geographies] = await Promise.all([
       transaction.get(
@@ -403,19 +448,21 @@ async function claimAlert(
     ]);
 
     const currentSummary = projections
-      .filter((projection): projection is Projection => Boolean(projection))
       .map(projectionSummary)
       .join("\n")
       .slice(0, 1800);
     const capturedSummary = String(intent.request.variables.opportunity_summary ?? "").trim();
     const capturedCount = Number(intent.request.variables.opportunity_count ?? 0);
     const authorityValid = Boolean(
-      membershipSnapshot?.exists &&
+      intent.savedSearchIds.length > 0 &&
+      intent.opportunityReferences.length > 0 &&
+      intent.matchEventIds.length > 0 &&
+      membershipSnapshot.exists &&
       membership &&
       membership.userId === intent.userId &&
       membership.organizationId === intent.organizationId &&
       membership.status === "active" &&
-      userSnapshot?.exists &&
+      userSnapshot.exists &&
       user &&
       user.id === intent.userId &&
       user.name?.trim() &&
@@ -424,18 +471,21 @@ async function claimAlert(
       (intent.request.recipient.displayName === null ||
         user.name.trim() === intent.request.recipient.displayName.trim()) &&
       searchSnapshots.every((item) => item.exists) &&
+      searches.length === intent.savedSearchIds.length &&
       searches.every((search) =>
-        Boolean(
-          search &&
-          search.organizationId === intent.organizationId &&
-          search.userId === intent.userId &&
-          search.membershipId === intent.membershipId &&
-          search.status === "active",
-        )
+        search.organizationId === intent.organizationId &&
+        search.userId === intent.userId &&
+        search.membershipId === intent.membershipId &&
+        search.status === "active"
       ) &&
       projectionSnapshots.every((item) => item.exists) &&
-      projections.every((projection) => Boolean(projection && projectionOpen(projection, now))) &&
       projections.length === intent.opportunityReferences.length &&
+      projections.every((projection) => projectionOpen(projection, now)) &&
+      matchSnapshots.every((item) => item.exists) &&
+      matches.length === intent.matchEventIds.length &&
+      matches.every((match) =>
+        matchStillAuthoritative(match, intent, searches, projections)
+      ) &&
       geographyRefs.length > 0 &&
       geographies.every((geography) =>
         geography.exists && geography.get("releaseState") === "released"
