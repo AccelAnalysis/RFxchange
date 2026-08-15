@@ -1,0 +1,32 @@
+{
+  "title": "Strukturierte Qualifizierer",
+  "intro": "Fügen Sie einer RFx-Anforderung gesteuerte Text-, Mengen-, boolesche oder geografische Bedingungen hinzu.",
+  "requirement": "Anforderung",
+  "qualifierType": "Qualifizierertyp",
+  "type": {
+    "text": "Text",
+    "quantity": "Menge",
+    "boolean": "Boolesch",
+    "geography": "Geografie"
+  },
+  "defaultLabel": "Bedingung",
+  "label": "Bezeichnung",
+  "requiredText": "Erforderlicher Text",
+  "amount": "Menge",
+  "unit": "Einheit",
+  "requiredValue": "Erforderlicher Wert",
+  "yesTrue": "Ja / wahr",
+  "noFalse": "Nein / falsch",
+  "localityIds": "Gesteuerte Orts-IDs",
+  "localityPlaceholder": "durch Kommas getrennte Orts-IDs",
+  "saving": "Speichern…",
+  "addQualifier": "Qualifizierer hinzufügen",
+  "saved": "Strukturierter Qualifizierer gespeichert.",
+  "error": {
+    "labelRequired": "Die Bezeichnung des Qualifizierers ist erforderlich.",
+    "valueRequired": "Der Wert des Qualifizierers ist erforderlich.",
+    "quantityRequired": "Eine positive Menge und eine Einheit sind erforderlich.",
+    "localityRequired": "Mindestens eine gesteuerte Orts-ID ist erforderlich.",
+    "save": "Der Qualifizierer konnte nicht gespeichert werden."
+  }
+}
