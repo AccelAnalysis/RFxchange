@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import { FieldValue, Timestamp, type DocumentData, type DocumentSnapshot, type Firestore, type Transaction } from "firebase-admin/firestore";
 import { OrganizationCommercialAccountService } from "../../application/commercial/organization-commercial-account.ts";
 import { createOrganizationCommercialAccount, evolveOrganizationCommercialAccount, type OrganizationCommercialAccount, type PaymentProviderReference } from "../../domain/commercial/model.ts";
@@ -44,19 +44,43 @@ export interface FoundingOrganizationContext { readonly db: Firestore; readonly 
 
 function isoNow(): string { return new Date().toISOString(); }
 function defaultCapacity(): CapacityDocument { return Object.freeze({ limit: RFXCHANGE_FOUNDING_CAP, committedOrganizationIds: Object.freeze([]), reservations: Object.freeze([]) }); }
+function exactCapacityString(value: unknown, label: string): string {
+  if (typeof value !== "string" || !value.trim() || value !== value.trim()) {
+    throw new FoundingCommerceError(503, "capacity-state-invalid", `${label} is invalid.`);
+  }
+  return value;
+}
 function capacityFromData(data: DocumentData | undefined): CapacityDocument {
   if (!data) return defaultCapacity();
   if (data.schemaVersion !== FIRESTORE_SCHEMA_VERSION || data.limit !== RFXCHANGE_FOUNDING_CAP) throw new FoundingCommerceError(503, "capacity-state-invalid", "Founding capacity state is invalid.");
-  const committed = Array.isArray(data.committedOrganizationIds) ? data.committedOrganizationIds.filter((v): v is string => typeof v === "string" && Boolean(v.trim())) : [];
-  const reservations = Array.isArray(data.reservations) ? data.reservations.map((v): CapacityReservation => {
-    if (!v || typeof v !== "object" || Array.isArray(v)) throw new FoundingCommerceError(503, "capacity-state-invalid", "Founding capacity reservation state is invalid.");
-    const r = v as Record<string, unknown>;
-    if (typeof r.reservationId !== "string" || typeof r.organizationId !== "string" || (r.checkoutSessionId !== null && typeof r.checkoutSessionId !== "string") || (r.checkoutUrl !== null && typeof r.checkoutUrl !== "string")) throw new FoundingCommerceError(503, "capacity-state-invalid", "Founding capacity reservation state is invalid.");
-    const reservedAt = r.reservedAt == null ? null : typeof r.reservedAt === "string" && Number.isFinite(Date.parse(r.reservedAt)) ? r.reservedAt : null;
-    return Object.freeze({ reservationId: r.reservationId, organizationId: r.organizationId, checkoutSessionId: r.checkoutSessionId as string | null, checkoutUrl: r.checkoutUrl as string | null, reservedAt });
-  }) : [];
-  if (new Set(reservations.map((r) => r.organizationId)).size !== reservations.length) throw new FoundingCommerceError(503, "capacity-state-invalid", "Founding capacity contains duplicate organization reservations.");
-  return Object.freeze({ limit: RFXCHANGE_FOUNDING_CAP, committedOrganizationIds: Object.freeze([...new Set(committed)]), reservations: Object.freeze(reservations) });
+  if (!Array.isArray(data.committedOrganizationIds) || !Array.isArray(data.reservations)) {
+    throw new FoundingCommerceError(503, "capacity-state-invalid", "Founding capacity arrays are invalid.");
+  }
+  const committed = data.committedOrganizationIds.map((value) => exactCapacityString(value, "Founding committed organization identity"));
+  if (new Set(committed).size !== committed.length) {
+    throw new FoundingCommerceError(503, "capacity-state-invalid", "Founding capacity contains duplicate committed organizations.");
+  }
+  const reservations = data.reservations.map((value): CapacityReservation => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw new FoundingCommerceError(503, "capacity-state-invalid", "Founding capacity reservation state is invalid.");
+    const record = value as Record<string, unknown>;
+    const reservationId = exactCapacityString(record.reservationId, "Founding reservation identity");
+    const organizationId = exactCapacityString(record.organizationId, "Founding reservation organization identity");
+    const checkoutSessionId = record.checkoutSessionId === null
+      ? null
+      : exactCapacityString(record.checkoutSessionId, "Founding Checkout Session identity");
+    const checkoutUrl = record.checkoutUrl === null
+      ? null
+      : exactCapacityString(record.checkoutUrl, "Founding Checkout URL");
+    const reservedAt = record.reservedAt == null
+      ? null
+      : typeof record.reservedAt === "string" && record.reservedAt === record.reservedAt.trim() && Number.isFinite(Date.parse(record.reservedAt))
+        ? record.reservedAt
+        : (() => { throw new FoundingCommerceError(503, "capacity-state-invalid", "Founding capacity reservation timestamp is invalid."); })();
+    return Object.freeze({ reservationId, organizationId, checkoutSessionId, checkoutUrl, reservedAt });
+  });
+  if (new Set(reservations.map((reservation) => reservation.organizationId)).size !== reservations.length) throw new FoundingCommerceError(503, "capacity-state-invalid", "Founding capacity contains duplicate organization reservations.");
+  if (new Set(reservations.map((reservation) => reservation.reservationId)).size !== reservations.length) throw new FoundingCommerceError(503, "capacity-state-invalid", "Founding capacity contains duplicate reservation identities.");
+  return Object.freeze({ limit: RFXCHANGE_FOUNDING_CAP, committedOrganizationIds: Object.freeze(committed), reservations: Object.freeze(reservations) });
 }
 function capacitySnapshot(capacity: CapacityDocument, organizationId?: string): FoundingCapacitySnapshot {
   const committed = capacity.committedOrganizationIds.length;
@@ -83,6 +107,10 @@ async function ensureAccount(db: Firestore, organization: OrganizationAccount): 
 }
 
 function assertRelease(organizationId: string): void { const d: FoundingCheckoutReleaseDecision = resolveFoundingCheckoutReleaseDecision(organizationId); if (d.allowed) return; if (d.reason === "proof-organization-only") throw new FoundingCommerceError(403, d.reason, "Founding checkout is not open for this organization."); throw new FoundingCommerceError(503, d.reason, "Founding checkout remains closed."); }
+function foundingCheckoutReservationId(organizationId: string, commandId: string): string {
+  const commandFingerprint = createHash("sha256").update(`${organizationId}\u0000${commandId}`, "utf8").digest("hex");
+  return `founding-command-${commandFingerprint}`;
+}
 
 export async function resolveFoundingOrganizationContext(input: Readonly<{ sessionCookie?: string | null }>): Promise<FoundingOrganizationContext> {
   const access = await resolveParticipantRoute({ sessionCookie: input.sessionCookie });
@@ -95,9 +123,10 @@ export async function resolveFoundingOrganizationContext(input: Readonly<{ sessi
 }
 export async function getFoundingCapacitySnapshot(db: Firestore, organizationId?: string): Promise<FoundingCapacitySnapshot> { const s = await db.collection(CAPACITY_COLLECTION).doc(CAPACITY_DOCUMENT).get(); return capacitySnapshot(capacityFromData(s.data()), organizationId); }
 
-export async function reserveFoundingCheckout(db: Firestore, organizationId: string): Promise<Readonly<{ kind: "reserved"; reservationId: string; existing: boolean }> | Readonly<{ kind: "reused"; reservationId: string; checkoutSessionId: string; checkoutUrl: string }>> {
+export async function reserveFoundingCheckout(db: Firestore, organizationId: string, commandId: string): Promise<Readonly<{ kind: "reserved"; reservationId: string; existing: boolean }> | Readonly<{ kind: "reused"; reservationId: string; checkoutSessionId: string; checkoutUrl: string }>> {
   const ref = db.collection(CAPACITY_COLLECTION).doc(CAPACITY_DOCUMENT);
-  return db.runTransaction(async (transaction) => { const snap = await transaction.get(ref); const state = capacityFromData(snap.data()); if (state.committedOrganizationIds.includes(organizationId)) throw new FoundingCommerceError(409, "already-founding", "This organization already occupies a Founding position."); const existing = state.reservations.find((r) => r.organizationId === organizationId); if (existing?.checkoutSessionId && existing.checkoutUrl) return Object.freeze({ kind: "reused" as const, reservationId: existing.reservationId, checkoutSessionId: existing.checkoutSessionId, checkoutUrl: existing.checkoutUrl }); if (existing) return Object.freeze({ kind: "reserved" as const, reservationId: existing.reservationId, existing: true }); if (capacitySnapshot(state).remaining <= 0) throw new FoundingCommerceError(409, "founding-capacity-full", "Founding Membership has reached capacity."); const reservation = Object.freeze({ reservationId: randomUUID(), organizationId, checkoutSessionId: null, checkoutUrl: null, reservedAt: isoNow() }); writeCapacity(transaction, snap, Object.freeze({ ...state, reservations: Object.freeze([...state.reservations, reservation]) })); return Object.freeze({ kind: "reserved" as const, reservationId: reservation.reservationId, existing: false }); });
+  const commandReservationId = foundingCheckoutReservationId(organizationId, commandId);
+  return db.runTransaction(async (transaction) => { const snap = await transaction.get(ref); const state = capacityFromData(snap.data()); if (state.committedOrganizationIds.includes(organizationId)) throw new FoundingCommerceError(409, "already-founding", "This organization already occupies a Founding position."); const existing = state.reservations.find((r) => r.organizationId === organizationId); if (existing?.checkoutSessionId && existing.checkoutUrl) return Object.freeze({ kind: "reused" as const, reservationId: existing.reservationId, checkoutSessionId: existing.checkoutSessionId, checkoutUrl: existing.checkoutUrl }); if (existing) return Object.freeze({ kind: "reserved" as const, reservationId: existing.reservationId, existing: true }); if (capacitySnapshot(state).remaining <= 0) throw new FoundingCommerceError(409, "founding-capacity-full", "Founding Membership has reached capacity."); const reservation = Object.freeze({ reservationId: commandReservationId, organizationId, checkoutSessionId: null, checkoutUrl: null, reservedAt: isoNow() }); writeCapacity(transaction, snap, Object.freeze({ ...state, reservations: Object.freeze([...state.reservations, reservation]) })); return Object.freeze({ kind: "reserved" as const, reservationId: reservation.reservationId, existing: false }); });
 }
 
 /** Release only the exact still-unattached reservation after a definitive pre-session failure. */
@@ -223,7 +252,7 @@ export async function beginFoundingCheckout(input: Readonly<{ context: FoundingO
   const organizationId = String(input.context.organization.id); assertRelease(organizationId); if (hasNonTerminalSubscription(input.context.commercialAccount)) throw new FoundingCommerceError(409, "subscription-exists", "A non-terminal Founding subscription already exists.");
   const commandId = input.commandId?.trim() ?? ""; if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{7,190}$/.test(commandId)) throw new FoundingCommerceError(400, "invalid-command-id", "Checkout command identity is invalid.");
   let origin: URL; try { origin = new URL(input.publicOrigin); } catch { throw new FoundingCommerceError(503, "public-origin-invalid", "RFxchange public origin is invalid."); } if (!["http:", "https:"].includes(origin.protocol) || origin.pathname !== "/" || origin.search || origin.hash) throw new FoundingCommerceError(503, "public-origin-invalid", "RFxchange public origin is invalid.");
-  assertFoundingStripeConfiguration(); await reconcileAmbiguousFoundingReservations(input.context.db, organizationId); const reservation = await reserveFoundingCheckout(input.context.db, organizationId); if (reservation.kind === "reused") return Object.freeze({ checkoutUrl: reservation.checkoutUrl, checkoutSessionId: reservation.checkoutSessionId, reused: true });
+  assertFoundingStripeConfiguration(); await reconcileAmbiguousFoundingReservations(input.context.db, organizationId); const reservation = await reserveFoundingCheckout(input.context.db, organizationId, commandId); if (reservation.kind === "reused") return Object.freeze({ checkoutUrl: reservation.checkoutUrl, checkoutSessionId: reservation.checkoutSessionId, reused: true });
   const repository = new FirestoreOrganizationCommercialAccountRepository(input.context.db); const service = new OrganizationCommercialAccountService({ repository, paymentProvider: new StripePaymentProvider() });
   let result;
   try {
