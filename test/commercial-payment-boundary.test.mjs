@@ -1,92 +1,97 @@
-import assert from "node:assert/strict";
 import test from "node:test";
+import assert from "node:assert/strict";
 
-import { OrganizationCommercialAccountService } from "../src/application/commercial/organization-commercial-account.ts";
+import { createOrganizationAccount } from "../src/domain/organizations/model.ts";
 import {
   createOrganizationCommercialAccount,
   createPaymentProviderReference,
   evolveOrganizationCommercialAccount,
-  paymentProviderKey,
 } from "../src/domain/commercial/model.ts";
-import { createOrganizationAccount } from "../src/domain/organizations/model.ts";
+import { OrganizationCommercialAccountService } from "../src/application/commercial/organization-commercial-account.ts";
 
-const now = "2026-03-03T00:00:00.000Z";
+const now = "2026-07-30T15:00:00.000Z";
 
 class MemoryCommercialRepository {
-  constructor() { this.values = new Map(); }
-  async getById(id) { return this.values.get(String(id)) ?? null; }
+  constructor() { this.records = new Map(); }
+  async getById(id) { return this.records.get(id) ?? null; }
   async getByOrganizationId(organizationId) {
-    return [...this.values.values()].find((value) => String(value.organizationId) === String(organizationId)) ?? null;
+    return [...this.records.values()].find((account) => account.organizationId === organizationId) ?? null;
   }
-  async create(account) { this.values.set(String(account.id), account); }
-  async save(account) { this.values.set(String(account.id), account); }
+  async create(account) {
+    if (this.records.has(account.id)) throw new Error("duplicate commercial account");
+    this.records.set(account.id, account);
+  }
+  async save(account) { this.records.set(account.id, account); }
 }
 
 class FakePaymentProvider {
-  constructor() {
-    this.providerKey = paymentProviderKey("fake-provider");
-    this.customerRequests = [];
-    this.checkoutRequests = [];
-    this.portalRequests = [];
-  }
+  constructor() { this.customerRequests = []; this.checkoutRequests = []; }
   async ensureCustomer(request) {
     this.customerRequests.push(request);
-    return {
-      providerKey: this.providerKey,
-      customerReference: createPaymentProviderReference({ providerKey: this.providerKey, kind: "customer", externalReference: "cus_demo" }),
-    };
+    const customerReference = createPaymentProviderReference({
+      providerKey: "test-payments",
+      kind: "customer",
+      externalReference: `cus_${request.organizationId}`,
+    });
+    return { providerKey: customerReference.providerKey, customerReference };
   }
   async beginSubscriptionCheckout(request) {
     this.checkoutRequests.push(request);
+    const checkoutReference = createPaymentProviderReference({
+      providerKey: "test-payments",
+      kind: "checkout-session",
+      externalReference: `checkout_${request.organizationId}`,
+    });
     return {
-      providerKey: this.providerKey,
+      providerKey: checkoutReference.providerKey,
+      checkoutReference,
       customerReference: request.customerReference,
-      checkoutReference: createPaymentProviderReference({ providerKey: this.providerKey, kind: "checkout-session", externalReference: "cs_demo" }),
-      redirectUrl: "https://payments.example.test/checkout/cs_demo",
+      redirectUrl: "https://payments.example.test/checkout/session",
     };
   }
-  async createCustomerPortalSession(request) {
-    this.portalRequests.push(request);
-    return {
-      providerKey: this.providerKey,
-      portalReference: createPaymentProviderReference({ providerKey: this.providerKey, kind: "customer-portal-session", externalReference: "bps_demo" }),
-      redirectUrl: "https://payments.example.test/portal/bps_demo",
-    };
-  }
+  async createCustomerPortalSession() { throw new Error("not used"); }
 }
 
-test("COM-038 organization commercial accounts are provider-neutral and default free", () => {
+test("ARC-010 commercial state is owned by the organization account tenant, never an individual user", () => {
   const account = createOrganizationCommercialAccount({ organizationId: "org_001", now });
+  assert.equal(account.id, "org_001");
+  assert.equal(account.organizationId, "org_001");
   assert.equal(account.planKey, "free");
+  assert.equal(account.subscription.status, "not-subscribed");
   assert.deepEqual(account.entitlementKeys, []);
   assert.deepEqual(account.providerReferences, []);
-  assert.equal(account.subscription.status, "not-subscribed");
-  assert.equal("stripeCustomerId" in account, false);
-  assert.equal("stripeSubscriptionId" in account, false);
-  assert.equal("stripeCheckoutSessionId" in account, false);
+  assert.equal("userId" in account, false);
+  assert.equal("membershipId" in account, false);
 });
 
-test("COM-038 paid commercial state uses opaque provider references and generic subscription state", () => {
-  const providerKey = paymentProviderKey("provider-a");
-  const customer = createPaymentProviderReference({ providerKey, kind: "customer", externalReference: "customer-a" });
-  const subscription = createPaymentProviderReference({ providerKey, kind: "subscription", externalReference: "subscription-a" });
+test("COM-038 keeps provider references opaque and separate from RFxchange commercial state", () => {
+  const customer = createPaymentProviderReference({
+    providerKey: "provider-a",
+    kind: "customer",
+    externalReference: "opaque-customer-781",
+  });
+  const subscription = createPaymentProviderReference({
+    providerKey: "provider-a",
+    kind: "subscription",
+    externalReference: "opaque-subscription-942",
+  });
   const base = createOrganizationCommercialAccount({ organizationId: "org_002", now });
   const paid = evolveOrganizationCommercialAccount(base, {
     planKey: "founding",
-    entitlementKeys: ["founding.recognition"],
+    entitlementKeys: ["opportunity.saved-searches", "opportunity.saved-searches", "profile.enhanced"],
     providerReferences: [customer, subscription],
     subscription: {
       status: "active",
       providerSubscriptionReference: subscription,
-      currentPeriodEndsAt: "2026-04-03T00:00:00.000Z",
-      cancelAtPeriodEnd: false,
+      currentPeriodEndsAt: "2026-08-30T15:00:00.000Z",
     },
-    now: "2026-03-03T00:01:00.000Z",
+    now: "2026-07-30T15:01:00.000Z",
   });
+  assert.equal(paid.organizationId, "org_002");
   assert.equal(paid.planKey, "founding");
-  assert.equal(paid.subscription.status, "active");
-  assert.equal(paid.subscription.providerSubscriptionReference.kind, "subscription");
-  assert.equal("stripeCustomerId" in paid, false);
+  assert.deepEqual(paid.entitlementKeys, ["opportunity.saved-searches", "profile.enhanced"]);
+  assert.equal(paid.subscription.providerSubscriptionReference.externalReference, "opaque-subscription-942");
+  assert.equal("stripeCustomer" in paid, false);
   assert.equal("stripeSubscription" in paid, false);
 });
 
@@ -124,7 +129,7 @@ test("COM-038 application service reaches payment infrastructure only through th
     successUrl: "https://rfxchange.example.test/account/billing/success",
     cancelUrl: "https://rfxchange.example.test/account/billing",
     idempotencyKey: "org-004-founding-checkout-1",
-    checkoutCorrelationId: "checkout-correlation-org-004-1",
+    checkoutCorrelationId: "org-004-founding-correlation-1",
     now,
   });
 
@@ -134,6 +139,6 @@ test("COM-038 application service reaches payment infrastructure only through th
   assert.equal(paymentProvider.checkoutRequests.length, 1);
   assert.equal(paymentProvider.checkoutRequests[0].planKey, "founding");
   assert.equal(paymentProvider.checkoutRequests[0].customerReference.kind, "customer");
-  assert.equal(paymentProvider.checkoutRequests[0].checkoutCorrelationId, "checkout-correlation-org-004-1");
+  assert.equal(paymentProvider.checkoutRequests[0].checkoutCorrelationId, "org-004-founding-correlation-1");
   assert.equal(result.checkoutReference.kind, "checkout-session");
 });
