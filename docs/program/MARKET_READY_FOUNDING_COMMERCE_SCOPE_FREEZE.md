@@ -58,12 +58,15 @@ Control Room authorizes these additional **exact files only** for the remaining 
 - `src/infrastructure/firestore/support.ts`
 - `test/commercial-payment-boundary.test.mjs`
 - `src/components/acquisition/FoundingAcquisitionContinuation.tsx`
+- `scripts/validate-post-wave3-marketing-surfaces.mjs`
 
 This amendment is narrow and does not transfer general ownership of their parent directories.
 
 The first four files are owned only for the Issue #192 commercial-authority persistence/security boundary already required by this packet: server-only commercial authority, canonical Firestore support, and direct-client denial evidence. They may not be used to redesign unrelated authorization, persistence, or participant behavior.
 
 `src/components/acquisition/FoundingAcquisitionContinuation.tsx` is a one-file Lane 01 shared-contract seam owned only to connect the already-governed post-value Founding continuation to the packet-owned `/commercial/founding` surface. Its localized copy, eligibility semantics, and surrounding participant-shell behavior remain unchanged. No other `src/components/acquisition/**`, participant-shell, orientation, or Exchange Room path is authorized by this amendment.
+
+`scripts/validate-post-wave3-marketing-surfaces.mjs` is owned only to reconcile its existing preserved-intent assertion with that same one-file continuation change. It must continue to require the public `/founding` conversion actions to enter `/acquisition/founding`; only the already-qualified post-value continuation assertion may point to `/commercial/founding`.
 
 Shared background-job runner/store files remain read-only dependencies. This amendment does not authorize Phase 2, Opportunities/RFx, Resources, Intelligence, Referrals, Independent Acceptance, merge, deployment, or live Checkout work.
 
