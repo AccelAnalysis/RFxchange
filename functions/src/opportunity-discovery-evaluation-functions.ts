@@ -75,6 +75,7 @@ interface EvaluationRecord {
   readonly projectionVersion: number;
   readonly projectionDigest: string;
   readonly projection: Projection;
+  readonly evaluationAt?: string;
   readonly status: string;
   readonly attemptCount: number;
   readonly claimId?: string | null;
@@ -570,12 +571,16 @@ async function processEvaluation(db: Firestore, id: string): Promise<boolean> {
     ) {
       throw new Error("Opportunity projection changed before durable evaluation.");
     }
+    const evaluationAt = claimed.record.evaluationAt ?? projection.publishedAt;
+    if (!evaluationAt || !Number.isFinite(Date.parse(evaluationAt))) {
+      throw new Error("Opportunity discovery evaluation time is unavailable.");
+    }
     await processAllActiveSearches(
       db,
       id,
       claimed.claimId,
       current,
-      new Date().toISOString(),
+      new Date(evaluationAt).toISOString(),
       claimed.record.savedSearchCursorId ?? null,
     );
     await completeEvaluation(db, id, claimed.claimId);
