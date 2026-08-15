@@ -105,11 +105,13 @@ export class OrganizationCommercialAccountService {
     successUrl: string;
     cancelUrl: string;
     idempotencyKey: string;
+    checkoutCorrelationId: string;
     now: string;
   }>): Promise<PaymentProviderCheckoutResult> {
     let account = await this.ensureFreeAccount(input.organization, input.now);
     const email = normalizedEmail(input.billingEmail);
     const idempotencyKey = required(input.idempotencyKey, "Payment idempotency key");
+    const checkoutCorrelationId = required(input.checkoutCorrelationId, "Checkout correlation id");
     const requestedPlan = commercialPlanKey(input.planKey);
     let customer = customerReference(account);
 
@@ -137,6 +139,7 @@ export class OrganizationCommercialAccountService {
       successUrl: required(input.successUrl, "Checkout success URL"),
       cancelUrl: required(input.cancelUrl, "Checkout cancel URL"),
       idempotencyKey,
+      checkoutCorrelationId,
     });
     assertCheckoutResult(result);
     return result;
