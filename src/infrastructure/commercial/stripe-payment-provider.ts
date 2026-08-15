@@ -20,6 +20,7 @@ export const RFXCHANGE_FOUNDING_CURRENCY = "usd";
 export const RFXCHANGE_FOUNDING_INTERVAL = "month";
 export const RFXCHANGE_FOUNDING_CAP = 250;
 export const RFXCHANGE_FOUNDING_AMBIGUOUS_RECONCILE_AFTER_MS = 45 * 60 * 1000;
+export const RFXCHANGE_FOUNDING_CHECKOUT_SESSION_LIFETIME_SECONDS = 35 * 60;
 const PROVIDER_KEY = paymentProviderKey("stripe");
 
 type StripeMode = "live" | "test";
@@ -148,13 +149,28 @@ function subscriptionItems(subscription: StripeSubscription): readonly StripeSub
   return subscription.items?.data ?? [];
 }
 
+async function listAllCustomerSubscriptions(customerReference: string): Promise<readonly StripeSubscription[]> {
+  const subscriptions: StripeSubscription[] = [];
+  let startingAfter: string | null = null;
+  do {
+    const query = new URLSearchParams({ customer: customerReference, status: "all", limit: "100" });
+    if (startingAfter) query.set("starting_after", startingAfter);
+    const page = await stripeRequest<StripeList<StripeSubscription>>(`/subscriptions?${query.toString()}`);
+    subscriptions.push(...page.data);
+    if (!page.has_more) break;
+    const last = page.data.at(-1);
+    if (!last?.id) throw new Error("Stripe subscription pagination is malformed; provider inspection fails closed.");
+    startingAfter = last.id;
+  } while (true);
+  return Object.freeze(subscriptions);
+}
+
 async function hasCorrelatedNonTerminalFoundingSubscription(customerReference: string, organizationId: string): Promise<boolean> {
-  const query = new URLSearchParams({ customer: customerReference, status: "all", limit: "100" });
-  const subscriptions = await stripeRequest<StripeList<StripeSubscription>>(`/subscriptions?${query.toString()}`);
+  const subscriptions = await listAllCustomerSubscriptions(customerReference);
   const config = configuration();
   let correlatedCount = 0;
 
-  for (const subscription of subscriptions.data) {
+  for (const subscription of subscriptions) {
     if (["canceled", "incomplete_expired"].includes(subscription.status)) continue;
     const items = subscriptionItems(subscription);
     const usesApprovedFoundingPrice = items.some((item) => item.price?.id === config.priceId);
@@ -284,7 +300,7 @@ export class StripePaymentProvider implements PaymentProvider {
         success_url: request.successUrl,
         cancel_url: request.cancelUrl,
         client_reference_id: organizationId,
-        expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+        expires_at: Math.floor(Date.now() / 1000) + RFXCHANGE_FOUNDING_CHECKOUT_SESSION_LIFETIME_SECONDS,
         "metadata[organizationId]": organizationId,
         "metadata[rfxchangePlan]": "founding",
         "metadata[rfxchangeReservationId]": checkoutCorrelationId,
