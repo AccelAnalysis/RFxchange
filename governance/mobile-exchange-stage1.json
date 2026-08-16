@@ -11,9 +11,17 @@
     "controlBranch": "control/mobile-stage1-architecture-lock",
     "implementationLane": "shared-exchange",
     "implementationBranch": "lane01/mobile-exchange-stage1-contracts",
-    "candidatePullRequest": null,
-    "candidateSha": null,
-    "status": "active-contract-convergence",
+    "candidatePullRequest": 218,
+    "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+    "candidateDisposition": "implemented-not-verified",
+    "candidateCi": {
+      "workflow": "production-ci",
+      "runNumber": 1482,
+      "status": "completed",
+      "conclusion": "failure",
+      "failureStage": "whitespace-integrity"
+    },
+    "status": "active-candidate-correction",
     "stage2Authorized": false
   },
   "lockedLensOrder": [
@@ -34,25 +42,71 @@
     "preserveMapContinuity": true
   },
   "contracts": [
-    { "id": "mobile-shell", "state": "not-started" },
-    { "id": "bottom-four-lens-navigation", "state": "foundation-exists-contract-not-converged" },
-    { "id": "three-position-bottom-sheet", "state": "not-started" },
-    { "id": "four-position-lens-action-rail", "state": "phase2-foundation-contract-not-converged" },
-    { "id": "result-business-card", "state": "not-started" },
-    { "id": "media", "state": "not-started" },
-    { "id": "favorite", "state": "not-started" },
-    { "id": "selected-object", "state": "organization-foundation-record-contract-not-converged" },
-    { "id": "map-projection", "state": "camera-geography-foundation-record-bounds-contract-not-converged" },
-    { "id": "detail-state", "state": "not-started" },
-    { "id": "continuity-state", "state": "version1-spatial-foundation-stage1-contract-not-converged" }
+    { "id": "mobile-shell", "state": "candidate-pending-review" },
+    { "id": "bottom-four-lens-navigation", "state": "candidate-pending-review" },
+    { "id": "three-position-bottom-sheet", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-002"] },
+    { "id": "four-position-lens-action-rail", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-004"] },
+    { "id": "result-business-card", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003"] },
+    { "id": "media", "state": "candidate-pending-review" },
+    { "id": "favorite", "state": "candidate-pending-review" },
+    { "id": "selected-object", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003"] },
+    { "id": "map-projection", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003"] },
+    { "id": "detail-state", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-002", "MOB1-FIND-00-003"] },
+    { "id": "continuity-state", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-002"] }
   ],
   "domainReviews": {
-    "02": { "lane": "opportunities-rfx", "status": "waiting-for-lane01-candidate", "candidateSha": null, "findingIds": [] },
-    "03": { "lane": "intelligence", "status": "waiting-for-lane01-candidate", "candidateSha": null, "findingIds": [] },
-    "04": { "lane": "resources", "status": "waiting-for-lane01-candidate", "candidateSha": null, "findingIds": [] },
-    "05": { "lane": "referrals", "status": "waiting-for-lane01-candidate", "candidateSha": null, "findingIds": [] }
+    "02": { "lane": "opportunities-rfx", "status": "waiting-for-corrected-candidate", "candidateSha": null, "findingIds": [] },
+    "03": { "lane": "intelligence", "status": "waiting-for-corrected-candidate", "candidateSha": null, "findingIds": [] },
+    "04": { "lane": "resources", "status": "waiting-for-corrected-candidate", "candidateSha": null, "findingIds": [] },
+    "05": { "lane": "referrals", "status": "waiting-for-corrected-candidate", "candidateSha": null, "findingIds": [] }
   },
-  "findings": [],
+  "findings": [
+    {
+      "id": "MOB1-FIND-00-001",
+      "candidatePullRequest": 218,
+      "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+      "contract": "completion-governance",
+      "state": "open",
+      "requestedDisposition": "accepted-shared-correction",
+      "summary": "Remove the reintroduced universal Independent Acceptance prerequisite and align with current completion governance."
+    },
+    {
+      "id": "MOB1-FIND-00-002",
+      "candidatePullRequest": 218,
+      "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+      "contract": "responsive-continuity",
+      "state": "open",
+      "requestedDisposition": "accepted-shared-correction",
+      "summary": "Represent result identity/cursor, internal scroll, safe-area, keyboard/orientation, reduced-motion/accessibility, and non-gesture sheet controls without implementing Stage 2 UI."
+    },
+    {
+      "id": "MOB1-FIND-00-003",
+      "candidatePullRequest": 218,
+      "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+      "contract": "selected-object-parity",
+      "state": "open",
+      "requestedDisposition": "accepted-shared-correction",
+      "summary": "Make marker, card, and detail subject identity internally consistent and enforceable with negative tests."
+    },
+    {
+      "id": "MOB1-FIND-00-004",
+      "candidatePullRequest": 218,
+      "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+      "contract": "lens-action-rail",
+      "state": "open",
+      "requestedDisposition": "accepted-shared-correction",
+      "summary": "Validate each projected action against the frozen canonical action ID for its lens and position."
+    },
+    {
+      "id": "BUILD-FIND-218-001",
+      "candidatePullRequest": 218,
+      "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+      "contract": "exact-head-ci",
+      "state": "open",
+      "requestedDisposition": "accepted-shared-correction",
+      "summary": "Remove trailing whitespace and obtain green exact-head production CI."
+    }
+  ],
   "sharedContractRequests": [],
   "allowedFindingDispositions": [
     "accepted-shared-correction",
@@ -65,11 +119,11 @@
   "exitGate": {
     "satisfied": false,
     "reasons": [
-      "Lane 01 has no Stage 1 candidate pull request.",
-      "Lanes 02-05 have not reviewed an exact Lane 01 candidate SHA.",
-      "The shared mobile contract family has not been implemented or reconciled.",
-      "No candidate-bound finding and disposition cycle has occurred."
+      "PR 218 has four unresolved substantive Control Room findings.",
+      "PR 218 exact-head production CI failed.",
+      "Lanes 02-05 have not reviewed a corrected exact candidate SHA.",
+      "No candidate-bound finding has a durable final disposition."
     ]
   },
-  "nextAction": "Lane 01 branches lane01/mobile-exchange-stage1-contracts from 0b23a9f9b49468aab12609dea6116e1409c925fe, implements only the bounded shared contract/type/test surface, and opens one draft PR naming WP-MOBILE-EXCHANGE-STAGE1-01."
+  "nextAction": "Lane 01 corrects MOB1-FIND-00-001 through MOB1-FIND-00-004 and BUILD-FIND-218-001 on PR 218, obtains green exact-head CI, and then Lanes 02-05 review the corrected exact SHA through GitHub."
 }
