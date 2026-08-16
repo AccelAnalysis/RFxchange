@@ -15,6 +15,8 @@ Every lane must:
 - recalculate from merged `main` before merge; and
 - stop at its packet boundary.
 
+For any `MOB-01` through `MOB-05` packet or any work that plans, implements, reviews, reconciles, tests, or integrates the mobile Exchange composition, **every participating lane must read `docs/program/MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md` and its linked current visual reference before acting**. Lens lanes must consume the shared mobile contracts rather than independently reinterpret the visual reference.
+
 ## Lane 00 — Control Room
 
 Own program status, work packets, dependency/branch assignment, merge order, Shared Contract Request routing and post-merge recalculation. Do not normally implement runtime or independently certify a requirement. Publish the current batch with exact bases, dependencies and acceptance owners.
