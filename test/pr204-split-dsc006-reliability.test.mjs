@@ -58,9 +58,30 @@ test("DSC-006 delivery preserves valid digest constituents and never mutates an 
   assert.match(delivery, /releaseClaimForRetry/);
   assert.match(delivery, /secrets: \["RFXCHANGE_MICROSOFT_CLIENT_SECRET"\]/);
   assert.match(delivery, /executeReliableTransactionalEmailJob/);
-  assert.match(delivery, /normalizeOpportunityAlertLocale/);
+  assert.match(delivery, /persistedDeliveryLocale/);
+  assert.match(delivery, /deliveryLocale/);
+  assert.match(delivery, /RFXCHANGE_MICROSOFT_EXPECTED_ENV/);
+  assert.match(delivery, /assertMicrosoftEnvironmentBinding\(\)/);
   assert.match(delivery, /\/opportunities\/\$\{encodeURIComponent\(firstReference\)\}/);
+  assert.doesNotMatch(delivery, /preferredLocale|user\.locale/);
   assert.doesNotMatch(delivery, /searches\.every\([\s\S]{0,250}status === "active"/);
+});
+
+test("DSC-006 persists the governed request locale atomically with saved searches", async () => {
+  const [route, runtime] = await Promise.all([
+    read("app/api/opportunities/route.ts"),
+    read("src/infrastructure/rfx/opportunity-discovery-runtime.ts"),
+  ]);
+
+  assert.match(route, /getRequestLocale/);
+  assert.match(route, /createServerOpportunityDiscoveryService\(undefined, locale\)/);
+  assert.match(runtime, /class LocaleBoundOpportunityDiscoveryRepository/);
+  assert.match(runtime, /override saveSavedSearch/);
+  assert.match(runtime, /deliveryLocale: this\.locale/);
+  assert.match(runtime, /return super\.saveSavedSearch/);
+  for (const value of ["en-US", "es", "fr", "it", "de"]) {
+    assert.match(runtime, new RegExp(`\\"${value}\\"`));
+  }
 });
 
 test("DSC-006 synchronous persistence freezes claimed digests and deduplicates summaries", async () => {
