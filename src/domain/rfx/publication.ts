@@ -11,6 +11,7 @@ import type {
   RfxFoundationRequirement,
   RfxId,
   RfxRequirementLevel,
+  RfxRequirementDefinition,
   RfxRequirementQualifier,
   RfxResponseSectionFormat,
   RfxTiming,
@@ -61,6 +62,17 @@ export interface ResponderRequirementProjection {
   readonly evidence: readonly string[];
 }
 
+export interface ResponderRequirementIndexEntry {
+  readonly ordinal: number;
+  readonly requirementId: string;
+  readonly capabilityId: string | null;
+  readonly amacsReleaseVersion: string | null;
+  readonly level: RfxRequirementLevel;
+  readonly satisfyingParty: RfxRequirementDefinition["satisfyingParty"];
+  readonly teamCoverageAllowed: boolean;
+  readonly evidenceRequired: boolean;
+}
+
 export interface ResponderOpportunityPayload {
   readonly title: string;
   readonly summary: string;
@@ -109,6 +121,10 @@ export interface ResponderOpportunityProjection {
   readonly digest: string;
   readonly payload: ResponderOpportunityPayload;
   readonly publishedAt: string | null;
+  /** Trusted-server comparison data. Never project this index into participant HTML/API envelopes. */
+  readonly issuerOrganizationIndexKey?: string;
+  /** Stable requirement semantics used by deterministic fit. Never expose as primary participant labels. */
+  readonly requirementIndex?: readonly ResponderRequirementIndexEntry[];
   readonly requestFamilyIndexKey: string;
   readonly localityIndexKeys: readonly string[];
   readonly capabilityIndexKeys: readonly string[];
@@ -127,6 +143,55 @@ export interface RfxPublicationSnapshot {
   readonly amacsSourceCommit: string;
   readonly projectionDigest: string;
   readonly publishedAt: string;
+}
+
+export function responderOpportunityFitIndex(aggregate: RfxAggregate): Readonly<{
+  issuerOrganizationIndexKey: string;
+  requirementIndex: readonly ResponderRequirementIndexEntry[];
+}> {
+  if (!aggregate.definition) throw new Error("RFx fit index requires a complete definition.");
+  return Object.freeze({
+    issuerOrganizationIndexKey: String(aggregate.issuerOrganizationId),
+    requirementIndex: Object.freeze(
+      aggregate.definition.requirements.map((requirement, ordinal) => Object.freeze({
+        ordinal,
+        requirementId: requirement.id,
+        capabilityId: requirement.capability?.id ?? null,
+        amacsReleaseVersion: requirement.capability?.amacsReleaseVersion ?? null,
+        level: requirement.level,
+        satisfyingParty: requirement.satisfyingParty,
+        teamCoverageAllowed: requirement.teamCoverageAllowed,
+        evidenceRequired: requirement.evidenceRequirementIds.length > 0,
+      })),
+    ),
+  });
+}
+
+export function governedResponderOpportunityProjection(
+  projection: ResponderOpportunityProjection,
+  snapshot: RfxPublicationSnapshot,
+): ResponderOpportunityProjection {
+  if (
+    snapshot.reference !== projection.reference ||
+    snapshot.aggregateVersion !== projection.aggregateVersion ||
+    snapshot.projectionDigest !== projection.digest ||
+    stableDigest(projection.payload) !== projection.digest ||
+    snapshot.aggregate.version !== projection.aggregateVersion ||
+    snapshot.aggregate.lifecycleState !== "published"
+  ) throw new Error("Opportunity publication evidence does not match the responder projection.");
+  const canonical = responderOpportunityFitIndex(snapshot.aggregate);
+  const indexMatches = projection.requirementIndex === undefined || (
+    projection.requirementIndex.length === canonical.requirementIndex.length &&
+    projection.requirementIndex.every((item, ordinal) => {
+      const expected = canonical.requirementIndex[ordinal];
+      return item.ordinal === expected.ordinal && item.requirementId === expected.requirementId && item.capabilityId === expected.capabilityId && item.amacsReleaseVersion === expected.amacsReleaseVersion && item.level === expected.level && item.satisfyingParty === expected.satisfyingParty && item.teamCoverageAllowed === expected.teamCoverageAllowed && item.evidenceRequired === expected.evidenceRequired;
+    })
+  );
+  if (
+    (projection.issuerOrganizationIndexKey !== undefined && projection.issuerOrganizationIndexKey !== canonical.issuerOrganizationIndexKey) ||
+    !indexMatches
+  ) throw new Error("Opportunity fit indexes do not match immutable publication evidence.");
+  return Object.freeze({ ...projection, ...canonical });
 }
 
 function stableDigest(payload: ResponderOpportunityPayload): string {
@@ -258,6 +323,7 @@ export function projectResponderOpportunity(input: Readonly<{
     }),
   });
   if (!payload.issuerDisplayName) throw new Error("Issuer display identity is unavailable.");
+  const fitIndex = responderOpportunityFitIndex(aggregate);
   return Object.freeze({
     schemaVersion: RFX_PUBLICATION_SCHEMA_VERSION,
     reference: input.reference,
@@ -267,6 +333,7 @@ export function projectResponderOpportunity(input: Readonly<{
     digest: stableDigest(payload),
     payload,
     publishedAt: input.mode === "published" ? (input.publishedAt ?? null) : null,
+    ...fitIndex,
     requestFamilyIndexKey: aggregate.requestFamily.requestFamilyId,
     localityIndexKeys: Object.freeze(permittedLocalities.map((item) => item.indexKey)),
     capabilityIndexKeys: Object.freeze(
