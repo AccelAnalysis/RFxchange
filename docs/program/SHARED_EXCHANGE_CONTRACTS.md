@@ -34,15 +34,14 @@ For `WP-MOBILE-EXCHANGE-STAGE1-01`, Lane 01 owns one converged interface family 
 - mobile shell composition;
 - exact four-lens bottom navigation;
 - three-position bottom sheet;
-- the four-position active-lens action rail;
+- four active-lens action positions;
 - result/business cards;
-- optional image and video media projection;
-- record favorites;
-- record-specific actions;
-- focal selected organization/record/marker state plus associated organization context;
+- optional image and video media;
+- record favorites and record-specific actions;
+- focal selected organization/record/marker plus truthful associated-organization context;
 - map camera/bounds and record projection;
-- detail context;
-- continuity and fail-closed reconciliation across lens, sheet, list, map, and detail transitions.
+- detail/safe-return context;
+- scoped continuity and fail-closed reconciliation across lens, sheet, list, map, and detail transitions.
 
 The existing sixteen action identities remain the lens-level registry. Record actions are a separate extension family and must not consume or rename those positions.
 
@@ -54,44 +53,33 @@ A request is a durable GitHub record with:
 
 - request ID `SCR-<lane>-<sequence>` or `SCR-<lane>-MOB1-<sequence>`;
 - requesting lane and exact candidate/base SHA;
-- affected stable requirement IDs or controlling authority section;
-- participant problem and desired generalized behavior;
-- current shared seam inspected;
-- domain-specific facts supplied by the requester;
+- affected authority/requirement;
+- participant problem and generalized behavior;
+- existing shared seam inspected;
+- domain facts supplied by the requester;
 - security/privacy/authority constraints;
 - consumers and compatibility impact;
-- proposed checks or evidence;
+- proposed checks/evidence;
 - explicit non-scope; and
-- requested dependency date or merge order.
+- requested dependency/merge order.
 
-The post-amendment flow is:
+The current flow is:
 
 ```text
-domain lane records need on the shared candidate PR
-→ Lane 01 decides whether generalized support is warranted
-→ Control Room confirms or adjusts the exact-base packet
-→ Lane 01 implements/reconciles the shared contract
-→ domain consumers review the exact candidate through GitHub
-→ findings receive durable dispositions
+domain lane records need on the Lane 01 PR
+→ Lane 01 proposes the shared correction
+→ Control Room reviews exact head and records disposition
+→ domain consumers review the same exact head through GitHub
 → applicable checks and exact-head CI pass
 → Control Room may close/merge under current completion governance
 → optional Lane 06 assurance may occur separately
-→ dependent lanes consume the merged contract
 ```
 
-If an existing seam is sufficient, the request closes with the reuse decision and no new shared implementation.
+If an existing seam is sufficient, the request closes with the reuse decision and no new implementation.
 
 ## Mobile Stage 1 finding protocol
 
-Substantive findings use `MOB1-FIND-<lane-number>-<sequence>` and record:
-
-- exact candidate PR and SHA;
-- affected contract;
-- representative domain record/journey;
-- conflict with an authority or required capability;
-- impact on security, privacy, accessibility, map/selection parity, or continuity;
-- smallest shared correction needed; and
-- explicit non-scope.
+Substantive findings use `MOB1-FIND-<lane-number>-<sequence>` and record exact candidate, affected contract, representative journey, authority conflict, impact, smallest shared correction, and explicit non-scope.
 
 Allowed dispositions are:
 
@@ -102,54 +90,54 @@ Allowed dispositions are:
 - `rejected-conflicts-with-authority`;
 - `superseded-by-candidate-sha`.
 
-The detailed review template, assignments, and convergence ledger are in `MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md`.
+The detailed review template and convergence ledger are in `MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md`.
 
 ## Ownership constraints
 
 - Global lens order, Account utility, generic marker/card/detail grammar, generic spatial state, drawer/sheet behavior, and cross-lens continuity are not domain-lane private code.
-- Focal record identity and associated organization identity must remain separately truthful where they represent different market objects.
-- A domain lane may supply domain facts/actions through shared extension points without moving authorization into the client.
-- Cross-geography or privacy-suppressed records do not receive fabricated coordinates.
-- Browser-restored geography remains unvalidated continuity until an authoritative server projection revalidates it.
-- New persistence fields require versioning, scope, invalidation, and backward-compatibility decisions.
-- Disabled presentation is never the security boundary, and disabled explanation keys must resolve in every supported locale.
+- Focal record identity and associated organization identity remain separately truthful when they are different market objects.
+- A domain lane supplies facts/actions through shared extension points without moving authorization into the client.
+- Privacy-suppressed records do not receive fabricated coordinates.
+- Browser-restored geography remains unvalidated until an authoritative server projection revalidates it.
+- New persistence fields require versioning, scope, invalidation, and backward compatibility.
+- Disabled presentation is never the security boundary, and explanation keys must resolve in every supported locale.
 - A shared contract may be reported `Implemented — Not Verified` without mandatory Lane 06 review when current completion governance is otherwise satisfied.
 
-## Current requests and convergence state
-
-Mobile Stage 1 is active under `WP-MOBILE-EXCHANGE-STAGE1-01` from base `0b23a9f9b49468aab12609dea6116e1409c925fe`.
+## Current Stage 1 state
 
 - Control Room packet: PR #217.
-- Lane 01 candidate: PR #218 at `3c67ef3dffeaa60aef761debb6cf76ea1c807789`.
-- Candidate state: `Implemented — Not Verified`.
-- Exact-head production-ci #1483: SUCCESS.
-- Lane 02 exact-head review: FINDING.
-- Lanes 03–05: review not submitted.
+- Lane 01 candidate: PR #218 at `cf73a656dba4c09e735ac991cab557ecc2a22943`.
+- Candidate disposition: `Implemented — Not Verified`.
+- Production-ci #1492: in progress.
+- Lane 02 reviewed prior head `3c67ef3d…` with FINDING and must re-review the current/final head.
+- Lanes 03–05 have not submitted reviews.
 - Stage 1 exit gate: not satisfied.
 - Stage 2: not authorized.
 
-### Open Control Room findings
+The current head adds a bounded continuity module with versioned participant/membership/viewer-organization/geography scope, typed invalidation reasons, fail-closed selected-object narrowing, safe return context, and accessibility/responsive policy facts. This partially addresses continuity findings but does not resolve the remaining conflicts.
+
+### Control Room findings
 
 | Finding | State | Required shared disposition |
 | --- | --- | --- |
-| `MOB1-FIND-00-001` | Open | Remove the candidate's universal Independent Acceptance prerequisite. |
-| `MOB1-FIND-00-002` | Open | Complete responsive/accessibility and result/scroll/cursor continuity architecture. |
+| `MOB1-FIND-00-001` | Open | Remove the candidate's mandatory Independent Acceptance prerequisite. |
+| `MOB1-FIND-00-002` | Partially addressed; open | Add result-set identity/cursor, internal scroll state, and focused continuity/accessibility tests. |
 | `MOB1-FIND-00-003` | Open | Enforce focal marker/card/detail identity and internal subject parity. |
 | `MOB1-FIND-00-004` | Open | Bind action-rail inputs to canonical lens/position action IDs. |
 | `MOB1-FIND-00-005` | Open | Treat restored geography as unvalidated until server revalidation. |
-| `MOB1-FIND-00-006` | Open | Reuse or install the canonical supported-locale disabled-reason contract. |
-| `BUILD-FIND-218-001` | Resolved | Whitespace fixed and production-ci #1483 succeeded at `3c67ef3d…`. |
+| `MOB1-FIND-00-006` | Open | Reuse/install the canonical supported-locale disabled-reason contract. |
+| `BUILD-FIND-218-001` | Resolved on `3c67ef3d…` | Whitespace corrected and production-ci #1483 succeeded. |
 
-Four unresolved Codex threads corroborate `MOB1-FIND-00-002` and `MOB1-FIND-00-003` and provide the originating evidence for `MOB1-FIND-00-005` and `MOB1-FIND-00-006`.
+All four Codex threads remain unresolved and current.
 
-### Open Lane 02 findings
+### Lane 02 findings
 
 | Finding | State | Required shared disposition |
 | --- | --- | --- |
-| `MOB1-FIND-02-001` | Open | Preserve distinct focal opportunity and associated issuer-organization identities. |
-| `MOB1-FIND-02-002` | Open | Carry versioned continuity scope and add typed fail-closed reconciliation/invalidation. |
-| `MOB1-FIND-02-003` | Open | Represent actual optional video media separately from its poster image. |
+| `MOB1-FIND-02-001` | Open | Preserve distinct focal opportunity and issuer-organization identities. |
+| `MOB1-FIND-02-002` | Partially addressed; open | Add mismatch/authority negative tests and resolve geography authority labeling. |
+| `MOB1-FIND-02-003` | Open | Represent actual optional video separately from its poster image. |
 
-No Shared Contract Request is open because all current findings are bounded corrections to PR #218.
+No Shared Contract Request is open because all current findings remain bounded corrections to PR #218.
 
 Historical Shared Contract Requests remain governed by their original records and later dispositions; this activation does not silently reopen them.
