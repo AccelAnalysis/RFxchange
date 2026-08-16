@@ -39,7 +39,7 @@ function markerId(reference: string): string {
   return `opportunity-${reference}`;
 }
 
-function queryHref(result: OpportunityDiscoveryResult, selectedReference?: string | null): string {
+function queryHref(result: OpportunityDiscoveryResult, selectedReference?: string | null, cursor: string | null = result.query.cursor ?? null): string {
   const params = new URLSearchParams();
   if (result.query.text) params.set("q", result.query.text);
   if (result.query.deadlineWindow !== "all-open") params.set("deadline", result.query.deadlineWindow);
@@ -47,6 +47,7 @@ function queryHref(result: OpportunityDiscoveryResult, selectedReference?: strin
   for (const locality of result.query.localityIds) params.append("locality", locality);
   for (const capability of result.query.capabilityIds) params.append("capability", capability);
   for (const family of result.query.requestFamilyKeys) params.append("requestFamily", family);
+  if (cursor) params.set("cursor", cursor);
   if (selectedReference) params.set("selected", selectedReference);
   return params.size ? `/opportunities?${params.toString()}` : "/opportunities";
 }
@@ -217,101 +218,25 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
               <Link href="/opportunities/manage">{t("rfxWorkspace.discovery.manage")}</Link>
             </div>
             <form role="search" action="/opportunities" method="get" className={styles.form}>
-              <label>
-                <span>{t("rfxWorkspace.discovery.search.label")}</span>
-                <input name="q" type="search" defaultValue={result.query.text} placeholder={t("rfxWorkspace.discovery.search.placeholder")} />
-              </label>
-              <label>
-                <span>{t("rfxWorkspace.discovery.detail.requestType")}</span>
-                {(result.query.requestFamilyKeys.length ? result.query.requestFamilyKeys : [""]).map((value, index) => (
-                  <input
-                    key={`requestFamily:${index}:${value}`}
-                    data-opportunity-request-family-filter
-                    name="requestFamily"
-                    defaultValue={value}
-                  />
-                ))}
-              </label>
-              <label>
-                <span>{t("rfxWorkspace.capabilitySearch")}</span>
-                {(result.query.capabilityIds.length ? result.query.capabilityIds : [""]).map((value, index) => (
-                  <input
-                    key={`capability:${index}:${value}`}
-                    data-opportunity-capability-filter
-                    name="capability"
-                    defaultValue={value}
-                  />
-                ))}
-              </label>
-              <label>
-                <span>{t("rfxWorkspace.discovery.detail.location")}</span>
-                {(result.query.localityIds.length ? result.query.localityIds : [""]).map((value, index) => (
-                  <input
-                    key={`locality:${index}:${value}`}
-                    data-opportunity-locality-filter
-                    name="locality"
-                    defaultValue={value}
-                    placeholder={index === 0 ? spatialScope.geographyId : undefined}
-                  />
-                ))}
-              </label>
+              <label><span>{t("rfxWorkspace.discovery.search.label")}</span><input name="q" type="search" defaultValue={result.query.text} placeholder={t("rfxWorkspace.discovery.search.placeholder")} /></label>
+              <label><span>{t("rfxWorkspace.discovery.detail.requestType")}</span>{(result.query.requestFamilyKeys.length ? result.query.requestFamilyKeys : [""]).map((value, index) => <input key={`requestFamily:${index}:${value}`} data-opportunity-request-family-filter name="requestFamily" defaultValue={value} />)}</label>
+              <label><span>{t("rfxWorkspace.capabilitySearch")}</span>{(result.query.capabilityIds.length ? result.query.capabilityIds : [""]).map((value, index) => <input key={`capability:${index}:${value}`} data-opportunity-capability-filter name="capability" defaultValue={value} />)}</label>
+              <label><span>{t("rfxWorkspace.discovery.detail.location")}</span>{(result.query.localityIds.length ? result.query.localityIds : [""]).map((value, index) => <input key={`locality:${index}:${value}`} data-opportunity-locality-filter name="locality" defaultValue={value} placeholder={index === 0 ? spatialScope.geographyId : undefined} />)}</label>
               <label><span>{t("rfxWorkspace.discovery.search.deadline")}</span><select name="deadline" defaultValue={result.query.deadlineWindow}><option value="all-open">{t("rfxWorkspace.discovery.search.allOpen")}</option><option value="next-7-days">{t("rfxWorkspace.discovery.search.next7")}</option><option value="next-30-days">{t("rfxWorkspace.discovery.search.next30")}</option></select></label>
               <label className={styles.check}><input name="watched" type="checkbox" value="true" defaultChecked={result.query.watched === true} /><span>{t("rfxWorkspace.discovery.search.watched")}</span></label>
               <div className={styles.actions}><button type="submit">{t("rfxWorkspace.discovery.search.submit")}</button><Link href="/opportunities">{t("rfxWorkspace.discovery.search.clear")}</Link></div>
             </form>
             <div className={styles.summary} aria-live="polite"><strong>{t("rfxWorkspace.discovery.search.count", { count: result.items.length })}</strong><span>{t("rfxWorkspace.discovery.search.truth")}</span></div>
-            <section className={styles.deadlines} aria-labelledby="opportunity-deadline-view-title">
-              <h2 id="opportunity-deadline-view-title">{t("rfxWorkspace.discovery.deadlines.title")}</h2>
-              <ul>
-                <li><strong>{result.deadlines.next7Days.length}</strong><span>{t("rfxWorkspace.discovery.deadlines.next7")}</span></li>
-                <li><strong>{result.deadlines.next30Days.length}</strong><span>{t("rfxWorkspace.discovery.deadlines.next30")}</span></li>
-                <li><strong>{result.deadlines.later.length}</strong><span>{t("rfxWorkspace.discovery.deadlines.later")}</span></li>
-              </ul>
-              <p>{t("rfxWorkspace.discovery.deadlines.source")}</p>
-            </section>
-            {result.items.length ? (
-              <ul className={styles.results} aria-label={t("rfxWorkspace.discovery.resultsLabel")}>
-                {result.items.map((item) => <li key={item.reference}><button type="button" aria-pressed={selected?.reference === item.reference} data-opportunity-reference={item.reference} onClick={() => select(item)}><span><strong>{item.title}</strong><small>{item.issuerDisplayName}</small></span><span>{item.localities.map((locality) => locality.label).join(" · ")}</span><span>{t("rfxWorkspace.discovery.deadline", { date: item.responseDeadline })}</span></button></li>)}
-              </ul>
-            ) : result.nextCursor ? (
-              <StatePanel state="loading" title={t("rfxWorkspace.discovery.more")}>
-                <span data-opportunity-scan-incomplete>{t("rfxWorkspace.discovery.search.truth")}</span>
-              </StatePanel>
-            ) : (
-              <StatePanel state="empty" title={t("rfxWorkspace.discovery.emptyTitle")}>{t("rfxWorkspace.discovery.emptyBody")}</StatePanel>
-            )}
-            {result.nextCursor ? <Link className={styles.more} href={`${queryHref(result)}${queryHref(result).includes("?") ? "&" : "?"}cursor=${encodeURIComponent(result.nextCursor)}`}>{t("rfxWorkspace.discovery.more")}</Link> : null}
-            <details className={styles.save}>
-              <summary>{t("rfxWorkspace.discovery.saved.action")}</summary>
-              <label><span>{t("rfxWorkspace.discovery.saved.label")}</span><input value={saveLabel} onChange={(event) => setSaveLabel(event.target.value)} maxLength={80} /></label>
-              <label><span>{t("rfxWorkspace.discovery.saved.alertPolicy")}</span><select value={alertPolicy} onChange={(event) => setAlertPolicy(event.target.value)}><option value="off">{t("rfxWorkspace.discovery.saved.off")}</option><option value="immediate">{t("rfxWorkspace.discovery.saved.immediate")}</option><option value="daily-digest">{t("rfxWorkspace.discovery.saved.daily")}</option></select></label>
-              <button type="button" disabled={busy !== null || !saveLabel.trim()} onClick={saveSearch}>{busy === "save" ? t("rfxWorkspace.discovery.pending") : t("rfxWorkspace.discovery.saved.confirm")}</button>
-              {result.savedSearches.length ? <p>{t("rfxWorkspace.discovery.saved.count", { count: result.savedSearches.length })}</p> : null}
-            </details>
-            {result.savedSearches.length ? <ul className={styles.savedList} aria-label={t("rfxWorkspace.discovery.saved.listLabel")}>
-              {result.savedSearches.map((savedSearch) => <li key={savedSearch.id}>
-                <span><strong>{savedSearch.label}</strong><small>{savedSearch.status}</small></span>
-                <span>
-                  <button type="button" disabled={busy !== null} onClick={() => updateSavedSearch(savedSearch, savedSearch.status === "paused" ? "active" : "paused")}>{savedSearch.status === "paused" ? t("rfxWorkspace.discovery.saved.resume") : t("rfxWorkspace.discovery.saved.pause")}</button>
-                  <button type="button" disabled={busy !== null} onClick={() => updateSavedSearch(savedSearch, "deleted")}>{t("rfxWorkspace.discovery.saved.delete")}</button>
-                </span>
-              </li>)}
-            </ul> : null}
+            <section className={styles.deadlines} aria-labelledby="opportunity-deadline-view-title"><h2 id="opportunity-deadline-view-title">{t("rfxWorkspace.discovery.deadlines.title")}</h2><ul><li><strong>{result.deadlines.next7Days.length}</strong><span>{t("rfxWorkspace.discovery.deadlines.next7")}</span></li><li><strong>{result.deadlines.next30Days.length}</strong><span>{t("rfxWorkspace.discovery.deadlines.next30")}</span></li><li><strong>{result.deadlines.later.length}</strong><span>{t("rfxWorkspace.discovery.deadlines.later")}</span></li></ul><p>{t("rfxWorkspace.discovery.deadlines.source")}</p></section>
+            {result.items.length ? <ul className={styles.results} aria-label={t("rfxWorkspace.discovery.resultsLabel")}>{result.items.map((item) => <li key={item.reference}><button type="button" aria-pressed={selected?.reference === item.reference} data-opportunity-reference={item.reference} onClick={() => select(item)}><span><strong>{item.title}</strong><small>{item.issuerDisplayName}</small></span><span>{item.localities.map((locality) => locality.label).join(" · ")}</span><span>{t("rfxWorkspace.discovery.deadline", { date: item.responseDeadline })}</span></button></li>)}</ul> : result.nextCursor ? <StatePanel state="loading" title={t("rfxWorkspace.discovery.more")}><span data-opportunity-scan-incomplete>{t("rfxWorkspace.discovery.search.truth")}</span></StatePanel> : <StatePanel state="empty" title={t("rfxWorkspace.discovery.emptyTitle")}>{t("rfxWorkspace.discovery.emptyBody")}</StatePanel>}
+            {result.nextCursor ? <Link className={styles.more} href={queryHref(result, null, result.nextCursor)}>{t("rfxWorkspace.discovery.more")}</Link> : null}
+            <details className={styles.save}><summary>{t("rfxWorkspace.discovery.saved.action")}</summary><label><span>{t("rfxWorkspace.discovery.saved.label")}</span><input value={saveLabel} onChange={(event) => setSaveLabel(event.target.value)} maxLength={80} /></label><label><span>{t("rfxWorkspace.discovery.saved.alertPolicy")}</span><select value={alertPolicy} onChange={(event) => setAlertPolicy(event.target.value)}><option value="off">{t("rfxWorkspace.discovery.saved.off")}</option><option value="immediate">{t("rfxWorkspace.discovery.saved.immediate")}</option><option value="daily-digest">{t("rfxWorkspace.discovery.saved.daily")}</option></select></label><button type="button" disabled={busy !== null || !saveLabel.trim()} onClick={saveSearch}>{busy === "save" ? t("rfxWorkspace.discovery.pending") : t("rfxWorkspace.discovery.saved.confirm")}</button>{result.savedSearches.length ? <p>{t("rfxWorkspace.discovery.saved.count", { count: result.savedSearches.length })}</p> : null}</details>
+            {result.savedSearches.length ? <ul className={styles.savedList} aria-label={t("rfxWorkspace.discovery.saved.listLabel")}>{result.savedSearches.map((savedSearch) => <li key={savedSearch.id}><span><strong>{savedSearch.label}</strong><small>{savedSearch.status}</small></span><span><button type="button" disabled={busy !== null} onClick={() => updateSavedSearch(savedSearch, savedSearch.status === "paused" ? "active" : "paused")}>{savedSearch.status === "paused" ? t("rfxWorkspace.discovery.saved.resume") : t("rfxWorkspace.discovery.saved.pause")}</button><button type="button" disabled={busy !== null} onClick={() => updateSavedSearch(savedSearch, "deleted")}>{t("rfxWorkspace.discovery.saved.delete")}</button></span></li>)}</ul> : null}
             {message ? <p role="status" className={styles.message}>{message}</p> : null}
           </section>
         </MapOverlaySurface>
 
-        {selected ? <ResponsiveEdgeSheet ariaLabelledBy="opportunity-detail-title" side="right" width="standard">
-          <article className={styles.detail} data-selected-opportunity-reference={selected.reference}>
-            <header><div><p>{t("rfxWorkspace.discovery.detail.eyebrow")}</p><h2 id="opportunity-detail-title">{selected.title}</h2></div><button type="button" onClick={() => select(null)} aria-label={t("rfxWorkspace.discovery.detail.close")}>×</button></header>
-            <div className={styles.pills}><StatusPill tone="information">{t("rfxWorkspace.discovery.detail.discovered")}</StatusPill>{selected.deadlineState === "due-soon" ? <StatusPill tone="connection">{t("rfxWorkspace.discovery.detail.dueSoon")}</StatusPill> : null}</div>
-            <p>{selected.summary}</p>
-            <dl><div><dt>{t("rfxWorkspace.discovery.detail.issuer")}</dt><dd>{selected.issuerDisplayName}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.requestType")}</dt><dd>{selected.requestFamilyLabel}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.location")}</dt><dd>{selected.localities.map((locality) => locality.label).join(" · ")}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.deadline")}</dt><dd>{selected.responseDeadline}</dd></div></dl>
-            <section><h3>{t("rfxWorkspace.discovery.detail.requirements")}</h3><ul>{selected.projection.payload.requirements.map((requirement, index) => <li key={`${requirement.title}-${index}`}><strong>{requirement.title}</strong><span>{requirement.description}</span></li>)}</ul></section>
-            <div className={styles.detailActions}><button type="button" disabled={busy !== null} onClick={() => setWatch(selected)}>{busy === "watch" ? t("rfxWorkspace.discovery.pending") : selected.watched ? t("rfxWorkspace.discovery.watch.remove") : t("rfxWorkspace.discovery.watch.action")}</button><Link href={`/opportunities/${encodeURIComponent(selected.reference)}`}>{t("rfxWorkspace.discovery.detail.open")}</Link></div>
-            <p className={styles.disclaimer}>{t("rfxWorkspace.discovery.detail.disclaimer")}</p>
-          </article>
-        </ResponsiveEdgeSheet> : null}
+        {selected ? <ResponsiveEdgeSheet ariaLabelledBy="opportunity-detail-title" side="right" width="standard"><article className={styles.detail} data-selected-opportunity-reference={selected.reference}><header><div><p>{t("rfxWorkspace.discovery.detail.eyebrow")}</p><h2 id="opportunity-detail-title">{selected.title}</h2></div><button type="button" onClick={() => select(null)} aria-label={t("rfxWorkspace.discovery.detail.close")}>×</button></header><div className={styles.pills}><StatusPill tone="information">{t("rfxWorkspace.discovery.detail.discovered")}</StatusPill>{selected.deadlineState === "due-soon" ? <StatusPill tone="connection">{t("rfxWorkspace.discovery.detail.dueSoon")}</StatusPill> : null}</div><p>{selected.summary}</p><dl><div><dt>{t("rfxWorkspace.discovery.detail.issuer")}</dt><dd>{selected.issuerDisplayName}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.requestType")}</dt><dd>{selected.requestFamilyLabel}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.location")}</dt><dd>{selected.localities.map((locality) => locality.label).join(" · ")}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.deadline")}</dt><dd>{selected.responseDeadline}</dd></div></dl><section><h3>{t("rfxWorkspace.discovery.detail.requirements")}</h3><ul>{selected.projection.payload.requirements.map((requirement, index) => <li key={`${requirement.title}-${index}`}><strong>{requirement.title}</strong><span>{requirement.description}</span></li>)}</ul></section><div className={styles.detailActions}><button type="button" disabled={busy !== null} onClick={() => setWatch(selected)}>{busy === "watch" ? t("rfxWorkspace.discovery.pending") : selected.watched ? t("rfxWorkspace.discovery.watch.remove") : t("rfxWorkspace.discovery.watch.action")}</button><Link href={`/opportunities/${encodeURIComponent(selected.reference)}/assess?returnTo=${encodeURIComponent(queryHref(result, selected.reference))}`}>{t("rfxWorkspace.discovery.detail.assess")}</Link><Link href={`/opportunities/${encodeURIComponent(selected.reference)}`}>{t("rfxWorkspace.discovery.detail.open")}</Link></div><p className={styles.disclaimer}>{t("rfxWorkspace.discovery.detail.disclaimer")}</p></article></ResponsiveEdgeSheet> : null}
       </SpatialWorkspace>
     </ParticipantShell>
   );
