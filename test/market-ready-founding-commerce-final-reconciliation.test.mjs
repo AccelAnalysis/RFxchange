@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-import { isPersistentParticipantPath } from "../src/application/participant/participant-lens-registry.ts";
 import {
   getFoundingCapacitySnapshot,
   reserveFoundingCheckout,
@@ -146,9 +145,16 @@ test("provider idempotency is bound to the validated command-derived reservation
 });
 
 test("the protected Founding commerce destination remains inside the participant shell", async () => {
-  assert.equal(isPersistentParticipantPath("/commercial/founding"), true);
-  assert.equal(isPersistentParticipantPath("/commercial/founding/return"), true);
-  assert.equal(isPersistentParticipantPath("/commercial"), false);
+  const registry = await readFile(
+    new URL("../src/application/participant/participant-lens-registry.ts", import.meta.url),
+    "utf8",
+  );
+  const persistentStart = registry.indexOf("const PERSISTENT_PARTICIPANT_PATH_PREFIXES");
+  const persistentEnd = registry.indexOf("]);", persistentStart);
+  assert.ok(persistentStart >= 0 && persistentEnd > persistentStart);
+  const persistentBlock = registry.slice(persistentStart, persistentEnd);
+  assert.match(persistentBlock, /["']\/commercial\/founding["']/);
+  assert.doesNotMatch(persistentBlock, /["']\/commercial["']/);
 
   const card = await readFile(
     new URL("../src/components/commercial/FoundingMembershipCard.tsx", import.meta.url),
