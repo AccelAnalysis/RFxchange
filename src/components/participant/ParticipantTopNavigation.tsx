@@ -10,7 +10,6 @@ import {
   useSyncExternalStore,
   type KeyboardEvent,
   type MouseEvent,
-  type ReactNode,
 } from "react";
 
 import {
@@ -38,10 +37,6 @@ import { useI18n } from "../i18n/I18nProvider";
 
 import styles from "./ParticipantTopNavigation.module.css";
 
-/**
- * Legacy page-local values remain accepted only while transitional workspaces are migrated. They
- * normalize to the governed lens/utility registry and are never rendered as peer destinations.
- */
 export type ParticipantNavigationItem =
   | ParticipantNavigationState
   | "Network"
@@ -53,6 +48,12 @@ export type ParticipantNavigationItem =
 type NavigationDestination = Exclude<ParticipantNavigationState, null>;
 
 const CANONICAL_INTELLIGENCE_HREF = "/geography/canvas";
+const LENS_ICONS: Readonly<Record<ParticipantLensId, string>> = Object.freeze({
+  "opportunities-rfx": "◎",
+  resources: "◇",
+  intelligence: "⌖",
+  referrals: "↗",
+});
 
 function normalizedActiveItem(item?: ParticipantNavigationItem): ParticipantNavigationState {
   switch (item) {
@@ -72,13 +73,11 @@ function normalizedActiveItem(item?: ParticipantNavigationItem): ParticipantNavi
 }
 
 function isUnmodifiedPrimaryClick(event: MouseEvent<HTMLAnchorElement>): boolean {
-  return (
-    event.button === 0 &&
-    !event.altKey &&
-    !event.ctrlKey &&
-    !event.metaKey &&
-    !event.shiftKey
-  );
+  return event.button === 0
+    && !event.altKey
+    && !event.ctrlKey
+    && !event.metaKey
+    && !event.shiftKey;
 }
 
 function organizationInitials(name: string | null): string {
@@ -109,7 +108,7 @@ function transitionMarkName(destination: NavigationDestination): string {
   return `rfxchange.participant-transition:${destination}`;
 }
 
-function subscribeIntelligenceHref(onStoreChange: () => void): () => void {
+function subscribeLensHrefs(onStoreChange: () => void): () => void {
   window.addEventListener(PARTICIPANT_INTELLIGENCE_CONTEXT_CHANGED_EVENT, onStoreChange);
   window.addEventListener(PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT, onStoreChange);
   window.addEventListener("storage", onStoreChange);
@@ -124,24 +123,11 @@ function storedIntelligenceHref(): string {
   const spatialContext = readActiveParticipantSpatialContext();
   const safeQueryBaseHref = safeIntelligenceHref(readParticipantIntelligenceContext());
   return (spatialContext
-      ? safeIntelligenceHref(participantSpatialIntelligenceHref(
-          spatialContext,
-          safeQueryBaseHref ?? spatialContext.returnHref,
-        ))
-      : safeQueryBaseHref)
-    ?? CANONICAL_INTELLIGENCE_HREF;
-}
-
-function storedResourceHref(): string {
-  return participantSpatialLensHref("resources");
-}
-
-function storedReferralHref(): string {
-  return participantSpatialLensHref("referrals");
-}
-
-function storedOpportunityHref(): string {
-  return participantSpatialLensHref("opportunities-rfx");
+    ? safeIntelligenceHref(participantSpatialIntelligenceHref(
+        spatialContext,
+        safeQueryBaseHref ?? spatialContext.returnHref,
+      ))
+    : safeQueryBaseHref) ?? CANONICAL_INTELLIGENCE_HREF;
 }
 
 interface ParticipantLensHrefSnapshot {
@@ -161,9 +147,9 @@ const DEFAULT_LENS_HREF_SNAPSHOT = JSON.stringify({
 function storedLensHrefSnapshot(): string {
   return JSON.stringify({
     intelligenceHref: storedIntelligenceHref(),
-    opportunityHref: storedOpportunityHref(),
-    resourceHref: storedResourceHref(),
-    referralHref: storedReferralHref(),
+    opportunityHref: participantSpatialLensHref("opportunities-rfx"),
+    resourceHref: participantSpatialLensHref("resources"),
+    referralHref: participantSpatialLensHref("referrals"),
   } satisfies ParticipantLensHrefSnapshot);
 }
 
@@ -171,22 +157,20 @@ function useTransitionFeedback(pathname: string) {
   const searchParams = useSearchParams();
   const serializedSearchParams = searchParams.toString();
   const pendingTransition = useRef<Readonly<{
-    id: number;
     destination: NavigationDestination;
     fromPathname: string;
   }> | null>(null);
-  const nextTransitionId = useRef(0);
   const serializedLensHrefs = useSyncExternalStore(
-  subscribeIntelligenceHref,
-  storedLensHrefSnapshot,
-  () => DEFAULT_LENS_HREF_SNAPSHOT,
-);
-const {
-  intelligenceHref,
-  opportunityHref,
-  resourceHref,
-  referralHref,
-} = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;
+    subscribeLensHrefs,
+    storedLensHrefSnapshot,
+    () => DEFAULT_LENS_HREF_SNAPSHOT,
+  );
+  const {
+    intelligenceHref,
+    opportunityHref,
+    resourceHref,
+    referralHref,
+  } = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;
 
   useEffect(() => {
     if (participantNavigationState(pathname) !== "intelligence") return;
@@ -198,21 +182,13 @@ const {
 
   useEffect(() => {
     const transition = pendingTransition.current;
-    if (
-      !transition
-      || participantNavigationState(pathname) !== transition.destination
-    ) return;
-
+    if (!transition || participantNavigationState(pathname) !== transition.destination) return;
     const markName = transitionMarkName(transition.destination);
     const endMark = `${markName}:settled`;
     performance.clearMarks(endMark);
     performance.mark(endMark);
     performance.clearMeasures("rfxchange.participant-transition");
-    performance.measure(
-      "rfxchange.participant-transition",
-      markName,
-      endMark,
-    );
+    performance.measure("rfxchange.participant-transition", markName, endMark);
     const measure = performance.getEntriesByName(
       "rfxchange.participant-transition",
       "measure",
@@ -230,19 +206,12 @@ const {
   }, [pathname]);
 
   function begin(destination: NavigationDestination) {
-    const currentState = participantNavigationState(pathname);
-    if (currentState === destination) return;
-
+    if (participantNavigationState(pathname) === destination) return;
     const markName = transitionMarkName(destination);
     performance.clearMarks(markName);
     performance.clearMarks(`${markName}:settled`);
     performance.mark(markName);
-    nextTransitionId.current += 1;
-    pendingTransition.current = Object.freeze({
-      id: nextTransitionId.current,
-      destination,
-      fromPathname: pathname,
-    });
+    pendingTransition.current = Object.freeze({ destination, fromPathname: pathname });
   }
 
   return {
@@ -257,19 +226,22 @@ const {
 function NavigationLinkContent({
   label,
   loadingLabel,
+  icon,
+  mobile = false,
   onSettled,
 }: Readonly<{
   label: string;
   loadingLabel: string;
+  icon?: string;
+  mobile?: boolean;
   onSettled?: () => void;
 }>) {
   const { pending } = useLinkStatus();
   const observedPending = useRef(false);
 
   useEffect(() => {
-    if (pending) {
-      observedPending.current = true;
-    } else if (observedPending.current) {
+    if (pending) observedPending.current = true;
+    else if (observedPending.current) {
       observedPending.current = false;
       onSettled?.();
     }
@@ -277,14 +249,10 @@ function NavigationLinkContent({
 
   return (
     <>
-      <span>{label}</span>
+      {mobile ? <span className={styles.lensIcon} aria-hidden="true">{icon}</span> : null}
+      <span className={styles.lensLabel}>{label}</span>
       {pending ? (
-        <span
-          className={styles.liveStatus}
-          role="status"
-          aria-live="polite"
-          data-link-pending="true"
-        >
+        <span className={styles.liveStatus} role="status" aria-live="polite" data-link-pending="true">
           {loadingLabel}
         </span>
       ) : null}
@@ -292,36 +260,41 @@ function NavigationLinkContent({
   );
 }
 
+function lensHref(
+  lensId: ParticipantLensId,
+  snapshot: ParticipantLensHrefSnapshot,
+): string {
+  if (lensId === "intelligence") return snapshot.intelligenceHref;
+  if (lensId === "opportunities-rfx") return snapshot.opportunityHref;
+  if (lensId === "resources") return snapshot.resourceHref;
+  return snapshot.referralHref;
+}
+
 function LensItems({
   activeState,
-  intelligenceHref,
-  opportunityHref,
-  resourceHref,
-  referralHref,
+  hrefs,
   unavailableLensIds,
   beginNavigation,
-  onNavigate,
+  mobile = false,
 }: Readonly<{
   activeState: ParticipantNavigationState;
-  intelligenceHref: string;
-  opportunityHref: string;
-  resourceHref: string;
-  referralHref: string;
+  hrefs: ParticipantLensHrefSnapshot;
   unavailableLensIds: readonly ParticipantLensId[];
   beginNavigation(destination: NavigationDestination): void;
-  onNavigate?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  mobile?: boolean;
 }>) {
   const { t } = useI18n();
   const scopeId = useId().replaceAll(":", "");
 
   return PARTICIPANT_LENSES.map((lens) => {
     const label = t(lens.labelKey);
-    if (lens.availability === "unavailable" || unavailableLensIds.includes(lens.id)) {
+    const unavailable = lens.availability === "unavailable" || unavailableLensIds.includes(lens.id);
+    if (unavailable) {
       const descriptionId = `${scopeId}-${lens.id}-availability`;
       return (
         <span
           key={lens.id}
-          className={styles.unavailableLens}
+          className={mobile ? styles.mobileUnavailableLens : styles.unavailableLens}
           role="link"
           aria-disabled="true"
           aria-label={label}
@@ -329,37 +302,31 @@ function LensItems({
           data-participant-lens={lens.id}
           data-availability="unavailable"
         >
-          <span>{label}</span>
+          {mobile ? <span className={styles.lensIcon} aria-hidden="true">{LENS_ICONS[lens.id]}</span> : null}
+          <span className={styles.lensLabel}>{label}</span>
           <small id={descriptionId}>{t("participantNavigation.notYetAvailable")}</small>
         </span>
       );
     }
 
-    const href = lens.id === "intelligence"
-      ? intelligenceHref
-      : lens.id === "opportunities-rfx"
-        ? opportunityHref
-      : lens.id === "resources"
-        ? resourceHref
-        : lens.id === "referrals"
-          ? referralHref
-          : lens.href;
     return (
       <Link
         key={lens.id}
-        href={href}
-        className={styles.lensLink}
+        href={lensHref(lens.id, hrefs)}
+        className={mobile ? styles.mobileLensLink : styles.lensLink}
         aria-current={activeState === lens.id ? "page" : undefined}
         data-participant-lens={lens.id}
         data-availability="enabled"
+        data-mobile-lens-navigation={mobile ? "true" : undefined}
         onClick={(event) => {
           if (isUnmodifiedPrimaryClick(event)) beginNavigation(lens.id);
-          onNavigate?.(event);
         }}
       >
         <NavigationLinkContent
           label={label}
           loadingLabel={`${t("participantNavigation.loadingDestination")} ${label}`}
+          icon={LENS_ICONS[lens.id]}
+          mobile={mobile}
         />
       </Link>
     );
@@ -396,9 +363,7 @@ function AccountUtility({
   const [administrationHref, setAdministrationHref] = useState<string | null>(
     initialAdministrationHref ?? null,
   );
-  const [administrationResolved, setAdministrationResolved] = useState(
-    Boolean(initialAdministrationHref),
-  );
+  const [administrationResolved, setAdministrationResolved] = useState(Boolean(initialAdministrationHref));
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -413,9 +378,7 @@ function AccountUtility({
       .then(async (response) => {
         if (!response.ok) return null;
         const payload = await response.json() as { administrationHref?: unknown };
-        return typeof payload.administrationHref === "string"
-          ? payload.administrationHref
-          : null;
+        return typeof payload.administrationHref === "string" ? payload.administrationHref : null;
       })
       .then(setAdministrationHref)
       .catch(() => setAdministrationHref(null));
@@ -424,11 +387,9 @@ function AccountUtility({
   function showMenu(focusFirst = false) {
     setOpen(true);
     resolveAdministration();
-    if (focusFirst) {
-      requestAnimationFrame(() => {
-        menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
-      });
-    }
+    if (focusFirst) requestAnimationFrame(() => {
+      menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+    });
   }
 
   function hideMenu(restoreFocus = false) {
@@ -438,12 +399,10 @@ function AccountUtility({
 
   useEffect(() => {
     if (!open) return;
-    const dismiss = (event: PointerEvent) => {
+    const dismiss = (event: globalThis.PointerEvent) => {
       const target = event.target;
       if (!(target instanceof Node)) return;
-      if (!menuRef.current?.contains(target) && !buttonRef.current?.contains(target)) {
-        hideMenu();
-      }
+      if (!menuRef.current?.contains(target) && !buttonRef.current?.contains(target)) hideMenu();
     };
     document.addEventListener("pointerdown", dismiss);
     return () => document.removeEventListener("pointerdown", dismiss);
@@ -475,9 +434,7 @@ function AccountUtility({
           }
         }}
       >
-        <span className={styles.accountAvatar} aria-hidden="true">
-          {organizationInitials(organizationName)}
-        </span>
+        <span className={styles.accountAvatar} aria-hidden="true">{organizationInitials(organizationName)}</span>
       </button>
       {open ? (
         <div
@@ -521,12 +478,7 @@ function AccountUtility({
             />
           </Link>
           {quickStartUnavailable ? (
-            <span
-              className={styles.unavailableUtility}
-              role="menuitem"
-              aria-disabled="true"
-              data-availability="unavailable"
-            >
+            <span className={styles.unavailableUtility} role="menuitem" aria-disabled="true" data-availability="unavailable">
               <span>{t("participantNavigation.quickStart")}</span>
               <small>{t("participantNavigation.notYetAvailable")}</small>
             </span>
@@ -559,32 +511,6 @@ function AccountUtility({
   );
 }
 
-function closeMobileLensMenu(event: MouseEvent<HTMLAnchorElement>) {
-  const details = event.currentTarget.closest("details");
-  if (details instanceof HTMLDetailsElement) details.open = false;
-}
-
-function MobileLensMenu({
-  children,
-  label,
-}: Readonly<{ children: ReactNode; label: string }>) {
-  return (
-    <details
-      className={styles.mobileLensMenu}
-      onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          event.preventDefault();
-          event.currentTarget.open = false;
-          event.currentTarget.querySelector<HTMLElement>("summary")?.focus();
-        }
-      }}
-    >
-      <summary>{label}</summary>
-      <nav aria-label={label}>{children}</nav>
-    </details>
-  );
-}
-
 export function ParticipantTopNavigation({
   activeItem,
   administrationHref,
@@ -604,44 +530,46 @@ export function ParticipantTopNavigation({
     ? participantNavigationState(pathname)
     : normalizedActiveItem(activeItem);
   const transition = useTransitionFeedback(pathname);
+  const hrefs: ParticipantLensHrefSnapshot = Object.freeze({
+    intelligenceHref: transition.intelligenceHref,
+    opportunityHref: transition.opportunityHref,
+    resourceHref: transition.resourceHref,
+    referralHref: transition.referralHref,
+  });
 
   return (
-    <header
-      className={styles.header}
-      data-participant-navigation
-      data-participant-shell-header
-    >
-      <div className={styles.brand}><BrandWordmark compact /></div>
-      <nav className={styles.desktopLenses} aria-label={t("participantNavigation.ariaLabel")}>
+    <>
+      <header className={styles.header} data-participant-navigation data-participant-shell-header>
+        <div className={styles.brand}><BrandWordmark compact /></div>
+        <nav className={styles.desktopLenses} aria-label={t("participantNavigation.ariaLabel")}>
+          <LensItems
+            activeState={activeState}
+            hrefs={hrefs}
+            unavailableLensIds={unavailableLensIds}
+            beginNavigation={transition.begin}
+          />
+        </nav>
+        <AccountUtility
+          activeState={activeState}
+          administrationHref={administrationHref}
+          organizationName={organizationName}
+          quickStartUnavailable={unavailableUtilityIds.includes("quick-start")}
+          beginNavigation={transition.begin}
+        />
+      </header>
+      <nav
+        className={styles.mobileBottomNavigation}
+        aria-label={t("participantNavigation.ariaLabel")}
+        data-mobile-lens-navigation="persistent-bottom"
+      >
         <LensItems
           activeState={activeState}
-          intelligenceHref={transition.intelligenceHref}
-          opportunityHref={transition.opportunityHref}
-          resourceHref={transition.resourceHref}
-          referralHref={transition.referralHref}
+          hrefs={hrefs}
           unavailableLensIds={unavailableLensIds}
           beginNavigation={transition.begin}
+          mobile
         />
       </nav>
-      <MobileLensMenu label={t("participantNavigation.menu")}>
-        <LensItems
-          activeState={activeState}
-          intelligenceHref={transition.intelligenceHref}
-          opportunityHref={transition.opportunityHref}
-          resourceHref={transition.resourceHref}
-          referralHref={transition.referralHref}
-          unavailableLensIds={unavailableLensIds}
-          beginNavigation={transition.begin}
-          onNavigate={closeMobileLensMenu}
-        />
-      </MobileLensMenu>
-      <AccountUtility
-        activeState={activeState}
-        administrationHref={administrationHref}
-        organizationName={organizationName}
-        quickStartUnavailable={unavailableUtilityIds.includes("quick-start")}
-        beginNavigation={transition.begin}
-      />
-    </header>
+    </>
   );
 }
