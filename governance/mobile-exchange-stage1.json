@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "authority": "docs/program/MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md",
+  "controllingProductAuthority": "docs/program/MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md",
+  "visualReference": "docs/reference/screenshots/rfxchange-mobile-composition-reference.jpg",
+  "activation": {
+    "id": "mobile-exchange-stage1-2026-08-16",
+    "packetId": "WP-MOBILE-EXCHANGE-STAGE1-01",
+    "mainBaseSha": "0b23a9f9b49468aab12609dea6116e1409c925fe",
+    "controlPullRequest": 217,
+    "implementationLane": "shared-exchange",
+    "candidatePullRequest": 218,
+    "candidateSha": "e6eaa7207b5610ab88f1847b2b7142335c713e7f",
+    "candidateCi": {
+      "workflow": "production-ci",
+      "runNumber": 1504,
+      "runId": 31971663240,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "candidateDisposition": "implemented-not-verified",
+    "candidateMerged": true,
+    "integratedMainSha": "9b97b37365b0e3cab1292cccb86ffe248d5734a2",
+    "status": "stage1-complete-integrated",
+    "stage2Authorized": true
+  },
+  "lockedLensOrder": [
+    "opportunities-rfx",
+    "resources",
+    "intelligence",
+    "referrals"
+  ],
+  "utilityIsNotLens": true,
+  "phase2Compatibility": {
+    "controllerPullRequest": 191,
+    "truthCorrectionPullRequest": 212,
+    "preserveSixteenActionRegistry": true,
+    "preserveOperationalApplicableAuthorizedSeparation": true,
+    "preserveServerDerivedAuthorization": true,
+    "preserveProgressiveAvailability": true,
+    "preserveSelectedObjectContinuity": true,
+    "preserveMapContinuity": true
+  },
+  "contracts": [
+    { "id": "mobile-shell", "state": "integrated" },
+    { "id": "bottom-four-lens-navigation", "state": "integrated" },
+    { "id": "three-position-bottom-sheet", "state": "integrated" },
+    { "id": "four-position-lens-action-rail", "state": "integrated" },
+    { "id": "result-business-card", "state": "integrated" },
+    { "id": "media", "state": "integrated" },
+    { "id": "favorite", "state": "integrated" },
+    { "id": "selected-object", "state": "integrated" },
+    { "id": "map-projection", "state": "integrated" },
+    { "id": "detail-state", "state": "integrated" },
+    { "id": "continuity-state", "state": "integrated" },
+    { "id": "analytical-layer-continuity", "state": "integrated" },
+    { "id": "non-point-area-projection", "state": "integrated" },
+    { "id": "relationship-path-continuity", "state": "integrated" },
+    { "id": "disabled-explanation-localization", "state": "integrated" },
+    { "id": "completion-governance", "state": "resolved" }
+  ],
+  "domainReviews": {
+    "02": {
+      "lane": "opportunities-rfx",
+      "status": "concur",
+      "candidateSha": "e6eaa7207b5610ab88f1847b2b7142335c713e7f",
+      "findingIdsResolved": ["MOB1-FIND-02-001", "MOB1-FIND-02-002", "MOB1-FIND-02-003"]
+    },
+    "03": {
+      "lane": "intelligence",
+      "status": "concur",
+      "candidateSha": "e6eaa7207b5610ab88f1847b2b7142335c713e7f",
+      "findingIdsResolved": ["MOB1-FIND-03-001"]
+    },
+    "04": {
+      "lane": "resources",
+      "status": "concur",
+      "candidateSha": "e6eaa7207b5610ab88f1847b2b7142335c713e7f",
+      "findingIdsResolved": ["MOB1-FIND-04-001", "MOB1-FIND-04-002"]
+    },
+    "05": {
+      "lane": "referrals",
+      "status": "concur",
+      "candidateSha": "e6eaa7207b5610ab88f1847b2b7142335c713e7f",
+      "findingIdsResolved": ["MOB1-FIND-05-001", "MOB1-FIND-05-002"]
+    }
+  },
+  "codexReview": {
+    "reviewedSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+    "unresolvedThreads": 0,
+    "allThreadsResolved": true
+  },
+  "findings": [
+    { "id": "MOB1-FIND-00-001", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-00-002", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-00-003", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-00-004", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-00-005", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-00-006", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "BUILD-FIND-218-001", "state": "resolved", "disposition": "accepted-shared-correction", "evidence": "production-ci 1504 succeeded on e6eaa7207b5610ab88f1847b2b7142335c713e7f" },
+    { "id": "MOB1-FIND-02-001", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-02-002", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-02-003", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-03-001", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-04-001", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-04-002", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-05-001", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-05-002", "state": "resolved", "disposition": "accepted-shared-correction" }
+  ],
+  "sharedContractRequests": [],
+  "allowedFindingDispositions": [
+    "accepted-shared-correction",
+    "reuse-existing-shared-seam",
+    "domain-fact-no-shared-change",
+    "deferred-explicitly-approved",
+    "rejected-conflicts-with-authority",
+    "superseded-by-candidate-sha"
+  ],
+  "exitGate": {
+    "satisfied": true,
+    "basis": [
+      "PR 218 exact-head production CI 1504 succeeded.",
+      "Lanes 02, 03, 04, and 05 all CONCUR on exact candidate e6eaa7207b5610ab88f1847b2b7142335c713e7f.",
+      "All Stage 1 substantive findings are resolved with shared corrections.",
+      "All Codex inline review threads are resolved.",
+      "PR 218 merged to main as 9b97b37365b0e3cab1292cccb86ffe248d5734a2.",
+      "Independent Acceptance remains optional assurance and is not a universal Stage 1 prerequisite."
+    ]
+  },
+  "nextAction": "Proceed to Stage 2 mobile composition implementation using the integrated Stage 1 shared contracts."
+}
