@@ -1,8 +1,8 @@
 # Resources Stage 2 Mobile Composition Consumption
 
-**Lane:** 04 — Resources  
-**Base:** `e46f57473d9a1ead6b90c7f48a317252f3416f09`  
-**Stage 1 contracts:** merged through PR #218 and closed by `MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md`  
+**Lane:** 04 — Resources
+**Base:** `e46f57473d9a1ead6b90c7f48a317252f3416f09`
+**Stage 1 contracts:** merged through PR #218 and closed by `MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md`
 **Shared Stage 2 presentation dependency:** Lane 01 mobile shell/sheet/card React composition; no Lane 01 Stage 2 candidate existed when this bounded domain adapter was opened.
 
 ## Purpose
