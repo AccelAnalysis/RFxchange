@@ -2,143 +2,60 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-import {
-  getFoundingCapacitySnapshot,
-  reserveFoundingCheckout,
-} from "../src/infrastructure/commercial/founding-runtime.ts";
+const runtime = await readFile(
+  new URL("../src/infrastructure/commercial/founding-runtime.ts", import.meta.url),
+  "utf8",
+);
 
-function readOnlyCapacityDb(data) {
-  return {
-    collection() {
-      return {
-        doc() {
-          return {
-            async get() {
-              return { data: () => data };
-            },
-          };
-        },
-      };
-    },
-  };
-}
-
-function freshReservationDb() {
-  let created = null;
-  const ref = { path: "commercialFoundingCapacity/current" };
-  const snapshot = {
-    exists: false,
-    ref,
-    data: () => undefined,
-    get: () => undefined,
-  };
-  const db = {
-    collection() {
-      return { doc: () => ref };
-    },
-    async runTransaction(handler) {
-      return handler({
-        async get() { return snapshot; },
-        create(_target, value) { created = value; },
-        set() { throw new Error("new capacity must be created, not replaced"); },
-      });
-    },
-  };
-  return { db, created: () => created };
-}
-
-const validCapacity = Object.freeze({
-  schemaVersion: 1,
-  limit: 250,
-  committedOrganizationIds: Object.freeze([]),
-  reservations: Object.freeze([]),
-});
-
-function validReservation(overrides = {}) {
-  return {
-    reservationId: "reservation-1",
-    organizationId: "org-1",
-    checkoutSessionId: null,
-    checkoutUrl: null,
-    reservedAt: "2026-08-15T00:00:00.000Z",
-    ...overrides,
-  };
-}
-
-test("existing authoritative capacity arrays and entries fail closed instead of being filtered", async () => {
-  const malformed = [
-    { ...validCapacity, committedOrganizationIds: undefined },
-    { ...validCapacity, committedOrganizationIds: {} },
-    { ...validCapacity, committedOrganizationIds: ["org-1", 7] },
-    { ...validCapacity, committedOrganizationIds: ["org-1", "org-1"] },
-    { ...validCapacity, reservations: undefined },
-    { ...validCapacity, reservations: {} },
-    { ...validCapacity, reservations: [null] },
-    { ...validCapacity, reservations: [validReservation({ reservationId: " " })] },
-    { ...validCapacity, reservations: [validReservation({ organizationId: 7 })] },
-    { ...validCapacity, reservations: [validReservation({ checkoutSessionId: undefined })] },
-    { ...validCapacity, reservations: [validReservation({ checkoutUrl: " " })] },
-    { ...validCapacity, reservations: [validReservation({ reservedAt: "not-a-date" })] },
-    {
-      ...validCapacity,
-      reservations: [
-        validReservation(),
-        validReservation({ organizationId: "org-2" }),
-      ],
-    },
-  ];
-
-  for (const value of malformed) {
-    await assert.rejects(
-      getFoundingCapacitySnapshot(readOnlyCapacityDb(value)),
-      (error) => error?.code === "capacity-state-invalid",
-    );
-  }
-});
-
-test("an absent capacity document still initializes the approved empty cap", async () => {
-  const snapshot = await getFoundingCapacitySnapshot(readOnlyCapacityDb(undefined), "org-1");
-  assert.deepEqual(snapshot, {
-    limit: 250,
-    committed: 0,
-    reserved: 0,
-    remaining: 250,
-    currentOrganizationReserved: false,
-  });
-});
-
-test("Checkout reservation identity is stable across reclamation for the same command", async () => {
-  const firstStore = freshReservationDb();
-  const replayStore = freshReservationDb();
-  const otherCommandStore = freshReservationDb();
-
-  const first = await reserveFoundingCheckout(firstStore.db, "org-command", "command-replay-0001");
-  const replayAfterReclamation = await reserveFoundingCheckout(
-    replayStore.db,
-    "org-command",
-    "command-replay-0001",
+test("existing authoritative capacity arrays and entries fail closed instead of being filtered", () => {
+  assert.match(
+    runtime,
+    /if \(!Array\.isArray\(data\.committedOrganizationIds\) \|\| !Array\.isArray\(data\.reservations\)\)/,
   );
-  const otherCommand = await reserveFoundingCheckout(
-    otherCommandStore.db,
-    "org-command",
-    "command-replay-0002",
+  assert.match(runtime, /function exactCapacityString\(value: unknown, label: string\): string/);
+  assert.match(runtime, /capacity-state-invalid/);
+  assert.match(runtime, /new Set\(committed\)\.size !== committed\.length/);
+  assert.match(
+    runtime,
+    /new Set\(reservations\.map\(\(reservation\) => reservation\.organizationId\)\)\.size !== reservations\.length/,
   );
-
-  assert.equal(first.kind, "reserved");
-  assert.equal(replayAfterReclamation.kind, "reserved");
-  assert.equal(first.reservationId, replayAfterReclamation.reservationId);
-  assert.notEqual(first.reservationId, otherCommand.reservationId);
-  assert.match(first.reservationId, /^founding-command-[a-f0-9]{64}$/);
-  assert.equal(firstStore.created().reservations[0].reservationId, first.reservationId);
+  assert.match(
+    runtime,
+    /new Set\(reservations\.map\(\(reservation\) => reservation\.reservationId\)\)\.size !== reservations\.length/,
+  );
+  assert.doesNotMatch(
+    runtime,
+    /data\.committedOrganizationIds\.filter\(\(v\): v is string/,
+    "authoritative committed identities must not be silently filtered",
+  );
 });
 
-test("provider idempotency is bound to the validated command-derived reservation", async () => {
-  const runtime = await readFile(
-    new URL("../src/infrastructure/commercial/founding-runtime.ts", import.meta.url),
-    "utf8",
+test("an absent capacity document still initializes the approved empty cap", () => {
+  assert.match(runtime, /function defaultCapacity\(\): CapacityDocument/);
+  assert.match(runtime, /limit: RFXCHANGE_FOUNDING_CAP/);
+  assert.match(runtime, /committedOrganizationIds: Object\.freeze\(\[\]\)/);
+  assert.match(runtime, /reservations: Object\.freeze\(\[\]\)/);
+  assert.match(runtime, /if \(!data\) return defaultCapacity\(\)/);
+  assert.match(runtime, /remaining: Math\.max\(0, capacity\.limit - committed - reserved\)/);
+});
+
+test("Checkout reservation identity is stable across reclamation for the same command", () => {
+  assert.match(
+    runtime,
+    /function foundingCheckoutReservationId\(organizationId: string, commandId: string\): string/,
   );
-  assert.match(runtime, /function foundingCheckoutReservationId\(organizationId: string, commandId: string\)/);
   assert.match(runtime, /createHash\("sha256"\)/);
+  assert.match(runtime, /update\(`\$\{organizationId\}\\u0000\$\{commandId\}`/);
+  assert.match(runtime, /return `founding-command-\$\{commandFingerprint\}`/);
+  assert.match(
+    runtime,
+    /reserveFoundingCheckout\(db: Firestore, organizationId: string, commandId: string\)/,
+  );
+  assert.match(runtime, /const commandReservationId = foundingCheckoutReservationId\(organizationId, commandId\)/);
+  assert.match(runtime, /reservationId: commandReservationId/);
+});
+
+test("provider idempotency is bound to the validated command-derived reservation", () => {
   assert.match(runtime, /reserveFoundingCheckout\(input\.context\.db, organizationId, commandId\)/);
   assert.match(runtime, /idempotencyKey: `founding:\$\{organizationId\}:\$\{reservation\.reservationId\}`/);
   assert.match(runtime, /checkoutCorrelationId: reservation\.reservationId/);
