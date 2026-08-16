@@ -36,92 +36,14 @@
   background: var(--semantic-surface-subtle);
 }
 
-.unavailableAction {
-  min-height: 44px;
-  padding: 0 var(--space-md);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: var(--border-hairline) solid var(--semantic-border-subtle);
-  border-radius: var(--radius-control);
-  color: var(--semantic-text-muted);
-  background: var(--semantic-surface-subtle);
-  cursor: not-allowed;
-  font-weight: 720;
-  opacity: 0.72;
+.desktopSearchOverlay,
+.desktopDetailSheet {
+  display: contents;
 }
 
-.stateAction:focus-visible,
-.primaryAction:focus-visible,
-.secondaryAction:focus-visible,
-.organizationHomeButton:focus-visible,
-.closeButton:focus-visible,
-.networkResultButton:focus-visible,
-.networkForm input:focus-visible,
-.networkForm select:focus-visible {
-  outline: var(--focus-outline-width) solid var(--semantic-border-focus);
-  outline-offset: var(--focus-outline-offset-high);
-}
-
-.workspaceActions {
-  position: absolute;
-  z-index: 24;
-  top: var(--space-lg);
-  right: var(--space-lg);
-}
-
-.organizationHomeButton {
-  min-width: min(340px, calc(100vw - 36px));
-  min-height: 58px;
-  padding: var(--space-xs) var(--space-md) var(--space-xs) var(--space-xs);
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  border: var(--border-hairline) solid var(--semantic-border-glass);
-  border-radius: var(--radius-panel);
-  color: var(--semantic-text-primary);
-  background: var(--semantic-surface-glass-strong);
-  box-shadow: var(--elevation-control);
-  backdrop-filter: blur(22px) saturate(122%);
-  -webkit-backdrop-filter: blur(22px) saturate(122%);
-  cursor: pointer;
-  text-align: left;
-}
-
-.organizationHomeButton > span:last-child {
-  min-width: 0;
-  display: grid;
-  gap: var(--space-xxs);
-}
-
-.organizationHomeButton small {
-  color: var(--semantic-text-connection-small);
-  font: 800 var(--type-caption-size)/1 var(--type-interface-family);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.organizationHomeButton strong {
-  overflow: hidden;
-  color: var(--semantic-text-primary);
-  font: 720 0.96rem/1.2 var(--type-interface-family);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.organizationNode {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border: 3px solid var(--object-node-selected-ring);
-  border-radius: var(--radius-pill);
-  color: var(--object-node-organization-foreground);
-  background: var(--object-node-organization-fill);
-  box-shadow: 0 0 0 5px var(--semantic-surface-connection);
-  font: 800 0.72rem/1 var(--type-interface-family);
-  letter-spacing: -0.03em;
+.mobileSearchOverlay,
+.mobileResultStream {
+  display: none;
 }
 
 .organizationHome {
@@ -224,13 +146,6 @@
   margin-top: var(--space-lg);
 }
 
-.actionAvailabilityNote {
-  margin: var(--space-sm) 0 0;
-  color: var(--semantic-text-muted);
-  font-size: var(--type-caption-size);
-  line-height: 1.45;
-}
-
 .provenance,
 .capabilitySection,
 .publicContact {
@@ -240,7 +155,8 @@
   background: var(--semantic-surface-subtle);
 }
 
-.provenance dl {
+.provenance dl,
+.capabilityList {
   margin-top: var(--space-md);
 }
 
@@ -311,8 +227,7 @@
   font-size: 0.92rem;
 }
 
-.networkResultSummary span,
-.matchDisclaimer {
+.networkResultSummary span {
   color: var(--semantic-text-muted);
   font-size: 0.76rem;
   line-height: 1.45;
@@ -398,12 +313,7 @@
   text-decoration: none;
 }
 
-.matchDisclaimer {
-  margin: 0;
-}
-
 .capabilityList {
-  margin-top: var(--space-md);
   gap: var(--space-sm);
 }
 
@@ -432,6 +342,23 @@
   font-weight: 720;
 }
 
+.mobileResultUtilityRow {
+  min-height: 38px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--semantic-text-muted);
+  font-size: 0.74rem;
+}
+
+.mobileResultUtilityRow a {
+  color: var(--semantic-text-link);
+  font-weight: 760;
+  text-decoration: none;
+}
+
 .srOnly {
   position: absolute;
   width: 1px;
@@ -444,32 +371,90 @@
   border: 0;
 }
 
+.stateAction:focus-visible,
+.primaryAction:focus-visible,
+.secondaryAction:focus-visible,
+.closeButton:focus-visible,
+.networkResultButton:focus-visible,
+.networkForm input:focus-visible,
+.networkForm select:focus-visible,
+.mobileSearchOverlay :is(input, select, button):focus-visible {
+  outline: var(--focus-outline-width) solid var(--semantic-border-focus);
+  outline-offset: var(--focus-outline-offset-high);
+}
+
 @media (max-width: 760px) {
-  .workspaceActions {
-    top: var(--space-sm);
-    right: var(--space-sm);
-    left: auto;
-    max-width: min(45vw, 210px);
+  .desktopSearchOverlay,
+  .desktopDetailSheet {
+    display: none;
   }
 
-  .organizationHomeButton {
-    width: 100%;
+  .mobileSearchOverlay {
+    position: fixed;
+    z-index: 38;
+    top: calc(env(safe-area-inset-top, 0px) + 58px);
+    right: max(10px, env(safe-area-inset-right, 0px));
+    left: max(10px, env(safe-area-inset-left, 0px));
+    min-height: 48px;
+    padding: 5px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 50px 46px;
+    gap: 5px;
+    border: var(--border-hairline) solid var(--semantic-border-glass);
+    border-radius: 18px;
+    background: var(--semantic-surface-glass-strong);
+    box-shadow: var(--elevation-overlay);
+    backdrop-filter: blur(20px) saturate(120%);
+    -webkit-backdrop-filter: blur(20px) saturate(120%);
+  }
+
+  .mobileSearchOverlay label {
     min-width: 0;
-    padding-right: var(--space-xs);
   }
 
-  .organizationHomeButton small,
-  .organizationHomeButton strong {
-    max-width: 116px;
+  .mobileSearchOverlay input,
+  .mobileSearchOverlay select,
+  .mobileSearchOverlay button {
+    width: 100%;
+    min-height: 44px;
+    border: 0;
+    border-radius: 13px;
+    color: var(--semantic-text-primary);
+    background: var(--semantic-canvas-elevated);
+    font: 650 0.84rem/1 var(--type-interface-family);
   }
 
-  .networkSearch {
-    width: min(54vw, 330px);
-    max-height: 48dvh;
+  .mobileSearchOverlay input {
+    padding: 0 12px;
   }
 
-  .networkFilterGrid {
-    grid-template-columns: 1fr;
+  .mobileSearchOverlay select {
+    padding: 0 6px;
+    color: transparent;
+    background-image: linear-gradient(45deg, transparent 50%, var(--semantic-text-secondary) 50%), linear-gradient(135deg, var(--semantic-text-secondary) 50%, transparent 50%);
+    background-position: calc(50% - 3px) 50%, calc(50% + 3px) 50%;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    appearance: none;
+  }
+
+  .mobileSearchOverlay button {
+    color: var(--semantic-action-primary-foreground);
+    background: var(--semantic-action-primary-background);
+    cursor: pointer;
+    font-size: 1.2rem;
+  }
+
+  .mobileResultStream {
+    display: block;
+  }
+
+  .organizationHome {
+    gap: var(--space-md);
+  }
+
+  .sheetHeader h1 {
+    font-size: clamp(1.55rem, 7vw, 2.2rem);
   }
 
   .organizationFacts > div,
@@ -478,33 +463,33 @@
     gap: var(--space-xs);
   }
 
+  .provenance,
+  .capabilitySection,
+  .publicContact {
+    padding: var(--space-md);
+  }
+
   .primaryAction,
   .secondaryAction,
   .stateAction {
     width: 100%;
   }
+
+  .networkPagination {
+    margin: 14px 0 4px;
+    padding: 10px 0;
+    border-top: 1px solid var(--semantic-border-subtle);
+  }
 }
 
-@media (max-width: 520px) {
-  .networkSearch {
-    width: calc(100vw - 24px);
-    max-height: 54dvh;
-    padding: var(--space-sm);
-    border: var(--border-hairline) solid var(--semantic-border-glass);
-    border-radius: var(--radius-panel);
-    background: var(--semantic-surface-glass-strong);
-    box-shadow: var(--elevation-overlay);
-    backdrop-filter: blur(24px) saturate(122%);
-    -webkit-backdrop-filter: blur(24px) saturate(122%);
-  }
-
-  .workspaceActions {
-    display: none;
+@media (orientation: landscape) and (max-height: 520px) {
+  .mobileSearchOverlay {
+    top: calc(env(safe-area-inset-top, 0px) + 8px);
+    right: 62px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .organizationHomeButton,
   .closeButton,
   .networkResultButton {
     transition: none;
@@ -512,8 +497,7 @@
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .organizationHomeButton,
-  .networkSearch {
+  .mobileSearchOverlay {
     background: var(--semantic-canvas-elevated);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
