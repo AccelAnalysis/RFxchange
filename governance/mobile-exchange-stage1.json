@@ -8,20 +8,21 @@
     "packetId": "WP-MOBILE-EXCHANGE-STAGE1-01",
     "mainBaseSha": "0b23a9f9b49468aab12609dea6116e1409c925fe",
     "controlPullRequest": 217,
-    "controlBranch": "control/mobile-stage1-architecture-lock",
     "implementationLane": "shared-exchange",
-    "implementationBranch": "lane01/mobile-exchange-stage1-contracts",
     "candidatePullRequest": 218,
-    "candidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-    "candidateDisposition": "implemented-not-verified",
+    "candidateSha": "e6eaa7207b5610ab88f1847b2b7142335c713e7f",
     "candidateCi": {
       "workflow": "production-ci",
-      "runNumber": 1494,
+      "runNumber": 1504,
+      "runId": 31971663240,
       "status": "completed",
       "conclusion": "success"
     },
-    "status": "active-candidate-correction-and-cross-lens-review",
-    "stage2Authorized": false
+    "candidateDisposition": "implemented-not-verified",
+    "candidateMerged": true,
+    "integratedMainSha": "9b97b37365b0e3cab1292cccb86ffe248d5734a2",
+    "status": "stage1-complete-integrated",
+    "stage2Authorized": true
   },
   "lockedLensOrder": [
     "opportunities-rfx",
@@ -41,132 +42,70 @@
     "preserveMapContinuity": true
   },
   "contracts": [
-    { "id": "mobile-shell", "state": "candidate-pending-cross-lens-review" },
-    { "id": "bottom-four-lens-navigation", "state": "candidate-pending-cross-lens-review" },
-    { "id": "three-position-bottom-sheet", "state": "candidate-partial-finding-open", "findingIds": ["MOB1-FIND-00-002"] },
-    { "id": "four-position-lens-action-rail", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-004"] },
-    { "id": "result-business-card", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003", "MOB1-FIND-02-001"] },
-    { "id": "media", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-02-003"] },
-    { "id": "favorite", "state": "candidate-pending-cross-lens-review" },
-    { "id": "selected-object", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003", "MOB1-FIND-02-001"] },
-    { "id": "map-projection", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003", "MOB1-FIND-00-005"] },
-    { "id": "detail-state", "state": "candidate-partial-finding-open", "findingIds": ["MOB1-FIND-00-002", "MOB1-FIND-00-003"] },
-    { "id": "continuity-state", "state": "candidate-partial-finding-open", "findingIds": ["MOB1-FIND-00-002", "MOB1-FIND-00-005", "MOB1-FIND-02-002"] },
-    { "id": "disabled-explanation-localization", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-006"] },
-    { "id": "completion-governance", "state": "resolved", "findingIds": ["MOB1-FIND-00-001"] }
+    { "id": "mobile-shell", "state": "integrated" },
+    { "id": "bottom-four-lens-navigation", "state": "integrated" },
+    { "id": "three-position-bottom-sheet", "state": "integrated" },
+    { "id": "four-position-lens-action-rail", "state": "integrated" },
+    { "id": "result-business-card", "state": "integrated" },
+    { "id": "media", "state": "integrated" },
+    { "id": "favorite", "state": "integrated" },
+    { "id": "selected-object", "state": "integrated" },
+    { "id": "map-projection", "state": "integrated" },
+    { "id": "detail-state", "state": "integrated" },
+    { "id": "continuity-state", "state": "integrated" },
+    { "id": "analytical-layer-continuity", "state": "integrated" },
+    { "id": "non-point-area-projection", "state": "integrated" },
+    { "id": "relationship-path-continuity", "state": "integrated" },
+    { "id": "disabled-explanation-localization", "state": "integrated" },
+    { "id": "completion-governance", "state": "resolved" }
   ],
   "domainReviews": {
     "02": {
       "lane": "opportunities-rfx",
-      "status": "finding-re-review-required",
-      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
-      "currentCandidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-      "findingIds": ["MOB1-FIND-02-001", "MOB1-FIND-02-002", "MOB1-FIND-02-003"]
+      "status": "concur",
+      "candidateSha": "e6eaa7207b5610ab88f1847b2b7142335c713e7f",
+      "findingIdsResolved": ["MOB1-FIND-02-001", "MOB1-FIND-02-002", "MOB1-FIND-02-003"]
     },
-    "03": { "lane": "intelligence", "status": "not-submitted", "candidateSha": null, "findingIds": [] },
-    "04": { "lane": "resources", "status": "not-submitted", "candidateSha": null, "findingIds": [] },
-    "05": { "lane": "referrals", "status": "not-submitted", "candidateSha": null, "findingIds": [] }
+    "03": {
+      "lane": "intelligence",
+      "status": "concur",
+      "candidateSha": "e6eaa7207b5610ab88f1847b2b7142335c713e7f",
+      "findingIdsResolved": ["MOB1-FIND-03-001"]
+    },
+    "04": {
+      "lane": "resources",
+      "status": "concur",
+      "candidateSha": "e6eaa7207b5610ab88f1847b2b7142335c713e7f",
+      "findingIdsResolved": ["MOB1-FIND-04-001", "MOB1-FIND-04-002"]
+    },
+    "05": {
+      "lane": "referrals",
+      "status": "concur",
+      "candidateSha": "e6eaa7207b5610ab88f1847b2b7142335c713e7f",
+      "findingIdsResolved": ["MOB1-FIND-05-001", "MOB1-FIND-05-002"]
+    }
   },
   "codexReview": {
     "reviewedSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
-    "unresolvedThreads": 4,
-    "allThreadsCurrentAtCandidate": true,
-    "corroborates": ["MOB1-FIND-00-002", "MOB1-FIND-00-003"],
-    "originates": ["MOB1-FIND-00-005", "MOB1-FIND-00-006"]
+    "unresolvedThreads": 0,
+    "allThreadsResolved": true
   },
   "findings": [
-    {
-      "id": "MOB1-FIND-00-001",
-      "candidatePullRequest": 218,
-      "candidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-      "contract": "completion-governance",
-      "state": "resolved",
-      "disposition": "accepted-shared-correction",
-      "summary": "The architecture record now treats Independent Acceptance as optional assurance rather than a universal prerequisite."
-    },
-    {
-      "id": "MOB1-FIND-00-002",
-      "candidatePullRequest": 218,
-      "candidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-      "contract": "responsive-continuity",
-      "state": "partially-addressed-open",
-      "requestedDisposition": "accepted-shared-correction",
-      "resolvedPortion": "Accessibility/responsive policy and focused continuity tests are present.",
-      "remaining": "Add opaque result-set identity/cursor and explicit internal sheet/detail scroll state."
-    },
-    {
-      "id": "MOB1-FIND-00-003",
-      "candidatePullRequest": 218,
-      "candidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-      "contract": "selected-object-parity",
-      "state": "open",
-      "requestedDisposition": "accepted-shared-correction",
-      "summary": "Make focal marker, card, and detail subject identity internally consistent and enforceable."
-    },
-    {
-      "id": "MOB1-FIND-00-004",
-      "candidatePullRequest": 218,
-      "candidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-      "contract": "lens-action-rail",
-      "state": "open",
-      "requestedDisposition": "accepted-shared-correction",
-      "summary": "Validate each projected action against the frozen canonical action ID for its lens and position."
-    },
-    {
-      "id": "MOB1-FIND-00-005",
-      "candidatePullRequest": 218,
-      "candidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-      "contract": "geography-authority",
-      "state": "open",
-      "requestedDisposition": "accepted-shared-correction",
-      "summary": "Represent browser-restored geography as unvalidated until authoritative server revalidation."
-    },
-    {
-      "id": "MOB1-FIND-00-006",
-      "candidatePullRequest": 218,
-      "candidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-      "contract": "disabled-explanation-localization",
-      "state": "open",
-      "requestedDisposition": "accepted-shared-correction",
-      "summary": "Use the canonical supported-locale key for disabled action explanations."
-    },
-    {
-      "id": "BUILD-FIND-218-001",
-      "candidatePullRequest": 218,
-      "candidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-      "contract": "exact-head-ci",
-      "state": "resolved",
-      "disposition": "accepted-shared-correction",
-      "evidence": "production-ci run 1494 succeeded"
-    },
-    {
-      "id": "MOB1-FIND-02-001",
-      "candidatePullRequest": 218,
-      "candidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-      "contract": "focal-and-associated-identity",
-      "state": "open",
-      "requestedDisposition": "accepted-shared-correction",
-      "summary": "Preserve distinct opportunity and issuer-organization identities while maintaining focal record parity."
-    },
-    {
-      "id": "MOB1-FIND-02-002",
-      "candidatePullRequest": 218,
-      "candidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-      "contract": "continuity-scope-invalidation",
-      "state": "partially-addressed-open",
-      "requestedDisposition": "accepted-shared-correction",
-      "resolvedPortion": "Versioned scope, typed invalidation, and negative scope/selected-object tests are present.",
-      "remaining": "Resolve restored-geography authority labeling before final disposition."
-    },
-    {
-      "id": "MOB1-FIND-02-003",
-      "candidatePullRequest": 218,
-      "candidateSha": "f41b791644c6a3b372e28a1db7c32d16c1a25714",
-      "contract": "video-media",
-      "state": "open",
-      "requestedDisposition": "accepted-shared-correction",
-      "summary": "Represent actual optional video media separately from a poster image."
-    }
+    { "id": "MOB1-FIND-00-001", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-00-002", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-00-003", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-00-004", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-00-005", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-00-006", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "BUILD-FIND-218-001", "state": "resolved", "disposition": "accepted-shared-correction", "evidence": "production-ci 1504 succeeded on e6eaa7207b5610ab88f1847b2b7142335c713e7f" },
+    { "id": "MOB1-FIND-02-001", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-02-002", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-02-003", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-03-001", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-04-001", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-04-002", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-05-001", "state": "resolved", "disposition": "accepted-shared-correction" },
+    { "id": "MOB1-FIND-05-002", "state": "resolved", "disposition": "accepted-shared-correction" }
   ],
   "sharedContractRequests": [],
   "allowedFindingDispositions": [
@@ -178,14 +117,15 @@
     "superseded-by-candidate-sha"
   ],
   "exitGate": {
-    "satisfied": false,
-    "reasons": [
-      "PR 218 has five open or partially addressed Control Room findings.",
-      "PR 218 has three open or partially addressed Lane 02 findings.",
-      "Four Codex review threads remain unresolved and current.",
-      "Lane 02 must re-review the current candidate; Lanes 03-05 have not submitted reviews.",
-      "No open substantive finding has a final durable disposition."
+    "satisfied": true,
+    "basis": [
+      "PR 218 exact-head production CI 1504 succeeded.",
+      "Lanes 02, 03, 04, and 05 all CONCUR on exact candidate e6eaa7207b5610ab88f1847b2b7142335c713e7f.",
+      "All Stage 1 substantive findings are resolved with shared corrections.",
+      "All Codex inline review threads are resolved.",
+      "PR 218 merged to main as 9b97b37365b0e3cab1292cccb86ffe248d5734a2.",
+      "Independent Acceptance remains optional assurance and is not a universal Stage 1 prerequisite."
     ]
   },
-  "nextAction": "Lane 01 completes the remaining shared corrections on PR 218, records exact-SHA dispositions, and obtains green CI on the final head. Lanes 02-05 then review or re-review that exact head through GitHub."
+  "nextAction": "Proceed to Stage 2 mobile composition implementation using the integrated Stage 1 shared contracts."
 }
