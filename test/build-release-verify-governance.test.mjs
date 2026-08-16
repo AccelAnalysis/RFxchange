@@ -12,6 +12,7 @@ const buildReleaseVerify = read("docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AM
 const completionAmendment = read("docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md");
 const protocol = read("docs/program/INDEPENDENT_ACCEPTANCE_PROTOCOL.md");
 const agents = read("AGENTS.md");
+const trackerIntegrity = read("scripts/validate-four-lens-tracker-integrity.mjs");
 
 const universalMergeGatePattern = /Exact-head review remains a real merge gate/;
 
@@ -43,12 +44,28 @@ test("removing mandatory independent verification does not weaken safety gates",
   assert.match(completionAmendment, /A green check is not permission to ignore a known material defect/);
 });
 
-test("historical Four-Lens authorities remain provenance while the amendment governs completion", () => {
+test("historical Four-Lens authorities remain provenance while the completion amendment governs current completion", () => {
   assert.match(authority, /BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT\.md/);
   assert.doesNotMatch(authority, universalMergeGatePattern);
   assert.match(buildReleaseVerify, /Build → Release → Verify/);
   assert.match(protocol, /Independent Acceptance Protocol/);
+  assert.match(agents, /FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT\.md/);
   assert.match(agents, /Production CI must pass on the exact candidate head before ordinary merge and again on merged `main`/);
+});
+
+test("operating instructions do not reinstall Independent Acceptance as a completion gate", () => {
+  assert.match(agents, /Independent Acceptance is not required merely to check a completed item/);
+  assert.match(agents, /Independent review is not a universal completion, tracker, merge, release or development prerequisite/);
+  assert.match(agents, /`Implemented — Not Verified` may be a terminal completion state/);
+  assert.doesNotMatch(agents, /A checked item requires implementation and independently accepted evidence/);
+  assert.doesNotMatch(agents, /only the Independent Acceptance lane may record `Verified`\. No builder certifies its own feature or experience completion/);
+});
+
+test("RFx tracker completion accepts implemented terminal state without Lane 06", () => {
+  assert.match(trackerIntegrity, /const completionStatuses = new Set\(\["Implemented — Not Verified", "Verified"\]\)/);
+  assert.match(trackerIntegrity, /if \(requirement\.status === "Verified"\)/);
+  assert.doesNotMatch(trackerIntegrity, /every later completion requires Verified/);
+  assert.doesNotMatch(trackerIntegrity, /completion lacks Lane 06 acceptance/);
 });
 
 test("the streamlined program does not replace verification with another universal approval layer", () => {
