@@ -12,7 +12,7 @@ The Master Build Tracker remains the Feature-ID authority. This matrix does not 
 
 ## Current completion governance
 
-`FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md` is controlling where older program text conflicts.
+`FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md` controls where older program text conflicts.
 
 - Implementation, merge/release, and optional independent assurance are separate facts.
 - A bounded packet may close as `Implemented — Not Verified` when implementation evidence, applicable checks, dependencies, ownership, and durable disposition of material findings are sufficient.
@@ -53,8 +53,8 @@ No percentage is inferred from these status counts. Stage 1 is a cross-cutting a
 | Composition reference | `docs/reference/screenshots/rfxchange-mobile-composition-reference.jpg` |
 | Control document | `docs/program/MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md` |
 | Machine ledger | `governance/mobile-exchange-stage1.json` |
-| Lane 01 candidate | PR `#218` at `3c67ef3dffeaa60aef761debb6cf76ea1c807789` |
-| Candidate build | production-ci #1483 — **SUCCESS** |
+| Lane 01 candidate | PR `#218` at `cf73a656dba4c09e735ac991cab557ecc2a22943` |
+| Candidate build | production-ci #1492 — **IN PROGRESS** |
 | Candidate disposition | `Implemented — Not Verified`; substantive findings unresolved |
 | Current state | **Active — candidate correction and cross-lens review** |
 | Stage 1 exit gate | **Not satisfied** |
@@ -94,68 +94,80 @@ Account/Menu is a utility, not a fifth lens.
 | Lane | Role | Exact current state | Shared-path write authority |
 | --- | --- | --- | --- |
 | 00 — Control Room | packet, convergence, findings, exit decision | PR #217 records current candidate and findings | Governance/program artifacts only |
-| 01 — Shared Exchange Platform | shared contract implementation | PR #218 at `3c67ef3d…`; CI green; correction required | Yes, within packet-owned contract/type/test paths |
-| 02 — Opportunities/RFx | architecture consumer/reviewer | Exact-head review submitted with 3 findings | No private mobile framework |
-| 03 — Intelligence | architecture consumer/reviewer | Review not yet submitted | No private mobile framework |
-| 04 — Resources | architecture consumer/reviewer | Review not yet submitted | No private mobile framework |
-| 05 — Referrals | architecture consumer/reviewer | Review not yet submitted | No private mobile framework |
+| 01 — Shared Exchange Platform | shared contract implementation | PR #218 at `cf73a656…`; continuity correction added; CI pending | Yes, within packet-owned contract/type/test paths |
+| 02 — Opportunities/RFx | architecture consumer/reviewer | FINDING at `3c67ef3d…`; re-review current/final head | No private mobile framework |
+| 03 — Intelligence | architecture consumer/reviewer | Review not submitted | No private mobile framework |
+| 04 — Resources | architecture consumer/reviewer | Review not submitted | No private mobile framework |
+| 05 — Referrals | architecture consumer/reviewer | Review not submitted | No private mobile framework |
 | 06 — Independent Acceptance | optional assurance | Not required for Stage 1 closure | No production code |
 | 07 — Integration / Cross-Lens QA | later integrated behavior | Standby; Stage 2 unauthorized | No Stage 1 shared implementation |
 
+## Current candidate correction
+
+The current Lane 01 head adds `mobile-exchange-continuity.ts` with:
+
+- versioned session/participant/membership/viewer-organization/geography scope;
+- typed scope/schema/selected-object invalidation reasons;
+- fail-closed selected-object narrowing;
+- safe return context;
+- safe-area, non-drag sheet control, keyboard/switch access, focus restoration, reduced-motion, and orientation continuity policy.
+
+This is a bounded Stage 1 architecture correction. It does not implement UI. It partially addresses `MOB1-FIND-00-002` and `MOB1-FIND-02-002`; it does not resolve them because result-set identity/cursor, internal sheet/detail scroll state, focused negative tests, and the restored-geography authority correction remain absent.
+
 ## Shared contract status
 
-| Contract | Candidate state | Current convergence blocker |
+| Contract | Current state | Convergence blocker |
 | --- | --- | --- |
-| shell composition | Present | Pending domain review |
-| bottom four-lens navigation | Present | Pending domain review |
-| three-position bottom sheet | Present | `MOB1-FIND-00-002` |
-| four-position action rail | Present | `MOB1-FIND-00-004` |
-| result/business card | Present | `MOB1-FIND-00-003`, `MOB1-FIND-02-001` |
-| media | Present | `MOB1-FIND-02-003` |
-| favorites | Present | Pending domain review; Lane 02 domain note applies |
-| selected-object state | Present | `MOB1-FIND-00-003`, `MOB1-FIND-02-001` |
-| map projection | Present | `MOB1-FIND-00-003`, `MOB1-FIND-00-005` |
-| detail state | Present | `MOB1-FIND-00-002`, `MOB1-FIND-00-003` |
-| continuity | Present | `MOB1-FIND-00-002`, `MOB1-FIND-02-002`, `MOB1-FIND-00-005` |
-| disabled explanation copy | Present but invalid namespace | `MOB1-FIND-00-006` |
+| shell composition | Candidate present | Final-head reviews incomplete |
+| bottom four-lens navigation | Candidate present | Final-head reviews incomplete |
+| three-position bottom sheet | Partially represented | `MOB1-FIND-00-002` |
+| four-position action rail | Candidate present | `MOB1-FIND-00-004` |
+| result/business card | Candidate present | `MOB1-FIND-00-003`, `MOB1-FIND-02-001` |
+| media | Candidate present | `MOB1-FIND-02-003` |
+| favorites | Candidate present | Final-head reviews incomplete; Lane 02 domain note applies |
+| selected-object state | Candidate present | `MOB1-FIND-00-003`, `MOB1-FIND-02-001` |
+| map projection | Candidate present | `MOB1-FIND-00-003`, `MOB1-FIND-00-005` |
+| detail state | Partially represented | `MOB1-FIND-00-002`, `MOB1-FIND-00-003` |
+| continuity/invalidation | Partially represented | `MOB1-FIND-00-002`, `MOB1-FIND-02-002`, `MOB1-FIND-00-005` |
+| disabled explanation copy | Invalid namespace remains | `MOB1-FIND-00-006` |
 | completion governance | Candidate doc conflicts | `MOB1-FIND-00-001` |
 
 ## Current findings
 
 ### Control Room findings
 
-| Finding | State | Required correction |
+| Finding | State at `cf73a656…` | Required correction |
 | --- | --- | --- |
-| `MOB1-FIND-00-001` | Open | Remove the reintroduced mandatory Independent Acceptance prerequisite. |
-| `MOB1-FIND-00-002` | Open | Complete result-set/cursor, internal scroll, safe-area, keyboard/orientation, reduced-motion/accessibility, and non-gesture sheet architecture. |
-| `MOB1-FIND-00-003` | Open | Enforce marker/card/detail selected-object parity and internal subject consistency. |
+| `MOB1-FIND-00-001` | Open | Remove the mandatory Independent Acceptance prerequisite. |
+| `MOB1-FIND-00-002` | Partially addressed; open | Add result-set/cursor, internal scroll, and focused continuity/accessibility tests. |
+| `MOB1-FIND-00-003` | Open | Enforce marker/card/detail focal identity and internal subject consistency. |
 | `MOB1-FIND-00-004` | Open | Validate action-rail input against the frozen canonical action ID per lens/position. |
-| `MOB1-FIND-00-005` | Open | Do not label browser-restored geography as server-authoritative before revalidation. |
-| `MOB1-FIND-00-006` | Open | Use a real supported-locale key contract for disabled explanations. |
-| `BUILD-FIND-218-001` | Resolved | Whitespace fixed; production-ci #1483 succeeded at `3c67ef3d…`. |
+| `MOB1-FIND-00-005` | Open | Do not label browser-restored geography server-authoritative before revalidation. |
+| `MOB1-FIND-00-006` | Open | Use the canonical supported-locale key contract for disabled explanations. |
+| `BUILD-FIND-218-001` | Resolved on prior head | Whitespace fixed; production-ci #1483 succeeded at `3c67ef3d…`. |
 
-Codex review threads independently corroborate `MOB1-FIND-00-002` and `MOB1-FIND-00-003`, and are the originating evidence for `MOB1-FIND-00-005` and `MOB1-FIND-00-006`. All four Codex threads remain unresolved on PR #218.
+All four Codex threads remain unresolved, current, and mapped to `MOB1-FIND-00-002`, `003`, `005`, and `006`.
 
 ### Lane 02 findings
 
-| Finding | State | Required shared correction |
+| Finding | State at `cf73a656…` | Required shared correction |
 | --- | --- | --- |
-| `MOB1-FIND-02-001` | Open | Keep focal opportunity identity distinct from associated issuer-organization identity while preserving record marker/card/detail parity. |
-| `MOB1-FIND-02-002` | Open | Carry versioned participant/membership/viewer-organization/geography scope and define fail-closed continuity reconciliation/invalidation. |
-| `MOB1-FIND-02-003` | Open | Represent actual optional video media separately from a poster image. |
+| `MOB1-FIND-02-001` | Open | Keep focal opportunity identity distinct from associated issuer-organization identity. |
+| `MOB1-FIND-02-002` | Partially addressed; open | Add scope-mismatch/authority negative tests and resolve restored-geography authority. |
+| `MOB1-FIND-02-003` | Open | Represent actual optional video separately from a poster image. |
 
-No Shared Contract Request is needed for these findings because they are bounded corrections to the existing shared candidate.
+No Shared Contract Request is needed because these remain bounded candidate corrections.
 
 ## Domain review state
 
-| Lane | Review disposition | Exact SHA | Findings |
+| Lane | Review disposition | Review SHA | Current-head requirement |
 | --- | --- | --- | --- |
-| 02 | FINDING | `3c67ef3dffeaa60aef761debb6cf76ea1c807789` | `MOB1-FIND-02-001`–`003` |
-| 03 | Not submitted | — | — |
-| 04 | Not submitted | — | — |
-| 05 | Not submitted | — | — |
+| 02 | FINDING | `3c67ef3dffeaa60aef761debb6cf76ea1c807789` | Re-review final head; prior findings remain applicable. |
+| 03 | Not submitted | — | Review final exact head. |
+| 04 | Not submitted | — | Review final exact head. |
+| 05 | Not submitted | — | Review final exact head. |
 
-A concurrence applies only to an exact candidate SHA. Lanes 03–05 must review PR #218 through GitHub; no conversation relay or private shared implementation is accepted.
+A concurrence applies only to an exact candidate SHA. No conversation relay or private shared implementation is accepted.
 
 ## Parallel-write control
 
@@ -168,8 +180,8 @@ A concurrence applies only to an exact candidate SHA. Lanes 03–05 must review 
 
 **NOT SATISFIED.**
 
-The authority/reference are installed and PR #218 has green exact-head CI, but six Control Room findings, three Lane 02 findings, four unresolved Codex threads, and missing reviews from Lanes 03–05 prevent convergence.
+The authority/reference are installed and the candidate has advanced, but six Control Room findings, three Lane 02 findings, four unresolved Codex threads, pending exact-head CI, and missing final-head reviews from Lanes 02–05 prevent convergence.
 
 ## Exact next action
 
-Lane 01 corrects the open findings on PR #218 without entering Stage 2 UI, records dispositions on the PR, and obtains green CI on the new exact head. Lanes 02–05 then review or re-review that exact head. Stage 2 remains unauthorized.
+Lane 01 completes the remaining shared corrections and focused evidence on PR #218 without entering Stage 2 UI, records exact-SHA dispositions, and obtains green CI on the final head. Lanes 02–05 then review or re-review that exact head. Stage 2 remains unauthorized.
