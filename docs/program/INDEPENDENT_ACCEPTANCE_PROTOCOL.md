@@ -1,219 +1,133 @@
-# Independent Acceptance Protocol
+# Optional Independent Assurance Protocol
 
-**Owner:** Lane 06 — Independent Acceptance
+**Owner:** Lane 06 — Optional Independent Assurance
 
-Independent Acceptance certifies approved requirements, not implementation effort. It does not implement production feature code and does not change a requirement to match an implementation.
+This protocol is governed by [`FOUR_LENS_OPTIONAL_ASSURANCE_AMENDMENT.md`](FOUR_LENS_OPTIONAL_ASSURANCE_AMENDMENT.md).
 
-This protocol describes **Layer 1 acceptance integrity** required by the Four-Lens program. Advanced provenance, retention and multi-stage certification hardening belongs to the separately planned `WP-ACCEPTANCE-INTEGRITY-HARDENING-01`; that hardening does not replace or postpone the no-self-certification rule.
+Lane 06 is retained as an optional, on-demand assurance/audit capability. Independent verification is **not** a prerequisite to Four-Lens implementation completion, merge, release, deployment, tracker progression, workstream closure, or program closure.
 
-The governing delivery model is `Build → Release → Verify` under [`BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`](BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md). Merge and production deployment are not equivalent to Independent Acceptance.
+Historical Independent Acceptance evidence and `Verified` dispositions remain valid historical assurance records. Nothing in this protocol automatically grants or removes `Verified` status.
 
-## Entry criteria
+## When to use Lane 06
 
-An implementation may enter final acceptance whether it is:
+Control Room or the participant/product owner may request optional independent assurance when it adds value, including:
 
-- an exact open candidate;
-- an exact merged implementation; or
-- an exact deployed implementation with sufficient source/build/runtime provenance for the claim being evaluated.
+- a high-risk or consequential boundary;
+- a disputed requirement interpretation;
+- post-release audit;
+- targeted security/privacy/authority review;
+- regression investigation;
+- evidence desired for external confidence; or
+- a later bounded authority that explicitly requires independent assurance for a named action.
 
-Control Room records:
+Reviewer unavailability alone does not block ordinary delivery.
+
+## Entry information
+
+When optional assurance is requested, provide enough information to audit the actual implementation:
 
 - exact implementation SHA;
-- exact packet activation/base SHA where applicable;
-- immutable requirement IDs;
-- governing sources;
-- implementation PR and implementation actor;
-- known limitations and dependencies;
-- applicable implementation CI complete;
-- implementation environment/evidence location; and
-- an exact implementation freeze/reference notice.
+- governing requirement IDs and sources;
+- implementation PR/actor;
+- applicable dependencies and known limitations;
+- implementation CI/runtime evidence; and
+- the environment or evidence location relevant to the claim.
 
-Incomplete entry data yields `Blocked`; it is not silently reconstructed from chat history.
-
-A candidate does not need to remain unmerged merely to become eligible for Lane 06 audit. Merge/release eligibility is governed separately from certification eligibility.
+Missing information may prevent the optional assurance opinion, but does not retroactively make an otherwise safely delivered implementation incomplete.
 
 ## Audit sequence
 
-For each requirement:
+When Lane 06 is invoked:
 
-1. read the original requirement and source;
-2. identify controlling security, privacy, lifecycle, geography, domain, brand/design and dependency authority;
-3. describe expected participant/domain behavior without relying on the implementation summary;
-4. select evidence matching every declared acceptance type;
-5. exercise the exact implementation runtime, including negative paths;
-6. bind evidence to the exact implementation SHA and packet activation/base SHA;
-7. record a disposition and findings; and
-8. update the ledger only through a reviewed Lane 06 acceptance change.
+1. read the original requirement and governing authority;
+2. identify applicable security, privacy, lifecycle, geography, domain and dependency boundaries;
+3. define expected behavior independently of the implementation summary;
+4. select evidence appropriate to the claim;
+5. exercise the exact implementation where practical;
+6. bind findings to the exact implementation SHA; and
+7. record the assurance result without changing the original requirement to fit the implementation.
 
-## Dispositions
+## Optional assurance dispositions
 
-| Disposition | Meaning | Completion effect |
-| --- | --- | --- |
-| `Verified` | Exact approved requirement is satisfied on the recorded implementation SHA. | Counts toward experience completion; may support tracker promotion. |
-| `Partial` | A meaningful subset exists, but the full requirement does not. | Blocks completion. |
-| `Not Implemented` | Required behavior does not exist. | Blocks completion. |
-| `Blocked` | A genuine dependency prevents verification. | Blocks completion. |
-| `Deferred` | Exact omission has explicit independent approval and a recorded future owner/impact. | Does not count as implemented. |
-| `Decision Required` | Authorities are materially ambiguous or conflicting. | Blocks completion pending explicit resolution. |
+Lane 06 may record:
 
-Only `Verified` is completion.
+- `Verified` — independently assured on the recorded exact implementation;
+- `Partial`;
+- `Not Implemented`;
+- `Blocked` — the assurance activity itself cannot reach a conclusion;
+- `Deferred`; or
+- `Decision Required`.
 
-A merged or live implementation may remain `Implemented — Not Verified`, `Partial`, or `Blocked` without creating a contradiction. Deployment state and certification state are separate.
+These dispositions describe **assurance state**, not the sole definition of delivery completion.
 
-## Configurable authenticated reviewer identity
+`Verified` remains a meaningful optional label for work that actually received independent assurance. It is not required for completion.
 
-The program accepts exact GitHub identities in either form:
+## Completion and delivery
 
-- `github:<login>` for a human GitHub identity;
-- `github-app:<login>` for a GitHub App identity.
+Four-Lens delivery completion is governed by the Optional Assurance Amendment. In summary, work may be complete for delivery when approved scope is implemented, applicable implementation/release evidence is satisfied, dependencies/ownership are respected, and no known material defect makes the implementation unsafe or knowingly false.
 
-The workstream ledger contains program-authorized identities and permits a Lane 06 packet to receive another exact packet-scoped GitHub human/App assignment before certification begins.
+Therefore:
 
-The acceptance signal required for `Verified` must be authored in GitHub by the exact configured or packet-assigned identity. The reviewer must differ from the implementation actor. This rule applies regardless of reviewer mechanism.
+- `Implemented — Not Verified` may be complete and releasable;
+- absence of a Lane 06 packet is not a defect;
+- an uncompleted acceptance packet is not automatically delivery debt;
+- a missing independent GitHub review signal is not automatically delivery debt; and
+- tracker/program calculations must not require `Verified` as the sole completion numerator.
 
-`github-app:chatgpt-codex-connector[bot]` remains supported, but the program is not coupled exclusively to that App; another explicitly assigned independent human or App may perform Lane 06 review.
+## Independence truthfulness
 
-Reviewer capacity blocks `Verified` when no qualifying reviewer exists. It does not, by itself, retroactively make a merged/live `Implemented — Not Verified` implementation invalid or require ordinary safe integration to stop.
+A builder or Control Room may report implementation complete when objective delivery evidence supports it. They may not claim that their own work was independently `Verified` unless an actual independent assurance event supports that statement.
 
-Layer 1 structurally records and validates this identity/separation contract. Live GitHub API reauthentication of historical review actors is acceptance-hardening work, not a prerequisite for normal integration/release.
+If Lane 06 performs an audit, the reviewer should remain independent of the implementation actor for any `Verified` claim.
 
-## Evidence rules
+## Evidence guidance
 
-- Functional claims require runtime behavior.
-- Domain/security claims require positive and negative runtime or emulator evidence.
-- Visual claims require browser-rendered evidence.
-- Responsive claims require applicable viewport evidence.
-- Motion claims require before, transition and settled observations, including reduced motion.
-- Accessibility claims require keyboard, semantic, focus and assistive-state evidence.
-- Participant copy requires rendered review in governed locales.
-- Cross-lens continuity requires a real supported journey.
-- Performance claims require bounded measurements appropriate to the claim.
-- Static scans and implementation tests are supporting evidence only.
+When optional assurance is performed, use evidence appropriate to the claim:
 
-For `Verified`, the ledger evidence is structured as `{ type, manifest }`, where `manifest` is the exact implementation's tracked `docs/program/evidence/<implementation-sha>.json` Lane 06 record. That manifest names:
+- functional — runtime behavior;
+- domain/security — positive and negative runtime/emulator evidence;
+- visual/responsive — browser-rendered evidence at applicable viewports;
+- accessibility — keyboard, semantics, focus and assistive-state evidence;
+- copy/locales — rendered output in governed locales;
+- cross-lens continuity — actual supported journey;
+- performance — bounded measurements appropriate to the claim.
 
-- exact implementation SHA;
-- exact activation/base SHA;
-- Lane 06 producer and reviewer identity;
-- GitHub Actions run reference;
-- configured environment/reference;
-- passed check(s) for every claimed acceptance type; and
-- durable repository/HTTPS artifact references.
+Static scans and implementation tests may supplement runtime evidence.
 
-Every acceptance type declared by the requirement must be mapped. One generic entry, stale-implementation evidence, an unmapped string, or partial type coverage is insufficient.
+## Findings against delivered work
 
-Layer 1 validates manifest structure and exact-SHA/type/reviewer binding without making repository CI depend on live GitHub API or Actions artifact retention.
+If optional assurance finds a material defect in merged/live work:
 
-## Exact-implementation change control
+1. bind the finding to the exact implementation;
+2. determine production impact;
+3. notify Control Room;
+4. contain, disable, roll back or correct the affected behavior when the defect is material;
+5. preserve prior provenance; and
+6. optionally re-audit the corrected implementation.
 
-Acceptance begins against implementation `X`. A substantive finding fails `X` for certification. Any correction produces implementation `Y`; affected evidence and review on `X` do not transfer to `Y`.
+A known material defect remains actionable because of its substance, not because an independent reviewer exists.
 
-`Y` requires full applicable CI, regenerated affected evidence and a fresh independent GitHub review signal before `Verified` may be recorded.
+## Safety boundary
 
-This does **not** mean every `Y` must remain unmerged until that review exists. Merge and release follow the risk-based Build → Release → Verify authority. However:
+Removal of mandatory Independent Acceptance does not waive authentication, authorization, tenant isolation, privacy, legal/current-policy, payment integrity, data integrity, geography/lifecycle authority, required CI/evidence, or truthful participant behavior.
 
-- no candidate may merge over a known material finding that makes integration unsafe;
-- no production release may proceed over a known material security/privacy/integrity finding;
-- a reviewer-capacity exception may waive only missing reviewer availability for release, not evidence or known defects.
+## Historical compatibility
 
-The final review signal is external GitHub state. It is **not** committed back into the same implementation merely to prove that the review occurred, because doing so would create a new head and invalidate the review by construction.
+Existing fields in `governance/four-lens-requirements.json`, `governance/four-lens-workstreams.json`, prior evidence manifests, acceptance packets and historical program documents may remain for compatibility and provenance.
 
-## Independence constraints
+Where older artifacts state that only `Verified` is complete, that Lane 06 is required for completion, or that `acceptanceRequired` is universally blocking, the Optional Assurance Amendment supersedes that interpretation unless a later explicit product-owner authority reactivates a named independent-assurance gate.
 
-- Lane 06 may maintain acceptance tooling and evidence infrastructure but may not implement production feature code for the implementation it certifies.
-- A builder's tests may be reused as inputs, but Lane 06 selects and interprets its own evidence against the original requirement.
-- Control Room coordinates merge/release sequencing; it does not substitute its own approval for Lane 06 certification.
-- Participant/product-owner release authority may authorize a risk-based release when governance permits; it does not substitute for Lane 06 certification.
-- Lane 07 integration acceptance supplements rather than replaces Lane 06 requirement acceptance.
-- A reviewer identity equal to the implementation actor cannot produce `Verified` for that production requirement.
-
-## Requirement and packet coupling
-
-A requirement may be `Verified` only when:
-
-- its implementation actor and exact implementation SHA are recorded;
-- its acceptance lane is `independent-acceptance`;
-- its reviewer is explicitly authorized and distinct from the implementation actor;
-- its acceptance SHA equals the implementation SHA;
-- its exact GitHub review signal is recorded;
-- its declared acceptance types are completely covered by implementation-bound evidence;
-- its governed dependencies are resolved; and
-- a Lane 06 packet containing that requirement has reached a verified/completed/closed acceptance state.
-
-Implementation produces `Implemented — Not Verified`; merge and deployment do not automatically advance the acceptance packet or canonical tracker.
-
-For packets created after the Build → Release → Verify amendment, `acceptanceRequired` denotes certification obligations unless the packet explicitly designates a merge or release gate. Immutable pre-amendment stop boundaries remain binding until Control Room records a successor/reconciliation/reclassification; Lane 06 does not silently reinterpret them.
-
-## Findings against merged/live unverified work
-
-If Lane 06 finds a material defect in an implementation already merged or released as `Implemented — Not Verified`:
-
-1. bind the finding to the exact implementation SHA;
-2. determine the affected requirement disposition;
-3. notify Control Room of production impact;
-4. require rollback/disable/containment when the finding creates material production risk;
-5. route correction to the owning implementation lane;
-6. preserve the prior merge/deployment provenance; and
-7. independently re-evaluate the corrected exact implementation.
-
-Lane 06 never changes a requirement to match deployed behavior merely because that behavior is already live.
-
-## Deferral and N/A
-
-A new `Deferred — Explicitly Approved` or `Not Applicable — Explicitly Approved` decision requires:
-
-- exact requirement ID;
-- reason;
-- missing dependency where applicable;
-- participant/product impact;
-- future owner;
-- exact independent GitHub approver identity authorized for the requirement;
-- approver distinct from the implementation actor; and
-- exact GitHub approval signal.
-
-Builder-authored `approvedBy` prose alone is not governed approval.
-
-The adoption-time cursor deferral for `SHARED-RESULT-001` is the single frozen historical exception carried into the program. It cannot be broadened or silently rewritten.
-
-## Tracker and ledger updates
-
-Lane 06 records exact-SHA dispositions in `governance/four-lens-requirements.json`. Only `Verified` changes a Four-Lens requirement numerator.
-
-Feature-ID tracker promotion occurs only after the applicable independent acceptance and under the canonical tracker protocol. Retroactive Wave 4 assurance findings are handled under `WAVE_4_ASSURANCE_LEDGER.md`; prior tracker state is not silently rewritten.
-
-Merge and production release do not promote the tracker by themselves.
-
-## Acceptance hardening boundary
-
-`WP-ACCEPTANCE-INTEGRITY-HARDENING-01` may later strengthen:
-
-- GitHub API provenance checks;
-- Actions artifact download/replay;
-- cryptographic retention;
-- workflow/harness immutability;
-- historical/retroactive audit execution;
-- multi-stage certification/disposition mechanics; and
-- append-only historical reauthentication.
-
-Those controls strengthen the provenance and durability of an independent decision. They do not authorize a builder to make that decision and do not re-establish reviewer availability as a universal merge gate.
-
-## Acceptance closeout template
+## Optional assurance closeout template
 
 ```text
-Acceptance packet:
-Accepting lane:
-Independent reviewer:
+Assurance request:
+Assurance lane/reviewer:
 Implementation actor:
 Implementation SHA:
-Merge/release state:
-Activation/base SHA:
-Requirements:
-Authorities read:
-Evidence by acceptance type:
+Requirements/authorities:
+Evidence reviewed:
 Findings:
-Disposition per requirement:
-Residual/cleanup result:
-Tracker recommendation:
-Exact GitHub review signal:
-Stop boundary confirmed:
+Assurance disposition:
+Production impact, if any:
+Recommended follow-up:
 ```
