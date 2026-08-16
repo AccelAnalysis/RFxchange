@@ -641,10 +641,7 @@ function selectedOrganizationIdForActions(
   selection: ExchangeSelectionState,
   viewerOrganizationId: string,
 ): string {
-  if (selection.kind === "organization") {
-    return selection.selectedOrganization.organizationId;
-  }
-  if (selection.kind === "record" && selection.selectedOrganization) {
+  if (selection.selectedOrganization) {
     return selection.selectedOrganization.organizationId;
   }
   return viewerOrganizationId;
