@@ -25,63 +25,44 @@ This registry identifies behavior that must remain one shared Exchange contract 
 | Account utility and optional Administration | `SHARED-ACCOUNT-*` | Lane 01 | all participant lanes |
 | Truthful copy, accessibility, locales, and performance | `SHARED-COPY-*`, `SHARED-PRIVACY-*`, `SHARED-A11Y-*`, `SHARED-I18N-*`, `SHARED-PERF-*` | Lane 01 | Lanes 02–05 |
 
-Shared client state is always non-authorizing. Domain inputs such as RFx lifecycle, provider status, referral access, publication visibility, favorite ownership, media visibility, organization membership, and geography authority remain server-authoritative and domain-owned.
+Shared client state is always non-authorizing. RFx lifecycle, provider status, referral access, publication visibility, favorite ownership, media visibility, membership, and geography authority remain server-authoritative and domain-owned.
 
-## Mobile Stage 1 shared contract boundary
+## Mobile Stage 1 boundary
 
-For `WP-MOBILE-EXCHANGE-STAGE1-01`, Lane 01 owns one converged interface family for:
+For `WP-MOBILE-EXCHANGE-STAGE1-01`, Lane 01 owns one shared family for:
 
 - mobile shell composition;
 - exact four-lens bottom navigation;
-- three-position bottom sheet;
+- three-position sheet;
 - four active-lens action positions;
-- result/business cards;
-- optional image and video media;
-- record favorites and record-specific actions;
-- focal selected organization/record/marker plus truthful associated-organization context;
-- map camera/bounds and record projection;
-- detail/safe-return context;
-- scoped continuity and fail-closed reconciliation across lens, sheet, list, map, and detail transitions.
+- cards, optional image/video media, favorites, and record actions;
+- focal selected object plus truthful associated-organization context;
+- map projection, detail/safe-return context, and scoped continuity;
+- fail-closed reconciliation across lens, sheet, list, map, and detail transitions.
 
-The existing sixteen action identities remain the lens-level registry. Record actions are a separate extension family and must not consume or rename those positions.
-
-Lanes 02–05 may provide domain facts and representative record models. During Stage 1 they may not create a private mobile shell, navigation, bottom sheet, card framework, selection framework, action rail, favorite implementation, media framework, or continuity implementation.
+The sixteen action identities remain the lens-level registry. Record actions remain a separate family. Lanes 02–05 may supply domain facts, but during Stage 1 they may not create private mobile shells, navigation, sheets, cards, selection frameworks, action rails, favorites, media frameworks, or continuity stores.
 
 ## Shared Contract Request
 
-A request is a durable GitHub record with:
-
-- request ID `SCR-<lane>-<sequence>` or `SCR-<lane>-MOB1-<sequence>`;
-- requesting lane and exact candidate/base SHA;
-- affected authority/requirement;
-- participant problem and generalized behavior;
-- existing shared seam inspected;
-- domain facts supplied by the requester;
-- security/privacy/authority constraints;
-- consumers and compatibility impact;
-- proposed checks/evidence;
-- explicit non-scope; and
-- requested dependency/merge order.
+A request uses `SCR-<lane>-<sequence>` or `SCR-<lane>-MOB1-<sequence>` and records exact candidate/base, authority, participant problem, existing shared seam, domain facts, constraints, consumers, tests/evidence, non-scope, and dependency/merge order.
 
 The current flow is:
 
 ```text
 domain lane records need on the Lane 01 PR
 → Lane 01 proposes the shared correction
-→ Control Room reviews exact head and records disposition
+→ Control Room reviews the exact head and records disposition
 → domain consumers review the same exact head through GitHub
 → applicable checks and exact-head CI pass
 → Control Room may close/merge under current completion governance
 → optional Lane 06 assurance may occur separately
 ```
 
-If an existing seam is sufficient, the request closes with the reuse decision and no new implementation.
+If an existing seam is sufficient, the request closes with the reuse decision.
 
-## Mobile Stage 1 finding protocol
+## Mobile Stage 1 findings
 
-Substantive findings use `MOB1-FIND-<lane-number>-<sequence>` and record exact candidate, affected contract, representative journey, authority conflict, impact, smallest shared correction, and explicit non-scope.
-
-Allowed dispositions are:
+Findings use `MOB1-FIND-<lane-number>-<sequence>`. Allowed dispositions are:
 
 - `accepted-shared-correction`;
 - `reuse-existing-shared-seam`;
@@ -90,43 +71,43 @@ Allowed dispositions are:
 - `rejected-conflicts-with-authority`;
 - `superseded-by-candidate-sha`.
 
-The detailed review template and convergence ledger are in `MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md`.
+The detailed review protocol and convergence ledger are in `MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md`.
 
 ## Ownership constraints
 
-- Global lens order, Account utility, generic marker/card/detail grammar, generic spatial state, drawer/sheet behavior, and cross-lens continuity are not domain-lane private code.
-- Focal record identity and associated organization identity remain separately truthful when they are different market objects.
-- A domain lane supplies facts/actions through shared extension points without moving authorization into the client.
+- Global lens order, Account utility, generic marker/card/detail grammar, spatial state, sheet behavior, and cross-lens continuity are not domain-private code.
+- Focal record and associated organization identities remain separately truthful when they are different objects.
+- Domain lanes supply facts/actions through shared extension points without moving authorization into the client.
 - Privacy-suppressed records do not receive fabricated coordinates.
-- Browser-restored geography remains unvalidated until an authoritative server projection revalidates it.
-- New persistence fields require versioning, scope, invalidation, and backward compatibility.
+- Browser-restored geography remains unvalidated until authoritative revalidation.
+- New persistence fields require versioning, scope, invalidation, and compatibility.
 - Disabled presentation is never the security boundary, and explanation keys must resolve in every supported locale.
-- A shared contract may be reported `Implemented — Not Verified` without mandatory Lane 06 review when current completion governance is otherwise satisfied.
+- A shared contract may be `Implemented — Not Verified` without mandatory Lane 06 review when current completion governance is otherwise satisfied.
 
 ## Current Stage 1 state
 
 - Control Room packet: PR #217.
-- Lane 01 candidate: PR #218 at `cf73a656dba4c09e735ac991cab557ecc2a22943`.
+- Lane 01 candidate: PR #218 at `f41b791644c6a3b372e28a1db7c32d16c1a25714`.
 - Candidate disposition: `Implemented — Not Verified`.
-- Production-ci #1492: in progress.
+- Production-ci #1494: SUCCESS.
 - Lane 02 reviewed prior head `3c67ef3d…` with FINDING and must re-review the current/final head.
 - Lanes 03–05 have not submitted reviews.
 - Stage 1 exit gate: not satisfied.
 - Stage 2: not authorized.
 
-The current head adds a bounded continuity module with versioned participant/membership/viewer-organization/geography scope, typed invalidation reasons, fail-closed selected-object narrowing, safe return context, and accessibility/responsive policy facts. This partially addresses continuity findings but does not resolve the remaining conflicts.
+The current candidate adds scoped continuity, typed invalidation, selected-object narrowing, safe return context, responsive/accessibility policy, focused tests, and corrected completion-governance wording. It remains unconverged because substantive contract findings remain.
 
 ### Control Room findings
 
 | Finding | State | Required shared disposition |
 | --- | --- | --- |
-| `MOB1-FIND-00-001` | Open | Remove the candidate's mandatory Independent Acceptance prerequisite. |
-| `MOB1-FIND-00-002` | Partially addressed; open | Add result-set identity/cursor, internal scroll state, and focused continuity/accessibility tests. |
-| `MOB1-FIND-00-003` | Open | Enforce focal marker/card/detail identity and internal subject parity. |
+| `MOB1-FIND-00-001` | Resolved | `accepted-shared-correction`: mandatory Independent Acceptance wording removed. |
+| `MOB1-FIND-00-002` | Partially addressed; open | Add result-set identity/cursor and internal sheet/detail scroll state. |
+| `MOB1-FIND-00-003` | Open | Enforce focal marker/card/detail identity and subject parity. |
 | `MOB1-FIND-00-004` | Open | Bind action-rail inputs to canonical lens/position action IDs. |
 | `MOB1-FIND-00-005` | Open | Treat restored geography as unvalidated until server revalidation. |
-| `MOB1-FIND-00-006` | Open | Reuse/install the canonical supported-locale disabled-reason contract. |
-| `BUILD-FIND-218-001` | Resolved on `3c67ef3d…` | Whitespace corrected and production-ci #1483 succeeded. |
+| `MOB1-FIND-00-006` | Open | Use the canonical supported-locale disabled-reason contract. |
+| `BUILD-FIND-218-001` | Resolved | Exact-head production-ci #1494 succeeded. |
 
 All four Codex threads remain unresolved and current.
 
@@ -135,9 +116,9 @@ All four Codex threads remain unresolved and current.
 | Finding | State | Required shared disposition |
 | --- | --- | --- |
 | `MOB1-FIND-02-001` | Open | Preserve distinct focal opportunity and issuer-organization identities. |
-| `MOB1-FIND-02-002` | Partially addressed; open | Add mismatch/authority negative tests and resolve geography authority labeling. |
+| `MOB1-FIND-02-002` | Partially addressed; open | Scope/invalidation and negative tests exist; resolve geography authority labeling. |
 | `MOB1-FIND-02-003` | Open | Represent actual optional video separately from its poster image. |
 
-No Shared Contract Request is open because all current findings remain bounded corrections to PR #218.
+No Shared Contract Request is open because these remain bounded corrections to PR #218.
 
 Historical Shared Contract Requests remain governed by their original records and later dispositions; this activation does not silently reopen them.
