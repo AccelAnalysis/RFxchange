@@ -1,6 +1,6 @@
 # Mobile Exchange Stage 1 — Architecture Lock
 
-**Status:** ACTIVE — CANDIDATE CORRECTION AND CROSS-LENS REVIEW
+**Status:** COMPLETE — INTEGRATED
 
 **Control Room owner:** 00 — RFxchange Control Room
 
@@ -16,187 +16,126 @@
 
 **Control Room PR:** `#217`
 
-**Lane 01 candidate:** PR `#218` at `f41b791644c6a3b372e28a1db7c32d16c1a25714`
+**Lane 01 candidate:** PR `#218`, exact reviewed head `e6eaa7207b5610ab88f1847b2b7142335c713e7f`
 
-**Candidate build:** production-ci `#1494` — SUCCESS
+**Candidate build:** production-ci `#1504` / run `31971663240` — SUCCESS
 
-**Stage 1 exit gate:** NOT SATISFIED
+**Integrated main:** `9b97b37365b0e3cab1292cccb86ffe248d5734a2`
 
-**Stage 2 authorization:** NOT GRANTED
+**Stage 1 exit gate:** SATISFIED
 
-## 1. Purpose
+**Stage 2 authorization:** GRANTED
 
-This packet activates and coordinates the architecture-lock work required by `MOB-01 Mobile Experience Authority`. It does not redesign the established mobile Exchange and does not authorize Stage 2 production UI.
+## 1. Purpose and closeout
 
-The controlling product/composition reference is installed on merged `main`:
+This packet locked the shared mobile architecture required by `MOB-01 Mobile Experience Authority` without implementing Stage 2 production presentation. The shared contracts are now integrated on `main` through PR #218.
+
+The controlling references remain:
 
 - [`MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md`](MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md);
 - [`../reference/screenshots/rfxchange-mobile-composition-reference.jpg`](../reference/screenshots/rfxchange-mobile-composition-reference.jpg);
 - [`../reference/screenshots/README.md`](../reference/screenshots/README.md).
 
-Historical labels in the visual source are non-authoritative. The governed lens order is:
+The governed permanent lens order is:
 
 ```text
 Opportunities/RFx | Resources | Intelligence | Referrals
 ```
 
-Account/Menu is a utility, not a fifth lens.
+Account/Menu remains a utility, not a fifth lens.
 
 ## 2. Locked composition
 
-Stage 1 contracts preserve:
+Stage 2 must implement the already-established mobile Exchange composition rather than reinterpret it:
 
 - map-first primary canvas;
-- floating search/filter;
-- persistent bottom four-lens navigation;
-- peek/collapsed, partial, and expanded sheet positions;
-- exactly four active-lens action positions at the sheet top;
-- Zillow-like result/business cards inside the sheet;
-- optional logo, image, or video media;
-- record favorites and record-specific actions;
-- synchronized marker, card, keyboard, and detail focus;
+- floating search/filter over the map;
+- persistent four-lens bottom navigation;
+- three-state `peek | partial | expanded` draggable sheet with a non-gesture control path;
+- exactly four active-lens actions at the sheet top;
+- Zillow-style result/business cards inside the sheet;
+- optional logo/image/video media;
+- record favorites and record-specific actions separate from the sixteen lens actions;
+- marker/card/keyboard/detail focal-object synchronization;
 - expanded detail without abandoning Exchange context;
-- progressive availability with individually disabled actions;
-- applicable map, selection, query, sheet, scroll, and detail continuity;
-- safe-area, touch-target, keyboard, screen-reader, reduced-motion, orientation, and non-gesture requirements.
+- progressive availability with unavailable actions remaining individually visible/disabled as governed;
+- map, selection, query, result-set/cursor, sheet, scroll, detail, layer, area, and relationship continuity where meaningful and authorized;
+- safe-area, touch-target, keyboard, screen-reader, reduced-motion, software-keyboard, orientation, and resize obligations.
 
-A Menu route does not satisfy persistent bottom navigation. Technical retrievability does not replace the governed sheet/card composition.
+A Menu route does not satisfy persistent bottom navigation. A separate dashboard/list application does not satisfy the shared map/sheet composition.
 
-## 3. Compatibility foundation
+## 3. Integrated Stage 1 shared contract family
 
-Stage 1 extends, and must not replace:
+PR #218 integrated the Stage 1 shared architecture on `main` at `9b97b37365b0e3cab1292cccb86ffe248d5734a2`.
 
-1. `participant-lens-registry.ts` for four-lens identity/order and utility separation;
-2. `exchange-room-actions.ts` for the frozen sixteen actions and independent `operational`, `applicable`, `authorized`, disabled-presentation, and handler facts;
-3. `participant-spatial-context.ts` for scoped, versioned, non-authorizing continuity;
-4. `EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md` for `4 lenses × 4 action positions`;
-5. merged PR #191 and PR #212.
+The integrated family covers:
 
-Stage 1 must not weaken lens-controller behavior, the sixteen-position registry, server authorization, progressive availability, selected-object continuity, map continuity, or tenant/geography/privacy boundaries.
+- shared mobile shell and persistent bottom navigation;
+- three-position bottom sheet and four-position action rail;
+- result cards, optional media, favorites, and record actions;
+- focal subject identity plus separately keyed associated organization context;
+- marker/card/detail identity validation;
+- camera, bounds, geography, search/filter/sort, result-set/cursor, list/sheet scroll, and detail continuity;
+- scoped, versioned, non-authorizing client continuity and fail-closed reconciliation;
+- actual video-source semantics distinct from a poster image;
+- per-lens analytical layer identity and domain revalidation;
+- generic non-point area/field projection for governed service territory/geography;
+- privacy-safe relationship identity/path/no-path projection;
+- safe return context and responsive/accessibility policy.
 
-## 4. Lane 01 bounded assignment
+The existing Phase 2 foundations remain controlling for the exact sixteen lens-action identities and positions, action truth, authorization, and progressive availability.
 
-Lane 01 owns one shared family covering shell, persistent bottom navigation, three-position sheet, four-position lens action rail, cards, media, favorites, record actions, selected-object state, map projection, detail/safe-return state, and versioned continuity/reconciliation.
+## 4. Final domain review dispositions
 
-Where applicable, it represents:
+All domain lanes reviewed the same exact candidate head `e6eaa7207b5610ab88f1847b2b7142335c713e7f` after the final Lane 01 correction pass.
 
-- active lens;
-- focal selected organization or record;
-- associated organization context without collapsing distinct record identity;
-- selected marker;
-- camera and bounds;
-- geography and validation source;
-- search, filters, sort, result-set identity, opaque cursor, and scroll positions;
-- sheet snap point;
-- detail and return context;
-- versioned session/participant/membership/viewer-organization/geography scope;
-- fail-closed selected-object reconciliation.
-
-The existing registry remains the source for exactly four active-lens positions. Record actions remain separate. Client continuity is presentation state only and never grants protected authority.
-
-### Stop boundary
-
-This packet does **not** authorize React/JSX, CSS, production rendering, map renderer changes, routes, domain handlers, lens-specific behavior, changes to the sixteen actions, tracker arithmetic, Stage 2, or mandatory Independent Acceptance.
-
-## 5. Current Lane 01 candidate
-
-PR #218 currently changes only:
-
-- `src/application/participant/mobile-exchange-contracts.ts`;
-- `src/application/participant/mobile-exchange-continuity.ts`;
-- `test/mobile-exchange-stage1-contracts.test.mjs`;
-- `test/mobile-exchange-stage1-continuity.test.mjs`;
-- `docs/architecture/MOBILE_EXCHANGE_STAGE1_CONTRACTS.md`.
-
-The candidate remains `Implemented — Not Verified`. Exact-head production-ci #1494 succeeded at `f41b791644c6a3b372e28a1db7c32d16c1a25714`.
-
-It now provides scoped continuity, typed invalidation, selected-object narrowing, safe return context, responsive/accessibility policy, and focused tests. It also corrects the architecture record so Independent Acceptance is no longer a universal prerequisite. These are bounded Stage 1 improvements, not Stage 2 UI.
-
-## 6. One-candidate domain review protocol
-
-Lanes 02–05 review the same exact Lane 01 PR head through GitHub:
-
-```text
-MOB1-DOMAIN-REVIEW
-lane: 02 | 03 | 04 | 05
-candidate-pr: 218
-candidate-sha: <exact head>
-disposition: CONCUR | FINDING
-contracts-reviewed: <names>
-representative-domain-records: <record kinds checked>
-shared-findings: <finding IDs or none>
-domain-notes: <domain facts that do not request private shared UI>
-```
-
-A concurrence applies only to the exact SHA and named surfaces. A later head requires renewed review for changed surfaces; unchanged surfaces may carry forward only by explicit SHA/diff reference. Conversation relay is not acceptance.
-
-## 7. Findings and dispositions
-
-Findings use `MOB1-FIND-<lane-number>-<sequence>`. Missing generalized capabilities that cannot be handled as candidate corrections use `SCR-<lane>-MOB1-<sequence>` on or linked from PR #218.
-
-Allowed dispositions are `accepted-shared-correction`, `reuse-existing-shared-seam`, `domain-fact-no-shared-change`, `deferred-explicitly-approved`, `rejected-conflicts-with-authority`, and `superseded-by-candidate-sha`.
-
-## 8. Current findings
-
-### Control Room
-
-| Finding | State at `f41b7916…` | Disposition / remaining correction |
+| Lane | Final disposition | Resolved findings |
 | --- | --- | --- |
-| `MOB1-FIND-00-001` | Resolved | `accepted-shared-correction`: mandatory Independent Acceptance wording removed. |
-| `MOB1-FIND-00-002` | Partially addressed; open | Accessibility/responsive policy and tests exist. Add opaque result-set identity/cursor and explicit internal sheet/detail scroll state. |
-| `MOB1-FIND-00-003` | Open | Enforce focal marker/card/detail subject parity and validate card detail identity. |
-| `MOB1-FIND-00-004` | Open | Validate every action-rail projection against the canonical action ID for its lens and position. |
-| `MOB1-FIND-00-005` | Open | Do not label browser-restored geography server-authoritative before revalidation. |
-| `MOB1-FIND-00-006` | Open | Use the canonical supported-locale disabled-explanation key contract. |
-| `BUILD-FIND-218-001` | Resolved | Exact-head production-ci #1494 succeeded. |
+| 02 — Opportunities/RFx | CONCUR | `MOB1-FIND-02-001`, `MOB1-FIND-02-002`, `MOB1-FIND-02-003` |
+| 03 — Intelligence | CONCUR | `MOB1-FIND-03-001` |
+| 04 — Resources | CONCUR | `MOB1-FIND-04-001`, `MOB1-FIND-04-002` |
+| 05 — Referrals | CONCUR | `MOB1-FIND-05-001`, `MOB1-FIND-05-002` |
 
-All four Codex threads remain unresolved and current.
+No Stage 1 Shared Contract Request remains open.
 
-### Lane 02 — Opportunities/RFx
+## 5. Control Room findings
 
-| Finding | State at `f41b7916…` | Remaining correction |
-| --- | --- | --- |
-| `MOB1-FIND-02-001` | Open | Keep focal opportunity identity distinct from associated issuer-organization identity. |
-| `MOB1-FIND-02-002` | Partially addressed; open | Scope/invalidation and negative tests exist; final disposition depends on resolving restored-geography authority. |
-| `MOB1-FIND-02-003` | Open | Represent actual optional video separately from its poster image. |
+The original Control Room findings `MOB1-FIND-00-001` through `MOB1-FIND-00-006` and `BUILD-FIND-218-001` are resolved by accepted shared corrections and green exact-head CI. The original Codex inline review threads are resolved.
 
-No Shared Contract Request is open because these remain bounded corrections to PR #218.
+The final candidate preserved:
 
-## 9. Domain review state
+- four permanent lenses and Account/Menu utility separation;
+- frozen `4 × 4 = 16` action registry;
+- independent `operational`, `applicable`, and `authorized` facts;
+- server-derived protected authority;
+- progressive availability;
+- tenant/geography/privacy boundaries;
+- selected-object and map continuity;
+- domain ownership of favorites and business behavior.
 
-| Lane | Current disposition | Review SHA | Required next review |
-| --- | --- | --- | --- |
-| 02 — Opportunities/RFx | FINDING | `3c67ef3dffeaa60aef761debb6cf76ea1c807789` | Re-review `f41b7916…`; prior findings remain applicable. |
-| 03 — Intelligence | Not submitted | — | Review exact final head. |
-| 04 — Resources | Not submitted | — | Review exact final head. |
-| 05 — Referrals | Not submitted | — | Review exact final head. |
+## 6. Completion governance
 
-## 10. Convergence ledger
+Stage 1 closes as **Implemented — Not Verified / integrated architecture** under the current completion-governance amendment. Independent Acceptance is optional assurance, not a universal prerequisite.
 
-| Contract | Current state | Open conflict/review gap |
-| --- | --- | --- |
-| shell | Candidate present | Final-head reviews incomplete |
-| bottom navigation | Candidate present | Final-head reviews incomplete |
-| bottom sheet | Partially represented | `MOB1-FIND-00-002` |
-| action rail | Candidate present | `MOB1-FIND-00-004` |
-| card | Candidate present | `MOB1-FIND-00-003`, `MOB1-FIND-02-001` |
-| media | Candidate present | `MOB1-FIND-02-003` |
-| favorite | Candidate present | Final-head reviews incomplete |
-| selected-object state | Candidate present | `MOB1-FIND-00-003`, `MOB1-FIND-02-001` |
-| map projection | Candidate present | `MOB1-FIND-00-003`, `MOB1-FIND-00-005` |
-| detail | Partially represented | `MOB1-FIND-00-002`, `MOB1-FIND-00-003` |
-| continuity/invalidation | Partially represented and tested | `MOB1-FIND-00-002`, `MOB1-FIND-00-005`, `MOB1-FIND-02-002` |
-| localization | Invalid namespace remains | `MOB1-FIND-00-006` |
-| completion governance | Resolved | None |
+No claim of Lane 06 `Verified` status is made by this packet.
 
-## 11. Exit gate
+## 7. Stage 1 exit decision
 
-A corrected candidate may retain `Implemented — Not Verified` when the shared family is complete, canonical actions remain preserved, record actions stay separate, focal/associated identities are truthful, continuity and responsive/accessibility obligations are represented and tested, exact-head CI passes, Lanes 02–05 review the final exact head, every substantive finding has a durable disposition, and no material unresolved conflict remains.
+**SATISFIED.**
 
-Independent Acceptance is optional assurance, not a universal Stage 1 completion gate.
+Basis:
 
-The Stage 1 exit gate is **not satisfied**. Five Control Room findings remain open or partially addressed, three Lane 02 findings remain open or partially addressed, four Codex threads remain unresolved, Lane 02 must re-review the current head, and Lanes 03–05 have not submitted reviews.
+1. exact-head production-ci #1504 succeeded on `e6eaa7207b5610ab88f1847b2b7142335c713e7f`;
+2. Lanes 02–05 all returned `CONCUR` on that exact head;
+3. every substantive Stage 1 finding has a final shared disposition;
+4. Codex inline threads are resolved;
+5. PR #218 merged the reviewed contracts to `main` at `9b97b37365b0e3cab1292cccb86ffe248d5734a2`;
+6. no mandatory Independent Acceptance gate has been reinstalled.
 
-## 12. Exact next action
+## 8. Stage 2 authorization
 
-Lane 01 completes the remaining shared corrections on PR #218, records exact-SHA dispositions, and obtains green CI on the final head. Lanes 02–05 then review or re-review that exact head through GitHub. Stage 2 remains unauthorized.
+**GRANTED.**
+
+The next program step is **Stage 2 — Restore the Shared Mobile Composition**. Stage 2 may now implement the mobile shell/presentation against the integrated shared contracts, while domain lanes consume those contracts and continue to own domain projections/business behavior.
+
+Stage 2 must not reopen the architecture into competing shells, private lens navigation, private sheets, private selection stores, or domain-specific card frameworks. Any genuinely missing generalized shared capability discovered during implementation must use the installed shared-contract mechanism rather than a private workaround.
