@@ -7,15 +7,23 @@ import {
 } from "../../application/rfx/opportunity-discovery-service.ts";
 import { createOpportunityDiscoveryQuery } from "../../domain/rfx/discovery.ts";
 import { geographyId } from "../../domain/geography/model.ts";
+import type { ResponderOpportunityProjection } from "../../domain/rfx/publication.ts";
 import { loadImmutableAmacsCatalog } from "../amacs/runtime.ts";
 import { getServerFirestore } from "../firestore/runtime.ts";
 import { Wave4GapOpportunityDiscoveryRepository } from "./wave4-gap-opportunity-discovery-repository.ts";
+
+const DELIVERY_LOCALES = Object.freeze(new Set(["en-US", "es", "fr", "it", "de"]));
 
 function publicOrigin(): string {
   const value = process.env.RFXCHANGE_PUBLIC_ORIGIN?.trim() || "http://localhost:3000";
   const url = new URL(value);
   if (url.pathname !== "/" || url.search || url.hash) throw new Error("RFXCHANGE_PUBLIC_ORIGIN must be an origin without a path.");
   return url.origin;
+}
+
+function deliveryLocale(value: string): string {
+  const normalized = value.trim();
+  return DELIVERY_LOCALES.has(normalized) ? normalized : "en-US";
 }
 
 function stableIdentifier(value: string, label: string): string {
@@ -96,12 +104,37 @@ async function validateGovernedFilters(
   }
 }
 
+class LocaleBoundOpportunityDiscoveryRepository extends Wave4GapOpportunityDiscoveryRepository {
+  constructor(
+    db: Firestore,
+    private readonly locale: string,
+  ) {
+    super(db);
+  }
+
+  override saveSavedSearch(
+    bundle: Parameters<Wave4GapOpportunityDiscoveryRepository["saveSavedSearch"]>[0],
+  ) {
+    const record = Object.freeze({
+      ...bundle.record,
+      // This request locale is resolved from RFxchange's governed locale cookie / Accept-Language
+      // boundary and is persisted atomically with the saved search so background delivery can
+      // render a real participant language without inventing a user-profile field.
+      deliveryLocale: this.locale,
+    });
+    return super.saveSavedSearch(Object.freeze({ ...bundle, record }));
+  }
+}
+
 class GovernedOpportunityDiscoveryService extends BoundedOpportunityDiscoveryService {
   private readonly governedDb: Firestore;
   private readonly governedRepository: Wave4GapOpportunityDiscoveryRepository;
 
-  constructor(governedDb: Firestore, origin: string) {
-    const repository = new Wave4GapOpportunityDiscoveryRepository(governedDb);
+  constructor(governedDb: Firestore, origin: string, locale: string) {
+    const repository = new LocaleBoundOpportunityDiscoveryRepository(
+      governedDb,
+      deliveryLocale(locale),
+    );
     super(repository, undefined, origin);
     this.governedDb = governedDb;
     this.governedRepository = repository;
@@ -145,10 +178,32 @@ class GovernedOpportunityDiscoveryService extends BoundedOpportunityDiscoverySer
     await validateGovernedFilters(this.governedDb, input.query);
     return super.saveSearch(scope, input);
   }
+
+  override async evaluatePublishedProjection(
+    projection: ResponderOpportunityProjection,
+  ): Promise<Readonly<{ matches: number; alerts: number }>> {
+    if (
+      projection.mode !== "published" ||
+      !projection.publishedAt ||
+      (projection.audience !== "public" && projection.audience !== "authenticated-participants")
+    ) {
+      return Object.freeze({ matches: 0, alerts: 0 });
+    }
+
+    // DSC-006 matching is deliberately durable-only. The committed projection is
+    // observed by a retryable Firestore-triggered queue, and the scheduler owns
+    // exhaustive saved-search evaluation. Never create a bounded synchronous match
+    // that could race provider authority, digest freezing, or process termination.
+    throw new OpportunityDiscoveryError(
+      "dependency-unavailable",
+      "Opportunity discovery evaluation is queued for durable processing.",
+    );
+  }
 }
 
 export function createServerOpportunityDiscoveryService(
   db: Firestore = getServerFirestore(),
+  locale = "en-US",
 ) {
-  return new GovernedOpportunityDiscoveryService(db, publicOrigin());
+  return new GovernedOpportunityDiscoveryService(db, publicOrigin(), locale);
 }

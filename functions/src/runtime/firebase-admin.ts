@@ -1,13 +1,21 @@
 import { getApp, getApps, initializeApp, type App } from "firebase-admin/app";
+import { getAuth, type Auth } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
 let functionsAdminApp: App | null = null;
+let functionsAuth: Auth | null = null;
 let functionsFirestore: Firestore | null = null;
 
 export function getFunctionsAdminApp(): App {
   if (functionsAdminApp) return functionsAdminApp;
   functionsAdminApp = getApps().length > 0 ? getApp() : initializeApp();
   return functionsAdminApp;
+}
+
+export function getFunctionsAuth(): Auth {
+  if (functionsAuth) return functionsAuth;
+  functionsAuth = getAuth(getFunctionsAdminApp());
+  return functionsAuth;
 }
 
 export function getFunctionsFirestore(): Firestore {
