@@ -104,7 +104,7 @@ test("ISS-016 computes deterministic requirement-aware readiness without qualifi
   });
   const blocked = evaluatePublicationReadiness({ aggregate: incomplete, audience: "public", evaluatedAt: NOW, localities: [locality], publishAuthorized: true, issuerDisplayNameAvailable: true });
   assert.equal(blocked.status, "blocked");
-  assert.ok(blocked.findings.some((item) => item.code === "evaluation.weights-not-10000" && item.workspaceTarget === "#rfx-definition-evaluation"));
+  assert.ok(blocked.findings.some((item) => item.code === "evaluation.weights-not-10000" && item.workspaceTarget === "#rfx-definition-evaluationDefinition"));
 
   const sourceDefinition = aggregate().definition;
   const disconnected = aggregate({

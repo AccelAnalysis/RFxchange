@@ -5,7 +5,10 @@ import {
   type PublicOpportunityProjection,
   type PublicOpportunityProjectionRepository,
 } from "../../domain/acquisition/public-opportunity.ts";
-import type { ResponderOpportunityProjection } from "../../domain/rfx/publication.ts";
+import type {
+  ResponderOpportunityProjection,
+  RfxPublicationAudience,
+} from "../../domain/rfx/publication.ts";
 import { getFirestoreRecordById } from "../firestore/support.ts";
 
 const COLLECTION = "rfxOpportunityProjections";
@@ -27,16 +30,26 @@ export class FirestorePublishedOpportunityRepository
   implements PublicOpportunityProjectionRepository {
   constructor(private readonly db: Firestore) {}
 
-  async getResponderProjection(
-    reference: string,
-    participantAuthorized = false,
-  ): Promise<ResponderOpportunityProjection | null> {
+  private async rawProjection(reference: string): Promise<ResponderOpportunityProjection | null> {
     const projection = await getFirestoreRecordById<ResponderOpportunityProjection>(
       this.db,
       COLLECTION,
       reference.trim(),
     );
-    return permitted(projection, participantAuthorized);
+    return projection && projection.mode === "published" && projection.publishedAt
+      ? projection
+      : null;
+  }
+
+  async getResponderProjection(
+    reference: string,
+    participantAuthorized = false,
+  ): Promise<ResponderOpportunityProjection | null> {
+    return permitted(await this.rawProjection(reference), participantAuthorized);
+  }
+
+  async getPublicationAudience(reference: string): Promise<RfxPublicationAudience | null> {
+    return (await this.rawProjection(reference))?.audience ?? null;
   }
 
   async getByReference(reference: string): Promise<PublicOpportunityProjection | null> {

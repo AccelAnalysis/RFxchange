@@ -1,0 +1,26 @@
+{
+  "actionsLabel": "Exchange-Aktionen",
+  "actions": {
+    "opportunities.find": "Chancen finden",
+    "opportunities.create-rfx": "RFx erstellen",
+    "opportunities.pursue-respond": "Verfolgen / Antworten",
+    "opportunities.team": "Team bilden",
+    "resources.find-providers": "Anbieter finden",
+    "resources.browse-resources": "Ressourcen durchsuchen",
+    "resources.my-requests": "Meine Anfragen",
+    "resources.provider-status": "Anbieterstatus",
+    "intelligence.organizations": "Organisationen",
+    "intelligence.capabilities": "Fähigkeiten",
+    "intelligence.locations": "Standorte",
+    "intelligence.layers": "Intelligence-Ebenen",
+    "referrals.new": "Neue Empfehlung",
+    "referrals.sent": "Gesendet",
+    "referrals.received": "Empfangen",
+    "referrals.starred": "Markiert"
+  },
+  "disabledReasons": {
+    "not-operational": "Funktion ohne betriebsbereiten Handler.",
+    "not-applicable": "Funktion im aktuellen Kontext nicht anwendbar.",
+    "not-authorized": "Funktion im aktuellen Zustand nicht zulässig."
+  }
+}

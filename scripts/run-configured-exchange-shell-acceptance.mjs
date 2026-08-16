@@ -46,6 +46,24 @@ replaceOnce(
   `  const phase2SurfacePresent = await evaluate(cdp, \`Boolean(document.querySelector('[data-exchange-room-action-grid]'))\`);\n  if (phase2SurfacePresent) exchangeRoomPhase2RuntimeDetected = true;\n  const phase2 = exchangeRoomPhase2RuntimeDetected\n    && await evaluate(cdp, \`location.pathname === "/geography/canvas"\`);\n  return phase2\n    ? clickExchangeRoomLens(cdp, id, href, expectedPath, options)\n    : clickHref(cdp, href, expectedPath, options);`,
 );
 
+replaceOnce(
+  "controlled participant permanent Resources lens expectation",
+  `location.pathname === "/geography/canvas" && Boolean(document.querySelector('[data-participant-lens="resources"][aria-disabled="true"]'))`,
+  `location.pathname === "/geography/canvas" && document.querySelector('[data-participant-lens="resources"]')?.getAttribute('data-availability') === "enabled"`,
+);
+
+replaceOnce(
+  "orientation-complete permanent Referrals lens expectation",
+  `location.pathname === "/geography/canvas" && Boolean(document.querySelector('[data-participant-lens="referrals"][aria-disabled="true"]'))`,
+  `location.pathname === "/geography/canvas" && document.querySelector('[data-participant-lens="referrals"]')?.getAttribute('data-availability') === "enabled"`,
+);
+
+replaceOnce(
+  "controlled whole-lens evidence semantics",
+  `      controlledLensesUnavailable: true,`,
+  `      controlledLensesUnavailable: false,`,
+);
+
 await writeFile(runtimeUrl, source, "utf8");
 try {
   await import(`${runtimeUrl.href}?run=${Date.now()}`);

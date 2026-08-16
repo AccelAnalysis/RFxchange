@@ -71,6 +71,31 @@ function currentAggregate(record: RfxAggregate): RfxAggregate {
     : record;
 }
 
+function definitionGeographyQualifierIds(aggregate: RfxAggregate): readonly string[] {
+  if (!aggregate.definition) return Object.freeze([]);
+  return Object.freeze([
+    ...new Set(
+      aggregate.definition.requirements.flatMap((requirement) =>
+        requirement.qualifiers.flatMap((qualifier) =>
+          qualifier.kind === "geography" ? [...qualifier.localityIds] : [],
+        ),
+      ),
+    ),
+  ]);
+}
+
+function assertReleasedQualifierGeographies(
+  snapshots: readonly FirebaseFirestore.DocumentSnapshot[],
+): void {
+  for (const snapshot of snapshots) {
+    if (!snapshot.exists || snapshot.get("releaseState") !== "released") {
+      throw new RfxPersistenceConflictError(
+        "RFx definition geography qualifier authority changed.",
+      );
+    }
+  }
+}
+
 function comparableTimestamp(value: unknown): string | null {
   if (typeof value === "string") {
     const parsed = new Date(value);
@@ -148,10 +173,19 @@ export class FirestoreRfxRepository implements RfxRepository {
     const eventRef = this.db.collection(EVENTS).doc(bundle.event.id);
     const commandRef = this.db.collection(COMMANDS).doc(bundle.command.id);
     const auditRef = this.db.collection(AUDITS).doc(bundle.audit.id);
+    const qualifierGeographyRefs = definitionGeographyQualifierIds(bundle.aggregate).map((id) =>
+      this.db.collection(GEOGRAPHIES).doc(id),
+    );
 
     return this.db.runTransaction(async (transaction) => {
-      const [commandSnapshot, aggregateSnapshot, eventSnapshot, auditSnapshot] =
-        await transaction.getAll(commandRef, aggregateRef, eventRef, auditRef);
+      const records = await transaction.getAll(
+        commandRef,
+        aggregateRef,
+        eventRef,
+        auditRef,
+        ...qualifierGeographyRefs,
+      );
+      const [commandSnapshot, aggregateSnapshot, eventSnapshot, auditSnapshot, ...qualifierGeographySnapshots] = records;
 
       if (commandSnapshot.exists) {
         const prior = commandSnapshot.data() as RfxCommandReceipt;
@@ -165,6 +199,8 @@ export class FirestoreRfxRepository implements RfxRepository {
           "RFx evidence identity collision.",
         );
       }
+
+      assertReleasedQualifierGeographies(qualifierGeographySnapshots);
 
       if (bundle.expectedVersion === null) {
         if (
@@ -216,6 +252,9 @@ export class FirestoreRfxRepository implements RfxRepository {
     const geographyRefs = bundle.expectedGeographies.map((item) =>
       this.db.collection(GEOGRAPHIES).doc(item.id),
     );
+    const qualifierGeographyRefs = definitionGeographyQualifierIds(bundle.aggregate).map((id) =>
+      this.db.collection(GEOGRAPHIES).doc(id),
+    );
     const organizationRef = this.db.collection(ORGANIZATIONS).doc(bundle.aggregate.issuerOrganizationId);
     const membershipRef = this.db.collection(MEMBERSHIPS).doc(bundle.event.actorMembershipId);
     const authorizationRef = this.db.collection(AUTHORIZATIONS).doc(bundle.event.actorMembershipId);
@@ -232,10 +271,14 @@ export class FirestoreRfxRepository implements RfxRepository {
         membershipRef,
         authorizationRef,
         ...geographyRefs,
+        ...qualifierGeographyRefs,
       );
+      const coreCount = 9;
       const [commandSnapshot, aggregateSnapshot, eventSnapshot, auditSnapshot,
         publicationSnapshot, projectionSnapshot, organizationSnapshot,
-        membershipSnapshot, authorizationSnapshot, ...geographySnapshots] = records;
+        membershipSnapshot, authorizationSnapshot] = records.slice(0, coreCount);
+      const geographySnapshots = records.slice(coreCount, coreCount + geographyRefs.length);
+      const qualifierGeographySnapshots = records.slice(coreCount + geographyRefs.length);
       const [organizationRestrictions, membershipRestrictions] = await Promise.all([
         transaction.get(
           this.db.collection(RESTRICTIONS)
@@ -305,6 +348,7 @@ export class FirestoreRfxRepository implements RfxRepository {
             comparableTimestamp(expected.authorityUpdatedAt)
         ) throw new RfxPersistenceConflictError("RFx publication geography changed.");
       }
+      assertReleasedQualifierGeographies(qualifierGeographySnapshots);
 
       transaction.set(aggregateRef, mutable(bundle.aggregate));
       transaction.create(snapshotRef, immutable(bundle.snapshot));

@@ -58,10 +58,9 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
   if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   const acquisition = access.state.acquisitionContext;
-  if (!acquisition || acquisition.kind === "direct") {
-    redirect(access.state.controlledPlatformUrl ?? "/geography/canvas");
-  }
-  if (access.state.lifecycleState === "open-platform" && !["referral", "provider"].includes(acquisition.kind)) redirect("/exchange");
+  const canonicalWorkspace = access.state.controlledPlatformUrl ?? "/exchange";
+  if (!acquisition || acquisition.kind === "direct") redirect(canonicalWorkspace);
+
   let resumeStatus: "resumed" | "pending" = "pending";
   try {
     const resumed = await createServerAcquisitionContextService().resume({
@@ -71,20 +70,44 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
     });
     resumeStatus = resumed.resumeStatus;
   } catch {
-    // The saved context never blocks access to the participant's canonical Exchange workspace.
+    redirect(canonicalWorkspace);
   }
-  const opportunity = acquisition.kind === "opportunity" && acquisition.subjectReference
-    ? await resolvePublicOpportunityProjection(acquisition.subjectReference)
-    : null;
+
+  const participantOpportunity =
+    acquisition.kind === "opportunity" && acquisition.subjectReference
+      ? await resolvePublicOpportunityProjection(acquisition.subjectReference, true)
+      : null;
+  if (participantOpportunity) {
+    redirect(`/opportunities/${encodeURIComponent(participantOpportunity.reference)}`);
+  }
+  if (acquisition.kind === "opportunity") {
+    redirect(canonicalWorkspace);
+  }
+
+  if (
+    access.state.lifecycleState === "open-platform" &&
+    !["referral", "provider"].includes(acquisition.kind)
+  ) {
+    redirect("/exchange");
+  }
+
   const mapUrl = access.state.lifecycleState === "open-platform"
-    ? acquisition.kind === "provider" ? "/resources" : "/referrals"
-    : access.state.controlledPlatformUrl ?? "/exchange";
+    ? acquisition.kind === "provider"
+      ? "/resources"
+      : acquisition.kind === "referral"
+        ? "/referrals"
+        : "/exchange"
+    : canonicalWorkspace;
   const continuationLabel = access.state.lifecycleState === "open-platform"
-    ? acquisition.kind === "provider" ? "Continue to Resources" : "Continue to referrals"
+    ? acquisition.kind === "provider"
+      ? "Continue to Resources"
+      : acquisition.kind === "referral"
+        ? "Continue to referrals"
+        : "Enter the Exchange"
     : mapUrl === "/exchange" ? "Enter the Exchange" : "Continue setup";
 
   return (
-    <ParticipantShell activeItem={acquisition.kind === "opportunity" ? undefined : acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Network"}>
+    <ParticipantShell activeItem={acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Network"}>
       <OperationalWorkspace ariaLabel="Saved acquisition context">
         <section className={styles.wrap}>
           <p className={styles.eyebrow}>Context recovered</p>
@@ -105,21 +128,14 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
 
           <article className={styles.card}>
             <span>{INTENT_LABELS[acquisition.kind]}</span>
-            <h2>{opportunity?.payload.title ?? "Your saved next step"}</h2>
+            <h2>Your saved next step</h2>
             <p>
-              {opportunity?.payload.summary ?? (acquisition.kind === "referral"
+              {acquisition.kind === "referral"
                 ? "Your invitation points to one real business referral. Attaching it makes the minimum referral context available to your organization; it does not accept the referral."
                 : acquisition.kind === "provider"
                   ? "A provider invited your organization to complete its own profile. The invitation preserves that context; it does not grant organization authority, provider status, eligibility, or verification."
-                  : "Your saved context is preserved without claiming that the originating action was completed or accepted.")}
+                  : "Your saved context is preserved without claiming that the originating action was completed or accepted."}
             </p>
-            {opportunity ? (
-              <dl>
-                <div><dt>Issued by</dt><dd>{opportunity.payload.issuerDisplayName}</dd></div>
-                <div><dt>Geography</dt><dd>{opportunity.payload.localities.map((item) => item.label).join(", ")}</dd></div>
-                <div><dt>Status</dt><dd>Published</dd></div>
-              </dl>
-            ) : null}
             <small>Reference: {acquisition.subjectReference}</small>
             <small>Resume status: {resumeStatus}</small>
           </article>
@@ -129,11 +145,6 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
               <form action="/api/referrals/attach" method="post">
                 <button className={styles.primary} type="submit">Attach and review referral</button>
               </form>
-            ) : null}
-            {opportunity ? (
-              <Link className={styles.primary} href={`/opportunities/${encodeURIComponent(opportunity.reference)}`}>
-                Review public opportunity
-              </Link>
             ) : null}
             <Link className={styles.secondary} href={mapUrl}>{continuationLabel}</Link>
           </div>

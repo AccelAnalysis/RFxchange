@@ -82,6 +82,9 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
     const filters: Record<string, string> = {};
     if (result.query.deadlineWindow !== "all-open") filters.deadline = result.query.deadlineWindow;
     if (result.query.watched !== null) filters.watched = String(result.query.watched);
+    if (result.query.requestFamilyKeys.length) filters.requestFamily = result.query.requestFamilyKeys.join(",");
+    if (result.query.capabilityIds.length) filters.capability = result.query.capabilityIds.join(",");
+    if (result.query.localityIds.length) filters.locality = result.query.localityIds.join(",");
     updateSpatialContext((current) => Object.freeze({
       ...current,
       activeLens: "opportunities-rfx" as const,
@@ -96,7 +99,16 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
       panelOpen: selected !== null,
       originLens: current.activeLens,
     }));
-  }, [result.query.deadlineWindow, result.query.text, result.query.watched, selected, updateSpatialContext]);
+  }, [
+    result.query.capabilityIds,
+    result.query.deadlineWindow,
+    result.query.localityIds,
+    result.query.requestFamilyKeys,
+    result.query.text,
+    result.query.watched,
+    selected,
+    updateSpatialContext,
+  ]);
 
   function select(item: OpportunityDiscoveryItem | null) {
     updateSpatialContext((current) => Object.freeze({
@@ -205,7 +217,44 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
               <Link href="/opportunities/manage">{t("rfxWorkspace.discovery.manage")}</Link>
             </div>
             <form role="search" action="/opportunities" method="get" className={styles.form}>
-              <label><span>{t("rfxWorkspace.discovery.search.label")}</span><input name="q" type="search" defaultValue={result.query.text} placeholder={t("rfxWorkspace.discovery.search.placeholder")} /></label>
+              <label>
+                <span>{t("rfxWorkspace.discovery.search.label")}</span>
+                <input name="q" type="search" defaultValue={result.query.text} placeholder={t("rfxWorkspace.discovery.search.placeholder")} />
+              </label>
+              <label>
+                <span>{t("rfxWorkspace.discovery.detail.requestType")}</span>
+                {(result.query.requestFamilyKeys.length ? result.query.requestFamilyKeys : [""]).map((value, index) => (
+                  <input
+                    key={`requestFamily:${index}:${value}`}
+                    data-opportunity-request-family-filter
+                    name="requestFamily"
+                    defaultValue={value}
+                  />
+                ))}
+              </label>
+              <label>
+                <span>{t("rfxWorkspace.capabilitySearch")}</span>
+                {(result.query.capabilityIds.length ? result.query.capabilityIds : [""]).map((value, index) => (
+                  <input
+                    key={`capability:${index}:${value}`}
+                    data-opportunity-capability-filter
+                    name="capability"
+                    defaultValue={value}
+                  />
+                ))}
+              </label>
+              <label>
+                <span>{t("rfxWorkspace.discovery.detail.location")}</span>
+                {(result.query.localityIds.length ? result.query.localityIds : [""]).map((value, index) => (
+                  <input
+                    key={`locality:${index}:${value}`}
+                    data-opportunity-locality-filter
+                    name="locality"
+                    defaultValue={value}
+                    placeholder={index === 0 ? spatialScope.geographyId : undefined}
+                  />
+                ))}
+              </label>
               <label><span>{t("rfxWorkspace.discovery.search.deadline")}</span><select name="deadline" defaultValue={result.query.deadlineWindow}><option value="all-open">{t("rfxWorkspace.discovery.search.allOpen")}</option><option value="next-7-days">{t("rfxWorkspace.discovery.search.next7")}</option><option value="next-30-days">{t("rfxWorkspace.discovery.search.next30")}</option></select></label>
               <label className={styles.check}><input name="watched" type="checkbox" value="true" defaultChecked={result.query.watched === true} /><span>{t("rfxWorkspace.discovery.search.watched")}</span></label>
               <div className={styles.actions}><button type="submit">{t("rfxWorkspace.discovery.search.submit")}</button><Link href="/opportunities">{t("rfxWorkspace.discovery.search.clear")}</Link></div>
@@ -224,7 +273,13 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
               <ul className={styles.results} aria-label={t("rfxWorkspace.discovery.resultsLabel")}>
                 {result.items.map((item) => <li key={item.reference}><button type="button" aria-pressed={selected?.reference === item.reference} data-opportunity-reference={item.reference} onClick={() => select(item)}><span><strong>{item.title}</strong><small>{item.issuerDisplayName}</small></span><span>{item.localities.map((locality) => locality.label).join(" · ")}</span><span>{t("rfxWorkspace.discovery.deadline", { date: item.responseDeadline })}</span></button></li>)}
               </ul>
-            ) : <StatePanel state="empty" title={t("rfxWorkspace.discovery.emptyTitle")}>{t("rfxWorkspace.discovery.emptyBody")}</StatePanel>}
+            ) : result.nextCursor ? (
+              <StatePanel state="loading" title={t("rfxWorkspace.discovery.more")}>
+                <span data-opportunity-scan-incomplete>{t("rfxWorkspace.discovery.search.truth")}</span>
+              </StatePanel>
+            ) : (
+              <StatePanel state="empty" title={t("rfxWorkspace.discovery.emptyTitle")}>{t("rfxWorkspace.discovery.emptyBody")}</StatePanel>
+            )}
             {result.nextCursor ? <Link className={styles.more} href={`${queryHref(result)}${queryHref(result).includes("?") ? "&" : "?"}cursor=${encodeURIComponent(result.nextCursor)}`}>{t("rfxWorkspace.discovery.more")}</Link> : null}
             <details className={styles.save}>
               <summary>{t("rfxWorkspace.discovery.saved.action")}</summary>
