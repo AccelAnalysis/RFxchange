@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "authority": "docs/program/MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md",
+  "controllingProductAuthority": "docs/program/MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md",
+  "visualReference": "docs/reference/screenshots/rfxchange-mobile-composition-reference.jpg",
+  "activation": {
+    "id": "mobile-exchange-stage1-2026-08-16",
+    "packetId": "WP-MOBILE-EXCHANGE-STAGE1-01",
+    "mainBaseSha": "0b23a9f9b49468aab12609dea6116e1409c925fe",
+    "controlBranch": "control/mobile-stage1-architecture-lock",
+    "implementationLane": "shared-exchange",
+    "implementationBranch": "lane01/mobile-exchange-stage1-contracts",
+    "candidatePullRequest": null,
+    "candidateSha": null,
+    "status": "active-contract-convergence",
+    "stage2Authorized": false
+  },
+  "lockedLensOrder": [
+    "opportunities-rfx",
+    "resources",
+    "intelligence",
+    "referrals"
+  ],
+  "utilityIsNotLens": true,
+  "phase2Compatibility": {
+    "controllerPullRequest": 191,
+    "truthCorrectionPullRequest": 212,
+    "preserveSixteenActionRegistry": true,
+    "preserveOperationalApplicableAuthorizedSeparation": true,
+    "preserveServerDerivedAuthorization": true,
+    "preserveProgressiveAvailability": true,
+    "preserveSelectedObjectContinuity": true,
+    "preserveMapContinuity": true
+  },
+  "contracts": [
+    { "id": "mobile-shell", "state": "not-started" },
+    { "id": "bottom-four-lens-navigation", "state": "foundation-exists-contract-not-converged" },
+    { "id": "three-position-bottom-sheet", "state": "not-started" },
+    { "id": "four-position-lens-action-rail", "state": "phase2-foundation-contract-not-converged" },
+    { "id": "result-business-card", "state": "not-started" },
+    { "id": "media", "state": "not-started" },
+    { "id": "favorite", "state": "not-started" },
+    { "id": "selected-object", "state": "organization-foundation-record-contract-not-converged" },
+    { "id": "map-projection", "state": "camera-geography-foundation-record-bounds-contract-not-converged" },
+    { "id": "detail-state", "state": "not-started" },
+    { "id": "continuity-state", "state": "version1-spatial-foundation-stage1-contract-not-converged" }
+  ],
+  "domainReviews": {
+    "02": { "lane": "opportunities-rfx", "status": "waiting-for-lane01-candidate", "candidateSha": null, "findingIds": [] },
+    "03": { "lane": "intelligence", "status": "waiting-for-lane01-candidate", "candidateSha": null, "findingIds": [] },
+    "04": { "lane": "resources", "status": "waiting-for-lane01-candidate", "candidateSha": null, "findingIds": [] },
+    "05": { "lane": "referrals", "status": "waiting-for-lane01-candidate", "candidateSha": null, "findingIds": [] }
+  },
+  "findings": [],
+  "sharedContractRequests": [],
+  "allowedFindingDispositions": [
+    "accepted-shared-correction",
+    "reuse-existing-shared-seam",
+    "domain-fact-no-shared-change",
+    "deferred-explicitly-approved",
+    "rejected-conflicts-with-authority",
+    "superseded-by-candidate-sha"
+  ],
+  "exitGate": {
+    "satisfied": false,
+    "reasons": [
+      "Lane 01 has no Stage 1 candidate pull request.",
+      "Lanes 02-05 have not reviewed an exact Lane 01 candidate SHA.",
+      "The shared mobile contract family has not been implemented or reconciled.",
+      "No candidate-bound finding and disposition cycle has occurred."
+    ]
+  },
+  "nextAction": "Lane 01 branches lane01/mobile-exchange-stage1-contracts from 0b23a9f9b49468aab12609dea6116e1409c925fe, implements only the bounded shared contract/type/test surface, and opens one draft PR naming WP-MOBILE-EXCHANGE-STAGE1-01."
+}
