@@ -83,6 +83,8 @@ interface SavedSearch {
   readonly membershipId: string;
   readonly status: string;
   readonly version: number;
+  readonly deliveryLocale?: string;
+  readonly updatedAt?: string;
 }
 
 interface SavedSearchMatch {
@@ -115,8 +117,6 @@ interface ParticipantUser {
   readonly id?: string;
   readonly name?: string;
   readonly primaryEmail?: string;
-  readonly preferredLocale?: string;
-  readonly locale?: string;
   readonly login?: Readonly<{ readonly provider?: string; readonly subject?: string }>;
 }
 
@@ -173,6 +173,27 @@ function requiredEnvironment(name: string): string {
   return value;
 }
 
+function assertMicrosoftEnvironmentBinding(): void {
+  const runtimeEnvironment = requiredEnvironment("RFXCHANGE_ENV").toLowerCase();
+  if (!["development", "staging", "production"].includes(runtimeEnvironment)) {
+    throw new ProviderFailure({
+      code: "microsoft-email-configuration-invalid",
+      message: "RFXCHANGE_ENV must be development, staging, or production.",
+      retryable: false,
+      deliveryOutcome: "known-failure",
+    });
+  }
+  const expectedEnvironment = process.env.RFXCHANGE_MICROSOFT_EXPECTED_ENV?.trim().toLowerCase();
+  if (expectedEnvironment && expectedEnvironment !== runtimeEnvironment) {
+    throw new ProviderFailure({
+      code: "microsoft-email-configuration-invalid",
+      message: `Microsoft email configuration is scoped to ${expectedEnvironment}, not ${runtimeEnvironment}.`,
+      retryable: false,
+      deliveryOutcome: "known-failure",
+    });
+  }
+}
+
 function responseReference(response: Response): string | null {
   return (
     response.headers.get("request-id") ??
@@ -226,22 +247,32 @@ function publicOrigin(): string {
   return new URL(value).origin;
 }
 
+function persistedDeliveryLocale(searches: readonly SavedSearch[]): string {
+  const newestFirst = [...searches].sort(
+    (left, right) =>
+      (right.updatedAt ?? "").localeCompare(left.updatedAt ?? "") ||
+      left.id.localeCompare(right.id),
+  );
+  return normalizeOpportunityAlertLocale(
+    newestFirst.find((search) => search.deliveryLocale?.trim())?.deliveryLocale ?? "en-US",
+  );
+}
+
 function rebuiltRequest(
   intent: OpportunityAlertIntent,
   user: ParticipantUser,
   projections: readonly Projection[],
+  searches: readonly SavedSearch[],
   identity: Readonly<{ id: string; windowKey: string; requestedAt: string }>,
 ): TransactionalEmailRequest {
   const name = user.name?.trim() ?? "";
   const email = user.primaryEmail?.trim() ?? "";
-  if (!name || !email || projections.length === 0) {
-    throw new Error("Opportunity alert recipient or projection is unavailable.");
+  if (!name || !email || projections.length === 0 || searches.length === 0) {
+    throw new Error("Opportunity alert recipient, projection, or saved-search locale is unavailable.");
   }
   const summary = projections.map(projectionSummary).join("\n").slice(0, 1800);
   const firstReference = projections[0]!.reference;
-  const locale = normalizeOpportunityAlertLocale(
-    intent.request.variables.locale ?? user.preferredLocale ?? user.locale,
-  );
+  const locale = persistedDeliveryLocale(searches);
   return Object.freeze({
     ...intent.request,
     id: identity.id,
@@ -423,11 +454,16 @@ async function claimAlert(db: Firestore, id: string, now: Timestamp): Promise<Cl
     });
     const validMatchIds = unique(validMatches.map((match) => match.id));
     const validSearchIds = unique(validMatches.map((match) => match.savedSearchId));
+    const validSearches = validSearchIds.flatMap((searchId) => {
+      const search = searches.get(searchId);
+      return search ? [search] : [];
+    });
     const nowIso = now.toDate().toISOString();
     const rebuilt = rebuiltRequest(
       intent,
       user,
       validProjections,
+      validSearches,
       Object.freeze({ id: intent.id, windowKey: intent.windowKey, requestedAt: intent.request.metadata.requestedAt }),
     );
     const constituentsChanged =
@@ -452,6 +488,7 @@ async function claimAlert(db: Firestore, id: string, now: Timestamp): Promise<Cl
           intent,
           user,
           validProjections,
+          validSearches,
           Object.freeze({ id: replacementId, windowKey: replacementWindow, requestedAt: nowIso }),
         );
         transaction.create(replacementRef, {
@@ -658,6 +695,7 @@ async function graphToken(): Promise<string> {
 }
 
 async function deliverOpportunityAlert(request: TransactionalEmailRequest) {
+  assertMicrosoftEnvironmentBinding();
   const rendered = renderedAlert(request);
   const token = await graphToken();
   const sender = requiredEnvironment("RFXCHANGE_MICROSOFT_APPROVED_SENDER");
