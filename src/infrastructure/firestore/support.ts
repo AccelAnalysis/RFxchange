@@ -117,6 +117,10 @@ const DOMAIN_TIMESTAMP_EXPOSURE: Readonly<Record<FirestoreCollectionKey, DomainT
     aiInterpretationUsageEvents: Object.freeze({ createdAt: true, updatedAt: false }),
     aiInterpretationEvents: Object.freeze({ createdAt: true, updatedAt: false }),
     aiInterpretationQuotaBuckets: Object.freeze({ createdAt: true, updatedAt: true }),
+    organizationCommercialAccounts: Object.freeze({ createdAt: true, updatedAt: true }),
+    commercialFoundingCapacity: Object.freeze({ createdAt: true, updatedAt: true }),
+    commercialProviderEvents: Object.freeze({ createdAt: true, updatedAt: false }),
+    commercialSubscriptionReconciliations: Object.freeze({ createdAt: true, updatedAt: true }),
   });
 
 function asDocumentData(record: object): DocumentData {

@@ -525,6 +525,25 @@ service cloud.firestore {
       allow read, write: if serverManagedOnly();
     }
 
+    // MRFC Critical authority collections remain server-managed. Browser clients cannot read or
+    // mutate commercial account, capacity, provider-event, or subscription-reconciliation truth.
+    match /organizationCommercialAccounts/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /commercialFoundingCapacity/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
+    match /commercialProviderEvents/{documentId} {
+      allow read, create: if serverManagedOnly();
+      allow update, delete: if false;
+    }
+
+    match /commercialSubscriptionReconciliations/{documentId} {
+      allow read, write: if serverManagedOnly();
+    }
+
     match /storedAssets/{documentId} {
       allow read, write: if serverManagedOnly();
     }

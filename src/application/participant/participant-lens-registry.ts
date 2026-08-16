@@ -86,6 +86,7 @@ const PERSISTENT_PARTICIPANT_PATH_PREFIXES = Object.freeze([
   "/organization-profile",
   "/quick-start",
   "/provider-application",
+  "/commercial/founding",
 ]);
 
 function matchesPrefix(pathname: string, prefix: string): boolean {

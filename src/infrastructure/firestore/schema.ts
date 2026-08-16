@@ -93,6 +93,10 @@ export const FIRESTORE_COLLECTIONS = {
   aiInterpretationUsageEvents: "aiInterpretationUsageEvents",
   aiInterpretationEvents: "aiInterpretationEvents",
   aiInterpretationQuotaBuckets: "aiInterpretationQuotaBuckets",
+  organizationCommercialAccounts: "organizationCommercialAccounts",
+  commercialFoundingCapacity: "commercialFoundingCapacity",
+  commercialProviderEvents: "commercialProviderEvents",
+  commercialSubscriptionReconciliations: "commercialSubscriptionReconciliations",
 } as const;
 
 export type FirestoreCollectionKey = keyof typeof FIRESTORE_COLLECTIONS;
@@ -112,6 +116,7 @@ export interface FirestoreCollectionConvention {
     | "membershipId"
     | "administratorId"
     | "userId"
+    | "organizationId"
     | "reference";
   readonly scope: FirestoreRecordScope;
   readonly organizationIdRequired: boolean;
@@ -512,6 +517,10 @@ export const FIRESTORE_COLLECTION_CONVENTIONS: Readonly<
   aiInterpretationUsageEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationUsageEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
   aiInterpretationEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
   aiInterpretationQuotaBuckets: Object.freeze({ collection: FIRESTORE_COLLECTIONS.aiInterpretationQuotaBuckets, documentIdSource: "id", scope: "mixed-scope", organizationIdRequired: false, appendOnly: false, mutable: true }),
+  organizationCommercialAccounts: Object.freeze({ collection: FIRESTORE_COLLECTIONS.organizationCommercialAccounts, documentIdSource: "organizationId", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
+  commercialFoundingCapacity: Object.freeze({ collection: FIRESTORE_COLLECTIONS.commercialFoundingCapacity, documentIdSource: "reference", scope: "platform-scoped", organizationIdRequired: false, appendOnly: false, mutable: true }),
+  commercialProviderEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.commercialProviderEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
+  commercialSubscriptionReconciliations: Object.freeze({ collection: FIRESTORE_COLLECTIONS.commercialSubscriptionReconciliations, documentIdSource: "organizationId", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
 });
 
 export const FIRESTORE_SYSTEM_FIELDS = Object.freeze({

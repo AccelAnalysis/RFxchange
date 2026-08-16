@@ -106,6 +106,10 @@ test("defines schema version and canonical collection names", () => {
     aiInterpretationUsageEvents: "aiInterpretationUsageEvents",
     aiInterpretationEvents: "aiInterpretationEvents",
     aiInterpretationQuotaBuckets: "aiInterpretationQuotaBuckets",
+    organizationCommercialAccounts: "organizationCommercialAccounts",
+    commercialFoundingCapacity: "commercialFoundingCapacity",
+    commercialProviderEvents: "commercialProviderEvents",
+    commercialSubscriptionReconciliations: "commercialSubscriptionReconciliations",
   });
 });
 
@@ -186,6 +190,9 @@ test("organization-scoped collections explicitly require organizationId", () => 
     "aiInterpretationProvenance",
     "aiInterpretationUsageEvents",
     "aiInterpretationEvents",
+    "organizationCommercialAccounts",
+    "commercialProviderEvents",
+    "commercialSubscriptionReconciliations",
   ]) {
     assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, true);
     assert.throws(
@@ -210,6 +217,7 @@ test("organization-scoped collections explicitly require organizationId", () => 
     "rfxOpportunityProjections",
     "providerRequestMessages",
     "aiInterpretationQuotaBuckets",
+    "commercialFoundingCapacity",
   ]) {
     assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, false);
     assert.doesNotThrow(() => assertOrganizationScopedFirestoreRecord(key, undefined));
@@ -261,6 +269,7 @@ test("append-only domain and operational history remains non-mutable", () => {
     "aiInterpretationProvenance",
     "aiInterpretationUsageEvents",
     "aiInterpretationEvents",
+    "commercialProviderEvents",
   ]) {
     const convention = FIRESTORE_COLLECTION_CONVENTIONS[key];
     assert.equal(convention.appendOnly, true, `${key} must be append-only`);
@@ -282,4 +291,39 @@ test("singleton relationship state uses the owning stable identity as document I
   assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.organizationAuthorizations.documentIdSource, "membershipId");
   assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.adminAuthorityContexts.documentIdSource, "administratorId");
   assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.primaryGeographySelections.documentIdSource, "userId");
+});
+
+test("Founding commerce registrations preserve the bounded INF-003 conventions", () => {
+  assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.organizationCommercialAccounts, {
+    collection: "organizationCommercialAccounts",
+    documentIdSource: "organizationId",
+    scope: "organization-scoped",
+    organizationIdRequired: true,
+    appendOnly: false,
+    mutable: true,
+  });
+  assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.commercialFoundingCapacity, {
+    collection: "commercialFoundingCapacity",
+    documentIdSource: "reference",
+    scope: "platform-scoped",
+    organizationIdRequired: false,
+    appendOnly: false,
+    mutable: true,
+  });
+  assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.commercialProviderEvents, {
+    collection: "commercialProviderEvents",
+    documentIdSource: "id",
+    scope: "organization-scoped",
+    organizationIdRequired: true,
+    appendOnly: true,
+    mutable: false,
+  });
+  assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.commercialSubscriptionReconciliations, {
+    collection: "commercialSubscriptionReconciliations",
+    documentIdSource: "organizationId",
+    scope: "organization-scoped",
+    organizationIdRequired: true,
+    appendOnly: false,
+    mutable: true,
+  });
 });

@@ -129,6 +129,7 @@ test("COM-038 application service reaches payment infrastructure only through th
     successUrl: "https://rfxchange.example.test/account/billing/success",
     cancelUrl: "https://rfxchange.example.test/account/billing",
     idempotencyKey: "org-004-founding-checkout-1",
+    checkoutCorrelationId: "org-004-founding-correlation-1",
     now,
   });
 
@@ -138,5 +139,6 @@ test("COM-038 application service reaches payment infrastructure only through th
   assert.equal(paymentProvider.checkoutRequests.length, 1);
   assert.equal(paymentProvider.checkoutRequests[0].planKey, "founding");
   assert.equal(paymentProvider.checkoutRequests[0].customerReference.kind, "customer");
+  assert.equal(paymentProvider.checkoutRequests[0].checkoutCorrelationId, "org-004-founding-correlation-1");
   assert.equal(result.checkoutReference.kind, "checkout-session");
 });

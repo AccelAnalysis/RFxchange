@@ -1,6 +1,6 @@
 import { getAuth, type Auth } from "firebase-admin/auth";
 
-import { getFirebaseAdminApp } from "../firebase/admin";
+import { getFirebaseAdminApp } from "../firebase/admin.ts";
 
 /**
  * Server-side Firebase Authentication provider handle.
