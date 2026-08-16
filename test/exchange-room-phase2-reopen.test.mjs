@@ -24,12 +24,14 @@ test("ordinary permanent-lens activation reopens the existing Room surface after
   assert.doesNotMatch(controller, /location\.(assign|replace)|window\.location/);
 });
 
-test("reopen path preserves authorization boundary and dedicated deep-link truth", () => {
+test("reopen path preserves authorization boundary and truthful active deep links while New Referral stays disabled", () => {
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
+  const registry = read("src/application/participant/exchange-room-actions.ts");
   assert.match(controller, /fetch\("\/geography\/canvas\/action-authorization"/);
   assert.match(controller, /opportunities\.create-rfx/);
   assert.match(controller, /resources\.my-requests/);
   assert.match(controller, /resources\.provider-status/);
-  assert.match(controller, /referrals\.new/);
-  assert.match(controller, /participantSpatialLensHref\("referrals"\)/);
+  assert.match(controller, /participantSpatialLensHref\("resources"\)/);
+  assert.doesNotMatch(controller, /actionId === "referrals\.new"/);
+  assert.match(registry, /id: "referrals\.new"[^\n]*operational: false[^\n]*handler: null/);
 });

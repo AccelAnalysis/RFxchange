@@ -114,7 +114,6 @@ function privilegedHref(actionId: string): string | null {
   }
   if (actionId === "resources.my-requests") return "/resources";
   if (actionId === "resources.provider-status") return "/provider-application";
-  if (actionId === "referrals.new") return participantSpatialLensHref("referrals");
   return null;
 }
 
@@ -191,7 +190,7 @@ export function ExchangeRoomActionController({
         if (networkIntent && networkDiscoveryAvailable) {
           return <button key={action.id} type="button" className={styles.activeAction} data-exchange-room-action={action.id} data-action-state="active" onClick={() => onNetworkFocus(networkIntent)}>{label}</button>;
         }
-        if (permission === true && action.applicable) {
+        if (permission === true && action.operational && action.applicable) {
           const href = privilegedHref(action.id);
           if (href) return <Link key={action.id} className={styles.activeAction} href={href} data-exchange-room-action={action.id} data-action-state="active">{label}</Link>;
         }

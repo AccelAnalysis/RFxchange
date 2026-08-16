@@ -48,6 +48,14 @@ test("fresh server authorization revokes every open-platform action and Resource
   assert.match(registry, /id: "resources\.browse-resources"[^\n]*authorization: "open-platform-referral-manage"/);
 });
 
+test("permission refresh cannot reactivate a non-operational privileged action", () => {
+  const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
+  const registry = read("src/application/participant/exchange-room-actions.ts");
+  assert.match(controller, /permission === true && action\.operational && action\.applicable/);
+  assert.doesNotMatch(controller, /actionId === "referrals\.new"/);
+  assert.match(registry, /id: "referrals\.new"[^\n]*operational: false[^\n]*handler: null/);
+});
+
 test("closing organization detail cannot remove the shared four-action architecture", () => {
   const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
   const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
