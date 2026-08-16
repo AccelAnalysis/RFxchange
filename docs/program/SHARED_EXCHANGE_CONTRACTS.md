@@ -8,7 +8,7 @@
 
 This registry identifies behavior that must remain one shared Exchange contract rather than diverging across lenses. A domain lane consumes the shared contract; it does not clone it.
 
-`FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md` supersedes older language that made Lane 06 review a universal completion prerequisite. Independent Acceptance remains available as optional assurance. Shared contract completion still requires implementation evidence, applicable checks, satisfied dependencies/ownership, durable disposition of material findings, and no known material unresolved defect.
+`FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md` supersedes older language that made Lane 06 review a universal completion prerequisite. Independent Acceptance remains optional assurance. Shared contract completion still requires implementation evidence, applicable checks, satisfied dependencies/ownership, durable disposition of material findings, and no known material unresolved defect.
 
 ## Owned contract families
 
@@ -25,7 +25,7 @@ This registry identifies behavior that must remain one shared Exchange contract 
 | Account utility and optional Administration | `SHARED-ACCOUNT-*` | Lane 01 | all participant lanes |
 | Truthful copy, accessibility, locales, and performance | `SHARED-COPY-*`, `SHARED-PRIVACY-*`, `SHARED-A11Y-*`, `SHARED-I18N-*`, `SHARED-PERF-*` | Lane 01 | Lanes 02–05 |
 
-Shared client state is always non-authorizing. Domain inputs such as provider status, RFx lifecycle, referral access, publication visibility, favorite ownership, media visibility, and organization membership remain server-authoritative and domain-owned.
+Shared client state is always non-authorizing. Domain inputs such as RFx lifecycle, provider status, referral access, publication visibility, favorite ownership, media visibility, organization membership, and geography authority remain server-authoritative and domain-owned.
 
 ## Mobile Stage 1 shared contract boundary
 
@@ -36,13 +36,13 @@ For `WP-MOBILE-EXCHANGE-STAGE1-01`, Lane 01 owns one converged interface family 
 - three-position bottom sheet;
 - the four-position active-lens action rail;
 - result/business cards;
-- optional media projection;
+- optional image and video media projection;
 - record favorites;
 - record-specific actions;
-- generic selected organization/record/marker state;
+- focal selected organization/record/marker state plus associated organization context;
 - map camera/bounds and record projection;
 - detail context;
-- continuity across lens, sheet, list, map, and detail transitions.
+- continuity and fail-closed reconciliation across lens, sheet, list, map, and detail transitions.
 
 The existing sixteen action identities remain the lens-level registry. Record actions are a separate extension family and must not consume or rename those positions.
 
@@ -52,7 +52,7 @@ Lanes 02–05 may provide domain facts and representative record models. During 
 
 A request is a durable GitHub record with:
 
-- request ID `SCR-<lane>-<sequence>` or, for Mobile Stage 1, `SCR-<lane>-MOB1-<sequence>`;
+- request ID `SCR-<lane>-<sequence>` or `SCR-<lane>-MOB1-<sequence>`;
 - requesting lane and exact candidate/base SHA;
 - affected stable requirement IDs or controlling authority section;
 - participant problem and desired generalized behavior;
@@ -83,7 +83,7 @@ If an existing seam is sufficient, the request closes with the reuse decision an
 
 ## Mobile Stage 1 finding protocol
 
-Substantive findings against the Lane 01 candidate use `MOB1-FIND-<lane-number>-<sequence>` and record:
+Substantive findings use `MOB1-FIND-<lane-number>-<sequence>` and record:
 
 - exact candidate PR and SHA;
 - affected contract;
@@ -102,15 +102,17 @@ Allowed dispositions are:
 - `rejected-conflicts-with-authority`;
 - `superseded-by-candidate-sha`.
 
-The detailed candidate-review template, current review assignments, and convergence ledger are in `MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md`.
+The detailed review template, assignments, and convergence ledger are in `MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md`.
 
 ## Ownership constraints
 
-- Participant navigation, global lens order, Account utility, generic organization/record marker grammar, generic spatial state, generic card/detail projection, generic drawer/sheet, and cross-lens context are not domain-lane private code.
-- A domain lane may render domain-specific objects and actions through shared extension points without moving its authorization logic into the client.
-- A cross-geography or privacy-suppressed domain object does not receive a fabricated coordinate to satisfy a shared visual contract.
-- New shared persistence fields require versioning, scope, invalidation, and backward-compatibility decisions.
-- A gray/disabled action remains presentation, never the security boundary.
+- Global lens order, Account utility, generic marker/card/detail grammar, generic spatial state, drawer/sheet behavior, and cross-lens continuity are not domain-lane private code.
+- Focal record identity and associated organization identity must remain separately truthful where they represent different market objects.
+- A domain lane may supply domain facts/actions through shared extension points without moving authorization into the client.
+- Cross-geography or privacy-suppressed records do not receive fabricated coordinates.
+- Browser-restored geography remains unvalidated continuity until an authoritative server projection revalidates it.
+- New persistence fields require versioning, scope, invalidation, and backward-compatibility decisions.
+- Disabled presentation is never the security boundary, and disabled explanation keys must resolve in every supported locale.
 - A shared contract may be reported `Implemented — Not Verified` without mandatory Lane 06 review when current completion governance is otherwise satisfied.
 
 ## Current requests and convergence state
@@ -118,19 +120,36 @@ The detailed candidate-review template, current review assignments, and converge
 Mobile Stage 1 is active under `WP-MOBILE-EXCHANGE-STAGE1-01` from base `0b23a9f9b49468aab12609dea6116e1409c925fe`.
 
 - Control Room packet: PR #217.
-- Lane 01 candidate: PR #218 at exact head `16c7b3b0131cfde1ba23119831ee1b3dab3a7942`.
-- Candidate state: `Implemented — Not Verified`; failed exact-head CI and unresolved shared findings prevent merge/convergence.
-- Lanes 02–05: no exact-head domain review submitted; review begins after Lane 01 correction.
+- Lane 01 candidate: PR #218 at `3c67ef3dffeaa60aef761debb6cf76ea1c807789`.
+- Candidate state: `Implemented — Not Verified`.
+- Exact-head production-ci #1483: SUCCESS.
+- Lane 02 exact-head review: FINDING.
+- Lanes 03–05: review not submitted.
 - Stage 1 exit gate: not satisfied.
+- Stage 2: not authorized.
 
-### Open shared findings
+### Open Control Room findings
 
-| Finding | Candidate | State | Required shared disposition |
-| --- | --- | --- | --- |
-| `MOB1-FIND-00-001` | PR #218 / `16c7b3b0…` | Open | Remove the reintroduced mandatory Independent Acceptance prerequisite. |
-| `MOB1-FIND-00-002` | PR #218 / `16c7b3b0…` | Open | Complete the responsive/continuity architecture representation without implementing Stage 2 UI. |
-| `MOB1-FIND-00-003` | PR #218 / `16c7b3b0…` | Open | Enforce internal marker/card/detail selected-object identity parity. |
-| `MOB1-FIND-00-004` | PR #218 / `16c7b3b0…` | Open | Bind action-rail input to the canonical action ID for each lens/position. |
-| `BUILD-FIND-218-001` | PR #218 / `16c7b3b0…` | Open | Remove trailing whitespace and obtain green exact-head production CI. |
+| Finding | State | Required shared disposition |
+| --- | --- | --- |
+| `MOB1-FIND-00-001` | Open | Remove the candidate's universal Independent Acceptance prerequisite. |
+| `MOB1-FIND-00-002` | Open | Complete responsive/accessibility and result/scroll/cursor continuity architecture. |
+| `MOB1-FIND-00-003` | Open | Enforce focal marker/card/detail identity and internal subject parity. |
+| `MOB1-FIND-00-004` | Open | Bind action-rail inputs to canonical lens/position action IDs. |
+| `MOB1-FIND-00-005` | Open | Treat restored geography as unvalidated until server revalidation. |
+| `MOB1-FIND-00-006` | Open | Reuse or install the canonical supported-locale disabled-reason contract. |
+| `BUILD-FIND-218-001` | Resolved | Whitespace fixed and production-ci #1483 succeeded at `3c67ef3d…`. |
 
-Historical Shared Contract Requests remain governed by their original records and later dispositions; this Stage 1 activation does not silently reopen them.
+Four unresolved Codex threads corroborate `MOB1-FIND-00-002` and `MOB1-FIND-00-003` and provide the originating evidence for `MOB1-FIND-00-005` and `MOB1-FIND-00-006`.
+
+### Open Lane 02 findings
+
+| Finding | State | Required shared disposition |
+| --- | --- | --- |
+| `MOB1-FIND-02-001` | Open | Preserve distinct focal opportunity and associated issuer-organization identities. |
+| `MOB1-FIND-02-002` | Open | Carry versioned continuity scope and add typed fail-closed reconciliation/invalidation. |
+| `MOB1-FIND-02-003` | Open | Represent actual optional video media separately from its poster image. |
+
+No Shared Contract Request is open because all current findings are bounded corrections to PR #218.
+
+Historical Shared Contract Requests remain governed by their original records and later dispositions; this activation does not silently reopen them.
