@@ -452,13 +452,17 @@ test("does not convert Network match scoring or result counts into analytical cl
     map: composition.mapProjection,
   }).toLocaleLowerCase("en-US");
 
-  assert.equal(renderedDomainData.includes("\"score\""), false);
-  assert.equal(renderedDomainData.includes("capability density"), false);
-  assert.equal(renderedDomainData.includes("capability concentration"), false);
-  assert.equal(renderedDomainData.includes("market gap"), false);
+  assert.equal(renderedDomainData.includes("\"score\":"), false);
+  assert.equal(renderedDomainData.includes("\"density\":"), false);
+  assert.equal(renderedDomainData.includes("\"capabilityconcentration\":"), false);
+  assert.equal(renderedDomainData.includes("\"marketgap\":"), false);
   assert.equal(composition.coverage.reportedTotalMatched, 1);
   assert.equal(composition.coverage.reportedTotalMatchedMeaning, "bounded-authorized-discovery-set");
   assert.equal(composition.coverage.caveat, INTELLIGENCE_MOBILE_COVERAGE_CAVEAT);
+  assert.equal(
+    composition.coverage.caveat.toLocaleLowerCase("en-US").includes("capability concentration"),
+    true,
+  );
 });
 
 test("when Network discovery is unavailable, shared cards stay empty and all four Intelligence actions remain truthful", () => {
