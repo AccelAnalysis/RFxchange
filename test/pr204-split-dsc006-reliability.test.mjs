@@ -16,7 +16,8 @@ test("DSC-006 creates a durable publication-to-evaluation handoff", async () => 
   assert.match(index, /scheduledOpportunityAlertDelivery/);
   assert.match(queue, /rfxOpportunityProjections\/\{reference\}/);
   assert.match(queue, /onDocumentCreated/);
-  assert.match(queue, /evaluationAt: new Date\(Date\.parse\(projection\.publishedAt\)\)\.toISOString\(\)/);
+  assert.match(queue, /const publishedAt = new Date\(Date\.parse\(projection\.publishedAt\)\)\.toISOString\(\)/);
+  assert.match(queue, /evaluationAt: publishedAt/);
   assert.match(queue, /status: "queued"/);
   assert.match(queue, /transaction\.create\(ref/);
   assert.match(runtime, /override async evaluatePublishedProjection/);
