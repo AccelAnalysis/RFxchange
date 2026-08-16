@@ -81,14 +81,22 @@ test("live workspace sources retain bounded hydration, scoped refresh, and strea
   const resourcePage = read("app/resources/page.tsx");
   const resourceWorkspace = read("src/components/resource-network/ResourceNetworkWorkspace.tsx");
   const accountPage = read("app/organization-profile/page.tsx");
-  const opportunityPage = read("app/opportunities/page.tsx");
-  const opportunityWorkspace = read("src/components/opportunities/OpportunityDiscoveryWorkspace.tsx");
+  const marketProfileRuntime = read("src/infrastructure/market-profile/runtime.ts");
 
-  assert.match(resourcePage, /Promise\.allSettled/);
-  assert.match(resourcePage, /ownerSnapshot\(actor\)\.catch/);
+  assert.match(resourcePage, /selectedRequestId\s*\?\s*await service\.messages/);
+  assert.match(resourcePage, /Promise\.allSettled\(\[\s*referralsPromise,\s*ownerPromise/);
+  assert.doesNotMatch(resourcePage, /Promise\.all\(requestReferrals\.map/);
+  assert.doesNotMatch(resourceWorkspace, /window\.location\.reload/);
   assert.match(resourceWorkspace, /router\.refresh\(\)/);
-  assert.match(resourceWorkspace, /router\.replace\(destination, \{ scroll: false \}\)/);
-  assert.match(accountPage, /Suspense fallback=/);
-  assert.match(opportunityPage, /Promise\.allSettled/);
-  assert.match(opportunityWorkspace, /router\.refresh\(\)/);
+  for (const parameter of ["q", "availability", "provider", "resource", "request"]) {
+    assert.match(resourceWorkspace, new RegExp(`"${parameter}"`));
+  }
+  assert.match(accountPage, /settleOptionalWorkspacePanel/);
+  assert.ok((accountPage.match(/<Suspense/g) ?? []).length >= 3);
+  assert.doesNotMatch(accountPage, /Promise\.all\(\[pendingEnrichment, pendingMap\]\)/);
+  assert.match(accountPage, /const enrichmentResult = await pendingEnrichment/);
+  assert.match(accountPage, /<EnrichmentLocationMapSection/);
+  assert.match(marketProfileRuntime, /geographyDefinitions\.getById\(id\)/);
+  assert.match(accountPage, /serviceGeographies=\{marketProfile\.serviceGeographies\}/);
+  assert.doesNotMatch(accountPage, /label:\s*id/);
 });
