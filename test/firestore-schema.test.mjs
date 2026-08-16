@@ -79,6 +79,10 @@ test("defines schema version and canonical collection names", () => {
     opportunityAlertIntents: "opportunityAlertIntents",
     opportunityRelationCommands: "opportunityRelationCommands",
     opportunityRelationEvents: "opportunityRelationEvents",
+    opportunityFitSnapshots: "opportunityFitSnapshots",
+    opportunityPursuits: "opportunityPursuits",
+    opportunityPursuitCommands: "opportunityPursuitCommands",
+    opportunityPursuitEvents: "opportunityPursuitEvents",
     referralEducationAcknowledgements: "referralEducationAcknowledgements",
     referralCommunicationIntents: "referralCommunicationIntents",
     providerApplications: "providerApplications",
@@ -115,10 +119,7 @@ test("defines schema version and canonical collection names", () => {
 
 test("document paths derive deterministically from stable IDs", () => {
   assert.equal(firestoreDocumentPath("organizations", "org-alpha"), "organizations/org-alpha");
-  assert.equal(
-    firestoreDocumentPath("organizationMemberships", "membership-1"),
-    "organizationMemberships/membership-1",
-  );
+  assert.equal(firestoreDocumentPath("organizationMemberships", "membership-1"), "organizationMemberships/membership-1");
   assert.throws(() => firestoreDocumentPath("users", " "), /document id is required/);
   assert.throws(() => firestoreDocumentPath("users", "a/b"), /cannot contain a slash/);
   assert.throws(() => firestoreDocumentPath("users", ".."), /cannot be/);
@@ -126,97 +127,34 @@ test("document paths derive deterministically from stable IDs", () => {
 
 test("organization-scoped collections explicitly require organizationId", () => {
   for (const key of [
-    "organizationProfiles",
-    "organizationDiscoveryRecords",
-    "organizationResolutions",
-    "organizationEntityKeys",
-    "organizationAuthorityClaims",
-    "organizationAuthorityClaimEvents",
-    "organizationAuthorityDecisions",
-    "organizationLocationDrafts",
-    "organizationLocations",
-    "organizationLocationEvents",
-    "organizationServiceGeographies",
-    "organizationProfileCompletions",
-    "organizationProfileEvents",
-    "organizationCapabilityClaims",
-    "organizationIndustryProfiles",
-    "organizationPastPerformance",
-    "organizationMarketPreferences",
-    "organizationProvisionalTerms",
-    "organizationMarketProfileEvents",
-    "organizationMarketProfileCommands",
-    "organizationCredentials",
-    "organizationProfileAssets",
-    "organizationAdditionalLocationDrafts",
-    "organizationAdditionalLocations",
-    "organizationEnrichmentEvents",
-    "organizationEnrichmentCommands",
-    "organizationMarkerActivations",
-    "organizationMarkerEvents",
-    "organizationMemberships",
-    "organizationAuthorizations",
-    "organizationUserInvitations",
-    "organizationAuditEvents",
-    "legalAcknowledgements",
-    "organizationAuthorityRepresentations",
-    "orientationJourneys",
-    "orientationJourneyEvents",
-    "firstValueSelections",
-    "activationReleaseEvents",
-    "opportunitySavedSearches",
-    "opportunityWatches",
-    "opportunitySavedSearchMatches",
-    "opportunityAlertIntents",
-    "opportunityRelationCommands",
-    "opportunityRelationEvents",
-    "referralEducationAcknowledgements",
-    "providerApplications",
-    "providerApplicationVersions",
-    "providerApplicationEvents",
-    "providerApplicationCommands",
-    "officialResourceProviderStatuses",
-    "providerServiceProfiles",
-    "providerDiscoveryPublications",
-    "providerResources",
-    "providerNetworkEvents",
-    "providerNetworkCommands",
-    "providerAcquisitionInvitations",
-    "networkEducationProgress",
-    "networkEducationEvents",
-    "networkEducationCommands",
-    "aiInterpretationRecords",
-    "aiInterpretationCandidates",
-    "aiInterpretationProvenance",
-    "aiInterpretationUsageEvents",
-    "aiInterpretationEvents",
-    "organizationCommercialAccounts",
-    "commercialProviderEvents",
-    "commercialSubscriptionReconciliations",
+    "organizationProfiles", "organizationDiscoveryRecords", "organizationResolutions", "organizationEntityKeys",
+    "organizationAuthorityClaims", "organizationAuthorityClaimEvents", "organizationAuthorityDecisions",
+    "organizationLocationDrafts", "organizationLocations", "organizationLocationEvents", "organizationServiceGeographies",
+    "organizationProfileCompletions", "organizationProfileEvents", "organizationCapabilityClaims", "organizationIndustryProfiles",
+    "organizationPastPerformance", "organizationMarketPreferences", "organizationProvisionalTerms", "organizationMarketProfileEvents",
+    "organizationMarketProfileCommands", "organizationCredentials", "organizationProfileAssets", "organizationAdditionalLocationDrafts",
+    "organizationAdditionalLocations", "organizationEnrichmentEvents", "organizationEnrichmentCommands", "organizationMarkerActivations",
+    "organizationMarkerEvents", "organizationMemberships", "organizationAuthorizations", "organizationUserInvitations",
+    "organizationAuditEvents", "legalAcknowledgements", "organizationAuthorityRepresentations", "orientationJourneys",
+    "orientationJourneyEvents", "firstValueSelections", "activationReleaseEvents", "opportunitySavedSearches", "opportunityWatches",
+    "opportunitySavedSearchMatches", "opportunityAlertIntents", "opportunityRelationCommands", "opportunityRelationEvents",
+    "opportunityFitSnapshots", "opportunityPursuits", "opportunityPursuitCommands", "opportunityPursuitEvents",
+    "referralEducationAcknowledgements", "providerApplications", "providerApplicationVersions", "providerApplicationEvents",
+    "providerApplicationCommands", "officialResourceProviderStatuses", "providerServiceProfiles", "providerDiscoveryPublications",
+    "providerResources", "providerNetworkEvents", "providerNetworkCommands", "providerAcquisitionInvitations", "networkEducationProgress",
+    "networkEducationEvents", "networkEducationCommands", "aiInterpretationRecords", "aiInterpretationCandidates",
+    "aiInterpretationProvenance", "aiInterpretationUsageEvents", "aiInterpretationEvents", "organizationCommercialAccounts",
+    "commercialProviderEvents", "commercialSubscriptionReconciliations",
   ]) {
     assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, true);
-    assert.throws(
-      () => assertOrganizationScopedFirestoreRecord(key, ""),
-      /require an explicit organizationId/,
-    );
+    assert.throws(() => assertOrganizationScopedFirestoreRecord(key, ""), /require an explicit organizationId/);
     assert.doesNotThrow(() => assertOrganizationScopedFirestoreRecord(key, "org-alpha"));
   }
 
   for (const key of [
-    "users",
-    "backgroundJobs",
-    "backgroundJobEvents",
-    "acquisitionContexts",
-    "acquisitionContextEvents",
-    "businessReferralEvents",
-    "businessReferralCommands",
-    "rfxAggregates",
-    "rfxEvents",
-    "rfxCommands",
-    "rfxPublicationSnapshots",
-    "rfxOpportunityProjections",
-    "providerRequestMessages",
-    "aiInterpretationQuotaBuckets",
+    "users", "backgroundJobs", "backgroundJobEvents", "acquisitionContexts", "acquisitionContextEvents",
+    "businessReferralEvents", "businessReferralCommands", "rfxAggregates", "rfxEvents", "rfxCommands",
+    "rfxPublicationSnapshots", "rfxOpportunityProjections", "providerRequestMessages", "aiInterpretationQuotaBuckets",
     "commercialFoundingCapacity",
   ]) {
     assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, false);
@@ -226,56 +164,26 @@ test("organization-scoped collections explicitly require organizationId", () => 
 
 test("append-only domain and operational history remains non-mutable", () => {
   for (const key of [
-    "organizationAuditEvents",
-    "organizationResolutions",
-    "organizationEntityKeys",
-    "organizationAuthorityClaimEvents",
-    "organizationAuthorityDecisions",
-    "organizationLocationEvents",
-    "organizationProfileEvents",
-    "organizationProvisionalTerms",
-    "organizationMarketProfileEvents",
-    "organizationMarketProfileCommands",
-    "organizationEnrichmentEvents",
-    "organizationEnrichmentCommands",
-    "organizationMarkerEvents",
-    "legalDocumentVersions",
-    "legalAcknowledgements",
-    "organizationAuthorityRepresentations",
-    "platformChangeDirectives",
-    "retentionPolicies",
-    "retentionAssignments",
-    "adminPermissionGrants",
-    "backgroundJobEvents",
-    "acquisitionContextEvents",
-    "businessReferralEvents",
-    "businessReferralCommands",
-    "rfxEvents",
-    "rfxCommands",
-    "rfxPublicationSnapshots",
-    "rfxOpportunityProjections",
-    "opportunitySavedSearchMatches",
-    "opportunityRelationCommands",
-    "opportunityRelationEvents",
-    "referralEducationAcknowledgements",
-    "providerApplicationVersions",
-    "providerApplicationEvents",
-    "providerApplicationCommands",
-    "providerNetworkEvents",
-    "providerNetworkCommands",
-    "providerRequestMessages",
-    "orientationJourneyEvents",
-    "activationReleaseEvents",
-    "aiInterpretationProvenance",
-    "aiInterpretationUsageEvents",
-    "aiInterpretationEvents",
-    "commercialProviderEvents",
+    "organizationAuditEvents", "organizationResolutions", "organizationEntityKeys", "organizationAuthorityClaimEvents",
+    "organizationAuthorityDecisions", "organizationLocationEvents", "organizationProfileEvents", "organizationProvisionalTerms",
+    "organizationMarketProfileEvents", "organizationMarketProfileCommands", "organizationEnrichmentEvents",
+    "organizationEnrichmentCommands", "organizationMarkerEvents", "legalDocumentVersions", "legalAcknowledgements",
+    "organizationAuthorityRepresentations", "platformChangeDirectives", "retentionPolicies", "retentionAssignments",
+    "adminPermissionGrants", "backgroundJobEvents", "acquisitionContextEvents", "businessReferralEvents", "businessReferralCommands",
+    "rfxEvents", "rfxCommands", "rfxPublicationSnapshots", "rfxOpportunityProjections", "opportunitySavedSearchMatches",
+    "opportunityRelationCommands", "opportunityRelationEvents", "opportunityFitSnapshots", "opportunityPursuitCommands",
+    "opportunityPursuitEvents", "referralEducationAcknowledgements", "providerApplicationVersions", "providerApplicationEvents",
+    "providerApplicationCommands", "providerNetworkEvents", "providerNetworkCommands", "providerRequestMessages",
+    "orientationJourneyEvents", "activationReleaseEvents", "aiInterpretationProvenance", "aiInterpretationUsageEvents",
+    "aiInterpretationEvents", "commercialProviderEvents",
   ]) {
     const convention = FIRESTORE_COLLECTION_CONVENTIONS[key];
     assert.equal(convention.appendOnly, true, `${key} must be append-only`);
     assert.equal(convention.mutable, false, `${key} must not be mutable`);
   }
 
+  assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.opportunityPursuits.appendOnly, false);
+  assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.opportunityPursuits.mutable, true);
   assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.organizationUserInvitations.appendOnly, false);
   assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.organizationUserInvitations.mutable, true);
   assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.backgroundJobs.appendOnly, false);
@@ -293,37 +201,40 @@ test("singleton relationship state uses the owning stable identity as document I
   assert.equal(FIRESTORE_COLLECTION_CONVENTIONS.primaryGeographySelections.documentIdSource, "userId");
 });
 
+test("Slice 4.6 pursuit registrations preserve the canonical INF-003 conventions", () => {
+  assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.opportunityFitSnapshots, {
+    collection: "opportunityFitSnapshots", documentIdSource: "id", scope: "organization-scoped",
+    organizationIdRequired: true, appendOnly: true, mutable: false,
+  });
+  assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.opportunityPursuits, {
+    collection: "opportunityPursuits", documentIdSource: "id", scope: "organization-scoped",
+    organizationIdRequired: true, appendOnly: false, mutable: true,
+  });
+  assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.opportunityPursuitCommands, {
+    collection: "opportunityPursuitCommands", documentIdSource: "id", scope: "organization-scoped",
+    organizationIdRequired: true, appendOnly: true, mutable: false,
+  });
+  assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.opportunityPursuitEvents, {
+    collection: "opportunityPursuitEvents", documentIdSource: "id", scope: "organization-scoped",
+    organizationIdRequired: true, appendOnly: true, mutable: false,
+  });
+});
+
 test("Founding commerce registrations preserve the bounded INF-003 conventions", () => {
   assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.organizationCommercialAccounts, {
-    collection: "organizationCommercialAccounts",
-    documentIdSource: "organizationId",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
+    collection: "organizationCommercialAccounts", documentIdSource: "organizationId", scope: "organization-scoped",
+    organizationIdRequired: true, appendOnly: false, mutable: true,
   });
   assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.commercialFoundingCapacity, {
-    collection: "commercialFoundingCapacity",
-    documentIdSource: "reference",
-    scope: "platform-scoped",
-    organizationIdRequired: false,
-    appendOnly: false,
-    mutable: true,
+    collection: "commercialFoundingCapacity", documentIdSource: "reference", scope: "platform-scoped",
+    organizationIdRequired: false, appendOnly: false, mutable: true,
   });
   assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.commercialProviderEvents, {
-    collection: "commercialProviderEvents",
-    documentIdSource: "id",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: true,
-    mutable: false,
+    collection: "commercialProviderEvents", documentIdSource: "id", scope: "organization-scoped",
+    organizationIdRequired: true, appendOnly: true, mutable: false,
   });
   assert.deepEqual(FIRESTORE_COLLECTION_CONVENTIONS.commercialSubscriptionReconciliations, {
-    collection: "commercialSubscriptionReconciliations",
-    documentIdSource: "organizationId",
-    scope: "organization-scoped",
-    organizationIdRequired: true,
-    appendOnly: false,
-    mutable: true,
+    collection: "commercialSubscriptionReconciliations", documentIdSource: "organizationId", scope: "organization-scoped",
+    organizationIdRequired: true, appendOnly: false, mutable: true,
   });
 });

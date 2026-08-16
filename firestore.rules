@@ -10,546 +10,158 @@ service cloud.firestore {
       return false;
     }
 
-    match /organizations/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationProfiles/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
+    match /organizations/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationProfiles/{documentId} { allow read, write: if serverManagedOnly(); }
 
     // ACQ-004 / ORG-001 discovery data is projected by trusted server handlers; resolution-only
     // identity signals are never directly readable by browser clients.
-    match /organizationDiscoveryRecords/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
+    match /organizationDiscoveryRecords/{documentId} { allow read, write: if serverManagedOnly(); }
 
     // ORG-002/003 participant decisions and strong entity-key reservations are immutable evidence.
-    match /organizationResolutions/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /organizationEntityKeys/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
+    match /organizationResolutions/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /organizationEntityKeys/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
 
     // ORG-004 claim state is mutable only through trusted authority services. Workflow events and
     // decisions preserve append-only evidence, including denied and conflicting claims.
-    match /organizationAuthorityClaims/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationAuthorityClaimEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /organizationAuthorityDecisions/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
+    match /organizationAuthorityClaims/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationAuthorityClaimEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /organizationAuthorityDecisions/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
 
     // GEO-009/010 and ORG-005/006/009 keep private address/geocode state behind trusted
     // organization authorization. Location events remain immutable evidence.
-    match /organizationLocationDrafts/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationLocations/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationLocationEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /organizationServiceGeographies/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
+    match /organizationLocationDrafts/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationLocations/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationLocationEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /organizationServiceGeographies/{documentId} { allow read, write: if serverManagedOnly(); }
 
     // ORG-007/008/010/011/012 essential profile completion is server derived from the
     // canonical organization profile, location and service-geography records.
-    match /organizationProfileCompletions/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationProfileEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
+    match /organizationProfileCompletions/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationProfileEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
 
     // ORG-013/014/016/017 market enrichment is organization-scoped and server-authorized.
-    // Claims/context remain distinct from append-only participant actions and idempotency evidence.
-    match /organizationCapabilityClaims/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationIndustryProfiles/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationPastPerformance/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationMarketPreferences/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationProvisionalTerms/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /organizationMarketProfileEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /organizationMarketProfileCommands/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // ORG-015/018/019 credential, media and subordinate-location enrichment is
-    // organization-scoped and server-authorized. Events/commands are immutable.
-    match /organizationCredentials/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationProfileAssets/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationAdditionalLocationDrafts/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationAdditionalLocations/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationEnrichmentEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /organizationEnrichmentCommands/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // GEO-011 marker activation is a server-derived lifecycle aggregate. Transition
-    // events are immutable; direct clients cannot create a marker from browser state.
-    match /organizationMarkerActivations/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationMarkerEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /users/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationMemberships/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationAuthorizations/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationUserInvitations/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /organizationRoleBundles/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    // ADM-061 canonical administrative cases are mutable workflow aggregates; lifecycle events are
-    // immutable evidence and may only be appended by the trusted server boundary.
-    match /administrativeCases/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /administrativeCaseEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // ADM-083 governed policy values are server-managed configuration. Changes are authorized and
-    // audited by the application layer rather than exposed as direct client writes.
-    match /governedConfigurationValues/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    // ADM-084 records every governed configuration mutation as immutable version evidence.
-    match /governedConfigurationChanges/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // ADM-047 feature flags are mutable controlled state with append-only change evidence.
-    match /featureFlagStates/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /featureFlagChanges/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // ADM-048 recovery/maintenance state can only be driven through trusted server-side executors.
-    match /systemMaintenanceOperations/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    // ADM-085/086 administrative history and corrections share one append-only evidence stream.
-    match /platformAdministrativeAuditEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /organizationAuditEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // GEO-001/002/003/007/008 geography metadata, selections and participation authority are
-    // server managed. Browser map, route and local-storage state never grants locality access.
-    match /geographies/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /primaryGeographySelections/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /geographyParticipationAuthorizations/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /accessJourneys/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /accessRestrictions/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /legalDocumentVersions/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /legalAcknowledgements/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /organizationAuthorityRepresentations/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /platformChangeDirectives/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /retentionPolicies/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /retentionAssignments/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /adminAuthorityContexts/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /adminPermissionGrants/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /backgroundJobs/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /backgroundJobEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // COMMS-003/004/005 delivery state and events are operational server records. Recipient routing
-    // is hashed/minimized; direct clients cannot inspect status, provider references, or failures.
-    match /transactionalEmailDeliveries/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /transactionalEmailDeliveryEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // ACQ-003 contexts begin as anonymous server-issued bearer envelopes and become bound to one
-    // RFxchange user/access journey. Browser clients never read or mutate either state or evidence.
-    match /acquisitionContexts/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /acquisitionContextEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // REF-001-005 / EDU-014 / ACQ-006 referral state, exact-sharing evidence, command
-    // receipts, acquisition correlation, and communications routing remain server-managed.
-    match /businessReferrals/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /businessReferralEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /businessReferralCommands/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // ISS-001/002/003 RFx drafts are private organization-owned server aggregates. RFx events
-    // and idempotency receipts are immutable evidence; no draft is a public opportunity projection.
-    match /rfxAggregates/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /rfxEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /rfxCommands/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // ISS-019/ACQ-009 publication snapshots and permitted opportunity projections are created
-    // atomically by trusted server publication. Even public projections resolve through server
-    // audience gates; browser clients cannot read, write, update, or delete these records directly.
-    match /rfxPublicationSnapshots/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /rfxOpportunityProjections/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // DSC-004/005/006/007/008 discovery projections and private saved-search/watch/deadline
-    // relationships resolve only through trusted current-participant handlers. Match, command,
-    // event and audit evidence is immutable; direct clients cannot enumerate or mutate it.
-    match /opportunitySavedSearches/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /opportunityWatches/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /opportunitySavedSearchMatches/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /opportunityAlertIntents/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /opportunityRelationCommands/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /opportunityRelationEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /referralEducationAcknowledgements/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /referralCommunicationIntents/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    // RES-001/002/003 and ADM-070 keep provider applications, decisions, status and service
-    // profiles behind trusted participant/admin authorization. Versions, events and commands are
-    // immutable evidence; direct clients cannot self-approve or expose private provider data.
-    match /providerApplications/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /providerApplicationVersions/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /providerApplicationEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /providerApplicationCommands/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /officialResourceProviderStatuses/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /providerServiceProfiles/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    // RES-004/005/007/008, DSC-011, REF-006 and ACQ-008 remain server projected.
-    // Provider profiles and invitation recipients stay private; events, commands and
-    // request messages are append-only evidence and cannot be rewritten by clients.
-    match /providerDiscoveryPublications/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /providerResources/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /providerNetworkEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /providerNetworkCommands/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /providerRequestMessages/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /providerAcquisitionInvitations/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    // EDU-016/017 progress is separate from domain and authorization state. Mutable progress and
-    // append-only evidence remain behind the trusted OPEN-participant command boundary.
-    match /networkEducationProgress/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /networkEducationEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /networkEducationCommands/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // EDU-001-004 orientation progress is a participant-bound server aggregate. Tutorial events
-    // are immutable evidence, and neither collection is directly available to browser clients.
-    match /orientationJourneys/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /orientationJourneyEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // EDU-009/010 first-value intent and OPEN release are server-authoritative. The selection is
-    // participant-bound mutable state; release events are immutable evidence.
-    match /firstValueSelections/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /activationReleaseEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    // AI/AMACS interpretation is a server-only, non-authoritative workflow. Mutable suggestion
-    // state is separated from immutable provenance, usage, and participant disposition evidence.
-    match /aiInterpretationRecords/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /aiInterpretationCandidates/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /aiInterpretationProvenance/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /aiInterpretationUsageEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /aiInterpretationEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /aiInterpretationQuotaBuckets/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    // MRFC Critical authority collections remain server-managed. Browser clients cannot read or
-    // mutate commercial account, capacity, provider-event, or subscription-reconciliation truth.
-    match /organizationCommercialAccounts/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /commercialFoundingCapacity/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /commercialProviderEvents/{documentId} {
-      allow read, create: if serverManagedOnly();
-      allow update, delete: if false;
-    }
-
-    match /commercialSubscriptionReconciliations/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /storedAssets/{documentId} {
-      allow read, write: if serverManagedOnly();
-    }
-
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    match /organizationCapabilityClaims/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationIndustryProfiles/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationPastPerformance/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationMarketPreferences/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationProvisionalTerms/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /organizationMarketProfileEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /organizationMarketProfileCommands/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
+    // ORG-015/018/019 credential, media and subordinate-location enrichment is server-authorized.
+    match /organizationCredentials/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationProfileAssets/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationAdditionalLocationDrafts/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationAdditionalLocations/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationEnrichmentEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /organizationEnrichmentCommands/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
+    // GEO-011 marker activation is a server-derived lifecycle aggregate.
+    match /organizationMarkerActivations/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationMarkerEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
+    match /users/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationMemberships/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationAuthorizations/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationUserInvitations/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /organizationRoleBundles/{documentId} { allow read, write: if serverManagedOnly(); }
+
+    match /administrativeCases/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /administrativeCaseEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /governedConfigurationValues/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /governedConfigurationChanges/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /featureFlagStates/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /featureFlagChanges/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /systemMaintenanceOperations/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /platformAdministrativeAuditEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /organizationAuditEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
+    match /geographies/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /primaryGeographySelections/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /geographyParticipationAuthorizations/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /accessJourneys/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /accessRestrictions/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /legalDocumentVersions/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /legalAcknowledgements/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /organizationAuthorityRepresentations/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /platformChangeDirectives/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /retentionPolicies/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /retentionAssignments/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /adminAuthorityContexts/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /adminPermissionGrants/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /backgroundJobs/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /backgroundJobEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
+    match /transactionalEmailDeliveries/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /transactionalEmailDeliveryEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /acquisitionContexts/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /acquisitionContextEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
+    match /businessReferrals/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /businessReferralEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /businessReferralCommands/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
+    match /rfxAggregates/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /rfxEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /rfxCommands/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /rfxPublicationSnapshots/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /rfxOpportunityProjections/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
+    // DSC-004/005/006/007/008 discovery and relationship state remains server-managed.
+    match /opportunitySavedSearches/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /opportunityWatches/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /opportunitySavedSearchMatches/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /opportunityAlertIntents/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /opportunityRelationCommands/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /opportunityRelationEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
+    // RSP-001/002/003/004/006 pursuit fit and private decisions are server-authoritative.
+    // Fit snapshots, command receipts, and events are immutable; the pursuit aggregate is mutable
+    // only through trusted current-participant handlers. Direct clients cannot inspect or mutate them.
+    match /opportunityFitSnapshots/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /opportunityPursuits/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /opportunityPursuitCommands/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /opportunityPursuitEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
+    match /referralEducationAcknowledgements/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /referralCommunicationIntents/{documentId} { allow read, write: if serverManagedOnly(); }
+
+    match /providerApplications/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /providerApplicationVersions/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /providerApplicationEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /providerApplicationCommands/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /officialResourceProviderStatuses/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /providerServiceProfiles/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /providerDiscoveryPublications/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /providerResources/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /providerNetworkEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /providerNetworkCommands/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /providerRequestMessages/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /providerAcquisitionInvitations/{documentId} { allow read, write: if serverManagedOnly(); }
+
+    match /networkEducationProgress/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /networkEducationEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /networkEducationCommands/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /orientationJourneys/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /orientationJourneyEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /firstValueSelections/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /activationReleaseEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
+    match /aiInterpretationRecords/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /aiInterpretationCandidates/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /aiInterpretationProvenance/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /aiInterpretationUsageEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /aiInterpretationEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /aiInterpretationQuotaBuckets/{documentId} { allow read, write: if serverManagedOnly(); }
+
+    // MRFC Critical authority collections remain server-managed.
+    match /organizationCommercialAccounts/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /commercialFoundingCapacity/{documentId} { allow read, write: if serverManagedOnly(); }
+    match /commercialProviderEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+    match /commercialSubscriptionReconciliations/{documentId} { allow read, write: if serverManagedOnly(); }
+
+    match /storedAssets/{documentId} { allow read, write: if serverManagedOnly(); }
+
+    match /{document=**} { allow read, write: if false; }
   }
 }
