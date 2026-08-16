@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (value) => fs.readFileSync(path.join(root, value), "utf8");
+const exists = (value) => fs.existsSync(path.join(root, value));
 
 const requirements = JSON.parse(read("governance/four-lens-requirements.json"));
 const completionEvidence = JSON.parse(read("governance/four-lens-completion-evidence.json"));
@@ -14,6 +15,9 @@ const trackerEntries = [...rfxSection.matchAll(/- \[([ x])\] `([A-Z]+-\d+)`/g)].
   id: match[2],
   done: match[1] === "x",
 }));
+const allTrackerStatusById = new Map(
+  [...tracker.matchAll(/- \[([ x])\] `([A-Z]+-\d+)`/g)].map((match) => [match[2], match[1] === "x" ? "Done" : "Not Started"]),
+);
 
 assert.equal(trackerEntries.length, 41, "Canonical tracker must retain exactly 41 RFx Core Feature IDs");
 assert.equal(completionEvidence.schemaVersion, 1, "Four-Lens completion evidence registry schema must remain version 1");
@@ -46,6 +50,7 @@ const historicalDone = new Set([
 ]);
 assert.equal(historicalDone.size, 18, "Historical Wave 4 pre-authority completion exception must remain exactly 18 IDs");
 
+const requirementById = new Map(requirements.requirements.map((record) => [record.id, record]));
 const requirementByFeatureId = new Map(
   requirements.requirements
     .filter((record) => record.id.startsWith("RFX-FEATURE-"))
@@ -68,20 +73,27 @@ for (const record of completionEvidence.records) {
   assert.ok(!completionRecordByFeatureId.has(record.featureId), `Duplicate completion evidence record for ${record.featureId}`);
   assert.equal(record.requirementId, `RFX-FEATURE-${record.featureId}`, `${record.featureId} completion record has the wrong requirementId`);
   assert.match(record.implementationSha ?? "", /^[0-9a-f]{40}$/, `${record.featureId} completion record lacks an exact implementation SHA`);
-  assert.ok(record.recordedBy, `${record.featureId} completion record lacks recordedBy`);
+  assert.match(record.recordedBy ?? "", /^github(?:-app)?:/, `${record.featureId} completion record lacks an accountable GitHub actor`);
   assert.ok(typeof record.recordedAt === "string" && !Number.isNaN(Date.parse(record.recordedAt)), `${record.featureId} completion record lacks a valid recordedAt timestamp`);
   assert.equal(record.dependenciesSatisfied, true, `${record.featureId} completion record does not establish satisfied dependencies`);
+  assert.equal(record.ownershipSatisfied, true, `${record.featureId} completion record does not establish satisfied ownership boundaries`);
   assert.equal(record.noKnownMaterialDefect, true, `${record.featureId} completion record does not establish absence of a known material defect`);
   assert.ok(Array.isArray(record.evidence) && record.evidence.length > 0, `${record.featureId} completion record needs durable objective evidence`);
   for (const evidence of record.evidence) {
     assert.ok(evidence && typeof evidence === "object" && !Array.isArray(evidence), `${record.featureId} completion evidence entry must be structured`);
     assert.ok(typeof evidence.type === "string" && evidence.type.trim(), `${record.featureId} completion evidence entry lacks type`);
     assert.ok(typeof evidence.ref === "string" && evidence.ref.trim(), `${record.featureId} completion evidence entry lacks durable ref`);
+    const repositoryPath = evidence.ref.split("#", 1)[0];
+    assert.ok(
+      /^https:\/\/github\.com\/AccelAnalysis\/RFxchange\/(?:actions\/runs\/\d+|pull\/\d+)/.test(evidence.ref) || exists(repositoryPath),
+      `${record.featureId} completion evidence ref is not a durable repository/GitHub reference: ${evidence.ref}`,
+    );
   }
   completionRecordByFeatureId.set(record.featureId, record);
 }
 
 const completionStatuses = new Set(["Implemented — Not Verified", "Verified"]);
+const dependencyCompletionStatuses = new Set(["Implemented — Not Verified", "Verified", "Not Applicable — Explicitly Approved"]);
 
 for (const entry of trackerEntries.filter((candidate) => candidate.done && !historicalDone.has(candidate.id))) {
   const requirement = requirementByFeatureId.get(entry.id);
@@ -105,10 +117,20 @@ for (const entry of trackerEntries.filter((candidate) => candidate.done && !hist
   );
 
   for (const dependency of requirement.dependencies ?? []) {
-    if (dependency.startsWith("RFX-FEATURE-")) {
-      const dependencyFeatureId = dependency.replace("RFX-FEATURE-", "");
-      const dependencyEntry = trackerEntries.find((candidate) => candidate.id === dependencyFeatureId);
-      assert.ok(dependencyEntry?.done, `${entry.id} completion record cannot override incomplete RFx dependency ${dependencyFeatureId}`);
+    if (requirementById.has(dependency)) {
+      const dependencyRequirement = requirementById.get(dependency);
+      assert.ok(
+        dependencyCompletionStatuses.has(dependencyRequirement.status),
+        `${entry.id} cannot enter canonical RFx completion while program dependency ${dependency} is ${dependencyRequirement.status}`,
+      );
+      if (dependency.startsWith("RFX-FEATURE-")) {
+        const dependencyFeatureId = dependency.replace("RFX-FEATURE-", "");
+        assert.equal(allTrackerStatusById.get(dependencyFeatureId), "Done", `${entry.id} cannot enter canonical RFx completion while RFx dependency ${dependencyFeatureId} is not Done`);
+      }
+    } else if (allTrackerStatusById.has(dependency)) {
+      assert.equal(allTrackerStatusById.get(dependency), "Done", `${entry.id} cannot enter canonical RFx completion while tracker dependency ${dependency} is not Done`);
+    } else {
+      assert.fail(`${entry.id} cannot enter canonical RFx completion while external dependency ${dependency} has no governed resolved state`);
     }
   }
 
