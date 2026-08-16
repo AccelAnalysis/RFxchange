@@ -1,0 +1,16 @@
+{
+  "sheet": {
+    "region": "Résultats et détails de l’Exchange",
+    "dragHandle": "Faites glisser pour redimensionner le panneau de l’Exchange",
+    "peek": "Aperçu",
+    "partial": "Résultats",
+    "expanded": "Développer"
+  },
+  "card": {
+    "openDetail": "Ouvrir les détails",
+    "addFavorite": "Ajouter aux favoris",
+    "removeFavorite": "Retirer des favoris",
+    "favoriteUnavailable": "Les favoris ne sont pas disponibles pour cet enregistrement",
+    "mediaFallback": "Aucun média public disponible"
+  }
+}
