@@ -43,8 +43,8 @@ Development reporting adds the same truthfulness distinction between **implement
 Use these sources together rather than treating one file as universally authoritative:
 
 1. **Current explicit task instructions** define the work requested in the current task.
-2. `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md` and `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md` govern parallel delivery, merge/release separation and independent certification for declared Four-Lens work packets. Their machine ledgers and delivery matrix carry current packet/experience state but never expand product or domain scope.
-3. `docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md` is the live Feature-ID completion authority. A checked item requires implementation and independently accepted evidence under the current program when applicable.
+2. `docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md` governs Four-Lens completion semantics and makes Independent Acceptance optional assurance. `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md` and `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md` remain governing provenance for parallel delivery and risk-based release mechanics where they do not conflict with the Completion Governance Amendment. Their machine ledgers and delivery matrix carry current packet/experience state but never expand product or domain scope.
+3. `docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md` is the live Feature-ID completion authority. A checked item requires implementation plus the applicable objective tests/evidence, dependencies/ownership satisfaction, durable completion record, and no known material defect under the current Four-Lens Completion Governance Amendment. Independent Acceptance is not required merely to check a completed item.
 4. `docs/tracking/RFxchange_DEPENDENCY_MAP.md` is the live sequencing/dependency authority. Reviewed corrections there supersede seeded spreadsheet dependencies for scheduling.
 5. The applicable `docs/slices/` execution authority defines the approved implementation boundary. A brief cannot mark a feature complete or waive documented acceptance intent.
 6. `docs/context/` contains normalized cross-cutting product rules. `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md`, originally merged through PR #150 and reconciled by the bounded shell gate, governs participant-facing lens hierarchy, structural/capability/state/continuity truthfulness, spatial continuity, workspace boundaries and truthful cross-lens behavior.
@@ -58,7 +58,7 @@ Authority order for participant-facing work is:
 
 1. current task and authorized slice/gate;
 2. security, privacy, authorization, lifecycle, geography, domain, tracker and dependency authorities;
-3. Four-Lens Build → Release → Verify delivery authority;
+3. Four-Lens Completion Governance Amendment plus applicable parallel-delivery/release authority;
 4. Exchange Interaction Architecture and applicable RFx Core authority;
 5. `docs/brand/` for approved target experience;
 6. `docs/design/` for currently converged implementation baseline; and
@@ -69,15 +69,15 @@ If sources appear to conflict, do not silently choose the easiest interpretation
 ## Build sequencing
 
 - Use the **Four-Lens parallel lane model** only for a declared work packet in `governance/four-lens-workstreams.json`. Work outside that authority retains the single-active-slice or single-active-gate default unless the current task explicitly authorizes otherwise.
-- Parallel work requires explicit lane ownership, exact base SHA, immutable requirement IDs, dependencies, owned/non-owned paths, acceptance obligations and stop boundary. A branch dependent on an unmerged candidate must name its exact SHA.
-- The governing delivery model is **Build → Release → Verify**. Development may proceed in parallel; merge order remains dependency-aware; production release is risk-based; independent certification remains separate.
+- Parallel work requires explicit lane ownership, exact base SHA, immutable requirement IDs, dependencies, owned/non-owned paths, completion/evidence obligations and stop boundary. A branch dependent on an unmerged candidate must name its exact SHA.
+- The governing Four-Lens completion progression is **Build → Test → Integrate → Release → Improve** under `docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`. Development may proceed in parallel; merge order remains dependency-aware; production release is risk-based; independent assurance is optional unless a separate later authority explicitly requires it for a named action.
 - Reconcile every candidate from current merged `main` and obtain fresh exact-head evidence after dependency changes.
-- Unless a packet or stricter authority explicitly says otherwise, independent review is not a universal pre-merge requirement. A bounded candidate may merge as `Implemented — Not Verified` after authorized scope/dependency reconciliation, exact-head CI/evidence, and Control Room confirmation that no known material finding makes integration unsafe.
-- Builders may report `Implemented — Not Verified`; only the Independent Acceptance lane may record `Verified`. No builder certifies its own feature or experience completion.
+- Independent review is not a universal completion, tracker, merge, release or development prerequisite. A bounded candidate may be completed and merged as `Implemented — Not Verified` after authorized scope/dependency reconciliation, applicable exact-head CI/evidence, durable completion recording, and Control Room confirmation that no known material finding makes the claimed behavior unsafe or materially false.
+- Builders may report bounded work implemented/complete when objective delivery evidence supports that statement. Only an actual independent assurance event may be described as `Verified`; builders must not fabricate or self-label independent verification.
 - Merge and deployment never imply `Verified`.
-- If a pre-amendment packet explicitly says `do not merge before independent acceptance` or equivalent, preserve that packet history until Control Room creates a successor/reconciliation/reclassification. Do not silently reinterpret immutable packet text.
+- Pre-amendment packet language requiring Independent Acceptance is preserved as historical provenance but is superseded as a Four-Lens completion, tracker, merge, release or later-work gate by `FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, unless a later explicit current authority specifically reactivates independent assurance for a named action.
 - Do not implement future Feature IDs merely because adjacent code makes them convenient.
-- Incidental satisfaction of another Feature ID must be evaluated against that feature's own acceptance check before tracker status changes.
+- Incidental satisfaction of another Feature ID must be evaluated against that feature's own completion check before tracker status changes.
 - Recalculate the next slice from merged `main`, not from assumptions made on an older branch.
 - Documentation-only planning and reconciliation do not authorize production implementation.
 - No deployment/release blocker becomes a product-domain dependency unless a current canonical dependency authority establishes that edge.
@@ -85,15 +85,15 @@ If sources appear to conflict, do not silently choose the easiest interpretation
 
 ## Release sequencing
 
-Control Room classifies production releases under `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`:
+Control Room continues to use the risk classifications in `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md` where they do not conflict with the superseding Four-Lens Completion Governance Amendment:
 
 - **Standard** — bounded presentation/discoverability/non-authorizing/additive behavior: post-merge CI plus applicable runtime/browser/emulator evidence and canonical rollback path.
 - **Elevated** — consequential participant/domain workflow that preserves established authority: Standard requirements plus focused negative authorization/tenant/security evidence, explicit Control Room release authorization, rollback/containment and post-release observation.
-- **Critical** — authentication/authorization, tenant isolation, privacy disclosure, policy/legal acceptance, payments, destructive/irreversible migration/write, secrets/credentials or comparable material-risk changes: Elevated requirements plus direct critical-boundary negative evidence and explicit participant/product-owner risk acceptance if independent reviewer capacity is unavailable.
+- **Critical** — authentication/authorization, tenant isolation, privacy disclosure, policy/legal acceptance, payments, destructive/irreversible migration/write, secrets/credentials or comparable material-risk changes: Elevated requirements plus direct critical-boundary negative evidence, containment/rollback planning, and explicit participant/product-owner release authority.
 
-A reviewer-capacity exception may waive only missing reviewer availability for an Elevated/Critical release. It never waives required safety evidence or a known material security/privacy/integrity defect. A known material critical defect remains non-releasable.
+Independent reviewer participation is optional for Four-Lens release decisions, so no reviewer-capacity waiver is required merely because a reviewer is unavailable. Optional assurance never substitutes for required safety evidence, and the absence of mandatory assurance never permits a known material security/privacy/integrity defect to ship. A known material critical defect remains non-releasable.
 
-Production deployment may truthfully be reported as `Live in production — independent certification pending` when deployment is proven but Lane 06 has not produced `Verified`.
+Production deployment may truthfully be reported as `Live in production — not independently verified` when deployment is proven and no optional independent assurance event has occurred. That assurance state is not delivery debt by itself.
 
 ## Current wave, stabilization and program boundary
 
@@ -113,7 +113,7 @@ The Exchange shell truthfulness/performance gate and post-PR-#159 convergence ar
 
 The permanent participant order is implemented as `Opportunities/RFx | Resources | Intelligence | Referrals`; available behavior consumes server-authorized runtimes. Network remains an Intelligence view/domain concept, Account and Quick Start remain utilities, and navigation context never grants authority.
 
-Slices 4.1–4.5 remain subject to the retroactive independent assurance ledger. Slice 4.6 PR #171 remains governed by its preserved pre-amendment packet/stop boundary until Control Room creates a successor/reconciliation/reclassification. Slice 4.7 remains ineligible until its governing dependencies are recalculated and explicitly authorized.
+Slices 4.1–4.5 retain their retroactive independent assurance ledger as historical/optional assurance evidence; optional assurance is not a completion prerequisite. Any known material findings from that ledger still require correction, containment, truthful unavailability or explicit current disposition on their substance. Slice 4.6 PR #171's preserved pre-amendment Independent Acceptance stop boundary remains historical provenance but no longer gates Four-Lens completion, merge, release or later work under the Completion Governance Amendment. Slice 4.7 eligibility must be recalculated from its actual current dependencies and explicitly authorized rather than from missing Independent Acceptance alone.
 
 ## AMACS and interpretation boundary
 
@@ -140,7 +140,7 @@ Before implementing any slice or Brand Gate:
 3. Read `docs/context/PRODUCT_PRINCIPLES.md`.
 4. Read `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md` for participant-facing work.
 5. Read the canonical tracker and dependency map.
-6. For Four-Lens work, read `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md`, `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`, `docs/program/PARALLEL_DELIVERY_MATRIX.md`, `docs/program/CHAT_LANE_CHARTERS.md`, `governance/four-lens-requirements.json` and the exact current work packet.
+6. For Four-Lens work, read `docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md`, `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`, `docs/program/PARALLEL_DELIVERY_MATRIX.md`, `docs/program/CHAT_LANE_CHARTERS.md`, `governance/four-lens-requirements.json` and the exact current work packet.
 7. Read the applicable wave/lens roadmap.
 8. Read the specific slice, lens or Brand Gate authority.
 9. Read the context/RFx documents listed under the authority's **Must read** or governing section.
@@ -188,21 +188,21 @@ Before claiming a slice or gate complete, run slice/gate-specific checks plus re
 npm run check
 ```
 
-For Four-Lens packets, use the acceptance types declared by each immutable requirement and exact work packet. Cross-lens Shared or Integration candidates must exercise supported multi-lens journeys, exact server revalidation, desktop/mobile, keyboard/accessibility, five locales, clean console/unhandled-rejection behavior and applicable timing evidence without turning a controlled run into a production-network promise.
+For Four-Lens packets, use the evidence types declared by each immutable requirement and exact work packet. Cross-lens Shared or Integration candidates must exercise supported multi-lens journeys, exact server revalidation, desktop/mobile, keyboard/accessibility, five locales, clean console/unhandled-rejection behavior and applicable timing evidence without turning a controlled run into a production-network promise.
 
-Run focused product/architecture/dependency/internationalization/emulator checks first where applicable. Production CI must pass on the exact candidate head before ordinary merge and again on merged `main`. Independent review remains required for `Verified` and for any explicit stricter packet/release gate, not as a universal pre-merge default. Brand acceptance supplements and never replaces domain, security, lifecycle, geography, emulator or configured-browser evidence.
+Run focused product/architecture/dependency/internationalization/emulator checks first where applicable. Production CI must pass on the exact candidate head before ordinary merge and again on merged `main`. Independent review is required only to truthfully claim optional `Verified` assurance, or where a separate current legal, contractual, regulatory or security authority explicitly requires it; it is not a universal Four-Lens completion, tracker, merge or release gate. Brand acceptance supplements and never replaces domain, security, lifecycle, geography, emulator or configured-browser evidence.
 
 ## Tracker discipline
 
 - Do not delete, rename or reorder approved Feature IDs casually.
-- Mark `[x]` only after the feature's documented acceptance check passes and implementation/validation evidence exists.
-- Under Four-Lens governance, an implementation may remain `Implemented — Not Verified` before merge, after merge, or while live in production until Lane 06 records independent acceptance on the exact implementation.
+- Mark `[x]` only after the feature's documented implementation/completion check passes and the required objective validation evidence exists.
+- Under `FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, `Implemented — Not Verified` may be a terminal completion state and may support a checked tracker item when the completion rule is satisfied. Lane 06 assurance is optional; `Verified` remains an additional independent-assurance marker rather than the sole completion state.
 - Update evidence in the same PR as implementation whenever practical.
 - Documentation-only planning/reconciliation must not change progress totals or completion statuses.
 - A visual simulation, architecture document or tutorial never completes the corresponding live domain Feature ID.
-- Existing tracker completion for Slices 4.1–4.5 is preserved while retroactive independent assurance is pending; material assurance findings require explicit tracker-correction analysis.
+- Existing tracker completion for Slices 4.1–4.5 is preserved; their retroactive assurance records are optional assurance history rather than mandatory verification debt. Material findings still require explicit correction/disposition analysis on their substance.
 - Showing or releasing a lens/route does not itself complete an RFx or lens-experience requirement.
-- Merge/release does not change the Verified numerator or Feature-ID tracker by itself.
+- Merge/release does not change the optional `Verified` assurance numerator or Feature-ID tracker by itself; tracker progression follows the completion rule and durable evidence.
 
 ## Design, brand and visual references
 
@@ -222,7 +222,7 @@ At the end of implementation, reconciliation or release work, report:
 - starting merged `main` SHA;
 - relevant authority PR disposition and merge SHA;
 - packet branch, PR number, final candidate head, merge SHA, exact-head CI and post-merge CI;
-- merge state, production release state and independent certification state separately;
+- merge state, production release state and optional independent-assurance state separately when assurance was requested or performed;
 - release risk class and release authorization/evidence when production deployment occurs;
 - final primary-lens order/availability and Account utility contents where applicable;
 - persistent-shell architecture, loading-boundary result and actual latency causes/corrections where applicable;
@@ -235,4 +235,4 @@ At the end of implementation, reconciliation or release work, report:
 - Stabilization 2C and B6b status; and
 - explicit confirmation that dependency-ineligible or otherwise unauthorized runtime work was not begun.
 
-For Four-Lens program packets, also report the work-packet ID, lane, exact base/candidate SHA, requirement dispositions, independent-acceptance state, verification debt, Shared Contract Requests, denominator effect, and whether builder/acceptance separation was preserved.
+For Four-Lens program packets, also report the work-packet ID, lane, exact base/candidate SHA, requirement dispositions, optional assurance state (if any), material findings/correction debt, Shared Contract Requests, denominator effect, and whether any claimed independent assurance was actually independent. Do not create or maintain verification debt solely because Lane 06 did not act.
