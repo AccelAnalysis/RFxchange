@@ -7,6 +7,7 @@
     "id": "mobile-exchange-stage1-2026-08-16",
     "packetId": "WP-MOBILE-EXCHANGE-STAGE1-01",
     "mainBaseSha": "0b23a9f9b49468aab12609dea6116e1409c925fe",
+    "controlPullRequest": 217,
     "controlBranch": "control/mobile-stage1-architecture-lock",
     "implementationLane": "shared-exchange",
     "implementationBranch": "lane01/mobile-exchange-stage1-contracts",
