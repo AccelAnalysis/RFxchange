@@ -57,6 +57,19 @@ export type OrganizationOperationAuthorizationDecision =
       readonly permission: OrganizationPermission;
     }>;
 
+export type OrganizationParticipationAuthorizationDecision =
+  | Readonly<{
+      readonly allowed: false;
+      readonly reason: OrganizationOperationDenialReason;
+      readonly restrictionState?: Exclude<AccessRestrictionState, "none">;
+    }>
+  | Readonly<{
+      readonly allowed: true;
+      readonly context: AuthenticatedServerContext;
+      readonly organization: OrganizationAccount;
+      readonly membership: OrganizationMembership;
+    }>;
+
 function denial(
   reason: OrganizationOperationDenialReason,
   restrictionState?: Exclude<AccessRestrictionState, "none">,
@@ -98,6 +111,46 @@ export async function authorizeOrganizationOperation(
   }>,
   dependencies: OrganizationOperationAuthorizationDependencies,
 ): Promise<OrganizationOperationAuthorizationDecision> {
+  const participation = await authorizeOrganizationParticipation(input, dependencies);
+  if (!participation.allowed) return participation;
+
+  const authorization = await dependencies.authorizations.getByMembershipId(input.membershipId);
+  if (!authorization) return denial("authorization-missing");
+
+  const permission = evaluateOrganizationPermission(
+    participation.membership,
+    authorization,
+    participation.organization,
+    input.permission,
+  );
+  if (!permission.allowed) {
+    if (permission.reason === "authorization-membership-mismatch") {
+      return denial("authorization-membership-mismatch");
+    }
+    if (permission.reason === "missing-permission") return denial("missing-permission");
+    if (permission.reason === "inactive-membership") return denial("membership-inactive");
+    return denial("wrong-organization");
+  }
+
+  return Object.freeze({
+    allowed: true as const,
+    context: participation.context,
+    organization: participation.organization,
+    membership: participation.membership,
+    authorization,
+    permission: input.permission,
+  });
+}
+
+/** Current authenticated organization participation without granting a consequential permission. */
+export async function authorizeOrganizationParticipation(
+  input: Readonly<{
+    readonly context: AuthenticatedServerContext | null;
+    readonly organizationId: OrganizationId;
+    readonly membershipId: OrganizationMembershipId;
+  }>,
+  dependencies: OrganizationOperationAuthorizationDependencies,
+): Promise<OrganizationParticipationAuthorizationDecision> {
   if (!input.context) return denial("unauthenticated");
 
   const membership = await dependencies.memberships.getById(input.membershipId);
@@ -138,30 +191,10 @@ export async function authorizeOrganizationOperation(
     return denial(eligibility.reason, eligibility.restrictionState);
   }
 
-  const authorization = await dependencies.authorizations.getByMembershipId(input.membershipId);
-  if (!authorization) return denial("authorization-missing");
-
-  const permission = evaluateOrganizationPermission(
-    membership,
-    authorization,
-    organization,
-    input.permission,
-  );
-  if (!permission.allowed) {
-    if (permission.reason === "authorization-membership-mismatch") {
-      return denial("authorization-membership-mismatch");
-    }
-    if (permission.reason === "missing-permission") return denial("missing-permission");
-    if (permission.reason === "inactive-membership") return denial("membership-inactive");
-    return denial("wrong-organization");
-  }
-
   return Object.freeze({
     allowed: true as const,
     context: input.context,
     organization,
     membership,
-    authorization,
-    permission: input.permission,
   });
 }

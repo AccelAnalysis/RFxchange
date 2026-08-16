@@ -30,6 +30,16 @@ export function formatCurrency(
   }).format(value);
 }
 
+export function currencyValueFromMinorUnits(
+  locale: Locale,
+  amountMinor: number,
+  currency: string,
+): number {
+  const exponent = new Intl.NumberFormat(locale, { style: "currency", currency })
+    .resolvedOptions().maximumFractionDigits ?? 2;
+  return amountMinor / (10 ** exponent);
+}
+
 export function formatPercent(
   locale: Locale,
   value: number,

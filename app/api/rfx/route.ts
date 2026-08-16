@@ -8,6 +8,7 @@ import {
   type RfxDefinitionSelectionInput,
 } from "@/src/application/rfx/rfx-draft-service";
 import type { RfxPackageInput } from "@/src/domain/rfx/model";
+import type { ResponderOpportunityProjection } from "@/src/domain/rfx/publication";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
@@ -21,6 +22,13 @@ import { createServerOpportunityDiscoveryService } from "@/src/infrastructure/rf
 
 export const runtime = "nodejs";
 
+function participantProjection(projection: ResponderOpportunityProjection) {
+  const visible: Record<string, unknown> = { ...projection };
+  Reflect.deleteProperty(visible, "issuerOrganizationIndexKey");
+  Reflect.deleteProperty(visible, "requirementIndex");
+  return Object.freeze(visible);
+}
+
 export async function GET(request: NextRequest) {
   try {
     const scope = await commandScope();
@@ -30,7 +38,7 @@ export async function GET(request: NextRequest) {
         rfxId: request.nextUrl.searchParams.get("rfxId") ?? "",
         audience: request.nextUrl.searchParams.get("audience") ?? "public",
       });
-      return NextResponse.json(result, {
+      return NextResponse.json({ ...result, preview: result.preview ? participantProjection(result.preview) : null }, {
         headers: { "cache-control": "private, no-store" },
       });
     }
@@ -38,7 +46,7 @@ export async function GET(request: NextRequest) {
       const result = await createServerRfxPublicationService().currentPublication(scope, {
         rfxId: request.nextUrl.searchParams.get("rfxId") ?? "",
       });
-      return NextResponse.json(result, {
+      return NextResponse.json({ ...result, projection: participantProjection(result.projection) }, {
         headers: { "cache-control": "private, no-store" },
       });
     }
@@ -223,7 +231,7 @@ export async function POST(request: NextRequest) {
         }));
         discoveryEvaluation = Object.freeze({ status: "pending", matches: 0, alerts: 0 });
       }
-      return NextResponse.json({ ...result, discoveryEvaluation });
+      return NextResponse.json({ ...result, projection: participantProjection(result.projection), discoveryEvaluation });
     }
     return NextResponse.json(
       { error: "RFx action is unsupported." },

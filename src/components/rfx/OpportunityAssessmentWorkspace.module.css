@@ -1,0 +1,27 @@
+.workspace { min-height: 100%; padding: clamp(1rem, 3vw, 2.5rem); background: #f5f1e8; color: #16241f; }
+.workspace > * { max-width: 74rem; margin-inline: auto; }
+.header { display: flex; gap: 2rem; align-items: flex-start; justify-content: space-between; padding-block: 1rem 2rem; }
+.header span { color: #526a61; font-size: .76rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.header h1 { margin: .35rem 0; font-size: clamp(2rem, 4vw, 3.4rem); font-weight: 520; }
+.header p { max-width: 50rem; color: #52605b; }
+.header a { color: inherit; white-space: nowrap; }
+.truth { display: grid; gap: .35rem; padding: 1rem 1.2rem; border-left: .25rem solid #17755b; background: #e6efe9; }
+.unavailable { display: grid; gap: 1rem; max-width: 48rem; margin-block: clamp(3rem, 10vh, 8rem); padding: clamp(1.25rem, 4vw, 2.5rem); background: rgba(255,255,255,.78); border: 1px solid #d7d0c1; border-radius: 1rem; }
+.unavailable h1, .unavailable p { margin: 0; }
+.unavailableActions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.unavailableActions a { padding: .65rem 1rem; border: 1px solid #527066; border-radius: 2rem; color: inherit; }
+.unavailableActions a:first-child { background: #173229; color: white; }
+.attribution { display: flex; gap: .5rem; padding-block: 1.25rem; }
+.facts, .requirements, .gaps, .assessment { margin-block: 1rem; padding: clamp(1rem, 2.5vw, 1.75rem); background: rgba(255,255,255,.72); border: 1px solid #d7d0c1; border-radius: 1rem; }
+.facts dl { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 1rem; }
+.facts dt { color: #66736e; font-size: .78rem; text-transform: uppercase; }
+.facts dd { margin: .25rem 0 0; }
+.table { display: grid; border-top: 1px solid #d7d0c1; }
+.table article { display: grid; grid-template-columns: minmax(12rem, .8fr) minmax(16rem, 1.5fr) minmax(15rem, 1fr); gap: 1rem; padding-block: 1rem; border-bottom: 1px solid #d7d0c1; }
+.table article div { display: grid; align-content: start; gap: .25rem; }.table article span,.table small { color: #66736e; }.table p { margin: 0; }
+.gapList { display: grid; gap: .75rem; padding: 0; list-style: none; }.gapList li { display: grid; grid-template-columns: minmax(0,1fr) minmax(12rem,.45fr); gap: 1rem; align-items: center; padding-block: .75rem; border-bottom: 1px solid #d7d0c1; }.gapList li > div,.gapList label { display: grid; gap: .3rem; }.gapList li span { color: #66736e; }.gapList select { width: 100%; padding: .6rem; border: 1px solid #83918b; border-radius: .4rem; background: #fff; color: inherit; }
+.assessment { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }.assessment h2 { grid-column: 1/-1; }
+.assessment fieldset { display: grid; gap: .75rem; border: 1px solid #d7d0c1; border-radius: .75rem; }.assessment label { display: grid; gap: .3rem; }.assessment select,.assessment textarea { width: 100%; padding: .65rem; border: 1px solid #83918b; border-radius: .4rem; background: #fff; color: inherit; }.assessment textarea { min-height: 5rem; resize: vertical; }
+.reconfirm { display: flex; gap: .75rem; align-items: flex-start; margin-block: 1rem; padding: 1rem 1.2rem; border: 1px solid #9c6f22; border-radius: .75rem; background: rgba(255,255,255,.78); }.reconfirm input { flex: 0 0 auto; margin-top: .2rem; }.reconfirm span { line-height: 1.45; }
+.actions { display: grid; gap: 1rem; position: sticky; bottom: 0; padding: 1rem 1.25rem; background: rgba(22,36,31,.96); color: white; border-radius: 1rem 1rem 0 0; }.actions > div { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }.actions button { margin-left: .5rem; padding: .65rem 1rem; border: 1px solid #d9e7e1; border-radius: 2rem; background: transparent; color: white; }.actions button:last-child { background: #dcece5; color: #173229; }.actions button:disabled { opacity: .55; }
+@media (max-width: 760px) { .header,.actions > div { align-items: stretch; flex-direction: column; }.facts dl,.assessment,.gapList li { grid-template-columns: 1fr; }.table article { grid-template-columns: 1fr; gap: .4rem; }.header a { white-space: normal; } }
