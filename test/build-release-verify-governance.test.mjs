@@ -8,47 +8,50 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "utf8");
 
 const authority = read("docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md");
-const amendment = read("docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md");
+const buildReleaseVerify = read("docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md");
+const completionAmendment = read("docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md");
 const protocol = read("docs/program/INDEPENDENT_ACCEPTANCE_PROTOCOL.md");
-const matrix = read("docs/program/PARALLEL_DELIVERY_MATRIX.md");
 const agents = read("AGENTS.md");
 
 const universalMergeGatePattern = /Exact-head review remains a real merge gate/;
 
-test("Build Release Verify separates integration, release and certification", () => {
-  assert.match(amendment, /Build → Release → Verify/);
-  assert.match(amendment, /Neither merge nor production deployment implies `Verified`/);
-  assert.match(amendment, /independent GitHub review is \*\*not a universal default pre-merge requirement\*\*/);
-  assert.match(amendment, /Reviewer capacity therefore blocks \*\*certification\*\*, not ordinary development by default/);
-  assert.match(amendment, /Standard/);
-  assert.match(amendment, /Elevated/);
-  assert.match(amendment, /Critical/);
+test("Four-Lens completion no longer requires independent verification", () => {
+  assert.match(completionAmendment, /Independent verification \/ Independent Acceptance is no longer a required completion condition/);
+  assert.match(completionAmendment, /`Implemented — Not Verified` is therefore a valid terminal Four-Lens implementation\/completion state/);
+  assert.match(completionAmendment, /Lane 06 remains available as an optional assurance and audit lane/);
+  assert.match(completionAmendment, /Lane 06 no longer owns whether ordinary Four-Lens work is complete/);
+  assert.match(completionAmendment, /Independent reviewer availability is not a merge, release, or completion factor by itself/);
 });
 
-test("Four-Lens authority no longer reinstates universal independent-review merge blocking", () => {
+test("the completion amendment explicitly supersedes the historical certification gate", () => {
+  assert.match(completionAmendment, /only `Verified` satisfies Four-Lens completion/);
+  assert.match(completionAmendment, /Independent Acceptance is required before a Four-Lens requirement may be considered complete/);
+  assert.match(completionAmendment, /tracker\/ledger promotion is prohibited solely because Independent Acceptance has not occurred/);
+  assert.match(completionAmendment, /Historical records are preserved/);
+});
+
+test("removing mandatory independent verification does not weaken safety gates", () => {
+  for (const required of [
+    "authentication and authorization controls",
+    "tenant isolation",
+    "privacy controls",
+    "payment integrity",
+    "legal/policy requirements",
+    "data-integrity requirements",
+    "known material defect correction",
+  ]) assert.match(completionAmendment, new RegExp(required.replace("/", "\\/")));
+  assert.match(completionAmendment, /A green check is not permission to ignore a known material defect/);
+});
+
+test("historical Four-Lens authorities remain provenance while the amendment governs completion", () => {
   assert.match(authority, /BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT\.md/);
-  assert.match(authority, /Independent exact-head review is no longer a universal default merge gate/);
   assert.doesNotMatch(authority, universalMergeGatePattern);
-  assert.match(authority, /Only `Verified` satisfies experience completion/);
-  assert.match(authority, /No builder may certify its own work as complete/);
-});
-
-test("Independent Acceptance remains the exclusive Verified path", () => {
-  assert.match(protocol, /A candidate does not need to remain unmerged merely to become eligible for Lane 06 audit/);
-  assert.match(protocol, /The acceptance signal required for `Verified` must be authored in GitHub by the exact configured or packet-assigned identity/);
-  assert.match(protocol, /reviewer must differ from the implementation actor/);
-  assert.match(protocol, /Merge and production release do not promote the tracker by themselves/);
-});
-
-test("repository operating instructions require exact-head safety evidence without universal review blocking", () => {
-  assert.match(agents, /governing delivery model is \*\*Build → Release → Verify\*\*/);
-  assert.match(agents, /independent review is not a universal pre-merge requirement/);
+  assert.match(buildReleaseVerify, /Build → Release → Verify/);
+  assert.match(protocol, /Independent Acceptance Protocol/);
   assert.match(agents, /Production CI must pass on the exact candidate head before ordinary merge and again on merged `main`/);
-  assert.match(agents, /only the Independent Acceptance lane may record `Verified`/);
 });
 
-test("delivery matrix treats reviewer scarcity as certification debt", () => {
-  assert.match(matrix, /reviewer constraint blocks \*\*new `Verified` certification\*\*/);
-  assert.match(matrix, /does not, by itself, freeze ordinary safe integration\/release/);
-  assert.match(matrix, /pre-amendment packet explicitly forbids merge before independent acceptance/);
+test("the streamlined program does not replace verification with another universal approval layer", () => {
+  assert.match(completionAmendment, /Do not replace the removed independent-verification requirement with another universal approval layer/);
+  assert.match(completionAmendment, /Use the smallest amount of governance necessary to ship the Exchange safely and truthfully/);
 });
