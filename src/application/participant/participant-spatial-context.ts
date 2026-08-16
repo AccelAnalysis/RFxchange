@@ -9,6 +9,14 @@ export const PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX = "rfxchange:participant
 export const PARTICIPANT_SPATIAL_ACTIVE_KEY = "rfxchange:participant-spatial:active";
 export const PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT = "rfxchange:participant-spatial-changed";
 
+export const PARTICIPANT_SHEET_SNAP_POINTS = Object.freeze([
+  "peek",
+  "partial",
+  "expanded",
+] as const);
+
+export type ParticipantSheetSnapPoint = (typeof PARTICIPANT_SHEET_SNAP_POINTS)[number];
+
 export interface ParticipantSpatialScope {
   readonly participantId: string;
   readonly membershipId: string;
@@ -38,6 +46,8 @@ export interface ParticipantSpatialContext {
   readonly camera: ParticipantMapCamera | null;
   readonly lensState: Readonly<Record<ParticipantLensId, ParticipantSpatialLensState>>;
   readonly panelOpen: boolean;
+  readonly sheetSnapPoint: ParticipantSheetSnapPoint;
+  readonly sheetScrollTop: number;
   readonly originLens: ParticipantLensId;
   readonly returnHref: string;
 }
@@ -55,8 +65,19 @@ function isAvailableLens(value: unknown): value is AvailableParticipantLens {
   return typeof value === "string" && LENSES.includes(value as AvailableParticipantLens);
 }
 
+function isSheetSnapPoint(value: unknown): value is ParticipantSheetSnapPoint {
+  return typeof value === "string"
+    && PARTICIPANT_SHEET_SNAP_POINTS.includes(value as ParticipantSheetSnapPoint);
+}
+
 function emptyLensState(): ParticipantSpatialLensState {
-  return Object.freeze({ search: "", filters: Object.freeze({}), resultPage: 1, resultIndex: 0, listScrollTop: 0 });
+  return Object.freeze({
+    search: "",
+    filters: Object.freeze({}),
+    resultPage: 1,
+    resultIndex: 0,
+    listScrollTop: 0,
+  });
 }
 
 export function participantSpatialScope(input: ParticipantSpatialScope): ParticipantSpatialScope {
@@ -102,6 +123,8 @@ export function createParticipantSpatialContext(input: Readonly<{
       "opportunities-rfx": emptyLensState(),
     }),
     panelOpen: true,
+    sheetSnapPoint: "partial",
+    sheetScrollTop: 0,
     originLens: activeLens,
     returnHref: "/geography/canvas",
   });
@@ -136,7 +159,9 @@ function safeReturnHref(value: unknown): string {
   if (typeof value !== "string") return "/geography/canvas";
   try {
     const parsed = new URL(value, "https://participant.invalid");
-    if (parsed.origin !== "https://participant.invalid" || parsed.pathname !== "/geography/canvas") return "/geography/canvas";
+    if (parsed.origin !== "https://participant.invalid" || parsed.pathname !== "/geography/canvas") {
+      return "/geography/canvas";
+    }
     return `${parsed.pathname}${parsed.search}`;
   } catch {
     return "/geography/canvas";
@@ -152,9 +177,13 @@ export function parseParticipantSpatialContext(
   try {
     const parsed = JSON.parse(serialized) as Partial<ParticipantSpatialContext>;
     if (parsed.version !== PARTICIPANT_SPATIAL_CONTEXT_VERSION || !parsed.scope) return null;
-    if (["resources", "intelligence", "referrals"].some((lens) => !parseLensState(parsed.lensState?.[lens as AvailableParticipantLens]))) return null;
+    if (["resources", "intelligence", "referrals"].some(
+      (lens) => !parseLensState(parsed.lensState?.[lens as AvailableParticipantLens]),
+    )) return null;
     const scope = participantSpatialScope(parsed.scope);
-    if (Object.keys(expectedScope).some((key) => scope[key as keyof ParticipantSpatialScope] !== expectedScope[key as keyof ParticipantSpatialScope])) return null;
+    if (Object.keys(expectedScope).some(
+      (key) => scope[key as keyof ParticipantSpatialScope] !== expectedScope[key as keyof ParticipantSpatialScope],
+    )) return null;
     if (!isAvailableLens(parsed.activeLens) || !isAvailableLens(parsed.originLens)) return null;
     if (!parsed.selection || typeof parsed.selection.organizationId !== "string" || typeof parsed.selection.markerId !== "string") return null;
     if (parsed.selection.relationshipId !== null && typeof parsed.selection.relationshipId !== "string") return null;
@@ -167,16 +196,24 @@ export function parseParticipantSpatialContext(
       selection: Object.freeze({
         organizationId: required(parsed.selection.organizationId, "Selected organization id"),
         markerId: required(parsed.selection.markerId, "Selected marker id"),
-        relationshipId: parsed.selection.relationshipId ? required(parsed.selection.relationshipId, "Relationship id") : null,
+        relationshipId: parsed.selection.relationshipId
+          ? required(parsed.selection.relationshipId, "Relationship id")
+          : null,
       }),
       camera: parsed.camera,
       lensState: Object.freeze({
         resources: parseLensState(parsed.lensState?.resources)!,
         intelligence: parseLensState(parsed.lensState?.intelligence)!,
         referrals: parseLensState(parsed.lensState?.referrals)!,
-        "opportunities-rfx": parseLensState(parsed.lensState?.["opportunities-rfx"]) ?? emptyLensState(),
+        "opportunities-rfx": parseLensState(parsed.lensState?.["opportunities-rfx"])
+          ?? emptyLensState(),
       }),
       panelOpen: parsed.panelOpen,
+      // Backward-compatible defaults preserve valid Stage 1 contexts already stored in browsers.
+      sheetSnapPoint: isSheetSnapPoint(parsed.sheetSnapPoint)
+        ? parsed.sheetSnapPoint
+        : parsed.panelOpen ? "partial" : "peek",
+      sheetScrollTop: safeInteger(parsed.sheetScrollTop, 0, 10_000_000),
       originLens: parsed.originLens,
       returnHref: safeReturnHref(parsed.returnHref),
     });
@@ -194,7 +231,9 @@ export function clearParticipantSpatialContexts(): void {
   try {
     for (let index = window.sessionStorage.length - 1; index >= 0; index -= 1) {
       const key = window.sessionStorage.key(index);
-      if (key?.startsWith(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)) window.sessionStorage.removeItem(key);
+      if (key?.startsWith(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)) {
+        window.sessionStorage.removeItem(key);
+      }
     }
     window.sessionStorage.removeItem(PARTICIPANT_SPATIAL_ACTIVE_KEY);
   } catch {
@@ -232,7 +271,15 @@ export function participantSpatialIntelligenceHref(
 
 export function participantSpatialLensHref(lens: ParticipantLensId): string {
   const context = readActiveParticipantSpatialContext();
-  if (!context) return lens === "resources" ? "/resources" : lens === "referrals" ? "/referrals" : lens === "opportunities-rfx" ? "/opportunities" : "/geography/canvas";
+  if (!context) {
+    return lens === "resources"
+      ? "/resources"
+      : lens === "referrals"
+        ? "/referrals"
+        : lens === "opportunities-rfx"
+          ? "/opportunities"
+          : "/geography/canvas";
+  }
   if (lens === "intelligence") return participantSpatialIntelligenceHref(context);
   if (lens === "opportunities-rfx") {
     const state = context.lensState["opportunities-rfx"];
@@ -261,6 +308,7 @@ export const participantSpatialContextPolicy = Object.freeze({
   storesAuthorization: false,
   storesPrivateCoordinates: false,
   storesDomainRecords: false,
+  storesPresentationOnlySheetState: true,
   scopeIncludesParticipantMembershipOrganizationAndGeography: true,
   serverRevalidatesSelectedObjectsAndActions: true,
 } as const);
