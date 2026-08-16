@@ -1,8 +1,8 @@
 # Mobile Exchange Stage 1 Shared Contracts
 
-**Owner:** 01 — Shared Exchange Platform  
-**Product authority:** `docs/program/MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md`  
-**Composition reference:** `docs/reference/screenshots/rfxchange-mobile-composition-reference.jpg`  
+**Owner:** 01 — Shared Exchange Platform
+**Product authority:** `docs/program/MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md`
+**Composition reference:** `docs/reference/screenshots/rfxchange-mobile-composition-reference.jpg`
 **Status:** Stage 1 technical architecture; implementation may be reported only as `Implemented — Not Verified` until Independent Acceptance records an exact-SHA disposition.
 
 ## Purpose
