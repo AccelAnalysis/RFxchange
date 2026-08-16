@@ -10,7 +10,9 @@ import {
   mobileExchangeSearchFilter,
   reconcileMobileExchangeContinuity,
   transitionMobileExchangeContinuityLens,
+  withServerRevalidatedMobileExchangeGeography,
 } from "../src/application/participant/mobile-exchange-continuity.ts";
+import { createExchangeSubjectIdentity } from "../src/application/participant/mobile-exchange-contracts.ts";
 
 const lensState = (search, listScrollTop) => ({
   search,
@@ -55,7 +57,7 @@ function spatialContext() {
   };
 }
 
-test("the continuity adapter preserves current spatial state and adds exact scope", () => {
+test("the continuity adapter preserves current spatial state and adds exact scope and cursor seams", () => {
   const context = spatialContext();
   const state = migrateParticipantSpatialContextToMobileExchangeContinuity(context, {
     sessionContextId: "session-1",
@@ -71,8 +73,13 @@ test("the continuity adapter preserves current spatial state and adds exact scop
   assert.equal(state.selection.selectedMarker.markerId, "marker-org-2");
   assert.deepEqual(state.mapCamera, context.camera);
   assert.equal(state.sheet.sheetSnapPoint, "partial");
+  assert.equal(state.sheet.sheetScrollPosition, 30);
   assert.equal(state.lensState.resources.search, "resource");
   assert.equal(state.lensState.resources.listScrollPosition, 20);
+  assert.equal(state.lensState.resources.sheetScrollPosition, 20);
+  assert.equal(state.lensState.resources.resultSetId, null);
+  assert.equal(state.lensState.resources.cursor, null);
+  assert.equal(state.geography.authority, "carried-unvalidated");
 
   const searchFilter = mobileExchangeSearchFilter(state);
   assert.equal(searchFilter.placement, "map-overlay");
@@ -80,6 +87,8 @@ test("the continuity adapter preserves current spatial state and adds exact scop
   assert.equal(searchFilter.search, "organization");
   assert.deepEqual(searchFilter.filters, { category: "organization-category" });
   assert.equal(searchFilter.sort, null);
+  assert.equal(searchFilter.resultSetId, null);
+  assert.equal(searchFilter.cursor, null);
 
   const changed = transitionMobileExchangeContinuityLens(state, "referrals");
   assert.equal(changed.activeLens, "referrals");
@@ -87,6 +96,7 @@ test("the continuity adapter preserves current spatial state and adds exact scop
   assert.strictEqual(changed.selection, state.selection);
   assert.strictEqual(changed.mapCamera, state.mapCamera);
   assert.strictEqual(changed.lensState, state.lensState);
+  assert.equal(changed.sheet.sheetScrollPosition, 40);
 });
 
 test("scope and schema changes invalidate the whole client continuity state", () => {
@@ -170,13 +180,16 @@ test("negative selected-object revalidation removes stale focus but preserves sa
   assert.equal(decision.safeState.detail.status, "closed");
 });
 
-test("detail return context is same-origin, lens-bounded, and focus-restorable", () => {
-  const base = {
-    selectionKey: "record:opportunity-1",
+test("detail return context is same-origin, lens-bounded, identity-coherent, and focus-restorable", () => {
+  const identity = createExchangeSubjectIdentity({
     subjectKind: "record",
+    selectionKey: "record:opportunity-1",
     organizationId: "issuer-1",
     recordType: "opportunity",
     recordId: "opportunity-1",
+  });
+  const base = {
+    identity,
     canonicalHref: "/opportunities/opportunity-1",
     returnLens: "opportunities-rfx",
   };
@@ -185,6 +198,7 @@ test("detail return context is same-origin, lens-bounded, and focus-restorable",
     returnHref: "/opportunities?selected=opportunity-1",
     focusReturnKey: "card:record:opportunity-1",
   });
+  assert.strictEqual(safe.identity, identity);
   assert.equal(safe.returnHref, "/opportunities?selected=opportunity-1");
   assert.equal(safe.focusReturnKey, "card:record:opportunity-1");
 
@@ -195,9 +209,32 @@ test("detail return context is same-origin, lens-bounded, and focus-restorable",
   assert.equal(external.focusReturnKey, null);
 });
 
+test("server geography projection requires exact scope and never trusts carried geography", () => {
+  const state = migrateParticipantSpatialContextToMobileExchangeContinuity(spatialContext(), {
+    sessionContextId: "session-1",
+  });
+  assert.equal(state.geography.authority, "carried-unvalidated");
+
+  const validated = withServerRevalidatedMobileExchangeGeography(state, {
+    geographyId: "geo-1",
+    label: "Example geography",
+  });
+  assert.equal(validated.geography.authority, "server-revalidated");
+  assert.equal(validated.geography.label, "Example geography");
+
+  assert.throws(
+    () => withServerRevalidatedMobileExchangeGeography(state, {
+      geographyId: "geo-other",
+      label: "Wrong geography",
+    }),
+    /does not match the active continuity scope/,
+  );
+});
+
 test("accessibility and authority policies bind Stage 2 without implementing it", () => {
   assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.minimumTouchTargetPx, 44);
   assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.safeAreaInsetsRequired, true);
+  assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.bottomSheetClearsBottomNavigationSafeArea, true);
   assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.nonDragSheetPositionControlRequired, true);
   assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.keyboardSelectionUsesSharedState, true);
   assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.switchAccessUsesSharedState, true);
@@ -206,6 +243,9 @@ test("accessibility and authority policies bind Stage 2 without implementing it"
   assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.focusRestorationKeyRequiredForDetail, true);
   assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.reducedMotionRequired, true);
   assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.orientationResizePreservesContinuity, true);
+  assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.softwareKeyboardPreservesReachability, true);
+  assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.sheetScrollStateRequired, true);
+  assert.equal(MOBILE_EXCHANGE_ACCESSIBILITY_POLICY.resultCursorContinuityRequired, true);
 
   assert.equal(MOBILE_EXCHANGE_STAGE1_AUTHORITY_POLICY.storesAuthorization, false);
   assert.equal(MOBILE_EXCHANGE_STAGE1_AUTHORITY_POLICY.grantsProtectedRouteAccess, false);
@@ -213,4 +253,5 @@ test("accessibility and authority policies bind Stage 2 without implementing it"
   assert.equal(MOBILE_EXCHANGE_STAGE1_AUTHORITY_POLICY.serverRevalidatesSelectedObjects, true);
   assert.equal(MOBILE_EXCHANGE_STAGE1_AUTHORITY_POLICY.scopeChangesInvalidateClientContinuity, true);
   assert.equal(MOBILE_EXCHANGE_STAGE1_AUTHORITY_POLICY.returnContextNeverGrantsAuthority, true);
+  assert.equal(MOBILE_EXCHANGE_STAGE1_AUTHORITY_POLICY.carriedGeographyIsNotServerAuthority, true);
 });

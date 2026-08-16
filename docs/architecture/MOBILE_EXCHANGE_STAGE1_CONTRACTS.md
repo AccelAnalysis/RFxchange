@@ -14,11 +14,11 @@
 
 **Composition reference:** `docs/reference/screenshots/rfxchange-mobile-composition-reference.jpg`
 
-**Candidate disposition:** `Implemented — Not Verified`; exact-candidate reviews by lanes 02–05 remain separate Stage 1 evidence.
+**Candidate disposition:** `Implemented — Not Verified`; exact-candidate compatibility reviews by lanes 02–05 and Independent Acceptance remain separate evidence.
 
-## Purpose
+## Purpose and boundary
 
-This document binds the governed mobile composition to one reusable Shared Exchange contract. It does not implement the Stage 2 visual shell, gesture system, floating search layout, production card styling, or lens-specific result streams.
+This Stage 1 architecture binds the governed mobile composition to one reusable Shared Exchange contract. It does not implement the Stage 2 visual shell, bottom-navigation styling, floating search layout, draggable gestures, production card styling, media playback, or lens-specific result streams.
 
 The contract family is implemented in:
 
@@ -34,8 +34,6 @@ It composes existing shared seams rather than creating a second mobile applicati
 
 ## Component-contract map
 
-The Stage 1 source exposes contracts corresponding to the governed conceptual components:
-
 | Governed concept | Shared contract |
 | --- | --- |
 | `MobileExchangeShell` | `MobileExchangeShellContract` and `MobileExchangeStage1ShellContract` |
@@ -43,7 +41,7 @@ The Stage 1 source exposes contracts corresponding to the governed conceptual co
 | `MobileLensNavigation` | `MobileLensNavigationContract` |
 | `ExchangeBottomSheet` | `ExchangeBottomSheetContract` and `ExchangeSheetState` |
 | `LensActionRail` | `LensActionRailContract` and `LensActionDefinitionTuple` |
-| `ExchangeResultCard` | `ExchangeResultCardContract` and `LensResultCardModel` |
+| `ExchangeResultCard` | `ExchangeResultCardContract`, `LensResultCardModel`, and `createLensResultCardModel` |
 | `ExchangeMedia` | `ExchangeMediaContract` and `ExchangeMediaModel` |
 | `ExchangeFavorite` | `ExchangeFavoriteContract` and `FavoriteState` |
 | `ExchangeSelectionState` | `ExchangeSelectionContract` and `ExchangeSelectionState` |
@@ -51,11 +49,11 @@ The Stage 1 source exposes contracts corresponding to the governed conceptual co
 | `ExchangeDetailState` | `ExchangeDetailContract`, `ExchangeDetailState`, `ExchangeDetailContext`, and `MobileExchangeDetailContext` |
 | continuity/invalidation | `MobileExchangeContinuityState`, `MobileExchangeContinuityScope`, and `MobileExchangeContinuityDecision` |
 
-These are data and interaction contracts. They are not final React components or final mobile styling.
+These are data and interaction contracts, not final React components.
 
-## Permanent navigation contract
+## Permanent navigation and composition
 
-`MOBILE_EXCHANGE_LENS_DEFINITIONS` is an exact four-element tuple in the governed order:
+`MOBILE_EXCHANGE_LENS_DEFINITIONS` is an exact four-element tuple in this governed order:
 
 1. Opportunities/RFx
 2. Resources
@@ -66,11 +64,11 @@ Each definition is projected from the current participant lens registry and cont
 
 `MOBILE_EXCHANGE_ACCOUNT_UTILITY` is explicitly a utility with `presentation: "menu"`; it is not part of the lens tuple. Existing Quick Start behavior remains a utility concern and is not converted into a fifth lens.
 
-`MOBILE_EXCHANGE_COMPOSITION_POLICY` fixes the map-first shell, map-overlay search/filter seam, bottom lens navigation, sheet-top action rail, and sheet-contained result cards. Stage 2 must render this contract as persistent bottom navigation on mobile. It must not reinterpret it as a top mobile lens menu.
+`MOBILE_EXCHANGE_COMPOSITION_POLICY` fixes the map-first shell, map-overlay search/filter seam, bottom lens navigation, sheet-top action rail, and sheet-contained result cards. Stage 2 must not reinterpret this as a top mobile lens menu.
 
 ## Fixed four-position action contract
 
-`LensActionDefinitionTuple` has exactly four positions. `mobileLensActionRail` adapts the current Phase 2 action projections without changing their authority semantics.
+`LensActionDefinitionTuple` has exactly four positions. `mobileLensActionRail` adapts the current Phase 2 action projections and validates them against the canonical action ID and position at every slot. Duplicate, substituted, missing, or displaced entries fail closed.
 
 Every action keeps these facts separate:
 
@@ -78,35 +76,62 @@ Every action keeps these facts separate:
 - `applicable` — the current lens/object context supports the action;
 - `authorized` — current server-derived authority permits the action.
 
-The rendered availability is derived only after those facts are known. Disabled actions retain a specific reason and a localization key. Disabled actions expose no handler and cannot create a remediation loop merely because they are unavailable.
+Rendered availability is derived only after those facts are known. Disabled actions retain a specific machine reason, use the existing localized `networkWorkspace.actionReasons.exchange-action-unavailable` explanation, and expose no handler. A visible unavailable action therefore cannot activate a route or remediation loop.
 
-A visible action therefore cannot become usable solely because client state, a URL, a card, or a marker says it is available.
+Record-specific card actions use the same fail-closed separation but remain distinct from the frozen sixteen lens-level action positions.
+
+## Subject identity and selected-object parity
+
+`ExchangeSubjectIdentity` is the single organization-or-record identity consumed by card, map and detail models. Organization identities cannot carry record fields. Record identities require a record type and ID.
+
+`createLensResultCardModel` constructs the card and its detail context from the same validated identity object. The contract does not expose two independently writable identity envelopes that could drift. `createExchangeMapObjectProjection` uses the same identity shape.
+
+`ExchangeSelectionState` has one canonical `selectionKey` shared by every present selected reference. It rejects organization, record and marker references with different keys.
+
+This binds:
+
+- map marker selection;
+- card selection;
+- keyboard and switch-access selection;
+- detail selection.
+
+`selectionMatchesCard` and `selectionMatchesMapObject` use that same key. A cluster is not a selectable organization or domain record. A permitted record may legitimately have no marker when privacy or domain rules provide no coordinate; the shared contract does not fabricate one.
 
 ## Mobile continuity state
 
-`MobileExchangeState` provides the presentation state. `MobileExchangeContinuityState` composes that complete state with `MobileExchangeContinuityScope`, so the Stage 1 contract intentionally represents:
+`MobileExchangeState` provides presentation state. `MobileExchangeContinuityState` composes it with a scope containing session, participant, membership, viewer organization and geography identities.
+
+The state intentionally represents:
 
 - `activeLens`;
-- one `ExchangeSelectionState` containing `selectedOrganization`, `selectedRecord`, and `selectedMarker` references;
-- `mapCamera` and optional `mapBounds`;
-- authoritative/current geography context;
-- per-lens `search`, `filters`, `sort`, result position, and `listScrollPosition`;
-- `sheet.sheetSnapPoint`;
-- `sheet.detailContext` and `detail.detailContext`;
-- a continuity scope containing session, participant, membership, viewer organization, and geography identities.
+- selected organization, record and marker;
+- map camera and optional bounds;
+- current geography and whether it is merely carried or freshly server-revalidated;
+- per-lens search, filters and sort;
+- result-set identity and cursor;
+- result page/index;
+- list and sheet scroll positions;
+- sheet snap point;
+- detail and return context.
 
-`migrateParticipantSpatialContextToMobileExchangeContinuity` is the explicit compatibility adapter from the existing `ParticipantSpatialContext` version. It preserves current search/filter/result/list continuity and maps the existing boolean panel state to a safe initial sheet state:
+`migrateParticipantSpatialContextToMobileExchangeContinuity` is the explicit adapter from the existing `ParticipantSpatialContext` version. It preserves current search/filter/result/list continuity, adds `null` result-set/cursor seams where the prior schema had none, and maps the current boolean panel state to a safe initial sheet state:
 
 - closed panel → `peek`;
 - open panel → `partial`.
 
-It does not add a second persisted browser store or change the current spatial-context version. Unsupported source versions fail closed. A later persistence change requires an explicit schema version, scope, invalidation, and compatibility decision.
+It does not create a second persisted browser store or silently upgrade unsupported schemas. Unsupported source versions fail closed.
 
-`transitionMobileExchangeContinuityLens` changes only `activeLens`. Selection, camera, geography, sheet state, and each lens's own query/list state remain intact unless authoritative revalidation narrows them.
+Lens transitions preserve selection, camera, geography and each lens's own continuity while restoring the target lens's sheet scroll position.
+
+## Geography authority
+
+A geography ID carried from client continuity is represented as `carried-unvalidated`; it is not labeled server-authoritative merely because it exists in browser state.
+
+`withServerRevalidatedMobileExchangeGeography` may project `server-revalidated` only when a current server result exactly matches the active continuity scope. A different geography fails closed. This state still grants no route, record or action permission.
 
 ## Continuity invalidation
 
-`reconcileMobileExchangeContinuity` evaluates the client continuity state against current server-derived scope and selected-object authority. It has explicit invalidation reasons for:
+`reconcileMobileExchangeContinuity` evaluates client continuity against current server-derived scope and selected-object authority. It has explicit invalidation reasons for:
 
 - contract/schema version change;
 - session-context change;
@@ -116,24 +141,15 @@ It does not add a second persisted browser store or change the current spatial-c
 - geography change;
 - selected-object authority change.
 
-Session, participant, membership, viewer-organization, geography, and schema mismatches invalidate the entire client state; the contract returns no reusable safe state. A selected-object authority change removes only the stale selection and open detail while preserving safe camera and per-lens search/filter/list continuity.
+Session, participant, membership, viewer-organization, geography and schema mismatches invalidate the entire client continuity state. A selected-object authority change removes only stale selection and open detail while preserving safe camera and per-lens query/list/scroll continuity.
 
-The caller still owns the authoritative server read. The continuity decision cannot grant tenant, organization, geography, publication, record, or action access.
+The caller still owns the authoritative server read. The continuity decision cannot grant tenant, organization, geography, publication, record or action access.
 
-## Selected-object parity
+## Floating search/filter and result continuity
 
-`ExchangeSelectionState` has one canonical `selectionKey` shared by every present selected reference. The constructor rejects a state in which the selected organization, record, and marker have different keys.
+`MobileExchangeSearchFilterContract` is explicitly placed over the map and projects the active lens's search, filters, sort, result-set ID and cursor. The contract supports both page/index and cursor/result-set continuity so later domain adapters do not need private mobile state systems.
 
-This binds these interactions to one selected object:
-
-- map marker selection;
-- card selection;
-- keyboard or switch-access result selection;
-- detail selection.
-
-`selectionMatchesCard` and `selectionMatchesMapObject` give Stage 2 one comparison rule. A cluster is not an organization or domain record and does not participate in card selection parity.
-
-A selected record may legitimately have no marker when privacy or domain projection rules provide no coordinate. The shared contract does not fabricate a coordinate to satisfy the composition.
+The shared layer does not invent cursor semantics for a domain that does not have them. The current spatial adapter uses `null` until an authorized domain projection supplies a real value.
 
 ## Bottom-sheet contract
 
@@ -143,85 +159,51 @@ A selected record may legitimately have no marker when privacy or domain project
 - `partial`;
 - `expanded`.
 
-`ExchangeSheetState` distinguishes result content from detail content and can carry a detail context. `MOBILE_EXCHANGE_ACCESSIBILITY_POLICY` requires a non-drag control capable of reaching all three positions, so gestures are never the only way to operate the sheet.
+`ExchangeSheetState` distinguishes result content from detail content and carries sheet-internal scroll state. `MOBILE_EXCHANGE_ACCESSIBILITY_POLICY` requires a non-drag control capable of reaching all three positions, so gestures are never the only way to operate the sheet.
 
-This is the state and accessibility representation only. Stage 1 does not implement drag physics, gesture recognition, snap measurements, safe-area styling, or animation.
+Stage 1 does not implement drag physics, snap measurements, safe-area CSS or animation.
 
-## Detail and focus-return contract
+## Card, media, favorite and detail contracts
 
-`MobileExchangeDetailContext` composes the shared `ExchangeDetailContext` with safe return and focus context. It carries:
+`LensResultCardModel` supports organizations and permitted domain records with:
 
-- the same selected-object key used by map and card projections;
-- subject and organization/record identities;
-- optional canonical detail destination;
-- return lens and safe return destination;
-- an optional focus-return key for keyboard, screen-reader, and switch-access restoration.
-
-Card-to-detail behavior can therefore expand the selected object without abandoning the shared Exchange context. A detail state does not grant authority to the subject it references.
-
-## Card contract
-
-`LensResultCardModel` supports both organizations and permitted domain records. `MobileLensResultCardModel` binds that card to `MobileExchangeDetailContext` for Stage 1 mobile composition. The model contains:
-
-- stable selection identity;
-- organization/record identity;
+- one validated subject identity;
 - title and optional organization identity;
 - locality;
 - concise summary;
-- an important status/date/indicator;
+- status/date/important indicator;
 - capability/category metadata;
 - optional media;
 - favorite state;
 - record-specific actions;
-- whole-card detail context.
+- whole-card detail behavior.
 
-Domain lanes provide truthful models from their own authorized projections. The shared card contract does not manufacture market records or domain state.
+`ExchangeMediaModel` supports organization logo, business/facility photo, product/service image, project image, branded media, video poster/thumbnail and fallback presentation. It uses opaque references and does not create upload, storage, moderation, transcoding or playback infrastructure.
 
-## Media contract
+`FavoriteState` supports hidden, disabled and enabled presentation. `projectFavoriteState` removes the handler when unavailable and declares `persistenceOwner: "domain"`. The shared star never creates an authoritative favorite relation.
 
-`ExchangeMediaModel` supports:
+`MobileExchangeDetailContext` adds a same-origin, lens-bounded return destination and optional focus-return key to the shared identity-bearing detail context. Return context is navigation only and never authority.
 
-- organization logo;
-- business or facility photo;
-- product or service image;
-- project image;
-- branded media;
-- video poster/thumbnail;
-- fallback presentation.
+## Accessibility and responsive obligations
 
-The model uses opaque asset/poster references and alternative/fallback text. It does not create final video playback, upload, transcoding, storage, moderation, or publication infrastructure.
-
-## Favorite contract
-
-`FavoriteState` supports hidden, disabled, and enabled presentation. `projectFavoriteState` keeps operational/applicable/authorized separate, removes the handler when unavailable, and declares `persistenceOwner: "domain"`.
-
-The shared star is therefore a presentation and interaction contract only. It does not create an authoritative favorite relation. Until a domain packet supplies a real relation, permission, and handler, the star must remain hidden or truthfully disabled.
-
-## Record-action contract
-
-`RecordActionDefinition` provides the same fail-closed separation for card-specific actions. Domain lanes own the underlying business meaning, eligibility, commands, and server authorization. The shared contract owns only the generalized projection shape.
-
-Record actions remain separate from the frozen sixteen lens-level action positions.
-
-## Accessibility and responsive contract
-
-`MOBILE_EXCHANGE_ACCESSIBILITY_POLICY` binds these Stage 2 implementation obligations without implementing the visuals:
+`MOBILE_EXCHANGE_ACCESSIBILITY_POLICY` binds these Stage 2 obligations without implementing visuals:
 
 - safe-area insets must be accommodated;
+- the sheet must clear the persistent bottom-navigation safe area;
 - touch targets are generally at least 44px;
-- keyboard and switch-access selection use the same selected-object state;
+- keyboard and switch-access selection use the shared selected-object state;
 - a non-drag sheet-position control is required;
 - selected/current state cannot rely on color alone;
 - a structured list alternative is required for map results;
-- detail transitions require a focus-restoration key where a focus origin exists;
+- detail transitions preserve a focus-return key where a focus origin exists;
 - reduced motion is required;
-- orientation and resize must preserve safe continuity.
-
-The four bottom-navigation items remain a single navigation control, not four unrelated buttons or routes presented through a top menu.
+- orientation/resize preserves safe continuity;
+- the software keyboard cannot make search, sheet controls or bottom navigation unreachable;
+- result cursor and sheet scroll continuity are explicit state obligations.
 
 ## Non-authorizing policy
 
-`MOBILE_EXCHANGE_CLIENT_STATE_POLICY` and `MOBILE_EXCHANGE_STAGE1_AUTHORITY_POLICY` state explicitly that mobile client state:
+`MOBILE_EXCHANGE_CLIENT_STATE_POLICY` and `MOBILE_EXCHANGE_STAGE1_AUTHORITY_POLICY` state that mobile client state:
 
 - stores no authorization;
 - grants no protected-route access;
@@ -231,48 +213,49 @@ The four bottom-navigation items remain a single navigation control, not four un
 - does not own favorite persistence;
 - treats sheet and camera state as presentation state;
 - invalidates continuity when its governing scope changes;
-- treats return context as navigation only, never authority.
+- treats return context as navigation only;
+- never treats carried geography as server authority.
 
-Server authorization, privacy, geography release, lifecycle, publication, tenant, membership, and domain invariants remain controlling.
+Server authorization, privacy, geography release, lifecycle, publication, tenant, membership and domain invariants remain controlling.
 
 ## Domain compatibility
 
 ### 02 — Opportunities/RFx
 
-The shared model can represent opportunity/RFx map objects, issuer identity/media, the existing four Opportunities action positions, favorites when a real domain relation exists, RFx-specific record actions, opportunity/team/pursuit context, and opportunity detail. No Opportunities-specific mobile shell, sheet, card, or navigation framework is required.
+The shared model can represent opportunity/RFx map objects, issuer identity/media, the existing four Opportunities actions, favorites when a real relation exists, RFx-specific record actions, opportunity/team/pursuit context and detail. No Opportunities-specific mobile shell, sheet, card or navigation framework is required.
 
 ### 03 — Intelligence
 
-The shared model can represent organizations, sites/locations, analytical records, capability/AMACS metadata, layers through the existing action positions, provenance metadata, compare/watch record actions, map bounds/camera, and Intelligence detail. Privacy-suppressed or non-spatial analytical objects may omit coordinates without breaking card/detail behavior.
+The shared model can represent organizations, sites/locations, analytical records, AMACS/provenance metadata, layers, compare/watch record actions, bounds/camera and detail. Privacy-suppressed or non-spatial analytical objects may omit coordinates without breaking card/detail behavior.
 
 ### 04 — Resources
 
-The shared model can represent provider/resource markers, offered or requested resource records, own-provider versus external-provider context, resource/provider media, availability indicators, the four Resource action positions, favorites when backed by a real relation, request actions, and provider/resource detail.
+The shared model can represent provider/resource markers, offered or requested resources, own-provider versus external-provider context, media, availability indicators, the four Resource actions, favorites when backed by a real relation, request actions and detail.
 
 ### 05 — Referrals
 
-The shared model can represent referral records and sent/received relationship context, recipient selection, the four Referral action positions, private favorite/star presentation when backed by a real relation, connect/refer/introduction record actions, and referral detail.
+The shared model can represent referral records, sent/received relationship context, recipient selection, the four Referral actions, private star presentation when backed by a real relation, connect/refer/introduction actions and detail.
 
-A missing generalized capability must be submitted through the Shared Contract Request mechanism. A domain lane must not fork the mobile shell, bottom sheet, card, media, favorite, selection, action rail, detail, or navigation contracts.
+A missing generalized capability must be submitted through the Shared Contract Request mechanism. A domain lane must not fork the mobile shell, bottom sheet, card, media, favorite, selection, action rail, detail or navigation contracts.
 
 ## Shared Contract Requests and review
 
-Lanes 02–05 review the same exact PR head using the Control Room packet's `MOB1-DOMAIN-REVIEW` format. A missing generalized capability is recorded as `MOB1-FIND-*` or `SCR-<lane>-MOB1-*`; it is not implemented privately by a domain lane.
+Lanes 02–05 review the same exact PR head under the Control Room packet's `MOB1-DOMAIN-REVIEW` format. A missing generalized capability is recorded as `MOB1-FIND-*` or `SCR-<lane>-MOB1-*`; it is not implemented privately by a domain lane.
 
-At candidate creation, no Mobile Stage 1 Shared Contract Request is unresolved. That status must be rechecked on the exact candidate after all four domain reviews.
+At candidate creation, no Mobile Stage 1 Shared Contract Request is unresolved. That status must be rechecked after all four exact-candidate reviews.
 
 ## Stage 2 hard boundary
 
 This Stage 1 contract does not implement:
 
 - final persistent bottom-navigation visuals;
-- floating search/filter placement;
+- floating search/filter styling;
 - draggable-sheet gestures or production snap geometry;
 - final responsive/safe-area CSS;
 - Zillow-like card styling;
 - final media playback;
 - production lens-specific card streams;
-- Opportunities/RFx, Intelligence, Resources, or Referrals business logic;
+- Opportunities/RFx, Intelligence, Resources or Referrals business logic;
 - synthetic market records.
 
 Stage 2 may compose visual components only after the exact Stage 1 candidate has been reviewed for compatibility by lanes 02–05 and accepted for implementation sequencing by Control Room.

@@ -3,6 +3,7 @@ import {
   MOBILE_EXCHANGE_CLIENT_STATE_POLICY,
   MOBILE_EXCHANGE_CONTRACT_VERSION,
   MOBILE_EXCHANGE_LENS_DEFINITIONS,
+  createExchangeGeographyContext,
   createExchangeSelectionState,
   mobileExchangeStateFromParticipantSpatialContext,
   type ExchangeDetailContext,
@@ -52,9 +53,10 @@ export interface MobileExchangeReturnContext {
 
 export type MobileExchangeDetailContext = ExchangeDetailContext & MobileExchangeReturnContext;
 
-export type MobileLensResultCardModel = Omit<LensResultCardModel, "detailContext"> & Readonly<{
-  detailContext: MobileExchangeDetailContext;
-}>;
+export interface MobileLensResultCardModel {
+  readonly card: LensResultCardModel;
+  readonly detailContext: MobileExchangeDetailContext;
+}
 
 export interface MobileExchangeSearchFilterContract {
   readonly placement: "map-overlay";
@@ -62,6 +64,8 @@ export interface MobileExchangeSearchFilterContract {
   readonly search: string;
   readonly filters: Readonly<Record<string, ExchangeFilterValue>>;
   readonly sort: ExchangeSortState | null;
+  readonly resultSetId: string | null;
+  readonly cursor: string | null;
 }
 
 export interface MobileExchangeStage1ShellContract {
@@ -90,6 +94,7 @@ export type MobileExchangeContinuityDecision =
 export const MOBILE_EXCHANGE_ACCESSIBILITY_POLICY = Object.freeze({
   minimumTouchTargetPx: 44,
   safeAreaInsetsRequired: true,
+  bottomSheetClearsBottomNavigationSafeArea: true,
   nonDragSheetPositionControlRequired: true,
   keyboardSelectionUsesSharedState: true,
   switchAccessUsesSharedState: true,
@@ -98,6 +103,9 @@ export const MOBILE_EXCHANGE_ACCESSIBILITY_POLICY = Object.freeze({
   focusRestorationKeyRequiredForDetail: true,
   reducedMotionRequired: true,
   orientationResizePreservesContinuity: true,
+  softwareKeyboardPreservesReachability: true,
+  sheetScrollStateRequired: true,
+  resultCursorContinuityRequired: true,
 } as const);
 
 export const MOBILE_EXCHANGE_STAGE1_AUTHORITY_POLICY = Object.freeze({
@@ -105,6 +113,7 @@ export const MOBILE_EXCHANGE_STAGE1_AUTHORITY_POLICY = Object.freeze({
   scopeChangesInvalidateClientContinuity: true,
   selectedObjectsRequireServerRevalidation: true,
   returnContextNeverGrantsAuthority: true,
+  carriedGeographyIsNotServerAuthority: true,
 } as const);
 
 const CANONICAL_LENS_HREFS: Readonly<Record<ParticipantLensId, string>> = Object.freeze({
@@ -186,6 +195,8 @@ export function mobileExchangeSearchFilter(
     search: lensState.search,
     filters: lensState.filters,
     sort: lensState.sort,
+    resultSetId: lensState.resultSetId,
+    cursor: lensState.cursor,
   });
 }
 
@@ -199,6 +210,34 @@ export function mobileExchangeDetailContext(
     focusReturnKey: input.focusReturnKey
       ? required(input.focusReturnKey, "Focus return key")
       : null,
+  });
+}
+
+export function mobileLensResultCardModel(
+  card: LensResultCardModel,
+  input: Readonly<{ returnHref?: string | null; focusReturnKey?: string | null }> = {},
+): MobileLensResultCardModel {
+  return Object.freeze({
+    card,
+    detailContext: mobileExchangeDetailContext(card.detailContext, input),
+  });
+}
+
+export function withServerRevalidatedMobileExchangeGeography(
+  state: MobileExchangeContinuityState,
+  input: Readonly<{ geographyId: string; label: string | null }>,
+): MobileExchangeContinuityState {
+  const geographyId = required(input.geographyId, "Geography id");
+  if (geographyId !== state.scope.geographyId) {
+    throw new Error("Server geography does not match the active continuity scope.");
+  }
+  return Object.freeze({
+    ...state,
+    geography: createExchangeGeographyContext({
+      geographyId,
+      label: input.label,
+      serverRevalidated: true,
+    }),
   });
 }
 
@@ -258,5 +297,12 @@ export function transitionMobileExchangeContinuityLens(
   state: MobileExchangeContinuityState,
   activeLens: ParticipantLensId,
 ): MobileExchangeContinuityState {
-  return Object.freeze({ ...state, activeLens });
+  return Object.freeze({
+    ...state,
+    activeLens,
+    sheet: Object.freeze({
+      ...state.sheet,
+      sheetScrollPosition: state.lensState[activeLens].sheetScrollPosition,
+    }),
+  });
 }

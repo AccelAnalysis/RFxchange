@@ -31,6 +31,8 @@ export type ExchangeActionPosition = 1 | 2 | 3 | 4;
 export type ExchangeSelectionSource = "map" | "card" | "keyboard" | "detail" | "restored";
 export type ExchangeAvailability = "enabled" | "disabled";
 export type ExchangeDetailStatus = "closed" | "opening" | "open" | "error";
+export type ExchangeGeographyAuthority = "carried-unvalidated" | "server-revalidated";
+
 export const EXCHANGE_MEDIA_KINDS = Object.freeze([
   "organization-logo",
   "business-photo",
@@ -42,6 +44,9 @@ export const EXCHANGE_MEDIA_KINDS = Object.freeze([
   "video-poster",
   "fallback",
 ] as const);
+
+export const MOBILE_EXCHANGE_UNAVAILABLE_EXPLANATION_KEY =
+  "networkWorkspace.actionReasons.exchange-action-unavailable" as const;
 
 export type ExchangeMediaKind = (typeof EXCHANGE_MEDIA_KINDS)[number];
 
@@ -55,7 +60,7 @@ export interface ExchangeMapBounds {
 export interface ExchangeGeographyContext {
   readonly geographyId: string;
   readonly label: string | null;
-  readonly authority: "server";
+  readonly authority: ExchangeGeographyAuthority;
 }
 
 export interface ExchangeSortState {
@@ -81,6 +86,22 @@ export interface ExchangeMarkerSelection {
   readonly selectionKey: string;
   readonly markerId: string;
 }
+
+export type ExchangeSubjectIdentity =
+  | Readonly<{
+      subjectKind: "organization";
+      selectionKey: string;
+      organizationId: string;
+      recordType: null;
+      recordId: null;
+    }>
+  | Readonly<{
+      subjectKind: "record";
+      selectionKey: string;
+      organizationId: string | null;
+      recordType: string;
+      recordId: string;
+    }>;
 
 export type ExchangeSelectionState =
   | Readonly<{
@@ -120,7 +141,7 @@ export interface RecordActionDefinition {
   readonly authorized: boolean;
   readonly availability: ExchangeAvailability;
   readonly disabledReason: ExchangeRoomActionDisabledReason | null;
-  readonly disabledExplanationKey: string | null;
+  readonly disabledExplanationKey: typeof MOBILE_EXCHANGE_UNAVAILABLE_EXPLANATION_KEY | null;
   readonly handler: RecordActionHandler | null;
   readonly authoritySource: "server-derived";
 }
@@ -133,18 +154,14 @@ export interface FavoriteState {
   readonly authorized: boolean;
   readonly availability: "hidden" | ExchangeAvailability;
   readonly disabledReason: ExchangeRoomActionDisabledReason | null;
-  readonly disabledExplanationKey: string | null;
+  readonly disabledExplanationKey: typeof MOBILE_EXCHANGE_UNAVAILABLE_EXPLANATION_KEY | null;
   readonly handler: RecordActionHandler | null;
   readonly persistenceOwner: "domain";
   readonly authoritySource: "server-derived";
 }
 
 export interface ExchangeDetailContext {
-  readonly selectionKey: string;
-  readonly subjectKind: "organization" | "record";
-  readonly organizationId: string | null;
-  readonly recordType: string | null;
-  readonly recordId: string | null;
+  readonly identity: ExchangeSubjectIdentity;
   readonly canonicalHref: string | null;
   readonly returnLens: ParticipantLensId;
 }
@@ -159,17 +176,15 @@ export type ExchangeDetailState =
 
 export interface ExchangeSheetState {
   readonly sheetSnapPoint: ExchangeSheetSnapPoint;
+  readonly sheetScrollPosition: number;
   readonly content: "results" | "detail";
   readonly detailContext: ExchangeDetailContext | null;
 }
 
 export interface ExchangeMapObjectProjection {
   readonly kind: "organization" | "record";
-  readonly selectionKey: string;
+  readonly identity: ExchangeSubjectIdentity;
   readonly markerId: string;
-  readonly organizationId: string | null;
-  readonly recordType: string | null;
-  readonly recordId: string | null;
   readonly coordinate: Readonly<{ longitude: number; latitude: number }> | null;
   readonly privacy: "exact" | "approximate" | "locality-only" | "suppressed";
   readonly accessibleLabel: string;
@@ -206,12 +221,11 @@ export interface ExchangeResultMetadata {
   readonly value: string;
 }
 
+declare const VALIDATED_RESULT_CARD: unique symbol;
+
 export interface LensResultCardModel {
-  readonly selectionKey: string;
-  readonly subjectKind: "organization" | "record";
-  readonly organizationId: string | null;
-  readonly recordType: string | null;
-  readonly recordId: string | null;
+  readonly [VALIDATED_RESULT_CARD]: true;
+  readonly identity: ExchangeSubjectIdentity;
   readonly title: string;
   readonly organizationIdentity: string | null;
   readonly locality: string | null;
@@ -228,9 +242,12 @@ export interface LensContinuityState {
   readonly search: string;
   readonly filters: Readonly<Record<string, ExchangeFilterValue>>;
   readonly sort: ExchangeSortState | null;
+  readonly resultSetId: string | null;
+  readonly cursor: string | null;
   readonly resultPage: number;
   readonly resultIndex: number;
   readonly listScrollPosition: number;
+  readonly sheetScrollPosition: number;
 }
 
 export interface MobileExchangeState {
@@ -255,7 +272,7 @@ export interface LensActionDefinition {
   readonly authorized: boolean;
   readonly availability: ExchangeAvailability;
   readonly disabledReason: ExchangeRoomActionDisabledReason | null;
-  readonly disabledExplanationKey: string | null;
+  readonly disabledExplanationKey: typeof MOBILE_EXCHANGE_UNAVAILABLE_EXPLANATION_KEY | null;
   readonly handler: ExchangeRoomActionHandler | null;
   readonly authoritySource: "server-derived";
 }
@@ -351,6 +368,10 @@ function required(value: string, label: string): string {
   return normalized;
 }
 
+function optionalRequired(value: string | null, label: string): string | null {
+  return value === null ? null : required(value, label);
+}
+
 function selectionKeyForOrganization(organizationId: string): string {
   return `organization:${required(organizationId, "Organization id")}`;
 }
@@ -364,6 +385,58 @@ function participantLens(id: ParticipantLensId): ParticipantLensDefinition {
   const definition = PARTICIPANT_LENSES.find((lens) => lens.id === id);
   if (!definition) throw new Error(`Participant lens ${id} is not registered.`);
   return definition;
+}
+
+export function createExchangeSubjectIdentity(input: Readonly<{
+  subjectKind: "organization" | "record";
+  selectionKey: string;
+  organizationId: string | null;
+  recordType: string | null;
+  recordId: string | null;
+}>): ExchangeSubjectIdentity {
+  const selectionKey = required(input.selectionKey, "Selection key");
+  if (input.subjectKind === "organization") {
+    if (!input.organizationId || input.recordType !== null || input.recordId !== null) {
+      throw new Error("Organization identity requires one organization and no domain record.");
+    }
+    return Object.freeze({
+      subjectKind: "organization",
+      selectionKey,
+      organizationId: required(input.organizationId, "Organization id"),
+      recordType: null,
+      recordId: null,
+    });
+  }
+  if (!input.recordType || !input.recordId) {
+    throw new Error("Record identity requires a record type and record id.");
+  }
+  return Object.freeze({
+    subjectKind: "record",
+    selectionKey,
+    organizationId: optionalRequired(input.organizationId, "Organization id"),
+    recordType: required(input.recordType, "Record type"),
+    recordId: required(input.recordId, "Record id"),
+  });
+}
+
+function sameSubjectIdentity(left: ExchangeSubjectIdentity, right: ExchangeSubjectIdentity): boolean {
+  return left.subjectKind === right.subjectKind
+    && left.selectionKey === right.selectionKey
+    && left.organizationId === right.organizationId
+    && left.recordType === right.recordType
+    && left.recordId === right.recordId;
+}
+
+export function createExchangeGeographyContext(input: Readonly<{
+  geographyId: string;
+  label?: string | null;
+  serverRevalidated: boolean;
+}>): ExchangeGeographyContext {
+  return Object.freeze({
+    geographyId: required(input.geographyId, "Geography id"),
+    label: input.label ? required(input.label, "Geography label") : null,
+    authority: input.serverRevalidated ? "server-revalidated" : "carried-unvalidated",
+  });
 }
 
 function lensDefinition(id: ParticipantLensId, order: ExchangeActionPosition): LensDefinition {
@@ -474,8 +547,10 @@ function disabledReasonFor(
   return null;
 }
 
-function disabledExplanationKey(reason: ExchangeRoomActionDisabledReason | null): string | null {
-  return reason ? `exchangeRoom.phase2.disabledReasons.${reason}` : null;
+function disabledExplanationKey(
+  reason: ExchangeRoomActionDisabledReason | null,
+): typeof MOBILE_EXCHANGE_UNAVAILABLE_EXPLANATION_KEY | null {
+  return reason ? MOBILE_EXCHANGE_UNAVAILABLE_EXPLANATION_KEY : null;
 }
 
 export function projectRecordAction(input: Readonly<{
@@ -488,6 +563,7 @@ export function projectRecordAction(input: Readonly<{
 }>): RecordActionDefinition {
   const disabledReason = disabledReasonFor(input.operational, input.applicable, input.authorized);
   const enabled = disabledReason === null && input.handler !== null;
+  const projectedReason = enabled ? null : disabledReason ?? "not-operational";
   return Object.freeze({
     id: required(input.id, "Record action id"),
     labelKey: required(input.labelKey, "Record action label key"),
@@ -495,8 +571,8 @@ export function projectRecordAction(input: Readonly<{
     applicable: input.applicable,
     authorized: input.authorized,
     availability: enabled ? "enabled" : "disabled",
-    disabledReason: enabled ? null : disabledReason ?? "not-operational",
-    disabledExplanationKey: disabledExplanationKey(enabled ? null : disabledReason ?? "not-operational"),
+    disabledReason: projectedReason,
+    disabledExplanationKey: disabledExplanationKey(projectedReason),
     handler: enabled ? input.handler : null,
     authoritySource: "server-derived",
   });
@@ -543,15 +619,91 @@ export function projectFavoriteState(input: Readonly<{
   });
 }
 
+export function createLensResultCardModel(input: Readonly<{
+  identity: ExchangeSubjectIdentity;
+  title: string;
+  organizationIdentity?: string | null;
+  locality?: string | null;
+  summary?: string | null;
+  indicator?: ExchangeResultIndicator | null;
+  metadata?: readonly ExchangeResultMetadata[];
+  media?: ExchangeMediaModel | null;
+  favorite: FavoriteState;
+  recordActions?: readonly RecordActionDefinition[];
+  canonicalHref?: string | null;
+  returnLens: ParticipantLensId;
+}>): LensResultCardModel {
+  const identity = createExchangeSubjectIdentity(input.identity);
+  const detailContext = Object.freeze({
+    identity,
+    canonicalHref: input.canonicalHref ? required(input.canonicalHref, "Canonical detail href") : null,
+    returnLens: input.returnLens,
+  });
+  return Object.freeze({
+    identity,
+    title: required(input.title, "Card title"),
+    organizationIdentity: input.organizationIdentity
+      ? required(input.organizationIdentity, "Organization identity")
+      : null,
+    locality: input.locality ? required(input.locality, "Locality") : null,
+    summary: input.summary ? required(input.summary, "Card summary") : null,
+    indicator: input.indicator ?? null,
+    metadata: Object.freeze([...(input.metadata ?? [])]),
+    media: input.media ?? null,
+    favorite: input.favorite,
+    recordActions: Object.freeze([...(input.recordActions ?? [])]),
+    detailContext,
+  }) as LensResultCardModel;
+}
+
+export function resultCardIdentityIsCoherent(card: LensResultCardModel): boolean {
+  return sameSubjectIdentity(card.identity, card.detailContext.identity);
+}
+
+export function createExchangeMapObjectProjection(input: Readonly<{
+  identity: ExchangeSubjectIdentity;
+  markerId: string;
+  coordinate: Readonly<{ longitude: number; latitude: number }> | null;
+  privacy: ExchangeMapObjectProjection["privacy"];
+  accessibleLabel: string;
+  selectable: boolean;
+}>): ExchangeMapObjectProjection {
+  const identity = createExchangeSubjectIdentity(input.identity);
+  return Object.freeze({
+    kind: identity.subjectKind,
+    identity,
+    markerId: required(input.markerId, "Marker id"),
+    coordinate: input.coordinate,
+    privacy: input.privacy,
+    accessibleLabel: required(input.accessibleLabel, "Accessible map label"),
+    selectable: input.selectable,
+  });
+}
+
 export function mobileLensActionRail(
   lens: ParticipantLensId,
   projections: readonly ExchangeRoomActionProjection[],
 ): LensActionRailContract {
+  const canonical = asFour(
+    exchangeRoomActionDefinitionsForLens(lens),
+    `${lens} canonical action registry`,
+  );
   const ordered = [...projections]
     .filter((projection) => projection.lens === lens)
     .sort((left, right) => left.order - right.order);
+  const source = asFour(ordered, `${lens} projected action rail`);
+  source.forEach((projection, index) => {
+    const definition = canonical[index];
+    if (projection.id !== definition.id || projection.order !== definition.order) {
+      throw new Error(`${lens} projected action rail must match the canonical action id and position.`);
+    }
+  });
+  if (new Set(source.map((projection) => projection.id)).size !== 4) {
+    throw new Error(`${lens} projected action rail cannot contain duplicate action ids.`);
+  }
+
   const actions = asFour(
-    ordered.map((projection): LensActionDefinition => {
+    source.map((projection): LensActionDefinition => {
       const enabled = projection.operational
         && projection.applicable
         && projection.authorized
@@ -582,9 +734,6 @@ export function mobileLensActionRail(
     }),
     `${lens} projected action rail`,
   );
-  if (actions.some((action, index) => action.position !== index + 1)) {
-    throw new Error(`${lens} projected action rail must preserve positions one through four.`);
-  }
   return Object.freeze({ placement: "sheet-top", lens, actions });
 }
 
@@ -593,9 +742,12 @@ function continuityState(state: ParticipantSpatialLensState): LensContinuityStat
     search: state.search,
     filters: Object.freeze({ ...state.filters }),
     sort: null,
+    resultSetId: null,
+    cursor: null,
     resultPage: state.resultPage,
     resultIndex: state.resultIndex,
     listScrollPosition: state.listScrollTop,
+    sheetScrollPosition: state.listScrollTop,
   });
 }
 
@@ -615,6 +767,12 @@ export function mobileExchangeStateFromParticipantSpatialContext(
       markerId: context.selection.markerId,
     }),
   });
+  const lensState = Object.freeze({
+    "opportunities-rfx": continuityState(context.lensState["opportunities-rfx"]),
+    resources: continuityState(context.lensState.resources),
+    intelligence: continuityState(context.lensState.intelligence),
+    referrals: continuityState(context.lensState.referrals),
+  });
 
   return Object.freeze({
     version: MOBILE_EXCHANGE_CONTRACT_VERSION,
@@ -622,19 +780,15 @@ export function mobileExchangeStateFromParticipantSpatialContext(
     selection,
     mapCamera: context.camera,
     mapBounds: null,
-    geography: Object.freeze({
+    geography: createExchangeGeographyContext({
       geographyId: context.scope.geographyId,
       label: null,
-      authority: "server",
+      serverRevalidated: false,
     }),
-    lensState: Object.freeze({
-      "opportunities-rfx": continuityState(context.lensState["opportunities-rfx"]),
-      resources: continuityState(context.lensState.resources),
-      intelligence: continuityState(context.lensState.intelligence),
-      referrals: continuityState(context.lensState.referrals),
-    }),
+    lensState,
     sheet: Object.freeze({
       sheetSnapPoint: context.panelOpen ? "partial" : "peek",
+      sheetScrollPosition: lensState[context.activeLens].sheetScrollPosition,
       content: "results",
       detailContext: null,
     }),
@@ -647,14 +801,23 @@ export function transitionMobileExchangeLens(
   activeLens: ParticipantLensId,
 ): MobileExchangeState {
   if (!PARTICIPANT_LENS_IDS.includes(activeLens)) throw new Error("Unknown participant lens.");
-  return Object.freeze({ ...state, activeLens });
+  return Object.freeze({
+    ...state,
+    activeLens,
+    sheet: Object.freeze({
+      ...state.sheet,
+      sheetScrollPosition: state.lensState[activeLens].sheetScrollPosition,
+    }),
+  });
 }
 
 export function selectionMatchesCard(
   selection: ExchangeSelectionState,
   card: LensResultCardModel,
 ): boolean {
-  return selection.selectionKey !== null && selection.selectionKey === card.selectionKey;
+  return resultCardIdentityIsCoherent(card)
+    && selection.selectionKey !== null
+    && selection.selectionKey === card.identity.selectionKey;
 }
 
 export function selectionMatchesMapObject(
@@ -663,5 +826,5 @@ export function selectionMatchesMapObject(
 ): boolean {
   return projection.kind !== "cluster"
     && selection.selectionKey !== null
-    && selection.selectionKey === projection.selectionKey;
+    && selection.selectionKey === projection.identity.selectionKey;
 }
