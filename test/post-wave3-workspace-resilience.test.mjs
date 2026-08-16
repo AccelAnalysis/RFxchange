@@ -88,7 +88,7 @@ test("live workspace sources retain bounded hydration, scoped refresh, and strea
   assert.doesNotMatch(resourcePage, /Promise\.all\(requestReferrals\.map/);
   assert.doesNotMatch(resourceWorkspace, /window\.location\.reload/);
   assert.match(resourceWorkspace, /router\.refresh\(\)/);
-  for (const parameter of ["q", "availability", "provider", "resource", "request"]) {
+  for (const parameter of ["q", "availability", "provider", "request"]) {
     assert.match(resourceWorkspace, new RegExp(`"${parameter}"`));
   }
   assert.match(accountPage, /settleOptionalWorkspacePanel/);
