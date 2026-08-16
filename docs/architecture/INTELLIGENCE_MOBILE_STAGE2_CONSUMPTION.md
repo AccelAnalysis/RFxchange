@@ -1,9 +1,13 @@
 # Intelligence Mobile Stage 2 Consumption
 
-**Lane:** 03 — Intelligence  
-**Stage:** 2 — Restore the Shared Mobile Composition  
-**Implementation base:** `e46f57473d9a1ead6b90c7f48a317252f3416f09`  
-**Shared architecture:** merged PR #218 / Stage 1 contracts  
+**Lane:** 03 — Intelligence
+
+**Stage:** 2 — Restore the Shared Mobile Composition
+
+**Implementation base:** `e46f57473d9a1ead6b90c7f48a317252f3416f09`
+
+**Shared architecture:** merged PR #218 / Stage 1 contracts
+
 **Control Room authorization:** merged PR #217 / `MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md`
 
 ## Purpose
