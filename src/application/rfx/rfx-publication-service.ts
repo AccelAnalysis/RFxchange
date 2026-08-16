@@ -351,6 +351,11 @@ export class RfxPublicationService {
           id: item.id,
           authorityUpdatedAt: item.authorityUpdatedAt,
         })),
+        authentication: Object.freeze({
+          provider: publishDecision.context.authentication.provider,
+          subject: publishDecision.context.authentication.subject,
+          authenticatedAt: publishDecision.context.authentication.authenticatedAt,
+        }),
         event,
         command: receipt,
         audit: createOrganizationActionAuditEvent(

@@ -1,6 +1,5 @@
 import type { Firestore } from "firebase-admin/firestore";
 
-import { RfxPublicationService } from "../../application/rfx/rfx-publication-service.ts";
 import {
   loadRfxQuantityDimensionAuthority,
   loadRfxQuantityUnitAuthority,
@@ -15,6 +14,8 @@ import { FirestoreAiInterpretationRepository } from "../firestore/ai-interpretat
 import { getServerFirestore } from "../firestore/runtime.ts";
 import { AuthoringAuthorityRfxDraftService } from "./authoring-authority-draft-service.ts";
 import { Iss006GovernedRfxRepository } from "./iss006-governed-rfx-repository.ts";
+import { Wave4GapPublicationService } from "../../application/rfx/wave4-gap-publication-service.ts";
+import { Wave4GapPublicationRepository } from "./wave4-gap-publication-repository.ts";
 
 export async function createServerRfxDraftService(
   db: Firestore = getServerFirestore(),
@@ -68,15 +69,17 @@ export function createServerRfxPublicationService(
   const foundation = createFirestoreFoundationRepositories(db);
   const geography = createFirestoreGeographyRepositories(db);
   const organizationLocation = createFirestoreOrganizationLocationRepositories(db);
-  return new RfxPublicationService({
+  const accountSecurity = createServerFirebaseAccountSecurityService();
+  const baseRepository = new FirestoreRfxRepository(db);
+  return new Wave4GapPublicationService({
     authorization: {
-      accountSecurity: createServerFirebaseAccountSecurityService(),
+      accountSecurity,
       organizations: foundation.organizations.accounts,
       memberships: foundation.users.memberships,
       authorizations: foundation.organizationAuthorization,
       restrictions: foundation.lifecycle.restrictions,
     },
-    repository: new FirestoreRfxRepository(db),
+    repository: new Wave4GapPublicationRepository(db, baseRepository, accountSecurity),
     profiles: foundation.organizations.profiles,
     locations: organizationLocation.locations,
     geographies: geography.definitions,

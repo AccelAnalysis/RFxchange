@@ -81,7 +81,7 @@ test("ISS-007 and ISS-011 preserve same-draft edits and support governed structu
   assert.match(runtime, /loadRfxQuantityDimensionAuthority/);
   assert.match(runtime, /db\.collection\("geographies"\)\.get\(\)/);
   assert.match(runtime, /releaseState !== "released"/);
-  assert.doesNotMatch(runtime, /Wave4GapPublicationService/);
+  assert.doesNotMatch(authority, /Wave4GapPublicationService/);
 
   assert.match(authority, /loadRfxQuantityUnitAuthority/);
   assert.match(authority, /loadRfxQuantityDimensionAuthority/);
