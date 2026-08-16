@@ -8,6 +8,7 @@ import {
 } from "@/src/infrastructure/auth/participant-route-runtime";
 import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import { createServerOpportunityDiscoveryService } from "@/src/infrastructure/rfx/opportunity-discovery-runtime";
+import { getRequestLocale } from "@/src/i18n/server";
 
 export const runtime = "nodejs";
 
@@ -94,7 +95,8 @@ export async function POST(request: NextRequest) {
     const participant = await scope();
     if (participant instanceof NextResponse) return participant;
     const body = (await request.json()) as Record<string, unknown>;
-    const service = createServerOpportunityDiscoveryService();
+    const locale = await getRequestLocale();
+    const service = createServerOpportunityDiscoveryService(undefined, locale);
     if (body.action === "save-search") {
       const result = await service.saveSearch(participant, {
         commandId: String(body.commandId ?? ""),
