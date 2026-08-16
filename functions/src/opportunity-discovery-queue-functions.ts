@@ -52,6 +52,7 @@ export const queueOpportunityDiscoveryEvaluationOnPublication = onDocumentCreate
     ) {
       throw new Error("Opportunity publication projection is invalid for durable evaluation.");
     }
+    const publishedAt = new Date(Date.parse(projection.publishedAt)).toISOString();
 
     const db = getFunctionsFirestore();
     const id = evaluationId(projection);
@@ -80,7 +81,7 @@ export const queueOpportunityDiscoveryEvaluationOnPublication = onDocumentCreate
         projectionVersion: projection.aggregateVersion,
         projectionDigest: projection.digest,
         projection,
-        evaluationAt: new Date(Date.parse(projection.publishedAt)).toISOString(),
+        evaluationAt: publishedAt,
         status: "queued",
         attemptCount: 0,
         claimId: null,
