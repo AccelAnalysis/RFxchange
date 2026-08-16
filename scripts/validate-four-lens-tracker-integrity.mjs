@@ -53,16 +53,28 @@ for (const featureId of historicalDone) {
   assert.ok(entry?.done, `Historical pre-authority completion ${featureId} was silently revoked; use the governed correction/reconciliation process instead`);
 }
 
+const completionStatuses = new Set(["Implemented — Not Verified", "Verified"]);
+
 for (const entry of trackerEntries.filter((candidate) => candidate.done && !historicalDone.has(candidate.id))) {
   const requirement = requirementByFeatureId.get(entry.id);
-  assert.equal(
-    requirement.status,
-    "Verified",
-    `${entry.id} cannot enter canonical RFx completion while ${requirement.id} is ${requirement.status}; implementation alone is Implemented — Not Verified`,
+  assert.ok(
+    completionStatuses.has(requirement.status),
+    `${entry.id} cannot enter canonical RFx completion while ${requirement.id} is ${requirement.status}; completion requires an implemented terminal state under the Four-Lens Completion Governance Amendment`,
   );
-  assert.equal(requirement.acceptance?.lane, "independent-acceptance", `${entry.id} completion lacks Lane 06 acceptance`);
-  assert.equal(requirement.acceptance?.result, "Verified", `${entry.id} completion lacks a Verified independent disposition`);
-  assert.equal(requirement.acceptance?.sha, requirement.implementation?.sha, `${entry.id} completion is not bound to the exact accepted implementation SHA`);
+  assert.match(
+    requirement.implementation?.sha ?? "",
+    /^[0-9a-f]{40}$/,
+    `${entry.id} completion lacks an exact implementation SHA`,
+  );
+  assert.ok(requirement.implementation?.actor, `${entry.id} completion lacks an implementation actor`);
+
+  if (requirement.status === "Verified") {
+    assert.equal(requirement.acceptance?.lane, "independent-acceptance", `${entry.id} Verified assurance lacks Lane 06 provenance`);
+    assert.equal(requirement.acceptance?.result, "Verified", `${entry.id} Verified assurance lacks a Verified independent disposition`);
+    assert.equal(requirement.acceptance?.sha, requirement.implementation?.sha, `${entry.id} Verified assurance is not bound to the exact implementation SHA`);
+  }
 }
 
-console.log(`Four-Lens tracker integrity validated: ${historicalDone.size} frozen pre-authority RFx completions; every later completion requires Verified.`);
+console.log(
+  `Four-Lens tracker integrity validated: ${historicalDone.size} frozen pre-authority RFx completions; later completions may be Implemented — Not Verified or optionally Verified.`,
+);
