@@ -16,9 +16,9 @@
 
 **Control Room PR:** `#217`
 
-**Lane 01 candidate:** PR `#218` at `3c67ef3dffeaa60aef761debb6cf76ea1c807789`
+**Lane 01 candidate:** PR `#218` at `cf73a656dba4c09e735ac991cab557ecc2a22943`
 
-**Candidate build:** production-ci `#1483` — SUCCESS
+**Candidate build:** production-ci `#1492` — IN PROGRESS
 
 **Stage 1 exit gate:** NOT SATISFIED
 
@@ -26,15 +26,15 @@
 
 ## 1. Purpose
 
-This packet activates and coordinates the architecture-lock work required by `MOB-01 Mobile Experience Authority`. It does not redesign the established mobile Exchange and it does not authorize Stage 2 production UI.
+This packet activates and coordinates the architecture-lock work required by `MOB-01 Mobile Experience Authority`. It does not redesign the established mobile Exchange and does not authorize Stage 2 production UI.
 
-The controlling product/composition reference is already installed on merged `main`:
+The controlling product/composition reference is installed on merged `main`:
 
 - [`MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md`](MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md);
 - [`../reference/screenshots/rfxchange-mobile-composition-reference.jpg`](../reference/screenshots/rfxchange-mobile-composition-reference.jpg);
 - [`../reference/screenshots/README.md`](../reference/screenshots/README.md).
 
-Historical labels in the visual source are non-authoritative. The permanent governed mobile lens order is:
+Historical labels in the visual source are non-authoritative. The governed mobile lens order is:
 
 ```text
 Opportunities/RFx | Resources | Intelligence | Referrals
@@ -44,35 +44,35 @@ Account/Menu is a utility, not a fifth lens.
 
 ## 2. Locked product composition
 
-Stage 1 contracts must preserve the established composition without weakening visual placement into mere reachability:
+Stage 1 contracts must preserve:
 
-- map-first primary canvas;
+- a map-first primary canvas;
 - floating search and filter over the map;
 - four permanent lenses persistently thumb-accessible at the bottom;
-- draggable sheet with peek/collapsed, partial, and expanded positions;
-- exactly four active-lens action positions at the top of the sheet;
+- a three-position peek/collapsed, partial, and expanded sheet;
+- exactly four active-lens action positions at the sheet top;
 - Zillow-like result/business cards inside the sheet;
-- optional logo, image, or video media region;
-- record favorite/star and record-specific actions;
+- optional logo, image, or video media;
+- record favorites and record-specific actions;
 - marker, card, keyboard, and detail synchronization through one focal selected-object identity;
 - expanded detail without abandoning Exchange context;
 - progressive availability with individually visible disabled actions;
 - applicable map, selection, search/filter, sheet, scroll, and detail continuity across lens changes;
-- safe-area, touch-target, keyboard, screen-reader, reduced-motion, orientation, and non-gesture requirements as first-class architecture facts.
+- safe-area, touch-target, keyboard, screen-reader, reduced-motion, orientation, and non-gesture requirements as architecture facts.
 
 A Menu route to a lens does not satisfy persistent bottom navigation. A technically retrievable card does not satisfy the governed sheet/card composition.
 
-## 3. Merged foundations that remain controlling
+## 3. Merged compatibility foundation
 
-Stage 1 extends, and must not replace, the merged Exchange Room architecture:
+Stage 1 extends, and must not replace:
 
-1. `participant-lens-registry.ts` preserves the exact four-lens identity/order and separates Account/Quick Start utilities.
-2. `exchange-room-actions.ts` preserves the canonical sixteen action identities and independently projects `operational`, `applicable`, `authorized`, disabled presentation, and a truthful handler.
-3. `participant-spatial-context.ts` preserves a scoped, versioned, and non-authorizing continuity context.
-4. `EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md` freezes `4 lenses × 4 action positions` and the distinction between lens existence and action availability.
-5. PR #191 merged the Phase 2 controller/registry; PR #212 merged the bounded `New Referral` truth correction.
+1. `participant-lens-registry.ts` for exact lens identity/order and utility separation;
+2. `exchange-room-actions.ts` for the canonical sixteen action identities and separate `operational`, `applicable`, `authorized`, disabled-presentation, and handler facts;
+3. `participant-spatial-context.ts` for scoped, versioned, non-authorizing continuity;
+4. `EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md` for `4 lenses × 4 action positions`;
+5. merged PR #191 and its bounded PR #212 truth correction.
 
-Stage 1 must not weaken current lens-controller behavior, the sixteen-position registry, server-derived authorization, progressive availability, selected-object continuity, map continuity, or tenant/geography/privacy boundaries.
+Stage 1 must not weaken the lens controller, sixteen-position registry, server authorization, progressive availability, selected-object continuity, map continuity, or tenant/geography/privacy boundaries.
 
 ## 4. Lane 01 bounded assignment
 
@@ -87,94 +87,60 @@ Lane 01 owns one shared contract family conceptually covering:
 - `ExchangeFavorite`;
 - `ExchangeSelectionState`;
 - `ExchangeMapProjection`;
-- `ExchangeDetailState`.
+- `ExchangeDetailState`;
+- one versioned continuity/reconciliation contract.
 
-The domain-facing model must be conceptually equivalent to:
-
-- `LensDefinition`;
-- exactly four `LensActionDefinition` positions for each lens;
-- `LensMapProjection`;
-- `LensResultCardModel`;
-- `RecordActionDefinition`;
-- `SelectionState`;
-- `SheetState`;
-- `FavoriteState`;
-- `DetailState`;
-- one versioned continuity contract or an equally explicit composition of those contracts.
+The domain-facing model must be conceptually equivalent to `LensDefinition`, exactly four `LensActionDefinition` positions per lens, `LensMapProjection`, `LensResultCardModel`, `RecordActionDefinition`, `SelectionState`, `SheetState`, `FavoriteState`, and `DetailState`.
 
 ### Required state coverage
 
-The shared contract must represent, where applicable:
+Where applicable, the shared contract represents:
 
 - active lens;
 - focal selected organization or record;
-- associated organization context without collapsing it into a distinct record identity;
+- associated organization context without collapsing distinct record identity;
 - selected marker;
 - map camera and bounds;
-- geography and its validation source;
-- search, filters, and sort;
-- result-set identity and cursor;
+- geography and validation source;
+- search, filters, sort, result-set identity, and opaque cursor;
 - sheet snap point;
 - list, sheet, and detail scroll position;
-- detail context and return context;
-- versioned participant, membership, viewer-organization, and geography scope for fail-closed reconciliation.
+- detail and safe return context;
+- versioned session/participant/membership/viewer-organization/geography scope;
+- fail-closed selected-object reconciliation.
 
 ### Action-state compatibility
 
-The existing action definitions remain the source for the four active-lens positions. The Stage 1 contract must preserve separately:
-
-- stable action identity and order;
-- owning lens and canonical position;
-- `operational`;
-- `applicable`;
-- `authorized`;
-- enabled/disabled presentation;
-- supported-locale disabled explanation;
-- handler presence only when truthful;
-- server-derived permission inputs where required.
-
-Record actions use a separate `RecordActionDefinition` family. They may not consume, rename, or expand the sixteen lens-level positions.
+The current registry remains the source for four active-lens positions. The contract preserves stable identity/order, owning lens/position, `operational`, `applicable`, `authorized`, enabled/disabled presentation, supported-locale explanation, truthful handler, and server-derived permission inputs. Record actions remain a separate family and may not consume or rename the sixteen lens-level positions.
 
 ### Security and privacy
 
-All Stage 1 state is client/presentation continuity only. It must never authorize a protected operation, widen organization membership, grant geography access, disclose a private coordinate, or persist protected domain records merely for convenience.
-
-The contract must fail closed or narrow safely for session, participant, membership, viewer organization, geography, schema/version, and selected-object authority changes. Browser-restored geography may not be represented as server-authoritative until an authoritative projection revalidates it.
+Stage 1 continuity is presentation state only. It never authorizes operations, widens membership, grants geography, discloses private coordinates, or persists protected domain records for convenience. Scope, schema, geography, and selected-object authority changes must fail closed or narrow safely. Browser-restored geography remains unvalidated until an authoritative server projection revalidates it.
 
 ### Accessibility and responsive architecture
 
-The contract must represent or explicitly require:
-
-- persistent bottom navigation as a four-item lens control;
-- safe-area inset accommodation above bottom navigation;
-- touch targets generally 44px or larger;
-- keyboard and switch-access operation;
-- a non-drag control for all three sheet positions;
-- software-keyboard and orientation changes;
-- focus movement/restoration for detail and sheet transitions;
-- selected/current semantics that do not rely on color alone;
-- structured list alternatives and accessible selected-object descriptions;
-- reduced-motion and orientation/resize continuity.
+The shared contract must represent persistent bottom navigation, safe-area offset, 44px-class touch targets, keyboard/switch access, non-drag sheet controls, software-keyboard/orientation behavior, focus restoration, non-color selected/current semantics, structured-list alternatives, accessible selected-object descriptions, and reduced-motion/resize continuity.
 
 ### Stop boundary
 
-This packet does **not** authorize React/JSX, CSS, production bottom navigation, sheet/card/detail rendering, map renderer changes, routes, domain handlers, lens-specific behavior, changes to the sixteen action identities/order, tracker arithmetic, Stage 2, or mandatory Independent Acceptance.
+This packet does **not** authorize React/JSX, CSS, production rendering, map renderer changes, routes, domain handlers, lens-specific behavior, changes to the sixteen actions, tracker arithmetic, Stage 2, or mandatory Independent Acceptance.
 
 ## 5. Current Lane 01 candidate
 
-PR #218 supplies only:
+PR #218 currently supplies:
 
 - `src/application/participant/mobile-exchange-contracts.ts`;
+- `src/application/participant/mobile-exchange-continuity.ts`;
 - `test/mobile-exchange-stage1-contracts.test.mjs`;
 - `docs/architecture/MOBILE_EXCHANGE_STAGE1_CONTRACTS.md`.
 
-Its current disposition is `Implemented — Not Verified`. It correctly reuses the current lens registry, Phase 2 action registry, participant spatial context, and map-camera contract rather than creating a second mobile store or production UI implementation.
+The current head added a bounded continuity module with versioned participant/membership/viewer-organization/geography scope, typed invalidation reasons, selected-object fail-closed narrowing, safe return context, and accessibility/responsive policy facts. It remains `Implemented — Not Verified` and does not implement Stage 2 UI.
 
-Exact-head production-ci #1483 succeeded at `3c67ef3dffeaa60aef761debb6cf76ea1c807789`. Green CI proves build health; it does not resolve the substantive contract findings below.
+Production-ci #1492 is still in progress on `cf73a656dba4c09e735ac991cab557ecc2a22943`. Build success, when available, will not resolve the contract findings below.
 
-## 6. Domain review protocol — one GitHub candidate
+## 6. One-candidate domain review protocol
 
-Lanes 02–05 review the **same exact Lane 01 PR head** through GitHub. Conversation relay is not an acceptance mechanism.
+Lanes 02–05 review the same exact Lane 01 PR head through GitHub:
 
 ```text
 MOB1-DOMAIN-REVIEW
@@ -188,11 +154,11 @@ shared-findings: <finding IDs or none>
 domain-notes: <domain facts that do not request private shared UI>
 ```
 
-A concurrence applies only to the exact candidate SHA and named contracts. A later head requires renewed review for changed surfaces; unchanged surfaces may be carried forward only by explicit SHA/diff reference.
+A concurrence applies only to the exact candidate SHA and named surfaces. A later head requires renewed review for changed surfaces; unchanged surfaces may be carried forward only by explicit SHA/diff reference. Conversation relay is not an acceptance mechanism.
 
-## 7. Shared findings, requests, and dispositions
+## 7. Findings, requests, and dispositions
 
-Substantive findings use `MOB1-FIND-<lane-number>-<sequence>`. A missing shared capability that cannot be resolved as a review correction uses `SCR-<lane>-MOB1-<sequence>` and must be filed on or linked from PR #218.
+Findings use `MOB1-FIND-<lane-number>-<sequence>`. Missing shared capabilities that cannot be handled as candidate corrections use `SCR-<lane>-MOB1-<sequence>` and must be filed on or linked from PR #218.
 
 Allowed dispositions are:
 
@@ -203,69 +169,69 @@ Allowed dispositions are:
 - `rejected-conflicts-with-authority`;
 - `superseded-by-candidate-sha`.
 
-A disposition is durable only when both the finding and resolution are visible on GitHub and, when code changes, bound to the resolving candidate SHA.
+A disposition is durable only when the finding and resolution are visible on GitHub and, when code changes, bound to the resolving exact SHA.
 
 ## 8. Current findings
 
 ### Control Room
 
-| Finding | State | Required correction |
+| Finding | State at `cf73a656…` | Required correction |
 | --- | --- | --- |
-| `MOB1-FIND-00-001` | Open | Remove the reintroduced mandatory Independent Acceptance prerequisite and align the candidate document with current completion governance. |
-| `MOB1-FIND-00-002` | Open | Complete result-set/cursor, internal scroll, safe-area, keyboard/orientation, reduced-motion/accessibility, and non-gesture sheet architecture. |
-| `MOB1-FIND-00-003` | Open | Enforce marker/card/detail focal-object parity and internal subject consistency with negative tests. |
-| `MOB1-FIND-00-004` | Open | Validate every action-rail input against the frozen canonical action ID for its lens and position. |
-| `MOB1-FIND-00-005` | Open | Represent browser-restored geography as restored/unvalidated until server revalidation. |
-| `MOB1-FIND-00-006` | Open | Use the canonical supported-locale key contract for disabled explanations. |
-| `BUILD-FIND-218-001` | Resolved | Trailing whitespace removed; production-ci #1483 succeeded at `3c67ef3d…`. |
+| `MOB1-FIND-00-001` | Open | Remove the architecture document's universal Independent Acceptance prerequisite. |
+| `MOB1-FIND-00-002` | Partially addressed; open | Accessibility/responsive policy is present. Add result-set identity/cursor, internal sheet/detail scroll state, and focused continuity tests. |
+| `MOB1-FIND-00-003` | Open | Enforce focal marker/card/detail subject parity and validate card detail identity. |
+| `MOB1-FIND-00-004` | Open | Validate every action-rail projection against the canonical action ID for its lens and position. |
+| `MOB1-FIND-00-005` | Open | Do not label browser-restored geography server-authoritative before revalidation. |
+| `MOB1-FIND-00-006` | Open | Use the canonical supported-locale disabled-explanation key contract. |
+| `BUILD-FIND-218-001` | Resolved on prior head | Whitespace fixed; production-ci #1483 succeeded at `3c67ef3d…`. Current-head CI is separately pending. |
 
-The four unresolved Codex threads corroborate `MOB1-FIND-00-002` and `MOB1-FIND-00-003` and supply the originating evidence for `MOB1-FIND-00-005` and `MOB1-FIND-00-006`.
+All four Codex threads remain unresolved and current at this candidate.
 
 ### Lane 02 — Opportunities/RFx
 
-| Finding | State | Required shared correction |
+| Finding | State at `cf73a656…` | Required shared correction |
 | --- | --- | --- |
-| `MOB1-FIND-02-001` | Open | Keep focal opportunity identity distinct from associated issuer-organization identity while preserving opportunity marker/card/detail parity. |
-| `MOB1-FIND-02-002` | Open | Carry versioned continuity scope and provide typed fail-closed reconciliation/invalidation. |
-| `MOB1-FIND-02-003` | Open | Represent actual optional video media separately from a poster image. |
+| `MOB1-FIND-02-001` | Open | Keep focal opportunity identity distinct from associated issuer-organization identity. |
+| `MOB1-FIND-02-002` | Partially addressed; open | Versioned scope/invalidation exists; add mismatch/authority negative tests and resolve restored-geography authority. |
+| `MOB1-FIND-02-003` | Open | Represent actual optional video separately from its poster image. |
 
-Lane 02 also records that a card star represents the current participant's OpportunityWatch relation, not the organization-owned OpportunityPursuit decision `watch`, and that this Stage 1 review does not activate currently unavailable Pursue/Respond or Team handlers.
+No Shared Contract Request is open because these remain bounded corrections to the existing candidate.
 
-No Shared Contract Request is open because these are bounded corrections to the existing shared candidate.
+## 9. Domain review state
 
-## 9. Domain review assignments
+| Lane | Current disposition | Review SHA | Current-head action |
+| --- | --- | --- | --- |
+| 02 — Opportunities/RFx | FINDING | `3c67ef3dffeaa60aef761debb6cf76ea1c807789` | Re-review `cf73a656…`; prior findings remain applicable. |
+| 03 — Intelligence | Not submitted | — | Review exact current/final head. |
+| 04 — Resources | Not submitted | — | Review exact current/final head. |
+| 05 — Referrals | Not submitted | — | Review exact current/final head. |
 
-| Lane | Review scope | Current status | Exact SHA | Findings |
-| --- | --- | --- | --- | --- |
-| 02 — Opportunities/RFx | opportunity/RFx cards, issuer context, record actions, selection, continuity, media | FINDING submitted | `3c67ef3dffeaa60aef761debb6cf76ea1c807789` | `MOB1-FIND-02-001`–`003` |
-| 03 — Intelligence | organization/capability/location/layer projection, map/provenance/media/detail | Not submitted | — | — |
-| 04 — Resources | provider/resource cards, provider context, favorite/request/detail | Not submitted | — | — |
-| 05 — Referrals | referral cards, sent/received context, recipient selection, starred/actions | Not submitted | — | — |
+## 10. Convergence ledger
 
-## 10. Stage 1 convergence ledger
+| Contract | Current state | Open findings/review gap |
+| --- | --- | --- |
+| shell composition | Candidate present | Lanes 02–05 final-head review incomplete |
+| bottom navigation | Candidate present | Lanes 02–05 final-head review incomplete |
+| bottom sheet | Partially represented | `MOB1-FIND-00-002` |
+| action rail | Candidate present | `MOB1-FIND-00-004` |
+| result card | Candidate present | `MOB1-FIND-00-003`, `MOB1-FIND-02-001` |
+| media | Candidate present | `MOB1-FIND-02-003` |
+| favorites | Candidate present | Final-head domain review incomplete |
+| selected-object state | Candidate present | `MOB1-FIND-00-003`, `MOB1-FIND-02-001` |
+| map projection | Candidate present | `MOB1-FIND-00-003`, `MOB1-FIND-00-005` |
+| detail state | Partially represented | `MOB1-FIND-00-002`, `MOB1-FIND-00-003` |
+| continuity/invalidation | Partially represented | `MOB1-FIND-00-002`, `MOB1-FIND-00-005`, `MOB1-FIND-02-002` |
+| localization | Invalid namespace remains | `MOB1-FIND-00-006` |
+| completion governance | Candidate document conflicts | `MOB1-FIND-00-001` |
 
-| Contract | Candidate state | 02 | 03 | 04 | 05 | Unresolved conflict |
-| --- | --- | --- | --- | --- | --- | --- |
-| shell composition | Present | Reviewed | Pending | Pending | Pending | None yet; incomplete review |
-| bottom four-lens navigation | Present | Reviewed | Pending | Pending | Pending | None yet; incomplete review |
-| three-position bottom sheet | Present | Reviewed | Pending | Pending | Pending | `MOB1-FIND-00-002` |
-| four-position action rail | Present | Reviewed | Pending | Pending | Pending | `MOB1-FIND-00-004` |
-| result/business card | Present | Finding | Pending | Pending | Pending | `MOB1-FIND-00-003`, `MOB1-FIND-02-001` |
-| media | Present | Finding | Pending | Pending | Pending | `MOB1-FIND-02-003` |
-| favorites | Present | Reviewed with domain note | Pending | Pending | Pending | Incomplete review |
-| selected-object state | Present | Finding | Pending | Pending | Pending | `MOB1-FIND-00-003`, `MOB1-FIND-02-001` |
-| map projection | Present | Finding | Pending | Pending | Pending | `MOB1-FIND-00-003`, `MOB1-FIND-00-005` |
-| detail state | Present | Reviewed | Pending | Pending | Pending | `MOB1-FIND-00-002`, `MOB1-FIND-00-003` |
-| continuity state | Present | Finding | Pending | Pending | Pending | `MOB1-FIND-00-002`, `MOB1-FIND-02-002`, `MOB1-FIND-00-005` |
+## 11. Exit gate
 
-## 11. Candidate and exit gates
-
-A corrected candidate may retain `Implemented — Not Verified` when the complete shared contract family exists, exact canonical lens actions remain preserved, record actions stay separate, focal and associated identities are truthful, continuity/invalidation and responsive/accessibility obligations are represented, tests prove positive and negative invariants, exact-head CI passes, Lanes 02–05 review the exact candidate, every substantive finding has a durable disposition, and no material unresolved conflict remains.
+A corrected candidate may retain `Implemented — Not Verified` when the complete shared contract family exists, canonical lens actions remain preserved, record actions stay separate, focal and associated identities are truthful, continuity/invalidation and responsive/accessibility obligations are represented and tested, exact-head CI passes, Lanes 02–05 review the final exact head, every substantive finding has a durable disposition, and no material unresolved conflict remains.
 
 Independent Acceptance may be requested as optional assurance. It is not a universal Stage 1 completion gate under `FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`.
 
-The current exit gate is **not satisfied** because PR #218 has six open Control Room findings, three open Lane 02 findings, four unresolved Codex threads, and no review from Lanes 03–05.
+The Stage 1 exit gate is **not satisfied**. The current head has six open or partially addressed Control Room findings, three open or partially addressed Lane 02 findings, four unresolved Codex threads, pending CI, and no final-head review from Lanes 02–05.
 
 ## 12. Exact next action
 
-Lane 01 corrects the open findings on PR #218 without entering Stage 2 UI, records exact-SHA dispositions, and obtains green CI on the new exact head. Lanes 02–05 then review or re-review that exact head through GitHub. Stage 2 remains unauthorized.
+Lane 01 completes the remaining shared corrections and focused evidence on PR #218 without entering Stage 2 UI, records exact-SHA dispositions, and obtains green CI on the final head. Lanes 02–05 then review or re-review that exact head through GitHub. Stage 2 remains unauthorized.
