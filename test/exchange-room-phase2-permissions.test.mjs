@@ -16,7 +16,6 @@ const activeCapable = [
   "resources.provider-status",
   "intelligence.organizations",
   "intelligence.capabilities",
-  "referrals.new",
 ];
 
 const gray = [
@@ -24,6 +23,7 @@ const gray = [
   "opportunities.team",
   "intelligence.locations",
   "intelligence.layers",
+  "referrals.new",
   "referrals.sent",
   "referrals.received",
   "referrals.starred",
@@ -40,16 +40,16 @@ test("Intelligence actions require Network discovery", () => {
   assert.match(source, /networkDiscoveryAvailable \?\? false/);
 });
 
-test("the frozen nine ACTIVE-capable positions remain operational entries", () => {
-  assert.equal(activeCapable.length, 9);
+test("the eight ACTIVE-capable positions remain operational entries", () => {
+  assert.equal(activeCapable.length, 8);
   for (const id of activeCapable) {
     const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     assert.match(source, new RegExp(`id: "${escaped}"[^\\n]*operational: true`), id);
   }
 });
 
-test("the frozen seven GRAY positions stay non-operational with no handler", () => {
-  assert.equal(gray.length, 7);
+test("the eight GRAY positions stay non-operational with no handler", () => {
+  assert.equal(gray.length, 8);
   for (const id of gray) {
     const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     assert.match(
@@ -58,4 +58,8 @@ test("the frozen seven GRAY positions stay non-operational with no handler", () 
       id,
     );
   }
+});
+
+test("New Referral remains individually disabled until an adapter opens the real composer", () => {
+  assert.match(source, /id: "referrals\.new"[^\n]*operational: false[^\n]*handler: null/);
 });
