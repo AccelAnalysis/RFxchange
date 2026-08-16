@@ -1,0 +1,16 @@
+{
+  "sheet": {
+    "region": "Resultados y detalles del Exchange",
+    "dragHandle": "Arrastra para cambiar el tamaño del panel del Exchange",
+    "peek": "Vista",
+    "partial": "Resultados",
+    "expanded": "Ampliar"
+  },
+  "card": {
+    "openDetail": "Abrir detalles",
+    "addFavorite": "Agregar a favoritos",
+    "removeFavorite": "Quitar de favoritos",
+    "favoriteUnavailable": "Los favoritos no están disponibles para este registro",
+    "mediaFallback": "No hay contenido multimedia público disponible"
+  }
+}
