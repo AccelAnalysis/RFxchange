@@ -12,16 +12,15 @@
     "implementationLane": "shared-exchange",
     "implementationBranch": "lane01/mobile-exchange-stage1-contracts",
     "candidatePullRequest": 218,
-    "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+    "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
     "candidateDisposition": "implemented-not-verified",
     "candidateCi": {
       "workflow": "production-ci",
-      "runNumber": 1482,
+      "runNumber": 1483,
       "status": "completed",
-      "conclusion": "failure",
-      "failureStage": "whitespace-integrity"
+      "conclusion": "success"
     },
-    "status": "active-candidate-correction",
+    "status": "active-candidate-correction-and-cross-lens-review",
     "stage2Authorized": false
   },
   "lockedLensOrder": [
@@ -42,69 +41,127 @@
     "preserveMapContinuity": true
   },
   "contracts": [
-    { "id": "mobile-shell", "state": "candidate-pending-review" },
-    { "id": "bottom-four-lens-navigation", "state": "candidate-pending-review" },
+    { "id": "mobile-shell", "state": "candidate-pending-cross-lens-review" },
+    { "id": "bottom-four-lens-navigation", "state": "candidate-pending-cross-lens-review" },
     { "id": "three-position-bottom-sheet", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-002"] },
     { "id": "four-position-lens-action-rail", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-004"] },
-    { "id": "result-business-card", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003"] },
-    { "id": "media", "state": "candidate-pending-review" },
-    { "id": "favorite", "state": "candidate-pending-review" },
-    { "id": "selected-object", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003"] },
-    { "id": "map-projection", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003"] },
+    { "id": "result-business-card", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003", "MOB1-FIND-02-001"] },
+    { "id": "media", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-02-003"] },
+    { "id": "favorite", "state": "candidate-pending-cross-lens-review" },
+    { "id": "selected-object", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003", "MOB1-FIND-02-001"] },
+    { "id": "map-projection", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-003", "MOB1-FIND-00-005"] },
     { "id": "detail-state", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-002", "MOB1-FIND-00-003"] },
-    { "id": "continuity-state", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-002"] }
+    { "id": "continuity-state", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-002", "MOB1-FIND-00-005", "MOB1-FIND-02-002"] },
+    { "id": "disabled-explanation-localization", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-006"] },
+    { "id": "completion-governance", "state": "candidate-finding-open", "findingIds": ["MOB1-FIND-00-001"] }
   ],
   "domainReviews": {
-    "02": { "lane": "opportunities-rfx", "status": "waiting-for-corrected-candidate", "candidateSha": null, "findingIds": [] },
-    "03": { "lane": "intelligence", "status": "waiting-for-corrected-candidate", "candidateSha": null, "findingIds": [] },
-    "04": { "lane": "resources", "status": "waiting-for-corrected-candidate", "candidateSha": null, "findingIds": [] },
-    "05": { "lane": "referrals", "status": "waiting-for-corrected-candidate", "candidateSha": null, "findingIds": [] }
+    "02": {
+      "lane": "opportunities-rfx",
+      "status": "finding",
+      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
+      "findingIds": ["MOB1-FIND-02-001", "MOB1-FIND-02-002", "MOB1-FIND-02-003"]
+    },
+    "03": { "lane": "intelligence", "status": "not-submitted", "candidateSha": null, "findingIds": [] },
+    "04": { "lane": "resources", "status": "not-submitted", "candidateSha": null, "findingIds": [] },
+    "05": { "lane": "referrals", "status": "not-submitted", "candidateSha": null, "findingIds": [] }
+  },
+  "codexReview": {
+    "reviewedSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+    "unresolvedThreads": 4,
+    "corroborates": ["MOB1-FIND-00-002", "MOB1-FIND-00-003"],
+    "originates": ["MOB1-FIND-00-005", "MOB1-FIND-00-006"]
   },
   "findings": [
     {
       "id": "MOB1-FIND-00-001",
       "candidatePullRequest": 218,
-      "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
       "contract": "completion-governance",
       "state": "open",
       "requestedDisposition": "accepted-shared-correction",
-      "summary": "Remove the reintroduced universal Independent Acceptance prerequisite and align with current completion governance."
+      "summary": "Remove the reintroduced universal Independent Acceptance prerequisite."
     },
     {
       "id": "MOB1-FIND-00-002",
       "candidatePullRequest": 218,
-      "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
       "contract": "responsive-continuity",
       "state": "open",
       "requestedDisposition": "accepted-shared-correction",
-      "summary": "Represent result identity/cursor, internal scroll, safe-area, keyboard/orientation, reduced-motion/accessibility, and non-gesture sheet controls without implementing Stage 2 UI."
+      "summary": "Represent result-set identity/cursor, internal scroll, safe-area, keyboard/orientation, reduced-motion/accessibility, and non-gesture sheet controls."
     },
     {
       "id": "MOB1-FIND-00-003",
       "candidatePullRequest": 218,
-      "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
       "contract": "selected-object-parity",
       "state": "open",
       "requestedDisposition": "accepted-shared-correction",
-      "summary": "Make marker, card, and detail subject identity internally consistent and enforceable with negative tests."
+      "summary": "Make focal marker, card, and detail subject identity internally consistent and enforceable."
     },
     {
       "id": "MOB1-FIND-00-004",
       "candidatePullRequest": 218,
-      "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
+      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
       "contract": "lens-action-rail",
       "state": "open",
       "requestedDisposition": "accepted-shared-correction",
       "summary": "Validate each projected action against the frozen canonical action ID for its lens and position."
     },
     {
-      "id": "BUILD-FIND-218-001",
+      "id": "MOB1-FIND-00-005",
       "candidatePullRequest": 218,
-      "candidateSha": "16c7b3b0131cfde1ba23119831ee1b3dab3a7942",
-      "contract": "exact-head-ci",
+      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
+      "contract": "geography-authority",
       "state": "open",
       "requestedDisposition": "accepted-shared-correction",
-      "summary": "Remove trailing whitespace and obtain green exact-head production CI."
+      "summary": "Represent browser-restored geography as unvalidated until authoritative server revalidation."
+    },
+    {
+      "id": "MOB1-FIND-00-006",
+      "candidatePullRequest": 218,
+      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
+      "contract": "disabled-explanation-localization",
+      "state": "open",
+      "requestedDisposition": "accepted-shared-correction",
+      "summary": "Use a canonical supported-locale key for disabled action explanations."
+    },
+    {
+      "id": "BUILD-FIND-218-001",
+      "candidatePullRequest": 218,
+      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
+      "contract": "exact-head-ci",
+      "state": "resolved",
+      "disposition": "accepted-shared-correction",
+      "evidence": "production-ci run 1483 succeeded"
+    },
+    {
+      "id": "MOB1-FIND-02-001",
+      "candidatePullRequest": 218,
+      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
+      "contract": "focal-and-associated-identity",
+      "state": "open",
+      "requestedDisposition": "accepted-shared-correction",
+      "summary": "Preserve distinct opportunity and issuer-organization identities while maintaining focal record parity."
+    },
+    {
+      "id": "MOB1-FIND-02-002",
+      "candidatePullRequest": 218,
+      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
+      "contract": "continuity-scope-invalidation",
+      "state": "open",
+      "requestedDisposition": "accepted-shared-correction",
+      "summary": "Carry versioned scope and define typed fail-closed continuity reconciliation and invalidation."
+    },
+    {
+      "id": "MOB1-FIND-02-003",
+      "candidatePullRequest": 218,
+      "candidateSha": "3c67ef3dffeaa60aef761debb6cf76ea1c807789",
+      "contract": "video-media",
+      "state": "open",
+      "requestedDisposition": "accepted-shared-correction",
+      "summary": "Represent actual optional video media separately from a poster image."
     }
   ],
   "sharedContractRequests": [],
@@ -119,11 +176,12 @@
   "exitGate": {
     "satisfied": false,
     "reasons": [
-      "PR 218 has four unresolved substantive Control Room findings.",
-      "PR 218 exact-head production CI failed.",
-      "Lanes 02-05 have not reviewed a corrected exact candidate SHA.",
-      "No candidate-bound finding has a durable final disposition."
+      "PR 218 has six open Control Room findings.",
+      "PR 218 has three open Lane 02 findings.",
+      "Four Codex review threads remain unresolved.",
+      "Lanes 03-05 have not submitted exact-head domain reviews.",
+      "No open substantive finding has a final durable disposition."
     ]
   },
-  "nextAction": "Lane 01 corrects MOB1-FIND-00-001 through MOB1-FIND-00-004 and BUILD-FIND-218-001 on PR 218, obtains green exact-head CI, and then Lanes 02-05 review the corrected exact SHA through GitHub."
+  "nextAction": "Lane 01 corrects the open findings on PR 218 without entering Stage 2 UI, records exact-SHA dispositions, and obtains green CI on the new exact head. Lanes 02-05 then review or re-review that exact head through GitHub."
 }
