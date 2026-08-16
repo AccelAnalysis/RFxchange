@@ -1,10 +1,10 @@
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
-import { getFirebaseAdminApp } from "../firebase/admin";
+import { getFirebaseAdminApp } from "../firebase/admin.ts";
 import {
   createFirestoreFoundationRepositories,
   type FirestoreFoundationRepositories,
-} from "./repositories";
+} from "./repositories.ts";
 
 /**
  * Server-only Firestore composition boundary.
