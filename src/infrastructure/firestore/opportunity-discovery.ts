@@ -1,4 +1,6 @@
-import { FieldValue, type Firestore, type Transaction } from "firebase-admin/firestore";
+import { createHash } from "node:crypto";
+
+import { FieldPath, FieldValue, type Firestore, type Transaction } from "firebase-admin/firestore";
 
 import type { OrganizationActionAuditEvent } from "../../domain/audit/model.ts";
 import type { OrganizationId } from "../../domain/organizations/model.ts";
@@ -57,15 +59,79 @@ async function releasedProjections(
   return Object.freeze(projections.filter((projection) => projection.payload.localities.length > 0 && projection.payload.localities.every((item) => released.has(item.id))));
 }
 
-function mergeDailyAlert(current: OpportunityAlertIntent, next: OpportunityAlertIntent): OpportunityAlertIntent {
-  if (current.deliveryMode !== "daily-digest" || next.deliveryMode !== "daily-digest" || current.windowKey !== next.windowKey || current.status !== "queued" || current.request.metadata.idempotencyKey !== next.request.metadata.idempotencyKey) {
+type PersistedOpportunityAlertIntent = Omit<OpportunityAlertIntent, "status"> & Readonly<{
+  status: string;
+  deliveryClaimId?: string | null;
+}>;
+
+function stableId(prefix: string, ...values: readonly string[]): string {
+  return `${prefix}_${createHash("sha256")
+    .update(values.join(":"), "utf8")
+    .digest("hex")
+    .slice(0, 40)}`;
+}
+
+function alertFrozen(current: PersistedOpportunityAlertIntent): boolean {
+  return (
+    current.status !== "queued" ||
+    Boolean(current.deliveryClaimId?.trim()) ||
+    Number(current.attemptCount ?? 0) > 0
+  );
+}
+
+function followUpDailyAlert(
+  next: OpportunityAlertIntent,
+  projection: ResponderOpportunityProjection,
+): OpportunityAlertIntent {
+  const followUpKey = stableId(
+    "followup",
+    projection.reference,
+    String(projection.aggregateVersion),
+    projection.digest,
+  ).slice(-16);
+  const windowKey = `${next.updatedAt.slice(0, 10)}:follow-up:${followUpKey}`;
+  const alertId = stableId(
+    "oppalert",
+    String(next.organizationId),
+    String(next.userId),
+    windowKey,
+  );
+  return Object.freeze({
+    ...next,
+    id: alertId,
+    windowKey,
+    request: Object.freeze({
+      ...next.request,
+      id: alertId as OpportunityAlertIntent["request"]["id"],
+      metadata: Object.freeze({
+        ...next.request.metadata,
+        correlationId: `opportunity-alert:${windowKey}` as OpportunityAlertIntent["request"]["metadata"]["correlationId"],
+        idempotencyKey: `opportunity-alert:${alertId}` as OpportunityAlertIntent["request"]["metadata"]["idempotencyKey"],
+        relatedObjectId: alertId,
+      }),
+    }),
+  });
+}
+
+function mergeDailyAlert(current: PersistedOpportunityAlertIntent, next: OpportunityAlertIntent): OpportunityAlertIntent {
+  if (current.deliveryMode !== "daily-digest" || next.deliveryMode !== "daily-digest" || current.windowKey !== next.windowKey || alertFrozen(current) || current.request.metadata.idempotencyKey !== next.request.metadata.idempotencyKey) {
     throw new Error("Opportunity daily digest identity collision.");
   }
-  const summaries = [current.request.variables.opportunity_summary, next.request.variables.opportunity_summary]
-    .filter((value): value is string => typeof value === "string" && Boolean(value.trim()));
-  const opportunityReferences = Object.freeze([...new Set([...current.opportunityReferences, ...next.opportunityReferences])]);
+  const currentReferences = [...current.opportunityReferences];
+  const nextUniqueReferences = next.opportunityReferences.filter((reference) => !currentReferences.includes(reference));
+  const opportunityReferences = Object.freeze([...new Set([...currentReferences, ...next.opportunityReferences])]);
+  const currentSummary = typeof current.request.variables.opportunity_summary === "string"
+    ? current.request.variables.opportunity_summary.trim()
+    : "";
+  const nextSummary = typeof next.request.variables.opportunity_summary === "string"
+    ? next.request.variables.opportunity_summary.trim()
+    : "";
+  const opportunitySummary = nextUniqueReferences.length && nextSummary
+    ? `${currentSummary}\n${nextSummary}`.trim().slice(0, 1800)
+    : currentSummary.slice(0, 1800);
   return Object.freeze({
     ...current,
+    status: "queued",
     matchEventIds: Object.freeze([...new Set([...current.matchEventIds, ...next.matchEventIds])]),
     opportunityReferences,
     savedSearchIds: Object.freeze([...new Set([...current.savedSearchIds, ...next.savedSearchIds])]),
@@ -74,7 +140,7 @@ function mergeDailyAlert(current: OpportunityAlertIntent, next: OpportunityAlert
       variables: Object.freeze({
         ...current.request.variables,
         opportunity_count: opportunityReferences.length,
-        opportunity_summary: summaries.join("\n").slice(0, 1800),
+        opportunity_summary: opportunitySummary,
       }),
     }),
     updatedAt: next.updatedAt,
@@ -99,11 +165,25 @@ export class FirestoreOpportunityDiscoveryRepository implements OpportunityDisco
   constructor(private readonly db: Firestore) {}
 
   async listProjections(limit: number) {
-    const projections = await listFirestoreRecords<ResponderOpportunityProjection>(
-      this.db.collection(PROJECTIONS).limit(Math.max(1, Math.min(250, limit))),
-      PROJECTIONS,
-    );
-    return releasedProjections(this.db, projections);
+    const requested = Math.max(1, limit);
+    const pageSize = Math.min(200, requested);
+    const permitted: ResponderOpportunityProjection[] = [];
+    let cursor: FirebaseFirestore.QueryDocumentSnapshot | null = null;
+
+    while (permitted.length < requested) {
+      let query: FirebaseFirestore.Query = this.db
+        .collection(PROJECTIONS)
+        .orderBy(FieldPath.documentId())
+        .limit(pageSize);
+      if (cursor) query = query.startAfter(cursor);
+      const page = await query.get();
+      if (page.empty) break;
+      const projections = page.docs.map((document) => document.data() as ResponderOpportunityProjection);
+      permitted.push(...await releasedProjections(this.db, projections));
+      cursor = page.docs.at(-1) ?? null;
+      if (page.size < pageSize) break;
+    }
+    return Object.freeze(permitted.slice(0, requested));
   }
 
   async getProjection(reference: string) {
@@ -197,19 +277,19 @@ export class FirestoreOpportunityDiscoveryRepository implements OpportunityDisco
 
   saveMatch(bundle: OpportunityMatchBundle): Promise<"created" | "replayed"> {
     const matchRef = this.db.collection(MATCHES).doc(bundle.match.id);
-    const alertRef = bundle.alert ? this.db.collection(ALERTS).doc(bundle.alert.id) : null;
+    const baseAlertRef = bundle.alert ? this.db.collection(ALERTS).doc(bundle.alert.id) : null;
     const savedSearchRef = this.db.collection(SAVED_SEARCHES).doc(bundle.match.savedSearchId);
     const projectionRef = this.db.collection(PROJECTIONS).doc(bundle.match.opportunityReference);
     const membershipRef = this.db.collection(MEMBERSHIPS).doc(bundle.match.membershipId);
     return this.db.runTransaction(async (transaction) => {
-      const refs = alertRef ? [matchRef, alertRef, savedSearchRef, projectionRef, membershipRef] : [matchRef, savedSearchRef, projectionRef, membershipRef];
+      const refs = baseAlertRef ? [matchRef, baseAlertRef, savedSearchRef, projectionRef, membershipRef] : [matchRef, savedSearchRef, projectionRef, membershipRef];
       const records = await transaction.getAll(...refs);
       const [matchSnapshot, ...rest] = records;
       if (matchSnapshot.exists) return "replayed" as const;
-      const alertSnapshot = alertRef ? rest.shift() : null;
+      const baseAlertSnapshot = baseAlertRef ? rest.shift() : null;
       const [savedSearchSnapshot, projectionSnapshot, membershipSnapshot] = rest;
-      const currentAlert = alertSnapshot?.data() as OpportunityAlertIntent | undefined;
-      if (alertSnapshot?.exists && (!currentAlert || bundle.alert?.deliveryMode !== "daily-digest")) throw new Error("Opportunity alert identity collision.");
+      const baseAlert = baseAlertSnapshot?.data() as PersistedOpportunityAlertIntent | undefined;
+      if (baseAlertSnapshot?.exists && (!baseAlert || bundle.alert?.deliveryMode !== "daily-digest")) throw new Error("Opportunity alert identity collision.");
       const savedSearch = savedSearchSnapshot?.data() as SavedOpportunitySearch | undefined;
       const projection = projectionSnapshot?.data() as ResponderOpportunityProjection | undefined;
       const membership = membershipSnapshot?.data() as { userId?: string; organizationId?: string; status?: string } | undefined;
@@ -223,10 +303,39 @@ export class FirestoreOpportunityDiscoveryRepository implements OpportunityDisco
       if (!savedSearchSnapshot?.exists || !savedSearch || savedSearch.status !== "active" || savedSearch.id !== bundle.match.savedSearchId || savedSearch.version !== bundle.match.savedSearchVersion || savedSearch.organizationId !== bundle.match.organizationId || savedSearch.userId !== bundle.match.userId || !projectionSnapshot?.exists || !projection || projection.mode !== "published" || !projection.publishedAt || (projection.audience !== "public" && projection.audience !== "authenticated-participants") || projection.reference !== bundle.match.opportunityReference || projection.aggregateVersion !== bundle.match.projectionVersion || projection.digest !== bundle.match.projectionDigest || !deadline || Date.parse(`${deadline}T23:59:59.999Z`) <= Date.now() || !geographyRefs.length || geographies.some((item) => !item.exists || item.get("releaseState") !== "released") || !membershipSnapshot?.exists || !membership || membership.status !== "active" || membership.userId !== bundle.match.userId || membership.organizationId !== bundle.match.organizationId || !unrestricted(organizationRestrictions.docs) || !unrestricted(membershipRestrictions.docs)) {
         throw new Error("Opportunity saved-search match authority changed.");
       }
+      let targetAlert = bundle.alert;
+      let targetAlertRef = baseAlertRef;
+      let targetAlertSnapshot = baseAlertSnapshot;
+      if (
+        targetAlert &&
+        baseAlertSnapshot?.exists &&
+        baseAlert &&
+        targetAlert.deliveryMode === "daily-digest" &&
+        alertFrozen(baseAlert)
+      ) {
+        targetAlert = followUpDailyAlert(targetAlert, projection);
+        targetAlertRef = this.db.collection(ALERTS).doc(targetAlert.id);
+        targetAlertSnapshot = await transaction.get(targetAlertRef);
+      }
+      const targetCurrent = targetAlertSnapshot?.data() as PersistedOpportunityAlertIntent | undefined;
+
       transaction.create(matchRef, immutable(bundle.match));
-      if (alertRef && bundle.alert) {
-        if (currentAlert) transaction.set(alertRef, mutable(mergeDailyAlert(currentAlert, bundle.alert)));
-        else transaction.create(alertRef, mutable(bundle.alert));
+      if (targetAlertRef && targetAlert) {
+        if (targetAlertSnapshot?.exists) {
+          if (!targetCurrent || targetAlert.deliveryMode !== "daily-digest") {
+            throw new Error("Opportunity alert identity collision.");
+          }
+          if (alertFrozen(targetCurrent)) {
+            const alreadyRepresented = targetAlert.opportunityReferences.every((reference) =>
+              targetCurrent.opportunityReferences.includes(reference),
+            );
+            if (!alreadyRepresented) throw new Error("Opportunity alert identity collision.");
+            return "created" as const;
+          }
+          transaction.set(targetAlertRef, mutable(mergeDailyAlert(targetCurrent, targetAlert)));
+        } else {
+          transaction.create(targetAlertRef, mutable(targetAlert));
+        }
       }
       return "created" as const;
     });

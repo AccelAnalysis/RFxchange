@@ -7,6 +7,7 @@ import {
 } from "../../application/rfx/opportunity-discovery-service.ts";
 import { createOpportunityDiscoveryQuery } from "../../domain/rfx/discovery.ts";
 import { geographyId } from "../../domain/geography/model.ts";
+import type { ResponderOpportunityProjection } from "../../domain/rfx/publication.ts";
 import { loadImmutableAmacsCatalog } from "../amacs/runtime.ts";
 import { getServerFirestore } from "../firestore/runtime.ts";
 import { Wave4GapOpportunityDiscoveryRepository } from "./wave4-gap-opportunity-discovery-repository.ts";
@@ -144,6 +145,27 @@ class GovernedOpportunityDiscoveryService extends BoundedOpportunityDiscoverySer
 
     await validateGovernedFilters(this.governedDb, input.query);
     return super.saveSearch(scope, input);
+  }
+
+  override async evaluatePublishedProjection(
+    projection: ResponderOpportunityProjection,
+  ): Promise<Readonly<{ matches: number; alerts: number }>> {
+    if (
+      projection.mode !== "published" ||
+      !projection.publishedAt ||
+      (projection.audience !== "public" && projection.audience !== "authenticated-participants")
+    ) {
+      return Object.freeze({ matches: 0, alerts: 0 });
+    }
+
+    // DSC-006 matching is deliberately durable-only. The committed projection is
+    // observed by a retryable Firestore-triggered queue, and the scheduler owns
+    // exhaustive saved-search evaluation. Never create a bounded synchronous match
+    // that could race provider authority, digest freezing, or process termination.
+    throw new OpportunityDiscoveryError(
+      "dependency-unavailable",
+      "Opportunity discovery evaluation is queued for durable processing.",
+    );
   }
 }
 

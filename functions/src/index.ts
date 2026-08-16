@@ -107,3 +107,12 @@ export {
   backgroundJobFrameworkProbe,
   scheduledBackgroundJobHeartbeat,
 } from "./background-job-functions.js";
+export {
+  queueOpportunityDiscoveryEvaluationOnPublication,
+} from "./opportunity-discovery-queue-functions.js";
+export {
+  scheduledOpportunityDiscoveryEvaluation,
+} from "./opportunity-discovery-evaluation-functions.js";
+export {
+  scheduledOpportunityAlertDelivery,
+} from "./opportunity-alert-delivery-functions.js";
