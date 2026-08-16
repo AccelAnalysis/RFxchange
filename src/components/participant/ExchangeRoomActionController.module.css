@@ -1,0 +1,95 @@
+.actionGrid {
+  position: absolute;
+  z-index: 40;
+  bottom: var(--space-lg);
+  left: var(--space-lg);
+  width: min(520px, calc(100% - 36px));
+  margin: 0;
+  padding: var(--space-xs);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-xs);
+  border: var(--border-hairline) solid var(--semantic-border-glass);
+  border-radius: var(--radius-panel);
+  background: var(--semantic-surface-glass-strong);
+  box-shadow: var(--elevation-overlay);
+  backdrop-filter: blur(20px) saturate(115%);
+}
+
+.activeAction,
+.disabledAction {
+  min-height: 48px;
+  padding: var(--space-sm) var(--space-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-hairline) solid var(--semantic-border-subtle);
+  border-radius: var(--radius-control);
+  font: 760 0.86rem/1.2 var(--type-interface-family);
+  text-align: center;
+}
+
+.activeAction {
+  color: var(--semantic-text-secondary);
+  background: var(--semantic-surface-subtle);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.activeAction:hover {
+  border-color: var(--semantic-border-focus);
+  background: var(--semantic-surface-connection);
+}
+
+.activeAction:focus-visible {
+  outline: var(--focus-outline-width) solid var(--semantic-border-focus);
+  outline-offset: var(--focus-outline-offset-high);
+}
+
+.disabledAction {
+  color: var(--semantic-text-muted);
+  background: var(--semantic-surface-subtle);
+  border-style: dashed;
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
+/* The right-side detail sheet and left action tray can geometrically overlap until the viewport
+   is wider than their combined fixed-width footprints. Reserve vertical scroll clearance through
+   that collision range so sheet controls and focused content can always scroll above the tray. */
+@media (max-width: 1024px) {
+  :global([data-participant-workspace="spatial"] [data-ui-sheet]) {
+    padding-bottom: calc(116px + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(116px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 760px) {
+  .actionGrid {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    width: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .activeAction,
+  .disabledAction {
+    min-height: 44px;
+    padding-inline: var(--space-xs);
+    font-size: 0.78rem;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .actionGrid {
+    background: var(--semantic-canvas);
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activeAction {
+    transition: none;
+  }
+}

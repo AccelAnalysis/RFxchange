@@ -1,0 +1,26 @@
+{
+  "actionsLabel": "Exchange actions",
+  "actions": {
+    "opportunities.find": "Find Opportunities",
+    "opportunities.create-rfx": "Create RFx",
+    "opportunities.pursue-respond": "Pursue / Respond",
+    "opportunities.team": "Team",
+    "resources.find-providers": "Find Providers",
+    "resources.browse-resources": "Browse Resources",
+    "resources.my-requests": "My Requests",
+    "resources.provider-status": "Provider Status",
+    "intelligence.organizations": "Organizations",
+    "intelligence.capabilities": "Capabilities",
+    "intelligence.locations": "Locations",
+    "intelligence.layers": "Intelligence Layers",
+    "referrals.new": "New Referral",
+    "referrals.sent": "Sent",
+    "referrals.received": "Received",
+    "referrals.starred": "Starred"
+  },
+  "disabledReasons": {
+    "not-operational": "This function does not have an operational handler in the current Exchange runtime.",
+    "not-applicable": "This function does not apply to the current organization or selected market context.",
+    "not-authorized": "Your current authorized Exchange state does not permit this function."
+  }
+}
