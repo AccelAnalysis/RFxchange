@@ -586,6 +586,9 @@ export function ExistingWorkspaceFoundation({
               </Link>
             </div>
           </ObjectCard>
+          <AlertBanner title={t("networkWorkspace.home.scopeTitle")} tone="information">
+            {t("networkWorkspace.home.scopeBody")}
+          </AlertBanner>
         </>
       )}
 
