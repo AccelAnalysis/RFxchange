@@ -32,6 +32,17 @@ export type ExchangeSelectionSource = "map" | "card" | "keyboard" | "detail" | "
 export type ExchangeAvailability = "enabled" | "disabled";
 export type ExchangeDetailStatus = "closed" | "opening" | "open" | "error";
 export type ExchangeGeographyAuthority = "carried-unvalidated" | "server-revalidated";
+export type ExchangeLayerStateAuthority = "carried-unvalidated" | "domain-revalidated";
+export type ExchangeRelationshipAuthority = "carried-unvalidated" | "server-revalidated";
+export type ExchangeOrganizationAssociationRole =
+  | "subject"
+  | "issuer"
+  | "provider"
+  | "counterparty"
+  | "owner"
+  | "associated";
+export type ExchangeMarkerSelectionRole = "focal" | "associated-organization";
+export type ExchangeMapPrivacy = "exact" | "approximate" | "locality-only" | "suppressed";
 
 export const EXCHANGE_MEDIA_KINDS = Object.freeze([
   "organization-logo",
@@ -73,6 +84,7 @@ export type ExchangeFilterValue = string | readonly string[] | number | boolean 
 export interface ExchangeOrganizationSelection {
   readonly selectionKey: string;
   readonly organizationId: string;
+  readonly associationRole: ExchangeOrganizationAssociationRole;
 }
 
 export interface ExchangeRecordSelection {
@@ -85,6 +97,12 @@ export interface ExchangeRecordSelection {
 export interface ExchangeMarkerSelection {
   readonly selectionKey: string;
   readonly markerId: string;
+  readonly role: ExchangeMarkerSelectionRole;
+}
+
+export interface ExchangeRelationshipSelection {
+  readonly relationshipId: string;
+  readonly authority: ExchangeRelationshipAuthority;
 }
 
 export type ExchangeSubjectIdentity =
@@ -108,24 +126,34 @@ export type ExchangeSelectionState =
       kind: "none";
       source: null;
       selectionKey: null;
+      focalIdentity: null;
       selectedOrganization: null;
       selectedRecord: null;
       selectedMarker: null;
+      selectedRelationship: null;
     }>
   | Readonly<{
       kind: "organization" | "record";
       source: ExchangeSelectionSource;
       selectionKey: string;
+      focalIdentity: ExchangeSubjectIdentity;
       selectedOrganization: ExchangeOrganizationSelection | null;
       selectedRecord: ExchangeRecordSelection | null;
       selectedMarker: ExchangeMarkerSelection | null;
+      selectedRelationship: ExchangeRelationshipSelection | null;
     }>;
+
+export interface ExchangeVideoSource {
+  readonly assetReference: string;
+  readonly authoritySource: "server-derived";
+}
 
 export interface ExchangeMediaModel {
   readonly kind: ExchangeMediaKind;
   readonly assetReference: string | null;
   readonly alt: string;
   readonly posterReference: string | null;
+  readonly videoSource: ExchangeVideoSource | null;
   readonly fallbackLabel: string | null;
 }
 
@@ -186,9 +214,10 @@ export interface ExchangeMapObjectProjection {
   readonly identity: ExchangeSubjectIdentity;
   readonly markerId: string;
   readonly coordinate: Readonly<{ longitude: number; latitude: number }> | null;
-  readonly privacy: "exact" | "approximate" | "locality-only" | "suppressed";
+  readonly privacy: ExchangeMapPrivacy;
   readonly accessibleLabel: string;
   readonly selectable: boolean;
+  readonly layerIds: readonly string[];
 }
 
 export interface ExchangeMapClusterProjection {
@@ -197,14 +226,61 @@ export interface ExchangeMapClusterProjection {
   readonly coordinate: Readonly<{ longitude: number; latitude: number }>;
   readonly count: number;
   readonly accessibleLabel: string;
+  readonly layerIds: readonly string[];
 }
 
-export type ExchangeMapProjection = ExchangeMapObjectProjection | ExchangeMapClusterProjection;
+/**
+ * Provider-neutral non-point projection. Geometry stays behind the existing
+ * geography/map authority: this seam carries an authoritative geography or
+ * opaque governed geometry reference, never arbitrary browser-created shape authority.
+ */
+export interface ExchangeMapAreaProjection {
+  readonly kind: "area";
+  readonly areaId: string;
+  readonly associationSelectionKey: string | null;
+  readonly geographyId: string;
+  readonly geometryReference: string | null;
+  readonly privacy: ExchangeMapPrivacy;
+  readonly release: "released" | "suppressed";
+  readonly accessibleLabel: string;
+  readonly selectable: boolean;
+  readonly selected: boolean;
+  readonly emphasized: boolean;
+  readonly layerIds: readonly string[];
+  readonly authoritySource: "server-derived";
+}
+
+export type ExchangeRelationshipPathState = "authorized-path" | "no-path";
+
+/**
+ * A relationship path is rendered only from a current server/domain projection.
+ * The explicit no-path form carries no endpoints or geometry and is the truthful
+ * representation for unavailable, external, expired, declined or suppressed paths.
+ */
+export interface ExchangeMapRelationshipProjection {
+  readonly kind: "relationship";
+  readonly relationshipId: string;
+  readonly pathState: ExchangeRelationshipPathState;
+  readonly endpointOrganizationIds: readonly [string, string] | null;
+  readonly geometryReference: string | null;
+  readonly privacy: "permitted" | "suppressed";
+  readonly accessibleLabel: string;
+  readonly layerIds: readonly string[];
+  readonly authoritySource: "server-derived";
+}
+
+export type ExchangeMapProjection =
+  | ExchangeMapObjectProjection
+  | ExchangeMapClusterProjection
+  | ExchangeMapAreaProjection
+  | ExchangeMapRelationshipProjection;
 
 export interface LensMapProjection {
   readonly lens: ParticipantLensId;
   readonly geography: ExchangeGeographyContext;
   readonly objects: readonly ExchangeMapProjection[];
+  readonly activeLayerIds: readonly string[];
+  readonly layerStateAuthority: ExchangeLayerStateAuthority;
   readonly camera: ParticipantMapCamera | null;
   readonly bounds: ExchangeMapBounds | null;
 }
@@ -248,6 +324,8 @@ export interface LensContinuityState {
   readonly resultIndex: number;
   readonly listScrollPosition: number;
   readonly sheetScrollPosition: number;
+  readonly activeLayerIds: readonly string[];
+  readonly layerStateAuthority: ExchangeLayerStateAuthority;
 }
 
 export interface MobileExchangeState {
@@ -372,6 +450,12 @@ function optionalRequired(value: string | null, label: string): string | null {
   return value === null ? null : required(value, label);
 }
 
+function requiredList(values: readonly string[] | undefined, label: string): readonly string[] {
+  if (!values) return Object.freeze([]);
+  const normalized = values.map((value) => required(value, label));
+  return Object.freeze([...new Set(normalized)]);
+}
+
 function selectionKeyForOrganization(organizationId: string): string {
   return `organization:${required(organizationId, "Organization id")}`;
 }
@@ -488,52 +572,187 @@ export const MOBILE_EXCHANGE_CLIENT_STATE_POLICY = Object.freeze({
   serverDerivesProtectedActionPermission: true,
   favoritePersistenceIsDomainOwned: true,
   sheetAndCameraStateArePresentationOnly: true,
+  activeLayersArePresentationOnly: true,
+  relationshipSelectionNeverGrantsDisclosure: true,
 } as const);
+
+function normalizedOrganizationSelection(
+  value: Readonly<{
+    selectionKey: string;
+    organizationId: string;
+    associationRole?: ExchangeOrganizationAssociationRole;
+  }>,
+  role: ExchangeOrganizationAssociationRole,
+): ExchangeOrganizationSelection {
+  return Object.freeze({
+    selectionKey: required(value.selectionKey, "Organization selection key"),
+    organizationId: required(value.organizationId, "Organization id"),
+    associationRole: value.associationRole ?? role,
+  });
+}
+
+function normalizedRecordSelection(value: ExchangeRecordSelection): ExchangeRecordSelection {
+  return Object.freeze({
+    selectionKey: required(value.selectionKey, "Record selection key"),
+    recordType: required(value.recordType, "Record type"),
+    recordId: required(value.recordId, "Record id"),
+    organizationId: optionalRequired(value.organizationId, "Organization id"),
+  });
+}
+
+function normalizedRelationshipSelection(
+  value: Readonly<{
+    relationshipId: string;
+    authority?: ExchangeRelationshipAuthority;
+  }> | null | undefined,
+): ExchangeRelationshipSelection | null {
+  if (!value) return null;
+  return Object.freeze({
+    relationshipId: required(value.relationshipId, "Relationship id"),
+    authority: value.authority ?? "carried-unvalidated",
+  });
+}
 
 export function createExchangeSelectionState(input: Readonly<{
   kind: "none" | "organization" | "record";
   source?: ExchangeSelectionSource;
-  selectedOrganization?: ExchangeOrganizationSelection | null;
+  selectedOrganization?: Readonly<{
+    selectionKey: string;
+    organizationId: string;
+    associationRole?: ExchangeOrganizationAssociationRole;
+  }> | null;
   selectedRecord?: ExchangeRecordSelection | null;
-  selectedMarker?: ExchangeMarkerSelection | null;
+  selectedMarker?: Readonly<{
+    selectionKey: string;
+    markerId: string;
+    role?: ExchangeMarkerSelectionRole;
+  }> | null;
+  selectedRelationship?: Readonly<{
+    relationshipId: string;
+    authority?: ExchangeRelationshipAuthority;
+  }> | null;
 }>): ExchangeSelectionState {
   if (input.kind === "none") {
-    if (input.selectedOrganization || input.selectedRecord || input.selectedMarker) {
-      throw new Error("An empty selection cannot contain selected objects.");
+    if (input.selectedOrganization || input.selectedRecord || input.selectedMarker || input.selectedRelationship) {
+      throw new Error("An empty selection cannot contain selected context.");
     }
     return Object.freeze({
       kind: "none",
       source: null,
       selectionKey: null,
+      focalIdentity: null,
       selectedOrganization: null,
       selectedRecord: null,
       selectedMarker: null,
+      selectedRelationship: null,
     });
   }
 
-  const references = [input.selectedOrganization, input.selectedRecord, input.selectedMarker].filter(
-    (value): value is ExchangeOrganizationSelection | ExchangeRecordSelection | ExchangeMarkerSelection => Boolean(value),
-  );
-  if (references.length === 0) throw new Error("A selected object requires at least one stable reference.");
-  const selectionKey = required(references[0]!.selectionKey, "Selection key");
-  if (references.some((reference) => required(reference.selectionKey, "Selection key") !== selectionKey)) {
-    throw new Error("Map, card, and detail selection references must share one selection key.");
+  if (input.kind === "organization") {
+    if (!input.selectedOrganization || input.selectedRecord) {
+      throw new Error("Organization selection must identify one organization and no domain record.");
+    }
+    const selectedOrganization = normalizedOrganizationSelection(input.selectedOrganization, "subject");
+    if (selectedOrganization.associationRole !== "subject") {
+      throw new Error("A focal organization must use the subject association role.");
+    }
+    const selectionKey = selectedOrganization.selectionKey;
+    const focalIdentity = createExchangeSubjectIdentity({
+      subjectKind: "organization",
+      selectionKey,
+      organizationId: selectedOrganization.organizationId,
+      recordType: null,
+      recordId: null,
+    });
+    let selectedMarker: ExchangeMarkerSelection | null = null;
+    if (input.selectedMarker) {
+      const markerKey = required(input.selectedMarker.selectionKey, "Marker selection key");
+      if (markerKey !== selectionKey) {
+        throw new Error("Map, card, and detail selection references must share one selection key for the focal organization.");
+      }
+      selectedMarker = Object.freeze({
+        selectionKey: markerKey,
+        markerId: required(input.selectedMarker.markerId, "Marker id"),
+        role: "focal",
+      });
+    }
+    return Object.freeze({
+      kind: "organization",
+      source: input.source ?? "restored",
+      selectionKey,
+      focalIdentity,
+      selectedOrganization,
+      selectedRecord: null,
+      selectedMarker,
+      selectedRelationship: normalizedRelationshipSelection(input.selectedRelationship),
+    });
   }
-  if (input.kind === "organization" && (!input.selectedOrganization || input.selectedRecord)) {
-    throw new Error("Organization selection must identify one organization and no domain record.");
-  }
-  if (input.kind === "record" && !input.selectedRecord) {
+
+  if (!input.selectedRecord) {
     throw new Error("Record selection must identify one domain record.");
+  }
+  const selectedRecord = normalizedRecordSelection(input.selectedRecord);
+  const selectionKey = selectedRecord.selectionKey;
+  const focalIdentity = createExchangeSubjectIdentity({
+    subjectKind: "record",
+    selectionKey,
+    organizationId: selectedRecord.organizationId,
+    recordType: selectedRecord.recordType,
+    recordId: selectedRecord.recordId,
+  });
+  const selectedOrganization = input.selectedOrganization
+    ? normalizedOrganizationSelection(input.selectedOrganization, "associated")
+    : null;
+  if (selectedOrganization?.associationRole === "subject") {
+    throw new Error("A record's associated organization cannot use the subject association role.");
+  }
+  if (
+    selectedRecord.organizationId
+    && selectedOrganization
+    && selectedRecord.organizationId !== selectedOrganization.organizationId
+  ) {
+    throw new Error("Record organization association must match the separately keyed organization context.");
+  }
+
+  let selectedMarker: ExchangeMarkerSelection | null = null;
+  if (input.selectedMarker) {
+    const markerKey = required(input.selectedMarker.selectionKey, "Marker selection key");
+    const inferredRole: ExchangeMarkerSelectionRole = markerKey === selectionKey
+      ? "focal"
+      : "associated-organization";
+    const role = input.selectedMarker.role ?? inferredRole;
+    if (role === "focal" && markerKey !== selectionKey) {
+      throw new Error("A focal record marker must share the focal record selection key.");
+    }
+    if (
+      role === "associated-organization"
+      && (!selectedOrganization || markerKey !== selectedOrganization.selectionKey)
+    ) {
+      throw new Error("An associated organization marker must match the separately keyed organization context.");
+    }
+    selectedMarker = Object.freeze({
+      selectionKey: markerKey,
+      markerId: required(input.selectedMarker.markerId, "Marker id"),
+      role,
+    });
   }
 
   return Object.freeze({
-    kind: input.kind,
+    kind: "record",
     source: input.source ?? "restored",
     selectionKey,
-    selectedOrganization: input.selectedOrganization ?? null,
-    selectedRecord: input.selectedRecord ?? null,
-    selectedMarker: input.selectedMarker ?? null,
+    focalIdentity,
+    selectedOrganization,
+    selectedRecord,
+    selectedMarker,
+    selectedRelationship: normalizedRelationshipSelection(input.selectedRelationship),
   });
+}
+
+export function selectionContainsKey(selection: ExchangeSelectionState, selectionKey: string): boolean {
+  if (selection.kind === "none") return false;
+  const key = required(selectionKey, "Selection key");
+  return selection.selectionKey === key || selection.selectedOrganization?.selectionKey === key;
 }
 
 function disabledReasonFor(
@@ -619,6 +838,38 @@ export function projectFavoriteState(input: Readonly<{
   });
 }
 
+export function createExchangeMediaModel(input: Readonly<{
+  kind: ExchangeMediaKind;
+  assetReference?: string | null;
+  alt: string;
+  posterReference?: string | null;
+  videoSource?: Readonly<{ assetReference: string }> | null;
+  fallbackLabel?: string | null;
+}>): ExchangeMediaModel {
+  const assetReference = input.assetReference ? required(input.assetReference, "Media asset reference") : null;
+  const posterReference = input.posterReference ? required(input.posterReference, "Media poster reference") : null;
+  const videoSource = input.videoSource
+    ? Object.freeze({
+        assetReference: required(input.videoSource.assetReference, "Video asset reference"),
+        authoritySource: "server-derived" as const,
+      })
+    : null;
+  if (videoSource && input.kind !== "video-poster") {
+    throw new Error("An actual video source must be represented separately from its video-poster presentation.");
+  }
+  if (input.kind === "fallback" && (assetReference || posterReference || videoSource)) {
+    throw new Error("Fallback media cannot carry asset or video references.");
+  }
+  return Object.freeze({
+    kind: input.kind,
+    assetReference,
+    alt: required(input.alt, "Media alt text"),
+    posterReference,
+    videoSource,
+    fallbackLabel: input.fallbackLabel ? required(input.fallbackLabel, "Media fallback label") : null,
+  });
+}
+
 export function createLensResultCardModel(input: Readonly<{
   identity: ExchangeSubjectIdentity;
   title: string;
@@ -664,9 +915,10 @@ export function createExchangeMapObjectProjection(input: Readonly<{
   identity: ExchangeSubjectIdentity;
   markerId: string;
   coordinate: Readonly<{ longitude: number; latitude: number }> | null;
-  privacy: ExchangeMapObjectProjection["privacy"];
+  privacy: ExchangeMapPrivacy;
   accessibleLabel: string;
   selectable: boolean;
+  layerIds?: readonly string[];
 }>): ExchangeMapObjectProjection {
   const identity = createExchangeSubjectIdentity(input.identity);
   return Object.freeze({
@@ -677,6 +929,94 @@ export function createExchangeMapObjectProjection(input: Readonly<{
     privacy: input.privacy,
     accessibleLabel: required(input.accessibleLabel, "Accessible map label"),
     selectable: input.selectable,
+    layerIds: requiredList(input.layerIds, "Layer id"),
+  });
+}
+
+export function createExchangeMapAreaProjection(input: Readonly<{
+  areaId: string;
+  associationSelectionKey?: string | null;
+  geographyId: string;
+  geometryReference?: string | null;
+  privacy: ExchangeMapPrivacy;
+  release: "released" | "suppressed";
+  accessibleLabel: string;
+  selectable: boolean;
+  selected: boolean;
+  emphasized: boolean;
+  layerIds?: readonly string[];
+}>): ExchangeMapAreaProjection {
+  if (input.release === "suppressed" && input.selectable) {
+    throw new Error("A suppressed map area cannot be selectable.");
+  }
+  if (input.release === "suppressed" && input.privacy !== "suppressed") {
+    throw new Error("A suppressed map area cannot expose released geography detail.");
+  }
+  return Object.freeze({
+    kind: "area",
+    areaId: required(input.areaId, "Area id"),
+    associationSelectionKey: input.associationSelectionKey
+      ? required(input.associationSelectionKey, "Area association selection key")
+      : null,
+    geographyId: required(input.geographyId, "Area geography id"),
+    geometryReference: input.geometryReference
+      ? required(input.geometryReference, "Area geometry reference")
+      : null,
+    privacy: input.privacy,
+    release: input.release,
+    accessibleLabel: required(input.accessibleLabel, "Accessible area label"),
+    selectable: input.selectable,
+    selected: input.selected,
+    emphasized: input.emphasized,
+    layerIds: requiredList(input.layerIds, "Layer id"),
+    authoritySource: "server-derived",
+  });
+}
+
+export function createExchangeMapRelationshipProjection(input: Readonly<{
+  relationshipId: string;
+  pathState: ExchangeRelationshipPathState;
+  endpointOrganizationIds?: readonly [string, string] | null;
+  geometryReference?: string | null;
+  accessibleLabel: string;
+  layerIds?: readonly string[];
+}>): ExchangeMapRelationshipProjection {
+  const relationshipId = required(input.relationshipId, "Relationship id");
+  if (input.pathState === "no-path") {
+    if (input.endpointOrganizationIds || input.geometryReference) {
+      throw new Error("An explicit no-path relationship cannot disclose endpoints or geometry.");
+    }
+    return Object.freeze({
+      kind: "relationship",
+      relationshipId,
+      pathState: "no-path",
+      endpointOrganizationIds: null,
+      geometryReference: null,
+      privacy: "suppressed",
+      accessibleLabel: required(input.accessibleLabel, "Accessible relationship label"),
+      layerIds: requiredList(input.layerIds, "Layer id"),
+      authoritySource: "server-derived",
+    });
+  }
+  if (!input.endpointOrganizationIds) {
+    throw new Error("An authorized relationship path requires two permitted organization endpoints.");
+  }
+  const endpointOrganizationIds = Object.freeze([
+    required(input.endpointOrganizationIds[0], "Relationship endpoint organization id"),
+    required(input.endpointOrganizationIds[1], "Relationship endpoint organization id"),
+  ]) as readonly [string, string];
+  return Object.freeze({
+    kind: "relationship",
+    relationshipId,
+    pathState: "authorized-path",
+    endpointOrganizationIds,
+    geometryReference: input.geometryReference
+      ? required(input.geometryReference, "Relationship geometry reference")
+      : null,
+    privacy: "permitted",
+    accessibleLabel: required(input.accessibleLabel, "Accessible relationship label"),
+    layerIds: requiredList(input.layerIds, "Layer id"),
+    authoritySource: "server-derived",
   });
 }
 
@@ -748,6 +1088,8 @@ function continuityState(state: ParticipantSpatialLensState): LensContinuityStat
     resultIndex: state.resultIndex,
     listScrollPosition: state.listScrollTop,
     sheetScrollPosition: state.listScrollTop,
+    activeLayerIds: Object.freeze([]),
+    layerStateAuthority: "carried-unvalidated",
   });
 }
 
@@ -761,11 +1103,19 @@ export function mobileExchangeStateFromParticipantSpatialContext(
     selectedOrganization: Object.freeze({
       selectionKey,
       organizationId: context.selection.organizationId,
+      associationRole: "subject",
     }),
     selectedMarker: Object.freeze({
       selectionKey,
       markerId: context.selection.markerId,
+      role: "focal",
     }),
+    selectedRelationship: context.selection.relationshipId
+      ? Object.freeze({
+          relationshipId: context.selection.relationshipId,
+          authority: "carried-unvalidated",
+        })
+      : null,
   });
   const lensState = Object.freeze({
     "opportunities-rfx": continuityState(context.lensState["opportunities-rfx"]),
@@ -816,15 +1166,28 @@ export function selectionMatchesCard(
   card: LensResultCardModel,
 ): boolean {
   return resultCardIdentityIsCoherent(card)
-    && selection.selectionKey !== null
-    && selection.selectionKey === card.identity.selectionKey;
+    && selection.kind !== "none"
+    && selection.selectionKey === card.identity.selectionKey
+    && sameSubjectIdentity(selection.focalIdentity, card.identity);
 }
 
 export function selectionMatchesMapObject(
   selection: ExchangeSelectionState,
   projection: ExchangeMapProjection,
 ): boolean {
-  return projection.kind !== "cluster"
-    && selection.selectionKey !== null
-    && selection.selectionKey === projection.identity.selectionKey;
+  if (selection.kind === "none" || projection.kind === "cluster") return false;
+  if (projection.kind === "relationship") {
+    return selection.selectedRelationship?.relationshipId === projection.relationshipId;
+  }
+  if (projection.kind === "area") {
+    return projection.associationSelectionKey !== null
+      && selectionContainsKey(selection, projection.associationSelectionKey);
+  }
+  if (projection.identity.subjectKind === "organization") {
+    if (projection.identity.selectionKey === selection.selectionKey) return true;
+    return selection.selectedOrganization?.selectionKey === projection.identity.selectionKey
+      && selection.selectedOrganization.organizationId === projection.identity.organizationId;
+  }
+  return projection.identity.selectionKey === selection.selectionKey
+    && sameSubjectIdentity(selection.focalIdentity, projection.identity);
 }

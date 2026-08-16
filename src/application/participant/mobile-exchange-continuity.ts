@@ -28,6 +28,8 @@ export const MOBILE_EXCHANGE_INVALIDATION_REASONS = Object.freeze([
   "viewer-organization-changed",
   "geography-changed",
   "selected-object-authority-changed",
+  "associated-organization-authority-changed",
+  "relationship-authority-changed",
 ] as const);
 
 export type MobileExchangeInvalidationReason =
@@ -112,6 +114,9 @@ export const MOBILE_EXCHANGE_STAGE1_AUTHORITY_POLICY = Object.freeze({
   ...MOBILE_EXCHANGE_CLIENT_STATE_POLICY,
   scopeChangesInvalidateClientContinuity: true,
   selectedObjectsRequireServerRevalidation: true,
+  associatedOrganizationsRequireServerRevalidation: true,
+  relationshipsRequireServerRevalidationBeforeDisclosure: true,
+  activeLayersRequireDomainRevalidation: true,
   returnContextNeverGrantsAuthority: true,
   carriedGeographyIsNotServerAuthority: true,
 } as const);
@@ -127,6 +132,11 @@ function required(value: string, label: string): string {
   const normalized = value.trim();
   if (!normalized || normalized.length > 240) throw new Error(`${label} is invalid.`);
   return normalized;
+}
+
+function requiredUniqueList(values: readonly string[], label: string): readonly string[] {
+  const normalized = values.map((value) => required(value, label));
+  return Object.freeze([...new Set(normalized)]);
 }
 
 function safeReturnHref(value: string | null | undefined, returnLens: ParticipantLensId): string {
@@ -241,18 +251,138 @@ export function withServerRevalidatedMobileExchangeGeography(
   });
 }
 
+/**
+ * Reconcile browser-carried layer selections against the current domain layer
+ * registry/projection. Unknown or removed IDs are discarded. The resulting IDs
+ * remain presentation state and do not grant access to the layer or its data.
+ */
+export function withDomainRevalidatedMobileExchangeLayers(
+  state: MobileExchangeContinuityState,
+  input: Readonly<{
+    lens: ParticipantLensId;
+    activeLayerIds: readonly string[];
+    availableLayerIds: readonly string[];
+  }>,
+): MobileExchangeContinuityState {
+  const activeLayerIds = requiredUniqueList(input.activeLayerIds, "Active layer id");
+  const available = new Set(requiredUniqueList(input.availableLayerIds, "Available layer id"));
+  const retained = Object.freeze(activeLayerIds.filter((layerId) => available.has(layerId)));
+  return Object.freeze({
+    ...state,
+    lensState: Object.freeze({
+      ...state.lensState,
+      [input.lens]: Object.freeze({
+        ...state.lensState[input.lens],
+        activeLayerIds: retained,
+        layerStateAuthority: "domain-revalidated" as const,
+      }),
+    }),
+  });
+}
+
+function closeDetail(
+  state: MobileExchangeContinuityState,
+): Pick<MobileExchangeContinuityState, "sheet" | "detail"> {
+  return {
+    sheet: Object.freeze({
+      ...state.sheet,
+      content: "results",
+      detailContext: null,
+    }),
+    detail: Object.freeze({ status: "closed" as const, detailContext: null, errorCode: null }),
+  };
+}
+
 function clearSelectedObject(
   state: MobileExchangeContinuityState,
 ): MobileExchangeContinuityState {
   return Object.freeze({
     ...state,
     selection: createExchangeSelectionState({ kind: "none" }),
-    sheet: Object.freeze({
-      ...state.sheet,
-      content: "results",
-      detailContext: null,
+    ...closeDetail(state),
+  });
+}
+
+function narrowRecordSelectionToAssociatedOrganization(
+  state: MobileExchangeContinuityState,
+): MobileExchangeContinuityState {
+  if (state.selection.kind !== "record" || !state.selection.selectedOrganization) {
+    return clearSelectedObject(state);
+  }
+  const organization = state.selection.selectedOrganization;
+  const associatedMarker = state.selection.selectedMarker?.role === "associated-organization"
+    && state.selection.selectedMarker.selectionKey === organization.selectionKey
+      ? state.selection.selectedMarker
+      : null;
+  return Object.freeze({
+    ...state,
+    selection: createExchangeSelectionState({
+      kind: "organization",
+      source: "restored",
+      selectedOrganization: {
+        selectionKey: organization.selectionKey,
+        organizationId: organization.organizationId,
+        associationRole: "subject",
+      },
+      selectedMarker: associatedMarker
+        ? {
+            selectionKey: associatedMarker.selectionKey,
+            markerId: associatedMarker.markerId,
+            role: "focal",
+          }
+        : null,
     }),
-    detail: Object.freeze({ status: "closed", detailContext: null, errorCode: null }),
+    ...closeDetail(state),
+  });
+}
+
+function removeAssociatedOrganization(
+  state: MobileExchangeContinuityState,
+): MobileExchangeContinuityState {
+  if (state.selection.kind !== "record" || !state.selection.selectedRecord) return state;
+  const record = state.selection.selectedRecord;
+  const selectedMarker = state.selection.selectedMarker?.role === "focal"
+    ? state.selection.selectedMarker
+    : null;
+  return Object.freeze({
+    ...state,
+    selection: createExchangeSelectionState({
+      kind: "record",
+      source: state.selection.source,
+      selectedRecord: {
+        ...record,
+        organizationId: null,
+      },
+      selectedMarker,
+      selectedRelationship: state.selection.selectedRelationship,
+    }),
+  });
+}
+
+function removeRelationship(
+  state: MobileExchangeContinuityState,
+): MobileExchangeContinuityState {
+  if (state.selection.kind === "none" || !state.selection.selectedRelationship) return state;
+  if (state.selection.kind === "organization") {
+    return Object.freeze({
+      ...state,
+      selection: createExchangeSelectionState({
+        kind: "organization",
+        source: state.selection.source,
+        selectedOrganization: state.selection.selectedOrganization,
+        selectedMarker: state.selection.selectedMarker,
+      }),
+    });
+  }
+  return Object.freeze({
+    ...state,
+    selection: createExchangeSelectionState({
+      kind: "record",
+      source: state.selection.source,
+      selectedOrganization: state.selection.selectedOrganization,
+      selectedRecord: state.selection.selectedRecord,
+      selectedMarker: state.selection.selectedMarker,
+    }),
   });
 }
 
@@ -261,7 +391,14 @@ export function reconcileMobileExchangeContinuity(
   input: Readonly<{
     expectedVersion: number;
     expectedScope: MobileExchangeContinuityScope;
-    selectedObjectAuthorized: boolean;
+    /** Legacy all-selected-context assertion retained for existing callers. */
+    selectedObjectAuthorized?: boolean;
+    /** Current server/domain result for the focal organization or domain record. */
+    focalSubjectAuthorized?: boolean;
+    /** Independently revalidated organization associated with a focal record. */
+    associatedOrganizationAuthorized?: boolean;
+    /** Independently revalidated relationship identity; never path disclosure authority by itself. */
+    relationshipAuthorized?: boolean;
   }>,
 ): MobileExchangeContinuityDecision {
   let reason: MobileExchangeInvalidationReason | null = null;
@@ -276,21 +413,58 @@ export function reconcileMobileExchangeContinuity(
     reason = "viewer-organization-changed";
   } else if (state.scope.geographyId !== input.expectedScope.geographyId) {
     reason = "geography-changed";
-  } else if (!input.selectedObjectAuthorized && state.selection.kind !== "none") {
-    reason = "selected-object-authority-changed";
   }
 
-  if (!reason) {
-    return Object.freeze({ status: "valid", reason: null, state, safeState: state });
+  if (reason) {
+    return Object.freeze({ status: "invalid", reason, state, safeState: null });
   }
-  return Object.freeze({
-    status: "invalid",
-    reason,
-    state,
-    safeState: reason === "selected-object-authority-changed"
-      ? clearSelectedObject(state)
-      : null,
-  });
+
+  const legacy = input.selectedObjectAuthorized;
+  const focalSubjectAuthorized = input.focalSubjectAuthorized ?? legacy ?? true;
+  const associatedOrganizationAuthorized = input.associatedOrganizationAuthorized ?? legacy ?? true;
+  const relationshipAuthorized = input.relationshipAuthorized ?? legacy ?? true;
+
+  if (!focalSubjectAuthorized && state.selection.kind !== "none") {
+    const safeState = state.selection.kind === "record"
+      && state.selection.selectedOrganization
+      && associatedOrganizationAuthorized
+        ? narrowRecordSelectionToAssociatedOrganization(state)
+        : clearSelectedObject(state);
+    return Object.freeze({
+      status: "invalid",
+      reason: "selected-object-authority-changed",
+      state,
+      safeState,
+    });
+  }
+
+  if (
+    !associatedOrganizationAuthorized
+    && state.selection.kind === "record"
+    && state.selection.selectedOrganization
+  ) {
+    return Object.freeze({
+      status: "invalid",
+      reason: "associated-organization-authority-changed",
+      state,
+      safeState: removeAssociatedOrganization(state),
+    });
+  }
+
+  if (
+    !relationshipAuthorized
+    && state.selection.kind !== "none"
+    && state.selection.selectedRelationship
+  ) {
+    return Object.freeze({
+      status: "invalid",
+      reason: "relationship-authority-changed",
+      state,
+      safeState: removeRelationship(state),
+    });
+  }
+
+  return Object.freeze({ status: "valid", reason: null, state, safeState: state });
 }
 
 export function transitionMobileExchangeContinuityLens(
