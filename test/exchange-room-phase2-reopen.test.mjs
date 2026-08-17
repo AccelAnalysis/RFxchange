@@ -8,7 +8,8 @@ const read = (path) => readFileSync(new URL(path, root), "utf8");
 test("Stage 2 action surfaces consume the validated spatial presentation state", () => {
   const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
   assert.match(workspace, /snapPoint=\{spatialContext\.sheetSnapPoint\}/);
-  assert.match(workspace, /initialScrollTop=\{spatialContext\.sheetScrollTop\}/);
+  assert.match(workspace, /initialScrollTop=\{mobileDetailOpen \? 0 : spatialContext\.sheetScrollTop\}/);
+  assert.match(workspace, /onScrollPositionChange=\{\(sheetScrollTop\) => \{\s*if \(mobileDetailOpen\) return;/);
   assert.match(workspace, /onSnapPointChange=\{\(sheetSnapPoint\)/);
   assert.match(workspace, /panelOpen: true/);
   assert.match(workspace, /placement="workspace"/);
@@ -24,6 +25,20 @@ test("ordinary permanent-lens activation reopens the existing Room surface after
   assert.match(controller, /PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT/);
   assert.match(controller, /event\.preventDefault\(\)/);
   assert.doesNotMatch(controller, /location\.(assign|replace)|window\.location/);
+});
+
+test("desktop and sheet action rails share one authorization request projection", () => {
+  const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
+  assert.match(controller, /let exchangeRoomAuthorizationSnapshot: LensAuthorizationProjection \| null = null;/);
+  assert.match(controller, /let exchangeRoomAuthorizationRequestLens: ParticipantLensId \| null = null;/);
+  assert.match(controller, /if \(exchangeRoomAuthorizationRequestLens === lens\) return;/);
+  assert.match(controller, /if \(exchangeRoomAuthorizationSnapshot\?\.lens === lens && exchangeRoomAuthorizationRequestLens === null\) return;/);
+  assert.match(controller, /useSyncExternalStore\(\s*subscribeExchangeRoomAuthorization,\s*exchangeRoomAuthorizationStoreSnapshot,/);
+  assert.equal(
+    controller.match(/fetch\("\/geography\/canvas\/action-authorization"/g)?.length ?? 0,
+    1,
+    "both responsive action rails must share the single module-level authorization fetch path",
+  );
 });
 
 test("reopen path preserves authorization boundary and truthful active deep links while New Referral stays disabled", () => {
