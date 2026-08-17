@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { exchangeRoomLocaleCatalog } from "../../application/participant/exchange-room-locale";
 import type { ExchangeRoomActionProjection } from "../../application/participant/exchange-room-actions";
@@ -38,6 +38,67 @@ const DENIED_ACTION_AUTHORIZATION: ActionAuthorizationProjection = Object.freeze
   referralManage: false,
   resourceManage: false,
 });
+
+let exchangeRoomAuthorizationSnapshot: LensAuthorizationProjection | null = null;
+const exchangeRoomAuthorizationListeners = new Set<() => void>();
+let exchangeRoomAuthorizationRequestLens: ParticipantLensId | null = null;
+let exchangeRoomAuthorizationGeneration = 0;
+
+function subscribeExchangeRoomAuthorization(listener: () => void): () => void {
+  exchangeRoomAuthorizationListeners.add(listener);
+  return () => exchangeRoomAuthorizationListeners.delete(listener);
+}
+
+function exchangeRoomAuthorizationStoreSnapshot(): LensAuthorizationProjection | null {
+  return exchangeRoomAuthorizationSnapshot;
+}
+
+function publishExchangeRoomAuthorization(snapshot: LensAuthorizationProjection): void {
+  exchangeRoomAuthorizationSnapshot = snapshot;
+  for (const listener of exchangeRoomAuthorizationListeners) listener();
+}
+
+function ensureExchangeRoomAuthorization(lens: ParticipantLensId): void {
+  if (exchangeRoomAuthorizationRequestLens === lens) return;
+  if (exchangeRoomAuthorizationSnapshot?.lens === lens && exchangeRoomAuthorizationRequestLens === null) return;
+
+  const generation = ++exchangeRoomAuthorizationGeneration;
+  exchangeRoomAuthorizationRequestLens = lens;
+  publishExchangeRoomAuthorization(Object.freeze({
+    lens,
+    authorization: DENIED_ACTION_AUTHORIZATION,
+  }));
+
+  void fetch("/geography/canvas/action-authorization", {
+    cache: "no-store",
+    credentials: "same-origin",
+  })
+    .then(async (response) => response.ok ? response.json() : DENIED_ACTION_AUTHORIZATION)
+    .then((payload: Partial<ActionAuthorizationProjection>) => {
+      if (generation !== exchangeRoomAuthorizationGeneration) return;
+      publishExchangeRoomAuthorization(Object.freeze({
+        lens,
+        authorization: Object.freeze({
+          openPlatform: payload.openPlatform === true,
+          rfxCreate: payload.rfxCreate === true,
+          referralManage: payload.referralManage === true,
+          resourceManage: payload.resourceManage === true,
+        }),
+      }));
+    })
+    .catch(() => {
+      if (generation !== exchangeRoomAuthorizationGeneration) return;
+      publishExchangeRoomAuthorization(Object.freeze({
+        lens,
+        authorization: DENIED_ACTION_AUTHORIZATION,
+      }));
+    })
+    .finally(() => {
+      if (generation === exchangeRoomAuthorizationGeneration) {
+        exchangeRoomAuthorizationRequestLens = null;
+      }
+    });
+}
 
 function isParticipantLensId(value: string | undefined): value is ParticipantLensId {
   return Boolean(value && PARTICIPANT_LENS_IDS.includes(value as ParticipantLensId));
@@ -123,14 +184,19 @@ export function ExchangeRoomActionController({
 }>) {
   const { locale } = useI18n();
   const messages = exchangeRoomLocaleCatalog(locale);
-  const [authorizationState, setAuthorizationState] = useState<LensAuthorizationProjection>(() => Object.freeze({
-    lens: activeLens,
-    authorization: DENIED_ACTION_AUTHORIZATION,
-  }));
+  const authorizationState = useSyncExternalStore(
+    subscribeExchangeRoomAuthorization,
+    exchangeRoomAuthorizationStoreSnapshot,
+    () => null,
+  );
   const [networkDiscoveryAvailable, setNetworkDiscoveryAvailable] = useState(false);
-  const authorization = authorizationState.lens === activeLens
+  const authorization = authorizationState?.lens === activeLens
     ? authorizationState.authorization
     : DENIED_ACTION_AUTHORIZATION;
+
+  useEffect(() => {
+    ensureExchangeRoomAuthorization(activeLens);
+  }, [activeLens]);
 
   useEffect(() => {
     let active = true;
@@ -138,30 +204,6 @@ export function ExchangeRoomActionController({
       if (!active) return;
       setNetworkDiscoveryAvailable(Boolean(document.querySelector('form[action="/geography/canvas"]')));
     });
-    void fetch("/geography/canvas/action-authorization", {
-      cache: "no-store",
-      credentials: "same-origin",
-    })
-      .then(async (response) => response.ok ? response.json() : DENIED_ACTION_AUTHORIZATION)
-      .then((payload: Partial<ActionAuthorizationProjection>) => {
-        if (!active) return;
-        setAuthorizationState(Object.freeze({
-          lens: activeLens,
-          authorization: Object.freeze({
-            openPlatform: payload.openPlatform === true,
-            rfxCreate: payload.rfxCreate === true,
-            referralManage: payload.referralManage === true,
-            resourceManage: payload.resourceManage === true,
-          }),
-        }));
-      })
-      .catch(() => {
-        if (!active) return;
-        setAuthorizationState(Object.freeze({
-          lens: activeLens,
-          authorization: DENIED_ACTION_AUTHORIZATION,
-        }));
-      });
     return () => {
       active = false;
       window.cancelAnimationFrame(discoveryFrame);
