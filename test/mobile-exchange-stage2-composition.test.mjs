@@ -39,6 +39,7 @@ test("MOB-02 keeps the mobile Exchange map-first with floating search, dynamic v
   assert.match(shellCss, /env\(safe-area-inset-bottom/);
   assert.match(workspace, /desktopSearchOverlay/);
   assert.match(workspace, /desktopDetailSheet/);
+  assert.match(workspace, /networkWorkspace\.match\.disclaimer/);
 });
 
 test("MOB-03 exposes exactly four persistent bottom lenses in governed order without a top details selector", async () => {
@@ -106,6 +107,9 @@ test("shared cards, media, favorites, detail, and marker selection converge on o
   assert.match(primitives, /export function ExchangeFavorite/);
   assert.match(primitives, /export function ExchangeResultCard/);
   assert.match(primitives, /data-selection-key=\{card\.identity\.selectionKey\}/);
+  assert.match(primitives, /resolveRecordActionLabel\(action\.labelKey\)/);
+  assert.match(primitives, /data-action-label-key=\{action\.labelKey\}/);
+  assert.match(workspace, /resolveRecordActionLabel=\{\(labelKey\) => t\(labelKey\)\}/);
   assert.match(workspace, /focusedMarkerId=\{selectedObjectId\}/);
   assert.match(workspace, /data-mobile-result-stream/);
   assert.match(workspace, /onOrganizationMarkerSelect=\{\(markerId\) => selectObject\(markerId\)\}/);
