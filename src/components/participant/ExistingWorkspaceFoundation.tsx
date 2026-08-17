@@ -343,9 +343,9 @@ export function ExistingWorkspaceFoundation({
       selectedOrganizationId: selectedOrganizationQueryId,
       page,
     });
-    const nextFilters: ParticipantSpatialLensState["filters"] = Object.freeze(
-      serviceAreaId ? { serviceArea: serviceAreaId } : {},
-    );
+    const nextFilterValues: Record<string, string> = {};
+    if (serviceAreaId) nextFilterValues.serviceArea = serviceAreaId;
+    const nextFilters: ParticipantSpatialLensState["filters"] = Object.freeze(nextFilterValues);
     updateSpatialContext((current) => {
       const lensState = current.lensState.intelligence;
       if (
