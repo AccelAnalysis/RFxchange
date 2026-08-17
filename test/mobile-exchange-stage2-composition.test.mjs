@@ -22,6 +22,7 @@ const paths = Object.freeze({
   actionController: "src/components/participant/ExchangeRoomActionController.tsx",
   actionCss: "src/components/participant/ExchangeRoomActionController.module.css",
   shellCss: "src/components/participant/PersistentParticipantShell.module.css",
+  i18nProvider: "src/components/i18n/I18nProvider.tsx",
 });
 
 test("MOB-02 keeps the mobile Exchange map-first with floating search, dynamic viewport, and safe areas", async () => {
@@ -99,9 +100,10 @@ test("MOB-05 renders the existing 16-action projection as four stable sheet posi
 });
 
 test("shared cards, media, favorites, detail, and marker selection converge on one production seam", async () => {
-  const [primitives, workspace] = await Promise.all([
+  const [primitives, workspace, i18nProvider] = await Promise.all([
     read(paths.primitives),
     read(paths.workspace),
+    read(paths.i18nProvider),
   ]);
   assert.match(primitives, /export function ExchangeMedia/);
   assert.match(primitives, /export function ExchangeFavorite/);
@@ -109,7 +111,10 @@ test("shared cards, media, favorites, detail, and marker selection converge on o
   assert.match(primitives, /data-selection-key=\{card\.identity\.selectionKey\}/);
   assert.match(primitives, /resolveRecordActionLabel\(action\.labelKey\)/);
   assert.match(primitives, /data-action-label-key=\{action\.labelKey\}/);
+  assert.ok((primitives.match(/\{label\}/g) ?? []).length >= 3, "enabled and disabled record actions must render resolved labels");
+  assert.doesNotMatch(primitives, />\{action\.labelKey\}</);
   assert.match(workspace, /resolveRecordActionLabel=\{\(labelKey\) => t\(labelKey\)\}/);
+  assert.match(i18nProvider, /mobileExchangeRecordActionLabel\(locale, key\)/);
   assert.match(workspace, /focusedMarkerId=\{selectedObjectId\}/);
   assert.match(workspace, /data-mobile-result-stream/);
   assert.match(workspace, /onOrganizationMarkerSelect=\{\(markerId\) => selectObject\(markerId\)\}/);
@@ -140,17 +145,30 @@ test("sheet continuity remains presentation-only and accepts valid pre-Stage-2 s
   assert.equal(restored?.sheetScrollTop, 0);
 });
 
-test("all five governed locales carry the complete Stage 2 sheet and card copy", async () => {
+test("all five governed locales carry complete Stage 2 sheet, card, and record-action copy", async () => {
   const localePaths = ["en-US", "es", "fr", "it", "de"].map(
     (locale) => `src/i18n/messages/network/mobile-exchange-stage2/${locale}.json`,
   );
   const catalogs = await Promise.all(localePaths.map(async (path) => JSON.parse(await read(path))));
   const expectedSheetKeys = ["region", "dragHandle", "peek", "partial", "expanded"];
   const expectedCardKeys = ["openDetail", "addFavorite", "removeFavorite", "favoriteUnavailable", "mediaFallback"];
+  const expectedRecordActionKeys = [
+    "resources.recordActions.viewProvider",
+    "resources.recordActions.viewResource",
+    "resources.recordActions.requestSupport",
+    "resources.recordActions.openIntake",
+    "resources.recordActions.viewRequest",
+  ];
   for (const catalog of catalogs) {
     assert.deepEqual(Object.keys(catalog.sheet), expectedSheetKeys);
     assert.deepEqual(Object.keys(catalog.card), expectedCardKeys);
+    assert.deepEqual(Object.keys(catalog.recordActions), expectedRecordActionKeys);
     assert.ok(Object.values(catalog.sheet).every((value) => typeof value === "string" && value.length > 0));
     assert.ok(Object.values(catalog.card).every((value) => typeof value === "string" && value.length > 0));
+    for (const key of expectedRecordActionKeys) {
+      assert.equal(typeof catalog.recordActions[key], "string");
+      assert.ok(catalog.recordActions[key].length > 0);
+      assert.notEqual(catalog.recordActions[key], key);
+    }
   }
 });
