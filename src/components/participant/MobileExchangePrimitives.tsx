@@ -223,6 +223,7 @@ export function ExchangeMedia({
 
 function invokeRecordAction(
   action: RecordActionDefinition,
+  label: string,
   onIntent?: (intent: string) => void,
 ): ReactNode {
   if (action.availability !== "enabled" || !action.handler) {
@@ -232,17 +233,23 @@ function invokeRecordAction(
         type="button"
         disabled
         data-record-action={action.id}
+        data-action-label-key={action.labelKey}
         data-action-state="disabled"
         data-disabled-reason={action.disabledReason ?? "not-operational"}
       >
-        {action.labelKey}
+        {label}
       </button>
     );
   }
   if (action.handler.kind === "href") {
     return (
-      <Link key={action.id} href={action.handler.href} data-record-action={action.id}>
-        {action.labelKey}
+      <Link
+        key={action.id}
+        href={action.handler.href}
+        data-record-action={action.id}
+        data-action-label-key={action.labelKey}
+      >
+        {label}
       </Link>
     );
   }
@@ -251,9 +258,10 @@ function invokeRecordAction(
       key={action.id}
       type="button"
       data-record-action={action.id}
+      data-action-label-key={action.labelKey}
       onClick={() => onIntent?.(action.handler?.kind === "intent" ? action.handler.intent : "")}
     >
-      {action.labelKey}
+      {label}
     </button>
   );
 }
@@ -308,6 +316,7 @@ export function ExchangeResultCard({
   selected,
   onSelect,
   onOpen,
+  resolveRecordActionLabel,
   onFavoriteIntent,
   onRecordActionIntent,
 }: Readonly<{
@@ -316,6 +325,7 @@ export function ExchangeResultCard({
   selected: boolean;
   onSelect(): void;
   onOpen(): void;
+  resolveRecordActionLabel(labelKey: string): string;
   onFavoriteIntent?(intent: string): void;
   onRecordActionIntent?(intent: string): void;
 }>) {
@@ -363,7 +373,11 @@ export function ExchangeResultCard({
       </button>
       {card.recordActions.length > 0 ? (
         <div className={styles.recordActions}>
-          {card.recordActions.map((action) => invokeRecordAction(action, onRecordActionIntent))}
+          {card.recordActions.map((action) => invokeRecordAction(
+            action,
+            resolveRecordActionLabel(action.labelKey),
+            onRecordActionIntent,
+          ))}
         </div>
       ) : null}
     </article>
