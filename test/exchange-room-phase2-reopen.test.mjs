@@ -27,6 +27,19 @@ test("ordinary permanent-lens activation reopens the existing Room surface after
   assert.doesNotMatch(controller, /location\.(assign|replace)|window\.location/);
 });
 
+test("configured-browser reopen acceptance closes detail while preserving the action rail", () => {
+  const runner = read("scripts/run-configured-exchange-shell-acceptance.mjs");
+  assert.match(runner, /!document\.querySelector\('#organization-detail-panel'\)/);
+  assert.match(runner, /Boolean\(document\.querySelector\('\[data-exchange-room-action-grid\]'\)\)/);
+  assert.match(runner, /closed Exchange Room detail surface with persistent action rail/);
+  assert.match(runner, /did not reopen the Exchange Room detail surface/);
+  assert.doesNotMatch(
+    runner,
+    /!document\.querySelector\('\[data-exchange-room-action-grid\]'\)/,
+    "the persistent four-position action rail must not be treated as a closable detail surface",
+  );
+});
+
 test("desktop and sheet action rails share one authorization request projection", () => {
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   assert.match(controller, /let exchangeRoomAuthorizationSnapshot: LensAuthorizationProjection \| null = null;/);
