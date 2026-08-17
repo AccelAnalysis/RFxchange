@@ -745,6 +745,7 @@ export function ExistingWorkspaceFoundation({
                       {t("networkWorkspace.search.noResultsBody")}
                     </StatePanel>
                   )}
+                  <p className={styles.matchDisclaimer}>{t("networkWorkspace.match.disclaimer")}</p>
                 </section>
               </MapOverlaySurface>
             </div>
@@ -808,6 +809,7 @@ export function ExistingWorkspaceFoundation({
                   <Link href={clearHref}>{t("networkWorkspace.search.clear")}</Link>
                 ) : null}
               </div>
+              <p className={styles.matchDisclaimer}>{t("networkWorkspace.match.disclaimer")}</p>
               {cards.length > 0 ? cards.map((card, index) => {
                 const organization = discovery?.organizations[index];
                 if (!organization) return null;
@@ -834,6 +836,7 @@ export function ExistingWorkspaceFoundation({
                           sheetSnapPoint: "expanded",
                         }));
                       }}
+                      resolveRecordActionLabel={(labelKey) => t(labelKey)}
                     />
                   </div>
                 );
