@@ -87,6 +87,7 @@ export function ExchangeBottomSheet({
     velocityY: number;
   }> | null>(null);
   const [dragOffset, setDragOffset] = useState(0);
+  const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
     if (!contentRef.current) return;
@@ -95,6 +96,7 @@ export function ExchangeBottomSheet({
 
   const setSnap = useCallback((next: ParticipantSheetSnapPoint) => {
     setDragOffset(0);
+    setDragging(false);
     onSnapPointChange(next);
   }, [onSnapPointChange]);
 
@@ -108,6 +110,7 @@ export function ExchangeBottomSheet({
       lastAt: performance.now(),
       velocityY: 0,
     });
+    setDragging(true);
   };
 
   const moveDrag = (event: PointerEvent<HTMLButtonElement>) => {
@@ -130,6 +133,7 @@ export function ExchangeBottomSheet({
     const current = dragState.current;
     if (!current || current.pointerId !== event.pointerId) return;
     dragState.current = null;
+    setDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
@@ -145,7 +149,7 @@ export function ExchangeBottomSheet({
       className={styles.sheet}
       data-mobile-exchange-sheet
       data-snap-point={snapPoint}
-      data-dragging={dragState.current ? "true" : undefined}
+      data-dragging={dragging ? "true" : undefined}
       aria-labelledby={labelledBy}
       aria-label={labels.region}
       style={style}
