@@ -21,13 +21,18 @@ test("shared controller hydrates authorization fail-closed and requires discover
   assert.ok(source.includes('form[action="/geography/canvas"]'));
 });
 
-test("persistent Room revalidates action authority fail-closed on every in-place lens transition", () => {
+test("persistent Room shares and revalidates fail-closed action authority on in-place lens transitions", () => {
   const source = read("src/components/participant/ExchangeRoomActionController.tsx");
-  assert.match(source, /interface LensAuthorizationProjection/);
-  assert.match(source, /authorizationState\.lens === activeLens/);
+  assert.match(source, /useSyncExternalStore/);
+  assert.match(source, /subscribeExchangeRoomAuthorization/);
+  assert.match(source, /exchangeRoomAuthorizationStoreSnapshot/);
+  assert.match(source, /exchangeRoomAuthorizationRequestLens === lens/);
+  assert.match(source, /const generation = \+\+exchangeRoomAuthorizationGeneration/);
+  assert.match(source, /generation !== exchangeRoomAuthorizationGeneration/);
+  assert.match(source, /ensureExchangeRoomAuthorization\(activeLens\)/);
+  assert.match(source, /authorizationState\?\.lens === activeLens/);
   assert.match(source, /: DENIED_ACTION_AUTHORIZATION;/);
-  assert.match(source, /lens: activeLens,[\s\S]*authorization: Object\.freeze/);
-  assert.match(source, /\}, \[activeLens\]\);/);
+  assert.equal((source.match(/fetch\("\/geography\/canvas\/action-authorization"/g) ?? []).length, 1);
 });
 
 test("fresh server authorization revokes open-platform actions while Resources keeps discovery and management authority distinct", () => {
