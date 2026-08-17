@@ -158,6 +158,7 @@ export default async function GeographyCanvasPage({
           geographyId: String(authenticated.mapProjection.model.selectedGeography.id),
         }}
         discovery={discovery.available ? discovery.projection : null}
+        discoveryUnavailableReason={discovery.available ? null : discovery.reason}
         focusedOrganization={focusedOrganization}
         serviceAreaOptions={discovery.available ? discovery.serviceAreaOptions : []}
         officialResourceProviderOrganizationIds={officialResourceProviderOrganizationIds}
