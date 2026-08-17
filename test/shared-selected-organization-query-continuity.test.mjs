@@ -35,7 +35,7 @@ test("Intelligence query actions preserve the revalidated selected organization"
   );
 
   const paginationStart = workspace.indexOf("className={styles.networkPagination}");
-  const paginationEnd = workspace.indexOf("<p className={styles.matchDisclaimer}", paginationStart);
+  const paginationEnd = workspace.indexOf("</nav>", paginationStart);
   assert.ok(paginationStart >= 0 && paginationEnd > paginationStart, "Intelligence pagination block was not found.");
   const pagination = workspace.slice(paginationStart, paginationEnd);
   assert.equal(

@@ -5,19 +5,21 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
 
-test("dismissed Phase 2 action surface follows validated spatial panel state", () => {
-  const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
-  assert.match(controller, /useSyncExternalStore\([\s\S]*subscribeExchangeRoomSurface[\s\S]*exchangeRoomSurfaceSnapshot/);
-  assert.match(controller, /readActiveParticipantSpatialContext\(\)/);
-  assert.match(controller, /context\?\.panelOpen === false \? "closed" : "open"/);
-  assert.match(controller, /if \(!surfaceOpen\) return null/);
+test("Stage 2 action surfaces consume the validated spatial presentation state", () => {
+  const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
+  assert.match(workspace, /snapPoint=\{spatialContext\.sheetSnapPoint\}/);
+  assert.match(workspace, /initialScrollTop=\{spatialContext\.sheetScrollTop\}/);
+  assert.match(workspace, /onSnapPointChange=\{\(sheetSnapPoint\)/);
+  assert.match(workspace, /panelOpen: true/);
+  assert.match(workspace, /placement="workspace"/);
+  assert.match(workspace, /placement="sheet"/);
 });
 
 test("ordinary permanent-lens activation reopens the existing Room surface after the lens transaction", () => {
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   assert.match(controller, /onLensSelect\(lens\);\s*reopenActiveExchangeRoomSurface\(\);/);
   assert.doesNotMatch(controller, /reopenActiveExchangeRoomSurface\(\);\s*onLensSelect\(lens\);/);
-  assert.match(controller, /Object\.freeze\(\{ \.\.\.current, panelOpen: true \}\)/);
+  assert.match(controller, /const reopened = Object\.freeze\(\{[\s\S]*\.\.\.current,[\s\S]*panelOpen: true,[\s\S]*sheetSnapPoint:/);
   assert.match(controller, /serializeParticipantSpatialContext\(reopened\)/);
   assert.match(controller, /PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT/);
   assert.match(controller, /event\.preventDefault\(\)/);
