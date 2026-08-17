@@ -66,12 +66,15 @@ export type ExistingWorkspaceStatus =
   | "expired"
   | "recovery";
 
+type DiscoveryUnavailableReason = "geography-not-permitted";
+
 interface ExistingWorkspaceFoundationProps {
   readonly model: ControlledLocalityMapModel;
   readonly homeMarker: ExchangeHomeMarker;
   readonly organizationId: string;
   readonly spatialScope: ParticipantSpatialScope;
   readonly discovery?: NetworkDiscoveryProjection | null;
+  readonly discoveryUnavailableReason?: DiscoveryUnavailableReason | null;
   readonly focusedOrganization?: NetworkDiscoveryOrganization | null;
   readonly serviceAreaOptions?: readonly NetworkServiceAreaOption[];
   readonly officialResourceProviderOrganizationIds?: readonly string[];
@@ -177,6 +180,7 @@ export function ExistingWorkspaceFoundation({
   organizationId,
   spatialScope,
   discovery = null,
+  discoveryUnavailableReason = null,
   focusedOrganization = null,
   serviceAreaOptions = [],
   officialResourceProviderOrganizationIds = [],
@@ -194,6 +198,7 @@ export function ExistingWorkspaceFoundation({
   const networkSearchInputRef = useRef<HTMLInputElement | null>(null);
   const cardRefs = useRef(new Map<string, HTMLElement>());
   const appliedFocusedOrganizationIdRef = useRef<string | null>(null);
+  const discoveryRestricted = discoveryUnavailableReason === "geography-not-permitted";
 
   const organizationsByMarkerId = useMemo(() => new Map(
     [
@@ -624,7 +629,15 @@ export function ExistingWorkspaceFoundation({
           workspaceOverlay={panelOpen ? "right" : "left"}
         />
 
-        {discovery ? (
+        {discoveryRestricted ? (
+          <div className={styles.desktopSearchOverlay}>
+            <MapOverlaySurface position="top-left">
+              <StatePanel state="permission" title={t("networkWorkspace.status.permission.title")}>
+                {t("networkWorkspace.status.permission.body")}
+              </StatePanel>
+            </MapOverlaySurface>
+          </div>
+        ) : discovery ? (
           <>
             <form className={styles.mobileSearchOverlay} role="search" method="get" action="/geography/canvas">
               <input type="hidden" name="organizationId" value={organizationId} />
@@ -759,7 +772,7 @@ export function ExistingWorkspaceFoundation({
           placement="workspace"
         />
 
-        {panelOpen ? (
+        {panelOpen && !mobileDetailOpen ? (
           <div className={styles.desktopDetailSheet}>
             <ResponsiveEdgeSheet ariaLabelledBy="organization-detail-title" side="right" width="standard">
               {detailContent}
@@ -771,23 +784,28 @@ export function ExistingWorkspaceFoundation({
           labelledBy="mobile-exchange-sheet-title"
           labels={sheetLabels}
           snapPoint={spatialContext.sheetSnapPoint}
-          initialScrollTop={spatialContext.sheetScrollTop}
+          initialScrollTop={mobileDetailOpen ? 0 : spatialContext.sheetScrollTop}
           onSnapPointChange={(sheetSnapPoint) => updateSpatialContext((current) => Object.freeze({
             ...current,
             sheetSnapPoint,
             panelOpen: true,
           }))}
-          onScrollPositionChange={(sheetScrollTop) => updateSpatialContext((current) => (
-            current.sheetScrollTop === sheetScrollTop
-              ? current
-              : Object.freeze({ ...current, sheetScrollTop })
-          ))}
+          onScrollPositionChange={(sheetScrollTop) => {
+            if (mobileDetailOpen) return;
+            updateSpatialContext((current) => (
+              current.sheetScrollTop === sheetScrollTop
+                ? current
+                : Object.freeze({ ...current, sheetScrollTop })
+            ));
+          }}
           summary={(
             <>
               <strong id="mobile-exchange-sheet-title">
                 {mobileDetailOpen
                   ? selectedOrganization?.profile.displayName ?? homeMarker.label
-                  : t("networkWorkspace.search.resultCount", { count: discovery?.totalMatched ?? 0 })}
+                  : discoveryRestricted
+                    ? t("networkWorkspace.status.permission.title")
+                    : t("networkWorkspace.search.resultCount", { count: discovery?.totalMatched ?? 0 })}
               </strong>
               <span>{mobileDetailOpen ? t("networkWorkspace.detail.eyebrow") : locality}</span>
             </>
@@ -801,7 +819,11 @@ export function ExistingWorkspaceFoundation({
             />
           )}
         >
-          {mobileDetailOpen ? detailContent : (
+          {mobileDetailOpen ? detailContent : discoveryRestricted ? (
+            <StatePanel state="permission" title={t("networkWorkspace.status.permission.title")}>
+              {t("networkWorkspace.status.permission.body")}
+            </StatePanel>
+          ) : (
             <div className={styles.mobileResultStream} data-mobile-result-stream>
               <div className={styles.mobileResultUtilityRow}>
                 <span>{t("networkWorkspace.search.lowDensity")}</span>
