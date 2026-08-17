@@ -8,7 +8,10 @@ import {
   type ReactNode,
 } from "react";
 
-import { mobileExchangeLocaleCatalog } from "@/src/application/participant/mobile-exchange-locale";
+import {
+  mobileExchangeLocaleCatalog,
+  mobileExchangeRecordActionLabel,
+} from "@/src/application/participant/mobile-exchange-locale";
 import type { Locale } from "@/src/i18n/config";
 import type { Dictionary } from "@/src/i18n/get-dictionary";
 
@@ -60,7 +63,7 @@ export function I18nProvider({
         const message = readMessage(dictionary, key);
         const mobileMessage = key.startsWith("mobileExchange.")
           ? readMessage(mobileExchangeLocaleCatalog(locale), key.slice("mobileExchange.".length))
-          : undefined;
+          : mobileExchangeRecordActionLabel(locale, key);
         const resolved = typeof message === "string" ? message : mobileMessage;
 
         if (typeof resolved !== "string") {

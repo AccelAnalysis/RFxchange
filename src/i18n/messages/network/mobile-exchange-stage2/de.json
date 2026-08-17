@@ -12,5 +12,12 @@
     "removeFavorite": "Aus Favoriten entfernen",
     "favoriteUnavailable": "Favoriten sind für diesen Datensatz nicht verfügbar",
     "mediaFallback": "Keine öffentlichen Medien verfügbar"
+  },
+  "recordActions": {
+    "resources.recordActions.viewProvider": "Anbieter anzeigen",
+    "resources.recordActions.viewResource": "Ressource anzeigen",
+    "resources.recordActions.requestSupport": "Unterstützung anfordern",
+    "resources.recordActions.openIntake": "Anfrage starten",
+    "resources.recordActions.viewRequest": "Anfrage anzeigen"
   }
 }

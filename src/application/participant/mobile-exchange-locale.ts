@@ -19,3 +19,10 @@ const catalogs: Readonly<Record<Locale, MobileExchangeLocaleCatalog>> = Object.f
 export function mobileExchangeLocaleCatalog(locale: Locale): MobileExchangeLocaleCatalog {
   return catalogs[locale];
 }
+
+export function mobileExchangeRecordActionLabel(locale: Locale, labelKey: string): string | null {
+  const label = catalogs[locale].recordActions[
+    labelKey as keyof MobileExchangeLocaleCatalog["recordActions"]
+  ];
+  return typeof label === "string" ? label : null;
+}

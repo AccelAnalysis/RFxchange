@@ -12,5 +12,12 @@
     "removeFavorite": "Remove from favorites",
     "favoriteUnavailable": "Favorite persistence is not available for this record",
     "mediaFallback": "No public media available"
+  },
+  "recordActions": {
+    "resources.recordActions.viewProvider": "View provider",
+    "resources.recordActions.viewResource": "View resource",
+    "resources.recordActions.requestSupport": "Request support",
+    "resources.recordActions.openIntake": "Start request",
+    "resources.recordActions.viewRequest": "View request"
   }
 }
