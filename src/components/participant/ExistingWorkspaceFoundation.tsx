@@ -23,7 +23,10 @@ import {
 } from "../../application/participant/mobile-exchange-contracts";
 import { projectExchangeRoomActions } from "../../application/participant/exchange-room-actions";
 import type { ParticipantLensId } from "../../application/participant/participant-lens-registry";
-import type { ParticipantSpatialScope } from "../../application/participant/participant-spatial-context";
+import type {
+  ParticipantSpatialLensState,
+  ParticipantSpatialScope,
+} from "../../application/participant/participant-spatial-context";
 import type { NetworkServiceAreaOption } from "../../infrastructure/network-discovery/runtime";
 import { formatDate } from "../../i18n/format";
 import { useI18n } from "../i18n/I18nProvider";
@@ -340,7 +343,9 @@ export function ExistingWorkspaceFoundation({
       selectedOrganizationId: selectedOrganizationQueryId,
       page,
     });
-    const nextFilters = Object.freeze(serviceAreaId ? { serviceArea: serviceAreaId } : {});
+    const nextFilters: ParticipantSpatialLensState["filters"] = Object.freeze(
+      serviceAreaId ? { serviceArea: serviceAreaId } : {},
+    );
     updateSpatialContext((current) => {
       const lensState = current.lensState.intelligence;
       if (
