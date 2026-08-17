@@ -19,7 +19,6 @@
   box-shadow: 0 -18px 50px rgb(11 11 13 / 18%);
   transform: translateY(var(--exchange-sheet-drag-offset, 0));
   transition: height var(--motion-duration-base, 220ms) var(--motion-easing-standard, ease), transform 80ms linear;
-  touch-action: none;
   will-change: height, transform;
 }
 
