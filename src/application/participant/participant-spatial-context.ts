@@ -32,7 +32,7 @@ export interface ParticipantSpatialSelection {
 
 export interface ParticipantSpatialLensState {
   readonly search: string;
-  readonly filters: Readonly<Partial<Record<string, string>>>;
+  readonly filters: Readonly<Record<string, string>>;
   readonly resultPage: number;
   readonly resultIndex: number;
   readonly listScrollTop: number;
