@@ -223,7 +223,7 @@ test("Intelligence context preservation is bounded to the canonical same-origin 
   assert.match(storage, /window\.sessionStorage\.getItem/);
   assert.match(storage, /window\.sessionStorage\.removeItem/);
   assert.match(navigation, /useSyncExternalStore/);
-  assert.match(navigation, /lens\.id === "intelligence"[\s\S]*intelligenceHref[\s\S]*lens\.id === "resources"[\s\S]*resourceHref/);
+  assert.match(navigation, /if \(lensId === "intelligence"\) return snapshot\.intelligenceHref;[\s\S]*if \(lensId === "resources"\) return snapshot\.resourceHref;/);
   assert.doesNotMatch(navigation, /authorize|permission|membership|tenancy/);
   assert.match(signOut, /clearParticipantIntelligenceContext\(\)[\s\S]*\.signOut\(\)/);
   assert.match(signIn, /method: "POST"[\s\S]*clearParticipantIntelligenceContext\(\)/);
