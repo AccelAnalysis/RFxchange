@@ -70,7 +70,7 @@ Canonical totals are **438 total · 175 Done · 263 Not Started**, with Wave 4 R
 This package and the Slice 4.1–4.6 runtime:
 
 - complete only the 23 Feature IDs checked in the canonical tracker through Slice 4.6;
-- create private organization-owned RFxs and a minimized published opportunity projection, never a pursuit, response, team, submission, evaluation, award or outcome record;
+- create private organization-owned RFxs, a minimized published opportunity projection, and only the bounded private Slice 4.6 Watch/Pursue/Decline relation; never create a response, team, submission, evaluation, award, or outcome record;
 - add no fake map, organization, opportunity, statistics or market activity;
 - do not import prototype HTML/CSS/JavaScript into production;
 - do not expose AMACS implementation identifiers as ordinary participant language;
