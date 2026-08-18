@@ -84,6 +84,13 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
     redirect(canonicalWorkspace);
   }
 
+  if (acquisition.kind === "team-invitation" && access.state.lifecycleState === "open-platform") {
+    const invitationReference = acquisition.subjectReference && /^teaminv_[a-f0-9]{40}$/.test(acquisition.subjectReference)
+      ? acquisition.subjectReference
+      : null;
+    redirect(invitationReference ? `/opportunities/team-invitations/${encodeURIComponent(invitationReference)}` : canonicalWorkspace);
+  }
+
   if (
     access.state.lifecycleState === "open-platform" &&
     !["referral", "provider"].includes(acquisition.kind)
@@ -107,7 +114,7 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
     : mapUrl === "/exchange" ? "Enter the Exchange" : "Continue setup";
 
   return (
-    <ParticipantShell activeItem={acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Network"}>
+    <ParticipantShell activeItem={acquisition.kind === "team-invitation" ? "opportunities-rfx" : acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Network"}>
       <OperationalWorkspace ariaLabel="Saved acquisition context">
         <section className={styles.wrap}>
           <p className={styles.eyebrow}>Context recovered</p>

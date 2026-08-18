@@ -2,7 +2,9 @@
 
 **Status: EXECUTION AUTHORITY — DOCUMENTATION ONLY.**
 
-**Current implementation basis:** `8f348c8c86a2a8eb1eeb6402a170a9120824d7ae` (PR #232 Control Room reconciliation, subject to successful exact post-merge CI)
+**Activated implementation basis:** `8f348c8c86a2a8eb1eeb6402a170a9120824d7ae` (PR #232 Control Room reconciliation; post-merge CI `32109036958` succeeded)
+
+**Reconciled implementation basis:** `4a3d9042425b88170f16cbda6aff61ba875abea1` (PR #236 narrow ownership amendment; post-merge CI `32111575377` succeeded)
 
 **Work packet:** `WP-MOBILE-EXCHANGE-RFX-47-01`
 
@@ -27,7 +29,8 @@ Browser state, an acquisition token, possession of an invitation URL, a discover
 | Wave 3 Resource discovery and consented provider connection | Satisfied through `RES-LENS-003` and `RES-LENS-007`. `RSP-008` creates only a safe context-preserving route into the existing provider projection/request boundary; it creates no provider record or duplicate provider workflow. |
 | Acquisition continuity and communications | `ACQ-003` and `COMMS-003` are implemented. The existing acquisition envelope already recognizes `team-invitation`; Slice 4.7 must bind it to the invitation without token authority or auto-acceptance. |
 | Stage 3 shared query/map/result/detail contracts | Satisfied through PRs #231 and #233. Slice 4.7 may consume the existing shared contracts but cannot edit or fork them. |
-| PR #232 Control Room reconciliation | Merged as `8f348c8c86a2a8eb1eeb6402a170a9120824d7ae`; runtime work remains contingent on its exact post-merge CI. |
+| PR #232 Control Room reconciliation | Merged as `8f348c8c86a2a8eb1eeb6402a170a9120824d7ae`; exact post-merge CI `32109036958` succeeded. |
+| PR #236 narrow ownership amendment | Final head `2e30da4682a2c6869f37a2cd1194ab9a5b24f549`, exact-head CI `32111009507`, merge `4a3d9042425b88170f16cbda6aff61ba875abea1`, and post-merge CI `32111575377` succeeded. It owns only the five RFx locale catalogs and the already-bound team-invitation continuation hop needed by this slice. |
 | B6c and Stabilization 2C | B6c remains separately eligible/Not Started. Stabilization 2C remains isolated release engineering and is not a product dependency. |
 
 No dependency edge is widened. Slice 4.8 remains ineligible until this runtime is merged, post-merge acceptance is green and Control Room closes the exact packet.
@@ -137,7 +140,7 @@ The acquisition envelope preserves why the recipient arrived through sign-in, ac
 
 After activation, the participant returns to the exact pending invitation review only after server-side binding confirms the acquisition context, user journey, normalized invited email and current organization authority. The participant must explicitly accept or decline. Reopening an already consumed/expired/revoked link returns a truthful unavailable/recovery state without leaking another organization's invitation.
 
-The existing acquisition continuation surface does not currently route `team-invitation` to an RFx review destination. Because `app/acquisition/continue/page.tsx` is outside this packet's declared owned paths, Control Room must approve a narrow ownership amendment or Shared Contract Request before that file is changed. Until then, implementation may create and test the invitation/acquisition domain seam and the owned RFx review route, but `ACQ-007` cannot be marked complete or the packet closed.
+PR #236 narrowly assigned `app/acquisition/continue/page.tsx` to this packet only for the final hop from an already server-bound `team-invitation` context to the exact invitation review destination, without attachment or auto-acceptance. It also assigned the five RFx locale catalogs for this slice's participant copy. No acquisition, account, organization, response, referral, commercial or cross-lens authority was added.
 
 ## 10. Persistence and atomicity
 
