@@ -62,6 +62,7 @@ function context(userId, email) {
 const actors = Object.freeze({
   lead: Object.freeze({ userId: "user-lead", email: "lead@example.test", organizationId: "org-lead", membershipId: "membership-lead" }),
   invitee: Object.freeze({ userId: "user-invitee", email: "invitee@example.test", organizationId: "org-candidate", membershipId: "membership-invitee" }),
+  viewer: Object.freeze({ userId: "user-viewer", email: "viewer@example.test", organizationId: "org-candidate", membershipId: "membership-viewer" }),
   other: Object.freeze({ userId: "user-other", email: "other@example.test", organizationId: "org-other", membershipId: "membership-other" }),
 });
 
@@ -71,7 +72,7 @@ function authorization() {
     accountSecurity: { inspect: async (subject) => Object.freeze({ provider: "firebase", subject, email: Object.values(actors).find((actor) => `subject-${actor.userId}` === subject)?.email ?? "unknown@example.test", emailVerified: true, disabled: false, mfaEnrolled: false, tokensValidAfter: "2026-08-18T11:00:00.000Z", lastSignInAt: NOW }) },
     organizations: { getById: async (id) => Object.freeze({ id, createdAt: NOW, updatedAt: NOW }) },
     memberships: { getById: async (id) => { const actor = byMembership.get(String(id)); return actor ? Object.freeze({ id, userId: actor.userId, organizationId: actor.organizationId, status: "active", createdAt: NOW, updatedAt: NOW }) : null; } },
-    authorizations: { getByMembershipId: async (id) => { const actor = byMembership.get(String(id)); return actor ? Object.freeze({ membershipId: id, userId: actor.userId, organizationId: actor.organizationId, roleKey: "response-manager", permissions: Object.freeze(["response.create"]), createdAt: NOW, updatedAt: NOW }) : null; } },
+    authorizations: { getByMembershipId: async (id) => { const actor = byMembership.get(String(id)); return actor ? Object.freeze({ membershipId: id, userId: actor.userId, organizationId: actor.organizationId, roleKey: id === "membership-viewer" ? "viewer" : "response-manager", permissions: Object.freeze(id === "membership-viewer" ? [] : ["response.create"]), createdAt: NOW, updatedAt: NOW }) : null; } },
     restrictions: { getForOrganization: async () => null, getForMembership: async () => null },
   });
 }
@@ -200,6 +201,8 @@ test("TEM-002/003 create one organization invitation, replay exactly, and requir
   assert.equal(replay.replayed, true);
   assert.equal(f.invitations.size, 1);
   await assert.rejects(f.service.review(f.scope(actors.other), created.invitation.id), (error) => error?.code === "not-found");
+  await assert.rejects(f.service.review(f.scope(actors.viewer), created.invitation.id), (error) => error?.code === "forbidden");
+  await assert.rejects(f.service.receivedInvitations(f.scope(actors.viewer)), (error) => error?.code === "forbidden");
   const review = await f.service.review(f.scope(actors.invitee), created.invitation.id);
   assert.equal(review.role, "invitee");
   assert.equal(review.canDecide, true);
