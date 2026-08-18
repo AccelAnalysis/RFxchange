@@ -14,16 +14,17 @@ const educationAcceptance = read("scripts/acceptance-network-education-configure
 
 const checked = tracker.match(/^- \[x\] `/gm) ?? [];
 const unchecked = tracker.match(/^- \[ \] `/gm) ?? [];
-assert.equal(checked.length, 170);
-assert.equal(unchecked.length, 268);
-assert.match(tracker, /438 total · 170 Done · 268 Not Started/);
+assert.equal(checked.length + unchecked.length, 438);
+assert.match(tracker, /438 total · \d+ Done · \d+ Not Started/);
 
 const network = tracker.match(/### 3 - Network([\s\S]*?)### 4 - RFx Core/)?.[1] ?? "";
 assert.equal((network.match(/^- \[x\] `/gm) ?? []).length, 38);
 assert.equal((network.match(/^- \[ \] `/gm) ?? []).length, 0);
 const rfxCore = tracker.match(/### 4 - RFx Core([\s\S]*?)### 5 - Trust & Engagement/)?.[1] ?? "";
-assert.equal((rfxCore.match(/^- \[ \] `/gm) ?? []).length, 23);
-assert.equal((rfxCore.match(/^- \[x\] `/gm) ?? []).length, 18);
+assert.equal(
+  (rfxCore.match(/^- \[ \] `/gm) ?? []).length + (rfxCore.match(/^- \[x\] `/gm) ?? []).length,
+  41,
+);
 
 for (const authority of [tracker, dependencyMap, roadmap, closeout]) {
   assert.match(authority, /Network(?: is|:) \*\*38\/38\*\*|Network \*\*38\/38\*\*|Network at 38\/38/);

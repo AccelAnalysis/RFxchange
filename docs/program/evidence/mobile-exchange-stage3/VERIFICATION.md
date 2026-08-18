@@ -32,7 +32,7 @@ Stage 3 is a shared foundation for later real domain adapters. Until a Stage 4 a
 - production CI on the exact implementation candidate
 - production CI on merged `main` before Stage 3 closeout
 
-The implementation PR records local results and exact-head CI. Control Room records the final candidate, merge SHA, post-merge CI, requirement dispositions, denominator arithmetic, and next-packet activation without changing the Feature-ID tracker.
+Implementation PR #231 records candidate `0b6b0999afe592725cd0a81a27f14b221f8c82b4`, successful exact-head CI run `32103926126`, merge `5ddca57bf2d9fa2c81a98e75aeee09302d278a23`, and post-merge run `32104375075`. Authorization-correction PR #233 records final corrected candidate `15e7c2333d1e9113055630bf256f977f7c39d080`, successful exact-head CI `32106236531`, merge `3830577e14b7b1bc6878965d26369529de2ebbbb`, and post-merge run `32106855995`. Control Room binds the query/detail requirements to the corrected candidate, preserves map/result implementation provenance, records the four `Implemented — Not Verified` dispositions and denominator arithmetic, and activates dependency-safe next packets without changing the Feature-ID tracker.
 
 ## Security and scope result
 

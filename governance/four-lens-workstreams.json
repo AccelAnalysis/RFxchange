@@ -155,6 +155,34 @@
       "controlPullRequest": 230,
       "packetIds": ["WP-MOBILE-EXCHANGE-STAGE3-SHARED-01"],
       "purpose": "Activate Lane 01 Stage 3 authoritative shared query, map, result/card, selection and detail/return contracts after the successor lens migration closed with successful exact-head and post-merge CI."
+    },
+    {
+      "id": "rfx-47-2026-08-18",
+      "mainBaseSha": "3830577e14b7b1bc6878965d26369529de2ebbbb",
+      "controlPullRequest": 232,
+      "packetIds": ["WP-MOBILE-EXCHANGE-RFX-47-01"],
+      "purpose": "Activate RFx Slice 4.7 gap resolution, teaming and external-invite continuity after merged Slice 4.6 was reconciled and closed under current completion governance."
+    },
+    {
+      "id": "mobile-exchange-stage4-resources-2026-08-18",
+      "mainBaseSha": "3830577e14b7b1bc6878965d26369529de2ebbbb",
+      "controlPullRequest": 232,
+      "packetIds": ["WP-MOBILE-EXCHANGE-STAGE4-RESOURCES-01"],
+      "purpose": "Activate the Resources domain adapter from exact merged main after Stage 3 shared contracts closed with successful exact-head and post-merge CI."
+    },
+    {
+      "id": "mobile-exchange-stage4-intelligence-2026-08-18",
+      "mainBaseSha": "3830577e14b7b1bc6878965d26369529de2ebbbb",
+      "controlPullRequest": 232,
+      "packetIds": ["WP-MOBILE-EXCHANGE-STAGE4-INTELLIGENCE-01"],
+      "purpose": "Activate the Intelligence domain adapter from exact merged main after Stage 3 shared contracts closed with successful exact-head and post-merge CI."
+    },
+    {
+      "id": "mobile-exchange-stage4-capabilities-2026-08-18",
+      "mainBaseSha": "3830577e14b7b1bc6878965d26369529de2ebbbb",
+      "controlPullRequest": 232,
+      "packetIds": ["WP-MOBILE-EXCHANGE-STAGE4-CAPABILITIES-01"],
+      "purpose": "Activate the Capabilities domain adapter from exact merged main after Stage 3 shared contracts closed with successful exact-head and post-merge CI."
     }
   ],
   "lanes": [
@@ -414,8 +442,8 @@
       "candidate": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "60764f2deaabcd2d184aea40734da880f2b6f1c0",
-        "mergeSha": null
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4",
+        "mergeSha": "3cef29d8ce300154a8d73a262ec7a20252a49db6"
       },
       "candidateHistory": [
         {
@@ -423,12 +451,20 @@
           "pr": 171,
           "sha": "e70413e2e45db4b75517376acdc0700f9838a963",
           "mergeSha": null
+        },
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 171,
+          "sha": "60764f2deaabcd2d184aea40734da880f2b6f1c0",
+          "mergeSha": null
         }
       ],
       "exactBaseSha": "347015829d64cfc596cdef1010601d8bda447818",
       "activationEpochId": "rfx-46-reconciliation-2026-08-12",
       "basePolicy": "authority-merge-sha plus preserved candidate e70413e2e45db4b75517376acdc0700f9838a963",
-      "status": "implemented-not-verified",
+      "postMergeRunUrl": "https://github.com/AccelAnalysis/RFxchange/actions/runs/31930900200",
+      "postMergeMainSha": "3cef29d8ce300154a8d73a262ec7a20252a49db6",
+      "status": "closed",
       "requirementIds": [
         "RFX-FEATURE-RSP-001",
         "RFX-FEATURE-RSP-002",
@@ -708,12 +744,19 @@
       "lane": "opportunities-rfx",
       "owner": "Wave 4 Slice 4.2 Corrective Production",
       "branch": "fix/rfx42-iss006-correction",
-      "candidate": null,
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 201,
+        "sha": "be99ecec42b28b8d1d36ecdf5010f73377f23126",
+        "mergeSha": "6c5fe65e69abeaa21c9f3b14adce43ca1e2f7cc7"
+      },
       "candidateHistory": [],
       "exactBaseSha": "69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068",
       "activationEpochId": "rfx-42-iss006-correction-2026-08-12",
       "basePolicy": "Exact current-main activation base; participant-authorized corrective implementation of RFX-FEATURE-ISS-006 only.",
-      "status": "active",
+      "postMergeRunUrl": "https://github.com/AccelAnalysis/RFxchange/actions/runs/31860051714",
+      "postMergeMainSha": "6c5fe65e69abeaa21c9f3b14adce43ca1e2f7cc7",
+      "status": "closed",
       "requirementIds": [
         "RFX-FEATURE-ISS-006"
       ],
@@ -1099,13 +1142,51 @@
       "id": "WP-MOBILE-EXCHANGE-STAGE3-SHARED-01",
       "lane": "shared-exchange",
       "owner": "Stage 3 authoritative shared discovery and continuity contracts",
-      "branch": "codex/mobile-exchange-stage3-shared",
-      "candidate": null,
-      "candidateHistory": [],
+      "branch": "codex/mobile-exchange-stage3-auth-correction",
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 233,
+        "sha": "15e7c2333d1e9113055630bf256f977f7c39d080",
+        "mergeSha": "3830577e14b7b1bc6878965d26369529de2ebbbb"
+      },
+      "candidateHistory": [
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 231,
+          "sha": "206d53728a9457a5894e3a165d3458d5d77b33ec",
+          "mergeSha": null
+        },
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 231,
+          "sha": "f897d8380b4757bbf7631b219372e635ef489109",
+          "mergeSha": null
+        },
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 231,
+          "sha": "0b6b0999afe592725cd0a81a27f14b221f8c82b4",
+          "mergeSha": "5ddca57bf2d9fa2c81a98e75aeee09302d278a23"
+        },
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 233,
+          "sha": "14f3241fca0425aa0fdac920048917586e59936f",
+          "mergeSha": null
+        },
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 233,
+          "sha": "a0715df60af470a61245d76955355738fb74c264",
+          "mergeSha": null
+        }
+      ],
       "exactBaseSha": "107c3b8899e19e0479b51f6542a06a808f2ae0df",
       "activationEpochId": "mobile-exchange-stage3-shared-2026-08-18",
       "basePolicy": "Activated by Control Room PR #230 from exact current merged main after WP-MOBILE-EXCHANGE-LENS-MIGRATION-01 closed.",
-      "status": "active",
+      "postMergeRunUrl": "https://github.com/AccelAnalysis/RFxchange/actions/runs/32106855995",
+      "postMergeMainSha": "3830577e14b7b1bc6878965d26369529de2ebbbb",
+      "status": "closed",
       "releaseClass": "Elevated",
       "requirementIds": ["MOB36-SHARED-QUERY-001", "MOB36-SHARED-MAP-001", "MOB36-SHARED-RESULT-001", "MOB36-SHARED-DETAIL-001"],
       "sources": ["docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/program/SHARED_EXCHANGE_CONTRACTS.md", "src/application/participant/mobile-exchange-contracts.ts", "src/application/participant/mobile-exchange-continuity.ts", "src/components/map/ExchangeSpatialScene.tsx"],
@@ -1124,10 +1205,10 @@
       "branch": "codex/rfx-slice-4-7",
       "candidate": null,
       "candidateHistory": [],
-      "exactBaseSha": null,
-      "activationEpochId": null,
-      "basePolicy": "Activate from exact current merged main only after the corrected Slice 4.6 packet closes.",
-      "status": "ready-after-authority-merge",
+      "exactBaseSha": "3830577e14b7b1bc6878965d26369529de2ebbbb",
+      "activationEpochId": "rfx-47-2026-08-18",
+      "basePolicy": "Activated by Control Room PR #232 from exact merged main after WP-RFX-46-RECONCILE closed.",
+      "status": "active",
       "releaseClass": "Elevated",
       "requirementIds": ["RFX-FEATURE-DSC-010", "RFX-FEATURE-RSP-007", "RFX-FEATURE-RSP-008", "RFX-FEATURE-TEM-001", "RFX-FEATURE-TEM-002", "RFX-FEATURE-TEM-003", "RFX-FEATURE-TEM-004", "RFX-FEATURE-ACQ-007"],
       "sources": ["docs/slices/WAVE_4_RFX_CORE_ROADMAP.md", "docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/rfx/RFX_CORE_PRODUCT_WORKSPACES.md"],
@@ -1241,10 +1322,10 @@
       "branch": "codex/mobile-exchange-stage4-resources",
       "candidate": null,
       "candidateHistory": [],
-      "exactBaseSha": null,
-      "activationEpochId": null,
-      "basePolicy": "Activate from exact current main after Stage 3 shared contracts merge; reconcile useful PR #221 domain work.",
-      "status": "ready-after-authority-merge",
+      "exactBaseSha": "3830577e14b7b1bc6878965d26369529de2ebbbb",
+      "activationEpochId": "mobile-exchange-stage4-resources-2026-08-18",
+      "basePolicy": "Activated by Control Room PR #232 from exact merged main after WP-MOBILE-EXCHANGE-STAGE3-SHARED-01 closed; reconcile useful PR #221 domain work.",
+      "status": "active",
       "releaseClass": "Elevated",
       "requirementIds": ["MOB36-RESOURCES-001"],
       "sources": ["docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/slices/SLICE_3_6_OFFICIAL_RESOURCE_PROVIDER_FOUNDATION.md", "docs/slices/SLICE_3_7_RESOURCE_DISCOVERY_ROUTING_AND_PROVIDER_DISTRIBUTION.md"],
@@ -1263,10 +1344,10 @@
       "branch": "codex/mobile-exchange-stage4-intelligence",
       "candidate": null,
       "candidateHistory": [],
-      "exactBaseSha": null,
-      "activationEpochId": null,
-      "basePolicy": "Activate from exact current main after Stage 3 shared contracts merge; reconcile useful PR #220 provenance work.",
-      "status": "ready-after-authority-merge",
+      "exactBaseSha": "3830577e14b7b1bc6878965d26369529de2ebbbb",
+      "activationEpochId": "mobile-exchange-stage4-intelligence-2026-08-18",
+      "basePolicy": "Activated by Control Room PR #232 from exact merged main after WP-MOBILE-EXCHANGE-STAGE3-SHARED-01 closed; reconcile useful PR #220 provenance work.",
+      "status": "active",
       "releaseClass": "Elevated",
       "requirementIds": ["MOB36-INTELLIGENCE-001"],
       "sources": ["docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/program/INTELLIGENCE_PROGRAM_ROADMAP.md", "docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md"],
@@ -1285,10 +1366,10 @@
       "branch": "codex/mobile-exchange-stage4-capabilities",
       "candidate": null,
       "candidateHistory": [],
-      "exactBaseSha": null,
-      "activationEpochId": null,
-      "basePolicy": "Activate from exact current main after Stage 3 shared contracts merge; consume the existing organization profile and pinned AMACS 0.5.0 integration.",
-      "status": "ready-after-authority-merge",
+      "exactBaseSha": "3830577e14b7b1bc6878965d26369529de2ebbbb",
+      "activationEpochId": "mobile-exchange-stage4-capabilities-2026-08-18",
+      "basePolicy": "Activated by Control Room PR #232 from exact merged main after WP-MOBILE-EXCHANGE-STAGE3-SHARED-01 closed; consume the existing organization profile and pinned AMACS 0.5.0 integration.",
+      "status": "active",
       "releaseClass": "Elevated",
       "requirementIds": ["MOB36-CAPABILITIES-001", "MOB36-CAPABILITIES-AMACS-001"],
       "sources": ["docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/rfx/AMACS_INTEGRATION_CONTRACT.md", "docs/context/ORGANIZATION_MODEL.md"],

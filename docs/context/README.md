@@ -95,7 +95,7 @@ The RFx Core planning package is indexed at [`../rfx/README.md`](../rfx/README.m
 - anti-regression and configured-browser acceptance; and
 - the real-data-only B6c RFx map lens.
 
-The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) through [`../slices/SLICE_4_5_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_5_EXECUTION_AUTHORITY.md). They cover 18 RFx Core Feature IDs: the organization-owned RFx kernel, private structured package/definition, readiness, exact preview, atomic publication, controlled sharing and real permitted opportunity discovery/watch/deadline behavior. The Four-Lens program retains their tracker state while retroactive independent assurance is pending.
+The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) through [`../slices/SLICE_4_6_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_6_EXECUTION_AUTHORITY.md). They cover 23 RFx Core Feature IDs: the organization-owned RFx kernel, private structured package/definition, readiness, exact preview, atomic publication, controlled sharing, real permitted opportunity discovery/watch/deadline behavior, and bounded private fit/pursuit/gap assessment. Optional independent assurance remains separate from completion.
 
 ## Current sequencing status
 
@@ -110,12 +110,12 @@ The dependency result remains:
 - AI/AMACS foundation: satisfied; Slice 4.4 readiness/preview/publication does not require or authorize an AI call;
 - organization authority/tenancy/audit/concurrency foundations: satisfied by prior cross-cutting implementation;
 - Exchange Interaction Architecture: satisfied by PR #150 and the merged shell/post-PR-#159 convergence gates;
-- Slices 4.1–4.5 RFx kernel/package/definition/publication/discovery: implemented for the canonical 18/41 RFx Core Feature IDs and pending retroactive Four-Lens assurance;
+- Slices 4.1–4.6 RFx kernel/package/definition/publication/discovery/fit-pursuit: implemented for the canonical 23/41 RFx Core Feature IDs; optional Four-Lens assurance remains separate;
 - ACQ-002/003 public projection and acquisition continuity: satisfied and reused by the canonical live Slice 4.4 RFx publication adapter;
 - Stabilization 2C: isolated release engineering, not a product prerequisite; and
 - the reviewed `ISS-009` dependency on stable Slice 4.2 and Slice 4.3 requirements is adopted; no other dependency correction is introduced.
 
-At Four-Lens adoption, canonical totals were **438 total · 170 Done · 268 Not Started**, with Wave 4 RFx Core **18/41**. Treat that as a historical snapshot and read the tracker for current arithmetic. B6c opportunity expression is eligible but Not Started. Slice 4.6 authority is merged; its runtime PR #171 remains a preserved candidate pending program reconciliation and independent acceptance, and Slice 4.7 remains ineligible before accepted 4.6 merges.
+At Four-Lens adoption, canonical totals were **438 total · 170 Done · 268 Not Started**, with Wave 4 RFx Core **18/41**. Treat that as a historical snapshot and read the tracker for current arithmetic. B6c opportunity expression remains eligible but Not Started. Slice 4.6 later merged and was reconciled as Implemented — Not Verified; Slice 4.7 proceeds only through its separately declared exact-base packet.
 
 ## Stabilization 2C boundary
 

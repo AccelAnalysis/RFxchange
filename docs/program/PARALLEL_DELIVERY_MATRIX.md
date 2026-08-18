@@ -2,9 +2,9 @@
 
 **Canonical volatile program-status source**
 
-**Snapshot basis:** merged `main` `107c3b8899e19e0479b51f6542a06a808f2ae0df` on 2026-08-18
+**Snapshot basis:** merged `main` `3830577e14b7b1bc6878965d26369529de2ebbbb` on 2026-08-18
 
-**Current task:** Implement `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` from exact activation base `107c3b8899e19e0479b51f6542a06a808f2ae0df` under Control Room PR `#230`
+**Current task:** Execute the four Control Room PR #232 activation epochs from exact merged main `3830577e14b7b1bc6878965d26369529de2ebbbb`: RFx Slice 4.7, Resources, Intelligence, and Capabilities
 
 **Update rule:** Control Room recalculates this document from current merged `main` after every program-state change.
 
@@ -25,20 +25,20 @@ The original 106 records remain immutable and in order. Twenty-two successor req
 
 | Experience | Requirement denominator | Verified | In Progress | Implemented — Not Verified | Not Started | Blocked | Explicitly deferred/N/A |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Shared Exchange | 36 | 0 | 0 | 23 | 6 | 3 | 4 |
+| Shared Exchange | 36 | 0 | 0 | 27 | 2 | 3 | 4 |
 | Opportunities/RFx | 42 | 0 | 0 | 23 | 19 | 0 | 0 |
 | Resources | 13 | 0 | 0 | 8 | 3 | 2 | 0 |
 | Intelligence | 15 | 0 | 0 | 3 | 7 | 5 | 0 |
 | Capabilities | 3 | 0 | 0 | 0 | 3 | 0 | 0 |
 | Referrals Cross-Lens | 14 | 0 | 0 | 10 | 3 | 0 | 1 |
 | Integration | 5 | 0 | 0 | 0 | 5 | 0 | 0 |
-| Program total | 128 | 0 | 0 | 67 | 46 | 10 | 5 |
+| Program total | 128 | 0 | 0 | 71 | 42 | 10 | 5 |
 
 No percentage is inferred from these counts. The successor requirement denominator changes no Feature-ID arithmetic.
 
 ## Canonical tracker comparison
 
-- Master Build Tracker: **438 total · 170 Done · 268 Not Started**.
+- Master Build Tracker: **438 total · 175 Done · 263 Not Started**.
 - Mobile Stages 1–2 and the Stages 3–6 authority change no Feature-ID arithmetic.
 - `MOB-01` is installed product authority, not a silently completed tracker feature.
 - `governance/four-lens-requirements.json` is append-only at 128 records; the original 106 remain immutable.
@@ -129,6 +129,32 @@ Exact-head audit of migration PR #228 then found four existing governed referral
 
 Control Room PR #230 records activation epoch `mobile-exchange-stage3-shared-2026-08-18` for `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` from exact base `107c3b8899e19e0479b51f6542a06a808f2ae0df`. Stage 3 alone is active; every Stage 4–6 domain/integration packet remains dependency-gated.
 
+## Mobile Exchange Stage 3 closeout
+
+| Field | Final state |
+| --- | --- |
+| Packet | `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` |
+| Exact activation base | `107c3b8899e19e0479b51f6542a06a808f2ae0df` |
+| Reconciled implementation base | `56e23c35dc3182330fe8bfd3521de001ee1fdf37` |
+| Candidate | PR #231 exact head `0b6b0999afe592725cd0a81a27f14b221f8c82b4` |
+| Exact-head CI | run `32103926126` — **SUCCESS** |
+| Integrated main | `5ddca57bf2d9fa2c81a98e75aeee09302d278a23` |
+| Post-merge CI | run `32104375075` — **SUCCESS** |
+| Authorization correction | PR #233 exact head `15e7c2333d1e9113055630bf256f977f7c39d080`; exact-head CI `32106236531` — **SUCCESS** |
+| Corrected integrated main | `3830577e14b7b1bc6878965d26369529de2ebbbb` |
+| Correction post-merge CI | run `32106855995` — **SUCCESS** |
+| Focused / canonical evidence | Corrected Stage 3 21/21; canonical full gate 771/771; configured browser and build identity passed |
+| Disposition | `Implemented — Not Verified`; optional independent assurance not performed |
+| Release state | Merged/integrated; no independent production deployment under this packet |
+| Tracker effect | None; tracker remains 170/438 and RFx Core 18/41 |
+| Stabilization 2C / B6b | Incomplete / intentionally pending |
+
+Control Room also reconciles the already-merged Slice 4.6 packet to its true final PR #171 candidate `dc17514ef9aed2dd37022b8bb121feb946bbcbf4`, merge `3cef29d8ce300154a8d73a262ec7a20252a49db6`, exact-head CI `31929740885`, and post-merge CI `31930900200`. Its pre-amendment independent-assurance language remains historical; the packet closes as `Implemented — Not Verified` under the current Completion Governance Amendment without claiming optional assurance. The five completed Feature IDs are checked in the canonical tracker, bringing the current tracker to 175/438 and RFx Core to 23/41.
+
+Before RFx Slice 4.7 activation, Control Room likewise closes the stale active ownership for `WP-RFX-42-ISS006-CORRECT-01` against its already-merged PR #201 final head `be99ecec42b28b8d1d36ecdf5010f73377f23126`, merge `6c5fe65e69abeaa21c9f3b14adce43ca1e2f7cc7`, exact-head CI `31859756636`, and post-merge CI `31860051714`. This removes overlapping RFx path ownership and rebinds `RFX-FEATURE-ISS-006` from the superseded defective PR #163 candidate to the corrected PR #201 implementation without changing its already-checked tracker state.
+
+Control Room PR #232 records four exact-base activation epochs at corrected merged main `3830577e14b7b1bc6878965d26369529de2ebbbb`: `rfx-47-2026-08-18`, `mobile-exchange-stage4-resources-2026-08-18`, `mobile-exchange-stage4-intelligence-2026-08-18`, and `mobile-exchange-stage4-capabilities-2026-08-18`. These lanes own disjoint packet paths. The Opportunities Stage 4 adapter remains inactive until RFx Slices 4.7–4.10 close; Capabilities matching, all Stage 5 packets, and Stage 6 remain inactive behind their declared dependencies.
+
 ## Stage 1 integrated contract family
 
 The integrated shared architecture now covers:
@@ -187,4 +213,4 @@ Any newly discovered generalized capability gap must be raised through the insta
 
 ## Exact next action
 
-Implement `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` against exact base `107c3b8899e19e0479b51f6542a06a808f2ae0df`: one non-authorizing query/map/result/detail family, marker/card/detail identity parity, truthful no-coordinate behavior, domain-owned persistence seams, safe detail return, desktop/mobile/five-locale/performance evidence, and no private domain framework. No Stage 4 domain packet begins before Stage 3 merges and its post-merge reconciliation closes the packet.
+Execute `WP-MOBILE-EXCHANGE-RFX-47-01`, `WP-MOBILE-EXCHANGE-STAGE4-RESOURCES-01`, `WP-MOBILE-EXCHANGE-STAGE4-INTELLIGENCE-01`, and `WP-MOBILE-EXCHANGE-STAGE4-CAPABILITIES-01` from their exact PR #232 activation epochs. Reconcile useful open PR provenance without merging stale heads, consume the Stage 3 shared contracts, preserve each packet stop boundary, and require exact-head/post-merge evidence before Control Room closes each packet or activates a dependent successor.

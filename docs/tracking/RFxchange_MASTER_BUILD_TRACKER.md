@@ -12,12 +12,12 @@
 
 ## Progress
 
-**438 total · 170 Done · 268 Not Started**
+**438 total · 175 Done · 263 Not Started**
 - 0 - Product System: **5/14**
 - 1 - Foundation: **64/64**
 - 2 - Activation: **43/43**
 - 3 - Network: **38/38**
-- 4 - RFx Core: **18/41**
+- 4 - RFx Core: **23/41**
 - 5 - Trust & Engagement: **0/141**
 - 6 - Commercial: **1/50**
 - 7 - Institutional & Scale: **1/47**
@@ -55,8 +55,9 @@ Network completion is **38/38**: four inherited Wave 1 foundations, three Slice 
 - **Slice 4.3 — `ISS-007` + `ISS-009` + `ISS-011`**: extends the same private aggregate with server-canonical AMACS requirements, an expandable linked response structure and an expandable linked evaluation definition with governed treatment/weight rules, bounded save/recovery and a complete manual path. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_3.md`.
 - **Slice 4.4 — `ISS-016` + `ISS-018` + `ISS-019` + `ISS-020` + `ACQ-009`**: adds current server-derived readiness, exact preview/publication projection parity, atomic one-way publication with immutable evidence, audience-gated controlled sharing and the truthful free/basic commercial boundary. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_4.md`.
 - **Slice 4.5 — `DSC-004` + `DSC-005` + `DSC-006` + `DSC-007` + `DSC-008`**: adds real permitted opportunity discovery in the Spatial Workspace, governed saved searches, minimized idempotent alert/digest requests, one private watch relation and canonical watched-deadline views. Acceptance evidence is recorded in `docs/architecture/WAVE_4_SLICE_4_5.md`.
+- **Slice 4.6 — `RSP-001` + `RSP-002` + `RSP-003` + `RSP-004` + `RSP-006`**: adds attributable discovery/match semantics, deterministic release-aware fit explanation, private participant-confirmed assessment, typed gaps, and one organization-owned Watch/Pursue/Decline relation. PR #171 final candidate `dc17514ef9aed2dd37022b8bb121feb946bbcbf4` corrected the preserved findings, passed exact-head and post-merge CI, and merged as `3cef29d8ce300154a8d73a262ec7a20252a49db6`. The terminal disposition is Implemented — Not Verified; no optional independent assurance event is claimed.
 
-Wave 4 RFx Core is **18/41**. Slice 4.5 consumes only real Slice 4.4 projections and makes Slice 4.6 documentation authority dependency-eligible. B6c remains eligible but Not Started; no fit, pursuit, response, teaming, submission or later lifecycle runtime was introduced.
+Wave 4 RFx Core is **23/41**. Slice 4.6 consumes real Slice 4.5 discovery and closes the fit/pursuit dependency for separately authorized Slice 4.7 gap-resolution and teaming work. B6c remains eligible but Not Started; no response construction, teaming, submission or later lifecycle runtime is inferred from Slice 4.6.
 
 ## Feature-ID checklist
 
@@ -256,11 +257,11 @@ Wave 4 RFx Core is **18/41**. Slice 4.5 consumes only real Slice 4.4 projections
 - [x] `ISS-018` — Slice 4.4; one minimized responder projector with exact preview/publication substantive payload and digest parity
 - [x] `ISS-019` — Slice 4.4; atomic one-way publication, immutable snapshot/projection/event/receipt/audit evidence, replay and stale-authority/version/digest rejection
 - [x] `ISS-020` — Slice 4.4; free-participation basic issuance with unknown advanced RFx capabilities failing closed and no commercial effect on market truth
-- [ ] `RSP-001`
-- [ ] `RSP-002`
-- [ ] `RSP-003`
-- [ ] `RSP-004`
-- [ ] `RSP-006`
+- [x] `RSP-001` — Slice 4.6; attributable Discovered/Potential Match semantics without qualification or endorsement
+- [x] `RSP-002` — Slice 4.6; deterministic release-aware capability/requirement alignment with explicit uncertainty and gaps
+- [x] `RSP-003` — Slice 4.6; private versioned participant-confirmed Go/No-Go assessment
+- [x] `RSP-004` — Slice 4.6; organization-owned authorized Watch/Pursue/Decline state with replay and stale-input protection
+- [x] `RSP-006` — Slice 4.6; typed stable requirement-linked missing, unconfirmed, review, and evidence gaps
 - [ ] `RSP-007`
 - [ ] `RSP-008`
 - [ ] `RSP-009`

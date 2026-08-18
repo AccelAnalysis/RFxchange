@@ -22,11 +22,16 @@ The packet changes shared, non-authorizing presentation contracts only. Domain r
 - Successor authority merge: `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`
 - Lens migration final candidate / merge: `0a71737f3ddc36d5fce6a880149793994609dc84` / `107c3b8899e19e0479b51f6542a06a808f2ae0df`
 - Stage 3 activation control merge / post-merge CI: `56e23c35dc3182330fe8bfd3521de001ee1fdf37` / `32100623664`
-- Stage 3 implementation candidate: bound by the implementation PR exact head and exact-head production CI, then durably reconciled by Control Room after merge
+- Stage 3 implementation PR / final candidate: PR #231 / `0b6b0999afe592725cd0a81a27f14b221f8c82b4`
+- Stage 3 exact-head CI: run `32103926126` — **SUCCESS** (770/770 canonical tests, configured browser, artifact, compiled/visible build identity)
+- Stage 3 merge / post-merge CI: `5ddca57bf2d9fa2c81a98e75aeee09302d278a23` / run `32104375075` — **SUCCESS**
+- Stage 3 authorization-correction PR / final candidate: PR #233 / `15e7c2333d1e9113055630bf256f977f7c39d080`
+- Correction exact-head CI: run `32106236531` — **SUCCESS** (771/771 canonical tests, configured browser, artifact, compiled/visible build identity)
+- Correction merge / post-merge CI: `3830577e14b7b1bc6878965d26369529de2ebbbb` / run `32106855995` — **SUCCESS**
 - Assurance: builder/repository evidence only; no optional independent assurance event occurred
-
-The intended completion state after exact-head evidence, merge, and Control Room reconciliation is **Implemented — Not Verified**.
 
 ## Post-merge authorization correction
 
-A GitHub review submitted after PR #231 merged identified two valid authorization-continuity defects: open details were not subjected to the same exact authority/canonical-destination reconciliation as opening details, and close accepted one authorization result for both the detail and a potentially different return-snapshot selection. The bounded correction in PR #233 on branch `codex/mobile-exchange-stage3-auth-correction` makes both checks explicit, coherently closes navigation after generic invalidation, binds the complete focal/association/relationship/marker selection to a server-revalidated result, and clears revoked or mismatched selection/focus/selection-bearing return context. Its exact candidate, CI, merge, and post-merge CI must be recorded before Control Room closes Stage 3 or activates dependent Stage 4 domain adapters.
+A GitHub review submitted after PR #231 merged identified two valid authorization-continuity defects: open details were not subjected to the same exact authority/canonical-destination reconciliation as opening details, and close accepted one authorization result for both the detail and a potentially different return-snapshot selection. PR #233 makes both checks explicit, coherently closes navigation after focal/association/relationship invalidation, binds the complete focal/association/relationship/marker selection to a server-revalidated result, and clears revoked or mismatched selection/focus/selection-bearing return context.
+
+The Control Room closeout disposition is **Implemented — Not Verified**. The packet is merged/integrated and was not deployed independently; optional independent assurance was not performed.

@@ -1157,8 +1157,8 @@
       "legacyClassification": "Previously accepted — independent assurance pending",
       "implementation": {
         "actor": "github:AccelAnalysis",
-        "pr": 163,
-        "sha": "d18986544881c9e81fb9a37858bccb35109724c4"
+        "pr": 201,
+        "sha": "be99ecec42b28b8d1d36ecdf5010f73377f23126"
       },
       "acceptance": {
         "lane": null,
@@ -1169,7 +1169,8 @@
           "docs/architecture/WAVE_4_SLICE_4_2.md"
         ]
       },
-      "deferral": null
+      "deferral": null,
+      "clarification": "PR #201 corrected the preserved PR #163 locality, currency, chronology, replay-ordering, and transaction-binding findings, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; the original independent audit remains historical and no later optional assurance event is claimed."
     },
     {
       "id": "RFX-FEATURE-ISS-007",
@@ -1620,7 +1621,7 @@
       "implementation": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4"
       },
       "acceptance": {
         "lane": null,
@@ -1630,7 +1631,7 @@
         "evidence": []
       },
       "deferral": null,
-      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+      "clarification": "PR #171 final candidate corrected the preserved-candidate findings, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; no optional independent assurance event occurred."
     },
     {
       "id": "RFX-FEATURE-RSP-002",
@@ -1653,7 +1654,7 @@
       "implementation": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4"
       },
       "acceptance": {
         "lane": null,
@@ -1663,7 +1664,7 @@
         "evidence": []
       },
       "deferral": null,
-      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+      "clarification": "PR #171 final candidate corrected the preserved-candidate findings, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; no optional independent assurance event occurred."
     },
     {
       "id": "RFX-FEATURE-RSP-003",
@@ -1684,7 +1685,7 @@
       "implementation": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4"
       },
       "acceptance": {
         "lane": null,
@@ -1694,7 +1695,7 @@
         "evidence": []
       },
       "deferral": null,
-      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+      "clarification": "PR #171 final candidate corrected the preserved-candidate findings, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; no optional independent assurance event occurred."
     },
     {
       "id": "RFX-FEATURE-RSP-004",
@@ -1714,7 +1715,7 @@
       "implementation": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4"
       },
       "acceptance": {
         "lane": null,
@@ -1724,7 +1725,7 @@
         "evidence": []
       },
       "deferral": null,
-      "clarification": "Frozen preserved implementation candidate; current PR has substantive stale-version reconfirmation and payload-digest review findings."
+      "clarification": "PR #171 final candidate corrected stale-version reconfirmation and authoritative payload-digest binding, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; no optional independent assurance event occurred."
     },
     {
       "id": "RFX-FEATURE-RSP-006",
@@ -1747,7 +1748,7 @@
       "implementation": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4"
       },
       "acceptance": {
         "lane": null,
@@ -1757,7 +1758,7 @@
         "evidence": []
       },
       "deferral": null,
-      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+      "clarification": "PR #171 final candidate corrected the preserved-candidate findings, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; no optional independent assurance event occurred."
     },
     {
       "id": "RFX-FEATURE-DSC-010",
@@ -3628,10 +3629,11 @@
       "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "capabilities", "referrals"],
       "dependencies": ["MOB36-MIGRATION-001", "SHARED-SPATIAL-001", "SHARED-SEARCH-001"],
       "acceptanceTypes": ["functional", "domain-security", "responsive", "cross-lens", "performance"],
-      "status": "Not Started",
-      "implementation": { "actor": null, "pr": null, "sha": null },
+      "status": "Implemented — Not Verified",
+      "implementation": { "actor": "github:AccelAnalysis", "pr": 233, "sha": "15e7c2333d1e9113055630bf256f977f7c39d080" },
       "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] },
-      "deferral": null
+      "deferral": null,
+      "clarification": "PR #233 corrected post-merge Stage 3 detail and return-selection authorization continuity on the final shared-contract implementation."
     },
     {
       "id": "MOB36-SHARED-MAP-001",
@@ -3641,8 +3643,8 @@
       "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "capabilities"],
       "dependencies": ["MOB36-SHARED-QUERY-001", "SHARED-MARKER-001", "SHARED-PRIVACY-002"],
       "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "cross-lens", "performance"],
-      "status": "Not Started",
-      "implementation": { "actor": null, "pr": null, "sha": null },
+      "status": "Implemented — Not Verified",
+      "implementation": { "actor": "github:AccelAnalysis", "pr": 231, "sha": "0b6b0999afe592725cd0a81a27f14b221f8c82b4" },
       "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] },
       "deferral": null
     },
@@ -3654,8 +3656,8 @@
       "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "capabilities"],
       "dependencies": ["MOB36-SHARED-QUERY-001", "SHARED-SELECTION-001", "SHARED-DRAWER-001"],
       "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "copy", "performance"],
-      "status": "Not Started",
-      "implementation": { "actor": null, "pr": null, "sha": null },
+      "status": "Implemented — Not Verified",
+      "implementation": { "actor": "github:AccelAnalysis", "pr": 231, "sha": "0b6b0999afe592725cd0a81a27f14b221f8c82b4" },
       "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] },
       "deferral": null
     },
@@ -3667,10 +3669,11 @@
       "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "capabilities", "referrals"],
       "dependencies": ["MOB36-SHARED-MAP-001", "MOB36-SHARED-RESULT-001", "SHARED-RETURN-001"],
       "acceptanceTypes": ["functional", "domain-security", "responsive", "accessibility", "cross-lens", "performance"],
-      "status": "Not Started",
-      "implementation": { "actor": null, "pr": null, "sha": null },
+      "status": "Implemented — Not Verified",
+      "implementation": { "actor": "github:AccelAnalysis", "pr": 233, "sha": "15e7c2333d1e9113055630bf256f977f7c39d080" },
       "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] },
-      "deferral": null
+      "deferral": null,
+      "clarification": "PR #233 corrected post-merge Stage 3 open-detail revalidation and exact composite return-selection restoration on the final shared-contract implementation."
     },
     {
       "id": "MOB36-OPPORTUNITIES-001",

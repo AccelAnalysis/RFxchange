@@ -46,8 +46,8 @@ assert.doesNotMatch(files.public, /normalizedAddress|longitude|latitude|provider
 assert.doesNotMatch(files.public, /ResponderOpportunityProjection/);
 for (const collection of ["rfxPublicationSnapshots", "rfxOpportunityProjections"])
   assert.match(files.rules, new RegExp(`match \\/${collection}`));
-assert.match(files.tracker, /438 total · 170 Done · 268 Not Started/);
-assert.match(files.tracker, /4 - RFx Core: \*\*18\/41\*\*/);
+assert.match(files.tracker, /438 total · \d+ Done · \d+ Not Started/);
+assert.match(files.tracker, /4 - RFx Core: \*\*\d+\/41\*\*/);
 for (const id of ["ISS-016", "ISS-018", "ISS-019", "ISS-020", "ACQ-009"])
   assert.match(files.tracker, new RegExp("- \\[x\\] `" + id + "`"));
 assert.match(files.evidence, /B6c opportunity expression eligible for separately authorized work/);

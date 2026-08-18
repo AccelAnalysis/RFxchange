@@ -10,7 +10,7 @@ Under `FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, `Implemented — Not Verif
 
 | Experience | Stable range | Denominator | Current characterization |
 | --- | --- | ---: | --- |
-| Shared Exchange | `SHARED-*`, shared `MOB36-*` | 36 | 20 implemented/not verified, one in progress, eight not started, three blocked, four explicitly deferred/N/A |
+| Shared Exchange | `SHARED-*`, shared `MOB36-*` | 36 | 27 implemented/not verified, two not started, three blocked, four explicitly deferred/N/A |
 | Opportunities/RFx | `RFX-FEATURE-*`, `MOB36-OPPORTUNITIES-*` | 42 | 23 implemented/not verified, 19 not started |
 | Resources | `RES-LENS-*`, `MOB36-RESOURCES-*` | 13 | eight implemented/not verified, three not started, two blocked |
 | Intelligence | `INTEL-*`, `MOB36-INTELLIGENCE-*` | 15 | three implemented/not verified, seven not started, five dependency-blocked |
@@ -59,8 +59,8 @@ All 41 canonical Feature IDs are retained once as `RFX-FEATURE-<ID>` without ren
 | 4.3 | `ISS-007`, `ISS-009`, `ISS-011` | Previously accepted — independent assurance pending |
 | 4.4 | `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020`, `ACQ-009` | Previously accepted — independent assurance pending |
 | 4.5 | `DSC-004`, `DSC-005`, `DSC-006`, `DSC-007`, `DSC-008` | Previously accepted — independent assurance pending |
-| 4.6 | `RSP-001`, `RSP-002`, `RSP-003`, `RSP-004`, `RSP-006` | Preserved candidate; implemented/not verified; substantive findings remain |
-| 4.7 | `DSC-010`, `RSP-007`, `RSP-008`, `TEM-001`–`004`, `ACQ-007` | Not Started; ineligible until accepted 4.6 merges |
+| 4.6 | `RSP-001`, `RSP-002`, `RSP-003`, `RSP-004`, `RSP-006` | Final PR #171 candidate corrected the preserved findings and merged; Implemented — Not Verified |
+| 4.7 | `DSC-010`, `RSP-007`, `RSP-008`, `TEM-001`–`004`, `ACQ-007` | Not Started; activated by Control Room after the merged 4.6 dependency closed |
 | 4.8 | `RSP-009`, `RSP-010`, `RSP-017` | Not Started |
 | 4.9 | `RSP-018`–`021` | Not Started |
 | 4.10 | `EDU-011`–`013` | Not Started |

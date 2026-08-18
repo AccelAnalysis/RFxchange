@@ -1,15 +1,15 @@
 # Wave 4 Independent Assurance Ledger
 
-The canonical tracker remains **18/41 RFx Core Done** at adoption. This ledger does not silently revoke those entries. It records the distinct Four-Lens assurance state: Slices 4.1–4.5 were accepted under the prior model and have now received the first bounded retroactive independent audit under `WP-ACCEPT-W4-41-45`; Slice 4.6 is the first candidate that must pass the new process before merge.
+The canonical tracker is **23/41 RFx Core Done**. This ledger does not silently revoke completed entries. It records distinct historical and optional Four-Lens assurance state: Slices 4.1–4.5 were accepted under the prior model and received a bounded retroactive audit under `WP-ACCEPT-W4-41-45`; the bounded ISS-006 correction and Slice 4.6 subsequently merged under the current Completion Governance Amendment.
 
 | Slice | Feature IDs | Implementation PR/head | Program state | Assurance packet |
 | --- | --- | --- | --- | --- |
 | 4.1 | `ISS-001`, `ISS-002`, `ISS-003` | #161 / `10d1156d45ac90e9c10b4a2704c78fe30606a3b0` | **Audited — 0 Verified; 3 Blocked**. Substantive kernel behavior is supported, but exact-candidate independent review/evidence-manifest/packet-finalization gates are unavailable. | `WP-ACCEPT-W4-41-45` |
-| 4.2 | `ISS-005`, `ISS-006` | #163 / `d18986544881c9e81fb9a37858bccb35109724c4` | **Audited — 0 Verified; `ISS-006` Partial; `ISS-005` Blocked**. Exact-head review proves structured-field/geography validation defects. | `WP-ACCEPT-W4-41-45` |
+| 4.2 | `ISS-005`, `ISS-006` | original #163 / `d18986544881c9e81fb9a37858bccb35109724c4`; ISS-006 correction #201 / `be99ecec42b28b8d1d36ecdf5010f73377f23126` | Original audit: 0 Verified; `ISS-006` Partial and `ISS-005` Blocked. PR #201 corrected the ISS-006 defects and merged as Implemented — Not Verified; no later optional assurance event occurred. | `WP-ACCEPT-W4-41-45`; `WP-RFX-42-ISS006-CORRECT-01` |
 | 4.3 | `ISS-007`, `ISS-009`, `ISS-011` | #165 / `c07f45ffa451aafb80852e40384a5bb31cbec5cf` | **Audited — 0 Verified; 3 Partial**. Exact-head review proves qualifier, definition-link and response/evaluation integrity defects. | `WP-ACCEPT-W4-41-45` |
 | 4.4 | `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020`, `ACQ-009` | #167 / `8ef26e63ff372a5c40e8ddd32b8a8667e37a0f99` | **Audited — 0 Verified; 4 Partial; `ISS-020` Blocked**. Publication/current-input, preview/readiness and acquisition-continuity defects remain on the recorded candidate. | `WP-ACCEPT-W4-41-45` |
 | 4.5 | `DSC-004`, `DSC-005`, `DSC-006`, `DSC-007`, `DSC-008` | #169 / `18bbcb56b4057927d2d7c8e57a2ca512cc60e231` | **Audited — 0 Verified; 3 Partial; 2 Blocked**. Discovery completeness, saved-search integrity and alert/digest delivery defects remain on the exact recorded candidate. | `WP-ACCEPT-W4-41-45` |
-| 4.6 | `RSP-001`, `RSP-002`, `RSP-003`, `RSP-004`, `RSP-006` | #171 / frozen `e70413e2e45db4b75517376acdc0700f9838a963` | Implemented — Not Verified; governance reconciliation and substantive corrections pending | `WP-RFX-46-RECONCILE`, then `WP-ACCEPT-W4-46` |
+| 4.6 | `RSP-001`, `RSP-002`, `RSP-003`, `RSP-004`, `RSP-006` | #171 / final `dc17514ef9aed2dd37022b8bb121feb946bbcbf4` | Implemented — Not Verified; corrected and merged as `3cef29d8ce300154a8d73a262ec7a20252a49db6`; optional assurance not performed | `WP-RFX-46-RECONCILE` |
 
 ## WP-ACCEPT-W4-41-45 audit result
 
@@ -35,9 +35,9 @@ Direct material correction set:
 - `DSC-005`
 - `DSC-006`
 
-These 11 requirements have exact-candidate evidence contradicting exact satisfaction and require bounded builder correction plus later independent acceptance. The seven Blocked requirements are not directly disproven by this audit; they remain uncertifiable because of unresolved dependencies, independent evidence/reviewer requirements, or packet lifecycle.
+These were the 11 direct material findings on the frozen audit candidates. `ISS-006` was later corrected by PR #201 and is now Implemented — Not Verified; the other historical findings retain their current machine-ledger dispositions. The seven Blocked requirements were not directly disproven by that audit; their historical optional-assurance result remains separate from implementation completion.
 
-No tracker checkbox or requirement-registry `Verified` state is changed by this audit. `WP-ACCEPT-W4-41-45` remains `active`, so the Four-Lens validator does not permit final `Verified` records under this packet yet.
+The audit itself changed no tracker checkbox or requirement-registry `Verified` state. Later bounded implementation/correction packets may complete requirements as Implemented — Not Verified under the Completion Governance Amendment without rewriting the historical assurance result.
 
 ## Audit order
 
@@ -55,6 +55,6 @@ If assurance finds a material unmet requirement:
 
 No assurance result silently rewrites prior evidence or Feature-ID history.
 
-## Slice 4.6 preserved candidate
+## Slice 4.6 correction and closeout
 
-The frozen candidate has green CI on `e70413e2...`, but two substantive review findings remain: stale opportunity/version reconfirmation before a pursuit decision and recomputation/binding of the authoritative projection payload digest. Uncommitted, incomplete corrections in the preserved Slice 4.6 worktree are not part of the PR head and are not authority. After this program authority merges, Lane 02 must reconcile the preserved work without discarding it, produce a new exact candidate, and submit it to Lane 06. Slice 4.7 remains ineligible.
+The frozen `e70413e2...` candidate remains historical evidence of the stale opportunity/version reconfirmation and authoritative projection payload-digest findings. PR #171 final candidate `dc17514ef9aed2dd37022b8bb121feb946bbcbf4` corrected those findings, passed exact-head production CI `31929740885`, merged as `3cef29d8ce300154a8d73a262ec7a20252a49db6`, and passed post-merge CI `31930900200`. The requirement records therefore remain **Implemented — Not Verified**; no optional independent assurance event is claimed. Slice 4.7 became eligible for a separately authorized packet after this dependency closed.
