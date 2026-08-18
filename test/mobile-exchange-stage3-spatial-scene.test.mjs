@@ -28,7 +28,7 @@ test("governed areas require exact authority keys and legacy overlays cannot dup
   assert.match(adapter, /candidate\.areaId === area\.areaId[\s\S]*candidate\.geographyId === area\.geographyId[\s\S]*candidate\.geometryReference === area\.geometryReference/);
   assert.match(scene, /A shared lens projection cannot be combined with legacy domain overlay props/);
   assert.match(scene, /data-lens-projection-list-only-count/);
-  assert.match(scene, /lensProjectionContainsOrganizationMarker\(lensProjectionAdapter, marker\.id\)/);
+  assert.match(scene, /lensProjectionContainsOrganizationMarker\([\s\S]{0,120}marker\.id,[\s\S]{0,80}marker\.organizationId/);
   assert.match(scene, /const sceneMarker = homeMarkerIsProjected \? null : marker/);
   assert.match(scene, /const markerRef = useRef\(marker\)/);
   assert.match(scene, /markerRef\.current = marker/);

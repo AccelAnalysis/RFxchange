@@ -88,7 +88,9 @@ test("provider-neutral map adapter renders only authoritative active-layer proje
   assert.equal(adapted.listOnlyObjects.length, 1);
   assert.equal(lensMapObjectForRenderId(adapted, "subject:organization:org-1"), adapted.points[0].projection);
   assert.equal(lensMapObjectForRenderId(adapted, "cluster:cluster-1"), null);
-  assert.equal(lensProjectionContainsOrganizationMarker(adapted, "marker-org-1"), true);
+  assert.equal(lensProjectionContainsOrganizationMarker(adapted, "marker-org-1", "org-1"), true);
+  assert.equal(lensProjectionContainsOrganizationMarker(adapted, "marker-org-1", "different-org"), false);
+  assert.equal(lensProjectionContainsOrganizationMarker(adapted, "marker-org-1", null), false);
 
   const noSelection = createExchangeSelectionState({ kind: "none" });
   assert.equal(adaptLensMapProjection(projection(), noSelection).areas[0].selected, false);
@@ -118,7 +120,7 @@ test("home-marker deduplication applies only to the same organization projection
     })],
   });
   const adapted = adaptLensMapProjection(recordProjection, createExchangeSelectionState({ kind: "none" }));
-  assert.equal(lensProjectionContainsOrganizationMarker(adapted, "marker-org-1"), false);
+  assert.equal(lensProjectionContainsOrganizationMarker(adapted, "marker-org-1", "org-1"), false);
 });
 
 test("nonselectable features remain visible without presenting a selection target", () => {

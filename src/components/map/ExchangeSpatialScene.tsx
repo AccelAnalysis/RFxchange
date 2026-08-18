@@ -43,6 +43,7 @@ export type ExchangeContinuousMotion = "instructional" | "milestone";
 
 export interface ExchangeHomeMarker {
   readonly id: string;
+  readonly organizationId?: string;
   readonly coordinate: readonly [longitude: number, latitude: number];
   readonly label: string;
   readonly accessibleLocationLabel?: string;
@@ -603,7 +604,11 @@ export function ExchangeSpatialScene({
     [governedAreaGeometries, lensProjectionAdapter],
   );
   const homeMarkerIsProjected = useMemo(
-    () => marker !== null && lensProjectionContainsOrganizationMarker(lensProjectionAdapter, marker.id),
+    () => marker !== null && lensProjectionContainsOrganizationMarker(
+      lensProjectionAdapter,
+      marker.id,
+      marker.organizationId,
+    ),
     [lensProjectionAdapter, marker],
   );
   const sceneMarker = homeMarkerIsProjected ? null : marker;

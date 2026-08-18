@@ -1386,7 +1386,10 @@ export function createLensDiscoveryProjection(input: Readonly<{
   if (new Set(contextualOrganizationIdentities.map((identity) => identity.selectionKey)).size !== contextualOrganizationIdentities.length) {
     throw new Error("Contextual organization identities must be unique.");
   }
-  const contextualKeys = new Set(contextualOrganizationIdentities.map((identity) => identity.selectionKey));
+  const isAuthorizedContextualOrganization = (object: ExchangeMapObjectProjection): boolean =>
+    object.kind === "organization"
+    && object.projectionRole === "context"
+    && contextualOrganizationIdentities.some((identity) => sameIdentity(identity, object.identity));
   const spatialKeys = spatialResults.map((disposition) => disposition.identity.selectionKey);
   if (new Set(spatialKeys).size !== spatialKeys.length) {
     throw new Error("Each result identity must have one spatial disposition.");
@@ -1394,10 +1397,7 @@ export function createLensDiscoveryProjection(input: Readonly<{
   const cards = input.results.status === "ready" ? input.results.cards : [];
   if (input.results.status !== "ready") {
     const disclosingProjection = input.map.objects.find((object) =>
-      (object.kind === "organization" && (
-        object.projectionRole !== "context"
-        || !contextualKeys.has(object.identity.selectionKey)
-      ))
+      (object.kind === "organization" && !isAuthorizedContextualOrganization(object))
       || object.kind === "record"
       || object.kind === "cluster"
       || object.kind === "area"
@@ -1440,13 +1440,12 @@ export function createLensDiscoveryProjection(input: Readonly<{
       }
     }
   }
-  const readyCardKeys = new Set(cards.map((card) => card.identity.selectionKey));
   if (input.results.status === "ready" && input.map.objects.some((object) => {
     if (object.kind !== "organization" && object.kind !== "record") return false;
     if (object.projectionRole === "context") {
-      return object.kind !== "organization" || !contextualKeys.has(object.identity.selectionKey);
+      return !isAuthorizedContextualOrganization(object);
     }
-    return !readyCardKeys.has(object.identity.selectionKey);
+    return !cards.some((card) => sameIdentity(card.identity, object.identity));
   })) {
     throw new Error("A ready discovery projection cannot expose an unpaired or unauthorized contextual map object.");
   }

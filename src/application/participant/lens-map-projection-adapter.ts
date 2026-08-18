@@ -165,9 +165,13 @@ export function lensMapObjectForRenderId(
 export function lensProjectionContainsOrganizationMarker(
   adapter: ExchangeSpatialProjectionAdapter,
   markerId: string,
+  organizationId: string | null | undefined,
 ): boolean {
+  if (!organizationId) return false;
   return adapter.points.some(
-    (point) => point.projection.kind === "organization" && point.projection.markerId === markerId,
+    (point) => point.projection.kind === "organization"
+      && point.projection.markerId === markerId
+      && point.projection.identity.organizationId === organizationId,
   );
 }
 

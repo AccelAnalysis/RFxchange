@@ -203,6 +203,33 @@ test("whole-lens discovery requires server geography, domain layers, and one spa
     results,
     spatialResults: [{ kind: "mapped", identity, markerId: "marker-resource-1" }],
   }), /unpaired or unauthorized contextual/);
+  const driftedResultIdentity = createExchangeSubjectIdentity({
+    subjectKind: "record",
+    selectionKey: identity.selectionKey,
+    organizationId: "different-provider",
+    recordType: "resource",
+    recordId: "different-resource",
+  });
+  const driftedResult = createExchangeMapObjectProjection({
+    identity: driftedResultIdentity,
+    markerId: "marker-drifted-result",
+    coordinate: null,
+    privacy: "locality-only",
+    accessibleLabel: "Drifted list-only result",
+    selectable: true,
+  });
+  assert.throws(() => createLensDiscoveryProjection({
+    lens: "resources",
+    queryId: "query-drifted-result",
+    map: createLensMapProjection({ ...map, objects: [driftedResult] }),
+    results,
+    spatialResults: [{
+      kind: "list-only",
+      identity,
+      reason: "missing-authoritative-coordinate",
+      explanationKey: "resources.locationUnavailable",
+    }],
+  }), /unpaired or unauthorized contextual/);
 
   const contextualIdentity = createExchangeSubjectIdentity({
     subjectKind: "organization",
@@ -238,6 +265,62 @@ test("whole-lens discovery requires server geography, domain layers, and one spa
   });
   assert.equal(contextualDiscovery.map.objects.length, 1);
   assert.equal(contextualDiscovery.contextualOrganizationIdentities[0].selectionKey, contextualIdentity.selectionKey);
+
+  const contextualOrganizationCard = createLensResultCardModel({
+    lens: "resources",
+    identity: contextualIdentity,
+    title: "Home organization result",
+    favorite: hiddenSave,
+    canonicalHref: "/resources/organizations/home",
+    returnLens: "resources",
+  });
+  const contextualOrganizationResults = createLensResultSetState({
+    status: "ready",
+    lens: "resources",
+    resultSetId: "set-context-collision",
+    cards: [contextualOrganizationCard],
+  });
+  assert.throws(() => createLensDiscoveryProjection({
+    lens: "resources",
+    queryId: "query-context-list-collision",
+    map: contextualMap,
+    results: contextualOrganizationResults,
+    spatialResults: [{
+      kind: "list-only",
+      identity: contextualIdentity,
+      reason: "missing-authoritative-coordinate",
+      explanationKey: "resources.locationUnavailable",
+    }],
+    contextualOrganizationIdentities: [contextualIdentity],
+  }), /cannot satisfy a list-only result disposition/);
+
+  const driftedContextIdentity = createExchangeSubjectIdentity({
+    subjectKind: "organization",
+    selectionKey: contextualIdentity.selectionKey,
+    organizationId: "different-organization",
+    recordType: null,
+    recordId: null,
+  });
+  const driftedContextMap = createLensMapProjection({
+    ...map,
+    objects: [createExchangeMapObjectProjection({
+      identity: driftedContextIdentity,
+      markerId: "marker-drifted-context",
+      coordinate: { longitude: -76.63, latitude: 36.77 },
+      privacy: "exact",
+      accessibleLabel: "Drifted contextual organization",
+      selectable: true,
+      projectionRole: "context",
+    })],
+  });
+  assert.throws(() => createLensDiscoveryProjection({
+    lens: "resources",
+    queryId: "query-drifted-context",
+    map: driftedContextMap,
+    results: restricted,
+    spatialResults: [],
+    contextualOrganizationIdentities: [contextualIdentity],
+  }), /cannot retain result map projections/);
 
   const unpairedOrganization = createExchangeMapObjectProjection({
     identity: contextualIdentity,
