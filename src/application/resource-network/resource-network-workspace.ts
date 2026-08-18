@@ -59,6 +59,31 @@ export function parseResourceWorkspaceId(value: SearchParamValue): string | null
   return workspaceId(value);
 }
 
+export function resourcesCompactReturnContext(
+  rawReference: string | undefined,
+  rawSuffix: string | undefined,
+): Readonly<{ rfxReference: string | undefined; returnTo: string | undefined }> {
+  const rfxReference = workspaceId(rawReference) ?? undefined;
+  if (!rfxReference || !rawSuffix) return Object.freeze({ rfxReference, returnTo: undefined });
+  let returnSuffix: string;
+  try {
+    returnSuffix = decodeURIComponent(rawSuffix);
+  } catch {
+    return Object.freeze({ rfxReference, returnTo: undefined });
+  }
+  if (returnSuffix === "-") return Object.freeze({
+    rfxReference,
+    returnTo: `/opportunities/${encodeURIComponent(rfxReference)}/assess`,
+  });
+  if (!returnSuffix.startsWith("?") && !returnSuffix.startsWith("#")) {
+    return Object.freeze({ rfxReference, returnTo: undefined });
+  }
+  return Object.freeze({
+    rfxReference,
+    returnTo: `/opportunities/${encodeURIComponent(rfxReference)}/assess${returnSuffix}`,
+  });
+}
+
 export function parseResourceNetworkWorkspaceQuery(
   params: Readonly<Record<string, SearchParamValue>>,
 ): ResourceNetworkWorkspaceQuery {

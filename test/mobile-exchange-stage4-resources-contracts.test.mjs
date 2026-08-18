@@ -11,6 +11,7 @@ import { matchesResourceDiscoveryTerms, resourceDiscoveryTerms } from "../src/ap
 import { ResourceNetworkService } from "../src/application/resource-network/resource-network.ts";
 import {
   parseResourcesMobileWorkspaceQuery,
+  resourcesCompactReturnContext,
   resourcesFocusedOrganizationId,
   resourcesWorkspaceMutationHref,
 } from "../src/application/resource-network/resource-network-workspace.ts";
@@ -286,8 +287,27 @@ test("maximum valid identifiers use bounded selection routes instead of crashing
   assert.equal(fallbackHrefs.every((href) => decodeURIComponent(new URL(href, "https://participant.invalid").pathname).includes("?tab=gaps#gap-2")), true);
   const fallbackRoute = fs.readFileSync(new URL("../app/resources/v/[kind]/[id]/[[...context]]/page.tsx", import.meta.url), "utf8");
   assert.match(fallbackRoute, /return renderResourcesPage/);
-  assert.match(fallbackRoute, /returnSuffix === "-" \? "" : returnSuffix/);
+  assert.match(fallbackRoute, /resourcesCompactReturnContext\(context\[0\], context\[1\]\)/);
   assert.doesNotMatch(fallbackRoute, /URLSearchParams|redirect\(`\/resources\?/);
+});
+
+test("compact destination decodes and validates its RFx return suffix before hydration", () => {
+  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "%3Ftab%3Dgaps%23gap-2"), {
+    rfxReference: "RFX-47",
+    returnTo: "/opportunities/RFX-47/assess?tab=gaps#gap-2",
+  });
+  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "-"), {
+    rfxReference: "RFX-47",
+    returnTo: "/opportunities/RFX-47/assess",
+  });
+  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "%2Fadmin"), {
+    rfxReference: "RFX-47",
+    returnTo: undefined,
+  });
+  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "%E0%A4%A"), {
+    rfxReference: "RFX-47",
+    returnTo: undefined,
+  });
 });
 
 test("compact-route query mutations retain server-revalidated RFx return context", () => {

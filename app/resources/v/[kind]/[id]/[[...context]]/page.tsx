@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
 
 import { renderResourcesPage } from "@/app/resources/page";
-import { parseResourceWorkspaceId } from "@/src/application/resource-network/resource-network-workspace";
+import {
+  parseResourceWorkspaceId,
+  resourcesCompactReturnContext,
+} from "@/src/application/resource-network/resource-network-workspace";
 
 interface Props {
   readonly params: Promise<Readonly<{
@@ -27,15 +30,11 @@ export default async function ResourceSelectionRoute({ params, searchParams }: P
   const selectionKind = SELECTION_KIND[kind as keyof typeof SELECTION_KIND];
   if (!selectionId || !selectionKind || ![0, 2].includes(context.length)) redirect("/resources");
 
-  const [rfxReference, returnSuffix] = context;
-  const returnTo = rfxReference && returnSuffix
-    ? `/opportunities/${encodeURIComponent(rfxReference)}/assess${returnSuffix === "-" ? "" : returnSuffix}`
-    : undefined;
+  const compactContext = resourcesCompactReturnContext(context[0], context[1]);
   return renderResourcesPage({
     searchParams: Promise.resolve({
       ...rawSearchParams,
-      rfxReference,
-      returnTo,
+      ...compactContext,
     }),
     selectionOverride: Object.freeze({ kind: selectionKind, id: selectionId }),
   });
