@@ -2,8 +2,10 @@
 
 **Status: GOVERNING PRODUCT-OWNER AUTHORITY WHEN MERGED**
 
-**Stage 1–2 foundation:** PR #222 merge `1fbf38e71747ac90c2f285e4934b22ea26312bec`  
-**Authority source:** the product-owner execution direction supplied on 2026-08-17, reconciled with current merged repository authority  
+**Stage 1–2 foundation:** PR #222 merge `1fbf38e71747ac90c2f285e4934b22ea26312bec`
+
+**Authority source:** the product-owner execution direction supplied on 2026-08-17, reconciled with current merged repository authority
+
 **Completion model:** `Build → Test → Integrate → Release → Improve` under `FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`
 
 This authority governs the successor mobile Exchange program after Stage 2. It changes the current permanent participant information architecture and authorizes bounded Stages 3–6 work packets. It does not rewrite the historical truth of Stages 1–2, change a completed Feature ID, weaken security/privacy/geography/tenant authority, authorize fabricated market data, or create payment authority.
