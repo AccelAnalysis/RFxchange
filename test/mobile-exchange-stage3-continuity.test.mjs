@@ -189,7 +189,12 @@ test("accepted server projection enables card/map/keyboard detail and close rest
   assert.equal(detailAccepted.status, "accepted");
   assert.equal(detailAccepted.state.detail.status, "open");
 
-  const closed = closeMobileExchangeDetail(detailAccepted.state, { currentScope: serverResult().expectedScope, stillAuthorized: true });
+  const closed = closeMobileExchangeDetail(detailAccepted.state, {
+    currentScope: serverResult().expectedScope,
+    detailStillAuthorized: true,
+    returnSelectionAuthorized: true,
+    returnSelectionIdentity: initial.selection.focalIdentity,
+  });
   assert.equal(closed.state.detail.status, "closed");
   assert.equal(closed.state.sheet.content, "results");
   assert.equal(closed.state.activeLens, "resources");
@@ -234,6 +239,23 @@ test("deep links disclose no record until exact affirmative revalidation and sco
   assert.equal(authorized.state.detail.status, "open");
   assert.equal(authorized.state.selection.selectionKey, resourceIdentity.selectionKey);
 
+  const revokedWhileOpen = reconcileServerRevalidatedMobileExchangeProjection(
+    authorized.state,
+    mobileExchangeQueryContext(authorized.state, { queryId: "query-1" }),
+    discovery(),
+    serverResult({
+      focalIdentity: resourceIdentity,
+      focalSubjectAuthorized: true,
+      detailSubjectAuthorized: false,
+      detailCanonicalHref: "/resources/resource-1",
+    }),
+  );
+  assert.equal(revokedWhileOpen.status, "rejected");
+  assert.equal(revokedWhileOpen.reason, "detail-authority-changed");
+  assert.equal(revokedWhileOpen.safeState.selection.kind, "none");
+  assert.equal(revokedWhileOpen.safeState.sheet.content, "results");
+  assert.equal(revokedWhileOpen.safeState.detail.status, "error");
+
   const denied = reconcileServerRevalidatedMobileExchangeProjection(
     pending,
     mobileExchangeQueryContext(pending, { queryId: "query-1" }),
@@ -254,10 +276,68 @@ test("deep links disclose no record until exact affirmative revalidation and sco
   assert.equal(wrongCanonical.reason, "detail-authority-changed");
 
   const changedScope = { ...serverResult().expectedScope, membershipId: "membership-2" };
-  const safelyClosed = closeMobileExchangeDetail(pending, { currentScope: changedScope, stillAuthorized: true });
+  const safelyClosed = closeMobileExchangeDetail(pending, {
+    currentScope: changedScope,
+    detailStillAuthorized: true,
+    returnSelectionAuthorized: true,
+    returnSelectionIdentity: initial.selection.focalIdentity,
+  });
   assert.equal(safelyClosed.state, null);
   assert.equal(safelyClosed.returnHref, "/resources");
   assert.equal(safelyClosed.focusReturnKey, null);
+});
+
+test("closing detail independently revalidates the return-snapshot selection", () => {
+  const initial = stage3State();
+  const accepted = reconcileServerRevalidatedMobileExchangeProjection(
+    initial,
+    mobileExchangeQueryContext(initial, { queryId: "query-1" }),
+    discovery(),
+    serverResult(),
+  );
+  assert.equal(accepted.status, "accepted");
+  const opening = openMobileExchangeDetailFromProjection(accepted.state, {
+    source: "card",
+    identity: resourceIdentity,
+    queryId: "query-1",
+    focusReturnKey: "card:record:resource-1",
+    returnHref: "/resources?selected=org-home",
+  });
+  const opened = reconcileServerRevalidatedMobileExchangeProjection(
+    opening,
+    mobileExchangeQueryContext(opening, { queryId: "query-1" }),
+    discovery(),
+    serverResult({ focalIdentity: resourceIdentity, detailCanonicalHref: "/resources/resource-1" }),
+  );
+  assert.equal(opened.status, "accepted");
+
+  const mismatchedReturnIdentity = closeMobileExchangeDetail(opened.state, {
+    currentScope: serverResult().expectedScope,
+    detailStillAuthorized: true,
+    returnSelectionAuthorized: true,
+    returnSelectionIdentity: resourceIdentity,
+  });
+  assert.equal(mismatchedReturnIdentity.state.selection.kind, "none");
+  assert.equal(mismatchedReturnIdentity.returnHref, "/resources");
+  assert.equal(mismatchedReturnIdentity.focusReturnKey, null);
+
+  const revokedReturnIdentity = closeMobileExchangeDetail(opened.state, {
+    currentScope: serverResult().expectedScope,
+    detailStillAuthorized: true,
+    returnSelectionAuthorized: false,
+    returnSelectionIdentity: null,
+  });
+  assert.equal(revokedReturnIdentity.state.selection.kind, "none");
+  assert.equal(revokedReturnIdentity.returnHref, "/resources");
+  assert.equal(revokedReturnIdentity.focusReturnKey, null);
+
+  assert.throws(
+    () => closeMobileExchangeDetail(opened.state, {
+      currentScope: serverResult().expectedScope,
+      detailStillAuthorized: true,
+    }),
+    /explicit detail and return-selection authorization results/,
+  );
 });
 
 test("list-only records remain card/keyboard targets and cannot masquerade as map entry", () => {
