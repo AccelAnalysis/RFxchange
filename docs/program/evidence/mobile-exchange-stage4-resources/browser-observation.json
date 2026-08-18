@@ -2,19 +2,20 @@
   "schemaVersion": 1,
   "workPacketId": "WP-MOBILE-EXCHANGE-STAGE4-RESOURCES-01",
   "requirementId": "MOB36-RESOURCES-001",
-  "candidateBinding": "The authenticated browser observations are bound exactly to runtime commit a037feee90dbcf3ef95f7d39635f5bbec511c61f. The enclosing final candidate differs from that runtime only by this durable evidence and closeout metadata.",
-  "observedRuntimeCommit": "a037feee90dbcf3ef95f7d39635f5bbec511c61f",
+  "candidateBinding": "The authenticated packet browser observations are bound exactly to runtime commit 33471c8d04da1f87a387744a3e2aa5d062fabc7d. The enclosing final candidate differs from that runtime only by this durable evidence and closeout metadata.",
+  "observedRuntimeCommit": "33471c8d04da1f87a387744a3e2aa5d062fabc7d",
   "fixture": {
-    "canonicalShellRunId": "shell-1787046132491-1e7d38",
+    "canonicalShellRunId": "shell-1787047223977-e674cc",
+    "canonicalShellRuntimeCommit": "3538ee1352cc2aa5026ff2fdc06486c38b6d1b95",
     "projectId": "demo-rfxchange",
     "geographyId": "us-va-portsmouth",
-    "providerOrganizationId": "org_harbor_shell-1787046132491-1e7d38",
-    "resourceId": "resource-public-org_harbor_shell-1787046132491-1e7d38",
-    "requestId": "provider-request-org_shell-1787046132491-1e7d38",
+    "providerOrganizationId": "org_harbor_shell-1787047223977-e674cc",
+    "resourceId": "resource-public-org_harbor_shell-1787047223977-e674cc",
+    "requestId": "provider-request-org_shell-1787047223977-e674cc",
     "reproduction": [
       "Run the canonical configured Exchange shell harness against the Firebase emulators without automatic cleanup.",
       "Run scripts/mobile-exchange-stage4-resources-live-fixture.mjs against the retained shell fixture.",
-      "Authenticate as the generated shell participant and open the bounded RFx-origin Resources URL against runtime commit a037feee90dbcf3ef95f7d39635f5bbec511c61f."
+      "Authenticate as the generated shell participant and open the bounded RFx-origin Resources URL against runtime commit 33471c8d04da1f87a387744a3e2aa5d062fabc7d."
     ]
   },
   "observations": {
@@ -35,16 +36,18 @@
       "expandedSheetRendered": true,
       "providerAndResourceCardsRendered": true,
       "openScrolledSelectedOperationsIntoView": true,
-      "selectedOperationsTopCssPixels": 228.515625,
-      "sheetScrollTopCssPixels": 808,
+      "selectedResourceDetailTopCssPixels": 242.5,
+      "sheetScrollTopCssPixels": 1940,
       "searchAndFilterControlsPresent": true,
       "rfXReturnPresent": true,
       "operationalProviderActionsPresent": true,
       "visibleHorizontalClippingObserved": false
     },
     "compactDestination": {
-      "unknownMaximumGrammarIdentifierFailedClosedToResources": true,
-      "unknownIdentifierDisclosed": false,
+      "authorizedResourceRendered": true,
+      "exactRfXReturnRendered": true,
+      "filterMutationPreservedReferenceAndReturn": true,
+      "filterMutationReturnedToCanonicalResourcesPath": true,
       "applicationErrorRendered": false
     },
     "locales": {
@@ -63,7 +66,8 @@
   },
   "limits": [
     "The browser fixture did not grant referral.manage or resource.manage for the discovered provider, so private request and owner-management success paths are established by focused application tests and Firestore emulator evidence, not this browser observation.",
-    "Maximum authorized compact-destination preservation is established by focused behavioral acceptance; the browser replay intentionally used an unknown maximum-grammar identifier to prove fail-closed handling without record disclosure.",
+    "The compact maximum-identifier boundary prioritizes the selected record, RFx reference, and exact return. The descriptive rfxGap label can be omitted at that extreme boundary and is retained on ordinary bounded destinations and subsequent query mutations when present.",
+    "Maximum-identifier boundedness, malformed-context rejection, unknown-record non-disclosure, and provider focus beyond the bounded Network page are established by focused behavioral acceptance; the authenticated browser used an authorized ordinary-length compact record to exercise hydration and mutation continuity.",
     "This is a builder-run packet-specific in-app browser replay, not optional independent assurance and not a production-network observation.",
     "The repository canonical configured-browser shell harness remains a separate exact-head CI gate."
   ]
