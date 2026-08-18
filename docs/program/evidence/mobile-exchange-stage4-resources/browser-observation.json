@@ -2,20 +2,21 @@
   "schemaVersion": 1,
   "workPacketId": "WP-MOBILE-EXCHANGE-STAGE4-RESOURCES-01",
   "requirementId": "MOB36-RESOURCES-001",
-  "candidateBinding": "The authenticated packet browser observations and canonical configured-shell replay are bound exactly to runtime commit 0700b9e9ad40b43348de66ac9676c34001282d5f. The enclosing final candidate differs from that runtime only by this durable evidence and closeout metadata.",
-  "observedRuntimeCommit": "0700b9e9ad40b43348de66ac9676c34001282d5f",
+  "candidateBinding": "The authenticated packet browser observations and canonical configured-shell replay are bound exactly to runtime commit 629ccc4b00bd5a176d35a81f6f4699bb10da018a. The enclosing final candidate differs from that runtime only by this durable evidence and closeout metadata.",
+  "observedRuntimeCommit": "629ccc4b00bd5a176d35a81f6f4699bb10da018a",
   "fixture": {
-    "canonicalShellRunId": "shell-1787047832183-5bb9d8",
-    "canonicalShellRuntimeCommit": "0700b9e9ad40b43348de66ac9676c34001282d5f",
+    "canonicalShellRunId": "shell-1787049061928-a72abf",
+    "canonicalShellRuntimeCommit": "629ccc4b00bd5a176d35a81f6f4699bb10da018a",
+    "packetBrowserParticipantRunId": "shell-1787048713369-1e056f",
     "projectId": "demo-rfxchange",
     "geographyId": "us-va-portsmouth",
-    "providerOrganizationId": "org_harbor_shell-1787047832183-5bb9d8",
-    "resourceId": "resource-public-org_harbor_shell-1787047832183-5bb9d8",
-    "requestId": "provider-request-org_shell-1787047832183-5bb9d8",
+    "providerOrganizationId": "org_harbor_shell-1787048713369-1e056f",
+    "resourceId": "resource-public-org_harbor_shell-1787048713369-1e056f",
+    "requestId": "provider-request-org_shell-1787048713369-1e056f",
     "reproduction": [
       "Run the canonical configured Exchange shell harness against the Firebase emulators without automatic cleanup.",
       "Run scripts/mobile-exchange-stage4-resources-live-fixture.mjs against the retained shell fixture.",
-      "Authenticate as the generated shell participant and open the bounded RFx-origin Resources URL against runtime commit 0700b9e9ad40b43348de66ac9676c34001282d5f."
+      "Authenticate as the generated shell participant and open the bounded RFx-origin Resources URL against runtime commit 629ccc4b00bd5a176d35a81f6f4699bb10da018a."
     ]
   },
   "observations": {
@@ -46,6 +47,8 @@
     "compactDestination": {
       "authorizedResourceRendered": true,
       "exactRfXReturnRendered": true,
+      "encodedQueryAndFragmentReturnPreservedExactly": true,
+      "rawCollidingRfXQueryContextRejectedOnMutation": true,
       "filterMutationPreservedReferenceAndReturn": true,
       "filterMutationReturnedToCanonicalResourcesPath": true,
       "applicationErrorRendered": false
