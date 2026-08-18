@@ -20,6 +20,12 @@ export type LegacyExchangeRoomActionDisposition =
   | Readonly<{ kind: "action"; actionId: ExchangeRoomActionId }>
   | Readonly<{ kind: "lens"; lens: ParticipantLensId }>
   | Readonly<{ kind: "utility"; href: string }>
+  | Readonly<{
+      kind: "deferred-utility";
+      utility: "referrals";
+      view: "sent" | "received" | "starred";
+      reason: "not-operational";
+    }>
   | Readonly<{ kind: "filter"; lens: "intelligence"; intent: "locations" | "layers" }>;
 
 export const LEGACY_EXCHANGE_ROOM_ACTION_DISPOSITIONS: Readonly<
@@ -37,10 +43,10 @@ export const LEGACY_EXCHANGE_ROOM_ACTION_DISPOSITIONS: Readonly<
   "intelligence.capabilities": Object.freeze({ kind: "lens", lens: "capabilities" }),
   "intelligence.locations": Object.freeze({ kind: "filter", lens: "intelligence", intent: "locations" }),
   "intelligence.layers": Object.freeze({ kind: "filter", lens: "intelligence", intent: "layers" }),
-  "referrals.new": Object.freeze({ kind: "utility", href: "/referrals" }),
-  "referrals.sent": Object.freeze({ kind: "utility", href: "/referrals?view=sent" }),
-  "referrals.received": Object.freeze({ kind: "utility", href: "/referrals?view=received" }),
-  "referrals.starred": Object.freeze({ kind: "utility", href: "/referrals?view=starred" }),
+  "referrals.new": Object.freeze({ kind: "utility", href: "/referrals?intent=manage" }),
+  "referrals.sent": Object.freeze({ kind: "deferred-utility", utility: "referrals", view: "sent", reason: "not-operational" }),
+  "referrals.received": Object.freeze({ kind: "deferred-utility", utility: "referrals", view: "received", reason: "not-operational" }),
+  "referrals.starred": Object.freeze({ kind: "deferred-utility", utility: "referrals", view: "starred", reason: "not-operational" }),
 });
 
 export type ExchangeRoomActionDisabledReason = "not-operational" | "not-applicable" | "not-authorized";

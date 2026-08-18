@@ -82,7 +82,10 @@ export const PARTICIPANT_LENSES: readonly ParticipantLensDefinition[] = Object.f
 export const PARTICIPANT_UTILITY_DESTINATIONS = Object.freeze({
   account: Object.freeze({ href: "/organization-profile" as const }),
   "quick-start": Object.freeze({ href: "/quick-start" as const }),
-  referrals: Object.freeze({ href: "/referrals" as const }),
+  referrals: Object.freeze({
+    href: "/referrals" as const,
+    managementHref: "/referrals?intent=manage" as const,
+  }),
 });
 
 const PERSISTENT_PARTICIPANT_PATH_PREFIXES = Object.freeze([

@@ -496,7 +496,7 @@ function AccountUtility({
           )}
           <Link
             role="menuitem"
-            href={PARTICIPANT_UTILITY_DESTINATIONS.referrals.href}
+            href={PARTICIPANT_UTILITY_DESTINATIONS.referrals.managementHref}
             aria-current={activeState === "referrals" ? "page" : undefined}
             onClick={(event) => {
               if (isUnmodifiedPrimaryClick(event)) beginNavigation("referrals");

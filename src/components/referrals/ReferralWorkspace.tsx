@@ -4,7 +4,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
-import type { ParticipantSpatialScope } from "../../application/participant/participant-spatial-context";
+import {
+  consumeLegacyReferralLensIntent,
+  type ParticipantSpatialScope,
+} from "../../application/participant/participant-spatial-context";
 import type { SenderReferralProjection, RecipientReferralProjection, ReferralStatus } from "../../domain/referrals/model";
 import {
   ExchangeSpatialScene,
@@ -47,6 +50,7 @@ interface ReferralWorkspaceProps {
   readonly requestedReferralId?: string | null;
   readonly requestedOrganizationId?: string | null;
   readonly preferOrganizationSelection?: boolean;
+  readonly legacyBareLensIntent?: boolean;
 }
 
 const REFERRAL_CREATE_SEND_STORAGE_KEY = "rfxchange:referral-create-and-send";
@@ -91,7 +95,7 @@ function browserSessionStorage(): Storage | null {
   }
 }
 
-export function ReferralWorkspace({ model, homeMarker, spatialScope, initialReferrals, organizations, commandRecoveryScope, requestedReferralId, requestedOrganizationId, preferOrganizationSelection = false }: ReferralWorkspaceProps) {
+export function ReferralWorkspace({ model, homeMarker, spatialScope, initialReferrals, organizations, commandRecoveryScope, requestedReferralId, requestedOrganizationId, preferOrganizationSelection = false, legacyBareLensIntent = false }: ReferralWorkspaceProps) {
   const { t } = useI18n();
   const pathname = usePathname();
   const router = useRouter();
@@ -140,6 +144,12 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
     label: organization.displayName,
     accessibleLocationLabel: organization.marker.accessibleLocationLabel,
   })), [organizations]);
+  useEffect(() => {
+    if (!legacyBareLensIntent) return;
+    const storage = browserSessionStorage();
+    if (!storage || !consumeLegacyReferralLensIntent(storage, spatialScope)) return;
+    startNavigation(() => router.replace("/geography/canvas?lens=capabilities", { scroll: false }));
+  }, [legacyBareLensIntent, router, spatialScope]);
   useEffect(() => {
     if (panelRef.current) panelRef.current.scrollTop = spatialContext.workflowState.referrals.listScrollTop;
   }, [spatialContext.workflowState.referrals.listScrollTop]);

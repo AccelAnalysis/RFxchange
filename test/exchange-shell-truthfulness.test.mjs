@@ -84,7 +84,7 @@ test("the typed registry preserves governed lens order, availability, routing, a
   assert.deepEqual(contract.utilities, {
     account: { href: "/organization-profile" },
     "quick-start": { href: "/quick-start" },
-    referrals: { href: "/referrals" },
+    referrals: { href: "/referrals", managementHref: "/referrals?intent=manage" },
   });
   assert.deepEqual(contract.matches, {
     resources: "resources",

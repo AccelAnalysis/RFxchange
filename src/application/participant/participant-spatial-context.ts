@@ -11,6 +11,7 @@ export const PARTICIPANT_SPATIAL_CONTEXT_VERSION = 2 as const;
 export const PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX = "rfxchange:participant-spatial:v2:";
 export const LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX = "rfxchange:participant-spatial:v1:";
 export const PARTICIPANT_SPATIAL_ACTIVE_KEY = "rfxchange:participant-spatial:active";
+export const PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY = "rfxchange:participant-spatial:legacy-referral-intent";
 export const PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT = "rfxchange:participant-spatial-changed";
 
 export const PARTICIPANT_SHEET_SNAP_POINTS = Object.freeze([
@@ -280,6 +281,91 @@ export function serializeParticipantSpatialContext(context: ParticipantSpatialCo
   });
 }
 
+export interface ParticipantSpatialStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+}
+
+export interface ParticipantSpatialStorageResolution {
+  readonly serialized: string;
+  readonly source: "successor" | "legacy" | "fallback";
+  readonly legacyReferralLensIntent: boolean;
+}
+
+function hasLegacyReferralLensIntent(serialized: string | null): boolean {
+  if (!serialized) return false;
+  try {
+    const parsed = JSON.parse(serialized) as Readonly<{ version?: unknown; activeLens?: unknown }>;
+    return parsed.version === 1 && parsed.activeLens === "referrals";
+  } catch {
+    return false;
+  }
+}
+
+export function resolveParticipantSpatialStorage(
+  storage: ParticipantSpatialStorage,
+  scope: ParticipantSpatialScope,
+  fallbackSerialized: string,
+): ParticipantSpatialStorageResolution {
+  const successor = storage.getItem(participantSpatialStorageKey(scope));
+  if (parseParticipantSpatialContext(successor, scope)) {
+    return Object.freeze({
+      serialized: successor!,
+      source: "successor" as const,
+      legacyReferralLensIntent: false,
+    });
+  }
+  const legacy = storage.getItem(legacyParticipantSpatialStorageKey(scope));
+  const migrated = parseParticipantSpatialContext(legacy, scope);
+  if (migrated) {
+    return Object.freeze({
+      serialized: serializeParticipantSpatialContext(migrated),
+      source: "legacy" as const,
+      legacyReferralLensIntent: hasLegacyReferralLensIntent(legacy),
+    });
+  }
+  if (!parseParticipantSpatialContext(fallbackSerialized, scope)) {
+    throw new Error("Participant spatial fallback is invalid for the requested scope.");
+  }
+  return Object.freeze({
+    serialized: fallbackSerialized,
+    source: "fallback" as const,
+    legacyReferralLensIntent: false,
+  });
+}
+
+export function commitParticipantSpatialStorage(
+  storage: ParticipantSpatialStorage,
+  scope: ParticipantSpatialScope,
+  resolution: ParticipantSpatialStorageResolution,
+): void {
+  const successorKey = participantSpatialStorageKey(scope);
+  const legacyKey = legacyParticipantSpatialStorageKey(scope);
+  // Publish the pointer only after a valid successor value and optional route discriminator exist.
+  storage.setItem(successorKey, resolution.serialized);
+  if (resolution.legacyReferralLensIntent) {
+    storage.setItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY, successorKey);
+  } else if (
+    resolution.source === "fallback"
+    && storage.getItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY) === successorKey
+  ) {
+    storage.removeItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY);
+  }
+  storage.removeItem(legacyKey);
+  storage.setItem(PARTICIPANT_SPATIAL_ACTIVE_KEY, successorKey);
+}
+
+export function consumeLegacyReferralLensIntent(
+  storage: ParticipantSpatialStorage,
+  scope: ParticipantSpatialScope,
+): boolean {
+  const successorKey = participantSpatialStorageKey(scope);
+  if (storage.getItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY) !== successorKey) return false;
+  storage.removeItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY);
+  return true;
+}
+
 export function clearParticipantSpatialContexts(): void {
   if (typeof window === "undefined") return;
   try {
@@ -291,6 +377,7 @@ export function clearParticipantSpatialContexts(): void {
       }
     }
     window.sessionStorage.removeItem(PARTICIPANT_SPATIAL_ACTIVE_KEY);
+    window.sessionStorage.removeItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY);
   } catch {
     // Optional continuity state never affects sign-out or participant authority.
   }

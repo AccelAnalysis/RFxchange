@@ -102,7 +102,8 @@ test("participant spatial context is scoped, versioned, non-authorizing, and rej
   assert.match(read("src/components/auth/SignInClient.tsx"), /clearParticipantSpatialContexts\(\)/);
   assert.match(read("src/components/onboarding/ActivationJourneyClient.tsx"), /clearParticipantSpatialContexts\(\)/);
   const hook = read("src/components/participant/useParticipantSpatialContext.ts");
-  assert.match(hook, /if \(stored === null\)[\s\S]*memory\.delete\(storageKey\)[\s\S]*return fallbackSnapshot/);
+  assert.match(hook, /resolveParticipantSpatialStorage\([\s\S]*fallbackSnapshot/);
+  assert.match(hook, /commitParticipantSpatialStorage\(window\.sessionStorage, input\.scope, resolution\)/);
   assert.match(hook, /!\(event instanceof StorageEvent\)[\s\S]*memory\.clear\(\)/);
   const storage = read("src/application/participant/participant-spatial-context.ts");
   assert.match(storage, /catch \{[\s\S]*\}[\s\S]*window\.dispatchEvent\(new Event\(PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT\)\)/);

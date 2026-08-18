@@ -61,6 +61,7 @@ import {
   LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX,
   PARTICIPANT_SPATIAL_ACTIVE_KEY,
   PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX,
+  PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY,
 } from "../src/application/participant/participant-spatial-context.ts";
 import {
   HAMPTON_ROADS_CONTROLLED_LOCALITY_DEFINITIONS,
@@ -1400,6 +1401,25 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       null,
       "Unavailable Capabilities became the current primary lens after migration.",
     );
+    assert.equal(
+      await evaluate(cdp, `sessionStorage.getItem(${JSON.stringify(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY)})`),
+      migratedSpatialContext.activeKey,
+      "v1 fourth-lens migration did not publish its one-time route discriminator.",
+    );
+    await navigate(cdp, `${baseUrl}/referrals`);
+    await waitForExpression(
+      cdp,
+      `location.pathname === "/geography/canvas"
+        && new URLSearchParams(location.search).get("lens") === "capabilities"`,
+      "bare legacy Referrals lens intent migration",
+    );
+    assert.equal(
+      await evaluate(cdp, `sessionStorage.getItem(${JSON.stringify(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY)})`),
+      null,
+      "Bare legacy Referrals route did not consume its one-time discriminator.",
+    );
+    await navigate(cdp, initialUrl);
+    await assertPrimaryNavigation(cdp);
     const migrationDocumentRequests = [...diagnostics.documentRequests];
     diagnostics.documentRequests.splice(0, Math.max(0, diagnostics.documentRequests.length - 1));
 
@@ -1411,7 +1431,7 @@ async function runCandidate({ cwd, port, sessionCookie }) {
     const observations = [];
     observations.push(await clickLens(cdp, "opportunities-rfx", "/opportunities", { candidate: true }));
     observations.push(await clickLens(cdp, "resources", "/resources", { candidate: true, latencyMs: 450 }));
-    observations.push(await clickUtility(cdp, "/referrals", "/referrals", true));
+    observations.push(await clickUtility(cdp, "/referrals?intent=manage", "/referrals", true));
     observations.push(await clickLens(cdp, "intelligence", "/geography/canvas", { candidate: true }));
     assert.equal(
       await evaluate(cdp, `location.search`),
@@ -1503,6 +1523,11 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       [],
       "Signing out retained participant spatial context.",
     );
+    assert.equal(
+      await evaluate(cdp, `sessionStorage.getItem(${JSON.stringify(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY)})`),
+      null,
+      "Signing out retained the legacy referral route discriminator.",
+    );
     assert.equal(diagnostics.consoleErrors.length, 0, diagnostics.consoleErrors.join("\n"));
     assert.equal(diagnostics.exceptions.length, 0, diagnostics.exceptions.join("\n"));
 
@@ -1538,6 +1563,8 @@ async function runCandidate({ cwd, port, sessionCookie }) {
         cameraPreserved: true,
         legacyKeyRemoved: true,
         successorOnlySerialization: !("referrals" in migratedSpatialContext.value.lensState),
+        bareReferralIntentMigratedOnce: true,
+        explicitManagementIntentRemainedReferralWorkflow: true,
       },
       transitionEvents: finalState.transitions,
       documentRequests: ordinaryDocumentRequests,
@@ -1841,8 +1868,8 @@ async function runSpatialAcceptance({ baseUrl, sessionCookie }) {
 
     const lensSnapshots = [];
     let referralRecipientCarryForward = false;
-    for (const [lens, route, kind] of [["resources", "/resources", "lens"], ["referrals", "/referrals", "utility"], ["intelligence", "/geography/canvas", "lens"]]) {
-      if (kind === "utility") await clickUtility(cdp, route, route, true);
+    for (const [lens, route, kind] of [["resources", "/resources", "lens"], ["referrals", "/referrals?intent=manage", "utility"], ["intelligence", "/geography/canvas", "lens"]]) {
+      if (kind === "utility") await clickUtility(cdp, route, "/referrals", true);
       else await clickLens(cdp, lens, route);
       await waitForExpression(
         cdp,

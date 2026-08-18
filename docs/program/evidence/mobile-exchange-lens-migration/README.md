@@ -12,7 +12,8 @@ The implementation candidate is identified as `SELF` until the packet PR supplie
 - The current action registry emits exactly the sixteen immutable successor IDs and contextual own/external labels in five locales.
 - Stage 2 IDs, locale catalogs, control documents, and Phase 2 evidence remain unchanged as historical provenance. A frozen predecessor fixture keeps the Stage 2 tuple and action identities testable.
 - Actual scoped `rfxchange:participant-spatial:v1:` keys and the active pointer migrate to v2. Generic fourth-lens state moves to `lensState.capabilities`, referral workflow continuity moves separately to `workflowState.referrals`, and v2 serialization emits no `lensState.referrals`.
-- Malformed, cross-scope, unknown, and ambiguous legacy state fails closed. Specific referral record links and referral-management intent stay in the referral workflow and never become capability authority.
+- Malformed, cross-scope, and unknown legacy state resets to a valid scoped v2 fallback before the active pointer is published. A valid v1 context remains recoverable when a corrupt v2 value exists.
+- A bare `/referrals` visit is treated as legacy fourth-lens intent only when the scoped v1 migration recorded that exact intent; the marker is consumed once and redirects to the successor Capabilities lens. Explicit referral-management and specific-record links stay in the referral workflow and never become capability authority.
 
 The migration changes optional, non-authorizing session presentation state only. It does not mutate referral records, repositories, lifecycle, consent, authorization, audit history, Firestore data, or tracker state. Rollback may safely reset the v2 session context to the existing server-authorized default; no authoritative domain record requires reversal.
 
