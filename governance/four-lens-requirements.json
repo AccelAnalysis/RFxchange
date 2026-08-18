@@ -1620,7 +1620,7 @@
       "implementation": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4"
       },
       "acceptance": {
         "lane": null,
@@ -1630,7 +1630,7 @@
         "evidence": []
       },
       "deferral": null,
-      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+      "clarification": "PR #171 final candidate corrected the preserved-candidate findings, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; no optional independent assurance event occurred."
     },
     {
       "id": "RFX-FEATURE-RSP-002",
@@ -1653,7 +1653,7 @@
       "implementation": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4"
       },
       "acceptance": {
         "lane": null,
@@ -1663,7 +1663,7 @@
         "evidence": []
       },
       "deferral": null,
-      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+      "clarification": "PR #171 final candidate corrected the preserved-candidate findings, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; no optional independent assurance event occurred."
     },
     {
       "id": "RFX-FEATURE-RSP-003",
@@ -1684,7 +1684,7 @@
       "implementation": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4"
       },
       "acceptance": {
         "lane": null,
@@ -1694,7 +1694,7 @@
         "evidence": []
       },
       "deferral": null,
-      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+      "clarification": "PR #171 final candidate corrected the preserved-candidate findings, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; no optional independent assurance event occurred."
     },
     {
       "id": "RFX-FEATURE-RSP-004",
@@ -1714,7 +1714,7 @@
       "implementation": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4"
       },
       "acceptance": {
         "lane": null,
@@ -1724,7 +1724,7 @@
         "evidence": []
       },
       "deferral": null,
-      "clarification": "Frozen preserved implementation candidate; current PR has substantive stale-version reconfirmation and payload-digest review findings."
+      "clarification": "PR #171 final candidate corrected stale-version reconfirmation and authoritative payload-digest binding, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; no optional independent assurance event occurred."
     },
     {
       "id": "RFX-FEATURE-RSP-006",
@@ -1747,7 +1747,7 @@
       "implementation": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "e70413e2e45db4b75517376acdc0700f9838a963"
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4"
       },
       "acceptance": {
         "lane": null,
@@ -1757,7 +1757,7 @@
         "evidence": []
       },
       "deferral": null,
-      "clarification": "Frozen preserved implementation candidate; reconciliation and independent acceptance pending."
+      "clarification": "PR #171 final candidate corrected the preserved-candidate findings, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; no optional independent assurance event occurred."
     },
     {
       "id": "RFX-FEATURE-DSC-010",
