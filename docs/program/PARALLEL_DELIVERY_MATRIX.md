@@ -2,7 +2,7 @@
 
 **Canonical volatile program-status source**
 
-**Snapshot basis:** merged `main` `08c16a68dd55338bb4fe4eff7a22066fadec8d28` on 2026-08-18
+**Snapshot basis:** merged `main` `b291c81fdc078962cd4967d19b93e67318741866` on 2026-08-18
 
 **Current task:** Implement `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from activation base `3455eaefe5978eeb713b161c139f9df1b0c7bfc7` after Control Room activation merged at `08c16a68dd55338bb4fe4eff7a22066fadec8d28`
 
@@ -108,6 +108,8 @@ Referrals is a governed cross-lens function and Menu/Account utility.
 Control Room PR #226 records activation epoch `mobile-exchange-lens-migration-2026-08-18` for `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from exact base `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`. Stage 3 and every domain packet remain pre-activation and dependency-gated.
 
 Control Room subsequently found two shared migration consumers outside the activated path list: `ReferralWorkspace.tsx` still wrote the predecessor lens-shaped client state, and the five participant-navigation catalogs still supplied the predecessor fourth-lens copy. The active packet therefore narrowly owns that one referral presentation consumer and those catalogs solely for schema/copy migration. Referral commands, records, lifecycle, consent, authorization, audit behavior, and every Stage 3/4 domain adapter remain outside the packet.
+
+Exact-head audit of migration PR #228 then found four existing governed referral workflow producers whose bare `/referrals` destinations could collide with the one-time legacy fourth-lens discriminator. The packet therefore also narrowly owns `src/domain/first-value/model.ts`, `src/application/network-education/catalog.ts`, `app/acquisition/continue/page.tsx`, and `app/api/referrals/attach/route.ts` only to add explicit referral-management intent to their existing destinations. No workflow meaning, referral attachment, domain authorization, record, lifecycle, audit, or acquisition behavior may change.
 
 ## Stage 1 integrated contract family
 
