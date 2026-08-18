@@ -1,6 +1,8 @@
 # Verification record
 
-Candidate lifecycle: `SELF` pending packet PR exact-head binding.
+Candidate lifecycle: PR #228 exact head `0a71737f3ddc36d5fce6a880149793994609dc84`; merge `107c3b8899e19e0479b51f6542a06a808f2ae0df`.
+
+CI lifecycle: superseded candidates `134a7f8438ea750a936b7f832125cea52e75c7d2` / run `32097470617` and `6307baf824783a0fa94b3db3fa8e16a6eea4277d` / run `32098578013`; final exact-head run `32099343826`; post-merge main run `32099779148`. All four runs completed successfully, but only the final exact-head and post-merge runs qualify packet closure.
 
 Stage 2 v1 fixture SHA-256: `9834dc81d77d0596a15827abf40b327f51053aa9b80c92a31f7f8d5eae81c51c`.
 
@@ -15,7 +17,7 @@ Stage 2 v1 fixture SHA-256: `9834dc81d77d0596a15827abf40b327f51053aa9b80c92a31f7
 - Desktop and 390 px navigation used the exact Capabilities-ending order. Account keyboard behavior, safe-area/overflow, reduced motion, and five non-empty localized Capabilities labels passed.
 - Every rendered responsive action grid independently contained exactly four successor actions. The historical PR #222 global-count regression was not reintroduced.
 
-The local configured run did not receive a Mapbox token, so its map-specific branch was intentionally skipped by the canonical harness. Exact-head CI supplies the configured runner under the repository’s existing secret-dependent policy; its result must be bound before merge.
+The local and exact-head configured runs did not receive a Mapbox token, so their map-specific result fields were null and no token-backed map-rendering claim is made. The migration changed shared registry, continuity, routes and composition rather than the map renderer; the successful configured run still covered the migration, navigation, responsive, locale, accessibility and clean-diagnostics obligations applicable to this packet.
 
 ## Security and scope result
 

@@ -2,9 +2,9 @@
 
 **Canonical volatile program-status source**
 
-**Snapshot basis:** merged `main` `b291c81fdc078962cd4967d19b93e67318741866` on 2026-08-18
+**Snapshot basis:** merged `main` `107c3b8899e19e0479b51f6542a06a808f2ae0df` on 2026-08-18
 
-**Current task:** Implement `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from activation base `3455eaefe5978eeb713b161c139f9df1b0c7bfc7` after Control Room activation merged at `08c16a68dd55338bb4fe4eff7a22066fadec8d28`
+**Current task:** Implement `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` from exact activation base `107c3b8899e19e0479b51f6542a06a808f2ae0df` under Control Room PR `#230`
 
 **Update rule:** Control Room recalculates this document from current merged `main` after every program-state change.
 
@@ -25,14 +25,14 @@ The original 106 records remain immutable and in order. Twenty-two successor req
 
 | Experience | Requirement denominator | Verified | In Progress | Implemented — Not Verified | Not Started | Blocked | Explicitly deferred/N/A |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Shared Exchange | 36 | 0 | 0 | 21 | 8 | 3 | 4 |
+| Shared Exchange | 36 | 0 | 0 | 23 | 6 | 3 | 4 |
 | Opportunities/RFx | 42 | 0 | 0 | 23 | 19 | 0 | 0 |
 | Resources | 13 | 0 | 0 | 8 | 3 | 2 | 0 |
 | Intelligence | 15 | 0 | 0 | 3 | 7 | 5 | 0 |
 | Capabilities | 3 | 0 | 0 | 0 | 3 | 0 | 0 |
 | Referrals Cross-Lens | 14 | 0 | 0 | 10 | 3 | 0 | 1 |
 | Integration | 5 | 0 | 0 | 0 | 5 | 0 | 0 |
-| Program total | 128 | 0 | 0 | 65 | 48 | 10 | 5 |
+| Program total | 128 | 0 | 0 | 67 | 46 | 10 | 5 |
 
 No percentage is inferred from these counts. The successor requirement denominator changes no Feature-ID arithmetic.
 
@@ -105,11 +105,29 @@ Referrals is a governed cross-lens function and Menu/Account utility.
 | Tracker effect | None; tracker remains 170/438 and RFx Core 18/41 |
 | Stabilization 2C / B6b | Incomplete / intentionally pending |
 
-Control Room PR #226 records activation epoch `mobile-exchange-lens-migration-2026-08-18` for `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from exact base `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`. Stage 3 and every domain packet remain pre-activation and dependency-gated.
+Control Room PR #226 recorded activation epoch `mobile-exchange-lens-migration-2026-08-18` for `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from exact base `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`. The packet is now closed by the migration closeout below.
 
 Control Room subsequently found two shared migration consumers outside the activated path list: `ReferralWorkspace.tsx` still wrote the predecessor lens-shaped client state, and the five participant-navigation catalogs still supplied the predecessor fourth-lens copy. The active packet therefore narrowly owns that one referral presentation consumer and those catalogs solely for schema/copy migration. Referral commands, records, lifecycle, consent, authorization, audit behavior, and every Stage 3/4 domain adapter remain outside the packet.
 
 Exact-head audit of migration PR #228 then found four existing governed referral workflow producers whose bare `/referrals` destinations could collide with the one-time legacy fourth-lens discriminator. The packet therefore also narrowly owns `src/domain/first-value/model.ts`, `src/application/network-education/catalog.ts`, `app/acquisition/continue/page.tsx`, and `app/api/referrals/attach/route.ts` only to add explicit referral-management intent to their existing destinations. No workflow meaning, referral attachment, domain authorization, record, lifecycle, audit, or acquisition behavior may change.
+
+## Mobile Exchange lens migration closeout
+
+| Field | Final state |
+| --- | --- |
+| Packet | `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` |
+| Exact activation base | `3455eaefe5978eeb713b161c139f9df1b0c7bfc7` |
+| Ownership amendments | PR #227 / `b291c81fdc078962cd4967d19b93e67318741866`; PR #229 / `0ca6d8bbf034b1efcff4eb8132426b7b46662401` |
+| Candidate | PR #228 exact head `0a71737f3ddc36d5fce6a880149793994609dc84` |
+| Exact-head CI | run `32099343826` — **SUCCESS** |
+| Integrated main | `107c3b8899e19e0479b51f6542a06a808f2ae0df` |
+| Post-merge CI | run `32099779148` — **SUCCESS** |
+| Disposition | `Implemented — Not Verified`; optional independent assurance not performed |
+| Release state | Merged/integrated; no production deployment under this packet |
+| Tracker effect | None; tracker remains 170/438 and RFx Core 18/41 |
+| Stabilization 2C / B6b | Incomplete / intentionally pending |
+
+Control Room PR #230 records activation epoch `mobile-exchange-stage3-shared-2026-08-18` for `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` from exact base `107c3b8899e19e0479b51f6542a06a808f2ae0df`. Stage 3 alone is active; every Stage 4–6 domain/integration packet remains dependency-gated.
 
 ## Stage 1 integrated contract family
 
@@ -169,4 +187,4 @@ Any newly discovered generalized capability gap must be raised through the insta
 
 ## Exact next action
 
-Complete `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` against its recorded activation epoch, including the scoped v1-to-v2 continuity consumer migration, five-locale successor copy, exact sixteen-action registry, configured-browser evidence, exact-head CI, and no known material finding. No Stage 3 or domain packet begins before that migration merges and its post-merge reconciliation closes the packet.
+Implement `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` against exact base `107c3b8899e19e0479b51f6542a06a808f2ae0df`: one non-authorizing query/map/result/detail family, marker/card/detail identity parity, truthful no-coordinate behavior, domain-owned persistence seams, safe detail return, desktop/mobile/five-locale/performance evidence, and no private domain framework. No Stage 4 domain packet begins before Stage 3 merges and its post-merge reconciliation closes the packet.
