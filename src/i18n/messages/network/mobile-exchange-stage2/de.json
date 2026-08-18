@@ -1,0 +1,23 @@
+{
+  "sheet": {
+    "region": "Exchange-Ergebnisse und Details",
+    "dragHandle": "Ziehen, um das Exchange-Panel zu vergrößern oder zu verkleinern",
+    "peek": "Vorschau",
+    "partial": "Ergebnisse",
+    "expanded": "Erweitern"
+  },
+  "card": {
+    "openDetail": "Details öffnen",
+    "addFavorite": "Zu Favoriten hinzufügen",
+    "removeFavorite": "Aus Favoriten entfernen",
+    "favoriteUnavailable": "Favoriten sind für diesen Datensatz nicht verfügbar",
+    "mediaFallback": "Keine öffentlichen Medien verfügbar"
+  },
+  "recordActions": {
+    "resources.recordActions.viewProvider": "Anbieter anzeigen",
+    "resources.recordActions.viewResource": "Ressource anzeigen",
+    "resources.recordActions.requestSupport": "Unterstützung anfordern",
+    "resources.recordActions.openIntake": "Anfrage starten",
+    "resources.recordActions.viewRequest": "Anfrage anzeigen"
+  }
+}

@@ -31,13 +31,13 @@ replaceOnce(
 replaceOnce(
   "continuity snapshot before reopen evidence",
   `  assert.equal(before.wholeLensDisabled, false, "A permanent lens was disabled as a whole.");\n\n  const continuityBefore = await exchangeRoomLensSnapshot(cdp);`,
-  `  assert.equal(before.wholeLensDisabled, false, "A permanent lens was disabled as a whole.");\n\n  if (!exchangeRoomReopenEvidenceCaptured) {\n    assert.equal(before.panelOpen, true, "Phase 2 action surface was not open before reopen acceptance.");\n    const closed = await evaluate(cdp, \`(() => {\n      const close = [...document.querySelectorAll('#organization-detail-panel button[type="button"]')]\n        .find((button) => button.textContent?.includes('×'));\n      if (!close) return false;\n      close.click();\n      return true;\n    })()\`);\n    assert.equal(closed, true, "Could not close the Exchange Room action surface before reopen acceptance.");\n    await waitForExpression(\n      cdp,\n      \`!document.querySelector('[data-exchange-room-action-grid]')\`,\n      "closed Exchange Room action surface",\n    );\n    exchangeRoomReopenEvidenceCaptured = true;\n  }\n\n  const continuityBefore = await exchangeRoomLensSnapshot(cdp);`,
+  `  assert.equal(before.wholeLensDisabled, false, "A permanent lens was disabled as a whole.");\n\n  if (!exchangeRoomReopenEvidenceCaptured) {\n    assert.equal(before.panelOpen, true, "Phase 2 detail surface was not open before reopen acceptance.");\n    const closed = await evaluate(cdp, \`(() => {\n      const close = [...document.querySelectorAll('#organization-detail-panel button[type="button"]')]\n        .find((button) => button.textContent?.includes('×'));\n      if (!close) return false;\n      close.click();\n      return true;\n    })()\`);\n    assert.equal(closed, true, "Could not close the Exchange Room detail surface before reopen acceptance.");\n    await waitForExpression(\n      cdp,\n      \`!document.querySelector('#organization-detail-panel')\n        && Boolean(document.querySelector('[data-exchange-room-action-grid]'))\`,\n      "closed Exchange Room detail surface with persistent action rail",\n    );\n    exchangeRoomReopenEvidenceCaptured = true;\n  }\n\n  const continuityBefore = await exchangeRoomLensSnapshot(cdp);`,
 );
 
 replaceOnce(
   "panel-state preservation assertion",
   `  assert.equal(after.panelOpen, continuityBefore.panelOpen, \`${"${id}"} changed the organization detail-panel state during lens activation.\`);`,
-  `  assert.equal(after.panelOpen, true, \`${"${id}"} did not leave/reopen the action surface.\`);`,
+  `  assert.equal(after.panelOpen, true, \`${"${id}"} did not reopen the Exchange Room detail surface.\`);`,
 );
 
 replaceOnce(

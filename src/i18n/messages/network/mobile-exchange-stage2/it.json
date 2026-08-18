@@ -1,0 +1,23 @@
+{
+  "sheet": {
+    "region": "Risultati e dettagli dell’Exchange",
+    "dragHandle": "Trascina per ridimensionare il pannello dell’Exchange",
+    "peek": "Anteprima",
+    "partial": "Risultati",
+    "expanded": "Espandi"
+  },
+  "card": {
+    "openDetail": "Apri dettagli",
+    "addFavorite": "Aggiungi ai preferiti",
+    "removeFavorite": "Rimuovi dai preferiti",
+    "favoriteUnavailable": "I preferiti non sono disponibili per questo record",
+    "mediaFallback": "Nessun contenuto multimediale pubblico disponibile"
+  },
+  "recordActions": {
+    "resources.recordActions.viewProvider": "Visualizza fornitore",
+    "resources.recordActions.viewResource": "Visualizza risorsa",
+    "resources.recordActions.requestSupport": "Richiedi assistenza",
+    "resources.recordActions.openIntake": "Avvia richiesta",
+    "resources.recordActions.viewRequest": "Visualizza richiesta"
+  }
+}

@@ -13,6 +13,7 @@ const [
   spatialScene,
   geographyRoute,
   existingWorkspace,
+  existingWorkspaceCss,
   participantMapRuntime,
   activationClient,
   locationPanel,
@@ -28,6 +29,7 @@ const [
   read("src/components/map/ExchangeSpatialScene.tsx"),
   read("app/geography/canvas/page.tsx"),
   read("src/components/participant/ExistingWorkspaceFoundation.tsx"),
+  read("src/components/participant/ExistingWorkspaceFoundation.module.css"),
   read("src/infrastructure/geography/participant-map-runtime.ts"),
   read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("src/components/organization-location/OrganizationLocationPanel.tsx"),
@@ -127,13 +129,19 @@ assert.ok(
     existingWorkspace.includes("role=\"search\"") &&
     existingWorkspace.includes("showSearch={false}") &&
     existingWorkspace.includes('workspaceOverlay={panelOpen ? "right" : "left"}'),
-  "Slice 3.2 must preserve authorized organization identity, exactly one operational Network search, and contextual map controls.",
+  "Slice 3.2 must preserve authorized organization identity, one operational Network search per responsive viewport, and contextual map controls.",
 );
 assert.ok(!geographyRoute.includes("SearchFilterOverlay"), "Intelligence must avoid a decorative duplicate search control.");
+const responsiveSearchRoles = existingWorkspace.match(/role="search"/g)?.length ?? 0;
 assert.ok(
   !existingWorkspace.includes("SearchFilterOverlay") &&
-    existingWorkspace.match(/role="search"/g)?.length === 1,
-  "The authenticated Spatial Workspace must expose one operational search/filter surface rather than duplicate controls.",
+    responsiveSearchRoles === 2 &&
+    existingWorkspace.includes("styles.mobileSearchOverlay") &&
+    existingWorkspace.includes("styles.desktopSearchOverlay") &&
+    /\.mobileSearchOverlay,\s*\.mobileResultStream\s*\{\s*display:\s*none;/.test(existingWorkspaceCss) &&
+    /@media \(max-width: 760px\)[\s\S]*\.desktopSearchOverlay,\s*\.desktopDetailSheet\s*\{\s*display:\s*none;/.test(existingWorkspaceCss) &&
+    /@media \(max-width: 760px\)[\s\S]*\.mobileSearchOverlay\s*\{[\s\S]*display:\s*grid;/.test(existingWorkspaceCss),
+  "The authenticated Spatial Workspace must expose one operational search/filter surface per responsive viewport rather than simultaneous duplicate controls.",
 );
 
 assert.ok(
@@ -166,5 +174,5 @@ assert.ok(
 );
 
 console.log(
-  "Mapbox production surfaces validated: Slice 3.2 authorized Network search/list/detail on the existing spatial shell, home organization continuity, map/view controls, authoritative home-locality focus, public-token hygiene, and viewport/authority separation.",
+  "Mapbox production surfaces validated: responsive one-per-viewport Network search/list/detail on the existing spatial shell, home organization continuity, map/view controls, authoritative home-locality focus, public-token hygiene, and viewport/authority separation.",
 );

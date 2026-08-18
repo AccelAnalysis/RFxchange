@@ -22,9 +22,9 @@ test("permanent lens deep links are projected atomically from one spatial-store 
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
   assert.match(navigation, /function storedLensHrefSnapshot\(\): string/);
   assert.match(navigation, /intelligenceHref: storedIntelligenceHref\(\)/);
-  assert.match(navigation, /opportunityHref: storedOpportunityHref\(\)/);
-  assert.match(navigation, /resourceHref: storedResourceHref\(\)/);
-  assert.match(navigation, /referralHref: storedReferralHref\(\)/);
+  assert.match(navigation, /opportunityHref: participantSpatialLensHref\("opportunities-rfx"\)/);
+  assert.match(navigation, /resourceHref: participantSpatialLensHref\("resources"\)/);
+  assert.match(navigation, /referralHref: participantSpatialLensHref\("referrals"\)/);
   assert.match(navigation, /const serializedLensHrefs = useSyncExternalStore\([\s\S]*storedLensHrefSnapshot[\s\S]*DEFAULT_LENS_HREF_SNAPSHOT/);
   assert.equal((navigation.match(/useSyncExternalStore\(/g) ?? []).length, 1);
 });
@@ -40,30 +40,31 @@ test("lens changes preserve the map, camera and selected organization substrate"
   assert.match(workspace, /selectedOrganizationId: selectedOrganizationQueryId/);
 });
 
-test("the four-action controller is mounted once outside the closable detail branch", () => {
+test("the four-action projection has desktop and sheet placements over the same active-lens state", () => {
   const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
   const controllerMatches = workspace.match(/<ExchangeRoomActionController/g) ?? [];
-  assert.equal(controllerMatches.length, 1);
-  const controllerIndex = workspace.indexOf("<ExchangeRoomActionController");
-  const panelConditionalIndex = workspace.indexOf("{panelOpen ? (");
-  assert.ok(controllerIndex >= 0 && panelConditionalIndex >= 0 && controllerIndex < panelConditionalIndex);
-  assert.match(workspace, /onClick=\{\(\) => updatePanel\(false\)\}/);
+  assert.equal(controllerMatches.length, 2);
+  assert.match(workspace, /placement="workspace"/);
+  assert.match(workspace, /placement="sheet"/);
+  assert.match(workspace, /actions=\{exchangeRoomActions\}/g);
+  assert.match(workspace, /onClick=\{\(\) => \{[\s\S]*panelOpen: false/);
 });
 
-test("390px uses the native mobile lens menu and ordinary selection can close it", () => {
+test("390px uses the persistent four-lens bottom navigation and sheet action rail", () => {
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
   const navigationStyles = read("src/components/participant/ParticipantTopNavigation.module.css");
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   const controllerStyles = read("src/components/participant/ExchangeRoomActionController.module.css");
 
-  assert.match(navigation, /onNavigate=\{closeMobileLensMenu\}/);
-  assert.match(navigation, /if \(event\.key === "Escape"\)/);
+  assert.match(navigation, /data-mobile-lens-navigation="persistent-bottom"/);
+  assert.match(navigation, /className=\{styles\.mobileBottomNavigation\}/);
+  assert.doesNotMatch(navigation, /<details|mobileLensMenu/);
   assert.match(navigationStyles, /@media \(max-width: 760px\)[\s\S]*?\.desktopLenses \{\s*display: none;/);
-  assert.match(navigationStyles, /@media \(max-width: 760px\)[\s\S]*?\.mobileLensMenu \{\s*display: block;/);
+  assert.match(navigationStyles, /@media \(max-width: 760px\)[\s\S]*?\.mobileBottomNavigation \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/);
   assert.match(navigationStyles, /@media \(max-width: 390px\)/);
   assert.doesNotMatch(controllerStyles, /\[data-participant-navigation\]/);
   assert.doesNotMatch(controller, /stopPropagation/);
-  assert.match(controllerStyles, /@media \(max-width: 760px\)[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(controllerStyles, /@media \(max-width: 760px\)[\s\S]*?action-rail-placement="sheet"[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
 });
 
 test("disabled Phase 2 actions are non-actionable without visible status prose", () => {

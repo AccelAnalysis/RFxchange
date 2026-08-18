@@ -56,7 +56,7 @@ test("controlled and OPEN participants enter the same map-first Exchange shell",
   assert.match(discovery, /listByUserAndGeography/);
 });
 
-test("unfinished lenses, utilities, and marker actions stay visible but non-actionable", () => {
+test("unfinished record actions remain visible/non-actionable while the four permanent lenses stay selectable", () => {
   const contract = behavioralContract();
   const actions = new Map(contract.mapOnlyActions.map((action) => [action.id, action]));
   assert.equal(actions.get("manage-profile").availability, "unavailable");
@@ -71,15 +71,18 @@ test("unfinished lenses, utilities, and marker actions stay visible but non-acti
 
   const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
+  const registry = read("src/application/participant/participant-lens-registry.ts");
   const compatibilityShell = read("src/components/participant/ParticipantWorkspace.tsx");
   const persistentShell = read("src/components/participant/PersistentParticipantShell.tsx");
-  assert.match(workspace, /MAP_ONLY_UNAVAILABLE_LENSES/);
+  assert.doesNotMatch(workspace, /MAP_ONLY_UNAVAILABLE_LENSES/);
+  assert.match(workspace, /activeItem=\{spatialContext\.activeLens\}/);
   assert.match(workspace, /operationalActionsAvailable/);
-  assert.match(workspace, /aria-disabled="true"/);
-  assert.match(workspace, /networkWorkspace\.actionReasons/);
-  assert.match(navigation, /unavailableLensIds\.includes\(lens\.id\)/);
-  assert.match(navigation, /quickStartUnavailable/);
-  assert.match(navigation, /data-availability="unavailable"/);
+  assert.match(workspace, /ExchangeRoomActionController/);
+  assert.match(navigation, /data-mobile-lens-navigation="persistent-bottom"/);
+  assert.match(registry, /id: "opportunities-rfx"[\s\S]*availability: "enabled"/);
+  assert.match(registry, /id: "resources"[\s\S]*availability: "enabled"/);
+  assert.match(registry, /id: "intelligence"[\s\S]*availability: "enabled"/);
+  assert.match(registry, /id: "referrals"[\s\S]*availability: "enabled"/);
   assert.match(compatibilityShell, /registerUnavailableDestinations/);
   assert.match(persistentShell, /unavailableLensIds=\{unavailableDestinations\?\.lensIds\}/);
 });
