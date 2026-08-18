@@ -383,8 +383,6 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
         <header><p className={styles.eyebrow}>{t("resourceNetworkWorkspace.eyebrow")}</p><h1>{t("resourceNetworkWorkspace.title")}</h1><p>{t("resourceNetworkWorkspace.supporting")}</p></header>
         {queryState.rfxReference || queryState.rfxGap ? <section className={styles.originContext} aria-label={mobileCopy.context}>
           <strong>{mobileCopy.context}</strong>
-          {queryState.rfxReference ? <span>RFx {queryState.rfxReference}</span> : null}
-          {queryState.rfxGap ? <p>{queryState.rfxGap}</p> : null}
           <small>{mobileCopy.contextOnly}</small>
           {queryState.returnTo ? <a href={queryState.returnTo}>{mobileCopy.return}</a> : null}
         </section> : null}

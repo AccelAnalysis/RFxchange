@@ -140,13 +140,14 @@ test("RFx gap origin is bounded, same-origin and preserved as non-authorizing qu
     q: "capital",
     rfxReference: "RFX-47",
     rfxGap: `  ${"gap ".repeat(80)} `,
-    returnTo: "/opportunities/RFX-47?tab=gaps#gap-2",
+    returnTo: "/opportunities/RFX-47/assess?tab=gaps#gap-2",
   });
   assert.equal(parsed.rfxReference, "RFX-47");
   assert.equal(parsed.rfxGap.length, 240);
-  assert.equal(parsed.returnTo, "/opportunities/RFX-47?tab=gaps#gap-2");
+  assert.equal(parsed.returnTo, "/opportunities/RFX-47/assess?tab=gaps#gap-2");
   assert.equal(parseResourcesMobileWorkspaceQuery({ returnTo: "https://evil.example/opportunities" }).returnTo, null);
   assert.equal(parseResourcesMobileWorkspaceQuery({ returnTo: "/account" }).returnTo, null);
+  assert.equal(parseResourcesMobileWorkspaceQuery({ rfxReference: "RFX-47", returnTo: "/opportunities/RFX-OTHER/assess" }).returnTo, null);
 });
 
 test("Resources-owned copy is complete for the repository five-locale set", () => {

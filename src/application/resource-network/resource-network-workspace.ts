@@ -24,14 +24,14 @@ function boundedText(value: SearchParamValue, maximum: number): string | null {
   return normalized || null;
 }
 
-function safeOpportunityReturn(value: SearchParamValue): string | null {
+function safeOpportunityReturn(value: SearchParamValue, rfxReference: string | null): string | null {
   const normalized = first(value).trim();
-  if (!normalized || normalized.startsWith("//")) return null;
+  if (!normalized || !rfxReference || normalized.startsWith("//")) return null;
   try {
     const parsed = new URL(normalized, "https://participant.invalid");
     if (
       parsed.origin !== "https://participant.invalid"
-      || (parsed.pathname !== "/opportunities" && !parsed.pathname.startsWith("/opportunities/"))
+      || parsed.pathname !== `/opportunities/${encodeURIComponent(rfxReference)}/assess`
     ) return null;
     return `${parsed.pathname}${parsed.search}${parsed.hash}`;
   } catch {
@@ -73,15 +73,16 @@ export function parseResourceNetworkWorkspaceQuery(
 export function parseResourcesMobileWorkspaceQuery(
   params: Readonly<Record<string, SearchParamValue>>,
 ): ResourcesMobileWorkspaceQuery {
+  const rfxReference = workspaceId(params.rfxReference);
   return Object.freeze({
     ...parseResourceNetworkWorkspaceQuery(params),
     resourceId: workspaceId(params.resource),
     manageMode: ["offer", "edit"].includes(first(params.manage))
       ? first(params.manage) as "offer" | "edit"
       : null,
-    rfxReference: workspaceId(params.rfxReference),
+    rfxReference,
     rfxGap: boundedText(params.rfxGap, 240),
-    returnTo: safeOpportunityReturn(params.returnTo),
+    returnTo: safeOpportunityReturn(params.returnTo, rfxReference),
   });
 }
 
