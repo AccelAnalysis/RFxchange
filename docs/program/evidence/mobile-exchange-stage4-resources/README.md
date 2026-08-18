@@ -9,7 +9,9 @@ Implementation state: Implemented — Not Verified
 Release class: Elevated
 Starting merged `main`: `8f348c8c86a2a8eb1eeb6402a170a9120824d7ae`
 
-The Control Room dependency packet `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` was closed before this build. The product owner confirmed post-merge production CI run `32109036958` succeeded on the exact starting main SHA. The historical activation base in the machine packet is preserved; this implementation uses the product-owner-directed descendant merged main above.
+Reconciled merged `main`: `4a3d9042425b88170f16cbda6aff61ba875abea1` (PR #236 ownership amendment; post-merge production CI `32111575377` succeeded)
+
+The Control Room dependency packet `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` was closed before this build. The product owner confirmed post-merge production CI run `32109036958` succeeded on the exact starting main SHA. The implementation is now merged forward to the exact reconciled descendant above; the historical activation base remains preserved in the machine packet.
 
 ## Requirement disposition
 
