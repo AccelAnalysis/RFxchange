@@ -414,8 +414,8 @@
       "candidate": {
         "actor": "github:AccelAnalysis",
         "pr": 171,
-        "sha": "60764f2deaabcd2d184aea40734da880f2b6f1c0",
-        "mergeSha": null
+        "sha": "dc17514ef9aed2dd37022b8bb121feb946bbcbf4",
+        "mergeSha": "3cef29d8ce300154a8d73a262ec7a20252a49db6"
       },
       "candidateHistory": [
         {
@@ -423,12 +423,20 @@
           "pr": 171,
           "sha": "e70413e2e45db4b75517376acdc0700f9838a963",
           "mergeSha": null
+        },
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 171,
+          "sha": "60764f2deaabcd2d184aea40734da880f2b6f1c0",
+          "mergeSha": null
         }
       ],
       "exactBaseSha": "347015829d64cfc596cdef1010601d8bda447818",
       "activationEpochId": "rfx-46-reconciliation-2026-08-12",
       "basePolicy": "authority-merge-sha plus preserved candidate e70413e2e45db4b75517376acdc0700f9838a963",
-      "status": "implemented-not-verified",
+      "postMergeRunUrl": "https://github.com/AccelAnalysis/RFxchange/actions/runs/31930900200",
+      "postMergeMainSha": "3cef29d8ce300154a8d73a262ec7a20252a49db6",
+      "status": "closed",
       "requirementIds": [
         "RFX-FEATURE-RSP-001",
         "RFX-FEATURE-RSP-002",
@@ -1100,12 +1108,32 @@
       "lane": "shared-exchange",
       "owner": "Stage 3 authoritative shared discovery and continuity contracts",
       "branch": "codex/mobile-exchange-stage3-shared",
-      "candidate": null,
-      "candidateHistory": [],
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 231,
+        "sha": "0b6b0999afe592725cd0a81a27f14b221f8c82b4",
+        "mergeSha": "5ddca57bf2d9fa2c81a98e75aeee09302d278a23"
+      },
+      "candidateHistory": [
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 231,
+          "sha": "206d53728a9457a5894e3a165d3458d5d77b33ec",
+          "mergeSha": null
+        },
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 231,
+          "sha": "f897d8380b4757bbf7631b219372e635ef489109",
+          "mergeSha": null
+        }
+      ],
       "exactBaseSha": "107c3b8899e19e0479b51f6542a06a808f2ae0df",
       "activationEpochId": "mobile-exchange-stage3-shared-2026-08-18",
       "basePolicy": "Activated by Control Room PR #230 from exact current merged main after WP-MOBILE-EXCHANGE-LENS-MIGRATION-01 closed.",
-      "status": "active",
+      "postMergeRunUrl": "https://github.com/AccelAnalysis/RFxchange/actions/runs/32104375075",
+      "postMergeMainSha": "5ddca57bf2d9fa2c81a98e75aeee09302d278a23",
+      "status": "closed",
       "releaseClass": "Elevated",
       "requirementIds": ["MOB36-SHARED-QUERY-001", "MOB36-SHARED-MAP-001", "MOB36-SHARED-RESULT-001", "MOB36-SHARED-DETAIL-001"],
       "sources": ["docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/program/SHARED_EXCHANGE_CONTRACTS.md", "src/application/participant/mobile-exchange-contracts.ts", "src/application/participant/mobile-exchange-continuity.ts", "src/components/map/ExchangeSpatialScene.tsx"],

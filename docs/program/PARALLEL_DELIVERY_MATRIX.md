@@ -2,9 +2,9 @@
 
 **Canonical volatile program-status source**
 
-**Snapshot basis:** merged `main` `107c3b8899e19e0479b51f6542a06a808f2ae0df` on 2026-08-18
+**Snapshot basis:** merged `main` `5ddca57bf2d9fa2c81a98e75aeee09302d278a23` on 2026-08-18
 
-**Current task:** Implement `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` from exact activation base `107c3b8899e19e0479b51f6542a06a808f2ae0df` under Control Room PR `#230`
+**Current task:** Close `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01`, reconcile merged Slice 4.6, and activate only the dependency-eligible Stage 4/RFx packets from exact merged main
 
 **Update rule:** Control Room recalculates this document from current merged `main` after every program-state change.
 
@@ -25,14 +25,14 @@ The original 106 records remain immutable and in order. Twenty-two successor req
 
 | Experience | Requirement denominator | Verified | In Progress | Implemented — Not Verified | Not Started | Blocked | Explicitly deferred/N/A |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Shared Exchange | 36 | 0 | 0 | 23 | 6 | 3 | 4 |
+| Shared Exchange | 36 | 0 | 0 | 27 | 2 | 3 | 4 |
 | Opportunities/RFx | 42 | 0 | 0 | 23 | 19 | 0 | 0 |
 | Resources | 13 | 0 | 0 | 8 | 3 | 2 | 0 |
 | Intelligence | 15 | 0 | 0 | 3 | 7 | 5 | 0 |
 | Capabilities | 3 | 0 | 0 | 0 | 3 | 0 | 0 |
 | Referrals Cross-Lens | 14 | 0 | 0 | 10 | 3 | 0 | 1 |
 | Integration | 5 | 0 | 0 | 0 | 5 | 0 | 0 |
-| Program total | 128 | 0 | 0 | 67 | 46 | 10 | 5 |
+| Program total | 128 | 0 | 0 | 71 | 42 | 10 | 5 |
 
 No percentage is inferred from these counts. The successor requirement denominator changes no Feature-ID arithmetic.
 
@@ -129,6 +129,25 @@ Exact-head audit of migration PR #228 then found four existing governed referral
 
 Control Room PR #230 records activation epoch `mobile-exchange-stage3-shared-2026-08-18` for `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` from exact base `107c3b8899e19e0479b51f6542a06a808f2ae0df`. Stage 3 alone is active; every Stage 4–6 domain/integration packet remains dependency-gated.
 
+## Mobile Exchange Stage 3 closeout
+
+| Field | Final state |
+| --- | --- |
+| Packet | `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` |
+| Exact activation base | `107c3b8899e19e0479b51f6542a06a808f2ae0df` |
+| Reconciled implementation base | `56e23c35dc3182330fe8bfd3521de001ee1fdf37` |
+| Candidate | PR #231 exact head `0b6b0999afe592725cd0a81a27f14b221f8c82b4` |
+| Exact-head CI | run `32103926126` — **SUCCESS** |
+| Integrated main | `5ddca57bf2d9fa2c81a98e75aeee09302d278a23` |
+| Post-merge CI | run `32104375075` — **SUCCESS** |
+| Focused / canonical evidence | Stage 3 18/18; combined focused 73/73; canonical full gate 770/770; configured browser and build identity passed |
+| Disposition | `Implemented — Not Verified`; optional independent assurance not performed |
+| Release state | Merged/integrated; no independent production deployment under this packet |
+| Tracker effect | None; tracker remains 170/438 and RFx Core 18/41 |
+| Stabilization 2C / B6b | Incomplete / intentionally pending |
+
+Control Room also reconciles the already-merged Slice 4.6 packet to its true final PR #171 candidate `dc17514ef9aed2dd37022b8bb121feb946bbcbf4`, merge `3cef29d8ce300154a8d73a262ec7a20252a49db6`, exact-head CI `31929740885`, and post-merge CI `31930900200`. Its pre-amendment independent-assurance language remains historical; the packet closes as `Implemented — Not Verified` under the current Completion Governance Amendment without claiming optional assurance.
+
 ## Stage 1 integrated contract family
 
 The integrated shared architecture now covers:
@@ -187,4 +206,4 @@ Any newly discovered generalized capability gap must be raised through the insta
 
 ## Exact next action
 
-Implement `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` against exact base `107c3b8899e19e0479b51f6542a06a808f2ae0df`: one non-authorizing query/map/result/detail family, marker/card/detail identity parity, truthful no-coordinate behavior, domain-owned persistence seams, safe detail return, desktop/mobile/five-locale/performance evidence, and no private domain framework. No Stage 4 domain packet begins before Stage 3 merges and its post-merge reconciliation closes the packet.
+After successful Stage 3 post-merge CI, activate from exact main `5ddca57bf2d9fa2c81a98e75aeee09302d278a23` only `WP-MOBILE-EXCHANGE-RFX-47-01`, `WP-MOBILE-EXCHANGE-STAGE4-RESOURCES-01`, `WP-MOBILE-EXCHANGE-STAGE4-INTELLIGENCE-01`, and `WP-MOBILE-EXCHANGE-STAGE4-CAPABILITIES-01`. The Opportunities Stage 4 adapter remains gated by Slices 4.7–4.10; Capabilities matching, Stage 5, and Stage 6 remain dependency-gated.
