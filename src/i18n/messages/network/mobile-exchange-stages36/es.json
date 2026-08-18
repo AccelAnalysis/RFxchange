@@ -1,0 +1,42 @@
+{
+  "actionsLabel": "Acciones del Exchange",
+  "actions": {
+    "opportunities.create-view.own": "Crear RFx",
+    "opportunities.create-view.external": "Ver detalles del RFx",
+    "opportunities.manage-respond.own": "Editar / Gestionar RFx",
+    "opportunities.manage-respond.external": "Responder",
+    "opportunities.team.own": "Invitar al equipo",
+    "opportunities.team.external": "Equipo",
+    "opportunities.watch.own": "Seguir / Vigilar",
+    "opportunities.watch.external": "Vigilar",
+    "resources.offer-request.own": "Ofrecer recurso",
+    "resources.offer-request.external": "Solicitar recurso",
+    "resources.manage-view.own": "Editar recurso",
+    "resources.manage-view.external": "Ver detalles del recurso",
+    "resources.share.own": "Compartir",
+    "resources.share.external": "Compartir",
+    "resources.save.own": "Guardar / Archivar",
+    "resources.save.external": "Guardar",
+    "intelligence.add-view.own": "Añadir información",
+    "intelligence.add-view.external": "Ver detalles de la información",
+    "intelligence.edit-note.own": "Editar información",
+    "intelligence.edit-note.external": "Añadir nota",
+    "intelligence.compare.own": "Comparar",
+    "intelligence.compare.external": "Comparar",
+    "intelligence.track.own": "Seguir",
+    "intelligence.track.external": "Seguir / Rastrear",
+    "capabilities.manage-view.own": "Gestionar capacidades",
+    "capabilities.manage-view.external": "Ver capacidades",
+    "capabilities.classify-match.own": "IA a AMACS",
+    "capabilities.classify-match.external": "Relacionar con RFx",
+    "capabilities.evidence-refer.own": "Añadir / Editar evidencia",
+    "capabilities.evidence-refer.external": "Referir",
+    "capabilities.gaps-save.own": "Brechas de capacidad",
+    "capabilities.gaps-save.external": "Guardar / Seguir"
+  },
+  "disabledReasons": {
+    "not-operational": "Esta función no tiene un controlador operativo en el Exchange actual.",
+    "not-applicable": "Esta función no se aplica a la organización o al contexto de mercado actual.",
+    "not-authorized": "El estado autorizado actual del Exchange no permite esta función."
+  }
+}

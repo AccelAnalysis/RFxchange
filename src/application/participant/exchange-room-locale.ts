@@ -1,11 +1,11 @@
 import type { Locale } from "../../i18n/config";
-import de from "../../i18n/messages/network/exchange-room-phase2/de.json";
-import enUS from "../../i18n/messages/network/exchange-room-phase2/en-US.json";
-import es from "../../i18n/messages/network/exchange-room-phase2/es.json";
-import fr from "../../i18n/messages/network/exchange-room-phase2/fr.json";
-import it from "../../i18n/messages/network/exchange-room-phase2/it.json";
+import de from "../../i18n/messages/network/mobile-exchange-stages36/de.json";
+import enUS from "../../i18n/messages/network/mobile-exchange-stages36/en-US.json";
+import es from "../../i18n/messages/network/mobile-exchange-stages36/es.json";
+import fr from "../../i18n/messages/network/mobile-exchange-stages36/fr.json";
+import it from "../../i18n/messages/network/mobile-exchange-stages36/it.json";
 
-export const EXCHANGE_ROOM_LOCALE_VERSION = 1 as const;
+export const EXCHANGE_ROOM_LOCALE_VERSION = 2 as const;
 export type ExchangeRoomLocaleCatalog = typeof enUS;
 
 const catalogs: Readonly<Record<Locale, ExchangeRoomLocaleCatalog>> = Object.freeze({

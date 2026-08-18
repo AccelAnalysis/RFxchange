@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "scope": {
+    "participantId": "participant-fixture",
+    "membershipId": "membership-fixture",
+    "organizationId": "organization-home",
+    "geographyId": "geography-fixture"
+  },
+  "activeLens": "referrals",
+  "selection": {
+    "organizationId": "organization-selected",
+    "markerId": "marker-selected",
+    "relationshipId": "referral-authorized"
+  },
+  "camera": {
+    "longitude": -76.3,
+    "latitude": 36.9,
+    "zoom": 10,
+    "pitch": 35,
+    "bearing": 12,
+    "viewMode": "perspective"
+  },
+  "lensState": {
+    "opportunities-rfx": {
+      "search": "opportunity",
+      "filters": { "status": "open" },
+      "resultPage": 2,
+      "resultIndex": 1,
+      "listScrollTop": 10
+    },
+    "resources": {
+      "search": "resource",
+      "filters": { "category": "equipment" },
+      "resultPage": 3,
+      "resultIndex": 2,
+      "listScrollTop": 20
+    },
+    "intelligence": {
+      "search": "intelligence",
+      "filters": { "layer": "organizations" },
+      "resultPage": 4,
+      "resultIndex": 3,
+      "listScrollTop": 30
+    },
+    "referrals": {
+      "search": "legacy-capability-evidence",
+      "filters": { "classification": "legacy-stage2" },
+      "resultPage": 5,
+      "resultIndex": 4,
+      "listScrollTop": 40
+    }
+  },
+  "panelOpen": true,
+  "sheetSnapPoint": "expanded",
+  "sheetScrollTop": 55,
+  "originLens": "referrals",
+  "returnHref": "/geography/canvas?q=steel&selectedOrganization=organization-selected"
+}

@@ -6,6 +6,7 @@ import {
   PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT,
   PARTICIPANT_SPATIAL_ACTIVE_KEY,
   createParticipantSpatialContext,
+  legacyParticipantSpatialStorageKey,
   parseParticipantSpatialContext,
   participantSpatialStorageKey,
   serializeParticipantSpatialContext,
@@ -21,6 +22,10 @@ export function useParticipantSpatialContext(input: Readonly<{
   activeLens: ParticipantSpatialContext["activeLens"];
 }>): readonly [ParticipantSpatialContext, (update: (current: ParticipantSpatialContext) => ParticipantSpatialContext) => void] {
   const storageKey = useMemo(() => participantSpatialStorageKey(input.scope), [input.scope]);
+  const legacyStorageKey = useMemo(
+    () => legacyParticipantSpatialStorageKey(input.scope),
+    [input.scope],
+  );
   const fallback = useMemo(
     () => createParticipantSpatialContext({ scope: input.scope, homeMarkerId: input.homeMarkerId, activeLens: input.activeLens }),
     [input.activeLens, input.homeMarkerId, input.scope],
@@ -28,8 +33,10 @@ export function useParticipantSpatialContext(input: Readonly<{
   const fallbackSnapshot = useMemo(() => serializeParticipantSpatialContext(fallback), [fallback]);
   const subscribe = useCallback((notify: () => void) => {
     const handle = (event: Event) => {
-      if (event instanceof StorageEvent && event.key && event.key !== storageKey) return;
-      if (event instanceof CustomEvent && event.detail && event.detail !== storageKey) return;
+      if (event instanceof StorageEvent && event.key
+        && event.key !== storageKey && event.key !== legacyStorageKey) return;
+      if (event instanceof CustomEvent && event.detail
+        && event.detail !== storageKey && event.detail !== legacyStorageKey) return;
       if (!(event instanceof StorageEvent) && !(event instanceof CustomEvent)) memory.clear();
       notify();
     };
@@ -39,24 +46,41 @@ export function useParticipantSpatialContext(input: Readonly<{
       window.removeEventListener("storage", handle);
       window.removeEventListener(PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT, handle);
     };
-  }, [storageKey]);
+  }, [legacyStorageKey, storageKey]);
   const getSnapshot = useCallback(() => {
     try {
       const stored = window.sessionStorage.getItem(storageKey);
       if (stored === null) {
-        memory.delete(storageKey);
-        return fallbackSnapshot;
+        const legacyStored = window.sessionStorage.getItem(legacyStorageKey);
+        const migrated = parseParticipantSpatialContext(legacyStored, input.scope);
+        if (!migrated) {
+          memory.delete(storageKey);
+          return fallbackSnapshot;
+        }
+        const successor = serializeParticipantSpatialContext(migrated);
+        memory.set(storageKey, successor);
+        return successor;
       }
       memory.set(storageKey, stored);
       return stored;
     } catch {
       return memory.get(storageKey) ?? fallbackSnapshot;
     }
-  }, [fallbackSnapshot, storageKey]);
+  }, [fallbackSnapshot, input.scope, legacyStorageKey, storageKey]);
   const serialized = useSyncExternalStore(subscribe, getSnapshot, () => fallbackSnapshot);
   useEffect(() => {
-    try { window.sessionStorage.setItem(PARTICIPANT_SPATIAL_ACTIVE_KEY, storageKey); } catch { /* optional continuity pointer */ }
-  }, [storageKey]);
+    try {
+      if (window.sessionStorage.getItem(storageKey) === null) {
+        const legacyStored = window.sessionStorage.getItem(legacyStorageKey);
+        const migrated = parseParticipantSpatialContext(legacyStored, input.scope);
+        if (migrated) {
+          window.sessionStorage.setItem(storageKey, serializeParticipantSpatialContext(migrated));
+          window.sessionStorage.removeItem(legacyStorageKey);
+        }
+      }
+      window.sessionStorage.setItem(PARTICIPANT_SPATIAL_ACTIVE_KEY, storageKey);
+    } catch { /* optional continuity pointer */ }
+  }, [input.scope, legacyStorageKey, storageKey]);
   const context = useMemo(
     () => parseParticipantSpatialContext(serialized, input.scope) ?? fallback,
     [fallback, input.scope, serialized],

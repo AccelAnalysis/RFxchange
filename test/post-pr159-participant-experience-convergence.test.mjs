@@ -181,7 +181,7 @@ test("a carried referral recipient is revalidated into its authorized discovery 
   const page = read("app/referrals/page.tsx");
   const runtime = read("src/infrastructure/network-discovery/runtime.ts");
   const workspace = read("src/components/referrals/ReferralWorkspace.tsx");
-  const navigation = read("src/application/participant/participant-spatial-context.ts");
+  const navigation = read("src/application/participant/organization-actions.ts");
   assert.match(page, /loadAuthorizedNetworkDiscovery\(\{ access, mapProjection, focusedOrganizationId \}\)/);
   assert.match(runtime, /organizationId\(input\.focusedOrganizationId\)/);
   assert.match(navigation, /\/referrals\?organization=/);

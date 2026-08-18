@@ -1,0 +1,42 @@
+{
+  "actionsLabel": "Exchange actions",
+  "actions": {
+    "opportunities.create-view.own": "Create RFx",
+    "opportunities.create-view.external": "View RFx Detail",
+    "opportunities.manage-respond.own": "Edit / Manage RFx",
+    "opportunities.manage-respond.external": "Respond",
+    "opportunities.team.own": "Invite Team",
+    "opportunities.team.external": "Team",
+    "opportunities.watch.own": "Track / Watch",
+    "opportunities.watch.external": "Watch",
+    "resources.offer-request.own": "Offer Resource",
+    "resources.offer-request.external": "Request Resource",
+    "resources.manage-view.own": "Edit Resource",
+    "resources.manage-view.external": "View Resource Detail",
+    "resources.share.own": "Share",
+    "resources.share.external": "Share",
+    "resources.save.own": "Save / Archive",
+    "resources.save.external": "Save",
+    "intelligence.add-view.own": "Add Insight",
+    "intelligence.add-view.external": "View Insight Detail",
+    "intelligence.edit-note.own": "Edit Insight",
+    "intelligence.edit-note.external": "Add Note",
+    "intelligence.compare.own": "Compare",
+    "intelligence.compare.external": "Compare",
+    "intelligence.track.own": "Track",
+    "intelligence.track.external": "Follow / Track",
+    "capabilities.manage-view.own": "Manage Capabilities",
+    "capabilities.manage-view.external": "View Capabilities",
+    "capabilities.classify-match.own": "AI to AMACS",
+    "capabilities.classify-match.external": "Match to RFx",
+    "capabilities.evidence-refer.own": "Add / Edit Evidence",
+    "capabilities.evidence-refer.external": "Refer",
+    "capabilities.gaps-save.own": "Capability Gaps",
+    "capabilities.gaps-save.external": "Save / Follow"
+  },
+  "disabledReasons": {
+    "not-operational": "This function does not have an operational handler in the current Exchange runtime.",
+    "not-applicable": "This function does not apply to the current organization or selected market context.",
+    "not-authorized": "Your current authorized Exchange state does not permit this function."
+  }
+}

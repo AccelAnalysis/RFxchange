@@ -25,6 +25,7 @@ function loadRegistryContract() {
         resourceDetail: participantLensForPathname("/resources/detail"),
         intelligence: participantLensForPathname("/geography/canvas"),
         referrals: participantLensForPathname("/referrals"),
+        referralUtility: participantUtilityForPathname("/referrals"),
         account: participantNavigationState("/organization-profile"),
         providerApplication: participantNavigationState("/provider-application"),
         quickStart: participantUtilityForPathname("/quick-start"),
@@ -68,27 +69,29 @@ test("the typed registry preserves governed lens order, availability, routing, a
   const contract = loadRegistryContract();
   assert.deepEqual(
     contract.lenses.map(({ id }) => id),
-    ["opportunities-rfx", "resources", "intelligence", "referrals"],
+    ["opportunities-rfx", "resources", "intelligence", "capabilities"],
   );
   assert.deepEqual(
     contract.lenses.map(({ availability }) => availability),
-    ["enabled", "enabled", "enabled", "enabled"],
+    ["enabled", "enabled", "enabled", "unavailable"],
   );
   assert.equal(contract.lenses[0].href, "/opportunities");
   assert.deepEqual(contract.lenses[0].activePathPrefixes, ["/opportunities"]);
   assert.equal(contract.lenses[1].href, "/resources");
   assert.equal(contract.lenses[2].href, "/geography/canvas");
-  assert.equal(contract.lenses[3].href, "/referrals");
+  assert.equal(contract.lenses[3].href, null);
   assert.equal(contract.lenses.some(({ id }) => id === "network"), false);
   assert.deepEqual(contract.utilities, {
     account: { href: "/organization-profile" },
     "quick-start": { href: "/quick-start" },
+    referrals: { href: "/referrals" },
   });
   assert.deepEqual(contract.matches, {
     resources: "resources",
     resourceDetail: "resources",
     intelligence: "intelligence",
-    referrals: "referrals",
+    referrals: null,
+    referralUtility: "referrals",
     account: "account",
     providerApplication: "account",
     quickStart: "quick-start",
@@ -259,6 +262,7 @@ test("new shell, unavailable, utility, and scoped-loading copy is complete in al
     "opportunitiesRfx",
     "resources",
     "intelligence",
+    "capabilities",
     "referrals",
     "notYetAvailable",
     "quickStart",
@@ -272,6 +276,8 @@ test("new shell, unavailable, utility, and scoped-loading copy is complete in al
     "loadingEyebrow",
     "loadingIntelligenceTitle",
     "loadingIntelligenceBody",
+    "loadingCapabilitiesTitle",
+    "loadingCapabilitiesBody",
     "loadingResourcesTitle",
     "loadingResourcesBody",
     "loadingReferralsTitle",

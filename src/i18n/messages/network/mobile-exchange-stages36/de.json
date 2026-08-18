@@ -1,0 +1,42 @@
+{
+  "actionsLabel": "Exchange-Aktionen",
+  "actions": {
+    "opportunities.create-view.own": "RFx erstellen",
+    "opportunities.create-view.external": "RFx-Details anzeigen",
+    "opportunities.manage-respond.own": "RFx bearbeiten / verwalten",
+    "opportunities.manage-respond.external": "Antworten",
+    "opportunities.team.own": "Team einladen",
+    "opportunities.team.external": "Team",
+    "opportunities.watch.own": "Verfolgen / Beobachten",
+    "opportunities.watch.external": "Beobachten",
+    "resources.offer-request.own": "Ressource anbieten",
+    "resources.offer-request.external": "Ressource anfragen",
+    "resources.manage-view.own": "Ressource bearbeiten",
+    "resources.manage-view.external": "Ressourcendetails anzeigen",
+    "resources.share.own": "Teilen",
+    "resources.share.external": "Teilen",
+    "resources.save.own": "Speichern / Archivieren",
+    "resources.save.external": "Speichern",
+    "intelligence.add-view.own": "Erkenntnis hinzufügen",
+    "intelligence.add-view.external": "Erkenntnisdetails anzeigen",
+    "intelligence.edit-note.own": "Erkenntnis bearbeiten",
+    "intelligence.edit-note.external": "Notiz hinzufügen",
+    "intelligence.compare.own": "Vergleichen",
+    "intelligence.compare.external": "Vergleichen",
+    "intelligence.track.own": "Verfolgen",
+    "intelligence.track.external": "Folgen / Verfolgen",
+    "capabilities.manage-view.own": "Fähigkeiten verwalten",
+    "capabilities.manage-view.external": "Fähigkeiten anzeigen",
+    "capabilities.classify-match.own": "KI zu AMACS",
+    "capabilities.classify-match.external": "Mit RFx abgleichen",
+    "capabilities.evidence-refer.own": "Nachweise hinzufügen / bearbeiten",
+    "capabilities.evidence-refer.external": "Empfehlen",
+    "capabilities.gaps-save.own": "Fähigkeitslücken",
+    "capabilities.gaps-save.external": "Speichern / Folgen"
+  },
+  "disabledReasons": {
+    "not-operational": "Diese Funktion hat in der aktuellen Exchange-Laufzeit keinen betriebsbereiten Handler.",
+    "not-applicable": "Diese Funktion gilt nicht für die aktuelle Organisation oder den ausgewählten Marktkontext.",
+    "not-authorized": "Der aktuell autorisierte Exchange-Status erlaubt diese Funktion nicht."
+  }
+}

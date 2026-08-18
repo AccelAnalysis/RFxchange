@@ -57,7 +57,11 @@ import { createOrganizationAccount, createOrganizationProfile } from "../src/dom
 import { createOrganizationMembership, createUserIdentity } from "../src/domain/users/model.ts";
 import { OrientationJourneyService } from "../src/application/orientation/orientation-journey.ts";
 import { PARTICIPANT_INTELLIGENCE_CONTEXT_STORAGE_KEY } from "../src/application/participant/intelligence-context-storage.ts";
-import { PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX } from "../src/application/participant/participant-spatial-context.ts";
+import {
+  LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX,
+  PARTICIPANT_SPATIAL_ACTIVE_KEY,
+  PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX,
+} from "../src/application/participant/participant-spatial-context.ts";
 import {
   HAMPTON_ROADS_CONTROLLED_LOCALITY_DEFINITIONS,
   PORTSMOUTH_CONTROLLED_LOCALITY,
@@ -949,30 +953,32 @@ async function clickHref(cdp, href, expectedPath, { candidate = false, latencyMs
 
 const EXCHANGE_ROOM_ACTION_IDS_BY_LENS = Object.freeze({
   "opportunities-rfx": Object.freeze([
-    "opportunities.find",
-    "opportunities.create-rfx",
-    "opportunities.pursue-respond",
+    "opportunities.create-view",
+    "opportunities.manage-respond",
     "opportunities.team",
+    "opportunities.watch",
   ]),
   resources: Object.freeze([
-    "resources.find-providers",
-    "resources.browse-resources",
-    "resources.my-requests",
-    "resources.provider-status",
+    "resources.offer-request",
+    "resources.manage-view",
+    "resources.share",
+    "resources.save",
   ]),
   intelligence: Object.freeze([
-    "intelligence.organizations",
-    "intelligence.capabilities",
-    "intelligence.locations",
-    "intelligence.layers",
+    "intelligence.add-view",
+    "intelligence.edit-note",
+    "intelligence.compare",
+    "intelligence.track",
   ]),
-  referrals: Object.freeze([
-    "referrals.new",
-    "referrals.sent",
-    "referrals.received",
-    "referrals.starred",
+  capabilities: Object.freeze([
+    "capabilities.manage-view",
+    "capabilities.classify-match",
+    "capabilities.evidence-refer",
+    "capabilities.gaps-save",
   ]),
 });
+
+let exchangeRoomReopenEvidenceCaptured = false;
 
 async function exchangeRoomLensSnapshot(cdp) {
   return evaluate(cdp, `(() => {
@@ -1008,8 +1014,9 @@ async function exchangeRoomLensSnapshot(cdp) {
       scope: spatial?.scope ?? null,
       shellInstance: document.querySelector('[data-participant-shell="persistent"]')?.dataset.participantShellInstance || null,
       navigationEntries: performance.getEntriesByType("navigation").length,
-      wholeLensDisabled: [...document.querySelectorAll('[data-participant-navigation] a[data-participant-lens]')]
-        .some((lens) => lens.getAttribute('aria-disabled') === 'true' || lens.dataset.availability === 'unavailable'),
+      wholeLensDisabled: [...document.querySelectorAll('[data-participant-navigation] [data-participant-lens]')]
+        .some((lens) => lens.dataset.participantLens !== 'capabilities'
+          && (lens.getAttribute('aria-disabled') === 'true' || lens.dataset.availability === 'unavailable')),
     };
   })()`);
 }
@@ -1022,6 +1029,25 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
   assert.equal(before.phase2, true, `${id} did not expose the Phase 2 Exchange Room controller.`);
   assert.equal(before.pathname, "/geography/canvas", `${id} started outside the Exchange Room.`);
   assert.equal(before.wholeLensDisabled, false, "A permanent lens was disabled as a whole.");
+
+  if (!exchangeRoomReopenEvidenceCaptured) {
+    assert.equal(before.panelOpen, true, "Phase 2 detail surface was not open before reopen acceptance.");
+    const closed = await evaluate(cdp, `(() => {
+      const close = [...document.querySelectorAll('#organization-detail-panel button[type="button"]')]
+        .find((button) => button.textContent?.includes('×'));
+      if (!close) return false;
+      close.click();
+      return true;
+    })()`);
+    assert.equal(closed, true, "Could not close the Exchange Room detail surface before reopen acceptance.");
+    await waitForExpression(
+      cdp,
+      `!document.querySelector('#organization-detail-panel')
+        && Boolean(document.querySelector('[data-exchange-room-action-grid]'))`,
+      "closed Exchange Room detail surface with persistent action rail",
+    );
+    exchangeRoomReopenEvidenceCaptured = true;
+  }
 
   const continuityBefore = await exchangeRoomLensSnapshot(cdp);
   if (latencyMs > 0) {
@@ -1107,7 +1133,7 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
       if (action.tagName === "A") assert.ok(action.href, `${action.id} active link lost its href.`);
     }
   }
-  assert.equal(after.panelOpen, continuityBefore.panelOpen, `${id} changed the organization detail-panel state during lens activation.`);
+  assert.equal(after.panelOpen, true, `${id} did not reopen the Exchange Room detail surface.`);
   assert.equal(after.wholeLensDisabled, false, "A permanent lens became disabled as a whole.");
   assert.deepEqual(after.selection, continuityBefore.selection, `${id} changed the selected organization.`);
   assert.deepEqual(after.camera, continuityBefore.camera, `${id} changed the persisted camera.`);
@@ -1260,7 +1286,7 @@ async function assertPrimaryNavigation(cdp) {
     "opportunities-rfx",
     "resources",
     "intelligence",
-    "referrals",
+    "capabilities",
   ]);
   assert.equal(contract[0].availability, "enabled");
   assert.equal(contract[0].href, "/opportunities");
@@ -1268,7 +1294,13 @@ async function assertPrimaryNavigation(cdp) {
   assert.equal(contract[0].describedBy, null);
   assert.match(contract[0].text, /Opportunities\/RFx/);
   assert.equal(contract[0].current, null);
-  assert.deepEqual(contract.map((item) => item.availability), ["enabled", "enabled", "enabled", "enabled"]);
+  assert.deepEqual(contract.map((item) => item.availability), ["enabled", "enabled", "enabled", "unavailable"]);
+  assert.equal(contract[3].href, null);
+  assert.equal(contract[3].disabled, "true");
+  assert.ok(contract[3].describedBy);
+  assert.match(contract[3].text, /Capabilities|Capacidades|Capacités|Capacità|Fähigkeiten/);
+  assert.equal(contract[3].current, null);
+  assert.equal(contract.some((item) => item.id === "referrals"), false);
 }
 
 async function assertAdministrationVisible(cdp) {
@@ -1290,6 +1322,87 @@ async function runCandidate({ cwd, port, sessionCookie }) {
     await assertPrimaryNavigation(cdp);
     await assertAdministrationVisible(cdp);
 
+    const legacyMigrationSeed = await evaluate(cdp, `(() => {
+      const successorKey = Object.keys(sessionStorage)
+        .find((key) => key.startsWith(${JSON.stringify(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)}));
+      if (!successorKey) return null;
+      const current = JSON.parse(sessionStorage.getItem(successorKey) || "null");
+      if (!current?.scope || !current?.lensState) return null;
+      const legacyKey = successorKey.replace(
+        ${JSON.stringify(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)},
+        ${JSON.stringify(LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)},
+      );
+      const referrals = {
+        search: "legacy-capability-evidence",
+        filters: { classification: "legacy-stage2" },
+        resultPage: 3,
+        resultIndex: 2,
+        listScrollTop: 456,
+      };
+      const legacy = {
+        ...current,
+        version: 1,
+        activeLens: "referrals",
+        originLens: "referrals",
+        lensState: {
+          "opportunities-rfx": current.lensState["opportunities-rfx"],
+          resources: current.lensState.resources,
+          intelligence: current.lensState.intelligence,
+          referrals,
+        },
+        panelOpen: true,
+        sheetSnapPoint: "expanded",
+        sheetScrollTop: 321,
+      };
+      delete legacy.workflowState;
+      sessionStorage.setItem(legacyKey, JSON.stringify(legacy));
+      sessionStorage.removeItem(successorKey);
+      sessionStorage.setItem(${JSON.stringify(PARTICIPANT_SPATIAL_ACTIVE_KEY)}, legacyKey);
+      return {
+        legacyKey,
+        successorKey,
+        scope: legacy.scope,
+        selection: legacy.selection,
+        camera: legacy.camera,
+        referrals,
+      };
+    })()`);
+    assert.ok(legacyMigrationSeed, "Could not seed the real Stage 2 v1 spatial context key.");
+    await cdp.send("Page.reload", { ignoreCache: true });
+    const migratedSpatialContext = await waitForExpression(
+      cdp,
+      `(() => {
+        const activeKey = sessionStorage.getItem(${JSON.stringify(PARTICIPANT_SPATIAL_ACTIVE_KEY)});
+        if (!activeKey?.startsWith(${JSON.stringify(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)})) return false;
+        const value = JSON.parse(sessionStorage.getItem(activeKey) || "null");
+        const currentLens = document.querySelector('[data-participant-navigation] [data-participant-lens][aria-current="page"]')
+          ?.dataset.participantLens || null;
+        return value?.version === 2 && value?.activeLens === "capabilities"
+          && value?.originLens === "capabilities" && currentLens === "intelligence"
+          ? { activeKey, value, currentLens }
+          : false;
+      })()`,
+      "v1 active-pointer migration to v2 successor context",
+    );
+    assert.equal(
+      await evaluate(cdp, `sessionStorage.getItem(${JSON.stringify(legacyMigrationSeed.legacyKey)})`),
+      null,
+      "Successful v1 migration retained the legacy scoped key.",
+    );
+    assert.deepEqual(migratedSpatialContext.value.scope, legacyMigrationSeed.scope);
+    assert.deepEqual(migratedSpatialContext.value.selection, legacyMigrationSeed.selection);
+    assert.deepEqual(migratedSpatialContext.value.camera, legacyMigrationSeed.camera);
+    assert.deepEqual(migratedSpatialContext.value.lensState.capabilities, legacyMigrationSeed.referrals);
+    assert.deepEqual(migratedSpatialContext.value.workflowState.referrals, legacyMigrationSeed.referrals);
+    assert.equal("referrals" in migratedSpatialContext.value.lensState, false);
+    assert.equal(
+      await evaluate(cdp, `document.querySelector('[data-participant-lens="capabilities"]')?.getAttribute('aria-current') || null`),
+      null,
+      "Unavailable Capabilities became the current primary lens after migration.",
+    );
+    const migrationDocumentRequests = [...diagnostics.documentRequests];
+    diagnostics.documentRequests.splice(0, Math.max(0, diagnostics.documentRequests.length - 1));
+
     const initialShell = await evaluate(cdp, `document.querySelector('[data-participant-shell="persistent"]')?.dataset.participantShellInstance || null`);
     assert.ok(initialShell, "Persistent shell instance was not present.");
     const initialNavigationEntries = await evaluate(cdp, `performance.getEntriesByType("navigation").length`);
@@ -1298,7 +1411,7 @@ async function runCandidate({ cwd, port, sessionCookie }) {
     const observations = [];
     observations.push(await clickLens(cdp, "opportunities-rfx", "/opportunities", { candidate: true }));
     observations.push(await clickLens(cdp, "resources", "/resources", { candidate: true, latencyMs: 450 }));
-    observations.push(await clickLens(cdp, "referrals", "/referrals", { candidate: true }));
+    observations.push(await clickUtility(cdp, "/referrals", "/referrals", true));
     observations.push(await clickLens(cdp, "intelligence", "/geography/canvas", { candidate: true }));
     assert.equal(
       await evaluate(cdp, `location.search`),
@@ -1411,6 +1524,21 @@ async function runCandidate({ cwd, port, sessionCookie }) {
       authorizedOrganizationContextReported: true,
       activationReplayObserved: finalState.activationReplay,
       protectedInitializationReplayObserved: false,
+      v1SpatialMigration: {
+        sourceKeyPrefix: LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX,
+        successorKeyPrefix: PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX,
+        legacyDocumentRequests: migrationDocumentRequests,
+        activeLens: migratedSpatialContext.value.activeLens,
+        originLens: migratedSpatialContext.value.originLens,
+        currentLens: migratedSpatialContext.currentLens,
+        capabilitiesState: migratedSpatialContext.value.lensState.capabilities,
+        referralWorkflowState: migratedSpatialContext.value.workflowState.referrals,
+        scopePreserved: true,
+        selectionPreserved: true,
+        cameraPreserved: true,
+        legacyKeyRemoved: true,
+        successorOnlySerialization: !("referrals" in migratedSpatialContext.value.lensState),
+      },
       transitionEvents: finalState.transitions,
       documentRequests: ordinaryDocumentRequests,
       serverTiming: diagnostics.serverTiming,
@@ -1713,8 +1841,9 @@ async function runSpatialAcceptance({ baseUrl, sessionCookie }) {
 
     const lensSnapshots = [];
     let referralRecipientCarryForward = false;
-    for (const [lens, route] of [["resources", "/resources"], ["referrals", "/referrals"], ["intelligence", "/geography/canvas"]]) {
-      await clickLens(cdp, lens, route);
+    for (const [lens, route, kind] of [["resources", "/resources", "lens"], ["referrals", "/referrals", "utility"], ["intelligence", "/geography/canvas", "lens"]]) {
+      if (kind === "utility") await clickUtility(cdp, route, route, true);
+      else await clickLens(cdp, lens, route);
       await waitForExpression(
         cdp,
         `(() => { const scene = document.querySelector('[data-map-ready="true"]'); return scene?.dataset.mapViewMode === 'perspective' && Math.abs(Number(scene.dataset.mapPitch) - 35) < 1 && scene.dataset.selectedMarkerId === ${JSON.stringify(harborMarkerId)}; })()`,
@@ -1725,6 +1854,11 @@ async function runSpatialAcceptance({ baseUrl, sessionCookie }) {
       assertCameraNear(snapshot, selectedPerspective, `${lens} lens`);
       lensSnapshots.push({ lens, ...snapshot });
       if (lens === "referrals") {
+        assert.equal(
+          await evaluate(cdp, `document.querySelector('[data-participant-navigation] [data-participant-lens][aria-current="page"]')?.dataset.participantLens || null`),
+          null,
+          "Referral workflow incorrectly became a permanent current lens.",
+        );
         await evaluate(cdp, `document.querySelector('aside header button')?.click()`);
         await waitForExpression(cdp, `Boolean(document.querySelector('[role="dialog"] select'))`, "referral composer selected recipient");
         referralRecipientCarryForward = await evaluate(cdp, `document.querySelector('[role="dialog"] select')?.value === ${JSON.stringify(externalOrganizationIds.harbor)}`);
@@ -2376,7 +2510,7 @@ async function runLifecycleAcceptance({ baseUrl, sessionCookie, seed }) {
     await cdp.send("Page.navigate", { url: `${baseUrl}/resources` });
     await waitForExpression(
       cdp,
-      `location.pathname === "/geography/canvas" && Boolean(document.querySelector('[data-participant-lens="resources"][aria-disabled="true"]'))`,
+      `location.pathname === "/geography/canvas" && document.querySelector('[data-participant-lens="resources"]')?.getAttribute('data-availability') === "enabled"`,
       "controlled participant map-first Exchange entry",
     );
 
@@ -2385,7 +2519,7 @@ async function runLifecycleAcceptance({ baseUrl, sessionCookie, seed }) {
     await cdp.send("Page.navigate", { url: `${baseUrl}/resources` });
     await waitForExpression(
       cdp,
-      `location.pathname === "/geography/canvas" && Boolean(document.querySelector('[data-participant-lens="referrals"][aria-disabled="true"]'))`,
+      `location.pathname === "/geography/canvas" && Boolean(document.querySelector('[data-participant-lens="capabilities"][aria-disabled="true"]'))`,
       "orientation-complete controlled participant map entry",
     );
 
@@ -2401,7 +2535,7 @@ async function runLifecycleAcceptance({ baseUrl, sessionCookie, seed }) {
     cdp.close();
     return {
       controlledDestination: "/geography/canvas",
-      controlledLensesUnavailable: true,
+      controlledLensesUnavailable: ["capabilities"],
       orientationCompleteControlledDestination: "/geography/canvas",
       fullyReleasedDestination: "/resources",
       completedTutorialReplayed: false,
@@ -2475,7 +2609,7 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
       "opportunities-rfx",
       "resources",
       "intelligence",
-      "referrals",
+      "capabilities",
     ]);
     assert.equal(mobile.accountVisible, true);
     assert.equal(mobile.reducedMotion, true);
@@ -2557,11 +2691,24 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
         `${locale} authorized participant navigation`,
       );
       const labels = await evaluate(cdp, `(() => {
-        const item = document.querySelector('[data-participant-navigation] [data-participant-lens="opportunities-rfx"]');
-        return { href: item?.getAttribute('href'), text: item?.textContent || '' };
+        const items = [...document.querySelectorAll('[data-participant-navigation] [data-participant-lens]')];
+        const opportunity = items.find((item) => item.dataset.participantLens === 'opportunities-rfx');
+        const capabilities = items.find((item) => item.dataset.participantLens === 'capabilities');
+        return {
+          ids: items.map((item) => item.dataset.participantLens),
+          opportunityHref: opportunity?.getAttribute('href'),
+          opportunityText: opportunity?.textContent || '',
+          capabilitiesText: capabilities?.textContent || '',
+          capabilitiesAvailability: capabilities?.dataset.availability || null,
+          capabilitiesHref: capabilities?.getAttribute('href') || null,
+        };
       })()`);
-      assert.equal(labels.href, "/opportunities");
-      assert.ok(labels.text.includes("Opportunities/RFx"), `${locale} governed RFx label drifted: ${labels.text}`);
+      assert.deepEqual(labels.ids, ["opportunities-rfx", "resources", "intelligence", "capabilities"]);
+      assert.equal(labels.opportunityHref, "/opportunities");
+      assert.ok(labels.opportunityText.includes("Opportunities/RFx"), `${locale} governed RFx label drifted: ${labels.opportunityText}`);
+      assert.ok(labels.capabilitiesText.trim(), `${locale} Capabilities label is empty.`);
+      assert.equal(labels.capabilitiesAvailability, "unavailable");
+      assert.equal(labels.capabilitiesHref, null);
     }
 
     const finalDiagnostics = await evaluate(cdp, `window.__rfxAcceptance.errors`);
@@ -2633,7 +2780,7 @@ try {
   const acceptanceChecklist = Object.freeze({
     candidateSha,
     startingSha: baselineSha,
-    routeChain: ["Intelligence", "Opportunities/RFx", "Resources", "Referrals", "Intelligence", "Account", "Quick Start"],
+    routeChain: ["Intelligence", "Opportunities/RFx", "Resources", "Capabilities (unavailable)", "Referrals (Menu)", "Intelligence", "Account", "Quick Start"],
     documentNavigationCount: candidateRun.result.fullDocumentNavigationCount,
     shellRemountCount: candidateRun.result.shellRemounts,
     loadingScreenOccurrenceCount: candidateRun.result.rootTakeoverObserved ? 1 : 0,
@@ -2660,6 +2807,7 @@ try {
     markerListSynchronization: spatial?.markerListSynchronization ?? false,
     resultDrawerState: spatial?.resultDrawer ?? null,
     searchFilterPreservation: candidateRun.result.intelligenceContextPreserved,
+    v1SpatialMigration: candidateRun.result.v1SpatialMigration,
     ownOrganizationActionResults: spatial?.actionStates.own ?? null,
     externalOrganizationActionResults: spatial?.actionStates.other ?? null,
     resourcesAvailabilityState: spatial?.actionStates.other["view-resources"] ?? null,
@@ -2696,8 +2844,9 @@ try {
     projectId,
     sequence: [
       "Intelligence",
+      "Stage 2 v1 spatial migration",
       "Resources",
-      "Referrals",
+      "Referrals (Menu)",
       "Intelligence",
       "Account",
       "Quick Start",

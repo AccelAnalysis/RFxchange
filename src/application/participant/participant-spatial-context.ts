@@ -2,10 +2,14 @@ import {
   isParticipantMapCamera,
   type ParticipantMapCamera,
 } from "../geography/map-view.ts";
-import type { ParticipantLensId } from "./participant-lens-registry.ts";
+import {
+  migrateLegacyParticipantLensId,
+  type ParticipantLensId,
+} from "./participant-lens-registry.ts";
 
-export const PARTICIPANT_SPATIAL_CONTEXT_VERSION = 1 as const;
-export const PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX = "rfxchange:participant-spatial:v1:";
+export const PARTICIPANT_SPATIAL_CONTEXT_VERSION = 2 as const;
+export const PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX = "rfxchange:participant-spatial:v2:";
+export const LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX = "rfxchange:participant-spatial:v1:";
 export const PARTICIPANT_SPATIAL_ACTIVE_KEY = "rfxchange:participant-spatial:active";
 export const PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT = "rfxchange:participant-spatial-changed";
 
@@ -38,6 +42,10 @@ export interface ParticipantSpatialLensState {
   readonly listScrollTop: number;
 }
 
+export interface ParticipantSpatialWorkflowState {
+  readonly referrals: ParticipantSpatialLensState;
+}
+
 export interface ParticipantSpatialContext {
   readonly version: typeof PARTICIPANT_SPATIAL_CONTEXT_VERSION;
   readonly scope: ParticipantSpatialScope;
@@ -45,6 +53,7 @@ export interface ParticipantSpatialContext {
   readonly selection: ParticipantSpatialSelection;
   readonly camera: ParticipantMapCamera | null;
   readonly lensState: Readonly<Record<ParticipantLensId, ParticipantSpatialLensState>>;
+  readonly workflowState: ParticipantSpatialWorkflowState;
   readonly panelOpen: boolean;
   readonly sheetSnapPoint: ParticipantSheetSnapPoint;
   readonly sheetScrollTop: number;
@@ -52,8 +61,9 @@ export interface ParticipantSpatialContext {
   readonly returnHref: string;
 }
 
-const LENSES = ["opportunities-rfx", "resources", "intelligence", "referrals"] as const;
+const LENSES = ["opportunities-rfx", "resources", "intelligence", "capabilities"] as const;
 type AvailableParticipantLens = (typeof LENSES)[number];
+type LegacyParticipantLens = Exclude<AvailableParticipantLens, "capabilities"> | "referrals";
 
 function required(value: string, label: string): string {
   const normalized = value.trim();
@@ -63,6 +73,11 @@ function required(value: string, label: string): string {
 
 function isAvailableLens(value: unknown): value is AvailableParticipantLens {
   return typeof value === "string" && LENSES.includes(value as AvailableParticipantLens);
+}
+
+function migratedLens(value: unknown, legacy: boolean): AvailableParticipantLens | null {
+  if (isAvailableLens(value)) return value;
+  return legacy ? migrateLegacyParticipantLensId(value) : null;
 }
 
 function isSheetSnapPoint(value: unknown): value is ParticipantSheetSnapPoint {
@@ -99,6 +114,16 @@ export function participantSpatialStorageKey(scopeInput: ParticipantSpatialScope
   ].map(encodeURIComponent).join(":")}`;
 }
 
+export function legacyParticipantSpatialStorageKey(scopeInput: ParticipantSpatialScope): string {
+  const scope = participantSpatialScope(scopeInput);
+  return `${LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX}${[
+    scope.participantId,
+    scope.membershipId,
+    scope.organizationId,
+    scope.geographyId,
+  ].map(encodeURIComponent).join(":")}`;
+}
+
 export function createParticipantSpatialContext(input: Readonly<{
   scope: ParticipantSpatialScope;
   homeMarkerId: string;
@@ -119,9 +144,10 @@ export function createParticipantSpatialContext(input: Readonly<{
     lensState: Object.freeze({
       resources: emptyLensState(),
       intelligence: emptyLensState(),
-      referrals: emptyLensState(),
+      capabilities: emptyLensState(),
       "opportunities-rfx": emptyLensState(),
     }),
+    workflowState: Object.freeze({ referrals: emptyLensState() }),
     panelOpen: true,
     sheetSnapPoint: "partial",
     sheetScrollTop: 0,
@@ -175,16 +201,33 @@ export function parseParticipantSpatialContext(
   if (!serialized) return null;
   const expectedScope = participantSpatialScope(expectedScopeInput);
   try {
-    const parsed = JSON.parse(serialized) as Partial<ParticipantSpatialContext>;
-    if (parsed.version !== PARTICIPANT_SPATIAL_CONTEXT_VERSION || !parsed.scope) return null;
-    if (["resources", "intelligence", "referrals"].some(
-      (lens) => !parseLensState(parsed.lensState?.[lens as AvailableParticipantLens]),
-    )) return null;
+    const parsed = JSON.parse(serialized) as Omit<Partial<ParticipantSpatialContext>,
+      "version" | "activeLens" | "originLens" | "lensState"> & Readonly<{
+      version?: number;
+      activeLens?: ParticipantLensId | LegacyParticipantLens;
+      originLens?: ParticipantLensId | LegacyParticipantLens;
+      lensState?: Partial<Record<ParticipantLensId | LegacyParticipantLens, ParticipantSpatialLensState>>;
+      workflowState?: Partial<ParticipantSpatialWorkflowState>;
+    }>;
+    const legacy = parsed.version === 1;
+    if ((!legacy && parsed.version !== PARTICIPANT_SPATIAL_CONTEXT_VERSION) || !parsed.scope) return null;
+    const capabilitiesState = parseLensState(
+      legacy ? parsed.lensState?.referrals : parsed.lensState?.capabilities,
+    );
+    const referralWorkflowState = parseLensState(
+      legacy ? parsed.lensState?.referrals : parsed.workflowState?.referrals,
+    );
+    if (!parseLensState(parsed.lensState?.resources)
+      || !parseLensState(parsed.lensState?.intelligence)
+      || !capabilitiesState
+      || !referralWorkflowState) return null;
     const scope = participantSpatialScope(parsed.scope);
     if (Object.keys(expectedScope).some(
       (key) => scope[key as keyof ParticipantSpatialScope] !== expectedScope[key as keyof ParticipantSpatialScope],
     )) return null;
-    if (!isAvailableLens(parsed.activeLens) || !isAvailableLens(parsed.originLens)) return null;
+    const activeLens = migratedLens(parsed.activeLens, legacy);
+    const originLens = migratedLens(parsed.originLens, legacy);
+    if (!activeLens || !originLens) return null;
     if (!parsed.selection || typeof parsed.selection.organizationId !== "string" || typeof parsed.selection.markerId !== "string") return null;
     if (parsed.selection.relationshipId !== null && typeof parsed.selection.relationshipId !== "string") return null;
     if (parsed.camera !== null && !isParticipantMapCamera(parsed.camera)) return null;
@@ -192,7 +235,7 @@ export function parseParticipantSpatialContext(
     return Object.freeze({
       version: PARTICIPANT_SPATIAL_CONTEXT_VERSION,
       scope,
-      activeLens: parsed.activeLens,
+      activeLens,
       selection: Object.freeze({
         organizationId: required(parsed.selection.organizationId, "Selected organization id"),
         markerId: required(parsed.selection.markerId, "Selected marker id"),
@@ -204,17 +247,18 @@ export function parseParticipantSpatialContext(
       lensState: Object.freeze({
         resources: parseLensState(parsed.lensState?.resources)!,
         intelligence: parseLensState(parsed.lensState?.intelligence)!,
-        referrals: parseLensState(parsed.lensState?.referrals)!,
+        capabilities: capabilitiesState,
         "opportunities-rfx": parseLensState(parsed.lensState?.["opportunities-rfx"])
           ?? emptyLensState(),
       }),
+      workflowState: Object.freeze({ referrals: referralWorkflowState }),
       panelOpen: parsed.panelOpen,
       // Backward-compatible defaults preserve valid Stage 1 contexts already stored in browsers.
       sheetSnapPoint: isSheetSnapPoint(parsed.sheetSnapPoint)
         ? parsed.sheetSnapPoint
         : parsed.panelOpen ? "partial" : "peek",
       sheetScrollTop: safeInteger(parsed.sheetScrollTop, 0, 10_000_000),
-      originLens: parsed.originLens,
+      originLens,
       returnHref: safeReturnHref(parsed.returnHref),
     });
   } catch {
@@ -223,7 +267,17 @@ export function parseParticipantSpatialContext(
 }
 
 export function serializeParticipantSpatialContext(context: ParticipantSpatialContext): string {
-  return JSON.stringify(context);
+  return JSON.stringify({
+    ...context,
+    version: PARTICIPANT_SPATIAL_CONTEXT_VERSION,
+    lensState: {
+      "opportunities-rfx": context.lensState["opportunities-rfx"],
+      resources: context.lensState.resources,
+      intelligence: context.lensState.intelligence,
+      capabilities: context.lensState.capabilities,
+    },
+    workflowState: { referrals: context.workflowState.referrals },
+  });
 }
 
 export function clearParticipantSpatialContexts(): void {
@@ -231,7 +285,8 @@ export function clearParticipantSpatialContexts(): void {
   try {
     for (let index = window.sessionStorage.length - 1; index >= 0; index -= 1) {
       const key = window.sessionStorage.key(index);
-      if (key?.startsWith(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)) {
+      if (key?.startsWith(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)
+        || key?.startsWith(LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)) {
         window.sessionStorage.removeItem(key);
       }
     }
@@ -246,7 +301,8 @@ export function readActiveParticipantSpatialContext(): ParticipantSpatialContext
   if (typeof window === "undefined") return null;
   try {
     const key = window.sessionStorage.getItem(PARTICIPANT_SPATIAL_ACTIVE_KEY);
-    if (!key?.startsWith(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)) return null;
+    if (!key?.startsWith(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)
+      && !key?.startsWith(LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)) return null;
     const serialized = window.sessionStorage.getItem(key);
     if (!serialized) return null;
     const parsed = JSON.parse(serialized) as Partial<ParticipantSpatialContext>;
@@ -261,6 +317,7 @@ export function participantSpatialIntelligenceHref(
   safeQueryBaseHref: string = context.returnHref,
 ): string {
   const destination = new URL(safeReturnHref(safeQueryBaseHref), "https://participant.invalid");
+  destination.searchParams.delete("lens");
   if (context.selection.organizationId !== context.scope.organizationId) {
     destination.searchParams.set("selectedOrganization", context.selection.organizationId);
   } else if (destination.searchParams.get("selectedOrganization") !== context.scope.organizationId) {
@@ -269,14 +326,15 @@ export function participantSpatialIntelligenceHref(
   return `${destination.pathname}${destination.search}`;
 }
 
-export function participantSpatialLensHref(lens: ParticipantLensId): string {
+export function participantSpatialLensHref(lens: "capabilities"): null;
+export function participantSpatialLensHref(lens: Exclude<ParticipantLensId, "capabilities">): string;
+export function participantSpatialLensHref(lens: ParticipantLensId): string | null {
+  if (lens === "capabilities") return null;
   const context = readActiveParticipantSpatialContext();
   if (!context) {
     return lens === "resources"
       ? "/resources"
-      : lens === "referrals"
-        ? "/referrals"
-        : lens === "opportunities-rfx"
+      : lens === "opportunities-rfx"
           ? "/opportunities"
           : "/geography/canvas";
   }
@@ -287,11 +345,6 @@ export function participantSpatialLensHref(lens: ParticipantLensId): string {
     if (state.search) params.set("q", state.search);
     for (const [key, value] of Object.entries(state.filters)) if (value) params.set(key, value);
     return params.size ? `/opportunities?${params.toString()}` : "/opportunities";
-  }
-  if (lens === "referrals") {
-    return context.selection.organizationId !== context.scope.organizationId
-      ? `/referrals?organization=${encodeURIComponent(context.selection.organizationId)}`
-      : "/referrals";
   }
   const state = context.lensState.resources;
   const params = new URLSearchParams();

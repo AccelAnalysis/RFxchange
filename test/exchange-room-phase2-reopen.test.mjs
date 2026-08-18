@@ -30,12 +30,13 @@ test("ordinary permanent-lens activation reopens the existing Room surface after
 test("configured-browser reopen acceptance closes detail while preserving the action rail", () => {
   const runner = read("scripts/run-configured-exchange-shell-acceptance.mjs");
   const acceptance = read("scripts/acceptance-exchange-shell-emulator.mjs");
-  assert.match(runner, /!document\.querySelector\('#organization-detail-panel'\)/);
-  assert.match(runner, /Boolean\(document\.querySelector\('\[data-exchange-room-action-grid\]'\)\)/);
-  assert.match(runner, /closed Exchange Room detail surface with persistent action rail/);
-  assert.match(runner, /did not reopen the Exchange Room detail surface/);
+  assert.match(runner, /import\("\.\/acceptance-exchange-shell-emulator\.mjs"\)/);
+  assert.match(acceptance, /!document\.querySelector\('#organization-detail-panel'\)/);
+  assert.match(acceptance, /Boolean\(document\.querySelector\('\[data-exchange-room-action-grid\]'\)\)/);
+  assert.match(acceptance, /closed Exchange Room detail surface with persistent action rail/);
+  assert.match(acceptance, /did not reopen the Exchange Room detail surface/);
   assert.doesNotMatch(
-    runner,
+    acceptance,
     /!document\.querySelector\('\[data-exchange-room-action-grid\]'\)/,
     "the persistent four-position action rail must not be treated as a closable detail surface",
   );
@@ -73,14 +74,12 @@ test("desktop and sheet action rails share one authorization request projection"
   );
 });
 
-test("reopen path preserves authorization boundary and truthful active deep links while New Referral stays disabled", () => {
+test("reopen path preserves authorization boundary while unavailable Capabilities actions stay disabled", () => {
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   const registry = read("src/application/participant/exchange-room-actions.ts");
   assert.match(controller, /fetch\("\/geography\/canvas\/action-authorization"/);
-  assert.match(controller, /opportunities\.create-rfx/);
-  assert.match(controller, /resources\.my-requests/);
-  assert.match(controller, /resources\.provider-status/);
-  assert.match(controller, /participantSpatialLensHref\("resources"\)/);
-  assert.doesNotMatch(controller, /actionId === "referrals\.new"/);
-  assert.match(registry, /id: "referrals\.new"[^\n]*operational: false[^\n]*handler: null/);
+  assert.match(controller, /opportunities\.create-view/);
+  assert.doesNotMatch(controller, /opportunities\.create-rfx|resources\.my-requests|resources\.provider-status/);
+  assert.doesNotMatch(controller, /actionId === "capabilities\.evidence-refer"/);
+  assert.match(registry, /id: "capabilities\.evidence-refer"[^\n]*operational: false[^\n]*handler: null/);
 });

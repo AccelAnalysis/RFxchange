@@ -89,21 +89,25 @@ assert.match(marketPanel, /preservedSnapshotNaics/);
 assert.match(marketPanel, /preserveExistingNaics/);
 assert.doesNotMatch(marketPanel, /name="naicsTitle"|name="naicsCode"|name="naicsVersion"/);
 
-const opportunitiesIndex = participantLensRegistry.indexOf('id: "opportunities-rfx"');
-const resourcesIndex = participantLensRegistry.indexOf('id: "resources"');
-const intelligenceIndex = participantLensRegistry.indexOf('id: "intelligence"');
-const referralsIndex = participantLensRegistry.indexOf('id: "referrals"');
+const participantLensDefinitions = participantLensRegistry.slice(
+  participantLensRegistry.indexOf("export const PARTICIPANT_LENSES"),
+);
+const opportunitiesIndex = participantLensDefinitions.indexOf('id: "opportunities-rfx"');
+const resourcesIndex = participantLensDefinitions.indexOf('id: "resources"');
+const intelligenceIndex = participantLensDefinitions.indexOf('id: "intelligence"');
+const capabilitiesIndex = participantLensDefinitions.indexOf('id: "capabilities"');
 assert.ok(
   opportunitiesIndex >= 0 &&
     opportunitiesIndex < resourcesIndex &&
     resourcesIndex < intelligenceIndex &&
-    intelligenceIndex < referralsIndex,
+    intelligenceIndex < capabilitiesIndex,
   "The permanent participant lenses must retain the governed order.",
 );
 assert.match(participantLensRegistry, /id: "opportunities-rfx"[\s\S]*?href: "\/opportunities"[\s\S]*?availability: "enabled"/);
 assert.match(participantLensRegistry, /id: "resources"[\s\S]*?href: "\/resources"/);
 assert.match(participantLensRegistry, /id: "intelligence"[\s\S]*?href: "\/geography\/canvas"/);
-assert.match(participantLensRegistry, /id: "referrals"[\s\S]*?href: "\/referrals"/);
+assert.match(participantLensRegistry, /id: "capabilities"[\s\S]*?href: null[\s\S]*?availability: "unavailable"/);
+assert.match(participantLensRegistry, /referrals:[\s\S]*?href: "\/referrals"/);
 assert.doesNotMatch(participantLensRegistry, /id: "network"/);
 assert.match(participantLensRegistry, /PARTICIPANT_UTILITY_DESTINATIONS/);
 assert.match(participantLensRegistry, /account:[\s\S]*?\/organization-profile/);
@@ -126,6 +130,7 @@ for (const locale of ["en-US", "es", "fr", "it", "de"]) {
   assert.equal(navigationCopy.opportunitiesRfx, "Opportunities/RFx");
   assert.equal(typeof navigationCopy.resources, "string");
   assert.equal(typeof navigationCopy.intelligence, "string");
+  assert.equal(typeof navigationCopy.capabilities, "string");
   assert.equal(typeof navigationCopy.referrals, "string");
   assert.equal(typeof navigationCopy.notYetAvailable, "string");
   assert.equal(typeof navigationCopy.accountUtilities, "string");

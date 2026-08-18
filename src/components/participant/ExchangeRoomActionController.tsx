@@ -12,7 +12,6 @@ import {
 import {
   PARTICIPANT_SPATIAL_ACTIVE_KEY,
   PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT,
-  participantSpatialLensHref,
   readActiveParticipantSpatialContext,
   serializeParticipantSpatialContext,
 } from "../../application/participant/participant-spatial-context";
@@ -162,12 +161,7 @@ function refreshedPermission(
 }
 
 function privilegedHref(actionId: string): string | null {
-  if (actionId === "opportunities.create-rfx") return "/opportunities/manage";
-  if (actionId === "resources.find-providers" || actionId === "resources.browse-resources") {
-    return participantSpatialLensHref("resources");
-  }
-  if (actionId === "resources.my-requests") return "/resources";
-  if (actionId === "resources.provider-status") return "/provider-application";
+  if (actionId === "opportunities.create-view") return "/opportunities/manage";
   return null;
 }
 
@@ -219,13 +213,11 @@ export function ExchangeRoomActionController({
       data-action-rail-placement={placement}
     >
       {actions.map((action) => {
-        const label = messages.actions[action.id];
+        const label = messages.actions[action.labelKey];
         const permission = refreshedPermission(action, authorization);
-        const networkIntent = action.id === "intelligence.organizations"
-          ? "organizations" as const
-          : action.id === "intelligence.capabilities"
-            ? "capabilities" as const
-            : null;
+        const networkIntent = action.resolvedHandler?.kind === "network-focus"
+          ? action.resolvedHandler.intent
+          : null;
 
         if (networkIntent && networkDiscoveryAvailable) {
           return (

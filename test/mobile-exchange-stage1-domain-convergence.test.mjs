@@ -29,14 +29,14 @@ const lensState = (search, listScrollTop) => ({
 
 function spatialContext({ relationshipId = null } = {}) {
   return {
-    version: 1,
+    version: 2,
     scope: {
       participantId: "participant-1",
       membershipId: "membership-1",
       organizationId: "org-home",
       geographyId: "geo-1",
     },
-    activeLens: "referrals",
+    activeLens: "capabilities",
     selection: {
       organizationId: "org-counterparty",
       markerId: "marker-org-counterparty",
@@ -54,8 +54,9 @@ function spatialContext({ relationshipId = null } = {}) {
       "opportunities-rfx": lensState("", 10),
       resources: lensState("", 20),
       intelligence: lensState("", 30),
-      referrals: lensState("", 40),
+      capabilities: lensState("", 40),
     },
+    workflowState: { referrals: lensState("", 50) },
     panelOpen: true,
     originLens: "intelligence",
     returnHref: "/geography/canvas",
@@ -196,7 +197,7 @@ test("Referral can narrow from focal record to independently valid counterparty 
   assert.equal(selectionMatchesMapObject(referralSelection, marker), true);
 
   const decision = reconcileMobileExchangeContinuity(state, {
-    expectedVersion: 1,
+    expectedVersion: 2,
     expectedScope: expectedScope(),
     focalSubjectAuthorized: false,
     associatedOrganizationAuthorized: true,

@@ -52,7 +52,7 @@ const LENS_ICONS: Readonly<Record<ParticipantLensId, string>> = Object.freeze({
   "opportunities-rfx": "◎",
   resources: "◇",
   intelligence: "⌖",
-  referrals: "↗",
+  capabilities: "✦",
 });
 
 function normalizedActiveItem(item?: ParticipantNavigationItem): ParticipantNavigationState {
@@ -134,14 +134,12 @@ interface ParticipantLensHrefSnapshot {
   readonly intelligenceHref: string;
   readonly opportunityHref: string;
   readonly resourceHref: string;
-  readonly referralHref: string;
 }
 
 const DEFAULT_LENS_HREF_SNAPSHOT = JSON.stringify({
   intelligenceHref: CANONICAL_INTELLIGENCE_HREF,
   opportunityHref: "/opportunities",
   resourceHref: "/resources",
-  referralHref: "/referrals",
 } satisfies ParticipantLensHrefSnapshot);
 
 function storedLensHrefSnapshot(): string {
@@ -149,7 +147,6 @@ function storedLensHrefSnapshot(): string {
     intelligenceHref: storedIntelligenceHref(),
     opportunityHref: participantSpatialLensHref("opportunities-rfx"),
     resourceHref: participantSpatialLensHref("resources"),
-    referralHref: participantSpatialLensHref("referrals"),
   } satisfies ParticipantLensHrefSnapshot);
 }
 
@@ -169,7 +166,6 @@ function useTransitionFeedback(pathname: string) {
     intelligenceHref,
     opportunityHref,
     resourceHref,
-    referralHref,
   } = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;
 
   useEffect(() => {
@@ -218,7 +214,6 @@ function useTransitionFeedback(pathname: string) {
     intelligenceHref,
     opportunityHref,
     resourceHref,
-    referralHref,
     begin,
   };
 }
@@ -267,7 +262,7 @@ function lensHref(
   if (lensId === "intelligence") return snapshot.intelligenceHref;
   if (lensId === "opportunities-rfx") return snapshot.opportunityHref;
   if (lensId === "resources") return snapshot.resourceHref;
-  return snapshot.referralHref;
+  throw new Error("Unavailable Capabilities lens cannot resolve a navigation href.");
 }
 
 function LensItems({
@@ -422,7 +417,7 @@ function AccountUtility({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={menuId}
-        data-current={activeState === "account" || activeState === "quick-start" ? "true" : undefined}
+        data-current={activeState === "account" || activeState === "quick-start" || activeState === "referrals" ? "true" : undefined}
         onClick={() => open ? hideMenu() : showMenu()}
         onKeyDown={(event) => {
           if (event.key === "ArrowDown") {
@@ -499,6 +494,21 @@ function AccountUtility({
               />
             </Link>
           )}
+          <Link
+            role="menuitem"
+            href={PARTICIPANT_UTILITY_DESTINATIONS.referrals.href}
+            aria-current={activeState === "referrals" ? "page" : undefined}
+            onClick={(event) => {
+              if (isUnmodifiedPrimaryClick(event)) beginNavigation("referrals");
+              else hideMenu();
+            }}
+          >
+            <NavigationLinkContent
+              label={t("participantNavigation.referrals")}
+              loadingLabel={`${t("participantNavigation.loadingDestination")} ${t("participantNavigation.referrals")}`}
+              onSettled={hideMenu}
+            />
+          </Link>
           {administrationHref ? (
             <Link role="menuitem" href={administrationHref} onClick={() => hideMenu()}>
               {t("participantNavigation.administration")}
@@ -534,7 +544,6 @@ export function ParticipantTopNavigation({
     intelligenceHref: transition.intelligenceHref,
     opportunityHref: transition.opportunityHref,
     resourceHref: transition.resourceHref,
-    referralHref: transition.referralHref,
   });
 
   return (

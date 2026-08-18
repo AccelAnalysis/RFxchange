@@ -2,33 +2,40 @@ export const PARTICIPANT_LENS_IDS = [
   "opportunities-rfx",
   "resources",
   "intelligence",
-  "referrals",
+  "capabilities",
 ] as const;
 
 export type ParticipantLensId = (typeof PARTICIPANT_LENS_IDS)[number];
-export type ParticipantUtilityId = "account" | "quick-start";
+export type ParticipantUtilityId = "account" | "quick-start" | "referrals";
 export type ParticipantNavigationState = ParticipantLensId | ParticipantUtilityId | null;
+
+export function migrateLegacyParticipantLensId(value: unknown): ParticipantLensId | null {
+  if (value === "referrals") return "capabilities";
+  return typeof value === "string" && PARTICIPANT_LENS_IDS.includes(value as ParticipantLensId)
+    ? value as ParticipantLensId
+    : null;
+}
 
 type ParticipantLensLabelKey =
   | "participantNavigation.opportunitiesRfx"
   | "participantNavigation.resources"
   | "participantNavigation.intelligence"
-  | "participantNavigation.referrals";
+  | "participantNavigation.capabilities";
 
 type ParticipantEnabledLensDefinition = Readonly<{
   id: ParticipantLensId;
   labelKey: ParticipantLensLabelKey;
-  href: "/opportunities" | "/resources" | "/geography/canvas" | "/referrals";
+  href: "/opportunities" | "/resources" | "/geography/canvas";
   availability: "enabled";
   activePathPrefixes: readonly string[];
 }>;
 
 type ParticipantUnavailableLensDefinition = Readonly<{
-  id: "opportunities-rfx";
-  labelKey: "participantNavigation.opportunitiesRfx";
+  id: "capabilities";
+  labelKey: "participantNavigation.capabilities";
   href: null;
   availability: "unavailable";
-  activePathPrefixes: readonly [];
+  activePathPrefixes: readonly string[];
 }>;
 
 export type ParticipantLensDefinition =
@@ -64,17 +71,18 @@ export const PARTICIPANT_LENSES: readonly ParticipantLensDefinition[] = Object.f
     activePathPrefixes: Object.freeze(["/geography/canvas"]),
   }),
   Object.freeze({
-    id: "referrals",
-    labelKey: "participantNavigation.referrals",
-    href: "/referrals",
-    availability: "enabled",
-    activePathPrefixes: Object.freeze(["/referrals"]),
+    id: "capabilities",
+    labelKey: "participantNavigation.capabilities",
+    href: null,
+    availability: "unavailable",
+    activePathPrefixes: Object.freeze([]),
   }),
 ]);
 
 export const PARTICIPANT_UTILITY_DESTINATIONS = Object.freeze({
   account: Object.freeze({ href: "/organization-profile" as const }),
   "quick-start": Object.freeze({ href: "/quick-start" as const }),
+  referrals: Object.freeze({ href: "/referrals" as const }),
 });
 
 const PERSISTENT_PARTICIPANT_PATH_PREFIXES = Object.freeze([
@@ -114,6 +122,9 @@ export function participantUtilityForPathname(pathname: string): ParticipantUtil
   }
   if (matchesPrefix(pathname, PARTICIPANT_UTILITY_DESTINATIONS["quick-start"].href)) {
     return "quick-start";
+  }
+  if (matchesPrefix(pathname, PARTICIPANT_UTILITY_DESTINATIONS.referrals.href)) {
+    return "referrals";
   }
   return null;
 }

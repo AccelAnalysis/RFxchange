@@ -75,14 +75,15 @@ test("unfinished record actions remain visible/non-actionable while the four per
   const compatibilityShell = read("src/components/participant/ParticipantWorkspace.tsx");
   const persistentShell = read("src/components/participant/PersistentParticipantShell.tsx");
   assert.doesNotMatch(workspace, /MAP_ONLY_UNAVAILABLE_LENSES/);
-  assert.match(workspace, /activeItem=\{spatialContext\.activeLens\}/);
+  assert.match(workspace, /activeItem=\{activeLens\}/);
   assert.match(workspace, /operationalActionsAvailable/);
   assert.match(workspace, /ExchangeRoomActionController/);
   assert.match(navigation, /data-mobile-lens-navigation="persistent-bottom"/);
   assert.match(registry, /id: "opportunities-rfx"[\s\S]*availability: "enabled"/);
   assert.match(registry, /id: "resources"[\s\S]*availability: "enabled"/);
   assert.match(registry, /id: "intelligence"[\s\S]*availability: "enabled"/);
-  assert.match(registry, /id: "referrals"[\s\S]*availability: "enabled"/);
+  assert.match(registry, /id: "capabilities"[\s\S]*availability: "unavailable"/);
+  assert.doesNotMatch(registry.split("export const PARTICIPANT_UTILITY_DESTINATIONS")[0], /id: "referrals"/);
   assert.match(compatibilityShell, /registerUnavailableDestinations/);
   assert.match(persistentShell, /unavailableLensIds=\{unavailableDestinations\?\.lensIds\}/);
 });

@@ -35,7 +35,7 @@ test("persistent Room shares and revalidates fail-closed action authority on in-
   assert.equal((source.match(/fetch\("\/geography\/canvas\/action-authorization"/g) ?? []).length, 1);
 });
 
-test("fresh server authorization revokes open-platform actions while Resources keeps discovery and management authority distinct", () => {
+test("fresh server authorization revokes successor actions while Resources keeps own and external authority distinct", () => {
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   const registry = read("src/application/participant/exchange-room-actions.ts");
   const spatial = read("src/application/participant/participant-spatial-context.ts");
@@ -46,23 +46,20 @@ test("fresh server authorization revokes open-platform actions while Resources k
   assert.ok(openPlatformGuard >= 0 && rfxPermission > openPlatformGuard && referralPermission > openPlatformGuard && resourcePermission > openPlatformGuard);
   assert.match(controller, /open-platform-referral-manage"\) return authorization\.referralManage/);
   assert.match(controller, /open-platform-resource-manage"\) return authorization\.resourceManage/);
-  assert.match(controller, /resources\.find-providers" \|\| actionId === "resources\.browse-resources"/);
-  assert.match(controller, /participantSpatialLensHref\("resources"\)/);
+  assert.match(controller, /opportunities\.create-view/);
   assert.match(spatial, /params\.set\("organization", context\.selection\.organizationId\)/);
   assert.match(spatial, /params\.set\("provider", context\.selection\.organizationId\)/);
   assert.match(spatial, /serverRevalidatesSelectedObjectsAndActions: true/);
-  assert.match(registry, /id: "resources\.find-providers"[^\n]*authorization: "open-platform"/);
-  assert.match(registry, /id: "resources\.browse-resources"[^\n]*authorization: "open-platform"/);
-  assert.match(registry, /id: "resources\.my-requests"[^\n]*authorization: "open-platform-referral-manage"/);
-  assert.match(registry, /id: "resources\.provider-status"[^\n]*authorization: "open-platform-resource-manage"/);
+  assert.match(registry, /id: "resources\.manage-view"[^\n]*authorization: "open-platform-resource-manage"[^\n]*externalAuthorization: "open-platform"/);
+  assert.match(registry, /id: "capabilities\.evidence-refer"[^\n]*externalAuthorization: "open-platform-referral-manage"/);
 });
 
 test("permission refresh cannot reactivate a non-operational privileged action", () => {
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   const registry = read("src/application/participant/exchange-room-actions.ts");
   assert.match(controller, /permission === true && action\.operational && action\.applicable/);
-  assert.doesNotMatch(controller, /actionId === "referrals\.new"/);
-  assert.match(registry, /id: "referrals\.new"[^\n]*operational: false[^\n]*handler: null/);
+  assert.doesNotMatch(controller, /actionId === "capabilities\.evidence-refer"/);
+  assert.match(registry, /id: "capabilities\.evidence-refer"[^\n]*operational: false[^\n]*handler: null/);
 });
 
 test("desktop and mobile share the same four-action projection without coupling it to detail visibility", () => {
