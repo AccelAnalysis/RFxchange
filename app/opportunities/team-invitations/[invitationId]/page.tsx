@@ -19,11 +19,16 @@ export default async function OpportunityTeamInvitationPage({ params }: Readonly
   if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   if (access.state.lifecycleState !== "open-platform") redirect(access.state.controlledPlatformUrl ?? "/join");
+  const service = createServerOpportunityTeamingService();
+  let invitation: Awaited<ReturnType<typeof service.review>> | null = null;
+  let teamingError: OpportunityTeamingError["code"] | null = null;
   try {
-    const invitation = await createServerOpportunityTeamingService().review({ context: access.context, organizationId: access.membership.organizationId, userId: access.context.user.id, membershipId: access.membership.id, acquisitionContext: access.state.acquisitionContext }, invitationId);
-    return <OpportunityTeamInvitationReview invitation={invitation} />;
+    invitation = await service.review({ context: access.context, organizationId: access.membership.organizationId, userId: access.context.user.id, membershipId: access.membership.id, acquisitionContext: access.state.acquisitionContext }, invitationId);
   } catch (error) {
     if (!(error instanceof OpportunityTeamingError)) throw error;
-    return <OpportunityAssessmentUnavailable errorCode={error.code} returnHref="/opportunities" retryHref={currentHref} />;
+    teamingError = error.code;
   }
+  if (teamingError) return <OpportunityAssessmentUnavailable errorCode={teamingError} returnHref="/opportunities" retryHref={currentHref} />;
+  if (!invitation) throw new Error("Team invitation review completed without a result.");
+  return <OpportunityTeamInvitationReview invitation={invitation} />;
 }
