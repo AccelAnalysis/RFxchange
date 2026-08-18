@@ -703,6 +703,7 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
       ? Object.freeze({
           ...state,
           ...continuity.safeState,
+          ...(state.detailNavigation.status === "closed" ? {} : closeDetail(continuity.safeState)),
           activeProjection: null,
           detailNavigation: Object.freeze({
             status: "closed" as const,

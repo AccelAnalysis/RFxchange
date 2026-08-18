@@ -282,6 +282,55 @@ test("deep links disclose no record until exact affirmative revalidation and sco
     assert.equal(focalRevoked.safeState.detailNavigation.context, null);
   }
 
+  const associationRevoked = reconcileServerRevalidatedMobileExchangeProjection(
+    authorized.state,
+    mobileExchangeQueryContext(authorized.state, { queryId: "query-1" }),
+    discovery(),
+    serverResult({
+      focalIdentity: resourceIdentity,
+      associatedOrganizationAuthorized: false,
+      detailCanonicalHref: "/resources/resource-1",
+    }),
+  );
+  assert.equal(associationRevoked.status, "rejected");
+  assert.equal(associationRevoked.safeState.sheet.content, "results");
+  assert.equal(associationRevoked.safeState.detail.status, "closed");
+  assert.equal(associationRevoked.safeState.detailNavigation.status, "closed");
+
+  const openWithRelationship = Object.freeze({
+    ...authorized.state,
+    selection: createExchangeSelectionState({
+      kind: "record",
+      source: "detail",
+      selectedRecord: {
+        selectionKey: resourceIdentity.selectionKey,
+        recordType: resourceIdentity.recordType,
+        recordId: resourceIdentity.recordId,
+        organizationId: resourceIdentity.organizationId,
+      },
+      selectedOrganization: authorized.state.selection.selectedOrganization,
+      selectedMarker: authorized.state.selection.selectedMarker,
+      selectedRelationship: {
+        relationshipId: "relationship-private",
+        authority: "server-revalidated",
+      },
+    }),
+  });
+  const relationshipRevoked = reconcileServerRevalidatedMobileExchangeProjection(
+    openWithRelationship,
+    mobileExchangeQueryContext(openWithRelationship, { queryId: "query-1" }),
+    discovery(),
+    serverResult({
+      focalIdentity: resourceIdentity,
+      relationshipAuthorized: false,
+      detailCanonicalHref: "/resources/resource-1",
+    }),
+  );
+  assert.equal(relationshipRevoked.status, "rejected");
+  assert.equal(relationshipRevoked.safeState.sheet.content, "results");
+  assert.equal(relationshipRevoked.safeState.detail.status, "closed");
+  assert.equal(relationshipRevoked.safeState.detailNavigation.status, "closed");
+
   const denied = reconcileServerRevalidatedMobileExchangeProjection(
     pending,
     mobileExchangeQueryContext(pending, { queryId: "query-1" }),
