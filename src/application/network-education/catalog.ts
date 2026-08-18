@@ -12,7 +12,7 @@ export type NetworkEducationAvailability = "available" | "planned";
 export type NetworkEducationRoute =
   | "/organization-profile"
   | "/geography/canvas"
-  | "/referrals"
+  | "/referrals?intent=manage"
   | "/provider-application"
   | "/resources";
 
@@ -48,7 +48,7 @@ export const NETWORK_EDUCATION_PATHS: readonly NetworkEducationPath[] = Object.f
     items: Object.freeze([
       item("quick-start-understand", "quickStart.items.understand", "available", "/organization-profile"),
       item("quick-start-discover", "quickStart.items.discover", "available", "/geography/canvas"),
-      item("quick-start-connect", "quickStart.items.connect", "available", "/referrals"),
+      item("quick-start-connect", "quickStart.items.connect", "available", "/referrals?intent=manage"),
       item("quick-start-act", "quickStart.items.act", "available", "/resources"),
     ]),
   }),
@@ -58,7 +58,7 @@ export const NETWORK_EDUCATION_PATHS: readonly NetworkEducationPath[] = Object.f
     items: Object.freeze([
       item("business-profile", "business.items.profile", "available", "/organization-profile"),
       item("business-discovery", "business.items.discovery", "available", "/geography/canvas"),
-      item("business-referrals", "business.items.referrals", "available", "/referrals"),
+      item("business-referrals", "business.items.referrals", "available", "/referrals?intent=manage"),
       item("business-resources", "business.items.resources", "available", "/resources"),
       item("business-rfx", "business.items.rfx", "planned", null),
       item("business-credibility", "business.items.credibility", "planned", null),

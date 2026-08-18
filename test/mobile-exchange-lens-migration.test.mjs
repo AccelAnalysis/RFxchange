@@ -163,10 +163,18 @@ test("bare legacy Referrals intent is consumed once while explicit management re
   const referralPage = read("app/referrals/page.tsx");
   const referralWorkspace = read("src/components/referrals/ReferralWorkspace.tsx");
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
+  const firstValue = read("src/domain/first-value/model.ts");
+  const networkEducation = read("src/application/network-education/catalog.ts");
+  const acquisitionContinuation = read("app/acquisition/continue/page.tsx");
+  const referralAttachment = read("app/api/referrals/attach/route.ts");
   assert.match(referralPage, /legacyBareLensIntent=\{!managementIntent && !requestedReferralId && !requestedOrganizationId\}/);
   assert.match(referralWorkspace, /consumeLegacyReferralLensIntent\(storage, spatialScope\)/);
   assert.match(referralWorkspace, /router\.replace\("\/geography\/canvas\?lens=capabilities"/);
   assert.match(navigation, /PARTICIPANT_UTILITY_DESTINATIONS\.referrals\.managementHref/);
+  assert.match(firstValue, /route: "\/referrals\?intent=manage"/);
+  assert.equal((networkEducation.match(/"\/referrals\?intent=manage"/g) ?? []).length, 3);
+  assert.match(acquisitionContinuation, /\? "\/referrals\?intent=manage"/);
+  assert.match(referralAttachment, /\/referrals\?intent=manage&status=invitation-unavailable/);
 });
 
 test("referral records remain a governed workflow and are never rewritten as capability records", () => {

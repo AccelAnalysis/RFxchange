@@ -1791,7 +1791,7 @@ async function runSpatialAcceptance({ baseUrl, sessionCookie }) {
     const ownActions = await evaluate(cdp, `Object.fromEntries([...document.querySelectorAll('[data-organization-action]')].map((action) => [action.dataset.organizationAction, { available: action.tagName === 'A', disabled: action.getAttribute('aria-disabled') === 'true', href: action.getAttribute('href') }]))`);
     assert.equal(ownActions["manage-profile"].href, "/organization-profile");
     assert.equal(ownActions["view-resources"].href, "/resources");
-    assert.equal(ownActions["start-referral"].href, "/referrals");
+    assert.equal(ownActions["start-referral"].href, "/referrals?intent=manage");
     assert.equal(ownActions["opportunities-rfx"].href, "/opportunities");
 
     const initial = await cameraSnapshotFromDom(cdp);

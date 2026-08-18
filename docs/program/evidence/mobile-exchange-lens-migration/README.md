@@ -1,6 +1,6 @@
 # Mobile Exchange lens migration evidence
 
-This directory records builder evidence for `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01`, covering `MOB36-LENS-001` and `MOB36-MIGRATION-001`. The packet is implemented on branch `codex/mobile-exchange-lens-migration` from activation base `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`, reconciled with the narrow ownership amendment merged as `b291c81fdc078962cd4967d19b93e67318741866`.
+This directory records builder evidence for `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01`, covering `MOB36-LENS-001` and `MOB36-MIGRATION-001`. The packet is implemented on branch `codex/mobile-exchange-lens-migration` from activation base `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`, reconciled with the narrow consumer ownership amendment merged as `b291c81fdc078962cd4967d19b93e67318741866` and the existing referral-workflow producer amendment merged as `0ca6d8bbf034b1efcff4eb8132426b7b46662401`.
 
 The implementation candidate is identified as `SELF` until the packet PR supplies its immutable exact-head SHA. The first post-merge Control Room reconciliation must replace that lifecycle state with the final candidate, merge SHA, exact-head CI, and post-merge CI before activating a dependent packet.
 
@@ -24,6 +24,7 @@ The migration changes optional, non-authorizing session presentation state only.
 - Historical exact-head/post-merge CI: `32090477890` / `32090896211`
 - Successor authority merge: `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`
 - Migration ownership amendment merge: `b291c81fdc078962cd4967d19b93e67318741866`
+- Referral-workflow producer amendment merge: `0ca6d8bbf034b1efcff4eb8132426b7b46662401`
 - v1 fixture: `v1-context-fixture.json` (digest recorded in `VERIFICATION.md`)
 
 This is builder/repository evidence. No optional independent assurance event occurred, so the assurance state is **Implemented — Not Verified**.

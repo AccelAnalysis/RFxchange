@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
     const acquisition = access.state.acquisitionContext;
     if (!acquisition || acquisition.kind !== "referral" || !acquisition.subjectReference) {
-      return NextResponse.redirect(new URL("/referrals?status=invitation-unavailable", request.url), 303);
+      return NextResponse.redirect(new URL("/referrals?intent=manage&status=invitation-unavailable", request.url), 303);
     }
     const repository = new FirestoreReferralRepository(getServerFirestore());
     const referral = await repository.getById(acquisition.subjectReference);

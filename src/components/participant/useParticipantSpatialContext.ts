@@ -61,7 +61,7 @@ export function useParticipantSpatialContext(input: Readonly<{
     } catch {
       return memory.get(storageKey) ?? fallbackSnapshot;
     }
-  }, [fallbackSnapshot, input.scope, legacyStorageKey, storageKey]);
+  }, [fallbackSnapshot, input.scope, storageKey]);
   const serialized = useSyncExternalStore(subscribe, getSnapshot, () => fallbackSnapshot);
   useEffect(() => {
     try {

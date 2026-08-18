@@ -43,7 +43,7 @@ function fixture() {
 test("EDU-016 defines four stable paths with allow-listed live links and truthful future stops", () => {
   assert.equal(NETWORK_EDUCATION_CATALOG_VERSION, 1);
   assert.deepEqual(NETWORK_EDUCATION_PATHS.map((path) => path.key), ["quick-start", "business", "issuer", "resource-provider"]);
-  const allowed = new Set(["/organization-profile", "/geography/canvas", "/referrals", "/provider-application", "/resources"]);
+  const allowed = new Set(["/organization-profile", "/geography/canvas", "/referrals?intent=manage", "/provider-application", "/resources"]);
   for (const path of NETWORK_EDUCATION_PATHS) {
     assert.ok(path.items.length >= 4);
     for (const item of path.items) {
