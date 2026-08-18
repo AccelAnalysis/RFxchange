@@ -4,7 +4,7 @@
 
 **Snapshot basis:** merged `main` `3455eaefe5978eeb713b161c139f9df1b0c7bfc7` on 2026-08-18
 
-**Current task:** Close the merged Stages 3–6 authority packet before successor runtime activation
+**Current task:** Activate `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from exact merged main `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`
 
 **Update rule:** Control Room recalculates this document from current merged `main` after every program-state change.
 
@@ -105,7 +105,7 @@ Referrals is a governed cross-lens function and Menu/Account utility.
 | Tracker effect | None; tracker remains 170/438 and RFx Core 18/41 |
 | Stabilization 2C / B6b | Incomplete / intentionally pending |
 
-Successor runtime work remains unopened until the Control Room records a separate exact activation epoch for `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01`.
+Control Room PR #226 records activation epoch `mobile-exchange-lens-migration-2026-08-18` for `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from exact base `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`. Stage 3 and every domain packet remain pre-activation and dependency-gated.
 
 ## Stage 1 integrated contract family
 
