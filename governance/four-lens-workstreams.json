@@ -744,12 +744,19 @@
       "lane": "opportunities-rfx",
       "owner": "Wave 4 Slice 4.2 Corrective Production",
       "branch": "fix/rfx42-iss006-correction",
-      "candidate": null,
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 201,
+        "sha": "be99ecec42b28b8d1d36ecdf5010f73377f23126",
+        "mergeSha": "6c5fe65e69abeaa21c9f3b14adce43ca1e2f7cc7"
+      },
       "candidateHistory": [],
       "exactBaseSha": "69daa4bea80b39cc9d5ed04715aa6e2ac8e1f068",
       "activationEpochId": "rfx-42-iss006-correction-2026-08-12",
       "basePolicy": "Exact current-main activation base; participant-authorized corrective implementation of RFX-FEATURE-ISS-006 only.",
-      "status": "active",
+      "postMergeRunUrl": "https://github.com/AccelAnalysis/RFxchange/actions/runs/31860051714",
+      "postMergeMainSha": "6c5fe65e69abeaa21c9f3b14adce43ca1e2f7cc7",
+      "status": "closed",
       "requirementIds": [
         "RFX-FEATURE-ISS-006"
       ],

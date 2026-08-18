@@ -148,6 +148,8 @@ Control Room PR #230 records activation epoch `mobile-exchange-stage3-shared-202
 
 Control Room also reconciles the already-merged Slice 4.6 packet to its true final PR #171 candidate `dc17514ef9aed2dd37022b8bb121feb946bbcbf4`, merge `3cef29d8ce300154a8d73a262ec7a20252a49db6`, exact-head CI `31929740885`, and post-merge CI `31930900200`. Its pre-amendment independent-assurance language remains historical; the packet closes as `Implemented — Not Verified` under the current Completion Governance Amendment without claiming optional assurance.
 
+Before RFx Slice 4.7 activation, Control Room likewise closes the stale active ownership for `WP-RFX-42-ISS006-CORRECT-01` against its already-merged PR #201 final head `be99ecec42b28b8d1d36ecdf5010f73377f23126`, merge `6c5fe65e69abeaa21c9f3b14adce43ca1e2f7cc7`, exact-head CI `31859756636`, and post-merge CI `31860051714`. This removes overlapping RFx path ownership without changing the already-recorded `RFX-FEATURE-ISS-006` disposition or tracker arithmetic.
+
 Control Room PR #232 records four exact-base activation epochs at merged main `5ddca57bf2d9fa2c81a98e75aeee09302d278a23`: `rfx-47-2026-08-18`, `mobile-exchange-stage4-resources-2026-08-18`, `mobile-exchange-stage4-intelligence-2026-08-18`, and `mobile-exchange-stage4-capabilities-2026-08-18`. These lanes own disjoint packet paths. The Opportunities Stage 4 adapter remains inactive until RFx Slices 4.7–4.10 close; Capabilities matching, all Stage 5 packets, and Stage 6 remain inactive behind their declared dependencies.
 
 ## Stage 1 integrated contract family
