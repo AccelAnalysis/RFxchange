@@ -67,6 +67,7 @@ export interface TeamInvitationView {
   readonly issuerDisplayName: string;
   readonly responseDeadline: string;
   readonly leadOrganizationId: string;
+  readonly leadOrganizationDisplayName: string;
   readonly targetDisplayName: string;
   readonly capabilityLabel: string;
   readonly gapTitle: string;
@@ -142,6 +143,7 @@ function participantView(invitation: TeamInvitation, role: TeamInvitationView["r
     issuerDisplayName: invitation.issuerDisplayNameSnapshot,
     responseDeadline: invitation.responseDeadlineSnapshot,
     leadOrganizationId: String(invitation.leadOrganizationId),
+    leadOrganizationDisplayName: invitation.leadOrganizationDisplayNameSnapshot,
     targetDisplayName: invitation.target.kind === "organization" ? invitation.target.displayNameSnapshot : invitation.target.recipientDisplayName,
     capabilityLabel: invitation.capabilityLabelSnapshot,
     gapTitle: invitation.gapTitleSnapshot,
@@ -194,12 +196,13 @@ export class OpportunityTeamingService {
     const reference = stable(referenceInput, "Opportunity reference");
     const gapReference = stable(gapReferenceInput, "Gap reference");
     const pursuitId = opportunityPursuitId(String(leadOrganizationId), reference);
-    const [persistedProjection, publication, pursuit] = await Promise.all([
+    const [persistedProjection, publication, pursuit, leadProfile] = await Promise.all([
       this.dependencies.pursuits.getProjection(reference),
       this.dependencies.pursuits.getPublicationSnapshotByReference(reference),
       this.dependencies.pursuits.getPursuit(pursuitId),
+      this.dependencies.profiles.getByOrganizationId(leadOrganizationId),
     ]);
-    if (!persistedProjection || !publication || !pursuit || pursuit.organizationId !== leadOrganizationId || pursuit.decision !== "pursue") {
+    if (!persistedProjection || !publication || !pursuit || !leadProfile || pursuit.organizationId !== leadOrganizationId || pursuit.decision !== "pursue") {
       throw new OpportunityTeamingError("not-found", "Current RFx gap resolution is unavailable.");
     }
     let projection;
@@ -247,6 +250,7 @@ export class OpportunityTeamingService {
     return Object.freeze({
       schemaVersion: 1,
       organizationId: leadOrganizationId,
+      leadOrganizationDisplayName: leadProfile.displayName,
       opportunityReference: reference,
       opportunityTitle: projection.payload.title,
       issuerOrganizationId: organizationId(projection.issuerOrganizationIndexKey),
@@ -273,12 +277,20 @@ export class OpportunityTeamingService {
     return this.currentGapContext(scope.organizationId, reference, gapReference);
   }
 
-  resourceHref(context: RfxGapResolutionContext): string {
+  resourceHref(context: RfxGapResolutionContext, returnHrefInput: string = context.returnHref): string {
+    const expectedPath = `/opportunities/${encodeURIComponent(context.opportunityReference)}/assess`;
+    let returnHref = context.returnHref;
+    try {
+      const parsed = new URL(returnHrefInput, "https://rfxchange.invalid");
+      if (parsed.origin === "https://rfxchange.invalid" && parsed.pathname === expectedPath && returnHrefInput.startsWith("/") && !returnHrefInput.startsWith("//") && returnHrefInput.length <= 2_000) returnHref = `${parsed.pathname}${parsed.search}`;
+    } catch {
+      // Browser return context never grants authority; malformed input falls back to the governed assessment.
+    }
     const query = new URLSearchParams({
       q: context.capabilityLabel,
       rfxReference: context.opportunityReference,
       rfxGap: context.gapReference,
-      returnTo: context.returnHref,
+      returnTo: returnHref,
     });
     return `/resources?${query.toString()}`;
   }
@@ -288,6 +300,13 @@ export class OpportunityTeamingService {
     const records = await this.dependencies.teaming.listByLeadOrganization(scope.organizationId, stable(reference, "Opportunity reference"));
     const management = await authorizeOrganizationOperation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId, permission: "response.create" }, this.dependencies.authorization);
     return Object.freeze(records.map((item) => participantView(item, "lead", management.allowed, this.now())));
+  }
+
+  async receivedInvitations(scope: OpportunityTeamingScope): Promise<readonly TeamInvitationView[]> {
+    await this.authorizeRead(scope);
+    const records = await this.dependencies.teaming.listByTargetOrganization(scope.organizationId);
+    const management = await authorizeOrganizationOperation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId, permission: "response.create" }, this.dependencies.authorization);
+    return Object.freeze(records.map((item) => participantView(item, "invitee", management.allowed, this.now())).sort((left, right) => right.responseDeadline.localeCompare(left.responseDeadline) || left.opportunityTitle.localeCompare(right.opportunityTitle)));
   }
 
   async createInvitation(scope: OpportunityTeamingScope, input: Readonly<{
@@ -359,9 +378,7 @@ export class OpportunityTeamingService {
         templateVersion: 1,
         variables: {
           recipient_name: target.recipientDisplayName,
-          lead_organization: authority.organization.id === scope.organizationId
-            ? (await this.dependencies.profiles.getByOrganizationId(scope.organizationId))?.displayName ?? "An organization"
-            : "An organization",
+          lead_organization: authority.organization.id === scope.organizationId ? context.leadOrganizationDisplayName : "An organization",
           opportunity_title: context.opportunityTitle,
           capability_need: context.capabilityLabel,
           proposed_responsibility: responsibilitySummary,

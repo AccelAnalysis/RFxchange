@@ -44,6 +44,7 @@ export type TeamInvitationTarget =
 export interface RfxGapResolutionContext {
   readonly schemaVersion: 1;
   readonly organizationId: OrganizationId;
+  readonly leadOrganizationDisplayName: string;
   readonly opportunityReference: string;
   readonly opportunityTitle: string;
   readonly issuerOrganizationId: OrganizationId;
@@ -68,6 +69,7 @@ export interface TeamInvitation {
   readonly schemaVersion: 1;
   readonly id: string;
   readonly leadOrganizationId: OrganizationId;
+  readonly leadOrganizationDisplayNameSnapshot: string;
   readonly opportunityReference: string;
   readonly opportunityTitleSnapshot: string;
   readonly issuerOrganizationId: OrganizationId;
@@ -271,6 +273,7 @@ export function createTeamInvitation(input: Readonly<{
     schemaVersion: 1,
     id: stable(input.id, "Invitation identity"),
     leadOrganizationId: input.context.organizationId,
+    leadOrganizationDisplayNameSnapshot: boundedText(input.context.leadOrganizationDisplayName, "Lead organization name", 160),
     opportunityReference: input.context.opportunityReference,
     opportunityTitleSnapshot: boundedText(input.context.opportunityTitle, "Opportunity title", 240),
     issuerOrganizationId: input.context.issuerOrganizationId,

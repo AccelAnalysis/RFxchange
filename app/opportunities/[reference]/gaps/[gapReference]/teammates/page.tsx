@@ -24,6 +24,13 @@ function safeReturn(value: string, reference: string): string {
   return parsed.origin === "https://rfxchange.invalid" && parsed.pathname === `/opportunities/${encodeURIComponent(reference)}/assess` ? `${parsed.pathname}${parsed.search}` : fallback;
 }
 
+function matchesNeed(candidate: Readonly<{ profile: Readonly<{ displayName: string }>; capabilities: readonly Readonly<{ label: string; definition: string; domainLabel: string; familyLabel: string; specialties: readonly string[] }>[] }>, need: string): boolean {
+  const terms = [...new Set(need.toLocaleLowerCase("en-US").split(/[^a-z0-9]+/).filter((item) => item.length >= 2))];
+  if (!terms.length) return true;
+  const corpus = [candidate.profile.displayName, ...candidate.capabilities.flatMap((item) => [item.label, item.definition, item.domainLabel, item.familyLabel, ...item.specialties])].join(" ").toLocaleLowerCase("en-US");
+  return terms.every((term) => corpus.includes(term));
+}
+
 export default async function OpportunityTeammatesPage({ params, searchParams }: Readonly<{ params: Promise<{ reference: string; gapReference: string }>; searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>> }>) {
   const { reference, gapReference } = await params; const query = searchParams ? await searchParams : {};
   const returnHref = safeReturn(first(query.returnTo, 2_000), reference);
@@ -45,7 +52,7 @@ export default async function OpportunityTeammatesPage({ params, searchParams }:
     const serviceArea = first(query.serviceArea);
     const discovery = await loadAuthorizedNetworkDiscovery({ access, mapProjection, capability: context.capabilityLabel, serviceGeographyId: serviceArea || null });
     const candidates: readonly OpportunityTeammateCandidateView[] = discovery.available ? Object.freeze(discovery.projection.organizations
-      .filter((item) => item.match.source === "confirmed-structured" && item.organizationId !== context.organizationId && item.organizationId !== context.issuerOrganizationId && item.match.matchedCapabilityNames.some((name) => name.toLocaleLowerCase("en-US") === context.capabilityLabel.toLocaleLowerCase("en-US")))
+      .filter((item) => item.match.source === "confirmed-structured" && item.organizationId !== context.organizationId && item.organizationId !== context.issuerOrganizationId && item.match.matchedCapabilityNames.some((name) => name.toLocaleLowerCase("en-US") === context.capabilityLabel.toLocaleLowerCase("en-US")) && matchesNeed(item, need))
       .map((item) => Object.freeze({ organizationId: String(item.organizationId), displayName: item.profile.displayName, matchedCapabilityNames: item.match.matchedCapabilityNames, serviceGeographyIds: item.serviceGeographyIds }))) : [];
     const invitations = await service.invitations(scope, reference);
     return <OpportunityTeammateWorkspace context={context} candidates={candidates} invitations={invitations} serviceAreas={discovery.available ? discovery.serviceAreaOptions : []} query={{ capacity, need, serviceArea }} returnHref={returnHref} />;

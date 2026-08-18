@@ -29,10 +29,10 @@ test("RSP-008 delegates to the existing Resources route with opaque non-authoriz
   const route = read("app/opportunities/[reference]/gaps/[gapReference]/resources/page.tsx");
   const service = read("src/application/rfx/opportunity-teaming-service.ts");
   assert.match(route, /service\.gapContext/);
-  assert.match(route, /redirect\(service\.resourceHref\(context\)\)/);
+  assert.match(route, /redirect\(service\.resourceHref\(context, returnTo\)\)/);
   assert.match(service, /rfxReference: context\.opportunityReference/);
   assert.match(service, /rfxGap: context\.gapReference/);
-  assert.match(service, /returnTo: context\.returnHref/);
+  assert.match(service, /returnTo: returnHref/);
   assert.doesNotMatch(route, /provider|resourceRepository|Firestore/);
 });
 
