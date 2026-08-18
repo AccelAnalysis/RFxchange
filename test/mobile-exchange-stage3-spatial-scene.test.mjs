@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const scene = await readFile(new URL("../src/components/map/ExchangeSpatialScene.tsx", import.meta.url), "utf8");
+const adapter = await readFile(new URL("../src/application/participant/lens-map-projection-adapter.ts", import.meta.url), "utf8");
 
 test("the existing spatial scene consumes one non-clustered shared projection source", () => {
   assert.match(scene, /LENS_PROJECTION_SOURCE_ID = "rfx-spatial-scene-lens-projection"/);
@@ -17,10 +18,15 @@ test("selection callbacks use the original projection lookup and clusters only m
   assert.match(scene, /lensProjectionClusterRef\.current\.get\(renderId\)/);
   assert.match(scene, /zoom: Math\.min\(map\.getZoom\(\) \+ 2, map\.getMaxZoom\(\)\)/);
   assert.doesNotMatch(scene, /lensProjectionClusterRef[\s\S]{0,500}onLensProjectionSelectRef/);
+  assert.match(scene, /layers: \[LENS_PROJECTION_OBJECT_LAYER_ID, LENS_PROJECTION_CLUSTER_LAYER_ID\]/);
+  assert.match(scene, /layers: \[LENS_PROJECTION_OBJECT_LAYER_ID\]/);
 });
 
 test("governed areas require exact authority keys and legacy overlays cannot duplicate the shared projection", () => {
-  assert.match(scene, /candidate\.areaId === area\.areaId[\s\S]*candidate\.geographyId === area\.geographyId[\s\S]*candidate\.geometryReference === area\.geometryReference/);
+  assert.match(adapter, /candidate\.areaId === area\.areaId[\s\S]*candidate\.geographyId === area\.geographyId[\s\S]*candidate\.geometryReference === area\.geometryReference/);
   assert.match(scene, /A shared lens projection cannot be combined with legacy domain overlay props/);
   assert.match(scene, /data-lens-projection-list-only-count/);
+  assert.match(scene, /point\.projection\.markerId === marker\.id/);
+  assert.match(scene, /const sceneMarker = homeMarkerIsProjected \? null : marker/);
+  assert.match(scene, /data-lens-projection-deduplicated-home-marker/);
 });

@@ -1,4 +1,4 @@
-import type { ParticipantMapCamera } from "../geography/map-view.ts";
+import { isParticipantMapCamera, type ParticipantMapCamera } from "../geography/map-view.ts";
 import { isLocale, type Locale } from "../../i18n/config.ts";
 import {
   exchangeRoomActionDefinitionsForLens,
@@ -101,6 +101,7 @@ export interface ExchangeLensQuery {
   readonly sort: ExchangeSortState | null;
   readonly cursor: string | null;
   readonly resultPage: number;
+  readonly requestIdentity: string;
 }
 
 export interface ExchangeOrganizationSelection {
@@ -600,18 +601,7 @@ function optionalBounded(value: string | null | undefined, label: string): strin
 
 function validatedCamera(camera: ParticipantMapCamera | null | undefined): ParticipantMapCamera | null {
   if (!camera) return null;
-  validatedCoordinate(camera, "Map camera center");
-  if (
-    !Number.isFinite(camera.zoom)
-    || camera.zoom < 0
-    || camera.zoom > 24
-    || !Number.isFinite(camera.pitch)
-    || camera.pitch < 0
-    || camera.pitch > 85
-    || !Number.isFinite(camera.bearing)
-    || camera.bearing < -360
-    || camera.bearing > 360
-  ) {
+  if (!isParticipantMapCamera(camera)) {
     throw new Error("Map camera is outside supported presentation bounds.");
   }
   return Object.freeze({ ...camera });
@@ -678,7 +668,7 @@ export function createExchangeLensQuery(input: Readonly<{
   if (sort && sort.direction !== "ascending" && sort.direction !== "descending") {
     throw new Error("Sort direction is invalid.");
   }
-  return Object.freeze({
+  const query = {
     version: MOBILE_EXCHANGE_CONTRACT_VERSION,
     lens: input.lens,
     locale: input.locale,
@@ -690,7 +680,12 @@ export function createExchangeLensQuery(input: Readonly<{
     sort,
     cursor: optionalBounded(input.cursor, "Result cursor"),
     resultPage,
+  } as const;
+  const requestIdentity = JSON.stringify({
+    ...query,
+    filters: Object.fromEntries(Object.entries(query.filters).sort(([left], [right]) => left.localeCompare(right))),
   });
+  return Object.freeze({ ...query, requestIdentity });
 }
 
 function selectionKeyForOrganization(organizationId: string): string {
@@ -1375,6 +1370,17 @@ export function createLensDiscoveryProjection(input: Readonly<{
     throw new Error("Each result identity must have one spatial disposition.");
   }
   const cards = input.results.status === "ready" ? input.results.cards : [];
+  if (input.results.status !== "ready") {
+    const disclosingProjection = input.map.objects.find((object) =>
+      object.kind === "record"
+      || object.kind === "cluster"
+      || object.kind === "area"
+      || object.kind === "relationship",
+    );
+    if (disclosingProjection) {
+      throw new Error(`${input.results.status} discovery cannot retain result map projections.`);
+    }
+  }
   if (cards.length !== spatialResults.length) {
     throw new Error("Every ready result card requires exactly one mapped or list-only disposition.");
   }
@@ -1403,6 +1409,12 @@ export function createLensDiscoveryProjection(input: Readonly<{
         throw new Error("A result with an authoritative permitted point cannot be mislabeled list-only.");
       }
     }
+  }
+  const readyCardKeys = new Set(cards.map((card) => card.identity.selectionKey));
+  if (input.results.status === "ready" && input.map.objects.some(
+    (object) => object.kind === "record" && !readyCardKeys.has(object.identity.selectionKey),
+  )) {
+    throw new Error("A ready discovery projection cannot expose an unpaired result record on the map.");
   }
   return Object.freeze({
     lens: input.lens,
@@ -1619,8 +1631,10 @@ export function mobileExchangeStateFromParticipantSpatialContext(
     }),
     lensState,
     sheet: Object.freeze({
-      sheetSnapPoint: context.panelOpen ? "partial" : "peek",
-      sheetScrollPosition: lensState[context.activeLens].sheetScrollPosition,
+      sheetSnapPoint: context.sheetSnapPoint ?? (context.panelOpen ? "partial" : "peek"),
+      sheetScrollPosition: Number.isFinite(context.sheetScrollTop)
+        ? context.sheetScrollTop
+        : lensState[context.activeLens].sheetScrollPosition,
       content: "results",
       detailContext: null,
     }),

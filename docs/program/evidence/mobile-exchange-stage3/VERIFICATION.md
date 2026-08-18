@@ -10,9 +10,9 @@
 - server-geography and domain-layer fail-closed map adaptation;
 - stable card/map/detail identity, truthful status/date/classification fields, hidden absent save/watch operations, and domain-owned persistence handlers;
 - loading, ready, empty, unavailable, restricted, and error result states with protected-data removal;
-- mandatory explicit server authorization results and rejection of stale scope/lens/locale/geography/query/result-set responses;
-- card/map/keyboard detail entry, deep-link pre-authorization isolation, affirmative resolution, nondisclosing denial, full return restoration, and stale-scope discard;
-- one existing Mapbox scene/source, original-projection click lookup, camera-only cluster expansion, exact governed-area geometry matching, and duplicate-overlay prevention.
+- mandatory explicit server authorization results, exact non-null selected identity, exact canonical detail destination, and rejection of stale scope/lens/locale/geography/query/result-set responses, including same-ID in-flight changes to camera, bounds, search, filters, sort, cursor, or page;
+- card/map/keyboard detail entry, deep-link pre-authorization isolation, affirmative resolution, nondisclosing denial, independent list/sheet restoration, exact snap-point restoration, lens-discriminated safe returns, and stale-scope discard;
+- one existing Mapbox scene/source, behaviorally exercised mutable GeoJSON output, original-projection click lookup, camera-only cluster expansion, exact governed-area geometry matching/omission, overlap priority, selection updates, and legacy/home-marker duplicate-overlay prevention.
 
 The preserved Stage 1–2 contract, continuity, domain-convergence, composition, permissions, reopen, and review regressions remain active. Historical Stage 1–2 authority, action catalogs, locale trees, and evidence are not rewritten.
 
@@ -37,7 +37,7 @@ The implementation PR records local results and exact-head CI. Control Room reco
 ## Security and scope result
 
 - Client query, map, selection, sheet, and detail state never grants participant, organization, membership, geography, record, relationship, action, or administrative authority.
-- Every accepted discovery response carries all four explicit authorization booleans and exact scope/lens/locale/geography/query/result-set binding; omitted booleans fail rather than default to allowed.
+- Every accepted discovery response carries all four explicit authorization booleans and exact scope/lens/locale/geography/query/result-set binding. A carried selection additionally requires an exact non-null focal identity, and a pending detail requires an exact identity plus canonical destination; omitted facts fail rather than default to allowed.
 - Suppressed or coordinate-less records remain selectable in their authorized list/detail treatment but never receive a fabricated point.
 - GeoJSON properties are presentation only and never reconstruct a selected domain identity.
 - Save/watch/follow remains domain-owned and hidden without a real operation.

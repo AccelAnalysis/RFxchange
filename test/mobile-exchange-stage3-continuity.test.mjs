@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   createExchangeGeographyContext,
   createExchangeMapObjectProjection,
+  createExchangeSelectionState,
   createExchangeSubjectIdentity,
   createLensDiscoveryProjection,
   createLensMapProjection,
@@ -16,6 +17,7 @@ import {
   closeMobileExchangeDetail,
   createMobileExchangeStage3ContinuityState,
   migrateParticipantSpatialContextToMobileExchangeContinuity,
+  mobileExchangeDetailContext,
   mobileExchangeContinuityScope,
   mobileExchangeQueryContext,
   openMobileExchangeDetailFromProjection,
@@ -39,6 +41,8 @@ const context = {
   },
   workflowState: { referrals: lensState("referral", 50) },
   panelOpen: true,
+  sheetSnapPoint: "expanded",
+  sheetScrollTop: 999,
   originLens: "resources",
   returnHref: "/resources",
 };
@@ -96,6 +100,7 @@ function discovery() {
 }
 
 function serverResult(overrides = {}) {
+  const queryIdentity = mobileExchangeQueryContext(stage3State(), { queryId: "query-1" }).query.requestIdentity;
   return {
     expectedVersion: 2,
     expectedScope: mobileExchangeContinuityScope({
@@ -109,12 +114,14 @@ function serverResult(overrides = {}) {
     locale: "en-US",
     geographyId: "geo-1",
     queryId: "query-1",
+    queryIdentity,
     resultSetId: "set-1",
-    focalIdentity: null,
+    focalIdentity: stage3State().selection.focalIdentity,
     focalSubjectAuthorized: true,
     associatedOrganizationAuthorized: true,
     relationshipAuthorized: true,
     detailSubjectAuthorized: true,
+    detailCanonicalHref: null,
     ...overrides,
   };
 }
@@ -131,7 +138,8 @@ test("the one query context carries exact scope, locale, spatial, list, selectio
   assert.deepEqual(query.query.filters, { category: "fabrication" });
   assert.equal(query.resultIndex, 3);
   assert.equal(query.listScrollPosition, 20);
-  assert.equal(query.sheet.sheetSnapPoint, "partial");
+  assert.equal(query.sheet.sheetSnapPoint, "expanded");
+  assert.equal(query.sheet.sheetScrollPosition, 999);
   assert.equal(query.clientStateGrantsAuthority, false);
 });
 
@@ -147,12 +155,41 @@ test("accepted server projection enables card/map/keyboard detail and close rest
     focusReturnKey: "card:record:resource-1",
     returnHref: "/resources?selected=resource-1",
   });
-  assert.equal(opened.detail.status, "open");
+  assert.equal(opened.detail.status, "opening");
   assert.equal(opened.sheet.content, "detail");
   assert.equal(opened.selection.selectionKey, resourceIdentity.selectionKey);
   assert.equal(opened.detailNavigation.returnSnapshot.query.search, "resource");
+  const crossLensReturn = openMobileExchangeDetailFromProjection(accepted.state, {
+    source: "card",
+    identity: resourceIdentity,
+    queryId: "query-1",
+    focusReturnKey: "card:record:resource-1",
+    returnHref: "/opportunities?selected=resource-1",
+  });
+  assert.equal(crossLensReturn.detailNavigation.returnSnapshot.returnHref, "/resources");
+  const intelligenceReturn = mobileExchangeDetailContext({
+    identity: resourceIdentity,
+    canonicalHref: "/geography/canvas?record=resource-1",
+    returnLens: "intelligence",
+  }, { returnHref: "/geography/canvas?lens=capabilities" });
+  assert.equal(intelligenceReturn.returnHref, "/geography/canvas");
+  const capabilitiesReturn = mobileExchangeDetailContext({
+    identity: resourceIdentity,
+    canonicalHref: "/geography/canvas?lens=capabilities&record=resource-1",
+    returnLens: "capabilities",
+  }, { returnHref: "/geography/canvas" });
+  assert.equal(capabilitiesReturn.returnHref, "/geography/canvas?lens=capabilities");
 
-  const closed = closeMobileExchangeDetail(opened, { currentScope: serverResult().expectedScope, stillAuthorized: true });
+  const detailAccepted = reconcileServerRevalidatedMobileExchangeProjection(
+    opened,
+    mobileExchangeQueryContext(opened, { queryId: "query-1" }),
+    discovery(),
+    serverResult({ focalIdentity: resourceIdentity, detailCanonicalHref: "/resources/resource-1" }),
+  );
+  assert.equal(detailAccepted.status, "accepted");
+  assert.equal(detailAccepted.state.detail.status, "open");
+
+  const closed = closeMobileExchangeDetail(detailAccepted.state, { currentScope: serverResult().expectedScope, stillAuthorized: true });
   assert.equal(closed.state.detail.status, "closed");
   assert.equal(closed.state.sheet.content, "results");
   assert.equal(closed.state.activeLens, "resources");
@@ -160,6 +197,10 @@ test("accepted server projection enables card/map/keyboard detail and close rest
   assert.deepEqual(closed.state.mapBounds, { west: -77, south: 36, east: -76, north: 37 });
   assert.equal(closed.state.lensState.resources.search, "resource");
   assert.equal(closed.state.lensState.resources.listScrollPosition, 20);
+  assert.equal(closed.state.lensState.resources.resultSetId, null);
+  assert.equal(closed.state.activeProjection, null);
+  assert.equal(closed.state.sheet.sheetSnapPoint, "expanded");
+  assert.equal(closed.state.sheet.sheetScrollPosition, 999);
   assert.equal(closed.returnHref, "/resources?selected=resource-1");
   assert.equal(closed.focusReturnKey, "card:record:resource-1");
 });
@@ -187,7 +228,7 @@ test("deep links disclose no record until exact affirmative revalidation and sco
     pending,
     mobileExchangeQueryContext(pending, { queryId: "query-1" }),
     discovery(),
-    serverResult({ focalIdentity: resourceIdentity }),
+    serverResult({ focalIdentity: resourceIdentity, detailCanonicalHref: "/resources/resource-1" }),
   );
   assert.equal(authorized.status, "accepted");
   assert.equal(authorized.state.detail.status, "open");
@@ -197,18 +238,76 @@ test("deep links disclose no record until exact affirmative revalidation and sco
     pending,
     mobileExchangeQueryContext(pending, { queryId: "query-1" }),
     discovery(),
-    serverResult({ focalIdentity: null, focalSubjectAuthorized: true, detailSubjectAuthorized: false }),
+    serverResult({ focalIdentity: null, focalSubjectAuthorized: true, detailSubjectAuthorized: false, detailCanonicalHref: "/resources/resource-1" }),
   );
   assert.equal(denied.status, "rejected");
   assert.equal(denied.reason, "detail-authority-changed");
   assert.equal(denied.safeState.selection.kind, "none");
 
+  const wrongCanonical = reconcileServerRevalidatedMobileExchangeProjection(
+    pending,
+    mobileExchangeQueryContext(pending, { queryId: "query-1" }),
+    discovery(),
+    serverResult({ focalIdentity: resourceIdentity, detailCanonicalHref: "/resources/a-different-record" }),
+  );
+  assert.equal(wrongCanonical.status, "rejected");
+  assert.equal(wrongCanonical.reason, "detail-authority-changed");
+
   const changedScope = { ...serverResult().expectedScope, membershipId: "membership-2" };
   const safelyClosed = closeMobileExchangeDetail(pending, { currentScope: changedScope, stillAuthorized: true });
-  assert.equal(safelyClosed.state.selection.kind, "none");
-  assert.equal(safelyClosed.state.activeProjection, null);
+  assert.equal(safelyClosed.state, null);
   assert.equal(safelyClosed.returnHref, "/resources");
   assert.equal(safelyClosed.focusReturnKey, null);
+});
+
+test("list-only records remain card/keyboard targets and cannot masquerade as map entry", () => {
+  const initial = stage3State();
+  const mapped = discovery();
+  const listOnlyObject = createExchangeMapObjectProjection({
+    identity: resourceIdentity,
+    markerId: "marker-resource-1",
+    coordinate: null,
+    privacy: "locality-only",
+    accessibleLabel: "Resource available in list only",
+    selectable: true,
+    layerIds: ["resources"],
+  });
+  const listOnlyDiscovery = createLensDiscoveryProjection({
+    lens: "resources",
+    queryId: "query-1",
+    map: createLensMapProjection({
+      ...mapped.map,
+      objects: [listOnlyObject],
+    }),
+    results: mapped.results,
+    spatialResults: [{
+      kind: "list-only",
+      identity: resourceIdentity,
+      reason: "missing-authoritative-coordinate",
+      explanationKey: "resources.locationUnavailable",
+    }],
+  });
+  const accepted = reconcileServerRevalidatedMobileExchangeProjection(
+    initial,
+    mobileExchangeQueryContext(initial, { queryId: "query-1" }),
+    listOnlyDiscovery,
+    serverResult(),
+  );
+  assert.equal(accepted.status, "accepted");
+  assert.throws(() => openMobileExchangeDetailFromProjection(accepted.state, {
+    source: "map",
+    identity: resourceIdentity,
+    queryId: "query-1",
+    focusReturnKey: "map:record:resource-1",
+  }), /visible selectable mapped disposition/);
+  const fromCard = openMobileExchangeDetailFromProjection(accepted.state, {
+    source: "card",
+    identity: resourceIdentity,
+    queryId: "query-1",
+    focusReturnKey: "card:record:resource-1",
+  });
+  assert.equal(fromCard.detail.status, "opening");
+  assert.equal(fromCard.selection.selectedMarker, null);
 });
 
 test("stale locale, query, result-set, and lens responses fail closed", () => {
@@ -224,6 +323,48 @@ test("stale locale, query, result-set, and lens responses fail closed", () => {
     assert.equal(result.status, "rejected");
     assert.equal(result.reason, reason);
   }
+  const withResourceState = (changes) => Object.freeze({
+    ...state,
+    lensState: Object.freeze({
+      ...state.lensState,
+      resources: Object.freeze({ ...state.lensState.resources, ...changes }),
+    }),
+  });
+  const staleStates = [
+    withResourceState({ search: "changed-after-request" }),
+    withResourceState({ filters: Object.freeze({ category: "construction" }) }),
+    withResourceState({ sort: Object.freeze({ id: "date", direction: "descending" }) }),
+    withResourceState({ cursor: "next-page" }),
+    withResourceState({ resultPage: 3 }),
+    Object.freeze({ ...state, mapCamera: Object.freeze({ ...state.mapCamera, zoom: 12 }) }),
+    Object.freeze({ ...state, mapBounds: Object.freeze({ ...state.mapBounds, west: -78 }) }),
+  ];
+  for (const staleState of staleStates) {
+    const staleSameId = reconcileServerRevalidatedMobileExchangeProjection(
+      staleState,
+      query,
+      discovery(),
+      serverResult(),
+    );
+    assert.equal(staleSameId.status, "rejected");
+    assert.equal(staleSameId.reason, "query-changed");
+  }
+  const missingSelectedIdentity = reconcileServerRevalidatedMobileExchangeProjection(
+    state,
+    query,
+    discovery(),
+    serverResult({ focalIdentity: null }),
+  );
+  assert.equal(missingSelectedIdentity.status, "rejected");
+  assert.equal(missingSelectedIdentity.reason, "selected-object-authority-changed");
+  const unselected = Object.freeze({ ...state, selection: createExchangeSelectionState({ kind: "none" }) });
+  const unselectedAccepted = reconcileServerRevalidatedMobileExchangeProjection(
+    unselected,
+    mobileExchangeQueryContext(unselected, { queryId: "query-1" }),
+    discovery(),
+    serverResult({ focalIdentity: null }),
+  );
+  assert.equal(unselectedAccepted.status, "accepted");
   const incomplete = serverResult();
   delete incomplete.detailSubjectAuthorized;
   assert.throws(

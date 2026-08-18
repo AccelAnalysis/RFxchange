@@ -20,11 +20,13 @@ import {
 import type { SyntheticOrientationMapOverlay } from "../../application/orientation/synthetic-scenario";
 import {
   adaptLensMapProjection,
+  createLensProjectionRenderModel,
+  type ExchangeGovernedAreaGeometry,
+  type ExchangeLensSelectableProjection,
+  type ExchangeSpatialGeometry,
   type ExchangeSpatialProjectionAdapter,
 } from "../../application/participant/lens-map-projection-adapter";
 import type {
-  ExchangeMapAreaProjection,
-  ExchangeMapObjectProjection,
   ExchangeSelectionState,
   LensMapProjection,
 } from "../../application/participant/mobile-exchange-contracts";
@@ -48,9 +50,11 @@ export interface ExchangeHomeMarker {
 export type ExchangeOrganizationMarker = ExchangeHomeMarker;
 export type ExchangeOpportunityMarker = ExchangeHomeMarker;
 
-export type ExchangeSpatialGeometry =
-  | { readonly type: "Polygon"; readonly coordinates: number[][][] }
-  | { readonly type: "MultiPolygon"; readonly coordinates: number[][][][] };
+export type {
+  ExchangeGovernedAreaGeometry,
+  ExchangeLensSelectableProjection,
+  ExchangeSpatialGeometry,
+} from "../../application/participant/lens-map-projection-adapter";
 
 export interface ExchangeRelationshipPath {
   readonly id: string;
@@ -66,15 +70,6 @@ export interface ExchangeServiceField {
   readonly geometry: ExchangeSpatialGeometry;
   readonly selected?: boolean;
 }
-
-export interface ExchangeGovernedAreaGeometry {
-  readonly areaId: string;
-  readonly geographyId: string;
-  readonly geometryReference: string | null;
-  readonly geometry: ExchangeSpatialGeometry;
-}
-
-export type ExchangeLensSelectableProjection = ExchangeMapObjectProjection | ExchangeMapAreaProjection;
 
 export interface ExchangeSpatialSceneProps {
   readonly model: ControlledLocalityMapModel;
@@ -149,6 +144,7 @@ const EMPTY_LENS_PROJECTION_ADAPTER: ExchangeSpatialProjectionAdapter = Object.f
   points: Object.freeze([]),
   areas: Object.freeze([]),
   listOnlyObjects: Object.freeze([]),
+  omittedObjects: Object.freeze([]),
   activeLayerIds: Object.freeze([]),
 });
 const HOME_MARKER_SOURCE_ID = "rfx-spatial-scene-home-marker";
@@ -363,82 +359,6 @@ function serviceFieldGeoJson(fields: readonly ExchangeServiceField[]) {
       geometry: field.geometry,
     })),
   };
-}
-
-function lensProjectionGeoJson(
-  adapter: ExchangeSpatialProjectionAdapter,
-  geometries: readonly ExchangeGovernedAreaGeometry[],
-) {
-  const selectableByRenderId = new Map<string, ExchangeLensSelectableProjection>();
-  const clusterByRenderId = new Map<string, ExchangeSpatialProjectionAdapter["points"][number]>();
-  const features: Array<Readonly<{
-    type: "Feature";
-    properties: Readonly<Record<string, string | number | boolean>>;
-    geometry: Readonly<{ type: "Point"; coordinates: readonly [number, number] }> | ExchangeSpatialGeometry;
-  }>> = [];
-
-  for (const point of adapter.points) {
-    const projection = point.projection;
-    const renderId = point.renderId;
-    if (projection.kind === "cluster") clusterByRenderId.set(renderId, point);
-    else if (point.selectable) selectableByRenderId.set(renderId, projection);
-    features.push({
-      type: "Feature",
-      properties: projection.kind === "cluster"
-        ? {
-            renderId,
-            kind: "cluster",
-            clusterId: projection.clusterId,
-            accessibleLabel: point.accessibleLabel,
-            selectable: false,
-            selected: 0,
-            count: projection.count,
-          }
-        : {
-            renderId,
-            kind: projection.kind,
-            markerId: projection.markerId,
-            selectionKey: projection.identity.selectionKey,
-            accessibleLabel: point.accessibleLabel,
-            selectable: point.selectable,
-            selected: point.selected ? 1 : 0,
-            count: 0,
-          },
-      geometry: { type: "Point", coordinates: point.coordinate },
-    });
-  }
-
-  for (const area of adapter.areas) {
-    const governed = geometries.find((candidate) =>
-      candidate.areaId === area.areaId
-      && candidate.geographyId === area.geographyId
-      && candidate.geometryReference === area.geometryReference,
-    );
-    if (!governed) continue;
-    const renderId = `area:${area.areaId}`;
-    if (area.selectable && area.associationSelectionKey !== null) selectableByRenderId.set(renderId, area);
-    features.push({
-      type: "Feature",
-      properties: {
-        renderId,
-        kind: "area",
-        areaId: area.areaId,
-        associationSelectionKey: area.associationSelectionKey ?? "",
-        accessibleLabel: area.accessibleLabel,
-        selectable: area.selectable,
-        selected: area.selected ? 1 : 0,
-        emphasized: area.emphasized ? 1 : 0,
-        count: 0,
-      },
-      geometry: governed.geometry,
-    });
-  }
-
-  return Object.freeze({
-    data: Object.freeze({ type: "FeatureCollection" as const, features: Object.freeze(features) }),
-    selectableByRenderId,
-    clusterByRenderId,
-  });
 }
 
 function organizationInitials(label: string): string {
@@ -678,9 +598,17 @@ export function ExchangeSpatialScene({
     [lensProjection, lensSelection],
   );
   const lensProjectionRenderModel = useMemo(
-    () => lensProjectionGeoJson(lensProjectionAdapter, governedAreaGeometries),
+    () => createLensProjectionRenderModel(lensProjectionAdapter, governedAreaGeometries),
     [governedAreaGeometries, lensProjectionAdapter],
   );
+  const homeMarkerIsProjected = useMemo(
+    () => marker !== null && lensProjectionAdapter.points.some(
+      (point) => (point.projection.kind === "organization" || point.projection.kind === "record")
+        && point.projection.markerId === marker.id,
+    ),
+    [lensProjectionAdapter.points, marker],
+  );
+  const sceneMarker = homeMarkerIsProjected ? null : marker;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -695,7 +623,7 @@ export function ExchangeSpatialScene({
   const reducedMotionRef = useRef(false);
   const modeRef = useRef(mode);
   const modelRef = useRef(model);
-  const markerRef = useRef(marker);
+  const markerRef = useRef(sceneMarker);
   const onOrganizationMarkerSelectRef = useRef(onOrganizationMarkerSelect);
   const onOpportunityMarkerSelectRef = useRef(onOpportunityMarkerSelect);
   const onLensProjectionSelectRef = useRef(onLensProjectionSelect);
@@ -707,7 +635,7 @@ export function ExchangeSpatialScene({
   const appliedOverlayRef = useRef({ activationOverlay, workspaceOverlay });
   const homeGeoJsonRef = useRef(localityGeoJson(model));
   const homeMaskGeoJsonRef = useRef(localityMaskGeoJson(model));
-  const homeMarkerGeoJsonRef = useRef(markerGeoJson(marker));
+  const homeMarkerGeoJsonRef = useRef(markerGeoJson(sceneMarker));
   const networkMarkerGeoJsonRef = useRef(organizationMarkerGeoJson(
     organizationMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
     null,
@@ -757,7 +685,7 @@ export function ExchangeSpatialScene({
 
   const homeGeoJson = useMemo(() => localityGeoJson(model), [model]);
   const homeMaskGeoJson = useMemo(() => localityMaskGeoJson(model), [model]);
-  const homeMarkerGeoJson = useMemo(() => markerGeoJson(marker), [marker]);
+  const homeMarkerGeoJson = useMemo(() => markerGeoJson(sceneMarker), [sceneMarker]);
   const networkMarkersGeoJson = useMemo(
     () => organizationMarkerGeoJson(
       organizationMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
@@ -793,7 +721,7 @@ export function ExchangeSpatialScene({
 
   modeRef.current = mode;
   modelRef.current = model;
-  markerRef.current = marker;
+  markerRef.current = sceneMarker;
   if (!sceneInitializationStartedRef.current) initialCameraRef.current = initialCamera;
   onOrganizationMarkerSelectRef.current = onOrganizationMarkerSelect;
   onOpportunityMarkerSelectRef.current = onOpportunityMarkerSelect;
@@ -1743,18 +1671,30 @@ export function ExchangeSpatialScene({
           map.on("mouseenter", layerId, () => { map.getCanvas().style.cursor = "pointer"; });
           map.on("mouseleave", layerId, () => { map.getCanvas().style.cursor = ""; });
         }
-        const selectLensProjection = (event: mapboxgl.MapLayerMouseEvent) => {
+        const lensProjectionForEvent = (event: mapboxgl.MapLayerMouseEvent) => {
           const feature = event.features?.[0] as unknown as
             | { readonly properties?: Readonly<Record<string, unknown>> }
             | undefined;
           const renderId = feature?.properties?.renderId;
-          if (typeof renderId !== "string") return;
-          const projection = lensProjectionSelectableRef.current.get(renderId);
-          if (projection) onLensProjectionSelectRef.current?.(projection);
+          return typeof renderId === "string"
+            ? lensProjectionSelectableRef.current.get(renderId) ?? null
+            : null;
         };
-        map.on("click", LENS_PROJECTION_OBJECT_LAYER_ID, selectLensProjection);
-        map.on("click", LENS_PROJECTION_AREA_FILL_LAYER_ID, selectLensProjection);
+        map.on("click", LENS_PROJECTION_OBJECT_LAYER_ID, (event) => {
+          const projection = lensProjectionForEvent(event);
+          if (projection) onLensProjectionSelectRef.current?.(projection);
+        });
+        map.on("click", LENS_PROJECTION_AREA_FILL_LAYER_ID, (event) => {
+          if (map.queryRenderedFeatures(event.point, {
+            layers: [LENS_PROJECTION_OBJECT_LAYER_ID, LENS_PROJECTION_CLUSTER_LAYER_ID],
+          }).length > 0) return;
+          const projection = lensProjectionForEvent(event);
+          if (projection) onLensProjectionSelectRef.current?.(projection);
+        });
         map.on("click", LENS_PROJECTION_CLUSTER_LAYER_ID, (event) => {
+          if (map.queryRenderedFeatures(event.point, {
+            layers: [LENS_PROJECTION_OBJECT_LAYER_ID],
+          }).length > 0) return;
           const feature = event.features?.[0] as unknown as
             | { readonly properties?: Readonly<Record<string, unknown>> }
             | undefined;
@@ -1915,7 +1855,9 @@ export function ExchangeSpatialScene({
       data-lens-projection={lensProjection ? lensProjection.lens : "none"}
       data-lens-projection-point-count={lensProjectionAdapter.points.length}
       data-lens-projection-list-only-count={lensProjectionAdapter.listOnlyObjects.length}
+      data-lens-projection-omitted-count={lensProjectionAdapter.omittedObjects.length}
       data-lens-projection-area-count={lensProjectionAdapter.areas.length}
+      data-lens-projection-deduplicated-home-marker={homeMarkerIsProjected ? "true" : "false"}
       data-rendered-cluster-count={renderedClusterCount}
       data-rendered-cluster-point={renderedClusterPoint}
       data-rendered-selected-marker-count={renderedSelectedMarkerCount}

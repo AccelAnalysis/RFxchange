@@ -85,6 +85,8 @@ export interface MobileExchangeReturnSnapshot {
   readonly sheetScrollPosition: number;
   readonly listScrollPosition: number;
   readonly resultIndex: number;
+  readonly activeLayerIds: readonly string[];
+  readonly layerStateAuthority: MobileExchangeContinuityState["lensState"][ParticipantLensId]["layerStateAuthority"];
   readonly returnHref: string;
   readonly focusReturnKey: string | null;
 }
@@ -119,12 +121,14 @@ export interface MobileExchangeServerRevalidationResult {
   readonly locale: Locale;
   readonly geographyId: string;
   readonly queryId: string;
+  readonly queryIdentity: string;
   readonly resultSetId: string | null;
   readonly focalIdentity: ExchangeSubjectIdentity | null;
   readonly focalSubjectAuthorized: boolean;
   readonly associatedOrganizationAuthorized: boolean;
   readonly relationshipAuthorized: boolean;
   readonly detailSubjectAuthorized: boolean;
+  readonly detailCanonicalHref: string | null;
 }
 
 export type MobileExchangeProjectionRejectionReason =
@@ -218,6 +222,13 @@ const CANONICAL_LENS_HREFS: Readonly<Record<ParticipantLensId, string>> = Object
   intelligence: "/geography/canvas",
   // Capabilities is structurally present but unavailable until its Stage 4 adapter merges.
   // Continuity falls back inside the authorized map shell and never creates a placeholder route.
+  capabilities: "/geography/canvas?lens=capabilities",
+});
+
+const CANONICAL_LENS_PATHS: Readonly<Record<ParticipantLensId, string>> = Object.freeze({
+  "opportunities-rfx": "/opportunities",
+  resources: "/resources",
+  intelligence: "/geography/canvas",
   capabilities: "/geography/canvas",
 });
 
@@ -238,20 +249,27 @@ function safeReturnHref(value: string | null | undefined, returnLens: Participan
   try {
     const parsed = new URL(value, "https://participant.invalid");
     if (parsed.origin !== "https://participant.invalid") return fallback;
-    const allowed = Object.values(CANONICAL_LENS_HREFS).some(
-      (prefix) => parsed.pathname === prefix || parsed.pathname.startsWith(`${prefix}/`),
-    );
+    const allowed = lensUrlMatches(parsed, returnLens);
     return allowed ? `${parsed.pathname}${parsed.search}` : fallback;
   } catch {
     return fallback;
   }
 }
 
-function safeDetailHref(value: string | null): string | null {
+function lensUrlMatches(parsed: URL, lens: ParticipantLensId): boolean {
+  const allowedPath = CANONICAL_LENS_PATHS[lens];
+  if (parsed.pathname !== allowedPath && !parsed.pathname.startsWith(`${allowedPath}/`)) return false;
+  const lensDiscriminator = parsed.searchParams.get("lens");
+  if (lens === "capabilities") return lensDiscriminator === "capabilities";
+  if (lens === "intelligence") return lensDiscriminator === null || lensDiscriminator === "intelligence";
+  return lensDiscriminator === null || lensDiscriminator === lens;
+}
+
+function safeDetailHref(value: string | null, lens: ParticipantLensId): string | null {
   if (!value) return null;
   try {
     const parsed = new URL(value, "https://participant.invalid");
-    return parsed.origin === "https://participant.invalid"
+    return parsed.origin === "https://participant.invalid" && lensUrlMatches(parsed, lens)
       ? `${parsed.pathname}${parsed.search}${parsed.hash}`
       : null;
   } catch {
@@ -428,6 +446,10 @@ function returnSnapshot(
     sheetScrollPosition: state.sheet.sheetScrollPosition,
     listScrollPosition: queryContext.listScrollPosition,
     resultIndex: queryContext.resultIndex,
+    activeLayerIds: queryContext.query.lens === state.activeLens
+      ? state.lensState[state.activeLens].activeLayerIds
+      : Object.freeze([]),
+    layerStateAuthority: state.lensState[state.activeLens].layerStateAuthority,
     returnHref: detailContext.returnHref,
     focusReturnKey: detailContext.focusReturnKey,
   });
@@ -438,7 +460,6 @@ export function openMobileExchangeDetailFromProjection(
   input: Readonly<{
     source: "card" | "map" | "keyboard";
     identity: ExchangeSubjectIdentity;
-    canonicalHref?: string | null;
     returnHref?: string | null;
     focusReturnKey: string;
     queryId: string;
@@ -451,16 +472,31 @@ export function openMobileExchangeDetailFromProjection(
   const card = projection.results.status === "ready"
     ? projection.results.cards.find((candidate) => subjectIdentityMatches(candidate.identity, input.identity))
     : undefined;
-  const mapObject = projection.map.objects.find((candidate) =>
-    (candidate.kind === "organization" || candidate.kind === "record")
-    && subjectIdentityMatches(candidate.identity, input.identity),
+  const mapObject = projection.map.objects.find(
+    (candidate): candidate is Extract<typeof candidate, { kind: "organization" | "record" }> =>
+      (candidate.kind === "organization" || candidate.kind === "record")
+      && subjectIdentityMatches(candidate.identity, input.identity),
   );
-  if (!card || (input.source === "map" && !mapObject)) {
+  const spatialDisposition = projection.spatialResults.find((candidate) =>
+    subjectIdentityMatches(candidate.identity, input.identity),
+  );
+  if (!card || !spatialDisposition) {
     throw new Error("Detail identity must be present in the accepted card and map/list projection.");
+  }
+  if (
+    input.source === "map"
+    && (
+      spatialDisposition.kind !== "mapped"
+      || !mapObject
+      || mapObject.coordinate === null
+      || !mapObject.selectable
+    )
+  ) {
+    throw new Error("Map detail entry requires the visible selectable mapped disposition.");
   }
   const context = mobileExchangeDetailContext({
     identity: card.identity,
-    canonicalHref: input.canonicalHref ?? card.detailContext.canonicalHref,
+    canonicalHref: card.detailContext.canonicalHref,
     returnLens: state.activeLens,
   }, {
     returnHref: input.returnHref,
@@ -471,15 +507,15 @@ export function openMobileExchangeDetailFromProjection(
   const selection = selectionForDetailIdentity(
     card.identity,
     input.source,
-    mapObject && (mapObject.kind === "organization" || mapObject.kind === "record") ? mapObject.markerId : null,
+    spatialDisposition.kind === "mapped" && mapObject ? mapObject.markerId : null,
   );
   return Object.freeze({
     ...state,
     selection,
     sheet: Object.freeze({ ...state.sheet, content: "detail" as const, detailContext: context }),
-    detail: Object.freeze({ status: "open" as const, detailContext: context, errorCode: null }),
+    detail: Object.freeze({ status: "opening" as const, detailContext: context, errorCode: null }),
     detailNavigation: Object.freeze({
-      status: "open" as const,
+      status: "opening" as const,
       source: input.source,
       context,
       returnSnapshot: snapshot,
@@ -506,6 +542,9 @@ export function beginMobileExchangeDeepLink(
     canonicalHref: input.canonicalHref,
     returnLens: input.returnLens,
   }, { returnHref: input.returnHref, focusReturnKey: null });
+  if (!context.canonicalHref) {
+    throw new Error("A detail deep link must use the canonical route family for its origin lens.");
+  }
   const snapshot = returnSnapshot(state, mobileExchangeQueryContext(state, { queryId: input.queryId }), context);
   return Object.freeze({
     ...state,
@@ -527,7 +566,7 @@ export function mobileExchangeDetailContext(
 ): MobileExchangeDetailContext {
   return Object.freeze({
     ...context,
-    canonicalHref: safeDetailHref(context.canonicalHref),
+    canonicalHref: safeDetailHref(context.canonicalHref, context.returnLens),
     returnHref: safeReturnHref(input.returnHref, context.returnLens),
     focusReturnKey: input.focusReturnKey
       ? required(input.focusReturnKey, "Focus return key")
@@ -627,6 +666,9 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
       : null;
     return rejectedStage3Projection(state, continuity.reason, safeState);
   }
+  if (!scopeMatches(query.scope, state.scope) || !scopeMatches(query.scope, result.expectedScope)) {
+    return rejectedStage3Projection(state, "query-changed", null);
+  }
   if (result.lens !== state.activeLens || query.query.lens !== result.lens || projection.lens !== result.lens) {
     return rejectedStage3Projection(state, "lens-changed", null);
   }
@@ -640,7 +682,13 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
   ) {
     return rejectedStage3Projection(state, "geography-changed", null);
   }
-  if (query.queryId !== result.queryId || projection.queryId !== result.queryId) {
+  const currentQuery = mobileExchangeQueryContext(state, { queryId: result.queryId });
+  if (
+    query.queryId !== result.queryId
+    || projection.queryId !== result.queryId
+    || query.query.requestIdentity !== result.queryIdentity
+    || currentQuery.query.requestIdentity !== result.queryIdentity
+  ) {
     return rejectedStage3Projection(state, "query-changed", null);
   }
   if (projection.results.resultSetId !== result.resultSetId) {
@@ -651,8 +699,10 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
   if (
     !pendingDetail
     && state.selection.kind !== "none"
-    && result.focalIdentity
-    && !subjectIdentityMatches(state.selection.focalIdentity, result.focalIdentity)
+    && (
+      !result.focalIdentity
+      || !subjectIdentityMatches(state.selection.focalIdentity, result.focalIdentity)
+    )
   ) {
     return rejectedStage3Projection(state, "selected-object-authority-changed", Object.freeze({
       ...state,
@@ -661,11 +711,13 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
     }));
   }
   if (pendingDetail) {
+    const canonicalHref = safeDetailHref(result.detailCanonicalHref, pendingDetail.context.returnLens);
     if (
       !result.detailSubjectAuthorized
       || !result.focalSubjectAuthorized
       || !result.focalIdentity
       || !subjectIdentityMatches(pendingDetail.context.identity, result.focalIdentity)
+      || canonicalHref !== pendingDetail.context.canonicalHref
     ) {
       const safeState = Object.freeze({
         ...state,
@@ -709,7 +761,7 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
 export function closeMobileExchangeDetail(
   state: MobileExchangeStage3ContinuityState,
   input: Readonly<{ currentScope: MobileExchangeContinuityScope; stillAuthorized: boolean }>,
-): Readonly<{ state: MobileExchangeStage3ContinuityState; returnHref: string; focusReturnKey: string | null }> {
+): Readonly<{ state: MobileExchangeStage3ContinuityState | null; returnHref: string; focusReturnKey: string | null }> {
   const navigation = state.detailNavigation;
   if (navigation.status === "closed") {
     return Object.freeze({
@@ -719,15 +771,16 @@ export function closeMobileExchangeDetail(
     });
   }
   const snapshot = navigation.returnSnapshot;
-  if (!input.stillAuthorized || !scopeMatches(snapshot.scope, input.currentScope)) {
+  if (!scopeMatches(snapshot.scope, input.currentScope)) {
+    return Object.freeze({
+      state: null,
+      returnHref: CANONICAL_LENS_HREFS[snapshot.query.lens],
+      focusReturnKey: null,
+    });
+  }
+  if (!input.stillAuthorized) {
     const safeState = Object.freeze({
       ...state,
-      scope: input.currentScope,
-      geography: createExchangeGeographyContext({
-        geographyId: input.currentScope.geographyId,
-        label: null,
-        serverRevalidated: false,
-      }),
       selection: createExchangeSelectionState({ kind: "none" }),
       sheet: Object.freeze({ ...state.sheet, content: "results" as const, detailContext: null }),
       detail: Object.freeze({ status: "closed" as const, detailContext: null, errorCode: null }),
@@ -761,10 +814,13 @@ export function closeMobileExchangeDetail(
         filters: snapshot.query.filters,
         sort: snapshot.query.sort,
         cursor: snapshot.query.cursor,
+        resultSetId: null,
         resultPage: snapshot.query.resultPage,
         resultIndex: snapshot.resultIndex,
         listScrollPosition: snapshot.listScrollPosition,
         sheetScrollPosition: snapshot.sheetScrollPosition,
+        activeLayerIds: snapshot.activeLayerIds,
+        layerStateAuthority: snapshot.layerStateAuthority,
       }),
     }),
     sheet: Object.freeze({
@@ -775,6 +831,7 @@ export function closeMobileExchangeDetail(
       detailContext: null,
     }),
     detail: Object.freeze({ status: "closed" as const, detailContext: null, errorCode: null }),
+    activeProjection: null,
     detailNavigation: Object.freeze({
       status: "closed" as const,
       source: null,

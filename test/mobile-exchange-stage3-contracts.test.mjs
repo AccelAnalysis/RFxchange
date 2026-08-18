@@ -78,6 +78,7 @@ test("Stage 3 query contract preserves all five locales and validates presentati
   assert.throws(() => createExchangeLensQuery({ lens: "resources", locale: "en-US", geographyId: "geo-1", resultPage: 0 }), /positive integer/);
   assert.throws(() => createExchangeLensQuery({ lens: "resources", locale: "en-US", geographyId: "geo-1", bounds: { west: 20, south: 10, east: 10, north: 20 } }), /ordered/);
   assert.throws(() => createExchangeLensQuery({ lens: "resources", locale: "en-US", geographyId: "geo-1", filters: { broken: Number.NaN } }), /non-finite/);
+  assert.throws(() => createExchangeLensQuery({ lens: "resources", locale: "en-US", geographyId: "geo-1", camera: { longitude: 0, latitude: 0, zoom: 4, pitch: 35, bearing: 0, viewMode: "2d" } }), /outside supported/);
 });
 
 test("Stage 3 map contract preserves identity and never fabricates missing coordinates", () => {
@@ -182,4 +183,23 @@ test("whole-lens discovery requires server geography, domain layers, and one spa
   assert.throws(() => createLensDiscoveryProjection({ lens: "resources", queryId: "query-1", map, results, spatialResults: [] }), /exactly one/);
   const carried = createLensMapProjection({ ...map, geography: createExchangeGeographyContext({ geographyId: "geo-1", serverRevalidated: false }) });
   assert.throws(() => createLensDiscoveryProjection({ lens: "resources", queryId: "query-1", map: carried, results, spatialResults: [{ kind: "mapped", identity, markerId: "marker-resource-1" }] }), /server-revalidated geography/);
+  const restricted = createLensResultSetState({ status: "restricted", lens: "resources", messageKey: "resources.restricted" });
+  assert.throws(() => createLensDiscoveryProjection({
+    lens: "resources",
+    queryId: "query-restricted",
+    map,
+    results: restricted,
+    spatialResults: [],
+  }), /cannot retain result map projections/);
+
+  const extraIdentity = createExchangeSubjectIdentity({ subjectKind: "record", selectionKey: "record:extra", organizationId: null, recordType: "resource", recordId: "extra" });
+  const extra = createExchangeMapObjectProjection({ identity: extraIdentity, markerId: "marker-extra", coordinate: { longitude: -76.6, latitude: 36.7 }, privacy: "approximate", accessibleLabel: "Extra", selectable: true });
+  const extraMap = createLensMapProjection({ ...map, objects: [mapped, extra] });
+  assert.throws(() => createLensDiscoveryProjection({
+    lens: "resources",
+    queryId: "query-extra",
+    map: extraMap,
+    results,
+    spatialResults: [{ kind: "mapped", identity, markerId: "marker-resource-1" }],
+  }), /unpaired result record/);
 });
