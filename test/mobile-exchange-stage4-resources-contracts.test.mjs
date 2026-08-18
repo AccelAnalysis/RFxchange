@@ -291,16 +291,20 @@ test("maximum valid identifiers use bounded selection routes instead of crashing
   assert.doesNotMatch(fallbackRoute, /URLSearchParams|redirect\(`\/resources\?/);
 });
 
-test("compact destination decodes and validates its RFx return suffix before hydration", () => {
-  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "%3Ftab%3Dgaps%23gap-2"), {
+test("compact destination validates the framework-decoded RFx return suffix without decoding it twice", () => {
+  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "?tab=gaps#gap-2"), {
     rfxReference: "RFX-47",
     returnTo: "/opportunities/RFX-47/assess?tab=gaps#gap-2",
+  });
+  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "?tab=gaps%26mode%3Dedit#item%252F1"), {
+    rfxReference: "RFX-47",
+    returnTo: "/opportunities/RFX-47/assess?tab=gaps%26mode%3Dedit#item%252F1",
   });
   assert.deepEqual(resourcesCompactReturnContext("RFX-47", "-"), {
     rfxReference: "RFX-47",
     returnTo: "/opportunities/RFX-47/assess",
   });
-  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "%2Fadmin"), {
+  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "/admin"), {
     rfxReference: "RFX-47",
     returnTo: undefined,
   });

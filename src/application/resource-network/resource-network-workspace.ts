@@ -65,12 +65,14 @@ export function resourcesCompactReturnContext(
 ): Readonly<{ rfxReference: string | undefined; returnTo: string | undefined }> {
   const rfxReference = workspaceId(rawReference) ?? undefined;
   if (!rfxReference || !rawSuffix) return Object.freeze({ rfxReference, returnTo: undefined });
-  let returnSuffix: string;
+  // Next decodes every dynamic route segment once before exposing `params`.
+  // Validate the remaining percent escapes without decoding the suffix again.
   try {
-    returnSuffix = decodeURIComponent(rawSuffix);
+    decodeURI(rawSuffix);
   } catch {
     return Object.freeze({ rfxReference, returnTo: undefined });
   }
+  const returnSuffix = rawSuffix;
   if (returnSuffix === "-") return Object.freeze({
     rfxReference,
     returnTo: `/opportunities/${encodeURIComponent(rfxReference)}/assess`,
