@@ -390,6 +390,41 @@ function subjectIdentityMatches(left: ExchangeSubjectIdentity, right: ExchangeSu
     && left.recordId === right.recordId;
 }
 
+function completeSelectionMatches(
+  carried: ExchangeSelectionState,
+  revalidated: ExchangeSelectionState,
+): boolean {
+  if (carried.kind === "none" || revalidated.kind === "none") {
+    return carried.kind === "none" && revalidated.kind === "none";
+  }
+  const sameOrganization = carried.selectedOrganization === null || revalidated.selectedOrganization === null
+    ? carried.selectedOrganization === revalidated.selectedOrganization
+    : carried.selectedOrganization.selectionKey === revalidated.selectedOrganization.selectionKey
+      && carried.selectedOrganization.organizationId === revalidated.selectedOrganization.organizationId
+      && carried.selectedOrganization.associationRole === revalidated.selectedOrganization.associationRole;
+  const sameRecord = carried.selectedRecord === null || revalidated.selectedRecord === null
+    ? carried.selectedRecord === revalidated.selectedRecord
+    : carried.selectedRecord.selectionKey === revalidated.selectedRecord.selectionKey
+      && carried.selectedRecord.recordType === revalidated.selectedRecord.recordType
+      && carried.selectedRecord.recordId === revalidated.selectedRecord.recordId
+      && carried.selectedRecord.organizationId === revalidated.selectedRecord.organizationId;
+  const sameMarker = carried.selectedMarker === null || revalidated.selectedMarker === null
+    ? carried.selectedMarker === revalidated.selectedMarker
+    : carried.selectedMarker.selectionKey === revalidated.selectedMarker.selectionKey
+      && carried.selectedMarker.markerId === revalidated.selectedMarker.markerId
+      && carried.selectedMarker.role === revalidated.selectedMarker.role;
+  const sameRelationship = carried.selectedRelationship === null || revalidated.selectedRelationship === null
+    ? carried.selectedRelationship === revalidated.selectedRelationship
+    : carried.selectedRelationship.relationshipId === revalidated.selectedRelationship.relationshipId
+      && revalidated.selectedRelationship.authority === "server-revalidated";
+  return carried.kind === revalidated.kind
+    && subjectIdentityMatches(carried.focalIdentity, revalidated.focalIdentity)
+    && sameOrganization
+    && sameRecord
+    && sameMarker
+    && sameRelationship;
+}
+
 function scopeMatches(left: MobileExchangeContinuityScope, right: MobileExchangeContinuityScope): boolean {
   return left.sessionContextId === right.sessionContextId
     && left.participantId === right.participantId
@@ -665,7 +700,19 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
   });
   if (continuity.status === "invalid") {
     const safeState = continuity.safeState
-      ? Object.freeze({ ...state, ...continuity.safeState, activeProjection: null })
+      ? Object.freeze({
+          ...state,
+          ...continuity.safeState,
+          ...(state.detailNavigation.status === "closed" ? {} : closeDetail(continuity.safeState)),
+          activeProjection: null,
+          detailNavigation: Object.freeze({
+            status: "closed" as const,
+            source: null,
+            context: null,
+            returnSnapshot: null,
+            errorCode: null,
+          }),
+        })
       : null;
     return rejectedStage3Projection(state, continuity.reason, safeState);
   }
@@ -698,9 +745,11 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
     return rejectedStage3Projection(state, "result-set-changed", null);
   }
 
-  const pendingDetail = state.detailNavigation.status === "opening" ? state.detailNavigation : null;
+  const activeDetail = state.detailNavigation.status === "opening" || state.detailNavigation.status === "open"
+    ? state.detailNavigation
+    : null;
   if (
-    !pendingDetail
+    !activeDetail
     && state.selection.kind !== "none"
     && (
       !result.focalIdentity
@@ -713,26 +762,26 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
       activeProjection: null,
     }));
   }
-  if (pendingDetail) {
-    const canonicalHref = safeDetailHref(result.detailCanonicalHref, pendingDetail.context.returnLens);
+  if (activeDetail) {
+    const canonicalHref = safeDetailHref(result.detailCanonicalHref, activeDetail.context.returnLens);
     if (
       !result.detailSubjectAuthorized
       || !result.focalSubjectAuthorized
       || !result.focalIdentity
-      || !subjectIdentityMatches(pendingDetail.context.identity, result.focalIdentity)
-      || canonicalHref !== pendingDetail.context.canonicalHref
+      || !subjectIdentityMatches(activeDetail.context.identity, result.focalIdentity)
+      || canonicalHref !== activeDetail.context.canonicalHref
     ) {
       const safeState = Object.freeze({
         ...state,
         selection: createExchangeSelectionState({ kind: "none" }),
         sheet: Object.freeze({ ...state.sheet, content: "results" as const, detailContext: null }),
-        detail: Object.freeze({ status: "error" as const, detailContext: pendingDetail.context, errorCode: "detail-unavailable" }),
+        detail: Object.freeze({ status: "error" as const, detailContext: activeDetail.context, errorCode: "detail-unavailable" }),
         activeProjection: projection,
         detailNavigation: Object.freeze({
           status: "error" as const,
-          source: pendingDetail.source,
-          context: pendingDetail.context,
-          returnSnapshot: pendingDetail.returnSnapshot,
+          source: activeDetail.source,
+          context: activeDetail.context,
+          returnSnapshot: activeDetail.returnSnapshot,
           errorCode: "detail-unavailable",
         }),
       });
@@ -741,7 +790,7 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
   }
 
   let acceptedState: MobileExchangeStage3ContinuityState = Object.freeze({ ...state, activeProjection: projection });
-  if (pendingDetail && result.focalIdentity) {
+  if (activeDetail?.status === "opening" && result.focalIdentity) {
     const mapObject = projection.map.objects.find((candidate) =>
       (candidate.kind === "organization" || candidate.kind === "record")
       && subjectIdentityMatches(candidate.identity, result.focalIdentity!),
@@ -754,8 +803,8 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
     acceptedState = Object.freeze({
       ...acceptedState,
       selection,
-      detail: Object.freeze({ status: "open" as const, detailContext: pendingDetail.context, errorCode: null }),
-      detailNavigation: Object.freeze({ ...pendingDetail, status: "open" as const }),
+      detail: Object.freeze({ status: "open" as const, detailContext: activeDetail.context, errorCode: null }),
+      detailNavigation: Object.freeze({ ...activeDetail, status: "open" as const }),
     });
   }
   return Object.freeze({ status: "accepted", state: acceptedState, projection });
@@ -763,7 +812,15 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
 
 export function closeMobileExchangeDetail(
   state: MobileExchangeStage3ContinuityState,
-  input: Readonly<{ currentScope: MobileExchangeContinuityScope; stillAuthorized: boolean }>,
+  input: Readonly<{
+    currentScope: MobileExchangeContinuityScope;
+    detailStillAuthorized: boolean;
+    returnContextAuthorized: boolean;
+    returnFocalSubjectAuthorized: boolean;
+    returnAssociatedOrganizationAuthorized: boolean;
+    returnRelationshipAuthorized: boolean;
+    revalidatedReturnSelection: ExchangeSelectionState | null;
+  }>,
 ): Readonly<{ state: MobileExchangeStage3ContinuityState | null; returnHref: string; focusReturnKey: string | null }> {
   const navigation = state.detailNavigation;
   if (navigation.status === "closed") {
@@ -781,7 +838,16 @@ export function closeMobileExchangeDetail(
       focusReturnKey: null,
     });
   }
-  if (!input.stillAuthorized) {
+  if (
+    typeof input.detailStillAuthorized !== "boolean"
+    || typeof input.returnContextAuthorized !== "boolean"
+    || typeof input.returnFocalSubjectAuthorized !== "boolean"
+    || typeof input.returnAssociatedOrganizationAuthorized !== "boolean"
+    || typeof input.returnRelationshipAuthorized !== "boolean"
+  ) {
+    throw new Error("Detail close requires explicit detail, return-context, and selection authorization results.");
+  }
+  if (!input.detailStillAuthorized) {
     const safeState = Object.freeze({
       ...state,
       selection: createExchangeSelectionState({ kind: "none" }),
@@ -802,11 +868,33 @@ export function closeMobileExchangeDetail(
       focusReturnKey: null,
     });
   }
+  const revalidatedReturnSelection = input.revalidatedReturnSelection;
+  const returnSelectionAuthorized = input.returnContextAuthorized
+    && revalidatedReturnSelection !== null
+    && completeSelectionMatches(snapshot.selection, revalidatedReturnSelection)
+    && (
+      snapshot.selection.kind === "none"
+      || (
+        input.returnFocalSubjectAuthorized
+        && (
+          snapshot.selection.kind !== "record"
+          || snapshot.selection.selectedOrganization === null
+          || input.returnAssociatedOrganizationAuthorized
+        )
+        && (
+          snapshot.selection.selectedRelationship === null
+          || input.returnRelationshipAuthorized
+        )
+      )
+    );
+  const restoredSelection = returnSelectionAuthorized && revalidatedReturnSelection
+    ? revalidatedReturnSelection
+    : createExchangeSelectionState({ kind: "none" });
   const lensState = state.lensState[snapshot.query.lens];
   const restored = Object.freeze({
     ...state,
     activeLens: snapshot.query.lens,
-    selection: snapshot.selection,
+    selection: restoredSelection,
     mapCamera: snapshot.mapCamera,
     mapBounds: snapshot.mapBounds,
     lensState: Object.freeze({
@@ -843,7 +931,11 @@ export function closeMobileExchangeDetail(
       errorCode: null,
     }),
   });
-  return Object.freeze({ state: restored, returnHref: snapshot.returnHref, focusReturnKey: snapshot.focusReturnKey });
+  return Object.freeze({
+    state: restored,
+    returnHref: returnSelectionAuthorized ? snapshot.returnHref : CANONICAL_LENS_HREFS[snapshot.query.lens],
+    focusReturnKey: returnSelectionAuthorized ? snapshot.focusReturnKey : null,
+  });
 }
 
 function closeDetail(
