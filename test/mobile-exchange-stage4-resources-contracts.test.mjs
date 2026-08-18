@@ -314,19 +314,23 @@ test("compact destination validates the framework-decoded RFx return suffix with
   });
 });
 
-test("compact-route query mutations retain server-revalidated RFx return context", () => {
+test("compact-route query mutations overwrite raw collisions with server-revalidated RFx context", () => {
   const queryState = parseResourcesMobileWorkspaceQuery({
     rfxReference: "RFX-47",
     rfxGap: "Need capital readiness",
     returnTo: "/opportunities/RFX-47/assess?tab=gaps#gap-2",
   });
-  const href = resourcesWorkspaceMutationHref("", queryState, {
+  const href = resourcesWorkspaceMutationHref(
+    "rfxReference=RFX-OTHER&rfxGap=stale&returnTo=%2Fopportunities%2FRFX-OTHER%2Fassess",
+    queryState,
+    {
     q: "capital",
     availability: "available",
     provider: null,
     resource: null,
     request: null,
-  });
+    },
+  );
   const parsed = new URL(href, "https://participant.invalid");
   assert.equal(parsed.pathname, "/resources");
   assert.equal(parsed.searchParams.get("q"), "capital");

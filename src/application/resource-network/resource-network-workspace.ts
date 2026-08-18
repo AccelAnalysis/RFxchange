@@ -141,7 +141,8 @@ export function resourcesWorkspaceMutationHref(
     returnTo: queryState.returnTo,
   } as const;
   for (const [key, value] of Object.entries(carriedContext)) {
-    if (value && !next.has(key)) next.set(key, value);
+    if (value) next.set(key, value);
+    else next.delete(key);
   }
   const normalizedUpdates: Record<string, string | null | undefined> = { ...updates };
   if (typeof updates.provider === "string" && !("resource" in updates) && !("request" in updates)) {
