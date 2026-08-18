@@ -1213,12 +1213,12 @@
       "requirementIds": ["RFX-FEATURE-DSC-010", "RFX-FEATURE-RSP-007", "RFX-FEATURE-RSP-008", "RFX-FEATURE-TEM-001", "RFX-FEATURE-TEM-002", "RFX-FEATURE-TEM-003", "RFX-FEATURE-TEM-004", "RFX-FEATURE-ACQ-007"],
       "sources": ["docs/slices/WAVE_4_RFX_CORE_ROADMAP.md", "docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/rfx/RFX_CORE_PRODUCT_WORKSPACES.md"],
       "dependencies": [{ "packetId": "WP-RFX-46-RECONCILE", "requiredStatuses": ["closed"] }],
-      "ownedPaths": ["docs/slices/SLICE_4_7_EXECUTION_AUTHORITY.md", "src/domain/rfx/**", "src/application/rfx/**", "src/infrastructure/rfx/**", "src/components/rfx/**", "app/opportunities/**", "app/api/opportunities/**", "test/rfx47-*.test.mjs", "scripts/rfx47-*.mjs", "docs/program/evidence/rfx47/**"],
+      "ownedPaths": ["docs/slices/SLICE_4_7_EXECUTION_AUTHORITY.md", "src/domain/rfx/**", "src/application/rfx/**", "src/infrastructure/rfx/**", "src/components/rfx/**", "src/i18n/messages/rfx/**", "app/opportunities/**", "app/api/opportunities/**", "app/acquisition/continue/page.tsx", "test/rfx47-*.test.mjs", "scripts/rfx47-*.mjs", "docs/program/evidence/rfx47/**"],
       "nonOwnedPaths": ["src/application/participant/**", "src/components/participant/**", "src/domain/referrals/**", "functions/**", "firestore.rules", "live payment", "deployment"],
       "acceptanceRequired": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "copy", "performance", "emulator", "exact-head-ci", "configured-browser"],
       "mergeGates": ["Slice 4.7 documentation authority from current main", "real gap-bound discovery", "RFx-scoped invite lifecycle", "accept/decline authorization", "nonbinding boundary", "external acquisition continuity", "no known material finding"],
       "expectedOutput": "Merged Slice 4.7 teaming and gap-resolution runtime for its exact Feature IDs, with no implied contract or automatic RFx authority.",
-      "stopBoundary": "Do not begin response construction, submit a response, create legal teaming terms, alter unrelated referral/commercial behavior, deploy or claim optional assurance."
+      "stopBoundary": "The rfx locale catalogs are owned only for the five-locale Slice 4.7 participant copy, and acquisition continuation is owned only to route an already server-bound team-invitation subject to the exact owned review page without attachment or auto-acceptance. Do not begin response construction, submit a response, create legal teaming terms, alter unrelated acquisition/referral/commercial behavior, deploy or claim optional assurance."
     },
     {
       "id": "WP-MOBILE-EXCHANGE-RFX-48-01",
