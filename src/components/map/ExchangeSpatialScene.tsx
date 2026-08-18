@@ -623,7 +623,9 @@ export function ExchangeSpatialScene({
   const reducedMotionRef = useRef(false);
   const modeRef = useRef(mode);
   const modelRef = useRef(model);
-  const markerRef = useRef(sceneMarker);
+  // The governed home marker remains the organization-mode camera anchor even
+  // when its legacy visual source is deduplicated against a lens projection.
+  const markerRef = useRef(marker);
   const onOrganizationMarkerSelectRef = useRef(onOrganizationMarkerSelect);
   const onOpportunityMarkerSelectRef = useRef(onOpportunityMarkerSelect);
   const onLensProjectionSelectRef = useRef(onLensProjectionSelect);
@@ -721,7 +723,7 @@ export function ExchangeSpatialScene({
 
   modeRef.current = mode;
   modelRef.current = model;
-  markerRef.current = sceneMarker;
+  markerRef.current = marker;
   if (!sceneInitializationStartedRef.current) initialCameraRef.current = initialCamera;
   onOrganizationMarkerSelectRef.current = onOrganizationMarkerSelect;
   onOpportunityMarkerSelectRef.current = onOpportunityMarkerSelect;

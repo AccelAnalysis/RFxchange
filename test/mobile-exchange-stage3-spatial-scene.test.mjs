@@ -28,5 +28,8 @@ test("governed areas require exact authority keys and legacy overlays cannot dup
   assert.match(scene, /data-lens-projection-list-only-count/);
   assert.match(scene, /point\.projection\.markerId === marker\.id/);
   assert.match(scene, /const sceneMarker = homeMarkerIsProjected \? null : marker/);
+  assert.match(scene, /const markerRef = useRef\(marker\)/);
+  assert.match(scene, /markerRef\.current = marker/);
+  assert.match(scene, /markerGeoJson\(sceneMarker\)/);
   assert.match(scene, /data-lens-projection-deduplicated-home-marker/);
 });
