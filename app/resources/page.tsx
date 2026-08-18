@@ -13,6 +13,7 @@ import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
+import { createServerFirestoreFoundationRepositories } from "@/src/infrastructure/firestore/runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
 import { loadAuthorizedNetworkDiscovery } from "@/src/infrastructure/network-discovery/runtime";
 import { createServerReferralNetworkService } from "@/src/infrastructure/referrals/runtime";
@@ -61,24 +62,39 @@ export default async function ResourcesPage({ searchParams }: Props) {
   });
   const service = createServerResourceNetworkService();
 
-  // These reads are independent. Keep optional/owner and referral hydration off the critical path
-  // while Network discovery supplies the only input required by provider/resource discovery.
+  // Discovery and permission resolution are independent. Provider/resource discovery remains
+  // available to an authorized OPEN participant even when request or provider-management
+  // permissions are absent; only those private adjunct projections are omitted.
   const networkPromise = loadAuthorizedNetworkDiscovery({
     access,
     mapProjection,
     focusedOrganizationId: queryState.organizationId ?? queryState.providerId,
   });
-  const referralsPromise = createServerReferralNetworkService().snapshot(actor);
-  const ownerPromise = service.ownerSnapshot(actor).catch((error: unknown) => {
-    if (error instanceof ResourceNetworkError && error.code === "forbidden") return null;
-    throw error;
-  });
+  const authorizationPromise = createServerFirestoreFoundationRepositories()
+    .organizationAuthorization
+    .getByMembershipId(access.membership.id);
+  const [network, authorization] = await Promise.all([
+    networkPromise,
+    authorizationPromise,
+  ]);
+  const permissions = authorization?.permissions ?? [];
+  const referralManage = permissions.includes("referral.manage");
+  const resourceManage = permissions.includes("resource.manage");
+
+  const referralsPromise = referralManage
+    ? createServerReferralNetworkService().snapshot(actor)
+    : Promise.resolve([]);
+  const ownerPromise = resourceManage
+    ? service.ownerSnapshot(actor).catch((error: unknown) => {
+        if (error instanceof ResourceNetworkError && error.code === "forbidden") return null;
+        throw error;
+      })
+    : Promise.resolve(null);
   const independentHydrationPromise = Promise.allSettled([
     referralsPromise,
     ownerPromise,
   ] as const);
 
-  const network = await networkPromise;
   const markers = network.available
     ? network.projection.organizations.map((organization) => Object.freeze({
         organizationId: String(organization.organizationId),
@@ -112,6 +128,9 @@ export default async function ResourcesPage({ searchParams }: Props) {
   const providers = resourceProjection.available
     ? resourceProjection.projection.providers
     : [];
+  const resources = resourceProjection.available
+    ? resourceProjection.projection.resources
+    : [];
   const selectedProviderId = authorizedWorkspaceSelection(
     queryState.providerId,
     providers.map((provider) => String(provider.organizationId)),
@@ -119,6 +138,10 @@ export default async function ResourcesPage({ searchParams }: Props) {
   const selectedOrganizationId = authorizedWorkspaceSelection(
     queryState.organizationId,
     markers.map((organization) => organization.organizationId),
+  );
+  const selectedResourceId = authorizedWorkspaceSelection(
+    queryState.resourceId,
+    resources.map((resource) => resource.id),
   );
   const selectedRequestId = authorizedWorkspaceSelection(
     queryState.requestId,
@@ -149,7 +172,7 @@ export default async function ResourcesPage({ searchParams }: Props) {
         }),
       })) : []}
       providers={providers}
-      resources={resourceProjection.available ? resourceProjection.projection.resources : []}
+      resources={resources}
       referrals={referrals}
       owner={owner}
       commandRecoveryScope={commandRecoveryScope}
@@ -157,6 +180,7 @@ export default async function ResourcesPage({ searchParams }: Props) {
         ...queryState,
         organizationId: selectedOrganizationId,
         providerId: selectedProviderId,
+        resourceId: selectedResourceId,
         requestId: selectedRequestId,
       })}
       selectedMessages={selectedMessages}

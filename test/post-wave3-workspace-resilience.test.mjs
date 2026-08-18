@@ -25,6 +25,7 @@ test("Resource Network query state normalizes the bounded URL contract", () => {
       availability: "limited",
       organizationId: "org-focus.1",
       providerId: "org-provider.1",
+      resourceId: null,
       requestId: "referral:1",
     },
   );
@@ -34,16 +35,18 @@ test("Resource Network query state normalizes the bounded URL contract", () => {
     availability: "fabricated",
     organization: "../not-authority",
     provider: "../not-authority",
+    resource: "../not-authority",
     request: "",
   });
   assert.equal(invalid.query.length, 160);
   assert.equal(invalid.availability, "all");
   assert.equal(invalid.organizationId, null);
   assert.equal(invalid.providerId, null);
+  assert.equal(invalid.resourceId, null);
   assert.equal(invalid.requestId, null);
 });
 
-test("selected provider and request identities must remain in the authorized projection", () => {
+test("selected provider, Resource, and request identities must remain in the authorized projection", () => {
   assert.equal(authorizedWorkspaceSelection("org-2", ["org-1", "org-2"]), "org-2");
   assert.equal(authorizedWorkspaceSelection("org-private", ["org-1", "org-2"]), null);
   assert.equal(authorizedWorkspaceSelection(null, ["org-1"]), null);

@@ -8,6 +8,7 @@ export interface ResourceNetworkWorkspaceQuery {
   readonly availability: ResourceAvailabilityFilter;
   readonly organizationId: string | null;
   readonly providerId: string | null;
+  readonly resourceId: string | null;
   readonly requestId: string | null;
 }
 
@@ -38,6 +39,7 @@ export function parseResourceNetworkWorkspaceQuery(
     availability,
     organizationId: workspaceId(params.organization),
     providerId: workspaceId(params.provider),
+    resourceId: workspaceId(params.resource),
     requestId: workspaceId(params.request),
   });
 }
