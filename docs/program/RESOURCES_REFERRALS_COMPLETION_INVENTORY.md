@@ -22,7 +22,9 @@ These map to `RES-LENS-001`–`008` as `Implemented — Not Verified`.
 | `RES-LENS-011` | Public-logo/marker behavior depends on Shared Exchange's unresolved safe logo projection. | Submit/consume the shared contract; do not expose private Storage references. |
 | `RES-LENS-012` | No whole-lens independent acceptance exists under the new model. | After requirements resolve, run Lane 06 and Lane 07 acceptance. |
 
-## Referrals
+## Referrals — successor cross-lens disposition
+
+Referrals is no longer a permanent lens under `MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md`. This inventory now supplies cross-lens referral and Menu/Account implementation provenance; it must not be used to restore Referrals to permanent navigation.
 
 ### Existing implementation evidence
 
@@ -38,8 +40,8 @@ These map to `RES-LENS-001`–`008` as `Implemented — Not Verified`.
 
 | Record | Gap | Required action |
 | --- | --- | --- |
-| `REF-LENS-010` | The approved lens experience names a Starred view, but no governed star relation/completion evidence was found. | Confirm authority and persistence; issue a bounded Referrals packet or obtain explicit disposition. |
-| `REF-LENS-012` | No whole-lens independent acceptance exists under the new model. | After requirements resolve, run Lane 06 and Lane 07 acceptance. |
+| `REF-LENS-010` | The historical lens experience names a Starred view, but no governed star relation/completion evidence was found. | Reconcile saved/follow behavior only under the current cross-lens/Menu authority; do not invent universal referral favorites. |
+| `REF-LENS-012` | Its whole-permanent-lens acceptance target is obsolete under the product-owner successor architecture. | Preserve the record and apply the explicit successor/N/A disposition; use `MOB36-REFERRAL-*` for current acceptance. |
 
 ## Initial packets
 

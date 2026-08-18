@@ -30,7 +30,8 @@ A domain-dependent brand expression may ship only when its authoritative domain 
 
 The no-Feature-ID Exchange-shell truthfulness gate establishes the current participant navigation and loading baseline:
 
-- the primary lens sequence is exactly `Opportunities/RFx | Resources | Intelligence | Referrals`;
+- the primary lens sequence is exactly `Opportunities/RFx | Resources | Intelligence | Capabilities`;
+- Referrals is a governed cross-lens function and Menu/Account destination, not a primary lens;
 - Opportunities/RFx is visibly present but explicitly unavailable, has no href, is not current and is described with text and assistive semantics rather than color alone;
 - Network remains the current organization-network view/domain concept within Intelligence, not a peer lens;
 - Account and Quick Start are separate utilities in the persistent participant header;

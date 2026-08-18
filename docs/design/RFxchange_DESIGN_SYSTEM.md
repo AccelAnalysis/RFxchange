@@ -287,7 +287,7 @@ Participant routes share one restrained primary navigation, normally `60–64px`
 desktop and more compact on mobile. It carries the RFxchange identity, approved primary
 product navigation and appropriate account/menu access.
 
-Do not add a permanent left rail for Intelligence, Referrals, Opportunities, Resources or
+Do not add a permanent left rail for Intelligence, Capabilities, Opportunities, Resources or
 other participant primary modes. Avoid stacking a global bar, route header, map title bar
 and search toolbar. Spatial routes normally consist of:
 

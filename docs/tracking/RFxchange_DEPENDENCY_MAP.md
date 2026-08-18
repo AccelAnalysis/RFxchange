@@ -10,6 +10,28 @@
 - Dependencies are prerequisites, not implicit completion. Satisfying a prerequisite never marks the dependent feature Done.
 - Recalculate the next slice from the merged `main` state after each slice or required non-Feature gate.
 
+## Mobile Exchange Stages 3–6 successor chain — reviewed 2026-08-18
+
+This chain is a current cross-cutting experience dependency and does not change Feature-ID completion by itself.
+
+```text
+PR #222 / Stage 2 shared composition (`1fbf38e71747ac90c2f285e4934b22ea26312bec`)
+  → Stages 3–6 product authority and immutable requirement/work-packet amendment
+  → shared permanent-lens registry + legacy Referrals-lens state migration
+  → Stage 3 shared query/map/result/detail/return contracts
+      ├─ Stage 4 Opportunities/RFx domain adapter (current RFx authorities + reconciled alerts)
+      ├─ Stage 4 Resources domain adapter (RES-001–005, RES-007–008, DSC-011, REF-006)
+      ├─ Stage 4 Intelligence domain adapter (approved real-data/provenance sources only)
+      └─ Stage 4 Capabilities domain adapter (organization capability + AMACS 0.5.0 contracts)
+          → Stage 5 cross-lens Referrals + Menu/Account management
+          → Stage 5 registration/onboarding convergence
+          → Stage 6 integrated acceptance, release, deployment and production-safe smoke
+```
+
+The four Stage 4 adapters may build in parallel only after Stage 3 shared contracts merge and each packet declares the exact current base. Their merge order remains dependency-aware. Stage 5 may consume only merged domain actions and must preserve the current referral/privacy/commercial boundaries. Stage 6 integrates merged main and cannot be used to backfill dependency-ineligible domain scope.
+
+The final permanent-lens order is `Opportunities/RFx | Resources | Intelligence | Capabilities`. Referrals remains a cross-lens domain and Menu/Account utility. Historical Stage 1–2 evidence is not rewritten.
+
 ## Reviewed dependency corrections — 2026-07-30
 
 | Feature | Seeded dependency | Canonical dependency | Reason for correction |

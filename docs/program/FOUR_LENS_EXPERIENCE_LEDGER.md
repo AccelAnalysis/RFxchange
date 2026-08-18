@@ -4,19 +4,21 @@ The canonical machine ledger is [`../../governance/four-lens-requirements.json`]
 
 ## Status meaning
 
-Only `Verified` counts as experience completion. `Implemented — Not Verified` records historical or candidate implementation without independent program certification. `Blocked` and explicit deferral never enter the verified numerator.
+Under `FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, `Implemented — Not Verified` may be terminal completion when its implementation/evidence/dependency/material-defect rule is satisfied. `Verified` is a separate optional independent-assurance label. Blocked, deferred, N/A, implemented, merged, released, live and Verified remain distinct facts.
 
 ## Denominators
 
 | Experience | Stable range | Denominator | Current characterization |
 | --- | --- | ---: | --- |
-| Shared Exchange | `SHARED-*` | 27 | 22 implemented/not verified, one not started, three blocked, one explicitly deferred |
-| Opportunities/RFx | `RFX-FEATURE-*` | 41 | 18 previously accepted/assurance pending, five Slice 4.6 candidate, 18 not started |
-| Resources | `RES-LENS-*` | 12 | eight implemented/not verified, two not started, two blocked |
-| Intelligence | `INTEL-*` | 14 | three implemented/not verified, six not started, five dependency-blocked |
-| Referrals | `REF-LENS-*` | 12 | ten implemented/not verified, one not started, one blocked |
+| Shared Exchange | `SHARED-*`, shared `MOB36-*` | 35 | 22 implemented/not verified, nine not started, three blocked, one explicitly deferred |
+| Opportunities/RFx | `RFX-FEATURE-*`, `MOB36-OPPORTUNITIES-*` | 42 | 23 implemented/not verified, 19 not started |
+| Resources | `RES-LENS-*`, `MOB36-RESOURCES-*` | 13 | eight implemented/not verified, three not started, two blocked |
+| Intelligence | `INTEL-*`, `MOB36-INTELLIGENCE-*` | 15 | three implemented/not verified, seven not started, five dependency-blocked |
+| Capabilities | `MOB36-CAPABILITIES-*` | 3 | three not started |
+| Referrals Cross-Lens | `REF-LENS-*`, `MOB36-REFERRAL-*` | 14 | ten implemented/not verified, three not started, one blocked |
+| Integration | integration-owned `MOB36-*` | 5 | five not started |
 
-The program denominator is 106 requirements. The delivery matrix displays cross-cutting `SHARED-EVIDENCE-001` with Shared Exchange because that is the candidate where the procedural gap occurred.
+The append-only program denominator is 127 requirements. The original 106 records remain immutable and in order. The delivery matrix displays cross-cutting `SHARED-EVIDENCE-001` with Shared Exchange because that is the candidate where the procedural gap occurred.
 
 ## Shared Exchange register
 
@@ -77,15 +79,19 @@ See [`RESOURCES_REFERRALS_COMPLETION_INVENTORY.md`](RESOURCES_REFERRALS_COMPLETI
 
 See [`INTELLIGENCE_PROGRAM_ROADMAP.md`](INTELLIGENCE_PROGRAM_ROADMAP.md).
 
-## Referrals register
+## Capabilities register
 
-`REF-LENS-001`–`009` retain existing referral implementation as unverified program evidence. `REF-LENS-010` Starred is Not Started. `REF-LENS-011` is Implemented — Not Verified through the PR #186 shared selected-organization continuity correction; `REF-LENS-012` remains blocked until the complete lens is independently accepted.
+`MOB36-CAPABILITIES-001`, `MOB36-CAPABILITIES-AMACS-001`, and `MOB36-CAPABILITIES-MATCH-001` govern the substantive fourth lens. They require organization-profile reuse, confirmed AMACS-backed assertions, evidence/verification separation, manual browse/search, non-authoritative assistance, comparison, explainable RFx matching, gaps, and real domain actions.
+
+## Referrals Cross-Lens register
+
+`REF-LENS-001`–`011` retain existing referral-domain implementation as program evidence. `MOB36-REFERRAL-CROSS-LENS-001` and `MOB36-REFERRAL-MENU-001` govern the successor cross-lens/Menu experience. The whole-lens-only `REF-LENS-012` is historical and receives an explicit successor/N/A disposition rather than being deleted.
 
 ## Ledger change rules
 
 - Stable IDs and original requirement text are append-only.
 - A clarification never replaces the original requirement.
-- A builder can move a record only to `Implemented — Not Verified`, `Partial`, or `Blocked` through a reviewed implementation change.
-- Only Lane 06 evidence can support `Verified`.
+- A builder may record `Implemented — Not Verified` only with the current completion evidence and material-finding discipline.
+- Only Lane 06 evidence can support the optional `Verified` label.
 - A deferral record is invalid without every mandatory field and explicit approval.
 - Denominator changes require a source-linked new record or an explicitly approved Not Applicable disposition; deletion is prohibited.

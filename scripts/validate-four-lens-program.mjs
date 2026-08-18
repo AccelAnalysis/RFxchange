@@ -12,6 +12,7 @@ const digest = (value) => createHash("sha256").update(JSON.stringify(value)).dig
 
 const requiredDocuments = [
   "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md",
+  "docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md",
   "docs/program/FOUR_LENS_EXPERIENCE_LEDGER.md",
   "docs/program/PARALLEL_DELIVERY_MATRIX.md",
   "docs/program/SHARED_EXCHANGE_CONTRACTS.md",
@@ -31,6 +32,7 @@ for (const file of requiredDocuments) assert.ok(exists(file), `Missing Four-Lens
 const requirements = json("governance/four-lens-requirements.json");
 const workstreams = json("governance/four-lens-workstreams.json");
 const authority = read("docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md");
+const stages36Authority = read("docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md");
 const matrix = read("docs/program/PARALLEL_DELIVERY_MATRIX.md");
 const wave4Assurance = read("docs/program/WAVE_4_ASSURANCE_LEDGER.md");
 const agents = read("AGENTS.md");
@@ -52,13 +54,21 @@ const expectedVerifiedEvidenceSchema = {
   manifest: "A durable Lane 06 JSON manifest binding candidate SHA, base SHA, reviewer, GitHub Actions run, environment, and a passed timestamped check plus artifacts for every claimed type.",
   coverage: "Verified requires at least one manifest-backed evidence entry for every acceptance type declared by the requirement.",
 };
-const expectedLanes = ["control-room", "shared-exchange", "opportunities-rfx", "intelligence", "resources", "referrals", "independent-acceptance", "integration"];
+const expectedLanes = ["control-room", "shared-exchange", "opportunities-rfx", "intelligence", "resources", "referrals", "independent-acceptance", "integration", "capabilities"];
 const expectedPacketStatuses = ["ready-after-authority-merge", "frozen-until-authority-merge", "in-progress", "active", "reconciliation-authorized", "implemented-not-verified", "acceptance-pending", "verified", "completed", "blocked", "closed"];
 const shaPattern = /^[0-9a-f]{40}$/;
 const identityPattern = /^github(?:-app)?:[A-Za-z0-9](?:[A-Za-z0-9_.\-\[\]]*[A-Za-z0-9_\-\[\]])?$/;
 const githubReviewPattern = /^https:\/\/github\.com\/AccelAnalysis\/RFxchange\/(?:pull\/\d+(?:#.+)?|actions\/runs\/\d+(?:\/.*)?)$/;
 
 const adoptionBaseline = {
+  algorithm: "sha256-json-v1",
+  recordCount: 127,
+  idDigest: "7fb07cad812ddaafd3636526b434f45d993d576db4d34eb06dd9782eed534e4a",
+  originalRequirementDigest: "bb80aedfecfe5fb1aaee976ee66faec3820f786e3acc0709f8286427c599761a",
+  governanceMetadataDigest: "68951aa360a20eb97b308964ee83552ba2228088710064f0f854bca01b7c07d4",
+};
+const historicalRequirementBaseline = {
+  name: "four-lens-adoption-2026-08-12",
   algorithm: "sha256-json-v1",
   recordCount: 106,
   idDigest: "ac587e5ce4fefeb6c1b28e7c0cfab89e81e0e180b8e20d9cb7e087ef03219a67",
@@ -73,6 +83,9 @@ const adoptionPacketBaseline = {
 };
 
 assert.deepEqual(requirements.statuses, expectedStatuses);
+assert.equal(requirements.productAuthority, "docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md");
+assert.equal(workstreams.productAuthority, requirements.productAuthority);
+assert.deepEqual(workstreams.productOwnerIdentities, ["github:AccelAnalysis"]);
 assert.deepEqual(requirements.acceptanceDispositions, expectedDispositions);
 assert.deepEqual(requirements.acceptanceTypes, expectedAcceptanceTypes);
 assert.deepEqual(requirements.verifiedEvidenceSchema, expectedVerifiedEvidenceSchema);
@@ -104,6 +117,16 @@ assert.equal(
   "Immutable requirement source, ownership, dependencies, or acceptance obligations were rewritten",
 );
 
+assert.deepEqual(requirements.historicalBaselines, [historicalRequirementBaseline]);
+const originalRecords = requirements.requirements.slice(0, historicalRequirementBaseline.recordCount);
+assert.equal(digest(originalRecords.map((record) => record.id)), historicalRequirementBaseline.idDigest, "Original 106 requirement IDs changed");
+assert.equal(digest(originalRecords.map(({ id, originalRequirement }) => ({ id, originalRequirement }))), historicalRequirementBaseline.originalRequirementDigest, "Original 106 requirement text changed");
+assert.equal(
+  digest(originalRecords.map(({ id, source, lane, dependentLanes, dependencies, acceptanceTypes }) => ({ id, source, lane, dependentLanes, dependencies, acceptanceTypes }))),
+  historicalRequirementBaseline.governanceMetadataDigest,
+  "Original 106 requirement governance metadata changed",
+);
+
 assert.equal(workstreams.adoptionPacketBaseline?.algorithm, adoptionPacketBaseline.algorithm);
 assert.equal(workstreams.adoptionPacketBaseline?.recordCount, adoptionPacketBaseline.recordCount);
 assert.equal(workstreams.adoptionPacketBaseline?.idDigest, adoptionPacketBaseline.idDigest);
@@ -122,6 +145,37 @@ assert.match(authority, /Layer 1 — Bootstrap Governance/);
 assert.match(authority, /Layer 2 — Acceptance Integrity Hardening/);
 assert.match(agents, /FOUR_LENS_PROGRAM_AUTHORITY\.md/);
 assert.match(agents, /only the Independent Acceptance lane may record `Verified`/);
+assert.match(stages36Authority, /Opportunities\/RFx \| Resources \| Intelligence \| Capabilities/);
+assert.match(stages36Authority, /Referrals is a governed cross-lens business function/);
+assert.match(stages36Authority, /paid referral fees, live financial obligations, and payout management are not authorized/);
+assert.match(stages36Authority, /Stabilization 2C remains incomplete/);
+assert.deepEqual(
+  requirements.requirements.slice(106).map((record) => record.id),
+  [
+    "MOB36-LENS-001",
+    "MOB36-MIGRATION-001",
+    "MOB36-SHARED-QUERY-001",
+    "MOB36-SHARED-MAP-001",
+    "MOB36-SHARED-RESULT-001",
+    "MOB36-SHARED-DETAIL-001",
+    "MOB36-OPPORTUNITIES-001",
+    "MOB36-RESOURCES-001",
+    "MOB36-INTELLIGENCE-001",
+    "MOB36-CAPABILITIES-001",
+    "MOB36-CAPABILITIES-AMACS-001",
+    "MOB36-CAPABILITIES-MATCH-001",
+    "MOB36-REFERRAL-CROSS-LENS-001",
+    "MOB36-REFERRAL-MENU-001",
+    "MOB36-MENU-001",
+    "MOB36-WORKFLOW-001",
+    "MOB36-NOTIFICATIONS-001",
+    "MOB36-ONBOARDING-001",
+    "MOB36-COMMERCIAL-001",
+    "MOB36-INTEGRATION-001",
+    "MOB36-RELEASE-001",
+  ],
+  "Stages 3–6 successor requirements must remain append-only and ordered",
+);
 
 const identityModel = workstreams.independentAcceptanceIdentityModel;
 assert.equal(identityModel?.lane, "independent-acceptance");
@@ -448,7 +502,9 @@ for (const [label, select] of [
   ["Opportunities/RFx", (record) => record.lane === "opportunities-rfx"],
   ["Resources", (record) => record.lane === "resources"],
   ["Intelligence", (record) => record.lane === "intelligence"],
-  ["Referrals", (record) => record.lane === "referrals"],
+  ["Capabilities", (record) => record.lane === "capabilities"],
+  ["Referrals Cross-Lens", (record) => record.lane === "referrals"],
+  ["Integration", (record) => record.lane === "integration"],
 ]) {
   const records = requirements.requirements.filter(select);
   const count = (statuses) => records.filter((record) => statuses.includes(record.status)).length;

@@ -14,14 +14,14 @@ This registry identifies behavior that must remain one shared Exchange contract 
 
 | Contract | Stable requirements / authority | Shared owner | Domain consumers |
 | --- | --- | --- | --- |
-| Participant shell and lens registry | `SHARED-TRUTH-*`, `SHARED-LENS-CONTEXT-*`, `SHARED-TRANSITION-*` | Lane 01 | Lanes 02–05 |
-| Spatial context and invalidation | `SHARED-SPATIAL-*`, `SHARED-CAMERA-*`, `SHARED-VIEW-*` | Lane 01 | Lanes 02–05 |
-| Selected-object and marker grammar | `SHARED-SELECTION-*`, `SHARED-MARKER-*`, `SHARED-CLUSTER-*`, `SHARED-IDENTITY-*` | Lane 01 | Lanes 02–05 |
-| Result drawer/sheet and search/filter grammar | `SHARED-DRAWER-*`, `SHARED-RESULT-*`, `SHARED-SEARCH-*` | Lane 01 | Lanes 02–05 |
-| Cross-lens continuation and safe return | `SHARED-CONTINUITY-*`, `SHARED-RETURN-*` | Lane 01 | Lanes 02–05 |
-| Lens-level action projection | `SHARED-ACTIONS-*`; `EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md` | Lane 01 with domain-owned eligibility inputs | Lanes 02–05 |
-| Record cards, media, favorites, and record actions | `MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md`; Stage 1 packet | Lane 01 contracts; domain-owned facts/operations | Lanes 02–05 |
-| Mobile shell, persistent bottom navigation, and three-position sheet | `MOB-01`; `MOBILE_EXCHANGE_STAGE_1_ARCHITECTURE_LOCK.md` | Lane 01 | Lanes 02–05 |
+| Participant shell and lens registry | `SHARED-TRUTH-*`, `SHARED-LENS-CONTEXT-*`, `SHARED-TRANSITION-*`; `MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md` | Lane 01 | Opportunities, Resources, Intelligence, Capabilities, cross-lens Referrals |
+| Spatial/query context and invalidation | `SHARED-SPATIAL-*`, `SHARED-CAMERA-*`, `SHARED-VIEW-*`, `MOB36-SHARED-QUERY-*` | Lane 01 | all participant domains |
+| Selected-object and marker grammar | `SHARED-SELECTION-*`, `SHARED-MARKER-*`, `SHARED-CLUSTER-*`, `SHARED-IDENTITY-*` | Lane 01 | all participant domains |
+| Result drawer/sheet and search/filter grammar | `SHARED-DRAWER-*`, `SHARED-RESULT-*`, `SHARED-SEARCH-*`, `MOB36-SHARED-RESULT-*` | Lane 01 | all participant domains |
+| Cross-lens continuation and safe return | `SHARED-CONTINUITY-*`, `SHARED-RETURN-*`, `MOB36-REFERRAL-*` | Lane 01 | all participant domains |
+| Lens-level action projection | `SHARED-ACTIONS-*`; `EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md`; successor action matrix | Lane 01 with domain-owned eligibility inputs | four permanent lenses |
+| Record cards, media, favorites, and record actions | `MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md`; `MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md` | Lane 01 contracts; domain-owned facts/operations | all participant domains |
+| Mobile shell, persistent bottom navigation, and three-position sheet | `MOB-01` through `MOB-05`; successor lens migration | Lane 01 | four permanent lenses |
 | Account utility and optional Administration | `SHARED-ACCOUNT-*` | Lane 01 | all participant lanes |
 | Truthful copy, accessibility, locales, and performance | `SHARED-COPY-*`, `SHARED-PRIVACY-*`, `SHARED-A11Y-*`, `SHARED-I18N-*`, `SHARED-PERF-*` | Lane 01 | Lanes 02–05 |
 
@@ -84,41 +84,21 @@ The detailed review protocol and convergence ledger are in `MOBILE_EXCHANGE_STAG
 - Disabled presentation is never the security boundary, and explanation keys must resolve in every supported locale.
 - A shared contract may be `Implemented — Not Verified` without mandatory Lane 06 review when current completion governance is otherwise satisfied.
 
-## Current Stage 1 state
+## Integrated Stage 1–2 state
 
-- Control Room packet: PR #217.
-- Lane 01 candidate: PR #218 at `f41b791644c6a3b372e28a1db7c32d16c1a25714`.
-- Candidate disposition: `Implemented — Not Verified`.
-- Production-ci #1494: SUCCESS.
-- Lane 02 reviewed prior head `3c67ef3d…` with FINDING and must re-review the current/final head.
-- Lanes 03–05 have not submitted reviews.
-- Stage 1 exit gate: not satisfied.
-- Stage 2: not authorized.
+- Stage 1 Control Room: PR #217; shared contract candidate: PR #218; merge `9b97b37365b0e3cab1292cccb86ffe248d5734a2`.
+- Stage 2 shared composition: PR #222; final candidate `704718a4611e80f01937d2501e7621319bfd6353`; merge `1fbf38e71747ac90c2f285e4934b22ea26312bec`.
+- Stage 2 disposition: `Implemented — Not Verified`; optional independent assurance was not performed.
+- Stage 2 exact-head production CI run `32090477890`: passed.
+- All Stage 1/2 material findings and PR #222 review threads: resolved.
+- SCR #223 (localized record-action labels) and SCR #224 (Resources discovery authorization split): resolved by PR #222.
 
-The current candidate adds scoped continuity, typed invalidation, selected-object narrowing, safe return context, responsive/accessibility policy, focused tests, and corrected completion-governance wording. It remains unconverged because substantive contract findings remain.
+Historical Stage 1–2 records retain the then-governed order ending in Referrals. The current successor authority changes only forward product operation to the order ending in Capabilities.
 
-### Control Room findings
+## Stage 3–6 successor boundary
 
-| Finding | State | Required shared disposition |
-| --- | --- | --- |
-| `MOB1-FIND-00-001` | Resolved | `accepted-shared-correction`: mandatory Independent Acceptance wording removed. |
-| `MOB1-FIND-00-002` | Partially addressed; open | Add result-set identity/cursor and internal sheet/detail scroll state. |
-| `MOB1-FIND-00-003` | Open | Enforce focal marker/card/detail identity and subject parity. |
-| `MOB1-FIND-00-004` | Open | Bind action-rail inputs to canonical lens/position action IDs. |
-| `MOB1-FIND-00-005` | Open | Treat restored geography as unvalidated until server revalidation. |
-| `MOB1-FIND-00-006` | Open | Use the canonical supported-locale disabled-reason contract. |
-| `BUILD-FIND-218-001` | Resolved | Exact-head production-ci #1494 succeeded. |
+Lane 01 must migrate the shared registry, routes, action contracts, serialization, locales, and acceptance scenarios before dependent domain adapters merge. Generic legacy Referrals-lens state migrates to Capabilities; specific referral records and management intent remain referral-domain routes.
 
-All four Codex threads remain unresolved and current.
+Stage 3 extends the same shared family with one canonical query context, typed map projection, result-card model, detail/return context, and domain-owned save/watch seam. Stage 4 domain lanes provide records and authoritative operations through those contracts. Stage 5 cross-lens Referrals consumes the origin/return seam without becoming a permanent lens. Stage 6 proves the integrated result.
 
-### Lane 02 findings
-
-| Finding | State | Required shared disposition |
-| --- | --- | --- |
-| `MOB1-FIND-02-001` | Open | Preserve distinct focal opportunity and issuer-organization identities. |
-| `MOB1-FIND-02-002` | Partially addressed; open | Scope/invalidation and negative tests exist; resolve geography authority labeling. |
-| `MOB1-FIND-02-003` | Open | Represent actual optional video separately from its poster image. |
-
-No Shared Contract Request is open because these remain bounded corrections to PR #218.
-
-Historical Shared Contract Requests remain governed by their original records and later dispositions; this activation does not silently reopen them.
+No successor packet may create a private shell, navigation, state store, map framework, card system, sheet, action rail, locale framework, or authority shortcut.

@@ -8,6 +8,8 @@ The adoption snapshot is historical: merged `main` was `21c4fc080a823ae03f33ae1e
 
 The governing delivery amendment is [`BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`](BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md). Where earlier text in this authority treated independent exact-head review as a universal merge prerequisite, the amendment supersedes that merge interpretation while preserving all independent-certification requirements for `Verified`.
 
+The current product amendment is [`MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md`](MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md). It replaces Referrals with Capabilities as the fourth permanent participant lens and retains Referrals as a cross-lens domain/utility. Historical adoption records remain immutable; current program operation follows the successor architecture.
+
 ## 1. Governing principle
 
 The permanent authenticated participant lenses remain, in exact order:
@@ -15,7 +17,9 @@ The permanent authenticated participant lenses remain, in exact order:
 1. Opportunities/RFx;
 2. Resources;
 3. Intelligence; and
-4. Referrals.
+4. Capabilities.
+
+Referrals remains a governed cross-lens function and Menu/Account utility rather than a permanent lens.
 
 They operate over one organization-centered Exchange and share substantial platform behavior. The delivery rule is:
 
@@ -50,7 +54,7 @@ This supersession does not permit:
 
 Work outside this program retains the repository's ordinary sequencing rules unless separately authorized.
 
-## 3. Eight permanent lanes
+## 3. Permanent program lanes
 
 | Lane | Name | Owns | Must not do |
 | --- | --- | --- | --- |
@@ -59,9 +63,10 @@ Work outside this program retains the repository's ordinary sequencing rules unl
 | 02 | Opportunities/RFx | Wave 4 and later authorized RFx transaction runtime | redefine Shared Exchange behavior or begin an ineligible slice |
 | 03 | Intelligence | organization, capability, market, location, site, RFx/demand, resource, referral and later outcome intelligence under real-data authority | fabricate market activity or consume unaccepted private projections |
 | 04 | Resources | provider application/status, approved-provider representation, discovery, details, service geography, resource and request experience | grant provider status or duplicate Shared Exchange contracts |
-| 05 | Referrals | sender/recipient interaction, creation, lifecycle, relationship context, paths and cross-lens continuity | invent unsupported third-party referral semantics |
+| 05 | Referrals | cross-lens sender/recipient interaction, creation, lifecycle, Menu management, relationship context, paths and return continuity | present Referrals as a permanent lens or invent unsupported third-party referral semantics |
 | 06 | Independent Acceptance | authority-outward audit, acceptance tests/evidence, findings and dispositions | implement production feature code or weaken the original requirement |
 | 07 | Integration / Cross-Lens QA | integrated journeys, shared state, desktop/mobile, accessibility, locales, performance and authority isolation | substitute integration evidence for missing requirement acceptance |
+| 08 | Capabilities | organization capability discovery/profile, evidence distinctions, AMACS integration, comparison and RFx matching | duplicate the organization profile, invent AMACS codes, or turn referral records into capability records |
 
 Lane charters are binding in [`CHAT_LANE_CHARTERS.md`](CHAT_LANE_CHARTERS.md).
 
@@ -325,9 +330,9 @@ Slices 4.1–4.5 remain `Previously accepted — independent assurance pending`.
 
 PR #171 remains governed by its preserved pre-amendment packet and explicit stop boundary until Control Room creates a successor/reconciliation/reclassification under the current authority. The amendment does not silently erase that history or begin Slice 4.7.
 
-### Intelligence, Resources and Referrals
+### Intelligence, Resources, Capabilities and cross-lens Referrals
 
-These permanent lenses continue under their declared packet ownership and dependency boundaries. Prior Feature-ID completion does not automatically prove a complete lens experience.
+Intelligence, Resources and Capabilities continue as permanent lenses under declared packet ownership and dependency boundaries. Referrals continues as a cross-lens domain. Prior Feature-ID completion does not automatically prove a complete lens or cross-lens experience.
 
 ## 15. Integration acceptance
 
