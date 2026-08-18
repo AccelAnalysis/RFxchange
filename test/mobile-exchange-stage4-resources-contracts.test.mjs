@@ -9,7 +9,11 @@ import {
 } from "../src/application/resource-network/mobile-resource-exchange.ts";
 import { matchesResourceDiscoveryTerms, resourceDiscoveryTerms } from "../src/application/resource-network/resource-discovery-query.ts";
 import { ResourceNetworkService } from "../src/application/resource-network/resource-network.ts";
-import { parseResourcesMobileWorkspaceQuery } from "../src/application/resource-network/resource-network-workspace.ts";
+import {
+  parseResourcesMobileWorkspaceQuery,
+  resourcesFocusedOrganizationId,
+  resourcesWorkspaceMutationHref,
+} from "../src/application/resource-network/resource-network-workspace.ts";
 
 const NOW = "2026-08-18T12:00:00.000Z";
 const provider = Object.freeze({
@@ -286,6 +290,45 @@ test("maximum valid identifiers use bounded selection routes instead of crashing
   assert.doesNotMatch(fallbackRoute, /URLSearchParams|redirect\(`\/resources\?/);
 });
 
+test("compact-route query mutations retain server-revalidated RFx return context", () => {
+  const queryState = parseResourcesMobileWorkspaceQuery({
+    rfxReference: "RFX-47",
+    rfxGap: "Need capital readiness",
+    returnTo: "/opportunities/RFX-47/assess?tab=gaps#gap-2",
+  });
+  const href = resourcesWorkspaceMutationHref("", queryState, {
+    q: "capital",
+    availability: "available",
+    provider: null,
+    resource: null,
+    request: null,
+  });
+  const parsed = new URL(href, "https://participant.invalid");
+  assert.equal(parsed.pathname, "/resources");
+  assert.equal(parsed.searchParams.get("q"), "capital");
+  assert.equal(parsed.searchParams.get("availability"), "available");
+  assert.equal(parsed.searchParams.get("rfxReference"), "RFX-47");
+  assert.equal(parsed.searchParams.get("rfxGap"), "Need capital readiness");
+  assert.equal(parsed.searchParams.get("returnTo"), "/opportunities/RFX-47/assess?tab=gaps#gap-2");
+});
+
+test("record-only destinations carry their associated provider into governed Network focus", () => {
+  assert.equal(resourcesFocusedOrganizationId({
+    resourceId: "resource-beyond-network-page",
+    resources: [{ id: "resource-beyond-network-page", organizationId: "provider-251" }],
+  }), "provider-251");
+  assert.equal(resourcesFocusedOrganizationId({
+    requestId: "request-beyond-network-page",
+    requests: [{ id: "request-beyond-network-page", providerContext: { providerOrganizationId: "provider-252" } }],
+  }), "provider-252");
+  assert.equal(resourcesFocusedOrganizationId({
+    explicitOrganizationId: "explicit-provider",
+    resourceId: "resource-beyond-network-page",
+    resources: [{ id: "resource-beyond-network-page", organizationId: "provider-251" }],
+  }), "explicit-provider");
+  assert.equal(resourcesFocusedOrganizationId({ resourceId: "unknown", resources: [] }), null);
+});
+
 test("route hydration gates private adjuncts and settles them independently from public discovery", () => {
   const page = fs.readFileSync(new URL("../app/resources/page.tsx", import.meta.url), "utf8");
   assert.match(page, /const referralsPromise = referralManage/);
@@ -303,9 +346,17 @@ test("route hydration gates private adjuncts and settles them independently from
   assert.match(workspace, /setPreviewSelection\(cardSelection/);
   assert.match(workspace, /suggestedProviderLabel/);
   assert.doesNotMatch(workspace, /error\.message/);
-  assert.match(workspace, /mobileOperationsRef\.current\?\.scrollIntoView\(\{ block: "start" \}\)/);
+  assert.match(workspace, /mobileResourceDetailRef\.current/);
+  assert.match(workspace, /mobileRequestDetailRef\.current/);
+  assert.match(workspace, /mobileManagementRef\.current/);
+  assert.match(workspace, /target \?\? mobileOperationsRef\.current/);
+  assert.match(workspace, /navigateToCanonicalSelection\(selectionKey\)/);
+  assert.match(workspace, /resourcesWorkspaceMutationHref\(searchParams\.toString\(\), queryState, updates\)/);
   assert.match(workspace, /selectedResource \? String\(selectedResource\.organizationId\) : null/);
   assert.match(workspace, /selectedRequest\?\.providerContext\?\.providerOrganizationId/);
+  assert.match(page, /focusedOrganizationIdPromise/);
+  assert.match(page, /preliminaryResourcePromise/);
+  assert.match(page, /resourcesFocusedOrganizationId/);
 });
 
 test("selection preserves complete provider association and marker identity", () => {

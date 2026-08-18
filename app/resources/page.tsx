@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import {
   authorizedWorkspaceSelection,
   parseResourcesMobileWorkspaceQuery,
+  resourcesFocusedOrganizationId,
 } from "@/src/application/resource-network/resource-network-workspace";
 import { ResourceNetworkWorkspace } from "@/src/components/resource-network/ResourceNetworkWorkspace";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
@@ -83,13 +84,9 @@ export async function renderResourcesPage({
   const referralManage = authorization?.permissions.includes("referral.manage") ?? false;
   const resourceManage = authorization?.permissions.includes("resource.manage") ?? false;
 
-  // These reads are independent. Keep optional/owner and referral hydration off the critical path
-  // while Network discovery supplies the only input required by provider/resource discovery.
-  const networkPromise = loadAuthorizedNetworkDiscovery({
-    access,
-    mapProjection,
-    focusedOrganizationId: queryState.organizationId ?? queryState.providerId,
-  });
+  // Optional/private adjuncts remain independently settled. A record-only canonical destination
+  // may additionally resolve its already-authorized provider identity before Network discovery so
+  // the carried provider can receive the same authoritative marker treatment beyond page one.
   const referralsPromise = referralManage
     ? createServerReferralNetworkService().snapshot(actor)
     : Promise.resolve([]);
@@ -98,8 +95,41 @@ export async function renderResourcesPage({
     referralsPromise,
     ownerPromise,
   ] as const);
+  const explicitFocusedOrganizationId = queryState.organizationId ?? queryState.providerId;
+  const preliminaryResourcePromise = !explicitFocusedOrganizationId && queryState.resourceId
+    ? loadAuthorizedResourceDiscovery({
+        access,
+        mapProjection,
+        query: queryState.query,
+        availability: queryState.availability === "all" ? null : queryState.availability,
+        markers: [],
+      })
+    : Promise.resolve(null);
+  const focusedOrganizationIdPromise = explicitFocusedOrganizationId
+    ? Promise.resolve(explicitFocusedOrganizationId)
+    : queryState.resourceId
+      ? preliminaryResourcePromise.then((projection) => resourcesFocusedOrganizationId({
+          resourceId: queryState.resourceId,
+          resources: projection?.available ? projection.projection.resources : [],
+        }))
+      : queryState.requestId
+        ? referralsPromise.then(
+            (referrals) => resourcesFocusedOrganizationId({
+              requestId: queryState.requestId,
+              requests: referrals,
+            }),
+            () => null,
+          )
+        : Promise.resolve(null);
 
-  const network = await networkPromise;
+  const [network, [referralsResult, ownerResult]] = await Promise.all([
+    focusedOrganizationIdPromise.then((focusedOrganizationId) => loadAuthorizedNetworkDiscovery({
+      access,
+      mapProjection,
+      focusedOrganizationId,
+    })),
+    independentHydrationPromise,
+  ]);
   const markers = network.available
     ? network.projection.organizations.map((organization) => Object.freeze({
         organizationId: String(organization.organizationId),
@@ -111,17 +141,13 @@ export async function renderResourcesPage({
       }))
     : [];
 
-  const resourcePromise = loadAuthorizedResourceDiscovery({
+  const resourceProjection = await loadAuthorizedResourceDiscovery({
     access,
     mapProjection,
     query: queryState.query,
     availability: queryState.availability === "all" ? null : queryState.availability,
     markers,
   });
-  const [resourceProjection, [referralsResult, ownerResult]] = await Promise.all([
-    resourcePromise,
-    independentHydrationPromise,
-  ]);
   const referrals = referralsResult.status === "fulfilled" ? referralsResult.value : [];
   const owner = ownerResult.status === "fulfilled" ? ownerResult.value : null;
 

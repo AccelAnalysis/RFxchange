@@ -19,6 +19,11 @@ export interface ResourcesMobileWorkspaceQuery extends ResourceNetworkWorkspaceQ
   readonly returnTo: string | null;
 }
 
+export type ResourcesWorkspaceQueryUpdate = Readonly<Partial<Record<
+  "q" | "availability" | "organization" | "provider" | "request" | "resource" | "manage",
+  string | null | undefined
+>>>;
+
 function boundedText(value: SearchParamValue, maximum: number): string | null {
   const normalized = first(value).trim().replace(/\s+/g, " ").slice(0, maximum);
   return normalized || null;
@@ -95,4 +100,52 @@ export function authorizedWorkspaceSelection(
   authorizedIds: readonly string[],
 ): string | null {
   return requestedId && authorizedIds.includes(requestedId) ? requestedId : null;
+}
+
+export function resourcesWorkspaceMutationHref(
+  currentSearch: string,
+  queryState: ResourcesMobileWorkspaceQuery,
+  updates: ResourcesWorkspaceQueryUpdate,
+): string {
+  const next = new URLSearchParams(currentSearch);
+  const carriedContext = {
+    rfxReference: queryState.rfxReference,
+    rfxGap: queryState.rfxGap,
+    returnTo: queryState.returnTo,
+  } as const;
+  for (const [key, value] of Object.entries(carriedContext)) {
+    if (value && !next.has(key)) next.set(key, value);
+  }
+  const normalizedUpdates: Record<string, string | null | undefined> = { ...updates };
+  if (typeof updates.provider === "string" && !("resource" in updates) && !("request" in updates)) {
+    normalizedUpdates.resource = null;
+    normalizedUpdates.request = null;
+  }
+  for (const [key, value] of Object.entries(normalizedUpdates)) {
+    if (!value || (key === "availability" && value === "all")) next.delete(key);
+    else next.set(key, value);
+  }
+  return `/resources${next.size ? `?${next.toString()}` : ""}`;
+}
+
+export function resourcesFocusedOrganizationId(input: Readonly<{
+  explicitOrganizationId?: string | null;
+  resourceId?: string | null;
+  resources?: readonly Readonly<{ id: string; organizationId: unknown }>[];
+  requestId?: string | null;
+  requests?: readonly Readonly<{
+    id: string;
+    providerContext?: Readonly<{ providerOrganizationId?: unknown }> | null;
+  }>[];
+}>): string | null {
+  if (input.explicitOrganizationId) return input.explicitOrganizationId;
+  if (input.resourceId) {
+    const organizationId = input.resources?.find((resource) => resource.id === input.resourceId)?.organizationId;
+    return organizationId === null || organizationId === undefined ? null : String(organizationId);
+  }
+  if (input.requestId) {
+    const organizationId = input.requests?.find((request) => request.id === input.requestId)?.providerContext?.providerOrganizationId;
+    return organizationId === null || organizationId === undefined ? null : String(organizationId);
+  }
+  return null;
 }
