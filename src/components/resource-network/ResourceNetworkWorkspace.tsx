@@ -9,6 +9,7 @@ import type { ResourcesMobileWorkspaceQuery } from "../../application/resource-n
 import {
   buildResourcesMobileProjection,
   resourcesMobileCopy,
+  resourcesMobileValueLabel,
   type ResourcesMobileAuthorization,
 } from "../../application/resource-network/mobile-resource-exchange";
 import { exchangeRoomLocaleCatalog } from "../../application/participant/exchange-room-locale";
@@ -57,10 +58,9 @@ interface Props {
 
 const PROVIDER_REQUEST_STORAGE_KEY = "rfxchange:provider-request-create-and-send";
 
-function readable(value: string) { return value.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" "); }
-function requestPartyLabel(referral: Referral, organizationId: string): string {
+function requestPartyLabel(referral: Referral, organizationId: string, ownOrganizationLabel: string): string {
   if (organizationId === String(referral.providerContext?.providerOrganizationId)) return referral.recipientLabel;
-  return referral.role === "recipient" ? referral.senderOrganizationName : "Your organization";
+  return referral.role === "recipient" ? referral.senderOrganizationName : ownOrganizationLabel;
 }
 
 function browserSessionStorage(): Storage | null {
@@ -87,8 +87,10 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
   const selected = providers.find((provider) => String(provider.organizationId) === selectedOrganizationId) ?? null;
   const providerReferrals = referrals.filter((referral) => referral.purpose === "provider-connection");
   const selectedRequest = providerReferrals.find((referral) => referral.id === queryState.requestId) ?? null;
+  const selectedResource = resources.find((resource) => resource.id === queryState.resourceId) ?? null;
   const actionBusy = busy || navigationPending;
   const mobileCopy = resourcesMobileCopy(locale);
+  const valueLabel = (value: string) => resourcesMobileValueLabel(locale, value);
   const actionCopy = exchangeRoomLocaleCatalog(locale);
   const mobileProjection = useMemo(() => buildResourcesMobileProjection({
     viewerOrganizationId: spatialScope.organizationId,
@@ -100,9 +102,16 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     locale,
     search: queryState.query,
     availability: queryState.availability,
+    navigationContext: {
+      query: queryState.query,
+      availability: queryState.availability,
+      rfxReference: queryState.rfxReference,
+      rfxGap: queryState.rfxGap,
+      returnTo: queryState.returnTo,
+    },
     selection: { providerOrganizationId: queryState.providerId, resourceId: queryState.resourceId, requestId: queryState.requestId, source: "restored" },
     camera: spatialContext.camera,
-  }), [authorization, locale, model.selectedGeography.id, model.selectedGeography.name, providers, queryState.availability, queryState.providerId, queryState.query, queryState.requestId, queryState.resourceId, referrals, resources, spatialContext.camera, spatialScope.organizationId]);
+  }), [authorization, locale, model.selectedGeography.id, model.selectedGeography.name, providers, queryState.availability, queryState.providerId, queryState.query, queryState.requestId, queryState.resourceId, queryState.returnTo, queryState.rfxGap, queryState.rfxReference, referrals, resources, spatialContext.camera, spatialScope.organizationId]);
   const governedAreaGeometries = useMemo(() => mobileProjection.serviceTerritories.map((binding) => Object.freeze({ areaId: binding.area.areaId, geographyId: binding.area.geographyId, geometryReference: binding.geometryReference, geometry: binding.geometry as ExchangeGovernedAreaGeometry["geometry"] })), [mobileProjection.serviceTerritories]);
 
   useEffect(() => {
@@ -287,7 +296,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     if (!selected) return;
     const serviceId = String(form.get("serviceId") ?? "");
     const summary = String(form.get("summary") ?? "");
-    if (form.get("consent") !== "yes") { setNotice("Review and acknowledge the exact recipient and shared information before sending."); return; }
+    if (form.get("consent") !== "yes") { setNotice(mobileCopy.consentRequired); return; }
     const operationFingerprint = JSON.stringify({
       providerOrganizationId: String(selected.organizationId),
       serviceId,
@@ -317,7 +326,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
         commandId,
       });
       providerRequestCommandRef.current = null;
-      setNotice(`Request sent to ${selected.displayName}.`);
+      setNotice(`${mobileCopy.requestSentPrefix} ${selected.displayName}.`);
       const referral = typeof result.referral === "object" && result.referral
         ? result.referral as Record<string, unknown>
         : null;
@@ -327,7 +336,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     } catch (error) {
       // An uncertain response keeps the same command in memory and actor-scoped session storage.
       // Re-entering the same provider, service, publication and summary after reload replays it.
-      setNotice(error instanceof Error ? error.message : "Request failed.");
+      setNotice(error instanceof Error ? error.message : mobileCopy.requestFailed);
     }
     finally { setBusy(false); }
   }
@@ -335,14 +344,14 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
   async function resourceAction(body: Record<string, unknown>) {
     setBusy(true); setNotice(null);
     try { await post("/api/resources", { ...body, commandId: `resource-${crypto.randomUUID()}` }); refreshAuthoritativeState(); }
-    catch (error) { setNotice(error instanceof Error ? error.message : "Resource action failed."); }
+    catch (error) { setNotice(error instanceof Error ? error.message : mobileCopy.resourceActionFailed); }
     finally { setBusy(false); }
   }
 
   async function referralAction(body: Record<string, unknown>) {
     setBusy(true); setNotice(null);
     try { await post("/api/referrals", { ...body, commandId: `provider-request-${crypto.randomUUID()}` }); refreshAuthoritativeState(); }
-    catch (error) { setNotice(error instanceof Error ? error.message : "Provider request action failed."); }
+    catch (error) { setNotice(error instanceof Error ? error.message : mobileCopy.providerActionFailed); }
     finally { setBusy(false); }
   }
 
@@ -400,35 +409,35 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
             provider: null,
           });
         }}>
-          <label>{t("resourceNetworkWorkspace.search")}<input key={`q:${queryState.query}`} name="q" defaultValue={queryState.query} type="search" maxLength={160} placeholder="Capital, workshops, assistance…" /></label>
-          <label>{t("resourceNetworkWorkspace.availability")}<select key={`availability:${queryState.availability}`} name="availability" defaultValue={queryState.availability}><option value="all">All maintained states</option><option value="available">Available</option><option value="limited">Limited</option><option value="unknown">Unknown</option></select></label>
+          <label>{t("resourceNetworkWorkspace.search")}<input key={`q:${queryState.query}`} name="q" defaultValue={queryState.query} type="search" maxLength={160} placeholder={mobileCopy.searchPlaceholder} /></label>
+          <label>{t("resourceNetworkWorkspace.availability")}<select key={`availability:${queryState.availability}`} name="availability" defaultValue={queryState.availability}><option value="all">{mobileCopy.allStates}</option><option value="available">{mobileCopy.availableState}</option><option value="limited">{mobileCopy.limitedState}</option><option value="unknown">{mobileCopy.unknownState}</option></select></label>
           <button disabled={actionBusy} type="submit">{t("resourceNetworkWorkspace.applyFilters")}</button>
         </form>
         {notice ? <p className={styles.notice} role="status">{notice}</p> : null}
         <div className={styles.columns}>
-          <section aria-label="Provider results"><h2>{providers.length} {t("resourceNetworkWorkspace.providers")}</h2>{providers.length ? <ul className={styles.list}>{providers.map((provider, resultIndex) => <li key={String(provider.organizationId)}><button type="button" aria-current={String(provider.organizationId) === selectedOrganizationId} disabled={actionBusy} onClick={() => selectProvider(String(provider.organizationId), resultIndex)}><strong>{provider.displayName}</strong><span>{provider.services.map((service) => service.name).join(" · ")}</span><small>{provider.match.reasons.join(" · ")}</small></button></li>)}</ul> : <div className={styles.empty}><strong>{t("resourceNetworkWorkspace.empty")}</strong><p>Try broader terms or another maintained availability state.</p></div>}</section>
-          <section className={styles.detail} aria-live="polite">{selected ? <><p className={styles.status}>{readable(selected.availability)} · {selected.territory.name}</p><h2>{selected.displayName}</h2><p>{selected.populationsServed}</p><dl><div><dt>Eligibility</dt><dd>{selected.eligibility}</dd></div><div><dt>Intake</dt><dd>{selected.intakeMethod}</dd></div><div><dt>Languages</dt><dd>{selected.languages.join(", ")}</dd></div><div><dt>Modalities</dt><dd>{selected.modalities.map(readable).join(", ")}</dd></div></dl><form action={connect} className={styles.form}><label>Service<select name="serviceId" required>{selected.services.map((service) => <option key={service.id} value={service.id}>{service.name} · {readable(service.availability)}</option>)}</select></label><label>What do you need?<textarea name="summary" required maxLength={1200} /></label><WorkflowExplainer explainerKey="provider-connection" /><label className={styles.check}><input name="consent" value="yes" type="checkbox" required />Share my organization name and this summary only with {selected.displayName}.</label><button disabled={actionBusy} type="submit">Send provider request</button></form></> : <p>Select a provider to see its published services and territory.</p>}</section>
+          <section aria-label={mobileCopy.providerResults}><h2>{providers.length} {t("resourceNetworkWorkspace.providers")}</h2>{providers.length ? <ul className={styles.list}>{providers.map((provider, resultIndex) => <li key={String(provider.organizationId)}><button type="button" aria-current={String(provider.organizationId) === selectedOrganizationId} disabled={actionBusy} onClick={() => selectProvider(String(provider.organizationId), resultIndex)}><strong>{provider.displayName}</strong><span>{provider.services.map((service) => service.name).join(" · ")}</span><small>{queryState.query ? mobileCopy.searchMatch : mobileCopy.localityMatch} · {valueLabel(provider.availability)}</small></button></li>)}</ul> : <div className={styles.empty}><strong>{t("resourceNetworkWorkspace.empty")}</strong><p>{mobileCopy.broaderSearch}</p></div>}</section>
+          <section className={styles.detail} aria-live="polite">{selected ? <><p className={styles.status}>{valueLabel(selected.availability)} · {selected.territory.name}</p><h2>{selected.displayName}</h2><p>{selected.populationsServed}</p><dl><div><dt>{mobileCopy.eligibilityLabel}</dt><dd>{selected.eligibility}</dd></div><div><dt>{mobileCopy.intakeLabel}</dt><dd>{selected.intakeMethod}</dd></div><div><dt>{mobileCopy.languagesLabel}</dt><dd>{selected.languages.join(", ")}</dd></div><div><dt>{mobileCopy.modalitiesLabel}</dt><dd>{selected.modalities.map(valueLabel).join(", ")}</dd></div></dl>{authorization.referralManage ? <form action={connect} className={styles.form}><label>{mobileCopy.serviceLabel}<select name="serviceId" required>{selected.services.map((service) => <option key={service.id} value={service.id}>{service.name} · {valueLabel(service.availability)}</option>)}</select></label><label>{mobileCopy.needLabel}<textarea name="summary" required maxLength={1200} /></label><WorkflowExplainer explainerKey="provider-connection" /><label className={styles.check}><input name="consent" value="yes" type="checkbox" required />{mobileCopy.consentPrefix} {selected.displayName}.</label><button disabled={actionBusy} type="submit">{mobileCopy.sendRequest}</button></form> : <p className={styles.notice}>{mobileCopy.requestAuthority}</p>}</> : <p>{mobileCopy.selectProvider}</p>}</section>
         </div>
-        <section className={styles.fieldAlternative} aria-label="Accessible service territory descriptions"><h2>Service territories</h2><ul>{providers.map((provider) => <li key={String(provider.organizationId)}><strong>{provider.displayName}</strong><span>Serves {provider.territory.name}; this field is separate from the provider&apos;s office marker.</span></li>)}</ul></section>
-        {resources.length ? <section className={styles.resources}><h2>Published resources</h2><ul>{resources.map((resource) => <li key={resource.id}><strong>{resource.title}</strong><span>{resource.providerDisplayName} · {readable(resource.kind)}</span><p>{resource.summary}</p>{resource.intakeUrl ? <a href={resource.intakeUrl}>Open intake information</a> : null}</li>)}</ul></section> : null}
+        <section className={styles.fieldAlternative} aria-label={mobileCopy.territoriesTitle}><h2>{mobileCopy.territoriesTitle}</h2><ul>{providers.map((provider) => <li key={String(provider.organizationId)}><strong>{provider.displayName}</strong><span>{mobileCopy.servesPrefix} {provider.territory.name}; {mobileCopy.territoryExplanation}</span></li>)}</ul></section>
+        {resources.length ? <section className={styles.resources}><h2>{mobileCopy.resourcesTitle}</h2><ul>{resources.map((resource) => <li key={resource.id} aria-current={resource.id === queryState.resourceId}><strong>{resource.title}</strong><span>{resource.providerDisplayName} · {valueLabel(resource.kind)}</span><p>{resource.summary}</p><button type="button" disabled={actionBusy} onClick={() => updateWorkspaceQuery({ provider: String(resource.organizationId), resource: resource.id, request: null })}>{mobileCopy.viewResource}</button></li>)}</ul>{selectedResource ? <article className={styles.detail} aria-live="polite"><p className={styles.status}>{valueLabel(selectedResource.status)} · {valueLabel(selectedResource.kind)}</p><h2>{selectedResource.title}</h2><p>{selectedResource.description}</p><dl><div><dt>{mobileCopy.eligibilityLabel}</dt><dd>{selectedResource.eligibility}</dd></div></dl>{selectedResource.intakeUrl ? <a href={selectedResource.intakeUrl}>{mobileCopy.openIntake}</a> : <p>{mobileCopy.contactProvider}</p>}</article> : null}</section> : null}
         <section className={styles.requests}>
-          <h2>Provider requests</h2>
-          {adjunctState.requests === "restricted" ? <p className={styles.notice}>Provider requests require current referral authority.</p> : null}
-          {adjunctState.requests === "unavailable" ? <p className={styles.notice} role="status">Private provider requests could not be loaded. Public provider and resource discovery remains available.</p> : null}
+          <h2>{mobileCopy.requestsTitle}</h2>
+          {adjunctState.requests === "restricted" ? <p className={styles.notice}>{mobileCopy.requestRestricted}</p> : null}
+          {adjunctState.requests === "unavailable" ? <p className={styles.notice} role="status">{mobileCopy.requestUnavailable}</p> : null}
           {providerReferrals.length ? <ul>{providerReferrals.map((referral) => <li key={referral.id}>
             <strong>{referral.role === "sender" ? referral.recipientLabel : referral.senderOrganizationName}</strong>
-            <span>{readable(referral.status)}</span>
+            <span>{valueLabel(referral.status)}</span>
             {referral.notificationStatus === "delivery-outcome-unknown" ? <p className={styles.notice} role="status">{t("referralWorkspace.notificationStates.deliveryOutcomeUnknown")}</p> : null}
             <p>{referral.summary}</p>
             <button type="button" aria-current={referral.id === queryState.requestId} disabled={actionBusy} onClick={() => updateWorkspaceQuery({ request: referral.id })}>{t("resourceNetworkWorkspace.viewCommunication")}</button>
-            {referral.role === "recipient" && referral.status === "sent" ? <div><WorkflowExplainer explainerKey="provider-response" /><button disabled={actionBusy} onClick={() => referralAction({ action: "accepted", referralId: referral.id, expectedVersion: referral.version })}>Accept</button><button disabled={actionBusy} onClick={() => referralAction({ action: "declined", referralId: referral.id, expectedVersion: referral.version })}>Decline</button><form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); referralAction({ action: "redirected", referralId: referral.id, expectedVersion: referral.version, suggestedProviderOrganizationId: data.get("provider"), redirectReason: data.get("reason") }); }}><label>Suggest another published provider<select name="provider" required><option value="">Choose provider</option>{providers.filter((provider) => String(provider.organizationId) !== String(referral.providerContext?.providerOrganizationId)).map((provider) => <option key={String(provider.organizationId)} value={String(provider.organizationId)}>{provider.displayName}</option>)}</select></label><label>Reason<input name="reason" required maxLength={600} /></label><button disabled={actionBusy}>Redirect</button></form></div> : null}
-            {["sent", "accepted", "contacted"].includes(referral.status) ? <form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); resourceAction({ action: "message-add", referralId: referral.id, message: data.get("message") }); }}><label>Private request message<textarea name="message" required maxLength={2000} /></label><button disabled={actionBusy}>Add message</button></form> : null}
+            {referral.role === "recipient" && referral.status === "sent" ? <div><WorkflowExplainer explainerKey="provider-response" /><button disabled={actionBusy} onClick={() => referralAction({ action: "accepted", referralId: referral.id, expectedVersion: referral.version })}>{mobileCopy.accept}</button><button disabled={actionBusy} onClick={() => referralAction({ action: "declined", referralId: referral.id, expectedVersion: referral.version })}>{mobileCopy.decline}</button><form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); referralAction({ action: "redirected", referralId: referral.id, expectedVersion: referral.version, suggestedProviderOrganizationId: data.get("provider"), redirectReason: data.get("reason") }); }}><label>{mobileCopy.suggestProvider}<select name="provider" required><option value="">{mobileCopy.chooseProvider}</option>{providers.filter((provider) => String(provider.organizationId) !== String(referral.providerContext?.providerOrganizationId)).map((provider) => <option key={String(provider.organizationId)} value={String(provider.organizationId)}>{provider.displayName}</option>)}</select></label><label>{mobileCopy.reason}<input name="reason" required maxLength={600} /></label><button disabled={actionBusy}>{mobileCopy.redirect}</button></form></div> : null}
+            {["sent", "accepted", "contacted"].includes(referral.status) ? <form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); resourceAction({ action: "message-add", referralId: referral.id, message: data.get("message") }); }}><label>{mobileCopy.privateMessage}<textarea name="message" required maxLength={2000} /></label><button disabled={actionBusy}>{mobileCopy.addMessage}</button></form> : null}
             {referral.providerRedirect ? <p>Suggested provider: {referral.providerRedirect.suggestedProviderDisplayName}. {referral.providerRedirect.reason}</p> : null}
-          </li>)}</ul> : <p>No provider requests yet.</p>}
+          </li>)}</ul> : <p>{mobileCopy.noRequests}</p>}
         </section>
-        {adjunctState.management === "unavailable" ? <p className={styles.notice} role="status">Provider management could not be loaded. Refresh before making provider changes.</p> : null}
-        {owner?.serviceProfile ? <section id="resource-management"><OwnerManagement owner={Object.freeze({ ...owner, serviceProfile: owner.serviceProfile })} busy={actionBusy} onSubmit={resourceAction} /></section> : null}
-        {selectedRequest ? <section className={styles.requests}><h2>Request communication history</h2><article><strong>{selectedRequest.role === "recipient" ? selectedRequest.senderOrganizationName : selectedRequest.recipientLabel}</strong>{selectedMessages.length ? <ol>{selectedMessages.map((message) => <li key={message.id}><small>{requestPartyLabel(selectedRequest, String(message.authorOrganizationId))} · {new Date(message.createdAt).toLocaleString()}</small><p>{message.body}</p></li>)}</ol> : <p>{t("resourceNetworkWorkspace.noMessages")}</p>}</article></section> : null}
+        {adjunctState.management === "unavailable" ? <p className={styles.notice} role="status">{mobileCopy.managementUnavailable}</p> : null}
+        {owner?.serviceProfile ? <section id="resource-management"><OwnerManagement owner={Object.freeze({ ...owner, serviceProfile: owner.serviceProfile })} busy={actionBusy} initiallyOpen={queryState.manageMode !== null} onSubmit={resourceAction} /></section> : null}
+        {selectedRequest ? <section className={styles.requests}><h2>{mobileCopy.communicationTitle}</h2><article><strong>{selectedRequest.role === "recipient" ? selectedRequest.senderOrganizationName : selectedRequest.recipientLabel}</strong>{selectedMessages.length ? <ol>{selectedMessages.map((message) => <li key={message.id}><small>{requestPartyLabel(selectedRequest, String(message.authorOrganizationId), mobileCopy.yourOrganization)} · {new Date(message.createdAt).toLocaleString(locale)}</small><p>{message.body}</p></li>)}</ol> : <p>{t("resourceNetworkWorkspace.noMessages")}</p>}</article></section> : null}
       </aside>
       <ExchangeBottomSheet
         labelledBy="resources-mobile-results"
@@ -449,21 +458,53 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
           onOpen={() => updateSpatialContext((current) => Object.freeze({ ...current, sheetSnapPoint: "expanded" as const }))}
           resolveRecordActionLabel={(key) => t(key)}
         />) : <p>{mobileCopy.empty}</p>}
+        <div className={styles.mobileOperations} data-resources-mobile-operations>
+          {queryState.rfxReference || queryState.rfxGap ? <section className={styles.originContext} aria-label={mobileCopy.context}>
+            <strong>{mobileCopy.context}</strong>
+            <small>{mobileCopy.contextOnly}</small>
+            {queryState.returnTo ? <a href={queryState.returnTo}>{mobileCopy.return}</a> : null}
+          </section> : null}
+          <form className={styles.filters} onSubmit={(event) => {
+            event.preventDefault();
+            const data = new FormData(event.currentTarget);
+            updateWorkspaceQuery({ q: String(data.get("q") ?? ""), availability: String(data.get("availability") ?? "all"), provider: null });
+          }}>
+            <label>{t("resourceNetworkWorkspace.search")}<input key={`mobile-q:${queryState.query}`} name="q" defaultValue={queryState.query} type="search" maxLength={160} placeholder={mobileCopy.searchPlaceholder} /></label>
+            <label>{t("resourceNetworkWorkspace.availability")}<select key={`mobile-availability:${queryState.availability}`} name="availability" defaultValue={queryState.availability}><option value="all">{mobileCopy.allStates}</option><option value="available">{mobileCopy.availableState}</option><option value="limited">{mobileCopy.limitedState}</option><option value="unknown">{mobileCopy.unknownState}</option></select></label>
+            <button disabled={actionBusy} type="submit">{t("resourceNetworkWorkspace.applyFilters")}</button>
+          </form>
+          {notice ? <p className={styles.notice} role="status">{notice}</p> : null}
+          <section className={styles.detail} aria-live="polite">{selected ? <><p className={styles.status}>{valueLabel(selected.availability)} · {selected.territory.name}</p><h2>{selected.displayName}</h2><p>{selected.populationsServed}</p><dl><div><dt>{mobileCopy.eligibilityLabel}</dt><dd>{selected.eligibility}</dd></div><div><dt>{mobileCopy.intakeLabel}</dt><dd>{selected.intakeMethod}</dd></div></dl>{authorization.referralManage ? <form action={connect} className={styles.form}><label>{mobileCopy.serviceLabel}<select name="serviceId" required>{selected.services.map((service) => <option key={service.id} value={service.id}>{service.name} · {valueLabel(service.availability)}</option>)}</select></label><label>{mobileCopy.needLabel}<textarea name="summary" required maxLength={1200} /></label><WorkflowExplainer explainerKey="provider-connection" /><label className={styles.check}><input name="consent" value="yes" type="checkbox" required />{mobileCopy.consentPrefix} {selected.displayName}.</label><button disabled={actionBusy} type="submit">{mobileCopy.sendRequest}</button></form> : <p className={styles.notice}>{mobileCopy.requestAuthority}</p>}</> : <p>{mobileCopy.selectProviderCard}</p>}</section>
+          {selectedResource ? <section className={styles.resources} aria-live="polite"><p className={styles.status}>{valueLabel(selectedResource.status)} · {valueLabel(selectedResource.kind)}</p><h2>{selectedResource.title}</h2><p>{selectedResource.description}</p><dl><div><dt>{mobileCopy.eligibilityLabel}</dt><dd>{selectedResource.eligibility}</dd></div></dl>{selectedResource.intakeUrl ? <a href={selectedResource.intakeUrl}>{mobileCopy.openIntake}</a> : <p>{mobileCopy.contactProvider}</p>}</section> : null}
+          <section className={styles.requests}><h2>{mobileCopy.requestsTitle}</h2>{adjunctState.requests === "restricted" ? <p className={styles.notice}>{mobileCopy.requestRestricted}</p> : null}{adjunctState.requests === "unavailable" ? <p className={styles.notice} role="status">{mobileCopy.requestUnavailable}</p> : null}{selectedRequest ? <article><strong>{selectedRequest.role === "recipient" ? selectedRequest.senderOrganizationName : selectedRequest.recipientLabel}</strong><p>{selectedRequest.summary}</p>{selectedRequest.role === "recipient" && selectedRequest.status === "sent" ? <div><WorkflowExplainer explainerKey="provider-response" /><button disabled={actionBusy} onClick={() => referralAction({ action: "accepted", referralId: selectedRequest.id, expectedVersion: selectedRequest.version })}>{mobileCopy.accept}</button><button disabled={actionBusy} onClick={() => referralAction({ action: "declined", referralId: selectedRequest.id, expectedVersion: selectedRequest.version })}>{mobileCopy.decline}</button><form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); referralAction({ action: "redirected", referralId: selectedRequest.id, expectedVersion: selectedRequest.version, suggestedProviderOrganizationId: data.get("provider"), redirectReason: data.get("reason") }); }}><label>{mobileCopy.suggestProvider}<select name="provider" required><option value="">{mobileCopy.chooseProvider}</option>{providers.filter((provider) => String(provider.organizationId) !== String(selectedRequest.providerContext?.providerOrganizationId)).map((provider) => <option key={String(provider.organizationId)} value={String(provider.organizationId)}>{provider.displayName}</option>)}</select></label><label>{mobileCopy.reason}<input name="reason" required maxLength={600} /></label><button disabled={actionBusy}>{mobileCopy.redirect}</button></form></div> : null}{["sent", "accepted", "contacted"].includes(selectedRequest.status) ? <form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); resourceAction({ action: "message-add", referralId: selectedRequest.id, message: data.get("message") }); }}><label>{mobileCopy.privateMessage}<textarea name="message" required maxLength={2000} /></label><button disabled={actionBusy}>{mobileCopy.addMessage}</button></form> : null}{selectedMessages.length ? <ol>{selectedMessages.map((message) => <li key={message.id}><small>{requestPartyLabel(selectedRequest, String(message.authorOrganizationId), mobileCopy.yourOrganization)} · {new Date(message.createdAt).toLocaleString(locale)}</small><p>{message.body}</p></li>)}</ol> : <p>{t("resourceNetworkWorkspace.noMessages")}</p>}</article> : <p>{mobileCopy.selectRequest}</p>}</section>
+          {adjunctState.management === "unavailable" ? <p className={styles.notice} role="status">{mobileCopy.managementUnavailable}</p> : null}
+          {owner?.serviceProfile ? <section id="resource-management-mobile"><OwnerManagement owner={Object.freeze({ ...owner, serviceProfile: owner.serviceProfile })} busy={actionBusy} initiallyOpen={queryState.manageMode !== null} onSubmit={resourceAction} /></section> : null}
+        </div>
       </ExchangeBottomSheet>
     </SpatialWorkspace>
   </ParticipantShell>;
 }
 
 function ResourceComposer({ busy, profile, geographyIds, onSubmit }: Readonly<{ busy: boolean; profile: ProviderServiceProfile; geographyIds: readonly string[]; onSubmit(body: Record<string, unknown>): void }>) {
-  return <form className={styles.form} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); onSubmit({ action: "resource-create", kind: data.get("kind"), title: data.get("title"), summary: data.get("summary"), description: data.get("description"), eligibility: data.get("eligibility"), intakeUrl: data.get("intakeUrl"), visibility: data.get("visibility"), serviceIds: [data.get("serviceId")], geographyIds, modalities: profile.modalities }); }}><h2>Create resource draft</h2><label>Type<select name="kind"><option value="resource">Resource</option><option value="program">Program</option><option value="workshop">Workshop</option><option value="funding-program">Funding program</option><option value="announcement">Announcement</option></select></label><label>Service<select name="serviceId">{profile.services.map((service) => <option key={service.id} value={service.id}>{service.name}</option>)}</select></label><label>Title<input name="title" required maxLength={180} /></label><label>Summary<textarea name="summary" required maxLength={600} /></label><label>Description<textarea name="description" required maxLength={4000} /></label><label>Eligibility<textarea name="eligibility" required maxLength={1200} /></label><label>Intake URL<input name="intakeUrl" type="url" /></label><label>Visibility<select name="visibility"><option value="network">RFxchange network</option><option value="public">Permitted public projection</option></select></label><button disabled={busy}>Save draft</button></form>;
+  const { locale } = useI18n();
+  const copy = resourcesMobileCopy(locale);
+  return <form className={styles.form} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); onSubmit({ action: "resource-create", kind: data.get("kind"), title: data.get("title"), summary: data.get("summary"), description: data.get("description"), eligibility: data.get("eligibility"), intakeUrl: data.get("intakeUrl"), visibility: data.get("visibility"), serviceIds: [data.get("serviceId")], geographyIds, modalities: profile.modalities }); }}><h2>{copy.createDraft}</h2><label>{copy.typeLabel}<select name="kind">{["resource", "program", "workshop", "funding-program", "announcement"].map((kind) => <option key={kind} value={kind}>{resourcesMobileValueLabel(locale, kind)}</option>)}</select></label><label>{copy.serviceLabel}<select name="serviceId">{profile.services.map((service) => <option key={service.id} value={service.id}>{service.name}</option>)}</select></label><label>{copy.titleLabel}<input name="title" required maxLength={180} /></label><label>{copy.summaryLabel}<textarea name="summary" required maxLength={600} /></label><label>{copy.descriptionLabel}<textarea name="description" required maxLength={4000} /></label><label>{copy.eligibilityLabel}<textarea name="eligibility" required maxLength={1200} /></label><label>{copy.intakeUrlLabel}<input name="intakeUrl" type="url" /></label><label>{copy.visibilityLabel}<select name="visibility"><option value="network">{copy.networkVisibility}</option><option value="public">{copy.publicVisibility}</option></select></label><button disabled={busy}>{copy.saveDraft}</button></form>;
 }
 
-function OwnerManagement({ owner, busy, onSubmit }: Readonly<{ owner: NonNullable<Owner> & { serviceProfile: ProviderServiceProfile }; busy: boolean; onSubmit(body: Record<string, unknown>): void }>) {
+function OwnerManagement({ owner, busy, initiallyOpen, onSubmit }: Readonly<{ owner: NonNullable<Owner> & { serviceProfile: ProviderServiceProfile }; busy: boolean; initiallyOpen: boolean; onSubmit(body: Record<string, unknown>): void }>) {
+  const { locale } = useI18n();
+  const copy = resourcesMobileCopy(locale);
   const [visibleServiceIds, setVisibleServiceIds] = useState<readonly string[]>(owner.publication?.visibleServiceIds ?? owner.serviceProfile.services.map((service) => service.id));
+  const detailsRef = useRef<HTMLDetailsElement | null>(null);
+  useEffect(() => {
+    if (initiallyOpen && detailsRef.current) detailsRef.current.open = true;
+  }, [initiallyOpen]);
   function toggle(id: string, selected: boolean) { setVisibleServiceIds((current) => selected ? Object.freeze([...new Set([...current, id])]) : Object.freeze(current.filter((value) => value !== id))); }
-  return <details className={styles.manage}><summary>Manage provider discovery and resources</summary><section><h2>Discovery publication</h2><p>Private profile changes do not publish automatically. Choose exactly which current services are discoverable.</p><WorkflowExplainer explainerKey="provider-resource-publication" /><div className={styles.serviceChecks}>{owner.serviceProfile.services.map((service) => <label key={service.id}><input type="checkbox" checked={visibleServiceIds.includes(service.id)} onChange={(event) => toggle(service.id, event.target.checked)} disabled={owner.publication?.status === "published"} />{service.name}</label>)}</div><button disabled={busy || !visibleServiceIds.length} onClick={() => onSubmit({ action: owner.publication?.status === "published" ? "publication-withdraw" : "publication-publish", expectedVersion: owner.publication?.version ?? null, visibleServiceIds })}>{owner.publication?.status === "published" ? "Withdraw discovery before editing" : "Publish selected services"}</button></section><ResourceComposer busy={busy} profile={owner.serviceProfile} geographyIds={owner.serviceGeography?.serviceGeographyIds.map(String) ?? []} onSubmit={onSubmit} /><InvitationComposer busy={busy} onSubmit={onSubmit} />{owner.resources.length ? <section><h2>Your resources</h2>{owner.resources.map((resource) => <p key={resource.id}><strong>{resource.title}</strong> · {readable(resource.status)} <button disabled={busy} onClick={() => onSubmit({ action: resource.status === "published" ? "resource-withdraw" : "resource-publish", resourceId: resource.id, expectedVersion: resource.version })}>{resource.status === "published" ? "Withdraw" : "Publish"}</button></p>)}</section> : null}</details>;
+  return <details ref={detailsRef} className={styles.manage}><summary>{copy.managementTitle}</summary><section><h2>{copy.publicationTitle}</h2><p>{copy.publicationNote}</p><WorkflowExplainer explainerKey="provider-resource-publication" /><div className={styles.serviceChecks}>{owner.serviceProfile.services.map((service) => <label key={service.id}><input type="checkbox" checked={visibleServiceIds.includes(service.id)} onChange={(event) => toggle(service.id, event.target.checked)} disabled={owner.publication?.status === "published"} />{service.name}</label>)}</div><button disabled={busy || !visibleServiceIds.length} onClick={() => onSubmit({ action: owner.publication?.status === "published" ? "publication-withdraw" : "publication-publish", expectedVersion: owner.publication?.version ?? null, visibleServiceIds })}>{owner.publication?.status === "published" ? copy.withdrawBeforeEdit : copy.publishServices}</button></section><ResourceComposer busy={busy} profile={owner.serviceProfile} geographyIds={owner.serviceGeography?.serviceGeographyIds.map(String) ?? []} onSubmit={onSubmit} /><InvitationComposer busy={busy} onSubmit={onSubmit} />{owner.resources.length ? <section><h2>{copy.yourResources}</h2>{owner.resources.map((resource) => <p key={resource.id}><strong>{resource.title}</strong> · {resourcesMobileValueLabel(locale, resource.status)} <button disabled={busy} onClick={() => onSubmit({ action: resource.status === "published" ? "resource-withdraw" : "resource-publish", resourceId: resource.id, expectedVersion: resource.version })}>{resource.status === "published" ? copy.withdraw : copy.publish}</button></p>)}</section> : null}</details>;
 }
 
 function InvitationComposer({ busy, onSubmit }: Readonly<{ busy: boolean; onSubmit(body: Record<string, unknown>): void }>) {
-  return <form className={styles.form} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); onSubmit({ action: "provider-invite", recipientLabel: data.get("recipientLabel"), recipientEmail: data.get("recipientEmail"), subjectKind: "profile-completion", invitationContext: data.get("invitationContext") }); }}><h2>Invite a provider to complete a profile</h2><label>Recipient name<input name="recipientLabel" required /></label><label>Email<input name="recipientEmail" type="email" required /></label><label>Context<textarea name="invitationContext" required maxLength={600} /></label><button disabled={busy}>Issue invitation</button></form>;
+  const { locale } = useI18n();
+  const copy = resourcesMobileCopy(locale);
+  return <form className={styles.form} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); onSubmit({ action: "provider-invite", recipientLabel: data.get("recipientLabel"), recipientEmail: data.get("recipientEmail"), subjectKind: "profile-completion", invitationContext: data.get("invitationContext") }); }}><h2>{copy.inviteTitle}</h2><label>{copy.recipientName}<input name="recipientLabel" required /></label><label>{copy.emailLabel}<input name="recipientEmail" type="email" required /></label><label>{copy.contextLabel}<textarea name="invitationContext" required maxLength={600} /></label><button disabled={busy}>{copy.issueInvitation}</button></form>;
 }

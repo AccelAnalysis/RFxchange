@@ -41,4 +41,10 @@
 .inlineForm { display: grid; gap: .5rem; margin-top: .7rem; padding: .7rem; border-left: 2px solid #b98727; }
 .inlineForm label { display: grid; gap: .3rem; font-size: .8rem; font-weight: 700; }
 .inlineForm input, .inlineForm select, .inlineForm textarea { padding: .55rem; border: 1px solid #b8b3a9; border-radius: .5rem; background: #fffdf8; }
+.mobileOperations { display: none; }
 @media (max-width: 760px) { .panel { display: none; } .columns, .filters { grid-template-columns: 1fr; } .workspace { min-height: 100vh; } .actionRail { grid-template-columns: repeat(4,minmax(4.5rem,1fr)); overflow-x: auto; } }
+@media (max-width: 760px) {
+  .mobileOperations { display: grid; gap: 1rem; padding-bottom: 1rem; }
+  .mobileOperations button { padding: .62rem .85rem; border: 1px solid #252a2f; border-radius: 999px; background: #252a2f; color: white; font-weight: 700; cursor: pointer; }
+  .mobileOperations button:disabled { opacity: .5; }
+}

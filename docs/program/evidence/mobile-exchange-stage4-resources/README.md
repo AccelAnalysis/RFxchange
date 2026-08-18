@@ -25,18 +25,18 @@ The Control Room dependency packet `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` was clo
 
 Exactly four canonical Resources actions are retained in their governed order. Offer/request and resource-detail behaviors are enabled only where a real existing runtime and current authorization exist. Share, Save/Archive and unsupported Edit behavior remain explicitly disabled. Favorite persistence remains hidden because the Resources domain has no authorized save aggregate.
 
-The optional RFx gap origin (`rfxReference`, `rfxGap`, `returnTo`) is bounded display/return context only. The Resources loader does not read RFx private state, infer provider eligibility from the origin, or grant authority. Search/filter query changes clone existing URL parameters so that a valid origin remains continuous.
+The optional RFx gap origin (`rfxReference`, `rfxGap`, `returnTo`) is bounded display/return context only. The Resources loader does not read RFx private state, infer provider eligibility from the origin, or grant authority. Search/filter query changes clone existing URL parameters so that a valid origin remains continuous. Card and rail destinations retain bounded origin and discovery context without exceeding the shared canonical-destination contract; the selected record and valid RFx return take priority if an unusually long search cannot fit.
 
 ## Objective local evidence
 
-- `node scripts/mobile-exchange-stage4-resources-acceptance.mjs`: 7/7 passing; real provider/resource/request composition, privacy-preserving map/list split, service-territory geometry binding, composite selection identity, negative/independently settled request authorization, bounded RFx return context and five-locale copy.
-- `npm run check` under Node 24.18.0: validation, Functions build/tests, 780/780 architecture tests, typecheck and lint passed. Its final build invocation alone could not acquire a lock because the temporary worktree exhausted local disk after the preceding gate stages.
-- After clearing only generated worktree artifacts, `npm ci --ignore-scripts` followed by `npm run build` under Node 24.18.0: passing on the same final source, including the `/resources` route.
+- `node scripts/mobile-exchange-stage4-resources-acceptance.mjs`: 13/13 passing; real provider/resource/request composition, bounded valid domain text, coherent Unicode-aware discovery across result families, privacy-preserving map/list split, neutral deduplicated service-territory geometry, composite selection identity, negative/independently settled request authorization, bounded RFx return context and five-locale copy/value labels.
+- `npm run check` under Node 24.18.0: passing; validation, Functions build and 43/43 tests, 786/786 architecture tests, typecheck, lint (zero errors; repository-baseline warnings only) and the production build all passed, including the `/resources` route.
 - Firestore emulator execution of `smoke-resource-network-emulator.mjs`: passing, including atomic persistence, publication/resource/message queries and direct-client denial.
+- Configured local browser fixture plus authenticated in-app browser acceptance: desktop and 390px mobile both rendered real approved providers, a published resource, a private authorized request and owner management; RFx origin/return survived provider, resource, request, filter and management movement; mobile exposed filters, provider consent/request, resource detail/intake, private request communication and owner controls; a resource-only search excluded the nonmatching private request; the five repository locales rendered localized Resources controls and status/category values; the final bounded journey recorded no new console errors or unhandled exceptions and no horizontal overflow.
 - `eslint .`: passing with repository baseline warnings only and no errors.
 - `git diff --check`: passing.
 
-Existing Resource Network architecture/emulator validation and the full repository `npm run check` are run separately and recorded on the exact candidate PR. Configured-browser, responsive, accessibility, console and timing observations must be attached to the exact candidate before merge; this document does not claim those external observations or optional independent assurance in advance.
+Existing Resource Network architecture/emulator validation and the full repository `npm run check` are run separately and recorded on the exact candidate PR. The repository's canonical configured-browser shell run remains separate from the packet-specific local fixture journey above. This document does not claim optional independent assurance.
 
 ## Security and truthfulness boundary
 

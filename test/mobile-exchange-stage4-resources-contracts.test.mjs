@@ -5,7 +5,9 @@ import test from "node:test";
 import {
   buildResourcesMobileProjection,
   resourcesMobileCopy,
+  resourcesMobileValueLabel,
 } from "../src/application/resource-network/mobile-resource-exchange.ts";
+import { matchesResourceDiscoveryTerms, resourceDiscoveryTerms } from "../src/application/resource-network/resource-discovery-query.ts";
 import { parseResourcesMobileWorkspaceQuery } from "../src/application/resource-network/resource-network-workspace.ts";
 
 const NOW = "2026-08-18T12:00:00.000Z";
@@ -73,7 +75,7 @@ function project(overrides = {}) {
     authorization: { openPlatform: true, referralManage: true, resourceManage: false },
     locale: "en-US",
     search: "capital",
-    availability: "available",
+    availability: "all",
     selection: {},
     ...overrides,
   });
@@ -93,6 +95,8 @@ test("Resources projects real providers, resources, requests and authoritative g
   assert.equal(projection.discovery.map.objects.filter((object) => object.kind === "record").length, 0);
   assert.equal(projection.discovery.map.objects.find((object) => object.kind === "organization").privacy, "approximate");
   assert.equal(projection.serviceTerritories[0].geometry, provider.territory.geometry);
+  assert.equal(projection.serviceTerritories[0].area.selectable, false);
+  assert.equal(projection.serviceTerritories[0].area.associationSelectionKey, null);
   assert.deepEqual(projection.discovery.spatialResults.map((result) => result.kind), ["mapped", "list-only", "list-only"]);
 });
 
@@ -104,6 +108,106 @@ test("private request hydration fails closed without blocking public Resources d
   assert.equal(projection.discovery.results.status, "ready");
 });
 
+test("valid long domain text is safely excerpted for bounded shared cards", () => {
+  const projection = project({
+    providers: [{
+      ...provider,
+      populationsServed: "p".repeat(2_000),
+      eligibility: "e".repeat(2_000),
+      services: [{ ...provider.services[0], name: "s".repeat(160), description: "d".repeat(600) }],
+    }],
+    resources: [{ ...resource, summary: "r".repeat(600), eligibility: "i".repeat(1_200) }],
+    requests: [{ ...request, summary: "q".repeat(1_200) }],
+    search: "",
+  });
+  for (const card of projection.discovery.results.cards) {
+    assert.equal((card.summary?.length ?? 0) <= 240, true);
+    assert.equal(card.metadata.every((item) => item.value.length <= 240), true);
+  }
+});
+
+test("Resources filters every result family coherently and keeps private requests outside availability filtering", () => {
+  const resourceSearch = project({ search: "preparation" });
+  assert.deepEqual(resourceSearch.discovery.results.cards.map((card) => card.identity.selectionKey), [
+    "organization:org-provider",
+    "provider-resource:resource-1",
+  ]);
+  const availability = project({ search: "capital", availability: "available" });
+  assert.deepEqual(availability.discovery.results.cards.map((card) => card.identity.selectionKey), [
+    "organization:org-provider",
+    "provider-resource:resource-1",
+  ]);
+  assert.equal(project({ search: "unmatched" }).discovery.results.status, "empty");
+});
+
+test("server and card query helpers require every bounded Unicode-aware term", () => {
+  const terms = resourceDiscoveryTerms("  Solar  retrofit SOLAR  aide-économique ");
+  assert.deepEqual(terms, ["solar", "retrofit", "aide", "économique"]);
+  assert.equal(matchesResourceDiscoveryTerms(["Solar retrofit", "Aide économique"], terms), true);
+  assert.equal(matchesResourceDiscoveryTerms(["Solar retrofit only"], terms), false);
+  assert.equal(resourceDiscoveryTerms("a ".repeat(100)).length <= 20, true);
+});
+
+test("coincident provider territories render once and never invent a provider selection target", () => {
+  const secondProvider = Object.freeze({
+    ...provider,
+    organizationId: "org-provider-2",
+    displayName: "Second Provider",
+    marker: { ...provider.marker, id: "marker-provider-2" },
+  });
+  const projection = project({ providers: [provider, secondProvider], search: "" });
+  assert.equal(projection.serviceTerritories.length, 1);
+  assert.equal(projection.serviceTerritories[0].area.selectable, false);
+  assert.equal(projection.serviceTerritories[0].area.associationSelectionKey, null);
+});
+
+test("card and rail destinations preserve bounded RFx origin and current discovery context", () => {
+  const projection = project({
+    navigationContext: {
+      query: "capital",
+      availability: "all",
+      rfxReference: "RFX-47",
+      rfxGap: "Need capital readiness",
+      returnTo: "/opportunities/RFX-47/assess?tab=gaps#gap-2",
+    },
+  });
+  const hrefs = [
+    ...projection.discovery.results.cards.flatMap((card) => [
+      card.detailContext.canonicalHref,
+      ...card.recordActions.map((action) => action.handler?.kind === "href" ? action.handler.href : null),
+    ]),
+    ...projection.actionRail.actions.map((action) => action.handler?.kind === "href" ? action.handler.href : null),
+  ].filter(Boolean);
+  assert.equal(hrefs.length > 0, true);
+  for (const href of hrefs) {
+    const parsed = new URL(href, "https://participant.invalid");
+    assert.equal(parsed.searchParams.get("rfxReference"), "RFX-47", href);
+    assert.equal(parsed.searchParams.get("rfxGap"), "Need capital readiness", href);
+    assert.equal(parsed.searchParams.get("returnTo"), "/opportunities/RFX-47/assess?tab=gaps#gap-2", href);
+    assert.equal(parsed.searchParams.get("q"), "capital", href);
+  }
+});
+
+test("maximum discovery text cannot overflow shared canonical destinations", () => {
+  const projection = project({
+    search: "preparation",
+    navigationContext: {
+      query: "long-query ".repeat(20),
+      availability: "available",
+      rfxReference: "RFX-47",
+      rfxGap: "Need capital readiness",
+      returnTo: "/opportunities/RFX-47/assess?tab=gaps#gap-2",
+    },
+  });
+  const resourceCard = projection.discovery.results.cards.find((card) => card.identity.recordType === "provider-resource");
+  assert.ok(resourceCard?.detailContext.canonicalHref);
+  assert.equal(resourceCard.detailContext.canonicalHref.length <= 240, true);
+  const parsed = new URL(resourceCard.detailContext.canonicalHref, "https://participant.invalid");
+  assert.equal(parsed.searchParams.get("resource"), resource.id);
+  assert.equal(parsed.searchParams.get("rfxReference"), "RFX-47");
+  assert.equal(parsed.searchParams.get("returnTo"), "/opportunities/RFX-47/assess?tab=gaps#gap-2");
+});
+
 test("route hydration gates private adjuncts and settles them independently from public discovery", () => {
   const page = fs.readFileSync(new URL("../app/resources/page.tsx", import.meta.url), "utf8");
   assert.match(page, /const referralsPromise = referralManage/);
@@ -112,6 +216,10 @@ test("route hydration gates private adjuncts and settles them independently from
   assert.match(page, /referralsResult\.status === "fulfilled" \? referralsResult\.value : \[\]/);
   assert.match(page, /ownerResult\.status === "fulfilled" \? ownerResult\.value : null/);
   assert.doesNotMatch(page, /throw referralsResult\.reason|throw ownerResult\.reason/);
+  const workspace = fs.readFileSync(new URL("../src/components/resource-network/ResourceNetworkWorkspace.tsx", import.meta.url), "utf8");
+  assert.match(workspace, /authorization\.referralManage \? <form action=\{connect\}/);
+  assert.match(workspace, /data-resources-mobile-operations/);
+  assert.match(workspace, /resource-management-mobile/);
 });
 
 test("selection preserves complete provider association and marker identity", () => {
@@ -154,5 +262,8 @@ test("Resources-owned copy is complete for the repository five-locale set", () =
   for (const locale of ["en-US", "es", "fr", "it", "de"]) {
     const copy = resourcesMobileCopy(locale);
     assert.equal(Object.values(copy).every((value) => typeof value === "string" && value.length > 0), true, locale);
+    for (const value of ["available", "limited", "unknown", "program", "funding-program", "technical-assistance", "published", "sent"]) {
+      assert.equal(resourcesMobileValueLabel(locale, value) === value, false, `${locale}:${value}`);
+    }
   }
 });
