@@ -1061,12 +1061,12 @@
       "requirementIds": ["MOB36-LENS-001", "MOB36-MIGRATION-001"],
       "sources": ["docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/program/SHARED_EXCHANGE_CONTRACTS.md", "src/application/participant/participant-lens-registry.ts", "src/application/participant/participant-spatial-context.ts"],
       "dependencies": [{ "packetId": "WP-MOBILE-EXCHANGE-STAGES36-AUTHORITY-01", "requiredStatuses": ["closed"] }],
-      "ownedPaths": ["src/application/participant/**", "src/components/participant/**", "src/i18n/messages/network/**", "app/geography/canvas/**", "app/exchange/**", "test/**", "scripts/**", "docs/program/evidence/mobile-exchange-lens-migration/**"],
+      "ownedPaths": ["src/application/participant/**", "src/components/participant/**", "src/components/referrals/ReferralWorkspace.tsx", "src/i18n/messages/network/**", "src/i18n/messages/participant-navigation/**", "app/geography/canvas/**", "app/exchange/**", "test/**", "scripts/**", "docs/program/evidence/mobile-exchange-lens-migration/**"],
       "nonOwnedPaths": ["src/domain/rfx/**", "src/domain/referrals/**", "src/domain/resource-providers/**", "src/domain/commercial/**", "functions/**", "firestore.rules", "docs/tracking/**"],
       "acceptanceRequired": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "copy", "cross-lens", "five-locales", "migration", "exact-head-ci", "configured-browser"],
       "mergeGates": ["exact final lens order", "generic Referrals state migrates to Capabilities", "specific referral links remain governed", "exactly four actions per permanent lens", "Menu remains utility", "desktop/mobile/five-locale evidence", "no known material finding"],
       "expectedOutput": "One backward-aware shared migration from the Stage 2 Referrals-ending registry to the Capabilities-ending registry without losing authorized referral records or creating a label-only capability lens.",
-      "stopBoundary": "Do not implement Stage 3 domain contracts, domain records/mutations, paid referrals, onboarding redesign, tracker completion, deployment or optional independent assurance."
+      "stopBoundary": "The narrow ReferralWorkspace and participant-navigation catalog ownership exists only to migrate the shared client continuity consumer and five-locale Menu/lens copy; do not change referral domain commands, records, lifecycle, consent, authorization or audit behavior. Do not implement Stage 3 domain contracts, domain records/mutations, paid referrals, onboarding redesign, tracker completion, deployment or optional independent assurance."
     },
     {
       "id": "WP-MOBILE-EXCHANGE-STAGE3-SHARED-01",

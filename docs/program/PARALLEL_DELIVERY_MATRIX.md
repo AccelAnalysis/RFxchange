@@ -2,9 +2,9 @@
 
 **Canonical volatile program-status source**
 
-**Snapshot basis:** merged `main` `3455eaefe5978eeb713b161c139f9df1b0c7bfc7` on 2026-08-18
+**Snapshot basis:** merged `main` `08c16a68dd55338bb4fe4eff7a22066fadec8d28` on 2026-08-18
 
-**Current task:** Activate `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from exact merged main `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`
+**Current task:** Implement `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from activation base `3455eaefe5978eeb713b161c139f9df1b0c7bfc7` after Control Room activation merged at `08c16a68dd55338bb4fe4eff7a22066fadec8d28`
 
 **Update rule:** Control Room recalculates this document from current merged `main` after every program-state change.
 
@@ -107,6 +107,8 @@ Referrals is a governed cross-lens function and Menu/Account utility.
 
 Control Room PR #226 records activation epoch `mobile-exchange-lens-migration-2026-08-18` for `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from exact base `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`. Stage 3 and every domain packet remain pre-activation and dependency-gated.
 
+Control Room subsequently found two shared migration consumers outside the activated path list: `ReferralWorkspace.tsx` still wrote the predecessor lens-shaped client state, and the five participant-navigation catalogs still supplied the predecessor fourth-lens copy. The active packet therefore narrowly owns that one referral presentation consumer and those catalogs solely for schema/copy migration. Referral commands, records, lifecycle, consent, authorization, audit behavior, and every Stage 3/4 domain adapter remain outside the packet.
+
 ## Stage 1 integrated contract family
 
 The integrated shared architecture now covers:
@@ -165,4 +167,4 @@ Any newly discovered generalized capability gap must be raised through the insta
 
 ## Exact next action
 
-Merge `WP-MOBILE-EXCHANGE-STAGES36-AUTHORITY-01` after exact-head CI. Then record its exact candidate/merge/post-merge evidence, close it, and activate `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from the exact current-main SHA. No Stage 3 or domain packet begins before that migration merges.
+Complete `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` against its recorded activation epoch, including the scoped v1-to-v2 continuity consumer migration, five-locale successor copy, exact sixteen-action registry, configured-browser evidence, exact-head CI, and no known material finding. No Stage 3 or domain packet begins before that migration merges and its post-merge reconciliation closes the packet.
