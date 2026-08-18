@@ -305,7 +305,7 @@ export class FirestoreOpportunityTeamingRepository implements OpportunityTeaming
       if (!current || current.target.kind !== "external" || !current.communicationRequest) throw new OpportunityTeamingRepositoryError("conflict", "External invitation communication is unavailable.");
       if (current.communicationStatus === "delivered") return current;
       if (current.version !== input.expectedVersion) throw new OpportunityTeamingRepositoryError("conflict", "Invitation changed before communication evidence was recorded.");
-      const updated = Object.freeze({ ...current, communicationStatus: input.status, communicationFailureCode: input.failureCode ?? null, updatedAt: input.updatedAt });
+      const updated = Object.freeze({ ...current, communicationStatus: input.status, communicationFailureCode: input.failureCode ?? null, version: current.version + 1, updatedAt: input.updatedAt });
       transaction.set(invitationRef, mutable(updated));
       return updated;
     }).catch((error: unknown) => { throw failure(error, "Invitation communication evidence is temporarily unavailable."); });

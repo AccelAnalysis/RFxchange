@@ -96,11 +96,14 @@ try {
   assert.equal(persistedAcquisition.status, "issued");
   assert.equal(persistedAcquisition.intent.subjectReference, ids.external);
   assert.equal((await repository.getInvitation(ids.external)).status, "pending");
+  const delivered = await repository.recordCommunicationResult({ invitationId: ids.external, expectedVersion: 1, status: "delivered", updatedAt: "2026-08-18T12:05:00.000Z" });
+  assert.equal(delivered.version, 2);
+  assert.equal(delivered.communicationStatus, "delivered");
   await db.collection("acquisitionContexts").doc(acquisition.context.id).update({ status: "bound", boundUserId: ids.candidateUser, boundAccessJourneyId: `journey-${suffix}` });
-  const accepted = decideTeamInvitation({ current: external, expectedVersion: 1, action: "accept", actorOrganizationId: ids.candidate, actorUserId: ids.candidateUser, actorMembershipId: ids.candidateMembership, attachedOrganizationId: ids.candidate, boundaryVersion: TEAMING_BOUNDARY_VERSION, boundaryLocale: "en-US", now: "2026-08-18T12:10:00.000Z" });
+  const accepted = decideTeamInvitation({ current: delivered, expectedVersion: 2, action: "accept", actorOrganizationId: ids.candidate, actorUserId: ids.candidateUser, actorMembershipId: ids.candidateMembership, attachedOrganizationId: ids.candidate, boundaryVersion: TEAMING_BOUNDARY_VERSION, boundaryLocale: "en-US", now: "2026-08-18T12:10:00.000Z" });
   const acceptanceCommand = command(`cmd-accept-${suffix}`, ids.candidate, "invitation.accept", accepted);
   const participation = createTeamParticipation({ invitation: accepted, actorOrganizationId: ids.candidate, actorUserId: ids.candidateUser, actorMembershipId: ids.candidateMembership });
-  assert.equal(await repository.decideInvitation({ invitation: accepted, expectedVersion: 1, command: acceptanceCommand, event: event(`event-accept-${suffix}`, accepted, ids.candidate, ids.candidateUser, ids.candidateMembership, "invitation-accepted", acceptanceCommand.id), audit: { ...audit(`audit-accept-${suffix}`, ids.candidate, "opportunity.team-invitation-accept"), actorUserId: ids.candidateUser, actorMembershipId: ids.candidateMembership }, participation }), "created");
+  assert.equal(await repository.decideInvitation({ invitation: accepted, expectedVersion: 2, command: acceptanceCommand, event: event(`event-accept-${suffix}`, accepted, ids.candidate, ids.candidateUser, ids.candidateMembership, "invitation-accepted", acceptanceCommand.id), audit: { ...audit(`audit-accept-${suffix}`, ids.candidate, "opportunity.team-invitation-accept"), actorUserId: ids.candidateUser, actorMembershipId: ids.candidateMembership }, participation }), "created");
   assert.equal((await repository.getInvitation(ids.external)).status, "accepted");
   assert.equal((await db.collection("rfxTeamParticipations").doc(participation.id).get()).exists, true);
 

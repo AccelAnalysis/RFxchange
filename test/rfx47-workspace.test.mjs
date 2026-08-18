@@ -45,6 +45,8 @@ test("TEM-003/004 review requires explicit current boundary acknowledgment", () 
   assert.match(review, /checked=\{acknowledged\}/);
   assert.match(review, /disabled=\{busy \|\| !acknowledged\}/);
   assert.match(review, /TEAMING_BOUNDARY_VERSION/);
+  assert.match(review, /action === "accept" \? "accepted" : "declined"/);
+  assert.doesNotMatch(review, /\$\{action\}ed/);
   assert.match(api, /boundaryVersion: action === "accept" \? Number\(body\.boundaryVersion\) : null/);
   assert.match(api, /boundaryLocale: action === "accept" \? String\(body\.boundaryLocale/);
   assert.match(api, /sameOrigin\(request\)/);

@@ -23,4 +23,3 @@ No response construction, assignment, submission, provider mutation, referral li
 - Canonical local gate: all validators, Functions build/tests, 786 architecture tests, typecheck, and lint passed. The final local Turbopack invocation is not evidence because the isolated worktree intentionally shares `node_modules` by an out-of-root symlink; a prior standalone clean-source production build passed. Exact-head CI must supply the authoritative clean-checkout production build.
 - Configured-browser evidence in canonical CI remains a shell/accessibility/transition regression. It does not by itself claim a live external email delivery or production-network invitation journey; provider delivery and production release remain separately controlled.
 - Assurance: builder/repository evidence only. No optional independent assurance event has occurred, so no `Verified` claim is made.
-

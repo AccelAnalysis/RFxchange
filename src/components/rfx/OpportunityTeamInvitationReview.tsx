@@ -19,7 +19,7 @@ export function OpportunityTeamInvitationReview({ invitation }: Readonly<{ invit
     try {
       const response = await fetch("/api/opportunities/teaming", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, commandId: crypto.randomUUID(), invitationId: invitation.id, expectedVersion: invitation.version, boundaryVersion: action === "accept" ? TEAMING_BOUNDARY_VERSION : null, boundaryLocale: action === "accept" ? locale : null }) });
       if (!response.ok) throw new Error("decision-failed");
-      setNotice(t(`rfxWorkspace.teamInvitation.${action}ed`)); router.refresh();
+      setNotice(t(`rfxWorkspace.teamInvitation.${action === "accept" ? "accepted" : "declined"}`)); router.refresh();
     } catch { setNotice(t("rfxWorkspace.teamInvitation.error")); }
     finally { setBusy(false); }
   }
