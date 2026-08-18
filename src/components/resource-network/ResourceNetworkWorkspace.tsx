@@ -8,7 +8,6 @@ import type { ParticipantSpatialScope } from "../../application/participant/part
 import {
   resourcesWorkspaceMutationHref,
   type ResourcesMobileWorkspaceQuery,
-  type ResourcesWorkspaceQueryUpdate,
 } from "../../application/resource-network/resource-network-workspace";
 import {
   buildResourcesMobileProjection,
@@ -41,6 +40,7 @@ import styles from "./ResourceNetworkWorkspace.module.css";
 
 type Referral = SenderReferralProjection | RecipientReferralProjection;
 type Owner = Readonly<{ serviceProfile: ProviderServiceProfile | null; serviceGeography: Readonly<{ serviceGeographyIds: readonly string[] }> | null; publication: Readonly<{ version: number; status: string; visibleServiceIds: readonly string[] }> | null; resources: readonly Readonly<{ id: string; version: number; title: string; status: string }>[]; invitations: readonly Readonly<{ id: string; recipientLabel: string; deliveryStatus: string; createdAt: string }>[] }> | null;
+type WorkspaceQueryUpdate = Readonly<Partial<Record<"q" | "availability" | "organization" | "provider" | "request" | "resource" | "manage", string | null | undefined>>>;
 
 interface Props {
   readonly model: ControlledLocalityMapModel;
@@ -271,8 +271,16 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
 
   function selectProvider(organizationId: string, resultIndex: number) {
     const organization = organizations.find((candidate) => candidate.organizationId === organizationId);
-    if (organization) applyOrganizationSpatialSelection(organization.marker.id);
+    if (organization) {
+      applyOrganizationSpatialSelection(organization.marker.id);
+      if (!navigateToCanonicalSelection(`organization:${organizationId}`)) {
+        updateWorkspaceQuery({ organization: null, provider: organizationId });
+      }
+    }
     else {
+      if (!navigateToCanonicalSelection(`organization:${organizationId}`)) {
+        updateWorkspaceQuery({ organization: null, provider: organizationId });
+      }
       updateSpatialContext((current) => Object.freeze({
         ...current,
         activeLens: "resources" as const,
@@ -285,9 +293,6 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
         originLens: current.activeLens,
       }));
     }
-    if (!navigateToCanonicalSelection(`organization:${organizationId}`)) {
-      updateWorkspaceQuery({ organization: null, provider: organizationId });
-    }
     updateSpatialContext((current) => Object.freeze({
       ...current,
       lensState: Object.freeze({
@@ -297,7 +302,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     }));
   }
 
-  function updateWorkspaceQuery(updates: ResourcesWorkspaceQueryUpdate) {
+  function updateWorkspaceQuery(updates: WorkspaceQueryUpdate) {
     setPreviewSelection(null);
     const destination = resourcesWorkspaceMutationHref(searchParams.toString(), queryState, updates);
     startNavigation(() => router.replace(destination, { scroll: false }));

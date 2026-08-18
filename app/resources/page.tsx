@@ -95,7 +95,9 @@ export async function renderResourcesPage({
     referralsPromise,
     ownerPromise,
   ] as const);
-  const explicitFocusedOrganizationId = queryState.organizationId ?? queryState.providerId;
+  const explicitFocusedOrganizationId = ({
+    focusedOrganizationId: queryState.organizationId ?? queryState.providerId,
+  }).focusedOrganizationId;
   const preliminaryResourcePromise = !explicitFocusedOrganizationId && queryState.resourceId
     ? loadAuthorizedResourceDiscovery({
         access,
