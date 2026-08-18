@@ -25,14 +25,14 @@ The original 106 records remain immutable and in order. Twenty-one successor req
 
 | Experience | Requirement denominator | Verified | In Progress | Implemented — Not Verified | Not Started | Blocked | Explicitly deferred/N/A |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Shared Exchange | 35 | 0 | 0 | 22 | 9 | 3 | 1 |
+| Shared Exchange | 35 | 0 | 0 | 20 | 8 | 3 | 4 |
 | Opportunities/RFx | 42 | 0 | 0 | 23 | 19 | 0 | 0 |
 | Resources | 13 | 0 | 0 | 8 | 3 | 2 | 0 |
 | Intelligence | 15 | 0 | 0 | 3 | 7 | 5 | 0 |
 | Capabilities | 3 | 0 | 0 | 0 | 3 | 0 | 0 |
-| Referrals Cross-Lens | 14 | 0 | 0 | 10 | 3 | 1 | 0 |
+| Referrals Cross-Lens | 14 | 0 | 0 | 10 | 3 | 0 | 1 |
 | Integration | 5 | 0 | 0 | 0 | 5 | 0 | 0 |
-| Program total | 127 | 0 | 0 | 66 | 49 | 11 | 1 |
+| Program total | 127 | 0 | 0 | 64 | 48 | 10 | 5 |
 
 No percentage is inferred from these counts. The successor requirement denominator changes no Feature-ID arithmetic.
 

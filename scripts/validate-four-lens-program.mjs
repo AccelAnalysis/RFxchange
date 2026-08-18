@@ -183,6 +183,7 @@ assert.equal(identityModel?.packetAssignment?.enabled, true);
 assert.deepEqual(identityModel?.packetAssignment?.allowedKinds, ["github", "github-app"]);
 assert.ok(Array.isArray(identityModel?.configuredIdentities) && identityModel.configuredIdentities.length >= 1, "At least one program-authorized independent identity is required");
 const programReviewerIdentities = new Set();
+const productOwnerIdentities = new Set(workstreams.productOwnerIdentities);
 for (const reviewer of identityModel.configuredIdentities) {
   assert.match(reviewer.identity, identityPattern, `Invalid independent reviewer identity ${reviewer.identity}`);
   assert.ok(["github", "github-app"].includes(reviewer.kind), `Invalid independent reviewer kind ${reviewer.kind}`);
@@ -487,15 +488,28 @@ for (const requirement of requirements.requirements) {
     for (const field of ["reason", "missingDependency", "impact", "futureLane"]) assert.ok(requirement.deferral?.[field], `${requirement.id} defer lacks ${field}`);
   } else if (requirement.status === "Not Applicable — Explicitly Approved") {
     assert.equal(requirement.acceptance.result, null, `${requirement.id} N/A must not masquerade as Verified acceptance`);
-    assert.match(requirement.deferral?.approvedBy, identityPattern, `${requirement.id} N/A needs an exact independent GitHub identity`);
+    assert.match(requirement.deferral?.approvedBy, identityPattern, `${requirement.id} N/A needs an exact authenticated GitHub identity`);
     assert.match(requirement.deferral?.approvalUrl, githubReviewPattern, `${requirement.id} N/A needs an authenticated GitHub approval signal`);
-    assert.ok(reviewerAuthorizedForRequirement(requirement.deferral.approvedBy, requirement.id), `${requirement.id} N/A approver is not authorized`);
-    assert.notEqual(requirement.deferral.approvedBy, requirement.implementation.actor, `${requirement.id} N/A was self-approved by the implementation actor`);
+    const productOwnerSupersession = requirement.deferral?.kind === "product-owner-supersession";
+    assert.ok(
+      productOwnerSupersession
+        ? productOwnerIdentities.has(requirement.deferral.approvedBy)
+        : reviewerAuthorizedForRequirement(requirement.deferral.approvedBy, requirement.id),
+      `${requirement.id} N/A approver is not authorized`,
+    );
+    if (!productOwnerSupersession) assert.notEqual(requirement.deferral.approvedBy, requirement.implementation.actor, `${requirement.id} N/A was self-approved by the implementation actor`);
     assert.ok(requirement.deferral?.reason && requirement.deferral?.impact && requirement.deferral?.futureLane, `${requirement.id} N/A needs explicit impact and future ownership`);
+    if (productOwnerSupersession) assert.ok(Array.isArray(requirement.deferral.successorRequirementIds) && requirement.deferral.successorRequirementIds.length > 0, `${requirement.id} product-owner supersession needs successor requirements`);
   } else if (requirement.id !== "SHARED-RESULT-001") {
     assert.equal(requirement.deferral, null, `${requirement.id} has deferral data without an explicit defer/N/A status`);
   }
 }
+
+assert.deepEqual(
+  requirements.requirements.filter((record) => record.status === "Not Applicable — Explicitly Approved").map((record) => record.id),
+  ["SHARED-TRUTH-001", "SHARED-CONTINUITY-001", "REF-LENS-012", "SHARED-LENS-CONTEXT-001"],
+  "Only the exact obsolete permanent-Referrals requirements receive this product-owner supersession",
+);
 
 for (const [label, select] of [
   ["Shared Exchange", (record) => record.lane === "shared-exchange" || record.lane === "independent-acceptance"],

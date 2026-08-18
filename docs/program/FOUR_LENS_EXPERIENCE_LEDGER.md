@@ -10,12 +10,12 @@ Under `FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, `Implemented — Not Verif
 
 | Experience | Stable range | Denominator | Current characterization |
 | --- | --- | ---: | --- |
-| Shared Exchange | `SHARED-*`, shared `MOB36-*` | 35 | 22 implemented/not verified, nine not started, three blocked, one explicitly deferred |
+| Shared Exchange | `SHARED-*`, shared `MOB36-*` | 35 | 20 implemented/not verified, eight not started, three blocked, four explicitly deferred/N/A |
 | Opportunities/RFx | `RFX-FEATURE-*`, `MOB36-OPPORTUNITIES-*` | 42 | 23 implemented/not verified, 19 not started |
 | Resources | `RES-LENS-*`, `MOB36-RESOURCES-*` | 13 | eight implemented/not verified, three not started, two blocked |
 | Intelligence | `INTEL-*`, `MOB36-INTELLIGENCE-*` | 15 | three implemented/not verified, seven not started, five dependency-blocked |
 | Capabilities | `MOB36-CAPABILITIES-*` | 3 | three not started |
-| Referrals Cross-Lens | `REF-LENS-*`, `MOB36-REFERRAL-*` | 14 | ten implemented/not verified, three not started, one blocked |
+| Referrals Cross-Lens | `REF-LENS-*`, `MOB36-REFERRAL-*` | 14 | ten implemented/not verified, three not started, one explicitly N/A |
 | Integration | integration-owned `MOB36-*` | 5 | five not started |
 
 The append-only program denominator is 127 requirements. The original 106 records remain immutable and in order. The delivery matrix displays cross-cutting `SHARED-EVIDENCE-001` with Shared Exchange because that is the candidate where the procedural gap occurred.
@@ -24,8 +24,8 @@ The append-only program denominator is 127 requirements. The original 106 record
 
 | Requirement | Status | Governing intent / disposition |
 | --- | --- | --- |
-| `SHARED-TRUTH-001` | Implemented — Not Verified | Historical permanent lens hierarchy/unavailable-state requirement remains immutable and separately dispositioned. |
-| `SHARED-LENS-CONTEXT-001` | Not Started | Phase 2 successor requires all four permanent lenses to remain visible/selectable Room contexts with exactly four stable action positions and individual-action availability. |
+| `SHARED-TRUTH-001` | Not Applicable — Explicitly Approved | Historical Referrals-ending hierarchy remains immutable; product-owner PR #225 supplies `MOB36-LENS-001` as the current successor. |
+| `SHARED-LENS-CONTEXT-001` | Not Applicable — Explicitly Approved | Historical Phase 2 container target remains immutable; `MOB36-LENS-001` and `MOB36-MIGRATION-001` govern the successor. |
 | `SHARED-TRANSITION-001` | Implemented — Not Verified | Current workspace remains through warm transition. |
 | `SHARED-LIFECYCLE-001` | Implemented — Not Verified | One stage-aware participant continuation resolver. |
 | `SHARED-SPATIAL-001`–`002` | Implemented — Not Verified | Versioned, scoped, non-authorizing continuity and invalidation. |
@@ -34,7 +34,7 @@ The append-only program denominator is 127 requirements. The original 106 record
 | `SHARED-SELECTION-001` | Implemented — Not Verified | One selected organization across map/list/detail. |
 | `SHARED-DRAWER-001`, `SHARED-SEARCH-001` | Implemented — Not Verified | Shared drawer/sheet and search/filter grammar. |
 | `SHARED-RESULT-001` | Deferred — Explicitly Approved | Current Network backend has a page contract; the post-#159 authority prohibited invented cursor semantics. |
-| `SHARED-CONTINUITY-001` | Implemented — Not Verified | Cross-lens selection/camera continuity. |
+| `SHARED-CONTINUITY-001` | Not Applicable — Explicitly Approved | Its permanent-Referrals transition target is superseded by the current query/detail and cross-lens referral return requirements. |
 | `SHARED-CONTINUITY-002` | Implemented — Not Verified | PR #186 candidate `6f160d84dd0f702e8546cbb421c17b2f3ac56dbd` corrected the PR #160 query-link loss and merged as `10150e66b4a1b37a0cda5381986c5599da96e632`; independent acceptance remains pending. |
 | `SHARED-RETURN-001` | Implemented — Not Verified | Explicit safe return context. |
 | `SHARED-ACCOUNT-001` | Implemented — Not Verified | Circular avatar trigger and authorized utility menu. |
