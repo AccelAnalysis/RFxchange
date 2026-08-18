@@ -75,12 +75,11 @@ export function resourcesCompactReturnContext(
     } catch {
       return Object.freeze({ rfxReference, returnTo: undefined });
     }
-  } else {
-    try {
-      decodeURI(returnSuffix);
-    } catch {
-      return Object.freeze({ rfxReference, returnTo: undefined });
-    }
+  }
+  try {
+    decodeURI(returnSuffix);
+  } catch {
+    return Object.freeze({ rfxReference, returnTo: undefined });
   }
   if (returnSuffix === "-") return Object.freeze({
     rfxReference,

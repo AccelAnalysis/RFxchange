@@ -317,6 +317,14 @@ test("compact destination accepts an encoded or framework-decoded RFx suffix wit
     rfxReference: "RFX-47",
     returnTo: undefined,
   });
+  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "%3Fq%3D%25E0%25A4%25A"), {
+    rfxReference: "RFX-47",
+    returnTo: undefined,
+  });
+  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "?q=%E0%A4%A"), {
+    rfxReference: "RFX-47",
+    returnTo: undefined,
+  });
 });
 
 test("compact-route query mutations overwrite raw collisions with server-revalidated RFx context", () => {
