@@ -1,4 +1,5 @@
 import type { ParticipantMapCamera } from "../geography/map-view.ts";
+import { isLocale, type Locale } from "../../i18n/config.ts";
 import {
   exchangeRoomActionDefinitionsForLens,
   type ExchangeRoomActionDisabledReason,
@@ -43,6 +44,13 @@ export type ExchangeOrganizationAssociationRole =
   | "associated";
 export type ExchangeMarkerSelectionRole = "focal" | "associated-organization";
 export type ExchangeMapPrivacy = "exact" | "approximate" | "locality-only" | "suppressed";
+export type ExchangeResultSetStatus =
+  | "loading"
+  | "ready"
+  | "empty"
+  | "unavailable"
+  | "restricted"
+  | "error";
 
 export const EXCHANGE_MEDIA_KINDS = Object.freeze([
   "organization-logo",
@@ -80,6 +88,20 @@ export interface ExchangeSortState {
 }
 
 export type ExchangeFilterValue = string | readonly string[] | number | boolean | null;
+
+export interface ExchangeLensQuery {
+  readonly version: typeof MOBILE_EXCHANGE_CONTRACT_VERSION;
+  readonly lens: ParticipantLensId;
+  readonly locale: Locale;
+  readonly geographyId: string;
+  readonly camera: ParticipantMapCamera | null;
+  readonly bounds: ExchangeMapBounds | null;
+  readonly search: string;
+  readonly filters: Readonly<Record<string, ExchangeFilterValue>>;
+  readonly sort: ExchangeSortState | null;
+  readonly cursor: string | null;
+  readonly resultPage: number;
+}
 
 export interface ExchangeOrganizationSelection {
   readonly selectionKey: string;
@@ -297,21 +319,100 @@ export interface ExchangeResultMetadata {
   readonly value: string;
 }
 
+export interface ExchangeResultClassification {
+  readonly id: string;
+  readonly label: string;
+  readonly value: string;
+}
+
+export interface ExchangeResultDates {
+  readonly publishedAt: string | null;
+  readonly updatedAt: string | null;
+  readonly closesAt: string | null;
+}
+
 declare const VALIDATED_RESULT_CARD: unique symbol;
 
 export interface LensResultCardModel {
   readonly [VALIDATED_RESULT_CARD]: true;
+  readonly lens: ParticipantLensId;
   readonly identity: ExchangeSubjectIdentity;
   readonly title: string;
+  readonly accessibleLabel: string;
   readonly organizationIdentity: string | null;
   readonly locality: string | null;
   readonly summary: string | null;
+  readonly status: ExchangeResultIndicator | null;
+  readonly dates: ExchangeResultDates;
+  readonly classifications: readonly ExchangeResultClassification[];
   readonly indicator: ExchangeResultIndicator | null;
   readonly metadata: readonly ExchangeResultMetadata[];
   readonly media: ExchangeMediaModel | null;
   readonly favorite: FavoriteState;
   readonly recordActions: readonly RecordActionDefinition[];
   readonly detailContext: ExchangeDetailContext;
+}
+
+export type LensResultSetState =
+  | Readonly<{
+      status: "loading";
+      lens: ParticipantLensId;
+      resultSetId: string | null;
+      cards: readonly [];
+      messageKey: string;
+      recovery: null;
+    }>
+  | Readonly<{
+      status: "ready";
+      lens: ParticipantLensId;
+      resultSetId: string;
+      cards: readonly LensResultCardModel[];
+      messageKey: null;
+      recovery: null;
+    }>
+  | Readonly<{
+      status: "empty" | "unavailable" | "restricted";
+      lens: ParticipantLensId;
+      resultSetId: string | null;
+      cards: readonly [];
+      messageKey: string;
+      recovery: RecordActionHandler | null;
+    }>
+  | Readonly<{
+      status: "error";
+      lens: ParticipantLensId;
+      resultSetId: string | null;
+      cards: readonly [];
+      messageKey: string;
+      recovery: RecordActionHandler;
+    }>;
+
+export type ExchangeListOnlyReason =
+  | "missing-authoritative-coordinate"
+  | "coordinate-withheld"
+  | "non-point-record";
+
+export type ExchangeResultSpatialDisposition =
+  | Readonly<{
+      kind: "mapped";
+      identity: ExchangeSubjectIdentity;
+      markerId: string;
+    }>
+  | Readonly<{
+      kind: "list-only";
+      identity: ExchangeSubjectIdentity;
+      reason: ExchangeListOnlyReason;
+      explanationKey: string;
+    }>;
+
+export interface LensDiscoveryProjection {
+  readonly lens: ParticipantLensId;
+  readonly queryId: string;
+  readonly geographyId: string;
+  readonly map: LensMapProjection;
+  readonly results: LensResultSetState;
+  readonly spatialResults: readonly ExchangeResultSpatialDisposition[];
+  readonly authoritySource: "server-derived";
 }
 
 export interface LensContinuityState {
@@ -454,6 +555,142 @@ function requiredList(values: readonly string[] | undefined, label: string): rea
   if (!values) return Object.freeze([]);
   const normalized = values.map((value) => required(value, label));
   return Object.freeze([...new Set(normalized)]);
+}
+
+function optionalIsoDate(value: string | null | undefined, label: string): string | null {
+  if (!value) return null;
+  const normalized = required(value, label);
+  if (!Number.isFinite(Date.parse(normalized))) throw new Error(`${label} must be an ISO-compatible date.`);
+  return normalized;
+}
+
+function validatedCoordinate(
+  value: Readonly<{ longitude: number; latitude: number }>,
+  label: string,
+): Readonly<{ longitude: number; latitude: number }> {
+  if (
+    !Number.isFinite(value.longitude)
+    || !Number.isFinite(value.latitude)
+    || value.longitude < -180
+    || value.longitude > 180
+    || value.latitude < -90
+    || value.latitude > 90
+  ) {
+    throw new Error(`${label} is outside valid longitude/latitude bounds.`);
+  }
+  return Object.freeze({ longitude: value.longitude, latitude: value.latitude });
+}
+
+function validatedResultHandler(handler: RecordActionHandler): RecordActionHandler {
+  if (handler.kind === "href") {
+    const href = required(handler.href, "Recovery href");
+    const parsed = new URL(href, "https://participant.invalid");
+    if (parsed.origin !== "https://participant.invalid") {
+      throw new Error("Recovery href must be same-origin and path-relative.");
+    }
+    return Object.freeze({ kind: "href", href: `${parsed.pathname}${parsed.search}${parsed.hash}` });
+  }
+  return Object.freeze({ kind: "intent", intent: required(handler.intent, "Recovery intent") });
+}
+
+function optionalBounded(value: string | null | undefined, label: string): string | null {
+  if (value === null || value === undefined) return null;
+  return required(value, label);
+}
+
+function validatedCamera(camera: ParticipantMapCamera | null | undefined): ParticipantMapCamera | null {
+  if (!camera) return null;
+  validatedCoordinate(camera, "Map camera center");
+  if (
+    !Number.isFinite(camera.zoom)
+    || camera.zoom < 0
+    || camera.zoom > 24
+    || !Number.isFinite(camera.pitch)
+    || camera.pitch < 0
+    || camera.pitch > 85
+    || !Number.isFinite(camera.bearing)
+    || camera.bearing < -360
+    || camera.bearing > 360
+  ) {
+    throw new Error("Map camera is outside supported presentation bounds.");
+  }
+  return Object.freeze({ ...camera });
+}
+
+function validatedBounds(bounds: ExchangeMapBounds | null | undefined): ExchangeMapBounds | null {
+  if (!bounds) return null;
+  const west = validatedCoordinate({ longitude: bounds.west, latitude: 0 }, "Map west bound").longitude;
+  const south = validatedCoordinate({ longitude: 0, latitude: bounds.south }, "Map south bound").latitude;
+  const east = validatedCoordinate({ longitude: bounds.east, latitude: 0 }, "Map east bound").longitude;
+  const north = validatedCoordinate({ longitude: 0, latitude: bounds.north }, "Map north bound").latitude;
+  if (west > east || south > north) throw new Error("Map bounds must use an ordered west/south/east/north extent.");
+  return Object.freeze({ west, south, east, north });
+}
+
+function validatedFilters(
+  filters: Readonly<Record<string, ExchangeFilterValue>> | null | undefined,
+): Readonly<Record<string, ExchangeFilterValue>> {
+  const result: Record<string, ExchangeFilterValue> = {};
+  for (const [rawKey, rawValue] of Object.entries(filters ?? {})) {
+    const key = required(rawKey, "Filter key");
+    if (key.length > 80) throw new Error("Filter key is invalid.");
+    if (typeof rawValue === "number" && !Number.isFinite(rawValue)) {
+      throw new Error(`Filter ${key} contains a non-finite number.`);
+    }
+    if (typeof rawValue === "string") {
+      result[key] = required(rawValue, `Filter ${key}`);
+      continue;
+    }
+    if (Array.isArray(rawValue)) {
+      result[key] = Object.freeze([...new Set(rawValue.map((value) => required(value, `Filter ${key}`)))]);
+      continue;
+    }
+    if (rawValue === null || typeof rawValue === "boolean" || typeof rawValue === "number") {
+      result[key] = rawValue;
+      continue;
+    }
+    throw new Error(`Filter ${key} has an unsupported value.`);
+  }
+  return Object.freeze(result);
+}
+
+export function createExchangeLensQuery(input: Readonly<{
+  lens: ParticipantLensId;
+  locale: string;
+  geographyId: string;
+  camera?: ParticipantMapCamera | null;
+  bounds?: ExchangeMapBounds | null;
+  search?: string;
+  filters?: Readonly<Record<string, ExchangeFilterValue>>;
+  sort?: ExchangeSortState | null;
+  cursor?: string | null;
+  resultPage?: number;
+}>): ExchangeLensQuery {
+  if (!PARTICIPANT_LENS_IDS.includes(input.lens)) throw new Error("Unknown participant lens.");
+  if (!isLocale(input.locale)) throw new Error("Unsupported Exchange locale.");
+  const search = (input.search ?? "").trim();
+  if (search.length > 240) throw new Error("Search query is invalid.");
+  const resultPage = input.resultPage ?? 1;
+  if (!Number.isInteger(resultPage) || resultPage < 1) throw new Error("Result page must be a positive integer.");
+  const sort = input.sort
+    ? Object.freeze({ id: required(input.sort.id, "Sort id"), direction: input.sort.direction })
+    : null;
+  if (sort && sort.direction !== "ascending" && sort.direction !== "descending") {
+    throw new Error("Sort direction is invalid.");
+  }
+  return Object.freeze({
+    version: MOBILE_EXCHANGE_CONTRACT_VERSION,
+    lens: input.lens,
+    locale: input.locale,
+    geographyId: required(input.geographyId, "Geography id"),
+    camera: validatedCamera(input.camera),
+    bounds: validatedBounds(input.bounds),
+    search,
+    filters: validatedFilters(input.filters),
+    sort,
+    cursor: optionalBounded(input.cursor, "Result cursor"),
+    resultPage,
+  });
 }
 
 function selectionKeyForOrganization(organizationId: string): string {
@@ -838,6 +1075,20 @@ export function projectFavoriteState(input: Readonly<{
   });
 }
 
+export function projectDomainOwnedSaveState(input: Readonly<{
+  visible: boolean;
+  favorited: boolean | null;
+  operational: boolean;
+  applicable: boolean;
+  authorized: boolean;
+  handler: RecordActionHandler | null;
+}>): FavoriteState {
+  return projectFavoriteState({
+    ...input,
+    visible: input.visible && input.operational,
+  });
+}
+
 export function createExchangeMediaModel(input: Readonly<{
   kind: ExchangeMediaKind;
   assetReference?: string | null;
@@ -871,11 +1122,16 @@ export function createExchangeMediaModel(input: Readonly<{
 }
 
 export function createLensResultCardModel(input: Readonly<{
+  lens?: ParticipantLensId;
   identity: ExchangeSubjectIdentity;
   title: string;
+  accessibleLabel?: string | null;
   organizationIdentity?: string | null;
   locality?: string | null;
   summary?: string | null;
+  status?: ExchangeResultIndicator | null;
+  dates?: Partial<ExchangeResultDates> | null;
+  classifications?: readonly ExchangeResultClassification[];
   indicator?: ExchangeResultIndicator | null;
   metadata?: readonly ExchangeResultMetadata[];
   media?: ExchangeMediaModel | null;
@@ -884,22 +1140,56 @@ export function createLensResultCardModel(input: Readonly<{
   canonicalHref?: string | null;
   returnLens: ParticipantLensId;
 }>): LensResultCardModel {
+  if (input.lens && input.lens !== input.returnLens) {
+    throw new Error("A result card lens and detail return lens must match.");
+  }
   const identity = createExchangeSubjectIdentity(input.identity);
+  const classificationKeys = (input.classifications ?? []).map((classification) => classification.id.trim());
+  if (new Set(classificationKeys).size !== classificationKeys.length) {
+    throw new Error("A result card cannot contain duplicate classification ids.");
+  }
   const detailContext = Object.freeze({
     identity,
     canonicalHref: input.canonicalHref ? required(input.canonicalHref, "Canonical detail href") : null,
     returnLens: input.returnLens,
   });
   return Object.freeze({
+    lens: input.lens ?? input.returnLens,
     identity,
     title: required(input.title, "Card title"),
+    accessibleLabel: input.accessibleLabel
+      ? required(input.accessibleLabel, "Card accessible label")
+      : required(input.title, "Card title"),
     organizationIdentity: input.organizationIdentity
       ? required(input.organizationIdentity, "Organization identity")
       : null,
     locality: input.locality ? required(input.locality, "Locality") : null,
     summary: input.summary ? required(input.summary, "Card summary") : null,
-    indicator: input.indicator ?? null,
-    metadata: Object.freeze([...(input.metadata ?? [])]),
+    status: input.status ? Object.freeze({
+      label: required(input.status.label, "Result status label"),
+      value: required(input.status.value, "Result status value"),
+      emphasis: input.status.emphasis,
+    }) : null,
+    dates: Object.freeze({
+      publishedAt: optionalIsoDate(input.dates?.publishedAt, "Published date"),
+      updatedAt: optionalIsoDate(input.dates?.updatedAt, "Updated date"),
+      closesAt: optionalIsoDate(input.dates?.closesAt, "Closing date"),
+    }),
+    classifications: Object.freeze((input.classifications ?? []).map((classification) => Object.freeze({
+      id: required(classification.id, "Classification id"),
+      label: required(classification.label, "Classification label"),
+      value: required(classification.value, "Classification value"),
+    }))),
+    indicator: input.indicator ? Object.freeze({
+      label: required(input.indicator.label, "Result indicator label"),
+      value: required(input.indicator.value, "Result indicator value"),
+      emphasis: input.indicator.emphasis,
+    }) : null,
+    metadata: Object.freeze((input.metadata ?? []).map((item) => Object.freeze({
+      id: required(item.id, "Result metadata id"),
+      label: required(item.label, "Result metadata label"),
+      value: required(item.value, "Result metadata value"),
+    }))),
     media: input.media ?? null,
     favorite: input.favorite,
     recordActions: Object.freeze([...(input.recordActions ?? [])]),
@@ -921,15 +1211,207 @@ export function createExchangeMapObjectProjection(input: Readonly<{
   layerIds?: readonly string[];
 }>): ExchangeMapObjectProjection {
   const identity = createExchangeSubjectIdentity(input.identity);
+  if (input.coordinate === null && input.privacy !== "locality-only" && input.privacy !== "suppressed") {
+    throw new Error("A map object without an authoritative coordinate must use a non-point privacy treatment.");
+  }
+  if (input.coordinate !== null && input.privacy === "suppressed") {
+    throw new Error("A privacy-suppressed map object cannot disclose coordinates.");
+  }
   return Object.freeze({
     kind: identity.subjectKind,
     identity,
     markerId: required(input.markerId, "Marker id"),
-    coordinate: input.coordinate,
+    coordinate: input.coordinate ? validatedCoordinate(input.coordinate, "Map object coordinate") : null,
     privacy: input.privacy,
     accessibleLabel: required(input.accessibleLabel, "Accessible map label"),
     selectable: input.selectable,
     layerIds: requiredList(input.layerIds, "Layer id"),
+  });
+}
+
+export function createExchangeMapClusterProjection(input: Readonly<{
+  clusterId: string;
+  coordinate: Readonly<{ longitude: number; latitude: number }>;
+  count: number;
+  accessibleLabel: string;
+  layerIds?: readonly string[];
+}>): ExchangeMapClusterProjection {
+  if (!Number.isInteger(input.count) || input.count < 2) {
+    throw new Error("A map cluster must represent at least two authoritative objects.");
+  }
+  return Object.freeze({
+    kind: "cluster",
+    clusterId: required(input.clusterId, "Cluster id"),
+    coordinate: validatedCoordinate(input.coordinate, "Map cluster coordinate"),
+    count: input.count,
+    accessibleLabel: required(input.accessibleLabel, "Accessible cluster label"),
+    layerIds: requiredList(input.layerIds, "Layer id"),
+  });
+}
+
+export function createLensMapProjection(input: Readonly<{
+  lens: ParticipantLensId;
+  geography: ExchangeGeographyContext;
+  objects?: readonly ExchangeMapProjection[];
+  activeLayerIds?: readonly string[];
+  layerStateAuthority: ExchangeLayerStateAuthority;
+  camera?: ParticipantMapCamera | null;
+  bounds?: ExchangeMapBounds | null;
+}>): LensMapProjection {
+  if (!PARTICIPANT_LENS_IDS.includes(input.lens)) throw new Error("Unknown participant lens.");
+  const objects = Object.freeze([...(input.objects ?? [])]);
+  const identities = objects.map((object) => {
+    if (object.kind === "organization" || object.kind === "record") return `subject:${object.identity.selectionKey}`;
+    if (object.kind === "cluster") return `cluster:${object.clusterId}`;
+    if (object.kind === "area") return `area:${object.areaId}`;
+    return "relationshipId" in object
+      ? `relationship:${object.relationshipId}`
+      : `subject:${object.identity.selectionKey}`;
+  });
+  if (new Set(identities).size !== identities.length) {
+    throw new Error("A lens map projection cannot contain duplicate projection identities.");
+  }
+  const bounds = validatedBounds(input.bounds);
+  return Object.freeze({
+    lens: input.lens,
+    geography: input.geography,
+    objects,
+    activeLayerIds: requiredList(input.activeLayerIds, "Active layer id"),
+    layerStateAuthority: input.layerStateAuthority,
+    camera: validatedCamera(input.camera),
+    bounds,
+  });
+}
+
+export function listOnlyMapObjects(projection: LensMapProjection): readonly ExchangeMapObjectProjection[] {
+  return Object.freeze(projection.objects.filter(
+    (object): object is ExchangeMapObjectProjection =>
+      (object.kind === "organization" || object.kind === "record") && object.coordinate === null,
+  ));
+}
+
+export function resultCardMatchesMapObject(
+  card: LensResultCardModel,
+  projection: ExchangeMapObjectProjection,
+): boolean {
+  return card.lens === card.detailContext.returnLens
+    && sameSubjectIdentity(card.identity, card.detailContext.identity)
+    && sameSubjectIdentity(card.identity, projection.identity);
+}
+
+export function createLensResultSetState(input: Readonly<{
+  status: ExchangeResultSetStatus;
+  lens: ParticipantLensId;
+  resultSetId?: string | null;
+  cards?: readonly LensResultCardModel[];
+  messageKey?: string | null;
+  recovery?: RecordActionHandler | null;
+}>): LensResultSetState {
+  const resultSetId = input.resultSetId ? required(input.resultSetId, "Result set id") : null;
+  if (input.status === "ready") {
+    if (!resultSetId) throw new Error("A ready result set requires a stable result-set id.");
+    const cards = Object.freeze([...(input.cards ?? [])]);
+    if (cards.length === 0) throw new Error("A ready result set cannot stand in for an empty state.");
+    if (cards.some((card) => card.lens !== input.lens)) {
+      throw new Error("Every result card must belong to the result set lens.");
+    }
+    if (new Set(cards.map((card) => card.identity.selectionKey)).size !== cards.length) {
+      throw new Error("A result set cannot contain duplicate subject identities.");
+    }
+    return Object.freeze({ status: "ready", lens: input.lens, resultSetId, cards, messageKey: null, recovery: null });
+  }
+  if ((input.cards?.length ?? 0) > 0) throw new Error(`${input.status} result state cannot expose record cards.`);
+  if (input.status === "empty" && !resultSetId) {
+    throw new Error("An empty result state requires the authoritative result-set id.");
+  }
+  if (input.status === "loading" && resultSetId) {
+    throw new Error("A loading result state cannot retain a protected result-set id.");
+  }
+  if ((input.status === "unavailable" || input.status === "restricted" || input.status === "error") && resultSetId) {
+    throw new Error(`${input.status} result state cannot retain a protected result-set id.`);
+  }
+  const messageKey = required(input.messageKey ?? `mobileExchange.results.${input.status}`, "Result state message key");
+  const emptyCards = Object.freeze([]) as readonly [];
+  if (input.status === "loading") {
+    return Object.freeze({ status: "loading", lens: input.lens, resultSetId, cards: emptyCards, messageKey, recovery: null });
+  }
+  if (input.status === "error") {
+    if (!input.recovery) throw new Error("An error result state requires a recovery action.");
+    return Object.freeze({ status: "error", lens: input.lens, resultSetId, cards: emptyCards, messageKey, recovery: validatedResultHandler(input.recovery) });
+  }
+  return Object.freeze({
+    status: input.status,
+    lens: input.lens,
+    resultSetId,
+    cards: emptyCards,
+    messageKey,
+    recovery: input.recovery ? validatedResultHandler(input.recovery) : null,
+  });
+}
+
+function sameIdentity(left: ExchangeSubjectIdentity, right: ExchangeSubjectIdentity): boolean {
+  return sameSubjectIdentity(left, right);
+}
+
+export function createLensDiscoveryProjection(input: Readonly<{
+  lens: ParticipantLensId;
+  queryId: string;
+  map: LensMapProjection;
+  results: LensResultSetState;
+  spatialResults?: readonly ExchangeResultSpatialDisposition[];
+}>): LensDiscoveryProjection {
+  if (input.map.lens !== input.lens || input.results.lens !== input.lens) {
+    throw new Error("Query, map, and result projections must share one lens.");
+  }
+  if (input.map.geography.authority !== "server-revalidated") {
+    throw new Error("Discovery projection requires server-revalidated geography.");
+  }
+  if (input.map.layerStateAuthority !== "domain-revalidated") {
+    throw new Error("Discovery projection requires domain-revalidated layer state.");
+  }
+  const spatialResults = Object.freeze([...(input.spatialResults ?? [])]);
+  const spatialKeys = spatialResults.map((disposition) => disposition.identity.selectionKey);
+  if (new Set(spatialKeys).size !== spatialKeys.length) {
+    throw new Error("Each result identity must have one spatial disposition.");
+  }
+  const cards = input.results.status === "ready" ? input.results.cards : [];
+  if (cards.length !== spatialResults.length) {
+    throw new Error("Every ready result card requires exactly one mapped or list-only disposition.");
+  }
+  for (const card of cards) {
+    const disposition = spatialResults.find((candidate) => sameIdentity(candidate.identity, card.identity));
+    if (!disposition) throw new Error("Result spatial disposition identity does not match a result card.");
+    if (disposition.kind === "mapped") {
+      const object = input.map.objects.find((candidate): candidate is ExchangeMapObjectProjection =>
+        (candidate.kind === "organization" || candidate.kind === "record")
+        && candidate.markerId === disposition.markerId,
+      );
+      if (
+        !object
+        || object.coordinate === null
+        || object.privacy === "suppressed"
+        || !sameIdentity(object.identity, card.identity)
+      ) {
+        throw new Error("Mapped result must reference the same authoritative point identity.");
+      }
+    } else {
+      const object = input.map.objects.find((candidate): candidate is ExchangeMapObjectProjection =>
+        (candidate.kind === "organization" || candidate.kind === "record")
+        && sameIdentity(candidate.identity, card.identity),
+      );
+      if (object?.coordinate && object.privacy !== "suppressed") {
+        throw new Error("A result with an authoritative permitted point cannot be mislabeled list-only.");
+      }
+    }
+  }
+  return Object.freeze({
+    lens: input.lens,
+    queryId: required(input.queryId, "Query id"),
+    geographyId: input.map.geography.geographyId,
+    map: input.map,
+    results: input.results,
+    spatialResults,
+    authoritySource: "server-derived",
   });
 }
 

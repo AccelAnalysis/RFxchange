@@ -4,11 +4,18 @@ import {
   MOBILE_EXCHANGE_CONTRACT_VERSION,
   MOBILE_EXCHANGE_LENS_DEFINITIONS,
   createExchangeGeographyContext,
+  createExchangeLensQuery,
   createExchangeSelectionState,
   mobileExchangeStateFromParticipantSpatialContext,
   type ExchangeDetailContext,
+  type ExchangeLensQuery,
+  type ExchangeMapBounds,
+  type ExchangeSelectionState,
+  type ExchangeSheetSnapPoint,
   type ExchangeFilterValue,
   type ExchangeSortState,
+  type ExchangeSubjectIdentity,
+  type LensDiscoveryProjection,
   type LensResultCardModel,
   type MobileExchangeState,
 } from "./mobile-exchange-contracts.ts";
@@ -17,6 +24,8 @@ import {
   PARTICIPANT_SPATIAL_CONTEXT_VERSION,
   type ParticipantSpatialContext,
 } from "./participant-spatial-context.ts";
+import { isLocale, type Locale } from "../../i18n/config.ts";
+import type { ParticipantMapCamera } from "../geography/map-view.ts";
 
 export const MOBILE_EXCHANGE_CONTINUITY_VERSION = MOBILE_EXCHANGE_CONTRACT_VERSION;
 
@@ -52,6 +61,88 @@ export interface MobileExchangeReturnContext {
   readonly returnHref: string;
   readonly focusReturnKey: string | null;
 }
+
+export interface MobileExchangeQueryContext {
+  readonly contractVersion: typeof MOBILE_EXCHANGE_CONTINUITY_VERSION;
+  readonly queryId: string;
+  readonly scope: MobileExchangeContinuityScope;
+  readonly query: ExchangeLensQuery;
+  readonly selection: ExchangeSelectionState;
+  readonly sheet: MobileExchangeContinuityState["sheet"];
+  readonly detail: MobileExchangeContinuityState["detail"];
+  readonly resultIndex: number;
+  readonly listScrollPosition: number;
+  readonly clientStateGrantsAuthority: false;
+}
+
+export interface MobileExchangeReturnSnapshot {
+  readonly scope: MobileExchangeContinuityScope;
+  readonly query: ExchangeLensQuery;
+  readonly selection: ExchangeSelectionState;
+  readonly mapCamera: ParticipantMapCamera | null;
+  readonly mapBounds: ExchangeMapBounds | null;
+  readonly sheetSnapPoint: ExchangeSheetSnapPoint;
+  readonly sheetScrollPosition: number;
+  readonly listScrollPosition: number;
+  readonly resultIndex: number;
+  readonly returnHref: string;
+  readonly focusReturnKey: string | null;
+}
+
+export type MobileExchangeDetailNavigationState =
+  | Readonly<{ status: "closed"; source: null; context: null; returnSnapshot: null; errorCode: null }>
+  | Readonly<{
+      status: "opening" | "open";
+      source: "card" | "map" | "keyboard" | "deep-link";
+      context: MobileExchangeDetailContext;
+      returnSnapshot: MobileExchangeReturnSnapshot;
+      errorCode: null;
+    }>
+  | Readonly<{
+      status: "error";
+      source: "card" | "map" | "keyboard" | "deep-link";
+      context: MobileExchangeDetailContext;
+      returnSnapshot: MobileExchangeReturnSnapshot;
+      errorCode: string;
+    }>;
+
+export type MobileExchangeStage3ContinuityState = MobileExchangeContinuityState & Readonly<{
+  locale: Locale;
+  activeProjection: LensDiscoveryProjection | null;
+  detailNavigation: MobileExchangeDetailNavigationState;
+}>;
+
+export interface MobileExchangeServerRevalidationResult {
+  readonly expectedVersion: number;
+  readonly expectedScope: MobileExchangeContinuityScope;
+  readonly lens: ParticipantLensId;
+  readonly locale: Locale;
+  readonly geographyId: string;
+  readonly queryId: string;
+  readonly resultSetId: string | null;
+  readonly focalIdentity: ExchangeSubjectIdentity | null;
+  readonly focalSubjectAuthorized: boolean;
+  readonly associatedOrganizationAuthorized: boolean;
+  readonly relationshipAuthorized: boolean;
+  readonly detailSubjectAuthorized: boolean;
+}
+
+export type MobileExchangeProjectionRejectionReason =
+  | MobileExchangeInvalidationReason
+  | "lens-changed"
+  | "locale-changed"
+  | "query-changed"
+  | "result-set-changed"
+  | "detail-authority-changed";
+
+export type MobileExchangeProjectionReconciliation =
+  | Readonly<{ status: "accepted"; state: MobileExchangeStage3ContinuityState; projection: LensDiscoveryProjection }>
+  | Readonly<{
+      status: "rejected";
+      reason: MobileExchangeProjectionRejectionReason;
+      state: MobileExchangeStage3ContinuityState;
+      safeState: MobileExchangeStage3ContinuityState | null;
+    }>;
 
 export type MobileExchangeDetailContext = ExchangeDetailContext & MobileExchangeReturnContext;
 
@@ -156,6 +247,18 @@ function safeReturnHref(value: string | null | undefined, returnLens: Participan
   }
 }
 
+function safeDetailHref(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const parsed = new URL(value, "https://participant.invalid");
+    return parsed.origin === "https://participant.invalid"
+      ? `${parsed.pathname}${parsed.search}${parsed.hash}`
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export function mobileExchangeContinuityScope(input: Readonly<{
   sessionContextId?: string | null;
   participantId: string;
@@ -212,12 +315,219 @@ export function mobileExchangeSearchFilter(
   });
 }
 
+export function createMobileExchangeStage3ContinuityState(
+  state: MobileExchangeContinuityState,
+  input: Readonly<{ locale: string }>,
+): MobileExchangeStage3ContinuityState {
+  if (!isLocale(input.locale)) throw new Error("Unsupported Exchange locale.");
+  return Object.freeze({
+    ...state,
+    locale: input.locale,
+    activeProjection: null,
+    detailNavigation: Object.freeze({
+      status: "closed" as const,
+      source: null,
+      context: null,
+      returnSnapshot: null,
+      errorCode: null,
+    }),
+  });
+}
+
+export function mobileExchangeQueryContext(
+  state: MobileExchangeStage3ContinuityState,
+  input: Readonly<{ queryId: string }>,
+): MobileExchangeQueryContext {
+  const lensState = state.lensState[state.activeLens];
+  return Object.freeze({
+    contractVersion: MOBILE_EXCHANGE_CONTINUITY_VERSION,
+    queryId: required(input.queryId, "Query id"),
+    scope: state.scope,
+    query: createExchangeLensQuery({
+      lens: state.activeLens,
+      locale: state.locale,
+      geographyId: state.geography.geographyId,
+      camera: state.mapCamera,
+      bounds: state.mapBounds,
+      search: lensState.search,
+      filters: lensState.filters,
+      sort: lensState.sort,
+      cursor: lensState.cursor,
+      resultPage: lensState.resultPage,
+    }),
+    selection: state.selection,
+    sheet: state.sheet,
+    detail: state.detail,
+    resultIndex: lensState.resultIndex,
+    listScrollPosition: lensState.listScrollPosition,
+    clientStateGrantsAuthority: false,
+  });
+}
+
+function subjectIdentityMatches(left: ExchangeSubjectIdentity, right: ExchangeSubjectIdentity): boolean {
+  return left.subjectKind === right.subjectKind
+    && left.selectionKey === right.selectionKey
+    && left.organizationId === right.organizationId
+    && left.recordType === right.recordType
+    && left.recordId === right.recordId;
+}
+
+function scopeMatches(left: MobileExchangeContinuityScope, right: MobileExchangeContinuityScope): boolean {
+  return left.sessionContextId === right.sessionContextId
+    && left.participantId === right.participantId
+    && left.membershipId === right.membershipId
+    && left.viewerOrganizationId === right.viewerOrganizationId
+    && left.geographyId === right.geographyId;
+}
+
+function selectionForDetailIdentity(
+  identity: ExchangeSubjectIdentity,
+  source: "card" | "map" | "keyboard" | "detail",
+  markerId: string | null,
+): ExchangeSelectionState {
+  if (identity.subjectKind === "organization") {
+    return createExchangeSelectionState({
+      kind: "organization",
+      source,
+      selectedOrganization: { selectionKey: identity.selectionKey, organizationId: identity.organizationId },
+      selectedMarker: markerId ? { selectionKey: identity.selectionKey, markerId } : null,
+    });
+  }
+  return createExchangeSelectionState({
+    kind: "record",
+    source,
+    selectedRecord: {
+      selectionKey: identity.selectionKey,
+      recordType: identity.recordType,
+      recordId: identity.recordId,
+      organizationId: identity.organizationId,
+    },
+    selectedOrganization: identity.organizationId
+      ? {
+          selectionKey: `organization:${identity.organizationId}`,
+          organizationId: identity.organizationId,
+          associationRole: "associated",
+        }
+      : null,
+    selectedMarker: markerId ? { selectionKey: identity.selectionKey, markerId, role: "focal" } : null,
+  });
+}
+
+function returnSnapshot(
+  state: MobileExchangeStage3ContinuityState,
+  queryContext: MobileExchangeQueryContext,
+  detailContext: MobileExchangeDetailContext,
+): MobileExchangeReturnSnapshot {
+  return Object.freeze({
+    scope: state.scope,
+    query: queryContext.query,
+    selection: state.selection,
+    mapCamera: state.mapCamera,
+    mapBounds: state.mapBounds,
+    sheetSnapPoint: state.sheet.sheetSnapPoint,
+    sheetScrollPosition: state.sheet.sheetScrollPosition,
+    listScrollPosition: queryContext.listScrollPosition,
+    resultIndex: queryContext.resultIndex,
+    returnHref: detailContext.returnHref,
+    focusReturnKey: detailContext.focusReturnKey,
+  });
+}
+
+export function openMobileExchangeDetailFromProjection(
+  state: MobileExchangeStage3ContinuityState,
+  input: Readonly<{
+    source: "card" | "map" | "keyboard";
+    identity: ExchangeSubjectIdentity;
+    canonicalHref?: string | null;
+    returnHref?: string | null;
+    focusReturnKey: string;
+    queryId: string;
+  }>,
+): MobileExchangeStage3ContinuityState {
+  const projection = state.activeProjection;
+  if (!projection || projection.lens !== state.activeLens || projection.queryId !== input.queryId) {
+    throw new Error("Detail entry requires the accepted active discovery projection.");
+  }
+  const card = projection.results.status === "ready"
+    ? projection.results.cards.find((candidate) => subjectIdentityMatches(candidate.identity, input.identity))
+    : undefined;
+  const mapObject = projection.map.objects.find((candidate) =>
+    (candidate.kind === "organization" || candidate.kind === "record")
+    && subjectIdentityMatches(candidate.identity, input.identity),
+  );
+  if (!card || (input.source === "map" && !mapObject)) {
+    throw new Error("Detail identity must be present in the accepted card and map/list projection.");
+  }
+  const context = mobileExchangeDetailContext({
+    identity: card.identity,
+    canonicalHref: input.canonicalHref ?? card.detailContext.canonicalHref,
+    returnLens: state.activeLens,
+  }, {
+    returnHref: input.returnHref,
+    focusReturnKey: required(input.focusReturnKey, "Focus return key"),
+  });
+  const queryContext = mobileExchangeQueryContext(state, { queryId: input.queryId });
+  const snapshot = returnSnapshot(state, queryContext, context);
+  const selection = selectionForDetailIdentity(
+    card.identity,
+    input.source,
+    mapObject && (mapObject.kind === "organization" || mapObject.kind === "record") ? mapObject.markerId : null,
+  );
+  return Object.freeze({
+    ...state,
+    selection,
+    sheet: Object.freeze({ ...state.sheet, content: "detail" as const, detailContext: context }),
+    detail: Object.freeze({ status: "open" as const, detailContext: context, errorCode: null }),
+    detailNavigation: Object.freeze({
+      status: "open" as const,
+      source: input.source,
+      context,
+      returnSnapshot: snapshot,
+      errorCode: null,
+    }),
+  });
+}
+
+export function beginMobileExchangeDeepLink(
+  state: MobileExchangeStage3ContinuityState,
+  input: Readonly<{
+    requestedIdentity: ExchangeSubjectIdentity;
+    canonicalHref: string;
+    returnLens: ParticipantLensId;
+    returnHref?: string | null;
+    queryId: string;
+  }>,
+): MobileExchangeStage3ContinuityState {
+  if (input.returnLens !== state.activeLens) {
+    throw new Error("A detail deep link must preserve the active origin lens for safe return.");
+  }
+  const context = mobileExchangeDetailContext({
+    identity: input.requestedIdentity,
+    canonicalHref: input.canonicalHref,
+    returnLens: input.returnLens,
+  }, { returnHref: input.returnHref, focusReturnKey: null });
+  const snapshot = returnSnapshot(state, mobileExchangeQueryContext(state, { queryId: input.queryId }), context);
+  return Object.freeze({
+    ...state,
+    sheet: Object.freeze({ ...state.sheet, content: "detail" as const, detailContext: context }),
+    detail: Object.freeze({ status: "opening" as const, detailContext: context, errorCode: null }),
+    detailNavigation: Object.freeze({
+      status: "opening" as const,
+      source: "deep-link" as const,
+      context,
+      returnSnapshot: snapshot,
+      errorCode: null,
+    }),
+  });
+}
+
 export function mobileExchangeDetailContext(
   context: ExchangeDetailContext,
   input: Readonly<{ returnHref?: string | null; focusReturnKey?: string | null }> = {},
 ): MobileExchangeDetailContext {
   return Object.freeze({
     ...context,
+    canonicalHref: safeDetailHref(context.canonicalHref),
     returnHref: safeReturnHref(input.returnHref, context.returnLens),
     focusReturnKey: input.focusReturnKey
       ? required(input.focusReturnKey, "Focus return key")
@@ -280,6 +590,200 @@ export function withDomainRevalidatedMobileExchangeLayers(
       }),
     }),
   });
+}
+
+function rejectedStage3Projection(
+  state: MobileExchangeStage3ContinuityState,
+  reason: MobileExchangeProjectionRejectionReason,
+  safeState: MobileExchangeStage3ContinuityState | null,
+): MobileExchangeProjectionReconciliation {
+  return Object.freeze({ status: "rejected", reason, state, safeState });
+}
+
+export function reconcileServerRevalidatedMobileExchangeProjection(
+  state: MobileExchangeStage3ContinuityState,
+  query: MobileExchangeQueryContext,
+  projection: LensDiscoveryProjection,
+  result: MobileExchangeServerRevalidationResult,
+): MobileExchangeProjectionReconciliation {
+  for (const [label, value] of [
+    ["focal subject", result.focalSubjectAuthorized],
+    ["associated organization", result.associatedOrganizationAuthorized],
+    ["relationship", result.relationshipAuthorized],
+    ["detail subject", result.detailSubjectAuthorized],
+  ] as const) {
+    if (typeof value !== "boolean") throw new Error(`Server revalidation must explicitly resolve ${label} authority.`);
+  }
+  const continuity = reconcileMobileExchangeContinuity(state, {
+    expectedVersion: result.expectedVersion,
+    expectedScope: result.expectedScope,
+    focalSubjectAuthorized: result.focalSubjectAuthorized,
+    associatedOrganizationAuthorized: result.associatedOrganizationAuthorized,
+    relationshipAuthorized: result.relationshipAuthorized,
+  });
+  if (continuity.status === "invalid") {
+    const safeState = continuity.safeState
+      ? Object.freeze({ ...state, ...continuity.safeState, activeProjection: null })
+      : null;
+    return rejectedStage3Projection(state, continuity.reason, safeState);
+  }
+  if (result.lens !== state.activeLens || query.query.lens !== result.lens || projection.lens !== result.lens) {
+    return rejectedStage3Projection(state, "lens-changed", null);
+  }
+  if (result.locale !== state.locale || query.query.locale !== result.locale) {
+    return rejectedStage3Projection(state, "locale-changed", null);
+  }
+  if (
+    result.geographyId !== state.scope.geographyId
+    || query.query.geographyId !== result.geographyId
+    || projection.geographyId !== result.geographyId
+  ) {
+    return rejectedStage3Projection(state, "geography-changed", null);
+  }
+  if (query.queryId !== result.queryId || projection.queryId !== result.queryId) {
+    return rejectedStage3Projection(state, "query-changed", null);
+  }
+  if (projection.results.resultSetId !== result.resultSetId) {
+    return rejectedStage3Projection(state, "result-set-changed", null);
+  }
+
+  const pendingDetail = state.detailNavigation.status === "opening" ? state.detailNavigation : null;
+  if (
+    !pendingDetail
+    && state.selection.kind !== "none"
+    && result.focalIdentity
+    && !subjectIdentityMatches(state.selection.focalIdentity, result.focalIdentity)
+  ) {
+    return rejectedStage3Projection(state, "selected-object-authority-changed", Object.freeze({
+      ...state,
+      selection: createExchangeSelectionState({ kind: "none" }),
+      activeProjection: null,
+    }));
+  }
+  if (pendingDetail) {
+    if (
+      !result.detailSubjectAuthorized
+      || !result.focalSubjectAuthorized
+      || !result.focalIdentity
+      || !subjectIdentityMatches(pendingDetail.context.identity, result.focalIdentity)
+    ) {
+      const safeState = Object.freeze({
+        ...state,
+        selection: createExchangeSelectionState({ kind: "none" }),
+        sheet: Object.freeze({ ...state.sheet, content: "results" as const, detailContext: null }),
+        detail: Object.freeze({ status: "error" as const, detailContext: pendingDetail.context, errorCode: "detail-unavailable" }),
+        activeProjection: projection,
+        detailNavigation: Object.freeze({
+          status: "error" as const,
+          source: pendingDetail.source,
+          context: pendingDetail.context,
+          returnSnapshot: pendingDetail.returnSnapshot,
+          errorCode: "detail-unavailable",
+        }),
+      });
+      return rejectedStage3Projection(state, "detail-authority-changed", safeState);
+    }
+  }
+
+  let acceptedState: MobileExchangeStage3ContinuityState = Object.freeze({ ...state, activeProjection: projection });
+  if (pendingDetail && result.focalIdentity) {
+    const mapObject = projection.map.objects.find((candidate) =>
+      (candidate.kind === "organization" || candidate.kind === "record")
+      && subjectIdentityMatches(candidate.identity, result.focalIdentity!),
+    );
+    const selection = selectionForDetailIdentity(
+      result.focalIdentity,
+      "detail",
+      mapObject && (mapObject.kind === "organization" || mapObject.kind === "record") ? mapObject.markerId : null,
+    );
+    acceptedState = Object.freeze({
+      ...acceptedState,
+      selection,
+      detail: Object.freeze({ status: "open" as const, detailContext: pendingDetail.context, errorCode: null }),
+      detailNavigation: Object.freeze({ ...pendingDetail, status: "open" as const }),
+    });
+  }
+  return Object.freeze({ status: "accepted", state: acceptedState, projection });
+}
+
+export function closeMobileExchangeDetail(
+  state: MobileExchangeStage3ContinuityState,
+  input: Readonly<{ currentScope: MobileExchangeContinuityScope; stillAuthorized: boolean }>,
+): Readonly<{ state: MobileExchangeStage3ContinuityState; returnHref: string; focusReturnKey: string | null }> {
+  const navigation = state.detailNavigation;
+  if (navigation.status === "closed") {
+    return Object.freeze({
+      state,
+      returnHref: CANONICAL_LENS_HREFS[state.activeLens],
+      focusReturnKey: null,
+    });
+  }
+  const snapshot = navigation.returnSnapshot;
+  if (!input.stillAuthorized || !scopeMatches(snapshot.scope, input.currentScope)) {
+    const safeState = Object.freeze({
+      ...state,
+      scope: input.currentScope,
+      geography: createExchangeGeographyContext({
+        geographyId: input.currentScope.geographyId,
+        label: null,
+        serverRevalidated: false,
+      }),
+      selection: createExchangeSelectionState({ kind: "none" }),
+      sheet: Object.freeze({ ...state.sheet, content: "results" as const, detailContext: null }),
+      detail: Object.freeze({ status: "closed" as const, detailContext: null, errorCode: null }),
+      activeProjection: null,
+      detailNavigation: Object.freeze({
+        status: "closed" as const,
+        source: null,
+        context: null,
+        returnSnapshot: null,
+        errorCode: null,
+      }),
+    });
+    return Object.freeze({
+      state: safeState,
+      returnHref: CANONICAL_LENS_HREFS[snapshot.query.lens],
+      focusReturnKey: null,
+    });
+  }
+  const lensState = state.lensState[snapshot.query.lens];
+  const restored = Object.freeze({
+    ...state,
+    activeLens: snapshot.query.lens,
+    selection: snapshot.selection,
+    mapCamera: snapshot.mapCamera,
+    mapBounds: snapshot.mapBounds,
+    lensState: Object.freeze({
+      ...state.lensState,
+      [snapshot.query.lens]: Object.freeze({
+        ...lensState,
+        search: snapshot.query.search,
+        filters: snapshot.query.filters,
+        sort: snapshot.query.sort,
+        cursor: snapshot.query.cursor,
+        resultPage: snapshot.query.resultPage,
+        resultIndex: snapshot.resultIndex,
+        listScrollPosition: snapshot.listScrollPosition,
+        sheetScrollPosition: snapshot.sheetScrollPosition,
+      }),
+    }),
+    sheet: Object.freeze({
+      ...state.sheet,
+      sheetSnapPoint: snapshot.sheetSnapPoint,
+      sheetScrollPosition: snapshot.sheetScrollPosition,
+      content: "results" as const,
+      detailContext: null,
+    }),
+    detail: Object.freeze({ status: "closed" as const, detailContext: null, errorCode: null }),
+    detailNavigation: Object.freeze({
+      status: "closed" as const,
+      source: null,
+      context: null,
+      returnSnapshot: null,
+      errorCode: null,
+    }),
+  });
+  return Object.freeze({ state: restored, returnHref: snapshot.returnHref, focusReturnKey: snapshot.focusReturnKey });
 }
 
 function closeDetail(
