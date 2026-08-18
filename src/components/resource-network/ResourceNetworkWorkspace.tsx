@@ -1,11 +1,23 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import type { ParticipantSpatialScope } from "../../application/participant/participant-spatial-context";
-import type { ResourceNetworkWorkspaceQuery } from "../../application/resource-network/resource-network-workspace";
+import {
+  resourcesWorkspaceMutationHref,
+  type ResourcesMobileWorkspaceQuery,
+} from "../../application/resource-network/resource-network-workspace";
+import {
+  buildResourcesMobileProjection,
+  resourcesMobileCopy,
+  resourcesMobileValueLabel,
+  type ResourcesMobileAuthorization,
+  type ResourcesMobileSelectionInput,
+} from "../../application/resource-network/mobile-resource-exchange";
+import { exchangeRoomLocaleCatalog } from "../../application/participant/exchange-room-locale";
+import type { ExchangeGovernedAreaGeometry, ExchangeLensSelectableProjection } from "../../application/participant/lens-map-projection-adapter";
 import type { ProviderDiscoveryProjection, ProviderRequestMessageProjection, ProviderResourceProjection } from "../../domain/resource-network/model";
 import type { ProviderServiceProfile } from "../../domain/resource-providers/model";
 import type { RecipientReferralProjection, SenderReferralProjection } from "../../domain/referrals/model";
@@ -13,11 +25,11 @@ import {
   ExchangeSpatialScene,
   type ExchangeHomeMarker,
   type ExchangeOrganizationMarker,
-  type ExchangeServiceField,
 } from "../map/ExchangeSpatialScene";
 import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
+import { ExchangeBottomSheet, ExchangeResultCard } from "../participant/MobileExchangePrimitives";
 import { useParticipantSpatialContext } from "../participant/useParticipantSpatialContext";
 import {
   clearRetryStableCommand,
@@ -28,6 +40,7 @@ import styles from "./ResourceNetworkWorkspace.module.css";
 
 type Referral = SenderReferralProjection | RecipientReferralProjection;
 type Owner = Readonly<{ serviceProfile: ProviderServiceProfile | null; serviceGeography: Readonly<{ serviceGeographyIds: readonly string[] }> | null; publication: Readonly<{ version: number; status: string; visibleServiceIds: readonly string[] }> | null; resources: readonly Readonly<{ id: string; version: number; title: string; status: string }>[]; invitations: readonly Readonly<{ id: string; recipientLabel: string; deliveryStatus: string; createdAt: string }>[] }> | null;
+type WorkspaceQueryUpdate = Readonly<Partial<Record<"q" | "availability" | "organization" | "provider" | "request" | "resource" | "manage", string | null | undefined>>>;
 
 interface Props {
   readonly model: ControlledLocalityMapModel;
@@ -38,17 +51,35 @@ interface Props {
   readonly resources: readonly ProviderResourceProjection[];
   readonly referrals: readonly Referral[];
   readonly owner: Owner;
+  readonly adjunctState: Readonly<{
+    requests: "available" | "restricted" | "unavailable";
+    management: "available" | "restricted" | "unavailable";
+  }>;
+  readonly authorization: ResourcesMobileAuthorization;
   readonly commandRecoveryScope: string;
-  readonly queryState: ResourceNetworkWorkspaceQuery;
+  readonly queryState: ResourcesMobileWorkspaceQuery;
   readonly selectedMessages: readonly ProviderRequestMessageProjection[];
+  readonly selectedMessagesUnavailable: boolean;
 }
 
 const PROVIDER_REQUEST_STORAGE_KEY = "rfxchange:provider-request-create-and-send";
 
-function readable(value: string) { return value.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" "); }
-function requestPartyLabel(referral: Referral, organizationId: string): string {
+function requestPartyLabel(referral: Referral, organizationId: string, ownOrganizationLabel: string): string {
   if (organizationId === String(referral.providerContext?.providerOrganizationId)) return referral.recipientLabel;
-  return referral.role === "recipient" ? referral.senderOrganizationName : "Your organization";
+  return referral.role === "recipient" ? referral.senderOrganizationName : ownOrganizationLabel;
+}
+
+function cardSelection(selectionKey: string): ResourcesMobileSelectionInput {
+  if (selectionKey.startsWith("organization:")) {
+    return Object.freeze({ providerOrganizationId: selectionKey.slice("organization:".length), source: "card" });
+  }
+  if (selectionKey.startsWith("provider-resource:")) {
+    return Object.freeze({ resourceId: selectionKey.slice("provider-resource:".length), source: "card" });
+  }
+  if (selectionKey.startsWith("provider-request:")) {
+    return Object.freeze({ requestId: selectionKey.slice("provider-request:".length), source: "card" });
+  }
+  return Object.freeze({ source: "card" });
 }
 
 function browserSessionStorage(): Storage | null {
@@ -59,25 +90,59 @@ function browserSessionStorage(): Storage | null {
   }
 }
 
-export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, organizations, providers, resources, referrals, owner, commandRecoveryScope, queryState, selectedMessages }: Props) {
-  const { t } = useI18n();
-  const pathname = usePathname();
+export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, organizations, providers, resources, referrals, owner, adjunctState, authorization, commandRecoveryScope, queryState, selectedMessages, selectedMessagesUnavailable }: Props) {
+  const { t, locale } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [navigationPending, startNavigation] = useTransition();
   const providerRequestCommandRef = useRef<Readonly<{ fingerprint: string; commandId: string }> | null>(null);
+  const [previewSelection, setPreviewSelection] = useState<ResourcesMobileSelectionInput | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
+  const mobileOperationsRef = useRef<HTMLDivElement | null>(null);
+  const mobileProviderDetailRef = useRef<HTMLElement | null>(null);
+  const mobileResourceDetailRef = useRef<HTMLElement | null>(null);
+  const mobileRequestDetailRef = useRef<HTMLElement | null>(null);
+  const mobileManagementRef = useRef<HTMLElement | null>(null);
   const providerRequestStorageKey = `${PROVIDER_REQUEST_STORAGE_KEY}:${encodeURIComponent(commandRecoveryScope)}`;
   const [spatialContext, updateSpatialContext] = useParticipantSpatialContext({ scope: spatialScope, homeMarkerId: homeMarker.id, activeLens: "resources" });
-  const selectedOrganizationId = queryState.providerId ?? queryState.organizationId ?? spatialContext.selection.organizationId;
-  const selected = providers.find((provider) => String(provider.organizationId) === selectedOrganizationId) ?? null;
   const providerReferrals = referrals.filter((referral) => referral.purpose === "provider-connection");
-  const selectedRequest = providerReferrals.find((referral) => referral.id === queryState.requestId) ?? null;
+  const selectedResource = resources.find((resource) => resource.id === queryState.resourceId) ?? null;
   const actionBusy = busy || navigationPending;
-  const organizationMarkers = useMemo(() => organizations.map((organization) => organization.marker), [organizations]);
-  const serviceFields: readonly ExchangeServiceField[] = useMemo(() => providers.map((provider) => Object.freeze({ id: `service-field-${String(provider.organizationId)}`, label: `${provider.displayName} service territory`, geometry: provider.territory.geometry as ExchangeServiceField["geometry"], selected: String(provider.organizationId) === selectedOrganizationId })), [providers, selectedOrganizationId]);
+  const mobileCopy = resourcesMobileCopy(locale);
+  const valueLabel = (value: string) => resourcesMobileValueLabel(locale, value);
+  const actionCopy = exchangeRoomLocaleCatalog(locale);
+  const mobileProjection = useMemo(() => buildResourcesMobileProjection({
+    viewerOrganizationId: spatialScope.organizationId,
+    geography: { id: String(model.selectedGeography.id), label: model.selectedGeography.name },
+    providers,
+    resources,
+    requests: referrals,
+    authorization,
+    locale,
+    search: queryState.query,
+    availability: queryState.availability,
+    navigationContext: {
+      query: queryState.query,
+      availability: queryState.availability,
+      rfxReference: queryState.rfxReference,
+      rfxGap: queryState.rfxGap,
+      returnTo: queryState.returnTo,
+    },
+    selection: previewSelection ?? { providerOrganizationId: queryState.providerId, resourceId: queryState.resourceId, requestId: queryState.requestId, source: "restored" },
+    camera: spatialContext.camera,
+  }), [authorization, locale, model.selectedGeography.id, model.selectedGeography.name, previewSelection, providers, queryState.availability, queryState.providerId, queryState.query, queryState.requestId, queryState.resourceId, queryState.returnTo, queryState.rfxGap, queryState.rfxReference, referrals, resources, spatialContext.camera, spatialScope.organizationId]);
+  const visibleRequestIds = useMemo(() => new Set(mobileProjection.requestCards.map((card) => card.identity.recordId).filter((id): id is string => id !== null)), [mobileProjection.requestCards]);
+  const visibleProviderReferrals = providerReferrals.filter((referral) => visibleRequestIds.has(referral.id));
+  const selectedRequest = visibleProviderReferrals.find((referral) => referral.id === queryState.requestId) ?? null;
+  const selectedOrganizationId = queryState.providerId
+    ?? queryState.organizationId
+    ?? (selectedResource ? String(selectedResource.organizationId) : null)
+    ?? (selectedRequest?.providerContext?.providerOrganizationId ? String(selectedRequest.providerContext.providerOrganizationId) : null)
+    ?? spatialContext.selection.organizationId;
+  const selected = providers.find((provider) => String(provider.organizationId) === selectedOrganizationId) ?? null;
+  const governedAreaGeometries = useMemo(() => mobileProjection.serviceTerritories.map((binding) => Object.freeze({ areaId: binding.area.areaId, geographyId: binding.area.geographyId, geometryReference: binding.geometryReference, geometry: binding.geometry as ExchangeGovernedAreaGeometry["geometry"] })), [mobileProjection.serviceTerritories]);
 
   useEffect(() => {
     updateSpatialContext((current) => {
@@ -108,16 +173,26 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     if (panelRef.current) panelRef.current.scrollTop = spatialContext.lensState.resources.listScrollTop;
   }, [spatialContext.lensState.resources.listScrollTop]);
   useEffect(() => {
-    const focusedOrganizationId = queryState.organizationId ?? queryState.providerId;
+    if (!queryState.providerId && !queryState.resourceId && !queryState.requestId && !queryState.manageMode) return;
+    const target = queryState.manageMode
+      ? mobileManagementRef.current
+      : queryState.requestId
+        ? mobileRequestDetailRef.current
+        : queryState.resourceId
+          ? mobileResourceDetailRef.current
+          : mobileProviderDetailRef.current;
+    (target ?? mobileOperationsRef.current)?.scrollIntoView({ block: "start" });
+  }, [queryState.manageMode, queryState.providerId, queryState.requestId, queryState.resourceId]);
+  useEffect(() => {
+    const explicitFocusedOrganizationId = queryState.organizationId ?? queryState.providerId;
+    const focusedOrganizationId = explicitFocusedOrganizationId ?? selectedOrganizationId;
     if (!focusedOrganizationId) return;
     const organization = organizations.find(
       (candidate) => candidate.organizationId === focusedOrganizationId,
     );
-    const crossGeographyProvider = queryState.providerId
-      ? providers.find(
-          (candidate) => String(candidate.organizationId) === queryState.providerId && candidate.marker === null,
-        )
-      : null;
+    const crossGeographyProvider = providers.find(
+      (candidate) => String(candidate.organizationId) === focusedOrganizationId && candidate.marker === null,
+    ) ?? null;
     if (!organization && crossGeographyProvider) {
       if (
         spatialContext.selection.organizationId === spatialScope.organizationId
@@ -154,9 +229,9 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
       panelOpen: true,
       originLens: current.activeLens,
     }));
-  }, [homeMarker.id, organizations, providers, queryState.organizationId, queryState.providerId, spatialContext.selection.markerId, spatialContext.selection.organizationId, spatialScope.organizationId, updateSpatialContext]);
+  }, [homeMarker.id, organizations, providers, queryState.organizationId, queryState.providerId, selectedOrganizationId, spatialContext.selection.markerId, spatialContext.selection.organizationId, spatialScope.organizationId, updateSpatialContext]);
 
-  function selectOrganization(markerId: string) {
+  function applyOrganizationSpatialSelection(markerId: string) {
     const organization = organizations.find((candidate) => candidate.marker.id === markerId);
     const organizationId = organization?.organizationId ?? spatialScope.organizationId;
     updateSpatialContext((current) => Object.freeze({
@@ -166,17 +241,46 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
       panelOpen: true,
       originLens: current.activeLens,
     }));
+    return Object.freeze({ organization, organizationId });
+  }
+
+  function navigateToCanonicalSelection(selectionKey: string): boolean {
+    const card = mobileProjection.discovery.results.status === "ready"
+      ? mobileProjection.discovery.results.cards.find((candidate) => candidate.identity.selectionKey === selectionKey)
+      : null;
+    const href = card?.detailContext.canonicalHref;
+    if (!href) return false;
+    setPreviewSelection(cardSelection(selectionKey));
+    startNavigation(() => router.replace(href, { scroll: false }));
+    return true;
+  }
+
+  function selectOrganization(markerId: string) {
+    const { organization, organizationId } = applyOrganizationSpatialSelection(markerId);
+    if (
+      providers.some((provider) => String(provider.organizationId) === organizationId)
+      && navigateToCanonicalSelection(`organization:${organizationId}`)
+    ) return;
     updateWorkspaceQuery({
       organization: organization ? organizationId : null,
       provider: providers.some((provider) => String(provider.organizationId) === organizationId) ? organizationId : null,
+      resource: null,
+      request: null,
     });
   }
 
   function selectProvider(organizationId: string, resultIndex: number) {
     const organization = organizations.find((candidate) => candidate.organizationId === organizationId);
-    if (organization) selectOrganization(organization.marker.id);
+    if (organization) {
+      applyOrganizationSpatialSelection(organization.marker.id);
+      if (!navigateToCanonicalSelection(`organization:${organizationId}`)) {
+        updateWorkspaceQuery({ organization: null, provider: organizationId });
+      }
+    }
     else {
-      updateWorkspaceQuery({ organization: null, provider: organizationId });
+      if (!navigateToCanonicalSelection(`organization:${organizationId}`)) {
+        updateWorkspaceQuery({ organization: null, provider: organizationId });
+      }
       updateSpatialContext((current) => Object.freeze({
         ...current,
         activeLens: "resources" as const,
@@ -198,14 +302,51 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     }));
   }
 
-  function updateWorkspaceQuery(updates: Readonly<Partial<Record<"q" | "availability" | "organization" | "provider" | "request", string | null | undefined>>>) {
-    const next = new URLSearchParams(searchParams.toString());
-    for (const [key, value] of Object.entries(updates)) {
-      if (!value || (key === "availability" && value === "all")) next.delete(key);
-      else next.set(key, value);
-    }
-    const destination = `${pathname}${next.size ? `?${next.toString()}` : ""}`;
+  function updateWorkspaceQuery(updates: WorkspaceQueryUpdate) {
+    setPreviewSelection(null);
+    const destination = resourcesWorkspaceMutationHref(searchParams.toString(), queryState, updates);
     startNavigation(() => router.replace(destination, { scroll: false }));
+  }
+
+  function selectLensProjection(projection: ExchangeLensSelectableProjection) {
+    const selectionKey = projection.kind === "area"
+      ? projection.associationSelectionKey
+      : projection.identity.selectionKey;
+    if (!selectionKey) return;
+    if (selectionKey.startsWith("organization:")) {
+      const organizationId = selectionKey.slice("organization:".length);
+      selectProvider(organizationId, Math.max(0, providers.findIndex((provider) => String(provider.organizationId) === organizationId)));
+    } else if (selectionKey.startsWith("provider-resource:")) {
+      if (navigateToCanonicalSelection(selectionKey)) return;
+      const resourceId = selectionKey.slice("provider-resource:".length);
+      const resource = resources.find((candidate) => candidate.id === resourceId);
+      updateWorkspaceQuery({ organization: null, provider: resource ? String(resource.organizationId) : null, resource: resourceId, request: null });
+    } else if (selectionKey.startsWith("provider-request:")) {
+      if (navigateToCanonicalSelection(selectionKey)) return;
+      updateWorkspaceQuery({ organization: null, provider: null, request: selectionKey.slice("provider-request:".length), resource: null });
+    }
+  }
+
+  function selectCard(selectionKey: string) {
+    if (navigateToCanonicalSelection(selectionKey)) return;
+    const mapped = mobileProjection.discovery.map.objects.find((object) =>
+      (object.kind === "organization" || object.kind === "record")
+      && object.identity.selectionKey === selectionKey,
+    );
+    if (mapped && (mapped.kind === "organization" || mapped.kind === "record")) {
+      selectLensProjection(mapped);
+      return;
+    }
+    if (selectionKey.startsWith("organization:")) {
+      const organizationId = selectionKey.slice("organization:".length);
+      selectProvider(organizationId, Math.max(0, providers.findIndex((provider) => String(provider.organizationId) === organizationId)));
+    } else if (selectionKey.startsWith("provider-resource:")) {
+      const resourceId = selectionKey.slice("provider-resource:".length);
+      const resource = resources.find((candidate) => candidate.id === resourceId);
+      updateWorkspaceQuery({ organization: null, provider: resource ? String(resource.organizationId) : null, resource: resourceId, request: null });
+    } else if (selectionKey.startsWith("provider-request:")) {
+      updateWorkspaceQuery({ organization: null, provider: null, request: selectionKey.slice("provider-request:".length), resource: null });
+    }
   }
 
   function refreshAuthoritativeState() {
@@ -223,7 +364,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     if (!selected) return;
     const serviceId = String(form.get("serviceId") ?? "");
     const summary = String(form.get("summary") ?? "");
-    if (form.get("consent") !== "yes") { setNotice("Review and acknowledge the exact recipient and shared information before sending."); return; }
+    if (form.get("consent") !== "yes") { setNotice(mobileCopy.consentRequired); return; }
     const operationFingerprint = JSON.stringify({
       providerOrganizationId: String(selected.organizationId),
       serviceId,
@@ -253,17 +394,17 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
         commandId,
       });
       providerRequestCommandRef.current = null;
-      setNotice(`Request sent to ${selected.displayName}.`);
+      setNotice(`${mobileCopy.requestSentPrefix} ${selected.displayName}.`);
       const referral = typeof result.referral === "object" && result.referral
         ? result.referral as Record<string, unknown>
         : null;
       const requestId = typeof referral?.id === "string" ? referral.id : null;
       if (requestId) updateWorkspaceQuery({ request: requestId });
       else refreshAuthoritativeState();
-    } catch (error) {
+    } catch {
       // An uncertain response keeps the same command in memory and actor-scoped session storage.
       // Re-entering the same provider, service, publication and summary after reload replays it.
-      setNotice(error instanceof Error ? error.message : "Request failed.");
+      setNotice(mobileCopy.requestFailed);
     }
     finally { setBusy(false); }
   }
@@ -271,25 +412,29 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
   async function resourceAction(body: Record<string, unknown>) {
     setBusy(true); setNotice(null);
     try { await post("/api/resources", { ...body, commandId: `resource-${crypto.randomUUID()}` }); refreshAuthoritativeState(); }
-    catch (error) { setNotice(error instanceof Error ? error.message : "Resource action failed."); }
+    catch { setNotice(mobileCopy.resourceActionFailed); }
     finally { setBusy(false); }
   }
 
   async function referralAction(body: Record<string, unknown>) {
     setBusy(true); setNotice(null);
     try { await post("/api/referrals", { ...body, commandId: `provider-request-${crypto.randomUUID()}` }); refreshAuthoritativeState(); }
-    catch (error) { setNotice(error instanceof Error ? error.message : "Provider request action failed."); }
+    catch { setNotice(mobileCopy.providerActionFailed); }
     finally { setBusy(false); }
   }
 
   return <ParticipantShell activeItem="Resources">
     <SpatialWorkspace ariaLabel={t("resourceNetworkWorkspace.ariaLabel")} className={styles.workspace}>
+      {/* Stage 3 rendered serviceFields={serviceFields}; Stage 4 consumes the shared
+          lens projection instead so the same map never receives duplicate overlays. */}
       <ExchangeSpatialScene
         model={model}
         mode="organization"
         marker={homeMarker}
-        organizationMarkers={organizationMarkers}
-        serviceFields={serviceFields}
+        lensProjection={mobileProjection.discovery.map}
+        lensSelection={mobileProjection.selection}
+        governedAreaGeometries={governedAreaGeometries}
+        onLensProjectionSelect={selectLensProjection}
         focusedMarkerId={spatialContext.selection.markerId}
         onOrganizationMarkerSelect={selectOrganization}
         initialCamera={spatialContext.camera}
@@ -313,56 +458,127 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
         }}
       >
         <header><p className={styles.eyebrow}>{t("resourceNetworkWorkspace.eyebrow")}</p><h1>{t("resourceNetworkWorkspace.title")}</h1><p>{t("resourceNetworkWorkspace.supporting")}</p></header>
+        {queryState.rfxReference || queryState.rfxGap ? <section className={styles.originContext} aria-label={mobileCopy.context}>
+          <strong>{mobileCopy.context}</strong>
+          <small>{mobileCopy.contextOnly}</small>
+          {queryState.returnTo ? <a href={queryState.returnTo}>{mobileCopy.return}</a> : null}
+        </section> : null}
+        <nav className={styles.actionRail} aria-label={actionCopy.actionsLabel}>
+          {mobileProjection.actionRail.actions.map((action) => action.availability === "enabled" && action.handler?.kind === "href"
+            ? <a key={action.id} href={action.handler.href}>{actionCopy.actions[action.labelKey as keyof typeof actionCopy.actions]}</a>
+            : <button key={action.id} type="button" disabled data-disabled-reason={action.disabledReason ?? undefined}>{actionCopy.actions[action.labelKey as keyof typeof actionCopy.actions]}</button>)}
+        </nav>
         <form className={styles.filters} onSubmit={(event) => {
           event.preventDefault();
           const data = new FormData(event.currentTarget);
           updateWorkspaceQuery({
             q: String(data.get("q") ?? ""),
             availability: String(data.get("availability") ?? "all"),
+            organization: null,
             provider: null,
+            resource: null,
+            request: null,
           });
         }}>
-          <label>{t("resourceNetworkWorkspace.search")}<input key={`q:${queryState.query}`} name="q" defaultValue={queryState.query} type="search" maxLength={160} placeholder="Capital, workshops, assistance…" /></label>
-          <label>{t("resourceNetworkWorkspace.availability")}<select key={`availability:${queryState.availability}`} name="availability" defaultValue={queryState.availability}><option value="all">All maintained states</option><option value="available">Available</option><option value="limited">Limited</option><option value="unknown">Unknown</option></select></label>
+          <label>{t("resourceNetworkWorkspace.search")}<input key={`q:${queryState.query}`} name="q" defaultValue={queryState.query} type="search" maxLength={160} placeholder={mobileCopy.searchPlaceholder} /></label>
+          <label>{t("resourceNetworkWorkspace.availability")}<select key={`availability:${queryState.availability}`} name="availability" defaultValue={queryState.availability}><option value="all">{mobileCopy.allStates}</option><option value="available">{mobileCopy.availableState}</option><option value="limited">{mobileCopy.limitedState}</option><option value="unknown">{mobileCopy.unknownState}</option></select></label>
           <button disabled={actionBusy} type="submit">{t("resourceNetworkWorkspace.applyFilters")}</button>
         </form>
         {notice ? <p className={styles.notice} role="status">{notice}</p> : null}
         <div className={styles.columns}>
-          <section aria-label="Provider results"><h2>{providers.length} {t("resourceNetworkWorkspace.providers")}</h2>{providers.length ? <ul className={styles.list}>{providers.map((provider, resultIndex) => <li key={String(provider.organizationId)}><button type="button" aria-current={String(provider.organizationId) === selectedOrganizationId} disabled={actionBusy} onClick={() => selectProvider(String(provider.organizationId), resultIndex)}><strong>{provider.displayName}</strong><span>{provider.services.map((service) => service.name).join(" · ")}</span><small>{provider.match.reasons.join(" · ")}</small></button></li>)}</ul> : <div className={styles.empty}><strong>{t("resourceNetworkWorkspace.empty")}</strong><p>Try broader terms or another maintained availability state.</p></div>}</section>
-          <section className={styles.detail} aria-live="polite">{selected ? <><p className={styles.status}>{readable(selected.availability)} · {selected.territory.name}</p><h2>{selected.displayName}</h2><p>{selected.populationsServed}</p><dl><div><dt>Eligibility</dt><dd>{selected.eligibility}</dd></div><div><dt>Intake</dt><dd>{selected.intakeMethod}</dd></div><div><dt>Languages</dt><dd>{selected.languages.join(", ")}</dd></div><div><dt>Modalities</dt><dd>{selected.modalities.map(readable).join(", ")}</dd></div></dl><form action={connect} className={styles.form}><label>Service<select name="serviceId" required>{selected.services.map((service) => <option key={service.id} value={service.id}>{service.name} · {readable(service.availability)}</option>)}</select></label><label>What do you need?<textarea name="summary" required maxLength={1200} /></label><WorkflowExplainer explainerKey="provider-connection" /><label className={styles.check}><input name="consent" value="yes" type="checkbox" required />Share my organization name and this summary only with {selected.displayName}.</label><button disabled={actionBusy} type="submit">Send provider request</button></form></> : <p>Select a provider to see its published services and territory.</p>}</section>
+          <section aria-label={mobileCopy.providerResults}><h2>{providers.length} {t("resourceNetworkWorkspace.providers")}</h2>{providers.length ? <ul className={styles.list}>{providers.map((provider, resultIndex) => <li key={String(provider.organizationId)}><button type="button" aria-current={String(provider.organizationId) === selectedOrganizationId} disabled={actionBusy} onClick={() => selectProvider(String(provider.organizationId), resultIndex)}><strong>{provider.displayName}</strong><span>{provider.services.map((service) => service.name).join(" · ")}</span><small>{queryState.query ? mobileCopy.searchMatch : mobileCopy.localityMatch} · {valueLabel(provider.availability)}</small></button></li>)}</ul> : <div className={styles.empty}><strong>{t("resourceNetworkWorkspace.empty")}</strong><p>{mobileCopy.broaderSearch}</p></div>}</section>
+          <section className={styles.detail} aria-live="polite">{selected ? <><p className={styles.status}>{valueLabel(selected.availability)} · {selected.territory.name}</p><h2>{selected.displayName}</h2><p>{selected.populationsServed}</p><dl><div><dt>{mobileCopy.eligibilityLabel}</dt><dd>{selected.eligibility}</dd></div><div><dt>{mobileCopy.intakeLabel}</dt><dd>{selected.intakeMethod}</dd></div><div><dt>{mobileCopy.languagesLabel}</dt><dd>{selected.languages.join(", ")}</dd></div><div><dt>{mobileCopy.modalitiesLabel}</dt><dd>{selected.modalities.map(valueLabel).join(", ")}</dd></div></dl>{authorization.referralManage ? <form action={connect} className={styles.form}><label>{mobileCopy.serviceLabel}<select name="serviceId" required>{selected.services.map((service) => <option key={service.id} value={service.id}>{service.name} · {valueLabel(service.availability)}</option>)}</select></label><label>{mobileCopy.needLabel}<textarea name="summary" required maxLength={1200} /></label><WorkflowExplainer explainerKey="provider-connection" /><label className={styles.check}><input name="consent" value="yes" type="checkbox" required />{mobileCopy.consentPrefix} {selected.displayName}.</label><button disabled={actionBusy} type="submit">{mobileCopy.sendRequest}</button></form> : <p className={styles.notice}>{mobileCopy.requestAuthority}</p>}</> : <p>{mobileCopy.selectProvider}</p>}</section>
         </div>
-        <section className={styles.fieldAlternative} aria-label="Accessible service territory descriptions"><h2>Service territories</h2><ul>{providers.map((provider) => <li key={String(provider.organizationId)}><strong>{provider.displayName}</strong><span>Serves {provider.territory.name}; this field is separate from the provider&apos;s office marker.</span></li>)}</ul></section>
-        {resources.length ? <section className={styles.resources}><h2>Published resources</h2><ul>{resources.map((resource) => <li key={resource.id}><strong>{resource.title}</strong><span>{resource.providerDisplayName} · {readable(resource.kind)}</span><p>{resource.summary}</p>{resource.intakeUrl ? <a href={resource.intakeUrl}>Open intake information</a> : null}</li>)}</ul></section> : null}
+        <section className={styles.fieldAlternative} aria-label={mobileCopy.territoriesTitle}><h2>{mobileCopy.territoriesTitle}</h2><ul>{providers.map((provider) => <li key={String(provider.organizationId)}><strong>{provider.displayName}</strong><span>{mobileCopy.servesPrefix} {provider.territory.name}; {mobileCopy.territoryExplanation}</span></li>)}</ul></section>
+        {resources.length ? <section className={styles.resources}><h2>{mobileCopy.resourcesTitle}</h2><ul>{resources.map((resource) => <li key={resource.id} aria-current={resource.id === queryState.resourceId}><strong>{resource.title}</strong><span>{resource.providerDisplayName} · {valueLabel(resource.kind)}</span><p>{resource.summary}</p><button type="button" disabled={actionBusy} onClick={() => navigateToCanonicalSelection(`provider-resource:${resource.id}`) || updateWorkspaceQuery({ organization: null, provider: String(resource.organizationId), resource: resource.id, request: null })}>{mobileCopy.viewResource}</button></li>)}</ul>{selectedResource ? <article className={styles.detail} aria-live="polite"><p className={styles.status}>{valueLabel(selectedResource.status)} · {valueLabel(selectedResource.kind)}</p><h2>{selectedResource.title}</h2><p>{selectedResource.description}</p><dl><div><dt>{mobileCopy.eligibilityLabel}</dt><dd>{selectedResource.eligibility}</dd></div></dl>{selectedResource.intakeUrl ? <a href={selectedResource.intakeUrl}>{mobileCopy.openIntake}</a> : <p>{mobileCopy.contactProvider}</p>}</article> : null}</section> : null}
         <section className={styles.requests}>
-          <h2>Provider requests</h2>
-          {providerReferrals.length ? <ul>{providerReferrals.map((referral) => <li key={referral.id}>
+          <h2>{mobileCopy.requestsTitle}</h2>
+          {adjunctState.requests === "restricted" ? <p className={styles.notice}>{mobileCopy.requestRestricted}</p> : null}
+          {adjunctState.requests === "unavailable" ? <p className={styles.notice} role="status">{mobileCopy.requestUnavailable}</p> : null}
+          {visibleProviderReferrals.length ? <ul>{visibleProviderReferrals.map((referral) => <li key={referral.id}>
             <strong>{referral.role === "sender" ? referral.recipientLabel : referral.senderOrganizationName}</strong>
-            <span>{readable(referral.status)}</span>
+            <span>{valueLabel(referral.status)}</span>
             {referral.notificationStatus === "delivery-outcome-unknown" ? <p className={styles.notice} role="status">{t("referralWorkspace.notificationStates.deliveryOutcomeUnknown")}</p> : null}
             <p>{referral.summary}</p>
-            <button type="button" aria-current={referral.id === queryState.requestId} disabled={actionBusy} onClick={() => updateWorkspaceQuery({ request: referral.id })}>{t("resourceNetworkWorkspace.viewCommunication")}</button>
-            {referral.role === "recipient" && referral.status === "sent" ? <div><WorkflowExplainer explainerKey="provider-response" /><button disabled={actionBusy} onClick={() => referralAction({ action: "accepted", referralId: referral.id, expectedVersion: referral.version })}>Accept</button><button disabled={actionBusy} onClick={() => referralAction({ action: "declined", referralId: referral.id, expectedVersion: referral.version })}>Decline</button><form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); referralAction({ action: "redirected", referralId: referral.id, expectedVersion: referral.version, suggestedProviderOrganizationId: data.get("provider"), redirectReason: data.get("reason") }); }}><label>Suggest another published provider<select name="provider" required><option value="">Choose provider</option>{providers.filter((provider) => String(provider.organizationId) !== String(referral.providerContext?.providerOrganizationId)).map((provider) => <option key={String(provider.organizationId)} value={String(provider.organizationId)}>{provider.displayName}</option>)}</select></label><label>Reason<input name="reason" required maxLength={600} /></label><button disabled={actionBusy}>Redirect</button></form></div> : null}
-            {["sent", "accepted", "contacted"].includes(referral.status) ? <form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); resourceAction({ action: "message-add", referralId: referral.id, message: data.get("message") }); }}><label>Private request message<textarea name="message" required maxLength={2000} /></label><button disabled={actionBusy}>Add message</button></form> : null}
-            {referral.providerRedirect ? <p>Suggested provider: {referral.providerRedirect.suggestedProviderDisplayName}. {referral.providerRedirect.reason}</p> : null}
-          </li>)}</ul> : <p>No provider requests yet.</p>}
+            <button type="button" aria-current={referral.id === queryState.requestId} disabled={actionBusy} onClick={() => navigateToCanonicalSelection(`provider-request:${referral.id}`) || updateWorkspaceQuery({ organization: null, provider: null, resource: null, request: referral.id })}>{t("resourceNetworkWorkspace.viewCommunication")}</button>
+            {referral.role === "recipient" && referral.status === "sent" ? <div><WorkflowExplainer explainerKey="provider-response" /><button disabled={actionBusy} onClick={() => referralAction({ action: "accepted", referralId: referral.id, expectedVersion: referral.version })}>{mobileCopy.accept}</button><button disabled={actionBusy} onClick={() => referralAction({ action: "declined", referralId: referral.id, expectedVersion: referral.version })}>{mobileCopy.decline}</button><form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); referralAction({ action: "redirected", referralId: referral.id, expectedVersion: referral.version, suggestedProviderOrganizationId: data.get("provider"), redirectReason: data.get("reason") }); }}><label>{mobileCopy.suggestProvider}<select name="provider" required><option value="">{mobileCopy.chooseProvider}</option>{providers.filter((provider) => String(provider.organizationId) !== String(referral.providerContext?.providerOrganizationId)).map((provider) => <option key={String(provider.organizationId)} value={String(provider.organizationId)}>{provider.displayName}</option>)}</select></label><label>{mobileCopy.reason}<input name="reason" required maxLength={600} /></label><button disabled={actionBusy}>{mobileCopy.redirect}</button></form></div> : null}
+            {["sent", "accepted", "contacted"].includes(referral.status) ? <form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); resourceAction({ action: "message-add", referralId: referral.id, message: data.get("message") }); }}><label>{mobileCopy.privateMessage}<textarea name="message" required maxLength={2000} /></label><button disabled={actionBusy}>{mobileCopy.addMessage}</button></form> : null}
+            {referral.providerRedirect ? <p>{mobileCopy.suggestedProviderLabel}: {referral.providerRedirect.suggestedProviderDisplayName}. {referral.providerRedirect.reason}</p> : null}
+          </li>)}</ul> : <p>{mobileCopy.noRequests}</p>}
         </section>
-        {owner?.serviceProfile ? <OwnerManagement owner={Object.freeze({ ...owner, serviceProfile: owner.serviceProfile })} busy={actionBusy} onSubmit={resourceAction} /> : null}
-        {selectedRequest ? <section className={styles.requests}><h2>Request communication history</h2><article><strong>{selectedRequest.role === "recipient" ? selectedRequest.senderOrganizationName : selectedRequest.recipientLabel}</strong>{selectedMessages.length ? <ol>{selectedMessages.map((message) => <li key={message.id}><small>{requestPartyLabel(selectedRequest, String(message.authorOrganizationId))} · {new Date(message.createdAt).toLocaleString()}</small><p>{message.body}</p></li>)}</ol> : <p>{t("resourceNetworkWorkspace.noMessages")}</p>}</article></section> : null}
+        {adjunctState.management === "unavailable" ? <p className={styles.notice} role="status">{mobileCopy.managementUnavailable}</p> : null}
+        {owner?.serviceProfile ? <section id="resource-management"><OwnerManagement owner={Object.freeze({ ...owner, serviceProfile: owner.serviceProfile })} busy={actionBusy} initiallyOpen={queryState.manageMode !== null} onSubmit={resourceAction} /></section> : null}
+        {selectedRequest ? <section className={styles.requests}><h2>{mobileCopy.communicationTitle}</h2><article><strong>{selectedRequest.role === "recipient" ? selectedRequest.senderOrganizationName : selectedRequest.recipientLabel}</strong>{selectedMessagesUnavailable ? <p className={styles.notice} role="status">{mobileCopy.messagesUnavailable}</p> : selectedMessages.length ? <ol>{selectedMessages.map((message) => <li key={message.id}><small>{requestPartyLabel(selectedRequest, String(message.authorOrganizationId), mobileCopy.yourOrganization)} · {new Date(message.createdAt).toLocaleString(locale)}</small><p>{message.body}</p></li>)}</ol> : <p>{t("resourceNetworkWorkspace.noMessages")}</p>}</article></section> : null}
       </aside>
+      <ExchangeBottomSheet
+        labelledBy="resources-mobile-results"
+        labels={{ region: mobileCopy.results, dragHandle: mobileCopy.results, peek: mobileCopy.peek, partial: mobileCopy.partial, expanded: mobileCopy.expanded }}
+        snapPoint={spatialContext.sheetSnapPoint}
+        summary={<strong id="resources-mobile-results">{mobileProjection.discovery.results.status === "ready" ? `${mobileProjection.discovery.results.cards.length} ${mobileCopy.results}` : mobileCopy.empty}</strong>}
+        actionRail={<nav className={styles.actionRail} aria-label={actionCopy.actionsLabel}>{mobileProjection.actionRail.actions.map((action) => action.availability === "enabled" && action.handler?.kind === "href" ? <a key={action.id} href={action.handler.href}>{actionCopy.actions[action.labelKey as keyof typeof actionCopy.actions]}</a> : <button key={action.id} type="button" disabled>{actionCopy.actions[action.labelKey as keyof typeof actionCopy.actions]}</button>)}</nav>}
+        initialScrollTop={spatialContext.sheetScrollTop}
+        onSnapPointChange={(sheetSnapPoint) => updateSpatialContext((current) => Object.freeze({ ...current, sheetSnapPoint }))}
+        onScrollPositionChange={(sheetScrollTop) => updateSpatialContext((current) => Object.freeze({ ...current, sheetScrollTop }))}
+      >
+        {mobileProjection.discovery.results.status === "ready" ? mobileProjection.discovery.results.cards.map((card) => <ExchangeResultCard
+          key={card.identity.selectionKey}
+          card={card}
+          selected={mobileProjection.selection.selectionKey === card.identity.selectionKey}
+          labels={{ openDetail: mobileCopy.open, addFavorite: mobileCopy.save, removeFavorite: mobileCopy.remove, favoriteUnavailable: mobileCopy.unavailable, mediaFallback: mobileCopy.fallback }}
+          onSelect={() => setPreviewSelection(cardSelection(card.identity.selectionKey))}
+          onOpen={() => {
+            selectCard(card.identity.selectionKey);
+            updateSpatialContext((current) => Object.freeze({ ...current, sheetSnapPoint: "expanded" as const }));
+          }}
+          resolveRecordActionLabel={(key) => t(key)}
+        />) : <p>{mobileCopy.empty}</p>}
+        <div ref={mobileOperationsRef} className={styles.mobileOperations} data-resources-mobile-operations>
+          {queryState.rfxReference || queryState.rfxGap ? <section className={styles.originContext} aria-label={mobileCopy.context}>
+            <strong>{mobileCopy.context}</strong>
+            <small>{mobileCopy.contextOnly}</small>
+            {queryState.returnTo ? <a href={queryState.returnTo}>{mobileCopy.return}</a> : null}
+          </section> : null}
+          <form className={styles.filters} onSubmit={(event) => {
+            event.preventDefault();
+            const data = new FormData(event.currentTarget);
+            updateWorkspaceQuery({ q: String(data.get("q") ?? ""), availability: String(data.get("availability") ?? "all"), organization: null, provider: null, resource: null, request: null });
+          }}>
+            <label>{t("resourceNetworkWorkspace.search")}<input key={`mobile-q:${queryState.query}`} name="q" defaultValue={queryState.query} type="search" maxLength={160} placeholder={mobileCopy.searchPlaceholder} /></label>
+            <label>{t("resourceNetworkWorkspace.availability")}<select key={`mobile-availability:${queryState.availability}`} name="availability" defaultValue={queryState.availability}><option value="all">{mobileCopy.allStates}</option><option value="available">{mobileCopy.availableState}</option><option value="limited">{mobileCopy.limitedState}</option><option value="unknown">{mobileCopy.unknownState}</option></select></label>
+            <button disabled={actionBusy} type="submit">{t("resourceNetworkWorkspace.applyFilters")}</button>
+          </form>
+          {notice ? <p className={styles.notice} role="status">{notice}</p> : null}
+          <section ref={mobileProviderDetailRef} className={styles.detail} aria-live="polite">{selected ? <><p className={styles.status}>{valueLabel(selected.availability)} · {selected.territory.name}</p><h2>{selected.displayName}</h2><p>{selected.populationsServed}</p><dl><div><dt>{mobileCopy.eligibilityLabel}</dt><dd>{selected.eligibility}</dd></div><div><dt>{mobileCopy.intakeLabel}</dt><dd>{selected.intakeMethod}</dd></div></dl>{authorization.referralManage ? <form action={connect} className={styles.form}><label>{mobileCopy.serviceLabel}<select name="serviceId" required>{selected.services.map((service) => <option key={service.id} value={service.id}>{service.name} · {valueLabel(service.availability)}</option>)}</select></label><label>{mobileCopy.needLabel}<textarea name="summary" required maxLength={1200} /></label><WorkflowExplainer explainerKey="provider-connection" /><label className={styles.check}><input name="consent" value="yes" type="checkbox" required />{mobileCopy.consentPrefix} {selected.displayName}.</label><button disabled={actionBusy} type="submit">{mobileCopy.sendRequest}</button></form> : <p className={styles.notice}>{mobileCopy.requestAuthority}</p>}</> : <p>{mobileCopy.selectProviderCard}</p>}</section>
+          {selectedResource ? <section ref={mobileResourceDetailRef} className={styles.resources} aria-live="polite"><p className={styles.status}>{valueLabel(selectedResource.status)} · {valueLabel(selectedResource.kind)}</p><h2>{selectedResource.title}</h2><p>{selectedResource.description}</p><dl><div><dt>{mobileCopy.eligibilityLabel}</dt><dd>{selectedResource.eligibility}</dd></div></dl>{selectedResource.intakeUrl ? <a href={selectedResource.intakeUrl}>{mobileCopy.openIntake}</a> : <p>{mobileCopy.contactProvider}</p>}</section> : null}
+          <section ref={mobileRequestDetailRef} className={styles.requests}><h2>{mobileCopy.requestsTitle}</h2>{adjunctState.requests === "restricted" ? <p className={styles.notice}>{mobileCopy.requestRestricted}</p> : null}{adjunctState.requests === "unavailable" ? <p className={styles.notice} role="status">{mobileCopy.requestUnavailable}</p> : null}{selectedRequest ? <article><strong>{selectedRequest.role === "recipient" ? selectedRequest.senderOrganizationName : selectedRequest.recipientLabel}</strong><p>{selectedRequest.summary}</p>{selectedRequest.providerRedirect ? <p>{mobileCopy.suggestedProviderLabel}: {selectedRequest.providerRedirect.suggestedProviderDisplayName}. {selectedRequest.providerRedirect.reason}</p> : null}{selectedRequest.role === "recipient" && selectedRequest.status === "sent" ? <div><WorkflowExplainer explainerKey="provider-response" /><button disabled={actionBusy} onClick={() => referralAction({ action: "accepted", referralId: selectedRequest.id, expectedVersion: selectedRequest.version })}>{mobileCopy.accept}</button><button disabled={actionBusy} onClick={() => referralAction({ action: "declined", referralId: selectedRequest.id, expectedVersion: selectedRequest.version })}>{mobileCopy.decline}</button><form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); referralAction({ action: "redirected", referralId: selectedRequest.id, expectedVersion: selectedRequest.version, suggestedProviderOrganizationId: data.get("provider"), redirectReason: data.get("reason") }); }}><label>{mobileCopy.suggestProvider}<select name="provider" required><option value="">{mobileCopy.chooseProvider}</option>{providers.filter((provider) => String(provider.organizationId) !== String(selectedRequest.providerContext?.providerOrganizationId)).map((provider) => <option key={String(provider.organizationId)} value={String(provider.organizationId)}>{provider.displayName}</option>)}</select></label><label>{mobileCopy.reason}<input name="reason" required maxLength={600} /></label><button disabled={actionBusy}>{mobileCopy.redirect}</button></form></div> : null}{["sent", "accepted", "contacted"].includes(selectedRequest.status) ? <form className={styles.inlineForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); resourceAction({ action: "message-add", referralId: selectedRequest.id, message: data.get("message") }); }}><label>{mobileCopy.privateMessage}<textarea name="message" required maxLength={2000} /></label><button disabled={actionBusy}>{mobileCopy.addMessage}</button></form> : null}{selectedMessagesUnavailable ? <p className={styles.notice} role="status">{mobileCopy.messagesUnavailable}</p> : selectedMessages.length ? <ol>{selectedMessages.map((message) => <li key={message.id}><small>{requestPartyLabel(selectedRequest, String(message.authorOrganizationId), mobileCopy.yourOrganization)} · {new Date(message.createdAt).toLocaleString(locale)}</small><p>{message.body}</p></li>)}</ol> : <p>{t("resourceNetworkWorkspace.noMessages")}</p>}</article> : <p>{mobileCopy.selectRequest}</p>}</section>
+          {adjunctState.management === "unavailable" ? <p className={styles.notice} role="status">{mobileCopy.managementUnavailable}</p> : null}
+          {owner?.serviceProfile ? <section ref={mobileManagementRef} id="resource-management-mobile"><OwnerManagement owner={Object.freeze({ ...owner, serviceProfile: owner.serviceProfile })} busy={actionBusy} initiallyOpen={queryState.manageMode !== null} onSubmit={resourceAction} /></section> : null}
+        </div>
+      </ExchangeBottomSheet>
     </SpatialWorkspace>
   </ParticipantShell>;
 }
 
 function ResourceComposer({ busy, profile, geographyIds, onSubmit }: Readonly<{ busy: boolean; profile: ProviderServiceProfile; geographyIds: readonly string[]; onSubmit(body: Record<string, unknown>): void }>) {
-  return <form className={styles.form} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); onSubmit({ action: "resource-create", kind: data.get("kind"), title: data.get("title"), summary: data.get("summary"), description: data.get("description"), eligibility: data.get("eligibility"), intakeUrl: data.get("intakeUrl"), visibility: data.get("visibility"), serviceIds: [data.get("serviceId")], geographyIds, modalities: profile.modalities }); }}><h2>Create resource draft</h2><label>Type<select name="kind"><option value="resource">Resource</option><option value="program">Program</option><option value="workshop">Workshop</option><option value="funding-program">Funding program</option><option value="announcement">Announcement</option></select></label><label>Service<select name="serviceId">{profile.services.map((service) => <option key={service.id} value={service.id}>{service.name}</option>)}</select></label><label>Title<input name="title" required maxLength={180} /></label><label>Summary<textarea name="summary" required maxLength={600} /></label><label>Description<textarea name="description" required maxLength={4000} /></label><label>Eligibility<textarea name="eligibility" required maxLength={1200} /></label><label>Intake URL<input name="intakeUrl" type="url" /></label><label>Visibility<select name="visibility"><option value="network">RFxchange network</option><option value="public">Permitted public projection</option></select></label><button disabled={busy}>Save draft</button></form>;
+  const { locale } = useI18n();
+  const copy = resourcesMobileCopy(locale);
+  return <form className={styles.form} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); onSubmit({ action: "resource-create", kind: data.get("kind"), title: data.get("title"), summary: data.get("summary"), description: data.get("description"), eligibility: data.get("eligibility"), intakeUrl: data.get("intakeUrl"), visibility: data.get("visibility"), serviceIds: [data.get("serviceId")], geographyIds, modalities: profile.modalities }); }}><h2>{copy.createDraft}</h2><label>{copy.typeLabel}<select name="kind">{["resource", "program", "workshop", "funding-program", "announcement"].map((kind) => <option key={kind} value={kind}>{resourcesMobileValueLabel(locale, kind)}</option>)}</select></label><label>{copy.serviceLabel}<select name="serviceId">{profile.services.map((service) => <option key={service.id} value={service.id}>{service.name}</option>)}</select></label><label>{copy.titleLabel}<input name="title" required maxLength={180} /></label><label>{copy.summaryLabel}<textarea name="summary" required maxLength={600} /></label><label>{copy.descriptionLabel}<textarea name="description" required maxLength={4000} /></label><label>{copy.eligibilityLabel}<textarea name="eligibility" required maxLength={1200} /></label><label>{copy.intakeUrlLabel}<input name="intakeUrl" type="url" /></label><label>{copy.visibilityLabel}<select name="visibility"><option value="network">{copy.networkVisibility}</option><option value="public">{copy.publicVisibility}</option></select></label><button disabled={busy}>{copy.saveDraft}</button></form>;
 }
 
-function OwnerManagement({ owner, busy, onSubmit }: Readonly<{ owner: NonNullable<Owner> & { serviceProfile: ProviderServiceProfile }; busy: boolean; onSubmit(body: Record<string, unknown>): void }>) {
+function OwnerManagement({ owner, busy, initiallyOpen, onSubmit }: Readonly<{ owner: NonNullable<Owner> & { serviceProfile: ProviderServiceProfile }; busy: boolean; initiallyOpen: boolean; onSubmit(body: Record<string, unknown>): void }>) {
+  const { locale } = useI18n();
+  const copy = resourcesMobileCopy(locale);
   const [visibleServiceIds, setVisibleServiceIds] = useState<readonly string[]>(owner.publication?.visibleServiceIds ?? owner.serviceProfile.services.map((service) => service.id));
+  const detailsRef = useRef<HTMLDetailsElement | null>(null);
+  useEffect(() => {
+    if (initiallyOpen && detailsRef.current) detailsRef.current.open = true;
+  }, [initiallyOpen]);
   function toggle(id: string, selected: boolean) { setVisibleServiceIds((current) => selected ? Object.freeze([...new Set([...current, id])]) : Object.freeze(current.filter((value) => value !== id))); }
-  return <details className={styles.manage}><summary>Manage provider discovery and resources</summary><section><h2>Discovery publication</h2><p>Private profile changes do not publish automatically. Choose exactly which current services are discoverable.</p><WorkflowExplainer explainerKey="provider-resource-publication" /><div className={styles.serviceChecks}>{owner.serviceProfile.services.map((service) => <label key={service.id}><input type="checkbox" checked={visibleServiceIds.includes(service.id)} onChange={(event) => toggle(service.id, event.target.checked)} disabled={owner.publication?.status === "published"} />{service.name}</label>)}</div><button disabled={busy || !visibleServiceIds.length} onClick={() => onSubmit({ action: owner.publication?.status === "published" ? "publication-withdraw" : "publication-publish", expectedVersion: owner.publication?.version ?? null, visibleServiceIds })}>{owner.publication?.status === "published" ? "Withdraw discovery before editing" : "Publish selected services"}</button></section><ResourceComposer busy={busy} profile={owner.serviceProfile} geographyIds={owner.serviceGeography?.serviceGeographyIds.map(String) ?? []} onSubmit={onSubmit} /><InvitationComposer busy={busy} onSubmit={onSubmit} />{owner.resources.length ? <section><h2>Your resources</h2>{owner.resources.map((resource) => <p key={resource.id}><strong>{resource.title}</strong> · {readable(resource.status)} <button disabled={busy} onClick={() => onSubmit({ action: resource.status === "published" ? "resource-withdraw" : "resource-publish", resourceId: resource.id, expectedVersion: resource.version })}>{resource.status === "published" ? "Withdraw" : "Publish"}</button></p>)}</section> : null}</details>;
+  return <details ref={detailsRef} className={styles.manage}><summary>{copy.managementTitle}</summary><section><h2>{copy.publicationTitle}</h2><p>{copy.publicationNote}</p><WorkflowExplainer explainerKey="provider-resource-publication" /><div className={styles.serviceChecks}>{owner.serviceProfile.services.map((service) => <label key={service.id}><input type="checkbox" checked={visibleServiceIds.includes(service.id)} onChange={(event) => toggle(service.id, event.target.checked)} disabled={owner.publication?.status === "published"} />{service.name}</label>)}</div><button disabled={busy || !visibleServiceIds.length} onClick={() => onSubmit({ action: owner.publication?.status === "published" ? "publication-withdraw" : "publication-publish", expectedVersion: owner.publication?.version ?? null, visibleServiceIds })}>{owner.publication?.status === "published" ? copy.withdrawBeforeEdit : copy.publishServices}</button></section><ResourceComposer busy={busy} profile={owner.serviceProfile} geographyIds={owner.serviceGeography?.serviceGeographyIds.map(String) ?? []} onSubmit={onSubmit} /><InvitationComposer busy={busy} onSubmit={onSubmit} />{owner.resources.length ? <section><h2>{copy.yourResources}</h2>{owner.resources.map((resource) => <p key={resource.id}><strong>{resource.title}</strong> · {resourcesMobileValueLabel(locale, resource.status)} <button disabled={busy} onClick={() => onSubmit({ action: resource.status === "published" ? "resource-withdraw" : "resource-publish", resourceId: resource.id, expectedVersion: resource.version })}>{resource.status === "published" ? copy.withdraw : copy.publish}</button></p>)}</section> : null}</details>;
 }
 
 function InvitationComposer({ busy, onSubmit }: Readonly<{ busy: boolean; onSubmit(body: Record<string, unknown>): void }>) {
-  return <form className={styles.form} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); onSubmit({ action: "provider-invite", recipientLabel: data.get("recipientLabel"), recipientEmail: data.get("recipientEmail"), subjectKind: "profile-completion", invitationContext: data.get("invitationContext") }); }}><h2>Invite a provider to complete a profile</h2><label>Recipient name<input name="recipientLabel" required /></label><label>Email<input name="recipientEmail" type="email" required /></label><label>Context<textarea name="invitationContext" required maxLength={600} /></label><button disabled={busy}>Issue invitation</button></form>;
+  const { locale } = useI18n();
+  const copy = resourcesMobileCopy(locale);
+  return <form className={styles.form} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); onSubmit({ action: "provider-invite", recipientLabel: data.get("recipientLabel"), recipientEmail: data.get("recipientEmail"), subjectKind: "profile-completion", invitationContext: data.get("invitationContext") }); }}><h2>{copy.inviteTitle}</h2><label>{copy.recipientName}<input name="recipientLabel" required /></label><label>{copy.emailLabel}<input name="recipientEmail" type="email" required /></label><label>{copy.contextLabel}<textarea name="invitationContext" required maxLength={600} /></label><button disabled={busy}>{copy.issueInvitation}</button></form>;
 }

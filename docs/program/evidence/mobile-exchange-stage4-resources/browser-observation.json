@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "workPacketId": "WP-MOBILE-EXCHANGE-STAGE4-RESOURCES-01",
+  "requirementId": "MOB36-RESOURCES-001",
+  "candidateBinding": "The authenticated packet browser observations and canonical configured-shell replay are bound exactly to runtime commit 95922a4717234b283a2da8d133cc57cdac6b1e9d. The enclosing final candidate differs from that runtime only by this durable evidence and closeout metadata.",
+  "observedRuntimeCommit": "95922a4717234b283a2da8d133cc57cdac6b1e9d",
+  "fixture": {
+    "canonicalShellRunId": "shell-1787049509273-65db3a",
+    "canonicalShellRuntimeCommit": "95922a4717234b283a2da8d133cc57cdac6b1e9d",
+    "packetBrowserParticipantRunId": "shell-1787049509273-65db3a",
+    "projectId": "demo-rfxchange",
+    "geographyId": "us-va-portsmouth",
+    "providerOrganizationId": "org_harbor_shell-1787049509273-65db3a",
+    "resourceId": "resource-public-org_harbor_shell-1787049509273-65db3a",
+    "requestId": "provider-request-org_shell-1787049509273-65db3a",
+    "reproduction": [
+      "Run the canonical configured Exchange shell harness against the Firebase emulators without automatic cleanup.",
+      "Run scripts/mobile-exchange-stage4-resources-live-fixture.mjs against the retained shell fixture.",
+      "Authenticate as the generated shell participant and open the bounded RFx-origin Resources URL against runtime commit 95922a4717234b283a2da8d133cc57cdac6b1e9d."
+    ]
+  },
+  "observations": {
+    "desktop": {
+      "approvedProviderRendered": true,
+      "publishedResourceRendered": true,
+      "rfXContextAndExactReturnRendered": true,
+      "resourceOpenPreservedRfXOriginAndReturn": true,
+      "providerSelectionClearedStaleResourceAndRequest": true,
+      "resourceOnlyCanonicalLinkDerivedAssociatedProvider": true,
+      "resourceOnlySearchKeptProviderAndResource": true,
+      "resourceOnlySearchExcludedPrivateRequestResults": true,
+      "privateRequestAdjunctFailedClosedWithoutTakingDownPublicDiscovery": true,
+      "ownerAdjunctFailedClosedWithoutTakingDownPublicDiscovery": true
+    },
+    "mobile390": {
+      "persistentResourcesLensRendered": true,
+      "expandedSheetRendered": true,
+      "providerAndResourceCardsRendered": true,
+      "openScrolledSelectedOperationsIntoView": true,
+      "selectedResourceDetailTopCssPixels": 242.5,
+      "sheetScrollTopCssPixels": 1940,
+      "searchAndFilterControlsPresent": true,
+      "rfXReturnPresent": true,
+      "operationalProviderActionsPresent": true,
+      "visibleHorizontalClippingObserved": false
+    },
+    "compactDestination": {
+      "authorizedResourceRendered": true,
+      "exactRfXReturnRendered": true,
+      "encodedQueryAndFragmentReturnPreservedExactly": true,
+      "encodedMalformedPercentEscapesRejected": true,
+      "rawCollidingRfXQueryContextRejectedOnMutation": true,
+      "filterMutationPreservedReferenceAndReturn": true,
+      "filterMutationReturnedToCanonicalResourcesPath": true,
+      "applicationErrorRendered": false
+    },
+    "locales": {
+      "en-US": "Resource Network",
+      "de": "Ressourcennetzwerk",
+      "es": "Red de recursos",
+      "fr": "Réseau de ressources",
+      "it": "Rete delle risorse",
+      "rawAvailabilityOrPublicationEnumsRendered": false
+    },
+    "console": {
+      "warnings": 0,
+      "errors": 0,
+      "unhandledApplicationErrors": 0
+    }
+  },
+  "limits": [
+    "The browser fixture did not grant referral.manage or resource.manage for the discovered provider, so private request and owner-management success paths are established by focused application tests and Firestore emulator evidence, not this browser observation.",
+    "The compact maximum-identifier boundary prioritizes the selected record, RFx reference, and exact return. The descriptive rfxGap label can be omitted at that extreme boundary and is retained on ordinary bounded destinations and subsequent query mutations when present.",
+    "Maximum-identifier boundedness, malformed-context rejection, unknown-record non-disclosure, and provider focus beyond the bounded Network page are established by focused behavioral acceptance; the authenticated browser used an authorized ordinary-length compact record to exercise hydration and mutation continuity.",
+    "This is a builder-run packet-specific in-app browser replay, not optional independent assurance and not a production-network observation.",
+    "The repository canonical configured-browser shell harness remains a separate exact-head CI gate."
+  ]
+}

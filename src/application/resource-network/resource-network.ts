@@ -34,6 +34,7 @@ import {
 import type { ResourceNetworkRepository } from "../../domain/resource-network/repository.ts";
 import { organizationMembershipId } from "../../domain/users/model.ts";
 import { PROVIDER_ACQUISITION_EVENT, resourceNetworkTransactionalEmailCatalog } from "./resource-network-templates.ts";
+import { matchesResourceDiscoveryTerms, resourceDiscoveryTerms } from "./resource-discovery-query.ts";
 
 export class ResourceNetworkError extends Error {
   readonly code: "forbidden" | "invalid" | "not-found" | "conflict";
@@ -70,11 +71,15 @@ export interface ResourceNetworkDependencies {
 
 export interface ProviderMarkerProjection {
   readonly organizationId: string;
-  readonly marker: Readonly<{ id: string; coordinate: readonly [number, number]; accessibleLocationLabel: string }>;
+  readonly marker: Readonly<{
+    id: string;
+    coordinate: readonly [number, number];
+    accessibleLocationLabel: string;
+    privacyTreatment: "exact" | "approximate";
+  }>;
 }
 
 function fingerprint(value: unknown): string { return createHash("sha256").update(JSON.stringify(value)).digest("hex"); }
-function normalizedTerms(value: string | null | undefined): readonly string[] { return Object.freeze([...new Set((value ?? "").trim().toLowerCase().split(/[^a-z0-9]+/).filter((term) => term.length > 1))].slice(0, 20)); }
 function email(value: string): string { const normalized = value.trim().toLowerCase(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized) || normalized.length > 320) throw new Error("Invitation email is invalid."); return normalized; }
 function text(value: string, label: string, maximum: number): string { const normalized = value.trim().replace(/\s+/g, " "); if (!normalized || normalized.length > maximum) throw new Error(`${label} is required and cannot exceed ${maximum} characters.`); return normalized; }
 
@@ -89,7 +94,12 @@ function command(input: Readonly<{ id: string; organizationId: OrganizationId; o
 export class ResourceNetworkService {
   private readonly now: () => string;
   private readonly id: () => string;
-  constructor(private readonly dependencies: ResourceNetworkDependencies) { this.now = dependencies.now ?? (() => new Date().toISOString()); this.id = dependencies.id ?? randomUUID; }
+  private readonly dependencies: ResourceNetworkDependencies;
+  constructor(dependencies: ResourceNetworkDependencies) {
+    this.dependencies = dependencies;
+    this.now = dependencies.now ?? (() => new Date().toISOString());
+    this.id = dependencies.id ?? randomUUID;
+  }
 
   private async authorize(scope: ResourceNetworkScope, permission: "resource.manage" | "referral.manage") {
     const decision = await authorizeOrganizationOperation({ context: scope.context, organizationId: organizationId(scope.organizationId), membershipId: organizationMembershipId(scope.membershipId), permission }, this.dependencies.authorization);
@@ -128,8 +138,12 @@ export class ResourceNetworkService {
   }
 
   async discover(input: Readonly<{ viewerOrganizationId?: string | null; selectedGeography: GeographyDefinition; selectedGeometry: AuthoritativeGeoJsonGeometry; query?: string | null; modality?: string | null; language?: string | null; availability?: string | null; markers?: readonly ProviderMarkerProjection[] }>) {
-    const publications = await this.dependencies.network.listPublishedPublications();
-    const terms = normalizedTerms(input.query);
+    const [publications, allResources] = await Promise.all([
+      this.dependencies.network.listPublishedPublications(),
+      this.dependencies.network.listPublishedResources(),
+    ]);
+    const terms = resourceDiscoveryTerms(input.query);
+    const now = this.now();
     const markers = new Map((input.markers ?? []).map((value) => [value.organizationId, value.marker]));
     const projections = await Promise.all(publications.map(async (publication): Promise<ProviderDiscoveryProjection | null> => {
       if (String(publication.organizationId) === input.viewerOrganizationId) return null;
@@ -143,18 +157,38 @@ export class ResourceNetworkService {
       if (input.modality && !source.profile.modalities.includes(input.modality as never)) return null;
       if (input.language && !source.profile.languages.some((language) => language.toLowerCase() === input.language?.toLowerCase())) return null;
       if (input.availability && source.profile.availability !== input.availability) return null;
-      const corpus = [source.organizationProfile.displayName, source.profile.categories.join(" "), source.profile.populationsServed, source.profile.eligibility, ...services.flatMap((service) => [service.name, service.description])].join(" ").toLowerCase();
-      const matched = terms.filter((term) => corpus.includes(term));
-      if (terms.length && !matched.length) return null;
+      const providerValues = [source.organizationProfile.displayName, source.profile.categories.join(" "), source.profile.populationsServed, source.profile.eligibility, ...services.flatMap((service) => [service.name, service.description])];
+      const matchingResourceValues = allResources
+        .filter((resource) => resource.organizationId === publication.organizationId && resource.geographyIds.includes(String(input.selectedGeography.id)))
+        .map((resource) => publicProviderResource(resource, source.organizationProfile!.displayName, now))
+        .flatMap((resource) => resource ? [[resource.title, resource.summary, resource.description, resource.eligibility]] : []);
+      const matched = (
+        matchesResourceDiscoveryTerms(providerValues, terms)
+        || matchingResourceValues.some((resourceValues) => matchesResourceDiscoveryTerms([...providerValues, ...resourceValues], terms))
+      ) ? terms : [];
+      if (terms.length && matched.length !== terms.length) return null;
       const reasons = Object.freeze([...(matched.length ? [`Matched ${matched.join(", ")}`] : ["Serves this locality"]), `Service territory: ${input.selectedGeography.name}`, source.profile.availability === "unknown" ? "Availability is currently unknown" : `Availability: ${source.profile.availability}`]);
       return Object.freeze({ organizationId: publication.organizationId, displayName: source.organizationProfile.displayName, publicationVersion: publication.version, sourceProfileVersion: source.profile.version, categories: source.profile.categories, services: Object.freeze(services.map((service) => Object.freeze({ id: service.id, name: service.name, description: service.description, availability: service.availability }))), populationsServed: source.profile.populationsServed, eligibility: source.profile.eligibility, intakeMethod: source.profile.intakeMethod, modalities: source.profile.modalities, languages: source.profile.languages, availability: source.profile.availability, territory: Object.freeze({ geographyId: String(input.selectedGeography.id), name: input.selectedGeography.name, releaseState: input.selectedGeography.releaseState, geometry: input.selectedGeometry as ProviderDiscoveryProjection["territory"]["geometry"] }), marker: markers.get(String(publication.organizationId)) ?? null, match: Object.freeze({ score: matched.length * 20 + (source.profile.availability === "available" ? 5 : 0), reasons }), publishedAt: publication.publishedAt!, updatedAt: publication.updatedAt });
     }));
     const providers = Object.freeze(projections.flatMap((projection) => projection ? [projection] : []).sort((left, right) => right.match.score - left.match.score || left.displayName.localeCompare(right.displayName)));
-    const allResources = await this.dependencies.network.listPublishedResources();
     const resources = Object.freeze((await Promise.all(allResources.map(async (resource) => {
       if (!resource.geographyIds.includes(String(input.selectedGeography.id))) return null;
       const provider = providers.find((candidate) => candidate.organizationId === resource.organizationId);
-      return provider ? publicProviderResource(resource, provider.displayName, this.now()) : null;
+      if (!provider) return null;
+      const projection = publicProviderResource(resource, provider.displayName, now);
+      if (!projection || !terms.length) return projection;
+      const values = [
+        projection.title,
+        projection.summary,
+        projection.description,
+        projection.eligibility,
+        projection.providerDisplayName,
+        provider.categories.join(" "),
+        provider.populationsServed,
+        provider.eligibility,
+        ...provider.services.flatMap((service) => [service.name, service.description]),
+      ];
+      return matchesResourceDiscoveryTerms(values, terms) ? projection : null;
     }))).flatMap((resource) => resource ? [resource] : []));
     return Object.freeze({ providers, resources, query: Object.freeze({ text: input.query?.trim() ?? "", modality: input.modality ?? null, language: input.language ?? null, availability: input.availability ?? null }) });
   }

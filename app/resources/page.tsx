@@ -1,10 +1,10 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { ResourceNetworkError } from "@/src/application/resource-network/resource-network";
 import {
   authorizedWorkspaceSelection,
-  parseResourceNetworkWorkspaceQuery,
+  parseResourcesMobileWorkspaceQuery,
+  resourcesFocusedOrganizationId,
 } from "@/src/application/resource-network/resource-network-workspace";
 import { ResourceNetworkWorkspace } from "@/src/components/resource-network/ResourceNetworkWorkspace";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
@@ -15,6 +15,7 @@ import {
 } from "@/src/infrastructure/auth/participant-route-runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
 import { loadAuthorizedNetworkDiscovery } from "@/src/infrastructure/network-discovery/runtime";
+import { createServerFirestoreFoundationRepositories, getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 import { createServerReferralNetworkService } from "@/src/infrastructure/referrals/runtime";
 import { loadAuthorizedResourceDiscovery } from "@/src/infrastructure/resource-network/discovery-runtime";
 import { createServerResourceNetworkService } from "@/src/infrastructure/resource-network/runtime";
@@ -23,7 +24,15 @@ interface Props {
   readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
 }
 
-export default async function ResourcesPage({ searchParams }: Props) {
+export interface ResourceSelectionOverride {
+  readonly kind: "provider" | "resource" | "request";
+  readonly id: string;
+}
+
+export async function renderResourcesPage({
+  searchParams,
+  selectionOverride = null,
+}: Props & Readonly<{ selectionOverride?: ResourceSelectionOverride | null }>) {
   const access = await resolveParticipantRoute({
     sessionCookie: (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
   });
@@ -51,7 +60,16 @@ export default async function ResourcesPage({ searchParams }: Props) {
     );
   }
 
-  const queryState = parseResourceNetworkWorkspaceQuery(params);
+  const parsedQueryState = parseResourcesMobileWorkspaceQuery(params);
+  const queryState = selectionOverride
+    ? Object.freeze({
+        ...parsedQueryState,
+        organizationId: null,
+        providerId: selectionOverride.kind === "provider" ? selectionOverride.id : null,
+        resourceId: selectionOverride.kind === "resource" ? selectionOverride.id : null,
+        requestId: selectionOverride.kind === "request" ? selectionOverride.id : null,
+      })
+    : parsedQueryState;
   const organizationId = String(access.membership.organizationId);
   const membershipId = String(access.membership.id);
   const actor = Object.freeze({
@@ -60,25 +78,60 @@ export default async function ResourcesPage({ searchParams }: Props) {
     membershipId,
   });
   const service = createServerResourceNetworkService();
+  const authorization = await createServerFirestoreFoundationRepositories(
+    getServerFirestore(),
+  ).organizationAuthorization.getByMembershipId(access.membership.id);
+  const referralManage = authorization?.permissions.includes("referral.manage") ?? false;
+  const resourceManage = authorization?.permissions.includes("resource.manage") ?? false;
 
-  // These reads are independent. Keep optional/owner and referral hydration off the critical path
-  // while Network discovery supplies the only input required by provider/resource discovery.
-  const networkPromise = loadAuthorizedNetworkDiscovery({
-    access,
-    mapProjection,
-    focusedOrganizationId: queryState.organizationId ?? queryState.providerId,
-  });
-  const referralsPromise = createServerReferralNetworkService().snapshot(actor);
-  const ownerPromise = service.ownerSnapshot(actor).catch((error: unknown) => {
-    if (error instanceof ResourceNetworkError && error.code === "forbidden") return null;
-    throw error;
-  });
+  // Optional/private adjuncts remain independently settled. A record-only canonical destination
+  // may additionally resolve its already-authorized provider identity before Network discovery so
+  // the carried provider can receive the same authoritative marker treatment beyond page one.
+  const referralsPromise = referralManage
+    ? createServerReferralNetworkService().snapshot(actor)
+    : Promise.resolve([]);
+  const ownerPromise = resourceManage ? service.ownerSnapshot(actor) : Promise.resolve(null);
   const independentHydrationPromise = Promise.allSettled([
     referralsPromise,
     ownerPromise,
   ] as const);
+  const explicitFocusedOrganizationId = ({
+    focusedOrganizationId: queryState.organizationId ?? queryState.providerId,
+  }).focusedOrganizationId;
+  const preliminaryResourcePromise = !explicitFocusedOrganizationId && queryState.resourceId
+    ? loadAuthorizedResourceDiscovery({
+        access,
+        mapProjection,
+        query: queryState.query,
+        availability: queryState.availability === "all" ? null : queryState.availability,
+        markers: [],
+      })
+    : Promise.resolve(null);
+  const focusedOrganizationIdPromise = explicitFocusedOrganizationId
+    ? Promise.resolve(explicitFocusedOrganizationId)
+    : queryState.resourceId
+      ? preliminaryResourcePromise.then((projection) => resourcesFocusedOrganizationId({
+          resourceId: queryState.resourceId,
+          resources: projection?.available ? projection.projection.resources : [],
+        }))
+      : queryState.requestId
+        ? referralsPromise.then(
+            (referrals) => resourcesFocusedOrganizationId({
+              requestId: queryState.requestId,
+              requests: referrals,
+            }),
+            () => null,
+          )
+        : Promise.resolve(null);
 
-  const network = await networkPromise;
+  const [network, [referralsResult, ownerResult]] = await Promise.all([
+    focusedOrganizationIdPromise.then((focusedOrganizationId) => loadAuthorizedNetworkDiscovery({
+      access,
+      mapProjection,
+      focusedOrganizationId,
+    })),
+    independentHydrationPromise,
+  ]);
   const markers = network.available
     ? network.projection.organizations.map((organization) => Object.freeze({
         organizationId: String(organization.organizationId),
@@ -90,21 +143,15 @@ export default async function ResourcesPage({ searchParams }: Props) {
       }))
     : [];
 
-  const resourcePromise = loadAuthorizedResourceDiscovery({
+  const resourceProjection = await loadAuthorizedResourceDiscovery({
     access,
     mapProjection,
     query: queryState.query,
     availability: queryState.availability === "all" ? null : queryState.availability,
     markers,
   });
-  const [resourceProjection, [referralsResult, ownerResult]] = await Promise.all([
-    resourcePromise,
-    independentHydrationPromise,
-  ]);
-  if (referralsResult.status === "rejected") throw referralsResult.reason;
-  if (ownerResult.status === "rejected") throw ownerResult.reason;
-  const referrals = referralsResult.value;
-  const owner = ownerResult.value;
+  const referrals = referralsResult.status === "fulfilled" ? referralsResult.value : [];
+  const owner = ownerResult.status === "fulfilled" ? ownerResult.value : null;
 
   const requestReferrals = referrals.filter(
     (referral) => referral.purpose === "provider-connection",
@@ -124,8 +171,18 @@ export default async function ResourcesPage({ searchParams }: Props) {
     queryState.requestId,
     requestReferrals.map((referral) => referral.id),
   );
-  const selectedMessages = selectedRequestId
-    ? await service.messages(actor, selectedRequestId)
+  const selectedResourceId = authorizedWorkspaceSelection(
+    queryState.resourceId,
+    (resourceProjection.available ? resourceProjection.projection.resources : []).map((resource) => resource.id),
+  );
+  const selectedMessagesResult = selectedRequestId
+    ? await service.messages(actor, selectedRequestId).then(
+        (value) => Object.freeze({ status: "fulfilled" as const, value }),
+        (reason: unknown) => Object.freeze({ status: "rejected" as const, reason }),
+      )
+    : null;
+  const selectedMessages = selectedMessagesResult?.status === "fulfilled"
+    ? selectedMessagesResult.value
     : [];
   const commandRecoveryScope = `${String(access.membership.organizationId)}:${String(access.membership.id)}`;
 
@@ -152,14 +209,29 @@ export default async function ResourcesPage({ searchParams }: Props) {
       resources={resourceProjection.available ? resourceProjection.projection.resources : []}
       referrals={referrals}
       owner={owner}
+      adjunctState={Object.freeze({
+        requests: !referralManage ? "restricted" : referralsResult.status === "fulfilled" ? "available" : "unavailable",
+        management: !resourceManage ? "restricted" : ownerResult.status === "fulfilled" ? "available" : "unavailable",
+      })}
+      authorization={Object.freeze({
+        openPlatform: true,
+        referralManage,
+        resourceManage,
+      })}
       commandRecoveryScope={commandRecoveryScope}
       queryState={Object.freeze({
         ...queryState,
         organizationId: selectedOrganizationId,
         providerId: selectedProviderId,
         requestId: selectedRequestId,
+        resourceId: selectedResourceId,
       })}
       selectedMessages={selectedMessages}
+      selectedMessagesUnavailable={selectedMessagesResult?.status === "rejected"}
     />
   );
+}
+
+export default async function ResourcesPage(props: Props) {
+  return renderResourcesPage(props);
 }
