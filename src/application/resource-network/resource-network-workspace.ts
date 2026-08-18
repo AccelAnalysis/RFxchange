@@ -65,14 +65,23 @@ export function resourcesCompactReturnContext(
 ): Readonly<{ rfxReference: string | undefined; returnTo: string | undefined }> {
   const rfxReference = workspaceId(rawReference) ?? undefined;
   if (!rfxReference || !rawSuffix) return Object.freeze({ rfxReference, returnTo: undefined });
-  // Next decodes every dynamic route segment once before exposing `params`.
-  // Validate the remaining percent escapes without decoding the suffix again.
-  try {
-    decodeURI(rawSuffix);
-  } catch {
-    return Object.freeze({ rfxReference, returnTo: undefined });
+  // App Router boundaries may expose the catch-all segment encoded or already
+  // decoded. Decode only the structural prefix when it is not yet visible;
+  // never decode percent-escaped delimiters inside an existing query/hash.
+  let returnSuffix = rawSuffix;
+  if (returnSuffix !== "-" && !returnSuffix.startsWith("?") && !returnSuffix.startsWith("#")) {
+    try {
+      returnSuffix = decodeURIComponent(returnSuffix);
+    } catch {
+      return Object.freeze({ rfxReference, returnTo: undefined });
+    }
+  } else {
+    try {
+      decodeURI(returnSuffix);
+    } catch {
+      return Object.freeze({ rfxReference, returnTo: undefined });
+    }
   }
-  const returnSuffix = rawSuffix;
   if (returnSuffix === "-") return Object.freeze({
     rfxReference,
     returnTo: `/opportunities/${encodeURIComponent(rfxReference)}/assess`,

@@ -288,10 +288,15 @@ test("maximum valid identifiers use bounded selection routes instead of crashing
   const fallbackRoute = fs.readFileSync(new URL("../app/resources/v/[kind]/[id]/[[...context]]/page.tsx", import.meta.url), "utf8");
   assert.match(fallbackRoute, /return renderResourcesPage/);
   assert.match(fallbackRoute, /resourcesCompactReturnContext\(context\[0\], context\[1\]\)/);
+  assert.match(fallbackRoute, /rfxGap: undefined/);
   assert.doesNotMatch(fallbackRoute, /URLSearchParams|redirect\(`\/resources\?/);
 });
 
-test("compact destination validates the framework-decoded RFx return suffix without decoding it twice", () => {
+test("compact destination accepts an encoded or framework-decoded RFx suffix without double decoding", () => {
+  assert.deepEqual(resourcesCompactReturnContext("RFX-47", "%3Ftab%3Dgaps%23gap-2"), {
+    rfxReference: "RFX-47",
+    returnTo: "/opportunities/RFX-47/assess?tab=gaps#gap-2",
+  });
   assert.deepEqual(resourcesCompactReturnContext("RFX-47", "?tab=gaps#gap-2"), {
     rfxReference: "RFX-47",
     returnTo: "/opportunities/RFX-47/assess?tab=gaps#gap-2",
@@ -324,11 +329,11 @@ test("compact-route query mutations overwrite raw collisions with server-revalid
     "rfxReference=RFX-OTHER&rfxGap=stale&returnTo=%2Fopportunities%2FRFX-OTHER%2Fassess",
     queryState,
     {
-    q: "capital",
-    availability: "available",
-    provider: null,
-    resource: null,
-    request: null,
+      q: "capital",
+      availability: "available",
+      provider: null,
+      resource: null,
+      request: null,
     },
   );
   const parsed = new URL(href, "https://participant.invalid");

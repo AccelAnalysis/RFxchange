@@ -34,6 +34,7 @@ export default async function ResourceSelectionRoute({ params, searchParams }: P
   return renderResourcesPage({
     searchParams: Promise.resolve({
       ...rawSearchParams,
+      rfxGap: undefined,
       ...compactContext,
     }),
     selectionOverride: Object.freeze({ kind: selectionKind, id: selectionId }),
