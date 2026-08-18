@@ -9,10 +9,10 @@
 - coordinate/privacy invariants, explicit cluster identity/count, and list-only no-coordinate behavior;
 - server-geography and domain-layer fail-closed map adaptation;
 - stable card/map/detail identity, truthful status/date/classification fields, hidden absent save/watch operations, and domain-owned persistence handlers;
-- loading, ready, empty, unavailable, restricted, and error result states with protected-data removal;
+- loading, ready, empty, unavailable, restricted, and error result states with protected-data removal, explicit contextual-organization role/identity allow-listing, and unpaired organization/record rejection;
 - mandatory explicit server authorization results, exact non-null selected identity, exact canonical detail destination, and rejection of stale scope/lens/locale/geography/query/result-set responses, including same-ID in-flight changes to camera, bounds, search, filters, sort, cursor, or page;
 - card/map/keyboard detail entry, deep-link pre-authorization isolation, affirmative resolution, nondisclosing denial, independent list/sheet restoration, exact snap-point restoration, lens-discriminated safe returns, and stale-scope discard;
-- one existing Mapbox scene/source, behaviorally exercised mutable GeoJSON output, original-projection click lookup, camera-only cluster expansion, exact governed-area geometry matching/omission, overlap priority, selection updates, and legacy/home-marker duplicate-overlay prevention.
+- one existing Mapbox scene/source, behaviorally exercised mutable GeoJSON output, original-projection click lookup, camera-only cluster expansion, exact governed-area geometry matching/omission, overlap priority, selection updates, nonselectable feature truthfulness, and organization-only home-marker duplicate-overlay prevention without losing the camera anchor.
 
 The preserved Stage 1–2 contract, continuity, domain-convergence, composition, permissions, reopen, and review regressions remain active. Historical Stage 1–2 authority, action catalogs, locale trees, and evidence are not rewritten.
 

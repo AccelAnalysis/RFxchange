@@ -162,6 +162,15 @@ export function lensMapObjectForRenderId(
     : null;
 }
 
+export function lensProjectionContainsOrganizationMarker(
+  adapter: ExchangeSpatialProjectionAdapter,
+  markerId: string,
+): boolean {
+  return adapter.points.some(
+    (point) => point.projection.kind === "organization" && point.projection.markerId === markerId,
+  );
+}
+
 /**
  * Creates mutable GeoJSON for Mapbox while retaining immutable original projections
  * in private lookup tables. Governed area geometry is accepted only on an exact
@@ -195,6 +204,7 @@ export function createLensProjectionRenderModel(
         : {
             renderId,
             kind: projection.kind,
+            projectionRole: projection.projectionRole,
             markerId: projection.markerId,
             selectionKey: projection.identity.selectionKey,
             accessibleLabel: point.accessibleLabel,

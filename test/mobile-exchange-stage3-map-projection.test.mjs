@@ -5,6 +5,7 @@ import {
   adaptLensMapProjection,
   createLensProjectionRenderModel,
   lensMapObjectForRenderId,
+  lensProjectionContainsOrganizationMarker,
 } from "../src/application/participant/lens-map-projection-adapter.ts";
 import {
   createExchangeGeographyContext,
@@ -87,9 +88,63 @@ test("provider-neutral map adapter renders only authoritative active-layer proje
   assert.equal(adapted.listOnlyObjects.length, 1);
   assert.equal(lensMapObjectForRenderId(adapted, "subject:organization:org-1"), adapted.points[0].projection);
   assert.equal(lensMapObjectForRenderId(adapted, "cluster:cluster-1"), null);
+  assert.equal(lensProjectionContainsOrganizationMarker(adapted, "marker-org-1"), true);
 
   const noSelection = createExchangeSelectionState({ kind: "none" });
   assert.equal(adaptLensMapProjection(projection(), noSelection).areas[0].selected, false);
+});
+
+test("home-marker deduplication applies only to the same organization projection", () => {
+  const recordIdentity = createExchangeSubjectIdentity({
+    subjectKind: "record",
+    selectionKey: "record:resource-1",
+    organizationId: "org-1",
+    recordType: "resource",
+    recordId: "resource-1",
+  });
+  const recordProjection = createLensMapProjection({
+    lens: "resources",
+    geography: createExchangeGeographyContext({ geographyId: "geo-1", serverRevalidated: true }),
+    activeLayerIds: [],
+    layerStateAuthority: "domain-revalidated",
+    objects: [createExchangeMapObjectProjection({
+      identity: recordIdentity,
+      markerId: "marker-org-1",
+      coordinate: { longitude: -76.7, latitude: 36.8 },
+      privacy: "exact",
+      accessibleLabel: "Resource at the home organization",
+      selectable: true,
+      layerIds: [],
+    })],
+  });
+  const adapted = adaptLensMapProjection(recordProjection, createExchangeSelectionState({ kind: "none" }));
+  assert.equal(lensProjectionContainsOrganizationMarker(adapted, "marker-org-1"), false);
+});
+
+test("nonselectable features remain visible without presenting a selection target", () => {
+  const nonselectable = createLensMapProjection({
+    lens: "intelligence",
+    geography: createExchangeGeographyContext({ geographyId: "geo-1", serverRevalidated: true }),
+    activeLayerIds: [],
+    layerStateAuthority: "domain-revalidated",
+    objects: [createExchangeMapObjectProjection({
+      identity,
+      markerId: "marker-org-1",
+      coordinate: { longitude: -76.7, latitude: 36.8 },
+      privacy: "exact",
+      accessibleLabel: "Visible context only",
+      selectable: false,
+      projectionRole: "context",
+      layerIds: [],
+    })],
+  });
+  const renderModel = createLensProjectionRenderModel(
+    adaptLensMapProjection(nonselectable, createExchangeSelectionState({ kind: "none" })),
+    [],
+  );
+  assert.equal(renderModel.data.features[0].properties.selectable, false);
+  assert.equal(renderModel.data.features[0].properties.projectionRole, "context");
+  assert.equal(renderModel.selectableByRenderId.size, 0);
 });
 
 test("unvalidated geography and unvalidated layers fail map rendering closed", () => {

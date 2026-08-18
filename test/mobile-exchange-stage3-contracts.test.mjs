@@ -127,6 +127,7 @@ test("Stage 3 map contract preserves identity and never fabricates missing coord
   assert.equal(resultCardMatchesMapObject(card(), mapped), true);
   assert.throws(() => createExchangeMapObjectProjection({ ...mapped, coordinate: { longitude: 181, latitude: 0 } }), /outside valid/);
   assert.throws(() => createExchangeMapObjectProjection({ ...mapped, privacy: "suppressed" }), /cannot disclose coordinates/);
+  assert.throws(() => createExchangeMapObjectProjection({ ...mapped, projectionRole: "invented" }), /projection role is invalid/);
   assert.throws(() => createExchangeMapClusterProjection({ clusterId: "bad", coordinate: { longitude: 0, latitude: 0 }, count: 1, accessibleLabel: "Bad" }), /at least two/);
 });
 
@@ -201,5 +202,56 @@ test("whole-lens discovery requires server geography, domain layers, and one spa
     map: extraMap,
     results,
     spatialResults: [{ kind: "mapped", identity, markerId: "marker-resource-1" }],
-  }), /unpaired result record/);
+  }), /unpaired or unauthorized contextual/);
+
+  const contextualIdentity = createExchangeSubjectIdentity({
+    subjectKind: "organization",
+    selectionKey: "organization:home",
+    organizationId: "home",
+    recordType: null,
+    recordId: null,
+  });
+  const contextualOrganization = createExchangeMapObjectProjection({
+    identity: contextualIdentity,
+    markerId: "marker-home",
+    coordinate: { longitude: -76.65, latitude: 36.75 },
+    privacy: "exact",
+    accessibleLabel: "Authorized home organization",
+    selectable: true,
+    projectionRole: "context",
+  });
+  const contextualMap = createLensMapProjection({ ...map, objects: [contextualOrganization] });
+  assert.throws(() => createLensDiscoveryProjection({
+    lens: "resources",
+    queryId: "query-restricted-context-unbound",
+    map: contextualMap,
+    results: restricted,
+    spatialResults: [],
+  }), /cannot retain result map projections/);
+  const contextualDiscovery = createLensDiscoveryProjection({
+    lens: "resources",
+    queryId: "query-restricted-context",
+    map: contextualMap,
+    results: restricted,
+    spatialResults: [],
+    contextualOrganizationIdentities: [contextualIdentity],
+  });
+  assert.equal(contextualDiscovery.map.objects.length, 1);
+  assert.equal(contextualDiscovery.contextualOrganizationIdentities[0].selectionKey, contextualIdentity.selectionKey);
+
+  const unpairedOrganization = createExchangeMapObjectProjection({
+    identity: contextualIdentity,
+    markerId: "marker-external",
+    coordinate: { longitude: -76.64, latitude: 36.76 },
+    privacy: "exact",
+    accessibleLabel: "External result organization",
+    selectable: true,
+  });
+  assert.throws(() => createLensDiscoveryProjection({
+    lens: "resources",
+    queryId: "query-unpaired-organization",
+    map: createLensMapProjection({ ...map, objects: [mapped, unpairedOrganization] }),
+    results,
+    spatialResults: [{ kind: "mapped", identity, markerId: "marker-resource-1" }],
+  }), /unpaired or unauthorized contextual/);
 });

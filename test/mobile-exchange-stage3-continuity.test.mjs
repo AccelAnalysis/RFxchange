@@ -63,7 +63,7 @@ function stage3State() {
   return createMobileExchangeStage3ContinuityState(base, { locale: "en-US" });
 }
 
-function discovery() {
+function discovery(canonicalHref = "/resources/resource-1") {
   const mapObject = createExchangeMapObjectProjection({
     identity: resourceIdentity,
     markerId: "marker-resource-1",
@@ -79,7 +79,7 @@ function discovery() {
     identity: resourceIdentity,
     title: "Resource record",
     favorite: save,
-    canonicalHref: "/resources/resource-1",
+    canonicalHref,
     returnLens: "resources",
   });
   return createLensDiscoveryProjection({
@@ -308,6 +308,24 @@ test("list-only records remain card/keyboard targets and cannot masquerade as ma
   });
   assert.equal(fromCard.detail.status, "opening");
   assert.equal(fromCard.selection.selectedMarker, null);
+});
+
+test("a card without a canonical detail destination cannot begin detail authorization", () => {
+  const initial = stage3State();
+  const projection = discovery(null);
+  const accepted = reconcileServerRevalidatedMobileExchangeProjection(
+    initial,
+    mobileExchangeQueryContext(initial, { queryId: "query-1" }),
+    projection,
+    serverResult(),
+  );
+  assert.equal(accepted.status, "accepted");
+  assert.throws(() => openMobileExchangeDetailFromProjection(accepted.state, {
+    source: "card",
+    identity: resourceIdentity,
+    queryId: "query-1",
+    focusReturnKey: "card:record:resource-1",
+  }), /canonical destination/);
 });
 
 test("stale locale, query, result-set, and lens responses fail closed", () => {

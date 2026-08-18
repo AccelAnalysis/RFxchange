@@ -21,13 +21,14 @@ test("selection callbacks use the original projection lookup and clusters only m
   assert.match(scene, /layers: \[\s*LENS_PROJECTION_OBJECT_LAYER_ID,\s*HOME_MARKER_CORE_LAYER_ID,\s*LENS_PROJECTION_CLUSTER_LAYER_ID/);
   assert.match(scene, /layers: \[LENS_PROJECTION_OBJECT_LAYER_ID, HOME_MARKER_CORE_LAYER_ID\]/);
   assert.doesNotMatch(scene, /map\.on\("click", HOME_MARKER_CORE_LAYER_ID[\s\S]{0,500}LENS_PROJECTION_(?:CLUSTER|AREA)/);
+  assert.match(scene, /properties\?\.selectable === true/);
 });
 
 test("governed areas require exact authority keys and legacy overlays cannot duplicate the shared projection", () => {
   assert.match(adapter, /candidate\.areaId === area\.areaId[\s\S]*candidate\.geographyId === area\.geographyId[\s\S]*candidate\.geometryReference === area\.geometryReference/);
   assert.match(scene, /A shared lens projection cannot be combined with legacy domain overlay props/);
   assert.match(scene, /data-lens-projection-list-only-count/);
-  assert.match(scene, /point\.projection\.markerId === marker\.id/);
+  assert.match(scene, /lensProjectionContainsOrganizationMarker\(lensProjectionAdapter, marker\.id\)/);
   assert.match(scene, /const sceneMarker = homeMarkerIsProjected \? null : marker/);
   assert.match(scene, /const markerRef = useRef\(marker\)/);
   assert.match(scene, /markerRef\.current = marker/);

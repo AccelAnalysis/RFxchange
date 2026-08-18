@@ -502,6 +502,9 @@ export function openMobileExchangeDetailFromProjection(
     returnHref: input.returnHref,
     focusReturnKey: required(input.focusReturnKey, "Focus return key"),
   });
+  if (!context.canonicalHref) {
+    throw new Error("Detail entry requires a canonical destination for the accepted card.");
+  }
   const queryContext = mobileExchangeQueryContext(state, { queryId: input.queryId });
   const snapshot = returnSnapshot(state, queryContext, context);
   const selection = selectionForDetailIdentity(

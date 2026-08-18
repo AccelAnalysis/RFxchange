@@ -234,6 +234,7 @@ export interface ExchangeSheetState {
 
 export interface ExchangeMapObjectProjection {
   readonly kind: "organization" | "record";
+  readonly projectionRole: "context" | "result";
   readonly identity: ExchangeSubjectIdentity;
   readonly markerId: string;
   readonly coordinate: Readonly<{ longitude: number; latitude: number }> | null;
@@ -413,6 +414,7 @@ export interface LensDiscoveryProjection {
   readonly map: LensMapProjection;
   readonly results: LensResultSetState;
   readonly spatialResults: readonly ExchangeResultSpatialDisposition[];
+  readonly contextualOrganizationIdentities: readonly ExchangeSubjectIdentity[];
   readonly authoritySource: "server-derived";
 }
 
@@ -1203,9 +1205,14 @@ export function createExchangeMapObjectProjection(input: Readonly<{
   privacy: ExchangeMapPrivacy;
   accessibleLabel: string;
   selectable: boolean;
+  projectionRole?: "context" | "result";
   layerIds?: readonly string[];
 }>): ExchangeMapObjectProjection {
   const identity = createExchangeSubjectIdentity(input.identity);
+  const projectionRole = input.projectionRole ?? "result";
+  if (projectionRole !== "context" && projectionRole !== "result") {
+    throw new Error("Map object projection role is invalid.");
+  }
   if (input.coordinate === null && input.privacy !== "locality-only" && input.privacy !== "suppressed") {
     throw new Error("A map object without an authoritative coordinate must use a non-point privacy treatment.");
   }
@@ -1214,6 +1221,7 @@ export function createExchangeMapObjectProjection(input: Readonly<{
   }
   return Object.freeze({
     kind: identity.subjectKind,
+    projectionRole,
     identity,
     markerId: required(input.markerId, "Marker id"),
     coordinate: input.coordinate ? validatedCoordinate(input.coordinate, "Map object coordinate") : null,
@@ -1354,6 +1362,7 @@ export function createLensDiscoveryProjection(input: Readonly<{
   map: LensMapProjection;
   results: LensResultSetState;
   spatialResults?: readonly ExchangeResultSpatialDisposition[];
+  contextualOrganizationIdentities?: readonly ExchangeSubjectIdentity[];
 }>): LensDiscoveryProjection {
   if (input.map.lens !== input.lens || input.results.lens !== input.lens) {
     throw new Error("Query, map, and result projections must share one lens.");
@@ -1365,6 +1374,19 @@ export function createLensDiscoveryProjection(input: Readonly<{
     throw new Error("Discovery projection requires domain-revalidated layer state.");
   }
   const spatialResults = Object.freeze([...(input.spatialResults ?? [])]);
+  const contextualOrganizationIdentities = Object.freeze(
+    (input.contextualOrganizationIdentities ?? []).map((identity) => {
+      const validated = createExchangeSubjectIdentity(identity);
+      if (validated.subjectKind !== "organization") {
+        throw new Error("Only organization identities can be authorized as contextual map objects.");
+      }
+      return validated;
+    }),
+  );
+  if (new Set(contextualOrganizationIdentities.map((identity) => identity.selectionKey)).size !== contextualOrganizationIdentities.length) {
+    throw new Error("Contextual organization identities must be unique.");
+  }
+  const contextualKeys = new Set(contextualOrganizationIdentities.map((identity) => identity.selectionKey));
   const spatialKeys = spatialResults.map((disposition) => disposition.identity.selectionKey);
   if (new Set(spatialKeys).size !== spatialKeys.length) {
     throw new Error("Each result identity must have one spatial disposition.");
@@ -1372,7 +1394,11 @@ export function createLensDiscoveryProjection(input: Readonly<{
   const cards = input.results.status === "ready" ? input.results.cards : [];
   if (input.results.status !== "ready") {
     const disclosingProjection = input.map.objects.find((object) =>
-      object.kind === "record"
+      (object.kind === "organization" && (
+        object.projectionRole !== "context"
+        || !contextualKeys.has(object.identity.selectionKey)
+      ))
+      || object.kind === "record"
       || object.kind === "cluster"
       || object.kind === "area"
       || object.kind === "relationship",
@@ -1394,6 +1420,7 @@ export function createLensDiscoveryProjection(input: Readonly<{
       );
       if (
         !object
+        || object.projectionRole !== "result"
         || object.coordinate === null
         || object.privacy === "suppressed"
         || !sameIdentity(object.identity, card.identity)
@@ -1405,16 +1432,23 @@ export function createLensDiscoveryProjection(input: Readonly<{
         (candidate.kind === "organization" || candidate.kind === "record")
         && sameIdentity(candidate.identity, card.identity),
       );
+      if (object?.projectionRole === "context") {
+        throw new Error("A contextual organization cannot satisfy a list-only result disposition.");
+      }
       if (object?.coordinate && object.privacy !== "suppressed") {
         throw new Error("A result with an authoritative permitted point cannot be mislabeled list-only.");
       }
     }
   }
   const readyCardKeys = new Set(cards.map((card) => card.identity.selectionKey));
-  if (input.results.status === "ready" && input.map.objects.some(
-    (object) => object.kind === "record" && !readyCardKeys.has(object.identity.selectionKey),
-  )) {
-    throw new Error("A ready discovery projection cannot expose an unpaired result record on the map.");
+  if (input.results.status === "ready" && input.map.objects.some((object) => {
+    if (object.kind !== "organization" && object.kind !== "record") return false;
+    if (object.projectionRole === "context") {
+      return object.kind !== "organization" || !contextualKeys.has(object.identity.selectionKey);
+    }
+    return !readyCardKeys.has(object.identity.selectionKey);
+  })) {
+    throw new Error("A ready discovery projection cannot expose an unpaired or unauthorized contextual map object.");
   }
   return Object.freeze({
     lens: input.lens,
@@ -1423,6 +1457,7 @@ export function createLensDiscoveryProjection(input: Readonly<{
     map: input.map,
     results: input.results,
     spatialResults,
+    contextualOrganizationIdentities,
     authoritySource: "server-derived",
   });
 }

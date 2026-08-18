@@ -21,6 +21,7 @@ import type { SyntheticOrientationMapOverlay } from "../../application/orientati
 import {
   adaptLensMapProjection,
   createLensProjectionRenderModel,
+  lensProjectionContainsOrganizationMarker,
   type ExchangeGovernedAreaGeometry,
   type ExchangeLensSelectableProjection,
   type ExchangeSpatialGeometry,
@@ -602,11 +603,8 @@ export function ExchangeSpatialScene({
     [governedAreaGeometries, lensProjectionAdapter],
   );
   const homeMarkerIsProjected = useMemo(
-    () => marker !== null && lensProjectionAdapter.points.some(
-      (point) => (point.projection.kind === "organization" || point.projection.kind === "record")
-        && point.projection.markerId === marker.id,
-    ),
-    [lensProjectionAdapter.points, marker],
+    () => marker !== null && lensProjectionContainsOrganizationMarker(lensProjectionAdapter, marker.id),
+    [lensProjectionAdapter, marker],
   );
   const sceneMarker = homeMarkerIsProjected ? null : marker;
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -1665,14 +1663,15 @@ export function ExchangeSpatialScene({
         };
         map.on("click", OPPORTUNITY_MARKER_LAYER_ID, selectOpportunityMarker);
         map.on("click", OPPORTUNITY_SELECTED_MARKER_LAYER_ID, selectOpportunityMarker);
-        for (const layerId of [
-          LENS_PROJECTION_OBJECT_LAYER_ID,
-          LENS_PROJECTION_CLUSTER_LAYER_ID,
-          LENS_PROJECTION_AREA_FILL_LAYER_ID,
-        ]) {
-          map.on("mouseenter", layerId, () => { map.getCanvas().style.cursor = "pointer"; });
+        for (const layerId of [LENS_PROJECTION_OBJECT_LAYER_ID, LENS_PROJECTION_AREA_FILL_LAYER_ID]) {
+          map.on("mouseenter", layerId, (event) => {
+            const selectable = event.features?.[0]?.properties?.selectable === true;
+            map.getCanvas().style.cursor = selectable ? "pointer" : "";
+          });
           map.on("mouseleave", layerId, () => { map.getCanvas().style.cursor = ""; });
         }
+        map.on("mouseenter", LENS_PROJECTION_CLUSTER_LAYER_ID, () => { map.getCanvas().style.cursor = "pointer"; });
+        map.on("mouseleave", LENS_PROJECTION_CLUSTER_LAYER_ID, () => { map.getCanvas().style.cursor = ""; });
         const lensProjectionForEvent = (event: mapboxgl.MapLayerMouseEvent) => {
           const feature = event.features?.[0] as unknown as
             | { readonly properties?: Readonly<Record<string, unknown>> }
