@@ -21,18 +21,18 @@ The Master Build Tracker remains the Feature-ID authority. This matrix does not 
 
 ## Experience completion
 
-The original 106 records remain immutable and in order. Twenty-one successor requirements are appended by the current product-owner authority; obsolete permanent-Referrals requirements remain historical and receive explicit successor disposition before this authority closes.
+The original 106 records remain immutable and in order. Twenty-two successor requirements are appended by the current product-owner authority; obsolete permanent-Referrals requirements remain historical and receive explicit successor disposition before this authority closes.
 
 | Experience | Requirement denominator | Verified | In Progress | Implemented — Not Verified | Not Started | Blocked | Explicitly deferred/N/A |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Shared Exchange | 35 | 0 | 0 | 20 | 8 | 3 | 4 |
+| Shared Exchange | 36 | 0 | 1 | 20 | 8 | 3 | 4 |
 | Opportunities/RFx | 42 | 0 | 0 | 23 | 19 | 0 | 0 |
 | Resources | 13 | 0 | 0 | 8 | 3 | 2 | 0 |
 | Intelligence | 15 | 0 | 0 | 3 | 7 | 5 | 0 |
 | Capabilities | 3 | 0 | 0 | 0 | 3 | 0 | 0 |
 | Referrals Cross-Lens | 14 | 0 | 0 | 10 | 3 | 0 | 1 |
 | Integration | 5 | 0 | 0 | 0 | 5 | 0 | 0 |
-| Program total | 127 | 0 | 0 | 64 | 48 | 10 | 5 |
+| Program total | 128 | 0 | 1 | 64 | 48 | 10 | 5 |
 
 No percentage is inferred from these counts. The successor requirement denominator changes no Feature-ID arithmetic.
 
@@ -41,7 +41,7 @@ No percentage is inferred from these counts. The successor requirement denominat
 - Master Build Tracker: **438 total · 170 Done · 268 Not Started**.
 - Mobile Stages 1–2 and the Stages 3–6 authority change no Feature-ID arithmetic.
 - `MOB-01` is installed product authority, not a silently completed tracker feature.
-- `governance/four-lens-requirements.json` is append-only at 127 records; the original 106 remain immutable.
+- `governance/four-lens-requirements.json` is append-only at 128 records; the original 106 remain immutable.
 
 ## Mobile Exchange Stage 1 closeout
 

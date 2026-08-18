@@ -10,7 +10,7 @@ Under `FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, `Implemented — Not Verif
 
 | Experience | Stable range | Denominator | Current characterization |
 | --- | --- | ---: | --- |
-| Shared Exchange | `SHARED-*`, shared `MOB36-*` | 35 | 20 implemented/not verified, eight not started, three blocked, four explicitly deferred/N/A |
+| Shared Exchange | `SHARED-*`, shared `MOB36-*` | 36 | 20 implemented/not verified, one in progress, eight not started, three blocked, four explicitly deferred/N/A |
 | Opportunities/RFx | `RFX-FEATURE-*`, `MOB36-OPPORTUNITIES-*` | 42 | 23 implemented/not verified, 19 not started |
 | Resources | `RES-LENS-*`, `MOB36-RESOURCES-*` | 13 | eight implemented/not verified, three not started, two blocked |
 | Intelligence | `INTEL-*`, `MOB36-INTELLIGENCE-*` | 15 | three implemented/not verified, seven not started, five dependency-blocked |
@@ -18,7 +18,7 @@ Under `FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, `Implemented — Not Verif
 | Referrals Cross-Lens | `REF-LENS-*`, `MOB36-REFERRAL-*` | 14 | ten implemented/not verified, three not started, one explicitly N/A |
 | Integration | integration-owned `MOB36-*` | 5 | five not started |
 
-The append-only program denominator is 127 requirements. The original 106 records remain immutable and in order. The delivery matrix displays cross-cutting `SHARED-EVIDENCE-001` with Shared Exchange because that is the candidate where the procedural gap occurred.
+The append-only program denominator is 128 requirements. The original 106 records remain immutable and in order. The delivery matrix displays cross-cutting `SHARED-EVIDENCE-001` with Shared Exchange because that is the candidate where the procedural gap occurred.
 
 ## Shared Exchange register
 

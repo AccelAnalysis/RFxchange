@@ -19,16 +19,18 @@ PR #222 / Stage 2 shared composition (`1fbf38e71747ac90c2f285e4934b22ea26312bec`
   → Stages 3–6 product authority and immutable requirement/work-packet amendment
   → shared permanent-lens registry + legacy Referrals-lens state migration
   → Stage 3 shared query/map/result/detail/return contracts
-      ├─ Stage 4 Opportunities/RFx domain adapter (current RFx authorities + reconciled alerts)
+      ├─ RFx Slice 4.6 correction/merge → 4.7 team/invite → 4.8 response → 4.9 submission/handoff → 4.10 education
+      │   └─ Stage 4 Opportunities/RFx domain adapter + reconciled alerts
       ├─ Stage 4 Resources domain adapter (RES-001–005, RES-007–008, DSC-011, REF-006)
       ├─ Stage 4 Intelligence domain adapter (approved real-data/provenance sources only)
       └─ Stage 4 Capabilities domain adapter (organization capability + AMACS 0.5.0 contracts)
-          → Stage 5 cross-lens Referrals + Menu/Account management
-          → Stage 5 registration/onboarding convergence
-          → Stage 6 integrated acceptance, release, deployment and production-safe smoke
+          └─ after Opportunities merges: Capabilities ↔ RFx matching integration
+      → Stage 5 cross-lens Referrals domain → Lane 01 Menu/Account extension
+      → Stage 5 registration/onboarding convergence
+      → Stage 6 integrated acceptance, release, deployment and production-safe smoke
 ```
 
-The four Stage 4 adapters may build in parallel only after Stage 3 shared contracts merge and each packet declares the exact current base. Their merge order remains dependency-aware. Stage 5 may consume only merged domain actions and must preserve the current referral/privacy/commercial boundaries. Stage 6 integrates merged main and cannot be used to backfill dependency-ineligible domain scope.
+Resources, Intelligence, the Capabilities foundation, and eligible RFx work may build in parallel only after their exact packet dependencies merge and each packet declares the exact current base. The final Opportunities adapter waits for RFx Slices 4.6–4.10; Capabilities-to-RFx matching waits for both owning adapters. Stage 5 consumes only closed domain packets and preserves referral/privacy/commercial boundaries. Stage 6 integrates merged main; runtime defects reopen their exact owning packet rather than being backfilled under Integration.
 
 The final permanent-lens order is `Opportunities/RFx | Resources | Intelligence | Capabilities`. Referrals remains a cross-lens domain and Menu/Account utility. Historical Stage 1–2 evidence is not rewritten.
 

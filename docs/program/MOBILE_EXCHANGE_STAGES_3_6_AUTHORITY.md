@@ -39,6 +39,8 @@ This authority specifically supersedes the permanent-lens product statements in:
 - the current sections of `PARALLEL_DELIVERY_MATRIX.md`, `CHAT_LANE_CHARTERS.md`, and `SHARED_EXCHANGE_CONTRACTS.md`; and
 - the legacy permanent-lens requirements identified in `governance/four-lens-requirements.json`.
 
+It also makes `MOBILE_EXCHANGE_STAGES36_ACTION_REGISTRY.md` the current immutable sixteen-position registry. `EXCHANGE_ROOM_PHASE2_ACTION_REGISTRY.md`, `EXCHANGE_ROOM_PHASE2_CONTROL.md`, and the Referrals-ending portions of `MARKET_READY_BASELINE.md` remain governing provenance for Stage 2 only.
+
 It does not supersede:
 
 - server-side authorization, tenant isolation, privacy, consent, geography, lifecycle, audit, idempotency, or evidence requirements;
@@ -73,13 +75,14 @@ The successor program uses bounded packets in dependency order:
 1. `WP-MOBILE-EXCHANGE-STAGES36-AUTHORITY-01` — Control Room authority and ledger amendment.
 2. `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` — Lane 01 registry, routing, serialization, action, locale, and compatibility migration.
 3. `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01` — Lane 01 authoritative shared query/map/result/detail contracts.
-4. `WP-MOBILE-EXCHANGE-STAGE4-OPPORTUNITIES-01` — Opportunities/RFx adapter and complete authorized actions.
-5. `WP-MOBILE-EXCHANGE-STAGE4-RESOURCES-01` — Resources adapter and complete authorized actions.
-6. `WP-MOBILE-EXCHANGE-STAGE4-INTELLIGENCE-01` — Intelligence adapter and complete authorized actions.
-7. `WP-MOBILE-EXCHANGE-STAGE4-CAPABILITIES-01` — Capabilities lens, organization capability projection, AMACS boundary, comparison, and matching.
-8. `WP-MOBILE-EXCHANGE-STAGE5-REFERRALS-MENU-01` — cross-lens referrals and Menu/Account referral management.
-9. `WP-MOBILE-EXCHANGE-STAGE5-ONBOARDING-01` — registration/onboarding and final-architecture convergence.
-10. `WP-MOBILE-EXCHANGE-STAGE6-INTEGRATION-01` — integrated security, browser, accessibility, performance, release, deployment, and smoke evidence.
+4. `WP-RFX-46-RECONCILE`, then `WP-MOBILE-EXCHANGE-RFX-47-01` through `WP-MOBILE-EXCHANGE-RFX-410-01` — dependency-ordered RFx fit/pursuit, team/invite, response, submission/handoff, and education foundations.
+5. `WP-MOBILE-EXCHANGE-STAGE4-OPPORTUNITIES-01` — Opportunities/RFx adapter and complete authorized actions after those RFx foundations merge.
+6. `WP-MOBILE-EXCHANGE-STAGE4-RESOURCES-01` — Resources adapter and complete authorized actions.
+7. `WP-MOBILE-EXCHANGE-STAGE4-INTELLIGENCE-01` — Intelligence adapter and complete authorized actions.
+8. `WP-MOBILE-EXCHANGE-STAGE4-CAPABILITIES-01`, then `WP-MOBILE-EXCHANGE-STAGE4-CAPABILITIES-MATCH-01` — Capabilities projection/AMACS boundary followed by RFx matching after both domains merge.
+9. `WP-MOBILE-EXCHANGE-STAGE5-REFERRALS-MENU-01`, then `WP-MOBILE-EXCHANGE-STAGE5-MENU-01` — cross-lens referral domain/workflows followed by the Lane 01-owned Menu/Account extension.
+10. `WP-MOBILE-EXCHANGE-STAGE5-ONBOARDING-01` — registration/onboarding and final-architecture convergence.
+11. `WP-MOBILE-EXCHANGE-STAGE6-INTEGRATION-01` — integrated security, browser, accessibility, performance, release, deployment, and smoke evidence; material runtime defects reopen their owning packet.
 
 Lane 01 owns shared shell, navigation, query, spatial state, map projection, generic cards/details, return context, utilities, and compatibility migration. Domain lanes own record meaning, filters, lifecycles, persistence, visibility, authorization, and authoritative mutations. A domain lane must request a shared contract change rather than introduce a private substitute.
 
@@ -177,11 +180,15 @@ Every permanent lens registers exactly four stable positions. Each projection ke
 | Intelligence | Add Insight; Edit Insight; Compare; Track | View Insight Detail; Add Note; Compare; Follow/Track |
 | Capabilities | Manage Capabilities; AI to AMACS; Add/Edit Evidence; Capability Gaps | View Capabilities; Match to RFx; Refer; Save/Follow |
 
+`MOBILE_EXCHANGE_STAGES36_ACTION_REGISTRY.md` assigns the exact immutable ID to each paired position and defines the backward-aware mapping from every Stage 2 ID. The table above defines contextual labels; it does not authorize a builder to invent IDs or substitute actions.
+
 Existing stable action IDs should be retained where their meaning remains valid. Any rename/migration must be explicit and backward-aware. `AI to AMACS` remains truthful and non-operational unless a current provider runtime is separately authorized; manual AMACS browse/search remains available.
 
 ### Opportunities/RFx
 
 Use real permitted RFx/opportunity records and the current RFx aggregate. Discovery/detail may project authoritative issuer, type, category, geography, dates/deadline, status, summary, documents, watch, and response state. Issuer and responder mutations remain server-authorized and lifecycle-correct. Closed, expired, unavailable, issuer/non-issuer, watch, response, team, and alert states require focused evidence. Reconcile useful PR #210 alert work from current main; do not merge its stale private matching or overwrite unrelated current Functions exports.
+
+The Opportunities packet may not claim the complete contextual action matrix from Stage 4 discovery alone. It must consume merged RFx Slice 4.6 fit/pursuit, Slice 4.7 gap/team/invite, Slice 4.8 response-workspace/readiness, Slice 4.9 review/submission or external handoff, and Slice 4.10 contextual-education packets for the applicable unchecked Feature IDs. Those packets run in the dependency order in `WAVE_4_RFX_CORE_ROADMAP.md`; a position stays truthfully inactive until its owning RFx packet is merged. Stage 4 Opportunities closes only after those dependencies close and the final integrated adapter passes its own evidence.
 
 ### Resources
 
@@ -238,6 +245,8 @@ Marketing or governed invitation
 ```
 
 Do not create a second registration system. Organization type, buyer/supplier role, provider status, Verification, optional enrichment, and payment are not general Exchange-entry prerequisites. Capabilities replaces Referrals in permanent-lens onboarding language/destination behavior; referral policy remains optional progressive organization management. A current approved entitlement-specific payment path may be shown only under its own authority and never silently gates legitimate free participation.
+
+After the required activation milestone, progressive onboarding must offer the current-authorized equivalents of core organization details; geography and locations; organization directory and team; capability profile; Resources; Intelligence; Opportunities/RFx readiness; referral policy; preferences and alerts; and a progress overview. Each module preserves its own authorization and completion semantics. Optional enrichment remains deferrable and does not silently become an activation gate.
 
 ### Commercial boundary
 

@@ -17,7 +17,7 @@ Every lane must:
 
 For any `MOB-01` through `MOB-05` packet or any work that plans, implements, reviews, reconciles, tests, or integrates the mobile Exchange composition, **every participating lane must read `docs/program/MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md` and its linked current visual reference before acting**. Lens lanes must consume the shared mobile contracts rather than independently reinterpret the visual reference.
 
-For the successor lens migration or any Stage 3–6 packet, every participating lane must also read `docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md`. The successor authority governs current architecture; Stage 1–2 authorities remain historical provenance.
+For the successor lens migration or any Stage 3–6 packet, every participating lane must also read `docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md`. The mobile Stage 1–2 authority remains the formal governor for MOB-01 through MOB-05 shared contracts, the Stage 2 Referrals-ending composition, and its evidence. The Stage 3–6 authority governs the successor architecture and migration without relabeling that history.
 
 ## Lane 00 — Control Room
 

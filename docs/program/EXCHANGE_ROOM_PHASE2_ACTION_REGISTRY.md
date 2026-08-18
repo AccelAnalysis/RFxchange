@@ -1,12 +1,14 @@
 # Exchange Room Phase 2 — Canonical 16-Action Registry
 
-**Status:** Control Room product authority for `WP-EXCHANGE-ROOM-PHASE2-01`.
+**Status:** HISTORICAL GOVERNING REGISTRY FOR STAGE 2 / `WP-EXCHANGE-ROOM-PHASE2-01`
 
 **Owner:** 00 — RFxchange Control Room
 
 **Implementation owner:** 01 — Shared Exchange Platform
 
 This document freezes the stable identity, order, participant-visible label, owning lane and governing source family for the sixteen permanent Exchange Room action positions.
+
+For successor Stages 3–6, `MOBILE_EXCHANGE_STAGES36_ACTION_REGISTRY.md` is the governing amended registry. This file remains authoritative for the implemented Stage 2 composition and its evidence; it is not the current runtime-migration target and must not be rewritten to describe Capabilities after the fact.
 
 Lane 01 implements this registry. It does **not** choose, rename, reorder, substitute, split, merge or invent these action identities. Any future change to an action identity or visible label requires a Control Room product-authority amendment rather than a builder-local decision.
 

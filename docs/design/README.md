@@ -26,13 +26,15 @@ A brand or visual rule never overrides security or product authority. If a targe
 
 A domain-dependent brand expression may ship only when its authoritative domain exists. Do not fabricate opportunities, service territories, referral/team/RFx relationships, credibility or outcomes to satisfy a visual design.
 
-## Implemented participant-shell convergence
+## Implemented baseline and successor target
 
-The no-Feature-ID Exchange-shell truthfulness gate establishes the current participant navigation and loading baseline:
+The no-Feature-ID Exchange-shell truthfulness gate and Stage 2 establish the currently merged participant navigation and loading baseline. Until the successor migration packet merges, that runtime retains `Opportunities/RFx | Resources | Intelligence | Referrals`.
+
+The Stage 3–6 authority sets the target architecture; it is not yet an implementation claim:
 
 - the primary lens sequence is exactly `Opportunities/RFx | Resources | Intelligence | Capabilities`;
 - Referrals is a governed cross-lens function and Menu/Account destination, not a primary lens;
-- Opportunities/RFx is visibly present but explicitly unavailable, has no href, is not current and is described with text and assistive semantics rather than color alone;
+- Opportunities/RFx remains visibly first and consumes the real permitted `/opportunities` runtime;
 - Network remains the current organization-network view/domain concept within Intelligence, not a peer lens;
 - Account and Quick Start are separate utilities in the persistent participant header;
 - Administration is optional, server-authoritative and limited to implemented destinations;
@@ -40,7 +42,7 @@ The no-Feature-ID Exchange-shell truthfulness gate establishes the current parti
 - pending route content uses scoped status/skeleton treatment below the header; and
 - the former root-level `Loading RFxchange` / `Preparing this page` takeover is not part of ordinary authenticated navigation.
 
-The stable Intelligence route remains `/geography/canvas`, including compatible query parameters. This gate does not enable Opportunities/RFx, create RFx state, add Intelligence datasets, change Feature IDs or tracker totals, implement Dark Appearance, or begin Slice 4.1 runtime.
+The stable Intelligence route remains `/geography/canvas`, including compatible query parameters. The successor target does not by itself implement Capabilities, migrate runtime state, add Intelligence datasets, change Feature IDs or tracker totals, or implement Dark Appearance.
 
 ## Target brand authority
 

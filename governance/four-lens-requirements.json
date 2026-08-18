@@ -28,11 +28,11 @@
   ],
   "adoptionBaseline": {
     "algorithm": "sha256-json-v1",
-    "recordCount": 127,
-    "idDigest": "7fb07cad812ddaafd3636526b434f45d993d576db4d34eb06dd9782eed534e4a",
-    "originalRequirementDigest": "bb80aedfecfe5fb1aaee976ee66faec3820f786e3acc0709f8286427c599761a",
-    "governanceMetadataDigest": "68951aa360a20eb97b308964ee83552ba2228088710064f0f854bca01b7c07d4",
-    "policy": "All 127 adopted records are frozen in order. A newly authorized requirement must append while the same reviewed change advances the baseline count and digests; no appended record may exist outside the baseline. Historical permanent-Referrals records remain immutable and carry explicit successor disposition metadata."
+    "recordCount": 128,
+    "idDigest": "1fb059057ea5a4e092e658b17c7c8f31c57fac598b2a283a96d13947feeeff6a",
+    "originalRequirementDigest": "220497f3a629dde07c3b359e0c5f7c574d8993f2f6055f28bcf1e1091a52d9d6",
+    "governanceMetadataDigest": "be3a2f94fc870abf5ea9401c317a898bb2dec00ffc6dd05202f1b4016624de25",
+    "policy": "All 128 adopted records are frozen in order. A newly authorized requirement must append while the same reviewed change advances the baseline count and digests; no appended record may exist outside the baseline. Historical permanent-Referrals records remain immutable and carry explicit successor disposition metadata."
   },
   "statuses": [
     "Not Started",
@@ -70,6 +70,26 @@
     },
     "manifest": "A durable Lane 06 JSON manifest binding candidate SHA, base SHA, reviewer, GitHub Actions run, environment, and a passed timestamped check plus artifacts for every claimed type.",
     "coverage": "Verified requires at least one manifest-backed evidence entry for every acceptance type declared by the requirement."
+  },
+  "mobileExchangeStages36": {
+    "actionRegistry": [
+      { "lens": "opportunities-rfx", "order": 1, "id": "opportunities.create-view" },
+      { "lens": "opportunities-rfx", "order": 2, "id": "opportunities.manage-respond" },
+      { "lens": "opportunities-rfx", "order": 3, "id": "opportunities.team" },
+      { "lens": "opportunities-rfx", "order": 4, "id": "opportunities.watch" },
+      { "lens": "resources", "order": 1, "id": "resources.offer-request" },
+      { "lens": "resources", "order": 2, "id": "resources.manage-view" },
+      { "lens": "resources", "order": 3, "id": "resources.share" },
+      { "lens": "resources", "order": 4, "id": "resources.save" },
+      { "lens": "intelligence", "order": 1, "id": "intelligence.add-view" },
+      { "lens": "intelligence", "order": 2, "id": "intelligence.edit-note" },
+      { "lens": "intelligence", "order": 3, "id": "intelligence.compare" },
+      { "lens": "intelligence", "order": 4, "id": "intelligence.track" },
+      { "lens": "capabilities", "order": 1, "id": "capabilities.manage-view" },
+      { "lens": "capabilities", "order": 2, "id": "capabilities.classify-match" },
+      { "lens": "capabilities", "order": 3, "id": "capabilities.evidence-refer" },
+      { "lens": "capabilities", "order": 4, "id": "capabilities.gaps-save" }
+    ]
   },
   "requirements": [
     {
@@ -3576,7 +3596,7 @@
     },
     {
       "id": "MOB36-LENS-001",
-      "originalRequirement": "The permanent authenticated participant lenses are always presented in the exact order Opportunities/RFx, Resources, Intelligence and Capabilities; Referrals is a governed cross-lens function and Menu/Account utility rather than a permanent lens.",
+      "originalRequirement": "The permanent authenticated participant lenses are always presented in the exact order Opportunities/RFx, Resources, Intelligence and Capabilities; Referrals is cross-lens/Menu-based, and the sixteen positions use only the immutable IDs in MOBILE_EXCHANGE_STAGES36_ACTION_REGISTRY.md.",
       "source": "docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md#1-product-owner-decision",
       "lane": "shared-exchange",
       "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "capabilities", "referrals", "integration"],
@@ -3658,7 +3678,7 @@
       "source": "docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md#opportunitiesrfx",
       "lane": "opportunities-rfx",
       "dependentLanes": ["shared-exchange", "capabilities", "referrals", "integration"],
-      "dependencies": ["MOB36-SHARED-DETAIL-001", "RFX-FEATURE-DSC-004"],
+      "dependencies": ["MOB36-SHARED-DETAIL-001", "RFX-FEATURE-DSC-004", "RFX-FEATURE-RSP-001", "RFX-FEATURE-RSP-002", "RFX-FEATURE-RSP-003", "RFX-FEATURE-RSP-004", "RFX-FEATURE-RSP-006", "RFX-FEATURE-DSC-010", "RFX-FEATURE-RSP-007", "RFX-FEATURE-RSP-008", "RFX-FEATURE-TEM-001", "RFX-FEATURE-TEM-002", "RFX-FEATURE-TEM-003", "RFX-FEATURE-TEM-004", "RFX-FEATURE-ACQ-007", "RFX-FEATURE-RSP-009", "RFX-FEATURE-RSP-010", "RFX-FEATURE-RSP-017", "RFX-FEATURE-RSP-018", "RFX-FEATURE-RSP-019", "RFX-FEATURE-RSP-020", "RFX-FEATURE-RSP-021", "RFX-FEATURE-EDU-011", "RFX-FEATURE-EDU-012", "RFX-FEATURE-EDU-013"],
       "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "copy", "cross-lens", "performance"],
       "status": "Not Started",
       "implementation": { "actor": null, "pr": null, "sha": null },
@@ -3775,7 +3795,7 @@
       "source": "docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md#workflows-notification-and-return",
       "lane": "integration",
       "dependentLanes": ["shared-exchange", "opportunities-rfx", "resources", "intelligence", "capabilities", "referrals"],
-      "dependencies": ["MOB36-REFERRAL-CROSS-LENS-001", "MOB36-MENU-001"],
+      "dependencies": ["MOB36-REFERRAL-CROSS-LENS-001"],
       "acceptanceTypes": ["functional", "domain-security", "responsive", "accessibility", "copy", "cross-lens", "performance"],
       "status": "Not Started",
       "implementation": { "actor": null, "pr": null, "sha": null },
@@ -3797,7 +3817,7 @@
     },
     {
       "id": "MOB36-ONBOARDING-001",
-      "originalRequirement": "The existing organization-centered registration, geography, claim/create, authority, essential profile, marker, orientation, first-value and OPEN journey converges on Capabilities as the fourth lens without making optional enrichment, provider status, Verification or payment a general Exchange-entry gate.",
+      "originalRequirement": "The existing organization-centered registration, geography, claim/create, authority, essential profile, marker, orientation, first-value and OPEN journey converges on Capabilities as the fourth lens, then offers progressive core details, geography/locations, directory/team, capability profile, Resources, Intelligence, Opportunities readiness, referral policy, preferences/alerts and progress overview without making optional enrichment, provider status, Verification or payment a general Exchange-entry gate.",
       "source": "docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md#registration-and-onboarding",
       "lane": "shared-exchange",
       "dependentLanes": ["capabilities", "referrals", "integration"],
@@ -3844,6 +3864,19 @@
       "acceptanceTypes": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "copy", "cross-lens", "performance", "governance"],
       "status": "Not Started",
       "implementation": { "actor": null, "pr": null, "sha": null },
+      "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] },
+      "deferral": null
+    },
+    {
+      "id": "MOB36-AUTHORITY-001",
+      "originalRequirement": "The product-owner Stage 3–6 architecture, immutable sixteen-action registry, legacy successor dispositions, dependency-safe work packets, free-entry commercial boundary and release constraints are codified in repository authority before successor runtime implementation begins.",
+      "source": "docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md",
+      "lane": "shared-exchange",
+      "dependentLanes": ["opportunities-rfx", "resources", "intelligence", "capabilities", "referrals", "integration"],
+      "dependencies": [],
+      "acceptanceTypes": ["governance", "copy"],
+      "status": "In Progress",
+      "implementation": { "actor": "github:AccelAnalysis", "pr": 225, "sha": null },
       "acceptance": { "lane": null, "reviewer": null, "sha": null, "result": null, "evidence": [] },
       "deferral": null
     }
