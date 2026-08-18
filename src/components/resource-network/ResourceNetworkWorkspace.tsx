@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
@@ -88,7 +88,7 @@ function browserSessionStorage(): Storage | null {
 
 export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, organizations, providers, resources, referrals, owner, adjunctState, authorization, commandRecoveryScope, queryState, selectedMessages, selectedMessagesUnavailable }: Props) {
   const { t, locale } = useI18n();
-  const pathname = usePathname();
+  const pathname = "/resources";
   const router = useRouter();
   const searchParams = useSearchParams();
   const [notice, setNotice] = useState<string | null>(null);
@@ -97,10 +97,9 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
   const providerRequestCommandRef = useRef<Readonly<{ fingerprint: string; commandId: string }> | null>(null);
   const [previewSelection, setPreviewSelection] = useState<ResourcesMobileSelectionInput | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
+  const mobileOperationsRef = useRef<HTMLDivElement | null>(null);
   const providerRequestStorageKey = `${PROVIDER_REQUEST_STORAGE_KEY}:${encodeURIComponent(commandRecoveryScope)}`;
   const [spatialContext, updateSpatialContext] = useParticipantSpatialContext({ scope: spatialScope, homeMarkerId: homeMarker.id, activeLens: "resources" });
-  const selectedOrganizationId = queryState.providerId ?? queryState.organizationId ?? spatialContext.selection.organizationId;
-  const selected = providers.find((provider) => String(provider.organizationId) === selectedOrganizationId) ?? null;
   const providerReferrals = referrals.filter((referral) => referral.purpose === "provider-connection");
   const selectedResource = resources.find((resource) => resource.id === queryState.resourceId) ?? null;
   const actionBusy = busy || navigationPending;
@@ -130,6 +129,12 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
   const visibleRequestIds = useMemo(() => new Set(mobileProjection.requestCards.map((card) => card.identity.recordId).filter((id): id is string => id !== null)), [mobileProjection.requestCards]);
   const visibleProviderReferrals = providerReferrals.filter((referral) => visibleRequestIds.has(referral.id));
   const selectedRequest = visibleProviderReferrals.find((referral) => referral.id === queryState.requestId) ?? null;
+  const selectedOrganizationId = queryState.providerId
+    ?? queryState.organizationId
+    ?? (selectedResource ? String(selectedResource.organizationId) : null)
+    ?? (selectedRequest?.providerContext?.providerOrganizationId ? String(selectedRequest.providerContext.providerOrganizationId) : null)
+    ?? spatialContext.selection.organizationId;
+  const selected = providers.find((provider) => String(provider.organizationId) === selectedOrganizationId) ?? null;
   const governedAreaGeometries = useMemo(() => mobileProjection.serviceTerritories.map((binding) => Object.freeze({ areaId: binding.area.areaId, geographyId: binding.area.geographyId, geometryReference: binding.geometryReference, geometry: binding.geometry as ExchangeGovernedAreaGeometry["geometry"] })), [mobileProjection.serviceTerritories]);
 
   useEffect(() => {
@@ -161,16 +166,19 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     if (panelRef.current) panelRef.current.scrollTop = spatialContext.lensState.resources.listScrollTop;
   }, [spatialContext.lensState.resources.listScrollTop]);
   useEffect(() => {
-    const focusedOrganizationId = queryState.organizationId ?? queryState.providerId;
+    if (!queryState.providerId && !queryState.resourceId && !queryState.requestId && !queryState.manageMode) return;
+    mobileOperationsRef.current?.scrollIntoView({ block: "start" });
+  }, [queryState.manageMode, queryState.providerId, queryState.requestId, queryState.resourceId]);
+  useEffect(() => {
+    const explicitFocusedOrganizationId = queryState.organizationId ?? queryState.providerId;
+    const focusedOrganizationId = explicitFocusedOrganizationId ?? selectedOrganizationId;
     if (!focusedOrganizationId) return;
     const organization = organizations.find(
       (candidate) => candidate.organizationId === focusedOrganizationId,
     );
-    const crossGeographyProvider = queryState.providerId
-      ? providers.find(
-          (candidate) => String(candidate.organizationId) === queryState.providerId && candidate.marker === null,
-        )
-      : null;
+    const crossGeographyProvider = providers.find(
+      (candidate) => String(candidate.organizationId) === focusedOrganizationId && candidate.marker === null,
+    ) ?? null;
     if (!organization && crossGeographyProvider) {
       if (
         spatialContext.selection.organizationId === spatialScope.organizationId
@@ -207,7 +215,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
       panelOpen: true,
       originLens: current.activeLens,
     }));
-  }, [homeMarker.id, organizations, providers, queryState.organizationId, queryState.providerId, spatialContext.selection.markerId, spatialContext.selection.organizationId, spatialScope.organizationId, updateSpatialContext]);
+  }, [homeMarker.id, organizations, providers, queryState.organizationId, queryState.providerId, selectedOrganizationId, spatialContext.selection.markerId, spatialContext.selection.organizationId, spatialScope.organizationId, updateSpatialContext]);
 
   function selectOrganization(markerId: string) {
     const organization = organizations.find((candidate) => candidate.marker.id === markerId);
@@ -359,10 +367,10 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
       const requestId = typeof referral?.id === "string" ? referral.id : null;
       if (requestId) updateWorkspaceQuery({ request: requestId });
       else refreshAuthoritativeState();
-    } catch (error) {
+    } catch {
       // An uncertain response keeps the same command in memory and actor-scoped session storage.
       // Re-entering the same provider, service, publication and summary after reload replays it.
-      setNotice(error instanceof Error ? error.message : mobileCopy.requestFailed);
+      setNotice(mobileCopy.requestFailed);
     }
     finally { setBusy(false); }
   }
@@ -370,14 +378,14 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
   async function resourceAction(body: Record<string, unknown>) {
     setBusy(true); setNotice(null);
     try { await post("/api/resources", { ...body, commandId: `resource-${crypto.randomUUID()}` }); refreshAuthoritativeState(); }
-    catch (error) { setNotice(error instanceof Error ? error.message : mobileCopy.resourceActionFailed); }
+    catch { setNotice(mobileCopy.resourceActionFailed); }
     finally { setBusy(false); }
   }
 
   async function referralAction(body: Record<string, unknown>) {
     setBusy(true); setNotice(null);
     try { await post("/api/referrals", { ...body, commandId: `provider-request-${crypto.randomUUID()}` }); refreshAuthoritativeState(); }
-    catch (error) { setNotice(error instanceof Error ? error.message : mobileCopy.providerActionFailed); }
+    catch { setNotice(mobileCopy.providerActionFailed); }
     finally { setBusy(false); }
   }
 
@@ -490,7 +498,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
           }}
           resolveRecordActionLabel={(key) => t(key)}
         />) : <p>{mobileCopy.empty}</p>}
-        <div className={styles.mobileOperations} data-resources-mobile-operations>
+        <div ref={mobileOperationsRef} className={styles.mobileOperations} data-resources-mobile-operations>
           {queryState.rfxReference || queryState.rfxGap ? <section className={styles.originContext} aria-label={mobileCopy.context}>
             <strong>{mobileCopy.context}</strong>
             <small>{mobileCopy.contextOnly}</small>

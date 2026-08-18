@@ -274,9 +274,16 @@ test("maximum valid identifiers use bounded selection routes instead of crashing
   ].filter(Boolean);
   assert.equal(hrefs.length > 0, true);
   assert.equal(hrefs.every((href) => href.length <= 240), true);
-  assert.equal(hrefs.some((href) => href.startsWith(`/resources/view/provider/${organizationId}`)), true);
-  assert.equal(hrefs.some((href) => href.startsWith(`/resources/view/resource/${resourceId}`)), true);
-  assert.equal(hrefs.some((href) => href.startsWith(`/resources/view/request/${requestId}`)), true);
+  assert.equal(hrefs.some((href) => href.startsWith(`/resources/v/p/${organizationId}/RFX-47/`)), true);
+  assert.equal(hrefs.some((href) => href.startsWith(`/resources/v/r/${resourceId}/RFX-47/`)), true);
+  assert.equal(hrefs.some((href) => href.startsWith(`/resources/v/q/${requestId}/RFX-47/`)), true);
+  const fallbackHrefs = hrefs.filter((href) => href.startsWith("/resources/v/"));
+  assert.equal(fallbackHrefs.length > 0, true);
+  assert.equal(fallbackHrefs.every((href) => decodeURIComponent(new URL(href, "https://participant.invalid").pathname).includes("?tab=gaps#gap-2")), true);
+  const fallbackRoute = fs.readFileSync(new URL("../app/resources/v/[kind]/[id]/[[...context]]/page.tsx", import.meta.url), "utf8");
+  assert.match(fallbackRoute, /return renderResourcesPage/);
+  assert.match(fallbackRoute, /returnSuffix === "-" \? "" : returnSuffix/);
+  assert.doesNotMatch(fallbackRoute, /URLSearchParams|redirect\(`\/resources\?/);
 });
 
 test("route hydration gates private adjuncts and settles them independently from public discovery", () => {
@@ -295,6 +302,10 @@ test("route hydration gates private adjuncts and settles them independently from
   assert.match(workspace, /visibleProviderReferrals/);
   assert.match(workspace, /setPreviewSelection\(cardSelection/);
   assert.match(workspace, /suggestedProviderLabel/);
+  assert.doesNotMatch(workspace, /error\.message/);
+  assert.match(workspace, /mobileOperationsRef\.current\?\.scrollIntoView\(\{ block: "start" \}\)/);
+  assert.match(workspace, /selectedResource \? String\(selectedResource\.organizationId\) : null/);
+  assert.match(workspace, /selectedRequest\?\.providerContext\?\.providerOrganizationId/);
 });
 
 test("selection preserves complete provider association and marker identity", () => {

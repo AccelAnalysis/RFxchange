@@ -147,14 +147,27 @@ function resourcesHref(
     if (value) params.set(key, value);
   }
   const selectionEntries = Object.entries(selection).filter((entry): entry is [string, string] => Boolean(entry[1]));
-  const longSelection = (() => {
+  const longSelectionState = (() => {
     const query = params.toString();
-    if (`/resources${query ? `?${query}` : ""}`.length <= 240 || selectionEntries.length !== 1) return null;
+    if (`/resources${query ? `?${query}` : ""}`.length <= 240 || selectionEntries.length !== 1) {
+      return Object.freeze({ href: null, embeddedReturn: false });
+    }
     const [kind, id] = selectionEntries[0]!;
-    return ["provider", "resource", "request"].includes(kind)
-      ? `/resources/view/${kind}/${id}`
-      : null;
+    const compactKind = { provider: "p", resource: "r", request: "q" }[kind];
+    if (!compactKind) return Object.freeze({ href: null, embeddedReturn: false });
+    const fallback = `/resources/v/${compactKind}/${id}`;
+    const rfxReference = context?.rfxReference;
+    const returnTo = context?.returnTo;
+    if (!rfxReference || !returnTo) return Object.freeze({ href: fallback, embeddedReturn: false });
+    const returnPrefix = `/opportunities/${encodeURIComponent(rfxReference)}/assess`;
+    if (!returnTo.startsWith(returnPrefix)) return Object.freeze({ href: fallback, embeddedReturn: false });
+    const returnSuffix = returnTo.slice(returnPrefix.length);
+    const contextualFallback = `${fallback}/${encodeURIComponent(rfxReference)}/${encodeURIComponent(returnSuffix || "-")}`;
+    return contextualFallback.length <= 240
+      ? Object.freeze({ href: contextualFallback, embeddedReturn: true })
+      : Object.freeze({ href: fallback, embeddedReturn: false });
   })();
+  const longSelection = longSelectionState.href;
   if (longSelection) params.delete(selectionEntries[0]![0]);
   const href = () => {
     const query = params.toString();
@@ -165,8 +178,16 @@ function resourcesHref(
     params.set(key, value);
     if (href().length > 240) params.delete(key);
   };
-  addWhenBounded("rfxReference", context?.rfxReference);
-  addWhenBounded("returnTo", context?.returnTo);
+  if (!longSelectionState.embeddedReturn && context?.rfxReference && context.returnTo) {
+    params.set("rfxReference", context.rfxReference);
+    params.set("returnTo", context.returnTo);
+    if (href().length > 240) {
+      params.delete("returnTo");
+      params.delete("rfxReference");
+    }
+  } else if (!longSelectionState.embeddedReturn) {
+    addWhenBounded("rfxReference", context?.rfxReference);
+  }
   addWhenBounded("rfxGap", context?.rfxGap);
   if (context?.availability && context.availability !== "all") {
     addWhenBounded("availability", context.availability);

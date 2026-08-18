@@ -23,7 +23,15 @@ interface Props {
   readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
 }
 
-export default async function ResourcesPage({ searchParams }: Props) {
+export interface ResourceSelectionOverride {
+  readonly kind: "provider" | "resource" | "request";
+  readonly id: string;
+}
+
+export async function renderResourcesPage({
+  searchParams,
+  selectionOverride = null,
+}: Props & Readonly<{ selectionOverride?: ResourceSelectionOverride | null }>) {
   const access = await resolveParticipantRoute({
     sessionCookie: (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value,
   });
@@ -51,7 +59,16 @@ export default async function ResourcesPage({ searchParams }: Props) {
     );
   }
 
-  const queryState = parseResourcesMobileWorkspaceQuery(params);
+  const parsedQueryState = parseResourcesMobileWorkspaceQuery(params);
+  const queryState = selectionOverride
+    ? Object.freeze({
+        ...parsedQueryState,
+        organizationId: null,
+        providerId: selectionOverride.kind === "provider" ? selectionOverride.id : null,
+        resourceId: selectionOverride.kind === "resource" ? selectionOverride.id : null,
+        requestId: selectionOverride.kind === "request" ? selectionOverride.id : null,
+      })
+    : parsedQueryState;
   const organizationId = String(access.membership.organizationId);
   const membershipId = String(access.membership.id);
   const actor = Object.freeze({
@@ -185,4 +202,8 @@ export default async function ResourcesPage({ searchParams }: Props) {
       selectedMessagesUnavailable={selectedMessagesResult?.status === "rejected"}
     />
   );
+}
+
+export default async function ResourcesPage(props: Props) {
+  return renderResourcesPage(props);
 }
