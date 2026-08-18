@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { OpportunityTeamingError, type OpportunityTeamingScope, type VerifiedTeammateCandidate } from "@/src/application/rfx/opportunity-teaming-service";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
-import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
+import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute, type ParticipantRouteResolution } from "@/src/infrastructure/auth/participant-route-runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
 import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import { loadAuthorizedNetworkDiscovery } from "@/src/infrastructure/network-discovery/runtime";
@@ -11,12 +11,14 @@ import { attemptTeamInvitationDelivery, createServerOpportunityTeamingService } 
 
 export const runtime = "nodejs";
 
-async function participantScope(): Promise<OpportunityTeamingScope | NextResponse> {
+type AuthorizedParticipant = Extract<ParticipantRouteResolution, { readonly kind: "authorized" }>;
+
+async function participantScope(): Promise<Readonly<{ scope: OpportunityTeamingScope; access: AuthorizedParticipant }> | NextResponse> {
   const access = await resolveParticipantRoute({ sessionCookie: (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value });
   if (access.kind === "unauthenticated") return NextResponse.json({ error: "Authentication is required." }, { status: 401 });
   if (access.kind === "access-resolution-required" || access.kind === "activation-required") return NextResponse.json({ error: "Participant activation is required.", destination: participantEntryDestination(access) }, { status: 403 });
   if (access.kind === "wrong-organization" || access.kind === "restricted" || access.state.lifecycleState !== "open-platform") return NextResponse.json({ error: "RFx teaming is unavailable." }, { status: 403 });
-  return Object.freeze({
+  const scope = Object.freeze({
     context: access.context,
     organizationId: access.membership.organizationId,
     userId: access.context.user.id,
@@ -25,6 +27,7 @@ async function participantScope(): Promise<OpportunityTeamingScope | NextRespons
       ? Object.freeze({ id: access.state.acquisitionContext.id, kind: access.state.acquisitionContext.kind, subjectReference: access.state.acquisitionContext.subjectReference })
       : null,
   });
+  return Object.freeze({ scope, access });
 }
 
 function sameOrigin(request: NextRequest): boolean {
@@ -45,9 +48,7 @@ function problem(request: NextRequest, error: unknown) {
   });
 }
 
-async function verifiedCandidate(scope: OpportunityTeamingScope, reference: string, gapReference: string, organizationReference: string): Promise<VerifiedTeammateCandidate> {
-  const access = await resolveParticipantRoute({ sessionCookie: (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value });
-  if (access.kind !== "authorized" || access.membership.id !== scope.membershipId || access.membership.organizationId !== scope.organizationId) throw new OpportunityTeamingError("forbidden", "Candidate discovery is unavailable.");
+async function verifiedCandidate(scope: OpportunityTeamingScope, access: AuthorizedParticipant, reference: string, gapReference: string, organizationReference: string): Promise<VerifiedTeammateCandidate> {
   const mapProjection = await loadAuthorizedParticipantMapProjection(access);
   if (!mapProjection) throw new OpportunityTeamingError("dependency-unavailable", "Candidate geography is temporarily unavailable.");
   const context = await createServerOpportunityTeamingService().gapContext(scope, reference, gapReference);
@@ -62,8 +63,9 @@ export async function POST(request: NextRequest) {
   try {
     if (!sameOrigin(request)) return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
     if (Number(request.headers.get("content-length") ?? "0") > 65_536) return NextResponse.json({ error: "Teaming request body is too large." }, { status: 413 });
-    const scope = await participantScope();
-    if (scope instanceof NextResponse) return scope;
+    const participant = await participantScope();
+    if (participant instanceof NextResponse) return participant;
+    const { scope, access } = participant;
     const body = await request.json() as Record<string, unknown>;
     const service = createServerOpportunityTeamingService();
     const action = String(body.action ?? "");
@@ -71,7 +73,7 @@ export async function POST(request: NextRequest) {
       const reference = String(body.reference ?? "");
       const gapReference = String(body.gapReference ?? "");
       const candidateReference = typeof body.candidateOrganizationId === "string" && body.candidateOrganizationId ? body.candidateOrganizationId : null;
-      const candidate = candidateReference ? await verifiedCandidate(scope, reference, gapReference, candidateReference) : null;
+      const candidate = candidateReference ? await verifiedCandidate(scope, access, reference, gapReference, candidateReference) : null;
       const result = await service.createInvitation(scope, {
         commandId: String(body.commandId ?? ""), reference, gapReference,
         proposedCapacity: String(body.proposedCapacity ?? ""), responsibilitySummary: String(body.responsibilitySummary ?? ""),

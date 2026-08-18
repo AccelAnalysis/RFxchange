@@ -22,7 +22,8 @@ test("TEM-001 reuses server-governed Network discovery and never trusts a client
   assert.match(page, /loadAuthorizedNetworkDiscovery\(\{ access, mapProjection, capability: context\.capabilityLabel/);
   assert.match(page, /item\.match\.source === "confirmed-structured"/);
   assert.match(page, /item\.organizationId !== context\.organizationId && item\.organizationId !== context\.issuerOrganizationId/);
-  assert.match(route, /verifiedCandidate\(scope, reference, gapReference, candidateReference\)/);
+  assert.match(route, /verifiedCandidate\(scope, access, reference, gapReference, candidateReference\)/);
+  assert.equal((route.match(/resolveParticipantRoute\(/g) ?? []).length, 1);
   assert.match(route, /focusedOrganizationId: organizationReference/);
   assert.doesNotMatch(route, /body\.matchedCapabilityNames|body\.displayName/);
 });

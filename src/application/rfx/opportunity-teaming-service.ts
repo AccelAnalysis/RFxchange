@@ -297,15 +297,19 @@ export class OpportunityTeamingService {
 
   async invitations(scope: OpportunityTeamingScope, reference: string): Promise<readonly TeamInvitationView[]> {
     await this.authorizeRead(scope);
-    const records = await this.dependencies.teaming.listByLeadOrganization(scope.organizationId, stable(reference, "Opportunity reference"));
-    const management = await authorizeOrganizationOperation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId, permission: "response.create" }, this.dependencies.authorization);
+    const [records, management] = await Promise.all([
+      this.dependencies.teaming.listByLeadOrganization(scope.organizationId, stable(reference, "Opportunity reference")),
+      authorizeOrganizationOperation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId, permission: "response.create" }, this.dependencies.authorization),
+    ]);
     return Object.freeze(records.map((item) => participantView(item, "lead", management.allowed, this.now())));
   }
 
   async receivedInvitations(scope: OpportunityTeamingScope): Promise<readonly TeamInvitationView[]> {
     await this.authorizeRead(scope);
-    const records = await this.dependencies.teaming.listByTargetOrganization(scope.organizationId);
-    const management = await authorizeOrganizationOperation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId, permission: "response.create" }, this.dependencies.authorization);
+    const [records, management] = await Promise.all([
+      this.dependencies.teaming.listByTargetOrganization(scope.organizationId),
+      authorizeOrganizationOperation({ context: scope.context, organizationId: scope.organizationId, membershipId: scope.membershipId, permission: "response.create" }, this.dependencies.authorization),
+    ]);
     return Object.freeze(records.map((item) => participantView(item, "invitee", management.allowed, this.now())).sort((left, right) => right.responseDeadline.localeCompare(left.responseDeadline) || left.opportunityTitle.localeCompare(right.opportunityTitle)));
   }
 

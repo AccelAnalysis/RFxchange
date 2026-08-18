@@ -43,21 +43,38 @@ export default async function OpportunityTeammatesPage({ params, searchParams }:
   if (access.state.lifecycleState !== "open-platform") redirect(access.state.controlledPlatformUrl ?? "/join");
   const service = createServerOpportunityTeamingService();
   const scope = Object.freeze({ context: access.context, organizationId: access.membership.organizationId, userId: access.context.user.id, membershipId: access.membership.id, acquisitionContext: access.state.acquisitionContext });
+  let view: Readonly<{
+    context: Awaited<ReturnType<typeof service.gapContext>>;
+    candidates: readonly OpportunityTeammateCandidateView[];
+    invitations: Awaited<ReturnType<typeof service.invitations>>;
+    serviceAreas: readonly Readonly<{ id: string; name: string }>[];
+    capacity: string;
+    need: string;
+    serviceArea: string;
+  }> | null = null;
+  let teamingError: OpportunityTeamingError["code"] | null = null;
   try {
-    const context = await service.gapContext(scope, reference, gapReference);
-    const mapProjection = await loadAuthorizedParticipantMapProjection(access);
+    const [context, mapProjection] = await Promise.all([
+      service.gapContext(scope, reference, gapReference),
+      loadAuthorizedParticipantMapProjection(access),
+    ]);
     if (!mapProjection) throw new ParticipantRouteDependencyUnavailableError("workspace-state", new Error("Authorized teammate geography is incomplete."));
     const capacity = ["capability-contributor", "delivery-support", "subject-matter-support"].includes(first(query.capacity)) ? first(query.capacity) : "capability-contributor";
     const need = first(query.need, 160);
     const serviceArea = first(query.serviceArea);
-    const discovery = await loadAuthorizedNetworkDiscovery({ access, mapProjection, capability: context.capabilityLabel, serviceGeographyId: serviceArea || null });
+    const [discovery, invitations] = await Promise.all([
+      loadAuthorizedNetworkDiscovery({ access, mapProjection, capability: context.capabilityLabel, serviceGeographyId: serviceArea || null }),
+      service.invitations(scope, reference),
+    ]);
     const candidates: readonly OpportunityTeammateCandidateView[] = discovery.available ? Object.freeze(discovery.projection.organizations
       .filter((item) => item.match.source === "confirmed-structured" && item.organizationId !== context.organizationId && item.organizationId !== context.issuerOrganizationId && item.match.matchedCapabilityNames.some((name) => name.toLocaleLowerCase("en-US") === context.capabilityLabel.toLocaleLowerCase("en-US")) && matchesNeed(item, need))
       .map((item) => Object.freeze({ organizationId: String(item.organizationId), displayName: item.profile.displayName, matchedCapabilityNames: item.match.matchedCapabilityNames, serviceGeographyIds: item.serviceGeographyIds }))) : [];
-    const invitations = await service.invitations(scope, reference);
-    return <OpportunityTeammateWorkspace context={context} candidates={candidates} invitations={invitations} serviceAreas={discovery.available ? discovery.serviceAreaOptions : []} query={{ capacity, need, serviceArea }} returnHref={returnHref} />;
+    view = Object.freeze({ context, candidates, invitations, serviceAreas: discovery.available ? discovery.serviceAreaOptions : [], capacity, need, serviceArea });
   } catch (error) {
     if (!(error instanceof OpportunityTeamingError)) throw error;
-    return <OpportunityAssessmentUnavailable errorCode={error.code} returnHref={returnHref} retryHref={currentHref} />;
+    teamingError = error.code;
   }
+  if (teamingError) return <OpportunityAssessmentUnavailable errorCode={teamingError} returnHref={returnHref} retryHref={currentHref} />;
+  if (!view) throw new Error("Teammate workspace resolution completed without a result.");
+  return <OpportunityTeammateWorkspace context={view.context} candidates={view.candidates} invitations={view.invitations} serviceAreas={view.serviceAreas} query={{ capacity: view.capacity, need: view.need, serviceArea: view.serviceArea }} returnHref={returnHref} />;
 }
