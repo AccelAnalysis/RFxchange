@@ -4,7 +4,7 @@
 
 **Snapshot basis:** merged `main` `5ddca57bf2d9fa2c81a98e75aeee09302d278a23` on 2026-08-18
 
-**Current task:** Close `WP-MOBILE-EXCHANGE-STAGE3-SHARED-01`, reconcile merged Slice 4.6, and activate only the dependency-eligible Stage 4/RFx packets from exact merged main
+**Current task:** Execute the four Control Room PR #232 activation epochs from exact merged main `5ddca57bf2d9fa2c81a98e75aeee09302d278a23`: RFx Slice 4.7, Resources, Intelligence, and Capabilities
 
 **Update rule:** Control Room recalculates this document from current merged `main` after every program-state change.
 
@@ -148,6 +148,8 @@ Control Room PR #230 records activation epoch `mobile-exchange-stage3-shared-202
 
 Control Room also reconciles the already-merged Slice 4.6 packet to its true final PR #171 candidate `dc17514ef9aed2dd37022b8bb121feb946bbcbf4`, merge `3cef29d8ce300154a8d73a262ec7a20252a49db6`, exact-head CI `31929740885`, and post-merge CI `31930900200`. Its pre-amendment independent-assurance language remains historical; the packet closes as `Implemented — Not Verified` under the current Completion Governance Amendment without claiming optional assurance.
 
+Control Room PR #232 records four exact-base activation epochs at merged main `5ddca57bf2d9fa2c81a98e75aeee09302d278a23`: `rfx-47-2026-08-18`, `mobile-exchange-stage4-resources-2026-08-18`, `mobile-exchange-stage4-intelligence-2026-08-18`, and `mobile-exchange-stage4-capabilities-2026-08-18`. These lanes own disjoint packet paths. The Opportunities Stage 4 adapter remains inactive until RFx Slices 4.7–4.10 close; Capabilities matching, all Stage 5 packets, and Stage 6 remain inactive behind their declared dependencies.
+
 ## Stage 1 integrated contract family
 
 The integrated shared architecture now covers:
@@ -206,4 +208,4 @@ Any newly discovered generalized capability gap must be raised through the insta
 
 ## Exact next action
 
-After successful Stage 3 post-merge CI, activate from exact main `5ddca57bf2d9fa2c81a98e75aeee09302d278a23` only `WP-MOBILE-EXCHANGE-RFX-47-01`, `WP-MOBILE-EXCHANGE-STAGE4-RESOURCES-01`, `WP-MOBILE-EXCHANGE-STAGE4-INTELLIGENCE-01`, and `WP-MOBILE-EXCHANGE-STAGE4-CAPABILITIES-01`. The Opportunities Stage 4 adapter remains gated by Slices 4.7–4.10; Capabilities matching, Stage 5, and Stage 6 remain dependency-gated.
+Execute `WP-MOBILE-EXCHANGE-RFX-47-01`, `WP-MOBILE-EXCHANGE-STAGE4-RESOURCES-01`, `WP-MOBILE-EXCHANGE-STAGE4-INTELLIGENCE-01`, and `WP-MOBILE-EXCHANGE-STAGE4-CAPABILITIES-01` from their exact PR #232 activation epochs. Reconcile useful open PR provenance without merging stale heads, consume the Stage 3 shared contracts, preserve each packet stop boundary, and require exact-head/post-merge evidence before Control Room closes each packet or activates a dependent successor.
