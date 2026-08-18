@@ -27,11 +27,11 @@ The packet changes shared, non-authorizing presentation contracts only. Domain r
 - Stage 3 merge / post-merge CI: `5ddca57bf2d9fa2c81a98e75aeee09302d278a23` / run `32104375075` — **SUCCESS**
 - Stage 3 authorization-correction PR / final candidate: PR #233 / `15e7c2333d1e9113055630bf256f977f7c39d080`
 - Correction exact-head CI: run `32106236531` — **SUCCESS** (771/771 canonical tests, configured browser, artifact, compiled/visible build identity)
-- Correction merge / post-merge CI: `3830577e14b7b1bc6878965d26369529de2ebbbb` / run `32106855995` — **PENDING**
+- Correction merge / post-merge CI: `3830577e14b7b1bc6878965d26369529de2ebbbb` / run `32106855995` — **SUCCESS**
 - Assurance: builder/repository evidence only; no optional independent assurance event occurred
 
 ## Post-merge authorization correction
 
 A GitHub review submitted after PR #231 merged identified two valid authorization-continuity defects: open details were not subjected to the same exact authority/canonical-destination reconciliation as opening details, and close accepted one authorization result for both the detail and a potentially different return-snapshot selection. PR #233 makes both checks explicit, coherently closes navigation after focal/association/relationship invalidation, binds the complete focal/association/relationship/marker selection to a server-revalidated result, and clears revoked or mismatched selection/focus/selection-bearing return context.
 
-After the correction post-merge run succeeds, the Control Room closeout disposition is **Implemented — Not Verified**. The packet is merged/integrated and was not deployed independently; optional independent assurance was not performed.
+The Control Room closeout disposition is **Implemented — Not Verified**. The packet is merged/integrated and was not deployed independently; optional independent assurance was not performed.

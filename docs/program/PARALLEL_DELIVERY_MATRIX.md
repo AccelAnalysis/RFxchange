@@ -2,9 +2,9 @@
 
 **Canonical volatile program-status source**
 
-**Snapshot basis:** merged `main` `5ddca57bf2d9fa2c81a98e75aeee09302d278a23` on 2026-08-18
+**Snapshot basis:** merged `main` `3830577e14b7b1bc6878965d26369529de2ebbbb` on 2026-08-18
 
-**Current task:** Execute the four Control Room PR #232 activation epochs from exact merged main `5ddca57bf2d9fa2c81a98e75aeee09302d278a23`: RFx Slice 4.7, Resources, Intelligence, and Capabilities
+**Current task:** Execute the four Control Room PR #232 activation epochs from exact merged main `3830577e14b7b1bc6878965d26369529de2ebbbb`: RFx Slice 4.7, Resources, Intelligence, and Capabilities
 
 **Update rule:** Control Room recalculates this document from current merged `main` after every program-state change.
 
@@ -140,7 +140,10 @@ Control Room PR #230 records activation epoch `mobile-exchange-stage3-shared-202
 | Exact-head CI | run `32103926126` — **SUCCESS** |
 | Integrated main | `5ddca57bf2d9fa2c81a98e75aeee09302d278a23` |
 | Post-merge CI | run `32104375075` — **SUCCESS** |
-| Focused / canonical evidence | Stage 3 18/18; combined focused 73/73; canonical full gate 770/770; configured browser and build identity passed |
+| Authorization correction | PR #233 exact head `15e7c2333d1e9113055630bf256f977f7c39d080`; exact-head CI `32106236531` — **SUCCESS** |
+| Corrected integrated main | `3830577e14b7b1bc6878965d26369529de2ebbbb` |
+| Correction post-merge CI | run `32106855995` — **SUCCESS** |
+| Focused / canonical evidence | Corrected Stage 3 21/21; canonical full gate 771/771; configured browser and build identity passed |
 | Disposition | `Implemented — Not Verified`; optional independent assurance not performed |
 | Release state | Merged/integrated; no independent production deployment under this packet |
 | Tracker effect | None; tracker remains 170/438 and RFx Core 18/41 |
@@ -150,7 +153,7 @@ Control Room also reconciles the already-merged Slice 4.6 packet to its true fin
 
 Before RFx Slice 4.7 activation, Control Room likewise closes the stale active ownership for `WP-RFX-42-ISS006-CORRECT-01` against its already-merged PR #201 final head `be99ecec42b28b8d1d36ecdf5010f73377f23126`, merge `6c5fe65e69abeaa21c9f3b14adce43ca1e2f7cc7`, exact-head CI `31859756636`, and post-merge CI `31860051714`. This removes overlapping RFx path ownership without changing the already-recorded `RFX-FEATURE-ISS-006` disposition or tracker arithmetic.
 
-Control Room PR #232 records four exact-base activation epochs at merged main `5ddca57bf2d9fa2c81a98e75aeee09302d278a23`: `rfx-47-2026-08-18`, `mobile-exchange-stage4-resources-2026-08-18`, `mobile-exchange-stage4-intelligence-2026-08-18`, and `mobile-exchange-stage4-capabilities-2026-08-18`. These lanes own disjoint packet paths. The Opportunities Stage 4 adapter remains inactive until RFx Slices 4.7–4.10 close; Capabilities matching, all Stage 5 packets, and Stage 6 remain inactive behind their declared dependencies.
+Control Room PR #232 records four exact-base activation epochs at corrected merged main `3830577e14b7b1bc6878965d26369529de2ebbbb`: `rfx-47-2026-08-18`, `mobile-exchange-stage4-resources-2026-08-18`, `mobile-exchange-stage4-intelligence-2026-08-18`, and `mobile-exchange-stage4-capabilities-2026-08-18`. These lanes own disjoint packet paths. The Opportunities Stage 4 adapter remains inactive until RFx Slices 4.7–4.10 close; Capabilities matching, all Stage 5 packets, and Stage 6 remain inactive behind their declared dependencies.
 
 ## Stage 1 integrated contract family
 
