@@ -1688,14 +1688,18 @@ export function ExchangeSpatialScene({
         });
         map.on("click", LENS_PROJECTION_AREA_FILL_LAYER_ID, (event) => {
           if (map.queryRenderedFeatures(event.point, {
-            layers: [LENS_PROJECTION_OBJECT_LAYER_ID, LENS_PROJECTION_CLUSTER_LAYER_ID],
+            layers: [
+              LENS_PROJECTION_OBJECT_LAYER_ID,
+              HOME_MARKER_CORE_LAYER_ID,
+              LENS_PROJECTION_CLUSTER_LAYER_ID,
+            ],
           }).length > 0) return;
           const projection = lensProjectionForEvent(event);
           if (projection) onLensProjectionSelectRef.current?.(projection);
         });
         map.on("click", LENS_PROJECTION_CLUSTER_LAYER_ID, (event) => {
           if (map.queryRenderedFeatures(event.point, {
-            layers: [LENS_PROJECTION_OBJECT_LAYER_ID],
+            layers: [LENS_PROJECTION_OBJECT_LAYER_ID, HOME_MARKER_CORE_LAYER_ID],
           }).length > 0) return;
           const feature = event.features?.[0] as unknown as
             | { readonly properties?: Readonly<Record<string, unknown>> }
@@ -1718,9 +1722,7 @@ export function ExchangeSpatialScene({
               NETWORK_CLUSTER_CORE_LAYER_ID,
               NETWORK_MARKER_CORE_LAYER_ID,
               NETWORK_SELECTED_MARKER_CORE_LAYER_ID,
-              LENS_PROJECTION_CLUSTER_LAYER_ID,
               LENS_PROJECTION_OBJECT_LAYER_ID,
-              LENS_PROJECTION_AREA_FILL_LAYER_ID,
             ],
           }).length > 0) return;
           const markerId = markerRef.current?.id;

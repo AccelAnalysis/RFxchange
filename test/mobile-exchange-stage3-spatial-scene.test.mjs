@@ -18,8 +18,9 @@ test("selection callbacks use the original projection lookup and clusters only m
   assert.match(scene, /lensProjectionClusterRef\.current\.get\(renderId\)/);
   assert.match(scene, /zoom: Math\.min\(map\.getZoom\(\) \+ 2, map\.getMaxZoom\(\)\)/);
   assert.doesNotMatch(scene, /lensProjectionClusterRef[\s\S]{0,500}onLensProjectionSelectRef/);
-  assert.match(scene, /layers: \[LENS_PROJECTION_OBJECT_LAYER_ID, LENS_PROJECTION_CLUSTER_LAYER_ID\]/);
-  assert.match(scene, /layers: \[LENS_PROJECTION_OBJECT_LAYER_ID\]/);
+  assert.match(scene, /layers: \[\s*LENS_PROJECTION_OBJECT_LAYER_ID,\s*HOME_MARKER_CORE_LAYER_ID,\s*LENS_PROJECTION_CLUSTER_LAYER_ID/);
+  assert.match(scene, /layers: \[LENS_PROJECTION_OBJECT_LAYER_ID, HOME_MARKER_CORE_LAYER_ID\]/);
+  assert.doesNotMatch(scene, /map\.on\("click", HOME_MARKER_CORE_LAYER_ID[\s\S]{0,500}LENS_PROJECTION_(?:CLUSTER|AREA)/);
 });
 
 test("governed areas require exact authority keys and legacy overlays cannot duplicate the shared projection", () => {
