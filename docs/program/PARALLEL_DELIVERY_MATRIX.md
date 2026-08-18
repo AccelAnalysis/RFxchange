@@ -38,7 +38,7 @@ No percentage is inferred from these counts. The successor requirement denominat
 
 ## Canonical tracker comparison
 
-- Master Build Tracker: **438 total · 170 Done · 268 Not Started**.
+- Master Build Tracker: **438 total · 175 Done · 263 Not Started**.
 - Mobile Stages 1–2 and the Stages 3–6 authority change no Feature-ID arithmetic.
 - `MOB-01` is installed product authority, not a silently completed tracker feature.
 - `governance/four-lens-requirements.json` is append-only at 128 records; the original 106 remain immutable.
@@ -149,9 +149,9 @@ Control Room PR #230 records activation epoch `mobile-exchange-stage3-shared-202
 | Tracker effect | None; tracker remains 170/438 and RFx Core 18/41 |
 | Stabilization 2C / B6b | Incomplete / intentionally pending |
 
-Control Room also reconciles the already-merged Slice 4.6 packet to its true final PR #171 candidate `dc17514ef9aed2dd37022b8bb121feb946bbcbf4`, merge `3cef29d8ce300154a8d73a262ec7a20252a49db6`, exact-head CI `31929740885`, and post-merge CI `31930900200`. Its pre-amendment independent-assurance language remains historical; the packet closes as `Implemented — Not Verified` under the current Completion Governance Amendment without claiming optional assurance.
+Control Room also reconciles the already-merged Slice 4.6 packet to its true final PR #171 candidate `dc17514ef9aed2dd37022b8bb121feb946bbcbf4`, merge `3cef29d8ce300154a8d73a262ec7a20252a49db6`, exact-head CI `31929740885`, and post-merge CI `31930900200`. Its pre-amendment independent-assurance language remains historical; the packet closes as `Implemented — Not Verified` under the current Completion Governance Amendment without claiming optional assurance. The five completed Feature IDs are checked in the canonical tracker, bringing the current tracker to 175/438 and RFx Core to 23/41.
 
-Before RFx Slice 4.7 activation, Control Room likewise closes the stale active ownership for `WP-RFX-42-ISS006-CORRECT-01` against its already-merged PR #201 final head `be99ecec42b28b8d1d36ecdf5010f73377f23126`, merge `6c5fe65e69abeaa21c9f3b14adce43ca1e2f7cc7`, exact-head CI `31859756636`, and post-merge CI `31860051714`. This removes overlapping RFx path ownership without changing the already-recorded `RFX-FEATURE-ISS-006` disposition or tracker arithmetic.
+Before RFx Slice 4.7 activation, Control Room likewise closes the stale active ownership for `WP-RFX-42-ISS006-CORRECT-01` against its already-merged PR #201 final head `be99ecec42b28b8d1d36ecdf5010f73377f23126`, merge `6c5fe65e69abeaa21c9f3b14adce43ca1e2f7cc7`, exact-head CI `31859756636`, and post-merge CI `31860051714`. This removes overlapping RFx path ownership and rebinds `RFX-FEATURE-ISS-006` from the superseded defective PR #163 candidate to the corrected PR #201 implementation without changing its already-checked tracker state.
 
 Control Room PR #232 records four exact-base activation epochs at corrected merged main `3830577e14b7b1bc6878965d26369529de2ebbbb`: `rfx-47-2026-08-18`, `mobile-exchange-stage4-resources-2026-08-18`, `mobile-exchange-stage4-intelligence-2026-08-18`, and `mobile-exchange-stage4-capabilities-2026-08-18`. These lanes own disjoint packet paths. The Opportunities Stage 4 adapter remains inactive until RFx Slices 4.7–4.10 close; Capabilities matching, all Stage 5 packets, and Stage 6 remain inactive behind their declared dependencies.
 

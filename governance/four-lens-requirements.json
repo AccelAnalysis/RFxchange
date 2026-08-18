@@ -1157,8 +1157,8 @@
       "legacyClassification": "Previously accepted — independent assurance pending",
       "implementation": {
         "actor": "github:AccelAnalysis",
-        "pr": 163,
-        "sha": "d18986544881c9e81fb9a37858bccb35109724c4"
+        "pr": 201,
+        "sha": "be99ecec42b28b8d1d36ecdf5010f73377f23126"
       },
       "acceptance": {
         "lane": null,
@@ -1169,7 +1169,8 @@
           "docs/architecture/WAVE_4_SLICE_4_2.md"
         ]
       },
-      "deferral": null
+      "deferral": null,
+      "clarification": "PR #201 corrected the preserved PR #163 locality, currency, chronology, replay-ordering, and transaction-binding findings, passed exact-head and post-merge CI, and merged as Implemented — Not Verified; the original independent audit remains historical and no later optional assurance event is claimed."
     },
     {
       "id": "RFX-FEATURE-ISS-007",

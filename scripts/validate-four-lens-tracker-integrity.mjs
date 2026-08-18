@@ -8,6 +8,11 @@ const read = (value) => fs.readFileSync(path.join(root, value), "utf8");
 
 const requirements = JSON.parse(read("governance/four-lens-requirements.json"));
 const tracker = read("docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md");
+const trackerChecklist = tracker.split("## Feature-ID checklist")[1] ?? "";
+const allTrackerEntries = [...trackerChecklist.matchAll(/- \[([ x])\] `([A-Z]+-\d+)`/g)].map((match) => ({
+  id: match[2],
+  done: match[1] === "x",
+}));
 const rfxSection = tracker.match(/### 4 - RFx Core([\s\S]*?)### 5 - Trust & Engagement/)?.[1] ?? "";
 const trackerEntries = [...rfxSection.matchAll(/- \[([ x])\] `([A-Z]+-\d+)`/g)].map((match) => ({
   id: match[2],
@@ -15,6 +20,13 @@ const trackerEntries = [...rfxSection.matchAll(/- \[([ x])\] `([A-Z]+-\d+)`/g)].
 }));
 
 assert.equal(trackerEntries.length, 41, "Canonical tracker must retain exactly 41 RFx Core Feature IDs");
+assert.equal(allTrackerEntries.length, 438, "Canonical tracker must retain exactly 438 Feature IDs");
+const totalDone = allTrackerEntries.filter((entry) => entry.done).length;
+assert.match(
+  tracker,
+  new RegExp(`\\*\\*438 total · ${totalDone} Done · ${438 - totalDone} Not Started\\*\\*`),
+  "Canonical tracker summary arithmetic does not match its checkboxes",
+);
 
 const historicalDone = new Set([
   "ACQ-009",
@@ -75,6 +87,18 @@ for (const entry of trackerEntries.filter((candidate) => candidate.done && !hist
   }
 }
 
+for (const entry of trackerEntries) {
+  const requirement = requirementByFeatureId.get(entry.id);
+  assert.equal(
+    entry.done,
+    completionStatuses.has(requirement.status),
+    `${entry.id} tracker state must match its terminal Four-Lens implementation status`,
+  );
+}
+
+const rfxDone = trackerEntries.filter((entry) => entry.done).length;
+assert.match(tracker, new RegExp(`RFx Core: \\*\\*${rfxDone}\\/41\\*\\*`), "RFx Core summary arithmetic does not match its checkboxes");
+
 console.log(
-  `Four-Lens tracker integrity validated: ${historicalDone.size} frozen pre-authority RFx completions; later completions may be Implemented — Not Verified or optionally Verified.`,
+  `Four-Lens tracker integrity validated: ${totalDone}/438 total and ${rfxDone}/41 RFx Core; terminal requirement status matches every RFx checkbox.`,
 );

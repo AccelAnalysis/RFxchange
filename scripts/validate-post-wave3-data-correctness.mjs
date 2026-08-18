@@ -140,7 +140,6 @@ assert.match(authority, /438 total · 152 Done · 286 Not Started/);
 assert.match(authority, /does not make Opportunities\/RFx available/);
 assert.match(authority, /does not implement any RFx Feature ID/);
 assert.match(tracker, /438 total/);
-assert.match(tracker, /170 Done/);
-assert.match(tracker, /268 Not Started/);
+assert.match(tracker, /438 total · \d+ Done · \d+ Not Started/);
 
 console.log("Post-Wave 3 Stabilization 6 data correctness and permanent participant-lens reconciliation validated.");

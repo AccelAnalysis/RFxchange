@@ -55,6 +55,6 @@ Fresh exact-head CI, emulator, configured-browser, accessibility, five-locale va
 
 ## Four-Lens accounting and stop boundary
 
-The canonical Master Build Tracker remains **438 total · 170 Done · 268 Not Started**, with Wave 4 RFx Core **18/41**. The five Slice 4.6 tracker Feature IDs remain unchecked until Independent Acceptance. Their Four-Lens requirement records are `Implemented — Not Verified`, with Independent Acceptance as the acceptance lane.
+Control Room reconciliation records the five Slice 4.6 Feature IDs as terminal **Implemented — Not Verified** under the superseding Completion Governance Amendment. The canonical Master Build Tracker is therefore **438 total · 175 Done · 263 Not Started**, with Wave 4 RFx Core **23/41**. Optional Independent Acceptance was not performed and no `Verified` label is claimed.
 
-Lane 02 does not promote these features to `Verified`, does not change tracker completion, and does not activate Lane 06. Slice 4.7 gap-resolution/teaming runtime, Slice 4.8 response runtime, Slice 4.9 submission/handoff, Slice 4.10 education and later RFx lifecycle work remain outside this reconciliation.
+Lane 02 does not promote these features to `Verified` and does not activate Lane 06. Slice 4.7 gap-resolution/teaming runtime, Slice 4.8 response runtime, Slice 4.9 submission/handoff, Slice 4.10 education and later RFx lifecycle work remain outside this reconciliation.
