@@ -155,6 +155,8 @@ Before RFx Slice 4.7 activation, Control Room likewise closes the stale active o
 
 Control Room PR #232 records four exact-base activation epochs at corrected merged main `3830577e14b7b1bc6878965d26369529de2ebbbb`: `rfx-47-2026-08-18`, `mobile-exchange-stage4-resources-2026-08-18`, `mobile-exchange-stage4-intelligence-2026-08-18`, and `mobile-exchange-stage4-capabilities-2026-08-18`. These lanes own disjoint packet paths. The Opportunities Stage 4 adapter remains inactive until RFx Slices 4.7–4.10 close; Capabilities matching, all Stage 5 packets, and Stage 6 remain inactive behind their declared dependencies.
 
+Slice 4.7 documentation-first inspection identified two exact consumers needed by its already-declared acceptance: the five `src/i18n/messages/rfx/**` catalogs for localized teaming copy and `app/acquisition/continue/page.tsx` for the final hop from an already bound `team-invitation` acquisition context to the packet-owned invitation review route. Control Room narrowly assigns those paths to `WP-MOBILE-EXCHANGE-RFX-47-01` for those purposes only. The amendment grants no acquisition attachment, account, organization, response, referral, commercial, or cross-lens authority; the continuation must preserve all existing activation gates and may neither attach nor accept an invitation.
+
 ## Stage 1 integrated contract family
 
 The integrated shared architecture now covers:
