@@ -196,6 +196,9 @@ export function ExistingWorkspaceFoundation({
     homeMarkerId: homeMarker.id,
     activeLens: "intelligence",
   });
+  const activeLens = spatialContext.activeLens === "capabilities"
+    ? "intelligence"
+    : spatialContext.activeLens;
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const resultListRef = useRef<HTMLUListElement | null>(null);
   const networkSearchInputRef = useRef<HTMLInputElement | null>(null);
@@ -263,7 +266,7 @@ export function ExistingWorkspaceFoundation({
     selectedOrganizationId,
   );
   const exchangeRoomActions = projectExchangeRoomActions({
-    activeLens: spatialContext.activeLens,
+    activeLens,
     viewerOrganizationId: organizationId,
     selectedOrganizationId,
     selectedOrganizationIsOfficialResourceProvider,
@@ -275,6 +278,7 @@ export function ExistingWorkspaceFoundation({
   const networkMarkers = [...organizationsByMarkerId.values()].map((organization) => organization.marker);
 
   const selectLens = useCallback((lens: ParticipantLensId) => {
+    if (lens === "capabilities") return;
     updateSpatialContext((current) => {
       if (current.activeLens === lens) return current;
       return Object.freeze({
@@ -616,7 +620,7 @@ export function ExistingWorkspaceFoundation({
 
   return (
     <ParticipantShell
-      activeItem={spatialContext.activeLens}
+      activeItem={activeLens}
       unavailableUtilityIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_UTILITIES}
     >
       <SpatialWorkspace ariaLabel={t("networkWorkspace.ariaLabel")}>
@@ -771,7 +775,7 @@ export function ExistingWorkspaceFoundation({
         ) : null}
 
         <ExchangeRoomActionController
-          activeLens={spatialContext.activeLens}
+          activeLens={activeLens}
           actions={exchangeRoomActions}
           onNetworkFocus={focusNetwork}
           placement="workspace"
@@ -817,7 +821,7 @@ export function ExistingWorkspaceFoundation({
           )}
           actionRail={(
             <ExchangeRoomActionController
-              activeLens={spatialContext.activeLens}
+              activeLens={activeLens}
               actions={exchangeRoomActions}
               onNetworkFocus={focusNetwork}
               placement="sheet"

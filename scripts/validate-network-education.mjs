@@ -15,7 +15,7 @@ const architecture = read("docs/architecture/WAVE_3_SLICE_3_8.md");
 const workflow = read(".github/workflows/ci.yml");
 
 for (const key of ["quick-start", "business", "issuer", "resource-provider"]) assert.ok(catalog.includes(`key: "${key}"`));
-for (const routeValue of ["/organization-profile", "/geography/canvas", "/referrals", "/provider-application", "/resources"]) assert.ok(catalog.includes(`"${routeValue}"`));
+for (const routeValue of ["/organization-profile", "/geography/canvas", "/referrals?intent=manage", "/provider-application", "/resources"]) assert.ok(catalog.includes(`"${routeValue}"`));
 assert.match(catalog, /"issuer-rfx"[\s\S]*?"planned", null/);
 assert.match(catalog, /"business-credibility"[\s\S]*?"planned", null/);
 assert.match(service, /networkEducationProgressId\(userId: string, organizationId: string, membershipId: string\)/);

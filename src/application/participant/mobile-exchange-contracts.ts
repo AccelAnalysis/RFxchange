@@ -18,7 +18,7 @@ import type {
   ParticipantSpatialLensState,
 } from "./participant-spatial-context.ts";
 
-export const MOBILE_EXCHANGE_CONTRACT_VERSION = 1 as const;
+export const MOBILE_EXCHANGE_CONTRACT_VERSION = 2 as const;
 
 export const EXCHANGE_SHEET_SNAP_POINTS = Object.freeze([
   "peek",
@@ -1121,7 +1121,7 @@ export function mobileExchangeStateFromParticipantSpatialContext(
     "opportunities-rfx": continuityState(context.lensState["opportunities-rfx"]),
     resources: continuityState(context.lensState.resources),
     intelligence: continuityState(context.lensState.intelligence),
-    referrals: continuityState(context.lensState.referrals),
+    capabilities: continuityState(context.lensState.capabilities),
   });
 
   return Object.freeze({

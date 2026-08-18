@@ -1,0 +1,42 @@
+{
+  "actionsLabel": "Actions de l’Exchange",
+  "actions": {
+    "opportunities.create-view.own": "Créer un RFx",
+    "opportunities.create-view.external": "Voir le détail du RFx",
+    "opportunities.manage-respond.own": "Modifier / Gérer le RFx",
+    "opportunities.manage-respond.external": "Répondre",
+    "opportunities.team.own": "Inviter l’équipe",
+    "opportunities.team.external": "Équipe",
+    "opportunities.watch.own": "Suivre / Surveiller",
+    "opportunities.watch.external": "Surveiller",
+    "resources.offer-request.own": "Proposer une ressource",
+    "resources.offer-request.external": "Demander une ressource",
+    "resources.manage-view.own": "Modifier la ressource",
+    "resources.manage-view.external": "Voir le détail de la ressource",
+    "resources.share.own": "Partager",
+    "resources.share.external": "Partager",
+    "resources.save.own": "Enregistrer / Archiver",
+    "resources.save.external": "Enregistrer",
+    "intelligence.add-view.own": "Ajouter un éclairage",
+    "intelligence.add-view.external": "Voir le détail de l’éclairage",
+    "intelligence.edit-note.own": "Modifier l’éclairage",
+    "intelligence.edit-note.external": "Ajouter une note",
+    "intelligence.compare.own": "Comparer",
+    "intelligence.compare.external": "Comparer",
+    "intelligence.track.own": "Suivre",
+    "intelligence.track.external": "Suivre / S’abonner",
+    "capabilities.manage-view.own": "Gérer les capacités",
+    "capabilities.manage-view.external": "Voir les capacités",
+    "capabilities.classify-match.own": "IA vers AMACS",
+    "capabilities.classify-match.external": "Associer au RFx",
+    "capabilities.evidence-refer.own": "Ajouter / Modifier les preuves",
+    "capabilities.evidence-refer.external": "Recommander",
+    "capabilities.gaps-save.own": "Lacunes de capacité",
+    "capabilities.gaps-save.external": "Enregistrer / Suivre"
+  },
+  "disabledReasons": {
+    "not-operational": "Cette fonction ne dispose pas d’un gestionnaire opérationnel dans l’Exchange actuel.",
+    "not-applicable": "Cette fonction ne s’applique pas à l’organisation ou au contexte de marché actuel.",
+    "not-authorized": "L’état autorisé actuel de l’Exchange ne permet pas cette fonction."
+  }
+}

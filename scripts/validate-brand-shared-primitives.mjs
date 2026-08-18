@@ -151,18 +151,23 @@ assert.ok(
     !participantNavigation.includes('fetch("/api/participant-shell"'),
   "The persistent shell must reuse already-authorized page context instead of repeating session and organization hydration.",
 );
+const participantLensDefinitions = participantRegistry.slice(
+  participantRegistry.indexOf("export const PARTICIPANT_LENSES"),
+);
 assert.ok(
-  participantRegistry.indexOf('id: "opportunities-rfx"') <
-    participantRegistry.indexOf('id: "resources"') &&
-    participantRegistry.indexOf('id: "resources"') <
-      participantRegistry.indexOf('id: "intelligence"') &&
-    participantRegistry.indexOf('id: "intelligence"') <
-      participantRegistry.indexOf('id: "referrals"'),
+  participantLensDefinitions.indexOf('id: "opportunities-rfx"') <
+    participantLensDefinitions.indexOf('id: "resources"') &&
+    participantLensDefinitions.indexOf('id: "resources"') <
+      participantLensDefinitions.indexOf('id: "intelligence"') &&
+    participantLensDefinitions.indexOf('id: "intelligence"') <
+      participantLensDefinitions.indexOf('id: "capabilities"'),
   "The governed participant lenses are not in the required order.",
 );
 assert.ok(
   participantRegistry.includes('href: "/opportunities"') &&
     participantRegistry.includes('availability: "enabled"') &&
+    participantRegistry.includes('id: "capabilities"') &&
+    participantRegistry.includes('availability: "unavailable"') &&
     participantNavigation.includes("PARTICIPANT_LENSES.map") &&
     !participantRegistry.includes('id: "network"'),
   "The persistent shell must route the now-authorized Opportunities/RFx runtime without restoring Network as a peer lens.",

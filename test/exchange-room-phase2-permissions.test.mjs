@@ -9,147 +9,107 @@ const source = readFileSync(
   "utf8",
 );
 
-const activeCapable = [
-  "opportunities.find",
-  "opportunities.create-rfx",
-  "resources.find-providers",
-  "resources.browse-resources",
-  "resources.my-requests",
-  "resources.provider-status",
-  "intelligence.organizations",
-  "intelligence.capabilities",
-];
-
-const gray = [
-  "opportunities.pursue-respond",
-  "opportunities.team",
-  "intelligence.locations",
-  "intelligence.layers",
-  "referrals.new",
-  "referrals.sent",
-  "referrals.received",
-  "referrals.starred",
-];
-
-const resourcesInput = Object.freeze({
-  activeLens: "resources",
-  viewerOrganizationId: "organization-viewer",
-  selectedOrganizationId: "organization-viewer",
-  selectedOrganizationIsOfficialResourceProvider: false,
-  openPlatformActionsAuthorized: true,
-  actionAuthorization: Object.freeze({
-    rfxCreate: false,
-    referralManage: false,
-    resourceManage: false,
-  }),
+const authorization = Object.freeze({
+  rfxCreate: false,
+  referralManage: false,
+  resourceManage: false,
 });
 
-test("privileged Phase 2 actions fail closed without exact permission", () => {
+function input(activeLens, overrides = {}) {
+  return Object.freeze({
+    activeLens,
+    viewerOrganizationId: "organization-viewer",
+    selectedOrganizationId: "organization-viewer",
+    selectedOrganizationIsOfficialResourceProvider: false,
+    openPlatformActionsAuthorized: true,
+    actionAuthorization: authorization,
+    ...overrides,
+  });
+}
+
+test("successor privileged actions fail closed without their exact permission", () => {
   assert.match(source, /actionAuthorization\?\.rfxCreate \?\? false/);
   assert.match(source, /actionAuthorization\?\.referralManage \?\? false/);
   assert.match(source, /actionAuthorization\?\.resourceManage \?\? false/);
-  assert.match(source, /id: "resources\.my-requests"[^\n]*authorization: "open-platform-referral-manage"/);
-  assert.match(source, /id: "resources\.provider-status"[^\n]*authorization: "open-platform-resource-manage"/);
-});
 
-test("Resources discovery remains OPEN while private request and provider management retain stronger authority", () => {
-  const actions = projectExchangeRoomActions(resourcesInput);
-  assert.equal(actions.length, 4);
-  assert.deepEqual(actions.map((action) => action.id), [
-    "resources.find-providers",
-    "resources.browse-resources",
-    "resources.my-requests",
-    "resources.provider-status",
+  const actions = projectExchangeRoomActions(input("opportunities-rfx"));
+  assert.deepEqual(actions.map(({ id }) => id), [
+    "opportunities.create-view",
+    "opportunities.manage-respond",
+    "opportunities.team",
+    "opportunities.watch",
   ]);
-
-  const [findProviders, browseResources, myRequests, providerStatus] = actions;
-  assert.equal(findProviders?.authorization, "open-platform");
-  assert.equal(findProviders?.authorized, true);
-  assert.equal(findProviders?.availability, "active");
-  assert.equal(browseResources?.authorization, "open-platform");
-  assert.equal(browseResources?.authorized, true);
-  assert.equal(browseResources?.availability, "active");
-
-  assert.equal(myRequests?.authorization, "open-platform-referral-manage");
-  assert.equal(myRequests?.authorized, false);
-  assert.equal(myRequests?.availability, "disabled");
-  assert.equal(myRequests?.disabledReason, "not-authorized");
-
-  assert.equal(providerStatus?.authorization, "open-platform-resource-manage");
-  assert.equal(providerStatus?.applicable, true);
-  assert.equal(providerStatus?.authorized, false);
-  assert.equal(providerStatus?.availability, "disabled");
-  assert.equal(providerStatus?.disabledReason, "not-authorized");
+  assert.equal(actions[0].variant, "own");
+  assert.equal(actions[0].authorized, false);
+  assert.equal(actions[0].availability, "disabled");
+  assert.equal(actions[0].disabledReason, "not-authorized");
+  assert.equal(actions[0].resolvedHandler, null);
 });
 
-test("Resources management actions activate only with their own current server-derived permission", () => {
-  const actions = projectExchangeRoomActions({
-    ...resourcesInput,
-    actionAuthorization: Object.freeze({
-      rfxCreate: false,
-      referralManage: true,
-      resourceManage: true,
-    }),
-  });
-  assert.equal(actions[2]?.availability, "active");
-  assert.equal(actions[3]?.availability, "active");
+test("Create RFx activates only with current issuer permission while external detail is distinct", () => {
+  const own = projectExchangeRoomActions(input("opportunities-rfx", {
+    actionAuthorization: { ...authorization, rfxCreate: true },
+  }));
+  assert.equal(own[0].labelKey, "opportunities.create-view.own");
+  assert.deepEqual(own[0].resolvedHandler, { kind: "href", href: "/opportunities/manage" });
 
-  const externalSelection = projectExchangeRoomActions({
-    ...resourcesInput,
+  const external = projectExchangeRoomActions(input("opportunities-rfx", {
     selectedOrganizationId: "organization-other",
-    actionAuthorization: Object.freeze({
-      rfxCreate: false,
-      referralManage: true,
-      resourceManage: true,
-    }),
+    currentOpportunityReference: "RFX 001",
+  }));
+  assert.equal(external[0].variant, "external");
+  assert.equal(external[0].labelKey, "opportunities.create-view.external");
+  assert.deepEqual(external[0].resolvedHandler, {
+    kind: "href",
+    href: "/opportunities/RFX%20001",
   });
-  assert.equal(externalSelection[3]?.applicable, false);
-  assert.equal(externalSelection[3]?.availability, "disabled");
-  assert.equal(externalSelection[3]?.disabledReason, "not-applicable");
 });
 
-test("closed or restricted participants see every Resources action fail closed", () => {
-  const actions = projectExchangeRoomActions({
-    ...resourcesInput,
+test("Resources keeps own management disabled and exposes only a real authorized external detail", () => {
+  const own = projectExchangeRoomActions(input("resources", {
+    actionAuthorization: { ...authorization, resourceManage: true },
+  }));
+  assert.equal(own.length, 4);
+  assert.ok(own.every((action) => action.availability === "disabled"));
+
+  const external = projectExchangeRoomActions(input("resources", {
+    selectedOrganizationId: "organization-provider",
+    selectedOrganizationIsOfficialResourceProvider: true,
+  }));
+  assert.equal(external[1].id, "resources.manage-view");
+  assert.equal(external[1].labelKey, "resources.manage-view.external");
+  assert.deepEqual(external[1].resolvedHandler, {
+    kind: "href",
+    href: "/resources?organization=organization-provider&provider=organization-provider",
+  });
+});
+
+test("closed or restricted participants cannot activate a successor action", () => {
+  const actions = projectExchangeRoomActions(input("resources", {
+    selectedOrganizationId: "organization-provider",
+    selectedOrganizationIsOfficialResourceProvider: true,
     openPlatformActionsAuthorized: false,
-    actionAuthorization: Object.freeze({
-      rfxCreate: true,
-      referralManage: true,
-      resourceManage: true,
-    }),
-  });
-  for (const action of actions) {
-    assert.equal(action.authorized, false, action.id);
-    assert.equal(action.availability, "disabled", action.id);
-    assert.equal(action.disabledReason, "not-authorized", action.id);
-    assert.equal(action.resolvedHandler, null, action.id);
-  }
+    actionAuthorization: { rfxCreate: true, referralManage: true, resourceManage: true },
+  }));
+  const operational = actions.find(({ id }) => id === "resources.manage-view");
+  assert.equal(operational.authorized, false);
+  assert.equal(operational.availability, "disabled");
+  assert.equal(operational.disabledReason, "not-authorized");
+  assert.equal(operational.resolvedHandler, null);
 });
 
-test("Intelligence actions require Network discovery", () => {
-  assert.match(source, /networkDiscoveryAvailable \?\? false/);
-});
-
-test("the eight ACTIVE-capable positions remain operational entries", () => {
-  assert.equal(activeCapable.length, 8);
-  for (const id of activeCapable) {
-    const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    assert.match(source, new RegExp(`id: "${escaped}"[^\\n]*operational: true`), id);
-  }
-});
-
-test("the eight GRAY positions stay non-operational with no handler", () => {
-  assert.equal(gray.length, 8);
-  for (const id of gray) {
-    const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    assert.match(
-      source,
-      new RegExp(`id: "${escaped}"[^\\n]*operational: false[^\\n]*handler: null`),
-      id,
-    );
-  }
-});
-
-test("New Referral remains individually disabled until an adapter opens the real composer", () => {
-  assert.match(source, /id: "referrals\.new"[^\n]*operational: false[^\n]*handler: null/);
+test("Capabilities exposes four governed positions without referral handlers or fabricated composition", () => {
+  const actions = projectExchangeRoomActions(input("capabilities", {
+    selectedOrganizationId: "organization-other",
+    actionAuthorization: { rfxCreate: true, referralManage: true, resourceManage: true },
+  }));
+  assert.deepEqual(actions.map(({ id }) => id), [
+    "capabilities.manage-view",
+    "capabilities.classify-match",
+    "capabilities.evidence-refer",
+    "capabilities.gaps-save",
+  ]);
+  assert.ok(actions.every((action) => action.availability === "disabled"));
+  assert.ok(actions.every((action) => action.resolvedHandler === null));
+  assert.ok(actions.every((action) => !action.id.startsWith("referrals.")));
 });

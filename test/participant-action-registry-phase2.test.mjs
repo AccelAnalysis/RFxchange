@@ -13,10 +13,12 @@ const expectedIds = [
 ];
 
 test("Phase 2 freezes exactly sixteen stable action identities", () => {
-  const source = read("src/application/participant/exchange-room-actions.ts");
-  for (const id of expectedIds) assert.ok(source.includes(`id: "${id}"`), id);
-  assert.equal((source.match(/canonicalLabel: "/g) ?? []).length, 16);
-  assert.equal((source.match(/order: [1234],/g) ?? []).length, 16);
+  const source = read("src/application/participant/mobile-exchange-stage2-legacy.ts");
+  for (const id of expectedIds) assert.ok(source.includes(`"${id}"`), id);
+  assert.match(source, /not a current runtime registry/);
+  const currentPrefix = read("src/application/participant/exchange-room-actions.ts")
+    .split("export const LEGACY_EXCHANGE_ROOM_ACTION_IDS")[0];
+  assert.doesNotMatch(currentPrefix, /referrals\./);
 });
 
 test("five governed locale catalogs cover the exact sixteen actions", () => {

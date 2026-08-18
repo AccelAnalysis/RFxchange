@@ -95,7 +95,7 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
     ? acquisition.kind === "provider"
       ? "/resources"
       : acquisition.kind === "referral"
-        ? "/referrals"
+        ? "/referrals?intent=manage"
         : "/exchange"
     : canonicalWorkspace;
   const continuationLabel = access.state.lifecycleState === "open-platform"

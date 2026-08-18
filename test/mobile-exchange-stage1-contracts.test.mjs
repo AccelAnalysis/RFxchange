@@ -36,7 +36,7 @@ const lensState = (search, listScrollTop) => ({
 
 function spatialContext() {
   return {
-    version: 1,
+    version: 2,
     scope: {
       participantId: "participant-1",
       membershipId: "membership-1",
@@ -61,8 +61,9 @@ function spatialContext() {
       "opportunities-rfx": lensState("opportunity", 10),
       resources: lensState("resource", 20),
       intelligence: lensState("organization", 30),
-      referrals: lensState("referral", 40),
+      capabilities: lensState("capability", 40),
     },
+    workflowState: { referrals: lensState("referral", 50) },
     panelOpen: true,
     originLens: "resources",
     returnHref: "/resources",
@@ -109,25 +110,25 @@ test("every governed lens exposes exactly four stable Phase 2 action positions",
 test("the mobile action rail preserves operational, applicable, and authorized as separate facts", () => {
   const lens = "opportunities-rfx";
   const rail = mobileLensActionRail(lens, [
-    projection("opportunities.find", lens, 1, {
+    projection("opportunities.create-view", lens, 1, {
       operational: false,
       availability: "disabled",
       disabledReason: "not-operational",
       resolvedHandler: null,
     }),
-    projection("opportunities.create-rfx", lens, 2, {
+    projection("opportunities.manage-respond", lens, 2, {
       applicable: false,
       availability: "disabled",
       disabledReason: "not-applicable",
       resolvedHandler: null,
     }),
-    projection("opportunities.pursue-respond", lens, 3, {
+    projection("opportunities.team", lens, 3, {
       authorized: false,
       availability: "disabled",
       disabledReason: "not-authorized",
       resolvedHandler: null,
     }),
-    projection("opportunities.team", lens, 4),
+    projection("opportunities.watch", lens, 4),
   ]);
 
   assert.equal(rail.placement, "sheet-top");
@@ -147,10 +148,10 @@ test("the mobile action rail preserves operational, applicable, and authorized a
 test("the mobile action rail rejects duplicate, substituted, or displaced registry entries", () => {
   const lens = "opportunities-rfx";
   const canonical = [
-    projection("opportunities.find", lens, 1),
-    projection("opportunities.create-rfx", lens, 2),
-    projection("opportunities.pursue-respond", lens, 3),
-    projection("opportunities.team", lens, 4),
+    projection("opportunities.create-view", lens, 1),
+    projection("opportunities.manage-respond", lens, 2),
+    projection("opportunities.team", lens, 3),
+    projection("opportunities.watch", lens, 4),
   ];
   assert.equal(mobileLensActionRail(lens, canonical).actions.length, 4);
 
@@ -161,7 +162,7 @@ test("the mobile action rail rejects duplicate, substituted, or displaced regist
   assert.throws(
     () => mobileLensActionRail(lens, [
       canonical[0],
-      projection("opportunities.team", lens, 2),
+      projection("opportunities.watch", lens, 2),
       canonical[2],
       canonical[3],
     ]),
@@ -169,7 +170,7 @@ test("the mobile action rail rejects duplicate, substituted, or displaced regist
   );
   assert.throws(
     () => mobileLensActionRail(lens, [
-      projection("opportunities.find", lens, 2),
+      projection("opportunities.create-view", lens, 2),
       canonical[1],
       canonical[2],
       canonical[3],
@@ -286,8 +287,8 @@ test("the Stage 1 adapter preserves spatial continuity without claiming server g
   assert.equal(state.sheet.sheetSnapPoint, "partial");
   assert.equal(state.sheet.sheetScrollPosition, 30);
 
-  const changed = transitionMobileExchangeLens(state, "referrals");
-  assert.equal(changed.activeLens, "referrals");
+  const changed = transitionMobileExchangeLens(state, "capabilities");
+  assert.equal(changed.activeLens, "capabilities");
   assert.strictEqual(changed.selection, state.selection);
   assert.strictEqual(changed.mapCamera, state.mapCamera);
   assert.strictEqual(changed.lensState, state.lensState);

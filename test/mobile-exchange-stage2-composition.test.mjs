@@ -9,6 +9,7 @@ import {
   serializeParticipantSpatialContext,
 } from "../src/application/participant/participant-spatial-context.ts";
 import { PARTICIPANT_LENS_IDS } from "../src/application/participant/participant-lens-registry.ts";
+import { MOBILE_EXCHANGE_STAGE2_LENS_IDS } from "../src/application/participant/mobile-exchange-stage2-legacy.ts";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -48,11 +49,17 @@ test("MOB-03 exposes exactly four persistent bottom lenses in governed order wit
     read(paths.navigation),
     read(paths.navigationCss),
   ]);
-  assert.deepEqual([...PARTICIPANT_LENS_IDS], [
+  assert.deepEqual([...MOBILE_EXCHANGE_STAGE2_LENS_IDS], [
     "opportunities-rfx",
     "resources",
     "intelligence",
     "referrals",
+  ]);
+  assert.deepEqual([...PARTICIPANT_LENS_IDS], [
+    "opportunities-rfx",
+    "resources",
+    "intelligence",
+    "capabilities",
   ]);
   assert.match(navigation, /data-mobile-lens-navigation="persistent-bottom"/);
   assert.match(navigation, /PARTICIPANT_LENSES\.map/);

@@ -5,10 +5,11 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
 
-test("the Exchange Room uses spatial activeLens instead of whole-lens unavailability", () => {
+test("the Exchange Room uses one effective spatial lens while unavailable Capabilities stays non-current", () => {
   const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
-  assert.match(workspace, /activeItem=\{spatialContext\.activeLens\}/);
+  assert.match(workspace, /activeItem=\{activeLens\}/);
+  assert.match(workspace, /spatialContext\.activeLens === "capabilities"[\s\S]*\? "intelligence"/);
   assert.match(workspace, /useExchangeRoomLensController\(selectLens\)/);
   assert.doesNotMatch(workspace, /unavailableLensIds=/);
   assert.doesNotMatch(workspace, /const MAP_ONLY_UNAVAILABLE_LENSES/);
@@ -24,7 +25,8 @@ test("permanent lens deep links are projected atomically from one spatial-store 
   assert.match(navigation, /intelligenceHref: storedIntelligenceHref\(\)/);
   assert.match(navigation, /opportunityHref: participantSpatialLensHref\("opportunities-rfx"\)/);
   assert.match(navigation, /resourceHref: participantSpatialLensHref\("resources"\)/);
-  assert.match(navigation, /referralHref: participantSpatialLensHref\("referrals"\)/);
+  assert.doesNotMatch(navigation, /referralHref/);
+  assert.match(navigation, /Unavailable Capabilities lens cannot resolve a navigation href/);
   assert.match(navigation, /const serializedLensHrefs = useSyncExternalStore\([\s\S]*storedLensHrefSnapshot[\s\S]*DEFAULT_LENS_HREF_SNAPSHOT/);
   assert.equal((navigation.match(/useSyncExternalStore\(/g) ?? []).length, 1);
 });

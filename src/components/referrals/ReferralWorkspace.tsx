@@ -4,7 +4,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
-import type { ParticipantSpatialScope } from "../../application/participant/participant-spatial-context";
+import {
+  consumeLegacyReferralLensIntent,
+  type ParticipantSpatialScope,
+} from "../../application/participant/participant-spatial-context";
 import type { SenderReferralProjection, RecipientReferralProjection, ReferralStatus } from "../../domain/referrals/model";
 import {
   ExchangeSpatialScene,
@@ -47,6 +50,7 @@ interface ReferralWorkspaceProps {
   readonly requestedReferralId?: string | null;
   readonly requestedOrganizationId?: string | null;
   readonly preferOrganizationSelection?: boolean;
+  readonly legacyBareLensIntent?: boolean;
 }
 
 const REFERRAL_CREATE_SEND_STORAGE_KEY = "rfxchange:referral-create-and-send";
@@ -91,13 +95,13 @@ function browserSessionStorage(): Storage | null {
   }
 }
 
-export function ReferralWorkspace({ model, homeMarker, spatialScope, initialReferrals, organizations, commandRecoveryScope, requestedReferralId, requestedOrganizationId, preferOrganizationSelection = false }: ReferralWorkspaceProps) {
+export function ReferralWorkspace({ model, homeMarker, spatialScope, initialReferrals, organizations, commandRecoveryScope, requestedReferralId, requestedOrganizationId, preferOrganizationSelection = false, legacyBareLensIntent = false }: ReferralWorkspaceProps) {
   const { t } = useI18n();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startNavigation] = useTransition();
-  const [spatialContext, updateSpatialContext] = useParticipantSpatialContext({ scope: spatialScope, homeMarkerId: homeMarker.id, activeLens: "referrals" });
+  const [spatialContext, updateSpatialContext] = useParticipantSpatialContext({ scope: spatialScope, homeMarkerId: homeMarker.id, activeLens: "intelligence" });
   const [referrals, setReferrals] = useState(initialReferrals);
   const restoredReferralId = initialReferrals.some((referral) => referral.id === spatialContext.selection.relationshipId)
     ? spatialContext.selection.relationshipId
@@ -141,8 +145,14 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
     accessibleLocationLabel: organization.marker.accessibleLocationLabel,
   })), [organizations]);
   useEffect(() => {
-    if (panelRef.current) panelRef.current.scrollTop = spatialContext.lensState.referrals.listScrollTop;
-  }, [spatialContext.lensState.referrals.listScrollTop]);
+    if (!legacyBareLensIntent) return;
+    const storage = browserSessionStorage();
+    if (!storage || !consumeLegacyReferralLensIntent(storage, spatialScope)) return;
+    startNavigation(() => router.replace("/geography/canvas?lens=capabilities", { scroll: false }));
+  }, [legacyBareLensIntent, router, spatialScope]);
+  useEffect(() => {
+    if (panelRef.current) panelRef.current.scrollTop = spatialContext.workflowState.referrals.listScrollTop;
+  }, [spatialContext.workflowState.referrals.listScrollTop]);
   useEffect(() => {
     if (!preferOrganizationSelection || !requestedOrganizationId) return;
     const organization = organizations.find(
@@ -158,7 +168,6 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
     ) return;
     updateSpatialContext((current) => Object.freeze({
       ...current,
-      activeLens: "referrals" as const,
       selection: Object.freeze({
         organizationId: organization.organizationId,
         markerId: organization.marker.id,
@@ -182,7 +191,6 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
     ) return;
     updateSpatialContext((current) => Object.freeze({
       ...current,
-      activeLens: "referrals" as const,
       selection: Object.freeze({
         organizationId: other.organizationId,
         markerId: other.marker.id,
@@ -208,7 +216,6 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
     }
     updateSpatialContext((current) => Object.freeze({
       ...current,
-      activeLens: "referrals" as const,
       selection: Object.freeze({
         organizationId,
         markerId,
@@ -239,7 +246,6 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
     }
     updateSpatialContext((current) => Object.freeze({
       ...current,
-      activeLens: "referrals" as const,
       selection: Object.freeze({
         organizationId: other?.organizationId ?? spatialScope.organizationId,
         markerId: other?.marker.id ?? homeMarker.id,
@@ -247,9 +253,9 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
       }),
       panelOpen: true,
       originLens: current.activeLens,
-      lensState: Object.freeze({
-        ...current.lensState,
-        referrals: Object.freeze({ ...current.lensState.referrals, resultIndex }),
+      workflowState: Object.freeze({
+        ...current.workflowState,
+        referrals: Object.freeze({ ...current.workflowState.referrals, resultIndex }),
       }),
     }));
   }
@@ -409,7 +415,7 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
           focusedMarkerId={spatialContext.selection.markerId}
           onOrganizationMarkerSelect={selectOrganizationMarker}
           initialCamera={spatialContext.camera}
-          onCameraChange={(camera) => updateSpatialContext((current) => Object.freeze({ ...current, activeLens: "referrals" as const, camera }))}
+          onCameraChange={(camera) => updateSpatialContext((current) => Object.freeze({ ...current, camera }))}
           interactive
           showSearch={false}
           workspaceOverlay="right"
@@ -422,9 +428,9 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
             const listScrollTop = Math.max(0, Math.round(event.currentTarget.scrollTop));
             updateSpatialContext((current) => Object.freeze({
               ...current,
-              lensState: Object.freeze({
-                ...current.lensState,
-                referrals: Object.freeze({ ...current.lensState.referrals, listScrollTop }),
+              workflowState: Object.freeze({
+                ...current.workflowState,
+                referrals: Object.freeze({ ...current.workflowState.referrals, listScrollTop }),
               }),
             }));
           }}

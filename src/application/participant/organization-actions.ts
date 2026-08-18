@@ -45,7 +45,7 @@ export function projectOrganizationActions(input: Readonly<{
       availability: operationalActionsAvailable ? "available" as const : "unavailable" as const,
       href: operationalActionsAvailable
         ? self
-          ? "/referrals"
+          ? "/referrals?intent=manage"
           : `/referrals?organization=${encodeURIComponent(input.selectedOrganizationId)}`
         : null,
       reason: operationalActionsAvailable ? null : "exchange-action-unavailable" as const,

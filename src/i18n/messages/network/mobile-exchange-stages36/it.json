@@ -1,0 +1,42 @@
+{
+  "actionsLabel": "Azioni dell’Exchange",
+  "actions": {
+    "opportunities.create-view.own": "Crea RFx",
+    "opportunities.create-view.external": "Vedi dettagli RFx",
+    "opportunities.manage-respond.own": "Modifica / Gestisci RFx",
+    "opportunities.manage-respond.external": "Rispondi",
+    "opportunities.team.own": "Invita il team",
+    "opportunities.team.external": "Team",
+    "opportunities.watch.own": "Segui / Osserva",
+    "opportunities.watch.external": "Osserva",
+    "resources.offer-request.own": "Offri risorsa",
+    "resources.offer-request.external": "Richiedi risorsa",
+    "resources.manage-view.own": "Modifica risorsa",
+    "resources.manage-view.external": "Vedi dettagli risorsa",
+    "resources.share.own": "Condividi",
+    "resources.share.external": "Condividi",
+    "resources.save.own": "Salva / Archivia",
+    "resources.save.external": "Salva",
+    "intelligence.add-view.own": "Aggiungi analisi",
+    "intelligence.add-view.external": "Vedi dettagli analisi",
+    "intelligence.edit-note.own": "Modifica analisi",
+    "intelligence.edit-note.external": "Aggiungi nota",
+    "intelligence.compare.own": "Confronta",
+    "intelligence.compare.external": "Confronta",
+    "intelligence.track.own": "Monitora",
+    "intelligence.track.external": "Segui / Monitora",
+    "capabilities.manage-view.own": "Gestisci capacità",
+    "capabilities.manage-view.external": "Vedi capacità",
+    "capabilities.classify-match.own": "IA verso AMACS",
+    "capabilities.classify-match.external": "Abbina a RFx",
+    "capabilities.evidence-refer.own": "Aggiungi / Modifica prove",
+    "capabilities.evidence-refer.external": "Segnala",
+    "capabilities.gaps-save.own": "Lacune di capacità",
+    "capabilities.gaps-save.external": "Salva / Segui"
+  },
+  "disabledReasons": {
+    "not-operational": "Questa funzione non dispone di un gestore operativo nell’Exchange attuale.",
+    "not-applicable": "Questa funzione non si applica all’organizzazione o al contesto di mercato attuale.",
+    "not-authorized": "Lo stato autorizzato attuale dell’Exchange non consente questa funzione."
+  }
+}

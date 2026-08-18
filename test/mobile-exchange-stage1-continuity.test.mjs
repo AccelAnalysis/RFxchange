@@ -24,7 +24,7 @@ const lensState = (search, listScrollTop) => ({
 
 function spatialContext() {
   return {
-    version: 1,
+    version: 2,
     scope: {
       participantId: "participant-1",
       membershipId: "membership-1",
@@ -49,8 +49,9 @@ function spatialContext() {
       "opportunities-rfx": lensState("opportunity", 10),
       resources: lensState("resource", 20),
       intelligence: lensState("organization", 30),
-      referrals: lensState("referral", 40),
+      capabilities: lensState("capability", 40),
     },
+    workflowState: { referrals: lensState("referral", 50) },
     panelOpen: true,
     originLens: "resources",
     returnHref: "/resources",
@@ -90,8 +91,8 @@ test("the continuity adapter preserves current spatial state and adds exact scop
   assert.equal(searchFilter.resultSetId, null);
   assert.equal(searchFilter.cursor, null);
 
-  const changed = transitionMobileExchangeContinuityLens(state, "referrals");
-  assert.equal(changed.activeLens, "referrals");
+  const changed = transitionMobileExchangeContinuityLens(state, "capabilities");
+  assert.equal(changed.activeLens, "capabilities");
   assert.strictEqual(changed.scope, state.scope);
   assert.strictEqual(changed.selection, state.selection);
   assert.strictEqual(changed.mapCamera, state.mapCamera);
@@ -112,7 +113,7 @@ test("scope and schema changes invalidate the whole client continuity state", ()
   });
 
   const valid = reconcileMobileExchangeContinuity(state, {
-    expectedVersion: 1,
+    expectedVersion: 2,
     expectedScope,
     selectedObjectAuthorized: true,
   });
@@ -127,7 +128,7 @@ test("scope and schema changes invalidate the whole client continuity state", ()
     ["geographyId", "geo-2", "geography-changed"],
   ]) {
     const decision = reconcileMobileExchangeContinuity(state, {
-      expectedVersion: 1,
+      expectedVersion: 2,
       expectedScope: { ...expectedScope, [field]: value },
       selectedObjectAuthorized: true,
     });
@@ -137,7 +138,7 @@ test("scope and schema changes invalidate the whole client continuity state", ()
   }
 
   const schema = reconcileMobileExchangeContinuity(state, {
-    expectedVersion: 2,
+    expectedVersion: 3,
     expectedScope,
     selectedObjectAuthorized: true,
   });
@@ -148,7 +149,7 @@ test("scope and schema changes invalidate the whole client continuity state", ()
   assert.throws(
     () => migrateParticipantSpatialContextToMobileExchangeContinuity({
       ...spatialContext(),
-      version: 2,
+      version: 1,
     }),
     /Unsupported participant spatial context version/,
   );
@@ -167,7 +168,7 @@ test("negative selected-object revalidation removes stale focus but preserves sa
   });
 
   const decision = reconcileMobileExchangeContinuity(state, {
-    expectedVersion: 1,
+    expectedVersion: 2,
     expectedScope,
     selectedObjectAuthorized: false,
   });

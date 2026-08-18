@@ -125,7 +125,9 @@ const CANONICAL_LENS_HREFS: Readonly<Record<ParticipantLensId, string>> = Object
   "opportunities-rfx": "/opportunities",
   resources: "/resources",
   intelligence: "/geography/canvas",
-  referrals: "/referrals",
+  // Capabilities is structurally present but unavailable until its Stage 4 adapter merges.
+  // Continuity falls back inside the authorized map shell and never creates a placeholder route.
+  capabilities: "/geography/canvas",
 });
 
 function required(value: string, label: string): string {
