@@ -1059,8 +1059,13 @@ async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 
 
   await waitForExpression(
     cdp,
-    `document.querySelector('[data-exchange-room-action-grid]')?.dataset.activeLens === ${JSON.stringify(id)}
-      && document.querySelectorAll('[data-exchange-room-action-grid] [data-exchange-room-action]').length === 4`,
+    `(() => {
+      const grids = [...document.querySelectorAll('[data-exchange-room-action-grid]')];
+      return grids.length > 0 && grids.every((grid) => (
+        grid.dataset.activeLens === ${JSON.stringify(id)}
+        && grid.querySelectorAll('[data-exchange-room-action]').length === 4
+      ));
+    })()`,
     `${id} in-Room lens/action projection`,
   );
   const after = await exchangeRoomLensSnapshot(cdp);
@@ -2428,14 +2433,27 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
     });
     await navigate(cdp, `${baseUrl}/geography/canvas`);
     const mobile = await evaluate(cdp, `(() => {
-      const summary = document.querySelector('[data-participant-navigation] details > summary');
+      const bottomNavigation = document.querySelector('nav[data-mobile-lens-navigation="persistent-bottom"]');
+      const bottomNavigationRect = bottomNavigation?.getBoundingClientRect();
       const account = document.querySelector('[data-participant-utility="account"] > button');
       const avatar = account?.firstElementChild;
       const accountRect = account?.getBoundingClientRect();
       const avatarRect = avatar?.getBoundingClientRect();
       return {
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-        menuVisible: Boolean(summary && getComputedStyle(summary).display !== 'none'),
+        legacyLensMenuPresent: Boolean(document.querySelector('[data-participant-navigation] details')),
+        bottomNavigationVisible: Boolean(
+          bottomNavigation
+          && bottomNavigationRect
+          && getComputedStyle(bottomNavigation).display !== 'none'
+          && bottomNavigationRect.width > 0
+          && bottomNavigationRect.height >= 58
+        ),
+        bottomNavigationGap: bottomNavigationRect
+          ? window.innerHeight - bottomNavigationRect.bottom
+          : null,
+        bottomNavigationLenses: [...(bottomNavigation?.querySelectorAll('[data-participant-lens]') || [])]
+          .map((item) => item.dataset.participantLens),
         accountVisible: Boolean(account && getComputedStyle(account).display !== 'none'),
         reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
         accountAvatar: accountRect && avatarRect ? {
@@ -2447,7 +2465,18 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
       };
     })()`);
     assert.ok(mobile.overflow <= 0, `390px overflow: ${mobile.overflow}px.`);
-    assert.equal(mobile.menuVisible, true);
+    assert.equal(mobile.legacyLensMenuPresent, false);
+    assert.equal(mobile.bottomNavigationVisible, true);
+    assert.ok(
+      mobile.bottomNavigationGap !== null && Math.abs(mobile.bottomNavigationGap) <= 1,
+      `Mobile bottom navigation was not safe-area anchored (${mobile.bottomNavigationGap}px).`,
+    );
+    assert.deepEqual(mobile.bottomNavigationLenses, [
+      "opportunities-rfx",
+      "resources",
+      "intelligence",
+      "referrals",
+    ]);
     assert.equal(mobile.accountVisible, true);
     assert.equal(mobile.reducedMotion, true);
     assert.ok(mobile.accountAvatar?.hitWidth >= 44 && mobile.accountAvatar?.hitHeight >= 44);
@@ -2457,25 +2486,26 @@ async function runMobileAndLocales({ server, baseUrl, sessionCookie }) {
       await waitForExpression(cdp, `Boolean(document.querySelector('[data-map-ready="true"]'))`, "mobile configured map");
       spatialSheet = await evaluate(cdp, `(() => {
         const scene = document.querySelector('[data-map-ready="true"]');
-        const panel = document.querySelector('#organization-detail-panel')?.parentElement;
+        const panel = document.querySelector('[data-mobile-exchange-sheet]');
+        const navigation = document.querySelector('nav[data-mobile-lens-navigation="persistent-bottom"]');
         const sceneRect = scene?.getBoundingClientRect();
         const panelRect = panel?.getBoundingClientRect();
-        return sceneRect && panelRect ? {
+        const navigationRect = navigation?.getBoundingClientRect();
+        return sceneRect && panelRect && navigationRect ? {
           mapVisible: sceneRect.width > 300 && sceneRect.height > 500,
-          bottomGap: window.innerHeight - panelRect.bottom,
+          navigationGap: navigationRect.top - panelRect.bottom,
           sheetWidth: panelRect.width,
           sheetTop: panelRect.top,
         } : null;
       })()`);
       assert.ok(spatialSheet?.mapVisible, "Mobile bottom sheet obscured or removed the map.");
-      assert.ok(spatialSheet.bottomGap <= 10, `Mobile sheet was not bottom-anchored (${spatialSheet.bottomGap}px).`);
-      assert.ok(spatialSheet.sheetWidth <= 374, `Mobile sheet exceeded viewport-safe width (${spatialSheet.sheetWidth}px).`);
+      assert.ok(Math.abs(spatialSheet.navigationGap) <= 1, `Mobile sheet did not remain above bottom navigation (${spatialSheet.navigationGap}px).`);
+      assert.ok(spatialSheet.sheetWidth <= 390, `Mobile sheet exceeded viewport-safe width (${spatialSheet.sheetWidth}px).`);
       assert.ok(spatialSheet.sheetTop > 100, `Mobile sheet behaved like a page takeover (${spatialSheet.sheetTop}px).`);
     }
 
-    await evaluate(cdp, `document.querySelector('[data-participant-navigation] details > summary')?.click()`);
     const opportunity = await waitForExpression(cdp, `(() => {
-      const item = document.querySelector('[data-participant-navigation] details [data-participant-lens="opportunities-rfx"]');
+      const item = document.querySelector('nav[data-mobile-lens-navigation="persistent-bottom"] [data-participant-lens="opportunities-rfx"]');
       return item ? { text: item.textContent, disabled: item.getAttribute('aria-disabled'), href: item.getAttribute('href') } : null;
     })()`, "mobile RFx lens");
     assert.equal(opportunity.disabled, null);

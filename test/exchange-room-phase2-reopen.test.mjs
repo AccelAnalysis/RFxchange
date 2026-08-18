@@ -29,6 +29,7 @@ test("ordinary permanent-lens activation reopens the existing Room surface after
 
 test("configured-browser reopen acceptance closes detail while preserving the action rail", () => {
   const runner = read("scripts/run-configured-exchange-shell-acceptance.mjs");
+  const acceptance = read("scripts/acceptance-exchange-shell-emulator.mjs");
   assert.match(runner, /!document\.querySelector\('#organization-detail-panel'\)/);
   assert.match(runner, /Boolean\(document\.querySelector\('\[data-exchange-room-action-grid\]'\)\)/);
   assert.match(runner, /closed Exchange Room detail surface with persistent action rail/);
@@ -37,6 +38,24 @@ test("configured-browser reopen acceptance closes detail while preserving the ac
     runner,
     /!document\.querySelector\('\[data-exchange-room-action-grid\]'\)/,
     "the persistent four-position action rail must not be treated as a closable detail surface",
+  );
+  assert.match(
+    acceptance,
+    /grids\.length > 0 && grids\.every\(\(grid\) => \([\s\S]*grid\.querySelectorAll\('\[data-exchange-room-action\]'\)\.length === 4/,
+    "configured acceptance must validate each responsive four-position rail independently",
+  );
+  assert.doesNotMatch(
+    acceptance,
+    /document\.querySelectorAll\('\[data-exchange-room-action-grid\] \[data-exchange-room-action\]'\)\.length === 4/,
+    "the two responsive rails must not be collapsed into one global four-action count",
+  );
+  assert.match(acceptance, /nav\[data-mobile-lens-navigation="persistent-bottom"\]/);
+  assert.match(acceptance, /bottomNavigationLenses/);
+  assert.match(acceptance, /legacyLensMenuPresent/);
+  assert.doesNotMatch(
+    acceptance,
+    /\[data-participant-navigation\] details > summary/,
+    "configured mobile acceptance must use the persistent bottom navigation",
   );
 });
 
