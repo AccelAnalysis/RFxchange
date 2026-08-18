@@ -16,7 +16,7 @@
 
 This packet is a product-owner-authorized market-ready workstream that proceeds in parallel with the Four-Lens packet `WP-EXCHANGE-ROOM-PHASE2-01`.
 
-It is intentionally **outside the Four-Lens lane ledger**. The permanent Four-Lens machine model accepts only Control Room, Shared Exchange, Opportunities/RFx, Intelligence, Resources, Referrals, Independent Acceptance and Integration. Commercial implementation does not belong to any permanent lens, and this packet must not falsify ownership by assigning payment/domain work to a lens merely to satisfy the Four-Lens validator.
+It is intentionally **outside the Four-Lens lane ledger**. The current machine model accepts Control Room, Shared Exchange, Opportunities/RFx, Intelligence, Resources, cross-lens Referrals, Independent Acceptance, Integration and Capabilities. Commercial implementation does not belong to any permanent lens or cross-lens referral domain, and this packet must not falsify ownership by assigning payment/domain work to a lane merely to satisfy the Four-Lens validator.
 
 `AGENTS.md` permits work outside the Four-Lens packet model to run under a separately explicit current task authorization. The product owner has explicitly authorized this Founding commerce work to proceed concurrently with Phase 2.
 

@@ -12,6 +12,8 @@ const digest = (value) => createHash("sha256").update(JSON.stringify(value)).dig
 
 const requiredDocuments = [
   "docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md",
+  "docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md",
+  "docs/program/MOBILE_EXCHANGE_STAGES36_ACTION_REGISTRY.md",
   "docs/program/FOUR_LENS_EXPERIENCE_LEDGER.md",
   "docs/program/PARALLEL_DELIVERY_MATRIX.md",
   "docs/program/SHARED_EXCHANGE_CONTRACTS.md",
@@ -31,6 +33,8 @@ for (const file of requiredDocuments) assert.ok(exists(file), `Missing Four-Lens
 const requirements = json("governance/four-lens-requirements.json");
 const workstreams = json("governance/four-lens-workstreams.json");
 const authority = read("docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md");
+const stages36Authority = read("docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md");
+const stages36ActionRegistry = read("docs/program/MOBILE_EXCHANGE_STAGES36_ACTION_REGISTRY.md");
 const matrix = read("docs/program/PARALLEL_DELIVERY_MATRIX.md");
 const wave4Assurance = read("docs/program/WAVE_4_ASSURANCE_LEDGER.md");
 const agents = read("AGENTS.md");
@@ -52,13 +56,21 @@ const expectedVerifiedEvidenceSchema = {
   manifest: "A durable Lane 06 JSON manifest binding candidate SHA, base SHA, reviewer, GitHub Actions run, environment, and a passed timestamped check plus artifacts for every claimed type.",
   coverage: "Verified requires at least one manifest-backed evidence entry for every acceptance type declared by the requirement.",
 };
-const expectedLanes = ["control-room", "shared-exchange", "opportunities-rfx", "intelligence", "resources", "referrals", "independent-acceptance", "integration"];
+const expectedLanes = ["control-room", "shared-exchange", "opportunities-rfx", "intelligence", "resources", "referrals", "independent-acceptance", "integration", "capabilities"];
 const expectedPacketStatuses = ["ready-after-authority-merge", "frozen-until-authority-merge", "in-progress", "active", "reconciliation-authorized", "implemented-not-verified", "acceptance-pending", "verified", "completed", "blocked", "closed"];
 const shaPattern = /^[0-9a-f]{40}$/;
 const identityPattern = /^github(?:-app)?:[A-Za-z0-9](?:[A-Za-z0-9_.\-\[\]]*[A-Za-z0-9_\-\[\]])?$/;
 const githubReviewPattern = /^https:\/\/github\.com\/AccelAnalysis\/RFxchange\/(?:pull\/\d+(?:#.+)?|actions\/runs\/\d+(?:\/.*)?)$/;
 
 const adoptionBaseline = {
+  algorithm: "sha256-json-v1",
+  recordCount: 128,
+  idDigest: "1fb059057ea5a4e092e658b17c7c8f31c57fac598b2a283a96d13947feeeff6a",
+  originalRequirementDigest: "220497f3a629dde07c3b359e0c5f7c574d8993f2f6055f28bcf1e1091a52d9d6",
+  governanceMetadataDigest: "be3a2f94fc870abf5ea9401c317a898bb2dec00ffc6dd05202f1b4016624de25",
+};
+const historicalRequirementBaseline = {
+  name: "four-lens-adoption-2026-08-12",
   algorithm: "sha256-json-v1",
   recordCount: 106,
   idDigest: "ac587e5ce4fefeb6c1b28e7c0cfab89e81e0e180b8e20d9cb7e087ef03219a67",
@@ -73,6 +85,9 @@ const adoptionPacketBaseline = {
 };
 
 assert.deepEqual(requirements.statuses, expectedStatuses);
+assert.equal(requirements.productAuthority, "docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md");
+assert.equal(workstreams.productAuthority, requirements.productAuthority);
+assert.deepEqual(workstreams.productOwnerIdentities, ["github:AccelAnalysis"]);
 assert.deepEqual(requirements.acceptanceDispositions, expectedDispositions);
 assert.deepEqual(requirements.acceptanceTypes, expectedAcceptanceTypes);
 assert.deepEqual(requirements.verifiedEvidenceSchema, expectedVerifiedEvidenceSchema);
@@ -104,6 +119,16 @@ assert.equal(
   "Immutable requirement source, ownership, dependencies, or acceptance obligations were rewritten",
 );
 
+assert.deepEqual(requirements.historicalBaselines, [historicalRequirementBaseline]);
+const originalRecords = requirements.requirements.slice(0, historicalRequirementBaseline.recordCount);
+assert.equal(digest(originalRecords.map((record) => record.id)), historicalRequirementBaseline.idDigest, "Original 106 requirement IDs changed");
+assert.equal(digest(originalRecords.map(({ id, originalRequirement }) => ({ id, originalRequirement }))), historicalRequirementBaseline.originalRequirementDigest, "Original 106 requirement text changed");
+assert.equal(
+  digest(originalRecords.map(({ id, source, lane, dependentLanes, dependencies, acceptanceTypes }) => ({ id, source, lane, dependentLanes, dependencies, acceptanceTypes }))),
+  historicalRequirementBaseline.governanceMetadataDigest,
+  "Original 106 requirement governance metadata changed",
+);
+
 assert.equal(workstreams.adoptionPacketBaseline?.algorithm, adoptionPacketBaseline.algorithm);
 assert.equal(workstreams.adoptionPacketBaseline?.recordCount, adoptionPacketBaseline.recordCount);
 assert.equal(workstreams.adoptionPacketBaseline?.idDigest, adoptionPacketBaseline.idDigest);
@@ -122,6 +147,38 @@ assert.match(authority, /Layer 1 — Bootstrap Governance/);
 assert.match(authority, /Layer 2 — Acceptance Integrity Hardening/);
 assert.match(agents, /FOUR_LENS_PROGRAM_AUTHORITY\.md/);
 assert.match(agents, /only the Independent Acceptance lane may record `Verified`/);
+assert.match(stages36Authority, /Opportunities\/RFx \| Resources \| Intelligence \| Capabilities/);
+assert.match(stages36Authority, /Referrals is a governed cross-lens business function/);
+assert.match(stages36Authority, /paid referral fees, live financial obligations, and payout management are not authorized/);
+assert.match(stages36Authority, /Stabilization 2C remains incomplete/);
+assert.deepEqual(
+  requirements.requirements.slice(106).map((record) => record.id),
+  [
+    "MOB36-LENS-001",
+    "MOB36-MIGRATION-001",
+    "MOB36-SHARED-QUERY-001",
+    "MOB36-SHARED-MAP-001",
+    "MOB36-SHARED-RESULT-001",
+    "MOB36-SHARED-DETAIL-001",
+    "MOB36-OPPORTUNITIES-001",
+    "MOB36-RESOURCES-001",
+    "MOB36-INTELLIGENCE-001",
+    "MOB36-CAPABILITIES-001",
+    "MOB36-CAPABILITIES-AMACS-001",
+    "MOB36-CAPABILITIES-MATCH-001",
+    "MOB36-REFERRAL-CROSS-LENS-001",
+    "MOB36-REFERRAL-MENU-001",
+    "MOB36-MENU-001",
+    "MOB36-WORKFLOW-001",
+    "MOB36-NOTIFICATIONS-001",
+    "MOB36-ONBOARDING-001",
+    "MOB36-COMMERCIAL-001",
+    "MOB36-INTEGRATION-001",
+    "MOB36-RELEASE-001",
+    "MOB36-AUTHORITY-001",
+  ],
+  "Stages 3–6 successor requirements must remain append-only and ordered",
+);
 
 const identityModel = workstreams.independentAcceptanceIdentityModel;
 assert.equal(identityModel?.lane, "independent-acceptance");
@@ -129,6 +186,7 @@ assert.equal(identityModel?.packetAssignment?.enabled, true);
 assert.deepEqual(identityModel?.packetAssignment?.allowedKinds, ["github", "github-app"]);
 assert.ok(Array.isArray(identityModel?.configuredIdentities) && identityModel.configuredIdentities.length >= 1, "At least one program-authorized independent identity is required");
 const programReviewerIdentities = new Set();
+const productOwnerIdentities = new Set(workstreams.productOwnerIdentities);
 for (const reviewer of identityModel.configuredIdentities) {
   assert.match(reviewer.identity, identityPattern, `Invalid independent reviewer identity ${reviewer.identity}`);
   assert.ok(["github", "github-app"].includes(reviewer.kind), `Invalid independent reviewer kind ${reviewer.kind}`);
@@ -169,9 +227,36 @@ for (const requirement of requirements.requirements) {
   if (requirement.acceptance.result === "Verified") assert.equal(requirement.status, "Verified", `${requirement.id} has Verified acceptance but non-Verified status`);
 }
 
+const expectedMobileExchangeStages36Actions = [
+  { lens: "opportunities-rfx", order: 1, id: "opportunities.create-view" },
+  { lens: "opportunities-rfx", order: 2, id: "opportunities.manage-respond" },
+  { lens: "opportunities-rfx", order: 3, id: "opportunities.team" },
+  { lens: "opportunities-rfx", order: 4, id: "opportunities.watch" },
+  { lens: "resources", order: 1, id: "resources.offer-request" },
+  { lens: "resources", order: 2, id: "resources.manage-view" },
+  { lens: "resources", order: 3, id: "resources.share" },
+  { lens: "resources", order: 4, id: "resources.save" },
+  { lens: "intelligence", order: 1, id: "intelligence.add-view" },
+  { lens: "intelligence", order: 2, id: "intelligence.edit-note" },
+  { lens: "intelligence", order: 3, id: "intelligence.compare" },
+  { lens: "intelligence", order: 4, id: "intelligence.track" },
+  { lens: "capabilities", order: 1, id: "capabilities.manage-view" },
+  { lens: "capabilities", order: 2, id: "capabilities.classify-match" },
+  { lens: "capabilities", order: 3, id: "capabilities.evidence-refer" },
+  { lens: "capabilities", order: 4, id: "capabilities.gaps-save" },
+];
+assert.deepEqual(requirements.mobileExchangeStages36?.actionRegistry, expectedMobileExchangeStages36Actions, "Stages 3–6 immutable sixteen-action registry changed without a product-authority amendment");
+assert.ok(exists("docs/program/MOBILE_EXCHANGE_STAGES36_ACTION_REGISTRY.md"), "Stages 3–6 action registry document is missing");
+let previousActionPosition = -1;
+for (const action of expectedMobileExchangeStages36Actions) {
+  const position = stages36ActionRegistry.indexOf(`\`${action.id}\``);
+  assert.ok(position > previousActionPosition, `Stages 3–6 action registry is missing or reorders ${action.id}`);
+  previousActionPosition = position;
+}
+
 for (const requirement of requirements.requirements) {
   for (const dependency of requirement.dependencies) {
-    if (/^(SHARED-|RFX-FEATURE-|RES-LENS-|INTEL-|REF-LENS-)/.test(dependency)) {
+    if (/^(SHARED-|RFX-FEATURE-|RES-LENS-|INTEL-|REF-LENS-|MOB36-)/.test(dependency)) {
       assert.ok(requirementById.has(dependency), `${requirement.id} references missing program dependency ${dependency}`);
     }
   }
@@ -220,8 +305,13 @@ for (const packet of workstreams.workPackets) {
     assert.match(packet.candidate.actor, identityPattern, `${packet.id} has invalid candidate actor`);
     assert.ok(Number.isInteger(packet.candidate.pr) && packet.candidate.pr > 0, `${packet.id} has invalid candidate PR`);
     if (packet.candidate.sha === "SELF") {
-      assert.equal(packet.id, "WP-CONTROL-AUTHORITY-SETUP", "SELF is reserved for the pre-merge authority setup candidate");
-      assert.equal(workstreams.programPhase, "authority-setup", "SELF cannot survive the authority-setup phase");
+      const permittedSelfPacket = packet.id === "WP-CONTROL-AUTHORITY-SETUP" || packet.id === "WP-MOBILE-EXCHANGE-STAGES36-AUTHORITY-01";
+      assert.ok(permittedSelfPacket, "SELF is reserved for an active open Control Room authority candidate");
+      if (packet.id === "WP-CONTROL-AUTHORITY-SETUP") assert.equal(workstreams.programPhase, "authority-setup", "The bootstrap SELF cannot survive authority setup");
+      if (packet.id === "WP-MOBILE-EXCHANGE-STAGES36-AUTHORITY-01") {
+        assert.equal(packet.status, "in-progress", "The Stages 3–6 authority SELF is valid only while PR #225 is in progress");
+        assert.equal(packet.candidate.pr, 225, "The Stages 3–6 authority SELF must identify PR #225");
+      }
     } else {
       assert.match(packet.candidate.sha, shaPattern, `${packet.id} candidate SHA must be exact`);
     }
@@ -336,6 +426,19 @@ if (workstreams.programPhase === "authority-setup") {
   assert.equal(trackerRfxDone, requirements.historicalAdoption.tracker.rfxDone, "Governance bootstrap may not change RFx Core completion");
 }
 
+const resolvedRequirementStatuses = new Set(["Implemented — Not Verified", "Verified", "Not Applicable — Explicitly Approved"]);
+for (const requirement of requirements.requirements.filter((record) => record.id.startsWith("MOB36-") && resolvedRequirementStatuses.has(record.status))) {
+  for (const dependency of requirement.dependencies) {
+    if (requirementById.has(dependency)) {
+      assert.ok(resolvedRequirementStatuses.has(requirementById.get(dependency).status), `${requirement.id} cannot be terminal while dependency ${dependency} is ${requirementById.get(dependency).status}`);
+    } else {
+      const trackerId = dependency.replace(/^RFX-FEATURE-/, "");
+      if (trackerStatusById.has(trackerId)) assert.equal(trackerStatusById.get(trackerId), "Done", `${requirement.id} cannot be terminal while tracker dependency ${trackerId} is not Done`);
+      else assert.fail(`${requirement.id} cannot be terminal while dependency ${dependency} has no governed resolved state`);
+    }
+  }
+}
+
 const visitedRequirements = new Set();
 const activeRequirementPath = new Set();
 const visitRequirement = (requirementId) => {
@@ -433,22 +536,40 @@ for (const requirement of requirements.requirements) {
     for (const field of ["reason", "missingDependency", "impact", "futureLane"]) assert.ok(requirement.deferral?.[field], `${requirement.id} defer lacks ${field}`);
   } else if (requirement.status === "Not Applicable — Explicitly Approved") {
     assert.equal(requirement.acceptance.result, null, `${requirement.id} N/A must not masquerade as Verified acceptance`);
-    assert.match(requirement.deferral?.approvedBy, identityPattern, `${requirement.id} N/A needs an exact independent GitHub identity`);
+    assert.match(requirement.deferral?.approvedBy, identityPattern, `${requirement.id} N/A needs an exact authenticated GitHub identity`);
     assert.match(requirement.deferral?.approvalUrl, githubReviewPattern, `${requirement.id} N/A needs an authenticated GitHub approval signal`);
-    assert.ok(reviewerAuthorizedForRequirement(requirement.deferral.approvedBy, requirement.id), `${requirement.id} N/A approver is not authorized`);
-    assert.notEqual(requirement.deferral.approvedBy, requirement.implementation.actor, `${requirement.id} N/A was self-approved by the implementation actor`);
+    const productOwnerSupersession = requirement.deferral?.kind === "product-owner-supersession";
+    assert.ok(
+      productOwnerSupersession
+        ? productOwnerIdentities.has(requirement.deferral.approvedBy)
+        : reviewerAuthorizedForRequirement(requirement.deferral.approvedBy, requirement.id),
+      `${requirement.id} N/A approver is not authorized`,
+    );
+    if (!productOwnerSupersession) assert.notEqual(requirement.deferral.approvedBy, requirement.implementation.actor, `${requirement.id} N/A was self-approved by the implementation actor`);
     assert.ok(requirement.deferral?.reason && requirement.deferral?.impact && requirement.deferral?.futureLane, `${requirement.id} N/A needs explicit impact and future ownership`);
+    if (productOwnerSupersession) {
+      assert.ok(Array.isArray(requirement.deferral.successorRequirementIds) && requirement.deferral.successorRequirementIds.length > 0, `${requirement.id} product-owner supersession needs successor requirements`);
+      for (const successorId of requirement.deferral.successorRequirementIds) assert.ok(requirementById.has(successorId), `${requirement.id} references missing successor requirement ${successorId}`);
+    }
   } else if (requirement.id !== "SHARED-RESULT-001") {
     assert.equal(requirement.deferral, null, `${requirement.id} has deferral data without an explicit defer/N/A status`);
   }
 }
+
+assert.deepEqual(
+  requirements.requirements.filter((record) => record.status === "Not Applicable — Explicitly Approved").map((record) => record.id),
+  ["SHARED-TRUTH-001", "SHARED-CONTINUITY-001", "REF-LENS-012", "SHARED-LENS-CONTEXT-001"],
+  "Only the exact obsolete permanent-Referrals requirements receive this product-owner supersession",
+);
 
 for (const [label, select] of [
   ["Shared Exchange", (record) => record.lane === "shared-exchange" || record.lane === "independent-acceptance"],
   ["Opportunities/RFx", (record) => record.lane === "opportunities-rfx"],
   ["Resources", (record) => record.lane === "resources"],
   ["Intelligence", (record) => record.lane === "intelligence"],
-  ["Referrals", (record) => record.lane === "referrals"],
+  ["Capabilities", (record) => record.lane === "capabilities"],
+  ["Referrals Cross-Lens", (record) => record.lane === "referrals"],
+  ["Integration", (record) => record.lane === "integration"],
 ]) {
   const records = requirements.requirements.filter(select);
   const count = (statuses) => records.filter((record) => statuses.includes(record.status)).length;

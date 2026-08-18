@@ -1,5 +1,7 @@
 # RFxchange Market-Ready Baseline — “The Wall”
 
+> **Successor authority:** The Stage 1–2 baseline below is preserved as provenance. For Stages 3–6, `MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md` supersedes its permanent-lens and pre-Exchange payment sequence: the fourth lens is Capabilities, Referrals is cross-lens/Menu-based, legitimate free participation reaches value before an optional Founding offer, and payment never becomes a general Exchange-entry gate.
+
 **Product-owner objective:** get the wall standing, get people into the Exchange, and get paying Founding Members.
 
 This is the immediate go-to-market baseline. Work that does not materially serve this journey, or prevent a material security/privacy/tenant/payment/legal/truthfulness defect, must not displace it on the critical path.

@@ -2,9 +2,9 @@
 
 **Canonical volatile program-status source**
 
-**Snapshot basis:** merged `main` `9b97b37365b0e3cab1292cccb86ffe248d5734a2` on 2026-08-16
+**Snapshot basis:** merged `main` `1fbf38e71747ac90c2f285e4934b22ea26312bec` on 2026-08-18
 
-**Current task:** Stage 2 — Restore the Shared Mobile Composition
+**Current task:** Codify Mobile Exchange Stages 3–6 and the Capabilities/cross-lens Referrals successor architecture
 
 **Update rule:** Control Room recalculates this document from current merged `main` after every program-state change.
 
@@ -21,25 +21,27 @@ The Master Build Tracker remains the Feature-ID authority. This matrix does not 
 
 ## Experience completion
 
-The frozen Four-Lens requirement baseline remains unchanged.
+The original 106 records remain immutable and in order. Twenty-two successor requirements are appended by the current product-owner authority; obsolete permanent-Referrals requirements remain historical and receive explicit successor disposition before this authority closes.
 
 | Experience | Requirement denominator | Verified | In Progress | Implemented — Not Verified | Not Started | Blocked | Explicitly deferred/N/A |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Shared Exchange | 27 | 0 | 0 | 22 | 1 | 3 | 1 |
-| Opportunities/RFx | 41 | 0 | 0 | 23 | 18 | 0 | 0 |
-| Resources | 12 | 0 | 0 | 8 | 2 | 2 | 0 |
-| Intelligence | 14 | 0 | 0 | 3 | 6 | 5 | 0 |
-| Referrals | 12 | 0 | 0 | 10 | 1 | 1 | 0 |
-| Program total | 106 | 0 | 0 | 66 | 28 | 11 | 1 |
+| Shared Exchange | 36 | 0 | 1 | 20 | 8 | 3 | 4 |
+| Opportunities/RFx | 42 | 0 | 0 | 23 | 19 | 0 | 0 |
+| Resources | 13 | 0 | 0 | 8 | 3 | 2 | 0 |
+| Intelligence | 15 | 0 | 0 | 3 | 7 | 5 | 0 |
+| Capabilities | 3 | 0 | 0 | 0 | 3 | 0 | 0 |
+| Referrals Cross-Lens | 14 | 0 | 0 | 10 | 3 | 0 | 1 |
+| Integration | 5 | 0 | 0 | 0 | 5 | 0 | 0 |
+| Program total | 128 | 0 | 1 | 64 | 48 | 10 | 5 |
 
-No percentage is inferred from these counts. Mobile Stage 1 architecture convergence does not alter the frozen requirement arithmetic.
+No percentage is inferred from these counts. The successor requirement denominator changes no Feature-ID arithmetic.
 
 ## Canonical tracker comparison
 
 - Master Build Tracker: **438 total · 170 Done · 268 Not Started**.
-- Mobile Stage 1 changed no Feature-ID arithmetic.
+- Mobile Stages 1–2 and the Stages 3–6 authority change no Feature-ID arithmetic.
 - `MOB-01` is installed product authority, not a silently completed tracker feature.
-- `governance/four-lens-requirements.json` remains frozen.
+- `governance/four-lens-requirements.json` is append-only at 128 records; the original 106 remain immutable.
 
 ## Mobile Exchange Stage 1 closeout
 
@@ -60,13 +62,34 @@ No percentage is inferred from these counts. Mobile Stage 1 architecture converg
 | Stage 1 exit gate | **Satisfied** |
 | Stage 2 authorization | **Granted** |
 
-Permanent lens order remains:
+Historical Stage 1 lens order was:
 
 ```text
 Opportunities/RFx | Resources | Intelligence | Referrals
 ```
 
 Account/Menu remains a utility, not a fifth lens.
+
+## Mobile Exchange Stage 2 closeout
+
+| Field | Final state |
+| --- | --- |
+| Governing authority | `MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md` |
+| Candidate | PR `#222` exact head `704718a4611e80f01937d2501e7621319bfd6353` |
+| Exact-head CI | run `32090477890` — **SUCCESS** |
+| Integrated main | `1fbf38e71747ac90c2f285e4934b22ea26312bec` |
+| Review findings | All resolved |
+| SCR #223 / #224 | Closed as resolved by PR #222 |
+| Disposition | `Implemented — Not Verified`; optional independent assurance not performed |
+| Stage 2 exit | **Satisfied** |
+
+Stage 2 retains its historical Referrals-ending lens order as evidence. Current forward architecture is:
+
+```text
+Opportunities/RFx | Resources | Intelligence | Capabilities
+```
+
+Referrals is a governed cross-lens function and Menu/Account utility.
 
 ## Stage 1 integrated contract family
 
@@ -100,7 +123,7 @@ The integrated shared architecture now covers:
 | 06 — Independent Acceptance | Optional assurance | Not a universal Stage 2 prerequisite |
 | 07 — Integration / Cross-Lens QA | Standby for integrated Stage 2 runtime | Verify combined behavior after Stage 2 integration |
 
-## Stage 2 authorization
+## Historical Stage 2 authorization
 
 **AUTHORIZED — Restore the Shared Mobile Composition.**
 
@@ -126,4 +149,4 @@ Any newly discovered generalized capability gap must be raised through the insta
 
 ## Exact next action
 
-Activate the Stage 2 lane packets in parallel: Lane 01 builds the shared mobile shell/composition; Lanes 02–05 bind their existing domain truth into the shared card/action/map/detail interfaces without private framework duplication. Control Room coordinates merge order and resolves only genuine shared-contract conflicts.
+Merge `WP-MOBILE-EXCHANGE-STAGES36-AUTHORITY-01` after exact-head CI. Then record its exact candidate/merge/post-merge evidence, close it, and activate `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from the exact current-main SHA. No Stage 3 or domain packet begins before that migration merges.

@@ -17,6 +17,8 @@ Every lane must:
 
 For any `MOB-01` through `MOB-05` packet or any work that plans, implements, reviews, reconciles, tests, or integrates the mobile Exchange composition, **every participating lane must read `docs/program/MOBILE_EXCHANGE_STAGES_1_2_AUTHORITY.md` and its linked current visual reference before acting**. Lens lanes must consume the shared mobile contracts rather than independently reinterpret the visual reference.
 
+For the successor lens migration or any Stage 3–6 packet, every participating lane must also read `docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md`. The mobile Stage 1–2 authority remains the formal governor for MOB-01 through MOB-05 shared contracts, the Stage 2 Referrals-ending composition, and its evidence. The Stage 3–6 authority governs the successor architecture and migration without relabeling that history.
+
 ## Lane 00 — Control Room
 
 Own program status, work packets, dependency/branch assignment, merge order, Shared Contract Request routing and post-merge recalculation. Do not normally implement runtime or independently certify a requirement. Publish the current batch with exact bases, dependencies and acceptance owners.
@@ -37,9 +39,9 @@ Own the dedicated Intelligence roadmap and authorized analytical projections. Se
 
 Own provider application/status interaction, approved-provider representation, discovery, detail, service geography, resources and requests. Provider authority remains server-side and separate from payment, profile type and verification. Consume Shared Exchange contracts.
 
-## Lane 05 — Referrals
+## Lane 05 — Referrals (cross-lens)
 
-Own sender/recipient interaction, creation, lifecycle, relationship context, real privacy-safe paths and cross-lens recipient continuity. Preserve consent and minimum-necessary sharing. Do not invent a third-party subject or imply outcomes.
+Own cross-lens sender/recipient interaction, creation, lifecycle, Menu management, relationship context, real privacy-safe paths and origin/return continuity. Preserve consent and minimum-necessary sharing. Do not present Referrals as a permanent lens, invent a third-party subject or imply outcomes.
 
 ## Lane 06 — Independent Acceptance
 
@@ -48,3 +50,7 @@ Read authority before candidate summaries. Do not implement production feature c
 ## Lane 07 — Integration / Cross-Lens QA
 
 After lane-level acceptance, exercise supported end-to-end journeys across lenses. Verify selected object, camera, URL and return state, domain action changes, privacy, no stale or contradictory detail, desktop/mobile, keyboard/accessibility, five locales, performance and no authority leakage. Do not certify a missing lane-level requirement.
+
+## Lane 08 — Capabilities
+
+Own the permanent Capabilities lens, organization capability discovery/profile projections, evidence and verification distinctions, AMACS-backed browse/search and confirmed mappings, comparison, RFx matching explanations, gaps, and domain actions. Reuse the organization profile and shared Exchange contracts. Do not invent AMACS identifiers, treat assistance as authoritative, duplicate organization identity, or reuse referral records as capability records.

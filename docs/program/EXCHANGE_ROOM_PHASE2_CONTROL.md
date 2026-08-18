@@ -12,6 +12,8 @@
 
 **Activation epoch:** `exchange-room-phase2-2026-08-13`
 
+**Successor note:** This authority continues to govern MOB-02 through MOB-05 shared contracts and the historical Stage 2 Referrals-ending composition. After the Stage 3–6 authority merges, `MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md` and `MOBILE_EXCHANGE_STAGES36_ACTION_REGISTRY.md` govern the successor migration; this file is not rewritten as though Stage 2 originally used Capabilities.
+
 **Immutable activation base:** `10150e66b4a1b37a0cda5381986c5599da96e632`
 
 ## Product objective

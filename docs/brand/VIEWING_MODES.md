@@ -10,7 +10,7 @@ Use these terms precisely:
 
 | Term | Meaning |
 | --- | --- |
-| **Lens** | Functional market context that changes permitted projections, search semantics, filters and actions. The primary lenses are Opportunities/RFx, Resources, Intelligence and Referrals. |
+| **Lens** | Functional market context that changes permitted projections, search semantics, filters and actions. The permanent lenses are Opportunities/RFx, Resources, Intelligence and Capabilities; Referrals is cross-lens and Menu/Account-based. |
 | **Layer** | A map or analytical projection inside a lens, such as organizations, locality boundaries, service fields, opportunity beacons or capability density. |
 | **Appearance** | Visual treatment only. The governed appearance names are **Light Appearance** and **Dark Appearance**. Appearance never changes authority or data access. |
 | **Workspace** | Interaction composition used to complete a task. Spatial Workspace preserves geographic context; Operational Workspace supports authoring, forms, tables, review and other dense work. |

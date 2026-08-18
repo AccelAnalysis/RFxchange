@@ -6,7 +6,7 @@
 
 This document reconciles the RFxchange participant experience around one persistent, organization-centered spatial environment. It defines:
 
-- the hierarchy and meaning of the Opportunities/RFx, Resources, Intelligence, and Referrals lenses;
+- the hierarchy and meaning of the Opportunities/RFx, Resources, Intelligence, and Capabilities lenses;
 - structural, capability, state, and continuity truthfulness for participant-facing navigation;
 - the retained role of location and site functionality inside Intelligence;
 - the persistent map/context contract across lenses;
@@ -34,14 +34,14 @@ The governing architecture alone does not authorize runtime implementation.
 
 ## 2. Governing product decision
 
-> **The RFxchange is an RFx-centered, organization-centered spatial market environment. Opportunities/RFx is the primary transaction lens. Resources, Intelligence, and Referrals are supporting lenses over the same organizations, geography, relationships, and market activity. Changing lenses changes the question being asked and the actions available; it does not reset the market the participant is viewing.**
+> **The RFxchange is an RFx-centered, organization-centered spatial market environment. Opportunities/RFx is the primary transaction lens. Resources, Intelligence, and Capabilities are supporting lenses over the same organizations, geography, relationships, and market activity. Changing lenses changes the question being asked and the actions available; it does not reset the market the participant is viewing. Referrals is a cross-lens function, not a permanent lens.**
 
 The permanent authenticated lens hierarchy and order is exactly:
 
 1. **Opportunities/RFx** — turn market need into structured action and transaction.
 2. **Resources** — help organizations obtain approved business support relevant to what they are trying to accomplish.
 3. **Intelligence** — help participants understand organizations, capabilities, demand, geography, locations, sites, and market context.
-4. **Referrals** — make and track trusted, consented introductions.
+4. **Capabilities** — discover, compare, evidence, and match what organizations can do.
 
 These lenses are connected, but they are not four equal products. The RFxchange remains named and positioned around RFx activity. Supporting lenses make RFx activity more discoverable, understandable, completable, and useful.
 
@@ -51,7 +51,7 @@ The permanent order remains visible even before every lens is enabled. Before Sl
 
 The interface represents the stable, governed product architecture rather than a temporary taxonomy that will later be discarded.
 
-The permanent participant lens sequence is `Opportunities/RFx | Resources | Intelligence | Referrals`. Network may be the current organization-network view or layer inside Intelligence. Quick Start and Account are utilities, not peer market lenses.
+The permanent participant lens sequence is `Opportunities/RFx | Resources | Intelligence | Capabilities`. Network may be the current organization-network view or layer inside Intelligence. Quick Start and Account/Menu are utilities, not peer market lenses. Referrals is available through applicable records, profiles, actions, and Menu/Account management.
 
 > **The stable lens architecture remains visible even when a lens is unavailable. Availability governs action, not whether a governed permanent lens exists in the information architecture.**
 
@@ -103,7 +103,7 @@ Use the following terms precisely:
 
 | Term | Meaning |
 | --- | --- |
-| **Lens** | A functional market context that changes visible projections, search semantics, filters, information, and authorized actions. The primary lenses are Opportunities/RFx, Resources, Intelligence, and Referrals. |
+| **Lens** | A functional market context that changes visible projections, search semantics, filters, information, and authorized actions. The primary lenses are Opportunities/RFx, Resources, Intelligence, and Capabilities. |
 | **Layer** | A map or analytical projection inside a lens, such as organizations, opportunity beacons, service fields, locality boundaries, capability density, sites, or workforce data. |
 | **Appearance** | Visual treatment only. The governed names are **Light Appearance** and **Dark Appearance**. Appearance never changes authority or data access. |
 | **Workspace** | The interaction composition used to complete a task. Spatial Workspace preserves the map as the principal canvas; Operational Workspace supports authoring, forms, tables, policy, settings, review, and other dense workflows. |
@@ -167,7 +167,8 @@ Examples:
 
 - Resources → Opportunities retains the selected organization and map position while replacing provider/resource actions with RFx actions after Opportunities has a real accepted runtime.
 - Opportunities → Intelligence retains the selected RFx or organization while exposing analytical context after an authoritative RFx exists.
-- Intelligence → Referrals retains the selected organization while replacing analytical actions with referral actions.
+- Intelligence → Capabilities retains the selected organization while replacing analytical actions with capability discovery/comparison actions.
+- An applicable record → Referral workflow carries only the revalidated minimum-necessary origin and recipient context, then returns to the originating lens.
 
 If the selected object has no applicable projection in the new lens, the product should retain spatial focus and state truthfully that no applicable records/actions are available. It should not imply that the object disappeared from the Exchange.
 
@@ -397,31 +398,39 @@ The governing relationship is:
 
 > **Intelligence provides context for action. Opportunities/RFx turns the participant's need or observation into structured market action.**
 
-### 7.5 Referrals — trusted connection lens
+### 7.5 Capabilities — organization capability lens
 
-Referrals supports consented, minimum-necessary introductions and truthful lifecycle tracking.
+Capabilities answers:
 
-Own-organization actions may include:
+> **What can this organization credibly say it can do, where can it do it, what supports the assertion, and how does that relate to current market need?**
 
-- review or manage referral policy where authorized;
-- review Received, Sent, and Starred items;
-- create a referral;
-- accept/decline or otherwise advance received referrals;
-- track status and outcome evidence; and
-- review credibility implications only through the governed credibility domain.
+Capabilities consumes the existing organization profile and AMACS-backed organization capability assertions. It does not create a second supplier, responder, market-profile, or organization identity.
+
+Own-organization actions may include, only where the current runtime and permission exist:
+
+- Manage Capabilities;
+- AI to AMACS, with manual browse/search always available and assistance remaining non-authoritative;
+- Add/Edit Evidence; and
+- Capability Gaps.
 
 Other-organization actions may include:
 
-- view the organization's referral policy;
-- create a referral from the participant's organization to the selected recipient organization;
-- review permitted relationship context;
-- track a referral sent by the participant's organization to that recipient.
+- View Capabilities;
+- Match to RFx;
+- Refer; and
+- Save/Follow.
 
-The current referral aggregate has one sending organization and one recipient organization or external intended recipient. It does not represent a separately referred third organization or person. Copy should identify the participant's organization as sender and the selected organization as recipient. `Refer someone to this organization` and `Refer this organization to someone else` are deferred when they would imply an unsupported third-party subject, consent projection, or lifecycle.
+Capability selection, self-report, evidence submission, independent verification, and RFx matching are separate facts. Paid, Founding, sponsored, provider, or membership state cannot create a capability assertion, evidence conclusion, verification, qualification, ranking, or match.
 
-A referral does not imply acceptance, service completion, sale, award, endorsement, or verified economic outcome.
+### 7.6 Referrals — cross-lens function
 
-### 7.6 Lens accent treatment
+Referrals supports consented, minimum-necessary introductions and truthful lifecycle tracking from applicable Opportunities, Resources, Intelligence, Capabilities, organization-profile, card, and detail contexts. It is not a permanent map lens.
+
+Menu/Account provides the role-appropriate referral-management surface. A specific referral deep link may reopen the exact authorized record. The current referral aggregate retains one sending organization and one recipient organization or external intended recipient; unsupported third-party subject semantics remain deferred.
+
+A Refer action appears only when the origin, target, recipient, policy, consent, permission, and real referral runtime are valid. Cross-lens entry revalidates current server authority and carries only minimum-necessary origin/recipient context. A referral does not imply acceptance, service completion, sale, award, endorsement, capability match, or verified economic outcome.
+
+### 7.7 Lens accent treatment
 
 Each lens should receive a distinct, restrained visual signal so participants can recognize context without losing the overall RFxchange identity.
 
@@ -430,7 +439,7 @@ Future implementation should use centralized semantic tokens such as:
 - `lens.opportunities`;
 - `lens.resources`;
 - `lens.intelligence`;
-- `lens.referrals`.
+- `lens.capabilities`.
 
 This document does not assign raw colors. Lens treatment must:
 
@@ -452,9 +461,10 @@ Cross-lens actions are first-class continuations of one market workflow, not sho
 | Resource does not resolve the business need | Create an RFx | selected resource/provider, described need, organization, location, return target |
 | Intelligence reveals a need or market gap | Create an RFx | selected geography/analysis, relevant capabilities/organizations, participant-confirmed need |
 | Selected site/location | Create an RFx for this location | site/location reference, authoritative geography, participant-confirmed performance context |
-| Selected organization | Open Referrals | selected organization and referral direction intent |
+| Selected organization or applicable domain record | Open referral workflow | revalidated selected organization/record, minimum-necessary referral direction intent, origin lens and return target |
 | Referral context | View relevant organization, resource, or opportunity | referral identifier, permitted minimum-necessary context, return target |
 | Approved provider | View relevant Opportunities | provider organization, public capabilities/service geography, current search context |
+| Capability or capability gap | View or match relevant Opportunities/RFx | confirmed capability assertion or participant-confirmed gap, organization, geography and return target |
 
 The table describes mature authorized continuations. An unavailable destination remains non-actionable until the applicable runtime exists.
 
@@ -497,14 +507,15 @@ Marketing remains RFx-centered and should continue to emphasize the core promise
 
 > **Be found. Find opportunity. Build the connection.**
 
-Public messaging may explain how AMACS, Resources, Intelligence, and Referrals make RFx activity easier and more effective. It must not present Opportunities, Resources, Intelligence, and Referrals as four equal standalone products or shift the platform's identity toward commercial real estate, generic analytics, a resource directory, or a referral marketplace.
+Public messaging may explain how AMACS, Resources, Intelligence, Capabilities, and cross-lens Referrals make RFx activity easier and more effective. It must not present Opportunities, Resources, Intelligence, and Capabilities as four equal standalone products or shift the platform's identity toward commercial real estate, generic analytics, a resource directory, capability directory, or referral marketplace.
 
 A useful hierarchy is:
 
 - Opportunities/RFx turns need into action;
 - AMACS makes needs and capabilities legible;
 - Resources helps close support gaps;
-- Referrals helps trusted relationships move activity forward;
+- Capabilities makes what organizations can do understandable, discoverable, comparable, and matchable;
+- cross-lens Referrals helps trusted relationships move activity forward;
 - Intelligence explains the market context surrounding the activity.
 
 This document makes no marketing-page runtime or copy change.
@@ -543,8 +554,9 @@ No lens may fabricate unavailable domain state. Opportunities/RFx is now routabl
 
 Any authorized convergence must prove at least:
 
-- exact primary-lens order `Opportunities/RFx | Resources | Intelligence | Referrals`;
-- Opportunities/RFx visible, unavailable, non-routable, not current, and described without color-only communication;
+- exact primary-lens order `Opportunities/RFx | Resources | Intelligence | Capabilities`;
+- Referrals absent from permanent lens navigation and available only as a governed cross-lens/Menu function;
+- Opportunities/RFx visibly first and available only through its real permitted runtime; unavailable later actions remain non-actionable and described without color-only communication;
 - Network absent as a peer lens and retained only as an Intelligence view/domain concept;
 - Account and Quick Start absent from the lens list and available through a separate keyboard-operable utility control;
 - Administration optional, server-authoritative, limited to implemented destinations, and fail-closed without blocking the shell;

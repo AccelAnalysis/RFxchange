@@ -33,7 +33,8 @@ Demonstrates:
 
 Important legacy-label note:
 - visible labels/order inside the historical mockup are not the current semantic authority;
-- implement the permanent governed lens order `Opportunities/RFx | Resources | Intelligence | Referrals`;
+- implement the current permanent governed lens order `Opportunities/RFx | Resources | Intelligence | Capabilities`;
+- treat any screenshot showing Referrals as the fourth permanent lens as historical Stage 1–2 composition evidence, not current navigation authority;
 - `Menu/Account` may remain a utility slot but is not a fifth lens.
 
 Does not define:

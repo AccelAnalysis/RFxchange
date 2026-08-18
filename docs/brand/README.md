@@ -18,10 +18,11 @@ The platform should feel like a living market, not a conventional dashboard. Bra
 - **Core promise:** Be found. Find opportunity. Build the connection.
 - **Experience framework:** Visible. Connected. Actionable.
 
-Under the merged Exchange Interaction Architecture:
+Under the current Stage 3–6 successor authority:
 
 - Opportunities/RFx is the primary transaction lens and principal market-action proposition;
-- Resources, Intelligence and Referrals are supporting functional lenses over the same market;
+- Resources, Intelligence and Capabilities are supporting functional lenses over the same market;
+- Referrals is a governed cross-lens function and Menu/Account utility, not a permanent lens;
 - Location Intelligence and Site & Facility Intelligence remain inside Intelligence;
 - Light Appearance and Dark Appearance are visual presentation terms; and
 - lens, layer, appearance and workspace are distinct concepts.

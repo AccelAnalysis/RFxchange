@@ -5,8 +5,8 @@ This repository implements **The RFxchange**, an organization-centered, map-base
 ## Product model
 
 - The **organization** is the primary market entity. Individual users authenticate separately but act through one or more organizations with explicit membership, role and permission state.
-- The RFxchange is RFx-centered and organization-centered. Opportunities/RFx is the primary transaction lens and principal market-action proposition; Resources, Intelligence and Referrals are supporting lenses over the same market.
-- The permanent authenticated participant-lens order is exactly `Opportunities/RFx | Resources | Intelligence | Referrals`. Availability governs action, not whether a governed permanent lens exists in the information architecture.
+- The RFxchange is RFx-centered and organization-centered. Opportunities/RFx is the primary transaction lens and principal market-action proposition; Resources, Intelligence and Capabilities are supporting lenses over the same market.
+- The permanent authenticated participant-lens order is exactly `Opportunities/RFx | Resources | Intelligence | Capabilities`. Referrals is a governed cross-lens function available through applicable records and Menu/Account, not a permanent lens. Availability governs action, not whether a governed permanent lens exists in the information architecture.
 - Opportunities/RFx remains visibly first. Availability requires a separately authorized real participant runtime; current merged Slice 4.5 supplies real permitted opportunity discovery at `/opportunities`. Do not create a placeholder route, fabricated opportunity/beacon/match/response or simulated workflow to broaden it.
 - Network remains the current organization-network view/domain concept within Intelligence. It is not a peer lens. Account and Quick Start are utilities, not market lenses.
 - Administrative navigation remains different: it exposes only implemented, server-authorized destinations. Do not generalize participant unavailable-lens visibility to future administrative sections.
@@ -43,7 +43,7 @@ Development reporting adds the same truthfulness distinction between **implement
 Use these sources together rather than treating one file as universally authoritative:
 
 1. **Current explicit task instructions** define the work requested in the current task.
-2. `docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md` governs Four-Lens completion semantics and makes Independent Acceptance optional assurance. `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md` and `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md` remain governing provenance for parallel delivery and risk-based release mechanics where they do not conflict with the Completion Governance Amendment. Their machine ledgers and delivery matrix carry current packet/experience state but never expand product or domain scope.
+2. `docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md` governs the current permanent-lens architecture and successor mobile Exchange program. `docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md` governs Four-Lens completion semantics and makes Independent Acceptance optional assurance. `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md` and `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md` remain governing provenance for parallel delivery and risk-based release mechanics where they do not conflict with those current amendments. Their machine ledgers and delivery matrix carry current packet/experience state but never expand product or domain scope.
 3. `docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md` is the live Feature-ID completion authority. A checked item requires implementation plus the applicable objective tests/evidence, dependencies/ownership satisfaction, durable completion record, and no known material defect under the current Four-Lens Completion Governance Amendment. Independent Acceptance is not required merely to check a completed item.
 4. `docs/tracking/RFxchange_DEPENDENCY_MAP.md` is the live sequencing/dependency authority. Reviewed corrections there supersede seeded spreadsheet dependencies for scheduling.
 5. The applicable `docs/slices/` execution authority defines the approved implementation boundary. A brief cannot mark a feature complete or waive documented acceptance intent.
@@ -58,7 +58,7 @@ Authority order for participant-facing work is:
 
 1. current task and authorized slice/gate;
 2. security, privacy, authorization, lifecycle, geography, domain, tracker and dependency authorities;
-3. Four-Lens Completion Governance Amendment plus applicable parallel-delivery/release authority;
+3. Mobile Exchange Stages 3–6 authority, Four-Lens Completion Governance Amendment and applicable parallel-delivery/release authority;
 4. Exchange Interaction Architecture and applicable RFx Core authority;
 5. `docs/brand/` for approved target experience;
 6. `docs/design/` for currently converged implementation baseline; and
@@ -112,7 +112,7 @@ Do not copy current tracker totals, active packet SHAs or lane state into this l
 
 The Exchange shell truthfulness/performance gate and post-PR-#159 convergence are historical merged foundations. Current volatile lane, packet, candidate, merge/release and experience status lives only in the current program artifacts/GitHub state.
 
-The permanent participant order is implemented as `Opportunities/RFx | Resources | Intelligence | Referrals`; available behavior consumes server-authorized runtimes. Network remains an Intelligence view/domain concept, Account and Quick Start remain utilities, and navigation context never grants authority.
+Stage 2 merged through PR #222 using its historically governed order. The current successor authority now requires `Opportunities/RFx | Resources | Intelligence | Capabilities`; Referrals migrates to a governed cross-lens function and Menu/Account utility. Available behavior consumes server-authorized runtimes. Network remains an Intelligence view/domain concept, Account and Quick Start remain utilities, and navigation context never grants authority.
 
 Slices 4.1–4.5 retain their retroactive independent assurance ledger as historical/optional assurance evidence; optional assurance is not a completion prerequisite. Any known material findings from that ledger still require correction, containment, truthful unavailability or explicit current disposition on their substance. Slice 4.6 PR #171's preserved pre-amendment Independent Acceptance stop boundary remains historical provenance but no longer gates Four-Lens completion, merge, release or later work under the Completion Governance Amendment. Slice 4.7 eligibility must be recalculated from its actual current dependencies and explicitly authorized rather than from missing Independent Acceptance alone.
 
@@ -141,7 +141,7 @@ Before implementing any slice or Brand Gate:
 3. Read `docs/context/PRODUCT_PRINCIPLES.md`.
 4. Read `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md` for participant-facing work.
 5. Read the canonical tracker and dependency map.
-6. For Four-Lens work, read `docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md`, `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`, `docs/program/PARALLEL_DELIVERY_MATRIX.md`, `docs/program/CHAT_LANE_CHARTERS.md`, `governance/four-lens-requirements.json` and the exact current work packet.
+6. For current Mobile Exchange/Four-Lens work, read `docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md`, `docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md`, `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`, `docs/program/PARALLEL_DELIVERY_MATRIX.md`, `docs/program/CHAT_LANE_CHARTERS.md`, `governance/four-lens-requirements.json` and the exact current work packet.
 7. Read the applicable wave/lens roadmap.
 8. Read the specific slice, lens or Brand Gate authority.
 9. Read the context/RFx documents listed under the authority's **Must read** or governing section.

@@ -8,7 +8,7 @@ The governing decision is:
 
 > One structured RFx transaction is presented through role-appropriate issuer, responder, teammate and later evaluator workspaces. AMACS supplies versioned market-need, capability, request-family, response-structure, evaluation-method and readiness semantics. The RFxchange supplies organization authority, geography, lifecycle, workflow, permissions, AI implementation/provenance, projections and participant experience.
 
-The RFx Core workspaces operate within the cross-cutting Exchange interaction architecture: Opportunities/RFx is the primary transaction lens; Resources, Intelligence and Referrals support the same organization-centered market; spatial context is preserved across valid lens changes; and complex work may move into an Operational Workspace with an explicit return to the originating spatial context.
+The RFx Core workspaces operate within the cross-cutting Exchange interaction architecture: Opportunities/RFx is the primary transaction lens; Resources, Intelligence and Capabilities support the same organization-centered market; Referrals is a governed cross-lens function and Menu/Account utility; spatial context is preserved across valid lens changes; and complex work may move into an Operational Workspace with an explicit return to the originating spatial context.
 
 ## Read in this order
 

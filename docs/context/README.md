@@ -8,6 +8,7 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 
 - [`PRODUCT_PRINCIPLES.md`](PRODUCT_PRINCIPLES.md) — cross-cutting product invariants and boundaries.
 - [`EXCHANGE_INTERACTION_ARCHITECTURE.md`](EXCHANGE_INTERACTION_ARCHITECTURE.md) — RFx-first lens hierarchy, participant truthfulness, persistent spatial context, marker/selection behavior, Intelligence/Locations boundary, provider gating and cross-lens workflow rules.
+- [`../program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md`](../program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md) — current product-owner authority for the final Capabilities lens, cross-lens Referrals, shared migration, Stages 3–6 and release acceptance.
 - [`../program/FOUR_LENS_PROGRAM_AUTHORITY.md`](../program/FOUR_LENS_PROGRAM_AUTHORITY.md) — parallel lane delivery, immutable experience requirements and independent acceptance governance.
 - [`../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md`](../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md) — bounded no-Feature-ID authority for the persistent participant shell, exact lens registry, separate Account utilities, scoped loading and transition-performance acceptance.
 - [`USER_JOURNEY.md`](USER_JOURNEY.md) — canonical activation journey from public discovery through OPEN.
@@ -24,9 +25,10 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 
 [`EXCHANGE_INTERACTION_ARCHITECTURE.md`](EXCHANGE_INTERACTION_ARCHITECTURE.md), originally merged through PR #150 and reconciled by the bounded Exchange-shell gate, establishes the cross-cutting participant interaction authority:
 
-- the permanent authenticated lens order is exactly `Opportunities/RFx | Resources | Intelligence | Referrals`;
+- the permanent authenticated lens order is exactly `Opportunities/RFx | Resources | Intelligence | Capabilities`;
 - Opportunities/RFx remains the primary transaction lens and principal public positioning;
-- Resources, Intelligence and Referrals are supporting lenses over the same market rather than separate applications;
+- Resources, Intelligence and Capabilities are supporting lenses over the same market rather than separate applications;
+- Referrals is a governed cross-lens function and Menu/Account utility, not a permanent lens;
 - stable architecture remains visible when a permanent lens is unavailable; availability governs action rather than whether the lens exists;
 - Opportunities/RFx was present but explicitly unavailable until the accepted real Slice 4.5 participant discovery runtime supplied `/opportunities`; its current availability is bounded to implemented and server-authorized RFx behavior;
 - location and site functionality remains first-class inside Intelligence rather than becoming a peer commercial-real-estate product identity;
@@ -36,7 +38,7 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 - lens switching preserves authorized map/search/selection context where meaningful;
 - the participant's own organization uses the standing logo marker, while a selected external organization transitions from a compact node to the standing selected marker;
 - Official Resource Provider actions remain gated by the existing application/review/approval authority;
-- referral actions remain bounded by the current referral aggregate;
+- cross-lens referral actions and Menu management remain bounded by the current referral aggregate;
 - complex RFx authoring may use an Operational Workspace while retaining a safe return seam to the Spatial Workspace; and
 - no interface fabricates RFxs, opportunities, matches, providers, referrals, sites, intelligence, outcomes or market activity.
 
