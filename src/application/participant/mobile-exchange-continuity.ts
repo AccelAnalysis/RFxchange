@@ -390,6 +390,41 @@ function subjectIdentityMatches(left: ExchangeSubjectIdentity, right: ExchangeSu
     && left.recordId === right.recordId;
 }
 
+function completeSelectionMatches(
+  carried: ExchangeSelectionState,
+  revalidated: ExchangeSelectionState,
+): boolean {
+  if (carried.kind === "none" || revalidated.kind === "none") {
+    return carried.kind === "none" && revalidated.kind === "none";
+  }
+  const sameOrganization = carried.selectedOrganization === null || revalidated.selectedOrganization === null
+    ? carried.selectedOrganization === revalidated.selectedOrganization
+    : carried.selectedOrganization.selectionKey === revalidated.selectedOrganization.selectionKey
+      && carried.selectedOrganization.organizationId === revalidated.selectedOrganization.organizationId
+      && carried.selectedOrganization.associationRole === revalidated.selectedOrganization.associationRole;
+  const sameRecord = carried.selectedRecord === null || revalidated.selectedRecord === null
+    ? carried.selectedRecord === revalidated.selectedRecord
+    : carried.selectedRecord.selectionKey === revalidated.selectedRecord.selectionKey
+      && carried.selectedRecord.recordType === revalidated.selectedRecord.recordType
+      && carried.selectedRecord.recordId === revalidated.selectedRecord.recordId
+      && carried.selectedRecord.organizationId === revalidated.selectedRecord.organizationId;
+  const sameMarker = carried.selectedMarker === null || revalidated.selectedMarker === null
+    ? carried.selectedMarker === revalidated.selectedMarker
+    : carried.selectedMarker.selectionKey === revalidated.selectedMarker.selectionKey
+      && carried.selectedMarker.markerId === revalidated.selectedMarker.markerId
+      && carried.selectedMarker.role === revalidated.selectedMarker.role;
+  const sameRelationship = carried.selectedRelationship === null || revalidated.selectedRelationship === null
+    ? carried.selectedRelationship === revalidated.selectedRelationship
+    : carried.selectedRelationship.relationshipId === revalidated.selectedRelationship.relationshipId
+      && revalidated.selectedRelationship.authority === "server-revalidated";
+  return carried.kind === revalidated.kind
+    && subjectIdentityMatches(carried.focalIdentity, revalidated.focalIdentity)
+    && sameOrganization
+    && sameRecord
+    && sameMarker
+    && sameRelationship;
+}
+
 function scopeMatches(left: MobileExchangeContinuityScope, right: MobileExchangeContinuityScope): boolean {
   return left.sessionContextId === right.sessionContextId
     && left.participantId === right.participantId
@@ -665,7 +700,18 @@ export function reconcileServerRevalidatedMobileExchangeProjection(
   });
   if (continuity.status === "invalid") {
     const safeState = continuity.safeState
-      ? Object.freeze({ ...state, ...continuity.safeState, activeProjection: null })
+      ? Object.freeze({
+          ...state,
+          ...continuity.safeState,
+          activeProjection: null,
+          detailNavigation: Object.freeze({
+            status: "closed" as const,
+            source: null,
+            context: null,
+            returnSnapshot: null,
+            errorCode: null,
+          }),
+        })
       : null;
     return rejectedStage3Projection(state, continuity.reason, safeState);
   }
@@ -768,8 +814,11 @@ export function closeMobileExchangeDetail(
   input: Readonly<{
     currentScope: MobileExchangeContinuityScope;
     detailStillAuthorized: boolean;
-    returnSelectionAuthorized: boolean;
-    returnSelectionIdentity: ExchangeSubjectIdentity | null;
+    returnContextAuthorized: boolean;
+    returnFocalSubjectAuthorized: boolean;
+    returnAssociatedOrganizationAuthorized: boolean;
+    returnRelationshipAuthorized: boolean;
+    revalidatedReturnSelection: ExchangeSelectionState | null;
   }>,
 ): Readonly<{ state: MobileExchangeStage3ContinuityState | null; returnHref: string; focusReturnKey: string | null }> {
   const navigation = state.detailNavigation;
@@ -788,8 +837,14 @@ export function closeMobileExchangeDetail(
       focusReturnKey: null,
     });
   }
-  if (typeof input.detailStillAuthorized !== "boolean" || typeof input.returnSelectionAuthorized !== "boolean") {
-    throw new Error("Detail close requires explicit detail and return-selection authorization results.");
+  if (
+    typeof input.detailStillAuthorized !== "boolean"
+    || typeof input.returnContextAuthorized !== "boolean"
+    || typeof input.returnFocalSubjectAuthorized !== "boolean"
+    || typeof input.returnAssociatedOrganizationAuthorized !== "boolean"
+    || typeof input.returnRelationshipAuthorized !== "boolean"
+  ) {
+    throw new Error("Detail close requires explicit detail, return-context, and selection authorization results.");
   }
   if (!input.detailStillAuthorized) {
     const safeState = Object.freeze({
@@ -812,14 +867,27 @@ export function closeMobileExchangeDetail(
       focusReturnKey: null,
     });
   }
-  const returnSelectionAuthorized = snapshot.selection.kind === "none"
-    || (
-      input.returnSelectionAuthorized
-      && input.returnSelectionIdentity !== null
-      && subjectIdentityMatches(snapshot.selection.focalIdentity, input.returnSelectionIdentity)
+  const revalidatedReturnSelection = input.revalidatedReturnSelection;
+  const returnSelectionAuthorized = input.returnContextAuthorized
+    && revalidatedReturnSelection !== null
+    && completeSelectionMatches(snapshot.selection, revalidatedReturnSelection)
+    && (
+      snapshot.selection.kind === "none"
+      || (
+        input.returnFocalSubjectAuthorized
+        && (
+          snapshot.selection.kind !== "record"
+          || snapshot.selection.selectedOrganization === null
+          || input.returnAssociatedOrganizationAuthorized
+        )
+        && (
+          snapshot.selection.selectedRelationship === null
+          || input.returnRelationshipAuthorized
+        )
+      )
     );
-  const restoredSelection = returnSelectionAuthorized
-    ? snapshot.selection
+  const restoredSelection = returnSelectionAuthorized && revalidatedReturnSelection
+    ? revalidatedReturnSelection
     : createExchangeSelectionState({ kind: "none" });
   const lensState = state.lensState[snapshot.query.lens];
   const restored = Object.freeze({
