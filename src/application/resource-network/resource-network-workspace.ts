@@ -26,7 +26,7 @@ function boundedText(value: SearchParamValue, maximum: number): string | null {
 
 function safeOpportunityReturn(value: SearchParamValue, rfxReference: string | null): string | null {
   const normalized = first(value).trim();
-  if (!normalized || !rfxReference || normalized.startsWith("//")) return null;
+  if (!normalized || normalized.length > 240 || !rfxReference || normalized.startsWith("//")) return null;
   try {
     const parsed = new URL(normalized, "https://participant.invalid");
     if (
@@ -48,6 +48,10 @@ function first(value: SearchParamValue): string {
 function workspaceId(value: SearchParamValue): string | null {
   const normalized = first(value).trim();
   return WORKSPACE_ID_PATTERN.test(normalized) ? normalized : null;
+}
+
+export function parseResourceWorkspaceId(value: SearchParamValue): string | null {
+  return workspaceId(value);
 }
 
 export function parseResourceNetworkWorkspaceQuery(

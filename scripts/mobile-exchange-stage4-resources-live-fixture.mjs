@@ -29,8 +29,14 @@ async function latestAcceptanceUser() {
   const candidates = result.users
     .filter((user) => user.email?.startsWith("shell-") && user.email.endsWith("@example.test"))
     .sort((left, right) => Number(right.metadata.creationTime ? Date.parse(right.metadata.creationTime) : 0) - Number(left.metadata.creationTime ? Date.parse(left.metadata.creationTime) : 0));
-  assert.ok(candidates[0]?.email, "The configured participant fixture has not been seeded yet.");
-  return candidates[0];
+  if (candidates[0]?.email) return candidates[0];
+  const userRecords = await db.collection("users").get();
+  const persisted = userRecords.docs
+    .map((document) => document.data())
+    .filter((user) => typeof user.primaryEmail === "string" && user.primaryEmail.startsWith("shell-") && user.primaryEmail.endsWith("@example.test") && typeof user.login?.subject === "string")
+    .sort((left, right) => String(right.createdAt ?? "").localeCompare(String(left.createdAt ?? "")))[0];
+  assert.ok(persisted, "The configured participant fixture has not been seeded yet.");
+  return auth.createUser({ uid: persisted.login.subject, email: persisted.primaryEmail, password });
 }
 
 function providerStatus(organizationId) {

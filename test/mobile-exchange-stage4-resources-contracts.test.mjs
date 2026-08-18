@@ -8,6 +8,7 @@ import {
   resourcesMobileValueLabel,
 } from "../src/application/resource-network/mobile-resource-exchange.ts";
 import { matchesResourceDiscoveryTerms, resourceDiscoveryTerms } from "../src/application/resource-network/resource-discovery-query.ts";
+import { ResourceNetworkService } from "../src/application/resource-network/resource-network.ts";
 import { parseResourcesMobileWorkspaceQuery } from "../src/application/resource-network/resource-network-workspace.ts";
 
 const NOW = "2026-08-18T12:00:00.000Z";
@@ -127,11 +128,12 @@ test("valid long domain text is safely excerpted for bounded shared cards", () =
 });
 
 test("Resources filters every result family coherently and keeps private requests outside availability filtering", () => {
-  const resourceSearch = project({ search: "preparation" });
+  const resourceSearch = project({ search: "preparation", selection: { requestId: request.id, source: "restored" } });
   assert.deepEqual(resourceSearch.discovery.results.cards.map((card) => card.identity.selectionKey), [
     "organization:org-provider",
     "provider-resource:resource-1",
   ]);
+  assert.equal(resourceSearch.selection.kind, "none");
   const availability = project({ search: "capital", availability: "available" });
   assert.deepEqual(availability.discovery.results.cards.map((card) => card.identity.selectionKey), [
     "organization:org-provider",
@@ -146,6 +148,42 @@ test("server and card query helpers require every bounded Unicode-aware term", (
   assert.equal(matchesResourceDiscoveryTerms(["Solar retrofit", "Aide économique"], terms), true);
   assert.equal(matchesResourceDiscoveryTerms(["Solar retrofit only"], terms), false);
   assert.equal(resourceDiscoveryTerms("a ".repeat(100)).length <= 20, true);
+});
+
+test("suppressed and expired resource text cannot influence provider discovery", async () => {
+  const publication = Object.freeze({ organizationId: "org-provider", version: 2, status: "published", sourceProfileVersion: 3, visibleServiceIds: ["service-capital"], publishedAt: NOW, updatedAt: NOW });
+  const { providerDisplayName: _providerDisplayName, ...resourceRecord } = resource;
+  void _providerDisplayName;
+  const hiddenResources = [
+    Object.freeze({ ...resourceRecord, id: "suppressed-resource", title: "private-oracle-term", moderation: { status: "suppressed", reason: "moderated" }, createdByUserId: "user-provider", updatedByUserId: "user-provider" }),
+    Object.freeze({ ...resourceRecord, id: "expired-resource", title: "expired-oracle-term", endsAt: "2026-08-17T12:00:00.000Z", moderation: { status: "clear", reason: null }, createdByUserId: "user-provider", updatedByUserId: "user-provider" }),
+  ];
+  const service = new ResourceNetworkService({
+    network: {
+      listPublishedPublications: async () => [publication],
+      listPublishedResources: async () => hiddenResources,
+      getPublication: async () => publication,
+    },
+    providers: {
+      getStatusByOrganizationId: async () => ({ status: "official-resource-provider" }),
+      getServiceProfileByOrganizationId: async () => ({ ...provider, version: 3, status: "active" }),
+    },
+    completions: { getByOrganizationId: async () => ({ status: "active" }) },
+    serviceGeographies: { getByOrganizationId: async () => ({ serviceGeographyIds: ["geo-1"] }) },
+    restrictions: { getForOrganization: async () => ({ state: "none" }) },
+    profiles: { getByOrganizationId: async () => ({ displayName: provider.displayName }) },
+    authorization: {}, geographies: {}, referrals: {}, acquisition: {}, publicOrigin: "https://participant.invalid", now: () => NOW,
+  });
+  for (const query of ["private-oracle-term", "expired-oracle-term"]) {
+    const discovery = await service.discover({
+      viewerOrganizationId: "org-viewer",
+      selectedGeography: { id: "geo-1", name: "Released locality", releaseState: "released" },
+      selectedGeometry: provider.territory.geometry,
+      query,
+    });
+    assert.equal(discovery.providers.length, 0, query);
+    assert.equal(discovery.resources.length, 0, query);
+  }
 });
 
 test("coincident provider territories render once and never invent a provider selection target", () => {
@@ -208,11 +246,45 @@ test("maximum discovery text cannot overflow shared canonical destinations", () 
   assert.equal(parsed.searchParams.get("returnTo"), "/opportunities/RFX-47/assess?tab=gaps#gap-2");
 });
 
+test("maximum valid identifiers use bounded selection routes instead of crashing cards", () => {
+  const organizationId = `a${":x".repeat(95)}`;
+  const resourceId = `r${":x".repeat(95)}`;
+  const requestId = `q${":x".repeat(95)}`;
+  const longProvider = { ...provider, organizationId, marker: { ...provider.marker, id: "long-marker" } };
+  const longResource = { ...resource, id: resourceId, organizationId };
+  const longRequest = { ...request, id: requestId, providerContext: { ...request.providerContext, providerOrganizationId: organizationId } };
+  const projection = project({
+    providers: [longProvider],
+    resources: [longResource],
+    requests: [longRequest],
+    search: "",
+    selection: { resourceId, source: "restored" },
+    navigationContext: {
+      rfxReference: "RFX-47",
+      rfxGap: "Need capital readiness",
+      returnTo: "/opportunities/RFX-47/assess?tab=gaps#gap-2",
+    },
+  });
+  const hrefs = [
+    ...projection.discovery.results.cards.flatMap((card) => [
+      card.detailContext.canonicalHref,
+      ...card.recordActions.map((action) => action.handler?.kind === "href" ? action.handler.href : null),
+    ]),
+    ...projection.actionRail.actions.map((action) => action.handler?.kind === "href" ? action.handler.href : null),
+  ].filter(Boolean);
+  assert.equal(hrefs.length > 0, true);
+  assert.equal(hrefs.every((href) => href.length <= 240), true);
+  assert.equal(hrefs.some((href) => href.startsWith(`/resources/view/provider/${organizationId}`)), true);
+  assert.equal(hrefs.some((href) => href.startsWith(`/resources/view/resource/${resourceId}`)), true);
+  assert.equal(hrefs.some((href) => href.startsWith(`/resources/view/request/${requestId}`)), true);
+});
+
 test("route hydration gates private adjuncts and settles them independently from public discovery", () => {
   const page = fs.readFileSync(new URL("../app/resources/page.tsx", import.meta.url), "utf8");
   assert.match(page, /const referralsPromise = referralManage/);
   assert.match(page, /const ownerPromise = resourceManage/);
   assert.match(page, /Promise\.allSettled/);
+  assert.match(page, /selectedMessagesResult.*await service\.messages.*status: "rejected"/s);
   assert.match(page, /referralsResult\.status === "fulfilled" \? referralsResult\.value : \[\]/);
   assert.match(page, /ownerResult\.status === "fulfilled" \? ownerResult\.value : null/);
   assert.doesNotMatch(page, /throw referralsResult\.reason|throw ownerResult\.reason/);
@@ -220,6 +292,9 @@ test("route hydration gates private adjuncts and settles them independently from
   assert.match(workspace, /authorization\.referralManage \? <form action=\{connect\}/);
   assert.match(workspace, /data-resources-mobile-operations/);
   assert.match(workspace, /resource-management-mobile/);
+  assert.match(workspace, /visibleProviderReferrals/);
+  assert.match(workspace, /setPreviewSelection\(cardSelection/);
+  assert.match(workspace, /suggestedProviderLabel/);
 });
 
 test("selection preserves complete provider association and marker identity", () => {
@@ -256,6 +331,7 @@ test("RFx gap origin is bounded, same-origin and preserved as non-authorizing qu
   assert.equal(parseResourcesMobileWorkspaceQuery({ returnTo: "https://evil.example/opportunities" }).returnTo, null);
   assert.equal(parseResourcesMobileWorkspaceQuery({ returnTo: "/account" }).returnTo, null);
   assert.equal(parseResourcesMobileWorkspaceQuery({ rfxReference: "RFX-47", returnTo: "/opportunities/RFX-OTHER/assess" }).returnTo, null);
+  assert.equal(parseResourcesMobileWorkspaceQuery({ rfxReference: "RFX-47", returnTo: `/opportunities/RFX-47/assess?q=${"x".repeat(240)}` }).returnTo, null);
 });
 
 test("Resources-owned copy is complete for the repository five-locale set", () => {

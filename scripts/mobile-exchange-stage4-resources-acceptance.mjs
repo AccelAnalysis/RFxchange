@@ -2,7 +2,9 @@ import { spawnSync } from "node:child_process";
 
 const startedAt = performance.now();
 const result = spawnSync(process.execPath, [
-  "--experimental-strip-types",
+  "--experimental-transform-types",
+  "--experimental-loader",
+  "./scripts/node-typescript-source-loader.mjs",
   "--test",
   "test/mobile-exchange-stage4-resources-contracts.test.mjs",
 ], { stdio: "inherit", env: process.env });

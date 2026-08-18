@@ -94,7 +94,12 @@ function command(input: Readonly<{ id: string; organizationId: OrganizationId; o
 export class ResourceNetworkService {
   private readonly now: () => string;
   private readonly id: () => string;
-  constructor(private readonly dependencies: ResourceNetworkDependencies) { this.now = dependencies.now ?? (() => new Date().toISOString()); this.id = dependencies.id ?? randomUUID; }
+  private readonly dependencies: ResourceNetworkDependencies;
+  constructor(dependencies: ResourceNetworkDependencies) {
+    this.dependencies = dependencies;
+    this.now = dependencies.now ?? (() => new Date().toISOString());
+    this.id = dependencies.id ?? randomUUID;
+  }
 
   private async authorize(scope: ResourceNetworkScope, permission: "resource.manage" | "referral.manage") {
     const decision = await authorizeOrganizationOperation({ context: scope.context, organizationId: organizationId(scope.organizationId), membershipId: organizationMembershipId(scope.membershipId), permission }, this.dependencies.authorization);
@@ -138,6 +143,7 @@ export class ResourceNetworkService {
       this.dependencies.network.listPublishedResources(),
     ]);
     const terms = resourceDiscoveryTerms(input.query);
+    const now = this.now();
     const markers = new Map((input.markers ?? []).map((value) => [value.organizationId, value.marker]));
     const projections = await Promise.all(publications.map(async (publication): Promise<ProviderDiscoveryProjection | null> => {
       if (String(publication.organizationId) === input.viewerOrganizationId) return null;
@@ -154,7 +160,8 @@ export class ResourceNetworkService {
       const providerValues = [source.organizationProfile.displayName, source.profile.categories.join(" "), source.profile.populationsServed, source.profile.eligibility, ...services.flatMap((service) => [service.name, service.description])];
       const matchingResourceValues = allResources
         .filter((resource) => resource.organizationId === publication.organizationId && resource.geographyIds.includes(String(input.selectedGeography.id)))
-        .map((resource) => [resource.title, resource.summary, resource.description, resource.eligibility]);
+        .map((resource) => publicProviderResource(resource, source.organizationProfile!.displayName, now))
+        .flatMap((resource) => resource ? [[resource.title, resource.summary, resource.description, resource.eligibility]] : []);
       const matched = (
         matchesResourceDiscoveryTerms(providerValues, terms)
         || matchingResourceValues.some((resourceValues) => matchesResourceDiscoveryTerms([...providerValues, ...resourceValues], terms))
@@ -168,7 +175,7 @@ export class ResourceNetworkService {
       if (!resource.geographyIds.includes(String(input.selectedGeography.id))) return null;
       const provider = providers.find((candidate) => candidate.organizationId === resource.organizationId);
       if (!provider) return null;
-      const projection = publicProviderResource(resource, provider.displayName, this.now());
+      const projection = publicProviderResource(resource, provider.displayName, now);
       if (!projection || !terms.length) return projection;
       const values = [
         projection.title,

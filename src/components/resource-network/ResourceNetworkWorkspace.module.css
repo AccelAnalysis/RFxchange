@@ -1,5 +1,6 @@
 .workspace { position: relative; min-height: calc(100vh - 4.4rem); background: #ede9df; }
 .panel { position: absolute; z-index: 5; top: 1rem; right: 1rem; bottom: 1rem; width: min(46rem, calc(100vw - 2rem)); overflow: auto; padding: 1.25rem; border: 1px solid rgba(34,39,45,.16); border-radius: 1.25rem; background: rgba(255,252,245,.94); box-shadow: 0 1.25rem 3rem rgba(24,29,35,.18); backdrop-filter: blur(18px); }
+.panel, .mobileOperations, .detail, .resources, .requests, .manage { min-width: 0; overflow-wrap: anywhere; }
 .panel header h1 { margin: .2rem 0; font-size: clamp(1.6rem,3vw,2.35rem); line-height: 1; }
 .panel h2 { font-size: 1rem; }
 .eyebrow, .status { margin: 0; color: #866315; font-size: .76rem; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }

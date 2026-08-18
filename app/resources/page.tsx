@@ -130,8 +130,14 @@ export default async function ResourcesPage({ searchParams }: Props) {
     queryState.resourceId,
     (resourceProjection.available ? resourceProjection.projection.resources : []).map((resource) => resource.id),
   );
-  const selectedMessages = selectedRequestId
-    ? await service.messages(actor, selectedRequestId)
+  const selectedMessagesResult = selectedRequestId
+    ? await service.messages(actor, selectedRequestId).then(
+        (value) => Object.freeze({ status: "fulfilled" as const, value }),
+        (reason: unknown) => Object.freeze({ status: "rejected" as const, reason }),
+      )
+    : null;
+  const selectedMessages = selectedMessagesResult?.status === "fulfilled"
+    ? selectedMessagesResult.value
     : [];
   const commandRecoveryScope = `${String(access.membership.organizationId)}:${String(access.membership.id)}`;
 
@@ -176,6 +182,7 @@ export default async function ResourcesPage({ searchParams }: Props) {
         resourceId: selectedResourceId,
       })}
       selectedMessages={selectedMessages}
+      selectedMessagesUnavailable={selectedMessagesResult?.status === "rejected"}
     />
   );
 }
