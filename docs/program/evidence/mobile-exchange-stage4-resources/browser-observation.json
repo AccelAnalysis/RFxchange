@@ -2,19 +2,19 @@
   "schemaVersion": 1,
   "workPacketId": "WP-MOBILE-EXCHANGE-STAGE4-RESOURCES-01",
   "requirementId": "MOB36-RESOURCES-001",
-  "candidateBinding": "The enclosing Git commit is the exact candidate; exact-head CI is recorded on PR #237.",
-  "observedFromPublishedHead": "d0bee0918bd8f308fd571868f7c9fea420f722b1",
-  "implementationPatchSha256BeforeEvidence": "fdab7b5e795e087538b954ddc94592790d822675579fc052de17ca7e6a4dd47a",
+  "candidateBinding": "The authenticated browser observations are bound exactly to runtime commit a037feee90dbcf3ef95f7d39635f5bbec511c61f. The enclosing final candidate differs from that runtime only by this durable evidence and closeout metadata.",
+  "observedRuntimeCommit": "a037feee90dbcf3ef95f7d39635f5bbec511c61f",
   "fixture": {
-    "canonicalShellRunId": "shell-1787043459494-4f0a37",
+    "canonicalShellRunId": "shell-1787046132491-1e7d38",
     "projectId": "demo-rfxchange",
     "geographyId": "us-va-portsmouth",
-    "providerOrganizationId": "org_harbor_shell-1787043459494-4f0a37",
-    "resourceId": "resource-public-org_harbor_shell-1787043459494-4f0a37",
+    "providerOrganizationId": "org_harbor_shell-1787046132491-1e7d38",
+    "resourceId": "resource-public-org_harbor_shell-1787046132491-1e7d38",
+    "requestId": "provider-request-org_shell-1787046132491-1e7d38",
     "reproduction": [
       "Run the canonical configured Exchange shell harness against the Firebase emulators without automatic cleanup.",
       "Run scripts/mobile-exchange-stage4-resources-live-fixture.mjs against the retained shell fixture.",
-      "Authenticate as the generated shell participant and open the bounded RFx-origin Resources URL."
+      "Authenticate as the generated shell participant and open the bounded RFx-origin Resources URL against runtime commit a037feee90dbcf3ef95f7d39635f5bbec511c61f."
     ]
   },
   "observations": {
@@ -24,6 +24,7 @@
       "rfXContextAndExactReturnRendered": true,
       "resourceOpenPreservedRfXOriginAndReturn": true,
       "providerSelectionClearedStaleResourceAndRequest": true,
+      "resourceOnlyCanonicalLinkDerivedAssociatedProvider": true,
       "resourceOnlySearchKeptProviderAndResource": true,
       "resourceOnlySearchExcludedPrivateRequestResults": true,
       "privateRequestAdjunctFailedClosedWithoutTakingDownPublicDiscovery": true,
@@ -33,10 +34,18 @@
       "persistentResourcesLensRendered": true,
       "expandedSheetRendered": true,
       "providerAndResourceCardsRendered": true,
+      "openScrolledSelectedOperationsIntoView": true,
+      "selectedOperationsTopCssPixels": 228.515625,
+      "sheetScrollTopCssPixels": 808,
       "searchAndFilterControlsPresent": true,
       "rfXReturnPresent": true,
       "operationalProviderActionsPresent": true,
       "visibleHorizontalClippingObserved": false
+    },
+    "compactDestination": {
+      "unknownMaximumGrammarIdentifierFailedClosedToResources": true,
+      "unknownIdentifierDisclosed": false,
+      "applicationErrorRendered": false
     },
     "locales": {
       "en-US": "Resource Network",
@@ -54,6 +63,7 @@
   },
   "limits": [
     "The browser fixture did not grant referral.manage or resource.manage for the discovered provider, so private request and owner-management success paths are established by focused application tests and Firestore emulator evidence, not this browser observation.",
+    "Maximum authorized compact-destination preservation is established by focused behavioral acceptance; the browser replay intentionally used an unknown maximum-grammar identifier to prove fail-closed handling without record disclosure.",
     "This is a builder-run packet-specific in-app browser replay, not optional independent assurance and not a production-network observation.",
     "The repository canonical configured-browser shell harness remains a separate exact-head CI gate."
   ]
