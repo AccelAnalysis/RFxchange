@@ -211,6 +211,10 @@ test("TEM-002/003 create one organization invitation, replay exactly, and requir
   assert.equal(f.participations[0].boundaryCopyDigest, teamingBoundaryCopyDigest());
   assert.equal(f.participations[0].boundaryLocale, "en-US");
   assert.equal("responseId" in f.participations[0], false);
+  await assert.rejects(
+    f.service.decide(f.scope(actors.other), { commandId: "accept-internal", invitationId: created.invitation.id, expectedVersion: 1, action: "accept", boundaryVersion: TEAMING_BOUNDARY_VERSION, boundaryLocale: "en-US" }),
+    (error) => error instanceof OpportunityTeamingError && error.code === "conflict",
+  );
 });
 
 test("ACQ-007 external context is atomic, email-bound, and never auto-accepts", async () => {

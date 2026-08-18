@@ -351,7 +351,7 @@ export class OpportunityTeamingService {
     const requestFingerprint = fingerprint({ action: "invitation.create", organizationId: scope.organizationId, invitationId, context, target, proposedCapacity, responsibilitySummary });
     const prior = await this.dependencies.teaming.getCommand(commandId);
     if (prior) {
-      if (prior.action !== "invitation.create" || prior.requestFingerprint !== requestFingerprint || prior.invitationId !== invitationId) throw new OpportunityTeamingError("conflict", "Command identity was reused for different invitation intent.");
+      if (prior.organizationId !== scope.organizationId || prior.action !== "invitation.create" || prior.requestFingerprint !== requestFingerprint || prior.invitationId !== invitationId) throw new OpportunityTeamingError("conflict", "Command identity was reused for different invitation intent.");
       return Object.freeze({ invitation: prior.resultingInvitation, view: participantView(prior.resultingInvitation, "lead", true, this.now()), replayed: true });
     }
     const now = this.now();
@@ -465,11 +465,11 @@ export class OpportunityTeamingService {
     await this.authorizeWrite(scope);
     const commandId = stable(input.commandId, "Command identity");
     const invitationId = stable(input.invitationId, "Invitation identity");
-    const requestFingerprint = fingerprint({ action: input.action, invitationId, expectedVersion: input.expectedVersion, boundaryVersion: input.action === "accept" ? input.boundaryVersion ?? null : null, boundaryLocale: input.action === "accept" ? input.boundaryLocale ?? null : null });
+    const requestFingerprint = fingerprint({ action: input.action, organizationId: scope.organizationId, invitationId, expectedVersion: input.expectedVersion, boundaryVersion: input.action === "accept" ? input.boundaryVersion ?? null : null, boundaryLocale: input.action === "accept" ? input.boundaryLocale ?? null : null });
     const prior = await this.dependencies.teaming.getCommand(commandId);
     if (prior) {
       const expectedAction = `invitation.${input.action}`;
-      if (prior.action !== expectedAction || prior.requestFingerprint !== requestFingerprint || prior.invitationId !== invitationId) throw new OpportunityTeamingError("conflict", "Command identity was reused for a different invitation decision.");
+      if (prior.organizationId !== scope.organizationId || prior.action !== expectedAction || prior.requestFingerprint !== requestFingerprint || prior.invitationId !== invitationId) throw new OpportunityTeamingError("conflict", "Command identity was reused for a different invitation decision.");
       const role = prior.resultingInvitation.leadOrganizationId === scope.organizationId ? "lead" : "invitee";
       return Object.freeze({ view: participantView(prior.resultingInvitation, role, true, this.now()), replayed: true });
     }
