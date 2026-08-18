@@ -11,6 +11,34 @@ export interface ResourceNetworkWorkspaceQuery {
   readonly requestId: string | null;
 }
 
+export interface ResourcesMobileWorkspaceQuery extends ResourceNetworkWorkspaceQuery {
+  readonly resourceId: string | null;
+  readonly manageMode: "offer" | "edit" | null;
+  readonly rfxReference: string | null;
+  readonly rfxGap: string | null;
+  readonly returnTo: string | null;
+}
+
+function boundedText(value: SearchParamValue, maximum: number): string | null {
+  const normalized = first(value).trim().replace(/\s+/g, " ").slice(0, maximum);
+  return normalized || null;
+}
+
+function safeOpportunityReturn(value: SearchParamValue): string | null {
+  const normalized = first(value).trim();
+  if (!normalized || normalized.startsWith("//")) return null;
+  try {
+    const parsed = new URL(normalized, "https://participant.invalid");
+    if (
+      parsed.origin !== "https://participant.invalid"
+      || (parsed.pathname !== "/opportunities" && !parsed.pathname.startsWith("/opportunities/"))
+    ) return null;
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return null;
+  }
+}
+
 type SearchParamValue = string | readonly string[] | undefined;
 
 function first(value: SearchParamValue): string {
@@ -39,6 +67,21 @@ export function parseResourceNetworkWorkspaceQuery(
     organizationId: workspaceId(params.organization),
     providerId: workspaceId(params.provider),
     requestId: workspaceId(params.request),
+  });
+}
+
+export function parseResourcesMobileWorkspaceQuery(
+  params: Readonly<Record<string, SearchParamValue>>,
+): ResourcesMobileWorkspaceQuery {
+  return Object.freeze({
+    ...parseResourceNetworkWorkspaceQuery(params),
+    resourceId: workspaceId(params.resource),
+    manageMode: ["offer", "edit"].includes(first(params.manage))
+      ? first(params.manage) as "offer" | "edit"
+      : null,
+    rfxReference: workspaceId(params.rfxReference),
+    rfxGap: boundedText(params.rfxGap, 240),
+    returnTo: safeOpportunityReturn(params.returnTo),
   });
 }
 

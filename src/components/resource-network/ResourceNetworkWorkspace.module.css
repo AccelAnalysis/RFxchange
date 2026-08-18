@@ -22,6 +22,11 @@
 .panel button { padding: .62rem .85rem; border: 1px solid #252a2f; border-radius: 999px; background: #252a2f; color: white; font-weight: 700; cursor: pointer; }
 .panel button:disabled { opacity: .5; }
 .notice { padding: .7rem; border-radius: .5rem; background: #fff0be; }
+.originContext { display: grid; gap: .3rem; margin-top: .9rem; padding: .8rem; border-left: 3px solid #866315; background: #f7f0dd; }
+.originContext span, .originContext small { color: #4d565e; }
+.actionRail { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .45rem; margin-top: .8rem; }
+.actionRail a, .actionRail button { display: grid; place-items: center; min-height: 2.75rem; padding: .5rem; border: 1px solid #252a2f; border-radius: .65rem; text-align: center; font-size: .72rem; font-weight: 750; }
+.actionRail a { background: #252a2f; color: white; text-decoration: none; }
 .empty { padding: 1rem; border: 1px dashed #aaa49a; border-radius: .7rem; }
 .fieldAlternative { margin-top: 1rem; padding: .75rem; border-left: 3px solid #2e5eaa; background: #eef3f7; }
 .fieldAlternative ul { margin: 0; padding-left: 1.2rem; }
@@ -36,4 +41,4 @@
 .inlineForm { display: grid; gap: .5rem; margin-top: .7rem; padding: .7rem; border-left: 2px solid #b98727; }
 .inlineForm label { display: grid; gap: .3rem; font-size: .8rem; font-weight: 700; }
 .inlineForm input, .inlineForm select, .inlineForm textarea { padding: .55rem; border: 1px solid #b8b3a9; border-radius: .5rem; background: #fffdf8; }
-@media (max-width: 760px) { .panel { position: relative; inset: auto; width: auto; margin: 45vh .5rem .5rem; } .columns, .filters { grid-template-columns: 1fr; } .workspace { min-height: 100vh; } }
+@media (max-width: 760px) { .panel { display: none; } .columns, .filters { grid-template-columns: 1fr; } .workspace { min-height: 100vh; } .actionRail { grid-template-columns: repeat(4,minmax(4.5rem,1fr)); overflow-x: auto; } }

@@ -136,7 +136,12 @@ export interface ProviderDiscoveryProjection {
   readonly languages: readonly string[];
   readonly availability: ProviderAvailability;
   readonly territory: ProviderServiceTerritoryProjection;
-  readonly marker: Readonly<{ id: string; coordinate: readonly [number, number]; accessibleLocationLabel: string }> | null;
+  readonly marker: Readonly<{
+    id: string;
+    coordinate: readonly [number, number];
+    accessibleLocationLabel: string;
+    privacyTreatment: "exact" | "approximate";
+  }> | null;
   readonly match: Readonly<{ score: number; reasons: readonly string[] }>;
   readonly publishedAt: string;
   readonly updatedAt: string;

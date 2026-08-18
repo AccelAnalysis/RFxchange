@@ -1,10 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { ResourceNetworkError } from "@/src/application/resource-network/resource-network";
 import {
   authorizedWorkspaceSelection,
-  parseResourceNetworkWorkspaceQuery,
+  parseResourcesMobileWorkspaceQuery,
 } from "@/src/application/resource-network/resource-network-workspace";
 import { ResourceNetworkWorkspace } from "@/src/components/resource-network/ResourceNetworkWorkspace";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
@@ -15,6 +14,7 @@ import {
 } from "@/src/infrastructure/auth/participant-route-runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
 import { loadAuthorizedNetworkDiscovery } from "@/src/infrastructure/network-discovery/runtime";
+import { createServerFirestoreFoundationRepositories, getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 import { createServerReferralNetworkService } from "@/src/infrastructure/referrals/runtime";
 import { loadAuthorizedResourceDiscovery } from "@/src/infrastructure/resource-network/discovery-runtime";
 import { createServerResourceNetworkService } from "@/src/infrastructure/resource-network/runtime";
@@ -51,7 +51,7 @@ export default async function ResourcesPage({ searchParams }: Props) {
     );
   }
 
-  const queryState = parseResourceNetworkWorkspaceQuery(params);
+  const queryState = parseResourcesMobileWorkspaceQuery(params);
   const organizationId = String(access.membership.organizationId);
   const membershipId = String(access.membership.id);
   const actor = Object.freeze({
@@ -60,6 +60,11 @@ export default async function ResourcesPage({ searchParams }: Props) {
     membershipId,
   });
   const service = createServerResourceNetworkService();
+  const authorization = await createServerFirestoreFoundationRepositories(
+    getServerFirestore(),
+  ).organizationAuthorization.getByMembershipId(access.membership.id);
+  const referralManage = authorization?.permissions.includes("referral.manage") ?? false;
+  const resourceManage = authorization?.permissions.includes("resource.manage") ?? false;
 
   // These reads are independent. Keep optional/owner and referral hydration off the critical path
   // while Network discovery supplies the only input required by provider/resource discovery.
@@ -68,11 +73,10 @@ export default async function ResourcesPage({ searchParams }: Props) {
     mapProjection,
     focusedOrganizationId: queryState.organizationId ?? queryState.providerId,
   });
-  const referralsPromise = createServerReferralNetworkService().snapshot(actor);
-  const ownerPromise = service.ownerSnapshot(actor).catch((error: unknown) => {
-    if (error instanceof ResourceNetworkError && error.code === "forbidden") return null;
-    throw error;
-  });
+  const referralsPromise = referralManage
+    ? createServerReferralNetworkService().snapshot(actor)
+    : Promise.resolve([]);
+  const ownerPromise = resourceManage ? service.ownerSnapshot(actor) : Promise.resolve(null);
   const independentHydrationPromise = Promise.allSettled([
     referralsPromise,
     ownerPromise,
@@ -101,10 +105,8 @@ export default async function ResourcesPage({ searchParams }: Props) {
     resourcePromise,
     independentHydrationPromise,
   ]);
-  if (referralsResult.status === "rejected") throw referralsResult.reason;
-  if (ownerResult.status === "rejected") throw ownerResult.reason;
-  const referrals = referralsResult.value;
-  const owner = ownerResult.value;
+  const referrals = referralsResult.status === "fulfilled" ? referralsResult.value : [];
+  const owner = ownerResult.status === "fulfilled" ? ownerResult.value : null;
 
   const requestReferrals = referrals.filter(
     (referral) => referral.purpose === "provider-connection",
@@ -123,6 +125,10 @@ export default async function ResourcesPage({ searchParams }: Props) {
   const selectedRequestId = authorizedWorkspaceSelection(
     queryState.requestId,
     requestReferrals.map((referral) => referral.id),
+  );
+  const selectedResourceId = authorizedWorkspaceSelection(
+    queryState.resourceId,
+    (resourceProjection.available ? resourceProjection.projection.resources : []).map((resource) => resource.id),
   );
   const selectedMessages = selectedRequestId
     ? await service.messages(actor, selectedRequestId)
@@ -152,12 +158,22 @@ export default async function ResourcesPage({ searchParams }: Props) {
       resources={resourceProjection.available ? resourceProjection.projection.resources : []}
       referrals={referrals}
       owner={owner}
+      adjunctState={Object.freeze({
+        requests: !referralManage ? "restricted" : referralsResult.status === "fulfilled" ? "available" : "unavailable",
+        management: !resourceManage ? "restricted" : ownerResult.status === "fulfilled" ? "available" : "unavailable",
+      })}
+      authorization={Object.freeze({
+        openPlatform: true,
+        referralManage,
+        resourceManage,
+      })}
       commandRecoveryScope={commandRecoveryScope}
       queryState={Object.freeze({
         ...queryState,
         organizationId: selectedOrganizationId,
         providerId: selectedProviderId,
         requestId: selectedRequestId,
+        resourceId: selectedResourceId,
       })}
       selectedMessages={selectedMessages}
     />

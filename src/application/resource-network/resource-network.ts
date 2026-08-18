@@ -70,7 +70,12 @@ export interface ResourceNetworkDependencies {
 
 export interface ProviderMarkerProjection {
   readonly organizationId: string;
-  readonly marker: Readonly<{ id: string; coordinate: readonly [number, number]; accessibleLocationLabel: string }>;
+  readonly marker: Readonly<{
+    id: string;
+    coordinate: readonly [number, number];
+    accessibleLocationLabel: string;
+    privacyTreatment: "exact" | "approximate";
+  }>;
 }
 
 function fingerprint(value: unknown): string { return createHash("sha256").update(JSON.stringify(value)).digest("hex"); }

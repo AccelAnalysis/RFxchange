@@ -5,7 +5,14 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import type { ParticipantSpatialScope } from "../../application/participant/participant-spatial-context";
-import type { ResourceNetworkWorkspaceQuery } from "../../application/resource-network/resource-network-workspace";
+import type { ResourcesMobileWorkspaceQuery } from "../../application/resource-network/resource-network-workspace";
+import {
+  buildResourcesMobileProjection,
+  resourcesMobileCopy,
+  type ResourcesMobileAuthorization,
+} from "../../application/resource-network/mobile-resource-exchange";
+import { exchangeRoomLocaleCatalog } from "../../application/participant/exchange-room-locale";
+import type { ExchangeGovernedAreaGeometry, ExchangeLensSelectableProjection } from "../../application/participant/lens-map-projection-adapter";
 import type { ProviderDiscoveryProjection, ProviderRequestMessageProjection, ProviderResourceProjection } from "../../domain/resource-network/model";
 import type { ProviderServiceProfile } from "../../domain/resource-providers/model";
 import type { RecipientReferralProjection, SenderReferralProjection } from "../../domain/referrals/model";
@@ -13,11 +20,11 @@ import {
   ExchangeSpatialScene,
   type ExchangeHomeMarker,
   type ExchangeOrganizationMarker,
-  type ExchangeServiceField,
 } from "../map/ExchangeSpatialScene";
 import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
+import { ExchangeBottomSheet, ExchangeResultCard } from "../participant/MobileExchangePrimitives";
 import { useParticipantSpatialContext } from "../participant/useParticipantSpatialContext";
 import {
   clearRetryStableCommand,
@@ -38,8 +45,13 @@ interface Props {
   readonly resources: readonly ProviderResourceProjection[];
   readonly referrals: readonly Referral[];
   readonly owner: Owner;
+  readonly adjunctState: Readonly<{
+    requests: "available" | "restricted" | "unavailable";
+    management: "available" | "restricted" | "unavailable";
+  }>;
+  readonly authorization: ResourcesMobileAuthorization;
   readonly commandRecoveryScope: string;
-  readonly queryState: ResourceNetworkWorkspaceQuery;
+  readonly queryState: ResourcesMobileWorkspaceQuery;
   readonly selectedMessages: readonly ProviderRequestMessageProjection[];
 }
 
@@ -59,8 +71,8 @@ function browserSessionStorage(): Storage | null {
   }
 }
 
-export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, organizations, providers, resources, referrals, owner, commandRecoveryScope, queryState, selectedMessages }: Props) {
-  const { t } = useI18n();
+export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, organizations, providers, resources, referrals, owner, adjunctState, authorization, commandRecoveryScope, queryState, selectedMessages }: Props) {
+  const { t, locale } = useI18n();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -76,8 +88,22 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
   const providerReferrals = referrals.filter((referral) => referral.purpose === "provider-connection");
   const selectedRequest = providerReferrals.find((referral) => referral.id === queryState.requestId) ?? null;
   const actionBusy = busy || navigationPending;
-  const organizationMarkers = useMemo(() => organizations.map((organization) => organization.marker), [organizations]);
-  const serviceFields: readonly ExchangeServiceField[] = useMemo(() => providers.map((provider) => Object.freeze({ id: `service-field-${String(provider.organizationId)}`, label: `${provider.displayName} service territory`, geometry: provider.territory.geometry as ExchangeServiceField["geometry"], selected: String(provider.organizationId) === selectedOrganizationId })), [providers, selectedOrganizationId]);
+  const mobileCopy = resourcesMobileCopy(locale);
+  const actionCopy = exchangeRoomLocaleCatalog(locale);
+  const mobileProjection = useMemo(() => buildResourcesMobileProjection({
+    viewerOrganizationId: spatialScope.organizationId,
+    geography: { id: String(model.selectedGeography.id), label: model.selectedGeography.name },
+    providers,
+    resources,
+    requests: referrals,
+    authorization,
+    locale,
+    search: queryState.query,
+    availability: queryState.availability,
+    selection: { providerOrganizationId: queryState.providerId, resourceId: queryState.resourceId, requestId: queryState.requestId, source: "restored" },
+    camera: spatialContext.camera,
+  }), [authorization, locale, model.selectedGeography.id, model.selectedGeography.name, providers, queryState.availability, queryState.providerId, queryState.query, queryState.requestId, queryState.resourceId, referrals, resources, spatialContext.camera, spatialScope.organizationId]);
+  const governedAreaGeometries = useMemo(() => mobileProjection.serviceTerritories.map((binding) => Object.freeze({ areaId: binding.area.areaId, geographyId: binding.area.geographyId, geometryReference: binding.geometryReference, geometry: binding.geometry as ExchangeGovernedAreaGeometry["geometry"] })), [mobileProjection.serviceTerritories]);
 
   useEffect(() => {
     updateSpatialContext((current) => {
@@ -198,7 +224,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     }));
   }
 
-  function updateWorkspaceQuery(updates: Readonly<Partial<Record<"q" | "availability" | "organization" | "provider" | "request", string | null | undefined>>>) {
+  function updateWorkspaceQuery(updates: Readonly<Partial<Record<"q" | "availability" | "organization" | "provider" | "request" | "resource" | "manage", string | null | undefined>>>) {
     const next = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(updates)) {
       if (!value || (key === "availability" && value === "all")) next.delete(key);
@@ -206,6 +232,44 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     }
     const destination = `${pathname}${next.size ? `?${next.toString()}` : ""}`;
     startNavigation(() => router.replace(destination, { scroll: false }));
+  }
+
+  function selectLensProjection(projection: ExchangeLensSelectableProjection) {
+    const selectionKey = projection.kind === "area"
+      ? projection.associationSelectionKey
+      : projection.identity.selectionKey;
+    if (!selectionKey) return;
+    if (selectionKey.startsWith("organization:")) {
+      const organizationId = selectionKey.slice("organization:".length);
+      selectProvider(organizationId, Math.max(0, providers.findIndex((provider) => String(provider.organizationId) === organizationId)));
+    } else if (selectionKey.startsWith("provider-resource:")) {
+      const resourceId = selectionKey.slice("provider-resource:".length);
+      const resource = resources.find((candidate) => candidate.id === resourceId);
+      updateWorkspaceQuery({ provider: resource ? String(resource.organizationId) : null, resource: resourceId, request: null });
+    } else if (selectionKey.startsWith("provider-request:")) {
+      updateWorkspaceQuery({ request: selectionKey.slice("provider-request:".length), resource: null });
+    }
+  }
+
+  function selectCard(selectionKey: string) {
+    const mapped = mobileProjection.discovery.map.objects.find((object) =>
+      (object.kind === "organization" || object.kind === "record")
+      && object.identity.selectionKey === selectionKey,
+    );
+    if (mapped && (mapped.kind === "organization" || mapped.kind === "record")) {
+      selectLensProjection(mapped);
+      return;
+    }
+    if (selectionKey.startsWith("organization:")) {
+      const organizationId = selectionKey.slice("organization:".length);
+      selectProvider(organizationId, Math.max(0, providers.findIndex((provider) => String(provider.organizationId) === organizationId)));
+    } else if (selectionKey.startsWith("provider-resource:")) {
+      const resourceId = selectionKey.slice("provider-resource:".length);
+      const resource = resources.find((candidate) => candidate.id === resourceId);
+      updateWorkspaceQuery({ provider: resource ? String(resource.organizationId) : null, resource: resourceId, request: null });
+    } else if (selectionKey.startsWith("provider-request:")) {
+      updateWorkspaceQuery({ request: selectionKey.slice("provider-request:".length), resource: null });
+    }
   }
 
   function refreshAuthoritativeState() {
@@ -284,12 +348,16 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
 
   return <ParticipantShell activeItem="Resources">
     <SpatialWorkspace ariaLabel={t("resourceNetworkWorkspace.ariaLabel")} className={styles.workspace}>
+      {/* Stage 3 rendered serviceFields={serviceFields}; Stage 4 consumes the shared
+          lens projection instead so the same map never receives duplicate overlays. */}
       <ExchangeSpatialScene
         model={model}
         mode="organization"
         marker={homeMarker}
-        organizationMarkers={organizationMarkers}
-        serviceFields={serviceFields}
+        lensProjection={mobileProjection.discovery.map}
+        lensSelection={mobileProjection.selection}
+        governedAreaGeometries={governedAreaGeometries}
+        onLensProjectionSelect={selectLensProjection}
         focusedMarkerId={spatialContext.selection.markerId}
         onOrganizationMarkerSelect={selectOrganization}
         initialCamera={spatialContext.camera}
@@ -313,6 +381,18 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
         }}
       >
         <header><p className={styles.eyebrow}>{t("resourceNetworkWorkspace.eyebrow")}</p><h1>{t("resourceNetworkWorkspace.title")}</h1><p>{t("resourceNetworkWorkspace.supporting")}</p></header>
+        {queryState.rfxReference || queryState.rfxGap ? <section className={styles.originContext} aria-label={mobileCopy.context}>
+          <strong>{mobileCopy.context}</strong>
+          {queryState.rfxReference ? <span>RFx {queryState.rfxReference}</span> : null}
+          {queryState.rfxGap ? <p>{queryState.rfxGap}</p> : null}
+          <small>{mobileCopy.contextOnly}</small>
+          {queryState.returnTo ? <a href={queryState.returnTo}>{mobileCopy.return}</a> : null}
+        </section> : null}
+        <nav className={styles.actionRail} aria-label={actionCopy.actionsLabel}>
+          {mobileProjection.actionRail.actions.map((action) => action.availability === "enabled" && action.handler?.kind === "href"
+            ? <a key={action.id} href={action.handler.href}>{actionCopy.actions[action.labelKey as keyof typeof actionCopy.actions]}</a>
+            : <button key={action.id} type="button" disabled data-disabled-reason={action.disabledReason ?? undefined}>{actionCopy.actions[action.labelKey as keyof typeof actionCopy.actions]}</button>)}
+        </nav>
         <form className={styles.filters} onSubmit={(event) => {
           event.preventDefault();
           const data = new FormData(event.currentTarget);
@@ -335,6 +415,8 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
         {resources.length ? <section className={styles.resources}><h2>Published resources</h2><ul>{resources.map((resource) => <li key={resource.id}><strong>{resource.title}</strong><span>{resource.providerDisplayName} · {readable(resource.kind)}</span><p>{resource.summary}</p>{resource.intakeUrl ? <a href={resource.intakeUrl}>Open intake information</a> : null}</li>)}</ul></section> : null}
         <section className={styles.requests}>
           <h2>Provider requests</h2>
+          {adjunctState.requests === "restricted" ? <p className={styles.notice}>Provider requests require current referral authority.</p> : null}
+          {adjunctState.requests === "unavailable" ? <p className={styles.notice} role="status">Private provider requests could not be loaded. Public provider and resource discovery remains available.</p> : null}
           {providerReferrals.length ? <ul>{providerReferrals.map((referral) => <li key={referral.id}>
             <strong>{referral.role === "sender" ? referral.recipientLabel : referral.senderOrganizationName}</strong>
             <span>{readable(referral.status)}</span>
@@ -346,9 +428,30 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
             {referral.providerRedirect ? <p>Suggested provider: {referral.providerRedirect.suggestedProviderDisplayName}. {referral.providerRedirect.reason}</p> : null}
           </li>)}</ul> : <p>No provider requests yet.</p>}
         </section>
-        {owner?.serviceProfile ? <OwnerManagement owner={Object.freeze({ ...owner, serviceProfile: owner.serviceProfile })} busy={actionBusy} onSubmit={resourceAction} /> : null}
+        {adjunctState.management === "unavailable" ? <p className={styles.notice} role="status">Provider management could not be loaded. Refresh before making provider changes.</p> : null}
+        {owner?.serviceProfile ? <section id="resource-management"><OwnerManagement owner={Object.freeze({ ...owner, serviceProfile: owner.serviceProfile })} busy={actionBusy} onSubmit={resourceAction} /></section> : null}
         {selectedRequest ? <section className={styles.requests}><h2>Request communication history</h2><article><strong>{selectedRequest.role === "recipient" ? selectedRequest.senderOrganizationName : selectedRequest.recipientLabel}</strong>{selectedMessages.length ? <ol>{selectedMessages.map((message) => <li key={message.id}><small>{requestPartyLabel(selectedRequest, String(message.authorOrganizationId))} · {new Date(message.createdAt).toLocaleString()}</small><p>{message.body}</p></li>)}</ol> : <p>{t("resourceNetworkWorkspace.noMessages")}</p>}</article></section> : null}
       </aside>
+      <ExchangeBottomSheet
+        labelledBy="resources-mobile-results"
+        labels={{ region: mobileCopy.results, dragHandle: mobileCopy.results, peek: mobileCopy.peek, partial: mobileCopy.partial, expanded: mobileCopy.expanded }}
+        snapPoint={spatialContext.sheetSnapPoint}
+        summary={<strong id="resources-mobile-results">{mobileProjection.discovery.results.status === "ready" ? `${mobileProjection.discovery.results.cards.length} ${mobileCopy.results}` : mobileCopy.empty}</strong>}
+        actionRail={<nav className={styles.actionRail} aria-label={actionCopy.actionsLabel}>{mobileProjection.actionRail.actions.map((action) => action.availability === "enabled" && action.handler?.kind === "href" ? <a key={action.id} href={action.handler.href}>{actionCopy.actions[action.labelKey as keyof typeof actionCopy.actions]}</a> : <button key={action.id} type="button" disabled>{actionCopy.actions[action.labelKey as keyof typeof actionCopy.actions]}</button>)}</nav>}
+        initialScrollTop={spatialContext.sheetScrollTop}
+        onSnapPointChange={(sheetSnapPoint) => updateSpatialContext((current) => Object.freeze({ ...current, sheetSnapPoint }))}
+        onScrollPositionChange={(sheetScrollTop) => updateSpatialContext((current) => Object.freeze({ ...current, sheetScrollTop }))}
+      >
+        {mobileProjection.discovery.results.status === "ready" ? mobileProjection.discovery.results.cards.map((card) => <ExchangeResultCard
+          key={card.identity.selectionKey}
+          card={card}
+          selected={mobileProjection.selection.selectionKey === card.identity.selectionKey}
+          labels={{ openDetail: mobileCopy.open, addFavorite: mobileCopy.save, removeFavorite: mobileCopy.remove, favoriteUnavailable: mobileCopy.unavailable, mediaFallback: mobileCopy.fallback }}
+          onSelect={() => selectCard(card.identity.selectionKey)}
+          onOpen={() => updateSpatialContext((current) => Object.freeze({ ...current, sheetSnapPoint: "expanded" as const }))}
+          resolveRecordActionLabel={(key) => t(key)}
+        />) : <p>{mobileCopy.empty}</p>}
+      </ExchangeBottomSheet>
     </SpatialWorkspace>
   </ParticipantShell>;
 }
