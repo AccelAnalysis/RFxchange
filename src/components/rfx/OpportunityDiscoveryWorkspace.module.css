@@ -3,6 +3,7 @@
 .heading p, .detail header p { margin: 0 0 .25rem; color: #8a671c; font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .heading h1 { margin: 0; font-size: clamp(1.4rem, 4vw, 2rem); line-height: 1.05; }
 .heading a, .actions a, .more, .detailActions a { color: #174f79; font-weight: 700; }
+.headingActions { display: grid; gap: .35rem; text-align: right; }
 .form { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin-top: 1rem; }
 .form label, .save label { display: grid; gap: .3rem; font-size: .78rem; font-weight: 650; }
 .form label:first-child { grid-column: 1 / -1; }
