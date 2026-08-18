@@ -148,6 +148,13 @@
       "controlPullRequest": 226,
       "packetIds": ["WP-MOBILE-EXCHANGE-LENS-MIGRATION-01"],
       "purpose": "Activate only the Lane 01 successor registry, routing, serialization, action, locale and compatibility migration after the authority packet closed."
+    },
+    {
+      "id": "mobile-exchange-stage3-shared-2026-08-18",
+      "mainBaseSha": "107c3b8899e19e0479b51f6542a06a808f2ae0df",
+      "controlPullRequest": 230,
+      "packetIds": ["WP-MOBILE-EXCHANGE-STAGE3-SHARED-01"],
+      "purpose": "Activate Lane 01 Stage 3 authoritative shared query, map, result/card, selection and detail/return contracts after the successor lens migration closed with successful exact-head and post-merge CI."
     }
   ],
   "lanes": [
@@ -1051,12 +1058,32 @@
       "lane": "shared-exchange",
       "owner": "Successor lens registry, routing, state and action migration",
       "branch": "codex/mobile-exchange-lens-migration",
-      "candidate": null,
-      "candidateHistory": [],
+      "candidate": {
+        "actor": "github:AccelAnalysis",
+        "pr": 228,
+        "sha": "0a71737f3ddc36d5fce6a880149793994609dc84",
+        "mergeSha": "107c3b8899e19e0479b51f6542a06a808f2ae0df"
+      },
+      "candidateHistory": [
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 228,
+          "sha": "134a7f8438ea750a936b7f832125cea52e75c7d2",
+          "mergeSha": null
+        },
+        {
+          "actor": "github:AccelAnalysis",
+          "pr": 228,
+          "sha": "6307baf824783a0fa94b3db3fa8e16a6eea4277d",
+          "mergeSha": null
+        }
+      ],
       "exactBaseSha": "3455eaefe5978eeb713b161c139f9df1b0c7bfc7",
       "activationEpochId": "mobile-exchange-lens-migration-2026-08-18",
       "basePolicy": "Activated by Control Room PR #226 from exact merged main after WP-MOBILE-EXCHANGE-STAGES36-AUTHORITY-01 closed.",
-      "status": "active",
+      "postMergeRunUrl": "https://github.com/AccelAnalysis/RFxchange/actions/runs/32099779148",
+      "postMergeMainSha": "107c3b8899e19e0479b51f6542a06a808f2ae0df",
+      "status": "closed",
       "releaseClass": "Elevated",
       "requirementIds": ["MOB36-LENS-001", "MOB36-MIGRATION-001"],
       "sources": ["docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/program/SHARED_EXCHANGE_CONTRACTS.md", "src/application/participant/participant-lens-registry.ts", "src/application/participant/participant-spatial-context.ts"],
@@ -1075,20 +1102,20 @@
       "branch": "codex/mobile-exchange-stage3-shared",
       "candidate": null,
       "candidateHistory": [],
-      "exactBaseSha": null,
-      "activationEpochId": null,
-      "basePolicy": "Activate from exact current merged main after the successor lens migration closes.",
-      "status": "ready-after-authority-merge",
+      "exactBaseSha": "107c3b8899e19e0479b51f6542a06a808f2ae0df",
+      "activationEpochId": "mobile-exchange-stage3-shared-2026-08-18",
+      "basePolicy": "Activated by Control Room PR #230 from exact current merged main after WP-MOBILE-EXCHANGE-LENS-MIGRATION-01 closed.",
+      "status": "active",
       "releaseClass": "Elevated",
       "requirementIds": ["MOB36-SHARED-QUERY-001", "MOB36-SHARED-MAP-001", "MOB36-SHARED-RESULT-001", "MOB36-SHARED-DETAIL-001"],
-      "sources": ["docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/program/SHARED_EXCHANGE_CONTRACTS.md", "src/application/participant/mobile-exchange-contracts.ts", "src/application/participant/mobile-exchange-continuity.ts"],
+      "sources": ["docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/program/SHARED_EXCHANGE_CONTRACTS.md", "src/application/participant/mobile-exchange-contracts.ts", "src/application/participant/mobile-exchange-continuity.ts", "src/components/map/ExchangeSpatialScene.tsx"],
       "dependencies": [{ "packetId": "WP-MOBILE-EXCHANGE-LENS-MIGRATION-01", "requiredStatuses": ["closed"] }],
-      "ownedPaths": ["src/application/participant/**", "src/components/participant/**", "src/i18n/messages/network/**", "test/mobile-exchange-stage3-*.test.mjs", "scripts/mobile-exchange-stage3-*.mjs", "docs/program/evidence/mobile-exchange-stage3/**"],
+      "ownedPaths": ["src/application/participant/**", "src/components/participant/**", "src/components/map/ExchangeSpatialScene.tsx", "src/components/map/ExchangeSpatialScene.module.css", "src/i18n/messages/network/**", "test/mobile-exchange-stage3-*.test.mjs", "scripts/mobile-exchange-stage3-*.mjs", "docs/program/evidence/mobile-exchange-stage3/**"],
       "nonOwnedPaths": ["src/domain/rfx/**", "src/domain/referrals/**", "src/domain/resource-providers/**", "src/application/commercial/**", "functions/**", "firestore.rules", "docs/tracking/**"],
       "acceptanceRequired": ["functional", "domain-security", "browser-visual", "responsive", "accessibility", "copy", "cross-lens", "performance", "five-locales", "exact-head-ci", "configured-browser"],
       "mergeGates": ["one query/map/result/detail family", "marker/card/detail identity parity", "truthful no-coordinate behavior", "domain-owned persistence seams", "safe detail return", "no private domain framework", "no known material finding"],
       "expectedOutput": "Shared query, map, result/card, selection, save/watch presentation and detail/return contracts ready for all four permanent domain adapters.",
-      "stopBoundary": "Do not implement domain lifecycles or mutations, broaden server authority, fabricate records, alter Feature-ID completion, deploy or claim optional assurance."
+      "stopBoundary": "The narrow ExchangeSpatialScene ownership permits only provider-neutral shared-projection adaptation and rendering; do not create a second map framework or change domain/geography authority. Do not implement domain lifecycles or mutations, broaden server authority, fabricate records, alter Feature-ID completion, deploy or claim optional assurance."
     },
     {
       "id": "WP-MOBILE-EXCHANGE-RFX-47-01",
