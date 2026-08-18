@@ -141,6 +141,13 @@
       "controlPullRequest": 225,
       "packetIds": ["WP-MOBILE-EXCHANGE-STAGES36-AUTHORITY-01"],
       "purpose": "Codify the product-owner successor architecture and bounded Stages 3–6 packet chain from the exact merged Stage 2 main SHA."
+    },
+    {
+      "id": "mobile-exchange-lens-migration-2026-08-18",
+      "mainBaseSha": "3455eaefe5978eeb713b161c139f9df1b0c7bfc7",
+      "controlPullRequest": 226,
+      "packetIds": ["WP-MOBILE-EXCHANGE-LENS-MIGRATION-01"],
+      "purpose": "Activate only the Lane 01 successor registry, routing, serialization, action, locale and compatibility migration after the authority packet closed."
     }
   ],
   "lanes": [
@@ -1018,14 +1025,16 @@
       "candidate": {
         "actor": "github:AccelAnalysis",
         "pr": 225,
-        "sha": "SELF",
-        "mergeSha": null
+        "sha": "cffa37de7260ad49076abf0a1e3a2c787fa969c4",
+        "mergeSha": "3455eaefe5978eeb713b161c139f9df1b0c7bfc7"
       },
       "candidateHistory": [],
       "exactBaseSha": "1fbf38e71747ac90c2f285e4934b22ea26312bec",
       "activationEpochId": "mobile-exchange-stages36-authority-2026-08-17",
-      "basePolicy": "Active from the exact merged PR #222 main SHA. SELF denotes the current commit of open PR #225; the first post-merge Control Room change replaces it with the exact final head and records merge/post-merge evidence before activating runtime work.",
-      "status": "in-progress",
+      "basePolicy": "Activated from the exact merged PR #222 main SHA and closed only after PR #225 exact-head plus post-merge main CI passed.",
+      "postMergeRunUrl": "https://github.com/AccelAnalysis/RFxchange/actions/runs/32094062499",
+      "postMergeMainSha": "3455eaefe5978eeb713b161c139f9df1b0c7bfc7",
+      "status": "closed",
       "releaseClass": "Standard",
       "requirementIds": ["MOB36-AUTHORITY-001"],
       "sources": ["docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/program/MOBILE_EXCHANGE_STAGES36_ACTION_REGISTRY.md", "docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md", "docs/tracking/RFxchange_DEPENDENCY_MAP.md"],
@@ -1044,10 +1053,10 @@
       "branch": "codex/mobile-exchange-lens-migration",
       "candidate": null,
       "candidateHistory": [],
-      "exactBaseSha": null,
-      "activationEpochId": null,
-      "basePolicy": "Activate from exact current merged main only after WP-MOBILE-EXCHANGE-STAGES36-AUTHORITY-01 closes.",
-      "status": "ready-after-authority-merge",
+      "exactBaseSha": "3455eaefe5978eeb713b161c139f9df1b0c7bfc7",
+      "activationEpochId": "mobile-exchange-lens-migration-2026-08-18",
+      "basePolicy": "Activated by Control Room PR #226 from exact merged main after WP-MOBILE-EXCHANGE-STAGES36-AUTHORITY-01 closed.",
+      "status": "active",
       "releaseClass": "Elevated",
       "requirementIds": ["MOB36-LENS-001", "MOB36-MIGRATION-001"],
       "sources": ["docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md", "docs/program/SHARED_EXCHANGE_CONTRACTS.md", "src/application/participant/participant-lens-registry.ts", "src/application/participant/participant-spatial-context.ts"],

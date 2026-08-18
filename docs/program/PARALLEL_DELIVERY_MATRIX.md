@@ -2,9 +2,9 @@
 
 **Canonical volatile program-status source**
 
-**Snapshot basis:** merged `main` `1fbf38e71747ac90c2f285e4934b22ea26312bec` on 2026-08-18
+**Snapshot basis:** merged `main` `3455eaefe5978eeb713b161c139f9df1b0c7bfc7` on 2026-08-18
 
-**Current task:** Codify Mobile Exchange Stages 3–6 and the Capabilities/cross-lens Referrals successor architecture
+**Current task:** Activate `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from exact merged main `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`
 
 **Update rule:** Control Room recalculates this document from current merged `main` after every program-state change.
 
@@ -25,14 +25,14 @@ The original 106 records remain immutable and in order. Twenty-two successor req
 
 | Experience | Requirement denominator | Verified | In Progress | Implemented — Not Verified | Not Started | Blocked | Explicitly deferred/N/A |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Shared Exchange | 36 | 0 | 1 | 20 | 8 | 3 | 4 |
+| Shared Exchange | 36 | 0 | 0 | 21 | 8 | 3 | 4 |
 | Opportunities/RFx | 42 | 0 | 0 | 23 | 19 | 0 | 0 |
 | Resources | 13 | 0 | 0 | 8 | 3 | 2 | 0 |
 | Intelligence | 15 | 0 | 0 | 3 | 7 | 5 | 0 |
 | Capabilities | 3 | 0 | 0 | 0 | 3 | 0 | 0 |
 | Referrals Cross-Lens | 14 | 0 | 0 | 10 | 3 | 0 | 1 |
 | Integration | 5 | 0 | 0 | 0 | 5 | 0 | 0 |
-| Program total | 128 | 0 | 1 | 64 | 48 | 10 | 5 |
+| Program total | 128 | 0 | 0 | 65 | 48 | 10 | 5 |
 
 No percentage is inferred from these counts. The successor requirement denominator changes no Feature-ID arithmetic.
 
@@ -90,6 +90,22 @@ Opportunities/RFx | Resources | Intelligence | Capabilities
 ```
 
 Referrals is a governed cross-lens function and Menu/Account utility.
+
+## Mobile Exchange Stages 3–6 authority closeout
+
+| Field | Final state |
+| --- | --- |
+| Packet | `WP-MOBILE-EXCHANGE-STAGES36-AUTHORITY-01` |
+| Exact base | `1fbf38e71747ac90c2f285e4934b22ea26312bec` |
+| Candidate | PR `#225` exact head `cffa37de7260ad49076abf0a1e3a2c787fa969c4` |
+| Exact-head CI | run `32093758356` — **SUCCESS** |
+| Integrated main | `3455eaefe5978eeb713b161c139f9df1b0c7bfc7` |
+| Post-merge CI | run `32094062499` — **SUCCESS** |
+| Disposition | `Implemented — Not Verified`; no optional independent assurance event |
+| Tracker effect | None; tracker remains 170/438 and RFx Core 18/41 |
+| Stabilization 2C / B6b | Incomplete / intentionally pending |
+
+Control Room PR #226 records activation epoch `mobile-exchange-lens-migration-2026-08-18` for `WP-MOBILE-EXCHANGE-LENS-MIGRATION-01` from exact base `3455eaefe5978eeb713b161c139f9df1b0c7bfc7`. Stage 3 and every domain packet remain pre-activation and dependency-gated.
 
 ## Stage 1 integrated contract family
 
