@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { exchangeRoomLocaleCatalog } from "../../application/participant/exchange-room-locale";
-import type { ExchangeRoomActionProjection } from "../../application/participant/exchange-room-actions";
+import type {
+  ExchangeRoomActionIntent,
+  ExchangeRoomActionProjection,
+} from "../../application/participant/exchange-room-actions";
 import {
   PARTICIPANT_LENS_IDS,
   type ParticipantLensId,
@@ -160,20 +163,17 @@ function refreshedPermission(
   return null;
 }
 
-function privilegedHref(actionId: string): string | null {
-  if (actionId === "opportunities.create-view") return "/opportunities/manage";
-  return null;
-}
-
 export function ExchangeRoomActionController({
   activeLens,
   actions,
   onNetworkFocus,
+  onActionIntent,
   placement = "workspace",
 }: Readonly<{
   activeLens: ParticipantLensId;
   actions: readonly ExchangeRoomActionProjection[];
   onNetworkFocus(intent: "organizations" | "capabilities"): void;
+  onActionIntent?: (intent: ExchangeRoomActionIntent) => void;
   placement?: "workspace" | "sheet";
 }>) {
   const { locale } = useI18n();
@@ -215,64 +215,29 @@ export function ExchangeRoomActionController({
       {actions.map((action) => {
         const label = messages.actions[action.labelKey];
         const permission = refreshedPermission(action, authorization);
-        const networkIntent = action.resolvedHandler?.kind === "network-focus"
-          ? action.resolvedHandler.intent
-          : null;
+        const activeHandler = permission === true && action.operational && action.applicable
+          ? action.handlerCandidate
+          : permission === null && action.availability === "active"
+            ? action.resolvedHandler
+            : null;
 
-        if (networkIntent && networkDiscoveryAvailable) {
-          return (
-            <button
-              key={action.id}
-              type="button"
-              className={styles.activeAction}
-              data-exchange-room-action={action.id}
-              data-action-state="active"
-              data-operational="true"
-              data-applicable="true"
-              data-authorized="true"
-              onClick={() => onNetworkFocus(networkIntent)}
-            >
-              {label}
-            </button>
-          );
-        }
-        if (permission === true && action.operational && action.applicable) {
-          const href = privilegedHref(action.id);
-          if (href) {
-            return (
-              <Link
-                key={action.id}
-                className={styles.activeAction}
-                href={href}
-                data-exchange-room-action={action.id}
-                data-action-state="active"
-                data-operational={String(action.operational)}
-                data-applicable={String(action.applicable)}
-                data-authorized="true"
-              >
-                {label}
-              </Link>
-            );
-          }
-        }
-        if (permission === null && action.availability === "active" && action.resolvedHandler?.kind === "href") {
+        if (activeHandler?.kind === "href") {
           return (
             <Link
               key={action.id}
               className={styles.activeAction}
-              href={action.resolvedHandler.href}
+              href={activeHandler.href}
               data-exchange-room-action={action.id}
               data-action-state="active"
               data-operational={String(action.operational)}
               data-applicable={String(action.applicable)}
-              data-authorized={String(action.authorized)}
+              data-authorized="true"
             >
               {label}
             </Link>
           );
         }
-        if (permission === null && action.availability === "active" && action.resolvedHandler?.kind === "network-focus") {
-          const intent = action.resolvedHandler.intent;
+        if (activeHandler?.kind === "network-focus" && networkDiscoveryAvailable) {
           return (
             <button
               key={action.id}
@@ -282,8 +247,25 @@ export function ExchangeRoomActionController({
               data-action-state="active"
               data-operational={String(action.operational)}
               data-applicable={String(action.applicable)}
-              data-authorized={String(action.authorized)}
-              onClick={() => onNetworkFocus(intent)}
+              data-authorized="true"
+              onClick={() => onNetworkFocus(activeHandler.intent)}
+            >
+              {label}
+            </button>
+          );
+        }
+        if (activeHandler?.kind === "intent" && onActionIntent) {
+          return (
+            <button
+              key={action.id}
+              type="button"
+              className={styles.activeAction}
+              data-exchange-room-action={action.id}
+              data-action-state="active"
+              data-operational={String(action.operational)}
+              data-applicable={String(action.applicable)}
+              data-authorized="true"
+              onClick={() => onActionIntent(activeHandler.intent)}
             >
               {label}
             </button>
@@ -294,11 +276,13 @@ export function ExchangeRoomActionController({
           ? "not-operational" as const
           : !action.applicable
             ? "not-applicable" as const
-            : networkIntent && !networkDiscoveryAvailable
-              ? "not-operational" as const
-              : permission === false
-                ? "not-authorized" as const
-                : action.disabledReason ?? "not-operational";
+            : permission === false
+              ? "not-authorized" as const
+              : activeHandler?.kind === "network-focus" && !networkDiscoveryAvailable
+                ? "not-operational" as const
+                : activeHandler?.kind === "intent" && !onActionIntent
+                  ? "not-operational" as const
+                  : action.disabledReason ?? "not-operational";
         return (
           <button
             key={action.id}
