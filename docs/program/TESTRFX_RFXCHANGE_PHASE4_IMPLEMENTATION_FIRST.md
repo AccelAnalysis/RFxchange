@@ -1,8 +1,11 @@
 # TestRFx → RFxchange Phase 4 — Implementation-First Authority
 
-**Effective:** 2026-08-23  
-**Owner:** 00 — RFxchange Control Room  
-**Canonical production repository:** `AccelAnalysis/RFxchange`  
+**Effective:** 2026-08-23
+
+**Owner:** 00 — RFxchange Control Room
+
+**Canonical production repository:** `AccelAnalysis/RFxchange`
+
 **Controlled donor/reference repository:** `AccelAnalysis/TestRFx`
 
 ## Governing principle
