@@ -10,6 +10,7 @@ const exactReplacements = new Map<string, string>([
   ["The server checks the current RFx, geography, authority, and responder projection before publication.", "The Exchange checks the RFx, location, your permission to publish, and responder-facing information before publication."],
   ["Projection digest", "Preview reference"],
   ["Basic issuance is included for eligible organizations. Publication is atomic and cannot be undone in this slice.", "Eligible organizations can publish an RFx. Publishing makes it available to responders and cannot currently be undone."],
+  ["Publication is atomic and cannot be undone in this slice.", "Eligible organizations can publish an RFx. Publishing makes it available to responders and cannot currently be undone."],
   ["Authoritative publication", "Published RFx"],
   ["Open controlled share link", "Open share link"],
   ["This link preserves intent but grants no membership, response, invitation, or qualification authority.", "Opening this link does not give someone membership, response, invitation, or qualification access."],
