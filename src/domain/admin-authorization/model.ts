@@ -76,6 +76,8 @@ const RAW_ADMIN_PERMISSION_CATALOG = [
   ["credibility.endorsement-authority.restore", "credibility", "Restore endorsement authority."],
   ["provider.application.read", "provider", "Read resource-provider applications."],
   ["provider.application.review", "provider", "Review resource-provider applications."],
+  ["provider.seed-promotion.preview", "provider", "Preview an evidence-bound provider seed promotion without writing canonical records."],
+  ["provider.seed-promotion.commit", "provider", "Commit an approved provider seed promotion through the protected server adapter."],
   ["referral.record.read", "referral", "Read referral records allowed to administrative workflows."],
   ["referral.case.review", "referral", "Review referral cases without changing marketplace ranking."],
   ["commerce.account.read", "commerce", "Read commerce/account metadata allowed to administrative workflows."],
