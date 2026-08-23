@@ -1,39 +1,23 @@
-name: provider-promotion-typecheck-diagnostic
+name: provider-promotion-typecheck-repair
 
 on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnose:
+  repair:
+    if: github.head_ref == 'control/hampton-roads-provider-firebase-promotion'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24.18.0
-          cache: npm
-      - name: Install dependencies
-        run: npm ci
-      - name: Capture typecheck output
-        shell: bash
+          fetch-depth: 0
+      - name: Apply bounded typecheck repair
         run: |
-          mkdir -p artifacts
-          set +e
-          npm run typecheck > artifacts/provider-promotion-typecheck.log 2>&1
-          status=$?
-          set -e
-          printf '%s\n' "$status" > artifacts/provider-promotion-typecheck.status
-          cat artifacts/provider-promotion-typecheck.log
-      - name: Upload typecheck diagnostics
-        uses: actions/upload-artifact@v4
-        with:
-          name: provider-promotion-typecheck-diagnostics-${{ github.event.pull_request.head.sha }}
-          path: artifacts/provider-promotion-typecheck.*
-          if-no-files-found: error
-          retention-days: 3
+          git config user.name "RFxchange implementation"
+          git config user.email "actions@users.noreply.github.com"
+          python .github/scripts/fix-provider-promotion-typecheck.py
