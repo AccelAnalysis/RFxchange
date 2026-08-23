@@ -76,6 +76,7 @@ const RAW_ADMIN_PERMISSION_CATALOG = [
   ["credibility.endorsement-authority.restore", "credibility", "Restore endorsement authority."],
   ["provider.application.read", "provider", "Read resource-provider applications."],
   ["provider.application.review", "provider", "Review resource-provider applications."],
+["provider.seed.promote", "provider", "Promote an explicitly approved source-backed provider seed into canonical non-published Firebase records."],
   ["referral.record.read", "referral", "Read referral records allowed to administrative workflows."],
   ["referral.case.review", "referral", "Review referral cases without changing marketplace ranking."],
   ["commerce.account.read", "commerce", "Read commerce/account metadata allowed to administrative workflows."],
