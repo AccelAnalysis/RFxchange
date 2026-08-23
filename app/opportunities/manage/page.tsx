@@ -77,14 +77,17 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
     : requestedDraft && workspace.drafts.some((draft) => draft.id === requestedDraft)
       ? requestedDraft
       : (workspace.drafts[0]?.id ?? null);
+  const workspaceSelectionKey = selectedDraftId ?? (creatingNew ? "new" : "none");
 
   return (
     <RFxMobileTaskCanvas
+      canCreate={canCreate}
       drafts={workspace.drafts}
       selectedDraftId={selectedDraftId}
       creatingNew={creatingNew}
     >
       <RFxDraftWorkspace
+        key={workspaceSelectionKey}
         canCreate={canCreate}
         initialDrafts={workspace.drafts}
         requestFamilies={workspace.requestFamilies}
