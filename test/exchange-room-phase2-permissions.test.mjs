@@ -27,7 +27,7 @@ function input(activeLens, overrides = {}) {
   });
 }
 
-test("successor privileged actions fail closed without their exact permission", () => {
+test("successor privileged actions fail closed without their exact permission while retaining server handler candidates", () => {
   assert.match(source, /actionAuthorization\?\.rfxCreate \?\? false/);
   assert.match(source, /actionAuthorization\?\.referralManage \?\? false/);
   assert.match(source, /actionAuthorization\?\.resourceManage \?\? false/);
@@ -43,15 +43,21 @@ test("successor privileged actions fail closed without their exact permission", 
   assert.equal(actions[0].authorized, false);
   assert.equal(actions[0].availability, "disabled");
   assert.equal(actions[0].disabledReason, "not-authorized");
+  assert.deepEqual(actions[0].handlerCandidate, { kind: "href", href: "/opportunities/manage" });
   assert.equal(actions[0].resolvedHandler, null);
+  assert.deepEqual(actions[1].handlerCandidate, { kind: "href", href: "/opportunities/manage" });
+  assert.equal(actions[1].resolvedHandler, null);
 });
 
-test("Create RFx activates only with current issuer permission while external detail is distinct", () => {
+test("current issuer and responder RFx workflows activate without inventing response persistence", () => {
   const own = projectExchangeRoomActions(input("opportunities-rfx", {
     actionAuthorization: { ...authorization, rfxCreate: true },
   }));
   assert.equal(own[0].labelKey, "opportunities.create-view.own");
   assert.deepEqual(own[0].resolvedHandler, { kind: "href", href: "/opportunities/manage" });
+  assert.deepEqual(own[1].resolvedHandler, { kind: "href", href: "/opportunities/manage" });
+  assert.equal(own[2].availability, "disabled");
+  assert.equal(own[3].availability, "disabled");
 
   const external = projectExchangeRoomActions(input("opportunities-rfx", {
     selectedOrganizationId: "organization-other",
@@ -63,25 +69,58 @@ test("Create RFx activates only with current issuer permission while external de
     kind: "href",
     href: "/opportunities/RFX%20001",
   });
+  assert.deepEqual(external[1].resolvedHandler, {
+    kind: "href",
+    href: "/opportunities/RFX%20001/assess",
+  });
+  assert.deepEqual(external[2].resolvedHandler, {
+    kind: "href",
+    href: "/opportunities/RFX%20001/assess",
+  });
+  assert.deepEqual(external[3].resolvedHandler, {
+    kind: "intent",
+    intent: "opportunity-watch",
+  });
 });
 
-test("Resources keeps own management disabled and exposes only a real authorized external detail", () => {
+test("Resources activates current offer edit view and authorized request entry while future share/save stay gray", () => {
   const own = projectExchangeRoomActions(input("resources", {
     actionAuthorization: { ...authorization, resourceManage: true },
   }));
   assert.equal(own.length, 4);
-  assert.ok(own.every((action) => action.availability === "disabled"));
+  assert.deepEqual(own[0].resolvedHandler, { kind: "href", href: "/resources?manage=offer" });
+  assert.deepEqual(own[1].resolvedHandler, { kind: "href", href: "/resources?manage=edit" });
+  assert.equal(own[2].availability, "disabled");
+  assert.equal(own[3].availability, "disabled");
 
   const external = projectExchangeRoomActions(input("resources", {
     selectedOrganizationId: "organization-provider",
     selectedOrganizationIsOfficialResourceProvider: true,
+    actionAuthorization: { ...authorization, referralManage: true },
   }));
+  assert.equal(external[0].labelKey, "resources.offer-request.external");
+  assert.deepEqual(external[0].resolvedHandler, {
+    kind: "href",
+    href: "/resources?organization=organization-provider&provider=organization-provider",
+  });
   assert.equal(external[1].id, "resources.manage-view");
   assert.equal(external[1].labelKey, "resources.manage-view.external");
   assert.deepEqual(external[1].resolvedHandler, {
     kind: "href",
     href: "/resources?organization=organization-provider&provider=organization-provider",
   });
+});
+
+test("external Resource request remains permission-bound even when provider detail is viewable", () => {
+  const external = projectExchangeRoomActions(input("resources", {
+    selectedOrganizationId: "organization-provider",
+    selectedOrganizationIsOfficialResourceProvider: true,
+  }));
+  assert.equal(external[0].authorized, false);
+  assert.equal(external[0].availability, "disabled");
+  assert.equal(external[0].disabledReason, "not-authorized");
+  assert.ok(external[0].handlerCandidate);
+  assert.equal(external[1].availability, "active");
 });
 
 test("closed or restricted participants cannot activate a successor action", () => {
@@ -91,11 +130,13 @@ test("closed or restricted participants cannot activate a successor action", () 
     openPlatformActionsAuthorized: false,
     actionAuthorization: { rfxCreate: true, referralManage: true, resourceManage: true },
   }));
-  const operational = actions.find(({ id }) => id === "resources.manage-view");
-  assert.equal(operational.authorized, false);
-  assert.equal(operational.availability, "disabled");
-  assert.equal(operational.disabledReason, "not-authorized");
-  assert.equal(operational.resolvedHandler, null);
+  for (const operational of actions.slice(0, 2)) {
+    assert.equal(operational.authorized, false);
+    assert.equal(operational.availability, "disabled");
+    assert.equal(operational.disabledReason, "not-authorized");
+    assert.ok(operational.handlerCandidate);
+    assert.equal(operational.resolvedHandler, null);
+  }
 });
 
 test("Capabilities exposes four governed positions without referral handlers or fabricated composition", () => {
@@ -110,6 +151,7 @@ test("Capabilities exposes four governed positions without referral handlers or 
     "capabilities.gaps-save",
   ]);
   assert.ok(actions.every((action) => action.availability === "disabled"));
+  assert.ok(actions.every((action) => action.handlerCandidate === null));
   assert.ok(actions.every((action) => action.resolvedHandler === null));
   assert.ok(actions.every((action) => !action.id.startsWith("referrals.")));
 });
