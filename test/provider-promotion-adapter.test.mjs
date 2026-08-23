@@ -424,7 +424,12 @@ test("protected adapter code has an explicit release gate and cannot implicitly 
     "utf8",
   );
   assert.match(source, /RFXCHANGE_PROVIDER_PROMOTION_ENABLED/);
-  assert.match(source, /provider\.seed-promotion\.commit/);
+  const evaluator = readFileSync(
+    new URL("../src/application/provider-seeding/provider-promotion-evaluation.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(evaluator, /provider\.seed-promotion\.commit/);
+  assert.match(source, /PROMOTE APPROVED PROVIDER/);
   assert.doesNotMatch(source, /firestoreDocumentPath\("providerResources"/);
   assert.doesNotMatch(source, /firestoreDocumentPath\("providerDiscoveryPublications"/);
   assert.match(source, /seededProviderResourceDrafts|resourceDrafts/);

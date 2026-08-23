@@ -287,7 +287,15 @@ export class FirestoreProviderPromotionAdapter {
     }).preview;
   }
 
-  async commit(command: ProviderPromotionCommand): Promise<ProviderPromotionReceipt> {
+  async commit(
+    command: ProviderPromotionCommand,
+    confirmation: string,
+  ): Promise<ProviderPromotionReceipt> {
+    if (confirmation !== "PROMOTE APPROVED PROVIDER") {
+      throw new Error(
+        "Provider promotion commit requires the exact production confirmation phrase.",
+      );
+    }
     if (command.action !== "commit-approved-provider-promotion") {
       throw new Error("Provider promotion commit requires a committed promotion command.");
     }

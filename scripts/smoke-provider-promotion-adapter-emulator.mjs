@@ -88,20 +88,25 @@ try {
   );
 
   await assert.rejects(
-    disabledAdapter.commit(fixture.commitCommand),
+    enabledAdapter.commit(fixture.commitCommand, "PROMOTE UNREVIEWED PROVIDER"),
+    /exact production confirmation phrase/,
+  );
+
+  await assert.rejects(
+    disabledAdapter.commit(fixture.commitCommand, "PROMOTE APPROVED PROVIDER"),
     /RFXCHANGE_PROVIDER_PROMOTION_ENABLED/,
   );
 
-  const receipt = await enabledAdapter.commit(fixture.commitCommand);
+  const receipt = await enabledAdapter.commit(fixture.commitCommand, "PROMOTE APPROVED PROVIDER");
   assert.equal(receipt.commandId, fixture.commitCommand.id);
   assert.equal(receipt.targetOrganizationId, fixture.targetOrganizationId);
   assert.equal(receipt.publishProviderDiscovery, false);
   assert.equal(receipt.publishResource, false);
 
-  const replay = await enabledAdapter.commit(fixture.commitCommand);
+  const replay = await enabledAdapter.commit(fixture.commitCommand, "PROMOTE APPROVED PROVIDER");
   assert.deepEqual(replay, receipt, "Exact command replay must return the committed receipt.");
   await assert.rejects(
-    enabledAdapter.commit({ ...fixture.commitCommand, requestFingerprint: "sha256:conflict" }),
+    enabledAdapter.commit({ ...fixture.commitCommand, requestFingerprint: "sha256:conflict" }, "PROMOTE APPROVED PROVIDER"),
     /conflicts with an existing receipt/,
   );
 
