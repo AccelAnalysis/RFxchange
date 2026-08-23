@@ -129,6 +129,8 @@ PR #247 implements Stages 1 and 2 from exact starting `main` `4494e6dcdacf1a4c45
 
 Exact clean candidate `489c8c6a1866db8855c12dbac87ce956f9352820` passed production CI run `32666397590` (`production-ci` run 1662). Exact checkout identity, whitespace integrity, repository guardrails, Cloud Functions build and unit tests, the Firebase Auth/Firestore/Functions/Storage emulator smoke suite, focused architecture and participant-shell tests, TypeScript, lint, production build, canonical full gate, configured-browser shell/accessibility/transition acceptance, evidence upload, and compiled/visible build-identity verification all passed.
 
+Review remediation now preserves approximate-location truth while selected, restricts the participant basemap chooser to authorized daytime Exchange and Street treatments, and carries a safe internal Opportunity discovery return target into Respond and Team assessment entry. Focused regressions cover all three corrections.
+
 The branch remains **Implemented — Not Verified**. Production CI and configured-browser evidence support review and merge readiness, but the implementation lane does not self-promote the work to `Verified`.
 
 Stage 3 has begun on stacked branch `control/geography-fabric-foundation`. Its first bounded packet establishes Geography Fabric domain contracts and Firestore persistence conventions only; it does not call Census services, move accepted coordinates, or promote Hampton Roads provider records into production.
