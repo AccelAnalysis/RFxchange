@@ -1,8 +1,10 @@
 import {
   FieldValue,
+  Timestamp,
   type DocumentData,
   type DocumentSnapshot,
   type Firestore,
+  type Query,
   type Transaction,
 } from "firebase-admin/firestore";
 
@@ -28,17 +30,131 @@ import type {
   LocationGeographyProfileRepository,
 } from "../../domain/geography-fabric/repository.ts";
 import {
-  FIRESTORE_SCHEMA_VERSION,
-  firestoreCollectionName,
-  firestoreDocumentPath,
-  type FirestoreCollectionKey,
-} from "./schema.ts";
-import {
-  getFirestoreRecordById,
-  listFirestoreRecords,
-} from "./support.ts";
+  GEOGRAPHY_FABRIC_FIRESTORE_COLLECTION_CONVENTIONS,
+  assertGeographyFabricOrganizationScope,
+  geographyFabricCollectionName,
+  geographyFabricDocumentPath,
+  type GeographyFabricFirestoreCollectionKey,
+} from "./geography-fabric-schema.ts";
+import { FIRESTORE_SCHEMA_VERSION } from "./schema.ts";
 
-function appendOnlyPayload(record: object): DocumentData {
+interface DomainTimestampExposure {
+  readonly createdAt: boolean;
+  readonly updatedAt: boolean;
+}
+
+const DOMAIN_TIMESTAMP_EXPOSURE: Readonly<
+  Record<GeographyFabricFirestoreCollectionKey, DomainTimestampExposure>
+> = Object.freeze({
+  canonicalGeographies: Object.freeze({ createdAt: true, updatedAt: true }),
+  geographyVersions: Object.freeze({ createdAt: true, updatedAt: false }),
+  geographyDatasetSources: Object.freeze({ createdAt: false, updatedAt: false }),
+  locationGeographyProfiles: Object.freeze({ createdAt: false, updatedAt: true }),
+  locationGeographyMemberships: Object.freeze({ createdAt: true, updatedAt: false }),
+  geographicScopes: Object.freeze({ createdAt: true, updatedAt: true }),
+  geographicScopeMembers: Object.freeze({ createdAt: true, updatedAt: false }),
+  geographyFabricCommands: Object.freeze({ createdAt: false, updatedAt: false }),
+  geographyFabricEvents: Object.freeze({ createdAt: false, updatedAt: false }),
+  geographyMetricSnapshots: Object.freeze({ createdAt: false, updatedAt: false }),
+});
+
+function normalizeFirestoreValue(value: unknown): unknown {
+  if (value instanceof Timestamp) return value.toDate().toISOString();
+  if (Array.isArray(value)) return value.map(normalizeFirestoreValue);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nested]) => [key, normalizeFirestoreValue(nested)]),
+    );
+  }
+  return value;
+}
+
+function deepFreeze<T>(value: T): T {
+  if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
+  Object.freeze(value);
+  for (const nested of Object.values(value as Record<string, unknown>)) {
+    deepFreeze(nested);
+  }
+  return value;
+}
+
+function toDomainRecord<T extends object>(
+  snapshot: DocumentSnapshot,
+  key: GeographyFabricFirestoreCollectionKey,
+): T | null {
+  if (!snapshot.exists) return null;
+  const raw = snapshot.data();
+  if (!raw) return null;
+  const schemaVersion = raw.schemaVersion;
+  if (!Number.isInteger(schemaVersion) || schemaVersion < 1) {
+    throw new Error(`Firestore document ${snapshot.ref.path} is missing a valid schemaVersion.`);
+  }
+  if (Number(schemaVersion) > FIRESTORE_SCHEMA_VERSION) {
+    throw new Error(
+      `Firestore document ${snapshot.ref.path} uses unsupported future schemaVersion ${String(schemaVersion)}.`,
+    );
+  }
+
+  const normalized = normalizeFirestoreValue(raw) as Record<string, unknown>;
+  delete normalized.schemaVersion;
+  const exposure = DOMAIN_TIMESTAMP_EXPOSURE[key];
+  if (!exposure.createdAt) delete normalized.createdAt;
+  if (!exposure.updatedAt) delete normalized.updatedAt;
+  if (normalized.id !== snapshot.id) {
+    throw new Error(`Firestore document ${snapshot.ref.path} does not match canonical id identity.`);
+  }
+  assertGeographyFabricOrganizationScope(
+    key,
+    typeof normalized.organizationId === "string" ? normalized.organizationId : null,
+  );
+  return deepFreeze(normalized) as T;
+}
+
+async function getRecordById<T extends object>(
+  db: Firestore,
+  key: GeographyFabricFirestoreCollectionKey,
+  id: string,
+): Promise<T | null> {
+  const snapshot = await db.doc(geographyFabricDocumentPath(key, id)).get();
+  return toDomainRecord<T>(snapshot, key);
+}
+
+async function listRecords<T extends object>(
+  query: Query,
+  key: GeographyFabricFirestoreCollectionKey,
+): Promise<readonly T[]> {
+  const snapshot = await query.get();
+  return Object.freeze(
+    snapshot.docs.map((document) => {
+      const record = toDomainRecord<T>(document, key);
+      if (!record) {
+        throw new Error(`Firestore query returned missing document ${document.ref.path}.`);
+      }
+      return record;
+    }),
+  );
+}
+
+function assertWriteContract(
+  key: GeographyFabricFirestoreCollectionKey,
+  record: object,
+): void {
+  const organizationId = (record as { readonly organizationId?: unknown }).organizationId;
+  assertGeographyFabricOrganizationScope(
+    key,
+    typeof organizationId === "string" ? organizationId : null,
+  );
+}
+
+function appendOnlyPayload(
+  key: GeographyFabricFirestoreCollectionKey,
+  record: object,
+): DocumentData {
+  const convention = GEOGRAPHY_FABRIC_FIRESTORE_COLLECTION_CONVENTIONS[key];
+  if (!convention.appendOnly || convention.mutable) {
+    throw new Error(`${convention.collection} is not append-only.`);
+  }
+  assertWriteContract(key, record);
   return {
     ...record,
     schemaVersion: FIRESTORE_SCHEMA_VERSION,
@@ -46,7 +162,16 @@ function appendOnlyPayload(record: object): DocumentData {
   };
 }
 
-function mutablePayload(record: object, existing: DocumentSnapshot): DocumentData {
+function mutablePayload(
+  key: GeographyFabricFirestoreCollectionKey,
+  record: object,
+  existing: DocumentSnapshot,
+): DocumentData {
+  const convention = GEOGRAPHY_FABRIC_FIRESTORE_COLLECTION_CONVENTIONS[key];
+  if (!convention.mutable || convention.appendOnly) {
+    throw new Error(`${convention.collection} is not mutable.`);
+  }
+  assertWriteContract(key, record);
   return {
     ...record,
     schemaVersion: FIRESTORE_SCHEMA_VERSION,
@@ -70,11 +195,15 @@ function sameImmutableRecord(
   }
 }
 
-function commandIsReplay(existing: DocumentSnapshot, command: GeographyFabricCommand): boolean {
+function commandIsReplay(
+  existing: DocumentSnapshot,
+  command: GeographyFabricCommand,
+): boolean {
   if (!existing.exists) return false;
   const data = existing.data();
   if (
     data?.action !== command.action
+    || data?.organizationId !== command.organizationId
     || data?.subjectId !== command.subjectId
     || data?.requestFingerprint !== command.requestFingerprint
   ) {
@@ -95,28 +224,156 @@ function requireNextRevision(
   }
 }
 
-function createRecord(
+function appendRecord(
+  db: Firestore,
   transaction: Transaction,
-  key: FirestoreCollectionKey,
+  key: GeographyFabricFirestoreCollectionKey,
   id: string,
   record: object,
 ): void {
-  transaction.create(transaction.firestore.doc(firestoreDocumentPath(key, id)), appendOnlyPayload(record));
+  transaction.create(
+    db.doc(geographyFabricDocumentPath(key, id)),
+    appendOnlyPayload(key, record),
+  );
 }
 
-export class FirestoreCanonicalGeographyRepository implements CanonicalGeographyRepository {
+function assertCommandAndEvent(
+  command: GeographyFabricCommand,
+  event: GeographyFabricEvent,
+  action: GeographyFabricCommand["action"],
+  eventKind: GeographyFabricEvent["kind"],
+  subjectId: string,
+  organizationId: string | null,
+): void {
+  if (command.action !== action || event.kind !== eventKind) {
+    throw new Error("Geography Fabric unit of work received the wrong command or event kind.");
+  }
+  if (
+    command.subjectId !== subjectId
+    || event.subjectId !== subjectId
+    || event.commandId !== command.id
+  ) {
+    throw new Error("Geography Fabric command, event and aggregate subject must match.");
+  }
+  if (
+    command.organizationId !== organizationId
+    || event.organizationId !== organizationId
+  ) {
+    throw new Error("Geography Fabric command and event organization context must match.");
+  }
+}
+
+function assertMaterializationInput(input: Readonly<{
+  datasetSources: readonly GeographyDatasetSource[];
+  geographies: readonly CanonicalGeography[];
+  versions: readonly GeographyVersion[];
+  profile: LocationGeographyProfile;
+  memberships: readonly LocationGeographyMembership[];
+  command: GeographyFabricCommand;
+  event: GeographyFabricEvent;
+}>): void {
+  assertCommandAndEvent(
+    input.command,
+    input.event,
+    "materialize-location-profile",
+    "location-profile-materialized",
+    input.profile.id,
+    input.profile.organizationId,
+  );
+  const membershipIds = new Set(input.memberships.map((membership) => membership.id));
+  if (
+    membershipIds.size !== input.profile.membershipIds.length
+    || input.profile.membershipIds.some((id) => !membershipIds.has(id))
+  ) {
+    throw new Error("Materialization memberships must match the profile membership projection.");
+  }
+  const geographyIds = new Set(input.geographies.map((geography) => geography.id));
+  const versionIds = new Set(input.versions.map((version) => version.id));
+  const sourceIds = new Set(input.datasetSources.map((source) => source.id));
+  for (const version of input.versions) {
+    if (!geographyIds.has(version.geographyId) || !sourceIds.has(version.datasetSourceId)) {
+      throw new Error("Every geography version must link to supplied geography and dataset source records.");
+    }
+  }
+  for (const geography of input.geographies) {
+    if (!versionIds.has(geography.currentVersionId)) {
+      throw new Error("Every canonical geography must identify a supplied current version.");
+    }
+  }
+  for (const membership of input.memberships) {
+    if (
+      membership.locationId !== input.profile.locationId
+      || membership.organizationId !== input.profile.organizationId
+      || membership.profileVersion !== input.profile.profileVersion
+      || !geographyIds.has(membership.geographyId)
+      || !versionIds.has(membership.geographyVersionId)
+    ) {
+      throw new Error("Materialized membership is outside the supplied location profile graph.");
+    }
+  }
+}
+
+function assertScopeInput(input: Readonly<{
+  scope: GeographicScope;
+  members: readonly GeographicScopeMember[];
+  command: GeographyFabricCommand;
+  event: GeographyFabricEvent;
+}>): void {
+  assertCommandAndEvent(
+    input.command,
+    input.event,
+    "save-geographic-scope",
+    "geographic-scope-saved",
+    input.scope.id,
+    input.scope.organizationId,
+  );
+  const expectedMemberCount =
+    input.scope.inclusionVersionIds.length + input.scope.exclusionVersionIds.length;
+  if (input.members.length !== expectedMemberCount) {
+    throw new Error("Geographic scope members must materialize all include and exclude versions.");
+  }
+  const seen = new Set<string>();
+  for (const member of input.members) {
+    const key = `${member.inclusion}:${member.geographyVersionId}`;
+    if (
+      seen.has(key)
+      || member.scopeId !== input.scope.id
+      || member.scopeRevision !== input.scope.revision
+      || member.organizationId !== input.scope.organizationId
+    ) {
+      throw new Error("Geographic scope member does not match its scope identity and revision.");
+    }
+    const expectedIds = member.inclusion === "include"
+      ? input.scope.inclusionVersionIds
+      : input.scope.exclusionVersionIds;
+    if (!expectedIds.includes(member.geographyVersionId)) {
+      throw new Error("Geographic scope member is not declared by its scope.");
+    }
+    seen.add(key);
+  }
+}
+
+export class FirestoreCanonicalGeographyRepository
+  implements CanonicalGeographyRepository
+{
   constructor(private readonly db: Firestore) {}
 
   getById(id: CanonicalGeography["id"]): Promise<CanonicalGeography | null> {
-    return getFirestoreRecordById<CanonicalGeography>(this.db, "canonicalGeographies", id);
+    return getRecordById<CanonicalGeography>(this.db, "canonicalGeographies", id);
   }
 
   getVersionById(id: GeographyVersion["id"]): Promise<GeographyVersion | null> {
-    return getFirestoreRecordById<GeographyVersion>(this.db, "geographyVersions", id);
+    return getRecordById<GeographyVersion>(this.db, "geographyVersions", id);
   }
 
-  getDatasetSourceById(id: GeographyDatasetSource["id"]): Promise<GeographyDatasetSource | null> {
-    return getFirestoreRecordById<GeographyDatasetSource>(this.db, "geographyDatasetSources", id);
+  getDatasetSourceById(
+    id: GeographyDatasetSource["id"],
+  ): Promise<GeographyDatasetSource | null> {
+    return getRecordById<GeographyDatasetSource>(
+      this.db,
+      "geographyDatasetSources",
+      id,
+    );
   }
 }
 
@@ -125,8 +382,10 @@ export class FirestoreLocationGeographyProfileRepository
 {
   constructor(private readonly db: Firestore) {}
 
-  getById(id: LocationGeographyProfile["id"]): Promise<LocationGeographyProfile | null> {
-    return getFirestoreRecordById<LocationGeographyProfile>(
+  getById(
+    id: LocationGeographyProfile["id"],
+  ): Promise<LocationGeographyProfile | null> {
+    return getRecordById<LocationGeographyProfile>(
       this.db,
       "locationGeographyProfiles",
       id,
@@ -134,11 +393,13 @@ export class FirestoreLocationGeographyProfileRepository
   }
 }
 
-export class FirestoreGeographicScopeRepository implements GeographicScopeRepository {
+export class FirestoreGeographicScopeRepository
+  implements GeographicScopeRepository
+{
   constructor(private readonly db: Firestore) {}
 
   getById(id: GeographicScope["id"]): Promise<GeographicScope | null> {
-    return getFirestoreRecordById<GeographicScope>(this.db, "geographicScopes", id);
+    return getRecordById<GeographicScope>(this.db, "geographicScopes", id);
   }
 }
 
@@ -148,7 +409,11 @@ export class FirestoreGeographyFabricCommandRepository
   constructor(private readonly db: Firestore) {}
 
   getById(id: GeographyFabricCommand["id"]): Promise<GeographyFabricCommand | null> {
-    return getFirestoreRecordById<GeographyFabricCommand>(this.db, "geographyFabricCommands", id);
+    return getRecordById<GeographyFabricCommand>(
+      this.db,
+      "geographyFabricCommands",
+      id,
+    );
   }
 }
 
@@ -160,16 +425,18 @@ export class FirestoreGeographyMetricSnapshotRepository
   listByGeographyVersion(
     id: GeographyVersion["id"],
   ): Promise<readonly GeographyMetricSnapshot[]> {
-    return listFirestoreRecords<GeographyMetricSnapshot>(
+    return listRecords<GeographyMetricSnapshot>(
       this.db
-        .collection(firestoreCollectionName("geographyMetricSnapshots"))
+        .collection(geographyFabricCollectionName("geographyMetricSnapshots"))
         .where("geographyVersionId", "==", id),
       "geographyMetricSnapshots",
     );
   }
 }
 
-export class FirestoreGeographyFabricUnitOfWork implements GeographyFabricUnitOfWork {
+export class FirestoreGeographyFabricUnitOfWork
+  implements GeographyFabricUnitOfWork
+{
   constructor(private readonly db: Firestore) {}
 
   async materializeLocationProfile(input: Readonly<{
@@ -181,20 +448,31 @@ export class FirestoreGeographyFabricUnitOfWork implements GeographyFabricUnitOf
     command: GeographyFabricCommand;
     event: GeographyFabricEvent;
   }>): Promise<void> {
+    assertMaterializationInput(input);
     await this.db.runTransaction(async (transaction) => {
-      const commandRef = this.db.doc(firestoreDocumentPath("geographyFabricCommands", input.command.id));
-      const profileRef = this.db.doc(firestoreDocumentPath("locationGeographyProfiles", input.profile.id));
-      const datasetRefs = input.datasetSources.map((record) => this.db.doc(
-        firestoreDocumentPath("geographyDatasetSources", record.id),
-      ));
-      const geographyRefs = input.geographies.map((record) => this.db.doc(
-        firestoreDocumentPath("canonicalGeographies", record.id),
-      ));
-      const versionRefs = input.versions.map((record) => this.db.doc(
-        firestoreDocumentPath("geographyVersions", record.id),
-      ));
+      const commandRef = this.db.doc(
+        geographyFabricDocumentPath("geographyFabricCommands", input.command.id),
+      );
+      const profileRef = this.db.doc(
+        geographyFabricDocumentPath("locationGeographyProfiles", input.profile.id),
+      );
+      const datasetRefs = input.datasetSources.map((record) =>
+        this.db.doc(geographyFabricDocumentPath("geographyDatasetSources", record.id)),
+      );
+      const geographyRefs = input.geographies.map((record) =>
+        this.db.doc(geographyFabricDocumentPath("canonicalGeographies", record.id)),
+      );
+      const versionRefs = input.versions.map((record) =>
+        this.db.doc(geographyFabricDocumentPath("geographyVersions", record.id)),
+      );
 
-      const [commandSnapshot, profileSnapshot, datasetSnapshots, geographySnapshots, versionSnapshots] = await Promise.all([
+      const [
+        commandSnapshot,
+        profileSnapshot,
+        datasetSnapshots,
+        geographySnapshots,
+        versionSnapshots,
+      ] = await Promise.all([
         transaction.get(commandRef),
         transaction.get(profileRef),
         Promise.all(datasetRefs.map((ref) => transaction.get(ref))),
@@ -202,37 +480,89 @@ export class FirestoreGeographyFabricUnitOfWork implements GeographyFabricUnitOf
         Promise.all(versionRefs.map((ref) => transaction.get(ref))),
       ]);
       if (commandIsReplay(commandSnapshot, input.command)) return;
-      requireNextRevision(profileSnapshot, input.profile.profileVersion, "profileVersion", "Location geography profile");
+      requireNextRevision(
+        profileSnapshot,
+        input.profile.profileVersion,
+        "profileVersion",
+        "Location geography profile",
+      );
 
       for (const [index, record] of input.datasetSources.entries()) {
         const snapshot = datasetSnapshots[index];
-        if (!snapshot) throw new Error("Missing dataset-source transaction snapshot.");
+        const ref = datasetRefs[index];
+        if (!snapshot || !ref) throw new Error("Missing dataset-source transaction state.");
         if (snapshot.exists) {
-          sameImmutableRecord(snapshot, record, ["id", "sourceSystem", "authority", "vintage"], "Geography dataset source");
+          sameImmutableRecord(
+            snapshot,
+            record,
+            ["id", "sourceSystem", "authority", "vintage"],
+            "Geography dataset source",
+          );
         } else {
-          transaction.create(datasetRefs[index]!, appendOnlyPayload(record));
+          transaction.create(
+            ref,
+            appendOnlyPayload("geographyDatasetSources", record),
+          );
         }
       }
       for (const [index, record] of input.versions.entries()) {
         const snapshot = versionSnapshots[index];
-        if (!snapshot) throw new Error("Missing geography-version transaction snapshot.");
+        const ref = versionRefs[index];
+        if (!snapshot || !ref) throw new Error("Missing geography-version transaction state.");
         if (snapshot.exists) {
-          sameImmutableRecord(snapshot, record, ["id", "geographyId", "datasetSourceId", "vintage"], "Geography version");
+          sameImmutableRecord(
+            snapshot,
+            record,
+            ["id", "geographyId", "datasetSourceId", "vintage"],
+            "Geography version",
+          );
         } else {
-          transaction.create(versionRefs[index]!, appendOnlyPayload(record));
+          transaction.create(ref, appendOnlyPayload("geographyVersions", record));
         }
       }
       for (const [index, record] of input.geographies.entries()) {
         const snapshot = geographySnapshots[index];
-        if (!snapshot) throw new Error("Missing canonical-geography transaction snapshot.");
-        transaction.set(geographyRefs[index]!, mutablePayload(record, snapshot));
+        const ref = geographyRefs[index];
+        if (!snapshot || !ref) throw new Error("Missing canonical-geography transaction state.");
+        if (
+          snapshot.exists
+          && (
+            snapshot.data()?.type !== record.type
+            || snapshot.data()?.externalId !== record.externalId
+            || snapshot.data()?.sourceSystem !== record.sourceSystem
+          )
+        ) {
+          throw new Error("Canonical geography logical identity conflicts with persisted state.");
+        }
+        transaction.set(
+          ref,
+          mutablePayload("canonicalGeographies", record, snapshot),
+        );
       }
       for (const membership of input.memberships) {
-        createRecord(transaction, "locationGeographyMemberships", membership.id, membership);
+        appendRecord(
+          this.db,
+          transaction,
+          "locationGeographyMemberships",
+          membership.id,
+          membership,
+        );
       }
-      transaction.set(profileRef, mutablePayload(input.profile, profileSnapshot));
-      transaction.create(commandRef, appendOnlyPayload(input.command));
-      createRecord(transaction, "geographyFabricEvents", input.event.id, input.event);
+      transaction.set(
+        profileRef,
+        mutablePayload("locationGeographyProfiles", input.profile, profileSnapshot),
+      );
+      transaction.create(
+        commandRef,
+        appendOnlyPayload("geographyFabricCommands", input.command),
+      );
+      appendRecord(
+        this.db,
+        transaction,
+        "geographyFabricEvents",
+        input.event.id,
+        input.event,
+      );
     });
   }
 
@@ -242,22 +572,50 @@ export class FirestoreGeographyFabricUnitOfWork implements GeographyFabricUnitOf
     command: GeographyFabricCommand;
     event: GeographyFabricEvent;
   }>): Promise<void> {
+    assertScopeInput(input);
     await this.db.runTransaction(async (transaction) => {
-      const commandRef = this.db.doc(firestoreDocumentPath("geographyFabricCommands", input.command.id));
-      const scopeRef = this.db.doc(firestoreDocumentPath("geographicScopes", input.scope.id));
+      const commandRef = this.db.doc(
+        geographyFabricDocumentPath("geographyFabricCommands", input.command.id),
+      );
+      const scopeRef = this.db.doc(
+        geographyFabricDocumentPath("geographicScopes", input.scope.id),
+      );
       const [commandSnapshot, scopeSnapshot] = await Promise.all([
         transaction.get(commandRef),
         transaction.get(scopeRef),
       ]);
       if (commandIsReplay(commandSnapshot, input.command)) return;
-      requireNextRevision(scopeSnapshot, input.scope.revision, "revision", "Geographic scope");
+      requireNextRevision(
+        scopeSnapshot,
+        input.scope.revision,
+        "revision",
+        "Geographic scope",
+      );
 
       for (const member of input.members) {
-        createRecord(transaction, "geographicScopeMembers", member.id, member);
+        appendRecord(
+          this.db,
+          transaction,
+          "geographicScopeMembers",
+          member.id,
+          member,
+        );
       }
-      transaction.set(scopeRef, mutablePayload(input.scope, scopeSnapshot));
-      transaction.create(commandRef, appendOnlyPayload(input.command));
-      createRecord(transaction, "geographyFabricEvents", input.event.id, input.event);
+      transaction.set(
+        scopeRef,
+        mutablePayload("geographicScopes", input.scope, scopeSnapshot),
+      );
+      transaction.create(
+        commandRef,
+        appendOnlyPayload("geographyFabricCommands", input.command),
+      );
+      appendRecord(
+        this.db,
+        transaction,
+        "geographyFabricEvents",
+        input.event.id,
+        input.event,
+      );
     });
   }
 
@@ -266,13 +624,38 @@ export class FirestoreGeographyFabricUnitOfWork implements GeographyFabricUnitOf
     command: GeographyFabricCommand;
     event: GeographyFabricEvent;
   }>): Promise<void> {
+    assertCommandAndEvent(
+      input.command,
+      input.event,
+      "capture-metric-snapshot",
+      "metric-snapshot-captured",
+      input.snapshot.id,
+      null,
+    );
     await this.db.runTransaction(async (transaction) => {
-      const commandRef = this.db.doc(firestoreDocumentPath("geographyFabricCommands", input.command.id));
+      const commandRef = this.db.doc(
+        geographyFabricDocumentPath("geographyFabricCommands", input.command.id),
+      );
       const commandSnapshot = await transaction.get(commandRef);
       if (commandIsReplay(commandSnapshot, input.command)) return;
-      createRecord(transaction, "geographyMetricSnapshots", input.snapshot.id, input.snapshot);
-      transaction.create(commandRef, appendOnlyPayload(input.command));
-      createRecord(transaction, "geographyFabricEvents", input.event.id, input.event);
+      appendRecord(
+        this.db,
+        transaction,
+        "geographyMetricSnapshots",
+        input.snapshot.id,
+        input.snapshot,
+      );
+      transaction.create(
+        commandRef,
+        appendOnlyPayload("geographyFabricCommands", input.command),
+      );
+      appendRecord(
+        this.db,
+        transaction,
+        "geographyFabricEvents",
+        input.event.id,
+        input.event,
+      );
     });
   }
 }
