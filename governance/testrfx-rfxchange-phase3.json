@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "phase": "Phase 3 — Stabilize the destination before large ports",
+  "productionRepository": "AccelAnalysis/RFxchange",
+  "donorRepository": "AccelAnalysis/TestRFx",
+  "donorBaselineSha": "db19a0cc2171d0ddde4f34a20acc881ba7279248",
+  "phase2MergeSha": "be7a1d485f3034262e59c99f3a2fd92505dc65a0",
+  "startingMainSha": "be7a1d485f3034262e59c99f3a2fd92505dc65a0",
+  "finalMainSha": "b5c12b196193099ee4fe7af70fc94dc54fa3f97d",
+  "status": "implemented-not-verified",
+  "stabilizedCandidates": [
+    {
+      "area": "Resources",
+      "pr": 237,
+      "classification": "still required",
+      "candidateSha": "b30881b2a1e05ff8cace28642296c86018063f6b",
+      "mergeSha": "399072c05aa78e536ad57d0998a643f1c6d49b08",
+      "exactHeadCiRunId": 32128635399,
+      "result": "merged-successor"
+    },
+    {
+      "area": "Capabilities",
+      "pr": 234,
+      "classification": "still required",
+      "candidateSha": "7ffd357009dec1f33deb9a18f08ccbd78163f38f",
+      "mergeSha": "a6a220fd52e145c44bbc0be6274f2974462acdd9",
+      "exactHeadCiRunId": 32617310204,
+      "result": "merged-current-main"
+    },
+    {
+      "area": "Intelligence",
+      "pr": 235,
+      "classification": "still required",
+      "candidateSha": "04e8addda59799300d9f831bee48ac13fde09e58",
+      "mergeSha": "c3b1da7d1f21d38e075b6b7145c3c291beda4ba7",
+      "exactHeadCiRunId": 32617657384,
+      "result": "merged-current-main"
+    },
+    {
+      "area": "RFx Slice 4.7",
+      "pr": 238,
+      "classification": "still required",
+      "candidateSha": "033830caddb10d23621c35db9d32e0753212b256",
+      "mergeSha": "b5c12b196193099ee4fe7af70fc94dc54fa3f97d",
+      "exactHeadCiRunId": 32617987924,
+      "result": "merged-current-main"
+    }
+  ],
+  "historicalPullRequests": [
+    {
+      "pr": 221,
+      "area": "Stage 2 Resources",
+      "classification": "incorporated into a newer successor",
+      "successorPr": 237,
+      "status": "closed-not-merged"
+    },
+    {
+      "pr": 220,
+      "area": "Stage 2 Intelligence",
+      "classification": "incorporated into a newer successor",
+      "successorPr": 235,
+      "status": "closed-not-merged"
+    },
+    {
+      "pr": 219,
+      "area": "Stage 2 permanent-lens Referrals",
+      "classification": "partially reusable",
+      "successor": "future Stage 5 cross-lens Referrals packet",
+      "status": "superseded-closed-not-merged"
+    },
+    {
+      "pr": 210,
+      "area": "DSC-006 durable alerts and digests",
+      "classification": "partially reusable",
+      "successor": "future current-main DSC-006 extraction packet",
+      "status": "superseded-closed-not-merged"
+    }
+  ],
+  "admission": {
+    "waveA": {
+      "state": "eligible-for-bounded-activation-after-phase3-closeout",
+      "boundary": "presentation only; no persistence, authorization, lifecycle, action-ID or navigation redesign"
+    },
+    "taskCanvas": {
+      "state": "blocked",
+      "reasons": [
+        "RFx Slices 4.8, 4.9 and 4.10 are not merged",
+        "CM-010 Firebase RFx workspace extensions are not authorized",
+        "the final Stage 4 Opportunities adapter is not merged"
+      ]
+    },
+    "providerData": {
+      "state": "not-activated",
+      "reason": "private Firestore staging/import and emulator dry-run packet remains required"
+    },
+    "publicMedia": {
+      "state": "not-activated",
+      "reason": "reviewed public media projection over INF-008 remains required"
+    }
+  },
+  "nextRequiredPackets": [
+    "WP-CONVERGENCE-STAGE4-SHARED-INTEGRATION-01",
+    "WP-MOBILE-EXCHANGE-RFX-48-01",
+    "WP-MOBILE-EXCHANGE-RFX-49-01",
+    "WP-MOBILE-EXCHANGE-RFX-410-01",
+    "WP-MOBILE-EXCHANGE-STAGE4-OPPORTUNITIES-01",
+    "WP-CONVERGENCE-DSC006-ALERT-EXTRACTION-01"
+  ],
+  "prohibitions": [
+    "TestRFx runtime dependency",
+    "PostgreSQL or Neon production persistence",
+    "MapLibre production implementation",
+    "dual writes or cross-repository synchronization",
+    "browser-derived authority",
+    "large RFx Task Canvas port before destination commands and workspaces exist"
+  ]
+}
