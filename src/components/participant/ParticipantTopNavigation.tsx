@@ -34,6 +34,7 @@ import {
 import { SignOutButton } from "../auth/SignOutButton";
 import { BrandWordmark } from "../brand/BrandWordmark";
 import { useI18n } from "../i18n/I18nProvider";
+import { ExchangeLensIcon } from "./ExchangeLensIcon";
 
 import styles from "./ParticipantTopNavigation.module.css";
 
@@ -48,12 +49,6 @@ export type ParticipantNavigationItem =
 type NavigationDestination = Exclude<ParticipantNavigationState, null>;
 
 const CANONICAL_INTELLIGENCE_HREF = "/geography/canvas";
-const LENS_ICONS: Readonly<Record<ParticipantLensId, string>> = Object.freeze({
-  "opportunities-rfx": "◎",
-  resources: "◇",
-  intelligence: "⌖",
-  capabilities: "✦",
-});
 
 function normalizedActiveItem(item?: ParticipantNavigationItem): ParticipantNavigationState {
   switch (item) {
@@ -134,12 +129,14 @@ interface ParticipantLensHrefSnapshot {
   readonly intelligenceHref: string;
   readonly opportunityHref: string;
   readonly resourceHref: string;
+  readonly capabilityHref: string;
 }
 
 const DEFAULT_LENS_HREF_SNAPSHOT = JSON.stringify({
   intelligenceHref: CANONICAL_INTELLIGENCE_HREF,
   opportunityHref: "/opportunities",
   resourceHref: "/resources",
+  capabilityHref: "/capabilities",
 } satisfies ParticipantLensHrefSnapshot);
 
 function storedLensHrefSnapshot(): string {
@@ -147,6 +144,7 @@ function storedLensHrefSnapshot(): string {
     intelligenceHref: storedIntelligenceHref(),
     opportunityHref: participantSpatialLensHref("opportunities-rfx"),
     resourceHref: participantSpatialLensHref("resources"),
+    capabilityHref: "/capabilities",
   } satisfies ParticipantLensHrefSnapshot);
 }
 
@@ -162,11 +160,7 @@ function useTransitionFeedback(pathname: string) {
     storedLensHrefSnapshot,
     () => DEFAULT_LENS_HREF_SNAPSHOT,
   );
-  const {
-    intelligenceHref,
-    opportunityHref,
-    resourceHref,
-  } = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;
+  const snapshot = JSON.parse(serializedLensHrefs) as ParticipantLensHrefSnapshot;
 
   useEffect(() => {
     if (participantNavigationState(pathname) !== "intelligence") return;
@@ -210,12 +204,7 @@ function useTransitionFeedback(pathname: string) {
     pendingTransition.current = Object.freeze({ destination, fromPathname: pathname });
   }
 
-  return {
-    intelligenceHref,
-    opportunityHref,
-    resourceHref,
-    begin,
-  };
+  return { ...snapshot, begin };
 }
 
 function NavigationLinkContent({
@@ -227,7 +216,7 @@ function NavigationLinkContent({
 }: Readonly<{
   label: string;
   loadingLabel: string;
-  icon?: string;
+  icon?: ParticipantLensId;
   mobile?: boolean;
   onSettled?: () => void;
 }>) {
@@ -244,7 +233,9 @@ function NavigationLinkContent({
 
   return (
     <>
-      {mobile ? <span className={styles.lensIcon} aria-hidden="true">{icon}</span> : null}
+      {mobile && icon ? (
+        <span className={styles.lensIcon} aria-hidden="true"><ExchangeLensIcon icon={icon} /></span>
+      ) : null}
       <span className={styles.lensLabel}>{label}</span>
       {pending ? (
         <span className={styles.liveStatus} role="status" aria-live="polite" data-link-pending="true">
@@ -255,14 +246,11 @@ function NavigationLinkContent({
   );
 }
 
-function lensHref(
-  lensId: ParticipantLensId,
-  snapshot: ParticipantLensHrefSnapshot,
-): string {
+function lensHref(lensId: ParticipantLensId, snapshot: ParticipantLensHrefSnapshot): string {
   if (lensId === "intelligence") return snapshot.intelligenceHref;
   if (lensId === "opportunities-rfx") return snapshot.opportunityHref;
   if (lensId === "resources") return snapshot.resourceHref;
-  throw new Error("Unavailable Capabilities lens cannot resolve a navigation href.");
+  return snapshot.capabilityHref;
 }
 
 function LensItems({
@@ -297,7 +285,9 @@ function LensItems({
           data-participant-lens={lens.id}
           data-availability="unavailable"
         >
-          {mobile ? <span className={styles.lensIcon} aria-hidden="true">{LENS_ICONS[lens.id]}</span> : null}
+          {mobile ? (
+            <span className={styles.lensIcon} aria-hidden="true"><ExchangeLensIcon icon={lens.id} /></span>
+          ) : null}
           <span className={styles.lensLabel}>{label}</span>
           <small id={descriptionId}>{t("participantNavigation.notYetAvailable")}</small>
         </span>
@@ -320,7 +310,7 @@ function LensItems({
         <NavigationLinkContent
           label={label}
           loadingLabel={`${t("participantNavigation.loadingDestination")} ${label}`}
-          icon={LENS_ICONS[lens.id]}
+          icon={lens.id}
           mobile={mobile}
         />
       </Link>
@@ -340,28 +330,11 @@ function moveMenuFocus(menu: HTMLElement, current: EventTarget | null, direction
   items[nextIndex]?.focus();
 }
 
-function AccountUtility({
-  activeState,
-  administrationHref: initialAdministrationHref,
-  organizationName,
-  quickStartUnavailable,
-  beginNavigation,
-}: Readonly<{
-  activeState: ParticipantNavigationState;
-  administrationHref?: string;
-  organizationName: string | null;
-  quickStartUnavailable: boolean;
-  beginNavigation(destination: NavigationDestination): void;
-}>) {
-  const { t } = useI18n();
-  const [open, setOpen] = useState(false);
+function useAdministrationHref(initialAdministrationHref?: string) {
   const [administrationHref, setAdministrationHref] = useState<string | null>(
     initialAdministrationHref ?? null,
   );
   const [administrationResolved, setAdministrationResolved] = useState(Boolean(initialAdministrationHref));
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const menuId = useId();
 
   function resolveAdministration() {
     if (administrationResolved) return;
@@ -378,6 +351,29 @@ function AccountUtility({
       .then(setAdministrationHref)
       .catch(() => setAdministrationHref(null));
   }
+
+  return { administrationHref, resolveAdministration };
+}
+
+function AccountUtility({
+  activeState,
+  administrationHref: initialAdministrationHref,
+  organizationName,
+  quickStartUnavailable,
+  beginNavigation,
+}: Readonly<{
+  activeState: ParticipantNavigationState;
+  administrationHref?: string;
+  organizationName: string | null;
+  quickStartUnavailable: boolean;
+  beginNavigation(destination: NavigationDestination): void;
+}>) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const { administrationHref, resolveAdministration } = useAdministrationHref(initialAdministrationHref);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
 
   function showMenu(focusFirst = false) {
     setOpen(true);
@@ -457,65 +453,219 @@ function AccountUtility({
             }
           }}
         >
-          <Link
-            role="menuitem"
-            href={PARTICIPANT_UTILITY_DESTINATIONS.account.href}
-            aria-current={activeState === "account" ? "page" : undefined}
-            onClick={(event) => {
-              if (isUnmodifiedPrimaryClick(event)) beginNavigation("account");
-              else hideMenu();
-            }}
-          >
-            <NavigationLinkContent
-              label={t("participantNavigation.organizationProfile")}
-              loadingLabel={`${t("participantNavigation.loadingDestination")} ${t("participantNavigation.organizationProfile")}`}
-              onSettled={hideMenu}
-            />
-          </Link>
-          {quickStartUnavailable ? (
-            <span className={styles.unavailableUtility} role="menuitem" aria-disabled="true" data-availability="unavailable">
-              <span>{t("participantNavigation.quickStart")}</span>
-              <small>{t("participantNavigation.notYetAvailable")}</small>
-            </span>
-          ) : (
-            <Link
-              role="menuitem"
-              href={PARTICIPANT_UTILITY_DESTINATIONS["quick-start"].href}
-              aria-current={activeState === "quick-start" ? "page" : undefined}
-              onClick={(event) => {
-                if (isUnmodifiedPrimaryClick(event)) beginNavigation("quick-start");
-                else hideMenu();
+          <UtilityLinks
+            activeState={activeState}
+            administrationHref={administrationHref}
+            quickStartUnavailable={quickStartUnavailable}
+            beginNavigation={beginNavigation}
+            hideMenu={hideMenu}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function UtilityLinks({
+  activeState,
+  administrationHref,
+  quickStartUnavailable,
+  beginNavigation,
+  hideMenu,
+}: Readonly<{
+  activeState: ParticipantNavigationState;
+  administrationHref: string | null;
+  quickStartUnavailable: boolean;
+  beginNavigation(destination: NavigationDestination): void;
+  hideMenu(restoreFocus?: boolean): void;
+}>) {
+  const { t } = useI18n();
+  return (
+    <>
+      <Link
+        role="menuitem"
+        href={PARTICIPANT_UTILITY_DESTINATIONS.account.href}
+        aria-current={activeState === "account" ? "page" : undefined}
+        onClick={(event) => {
+          if (isUnmodifiedPrimaryClick(event)) beginNavigation("account");
+          else hideMenu();
+        }}
+      >
+        <NavigationLinkContent
+          label={t("participantNavigation.organizationProfile")}
+          loadingLabel={`${t("participantNavigation.loadingDestination")} ${t("participantNavigation.organizationProfile")}`}
+          onSettled={hideMenu}
+        />
+      </Link>
+      {quickStartUnavailable ? (
+        <span className={styles.unavailableUtility} role="menuitem" aria-disabled="true" data-availability="unavailable">
+          <span>{t("participantNavigation.quickStart")}</span>
+          <small>{t("participantNavigation.notYetAvailable")}</small>
+        </span>
+      ) : (
+        <Link
+          role="menuitem"
+          href={PARTICIPANT_UTILITY_DESTINATIONS["quick-start"].href}
+          aria-current={activeState === "quick-start" ? "page" : undefined}
+          onClick={(event) => {
+            if (isUnmodifiedPrimaryClick(event)) beginNavigation("quick-start");
+            else hideMenu();
+          }}
+        >
+          <NavigationLinkContent
+            label={t("participantNavigation.quickStart")}
+            loadingLabel={`${t("participantNavigation.loadingDestination")} ${t("participantNavigation.quickStart")}`}
+            onSettled={hideMenu}
+          />
+        </Link>
+      )}
+      <Link
+        role="menuitem"
+        href={PARTICIPANT_UTILITY_DESTINATIONS.referrals.managementHref}
+        aria-current={activeState === "referrals" ? "page" : undefined}
+        onClick={(event) => {
+          if (isUnmodifiedPrimaryClick(event)) beginNavigation("referrals");
+          else hideMenu();
+        }}
+      >
+        <NavigationLinkContent
+          label={t("participantNavigation.referrals")}
+          loadingLabel={`${t("participantNavigation.loadingDestination")} ${t("participantNavigation.referrals")}`}
+          onSettled={hideMenu}
+        />
+      </Link>
+      {administrationHref ? (
+        <Link role="menuitem" href={administrationHref} onClick={() => hideMenu()}>
+          {t("participantNavigation.administration")}
+        </Link>
+      ) : null}
+      <SignOutButton className={styles.signOut} role="menuitem" />
+    </>
+  );
+}
+
+function MobileMenuUtility({
+  activeState,
+  administrationHref: initialAdministrationHref,
+  organizationName,
+  quickStartUnavailable,
+  beginNavigation,
+}: Readonly<{
+  activeState: ParticipantNavigationState;
+  administrationHref?: string;
+  organizationName: string | null;
+  quickStartUnavailable: boolean;
+  beginNavigation(destination: NavigationDestination): void;
+}>) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const { administrationHref, resolveAdministration } = useAdministrationHref(initialAdministrationHref);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
+
+  function showMenu(focusFirst = false) {
+    setOpen(true);
+    resolveAdministration();
+    if (focusFirst) requestAnimationFrame(() => {
+      menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+    });
+  }
+
+  function hideMenu(restoreFocus = false) {
+    setOpen(false);
+    if (restoreFocus) requestAnimationFrame(() => triggerRef.current?.focus());
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    const dismiss = (event: globalThis.PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (!menuRef.current?.contains(target) && !triggerRef.current?.contains(target)) hideMenu();
+    };
+    document.addEventListener("pointerdown", dismiss);
+    return () => document.removeEventListener("pointerdown", dismiss);
+  }, [open]);
+
+  const current = activeState === "account" || activeState === "quick-start" || activeState === "referrals";
+  const label = t("participantNavigation.menu");
+  const organizationLabel = organizationName
+    ? `${label}: ${organizationName}`
+    : label;
+
+  return (
+    <div className={styles.mobileMenuUtility} data-participant-utility="account">
+      <button
+        ref={triggerRef}
+        type="button"
+        className={styles.mobileMenuTrigger}
+        aria-label={organizationLabel}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={menuId}
+        data-current={current ? "true" : undefined}
+        data-mobile-menu-trigger
+        onClick={() => open ? hideMenu() : showMenu()}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowUp" || event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            showMenu(true);
+          } else if (event.key === "Escape" && open) {
+            event.preventDefault();
+            hideMenu(true);
+          }
+        }}
+      >
+        <span className={styles.lensIcon} aria-hidden="true"><ExchangeLensIcon icon="menu" /></span>
+        <span className={styles.lensLabel}>{label}</span>
+      </button>
+      {open ? (
+        <>
+          <div className={styles.mobileMenuBackdrop} aria-hidden="true" />
+          <section className={styles.mobileMenuSurface} aria-label={t("participantNavigation.accountUtilities")}>
+            <header className={styles.mobileMenuHeader}>
+              <span className={styles.mobileMenuAvatar} aria-hidden="true">{organizationInitials(organizationName)}</span>
+              <div>
+                <strong>{organizationName ?? t("participantNavigation.account")}</strong>
+                <span>{t("participantNavigation.accountUtilities")}</span>
+              </div>
+              <button type="button" onClick={() => hideMenu(true)} aria-label={label}>×</button>
+            </header>
+            <div
+              ref={menuRef}
+              id={menuId}
+              className={styles.mobileMenuRows}
+              role="menu"
+              onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  hideMenu(true);
+                } else if (event.key === "ArrowDown") {
+                  event.preventDefault();
+                  moveMenuFocus(event.currentTarget, event.target, 1);
+                } else if (event.key === "ArrowUp") {
+                  event.preventDefault();
+                  moveMenuFocus(event.currentTarget, event.target, -1);
+                } else if (event.key === "Home") {
+                  event.preventDefault();
+                  moveMenuFocus(event.currentTarget, null, 1);
+                } else if (event.key === "End") {
+                  event.preventDefault();
+                  moveMenuFocus(event.currentTarget, null, -1);
+                }
               }}
             >
-              <NavigationLinkContent
-                label={t("participantNavigation.quickStart")}
-                loadingLabel={`${t("participantNavigation.loadingDestination")} ${t("participantNavigation.quickStart")}`}
-                onSettled={hideMenu}
+              <UtilityLinks
+                activeState={activeState}
+                administrationHref={administrationHref}
+                quickStartUnavailable={quickStartUnavailable}
+                beginNavigation={beginNavigation}
+                hideMenu={hideMenu}
               />
-            </Link>
-          )}
-          <Link
-            role="menuitem"
-            href={PARTICIPANT_UTILITY_DESTINATIONS.referrals.managementHref}
-            aria-current={activeState === "referrals" ? "page" : undefined}
-            onClick={(event) => {
-              if (isUnmodifiedPrimaryClick(event)) beginNavigation("referrals");
-              else hideMenu();
-            }}
-          >
-            <NavigationLinkContent
-              label={t("participantNavigation.referrals")}
-              loadingLabel={`${t("participantNavigation.loadingDestination")} ${t("participantNavigation.referrals")}`}
-              onSettled={hideMenu}
-            />
-          </Link>
-          {administrationHref ? (
-            <Link role="menuitem" href={administrationHref} onClick={() => hideMenu()}>
-              {t("participantNavigation.administration")}
-            </Link>
-          ) : null}
-          <SignOutButton className={styles.signOut} role="menuitem" />
-        </div>
+            </div>
+          </section>
+        </>
       ) : null}
     </div>
   );
@@ -544,7 +694,9 @@ export function ParticipantTopNavigation({
     intelligenceHref: transition.intelligenceHref,
     opportunityHref: transition.opportunityHref,
     resourceHref: transition.resourceHref,
+    capabilityHref: transition.capabilityHref,
   });
+  const quickStartUnavailable = unavailableUtilityIds.includes("quick-start");
 
   return (
     <>
@@ -562,7 +714,7 @@ export function ParticipantTopNavigation({
           activeState={activeState}
           administrationHref={administrationHref}
           organizationName={organizationName}
-          quickStartUnavailable={unavailableUtilityIds.includes("quick-start")}
+          quickStartUnavailable={quickStartUnavailable}
           beginNavigation={transition.begin}
         />
       </header>
@@ -577,6 +729,13 @@ export function ParticipantTopNavigation({
           unavailableLensIds={unavailableLensIds}
           beginNavigation={transition.begin}
           mobile
+        />
+        <MobileMenuUtility
+          activeState={activeState}
+          administrationHref={administrationHref}
+          organizationName={organizationName}
+          quickStartUnavailable={quickStartUnavailable}
+          beginNavigation={transition.begin}
         />
       </nav>
     </>
