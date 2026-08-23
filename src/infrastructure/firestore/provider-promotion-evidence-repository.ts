@@ -31,7 +31,11 @@ function normalizeValue(value: unknown): unknown {
 
 function normalizeRecord<T extends object>(data: DocumentData): T {
   const normalized = normalizeValue(data) as Record<string, unknown>;
-  const { schemaVersion: _schemaVersion, createdAt: _storageCreatedAt, ...record } = normalized;
+  const {
+    schemaVersion: _schemaVersion,
+    storageCreatedAt: _storageCreatedAt,
+    ...record
+  } = normalized;
   void _schemaVersion;
   void _storageCreatedAt;
   return Object.freeze(record) as T;
@@ -41,7 +45,7 @@ function immutablePayload(record: object): DocumentData {
   return {
     ...record,
     schemaVersion: FIRESTORE_SCHEMA_VERSION,
-    createdAt: FieldValue.serverTimestamp(),
+    storageCreatedAt: FieldValue.serverTimestamp(),
   };
 }
 
