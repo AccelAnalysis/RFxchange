@@ -322,8 +322,11 @@ function actionProjection(definition: ReturnType<typeof exchangeRoomActionDefini
   const href = definition.id === "resources.offer-request"
     ? own ? resourcesHref({ manage: "offer" }, input.navigationContext) : providerHref(selectedOrganizationId, input.navigationContext)
     : definition.id === "resources.manage-view" && selectedResource ? resourcesHref({ resource: selection.selectedRecord!.recordId }, input.navigationContext) : null;
-  const reason: ExchangeRoomActionDisabledReason | null = !operational ? "not-operational" : !applicable ? "not-applicable" : !authorized ? "not-authorized" : href ? null : "not-operational";
-  return Object.freeze({ ...definition, labelKey: variant === "own" ? definition.labelKey : definition.externalLabelKey, variant, operational, applicable, authorized, authorization: variant === "own" ? definition.authorization : definition.externalAuthorization, availability: reason === null ? "active" : "disabled", disabledReason: reason, resolvedHandler: reason === null && href ? Object.freeze({ kind: "href" as const, href }) : null });
+  const handlerCandidate = operational && applicable && href
+    ? Object.freeze({ kind: "href" as const, href })
+    : null;
+  const reason: ExchangeRoomActionDisabledReason | null = !operational ? "not-operational" : !applicable ? "not-applicable" : !authorized ? "not-authorized" : handlerCandidate ? null : "not-operational";
+  return Object.freeze({ ...definition, labelKey: variant === "own" ? definition.labelKey : definition.externalLabelKey, variant, operational, applicable, authorized, authorization: variant === "own" ? definition.authorization : definition.externalAuthorization, availability: reason === null ? "active" : "disabled", disabledReason: reason, handlerCandidate, resolvedHandler: reason === null ? handlerCandidate : null });
 }
 
 export interface ResourcesMobileProjectionInput {
