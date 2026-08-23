@@ -160,9 +160,8 @@ function refreshedPermission(
   return null;
 }
 
-function privilegedHref(actionId: string): string | null {
-  if (actionId === "opportunities.create-view") return "/opportunities/manage";
-  return null;
+function privilegedHref(action: ExchangeRoomActionProjection): string | null {
+  return action.resolvedHandler?.kind === "href" ? action.resolvedHandler.href : null;
 }
 
 export function ExchangeRoomActionController({
@@ -237,7 +236,7 @@ export function ExchangeRoomActionController({
           );
         }
         if (permission === true && action.operational && action.applicable) {
-          const href = privilegedHref(action.id);
+          const href = privilegedHref(action);
           if (href) {
             return (
               <Link
