@@ -31,6 +31,7 @@ import type {
   ExchangeSelectionState,
   LensMapProjection,
 } from "../../application/participant/mobile-exchange-contracts";
+import { beaconImageId, registerExchangeBeaconImages } from "./exchange-beacon-images";
 import {
   MAP_ROTATION_PREFERENCE_EVENT,
   readMapRotationPreference,
@@ -47,6 +48,7 @@ export interface ExchangeHomeMarker {
   readonly coordinate: readonly [longitude: number, latitude: number];
   readonly label: string;
   readonly accessibleLocationLabel?: string;
+  readonly precision?: "exact" | "approximate";
 }
 
 export type ExchangeOrganizationMarker = ExchangeHomeMarker;
@@ -110,6 +112,21 @@ type MapSearchResult = Readonly<{
   bbox: readonly [number, number, number, number] | null;
 }>;
 
+type MapBasemapPresetId = "exchange" | "street";
+type MapBasemapPreset = Readonly<{
+  id: MapBasemapPresetId;
+  label: string;
+  lightPreset: "day";
+  theme: "faded" | "default";
+  showTransitLabels: boolean;
+  showPointOfInterestLabels: boolean;
+}>;
+
+export const MAP_BASEMAP_PRESETS: readonly MapBasemapPreset[] = Object.freeze([
+  Object.freeze({ id: "exchange", label: "Exchange", lightPreset: "day", theme: "faded", showTransitLabels: false, showPointOfInterestLabels: true }),
+  Object.freeze({ id: "street", label: "Street", lightPreset: "day", theme: "default", showTransitLabels: true, showPointOfInterestLabels: true }),
+]);
+
 const LOCALITY_SOURCE_ID = "rfx-spatial-scene-locality";
 const LOCALITY_MASK_SOURCE_ID = "rfx-spatial-scene-locality-mask";
 const LOCALITY_MASK_LAYER_ID = "rfx-spatial-scene-locality-mask-fill";
@@ -118,6 +135,7 @@ const LOCALITY_OUTLINE_CONTRAST_LAYER_ID = "rfx-spatial-scene-locality-outline-c
 const LOCALITY_OUTLINE_LAYER_ID = "rfx-spatial-scene-locality-outline";
 const NETWORK_MARKER_SOURCE_ID = "rfx-spatial-scene-network-organizations";
 const NETWORK_SELECTED_MARKER_SOURCE_ID = "rfx-spatial-scene-selected-network-organization";
+const NETWORK_CLUSTER_BACK_LAYER_ID = "rfx-spatial-scene-network-cluster-back";
 const NETWORK_CLUSTER_CORE_LAYER_ID = "rfx-spatial-scene-network-cluster-core";
 const NETWORK_CLUSTER_COUNT_LAYER_ID = "rfx-spatial-scene-network-cluster-count";
 const NETWORK_MARKER_HALO_LAYER_ID = "rfx-spatial-scene-network-organization-halo";
@@ -127,6 +145,7 @@ const NETWORK_MARKER_IDENTITY_LAYER_ID = "rfx-spatial-scene-network-organization
 const NETWORK_MARKER_LABEL_LAYER_ID = "rfx-spatial-scene-network-organization-label";
 const OPPORTUNITY_MARKER_SOURCE_ID = "rfx-spatial-scene-opportunities";
 const OPPORTUNITY_SELECTED_MARKER_SOURCE_ID = "rfx-spatial-scene-selected-opportunity";
+const OPPORTUNITY_CLUSTER_BACK_LAYER_ID = "rfx-spatial-scene-opportunity-cluster-back";
 const OPPORTUNITY_CLUSTER_LAYER_ID = "rfx-spatial-scene-opportunity-cluster";
 const OPPORTUNITY_CLUSTER_COUNT_LAYER_ID = "rfx-spatial-scene-opportunity-cluster-count";
 const OPPORTUNITY_MARKER_LAYER_ID = "rfx-spatial-scene-opportunity-beacon";
@@ -136,6 +155,7 @@ const OPPORTUNITY_SELECTED_LABEL_LAYER_ID = "rfx-spatial-scene-selected-opportun
 const LENS_PROJECTION_SOURCE_ID = "rfx-spatial-scene-lens-projection";
 const LENS_PROJECTION_AREA_FILL_LAYER_ID = "rfx-spatial-scene-lens-area-fill";
 const LENS_PROJECTION_AREA_LINE_LAYER_ID = "rfx-spatial-scene-lens-area-line";
+const LENS_PROJECTION_CLUSTER_BACK_LAYER_ID = "rfx-spatial-scene-lens-cluster-back";
 const LENS_PROJECTION_CLUSTER_LAYER_ID = "rfx-spatial-scene-lens-cluster";
 const LENS_PROJECTION_CLUSTER_COUNT_LAYER_ID = "rfx-spatial-scene-lens-cluster-count";
 const LENS_PROJECTION_OBJECT_LAYER_ID = "rfx-spatial-scene-lens-object";
@@ -288,6 +308,8 @@ function markerGeoJson(marker?: ExchangeHomeMarker | null) {
           label: marker.label,
           identity: organizationInitials(marker.label),
           accessibleLocationLabel: marker.accessibleLocationLabel ?? "RFxchange organization marker",
+          precision: marker.precision ?? "exact",
+          beaconImage: beaconImageId("own", marker.precision === "approximate" ? "approximate" : "default"),
         },
         geometry: {
           type: "Point" as const,
@@ -311,6 +333,17 @@ function organizationMarkerGeoJson(
         label: marker.label,
         identity: organizationInitials(marker.label),
         selected: marker.id === focusedMarkerId ? 1 : 0,
+        precision: marker.precision ?? "exact",
+        beaconImage: beaconImageId(
+          "organization",
+          marker.id === focusedMarkerId
+            ? marker.precision === "approximate"
+              ? "selected-approximate"
+              : "selected"
+            : marker.precision === "approximate"
+              ? "approximate"
+              : "default",
+        ),
       },
       geometry: {
         type: "Point" as const,
@@ -332,6 +365,17 @@ function opportunityMarkerGeoJson(
         id: marker.id,
         label: marker.label,
         selected: marker.id === focusedMarkerId ? 1 : 0,
+        precision: marker.precision ?? "exact",
+        beaconImage: beaconImageId(
+          "opportunities-rfx",
+          marker.id === focusedMarkerId
+            ? marker.precision === "approximate"
+              ? "selected-approximate"
+              : "selected"
+            : marker.precision === "approximate"
+              ? "approximate"
+              : "default",
+        ),
       },
       geometry: {
         type: "Point" as const,
@@ -600,8 +644,12 @@ export function ExchangeSpatialScene({
     [lensProjection, lensSelection],
   );
   const lensProjectionRenderModel = useMemo(
-    () => createLensProjectionRenderModel(lensProjectionAdapter, governedAreaGeometries),
-    [governedAreaGeometries, lensProjectionAdapter],
+    () => createLensProjectionRenderModel(
+      lensProjectionAdapter,
+      governedAreaGeometries,
+      { ownOrganizationId: marker?.organizationId ?? null },
+    ),
+    [governedAreaGeometries, lensProjectionAdapter, marker?.organizationId],
   );
   const homeMarkerIsProjected = useMemo(
     () => marker !== null && lensProjectionContainsOrganizationMarker(
@@ -667,6 +715,7 @@ export function ExchangeSpatialScene({
   const searchMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
   const [viewMode, setViewMode] = useState<MapViewMode>("3d");
+  const [basemapPreset, setBasemapPreset] = useState<MapBasemapPresetId>("exchange");
   const [settledPitch, setSettledPitch] = useState(ORGANIZATION_ORBIT_PITCH);
   const [settledCamera, setSettledCamera] = useState<ParticipantMapCamera>(() => initialCamera ?? Object.freeze({
     longitude: marker?.coordinate[0] ?? model.camera.center.longitude,
@@ -935,6 +984,18 @@ export function ExchangeSpatialScene({
     });
   }, [pauseForInteraction]);
 
+  const selectBasemapPreset = useCallback((nextPreset: MapBasemapPresetId) => {
+    const map = mapRef.current;
+    const preset = MAP_BASEMAP_PRESETS.find((candidate) => candidate.id === nextPreset);
+    if (!map || !preset) return;
+    pauseForInteraction();
+    map.setConfigProperty("basemap", "lightPreset", preset.lightPreset);
+    map.setConfigProperty("basemap", "theme", preset.theme);
+    map.setConfigProperty("basemap", "showTransitLabels", preset.showTransitLabels);
+    map.setConfigProperty("basemap", "showPointOfInterestLabels", preset.showPointOfInterestLabels);
+    setBasemapPreset(nextPreset);
+  }, [pauseForInteraction]);
+
   const clearSearchHighlight = useCallback(() => {
     searchMarkerRef.current?.remove();
     searchMarkerRef.current = null;
@@ -1104,6 +1165,7 @@ export function ExchangeSpatialScene({
     map.on("load", () => {
       mapLoadedRef.current = true;
       setMapReady(true);
+      registerExchangeBeaconImages(map);
       map.addSource(LOCALITY_MASK_SOURCE_ID, { type: "geojson", data: homeMaskGeoJsonRef.current });
       map.addLayer({
         id: LOCALITY_MASK_LAYER_ID,
@@ -1295,6 +1357,19 @@ export function ExchangeSpatialScene({
         clusterRadius: 48,
       });
       map.addLayer({
+        id: NETWORK_CLUSTER_BACK_LAYER_ID,
+        type: "circle",
+        source: NETWORK_MARKER_SOURCE_ID,
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-radius": ["step", ["get", "point_count"], 15, 10, 19, 40, 23],
+          "circle-color": "#755014",
+          "circle-opacity": 0.7,
+          "circle-translate": [4, 4],
+          "circle-translate-anchor": "viewport",
+        },
+      });
+      map.addLayer({
         id: NETWORK_CLUSTER_CORE_LAYER_ID,
         type: "circle",
         source: NETWORK_MARKER_SOURCE_ID,
@@ -1302,7 +1377,9 @@ export function ExchangeSpatialScene({
         paint: {
           "circle-radius": ["step", ["get", "point_count"], 14, 10, 18, 40, 22],
           "circle-color": "#252932",
-          "circle-opacity": 0.92,
+          "circle-opacity": 0.97,
+          "circle-stroke-color": "#d6a23a",
+          "circle-stroke-width": 2.25,
         },
       });
       map.addLayer({
@@ -1335,25 +1412,31 @@ export function ExchangeSpatialScene({
       });
       map.addLayer({
         id: NETWORK_MARKER_CORE_LAYER_ID,
-        type: "circle",
+        type: "symbol",
         source: NETWORK_MARKER_SOURCE_ID,
         filter: ["!", ["has", "point_count"]],
-        paint: {
-          "circle-radius": 6,
-          "circle-color": "#252932",
-          "circle-stroke-color": "rgba(0,0,0,0)",
-          "circle-stroke-width": 0,
+        layout: {
+          "icon-image": ["get", "beaconImage"],
+          "icon-size": 0.76,
+          "icon-anchor": "bottom",
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          "icon-pitch-alignment": "viewport",
+          "icon-rotation-alignment": "viewport",
         },
       });
       map.addLayer({
         id: NETWORK_SELECTED_MARKER_CORE_LAYER_ID,
-        type: "circle",
+        type: "symbol",
         source: NETWORK_SELECTED_MARKER_SOURCE_ID,
-        paint: {
-          "circle-radius": 12,
-          "circle-color": "#252932",
-          "circle-stroke-color": "#d6a23a",
-          "circle-stroke-width": 3,
+        layout: {
+          "icon-image": ["get", "beaconImage"],
+          "icon-size": 1.08,
+          "icon-anchor": "bottom",
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          "icon-pitch-alignment": "viewport",
+          "icon-rotation-alignment": "viewport",
         },
       });
       map.addLayer({
@@ -1361,8 +1444,8 @@ export function ExchangeSpatialScene({
         type: "symbol",
         source: NETWORK_SELECTED_MARKER_SOURCE_ID,
         layout: {
-          "text-field": ["get", "identity"],
-          "text-size": 10,
+          "text-field": "",
+          "text-size": 1,
           "text-allow-overlap": true,
           "text-ignore-placement": true,
           "text-pitch-alignment": "viewport",
@@ -1378,7 +1461,7 @@ export function ExchangeSpatialScene({
         layout: {
           "text-field": ["get", "label"],
           "text-size": 12,
-          "text-offset": [0, 1.9],
+          "text-offset": [0, 3.35],
           "text-anchor": "top",
           "text-allow-overlap": false,
           "text-pitch-alignment": "viewport",
@@ -1399,16 +1482,29 @@ export function ExchangeSpatialScene({
         clusterRadius: 36,
       });
       map.addLayer({
+        id: OPPORTUNITY_CLUSTER_BACK_LAYER_ID,
+        type: "circle",
+        source: OPPORTUNITY_MARKER_SOURCE_ID,
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-radius": ["step", ["get", "point_count"], 16, 10, 20, 40, 24],
+          "circle-color": "#755014",
+          "circle-opacity": 0.7,
+          "circle-translate": [4, 4],
+          "circle-translate-anchor": "viewport",
+        },
+      });
+      map.addLayer({
         id: OPPORTUNITY_CLUSTER_LAYER_ID,
         type: "circle",
         source: OPPORTUNITY_MARKER_SOURCE_ID,
         filter: ["has", "point_count"],
         paint: {
           "circle-radius": ["step", ["get", "point_count"], 15, 10, 19, 40, 23],
-          "circle-color": "#1769aa",
-          "circle-opacity": 0.92,
-          "circle-stroke-color": "rgba(255,255,255,0.86)",
-          "circle-stroke-width": 2,
+          "circle-color": "#252932",
+          "circle-opacity": 0.97,
+          "circle-stroke-color": "#d6a23a",
+          "circle-stroke-width": 2.25,
         },
       });
       map.addLayer({
@@ -1425,17 +1521,13 @@ export function ExchangeSpatialScene({
         source: OPPORTUNITY_MARKER_SOURCE_ID,
         filter: ["!", ["has", "point_count"]],
         layout: {
-          "text-field": "◆",
-          "text-size": 22,
-          "text-allow-overlap": true,
-          "text-ignore-placement": true,
-          "text-pitch-alignment": "viewport",
-          "text-rotation-alignment": "viewport",
-        },
-        paint: {
-          "text-color": "#1769aa",
-          "text-halo-color": "rgba(255,255,255,0.92)",
-          "text-halo-width": 2,
+          "icon-image": ["get", "beaconImage"],
+          "icon-size": 0.8,
+          "icon-anchor": "bottom",
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          "icon-pitch-alignment": "viewport",
+          "icon-rotation-alignment": "viewport",
         },
       });
       map.addSource(OPPORTUNITY_SELECTED_MARKER_SOURCE_ID, {
@@ -1447,28 +1539,50 @@ export function ExchangeSpatialScene({
         type: "circle",
         source: OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
         paint: {
-          "circle-radius": 22,
-          "circle-color": "rgba(23,105,170,0.14)",
-          "circle-stroke-color": "rgba(23,105,170,0.48)",
+          "circle-radius": 23,
+          "circle-color": "rgba(214,162,58,0.16)",
+          "circle-stroke-color": "rgba(214,162,58,0.55)",
           "circle-stroke-width": 2,
+          "circle-translate": [0, -18],
+          "circle-translate-anchor": "viewport",
         },
       });
       map.addLayer({
         id: OPPORTUNITY_SELECTED_MARKER_LAYER_ID,
         type: "symbol",
         source: OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
-        layout: { "text-field": "◆", "text-size": 30, "text-allow-overlap": true, "text-ignore-placement": true, "text-pitch-alignment": "viewport" },
-        paint: { "text-color": "#1769aa", "text-halo-color": "#ffffff", "text-halo-width": 2.5 },
+        layout: {
+          "icon-image": ["get", "beaconImage"],
+          "icon-size": 1.1,
+          "icon-anchor": "bottom",
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          "icon-pitch-alignment": "viewport",
+          "icon-rotation-alignment": "viewport",
+        },
       });
       map.addLayer({
         id: OPPORTUNITY_SELECTED_LABEL_LAYER_ID,
         type: "symbol",
         source: OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
         minzoom: 7,
-        layout: { "text-field": ["get", "label"], "text-size": 12, "text-offset": [0, 2.25], "text-anchor": "top", "text-allow-overlap": false, "text-pitch-alignment": "viewport" },
+        layout: { "text-field": ["get", "label"], "text-size": 12, "text-offset": [0, 3.65], "text-anchor": "top", "text-allow-overlap": false, "text-pitch-alignment": "viewport" },
         paint: { "text-color": "#0b0b0d", "text-halo-color": "rgba(247,243,234,0.98)", "text-halo-width": 2 },
       });
 
+      map.addLayer({
+        id: LENS_PROJECTION_CLUSTER_BACK_LAYER_ID,
+        type: "circle",
+        source: LENS_PROJECTION_SOURCE_ID,
+        filter: ["==", ["get", "kind"], "cluster"],
+        paint: {
+          "circle-radius": ["step", ["get", "count"], 15, 10, 19, 40, 23],
+          "circle-color": "#755014",
+          "circle-opacity": 0.7,
+          "circle-translate": [4, 4],
+          "circle-translate-anchor": "viewport",
+        },
+      });
       map.addLayer({
         id: LENS_PROJECTION_CLUSTER_LAYER_ID,
         type: "circle",
@@ -1477,9 +1591,9 @@ export function ExchangeSpatialScene({
         paint: {
           "circle-radius": ["step", ["get", "count"], 14, 10, 18, 40, 22],
           "circle-color": "#252932",
-          "circle-opacity": 0.94,
-          "circle-stroke-color": "rgba(247,243,234,0.9)",
-          "circle-stroke-width": 2,
+          "circle-opacity": 0.97,
+          "circle-stroke-color": "#d6a23a",
+          "circle-stroke-width": 2.25,
         },
       });
       map.addLayer({
@@ -1504,14 +1618,17 @@ export function ExchangeSpatialScene({
       });
       map.addLayer({
         id: LENS_PROJECTION_OBJECT_LAYER_ID,
-        type: "circle",
+        type: "symbol",
         source: LENS_PROJECTION_SOURCE_ID,
         filter: ["in", ["get", "kind"], ["literal", ["organization", "record"]]],
-        paint: {
-          "circle-radius": ["case", ["==", ["get", "selected"], 1], 11, 7],
-          "circle-color": ["case", ["==", ["get", "kind"], "record"], "#1769aa", "#252932"],
-          "circle-stroke-color": ["case", ["==", ["get", "selected"], 1], "#d6a23a", "rgba(0,0,0,0)"],
-          "circle-stroke-width": ["case", ["==", ["get", "selected"], 1], 3, 0],
+        layout: {
+          "icon-image": ["get", "beaconImage"],
+          "icon-size": ["case", ["==", ["get", "selected"], 1], 1.08, 0.76],
+          "icon-anchor": "bottom",
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          "icon-pitch-alignment": "viewport",
+          "icon-rotation-alignment": "viewport",
         },
       });
       map.addLayer({
@@ -1523,7 +1640,7 @@ export function ExchangeSpatialScene({
         layout: {
           "text-field": ["get", "accessibleLabel"],
           "text-size": 12,
-          "text-offset": [0, 1.9],
+          "text-offset": [0, 3.45],
           "text-anchor": "top",
           "text-allow-overlap": false,
         },
@@ -1544,13 +1661,16 @@ export function ExchangeSpatialScene({
       });
       map.addLayer({
         id: HOME_MARKER_CORE_LAYER_ID,
-        type: "circle",
+        type: "symbol",
         source: HOME_MARKER_SOURCE_ID,
-        paint: {
-          "circle-radius": 13,
-          "circle-color": "#0b0b0d",
-          "circle-stroke-color": "#d6a23a",
-          "circle-stroke-width": 3,
+        layout: {
+          "icon-image": ["get", "beaconImage"],
+          "icon-size": 1.02,
+          "icon-anchor": "bottom",
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
+          "icon-pitch-alignment": "viewport",
+          "icon-rotation-alignment": "viewport",
         },
       });
       map.addLayer({
@@ -1558,8 +1678,8 @@ export function ExchangeSpatialScene({
         type: "symbol",
         source: HOME_MARKER_SOURCE_ID,
         layout: {
-          "text-field": ["get", "identity"],
-          "text-size": 12,
+          "text-field": "",
+          "text-size": 1,
           "text-allow-overlap": true,
           "text-ignore-placement": true,
           "text-pitch-alignment": "viewport",
@@ -1576,7 +1696,7 @@ export function ExchangeSpatialScene({
         layout: {
           "text-field": ["get", "label"],
           "text-size": 13,
-          "text-offset": [0, 2.15],
+          "text-offset": [0, 3.55],
           "text-anchor": "top",
           "text-allow-overlap": true,
           "text-ignore-placement": true,
@@ -1853,6 +1973,7 @@ export function ExchangeSpatialScene({
       data-interactive={interactive}
       data-workspace-overlay={workspaceOverlay ?? "none"}
       data-map-view-mode={viewMode}
+      data-map-basemap={basemapPreset}
       data-map-pitch={settledPitch.toFixed(2)}
       data-map-bearing={settledCamera.bearing.toFixed(2)}
       data-map-center={`${settledCamera.longitude.toFixed(6)},${settledCamera.latitude.toFixed(6)}`}
@@ -1941,6 +2062,20 @@ export function ExchangeSpatialScene({
                 onClick={() => selectViewMode(option.id)}
               >
                 {option.label}
+              </button>
+            ))}
+            <span className={styles.controlDivider} aria-hidden="true" />
+            <span className={styles.basemapLabel}>Map</span>
+            {MAP_BASEMAP_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                data-active={basemapPreset === preset.id}
+                aria-pressed={basemapPreset === preset.id}
+                aria-label={`Use ${preset.label} map appearance`}
+                onClick={() => selectBasemapPreset(preset.id)}
+              >
+                {preset.label}
               </button>
             ))}
             <button type="button" onClick={fitHomeLocality}>Fit home</button>

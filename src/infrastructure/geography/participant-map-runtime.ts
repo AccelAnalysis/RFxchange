@@ -73,9 +73,11 @@ export async function loadAuthorizedParticipantMapProjection(
     model,
     homeMarker: Object.freeze({
       id: marker.id,
+      organizationId: String(marker.organizationId),
       coordinate: marker.coordinate,
       label: profile?.displayName ?? "Your organization",
       accessibleLocationLabel: marker.accessibleLocationLabel,
+      precision: marker.privacyTreatment === "exact" ? "exact" : "approximate",
     }),
   });
 }

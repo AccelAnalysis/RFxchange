@@ -245,28 +245,39 @@ function actionProjection(input: Readonly<{
     let operational = false;
     const applicable = true;
     let authorized = true;
+    let handlerCandidate: ExchangeRoomActionProjection["handlerCandidate"] = null;
     let resolvedHandler: ExchangeRoomActionProjection["resolvedHandler"] = null;
 
     if (own && definition.id === "capabilities.manage-view") {
       operational = true;
       authorized = input.canManageProfile;
-      resolvedHandler = authorized ? Object.freeze({ kind: "href", href: "/organization-profile#market-profile-title" }) : null;
+      handlerCandidate = Object.freeze({
+        kind: "href" as const,
+        href: "/organization-profile#market-profile-title",
+      });
+      resolvedHandler = authorized ? handlerCandidate : null;
     } else if (own && definition.id === "capabilities.classify-match") {
       operational = true;
       authorized = input.canManageProfile;
-      resolvedHandler = authorized ? Object.freeze({ kind: "href", href: "/organization-profile#describe-capability-title" }) : null;
+      handlerCandidate = Object.freeze({
+        kind: "href" as const,
+        href: "/organization-profile#describe-capability-title",
+      });
+      resolvedHandler = authorized ? handlerCandidate : null;
     } else if (own && definition.id === "capabilities.gaps-save") {
       operational = true;
-      resolvedHandler = Object.freeze({
-        kind: "href",
+      handlerCandidate = Object.freeze({
+        kind: "href" as const,
         href: `/capabilities?view=gaps&selectedOrganization=${encodeURIComponent(input.organizationId)}`,
       });
+      resolvedHandler = handlerCandidate;
     } else if (!own && definition.id === "capabilities.manage-view") {
       operational = true;
-      resolvedHandler = Object.freeze({
-        kind: "href",
+      handlerCandidate = Object.freeze({
+        kind: "href" as const,
         href: `/capabilities?selectedOrganization=${encodeURIComponent(input.organizationId)}`,
       });
+      resolvedHandler = handlerCandidate;
     }
 
     const disabledReason = !operational
@@ -288,6 +299,7 @@ function actionProjection(input: Readonly<{
       authorization: "room-participant" as const,
       availability: resolvedHandler ? "active" as const : "disabled" as const,
       disabledReason,
+      handlerCandidate,
       resolvedHandler,
     });
   }));

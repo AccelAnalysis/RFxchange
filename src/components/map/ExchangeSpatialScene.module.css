@@ -69,3 +69,8 @@
 }
 @media (max-width: 430px) { .searchForm { grid-template-columns: minmax(0,1fr) 78px; } .homeContext { grid-template-columns: 1fr auto; } .homeContext span { grid-column: 1 / -1; } .viewModeControl button { padding-inline: 9px; font-size: 0.7rem; } }
 @media (prefers-reduced-transparency: reduce) { .searchPanel, .viewModeControl { background: var(--semantic-canvas); backdrop-filter: none; -webkit-backdrop-filter: none; } }
+
+
+.controlDivider { width: 1px; min-height: 26px; align-self: center; background: var(--semantic-border-subtle); }
+.basemapLabel { align-self: center; padding-inline: 5px 2px; color: var(--semantic-text-muted); font: 800 0.62rem/1 var(--type-interface-family); letter-spacing: 0.09em; text-transform: uppercase; }
+@media (max-width: 760px) { .viewModeControl { max-width: calc(100vw - 20px); flex-wrap: wrap; justify-content: flex-end; } .basemapLabel { display: none; } .controlDivider { min-height: 22px; } }

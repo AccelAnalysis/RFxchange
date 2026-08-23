@@ -13,6 +13,7 @@ const route = read("app/api/opportunities/route.ts");
 const page = read("app/opportunities/page.tsx");
 const workspace = read("src/components/rfx/OpportunityDiscoveryWorkspace.tsx");
 const map = read("src/components/map/ExchangeSpatialScene.tsx");
+const beacons = read("src/components/map/exchange-beacon-images.ts");
 const templates = read("src/application/rfx/opportunity-alert-templates.ts");
 const rules = read("firestore.rules");
 const tracker = read("docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md");
@@ -49,7 +50,14 @@ assert.match(workspace, /data-selected-opportunity-reference/);
 assert.match(workspace, /result\.deadlines\.next7Days/);
 assert.match(workspace, /Discovery and watching do not mean|rfxWorkspace\.discovery\.detail\.disclaimer/);
 assert.match(map, /OPPORTUNITY_MARKER_SOURCE_ID/);
-assert.match(map, /#1769aa/i);
+assert.match(map, /beaconImageId\(\s*"opportunities-rfx"/);
+assert.match(map, /registerExchangeBeaconImages\(map\)/);
+assert.match(map, /"icon-image": \["get", "beaconImage"\]/);
+assert.match(beacons, /"opportunities-rfx"/);
+assert.match(beacons, /kind === "opportunities-rfx" && selected/);
+assert.match(beacons, /rim: selected \? "#f3cf73" : "#d6a23a"/);
+assert.doesNotMatch(map, /"text-field": "◆"/);
+assert.doesNotMatch(beacons, /maplibre|openfreemap/i);
 assert.doesNotMatch(map, /opportunity.*animation|pulse.*opportunity/i);
 assert.match(templates, /rfx\.opportunity-alert/);
 assert.match(templates, /not qualification, eligibility, endorsement, or an award prediction/);
@@ -67,4 +75,4 @@ for (const locale of ["en-US", "es", "fr", "it", "de"]) {
   assert.ok(catalog.discovery?.detail?.disclaimer);
 }
 
-console.log("Wave 4 Slice 4.5 opportunity discovery, saved search, alert, watch, and deadline guardrails validated.");
+console.log("Wave 4 Slice 4.5 opportunity discovery, saved search, alert, watch, deadline, and dimensional RFx beacon guardrails validated.");

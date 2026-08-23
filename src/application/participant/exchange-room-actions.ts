@@ -52,11 +52,26 @@ export const LEGACY_EXCHANGE_ROOM_ACTION_DISPOSITIONS: Readonly<
 export type ExchangeRoomActionDisabledReason = "not-operational" | "not-applicable" | "not-authorized";
 export type ExchangeRoomActionVariant = "own" | "external";
 export type ExchangeRoomActionLabelKey = `${ExchangeRoomActionId}.${ExchangeRoomActionVariant}`;
+export type ExchangeRoomActionIntent = "opportunity-watch";
 export type ExchangeRoomActionHandler =
   | Readonly<{ kind: "href"; href: string }>
-  | Readonly<{ kind: "network-focus"; intent: "organizations" | "capabilities" }>;
+  | Readonly<{ kind: "network-focus"; intent: "organizations" | "capabilities" }>
+  | Readonly<{ kind: "intent"; intent: ExchangeRoomActionIntent }>;
 type AuthorizationRule = "room-participant" | "open-platform" | "open-platform-rfx-create" | "open-platform-referral-manage" | "open-platform-resource-manage";
-type HandlerRule = "opportunity-discovery" | "rfx-issuer" | "resource-target" | "provider-status" | "network-organizations" | "network-capabilities" | "organization-profile" | null;
+type HandlerRule =
+  | "opportunity-discovery"
+  | "opportunity-assessment"
+  | "opportunity-watch"
+  | "rfx-issuer"
+  | "resource-target"
+  | "resource-request"
+  | "resource-offer"
+  | "resource-edit"
+  | "provider-status"
+  | "network-organizations"
+  | "network-capabilities"
+  | "organization-profile"
+  | null;
 
 export interface ExchangeRoomActionDefinition {
   readonly id: ExchangeRoomActionId;
@@ -84,6 +99,12 @@ export interface ExchangeRoomActionProjection
   readonly authorization: AuthorizationRule;
   readonly availability: "active" | "disabled";
   readonly disabledReason: ExchangeRoomActionDisabledReason | null;
+  /**
+   * The server-derived route or intent candidate is retained even when the first
+   * client projection is permission-denied. A fresh server permission result may
+   * activate only this candidate; the browser never invents a handler.
+   */
+  readonly handlerCandidate: ExchangeRoomActionHandler | null;
   readonly resolvedHandler: ExchangeRoomActionHandler | null;
 }
 
@@ -96,15 +117,16 @@ export interface ExchangeRoomActionProjectionInput {
   readonly networkDiscoveryAvailable?: boolean;
   readonly actionAuthorization?: Readonly<{ rfxCreate: boolean; referralManage: boolean; resourceManage: boolean }>;
   readonly currentOpportunityReference?: string | null;
+  readonly currentOpportunityReturnTo?: string | null;
 }
 
 const DEFINITIONS: readonly ExchangeRoomActionDefinition[] = Object.freeze([
   Object.freeze({ id: "opportunities.create-view", lens: "opportunities-rfx", order: 1, canonicalLabel: "Create RFx / View RFx Detail", labelKey: "opportunities.create-view.own", externalLabelKey: "opportunities.create-view.external", operational: true, externalOperational: true, authorization: "open-platform-rfx-create", externalAuthorization: "open-platform", handler: "rfx-issuer", externalHandler: "opportunity-discovery" }),
-  Object.freeze({ id: "opportunities.manage-respond", lens: "opportunities-rfx", order: 2, canonicalLabel: "Edit / Manage RFx / Respond", labelKey: "opportunities.manage-respond.own", externalLabelKey: "opportunities.manage-respond.external", operational: false, externalOperational: false, authorization: "open-platform-rfx-create", externalAuthorization: "open-platform", handler: null, externalHandler: null }),
-  Object.freeze({ id: "opportunities.team", lens: "opportunities-rfx", order: 3, canonicalLabel: "Invite Team / Team", labelKey: "opportunities.team.own", externalLabelKey: "opportunities.team.external", operational: false, externalOperational: false, authorization: "open-platform", externalAuthorization: "open-platform", handler: null, externalHandler: null }),
-  Object.freeze({ id: "opportunities.watch", lens: "opportunities-rfx", order: 4, canonicalLabel: "Track / Watch / Watch", labelKey: "opportunities.watch.own", externalLabelKey: "opportunities.watch.external", operational: false, externalOperational: false, authorization: "open-platform", externalAuthorization: "open-platform", handler: null, externalHandler: null }),
-  Object.freeze({ id: "resources.offer-request", lens: "resources", order: 1, canonicalLabel: "Offer Resource / Request Resource", labelKey: "resources.offer-request.own", externalLabelKey: "resources.offer-request.external", operational: false, externalOperational: false, authorization: "open-platform-resource-manage", externalAuthorization: "open-platform", handler: null, externalHandler: null }),
-  Object.freeze({ id: "resources.manage-view", lens: "resources", order: 2, canonicalLabel: "Edit Resource / View Resource Detail", labelKey: "resources.manage-view.own", externalLabelKey: "resources.manage-view.external", operational: false, externalOperational: true, authorization: "open-platform-resource-manage", externalAuthorization: "open-platform", handler: null, externalHandler: "resource-target" }),
+  Object.freeze({ id: "opportunities.manage-respond", lens: "opportunities-rfx", order: 2, canonicalLabel: "Edit / Manage RFx / Respond", labelKey: "opportunities.manage-respond.own", externalLabelKey: "opportunities.manage-respond.external", operational: true, externalOperational: true, authorization: "open-platform-rfx-create", externalAuthorization: "open-platform", handler: "rfx-issuer", externalHandler: "opportunity-assessment" }),
+  Object.freeze({ id: "opportunities.team", lens: "opportunities-rfx", order: 3, canonicalLabel: "Invite Team / Team", labelKey: "opportunities.team.own", externalLabelKey: "opportunities.team.external", operational: false, externalOperational: true, authorization: "open-platform", externalAuthorization: "open-platform", handler: null, externalHandler: "opportunity-assessment" }),
+  Object.freeze({ id: "opportunities.watch", lens: "opportunities-rfx", order: 4, canonicalLabel: "Track / Watch / Watch", labelKey: "opportunities.watch.own", externalLabelKey: "opportunities.watch.external", operational: false, externalOperational: true, authorization: "open-platform", externalAuthorization: "open-platform", handler: null, externalHandler: "opportunity-watch" }),
+  Object.freeze({ id: "resources.offer-request", lens: "resources", order: 1, canonicalLabel: "Offer Resource / Request Resource", labelKey: "resources.offer-request.own", externalLabelKey: "resources.offer-request.external", operational: true, externalOperational: true, authorization: "open-platform-resource-manage", externalAuthorization: "open-platform-referral-manage", handler: "resource-offer", externalHandler: "resource-request" }),
+  Object.freeze({ id: "resources.manage-view", lens: "resources", order: 2, canonicalLabel: "Edit Resource / View Resource Detail", labelKey: "resources.manage-view.own", externalLabelKey: "resources.manage-view.external", operational: true, externalOperational: true, authorization: "open-platform-resource-manage", externalAuthorization: "open-platform", handler: "resource-edit", externalHandler: "resource-target" }),
   Object.freeze({ id: "resources.share", lens: "resources", order: 3, canonicalLabel: "Share", labelKey: "resources.share.own", externalLabelKey: "resources.share.external", operational: false, externalOperational: false, authorization: "open-platform", externalAuthorization: "open-platform", handler: null, externalHandler: null }),
   Object.freeze({ id: "resources.save", lens: "resources", order: 4, canonicalLabel: "Save / Archive / Save", labelKey: "resources.save.own", externalLabelKey: "resources.save.external", operational: false, externalOperational: false, authorization: "open-platform-resource-manage", externalAuthorization: "open-platform", handler: null, externalHandler: null }),
   Object.freeze({ id: "intelligence.add-view", lens: "intelligence", order: 1, canonicalLabel: "Add Insight / View Insight Detail", labelKey: "intelligence.add-view.own", externalLabelKey: "intelligence.add-view.external", operational: false, externalOperational: false, authorization: "room-participant", externalAuthorization: "room-participant", handler: null, externalHandler: null }),
@@ -146,6 +168,14 @@ function resourceTarget(input: ExchangeRoomActionProjectionInput): string | null
   return null;
 }
 
+function safeOpportunityReturnTo(
+  input: ExchangeRoomActionProjectionInput,
+): string | null {
+  const candidate = input.currentOpportunityReturnTo?.trim();
+  if (!candidate || candidate.startsWith("//") || /[\r\n]/.test(candidate)) return null;
+  return /^\/opportunities(?:[/?#]|$)/.test(candidate) ? candidate : null;
+}
+
 function resolveHandler(
   rule: HandlerRule,
   input: ExchangeRoomActionProjectionInput,
@@ -157,11 +187,29 @@ function resolveHandler(
         ? Object.freeze({ kind: "href", href: `/opportunities/${encodeURIComponent(reference)}` })
         : null;
     }
+    case "opportunity-assessment": {
+      const reference = input.currentOpportunityReference?.trim();
+      if (!reference) return null;
+      const assessmentHref = `/opportunities/${encodeURIComponent(reference)}/assess`;
+      const returnTo = safeOpportunityReturnTo(input);
+      return Object.freeze({
+        kind: "href",
+        href: returnTo
+          ? `${assessmentHref}?returnTo=${encodeURIComponent(returnTo)}`
+          : assessmentHref,
+      });
+    }
+    case "opportunity-watch": return input.currentOpportunityReference?.trim()
+      ? Object.freeze({ kind: "intent", intent: "opportunity-watch" })
+      : null;
     case "rfx-issuer": return Object.freeze({ kind: "href", href: "/opportunities/manage" });
-    case "resource-target": {
+    case "resource-target":
+    case "resource-request": {
       const href = resourceTarget(input);
       return href ? Object.freeze({ kind: "href", href }) : null;
     }
+    case "resource-offer": return Object.freeze({ kind: "href", href: "/resources?manage=offer" });
+    case "resource-edit": return Object.freeze({ kind: "href", href: "/resources?manage=edit" });
     case "provider-status": return Object.freeze({ kind: "href", href: "/provider-application" });
     case "network-organizations": return Object.freeze({ kind: "network-focus", intent: "organizations" });
     case "network-capabilities": return Object.freeze({ kind: "network-focus", intent: "capabilities" });
@@ -187,9 +235,9 @@ export function projectExchangeRoomActions(
     const handlerRule = isExternal ? definition.externalHandler : definition.handler;
     const labelKey = isExternal ? definition.externalLabelKey : definition.labelKey;
     const isAuthorized = authorized(authorization, input);
-    const candidateHandler = operational ? resolveHandler(handlerRule, input) : null;
-    const applicable = candidateHandler !== null || !operational;
-    const resolvedHandler = applicable && isAuthorized ? candidateHandler : null;
+    const handlerCandidate = operational ? resolveHandler(handlerRule, input) : null;
+    const applicable = handlerCandidate !== null || !operational;
+    const resolvedHandler = applicable && isAuthorized ? handlerCandidate : null;
     const disabledReason: ExchangeRoomActionDisabledReason | null = !operational
       ? "not-operational"
       : !applicable
@@ -209,6 +257,7 @@ export function projectExchangeRoomActions(
       authorization,
       availability: resolvedHandler ? "active" as const : "disabled" as const,
       disabledReason,
+      handlerCandidate,
       resolvedHandler,
     });
   }));

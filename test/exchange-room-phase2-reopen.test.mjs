@@ -88,7 +88,7 @@ test("reopen path preserves authorization boundary while unavailable Capabilitie
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   const registry = read("src/application/participant/exchange-room-actions.ts");
   assert.match(controller, /fetch\("\/geography\/canvas\/action-authorization"/);
-  assert.match(controller, /opportunities\.create-view/);
+  assert.match(controller, /action\.handlerCandidate/);
   assert.doesNotMatch(controller, /opportunities\.create-rfx|resources\.my-requests|resources\.provider-status/);
   assert.doesNotMatch(controller, /actionId === "capabilities\.evidence-refer"/);
   assert.match(registry, /id: "capabilities\.evidence-refer"[^\n]*operational: false[^\n]*handler: null/);

@@ -9,6 +9,7 @@ import type {
   OpportunityDiscoveryItem,
   OpportunityDiscoveryResult,
 } from "../../application/rfx/opportunity-discovery-service";
+import { projectExchangeRoomActions } from "../../application/participant/exchange-room-actions";
 import type { ParticipantSpatialScope } from "../../application/participant/participant-spatial-context";
 import { useI18n } from "../i18n/I18nProvider";
 import {
@@ -23,6 +24,7 @@ import {
   ResponsiveEdgeSheet,
   SpatialWorkspace,
 } from "../participant/ParticipantWorkspace";
+import { ExchangeRoomActionController } from "../participant/ExchangeRoomActionController";
 import { useParticipantSpatialContext } from "../participant/useParticipantSpatialContext";
 
 import styles from "./OpportunityDiscoveryWorkspace.module.css";
@@ -67,6 +69,16 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
   const selected = result.items.find((item) => item.reference === selectedReference)
     ?? result.items.find((item) => markerId(item.reference) === spatialContext.selection.markerId)
     ?? null;
+  const exchangeActions = useMemo(() => projectExchangeRoomActions({
+    activeLens: "opportunities-rfx",
+    viewerOrganizationId: spatialScope.organizationId,
+    selectedOrganizationId: spatialScope.organizationId,
+    selectedOrganizationIsOfficialResourceProvider: false,
+    openPlatformActionsAuthorized: true,
+    actionAuthorization: Object.freeze({ rfxCreate: false, referralManage: false, resourceManage: false }),
+    currentOpportunityReference: selected?.reference ?? null,
+    currentOpportunityReturnTo: queryHref(result, selected?.reference ?? null),
+  }), [result, selected?.reference, spatialScope.organizationId]);
   const opportunityMarkers: readonly ExchangeOpportunityMarker[] = useMemo(() => {
     const coordinate = [model.camera.center.longitude, model.camera.center.latitude] as const;
     return Object.freeze(result.items
@@ -236,7 +248,15 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
           </section>
         </MapOverlaySurface>
 
-        {selected ? <ResponsiveEdgeSheet ariaLabelledBy="opportunity-detail-title" side="right" width="standard"><article className={styles.detail} data-selected-opportunity-reference={selected.reference}><header><div><p>{t("rfxWorkspace.discovery.detail.eyebrow")}</p><h2 id="opportunity-detail-title">{selected.title}</h2></div><button type="button" onClick={() => select(null)} aria-label={t("rfxWorkspace.discovery.detail.close")}>×</button></header><div className={styles.pills}><StatusPill tone="information">{t("rfxWorkspace.discovery.detail.discovered")}</StatusPill>{selected.deadlineState === "due-soon" ? <StatusPill tone="connection">{t("rfxWorkspace.discovery.detail.dueSoon")}</StatusPill> : null}</div><p>{selected.summary}</p><dl><div><dt>{t("rfxWorkspace.discovery.detail.issuer")}</dt><dd>{selected.issuerDisplayName}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.requestType")}</dt><dd>{selected.requestFamilyLabel}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.location")}</dt><dd>{selected.localities.map((locality) => locality.label).join(" · ")}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.deadline")}</dt><dd>{selected.responseDeadline}</dd></div></dl><section><h3>{t("rfxWorkspace.discovery.detail.requirements")}</h3><ul>{selected.projection.payload.requirements.map((requirement, index) => <li key={`${requirement.title}-${index}`}><strong>{requirement.title}</strong><span>{requirement.description}</span></li>)}</ul></section><div className={styles.detailActions}><button type="button" disabled={busy !== null} onClick={() => setWatch(selected)}>{busy === "watch" ? t("rfxWorkspace.discovery.pending") : selected.watched ? t("rfxWorkspace.discovery.watch.remove") : t("rfxWorkspace.discovery.watch.action")}</button><Link href={`/opportunities/${encodeURIComponent(selected.reference)}/assess?returnTo=${encodeURIComponent(queryHref(result, selected.reference))}`}>{t("rfxWorkspace.discovery.detail.assess")}</Link><Link href={`/opportunities/${encodeURIComponent(selected.reference)}`}>{t("rfxWorkspace.discovery.detail.open")}</Link></div><p className={styles.disclaimer}>{t("rfxWorkspace.discovery.detail.disclaimer")}</p></article></ResponsiveEdgeSheet> : null}
+        {selected ? <ResponsiveEdgeSheet ariaLabelledBy="opportunity-detail-title" side="right" width="standard"><article className={styles.detail} data-selected-opportunity-reference={selected.reference}><header><div><p>{t("rfxWorkspace.discovery.detail.eyebrow")}</p><h2 id="opportunity-detail-title">{selected.title}</h2></div><button type="button" onClick={() => select(null)} aria-label={t("rfxWorkspace.discovery.detail.close")}>×</button></header><div className={styles.pills}><StatusPill tone="information">{t("rfxWorkspace.discovery.detail.discovered")}</StatusPill>{selected.deadlineState === "due-soon" ? <StatusPill tone="connection">{t("rfxWorkspace.discovery.detail.dueSoon")}</StatusPill> : null}</div><p>{selected.summary}</p><dl><div><dt>{t("rfxWorkspace.discovery.detail.issuer")}</dt><dd>{selected.issuerDisplayName}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.requestType")}</dt><dd>{selected.requestFamilyLabel}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.location")}</dt><dd>{selected.localities.map((locality) => locality.label).join(" · ")}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.deadline")}</dt><dd>{selected.responseDeadline}</dd></div></dl><section><h3>{t("rfxWorkspace.discovery.detail.requirements")}</h3><ul>{selected.projection.payload.requirements.map((requirement, index) => <li key={`${requirement.title}-${index}`}><strong>{requirement.title}</strong><span>{requirement.description}</span></li>)}</ul></section><ExchangeRoomActionController
+          activeLens="opportunities-rfx"
+          actions={exchangeActions}
+          onNetworkFocus={() => undefined}
+          onActionIntent={(intent) => {
+            if (intent === "opportunity-watch" && busy === null) void setWatch(selected);
+          }}
+          placement="sheet"
+        /><p className={styles.disclaimer}>{t("rfxWorkspace.discovery.detail.disclaimer")}</p></article></ResponsiveEdgeSheet> : null}
       </SpatialWorkspace>
     </ParticipantShell>
   );

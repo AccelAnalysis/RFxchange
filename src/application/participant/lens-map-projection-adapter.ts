@@ -175,6 +175,26 @@ export function lensProjectionContainsOrganizationMarker(
   );
 }
 
+function beaconImage(
+  lens: LensMapProjection["lens"],
+  projection: ExchangeMapObjectProjection,
+  selected: boolean,
+  ownOrganizationId: string | null,
+): string {
+  const own = ownOrganizationId !== null
+    && projection.identity.organizationId === ownOrganizationId;
+  const kind = own ? "own" : lens;
+  const approximate = projection.privacy === "approximate";
+  const state = selected
+    ? approximate
+      ? "selected-approximate"
+      : "selected"
+    : approximate
+      ? "approximate"
+      : "default";
+  return `exchange-beacon-${kind}-${state}`;
+}
+
 /**
  * Creates mutable GeoJSON for Mapbox while retaining immutable original projections
  * in private lookup tables. Governed area geometry is accepted only on an exact
@@ -183,10 +203,12 @@ export function lensProjectionContainsOrganizationMarker(
 export function createLensProjectionRenderModel(
   adapter: ExchangeSpatialProjectionAdapter,
   geometries: readonly ExchangeGovernedAreaGeometry[],
+  options: Readonly<{ ownOrganizationId?: string | null }> = Object.freeze({}),
 ): ExchangeLensProjectionRenderModel {
   const selectableByRenderId = new Map<string, ExchangeLensSelectableProjection>();
   const clusterByRenderId = new Map<string, ExchangeSpatialProjectionPoint>();
   const features: ExchangeLensProjectionRenderModel["data"]["features"] = [];
+  const ownOrganizationId = options.ownOrganizationId?.trim() || null;
 
   for (const point of adapter.points) {
     const projection = point.projection;
@@ -199,6 +221,7 @@ export function createLensProjectionRenderModel(
         ? {
             renderId,
             kind: "cluster",
+            lens: adapter.lens,
             clusterId: projection.clusterId,
             accessibleLabel: point.accessibleLabel,
             selectable: false,
@@ -208,12 +231,17 @@ export function createLensProjectionRenderModel(
         : {
             renderId,
             kind: projection.kind,
+            lens: adapter.lens,
             projectionRole: projection.projectionRole,
             markerId: projection.markerId,
+            organizationId: projection.identity.organizationId ?? "",
             selectionKey: projection.identity.selectionKey,
             accessibleLabel: point.accessibleLabel,
             selectable: point.selectable,
             selected: point.selected ? 1 : 0,
+            privacy: projection.privacy,
+            own: ownOrganizationId !== null && projection.identity.organizationId === ownOrganizationId ? 1 : 0,
+            beaconImage: beaconImage(adapter.lens, projection, point.selected, ownOrganizationId),
             count: 0,
           },
       geometry: { type: "Point", coordinates: [point.coordinate[0], point.coordinate[1]] },
@@ -235,6 +263,7 @@ export function createLensProjectionRenderModel(
       properties: {
         renderId,
         kind: "area",
+        lens: adapter.lens,
         areaId: area.areaId,
         associationSelectionKey: area.associationSelectionKey ?? "",
         accessibleLabel: area.accessibleLabel,
