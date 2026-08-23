@@ -46,7 +46,7 @@ test("fresh server authorization revokes successor actions while Resources keeps
   assert.ok(openPlatformGuard >= 0 && rfxPermission > openPlatformGuard && referralPermission > openPlatformGuard && resourcePermission > openPlatformGuard);
   assert.match(controller, /open-platform-referral-manage"\) return authorization\.referralManage/);
   assert.match(controller, /open-platform-resource-manage"\) return authorization\.resourceManage/);
-  assert.match(controller, /opportunities\.create-view/);
+  assert.match(controller, /action\.handlerCandidate/);
   assert.match(spatial, /params\.set\("organization", context\.selection\.organizationId\)/);
   assert.match(spatial, /params\.set\("provider", context\.selection\.organizationId\)/);
   assert.match(spatial, /serverRevalidatesSelectedObjectsAndActions: true/);
