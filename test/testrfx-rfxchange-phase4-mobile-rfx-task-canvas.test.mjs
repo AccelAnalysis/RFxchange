@@ -41,8 +41,9 @@ test("dictation is progressive while unavailable attachment capture remains visi
   const packageBuilder = read("src/components/rfx/RFxPackageBuilder.tsx");
   assert.match(canvas, /SpeechRecognition/);
   assert.match(canvas, /webkitSpeechRecognition/);
-  assert.match(canvas, /const \[speechAvailable, setSpeechAvailable\] = useState\(false\)/);
-  assert.match(canvas, /setSpeechAvailable\(speechRecognitionConstructor\(\) !== null\)/);
+  assert.match(canvas, /const Constructor = speechRecognitionConstructor\(\)/);
+  assert.match(canvas, /if \(!Constructor\) \{\s*setStatus\(copy\.dictationUnavailable\);\s*return;/);
+  assert.doesNotMatch(canvas, /speechAvailable|setSpeechAvailable/);
   assert.match(canvas, /\.slice\(event\.resultIndex\)/);
   assert.match(canvas, /result\.isFinal !== false/);
   assert.match(canvas, /disabled title=\{copy\.attachmentsUnavailable\}/);
