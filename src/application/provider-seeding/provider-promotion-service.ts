@@ -104,7 +104,7 @@ function assertCommandEvidence(
     command.marketKey !== candidate.marketKey
     || sourceRecord.marketKey !== candidate.marketKey
     || sourceRecord.seedKey !== candidate.seedKey
-    || sourceRecord.id !== candidate.id
+    || String(sourceRecord.id) !== String(candidate.id)
   ) {
     throw new Error("Provider promotion source record belongs to a different seed candidate.");
   }
