@@ -14,9 +14,14 @@ import {
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
-import { loadAuthorizedNetworkDiscovery } from "@/src/infrastructure/network-discovery/runtime";
+import {
+  loadAuthorizedNetworkDiscovery,
+  type AuthenticatedNetworkDiscovery,
+} from "@/src/infrastructure/network-discovery/runtime";
+import { projectAuthorizedIntelligenceMobileExchange } from "@/src/infrastructure/intelligence/mobile-exchange-intelligence-runtime";
 import { loadOptionalOfficialResourceProviderOrganizationIds } from "@/src/infrastructure/resource-network/discovery-runtime";
 import { migrateLegacyParticipantLensId } from "@/src/application/participant/participant-lens-registry";
+import { getRequestLocale } from "@/src/i18n/server";
 
 interface GeographyCanvasPageProps {
   readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
@@ -137,8 +142,9 @@ export default async function GeographyCanvasPage({
         (organization) => String(organization.organizationId) === selectedOrganizationId,
       ) ?? null
     : null;
+  let focusedDiscovery: AuthenticatedNetworkDiscovery | null = null;
   if (selectedOrganizationId && !focusedOrganization) {
-    const focusedDiscovery = await loadAuthorizedNetworkDiscovery({
+    focusedDiscovery = await loadAuthorizedNetworkDiscovery({
       access: authenticated.access,
       mapProjection: authenticated.mapProjection,
       focusedOrganizationId: selectedOrganizationId,
@@ -149,13 +155,23 @@ export default async function GeographyCanvasPage({
         ) ?? null
       : null;
   }
-  const providerStatusOrganizationIds = discovery.available
+  const intelligenceExchange = projectAuthorizedIntelligenceMobileExchange({
+    access: authenticated.access,
+    mapProjection: authenticated.mapProjection,
+    discovery,
+    focusedDiscovery,
+    selectedOrganizationId,
+    locale: await getRequestLocale(),
+  });
+  focusedOrganization = intelligenceExchange.focusedOrganization;
+  const authorizedDiscovery = intelligenceExchange.sourceDiscovery;
+  const providerStatusOrganizationIds = authorizedDiscovery.available
     ? [
         ...(focusedOrganization ? [String(focusedOrganization.organizationId)] : []),
-        ...discovery.projection.organizations.map((organization) => String(organization.organizationId)),
+        ...authorizedDiscovery.projection.organizations.map((organization) => String(organization.organizationId)),
       ].filter((organizationId, index, values) => values.indexOf(organizationId) === index)
     : [];
-  const officialResourceProviderOrganizationIds = discovery.available
+  const officialResourceProviderOrganizationIds = authorizedDiscovery.available
     ? await loadOptionalOfficialResourceProviderOrganizationIds({
       access: authenticated.access,
       organizationIds: providerStatusOrganizationIds,
@@ -176,10 +192,10 @@ export default async function GeographyCanvasPage({
           organizationId: authenticated.mapProjection.organizationId,
           geographyId: String(authenticated.mapProjection.model.selectedGeography.id),
         }}
-        discovery={discovery.available ? discovery.projection : null}
-        discoveryUnavailableReason={discovery.available ? null : discovery.reason}
+        discovery={authorizedDiscovery.available ? authorizedDiscovery.projection : null}
+        discoveryUnavailableReason={authorizedDiscovery.available ? null : authorizedDiscovery.reason}
         focusedOrganization={focusedOrganization}
-        serviceAreaOptions={discovery.available ? discovery.serviceAreaOptions : []}
+        serviceAreaOptions={authorizedDiscovery.available ? authorizedDiscovery.serviceAreaOptions : []}
         officialResourceProviderOrganizationIds={officialResourceProviderOrganizationIds}
         operationalActionsAvailable={authenticated.access.state.lifecycleState === "open-platform"}
       />
