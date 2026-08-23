@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { rfxMobileTaskCopy } from "../../application/rfx/rfx-mobile-task-locale";
 import type { RfxAggregate } from "../../domain/rfx/model";
@@ -11,13 +11,17 @@ import styles from "./RFxMobileTaskCanvas.module.css";
 
 type TaskDepth = "quick" | "guided" | "formal";
 
+type BrowserSpeechRecognitionResult = ArrayLike<{ transcript: string }> & { isFinal?: boolean };
 type BrowserSpeechRecognition = {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
   start: () => void;
   stop: () => void;
-  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal?: boolean }> }) => void) | null;
+  onresult: ((event: {
+    resultIndex: number;
+    results: ArrayLike<BrowserSpeechRecognitionResult>;
+  }) => void) | null;
   onerror: (() => void) | null;
   onend: (() => void) | null;
 };
@@ -41,17 +45,20 @@ function setControlledTextareaValue(element: HTMLTextAreaElement, value: string)
 
 function scrollToTarget(selector: string) {
   const target = document.querySelector<HTMLElement>(selector);
-  target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  target?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
   if (target && !target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
   target?.focus({ preventScroll: true });
 }
 
 export function RFxMobileTaskCanvas({
+  canCreate,
   drafts,
   selectedDraftId,
   creatingNew,
   children,
 }: Readonly<{
+  canCreate: boolean;
   drafts: readonly RfxAggregate[];
   selectedDraftId: string | null;
   creatingNew: boolean;
@@ -61,13 +68,15 @@ export function RFxMobileTaskCanvas({
   const copy = rfxMobileTaskCopy(locale);
   const [depth, setDepth] = useState<TaskDepth>("quick");
   const [intent, setIntent] = useState("");
-  const [fileNames, setFileNames] = useState<readonly string[]>([]);
   const [dictating, setDictating] = useState(false);
+  const [speechAvailable, setSpeechAvailable] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
-  const speechAvailable = useMemo(() => speechRecognitionConstructor() !== null, []);
 
-  useEffect(() => () => recognitionRef.current?.stop(), []);
+  useEffect(() => {
+    setSpeechAvailable(speechRecognitionConstructor() !== null);
+    return () => recognitionRef.current?.stop();
+  }, []);
 
   const depthHelp = depth === "quick"
     ? copy.quickHelp
@@ -76,6 +85,7 @@ export function RFxMobileTaskCanvas({
       : copy.formalHelp;
 
   function startDictation() {
+    if (!canCreate) return;
     const Constructor = speechRecognitionConstructor();
     if (!Constructor) {
       setStatus(copy.dictationUnavailable);
@@ -88,6 +98,8 @@ export function RFxMobileTaskCanvas({
     recognition.lang = locale === "en-US" ? "en-US" : locale;
     recognition.onresult = (event) => {
       const transcript = Array.from(event.results)
+        .slice(event.resultIndex)
+        .filter((result) => result.isFinal !== false)
         .flatMap((result) => Array.from(result))
         .map((item) => item.transcript.trim())
         .filter(Boolean)
@@ -111,13 +123,8 @@ export function RFxMobileTaskCanvas({
     setDictating(false);
   }
 
-  function captureFiles(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.target.files ?? []);
-    setFileNames(files.map((file) => file.name));
-    setStatus(files.length ? copy.localOnly : null);
-  }
-
   function applyIntent() {
+    if (!canCreate) return;
     const field = document.querySelector<HTMLTextAreaElement>("[data-rfx-source-statement]");
     if (!field) {
       setStatus(copy.applyFirst);
@@ -131,6 +138,7 @@ export function RFxMobileTaskCanvas({
   }
 
   function chooseDepth(next: TaskDepth) {
+    if (!canCreate) return;
     setDepth(next);
     const selector = next === "quick"
       ? "#rfx-need"
@@ -149,10 +157,16 @@ export function RFxMobileTaskCanvas({
             <h1>{copy.title}</h1>
             <p>{copy.subtitle}</p>
           </div>
-          <Link className={styles.newRfx} href="/opportunities/manage?create=1" aria-current={creatingNew ? "page" : undefined}>
-            {copy.newRfx}
-          </Link>
+          {canCreate ? (
+            <Link className={styles.newRfx} href="/opportunities/manage?create=1" aria-current={creatingNew ? "page" : undefined}>
+              {copy.newRfx}
+            </Link>
+          ) : (
+            <span className={styles.newRfx} aria-disabled="true">{copy.newRfx}</span>
+          )}
         </header>
+
+        {!canCreate ? <p className={styles.status} role="status">{copy.createUnavailable}</p> : null}
 
         <div className={styles.depthControl} role="group" aria-label="RFx authoring depth">
           {(["quick", "guided", "formal"] as const).map((option) => (
@@ -161,6 +175,7 @@ export function RFxMobileTaskCanvas({
               type="button"
               aria-pressed={depth === option}
               data-active={depth === option}
+              disabled={!canCreate}
               onClick={() => chooseDepth(option)}
             >
               {copy[option]}
@@ -176,6 +191,7 @@ export function RFxMobileTaskCanvas({
             rows={3}
             maxLength={4000}
             placeholder={copy.intentPlaceholder}
+            disabled={!canCreate}
             onChange={(event) => setIntent(event.target.value)}
           />
         </label>
@@ -183,38 +199,27 @@ export function RFxMobileTaskCanvas({
         <div className={styles.captureActions}>
           <button
             type="button"
-            disabled={!speechAvailable && !dictating}
+            disabled={!canCreate || (!speechAvailable && !dictating)}
             aria-pressed={dictating}
             onClick={dictating ? stopDictation : startDictation}
           >
             {dictating ? copy.dictating : copy.dictate}
           </button>
-          <label>
-            <span>{copy.camera}</span>
-            <input type="file" accept="image/*" capture="environment" onChange={captureFiles} />
-          </label>
-          <label>
-            <span>{copy.file}</span>
-            <input type="file" multiple onChange={captureFiles} />
-          </label>
-          <button type="button" disabled={!intent.trim()} onClick={applyIntent}>
+          <button type="button" disabled title={copy.attachmentsUnavailable}>{copy.camera}</button>
+          <button type="button" disabled title={copy.attachmentsUnavailable}>{copy.file}</button>
+          <button type="button" disabled={!canCreate || !intent.trim()} onClick={applyIntent}>
             {copy.apply}
           </button>
         </div>
+        <p className={styles.depthHelp}>{copy.attachmentsUnavailable}</p>
 
-        {fileNames.length ? (
-          <div className={styles.deviceFiles}>
-            <strong>{copy.selectedFiles}</strong>
-            <span>{fileNames.slice(0, 3).join(" · ")}{fileNames.length > 3 ? ` +${fileNames.length - 3}` : ""}</span>
-          </div>
-        ) : null}
         {status ? <p className={styles.status} role="status">{status}</p> : null}
 
         <nav className={styles.taskRail} aria-label="RFx task stages">
-          <button type="button" onClick={() => scrollToTarget("#rfx-need")}>{copy.need}</button>
-          <button type="button" onClick={() => scrollToTarget("#rfx-scope-outputs")}>{copy.build}</button>
-          <button type="button" onClick={() => scrollToTarget("#rfx-definition-requirements")}>{copy.define}</button>
-          <button type="button" onClick={() => scrollToTarget("#rfx-readiness")}>{copy.review}</button>
+          <button type="button" disabled={!canCreate} onClick={() => scrollToTarget("#rfx-need")}>{copy.need}</button>
+          <button type="button" disabled={!canCreate} onClick={() => scrollToTarget("#rfx-scope-outputs")}>{copy.build}</button>
+          <button type="button" disabled={!canCreate} onClick={() => scrollToTarget("#rfx-definition-requirements")}>{copy.define}</button>
+          <button type="button" disabled={!canCreate} onClick={() => scrollToTarget("#rfx-readiness")}>{copy.review}</button>
         </nav>
 
         <div className={styles.resume}>
