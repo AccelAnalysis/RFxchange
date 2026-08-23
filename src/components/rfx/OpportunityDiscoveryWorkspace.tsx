@@ -215,7 +215,7 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
           <section className={styles.search} aria-label={t("rfxWorkspace.discovery.search.ariaLabel")}>
             <div className={styles.heading}>
               <div><p>{t("rfxWorkspace.discovery.eyebrow")}</p><h1>{t("rfxWorkspace.discovery.title")}</h1></div>
-              <Link href="/opportunities/manage">{t("rfxWorkspace.discovery.manage")}</Link>
+              <nav className={styles.headingActions} aria-label={t("rfxWorkspace.teaming.navigation")}><Link href="/opportunities/team-invitations">{t("rfxWorkspace.teaming.receivedInvitations")}</Link><Link href="/opportunities/manage">{t("rfxWorkspace.discovery.manage")}</Link></nav>
             </div>
             <form role="search" action="/opportunities" method="get" className={styles.form}>
               <label><span>{t("rfxWorkspace.discovery.search.label")}</span><input name="q" type="search" defaultValue={result.query.text} placeholder={t("rfxWorkspace.discovery.search.placeholder")} /></label>

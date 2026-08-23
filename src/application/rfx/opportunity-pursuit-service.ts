@@ -63,6 +63,8 @@ export interface ParticipantOpportunityGap {
   readonly reference: string;
   readonly kind: OpportunityGapKind;
   readonly title: string;
+  readonly capabilityLabel: string | null;
+  readonly teamCoverageAllowed: boolean;
   readonly status: OpportunityGapStatus;
   readonly current: boolean;
 }
@@ -149,7 +151,21 @@ function gapAssessmentRecords(
 
 function participantGapViews(records: readonly OpportunityGapAssessment[], explanation: MatchExplanation): readonly ParticipantOpportunityGap[] {
   const currentReferences = new Set(explanation.gaps.map((item) => item.reference));
-  return Object.freeze(records.map((item) => Object.freeze({ reference: item.reference, kind: item.kind, title: item.title, status: item.status, current: currentReferences.has(item.reference) })));
+  const observations = new Map(explanation.requirementObservations.map((item) => [item.reference, item]));
+  const currentGaps = new Map(explanation.gaps.map((item) => [item.reference, item]));
+  return Object.freeze(records.map((item) => {
+    const gap = currentGaps.get(item.reference);
+    const observation = gap ? observations.get(gap.observationReference) : null;
+    return Object.freeze({
+      reference: item.reference,
+      kind: item.kind,
+      title: item.title,
+      capabilityLabel: observation?.capabilityLabel ?? item.capabilityLabel ?? null,
+      teamCoverageAllowed: Boolean(observation?.teamCoverageAllowed),
+      status: item.status,
+      current: currentReferences.has(item.reference),
+    });
+  }));
 }
 
 export class OpportunityPursuitService {
