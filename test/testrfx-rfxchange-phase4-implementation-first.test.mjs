@@ -10,7 +10,8 @@ test("Phase 4 makes technical feasibility the implementation gate and uses progr
   assert.match(authority, /Build everything that is technically possible now/);
   assert.match(authority, /Progressive availability handles unfinished functionality/);
   assert.match(authority, /Governance prevents architectural violations; it does not prevent implementation/);
-  assert.match(authority, /work-packet activation and wave order are no longer universal prerequisites/i);
+  assert.match(authority, /no longer implementation blockers by themselves/i);
+  assert.match(authority, /coordination preference, not a universal implementation prerequisite/i);
   assert.match(authority, /visible but disabled/i);
   assert.match(authority, /missing future function must not block implementation/i);
 });
