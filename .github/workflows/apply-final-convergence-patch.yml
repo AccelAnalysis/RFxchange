@@ -30,6 +30,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24.18.0
+      - name: Tighten the network-label replacement
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("scripts/apply-final-convergence-patch.mjs")
+          source = path.read_text()
+          old = 'replaceOnce(mapPath, `          "text-offset": [0, 1.9],`, `          "text-offset": [0, 3.35],`);'
+          new = '''replaceRegexOnce(
+            mapPath,
+            /(id: NETWORK_MARKER_LABEL_LAYER_ID,[\\s\\S]*?"text-offset": )\\[0, 1\\.9\\]/,
+            "$1[0, 3.35]",
+          );'''
+          if source.count(old) != 1:
+              raise SystemExit(f"Expected one network-label replacement, found {source.count(old)}")
+          path.write_text(source.replace(old, new))
+          PY
       - name: Apply deterministic source patch
         run: node scripts/apply-final-convergence-patch.mjs
       - name: Remove one-time patch machinery
