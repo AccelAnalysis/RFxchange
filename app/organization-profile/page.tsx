@@ -30,7 +30,6 @@ import {
 import { loadAuthorizedMarketProfile } from "@/src/infrastructure/market-profile/runtime";
 import { loadAuthorizedOrganizationEnrichment } from "@/src/infrastructure/organization-enrichment/runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
-import { currentBuildIdentity } from "@/src/infrastructure/system/build-identity";
 import { getRequestDictionary } from "@/src/i18n/server";
 import {
   settleOptionalWorkspacePanel,
@@ -285,7 +284,6 @@ export default async function OrganizationProfilePage() {
   const copy = dictionary.workspaceResilience;
   const profile = hydrateEssentialOrganizationProfile(profileRecord);
   const workspaceStatus = access.state.lifecycleState === "open-platform" ? "Open" : "Active";
-  const buildIdentity = currentBuildIdentity();
 
   return (
     <ParticipantShell activeItem="account" organizationName={profile.displayName}>
@@ -391,19 +389,6 @@ export default async function OrganizationProfilePage() {
                 process. It is not selected during registration and is not implied by Profile Complete.
               </p>
               <Link href="/provider-application">Request Resource Provider Status</Link>
-            </article>
-
-            <article className={styles.card}>
-              <h2>Current release boundary</h2>
-              <dl className={styles.definitionList}>
-                <dt>Build SHA</dt>
-                <dd><code>{buildIdentity?.commitSha ?? "Not embedded in this build"}</code></dd>
-              </dl>
-              <p className={styles.empty}>
-                Market profile, credential, media, additional-location enrichment, referrals, and
-                published provider/resource routing are available. Credibility, commercial benefits,
-                and RFx workflows remain unavailable until their approved slices are complete.
-              </p>
             </article>
           </section>
 
