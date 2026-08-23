@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
+import { rewriteParticipantText } from "../src/i18n/participant-language-firewall.ts";
+
 const repoRoot = new URL("../", import.meta.url);
 
 async function read(path) {
@@ -75,6 +77,24 @@ test("canonical English public marketing stays behind the participant-language f
   assertNoInternalParticipantLanguage(entries);
   assert.equal(baseDictionary.marketing.footer.bottomMatter, "Legal");
   assert.equal(marketingPages.availability.items.at(-1)?.status, "Coming next");
+});
+
+test("legacy internal RFx strings are normalized before English dictionaries render", async () => {
+  const getDictionarySource = await read("src/i18n/get-dictionary.ts");
+
+  assert.match(getDictionarySource, /"en-US": applyParticipantLanguageFirewall\(dictionary\(/);
+  assert.equal(rewriteParticipantText("Create a governed RFx draft"), "Create an RFx draft");
+  assert.equal(rewriteParticipantText("Governed lifecycle"), "Status");
+  assert.equal(rewriteParticipantText("Projection digest"), "Preview reference");
+  assert.equal(rewriteParticipantText("Find real published opportunities"), "Find published opportunities");
+  assert.equal(
+    rewriteParticipantText("Publication is atomic and cannot be undone in this slice."),
+    "Eligible organizations can publish an RFx. Publishing makes it available to responders and cannot currently be undone.",
+  );
+  assert.equal(
+    rewriteParticipantText("Search saved with its current governed filters."),
+    "Search saved with its current filters.",
+  );
 });
 
 test("public and participant chrome do not render build or release-engineering diagnostics", async () => {
