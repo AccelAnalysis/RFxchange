@@ -7,12 +7,20 @@ on:
     paths:
       - scripts/apply-final-convergence-patch.mjs
       - .github/workflows/apply-final-convergence-patch.yml
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
 
 permissions:
   contents: write
 
 jobs:
   apply:
+    if: github.head_ref == 'control/final-convergence-beacons-actions' || github.ref_name == 'control/final-convergence-beacons-actions'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
