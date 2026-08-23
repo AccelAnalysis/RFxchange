@@ -25,11 +25,14 @@ import {
 import type { OrganizationDiscoveryRepository } from "../../domain/organization-resolution/repository.ts";
 import {
   createProviderPromotionEvent,
+  type ProviderCanonicalMatchEvidence,
   type ProviderPromotionCommand,
 } from "../../domain/provider-seeding/promotion.ts";
-import type {
-  ProviderSeedPromotionEvidenceRepository,
-  ProviderSeedPromotionUnitOfWork,
+import {
+  providerCanonicalMatchSet,
+  type ProviderCanonicalOrganizationSearchPort,
+  type ProviderSeedPromotionEvidenceRepository,
+  type ProviderSeedPromotionUnitOfWork,
 } from "../../domain/provider-seeding/promotion-repository.ts";
 import {
   createProviderPromotionReceipt,
@@ -59,6 +62,7 @@ export interface ProviderSeedPromotionServiceDependencies {
   readonly profiles: OrganizationProfileRepository;
   readonly discovery: OrganizationDiscoveryRepository;
   readonly evidence: ProviderSeedPromotionEvidenceRepository;
+  readonly canonicalSearch: ProviderCanonicalOrganizationSearchPort;
   readonly unitOfWork: ProviderSeedPromotionUnitOfWork;
 }
 
@@ -70,6 +74,14 @@ export function providerPromotionAuthorityContextFingerprint(
 
 function sameStrings(left: readonly string[], right: readonly string[]): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function matchSetFingerprint(
+  matches: readonly ProviderCanonicalMatchEvidence[],
+): string {
+  return deterministicProviderPromotionFingerprint(
+    providerCanonicalMatchSet(matches),
+  );
 }
 
 function assertCommandEvidence(
@@ -160,10 +172,8 @@ function assertCommandEvidence(
   }
   if (
     canonicalSearch.candidateId !== candidate.id
-    || !sameStrings(
-      canonicalSearch.matches.map((match) => JSON.stringify(match)),
-      comparison.matches.map((match) => JSON.stringify(match)),
-    )
+    || matchSetFingerprint(canonicalSearch.matches)
+      !== matchSetFingerprint(comparison.matches)
   ) {
     throw new Error("Provider promotion comparison does not match its canonical search snapshot.");
   }
@@ -217,10 +227,10 @@ function assertLinkedOrganizationState(
 
 function selectedMatchDisplayName(
   evidence: ProviderSeedPromotionEvidenceBundle,
-  organizationId: string,
+  targetOrganizationId: string,
 ): string | null {
   return evidence.comparison.matches.find(
-    (match) => match.organizationId === organizationId,
+    (match) => match.organizationId === targetOrganizationId,
   )?.displayName ?? null;
 }
 
@@ -253,6 +263,7 @@ function createSeededOrganization(
     observedAt: evidence.sourceRecord.preparedAt,
   });
   const address = evidence.sourceRecord.location.address;
+  const domain = websiteDomain(evidence.sourceRecord.website);
   const discovery = createOrganizationDiscoveryRecord(account, profile, {
     id: `${command.targetOrganizationId}:seeded-discovery`,
     origin: "seeded",
@@ -270,9 +281,7 @@ function createSeededOrganization(
         ...(address.postalCode ? { postalCode: address.postalCode } : {}),
         countryCode: address.countryCode,
       },
-      ...(websiteDomain(evidence.sourceRecord.website)
-        ? { domain: websiteDomain(evidence.sourceRecord.website) }
-        : {}),
+      ...(domain ? { domain } : {}),
     },
     provenance,
     publicAddress: false,
@@ -284,10 +293,37 @@ function createSeededOrganization(
   return Object.freeze({ account, profile, discovery });
 }
 
+function sameSeededOrganization(
+  current: Readonly<{
+    account: OrganizationAccount;
+    profile: OrganizationProfile;
+    discovery: OrganizationDiscoveryRecord;
+  }>,
+  expected: Readonly<{
+    account: OrganizationAccount;
+    profile: OrganizationProfile;
+    discovery: OrganizationDiscoveryRecord;
+  }>,
+): boolean {
+  return current.account.id === expected.account.id
+    && current.profile.id === expected.profile.id
+    && current.profile.organizationId === expected.profile.organizationId
+    && normalizeOrganizationName(current.profile.displayName)
+      === normalizeOrganizationName(expected.profile.displayName)
+    && current.discovery.id === expected.discovery.id
+    && current.discovery.organizationId === expected.discovery.organizationId
+    && current.discovery.profileId === expected.discovery.profileId
+    && current.discovery.origin === "seeded"
+    && current.discovery.displayName.provenance.sourceRecordId
+      === expected.discovery.displayName.provenance.sourceRecordId;
+}
+
 export class ProviderSeedPromotionService {
-  constructor(
-    private readonly dependencies: ProviderSeedPromotionServiceDependencies,
-  ) {}
+  private readonly dependencies: ProviderSeedPromotionServiceDependencies;
+
+  constructor(dependencies: ProviderSeedPromotionServiceDependencies) {
+    this.dependencies = dependencies;
+  }
 
   private async loadOrganizationState(
     targetOrganizationId: string,
@@ -299,6 +335,29 @@ export class ProviderSeedPromotionService {
       this.dependencies.discovery.getByOrganizationId(id),
     ]);
     return Object.freeze({ account, profile, discovery });
+  }
+
+  private async assertCanonicalSearchIsCurrent(
+    command: ProviderPromotionCommand,
+    evidence: ProviderSeedPromotionEvidenceBundle,
+  ): Promise<void> {
+    const current = await this.dependencies.canonicalSearch.searchCurrent({
+      candidateId: evidence.candidate.id,
+      sourceRecord: evidence.sourceRecord,
+      generatedAt: command.recordedAt,
+      excludeOrganizationIds: command.targetOrganizationMode === "create"
+        ? Object.freeze([command.targetOrganizationId])
+        : Object.freeze([]),
+    });
+    if (
+      current.candidateId !== evidence.candidate.id
+      || matchSetFingerprint(current.matches)
+        !== matchSetFingerprint(evidence.canonicalSearch.matches)
+    ) {
+      throw new Error(
+        "Canonical Organization search changed after provider promotion approval; re-review is required.",
+      );
+    }
   }
 
   private async buildWriteSet(
@@ -313,19 +372,29 @@ export class ProviderSeedPromotionService {
     const evidence = await this.dependencies.evidence.loadForCommand(command);
     if (!evidence) throw new Error("Current provider promotion evidence bundle is incomplete.");
     assertCommandEvidence(command, evidence, authority);
+    await this.assertCanonicalSearchIsCurrent(command, evidence);
 
     const state = await this.loadOrganizationState(command.targetOrganizationId);
     let organization: ProviderSeedPromotionWriteSet["organization"];
     if (command.targetOrganizationMode === "create") {
-      if (state.account || state.profile || state.discovery) {
-        throw new Error("Approved new Organization identity is no longer available.");
+      const expected = createSeededOrganization(command, evidence);
+      if (!state.account && !state.profile && !state.discovery) {
+        organization = Object.freeze({
+          mode: "create",
+          ...expected,
+          createRecords: true,
+        });
+      } else {
+        assertLinkedOrganizationState(state);
+        if (!sameSeededOrganization(state, expected)) {
+          throw new Error("Approved new Organization identity is no longer available.");
+        }
+        organization = Object.freeze({
+          mode: "create",
+          ...expected,
+          createRecords: false,
+        });
       }
-      const created = createSeededOrganization(command, evidence);
-      organization = Object.freeze({
-        mode: "create",
-        ...created,
-        createRecords: true,
-      });
     } else {
       assertLinkedOrganizationState(state);
       const reviewedName = selectedMatchDisplayName(
@@ -395,7 +464,11 @@ export class ProviderSeedPromotionService {
       throw new Error("Provider promotion preview requires a preview command.");
     }
     const writeSet = await this.buildWriteSet(command);
-    return writeSet.receipt;
+    return Object.freeze({
+      ...writeSet.receipt,
+      organizationCreated: false,
+      organizationAttached: false,
+    });
   }
 
   async commit(command: ProviderPromotionCommand): Promise<ProviderPromotionReceipt> {
