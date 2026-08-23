@@ -96,12 +96,19 @@ export function providerSourceRecordFingerprint(
 export function providerGeographyProfileFingerprint(
   packet: LocationProfileMaterializationPacket,
 ): string {
+  const { organizationId: _profileOrganizationId, ...profile } = packet.profile;
+  void _profileOrganizationId;
+  const memberships = packet.memberships.map((membership) => {
+    const { organizationId: _membershipOrganizationId, ...rest } = membership;
+    void _membershipOrganizationId;
+    return rest;
+  });
   return providerPromotionFingerprint(Object.freeze({
     datasetSources: [...packet.datasetSources].sort((a, b) => String(a.id).localeCompare(String(b.id))),
     geographies: [...packet.geographies].sort((a, b) => String(a.id).localeCompare(String(b.id))),
     versions: [...packet.versions].sort((a, b) => String(a.id).localeCompare(String(b.id))),
-    profile: packet.profile,
-    memberships: [...packet.memberships].sort((a, b) => String(a.id).localeCompare(String(b.id))),
+    profile,
+    memberships: memberships.sort((a, b) => String(a.id).localeCompare(String(b.id))),
   }));
 }
 
