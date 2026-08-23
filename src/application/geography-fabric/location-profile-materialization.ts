@@ -40,6 +40,23 @@ function uniqueById<T extends Readonly<{ id: string }>>(
   return Object.freeze([...byId.values()]);
 }
 
+function uniqueEntries(
+  values: readonly ResolvedGeographyEntry[],
+): readonly ResolvedGeographyEntry[] {
+  const byVersionId = new Map<string, ResolvedGeographyEntry>();
+  for (const value of values) {
+    const key = value.version.id;
+    const existing = byVersionId.get(key);
+    if (existing && JSON.stringify(existing) !== JSON.stringify(value)) {
+      throw new Error(
+        `Resolved geography entry ${key} conflicts with another supplied record.`,
+      );
+    }
+    byVersionId.set(key, value);
+  }
+  return Object.freeze([...byVersionId.values()]);
+}
+
 export function buildLocationProfileMaterialization(input: Readonly<{
   locationId: string;
   organizationId?: string | null;
@@ -78,13 +95,10 @@ export function buildLocationProfileMaterialization(input: Readonly<{
     }
   }
 
-  const entries = uniqueById(
-    [
-      ...input.resolution.entries,
-      ...additionalOverlays.map((overlay) => overlay.entry),
-    ],
-    "Resolved geography entry",
-  );
+  const entries = uniqueEntries([
+    ...input.resolution.entries,
+    ...additionalOverlays.map((overlay) => overlay.entry),
+  ]);
   const datasetSources = uniqueById(
     [
       ...input.resolution.datasetSources,
