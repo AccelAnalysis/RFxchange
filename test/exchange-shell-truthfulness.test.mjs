@@ -24,6 +24,7 @@ function loadRegistryContract() {
         resources: participantLensForPathname("/resources"),
         resourceDetail: participantLensForPathname("/resources/detail"),
         intelligence: participantLensForPathname("/geography/canvas"),
+        capabilities: participantLensForPathname("/capabilities"),
         referrals: participantLensForPathname("/referrals"),
         referralUtility: participantUtilityForPathname("/referrals"),
         account: participantNavigationState("/organization-profile"),
@@ -36,6 +37,7 @@ function loadRegistryContract() {
         opportunities: isPersistentParticipantPath("/opportunities"),
         intelligence: isPersistentParticipantPath("/geography/canvas"),
         resources: isPersistentParticipantPath("/resources"),
+        capabilities: isPersistentParticipantPath("/capabilities"),
         referrals: isPersistentParticipantPath("/referrals"),
         account: isPersistentParticipantPath("/organization-profile"),
         quickStart: isPersistentParticipantPath("/quick-start"),
@@ -65,7 +67,7 @@ function loadRegistryContract() {
   return JSON.parse(output);
 }
 
-test("the typed registry preserves governed lens order, availability, routing, and utility separation", () => {
+test("the typed registry preserves governed lens order, enabled routing, and utility separation", () => {
   const contract = loadRegistryContract();
   assert.deepEqual(
     contract.lenses.map(({ id }) => id),
@@ -73,13 +75,14 @@ test("the typed registry preserves governed lens order, availability, routing, a
   );
   assert.deepEqual(
     contract.lenses.map(({ availability }) => availability),
-    ["enabled", "enabled", "enabled", "unavailable"],
+    ["enabled", "enabled", "enabled", "enabled"],
   );
   assert.equal(contract.lenses[0].href, "/opportunities");
   assert.deepEqual(contract.lenses[0].activePathPrefixes, ["/opportunities"]);
   assert.equal(contract.lenses[1].href, "/resources");
   assert.equal(contract.lenses[2].href, "/geography/canvas");
-  assert.equal(contract.lenses[3].href, null);
+  assert.equal(contract.lenses[3].href, "/capabilities");
+  assert.deepEqual(contract.lenses[3].activePathPrefixes, ["/capabilities"]);
   assert.equal(contract.lenses.some(({ id }) => id === "network"), false);
   assert.deepEqual(contract.utilities, {
     account: { href: "/organization-profile" },
@@ -90,6 +93,7 @@ test("the typed registry preserves governed lens order, availability, routing, a
     resources: "resources",
     resourceDetail: "resources",
     intelligence: "intelligence",
+    capabilities: "capabilities",
     referrals: null,
     referralUtility: "referrals",
     account: "account",
@@ -102,6 +106,7 @@ test("the typed registry preserves governed lens order, availability, routing, a
     opportunities: true,
     intelligence: true,
     resources: true,
+    capabilities: true,
     referrals: true,
     account: true,
     quickStart: true,
@@ -118,6 +123,7 @@ test("the persistent shell owns navigation while page-local shells collapse to c
   const accountPage = read("app/organization-profile/page.tsx");
   const exchangePage = read("app/exchange/page.tsx");
   const intelligencePage = read("app/geography/canvas/page.tsx");
+  const capabilitiesPage = read("app/capabilities/page.tsx");
   const providerApplicationPage = read("app/provider-application/page.tsx");
 
   assert.match(layout, /<PersistentParticipantShell>\{children\}<\/PersistentParticipantShell>/);
@@ -137,8 +143,9 @@ test("the persistent shell owns navigation while page-local shells collapse to c
   assert.match(compatibility, /registerExplicitActiveItem\(activeItem\)/);
   assert.match(accountPage, /<ParticipantShell activeItem="account" organizationName=\{profile\.displayName\}>/);
   assert.match(exchangePage, /redirect\(mapUrl\)/);
-  assert.match(intelligencePage, /<ExistingWorkspaceFoundation/);
-  assert.match(intelligencePage, /operationalActionsAvailable=\{authenticated\.access\.state\.lifecycleState === "open-platform"\}/);
+  assert.match(intelligencePage, /ExistingWorkspaceFoundation/);
+  assert.match(capabilitiesPage, /CapabilitiesWorkspace/);
+  assert.match(capabilitiesPage, /resolveParticipantRoute/);
   assert.match(providerApplicationPage, /<ParticipantShell activeItem="Account">/);
   assert.doesNotMatch(navigation, /fetch\("\/api\/participant-shell"/);
   assert.equal(
@@ -186,6 +193,8 @@ test("Account and Quick Start stay outside primary lenses and Administration rem
   assert.match(navigation, /ArrowDown/);
   assert.match(navigation, /ArrowUp/);
   assert.match(navigation, /Escape/);
+  assert.match(navigation, /data-mobile-menu-trigger/);
+  assert.match(navigation, /<ExchangeLensIcon icon="menu"/);
   assert.match(adminProjection, /resolveAdminPortalAccess/);
   assert.match(adminProjection, /access\.kind === "authorized" \? "\/admin" : null/);
   assert.match(adminProjection, /catch[\s\S]*closedAdministrationContext/);
@@ -226,7 +235,7 @@ test("Intelligence context preservation is bounded to the canonical same-origin 
   assert.match(storage, /window\.sessionStorage\.getItem/);
   assert.match(storage, /window\.sessionStorage\.removeItem/);
   assert.match(navigation, /useSyncExternalStore/);
-  assert.match(navigation, /if \(lensId === "intelligence"\) return snapshot\.intelligenceHref;[\s\S]*if \(lensId === "resources"\) return snapshot\.resourceHref;/);
+  assert.match(navigation, /intelligenceHref: storedIntelligenceHref\(\)/);
   assert.doesNotMatch(navigation, /authorize|permission|membership|tenancy/);
   assert.match(signOut, /clearParticipantIntelligenceContext\(\)[\s\S]*\.signOut\(\)/);
   assert.match(signIn, /method: "POST"[\s\S]*clearParticipantIntelligenceContext\(\)/);
@@ -239,6 +248,7 @@ test("warm participant navigation preserves current content and no route takeove
   const routeLoading = [
     ["app/geography/canvas/loading.tsx", "intelligence"],
     ["app/resources/loading.tsx", "resources"],
+    ["app/capabilities/loading.tsx", "capabilities"],
     ["app/referrals/loading.tsx", "referrals"],
     ["app/organization-profile/loading.tsx", "account"],
     ["app/quick-start/loading.tsx", "quick-start"],
@@ -257,8 +267,9 @@ test("warm participant navigation preserves current content and no route takeove
   assert.doesNotMatch(navigation, /Preparing this page|Loading RFxchange|setTimeout/);
 });
 
-test("new shell, unavailable, utility, and scoped-loading copy is complete in all supported locales", () => {
+test("new shell, utility, and scoped-loading copy is complete in all supported locales", () => {
   const requiredKeys = [
+    "menu",
     "opportunitiesRfx",
     "resources",
     "intelligence",
@@ -313,6 +324,7 @@ test("the participant shell preserves 390px, focus, Light Appearance, and reduce
   const persistentCss = read("src/components/participant/PersistentParticipantShell.module.css");
 
   assert.match(navigationCss, /@media \(max-width: 390px\)/);
+  assert.match(navigationCss, /grid-template-columns:\s*repeat\(5/);
   assert.match(navigationCss, /focus-visible/);
   assert.doesNotMatch(navigationCss, /animation:/);
   assert.match(persistentCss, /overflow-x: clip/);
