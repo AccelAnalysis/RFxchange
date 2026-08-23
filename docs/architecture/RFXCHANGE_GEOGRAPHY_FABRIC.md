@@ -1,8 +1,11 @@
 # RFxchange Geography Fabric
 
-**Status:** Foundation implementation — not independently verified  
-**Production authority:** `AccelAnalysis/RFxchange`  
-**Reference contribution:** TestRFx PR #72  
+**Status:** Foundation implementation — not independently verified
+
+**Production authority:** `AccelAnalysis/RFxchange`
+
+**Reference contribution:** TestRFx PR #72
+
 **Effective:** 2026-08-23
 
 ## Purpose
