@@ -8,8 +8,10 @@ import {
   type Transaction,
 } from "firebase-admin/firestore";
 
-import type {
-  CanonicalGeography,
+import {
+  assertGeographicScopeImmutableIdentity,
+  assertSameImmutableGeographyVersion,
+  type CanonicalGeography,
   GeographicScope,
   GeographicScopeMember,
   GeographyDatasetSource,
@@ -510,12 +512,14 @@ export class FirestoreGeographyFabricUnitOfWork
         const ref = versionRefs[index];
         if (!snapshot || !ref) throw new Error("Missing geography-version transaction state.");
         if (snapshot.exists) {
-          sameImmutableRecord(
+          const existingVersion = toDomainRecord<GeographyVersion>(
             snapshot,
-            record,
-            ["id", "geographyId", "datasetSourceId", "vintage"],
-            "Geography version",
+            "geographyVersions",
           );
+          if (!existingVersion) {
+            throw new Error("Geography version exists without readable data.");
+          }
+          assertSameImmutableGeographyVersion(existingVersion, record);
         } else {
           transaction.create(ref, appendOnlyPayload("geographyVersions", record));
         }
@@ -585,6 +589,16 @@ export class FirestoreGeographyFabricUnitOfWork
         transaction.get(scopeRef),
       ]);
       if (commandIsReplay(commandSnapshot, input.command)) return;
+      if (scopeSnapshot.exists) {
+        const existingScope = toDomainRecord<GeographicScope>(
+          scopeSnapshot,
+          "geographicScopes",
+        );
+        if (!existingScope) {
+          throw new Error("Geographic scope exists without readable data.");
+        }
+        assertGeographicScopeImmutableIdentity(existingScope, input.scope);
+      }
       requireNextRevision(
         scopeSnapshot,
         input.scope.revision,
