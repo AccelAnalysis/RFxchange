@@ -1,0 +1,60 @@
+name: provider-promotion-adapter-critical-ci
+
+on:
+  pull_request:
+    paths:
+      - "src/domain/provider-seeding/**"
+      - "src/application/provider-seeding/**"
+      - "src/infrastructure/firestore/provider-promotion-*.ts"
+      - "src/infrastructure/provider-seeding/**"
+      - "src/domain/admin-authorization/model.ts"
+      - "scripts/smoke-provider-promotion-adapter-emulator.mjs"
+      - "test/provider-promotion-adapter.test.mjs"
+      - "test/support/provider-promotion-fixture.mjs"
+      - ".github/workflows/provider-promotion-adapter-critical-ci.yml"
+  push:
+    branches:
+      - control/hampton-roads-provider-promotion-adapter
+
+permissions:
+  contents: read
+
+jobs:
+  critical-provider-promotion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify exact checkout and whitespace
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_sha="${{ github.event.pull_request.head.sha || github.sha }}"
+          test "$(git rev-parse HEAD)" = "$expected_sha"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff --check "${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            git diff --check HEAD^ HEAD
+          fi
+      - name: Focused provider promotion tests
+        run: node --test test/provider-seeding-promotion-approval.test.mjs test/provider-promotion-adapter.test.mjs
+      - name: Typecheck protected adapter
+        run: npm run typecheck
+      - name: Critical Firestore emulator acceptance
+        env:
+          RFXCHANGE_ENV: development
+          RFXCHANGE_EXPECTED_PROJECT_ID: demo-rfxchange
+        run: ./node_modules/.bin/firebase emulators:exec --only firestore --project demo-rfxchange "node --experimental-transform-types --experimental-loader ./scripts/node-typescript-source-loader.mjs scripts/smoke-provider-promotion-adapter-emulator.mjs"
