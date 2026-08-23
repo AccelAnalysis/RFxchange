@@ -1,6 +1,6 @@
 # Phase 2 Convergence Work-Packet Decomposition
 
-**Status:** Planning output only — no packet below is active  
+**Status:** Planning output only — no packet below is active
 **Exact RFxchange baseline used:** `399072c05aa78e536ad57d0998a643f1c6d49b08`
 
 The packet names below prevent a future broad “copy TestRFx” PR. Control Room must recalculate every packet from current merged `main` before activation.

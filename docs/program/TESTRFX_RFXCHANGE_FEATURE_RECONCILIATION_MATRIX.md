@@ -1,7 +1,7 @@
 # TestRFx → RFxchange Feature Reconciliation Matrix
 
-**RFxchange baseline:** `399072c05aa78e536ad57d0998a643f1c6d49b08`  
-**TestRFx baseline:** `db19a0cc2171d0ddde4f34a20acc881ba7279248`  
+**RFxchange baseline:** `399072c05aa78e536ad57d0998a643f1c6d49b08`
+**TestRFx baseline:** `db19a0cc2171d0ddde4f34a20acc881ba7279248`
 **Rows:** 53
 
 Detailed row fields are canonical in `governance/testrfx-rfxchange-reconciliation.json`.

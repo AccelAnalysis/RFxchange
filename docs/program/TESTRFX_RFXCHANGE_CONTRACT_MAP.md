@@ -1,7 +1,7 @@
 # TestRFx → RFxchange Contract Map
 
-**RFxchange baseline:** `399072c05aa78e536ad57d0998a643f1c6d49b08`  
-**TestRFx baseline:** `db19a0cc2171d0ddde4f34a20acc881ba7279248`  
+**RFxchange baseline:** `399072c05aa78e536ad57d0998a643f1c6d49b08`
+**TestRFx baseline:** `db19a0cc2171d0ddde4f34a20acc881ba7279248`
 **Contracts:** 26
 
 This is the formal Phase 2 map. Detailed mandatory fields live in `governance/testrfx-rfxchange-contract-map.json`.

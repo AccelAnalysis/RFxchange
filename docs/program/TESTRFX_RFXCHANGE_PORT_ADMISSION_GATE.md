@@ -1,6 +1,6 @@
 # TestRFx → RFxchange Port Admission Gate
 
-**Status:** Phase 2 governance gate  
+**Status:** Phase 2 governance gate
 **Effect:** Blocks donor runtime/data ports until all required evidence exists
 
 ## Gate question

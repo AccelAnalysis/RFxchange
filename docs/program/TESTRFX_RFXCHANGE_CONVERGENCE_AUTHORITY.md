@@ -1,10 +1,10 @@
 # TestRFx → RFxchange Convergence Authority
 
-**Status:** Proposed governance authority for review  
-**Repository of production truth:** `AccelAnalysis/RFxchange`  
-**Controlled donor/reference repository:** `AccelAnalysis/TestRFx`  
-**RFxchange baseline:** `399072c05aa78e536ad57d0998a643f1c6d49b08`  
-**TestRFx donor baseline:** `db19a0cc2171d0ddde4f34a20acc881ba7279248`  
+**Status:** Proposed governance authority for review
+**Repository of production truth:** `AccelAnalysis/RFxchange`
+**Controlled donor/reference repository:** `AccelAnalysis/TestRFx`
+**RFxchange baseline:** `399072c05aa78e536ad57d0998a643f1c6d49b08`
+**TestRFx donor baseline:** `db19a0cc2171d0ddde4f34a20acc881ba7279248`
 **Prepared:** 2026-08-22
 
 ## Decision
