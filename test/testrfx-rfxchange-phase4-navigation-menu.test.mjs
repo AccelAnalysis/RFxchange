@@ -69,7 +69,7 @@ test("all five locale dictionaries retain identical participant-navigation keys"
   }
 });
 
-test("the shared navigation port introduces no donor runtime or duplicate shell", () => {
+test("the shared navigation port introduces no donor runtime, duplicate shell, or imperative document navigation", () => {
   const combined = [
     read("src/application/participant/participant-lens-registry.ts"),
     read("src/components/participant/ParticipantTopNavigation.tsx"),
@@ -78,5 +78,6 @@ test("the shared navigation port introduces no donor runtime or duplicate shell"
 
   assert.doesNotMatch(combined, /postgres|postgis|neon|maplibre|openfreemap|rfx_session|exchange_records/i);
   assert.doesNotMatch(combined, /new PersistentParticipantShell|createContext\(/);
-  assert.doesNotMatch(combined, /window\.location|document\.location|location\.assign|location\.replace/);
+  assert.doesNotMatch(combined, /document\.location|location\.assign|location\.replace|window\.location\.(?:assign|replace)|window\.location\.href\s*=/);
+  assert.match(combined, /window\.location\.origin/);
 });
