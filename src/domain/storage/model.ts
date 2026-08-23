@@ -11,6 +11,7 @@ export type StoredAssetTimestamp = Brand<string, "StoredAssetTimestamp">;
 export const STORED_ASSET_CATEGORIES = [
   "organization-logo",
   "organization-media",
+  "organization-intro-video",
   "organization-document",
   "authority-evidence",
   "verification-evidence",
@@ -46,6 +47,13 @@ export const STORED_ASSET_POLICIES: Readonly<Record<StoredAssetCategory, StoredA
       sensitivity: "standard" as const,
       maximumBytes: 15 * MEBIBYTE,
       permittedContentTypes: Object.freeze(["image/jpeg", "image/png", "image/webp"]),
+      organizationPermission: "organization.profile.manage" as const,
+    }),
+    "organization-intro-video": Object.freeze({
+      category: "organization-intro-video" as const,
+      sensitivity: "standard" as const,
+      maximumBytes: 25 * MEBIBYTE,
+      permittedContentTypes: Object.freeze(["video/mp4", "video/webm"]),
       organizationPermission: "organization.profile.manage" as const,
     }),
     "organization-document": Object.freeze({
@@ -184,6 +192,8 @@ function extensionFor(contentType: string): string {
     "image/jpeg": "jpg",
     "image/png": "png",
     "image/webp": "webp",
+    "video/mp4": "mp4",
+    "video/webm": "webm",
     "application/pdf": "pdf",
     "application/msword": "doc",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
