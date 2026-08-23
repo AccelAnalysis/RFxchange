@@ -1,6 +1,6 @@
 {
   "ariaLabel": "Primäre Teilnehmernavigation",
-  "menu": "Ansichten",
+  "menu": "Menü",
   "opportunitiesRfx": "Opportunities/RFx",
   "resources": "Ressourcen",
   "intelligence": "Intelligence",
@@ -20,7 +20,7 @@
   "loadingIntelligenceTitle": "Organisationsergebnisse werden geladen",
   "loadingIntelligenceBody": "Exchange aktualisiert die zulässige Netzwerkansicht, während die Oberfläche und der aktuelle Organisationskontext verfügbar bleiben.",
   "loadingCapabilitiesTitle": "Fähigkeiten werden geladen",
-  "loadingCapabilitiesBody": "Exchange bewahrt den Organisationskontext, während der geregelte Fähigkeiten-Arbeitsbereich nicht verfügbar ist.",
+  "loadingCapabilitiesBody": "Exchange aktualisiert die zulässigen Fähigkeiten und bewahrt dabei Organisation, Karte und Rückkehrkontext.",
   "loadingResourcesTitle": "Ressourcen werden geladen",
   "loadingResourcesBody": "Genehmigte Anbieter, veröffentlichte Ressourcen und zulässige Anfragen werden aktualisiert.",
   "loadingReferralsTitle": "Empfehlungen werden geladen",
