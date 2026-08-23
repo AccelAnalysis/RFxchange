@@ -1,0 +1,70 @@
+name: Provider promotion confirmation repair
+
+on:
+  push:
+    branches:
+      - control/hampton-roads-provider-promotion-adapter
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: control/hampton-roads-provider-promotion-adapter
+      - name: Require confirmation at the Firebase adapter boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          adapter = Path('src/infrastructure/firestore/provider-promotion-adapter.ts')
+          text = adapter.read_text()
+          old = '  async commit(command: ProviderPromotionCommand): Promise<ProviderPromotionReceipt> {\n    if (command.action !== "commit-approved-provider-promotion") {'
+          new = '''  async commit(\n    command: ProviderPromotionCommand,\n    confirmation: string,\n  ): Promise<ProviderPromotionReceipt> {\n    if (confirmation !== "PROMOTE APPROVED PROVIDER") {\n      throw new Error(\n        "Provider promotion commit requires the exact production confirmation phrase.",\n      );\n    }\n    if (command.action !== "commit-approved-provider-promotion") {'''
+          if old not in text:
+              raise SystemExit('adapter commit signature pattern not found')
+          adapter.write_text(text.replace(old, new, 1))
+
+          test_file = Path('test/provider-promotion-adapter.test.mjs')
+          text = test_file.read_text()
+          old = '  assert.match(source, /provider\\.seed-promotion\\.commit/);'
+          new = '''  const evaluator = readFileSync(\n    new URL("../src/application/provider-seeding/provider-promotion-evaluation.ts", import.meta.url),\n    "utf8",\n  );\n  assert.match(evaluator, /provider\\.seed-promotion\\.commit/);\n  assert.match(source, /PROMOTE APPROVED PROVIDER/);'''
+          if old not in text:
+              raise SystemExit('adapter structural permission assertion not found')
+          test_file.write_text(text.replace(old, new, 1))
+
+          smoke = Path('scripts/smoke-provider-promotion-adapter-emulator.mjs')
+          text = smoke.read_text()
+          text = text.replace(
+              'disabledAdapter.commit(fixture.commitCommand)',
+              'disabledAdapter.commit(fixture.commitCommand, "PROMOTE APPROVED PROVIDER")',
+          )
+          text = text.replace(
+              'enabledAdapter.commit(fixture.commitCommand)',
+              'enabledAdapter.commit(fixture.commitCommand, "PROMOTE APPROVED PROVIDER")',
+          )
+          text = text.replace(
+              'enabledAdapter.commit({ ...fixture.commitCommand, requestFingerprint: "sha256:conflict" })',
+              'enabledAdapter.commit({ ...fixture.commitCommand, requestFingerprint: "sha256:conflict" }, "PROMOTE APPROVED PROVIDER")',
+          )
+          marker = '''  await assert.rejects(\n    disabledAdapter.commit(fixture.commitCommand, "PROMOTE APPROVED PROVIDER"),\n    /RFXCHANGE_PROVIDER_PROMOTION_ENABLED/,\n  );'''
+          negative = '''  await assert.rejects(\n    enabledAdapter.commit(fixture.commitCommand, "PROMOTE UNREVIEWED PROVIDER"),\n    /exact production confirmation phrase/,\n  );\n\n'''
+          if marker not in text:
+              raise SystemExit('release-gate smoke assertion not found')
+          smoke.write_text(text.replace(marker, negative + marker, 1))
+
+          Path('.github/workflows/provider-promotion-confirmation-repair.yml').unlink()
+          PY
+      - name: Commit repaired boundary
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Require exact confirmation at provider promotion adapter"
+          git push origin HEAD:control/hampton-roads-provider-promotion-adapter
