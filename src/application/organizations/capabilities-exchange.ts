@@ -251,24 +251,30 @@ function actionProjection(input: Readonly<{
     if (own && definition.id === "capabilities.manage-view") {
       operational = true;
       authorized = input.canManageProfile;
-      handlerCandidate = Object.freeze({ kind: "href", href: "/organization-profile#market-profile-title" });
+      handlerCandidate = Object.freeze({
+        kind: "href" as const,
+        href: "/organization-profile#market-profile-title",
+      });
       resolvedHandler = authorized ? handlerCandidate : null;
     } else if (own && definition.id === "capabilities.classify-match") {
       operational = true;
       authorized = input.canManageProfile;
-      handlerCandidate = Object.freeze({ kind: "href", href: "/organization-profile#describe-capability-title" });
+      handlerCandidate = Object.freeze({
+        kind: "href" as const,
+        href: "/organization-profile#describe-capability-title",
+      });
       resolvedHandler = authorized ? handlerCandidate : null;
     } else if (own && definition.id === "capabilities.gaps-save") {
       operational = true;
       handlerCandidate = Object.freeze({
-        kind: "href",
+        kind: "href" as const,
         href: `/capabilities?view=gaps&selectedOrganization=${encodeURIComponent(input.organizationId)}`,
       });
       resolvedHandler = handlerCandidate;
     } else if (!own && definition.id === "capabilities.manage-view") {
       operational = true;
       handlerCandidate = Object.freeze({
-        kind: "href",
+        kind: "href" as const,
         href: `/capabilities?selectedOrganization=${encodeURIComponent(input.organizationId)}`,
       });
       resolvedHandler = handlerCandidate;

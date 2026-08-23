@@ -311,22 +311,57 @@ function selectionFor(input: ResourcesMobileProjectionInput, providers: readonly
   return createExchangeSelectionState({ kind: "organization", source, selectedOrganization: { selectionKey: organizationKey(organizationId), organizationId, associationRole: "subject" }, selectedMarker: provider.marker ? { selectionKey: organizationKey(organizationId), markerId: provider.marker.id, role: "focal" } : null });
 }
 
-function actionProjection(definition: ReturnType<typeof exchangeRoomActionDefinitionsForLens>[number], input: ResourcesMobileProjectionInput, selection: ExchangeSelectionState): ExchangeRoomActionProjection {
+function actionProjection(
+  definition: ReturnType<typeof exchangeRoomActionDefinitionsForLens>[number],
+  input: ResourcesMobileProjectionInput,
+  selection: ExchangeSelectionState,
+): ExchangeRoomActionProjection {
   const selectedOrganizationId = selection.selectedOrganization?.organizationId ?? input.viewerOrganizationId;
   const own = selectedOrganizationId === input.viewerOrganizationId;
   const variant = own ? "own" as const : "external" as const;
   const selectedResource = selection.selectedRecord?.recordType === "provider-resource";
   const operational = definition.id === "resources.offer-request" || definition.id === "resources.manage-view";
-  const applicable = definition.id === "resources.offer-request" ? (own || selection.selectedOrganization !== null) : definition.id === "resources.manage-view" ? (!own && selectedResource) : true;
-  const authorized = input.authorization.openPlatform && (definition.id === "resources.offer-request" ? (own ? input.authorization.resourceManage : input.authorization.referralManage) : true);
+  const applicable = definition.id === "resources.offer-request"
+    ? (own || selection.selectedOrganization !== null)
+    : definition.id === "resources.manage-view"
+      ? (!own && selectedResource)
+      : true;
+  const authorized = input.authorization.openPlatform
+    && (definition.id === "resources.offer-request"
+      ? (own ? input.authorization.resourceManage : input.authorization.referralManage)
+      : true);
   const href = definition.id === "resources.offer-request"
-    ? own ? resourcesHref({ manage: "offer" }, input.navigationContext) : providerHref(selectedOrganizationId, input.navigationContext)
-    : definition.id === "resources.manage-view" && selectedResource ? resourcesHref({ resource: selection.selectedRecord!.recordId }, input.navigationContext) : null;
-  const handlerCandidate = operational && applicable && href
+    ? own
+      ? resourcesHref({ manage: "offer" }, input.navigationContext)
+      : providerHref(selectedOrganizationId, input.navigationContext)
+    : definition.id === "resources.manage-view" && selectedResource
+      ? resourcesHref({ resource: selection.selectedRecord!.recordId }, input.navigationContext)
+      : null;
+  const handlerCandidate: ExchangeRoomActionProjection["handlerCandidate"] = operational && applicable && href
     ? Object.freeze({ kind: "href" as const, href })
     : null;
-  const reason: ExchangeRoomActionDisabledReason | null = !operational ? "not-operational" : !applicable ? "not-applicable" : !authorized ? "not-authorized" : handlerCandidate ? null : "not-operational";
-  return Object.freeze({ ...definition, labelKey: variant === "own" ? definition.labelKey : definition.externalLabelKey, variant, operational, applicable, authorized, authorization: variant === "own" ? definition.authorization : definition.externalAuthorization, availability: reason === null ? "active" : "disabled", disabledReason: reason, handlerCandidate, resolvedHandler: reason === null ? handlerCandidate : null });
+  const reason: ExchangeRoomActionDisabledReason | null = !operational
+    ? "not-operational"
+    : !applicable
+      ? "not-applicable"
+      : !authorized
+        ? "not-authorized"
+        : handlerCandidate
+          ? null
+          : "not-operational";
+  return Object.freeze({
+    ...definition,
+    labelKey: variant === "own" ? definition.labelKey : definition.externalLabelKey,
+    variant,
+    operational,
+    applicable,
+    authorized,
+    authorization: variant === "own" ? definition.authorization : definition.externalAuthorization,
+    availability: reason === null ? "active" : "disabled",
+    disabledReason: reason,
+    handlerCandidate,
+    resolvedHandler: reason === null ? handlerCandidate : null,
+  });
 }
 
 export interface ResourcesMobileProjectionInput {
