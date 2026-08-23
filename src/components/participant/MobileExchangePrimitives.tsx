@@ -22,10 +22,12 @@ import {
   PARTICIPANT_SHEET_SNAP_POINTS,
   type ParticipantSheetSnapPoint,
 } from "../../application/participant/participant-spatial-context";
+import { ExchangeLensIcon } from "./ExchangeLensIcon";
 
 import styles from "./MobileExchangePrimitives.module.css";
 
 const SNAP_INDEX = Object.freeze({ peek: 0, partial: 1, expanded: 2 } as const);
+const OWNERSHIP_ACTION = /(?:^|\.)(?:manage|provider-status|my-records)(?:[.-]|$)/;
 
 export interface ExchangeSheetLabels {
   readonly region: string;
@@ -201,15 +203,23 @@ export function ExchangeBottomSheet({
 export function ExchangeMedia({
   media,
   fallbackLabel,
+  lens,
 }: Readonly<{
   media: ExchangeMediaModel | null;
   fallbackLabel: string;
+  lens: LensResultCardModel["lens"];
 }>) {
   const resolvedFallback = media?.fallbackLabel ?? fallbackLabel;
   if (!media || media.kind === "fallback" || (!media.assetReference && !media.posterReference)) {
     return (
-      <div className={styles.mediaFallback} data-media-kind="fallback" role="img" aria-label={resolvedFallback}>
-        <span aria-hidden="true">RFx</span>
+      <div
+        className={styles.mediaFallback}
+        data-media-kind="fallback"
+        data-lens={lens}
+        role="img"
+        aria-label={resolvedFallback}
+      >
+        <ExchangeLensIcon icon={lens} size={54} strokeWidth={1.65} />
         <small>{resolvedFallback}</small>
       </div>
     );
@@ -217,9 +227,9 @@ export function ExchangeMedia({
 
   const source = media.posterReference ?? media.assetReference;
   return (
-    <div className={styles.media} data-media-kind={media.kind}>
+    <div className={styles.media} data-media-kind={media.kind} data-lens={lens}>
       {/* Repository media references are server-derived. Full video playback remains domain-owned. */}
-      <img src={source ?? ""} alt={media.alt} loading="lazy" />
+      <img src={source ?? ""} alt={media.alt} loading="lazy" decoding="async" />
       {media.kind === "video-poster" ? <span className={styles.playBadge} aria-hidden="true">▶</span> : null}
     </div>
   );
@@ -296,7 +306,12 @@ export function ExchangeFavorite({
   }
   if (favorite.handler.kind === "href") {
     return (
-      <Link className={styles.favorite} href={favorite.handler.href} aria-label={label} data-favorite-state={favorite.favorited ? "saved" : "unsaved"}>
+      <Link
+        className={styles.favorite}
+        href={favorite.handler.href}
+        aria-label={label}
+        data-favorite-state={favorite.favorited ? "saved" : "unsaved"}
+      >
         <span aria-hidden="true">{favorite.favorited ? "★" : "☆"}</span>
       </Link>
     );
@@ -312,6 +327,10 @@ export function ExchangeFavorite({
       <span aria-hidden="true">{favorite.favorited ? "★" : "☆"}</span>
     </button>
   );
+}
+
+function cardIsOwned(card: LensResultCardModel): boolean {
+  return card.recordActions.some((action) => action.applicable && OWNERSHIP_ACTION.test(action.id));
 }
 
 export function ExchangeResultCard({
@@ -333,16 +352,29 @@ export function ExchangeResultCard({
   onFavoriteIntent?(intent: string): void;
   onRecordActionIntent?(intent: string): void;
 }>) {
+  const owned = cardIsOwned(card);
+  const visibleBadge = card.status ?? card.indicator;
+  const visibleClassifications = card.classifications.slice(0, 2);
+  const visibleMetadata = card.metadata.slice(0, 2);
+  const visibleRecordActions = card.recordActions.slice(0, 3);
+
   return (
     <article
       className={styles.card}
       data-exchange-result-card
       data-selection-key={card.identity.selectionKey}
+      data-lens={card.lens}
+      data-owned={owned ? "true" : "false"}
       data-selected={selected ? "true" : "false"}
       aria-current={selected ? "true" : undefined}
     >
       <div className={styles.cardMedia}>
-        <ExchangeMedia media={card.media} fallbackLabel={labels.mediaFallback} />
+        <ExchangeMedia media={card.media} fallbackLabel={labels.mediaFallback} lens={card.lens} />
+        {visibleBadge ? (
+          <span className={styles.mediaBadge} data-emphasis={visibleBadge.emphasis}>
+            {visibleBadge.label}: {visibleBadge.value}
+          </span>
+        ) : null}
         <ExchangeFavorite favorite={card.favorite} labels={labels} onIntent={onFavoriteIntent} />
       </div>
       <button
@@ -358,32 +390,44 @@ export function ExchangeResultCard({
       >
         <span className={styles.cardHeading}>
           <strong>{card.title}</strong>
-          {card.indicator ? (
-            <small data-emphasis={card.indicator.emphasis}>
-              {card.indicator.label}: {card.indicator.value}
-            </small>
-          ) : null}
         </span>
         {card.organizationIdentity ? <span className={styles.organizationIdentity}>{card.organizationIdentity}</span> : null}
         {card.locality ? <span className={styles.locality}>{card.locality}</span> : null}
+        {visibleClassifications.length > 0 ? (
+          <span className={styles.classifications}>
+            {visibleClassifications.map((item) => item.value).join(" · ")}
+          </span>
+        ) : null}
         {card.summary ? <span className={styles.summary}>{card.summary}</span> : null}
-        {card.metadata.length > 0 ? (
+        {visibleMetadata.length > 0 ? (
           <span className={styles.metadata}>
-            {card.metadata.map((item) => (
+            {visibleMetadata.map((item) => (
               <span key={item.id}><b>{item.label}</b> {item.value}</span>
             ))}
           </span>
         ) : null}
       </button>
-      {card.recordActions.length > 0 ? (
-        <div className={styles.recordActions}>
-          {card.recordActions.map((action) => invokeRecordAction(
-            action,
-            resolveRecordActionLabel(action.labelKey),
-            onRecordActionIntent,
-          ))}
-        </div>
-      ) : null}
+      <div className={styles.actionDock}>
+        {visibleRecordActions.length > 0 ? (
+          <div className={styles.recordActions}>
+            {visibleRecordActions.map((action) => invokeRecordAction(
+              action,
+              resolveRecordActionLabel(action.labelKey),
+              onRecordActionIntent,
+            ))}
+          </div>
+        ) : <span />}
+        <button
+          type="button"
+          className={styles.detailButton}
+          onClick={() => {
+            onSelect();
+            onOpen();
+          }}
+        >
+          {labels.openDetail}
+        </button>
+      </div>
     </article>
   );
 }
