@@ -1,10 +1,10 @@
 export const publicPositioning = {
   summary:
-    "The RFxchange helps organizations turn ordinary business meaning into governed, reusable market structure so they can become easier to understand, discover, and connect through released workflows.",
+    "The RFxchange helps organizations turn ordinary business meaning into reusable market context so they can become easier to understand, discover, and connect.",
   pillars: [
     { kicker: "Visible", title: "Capabilities become discoverable" },
     { kicker: "Connected", title: "Context travels to the next step" },
-    { kicker: "Actionable", title: "Released workflows support real action" },
+    { kicker: "Actionable", title: "Available workflows support business action" },
   ],
 } as const;
 
@@ -15,7 +15,7 @@ export const publicValueProgression = Object.freeze([
   }),
   Object.freeze({
     kicker: "Discoverable",
-    title: "Be found through confirmed market context",
+    title: "Be found through useful market context",
   }),
   Object.freeze({
     kicker: "Connectable",
@@ -23,7 +23,7 @@ export const publicValueProgression = Object.freeze([
   }),
   Object.freeze({
     kicker: "Actionable",
-    title: "Use released workflows for the next appropriate action",
+    title: "Use available workflows for the next appropriate action",
   }),
 ] as const);
 
@@ -31,17 +31,17 @@ export const publicDifferentiation = [
   {
     label: "More than a directory",
     detail:
-      "The live Network connects real organization identity, confirmed AMACS-backed capabilities, geography, service context, referrals, approved resource providers, and persistent guidance.",
+      "The Exchange connects organization identity, capabilities, geography, service context, referrals, resource providers, and guidance.",
   },
   {
     label: "Not a social feed",
     detail:
-      "The product is organized around organizations, capabilities, geography, consent, and authorized business workflows—not follower counts, general posting, or invented activity.",
+      "The product is organized around organizations, capabilities, geography, consent, and business workflows—not follower counts or general posting.",
   },
   {
     label: "Broader than a bid portal",
     detail:
-      "The planned RFx engine belongs inside a wider local business growth network. Until RFx Core is released, public copy identifies that transaction pathway as planned rather than live.",
+      "RFx activity belongs inside a wider local business growth network that also connects capabilities, resources, referrals, and intelligence.",
   },
 ] as const;
 
@@ -50,25 +50,25 @@ export const publicAvailability = Object.freeze([
     status: "Available now",
     title: "Organization and market profile",
     detail:
-      "Create or claim an organization, establish its real or privacy-safe map position, and confirm AMACS-backed capabilities plus authorized enrichment.",
+      "Create or claim an organization, confirm its map position, and describe its capabilities and market information.",
   }),
   Object.freeze({
     status: "Available now",
-    title: "Network discovery and connections",
+    title: "Discovery and connections",
     detail:
-      "Discover permitted organizations, create consented referrals, find approved resource providers, and create governed provider connections.",
+      "Find participating organizations, create referrals, discover resource providers, and carry useful context into the connection.",
   }),
   Object.freeze({
     status: "Available now",
-    title: "Resources and persistent education",
+    title: "Resources and guidance",
     detail:
-      "View governed provider resources and reopen Quick Start, role paths, and contextual workflow explainers.",
+      "View provider resources and reopen Quick Start, role paths, and contextual help when you need it.",
   }),
   Object.freeze({
-    status: "Next governed pathway",
-    title: "RFx Core, credibility, and commerce",
+    status: "Coming next",
+    title: "More Exchange workflows",
     detail:
-      "RFx creation, responses, teaming, evaluation, credibility, outcomes, advanced capacity routing, and paid entitlements remain later governed work.",
+      "Additional RFx, credibility, outcome, capacity, and commerce tools will appear as they become available.",
   }),
 ] as const);
 
@@ -77,21 +77,21 @@ export const audienceEmphasis = [
     name: "Economic developers + civic leaders",
     promise: "Connective economic infrastructure",
     detail:
-      "Use real participating organization, capability, geography, referral, and resource-provider context without treating incomplete participation as the whole economy.",
+      "Use participating organization, capability, geography, referral, and resource-provider context as one view into the local market.",
     signals: ["Visibility", "Coordination", "Resources", "Measured activity"],
   },
   {
     name: "Businesses",
     promise: "A reusable business-development position",
     detail:
-      "Establish the organization and its confirmed capabilities, then use live discovery, referrals, resources, and persistent guidance.",
+      "Establish the organization and its capabilities, then use discovery, referrals, resources, and guidance to find the next useful connection.",
     signals: ["Be found", "Capability", "Geography", "Next action"],
   },
   {
     name: "Resource providers",
     promise: "Contextual routing into support",
     detail:
-      "Approved providers can expose governed services, territories, eligibility, intake, resources, and consented connection pathways.",
-    signals: ["Controlled approval", "Service territory", "Handoffs", "Need context"],
+      "Show services, territories, eligibility, intake, resources, and the best way for businesses to connect.",
+    signals: ["Provider status", "Service territory", "Handoffs", "Need context"],
   },
 ] as const;
