@@ -69,14 +69,10 @@ export function RFxMobileTaskCanvas({
   const [depth, setDepth] = useState<TaskDepth>("quick");
   const [intent, setIntent] = useState("");
   const [dictating, setDictating] = useState(false);
-  const [speechAvailable, setSpeechAvailable] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
 
-  useEffect(() => {
-    setSpeechAvailable(speechRecognitionConstructor() !== null);
-    return () => recognitionRef.current?.stop();
-  }, []);
+  useEffect(() => () => recognitionRef.current?.stop(), []);
 
   const depthHelp = depth === "quick"
     ? copy.quickHelp
@@ -199,7 +195,7 @@ export function RFxMobileTaskCanvas({
         <div className={styles.captureActions}>
           <button
             type="button"
-            disabled={!canCreate || (!speechAvailable && !dictating)}
+            disabled={!canCreate}
             aria-pressed={dictating}
             onClick={dictating ? stopDictation : startDictation}
           >
