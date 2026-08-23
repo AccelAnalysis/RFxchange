@@ -17,4 +17,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: Apply bounded review remediation
-        run: python .github/scripts/remediate-pr248.py
+        run: |
+          git config user.name "RFxchange implementation"
+          git config user.email "actions@users.noreply.github.com"
+          python .github/scripts/remediate-pr248.py
