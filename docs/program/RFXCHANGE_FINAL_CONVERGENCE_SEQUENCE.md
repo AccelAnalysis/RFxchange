@@ -125,8 +125,12 @@ Convergence is complete when every selected TestRFx contribution is either imple
 
 ## Current implementation record
 
-The first bounded candidate is PR #247. It implements Stages 1 and 2 from exact starting `main` `4494e6dcdacf1a4c457b1cd0b8a6081878875318`.
+PR #247 implements Stages 1 and 2 from exact starting `main` `4494e6dcdacf1a4c457b1cd0b8a6081878875318`.
 
-Candidate `fe8f08096b1553c6500d3ab1cca7462f7d6ff307` passed the deterministic focused suite with 28 tests, 28 passed and 0 failed, including beacon identity, privacy-aware marker projection, stacked cluster registration, configured basemap presets, selected Opportunity action context, fresh permission handling, and preserved Room reopen behavior. `git diff --check` also passed.
+Exact clean candidate `489c8c6a1866db8855c12dbac87ce956f9352820` passed production CI run `32666397590` (`production-ci` run 1662). Exact checkout identity, whitespace integrity, repository guardrails, Cloud Functions build and unit tests, the Firebase Auth/Firestore/Functions/Storage emulator smoke suite, focused architecture and participant-shell tests, TypeScript, lint, production build, canonical full gate, configured-browser shell/accessibility/transition acceptance, evidence upload, and compiled/visible build-identity verification all passed.
 
-Domain-owned Capabilities and Resources action projections were then updated to carry the same server-derived `handlerCandidate` contract. The one-time compatibility workflow passed TypeScript and the focused regression suite before producing branch candidate `9704325ed1def8beae457604e6516a4065c8dc30`. This remains focused implementation evidence only; the next human-authored exact head must pass production CI and configured-browser acceptance before merge.
+Review remediation now preserves approximate-location truth while selected, restricts the participant basemap chooser to authorized daytime Exchange and Street treatments, and carries a safe internal Opportunity discovery return target into Respond and Team assessment entry. Focused regressions cover all three corrections.
+
+The branch remains **Implemented — Not Verified**. Production CI and configured-browser evidence support review and merge readiness, but the implementation lane does not self-promote the work to `Verified`.
+
+Stage 3 has begun on stacked branch `control/geography-fabric-foundation`. Its first bounded packet establishes Geography Fabric domain contracts and Firestore persistence conventions only; it does not call Census services, move accepted coordinates, or promote Hampton Roads provider records into production.

@@ -62,6 +62,7 @@ test("current issuer and responder RFx workflows activate without inventing resp
   const external = projectExchangeRoomActions(input("opportunities-rfx", {
     selectedOrganizationId: "organization-other",
     currentOpportunityReference: "RFX 001",
+    currentOpportunityReturnTo: "/opportunities?sort=deadline&selected=RFX%20001",
   }));
   assert.equal(external[0].variant, "external");
   assert.equal(external[0].labelKey, "opportunities.create-view.external");
@@ -71,11 +72,11 @@ test("current issuer and responder RFx workflows activate without inventing resp
   });
   assert.deepEqual(external[1].resolvedHandler, {
     kind: "href",
-    href: "/opportunities/RFX%20001/assess",
+    href: "/opportunities/RFX%20001/assess?returnTo=%2Fopportunities%3Fsort%3Ddeadline%26selected%3DRFX%2520001",
   });
   assert.deepEqual(external[2].resolvedHandler, {
     kind: "href",
-    href: "/opportunities/RFX%20001/assess",
+    href: "/opportunities/RFX%20001/assess?returnTo=%2Fopportunities%3Fsort%3Ddeadline%26selected%3DRFX%2520001",
   });
   assert.deepEqual(external[3].resolvedHandler, {
     kind: "intent",
@@ -154,4 +155,27 @@ test("Capabilities exposes four governed positions without referral handlers or 
   assert.ok(actions.every((action) => action.handlerCandidate === null));
   assert.ok(actions.every((action) => action.resolvedHandler === null));
   assert.ok(actions.every((action) => !action.id.startsWith("referrals.")));
+});
+
+
+test("Opportunity assessment preserves only a safe internal discovery return target", () => {
+  const safe = projectExchangeRoomActions(input("opportunities-rfx", {
+    selectedOrganizationId: "organization-other",
+    currentOpportunityReference: "RFX 001",
+    currentOpportunityReturnTo: "/opportunities?view=watched",
+  }));
+  assert.equal(
+    safe[1].resolvedHandler?.kind === "href" ? safe[1].resolvedHandler.href : null,
+    "/opportunities/RFX%20001/assess?returnTo=%2Fopportunities%3Fview%3Dwatched",
+  );
+
+  const unsafe = projectExchangeRoomActions(input("opportunities-rfx", {
+    selectedOrganizationId: "organization-other",
+    currentOpportunityReference: "RFX 001",
+    currentOpportunityReturnTo: "https://example.test/opportunities",
+  }));
+  assert.equal(
+    unsafe[1].resolvedHandler?.kind === "href" ? unsafe[1].resolvedHandler.href : null,
+    "/opportunities/RFX%20001/assess",
+  );
 });
