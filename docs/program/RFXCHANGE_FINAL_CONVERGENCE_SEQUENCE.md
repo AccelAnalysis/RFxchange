@@ -122,3 +122,9 @@ Finish with one bounded comparison of Registration, Geography onboarding, Organi
 Each numbered stage may be split into bounded PRs, but merge order remains dependency-aware. A later stage may proceed in parallel only where it does not create rework or bypass an earlier production primitive. Missing consequential actions remain visibly unavailable; surrounding valid experience should still ship.
 
 Convergence is complete when every selected TestRFx contribution is either implemented through RFxchange contracts, explicitly superseded/retired, or left unavailable with a named hard technical stop. TestRFx then remains a provenance/reference repository rather than a production backlog.
+
+## Current implementation record
+
+The first bounded candidate is PR #247. It implements Stages 1 and 2 from exact starting `main` `4494e6dcdacf1a4c457b1cd0b8a6081878875318`.
+
+Candidate `fe8f08096b1553c6500d3ab1cca7462f7d6ff307` passed the deterministic focused suite with 28 tests, 28 passed and 0 failed, including beacon identity, privacy-aware marker projection, stacked cluster registration, configured basemap presets, selected Opportunity action context, fresh permission handling, and preserved Room reopen behavior. `git diff --check` also passed. This evidence is focused implementation evidence only; exact-head production CI and configured-browser acceptance remain the merge gates.
