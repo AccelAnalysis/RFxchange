@@ -1,0 +1,45 @@
+name: Apply final convergence patch
+
+on:
+  push:
+    branches:
+      - control/final-convergence-beacons-actions
+    paths:
+      - scripts/apply-final-convergence-patch.mjs
+      - .github/workflows/apply-final-convergence-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: control/final-convergence-beacons-actions
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+      - name: Apply deterministic source patch
+        run: node scripts/apply-final-convergence-patch.mjs
+      - name: Remove one-time patch machinery
+        run: rm scripts/apply-final-convergence-patch.mjs .github/workflows/apply-final-convergence-patch.yml
+      - name: Focused regression tests
+        run: >-
+          node --test
+          test/final-convergence-beacons-actions.test.mjs
+          test/exchange-room-phase2-permissions.test.mjs
+          test/exchange-room-phase2-review-findings.test.mjs
+          test/exchange-room-phase2-reopen.test.mjs
+          test/mobile-exchange-stage3-map-projection.test.mjs
+      - name: Whitespace integrity
+        run: git diff --check
+      - name: Commit applied implementation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Implement dimensional beacons and corrected Exchange actions"
+          git push origin HEAD:control/final-convergence-beacons-actions
