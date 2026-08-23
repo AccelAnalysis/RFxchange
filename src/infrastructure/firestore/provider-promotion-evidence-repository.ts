@@ -17,17 +17,24 @@ import {
   type ProviderPromotionFirestoreCollectionKey,
 } from "./provider-promotion-schema.ts";
 
-function normalize(value: unknown): unknown {
+function normalizeValue(value: unknown): unknown {
   if (value instanceof Timestamp) return value.toDate().toISOString();
-  if (Array.isArray(value)) return value.map(normalize);
+  if (Array.isArray(value)) return value.map(normalizeValue);
   if (value && typeof value === "object") {
     return Object.freeze(Object.fromEntries(
       Object.entries(value as Readonly<Record<string, unknown>>)
-        .filter(([key]) => key !== "schemaVersion" && key !== "createdAt")
-        .map(([key, nested]) => [key, normalize(nested)]),
+        .map(([key, nested]) => [key, normalizeValue(nested)]),
     ));
   }
   return value;
+}
+
+function normalizeRecord<T extends object>(data: DocumentData): T {
+  const normalized = normalizeValue(data) as Record<string, unknown>;
+  const { schemaVersion: _schemaVersion, createdAt: _storageCreatedAt, ...record } = normalized;
+  void _schemaVersion;
+  void _storageCreatedAt;
+  return Object.freeze(record) as T;
 }
 
 function immutablePayload(record: object): DocumentData {
@@ -39,7 +46,7 @@ function immutablePayload(record: object): DocumentData {
 }
 
 function assertSame(existing: DocumentData, expected: object, label: string): void {
-  const normalized = normalize(existing);
+  const normalized = normalizeRecord(existing);
   if (providerPromotionFingerprint(normalized) !== providerPromotionFingerprint(expected)) {
     throw new Error(`${label} conflicts with the immutable staged promotion evidence.`);
   }
@@ -54,7 +61,7 @@ async function readRecord<T extends object>(
   if (!snapshot.exists) return null;
   const data = snapshot.data();
   if (!data) return null;
-  return normalize(data) as T;
+  return normalizeRecord<T>(data);
 }
 
 export class FirestoreProviderPromotionEvidenceRepository {
@@ -86,7 +93,9 @@ export class FirestoreProviderPromotionEvidenceRepository {
 
   async stage(input: ProviderPromotionEvidenceBundle): Promise<void> {
     if (
-      input.source.candidateId !== input.candidate.id
+      input.source.id !== input.candidate.id
+      || input.geography.id !== input.candidate.id
+      || input.source.candidateId !== input.candidate.id
       || input.geography.candidateId !== input.candidate.id
       || input.comparison.candidateId !== input.candidate.id
       || input.approval.candidateId !== input.candidate.id
@@ -106,9 +115,7 @@ export class FirestoreProviderPromotionEvidenceRepository {
       const refs = records.map(([key, id]) => this.db.doc(providerPromotionDocumentPath(key, id)));
       const snapshots = await Promise.all(refs.map((ref) => transaction.get(ref)));
       for (const [index, record] of records.entries()) {
-        const [key, id, value, label] = record;
-        void key;
-        void id;
+        const [, , value, label] = record;
         const snapshot = snapshots[index];
         if (!snapshot) throw new Error(`Missing transaction snapshot for ${label}.`);
         if (snapshot.exists) {
