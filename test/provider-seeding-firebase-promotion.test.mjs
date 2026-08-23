@@ -328,7 +328,12 @@ function organizationState(targetOrganizationId, displayName) {
   return Object.freeze({ account, profile, discovery });
 }
 
-function serviceFixture({ evidenceBundle, currentAuthority, existing = null }) {
+function serviceFixture({
+  evidenceBundle,
+  currentAuthority,
+  existing = null,
+  currentMatches = evidenceBundle.canonicalSearch.matches,
+}) {
   let committed = null;
   const service = new ProviderSeedPromotionService({
     authorityContexts: {
@@ -368,6 +373,18 @@ function serviceFixture({ evidenceBundle, currentAuthority, existing = null }) {
         return evidenceBundle;
       },
     },
+    canonicalSearch: {
+      async searchCurrent(input) {
+        return createProviderCanonicalSearchSnapshot({
+          id: `${input.candidateId}:fresh-search`,
+          candidateId: input.candidateId,
+          matches: currentMatches.filter(
+            (match) => !input.excludeOrganizationIds.includes(match.organizationId),
+          ),
+          generatedAt: input.generatedAt,
+        });
+      },
+    },
     unitOfWork: {
       async commit(writeSet) {
         committed = writeSet;
@@ -394,7 +411,7 @@ test("provider seed promotion permission is explicit and not ordinary provider r
   );
 });
 
-test("preview validates all evidence without persisting or publishing", async () => {
+test("preview validates all evidence without persisting, claiming creation, or publishing", async () => {
   const built = buildEvidence();
   const fixture = serviceFixture({
     evidenceBundle: built.evidence,
@@ -405,6 +422,8 @@ test("preview validates all evidence without persisting or publishing", async ()
   );
   assert.equal(fixture.committed(), null);
   assert.equal(receipt.status, "previewed");
+  assert.equal(receipt.organizationCreated, false);
+  assert.equal(receipt.organizationAttached, false);
   assert.equal(receipt.providerDiscoveryPublished, false);
   assert.equal(receipt.resourcePublished, false);
   assert.equal(receipt.officialResourceProviderGranted, false);
@@ -420,6 +439,8 @@ test("commit creates source-backed canonical staging without participant or publ
   const writeSet = fixture.committed();
   assert.ok(writeSet);
   assert.equal(receipt.status, "committed");
+  assert.equal(receipt.organizationCreated, true);
+  assert.equal(receipt.organizationAttached, false);
   assert.equal(writeSet.organization.createRecords, true);
   assert.equal(writeSet.organization.discovery.origin, "seeded");
   assert.equal(writeSet.organization.discovery.authorityState, "unestablished");
@@ -448,9 +469,11 @@ test("existing-Organization attachment reuses canonical identity without overwri
     currentAuthority: built.authority,
     existing,
   });
-  await fixture.service.commit(buildCommand(built.evidence));
+  const receipt = await fixture.service.commit(buildCommand(built.evidence));
   const writeSet = fixture.committed();
   assert.ok(writeSet);
+  assert.equal(receipt.organizationCreated, false);
+  assert.equal(receipt.organizationAttached, true);
   assert.equal(writeSet.organization.mode, "attach-existing");
   assert.equal(writeSet.organization.createRecords, false);
   assert.equal(writeSet.organization.profile, existing.profile);
@@ -458,6 +481,28 @@ test("existing-Organization attachment reuses canonical identity without overwri
     writeSet.draft.canonicalOrganizationDisplayName,
     existing.profile.displayName,
   );
+});
+
+test("fresh canonical identity search blocks a new duplicate after approval", async () => {
+  const built = buildEvidence();
+  const fixture = serviceFixture({
+    evidenceBundle: built.evidence,
+    currentAuthority: built.authority,
+    currentMatches: [
+      Object.freeze({
+        organizationId: "org-new-conflict",
+        displayName: "Example Provider",
+        basis: Object.freeze(["display-name"]),
+        confidence: 0.85,
+        evidenceSummary: "A matching canonical Organization appeared after approval.",
+      }),
+    ],
+  });
+  await assert.rejects(
+    fixture.service.commit(buildCommand(built.evidence)),
+    /Canonical Organization search changed after provider promotion approval/,
+  );
+  assert.equal(fixture.committed(), null);
 });
 
 test("stale persisted source evidence blocks promotion before the unit of work", async () => {
