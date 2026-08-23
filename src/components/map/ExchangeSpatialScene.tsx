@@ -112,11 +112,11 @@ type MapSearchResult = Readonly<{
   bbox: readonly [number, number, number, number] | null;
 }>;
 
-type MapBasemapPresetId = "exchange" | "street" | "night";
+type MapBasemapPresetId = "exchange" | "street";
 type MapBasemapPreset = Readonly<{
   id: MapBasemapPresetId;
   label: string;
-  lightPreset: "day" | "night";
+  lightPreset: "day";
   theme: "faded" | "default";
   showTransitLabels: boolean;
   showPointOfInterestLabels: boolean;
@@ -125,7 +125,6 @@ type MapBasemapPreset = Readonly<{
 export const MAP_BASEMAP_PRESETS: readonly MapBasemapPreset[] = Object.freeze([
   Object.freeze({ id: "exchange", label: "Exchange", lightPreset: "day", theme: "faded", showTransitLabels: false, showPointOfInterestLabels: true }),
   Object.freeze({ id: "street", label: "Street", lightPreset: "day", theme: "default", showTransitLabels: true, showPointOfInterestLabels: true }),
-  Object.freeze({ id: "night", label: "Night", lightPreset: "night", theme: "default", showTransitLabels: false, showPointOfInterestLabels: true }),
 ]);
 
 const LOCALITY_SOURCE_ID = "rfx-spatial-scene-locality";
@@ -338,7 +337,9 @@ function organizationMarkerGeoJson(
         beaconImage: beaconImageId(
           "organization",
           marker.id === focusedMarkerId
-            ? "selected"
+            ? marker.precision === "approximate"
+              ? "selected-approximate"
+              : "selected"
             : marker.precision === "approximate"
               ? "approximate"
               : "default",
@@ -368,7 +369,9 @@ function opportunityMarkerGeoJson(
         beaconImage: beaconImageId(
           "opportunities-rfx",
           marker.id === focusedMarkerId
-            ? "selected"
+            ? marker.precision === "approximate"
+              ? "selected-approximate"
+              : "selected"
             : marker.precision === "approximate"
               ? "approximate"
               : "default",

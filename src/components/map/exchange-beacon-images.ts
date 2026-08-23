@@ -10,7 +10,7 @@ export const EXCHANGE_BEACON_KINDS = [
 ] as const;
 export type ExchangeBeaconKind = (typeof EXCHANGE_BEACON_KINDS)[number];
 
-export const EXCHANGE_BEACON_STATES = ["default", "approximate", "selected"] as const;
+export const EXCHANGE_BEACON_STATES = ["default", "approximate", "selected", "selected-approximate"] as const;
 export type ExchangeBeaconState = (typeof EXCHANGE_BEACON_STATES)[number];
 
 const WIDTH = 132;
@@ -49,7 +49,7 @@ function medallionPath(offsetX = 0, offsetY = 0): Path2D {
 
 function palette(kind: ExchangeBeaconKind, state: ExchangeBeaconState) {
   const own = kind === "own";
-  const selected = state === "selected";
+  const selected = state === "selected" || state === "selected-approximate";
   return Object.freeze({
     faceTop: own ? "#fffaf0" : selected ? "#404652" : "#343a45",
     faceMid: own ? "#f1e8d8" : "#252932",
@@ -70,6 +70,7 @@ function drawBeacon(kind: ExchangeBeaconKind, state: ExchangeBeaconState): Image
   const context = canvas.getContext("2d");
   if (!context) throw new Error("RFxchange beacon canvas is unavailable.");
   const colors = palette(kind, state);
+  const selected = state === "selected" || state === "selected-approximate";
   context.clearRect(0, 0, WIDTH, HEIGHT);
 
   if (colors.flare) {
@@ -89,9 +90,9 @@ function drawBeacon(kind: ExchangeBeaconKind, state: ExchangeBeaconState): Image
 
   context.save();
   context.filter = "blur(7px)";
-  context.fillStyle = state === "selected" ? "rgba(214,162,58,0.28)" : "rgba(4,5,7,0.28)";
+  context.fillStyle = selected ? "rgba(214,162,58,0.28)" : "rgba(4,5,7,0.28)";
   context.beginPath();
-  context.ellipse(CENTER_X + 4, TIP_Y + 3, state === "selected" ? 34 : 27, 8, 0, 0, Math.PI * 2);
+  context.ellipse(CENTER_X + 4, TIP_Y + 3, selected ? 34 : 27, 8, 0, 0, Math.PI * 2);
   context.fill();
   context.restore();
 
@@ -123,15 +124,15 @@ function drawBeacon(kind: ExchangeBeaconKind, state: ExchangeBeaconState): Image
 
   context.save();
   context.strokeStyle = colors.rimDark;
-  context.lineWidth = state === "selected" ? 10 : 8;
+  context.lineWidth = selected ? 10 : 8;
   context.stroke(front);
   context.strokeStyle = colors.rim;
-  context.lineWidth = state === "selected" ? 6 : 4;
-  if (state === "approximate") context.setLineDash([7, 5]);
+  context.lineWidth = selected ? 6 : 4;
+  if (state === "approximate" || state === "selected-approximate") context.setLineDash([7, 5]);
   context.stroke(front);
   context.restore();
 
-  if (state === "selected") {
+  if (selected) {
     context.strokeStyle = "rgba(255,248,226,0.82)";
     context.lineWidth = 2;
     context.beginPath();
