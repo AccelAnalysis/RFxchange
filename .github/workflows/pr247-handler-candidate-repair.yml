@@ -1,0 +1,203 @@
+name: PR 247 handler candidate repair
+
+on:
+  push:
+    branches:
+      - control/final-convergence-beacons-actions
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: control/final-convergence-beacons-actions
+          fetch-depth: 0
+      - name: Preserve domain handler candidates behind authorization gates
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          capabilities_path = Path("src/application/organizations/capabilities-exchange.ts")
+          capabilities = capabilities_path.read_text()
+          capability_pattern = re.compile(
+              r"function actionProjection\([\s\S]*?\n}\n\nfunction recordActions",
+          )
+          capability_replacement = '''function actionProjection(input: Readonly<{
+            own: boolean;
+            organizationId: string;
+            canManageProfile: boolean;
+          }>): readonly ExchangeRoomActionProjection[] {
+            return Object.freeze(exchangeRoomActionDefinitionsForLens("capabilities").map((definition) => {
+              const own = input.own;
+              const labelKey = own ? definition.labelKey : definition.externalLabelKey;
+              let operational = false;
+              const applicable = true;
+              let authorized = true;
+              let handlerCandidate: ExchangeRoomActionProjection["handlerCandidate"] = null;
+              let resolvedHandler: ExchangeRoomActionProjection["resolvedHandler"] = null;
+
+              if (own && definition.id === "capabilities.manage-view") {
+                operational = true;
+                authorized = input.canManageProfile;
+                handlerCandidate = Object.freeze({
+                  kind: "href" as const,
+                  href: "/organization-profile#market-profile-title",
+                });
+                resolvedHandler = authorized ? handlerCandidate : null;
+              } else if (own && definition.id === "capabilities.classify-match") {
+                operational = true;
+                authorized = input.canManageProfile;
+                handlerCandidate = Object.freeze({
+                  kind: "href" as const,
+                  href: "/organization-profile#describe-capability-title",
+                });
+                resolvedHandler = authorized ? handlerCandidate : null;
+              } else if (own && definition.id === "capabilities.gaps-save") {
+                operational = true;
+                handlerCandidate = Object.freeze({
+                  kind: "href" as const,
+                  href: `/capabilities?view=gaps&selectedOrganization=${encodeURIComponent(input.organizationId)}`,
+                });
+                resolvedHandler = handlerCandidate;
+              } else if (!own && definition.id === "capabilities.manage-view") {
+                operational = true;
+                handlerCandidate = Object.freeze({
+                  kind: "href" as const,
+                  href: `/capabilities?selectedOrganization=${encodeURIComponent(input.organizationId)}`,
+                });
+                resolvedHandler = handlerCandidate;
+              }
+
+              const disabledReason = !operational
+                ? "not-operational" as const
+                : !applicable
+                  ? "not-applicable" as const
+                  : !authorized
+                    ? "not-authorized" as const
+                    : resolvedHandler
+                      ? null
+                      : "not-operational" as const;
+              return Object.freeze({
+                ...definition,
+                labelKey,
+                variant: own ? "own" as const : "external" as const,
+                operational,
+                applicable,
+                authorized,
+                authorization: "room-participant" as const,
+                availability: resolvedHandler ? "active" as const : "disabled" as const,
+                disabledReason,
+                handlerCandidate,
+                resolvedHandler,
+              });
+            }));
+          }
+
+          function recordActions'''
+          capabilities, capability_count = capability_pattern.subn(capability_replacement, capabilities, count=1)
+          if capability_count != 1:
+              raise SystemExit(f"Expected one capabilities actionProjection, replaced {capability_count}")
+          capabilities_path.write_text(capabilities)
+
+          resources_path = Path("src/application/resource-network/mobile-resource-exchange.ts")
+          resources = resources_path.read_text()
+          resource_pattern = re.compile(
+              r"function actionProjection\([\s\S]*?\n}\n\nexport interface ResourcesMobileProjectionInput",
+          )
+          resource_replacement = '''function actionProjection(
+            definition: ReturnType<typeof exchangeRoomActionDefinitionsForLens>[number],
+            input: ResourcesMobileProjectionInput,
+            selection: ExchangeSelectionState,
+          ): ExchangeRoomActionProjection {
+            const selectedOrganizationId = selection.selectedOrganization?.organizationId ?? input.viewerOrganizationId;
+            const own = selectedOrganizationId === input.viewerOrganizationId;
+            const variant = own ? "own" as const : "external" as const;
+            const selectedResource = selection.selectedRecord?.recordType === "provider-resource";
+            const operational = definition.id === "resources.offer-request" || definition.id === "resources.manage-view";
+            const applicable = definition.id === "resources.offer-request"
+              ? (own || selection.selectedOrganization !== null)
+              : definition.id === "resources.manage-view"
+                ? (!own && selectedResource)
+                : true;
+            const authorized = input.authorization.openPlatform
+              && (definition.id === "resources.offer-request"
+                ? (own ? input.authorization.resourceManage : input.authorization.referralManage)
+                : true);
+            const href = definition.id === "resources.offer-request"
+              ? own
+                ? resourcesHref({ manage: "offer" }, input.navigationContext)
+                : providerHref(selectedOrganizationId, input.navigationContext)
+              : definition.id === "resources.manage-view" && selectedResource
+                ? resourcesHref({ resource: selection.selectedRecord!.recordId }, input.navigationContext)
+                : null;
+            const handlerCandidate: ExchangeRoomActionProjection["handlerCandidate"] = operational && applicable && href
+              ? Object.freeze({ kind: "href" as const, href })
+              : null;
+            const reason: ExchangeRoomActionDisabledReason | null = !operational
+              ? "not-operational"
+              : !applicable
+                ? "not-applicable"
+                : !authorized
+                  ? "not-authorized"
+                  : handlerCandidate
+                    ? null
+                    : "not-operational";
+            return Object.freeze({
+              ...definition,
+              labelKey: variant === "own" ? definition.labelKey : definition.externalLabelKey,
+              variant,
+              operational,
+              applicable,
+              authorized,
+              authorization: variant === "own" ? definition.authorization : definition.externalAuthorization,
+              availability: reason === null ? "active" : "disabled",
+              disabledReason: reason,
+              handlerCandidate,
+              resolvedHandler: reason === null ? handlerCandidate : null,
+            });
+          }
+
+          export interface ResourcesMobileProjectionInput'''
+          resources, resource_count = resource_pattern.subn(resource_replacement, resources, count=1)
+          if resource_count != 1:
+              raise SystemExit(f"Expected one resources actionProjection, replaced {resource_count}")
+          resources_path.write_text(resources)
+
+          test_path = Path("test/final-convergence-beacons-actions.test.mjs")
+          test_source = test_path.read_text()
+          marker = 'test("domain-owned action projections preserve permission-gated handler candidates"'
+          if marker not in test_source:
+              test_source += '''
+
+          test("domain-owned action projections preserve permission-gated handler candidates", () => {
+            const capabilities = read("src/application/organizations/capabilities-exchange.ts");
+            const resources = read("src/application/resource-network/mobile-resource-exchange.ts");
+            assert.match(capabilities, /let handlerCandidate: ExchangeRoomActionProjection\["handlerCandidate"\] = null/);
+            assert.match(capabilities, /resolvedHandler = authorized \? handlerCandidate : null/);
+            assert.match(capabilities, /disabledReason,[\s\S]*handlerCandidate,[\s\S]*resolvedHandler/);
+            assert.match(resources, /const handlerCandidate: ExchangeRoomActionProjection\["handlerCandidate"\]/);
+            assert.match(resources, /resolvedHandler: reason === null \? handlerCandidate : null/);
+          });
+          '''
+              test_path.write_text(test_source)
+          PY
+      - name: Commit bounded repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/application/organizations/capabilities-exchange.ts \
+            src/application/resource-network/mobile-resource-exchange.ts \
+            test/final-convergence-beacons-actions.test.mjs
+          git diff --cached --check
+          git commit -m "Fix permission-gated action handler candidates"
+          git push origin HEAD:control/final-convergence-beacons-actions
