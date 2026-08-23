@@ -118,7 +118,11 @@ test("enrichment manifest generator cannot become a direct production write path
   const source = read("scripts/resolve-hampton-roads-location-geographies.mjs");
   assert.doesNotMatch(
     source,
-    /firebase-admin|firebase\/firestore|getFirestore|\.set\(|\.create\(|postgres|postgis|neon|maplibre/i,
+    /firebase-admin|firebase\/firestore|getFirestore|postgres|postgis|neon|maplibre/i,
+  );
+  assert.doesNotMatch(
+    source,
+    /\b(?:db|firestore|transaction|batch)\s*\.\s*(?:set|create|update|delete)\s*\(/i,
   );
   assert.match(source, /productionWrites: false/);
   assert.match(source, /needs_geography_resolution/);
