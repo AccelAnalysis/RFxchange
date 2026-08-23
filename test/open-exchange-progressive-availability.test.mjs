@@ -56,7 +56,7 @@ test("controlled and OPEN participants enter the same map-first Exchange shell",
   assert.match(discovery, /listByUserAndGeography/);
 });
 
-test("unfinished record actions remain visible/non-actionable while the four permanent lenses stay selectable", () => {
+test("unfinished record actions remain visible/non-actionable while all four permanent lenses are routed", () => {
   const contract = behavioralContract();
   const actions = new Map(contract.mapOnlyActions.map((action) => [action.id, action]));
   assert.equal(actions.get("manage-profile").availability, "unavailable");
@@ -79,10 +79,11 @@ test("unfinished record actions remain visible/non-actionable while the four per
   assert.match(workspace, /operationalActionsAvailable/);
   assert.match(workspace, /ExchangeRoomActionController/);
   assert.match(navigation, /data-mobile-lens-navigation="persistent-bottom"/);
+  assert.match(navigation, /data-mobile-menu-trigger/);
   assert.match(registry, /id: "opportunities-rfx"[\s\S]*availability: "enabled"/);
   assert.match(registry, /id: "resources"[\s\S]*availability: "enabled"/);
   assert.match(registry, /id: "intelligence"[\s\S]*availability: "enabled"/);
-  assert.match(registry, /id: "capabilities"[\s\S]*availability: "unavailable"/);
+  assert.match(registry, /id: "capabilities"[\s\S]*href: "\/capabilities"[\s\S]*availability: "enabled"/);
   assert.doesNotMatch(registry.split("export const PARTICIPANT_UTILITY_DESTINATIONS")[0], /id: "referrals"/);
   assert.match(compatibilityShell, /registerUnavailableDestinations/);
   assert.match(persistentShell, /unavailableLensIds=\{unavailableDestinations\?\.lensIds\}/);
@@ -98,6 +99,10 @@ test("progressive presentation does not weaken protected domain routes", () => {
   ]) {
     assert.match(read(path), /lifecycleState !== "open-platform"/, path);
   }
+  const capabilities = read("app/capabilities/page.tsx");
+  assert.match(capabilities, /resolveParticipantRoute/);
+  assert.match(capabilities, /lifecycleState !== "open-platform"/);
+
   const firstValueApi = read("app/api/first-value/route.ts");
   const firstValueClient = read("src/components/first-value/FirstValueChoiceClient.tsx");
   assert.match(firstValueApi, /selectAndRelease/);
