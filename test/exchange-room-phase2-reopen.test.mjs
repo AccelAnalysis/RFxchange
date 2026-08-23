@@ -27,10 +27,20 @@ test("ordinary permanent-lens activation reopens the existing Room surface after
   assert.doesNotMatch(controller, /location\.(assign|replace)|window\.location/);
 });
 
-test("configured-browser reopen acceptance closes detail while preserving the action rail", () => {
+test("configured-browser reopen acceptance preserves the canonical harness while adapting successor navigation", () => {
   const runner = read("scripts/run-configured-exchange-shell-acceptance.mjs");
   const acceptance = read("scripts/acceptance-exchange-shell-emulator.mjs");
-  assert.match(runner, /import\("\.\/acceptance-exchange-shell-emulator\.mjs"\)/);
+  assert.match(runner, /new URL\("\.\/acceptance-exchange-shell-emulator\.mjs", import\.meta\.url\)/);
+  assert.match(runner, /readFile\(sourceUrl, "utf8"\)/);
+  assert.match(runner, /function replaceOnce\(/);
+  assert.match(runner, /assert\.equal\(matches, 1/);
+  assert.match(runner, /new URL\("\.\/\.phase4-acceptance-exchange-shell-emulator\.mjs", import\.meta\.url\)/);
+  assert.match(runner, /await writeFile\(adaptedUrl, source, "utf8"\)/);
+  assert.match(runner, /await import\(`\$\{adaptedUrl\.href\}/);
+  assert.match(runner, /await rm\(adaptedUrl, \{ force: true \}\)/);
+  assert.match(runner, /primary Capabilities availability/);
+  assert.match(runner, /mobile Menu trigger metrics/);
+  assert.match(runner, /localized Capabilities route/);
   assert.match(acceptance, /!document\.querySelector\('#organization-detail-panel'\)/);
   assert.match(acceptance, /Boolean\(document\.querySelector\('\[data-exchange-room-action-grid\]'\)\)/);
   assert.match(acceptance, /closed Exchange Room detail surface with persistent action rail/);

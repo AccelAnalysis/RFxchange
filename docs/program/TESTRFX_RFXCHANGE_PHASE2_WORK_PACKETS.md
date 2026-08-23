@@ -1,16 +1,18 @@
 # Phase 2 Convergence Work-Packet Decomposition
 
-**Status:** Planning output only — no packet below is active
-**Exact RFxchange baseline used:** `399072c05aa78e536ad57d0998a643f1c6d49b08`
+**Status:** Planning/provenance output. Phase 4 implementation sequencing is governed by `TESTRFX_RFXCHANGE_PHASE4_IMPLEMENTATION_FIRST.md`.
+**Exact RFxchange baseline originally used:** `399072c05aa78e536ad57d0998a643f1c6d49b08`
 
-The packet names below prevent a future broad “copy TestRFx” PR. Control Room must recalculate every packet from current merged `main` before activation.
+The packet names below prevent a broad “copy TestRFx” change and preserve ownership/provenance. Control Room recalculates implementation against current merged `main`.
+
+> **Phase 4 supersession:** Work-packet activation and wave order are no longer universal prerequisites to implementation. Build everything technically possible now; use progressive availability for unfinished consequential functions. Governance prevents architectural violations, not implementation.
 
 ## Dependency stabilization first
 
 | Proposed packet | Owner | Dependency / stop boundary |
 | --- | --- | --- |
-| `WP-CONVERGENCE-STAGE4-RECONCILE-01` | Control Room | Reconcile PR #234 Capabilities, PR #235 Intelligence and PR #238 RFx Slice 4.7. No donor UI code. |
-| `WP-CONVERGENCE-SOURCE-BASELINE-01` | Control Room | Confirm donor commit `db19a0cc2171d0ddde4f34a20acc881ba7279248` and create/verify the requested baseline tag through an authorized Git operation. No donor changes. |
+| `WP-CONVERGENCE-STAGE4-RECONCILE-01` | Control Room | Reconcile PR #234 Capabilities, PR #235 Intelligence and PR #238 RFx Slice 4.7. No donor UI code. **Completed in Phase 3.** |
+| `WP-CONVERGENCE-SOURCE-BASELINE-01` | Control Room | Confirm donor commit `db19a0cc2171d0ddde4f34a20acc881ba7279248`; a human-readable tag is provenance convenience, not an implementation gate when the exact commit is recorded. No donor changes. |
 
 ## Wave A — Shared visual convergence
 
@@ -22,11 +24,11 @@ The packet names below prevent a future broad “copy TestRFx” PR. Control Roo
 | `WP-CONVERGENCE-MAP-PRESENTATION-01` | Shared Exchange / Geography | CM-004, CM-008, CM-025 | Mapbox basemap selector and 2.5D focus treatment; no MapLibre code. |
 | `WP-CONVERGENCE-FLOATING-CONTROLS-01` | Shared Exchange | CM-003, CM-024, CM-025 | Floating-control density and thumb-zone refinement only. |
 
-Wave A may not change persistence, authorization, domain lifecycles, action IDs or navigation architecture.
+Wave A may not change persistence, authorization, domain lifecycles or immutable action IDs merely to obtain visual parity. Current navigation architecture may be wired to real successor destinations when those destinations already exist.
 
 ## Wave B — Mobile RFx Task Canvas
 
-Activation remains behind the current RFx packet chain.
+Phase 4 implementation-first authority permits every Task Canvas behavior that can bind truthfully to current RFxchange RFx contracts to proceed now. A missing later server command blocks only that consequential action, not the surrounding workflow.
 
 | Proposed packet | Owner | Contract IDs | Bounded result |
 | --- | --- | --- | --- |
@@ -44,6 +46,8 @@ No packet may reuse TestRFx PostgreSQL APIs, `rfx_session`, SQL tables or local 
 
 ## Wave C — Resource provider data
 
+These packets may proceed independently of RFx work as soon as they bind to protected Firebase Admin/server authority.
+
 | Proposed packet | Owner | Contract IDs | Bounded result |
 | --- | --- | --- | --- |
 | `WP-CONVERGENCE-PROVIDER-IMPORT-MODEL-01` | Resources / Admin | CM-012, CM-013, CM-019 | Private staging collections, commands, idempotency, review and audit. |
@@ -53,6 +57,8 @@ No packet may reuse TestRFx PostgreSQL APIs, `rfx_session`, SQL tables or local 
 
 ## Wave D — Organization and record media
 
+Metadata/link work that can remain inside existing organization authority may proceed now. Only public delivery of hosted private objects waits for a reviewed public projection.
+
 | Proposed packet | Owner | Contract IDs | Bounded result |
 | --- | --- | --- | --- |
 | `WP-CONVERGENCE-PUBLIC-MEDIA-PROJECTION-01` | Storage / Organizations | CM-018, CM-019 | Reviewed public media projection; private source object remains protected. |
@@ -61,8 +67,8 @@ No packet may reuse TestRFx PostgreSQL APIs, `rfx_session`, SQL tables or local 
 
 ## Wave E — Remaining experience gaps
 
-After Waves A–D and current Stage 4/5 ownership are reconciled, compare TestRFx Public, Registration, Geography, Organization Profile, Capability Enrichment, Completion, Public Resources and Commercial UX. Each genuine gap receives its own packet; no second onboarding or commercial persistence model is authorized.
+Compare TestRFx Public, Registration, Geography, Organization Profile, Capability Enrichment, Completion, Public Resources and Commercial UX whenever a genuine gap can be implemented against existing RFxchange authority. Do not wait solely for Waves A–D. Each genuine gap still receives bounded provenance/ownership tracking, and no second onboarding or commercial persistence model is authorized.
 
-## Activation rule
+## Phase 4 implementation rule
 
-This file is decomposition, not activation. A packet becomes active only through the existing RFxchange Control Room process with current exact `main`, immutable requirements, ownership paths, dependencies, release class and acceptance obligations.
+This file remains decomposition and provenance. Under `TESTRFX_RFXCHANGE_PHASE4_IMPLEMENTATION_FIRST.md`, a packet does **not** require a separate activation event before implementation. Current exact `main`, canonical contracts, ownership/conflict awareness, architectural boundaries and relevant acceptance obligations remain mandatory; work-packet status and wave order do not themselves block executable work.

@@ -104,9 +104,9 @@ assert.ok(
   "The permanent participant lenses must retain the governed order.",
 );
 assert.match(participantLensRegistry, /id: "opportunities-rfx"[\s\S]*?href: "\/opportunities"[\s\S]*?availability: "enabled"/);
-assert.match(participantLensRegistry, /id: "resources"[\s\S]*?href: "\/resources"/);
-assert.match(participantLensRegistry, /id: "intelligence"[\s\S]*?href: "\/geography\/canvas"/);
-assert.match(participantLensRegistry, /id: "capabilities"[\s\S]*?href: null[\s\S]*?availability: "unavailable"/);
+assert.match(participantLensRegistry, /id: "resources"[\s\S]*?href: "\/resources"[\s\S]*?availability: "enabled"/);
+assert.match(participantLensRegistry, /id: "intelligence"[\s\S]*?href: "\/geography\/canvas"[\s\S]*?availability: "enabled"/);
+assert.match(participantLensRegistry, /id: "capabilities"[\s\S]*?href: "\/capabilities"[\s\S]*?availability: "enabled"/);
 assert.match(participantLensRegistry, /referrals:[\s\S]*?href: "\/referrals"/);
 assert.doesNotMatch(participantLensRegistry, /id: "network"/);
 assert.match(participantLensRegistry, /PARTICIPANT_UTILITY_DESTINATIONS/);
@@ -115,8 +115,8 @@ assert.match(participantLensRegistry, /"quick-start":[\s\S]*?\/quick-start/);
 assert.match(participantWorkspace, /ParticipantTopNavigation/);
 assert.match(participantWorkspace, /usePersistentParticipantShell/);
 assert.match(participantTopNavigation, /PARTICIPANT_LENSES\.map/);
-assert.match(participantTopNavigation, /PARTICIPANT_LENSES\.map/);
 assert.match(participantTopNavigation, /role="menu"/);
+assert.match(participantTopNavigation, /data-mobile-menu-trigger/);
 assert.match(dictionary, /participantNavigation/);
 
 for (const locale of ["en-US", "es", "fr", "it", "de"]) {
@@ -128,6 +128,7 @@ for (const locale of ["en-US", "es", "fr", "it", "de"]) {
   assert.match(marketCopyText, /"resultCount"/);
   assert.match(marketCopyText, /"selectorTitle"/);
   assert.equal(navigationCopy.opportunitiesRfx, "Opportunities/RFx");
+  assert.equal(typeof navigationCopy.menu, "string");
   assert.equal(typeof navigationCopy.resources, "string");
   assert.equal(typeof navigationCopy.intelligence, "string");
   assert.equal(typeof navigationCopy.capabilities, "string");

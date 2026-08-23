@@ -1,6 +1,6 @@
 {
   "ariaLabel": "Primary participant navigation",
-  "menu": "Lenses",
+  "menu": "Menu",
   "opportunitiesRfx": "Opportunities/RFx",
   "resources": "Resources",
   "intelligence": "Intelligence",
@@ -20,7 +20,7 @@
   "loadingIntelligenceTitle": "Loading organization results",
   "loadingIntelligenceBody": "The Exchange is updating the permitted Network view while keeping your shell and current organization context available.",
   "loadingCapabilitiesTitle": "Loading capabilities",
-  "loadingCapabilitiesBody": "The Exchange is preserving your organization context while the governed Capabilities workspace remains unavailable.",
+  "loadingCapabilitiesBody": "The Exchange is updating permitted capability claims while preserving your organization, map, and return context.",
   "loadingResourcesTitle": "Loading resources",
   "loadingResourcesBody": "Approved providers, published resources, and permitted requests are being updated.",
   "loadingReferralsTitle": "Loading referrals",

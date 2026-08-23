@@ -25,14 +25,14 @@ type ParticipantLensLabelKey =
 type ParticipantEnabledLensDefinition = Readonly<{
   id: ParticipantLensId;
   labelKey: ParticipantLensLabelKey;
-  href: "/opportunities" | "/resources" | "/geography/canvas";
+  href: "/opportunities" | "/resources" | "/geography/canvas" | "/capabilities";
   availability: "enabled";
   activePathPrefixes: readonly string[];
 }>;
 
 type ParticipantUnavailableLensDefinition = Readonly<{
-  id: "capabilities";
-  labelKey: "participantNavigation.capabilities";
+  id: ParticipantLensId;
+  labelKey: ParticipantLensLabelKey;
   href: null;
   availability: "unavailable";
   activePathPrefixes: readonly string[];
@@ -45,8 +45,8 @@ export type ParticipantLensDefinition =
 /**
  * Stable participant information architecture.
  *
- * Availability controls action, not whether a governed permanent lens exists. Opportunities/RFx
- * becomes enabled only when an owning slice supplies a real authorized runtime.
+ * Availability controls action, not whether a governed permanent lens exists. Each enabled lens
+ * resolves to a real server-authorized destination; page and action authorization remain domain-owned.
  */
 export const PARTICIPANT_LENSES: readonly ParticipantLensDefinition[] = Object.freeze([
   Object.freeze({
@@ -73,9 +73,9 @@ export const PARTICIPANT_LENSES: readonly ParticipantLensDefinition[] = Object.f
   Object.freeze({
     id: "capabilities",
     labelKey: "participantNavigation.capabilities",
-    href: null,
-    availability: "unavailable",
-    activePathPrefixes: Object.freeze([]),
+    href: "/capabilities",
+    availability: "enabled",
+    activePathPrefixes: Object.freeze(["/capabilities"]),
   }),
 ]);
 
@@ -93,6 +93,7 @@ const PERSISTENT_PARTICIPANT_PATH_PREFIXES = Object.freeze([
   "/opportunities",
   "/geography/canvas",
   "/resources",
+  "/capabilities",
   "/referrals",
   "/organization-profile",
   "/quick-start",

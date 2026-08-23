@@ -1,6 +1,6 @@
 {
   "ariaLabel": "Navegación principal del participante",
-  "menu": "Vistas",
+  "menu": "Menú",
   "opportunitiesRfx": "Opportunities/RFx",
   "resources": "Recursos",
   "intelligence": "Inteligencia",
@@ -20,7 +20,7 @@
   "loadingIntelligenceTitle": "Cargando resultados de organizaciones",
   "loadingIntelligenceBody": "Exchange está actualizando la vista de Red permitida mientras mantiene disponibles la estructura y el contexto de la organización actual.",
   "loadingCapabilitiesTitle": "Cargando capacidades",
-  "loadingCapabilitiesBody": "Exchange conserva el contexto de la organización mientras el espacio de Capacidades regulado no está disponible.",
+  "loadingCapabilitiesBody": "Exchange está actualizando las capacidades permitidas mientras conserva la organización, el mapa y el contexto de retorno.",
   "loadingResourcesTitle": "Cargando recursos",
   "loadingResourcesBody": "Se están actualizando los proveedores aprobados, los recursos publicados y las solicitudes permitidas.",
   "loadingReferralsTitle": "Cargando referencias",

@@ -1,6 +1,6 @@
 {
   "ariaLabel": "Navigation principale du participant",
-  "menu": "Vues",
+  "menu": "Menu",
   "opportunitiesRfx": "Opportunities/RFx",
   "resources": "Ressources",
   "intelligence": "Intelligence",
@@ -20,7 +20,7 @@
   "loadingIntelligenceTitle": "Chargement des résultats d’organisations",
   "loadingIntelligenceBody": "Exchange met à jour la vue Réseau autorisée tout en maintenant l’enveloppe et le contexte de l’organisation actuelle disponibles.",
   "loadingCapabilitiesTitle": "Chargement des capacités",
-  "loadingCapabilitiesBody": "Exchange préserve le contexte de l’organisation pendant que l’espace Capacités régi reste indisponible.",
+  "loadingCapabilitiesBody": "Exchange met à jour les capacités autorisées tout en préservant l’organisation, la carte et le contexte de retour.",
   "loadingResourcesTitle": "Chargement des ressources",
   "loadingResourcesBody": "Les fournisseurs approuvés, les ressources publiées et les demandes autorisées sont en cours de mise à jour.",
   "loadingReferralsTitle": "Chargement des recommandations",

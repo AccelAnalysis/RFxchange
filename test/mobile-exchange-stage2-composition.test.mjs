@@ -44,7 +44,7 @@ test("MOB-02 keeps the mobile Exchange map-first with floating search, dynamic v
   assert.match(workspace, /networkWorkspace\.match\.disclaimer/);
 });
 
-test("MOB-03 exposes exactly four persistent bottom lenses in governed order without a top details selector", async () => {
+test("MOB-03 preserves the four permanent successor lenses and adds Menu as a separate fifth mobile utility", async () => {
   const [navigation, navigationCss] = await Promise.all([
     read(paths.navigation),
     read(paths.navigationCss),
@@ -63,13 +63,14 @@ test("MOB-03 exposes exactly four persistent bottom lenses in governed order wit
   ]);
   assert.match(navigation, /data-mobile-lens-navigation="persistent-bottom"/);
   assert.match(navigation, /PARTICIPANT_LENSES\.map/);
+  assert.match(navigation, /data-mobile-menu-trigger/);
   assert.doesNotMatch(navigation, /<details/);
   assert.doesNotMatch(navigation, /MobileLensMenu/);
-  assert.match(navigationCss, /\.mobileBottomNavigation\s*\{[\s\S]*display: none/);
-  assert.match(navigationCss, /position: fixed/);
-  assert.match(navigationCss, /grid-template-columns: repeat\(4/);
+  assert.match(navigationCss, /\.mobileBottomNavigation,[\s\S]*?\.mobileMenuUtility\s*\{\s*display: none;/);
+  assert.match(navigationCss, /@media \(max-width: 760px\)[\s\S]*?\.mobileBottomNavigation\s*\{[\s\S]*?position: fixed/);
+  assert.match(navigationCss, /grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/);
   assert.match(navigationCss, /env\(safe-area-inset-bottom/);
-  assert.match(navigation, /data-participant-utility="account"/);
+  assert.match(navigation, /PARTICIPANT_UTILITY_DESTINATIONS\.account\.href/);
 });
 
 test("MOB-04 implements three sheet states, touch dragging, accessible controls, internal scrolling, and reduced motion", async () => {
