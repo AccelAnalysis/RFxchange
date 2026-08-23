@@ -77,7 +77,8 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
     openPlatformActionsAuthorized: true,
     actionAuthorization: Object.freeze({ rfxCreate: false, referralManage: false, resourceManage: false }),
     currentOpportunityReference: selected?.reference ?? null,
-  }), [selected?.reference, spatialScope.organizationId]);
+    currentOpportunityReturnTo: queryHref(result, selected?.reference ?? null),
+  }), [result, selected?.reference, spatialScope.organizationId]);
   const opportunityMarkers: readonly ExchangeOpportunityMarker[] = useMemo(() => {
     const coordinate = [model.camera.center.longitude, model.camera.center.latitude] as const;
     return Object.freeze(result.items

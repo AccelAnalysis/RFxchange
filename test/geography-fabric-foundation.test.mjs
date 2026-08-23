@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  assertGeographicScopeImmutableIdentity,
+  assertSameImmutableGeographyVersion,
   createCanonicalGeography,
   createGeographicScope,
   createGeographicScopeMembers,
@@ -270,6 +272,88 @@ test("Location profiles require complete source-qualified materialized membershi
   );
 });
 
+test("physical hierarchy rejects a tract from a different containment branch", () => {
+  const unrelatedCounty = geographyFixture({
+    id: "us-va-51700",
+    type: "county-equivalent",
+    name: "City of Newport News",
+    externalId: "51700",
+    parentVersionId: state.version.id,
+  });
+  const unrelatedTract = geographyFixture({
+    id: "us-va-51700-030100",
+    type: "census-tract",
+    name: "Census Tract 301",
+    externalId: "51700030100",
+    parentVersionId: unrelatedCounty.version.id,
+  });
+  assert.throws(
+    () =>
+      createLocationGeographyProfile({
+        locationId: "org-location-false-hierarchy",
+        organizationId: "org-1",
+        profileVersion: 1,
+        acceptedPoint: { longitude: -76.342, latitude: 37.029 },
+        visibility: "exact",
+        hierarchy: {
+          ...hierarchy,
+          censusTract: unrelatedTract.reference,
+          blockGroup: null,
+          censusBlock: null,
+        },
+        overlays: [],
+        memberships: [],
+        resolver: "resolver",
+        sourceLocationUpdatedAt: now,
+        resolvedAt: now,
+      }),
+    /does not belong to the supplied physical hierarchy parent/,
+  );
+});
+
+test("append-only geography versions compare every immutable semantic field", () => {
+  const conflictingParent = {
+    ...tract.version,
+    parentVersionId: state.version.id,
+  };
+  assert.throws(
+    () => assertSameImmutableGeographyVersion(tract.version, conflictingParent),
+    /conflicts with the existing immutable record/,
+  );
+  const conflictingMetadata = {
+    ...tract.version,
+    metadata: { revised: true },
+  };
+  assert.throws(
+    () => assertSameImmutableGeographyVersion(tract.version, conflictingMetadata),
+    /conflicts with the existing immutable record/,
+  );
+});
+
+test("persisted geographic scope identity cannot move across organizations or subjects", () => {
+  const existing = createGeographicScope({
+    id: "scope-org-1-service-immutable",
+    subject: { kind: "organization", id: "org-1", organizationId: "org-1" },
+    kind: "organization-service-area",
+    mode: "remote",
+    visibility: "network",
+    revision: 1,
+    updatedByUserId: "user-1",
+    updatedByMembershipId: "membership-1",
+    now,
+  });
+  const moved = {
+    ...existing,
+    organizationId: "org-2",
+    subject: { ...existing.subject, id: "org-2", organizationId: "org-2" },
+    revision: 2,
+  };
+  assert.throws(
+    () => assertGeographicScopeImmutableIdentity(existing, moved),
+    /cannot be reassigned/,
+  );
+});
+
 test("Participant projections do not leak tract, block, zone or hidden point precision", () => {
   const exact = profile("exact");
   const privateProjection = projectLocationGeographyProfile(exact, "private");
@@ -520,5 +604,7 @@ test("Firestore extension preserves server-only stable-id and tenant conventions
   assert.match(repositorySource, /transaction\.create/);
   assert.match(repositorySource, /commandIsReplay/);
   assert.match(repositorySource, /requireNextRevision/);
+  assert.match(repositorySource, /assertSameImmutableGeographyVersion/);
+  assert.match(repositorySource, /assertGeographicScopeImmutableIdentity/);
   assert.doesNotMatch(repositorySource, /census\.gov|fetch\(|firebase\/firestore/);
 });
