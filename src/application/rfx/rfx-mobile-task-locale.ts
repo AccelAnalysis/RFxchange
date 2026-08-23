@@ -6,6 +6,7 @@ export interface RfxMobileTaskCopy {
   readonly title: string;
   readonly subtitle: string;
   readonly newRfx: string;
+  readonly createUnavailable: string;
   readonly resume: string;
   readonly noDrafts: string;
   readonly quick: string;
@@ -21,8 +22,7 @@ export interface RfxMobileTaskCopy {
   readonly dictationUnavailable: string;
   readonly camera: string;
   readonly file: string;
-  readonly selectedFiles: string;
-  readonly localOnly: string;
+  readonly attachmentsUnavailable: string;
   readonly apply: string;
   readonly applyFirst: string;
   readonly applied: string;
@@ -39,6 +39,7 @@ const catalogs: Readonly<Record<Locale, RfxMobileTaskCopy>> = Object.freeze({
     title: "What do you need?",
     subtitle: "Start simply. Add structure only when it helps.",
     newRfx: "New RFx",
+    createUnavailable: "Your current organization role cannot create or edit RFx drafts.",
     resume: "Resume",
     noDrafts: "No saved drafts yet",
     quick: "Quick",
@@ -54,8 +55,7 @@ const catalogs: Readonly<Record<Locale, RfxMobileTaskCopy>> = Object.freeze({
     dictationUnavailable: "Dictation is not available in this browser.",
     camera: "Camera",
     file: "File",
-    selectedFiles: "Selected on this device",
-    localOnly: "Device selections stay local until an RFx attachment feature is available.",
+    attachmentsUnavailable: "Camera and file attachments will become available when the governed RFx attachment workflow is live.",
     apply: "Use this in the RFx",
     applyFirst: "Create or resume a draft first.",
     applied: "Added to the RFx need. Save the RFx when ready.",
@@ -70,6 +70,7 @@ const catalogs: Readonly<Record<Locale, RfxMobileTaskCopy>> = Object.freeze({
     title: "¿Qué necesita?",
     subtitle: "Empiece de forma sencilla. Añada estructura solo cuando ayude.",
     newRfx: "Nuevo RFx",
+    createUnavailable: "Su función actual en la organización no permite crear ni editar borradores RFx.",
     resume: "Continuar",
     noDrafts: "Aún no hay borradores guardados",
     quick: "Rápido",
@@ -85,8 +86,7 @@ const catalogs: Readonly<Record<Locale, RfxMobileTaskCopy>> = Object.freeze({
     dictationUnavailable: "El dictado no está disponible en este navegador.",
     camera: "Cámara",
     file: "Archivo",
-    selectedFiles: "Seleccionado en este dispositivo",
-    localOnly: "Los archivos seleccionados permanecen en este dispositivo hasta que RFx permita adjuntarlos.",
+    attachmentsUnavailable: "La cámara y los archivos estarán disponibles cuando se active el flujo controlado de adjuntos RFx.",
     apply: "Usar esto en el RFx",
     applyFirst: "Cree o continúe un borrador primero.",
     applied: "Añadido a la necesidad del RFx. Guarde el RFx cuando esté listo.",
@@ -101,6 +101,7 @@ const catalogs: Readonly<Record<Locale, RfxMobileTaskCopy>> = Object.freeze({
     title: "De quoi avez-vous besoin ?",
     subtitle: "Commencez simplement. Ajoutez de la structure seulement quand elle est utile.",
     newRfx: "Nouveau RFx",
+    createUnavailable: "Votre rôle actuel dans l’organisation ne permet pas de créer ou modifier des brouillons RFx.",
     resume: "Reprendre",
     noDrafts: "Aucun brouillon enregistré",
     quick: "Rapide",
@@ -116,8 +117,7 @@ const catalogs: Readonly<Record<Locale, RfxMobileTaskCopy>> = Object.freeze({
     dictationUnavailable: "La dictée n’est pas disponible dans ce navigateur.",
     camera: "Caméra",
     file: "Fichier",
-    selectedFiles: "Sélectionné sur cet appareil",
-    localOnly: "Les fichiers sélectionnés restent sur cet appareil jusqu’à ce que les pièces jointes RFx soient disponibles.",
+    attachmentsUnavailable: "La caméra et les fichiers seront disponibles lorsque le flux gouverné de pièces jointes RFx sera actif.",
     apply: "Utiliser dans le RFx",
     applyFirst: "Créez ou reprenez d’abord un brouillon.",
     applied: "Ajouté au besoin RFx. Enregistrez le RFx lorsque vous êtes prêt.",
@@ -132,6 +132,7 @@ const catalogs: Readonly<Record<Locale, RfxMobileTaskCopy>> = Object.freeze({
     title: "Di cosa hai bisogno?",
     subtitle: "Inizia in modo semplice. Aggiungi struttura solo quando serve.",
     newRfx: "Nuovo RFx",
+    createUnavailable: "Il tuo ruolo attuale nell’organizzazione non consente di creare o modificare bozze RFx.",
     resume: "Riprendi",
     noDrafts: "Nessuna bozza salvata",
     quick: "Rapido",
@@ -147,8 +148,7 @@ const catalogs: Readonly<Record<Locale, RfxMobileTaskCopy>> = Object.freeze({
     dictationUnavailable: "La dettatura non è disponibile in questo browser.",
     camera: "Fotocamera",
     file: "File",
-    selectedFiles: "Selezionato su questo dispositivo",
-    localOnly: "I file selezionati restano su questo dispositivo finché RFx non supporterà gli allegati.",
+    attachmentsUnavailable: "Fotocamera e file saranno disponibili quando il flusso governato degli allegati RFx sarà attivo.",
     apply: "Usa questo nel RFx",
     applyFirst: "Crea o riprendi prima una bozza.",
     applied: "Aggiunto al bisogno RFx. Salva il RFx quando sei pronto.",
@@ -163,6 +163,7 @@ const catalogs: Readonly<Record<Locale, RfxMobileTaskCopy>> = Object.freeze({
     title: "Was benötigen Sie?",
     subtitle: "Beginnen Sie einfach. Fügen Sie Struktur nur hinzu, wenn sie hilft.",
     newRfx: "Neues RFx",
+    createUnavailable: "Ihre aktuelle Organisationsrolle erlaubt das Erstellen oder Bearbeiten von RFx-Entwürfen nicht.",
     resume: "Fortsetzen",
     noDrafts: "Noch keine gespeicherten Entwürfe",
     quick: "Schnell",
@@ -178,8 +179,7 @@ const catalogs: Readonly<Record<Locale, RfxMobileTaskCopy>> = Object.freeze({
     dictationUnavailable: "Diktieren ist in diesem Browser nicht verfügbar.",
     camera: "Kamera",
     file: "Datei",
-    selectedFiles: "Auf diesem Gerät ausgewählt",
-    localOnly: "Ausgewählte Dateien bleiben auf diesem Gerät, bis RFx Anhänge unterstützt.",
+    attachmentsUnavailable: "Kamera- und Dateianhänge werden verfügbar, sobald der geregelte RFx-Anhangsablauf aktiv ist.",
     apply: "Im RFx verwenden",
     applyFirst: "Erstellen oder öffnen Sie zuerst einen Entwurf.",
     applied: "Zum RFx-Bedarf hinzugefügt. Speichern Sie das RFx, wenn Sie bereit sind.",
