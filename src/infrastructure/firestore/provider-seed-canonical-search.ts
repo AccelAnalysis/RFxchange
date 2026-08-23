@@ -1,4 +1,7 @@
-import type { Firestore } from "firebase-admin/firestore";
+import type {
+  DocumentData,
+  Firestore,
+} from "firebase-admin/firestore";
 
 import {
   normalizeOrganizationDomain,
@@ -15,6 +18,7 @@ import type {
 } from "../../domain/provider-seeding/promotion-repository.ts";
 import {
   createProviderCanonicalSearchSnapshot,
+  type ProviderCanonicalSearchSnapshot,
   type ProviderSeedSourceRecord,
 } from "../../domain/provider-seeding/promotion-runtime.ts";
 import { FIRESTORE_COLLECTIONS } from "./schema.ts";
@@ -98,12 +102,12 @@ function evidenceSummary(
 
 function recordFromData(
   id: string,
-  data: FirebaseFirestore.DocumentData,
+  data: DocumentData,
 ): OrganizationDiscoveryRecord {
   if (data.id !== id) {
     throw new Error("Canonical Organization discovery document identity is inconsistent.");
   }
-  return data as OrganizationDiscoveryRecord;
+  return data as unknown as OrganizationDiscoveryRecord;
 }
 
 export class FirestoreProviderCanonicalOrganizationSearch
@@ -117,7 +121,7 @@ export class FirestoreProviderCanonicalOrganizationSearch
 
   async searchCurrent(
     input: ProviderCanonicalOrganizationSearchInput,
-  ) {
+  ): Promise<ProviderCanonicalSearchSnapshot> {
     const excluded = new Set(input.excludeOrganizationIds);
     const snapshot = await this.db
       .collection(FIRESTORE_COLLECTIONS.organizationDiscoveryRecords)
