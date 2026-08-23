@@ -37,6 +37,8 @@ Country
 
 Virginia independent cities remain county-equivalents.
 
+Every physical geography reference retains the immutable `parentVersionId` supplied by its Geography Version. Profile construction verifies the actual version-parent chain rather than accepting type, country, and state agreement as proof of containment. A tract from a different county, block group from a different tract, or block from a different block group is rejected before memberships are materialized.
+
 Markets and other non-nesting areas are overlays, not physical parents. Supported overlay identities include:
 
 - region/market, including Hampton Roads;
@@ -78,6 +80,8 @@ This prevents a future tract or boundary revision from silently rewriting histor
 - According to which source and vintage?
 
 Dataset sources retain authority, use/license basis, vintage, import time, and optional effective dates.
+
+An append-only Geography Version may be replayed only when every immutable semantic field agrees with persisted truth: logical geography, dataset source, source layer, vintage, name, parent version, geometry reference, effective dates, and normalized metadata. A reused version ID with conflicting semantics fails before a command receipt or audit event can record success.
 
 ## Accepted point versus derived profile
 
@@ -126,6 +130,8 @@ Scope modes are:
 Scope kind and subject kind are governed pairs. For example, an RFx performance area must belong to an RFx subject, and a Resource service area must belong to a Resource subject. Remote scopes cannot carry an implied physical point, source location, polygon, radius, or geography membership.
 
 Statewide and nationwide scopes require one actual State or Country geography version; labels cannot substitute for geography truth.
+
+A scope revision is checked against the persisted aggregate, not only a caller-supplied prior value. Its scope ID, owning Organization, subject kind and ID, and governed purpose are immutable, so a correctly incremented revision cannot move the record across tenants or subjects.
 
 ## Privacy projection
 

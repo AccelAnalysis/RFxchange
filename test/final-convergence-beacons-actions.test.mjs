@@ -26,7 +26,7 @@ test("beacon renderer is one proprietary family with fixed-anchor states and no 
   for (const kind of ["own", "organization", "opportunities-rfx", "resources", "intelligence", "capabilities"]) {
     assert.match(renderer, new RegExp(`"${kind}"`));
   }
-  for (const state of ["default", "approximate", "selected"]) assert.match(renderer, new RegExp(`"${state}"`));
+  for (const state of ["default", "approximate", "selected", "selected-approximate"]) assert.match(renderer, new RegExp(`"${state}"`));
   assert.match(renderer, /TIP_Y/);
   assert.match(renderer, /setLineDash\(\[7, 5\]\)/);
   assert.match(renderer, /colors\.flare/);
@@ -44,7 +44,10 @@ test("Mapbox scene registers beacons, stacked clusters, configured presets, and 
   assert.match(scene, /"icon-image": \["get", "beaconImage"\]/);
   assert.match(scene, /MAP_BASEMAP_PRESETS/);
   assert.match(scene, /setConfigProperty\("basemap", "lightPreset"/);
+  assert.doesNotMatch(scene, /id: "night"|label: "Night"|lightPreset: "night"/);
+  assert.match(scene, /selected-approximate/);
   assert.match(adapter, /privacy: projection\.privacy/);
+  assert.match(adapter, /selected-approximate/);
   assert.match(adapter, /beaconImage:/);
   assert.match(adapter, /ownOrganizationId/);
 });
@@ -59,6 +62,8 @@ test("action projection preserves handler candidates through permission refresh 
   assert.match(controller, /action\.handlerCandidate/);
   assert.match(controller, /onActionIntent/);
   assert.match(opportunity, /currentOpportunityReference: selected\?\.reference \?\? null/);
+  assert.match(opportunity, /currentOpportunityReturnTo: queryHref\(result, selected\?\.reference \?\? null\)/);
+  assert.match(registry, /safeOpportunityReturnTo/);
   assert.match(opportunity, /<ExchangeRoomActionController/);
   assert.match(opportunity, /opportunity-watch/);
 });

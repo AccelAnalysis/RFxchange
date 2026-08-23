@@ -227,6 +227,7 @@ export interface GeographyReference {
   readonly externalId: string;
   readonly sourceSystem: GeographySourceSystem;
   readonly vintage: string;
+  readonly parentVersionId: GeographyVersionId | null;
   readonly countryCode: string;
   readonly stateCode: string | null;
   readonly economicDevelopmentZone: boolean;
@@ -663,6 +664,54 @@ export function createGeographyVersion(input: Readonly<{
   });
 }
 
+function metadataFingerprint(
+  metadata: Readonly<Record<string, string | number | boolean | null>>,
+): string {
+  return JSON.stringify(
+    Object.entries(metadata).sort(([left], [right]) => left.localeCompare(right)),
+  );
+}
+
+export function assertSameImmutableGeographyVersion(
+  existing: GeographyVersion,
+  expected: GeographyVersion,
+): void {
+  const scalarFields = [
+    "id",
+    "geographyId",
+    "datasetSourceId",
+    "sourceLayer",
+    "vintage",
+    "name",
+    "parentVersionId",
+    "geometryReference",
+    "effectiveFrom",
+    "effectiveTo",
+  ] as const;
+  if (
+    scalarFields.some((field) => existing[field] !== expected[field])
+    || metadataFingerprint(existing.metadata) !== metadataFingerprint(expected.metadata)
+  ) {
+    throw new Error("Geography version conflicts with the existing immutable record.");
+  }
+}
+
+export function assertGeographicScopeImmutableIdentity(
+  existing: GeographicScope,
+  expected: GeographicScope,
+): void {
+  if (
+    existing.id !== expected.id
+    || existing.organizationId !== expected.organizationId
+    || existing.kind !== expected.kind
+    || existing.subject.kind !== expected.subject.kind
+    || existing.subject.id !== expected.subject.id
+    || existing.subject.organizationId !== expected.subject.organizationId
+  ) {
+    throw new Error("Geographic scope identity, subject, and purpose cannot be reassigned.");
+  }
+}
+
 export function geographyReference(input: Readonly<{
   geography: CanonicalGeography;
   version: GeographyVersion;
@@ -678,6 +727,7 @@ export function geographyReference(input: Readonly<{
     externalId: input.geography.externalId,
     sourceSystem: input.geography.sourceSystem,
     vintage: input.version.vintage,
+    parentVersionId: input.version.parentVersionId,
     countryCode: input.geography.countryCode,
     stateCode: input.geography.stateCode,
     economicDevelopmentZone: input.geography.economicDevelopmentZone,
@@ -703,6 +753,31 @@ function validateHierarchy(
       throw new Error(`Physical hierarchy ${type} has the wrong geography type.`);
     }
   }
+
+  const requireParent = (
+    child: GeographyReference | null,
+    parent: GeographyReference | null,
+    label: string,
+  ) => {
+    if (!child) return;
+    if (!parent || child.parentVersionId !== parent.versionId) {
+      throw new Error(`${label} does not belong to the supplied physical hierarchy parent.`);
+    }
+  };
+  if (hierarchy.country.parentVersionId !== null) {
+    throw new Error("Physical hierarchy country cannot declare a parent geography version.");
+  }
+  requireParent(hierarchy.state, hierarchy.country, "State");
+  requireParent(
+    hierarchy.countyEquivalent,
+    hierarchy.state ?? hierarchy.country,
+    "County or county-equivalent",
+  );
+  requireParent(hierarchy.place, hierarchy.countyEquivalent, "Place");
+  requireParent(hierarchy.censusTract, hierarchy.countyEquivalent, "Census tract");
+  requireParent(hierarchy.blockGroup, hierarchy.censusTract, "Block group");
+  requireParent(hierarchy.censusBlock, hierarchy.blockGroup, "Census block");
+
   if (hierarchy.censusTract && !hierarchy.countyEquivalent) {
     throw new Error("Census tract containment requires a county or county-equivalent.");
   }

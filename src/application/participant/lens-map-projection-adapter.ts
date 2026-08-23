@@ -184,9 +184,12 @@ function beaconImage(
   const own = ownOrganizationId !== null
     && projection.identity.organizationId === ownOrganizationId;
   const kind = own ? "own" : lens;
+  const approximate = projection.privacy === "approximate";
   const state = selected
-    ? "selected"
-    : projection.privacy === "approximate"
+    ? approximate
+      ? "selected-approximate"
+      : "selected"
+    : approximate
       ? "approximate"
       : "default";
   return `exchange-beacon-${kind}-${state}`;

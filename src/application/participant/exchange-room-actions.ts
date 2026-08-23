@@ -117,6 +117,7 @@ export interface ExchangeRoomActionProjectionInput {
   readonly networkDiscoveryAvailable?: boolean;
   readonly actionAuthorization?: Readonly<{ rfxCreate: boolean; referralManage: boolean; resourceManage: boolean }>;
   readonly currentOpportunityReference?: string | null;
+  readonly currentOpportunityReturnTo?: string | null;
 }
 
 const DEFINITIONS: readonly ExchangeRoomActionDefinition[] = Object.freeze([
@@ -167,6 +168,14 @@ function resourceTarget(input: ExchangeRoomActionProjectionInput): string | null
   return null;
 }
 
+function safeOpportunityReturnTo(
+  input: ExchangeRoomActionProjectionInput,
+): string | null {
+  const candidate = input.currentOpportunityReturnTo?.trim();
+  if (!candidate || candidate.startsWith("//") || /[\r\n]/.test(candidate)) return null;
+  return /^\/opportunities(?:[/?#]|$)/.test(candidate) ? candidate : null;
+}
+
 function resolveHandler(
   rule: HandlerRule,
   input: ExchangeRoomActionProjectionInput,
@@ -180,9 +189,15 @@ function resolveHandler(
     }
     case "opportunity-assessment": {
       const reference = input.currentOpportunityReference?.trim();
-      return reference
-        ? Object.freeze({ kind: "href", href: `/opportunities/${encodeURIComponent(reference)}/assess` })
-        : null;
+      if (!reference) return null;
+      const assessmentHref = `/opportunities/${encodeURIComponent(reference)}/assess`;
+      const returnTo = safeOpportunityReturnTo(input);
+      return Object.freeze({
+        kind: "href",
+        href: returnTo
+          ? `${assessmentHref}?returnTo=${encodeURIComponent(returnTo)}`
+          : assessmentHref,
+      });
     }
     case "opportunity-watch": return input.currentOpportunityReference?.trim()
       ? Object.freeze({ kind: "intent", intent: "opportunity-watch" })
