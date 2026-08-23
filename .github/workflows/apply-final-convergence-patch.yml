@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24.18.0
-      - name: Tighten the network-label replacement
+      - name: Tighten deterministic source replacements
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -44,7 +44,12 @@ jobs:
           );'''
           if source.count(old) != 1:
               raise SystemExit(f"Expected one network-label replacement, found {source.count(old)}")
-          path.write_text(source.replace(old, new))
+          source = source.replace(old, new)
+          interpolation = '${preset.label}'
+          if source.count(interpolation) != 1:
+              raise SystemExit(f"Expected one preset-label interpolation, found {source.count(interpolation)}")
+          source = source.replace(interpolation, r'\${preset.label}')
+          path.write_text(source)
           PY
       - name: Apply deterministic source patch
         run: node scripts/apply-final-convergence-patch.mjs
