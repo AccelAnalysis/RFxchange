@@ -8,7 +8,7 @@ async function read(path) {
   return readFile(new URL(path, repoRoot), "utf8");
 }
 
-function collectStrings(value, path = "marketing", output = []) {
+function collectStrings(value, path = "root", output = []) {
   if (typeof value === "string") {
     output.push({ path, value });
     return output;
@@ -42,31 +42,51 @@ const prohibitedMarketingPatterns = [
   /\bsource sha\b/i,
   /\bbuild identity\b/i,
   /\bbottom matter\b/i,
+  /\bapproved slices?\b/i,
+  /\bcurrent release boundary\b/i,
   /\breal (?:organization|geography|map|marker|market activity)\b/i,
 ];
 
-test("canonical English marketing copy stays behind the participant-language firewall", async () => {
-  const dictionary = JSON.parse(await read("src/i18n/messages/en-US.json"));
-  const marketingStrings = collectStrings(dictionary.marketing);
-
+function assertNoInternalParticipantLanguage(entries) {
   const violations = [];
-  for (const entry of marketingStrings) {
+  for (const entry of entries) {
     for (const pattern of prohibitedMarketingPatterns) {
       if (pattern.test(entry.value)) {
         violations.push(`${entry.path}: ${JSON.stringify(entry.value)} matched ${pattern}`);
       }
     }
   }
-
   assert.deepEqual(violations, []);
-  assert.equal(dictionary.marketing.footer.bottomMatter, "Legal");
+}
+
+test("canonical English public marketing stays behind the participant-language firewall", async () => {
+  const [baseDictionary, marketingPages, marketingSource] = await Promise.all([
+    read("src/i18n/messages/en-US.json").then(JSON.parse),
+    read("src/i18n/messages/marketing-pages/en-US.json").then(JSON.parse),
+    read("src/content/marketing.ts"),
+  ]);
+
+  const entries = [
+    ...collectStrings(baseDictionary.marketing, "base.marketing"),
+    ...collectStrings(marketingPages, "marketingPages"),
+    { path: "src/content/marketing.ts", value: marketingSource },
+  ];
+
+  assertNoInternalParticipantLanguage(entries);
+  assert.equal(baseDictionary.marketing.footer.bottomMatter, "Legal");
+  assert.equal(marketingPages.availability.items.at(-1)?.status, "Coming next");
 });
 
-test("public marketing chrome does not render build or source diagnostics", async () => {
-  const chrome = await read("src/components/marketing/MarketingChrome.tsx");
+test("public and participant chrome do not render build or release-engineering diagnostics", async () => {
+  const [chrome, profile] = await Promise.all([
+    read("src/components/marketing/MarketingChrome.tsx"),
+    read("app/organization-profile/page.tsx"),
+  ]);
 
-  for (const token of ["currentBuildIdentity", "commitSha", "shortSha", "RFXCHANGE_BUILD_SHA"]) {
-    assert.equal(chrome.includes(token), false, `public marketing chrome must not contain ${token}`);
+  for (const surface of [chrome, profile]) {
+    for (const token of ["currentBuildIdentity", "commitSha", "shortSha", "RFXCHANGE_BUILD_SHA", "Build SHA", "Current release boundary", "approved slices"]) {
+      assert.equal(surface.includes(token), false, `participant surface must not contain ${token}`);
+    }
   }
 
   assert.doesNotMatch(chrome, />\s*SHA\s*\{/);
