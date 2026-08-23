@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { RfxDraftError } from "@/src/application/rfx/rfx-draft-service";
 import { RFxDraftWorkspace } from "@/src/components/rfx/RFxDraftWorkspace";
+import { RFxMobileTaskCanvas } from "@/src/components/rfx/RFxMobileTaskCanvas";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
@@ -64,22 +65,35 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
       : Array.isArray(params.draft)
         ? params.draft[0]
         : null;
-  const selectedDraftId =
-    requestedDraft &&
-    workspace.drafts.some((draft) => draft.id === requestedDraft)
+  const createParam =
+    typeof params.create === "string"
+      ? params.create
+      : Array.isArray(params.create)
+        ? params.create[0]
+        : null;
+  const creatingNew = canCreate && createParam === "1";
+  const selectedDraftId = creatingNew
+    ? null
+    : requestedDraft && workspace.drafts.some((draft) => draft.id === requestedDraft)
       ? requestedDraft
       : (workspace.drafts[0]?.id ?? null);
 
   return (
-    <RFxDraftWorkspace
-      canCreate={canCreate}
-      initialDrafts={workspace.drafts}
-      requestFamilies={workspace.requestFamilies}
+    <RFxMobileTaskCanvas
+      drafts={workspace.drafts}
       selectedDraftId={selectedDraftId}
-      commandRecoveryScope={`${scope.organizationId}:${scope.membershipId}`}
-      organizationId={scope.organizationId}
-      performanceLocationOption={workspace.performanceLocationOption}
-      definitionCatalog={workspace.definitionCatalog}
-    />
+      creatingNew={creatingNew}
+    >
+      <RFxDraftWorkspace
+        canCreate={canCreate}
+        initialDrafts={workspace.drafts}
+        requestFamilies={workspace.requestFamilies}
+        selectedDraftId={selectedDraftId}
+        commandRecoveryScope={`${scope.organizationId}:${scope.membershipId}`}
+        organizationId={scope.organizationId}
+        performanceLocationOption={workspace.performanceLocationOption}
+        definitionCatalog={workspace.definitionCatalog}
+      />
+    </RFxMobileTaskCanvas>
   );
 }
