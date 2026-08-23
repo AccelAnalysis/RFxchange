@@ -5,28 +5,30 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
 
-test("the Exchange Room uses one effective spatial lens while unavailable Capabilities stays non-current", () => {
+test("the shared Network workspace preserves one effective spatial lens while Capabilities owns its separate current route", () => {
   const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
+  const capabilities = read("src/components/capabilities/CapabilitiesWorkspace.tsx");
   assert.match(workspace, /activeItem=\{activeLens\}/);
   assert.match(workspace, /spatialContext\.activeLens === "capabilities"[\s\S]*\? "intelligence"/);
   assert.match(workspace, /useExchangeRoomLensController\(selectLens\)/);
-  assert.doesNotMatch(workspace, /unavailableLensIds=/);
   assert.doesNotMatch(workspace, /const MAP_ONLY_UNAVAILABLE_LENSES/);
+  assert.match(capabilities, /<ParticipantShell activeItem="capabilities"/);
+  assert.match(capabilities, /<ExchangeSpatialScene/);
   assert.match(controller, /event\.preventDefault\(\)/);
   assert.doesNotMatch(controller, /event\.stopPropagation\(\)/);
   assert.match(controller, /onLensSelect\(lens\)/);
   assert.match(controller, /data-active-lens=\{activeLens\}/);
 });
 
-test("permanent lens deep links are projected atomically from one spatial-store snapshot", () => {
+test("permanent lens deep links are projected atomically from one spatial-store snapshot plus the current Capabilities route", () => {
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
   assert.match(navigation, /function storedLensHrefSnapshot\(\): string/);
   assert.match(navigation, /intelligenceHref: storedIntelligenceHref\(\)/);
   assert.match(navigation, /opportunityHref: participantSpatialLensHref\("opportunities-rfx"\)/);
   assert.match(navigation, /resourceHref: participantSpatialLensHref\("resources"\)/);
+  assert.match(navigation, /capabilityHref: "\/capabilities"/);
   assert.doesNotMatch(navigation, /referralHref/);
-  assert.match(navigation, /Unavailable Capabilities lens cannot resolve a navigation href/);
   assert.match(navigation, /const serializedLensHrefs = useSyncExternalStore\([\s\S]*storedLensHrefSnapshot[\s\S]*DEFAULT_LENS_HREF_SNAPSHOT/);
   assert.equal((navigation.match(/useSyncExternalStore\(/g) ?? []).length, 1);
 });
@@ -52,7 +54,7 @@ test("the four-action projection has desktop and sheet placements over the same 
   assert.match(workspace, /onClick=\{\(\) => \{[\s\S]*panelOpen: false/);
 });
 
-test("390px uses the persistent four-lens bottom navigation and sheet action rail", () => {
+test("390px uses four permanent lenses plus Menu in the persistent bottom navigation and keeps the sheet action rail", () => {
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
   const navigationStyles = read("src/components/participant/ParticipantTopNavigation.module.css");
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
@@ -60,9 +62,10 @@ test("390px uses the persistent four-lens bottom navigation and sheet action rai
 
   assert.match(navigation, /data-mobile-lens-navigation="persistent-bottom"/);
   assert.match(navigation, /className=\{styles\.mobileBottomNavigation\}/);
+  assert.match(navigation, /data-mobile-menu-trigger/);
   assert.doesNotMatch(navigation, /<details|mobileLensMenu/);
-  assert.match(navigationStyles, /@media \(max-width: 760px\)[\s\S]*?\.desktopLenses \{\s*display: none;/);
-  assert.match(navigationStyles, /@media \(max-width: 760px\)[\s\S]*?\.mobileBottomNavigation \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/);
+  assert.match(navigationStyles, /@media \(max-width: 760px\)[\s\S]*?\.desktopLenses,[\s\S]*?\.accountUtility \{\s*display: none;/);
+  assert.match(navigationStyles, /@media \(max-width: 760px\)[\s\S]*?\.mobileBottomNavigation \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: repeat\(5, minmax\(0, 1fr\)\);/);
   assert.match(navigationStyles, /@media \(max-width: 390px\)/);
   assert.doesNotMatch(controllerStyles, /\[data-participant-navigation\]/);
   assert.doesNotMatch(controller, /stopPropagation/);
@@ -86,6 +89,7 @@ test("Phase 2 does not weaken protected domain routes", () => {
     "app/resources/page.tsx",
     "app/referrals/page.tsx",
     "app/provider-application/page.tsx",
+    "app/capabilities/page.tsx",
   ]) {
     assert.match(read(path), /lifecycleState !== "open-platform"/, path);
   }
