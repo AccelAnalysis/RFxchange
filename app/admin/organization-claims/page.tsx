@@ -257,7 +257,7 @@ export default async function OrganizationClaimsAdminPage({
                 <section className={styles.evidence} aria-labelledby="claim-evidence-heading">
                   <div className={styles.subheading}>
                     <h3 id="claim-evidence-heading">Evidence summary</h3>
-                    <span>Private files require separate access</span>
+                    <span>Private evidence requires separate access</span>
                   </div>
                   {selectedClaim.evidence.length ? (
                     <ul>
