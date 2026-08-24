@@ -21,6 +21,6 @@ export default async function AdminEntryPage() {
   }
   if (access.kind !== "authorized") notFound();
 
-  // /admin/overview remains intentionally unregistered until it has a truthful complete runtime.
+  // Registry order intentionally prefers the truthful operating core when a GLOBAL grant permits it.
   redirect(access.destinations[0].href);
 }
