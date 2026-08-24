@@ -52,7 +52,33 @@ jobs:
         run: npm run validate:product-system
       - name: Domain architecture guardrails
         run: npm run validate:architecture
-      - name: Internationalization guardrails
+      - name: Internationalization · base
+        env:
+          RFXCHANGE_I18N_NAMESPACE: base
+        run: npm run validate:internationalization
+      - name: Internationalization · marketing pages
+        env:
+          RFXCHANGE_I18N_NAMESPACE: marketing-pages
+        run: npm run validate:internationalization
+      - name: Internationalization · Network
+        env:
+          RFXCHANGE_I18N_NAMESPACE: network
+        run: npm run validate:internationalization
+      - name: Internationalization · market profile
+        env:
+          RFXCHANGE_I18N_NAMESPACE: market-profile
+        run: npm run validate:internationalization
+      - name: Internationalization · Network education
+        env:
+          RFXCHANGE_I18N_NAMESPACE: network-education
+        run: npm run validate:internationalization
+      - name: Internationalization · recovery
+        env:
+          RFXCHANGE_I18N_NAMESPACE: recovery
+        run: npm run validate:internationalization
+      - name: Internationalization · participant navigation
+        env:
+          RFXCHANGE_I18N_NAMESPACE: participant-navigation
         run: npm run validate:internationalization
       - name: Firebase foundation guardrails
         run: npm run validate:firebase-environment && npm run validate:firestore-schema && npm run validate:firestore-repositories && npm run validate:firestore-security-rules && npm run validate:firestore-indexes && npm run validate:firebase-auth-provider && npm run validate:firebase-user-resolution && npm run validate:firebase-server-session && npm run validate:firebase-authentication-lifecycle && npm run validate:firebase-auth-firestore-security-suite && npm run validate:first-persisted-authenticated-vertical-slice && npm run validate:transactional-email-provider-abstraction && npm run validate:firebase-functions-runtime && npm run validate:background-job-framework && npm run validate:firebase-storage-foundation
