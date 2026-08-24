@@ -17,7 +17,10 @@ test("the administrative product authority defines an attention-first restrained
   assert.match(authority, /Less container chrome/);
   assert.match(authority, /Human language over implementation language/);
   assert.match(authority, /only destinations with a truthful implemented runtime/i);
-  assert.match(authority, /Authority is not verification/i);
+  assert.match(
+    authority,
+    /authority, verification, provider status, commerce, and credibility remain visibly separate/i,
+  );
   assert.match(context, /ADMIN_PORTAL_PRODUCT_AUTHORITY\.md/);
   assert.doesNotMatch(authority, /binary `isAdmin` authorization is permitted/i);
 });
