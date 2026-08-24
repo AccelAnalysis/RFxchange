@@ -1,13 +1,78 @@
 {
-  "ariaLabel":"RFxchange referral workspace","eyebrow":"Organization referrals","title":"Referrals","create":"New referral",
-  "list":{"label":"Business referrals"},"empty":{"title":"No referrals yet","body":"Open an organization or create an introduction when you have someone specific to connect."},
-  "roles":{"sender":"Sending organization","recipient":"Recipient organization"},
-  "notificationStates":{"deliveryOutcomeUnknown":"We could not confirm whether the notification was delivered. Check the referral before trying again."},
-  "fields":{"purpose":"Purpose","urgency":"Urgency","contact":"Preferred contact","notification":"Notification","expires":"Expires"},
-  "detail":{"boundary":"This referral contains information provided by participants. It is not an endorsement, verified outcome, contract, or sale."},
-  "path":{"label":"Referral path","visible":"The referral path is shown for the current {status} status.","unavailable":"A path is not available for this referral yet."},
-  "actions":{"accepted":"Accept referral","declined":"Decline referral","contacted":"Record contact","closed":"Close referral","retry":"Retry notification"},
-  "states":{"error":"The referral action could not be completed. Refresh and try again.","sent":"Referral sent. Delivery and acceptance remain separate steps.","accepted":"Referral accepted.","declined":"Referral declined.","contacted":"Contact recorded.","closed":"Referral closed with the outcome reported by the participant.","retryQueued":"The notification will be tried again. No duplicate referral was created."},
-  "composer":{"title":"Send a business referral","close":"Close referral composer","recipientType":"Recipient type","existing":"RFxchange organization","external":"Invite an external recipient","organization":"Recipient organization","choose":"Choose one organization","name":"Recipient name","email":"Recipient email","summary":"Referral summary","consent":"I confirm this recipient may receive the organization name and summary shown here.","review":"Review what will be shared","back":"Back","sending":"Sending…","acknowledge":"Confirm and send"},
-  "education":{"eyebrow":"Before you send","title":"Know what sending means","body":"A referral belongs to your organization and introduces one named recipient for a business purpose.","recipient":"Named recipient","shared":"Information shared","sharedValue":"Sending organization name and referral summary","states":"Sending, delivery, acceptance, contact, and outcome are separate steps. None implies endorsement or success.","next":"The recipient may accept or decline. A referral may expire, and a failed notification can be retried without creating another referral."}
+  "ariaLabel": "RFxchange referral workspace",
+  "eyebrow": "Organization referrals",
+  "title": "Referrals",
+  "create": "New referral",
+  "list": {
+    "label": "Business referrals"
+  },
+  "empty": {
+    "title": "No referrals yet",
+    "body": "Open an organization or create an introduction when you have someone specific to connect."
+  },
+  "roles": {
+    "sender": "Sending organization",
+    "recipient": "Recipient organization"
+  },
+  "notificationStates": {
+    "deliveryOutcomeUnknown": "We could not confirm whether the notification was delivered. Check the referral before trying again."
+  },
+  "fields": {
+    "purpose": "Purpose",
+    "urgency": "Urgency",
+    "contact": "Preferred contact",
+    "notification": "Notification",
+    "expires": "Expires"
+  },
+  "detail": {
+    "boundary": "This referral contains information provided by participants. It is not an endorsement, verified outcome, contract, or sale."
+  },
+  "path": {
+    "label": "Referral path",
+    "visible": "The referral path is shown for the current {status} status.",
+    "unavailable": "A path is not available for this referral yet."
+  },
+  "actions": {
+    "accepted": "Accept referral",
+    "declined": "Decline referral",
+    "contacted": "Record contact",
+    "closed": "Close referral",
+    "retry": "Retry notification"
+  },
+  "states": {
+    "error": "The referral action could not be completed. Refresh and try again.",
+    "sent": "Referral sent. Delivery and acceptance remain separate steps.",
+    "accepted": "Referral accepted.",
+    "declined": "Referral declined.",
+    "contacted": "Contact recorded.",
+    "closed": "Referral closed with the outcome reported by the participant.",
+    "retryQueued": "The notification will be tried again. No duplicate referral was created."
+  },
+  "composer": {
+    "title": "Send a business referral",
+    "close": "Close referral composer",
+    "recipientType": "Recipient type",
+    "existing": "RFxchange organization",
+    "external": "Invite an external recipient",
+    "organization": "Recipient organization",
+    "choose": "Choose one organization",
+    "name": "Recipient name",
+    "email": "Recipient email",
+    "summary": "Referral summary",
+    "consent": "I confirm this recipient may receive the organization name and summary shown here.",
+    "review": "Review what will be shared",
+    "back": "Back",
+    "sending": "Sending…",
+    "acknowledge": "Confirm and send"
+  },
+  "education": {
+    "eyebrow": "Before you send",
+    "title": "Know what sending means",
+    "body": "A referral belongs to your organization and introduces one named recipient for a business purpose.",
+    "recipient": "Named recipient",
+    "shared": "Information shared",
+    "sharedValue": "Sending organization name and referral summary",
+    "states": "Sending, delivery, acceptance, contact, and outcome are separate steps. None implies endorsement or success.",
+    "next": "The recipient may accept or decline. A referral may expire, and a failed notification can be retried without creating another referral."
+  }
 }

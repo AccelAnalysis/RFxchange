@@ -6,7 +6,13 @@
     "countOne": "{count} bestätigte Fähigkeit",
     "countMany": "{count} bestätigte Fähigkeiten"
   },
-  "tabs": { "label": "Bereiche des Marktprofils", "capabilities": "Fähigkeiten", "industry": "Branche", "experience": "Erfahrung", "preferences": "Präferenzen" },
+  "tabs": {
+    "label": "Bereiche des Marktprofils",
+    "capabilities": "Fähigkeiten",
+    "industry": "Branche",
+    "experience": "Erfahrung",
+    "preferences": "Präferenzen"
+  },
   "common": {
     "refreshing": "Gespeichertes Marktprofil wird aktualisiert…",
     "visibility": "Sichtbarkeit",
@@ -43,7 +49,14 @@
     "reject": "Ablehnen",
     "none": "Keine davon beschreibt es"
   },
-  "dispositions": { "suggested": "vorgeschlagen", "accepted": "angenommen", "edited": "bearbeitet", "rejected": "abgelehnt", "unresolved": "ungeklärt", "withdrawn": "zurückgezogen" },
+  "dispositions": {
+    "suggested": "vorgeschlagen",
+    "accepted": "angenommen",
+    "edited": "bearbeitet",
+    "rejected": "abgelehnt",
+    "unresolved": "ungeklärt",
+    "withdrawn": "zurückgezogen"
+  },
   "catalog": {
     "eyebrow": "Vollständiger manueller Weg",
     "title": "Domäne → Familie → Fähigkeit durchsuchen",
@@ -89,8 +102,8 @@
     "domain": "Vorgeschlagene Domäne",
     "notSure": "Nicht sicher",
     "submit": "Vorläufigen Begriff einreichen",
-    "countOne": "{count} vorläufiger Begriff wartet auf geregelte redaktionelle Prüfung.",
-    "countMany": "{count} vorläufige Begriffe warten auf geregelte redaktionelle Prüfung."
+    "countOne": "{count} vorläufiger Begriff wartet auf redaktionelle Prüfung.",
+    "countMany": "{count} vorläufige Begriffe warten auf redaktionelle Prüfung."
   },
   "industry": {
     "title": "Branchen- und NAICS-Kontext",

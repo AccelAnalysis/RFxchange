@@ -1,1 +1,15 @@
-{"ariaLabel":"Réseau de ressources","eyebrow":"Réseau des fournisseurs officiels de ressources","title":"Ressources desservant cette localité","supporting":"Les résultats utilisent le territoire et la disponibilité maintenus par le fournisseur. Les raisons sont affichées; la capacité n’est jamais déduite.","search":"Rechercher des services","availability":"Disponibilité","providers":"fournisseurs","empty":"Aucun fournisseur publié correspondant","requests":"Demandes aux fournisseurs","manage":"Gérer la découverte et les ressources","applyFilters":"Appliquer les filtres","viewCommunication":"Voir les échanges","noMessages":"Aucun message privé n’a été enregistré pour cette demande."}
+{
+  "ariaLabel": "Réseau de ressources",
+  "eyebrow": "Réseau des fournisseurs officiels de ressources",
+  "title": "Ressources desservant cette localité",
+  "supporting": "Les résultats utilisent le territoire et la disponibilité maintenus par le fournisseur. Les raisons sont affichées; la capacité n’est jamais déduite.",
+  "search": "Rechercher des services",
+  "availability": "Disponibilité",
+  "providers": "fournisseurs",
+  "empty": "Aucun fournisseur publié correspondant",
+  "requests": "Demandes aux fournisseurs",
+  "manage": "Gérer la découverte et les ressources",
+  "applyFilters": "Appliquer les filtres",
+  "viewCommunication": "Voir les échanges",
+  "noMessages": "Aucun message privé n’a été enregistré pour cette demande."
+}

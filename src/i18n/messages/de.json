@@ -1,1 +1,227 @@
-{"metadata":{"title":"The RFxchange™","description":"Ein kartenbasiertes Netzwerk für Unternehmenswachstum, um Fähigkeiten, Chancen, Empfehlungen, Partnerschaften, Ressourcen und messbare Aktivität zu entdecken.","openGraphDescription":"Machen Sie Unternehmensfähigkeiten, Chancen und Verbindungen leichter auffindbar und umsetzbar."},"common":{"languageSelector":{"label":"Sprache","saving":"Sprache wird geändert…"},"actions":{"joinFree":"Kostenlos beitreten","signIn":"Anmelden","learnMore":"Mehr erfahren"}},"marketing":{"nav":{"ariaLabel":"Hauptnavigation Marketing","howItWorks":"So funktioniert es","businesses":"Für Unternehmen","buyers":"Für Käufer","resourceProviders":"Für Ressourcenanbieter","about":"Über uns"},"footer":{"summary":"Ein lokales Netzwerk für Unternehmenswachstum, das Organisationen hilft, gefunden zu werden, Chancen zu entdecken und die richtigen Verbindungen aufzubauen.","byline":"Von Accel Analysis","explore":"Entdecken","foundingMembership":"Gründungsmitgliedschaft","organization":"Organisation","about":"Über RFxchange","imageCredits":"Bildnachweise","bottomMatter":"Rechtliches","terms":"Nutzungsbedingungen","privacy":"Datenschutzrichtlinie","rules":"Plattformregeln","accessibility":"Barrierefreiheit","copyright":"© 2026 The RFxchange. Von Accel Analysis.","tagline":"Sichtbar · Verbunden · Handlungsfähig"}},"home":{"hero":{"eyebrow":"Ein lokales Netzwerk für Unternehmenswachstum · Von Accel Analysis","titleBefore":"Der lokale Markt ist bereits in Bewegung.","titleAccent":"Machen Sie ihn sichtbar.","summary":"The RFxchange bietet Organisationen eine gemeinsame Umgebung, in der sie anhand ihrer Fähigkeiten entdeckt werden und von Sichtbarkeit zu Chancen, Empfehlungen, Teams und Unterstützung übergehen können, sobald diese Funktionen verfügbar sind.","join":"Dem Exchange kostenlos beitreten","howItWorks":"So funktioniert es","evidenceNote":"Stockfotos dienen nur der Atmosphäre. Sie stellen keine Teilnehmer, Chancen, Ergebnisse, Referenzen oder Aktivitäten der RFxchange-Plattform dar."},"availability":{"eyebrow":"Produktverfügbarkeit","title":"Sehen Sie, was verfügbar ist und was noch entwickelt wird.","description":"The RFxchange erfindet keine Marktaktivität zur Darstellung. Verfügbare, in Entwicklung befindliche und geplante Funktionen werden getrennt ausgewiesen.","items":[{"status":"Jetzt verfügbar","title":"Richten Sie Ihre Organisation ein","detail":"Erstellen Sie ein Konto, wählen Sie einen Ort, finden oder erstellen Sie die Organisation, bestätigen Sie den Standort, fügen Sie eine aussagekräftige Fähigkeit hinzu und schließen Sie die Einrichtung ab."},{"status":"Jetzt verfügbar","title":"Werden Sie auf der Karte sichtbar","detail":"Eine korrekt aktivierte Organisation erhält eine bestätigte oder datenschutzgerechte Kartenposition und gelangt in den authentifizierten Exchange-Arbeitsbereich."},{"status":"In Entwicklung","title":"Entdecken Sie das aktive Netzwerk","detail":"Fähigkeitensuche, Organisationssuche, Empfehlungen, Ressourcenanbieter und umfassendere Netzwerkansichten werden hinzugefügt, sobald sie bereit sind."},{"status":"Demnächst","title":"Arbeiten Sie mit RFx und Ergebnissen weiter","detail":"RFx-Transaktionen, Informationen zur Glaubwürdigkeit und Ergebnisse werden ergänzt, sobald sie verfügbar sind. Diagramme beschreiben das Produktmodell, nicht die aktuelle Marktaktivität."}]},"live":{"eyebrow":"Jetzt verfügbar","title":"Ihre Organisation nimmt rund um einen bestätigten Standort Gestalt an.","description":"Der aktuelle Ablauf führt von der Kontoerstellung zu einer Kartenpräsenz der Organisation, ohne erfundene Chancendaten, Anbieterstatus, Geschäftsziele oder einen kostenpflichtigen Plan zu verlangen.","steps":[{"title":"Konto erstellen","detail":"Richten Sie Ihre Teilnehmeridentität ein und akzeptieren Sie die geltenden Richtlinien."},{"title":"Ort auswählen","detail":"Wählen Sie das Gebiet, das den operativen Kontext der Organisation festlegt."},{"title":"Organisation finden","detail":"Finden, beanspruchen oder erstellen Sie die Organisation."},{"title":"Standort bestätigen","detail":"Geokodieren und bestätigen Sie einen Standort oder eine datenschutzgerechte Kartenposition."},{"title":"Fähigkeit beschreiben","detail":"Fügen Sie die minimale aussagekräftige Fähigkeit hinzu, die zum Abschluss des Profils erforderlich ist."},{"title":"Organisation aktivieren","detail":"Schließen Sie die Einführung ab und öffnen Sie den authentifizierten Exchange-Arbeitsbereich."}]},"model":{"eyebrow":"Sichtbar. Verbunden. Handlungsfähig.","title":"Eine Marktumgebung. Ein Weg von Sichtbarkeit zu Ergebnissen.","description":"Dieses Modell zeigt, wie The RFxchange die Sichtbarkeit einer Organisation mit Chancen, Beziehungen, Aktionen und Ergebnissen verbindet, sobald die jeweiligen Funktionen verfügbar sind.","label":"Geplantes Produktmodell · keine aktuelle Marktaktivität","ariaLabel":"RFxchange-Produktmodell","readMore":"Den vollständigen Produktweg ansehen →","steps":[{"kicker":"Sichtbar","title":"Organisation","detail":"Eine Organisation und ihre Fähigkeiten werden entsprechend den Berechtigungen und der Einrichtung sichtbar."},{"kicker":"Nachfrage","title":"Chance","detail":"RFx führt strukturierte geschäftliche Nachfrage ein, wenn eine Chance veröffentlicht wird."},{"kicker":"Passung","title":"Entdeckung","detail":"Eine mögliche Passung wird erklärt, ohne Qualifikation oder Empfehlung zu behaupten."},{"kicker":"Verbindung","title":"Beziehung","detail":"Empfehlungen, Teams und Anbieter basieren auf Beziehungen, die in der Plattform erfasst sind."},{"kicker":"Aktion","title":"Arbeitsablauf","detail":"Teilnehmer arbeiten in dem für ihre Rolle verfügbaren Ablauf weiter."},{"kicker":"Nachweis","title":"Ergebnis","detail":"Glaubwürdigkeit und Ergebnisse werden angezeigt, wenn sie durch verlässliche Informationen gestützt sind."}]},"difference":{"eyebrow":"Ein lebendiger Markt, kein herkömmliches Dashboard","title":"Rund um Organisationen, Geografie und geschäftliche Aktion entwickelt.","items":[{"label":"Mehr als ein Verzeichnis","detail":"Die Aktivierung richtet eine Organisation, ihre Fähigkeiten, Geografie und Kartenpräsenz ein. Netzwerk- und RFx-Funktionen erweitern diese Position, sobald sie verfügbar sind."},{"label":"Kein sozialer Feed","detail":"Das Produkt ist um Organisationen, Fähigkeiten, Geografie und geschäftliche Abläufe aufgebaut, nicht um Followerzahlen, allgemeine Beiträge oder erfundene Aktivität."},{"label":"Mehr als ein Ausschreibungsportal","detail":"RFx ist Teil eines größeren lokalen Netzwerks für Unternehmenswachstum. Zukünftige Funktionen werden bis zu ihrer Verfügbarkeit als demnächst gekennzeichnet."}]},"connection":{"eyebrow":"Bauen Sie die Verbindung auf","title":"Der Kontext soll den Teilnehmer begleiten.","description":"Das Produkt ist so gestaltet, dass Fähigkeit, Bedarf, Organisation, Geografie und nächster Schritt miteinander verbunden bleiben. Empfehlungen, Teambildung, Anbieterweiterleitung und RFx-Aktivität erscheinen, sobald diese Funktionen verfügbar sind.","link":"Warum The RFxchange existiert"},"audience":{"eyebrow":"Ein Netzwerk · unterschiedliche Verantwortlichkeiten","title":"Eine praktische Umgebung für Menschen, die die lokale Wirtschaft voranbringen.","items":[{"name":"Wirtschaftsförderer und kommunale Führungskräfte","promise":"Verbindende wirtschaftliche Infrastruktur","detail":"Beginnen Sie mit der Sichtbarkeit von Organisationen und Geografie; zusätzliche Funktionen bringen Ressourcenkoordination und messbare Netzwerkaktivität hinzu."},{"name":"Unternehmen","promise":"Eine wiederverwendbare Position für Geschäftsentwicklung","detail":"Richten Sie jetzt die Organisation und ihre Fähigkeiten ein und nutzen Sie Netzwerk- und RFx-Abläufe, sobald sie verfügbar sind."},{"name":"Ressourcenanbieter","promise":"Kontextbezogene Weiterleitung zu Unterstützung","detail":"Anbieterbewerbung, Weiterleitung und die Suche nach Servicegebieten werden als Plattformfunktionen ergänzt, statt bei der Registrierung als Rolle ausgewählt zu werden."}]},"evidence":{"eyebrow":"Vertrauen Sie dem, was Sie sehen","title":"Gestützte Informationen oder eine klare Kennzeichnung.","description":"Marketing- und Produktoberflächen dürfen keine Organisationen, Chancen, Statistiken, Ergebnisse, Referenzen, Anbieterverfügbarkeit oder Dashboards suggerieren, die nicht existieren.","link":"Öffentliche Bildnachweise ansehen →","rules":["Stockfotos schaffen visuelle Atmosphäre; sie belegen niemals RFxchange-Aktivität.","Synthetische Tutorial-Inhalte bleiben gekennzeichnet und von Teilnehmerdaten getrennt.","Zukünftige Produktfunktionen werden als geplant oder in Entwicklung ausgewiesen.","Öffentlicher Kontext zu einer Chance gewährt niemals privaten Zugang oder zusätzliche Berechtigungen.","Glaubwürdigkeit und Ergebnisse benötigen unterstützende Informationen, bevor sie dargestellt werden."]},"cta":{"eyebrow":"Treten Sie The RFxchange bei","line1":"Werden Sie gefunden.","line2":"Finden Sie Chancen.","line3":"Bauen Sie die Verbindung auf.","description":"Beginnen Sie mit dem, was bereits verfügbar ist: Richten Sie Ihre Organisation ein, bestätigen Sie die Geografie, beschreiben Sie Ihre Fähigkeiten und werden Sie im authentifizierten Exchange sichtbar."},"images":{"construction":"Baufachleute prüfen Arbeiten auf einer aktiven Baustelle.","workshop":"Unternehmer arbeiten in einem Workshop zusammen.","collaboration":"Fachleute arbeiten gemeinsam an einem Tisch.","region":"Eine regionale Stadt- und Wirtschaftslandschaft.","manufacturing":"Eine Fachkraft arbeitet in einer Produktionsanlage.","professional":"Ein professionelles Team im Gespräch.","warehouse":"Eine Person arbeitet in einem Lager."}}}
+{
+  "metadata": {
+    "title": "The RFxchange™",
+    "description": "Ein kartenbasiertes Netzwerk für Unternehmenswachstum, um Fähigkeiten, Chancen, Empfehlungen, Partnerschaften, Ressourcen und messbare Aktivität zu entdecken.",
+    "openGraphDescription": "Machen Sie Unternehmensfähigkeiten, Chancen und Verbindungen leichter auffindbar und umsetzbar."
+  },
+  "common": {
+    "languageSelector": {
+      "label": "Sprache",
+      "saving": "Sprache wird geändert…"
+    },
+    "actions": {
+      "joinFree": "Kostenlos beitreten",
+      "signIn": "Anmelden",
+      "learnMore": "Mehr erfahren"
+    }
+  },
+  "marketing": {
+    "nav": {
+      "ariaLabel": "Hauptnavigation Marketing",
+      "howItWorks": "So funktioniert es",
+      "businesses": "Für Unternehmen",
+      "buyers": "Für Käufer",
+      "resourceProviders": "Für Ressourcenanbieter",
+      "about": "Über uns"
+    },
+    "footer": {
+      "summary": "Ein lokales Netzwerk für Unternehmenswachstum, das Organisationen hilft, gefunden zu werden, Chancen zu entdecken und die richtigen Verbindungen aufzubauen.",
+      "byline": "Von Accel Analysis",
+      "explore": "Entdecken",
+      "foundingMembership": "Gründungsmitgliedschaft",
+      "organization": "Organisation",
+      "about": "Über RFxchange",
+      "imageCredits": "Bildnachweise",
+      "bottomMatter": "Rechtliches",
+      "terms": "Nutzungsbedingungen",
+      "privacy": "Datenschutzrichtlinie",
+      "rules": "Plattformregeln",
+      "accessibility": "Barrierefreiheit",
+      "copyright": "© 2026 The RFxchange. Von Accel Analysis.",
+      "tagline": "Sichtbar · Verbunden · Handlungsfähig"
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Ein lokales Netzwerk für Unternehmenswachstum · Von Accel Analysis",
+      "titleBefore": "Der lokale Markt ist bereits in Bewegung.",
+      "titleAccent": "Machen Sie ihn sichtbar.",
+      "summary": "The RFxchange bietet Organisationen eine gemeinsame Umgebung, in der sie anhand ihrer Fähigkeiten entdeckt werden und von Sichtbarkeit zu Chancen, Empfehlungen, Teams und Unterstützung übergehen können, sobald diese Funktionen verfügbar sind.",
+      "join": "Dem Exchange kostenlos beitreten",
+      "howItWorks": "So funktioniert es",
+      "evidenceNote": "Stockfotos dienen nur der Atmosphäre. Sie stellen keine Teilnehmer, Chancen, Ergebnisse, Referenzen oder Aktivitäten der RFxchange-Plattform dar."
+    },
+    "availability": {
+      "eyebrow": "Produktverfügbarkeit",
+      "title": "Sehen Sie, was verfügbar ist und was noch entwickelt wird.",
+      "description": "The RFxchange erfindet keine Marktaktivität zur Darstellung. Verfügbare, in Entwicklung befindliche und geplante Funktionen werden getrennt ausgewiesen.",
+      "items": [
+        {
+          "status": "Jetzt verfügbar",
+          "title": "Richten Sie Ihre Organisation ein",
+          "detail": "Erstellen Sie ein Konto, wählen Sie einen Ort, finden oder erstellen Sie die Organisation, bestätigen Sie den Standort, fügen Sie eine aussagekräftige Fähigkeit hinzu und schließen Sie die Einrichtung ab."
+        },
+        {
+          "status": "Jetzt verfügbar",
+          "title": "Werden Sie auf der Karte sichtbar",
+          "detail": "Eine korrekt aktivierte Organisation erhält eine bestätigte oder datenschutzgerechte Kartenposition und gelangt in den authentifizierten Exchange-Arbeitsbereich."
+        },
+        {
+          "status": "In Entwicklung",
+          "title": "Entdecken Sie das aktive Netzwerk",
+          "detail": "Fähigkeitensuche, Organisationssuche, Empfehlungen, Ressourcenanbieter und umfassendere Netzwerkansichten werden hinzugefügt, sobald sie bereit sind."
+        },
+        {
+          "status": "Demnächst",
+          "title": "Arbeiten Sie mit RFx und Ergebnissen weiter",
+          "detail": "RFx-Transaktionen, Informationen zur Glaubwürdigkeit und Ergebnisse werden ergänzt, sobald sie verfügbar sind. Diagramme beschreiben das Produktmodell, nicht die aktuelle Marktaktivität."
+        }
+      ]
+    },
+    "live": {
+      "eyebrow": "Jetzt verfügbar",
+      "title": "Ihre Organisation nimmt rund um einen bestätigten Standort Gestalt an.",
+      "description": "Der aktuelle Ablauf führt von der Kontoerstellung zu einer Kartenpräsenz der Organisation, ohne erfundene Chancendaten, Anbieterstatus, Geschäftsziele oder einen kostenpflichtigen Plan zu verlangen.",
+      "steps": [
+        {
+          "title": "Konto erstellen",
+          "detail": "Richten Sie Ihre Teilnehmeridentität ein und akzeptieren Sie die geltenden Richtlinien."
+        },
+        {
+          "title": "Ort auswählen",
+          "detail": "Wählen Sie das Gebiet, das den operativen Kontext der Organisation festlegt."
+        },
+        {
+          "title": "Organisation finden",
+          "detail": "Finden, beanspruchen oder erstellen Sie die Organisation."
+        },
+        {
+          "title": "Standort bestätigen",
+          "detail": "Geokodieren und bestätigen Sie einen Standort oder eine datenschutzgerechte Kartenposition."
+        },
+        {
+          "title": "Fähigkeit beschreiben",
+          "detail": "Fügen Sie die minimale aussagekräftige Fähigkeit hinzu, die zum Abschluss des Profils erforderlich ist."
+        },
+        {
+          "title": "Organisation aktivieren",
+          "detail": "Schließen Sie die Einführung ab und öffnen Sie den authentifizierten Exchange-Arbeitsbereich."
+        }
+      ]
+    },
+    "model": {
+      "eyebrow": "Sichtbar. Verbunden. Handlungsfähig.",
+      "title": "Eine Marktumgebung. Ein Weg von Sichtbarkeit zu Ergebnissen.",
+      "description": "Dieses Modell zeigt, wie The RFxchange die Sichtbarkeit einer Organisation mit Chancen, Beziehungen, Aktionen und Ergebnissen verbindet, sobald die jeweiligen Funktionen verfügbar sind.",
+      "label": "Geplantes Produktmodell · keine aktuelle Marktaktivität",
+      "ariaLabel": "RFxchange-Produktmodell",
+      "readMore": "Den vollständigen Produktweg ansehen →",
+      "steps": [
+        {
+          "kicker": "Sichtbar",
+          "title": "Organisation",
+          "detail": "Eine Organisation und ihre Fähigkeiten werden entsprechend den Berechtigungen und der Einrichtung sichtbar."
+        },
+        {
+          "kicker": "Nachfrage",
+          "title": "Chance",
+          "detail": "RFx führt strukturierte geschäftliche Nachfrage ein, wenn eine Chance veröffentlicht wird."
+        },
+        {
+          "kicker": "Passung",
+          "title": "Entdeckung",
+          "detail": "Eine mögliche Passung wird erklärt, ohne Qualifikation oder Empfehlung zu behaupten."
+        },
+        {
+          "kicker": "Verbindung",
+          "title": "Beziehung",
+          "detail": "Empfehlungen, Teams und Anbieter basieren auf Beziehungen, die in der Plattform erfasst sind."
+        },
+        {
+          "kicker": "Aktion",
+          "title": "Arbeitsablauf",
+          "detail": "Teilnehmer arbeiten in dem für ihre Rolle verfügbaren Ablauf weiter."
+        },
+        {
+          "kicker": "Nachweis",
+          "title": "Ergebnis",
+          "detail": "Glaubwürdigkeit und Ergebnisse werden angezeigt, wenn sie durch verlässliche Informationen gestützt sind."
+        }
+      ]
+    },
+    "difference": {
+      "eyebrow": "Ein lebendiger Markt, kein herkömmliches Dashboard",
+      "title": "Rund um Organisationen, Geografie und geschäftliche Aktion entwickelt.",
+      "items": [
+        {
+          "label": "Mehr als ein Verzeichnis",
+          "detail": "Die Aktivierung richtet eine Organisation, ihre Fähigkeiten, Geografie und Kartenpräsenz ein. Netzwerk- und RFx-Funktionen erweitern diese Position, sobald sie verfügbar sind."
+        },
+        {
+          "label": "Kein sozialer Feed",
+          "detail": "Das Produkt ist um Organisationen, Fähigkeiten, Geografie und geschäftliche Abläufe aufgebaut, nicht um Followerzahlen, allgemeine Beiträge oder erfundene Aktivität."
+        },
+        {
+          "label": "Mehr als ein Ausschreibungsportal",
+          "detail": "RFx ist Teil eines größeren lokalen Netzwerks für Unternehmenswachstum. Zukünftige Funktionen werden bis zu ihrer Verfügbarkeit als demnächst gekennzeichnet."
+        }
+      ]
+    },
+    "connection": {
+      "eyebrow": "Bauen Sie die Verbindung auf",
+      "title": "Der Kontext soll den Teilnehmer begleiten.",
+      "description": "Das Produkt ist so gestaltet, dass Fähigkeit, Bedarf, Organisation, Geografie und nächster Schritt miteinander verbunden bleiben. Empfehlungen, Teambildung, Anbieterweiterleitung und RFx-Aktivität erscheinen, sobald diese Funktionen verfügbar sind.",
+      "link": "Warum The RFxchange existiert"
+    },
+    "audience": {
+      "eyebrow": "Ein Netzwerk · unterschiedliche Verantwortlichkeiten",
+      "title": "Eine praktische Umgebung für Menschen, die die lokale Wirtschaft voranbringen.",
+      "items": [
+        {
+          "name": "Wirtschaftsförderer und kommunale Führungskräfte",
+          "promise": "Verbindende wirtschaftliche Infrastruktur",
+          "detail": "Beginnen Sie mit der Sichtbarkeit von Organisationen und Geografie; zusätzliche Funktionen bringen Ressourcenkoordination und messbare Netzwerkaktivität hinzu."
+        },
+        {
+          "name": "Unternehmen",
+          "promise": "Eine wiederverwendbare Position für Geschäftsentwicklung",
+          "detail": "Richten Sie jetzt die Organisation und ihre Fähigkeiten ein und nutzen Sie Netzwerk- und RFx-Abläufe, sobald sie verfügbar sind."
+        },
+        {
+          "name": "Ressourcenanbieter",
+          "promise": "Kontextbezogene Weiterleitung zu Unterstützung",
+          "detail": "Anbieterbewerbung, Weiterleitung und die Suche nach Servicegebieten werden als Plattformfunktionen ergänzt, statt bei der Registrierung als Rolle ausgewählt zu werden."
+        }
+      ]
+    },
+    "evidence": {
+      "eyebrow": "Vertrauen Sie dem, was Sie sehen",
+      "title": "Gestützte Informationen oder eine klare Kennzeichnung.",
+      "description": "Marketing- und Produktoberflächen dürfen keine Organisationen, Chancen, Statistiken, Ergebnisse, Referenzen, Anbieterverfügbarkeit oder Dashboards suggerieren, die nicht existieren.",
+      "link": "Öffentliche Bildnachweise ansehen →",
+      "rules": [
+        "Stockfotos schaffen visuelle Atmosphäre; sie belegen niemals RFxchange-Aktivität.",
+        "Synthetische Tutorial-Inhalte bleiben gekennzeichnet und von Teilnehmerdaten getrennt.",
+        "Zukünftige Produktfunktionen werden als geplant oder in Entwicklung ausgewiesen.",
+        "Öffentlicher Kontext zu einer Chance gewährt niemals privaten Zugang oder zusätzliche Berechtigungen.",
+        "Glaubwürdigkeit und Ergebnisse benötigen unterstützende Informationen, bevor sie dargestellt werden."
+      ]
+    },
+    "cta": {
+      "eyebrow": "Treten Sie The RFxchange bei",
+      "line1": "Werden Sie gefunden.",
+      "line2": "Finden Sie Chancen.",
+      "line3": "Bauen Sie die Verbindung auf.",
+      "description": "Beginnen Sie mit dem, was bereits verfügbar ist: Richten Sie Ihre Organisation ein, bestätigen Sie die Geografie, beschreiben Sie Ihre Fähigkeiten und werden Sie im authentifizierten Exchange sichtbar."
+    },
+    "images": {
+      "construction": "Baufachleute prüfen Arbeiten auf einer aktiven Baustelle.",
+      "workshop": "Unternehmer arbeiten in einem Workshop zusammen.",
+      "collaboration": "Fachleute arbeiten gemeinsam an einem Tisch.",
+      "region": "Eine regionale Stadt- und Wirtschaftslandschaft.",
+      "manufacturing": "Eine Fachkraft arbeitet in einer Produktionsanlage.",
+      "professional": "Ein professionelles Team im Gespräch.",
+      "warehouse": "Eine Person arbeitet in einem Lager."
+    }
+  }
+}

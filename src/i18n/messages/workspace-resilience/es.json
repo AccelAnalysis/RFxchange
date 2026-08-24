@@ -1,1 +1,11 @@
-{"geographyTitle":"Geografía y marcador","geographyLoading":"Cargando la geografía autorizada…","geographyUnavailable":"No disponible temporalmente","marketProfileTitle":"Perfil de mercado","marketProfileLoading":"Cargando el perfil de mercado…","marketProfileUnavailable":"La información del perfil de mercado no está disponible temporalmente. La cuenta de su organización sigue disponible; vuelva a intentar esta página para recargar el panel.","enrichmentTitle":"Enriquecimiento de la organización","enrichmentLoading":"Cargando credenciales, medios y ubicaciones…","enrichmentUnavailable":"El enriquecimiento de credenciales, medios y ubicaciones no está disponible temporalmente. La cuenta de su organización sigue disponible; vuelva a intentar esta página para recargar el panel."}
+{
+  "geographyTitle": "Geografía y marcador",
+  "geographyLoading": "Cargando la geografía autorizada…",
+  "geographyUnavailable": "No disponible temporalmente",
+  "marketProfileTitle": "Perfil de mercado",
+  "marketProfileLoading": "Cargando el perfil de mercado…",
+  "marketProfileUnavailable": "La información del perfil de mercado no está disponible temporalmente. La cuenta de su organización sigue disponible; vuelva a intentar esta página para recargar el panel.",
+  "enrichmentTitle": "Enriquecimiento de la organización",
+  "enrichmentLoading": "Cargando credenciales, medios y ubicaciones…",
+  "enrichmentUnavailable": "El enriquecimiento de credenciales, medios y ubicaciones no está disponible temporalmente. La cuenta de su organización sigue disponible; vuelva a intentar esta página para recargar el panel."
+}

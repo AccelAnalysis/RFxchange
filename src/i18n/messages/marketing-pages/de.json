@@ -1,1 +1,472 @@
-{"availability":{"eyebrow":"Produktverfügbarkeit","title":"Das Netzwerk ist live. Die Transaktions-Engine folgt.","description":"Welle 3 ist abgeschlossen. Organisationen können eine strukturierte Marktposition aufbauen, zulässige Teilnehmer entdecken, einvernehmliche Verbindungen herstellen, zugelassene Ressourcen finden und kontextbezogene Hilfe erneut öffnen. Spätere Domänen bleiben klar gekennzeichnet.","items":[{"kind":"live","status":"Jetzt verfügbar","title":"Organisation + Marktprofil","detail":"Erstellen oder beanspruchen Sie eine Organisation, legen Sie ihre reale oder datenschutzgerechte Kartenposition fest und bestätigen Sie AMACS-gestützte Fähigkeiten, Produkte, Dienstleistungen, Branchenkontext, Nachweise, Medien, bisherige Leistungen, Präferenzen und zusätzliche Standorte."},{"kind":"live","status":"Jetzt verfügbar","title":"Entdeckung + Empfehlungen","detail":"Entdecken Sie zulässige Organisationen nach bestätigten Fähigkeiten, Geografie und Servicegebiet. Erstellen Sie organisationsbezogene Empfehlungen mit Zweck, Einwilligung, minimal erforderlicher Datenweitergabe, Lebenszyklusstatus und Kontinuität für externe Empfänger."},{"kind":"live","status":"Jetzt verfügbar","title":"Ressourcen + dauerhafte Orientierung","detail":"Finden Sie zugelassene Ressourcenanbieter nach Servicegebiet, Berechtigung und autorisiertem Kontext; erstellen Sie einvernehmliche Anbieterverbindungen; sehen Sie Anbieterressourcen; und öffnen Sie Schnellstart, Rollenpfade und Workflow-Erklärungen erneut."},{"kind":"planned","status":"Nächster geregelter Pfad","title":"RFx Core, Glaubwürdigkeit + Handel","detail":"RFx-Erstellung und -Veröffentlichung, Antworten, Teaming, Bewertung, Glaubwürdigkeit, Ergebnisse, erweiterte Anbieterkapazität und bezahlte Berechtigungen bleiben spätere geregelte Arbeit. Sie werden heute nicht als live dargestellt."}]},"home":{"metadata":{"title":"Machen Sie Ihr Unternehmen leichter auffindbar und verständlich","description":"The RFxchange hilft Unternehmen, ihren Bedarf zu beschreiben, ihre Fähigkeiten zu definieren, relevante Organisationen zu entdecken und durch eine gemeinsame Marktsprache bessere Geschäftsverbindungen aufzubauen."},"campaign":{"ariaLabel":"Kampagne für Gründungsorganisationen","text":"Die Founding 250 formieren sich.","link":"Gestalten Sie die erste RFxchange-Unternehmenskohorte mit."},"hero":{"eyebrow":"Ein lokales Netzwerk für Unternehmenswachstum · Von Accel Analysis","titleBefore":"Machen Sie Ihr Unternehmen leichter verständlich—","titleAccent":"und leichter, mit ihm Geschäfte zu machen.","summary":"Beschreiben Sie, was Sie brauchen. Definieren Sie, was Sie leisten können. The RFxchange verwandelt bestätigte geschäftliche Bedeutung in nutzbare Marktstruktur, damit relevante Organisationen, Ressourcen und nächste Schritte leichter zu entdecken sind.","primary":"Bringen Sie Ihr Unternehmen auf die Karte","secondary":"So funktioniert es","note":"Starten Sie kostenlos. Richten Sie Ihre Organisation ein, bestätigen Sie ihre Fähigkeiten und betreten Sie das Live-Netzwerk.","stockNote":"Fotografie dient nur der Atmosphäre. Sie zeigt keine RFxchange-Teilnehmer, Chancen, Ergebnisse, Referenzen oder Live-Aktivitäten."},"value":{"ariaLabel":"RFxchange-Kundennutzenentwicklung","items":[{"kicker":"Verständlich","title":"Drücken Sie aus, was Ihr Unternehmen tatsächlich kann.","detail":"Beginnen Sie in normaler Geschäftssprache und bestätigen Sie anschließend die Struktur, die Ihre Organisation abbildet."},{"kicker":"Auffindbar","title":"Werden Sie aus relevanten Gründen gefunden.","detail":"Bestätigte Fähigkeiten, Geografie und Servicekontext verbessern die Entdeckung über Namen oder grobe Kategorien hinaus."},{"kicker":"Verbindbar","title":"Nehmen Sie den Grund mit in die Beziehung.","detail":"Empfehlungen und Anbieterverbindungen bewahren nützlichen Kontext, statt die Interaktion auf Kontaktdaten zu reduzieren."},{"kicker":"Handlungsfähig","title":"Gehen Sie den passenden nächsten Schritt.","detail":"Veröffentlichte Workflows verwandeln Kontext in Handlung und halten potenzielle Passung, Verbindung, Entscheidung und Ergebnis getrennt."}],"promise":"Gefunden werden. Chancen finden. Die Verbindung aufbauen."},"problem":{"eyebrow":"Das Problem","title":"Geschäftschancen gehen oft in der Übersetzung verloren.","description":"Unternehmen kennen meist das gewünschte Ergebnis. Sie kennen jedoch nicht immer die richtige Anbieterkategorie, den passenden Fähigkeitsbegriff, die Beschaffungssprache oder die anzufordernden Nachweise. Leistungsfähige Anbieter haben dasselbe Problem in umgekehrter Richtung.","items":[{"title":"„Ich weiß, was ich brauche – aber nicht, wie es heißt.“","detail":"Ein Geschäftsproblem kommt selten bereits mit der richtigen Klassifizierung."},{"title":"„Wir können die Arbeit leisten – aber Kunden beschreiben sie anders.“","detail":"Ähnliche Fähigkeiten können über unterschiedliche Branchen, Dienstleistungen und Begriffe ausgedrückt werden."},{"title":"„Ein Verzeichnis sagt mir, wer existiert – nicht immer, wer passt.“","detail":"Namen, Websites und Branchencodes sind hilfreich, verbinden aber einen konkreten Bedarf nicht vollständig mit der erforderlichen Fähigkeit."},{"title":"„Der Kontext verschwindet, während der Prozess weiterläuft.“","detail":"E-Mail, Tabellen, Empfehlungen, Förderprogramme und Ausschreibungsportale enthalten häufig unterschiedliche Teile desselben Bedarfs."}],"closing":"The RFxchange wurde entwickelt, um diese Übersetzungslücke zu verringern."},"how":{"eyebrow":"Von Alltagssprache zu Marktaktion","title":"Beginnen Sie mit dem, was Sie wissen. The Exchange hilft bei der Struktur.","description":"Sie sollten kein Klassifizierungssystem lernen müssen, bevor Sie erklären können, was Ihr Unternehmen braucht oder leisten kann.","ariaLabel":"Wie The RFxchange Geschäftssprache in Marktaktion überführt","steps":[{"kicker":"Beschreiben","title":"Sagen Sie, was Sie brauchen oder leisten können.","detail":"Beginnen Sie in normaler Geschäftssprache oder durchsuchen Sie strukturierte Fähigkeiten direkt."},{"kicker":"Interpretieren","title":"Ermitteln Sie mögliche Marktkonzepte.","detail":"Geregelte Unterstützung kann relevante AMACS-Konzepte abrufen und mögliche Beziehungen ordnen."},{"kicker":"Bestätigen","title":"Sie entscheiden, was wahr ist.","detail":"Vorschläge werden erst dann zu verbindlichen Aussagen oder Anforderungen, wenn ein autorisierter Teilnehmer sie im jeweiligen Workflow bestätigt."},{"kicker":"Entdecken","title":"Finden Sie potenzielle Passung mit aussagekräftigem Kontext.","detail":"Bestätigte Fähigkeiten, Geografie, Servicegebiet und autorisierte Profildaten unterstützen deterministische Entdeckung."},{"kicker":"Verbinden","title":"Wechseln Sie in die richtige Geschäftsbeziehung.","detail":"Nutzen Sie veröffentlichte Empfehlungs- und Ressourcenworkflows unter Wahrung von Zweck, Einwilligung und minimal erforderlichem Kontext."},{"kicker":"Lernen","title":"Machen Sie geregelte Aktivität zu besserem Marktverständnis.","detail":"Wenn spätere Domänen geöffnet werden, können Antworten, Entscheidungen, Nachweise und Ergebnisse Marktinformationen verbessern, ohne Annahmen in Fakten umzuwandeln."}]},"amacs":{"eyebrow":"Der Standard unter The Exchange","title":"Eine gemeinsame Sprache für Marktaktivität.","description":"The RFxchange nutzt den Accel Market Activity and Capability Standard—AMACS—um mehr zu verbinden als nur das Angebot eines Unternehmens oder seine Branchenzugehörigkeit.","support":"AMACS gibt The Exchange eine gemeinsame Methode, den Bedarf des Marktes mit den tatsächlichen Fähigkeiten von Organisationen zu verbinden.","nodes":[{"title":"Bedarf","detail":"Was versucht der Markt zu erreichen?"},{"title":"Fähigkeit","detail":"Was muss ein Anbieter leisten können?"},{"title":"Nachweis","detail":"Was hilft, die relevante Eignung zu belegen?"},{"title":"Antwort","detail":"Welche Informationen benötigt der Markt zurück?"},{"title":"Entscheidung","detail":"Wie werden Alternativen bewertet?"},{"title":"Ergebnis","detail":"Was ist letztlich geschehen?"}],"futureNote":"Bedarf und Fähigkeit sind bereits zentral im aktuellen Produkt. RFx, Entscheidung, Glaubwürdigkeit und Ergebnisse bleiben spätere geregelte Pfade."},"ai":{"eyebrow":"Unterstützung mit Autoritätsgrenzen","title":"KI kann vorschlagen. Menschen bestätigen.","description":"KI kann den Aufwand verringern, alltägliche Beschreibungen in strukturierte Marktinformationen zu überführen. Sie kann relevante AMACS-Konzepte vorschlagen und mögliche Beziehungen erklären – aber ein Vorschlag ist keine Markttatsache.","highlight":"Ein autorisierter Teilnehmer bestätigt, was die Organisation tatsächlich benötigt, anbietet oder darstellt, bevor sich der verbindliche Zustand ändert.","principles":["Normale Geschäftssprache bleibt ein zulässiger Ausgangspunkt.","Das Modell darf keine AMACS-Kennungen erfinden oder stillschweigend Aussagen erzeugen.","Abgelehnte oder ungeklärte Vorschläge dürfen verbindliche Entdeckung oder Zuordnung nicht beeinflussen.","Manuelles AMACS-Browsen und -Suchen bleibt verfügbar, wenn die Unterstützung deaktiviert oder nicht verfügbar ist."]},"network":{"eyebrow":"Den Markt sehen","title":"Sehen Sie den Markt rund um Ihr Unternehmen.","description":"The RFxchange beginnt mit einer realen Organisation an einem realen Ort. Nach der Aktivierung erhält die Organisation eine reale oder datenschutzgerechte Kartenposition und kann über bestätigte Marktinformationen entdeckt werden.","items":[{"title":"Unternehmen nach Fähigkeit finden.","detail":"Suchen Sie danach, was Organisationen leisten können – nicht nur nach ihrem Namen."},{"title":"Geografie als Geschäftskontext nutzen.","detail":"Verstehen Sie, wo teilnehmende Organisationen ansässig sind und welche Gebiete sie autorisiert bedienen."},{"title":"Die Organisation hinter dem Marker öffnen.","detail":"Wechseln Sie vom Standort in den zulässigen Fähigkeits-, Service- und Organisationskontext."},{"title":"Von der Entdeckung zur Handlung wechseln.","detail":"Erstellen Sie einvernehmliche Empfehlungen und Anbieterverbindungen, ohne Entdeckung selbst als Ergebnis darzustellen."}],"imageNote":"Atmosphärisches Bild – kein Nachweis von Live-RFxchange-Marktaktivität."},"trust":{"eyebrow":"Vertrauen Sie dem, was Sie sehen","title":"Glaubwürdigkeit sollte aus Nachweisen entstehen – nicht aus Bezahlung.","description":"RFxchange trennt Unternehmensaussagen, öffentliche Quellen, Anbieterzulassung, Verifizierung, Verbindungen, kommerzielle Anerkennung und Ergebnisse, statt alles in ein einziges Abzeichen zu pressen.","highlight":"Bezahlte Mitgliedschaft, Founding-Anerkennung oder Sponsoring kaufen keine bessere Fähigkeitszuordnung, Verifizierung, Qualifikation oder bevorzugte Platzierung in neutraler Entdeckung.","rules":["Eine selbst angegebene Fähigkeit ist nicht automatisch verifiziert.","Der Status Offizieller Ressourcenanbieter ist eine genehmigte institutionelle Rolle – keine Garantie für Passung oder Verfügbarkeit.","Eine Empfehlung oder Anbieterverbindung ist weder eine abgeschlossene Leistung noch ein erfolgreicher Ausgang.","Künftige Glaubwürdigkeits- und Ergebnissignale müssen Nachweis und Autorität benennen."]},"audience":{"eyebrow":"Unterschiedliche Rollen · gemeinsamer Marktkontext","title":"Eine nützliche Position für jede Organisation, die Geschäft voranbringt.","items":[{"name":"Unternehmen","promise":"Gefunden werden. Finden, was Sie brauchen. Die Beziehung aufbauen.","detail":"Bestätigen Sie Fähigkeiten und nutzen Sie das Netzwerk als wiederverwendbare Geschäftsentwicklungsposition."},{"name":"Ressourcenanbieter","promise":"Erreichen Sie Unternehmen im Kontext eines echten Bedarfs.","detail":"Zugelassene Anbieter können geregelte Dienstleistungen, Gebiete, Berechtigung, Aufnahme, Ressourcen und Verbindungspfade sichtbar machen."},{"name":"Wirtschafts- + Gemeinschaftsverantwortliche","promise":"Sehen Sie, wie teilnehmende Marktbausteine zusammenhängen.","detail":"Nutzen Sie reale Organisations- und Netzwerkaktivität, ohne unvollständige Teilnahme mit der gesamten Wirtschaft gleichzusetzen."}]},"founding":{"eyebrow":"Die Founding 250","title":"Gestalten Sie das Netzwerk mit, das Ihr Unternehmen nutzen soll.","description":"Gründungsorganisationen bauen ihre Marktposition früh auf, beteiligen sich an strukturiertem Launch-Feedback und helfen sichtbar zu machen, wo RFxchange und AMACS klarer und nützlicher werden müssen.","primary":"Founding-Teilnahme erkunden","secondary":"Kostenlos beitreten","note":"Founding-Anerkennung bedeutet keine Verifizierung, Qualifikation, Empfehlung oder bevorzugte Suchbehandlung."},"cta":{"eyebrow":"The RFxchange betreten","title":"Ihr Unternehmen besitzt bereits Fähigkeiten. Machen Sie sie für den Markt leichter verständlich.","description":"Richten Sie Ihre Organisation ein, bringen Sie sie auf die Karte und bauen Sie die Marktposition auf, die Ihre Leistungen mit dem Bedarf anderer Unternehmen verbindet.","primary":"Kostenlos beitreten","secondary":"Anmelden","promise":"Gefunden werden. Chancen finden. Die Verbindung aufbauen."},"images":{"hero":"Luftaufnahme einer regionalen Stadt, Wasserwege und Wirtschaftsgeografie.","problem":"Fachleute besprechen operative Arbeit an einem Tisch.","ai":"Fachleute arbeiten gemeinsam an Geschäftsdokumenten.","network":"Handwerker kleiner Unternehmen arbeiten in einer Werkstatt.","audienceBusiness":"Fachkraft in einer Produktionsanlage.","audienceProvider":"Baufachleute prüfen Arbeiten auf einer aktiven Baustelle.","audienceLeader":"Regionale Stadt- und Wirtschaftslandschaft.","founding":"Fachleute arbeiten gemeinsam an einem Tisch.","cta":"Lagergänge voller Bestand."}},"founding":{"metadata":{"title":"Teilnahme als Gründungsorganisation","description":"Treten Sie der ersten RFxchange-Unternehmenskohorte bei, richten Sie Ihre Organisation früh ein und helfen Sie, die Marktsprache und Workflows zu verbessern, die Bedarf und Fähigkeiten verbinden."},"hero":{"eyebrow":"Die Founding 250","title":"Gestalten Sie einen Markt mit, in dem Unternehmen leichter zu verstehen und zu verbinden sind.","description":"Wir bilden die erste Organisationskohorte auf The RFxchange. Richten Sie Ihr Unternehmen früh ein, bestätigen Sie seine Marktfähigkeiten, nutzen Sie die Live-Netzwerkworkflows und helfen Sie, das System für nachfolgende Organisationen zu verbessern.","primary":"Mit Ihrer Organisation beginnen","secondary":"Sehen, was live ist","price":"Geplante Founding-Mitgliedschaft: 49 $/Monat","cap":"Begrenzt auf 250 Organisationen","readiness":"Die bezahlte Anmeldung öffnet erst, wenn die genehmigten Founding-Berechtigungen und die Abrechnung vollständig betriebsbereit sind. Nützliche Kernteilnahme bleibt kostenlos.","stockNote":"Fotografie dient nur der Atmosphäre. Sie zeigt keine Gründungsmitglieder, Ergebnisse oder Live-RFxchange-Aktivitäten."},"why":{"eyebrow":"Warum jetzt teilnehmen","title":"Sie müssen nicht auf die vollständige Fertigstellung von The Exchange warten, um Wert zu schaffen.","description":"Der erste nützliche Schritt besteht darin, Ihre Organisation für den Markt verständlich zu machen. Je klarer bestätigte Fähigkeiten und Kontext sind, desto nützlicher werden spätere Entdeckungs- und Transaktionsworkflows.","items":[{"title":"Bauen Sie Ihre Position früh auf","detail":"Erstellen oder beanspruchen Sie die Organisation, bestätigen Sie ihre Geografie und bauen Sie eine strukturierte Fähigkeitsposition auf, bevor die umfassendere Transaktions-Engine öffnet."},{"title":"Gestalten Sie praktische Workflows mit","detail":"Nutzen Sie reale Geschäftssituationen, um zu zeigen, wo Begriffe verwirren, Informationen belastend sind oder Verbindungen besseren Kontext benötigen."},{"title":"Tragen Sie zu einer besseren Marktsprache bei","detail":"Reale Teilnahme kann Lücken sichtbar machen, die in geregelte RFxchange- und AMACS-Prüfung einfließen – ohne dass Nutzung den Standard stillschweigend umschreibt."},{"title":"Werden Sie als Teil der Launch-Kohorte anerkannt","detail":"Die Anerkennung als Gründungsorganisation dokumentiert historische Teilnahme. Sie ist keine Verifizierung, Qualifikation, Empfehlung oder Aussage über höhere Leistung."}]},"scenario":{"eyebrow":"Das Problem, für das wir bauen","title":"Unternehmer sollten keine Beschaffungsexperten sein müssen, um einen Bedarf zu erklären.","quote":"„Unsere bisherige Bestandsverwaltung reicht nicht mehr aus, und wir brauchen Hilfe, ein besseres System zu finden.“","description":"Diese Aussage kann Prozessanalyse, Bestandssoftware, Systemintegration, Datenmigration, Schulung, Workflow-Design oder mehrere Fähigkeiten zusammen betreffen. RFxchange wird so aufgebaut, dass das Unternehmen mit dem verstandenen Problem beginnen und anschließend eine nützliche Struktur bestätigen kann."},"standard":{"eyebrow":"Ein Standard – keine Blackbox","title":"KI hilft bei der Übersetzung. AMACS liefert die Struktur. Menschen liefern die Autorität.","description":"AMACS verbindet Bedarf, Fähigkeit, Nachweis, Antwort, Entscheidung und Ergebnis. KI kann relevante Konzepte vorschlagen, entscheidet aber nicht, was Ihr Unternehmen leisten kann, erzeugt nicht still eine Anforderung und erklärt keine andere Organisation für qualifiziert.","highlight":"Vorschläge reduzieren den Aufwand. Autorisierte Menschen bestätigen die Markttatsachen.","flow":["Bedarf","Fähigkeit","Nachweis","Antwort","Entscheidung","Ergebnis"]},"membership":{"eyebrow":"Eine tiefere Beteiligungsebene","title":"Kostenlose Teilnahme schafft Dichte. Founding-Teilnahme unterstützt den Start.","description":"Ein nützlicher Markt darf Legitimität nicht hinter einer Bezahlschranke verstecken. Die Founding-Mitgliedschaft richtet sich an Organisationen, die nach erstem Produktnutzen eine tiefere Rolle im Start übernehmen möchten.","items":[{"title":"Anerkennung als Gründungsorganisation","detail":"Historische Anerkennung der Launch-Kohorte gemäß den geltenden Programmbedingungen."},{"title":"Strukturiertes Founder-Feedback","detail":"Definierte Möglichkeiten, praktisches Feedback zu Fähigkeitsstruktur, Geschäftssprache und neu veröffentlichten Workflows zu geben."},{"title":"Founder-Launch-Support","detail":"Spezifisches Onboarding und Release-Begleitung zum Aufbau einer nützlichen Organisationsposition."},{"title":"Genehmigte erweiterte Werkzeuge","detail":"Früher Zugang zu ausgewählten bezahlten Produktivitätsfunktionen erst nach Implementierung und Genehmigung der jeweiligen Berechtigung."}],"readiness":"Nicht implementierte Vorteile werden nicht als aktive Berechtigungen beworben."},"comparison":{"eyebrow":"Kostenlos oder Founding","title":"Sie müssen nicht bezahlen, um auf The RFxchange legitim zu sein.","description":"Kernmarktteilnahme und neutrale Entdeckung bleiben von kommerzieller Anerkennung getrennt.","free":{"title":"Kostenlose Organisation","subtitle":"Für nützliche Teilnahme","items":["Organisation einrichten oder beanspruchen.","Kernprofil der Organisation und Fähigkeiten pflegen.","An zulässiger Fähigkeits- und Geografieentdeckung teilnehmen.","Ausgewiesene kostenlose Empfehlungs-, Ressourcen- und Bildungsworkflows nutzen.","Künftige substanzielle Glaubwürdigkeit nur durch geregelte Nachweise und Aktivität erwerben.","Keinen gekauften Vorteil bei Zuordnung oder Qualifikation erhalten."],"cta":"Kostenlos beitreten"},"founding":{"title":"Gründungsorganisation","subtitle":"Für tiefere Launch-Teilnahme","items":["Alles aus der nützlichen kostenlosen Teilnahme.","Anerkennung als Gründungsorganisation.","Strukturierte Teilnahme am Launch-Feedbackprogramm.","Founder-Launch-Support.","Früher Zugang zu ausgewählten genehmigten erweiterten Werkzeugen.","Keine bezahlte Veränderung von neutraler Entdeckung, Verifizierung oder Qualifikation."],"price":"49 $/Monat, sobald die Anmeldung öffnet","cap":"Begrenzt auf 250 Organisationen","cta":"Mit Ihrer Organisation beginnen"},"footnote":"Gründungsorganisation ist Teilnahme und kommerzielle Anerkennung. Sie ist keine Verifizierung, kein Trusted-Status, keine Qualifikation, Empfehlung oder Garantie von Geschäftsergebnissen."},"contribution":{"eyebrow":"Für Ihr Unternehmen bauen · zum Markt beitragen","title":"Jedes reale Unternehmen lehrt uns etwas, das ein hypothetisches nicht kann.","description":"Ein Unternehmen kann zeigen, dass zwei ähnliche Fähigkeiten wesentlich verschieden sind, dass ein Käufer eine von der aktuellen Struktur schlecht erkannte Sprache verwendet oder dass eine Empfehlung zusätzlichen Kontext braucht, um nützlich zu werden.","highlight":"Ihre Organisation erhält eine klarere Darstellung. Geregelte Prüfung kann Markterkenntnisse in Verbesserungen für nachfolgende Organisationen überführen."},"boundaries":{"eyebrow":"Kommerzielle Neutralität","title":"Geld macht ein Unternehmen nicht passender.","items":[{"title":"Kein Pay-to-rank","detail":"Founding-Status stellt eine Organisation in neutraler Entdeckung nicht über einen relevanteren Teilnehmer."},{"title":"Kein Pay-to-verify","detail":"Mitgliedschaft beweist nicht, dass eine Fähigkeit, ein Nachweis oder eine Unternehmensaussage wahr ist."},{"title":"Kein Pay-to-qualify","detail":"Founding-Status kann die Anforderungen einer konkreten Chance nicht ersetzen."},{"title":"Kein garantiertes Geschäft","detail":"RFxchange garantiert keine Leads, Empfehlungen, Verträge, Umsätze, Zuschläge, Finanzierung oder Wachstum."}],"closing":"Kommerzielle Vorteile und Marktwahrheit bleiben bewusst getrennt."},"faq":{"eyebrow":"Fragen vor dem Start","title":"Founding-Teilnahme klar erklärt.","items":[{"question":"Muss ich wissen, wie man eine RFP schreibt?","answer":"Nein. RFxchange ist breiter als formale Beschaffung. Sie können mit dem Bedarf beginnen, den Sie verstehen; spätere RFx-Workflows fügen die passende Transaktionsstruktur hinzu."},{"question":"Muss ich AMACS-Codes verstehen?","answer":"Nein. Sie können strukturierte Konzepte durchsuchen, doch Alltagssprach-Unterstützung und Erklärungen machen den Standard nutzbar, ohne eine Taxonomie auswendig zu lernen."},{"question":"Macht Founding-Teilnahme mein Unternehmen verifiziert?","answer":"Nein. Gründungsorganisation ist eine Anerkennung der Launch-Kohorte. Verifizierung erfordert die jeweils geregelten Nachweise und Verfahren."},{"question":"Verbessert Founding-Mitgliedschaft mein Suchranking?","answer":"Nein. Zahlung verändert weder substanzielle Fähigkeitswahrheit noch neutrale Zuordnung, Qualifikation oder Glaubwürdigkeit."},{"question":"Ist die gesamte RFxchange-Plattform live?","answer":"Nein. Das Netzwerk aus Welle 3 ist live. RFx Core, Bewertung, Glaubwürdigkeit, Ergebnisse und bezahlte Berechtigungen bleiben spätere geregelte Pfade."},{"question":"Warum teilnehmen, bevor alles fertig ist?","answer":"Weil eine nützliche Marktposition vor der finalen Transaktions-Engine beginnt. Sie können jetzt strukturierte Organisationsinformationen aufbauen und helfen, Verbesserungsbedarf in späteren Workflows zu erkennen."},{"question":"Wie wird KI eingesetzt?","answer":"KI kann Alltagssprache interpretieren und relevante AMACS-Konzepte vorschlagen. Vorschläge bleiben unverbindlich, bis ein autorisierter Teilnehmer die jeweilige Bestätigungsaktion ausführt."},{"question":"Was geschieht, wenn AMACS etwas nicht beschreibt, das mein Unternehmen tut?","answer":"Erzwingen Sie keine falsche Klassifizierung. Bewahren Sie die ungeklärte Bedeutung und nutzen Sie – sofern verfügbar – den geregelten Pfad für vorläufige Begriffe und Prüfung."},{"question":"Kann ich teilnehmen, ohne Founder zu werden?","answer":"Ja. Nützliche kostenlose Organisationsteilnahme ist beabsichtigt. Founding ist eine tiefere Launch-Ebene, keine Maut vor legitimer Netzwerkaktivität."}]},"cta":{"eyebrow":"Die Founding 250","title":"Bauen Sie Ihre Position jetzt auf. Helfen Sie, den nächsten Markt zu verbessern.","description":"Richten Sie Ihre Organisation ein, bestätigen Sie, was Ihr Unternehmen tatsächlich leisten kann, und werden Sie Teil der Kohorte, die ein Live-Netzwerk zu einem verständlicheren Markt entwickelt.","primary":"Mit Ihrer Organisation beginnen","secondary":"Kostenlos beitreten","note":"Geplant für 49 $/Monat bei Öffnung der genehmigten kommerziellen Anmeldung · begrenzt auf 250 Organisationen · Kernteilnahme bleibt kostenlos."},"images":{"hero":"Lagergänge voller Bestand.","contribution":"Fachleute arbeiten gemeinsam an Geschäftsdokumenten."}}}
+{
+  "availability": {
+    "eyebrow": "Produktverfügbarkeit",
+    "title": "Das Netzwerk ist live. Die Transaktions-Engine folgt.",
+    "description": "Organisationen können eine strukturierte Marktposition aufbauen, zulässige Teilnehmer entdecken, einvernehmliche Verbindungen herstellen, zugelassene Ressourcen finden und kontextbezogene Hilfe erneut öffnen. künftige Funktionen bleiben klar gekennzeichnet.",
+    "items": [
+      {
+        "kind": "live",
+        "status": "Jetzt verfügbar",
+        "title": "Organisation + Marktprofil",
+        "detail": "Erstellen oder beanspruchen Sie eine Organisation, legen Sie ihre bestätigte oder datenschutzgerechte Kartenposition fest und bestätigen Sie AMACS-gestützte Fähigkeiten, Produkte, Dienstleistungen, Branchenkontext, Nachweise, Medien, bisherige Leistungen, Präferenzen und zusätzliche Standorte."
+      },
+      {
+        "kind": "live",
+        "status": "Jetzt verfügbar",
+        "title": "Entdeckung + Empfehlungen",
+        "detail": "Entdecken Sie zulässige Organisationen nach bestätigten Fähigkeiten, Geografie und Servicegebiet. Erstellen Sie organisationsbezogene Empfehlungen mit Zweck, Einwilligung, minimal erforderlicher Datenweitergabe, Lebenszyklusstatus und Kontinuität für externe Empfänger."
+      },
+      {
+        "kind": "live",
+        "status": "Jetzt verfügbar",
+        "title": "Ressourcen + dauerhafte Orientierung",
+        "detail": "Finden Sie zugelassene Ressourcenanbieter nach Servicegebiet, Berechtigung und autorisiertem Kontext; erstellen Sie einvernehmliche Anbieterverbindungen; sehen Sie Anbieterressourcen; und öffnen Sie Schnellstart, Rollenpfade und Workflow-Erklärungen erneut."
+      },
+      {
+        "kind": "planned",
+        "status": "Kommende Funktionen",
+        "title": "RFx Core, Glaubwürdigkeit + Handel",
+        "detail": "RFx-Erstellung und -Veröffentlichung, Antworten, Teaming, Bewertung, Glaubwürdigkeit, Ergebnisse, erweiterte Anbieterkapazität und bezahlte Berechtigungen bleiben künftige Funktionen. Sie werden heute nicht als live dargestellt."
+      }
+    ]
+  },
+  "home": {
+    "metadata": {
+      "title": "Machen Sie Ihr Unternehmen leichter auffindbar und verständlich",
+      "description": "The RFxchange hilft Unternehmen, ihren Bedarf zu beschreiben, ihre Fähigkeiten zu definieren, relevante Organisationen zu entdecken und durch eine gemeinsame Marktsprache bessere Geschäftsverbindungen aufzubauen."
+    },
+    "campaign": {
+      "ariaLabel": "Kampagne für Gründungsorganisationen",
+      "text": "Die Founding 250 formieren sich.",
+      "link": "Gestalten Sie die erste RFxchange-Unternehmenskohorte mit."
+    },
+    "hero": {
+      "eyebrow": "Ein lokales Netzwerk für Unternehmenswachstum · Von Accel Analysis",
+      "titleBefore": "Machen Sie Ihr Unternehmen leichter verständlich—",
+      "titleAccent": "und leichter, mit ihm Geschäfte zu machen.",
+      "summary": "Beschreiben Sie, was Sie brauchen. Definieren Sie, was Sie leisten können. The RFxchange verwandelt bestätigte geschäftliche Bedeutung in nutzbare Marktstruktur, damit relevante Organisationen, Ressourcen und nächste Schritte leichter zu entdecken sind.",
+      "primary": "Bringen Sie Ihr Unternehmen auf die Karte",
+      "secondary": "So funktioniert es",
+      "note": "Starten Sie kostenlos. Richten Sie Ihre Organisation ein, bestätigen Sie ihre Fähigkeiten und betreten Sie das Live-Netzwerk.",
+      "stockNote": "Fotografie dient nur der Atmosphäre. Sie zeigt keine RFxchange-Teilnehmer, Chancen, Ergebnisse, Referenzen oder Live-Aktivitäten."
+    },
+    "value": {
+      "ariaLabel": "RFxchange-Kundennutzenentwicklung",
+      "items": [
+        {
+          "kicker": "Verständlich",
+          "title": "Drücken Sie aus, was Ihr Unternehmen tatsächlich kann.",
+          "detail": "Beginnen Sie in normaler Geschäftssprache und bestätigen Sie anschließend die Struktur, die Ihre Organisation abbildet."
+        },
+        {
+          "kicker": "Auffindbar",
+          "title": "Werden Sie aus relevanten Gründen gefunden.",
+          "detail": "Bestätigte Fähigkeiten, Geografie und Servicekontext verbessern die Entdeckung über Namen oder grobe Kategorien hinaus."
+        },
+        {
+          "kicker": "Verbindbar",
+          "title": "Nehmen Sie den Grund mit in die Beziehung.",
+          "detail": "Empfehlungen und Anbieterverbindungen bewahren nützlichen Kontext, statt die Interaktion auf Kontaktdaten zu reduzieren."
+        },
+        {
+          "kicker": "Handlungsfähig",
+          "title": "Gehen Sie den passenden nächsten Schritt.",
+          "detail": "Veröffentlichte Workflows verwandeln Kontext in Handlung und halten potenzielle Passung, Verbindung, Entscheidung und Ergebnis getrennt."
+        }
+      ],
+      "promise": "Gefunden werden. Chancen finden. Die Verbindung aufbauen."
+    },
+    "problem": {
+      "eyebrow": "Das Problem",
+      "title": "Geschäftschancen gehen oft in der Übersetzung verloren.",
+      "description": "Unternehmen kennen meist das gewünschte Ergebnis. Sie kennen jedoch nicht immer die richtige Anbieterkategorie, den passenden Fähigkeitsbegriff, die Beschaffungssprache oder die anzufordernden Nachweise. Leistungsfähige Anbieter haben dasselbe Problem in umgekehrter Richtung.",
+      "items": [
+        {
+          "title": "„Ich weiß, was ich brauche – aber nicht, wie es heißt.“",
+          "detail": "Ein Geschäftsproblem kommt selten bereits mit der richtigen Klassifizierung."
+        },
+        {
+          "title": "„Wir können die Arbeit leisten – aber Kunden beschreiben sie anders.“",
+          "detail": "Ähnliche Fähigkeiten können über unterschiedliche Branchen, Dienstleistungen und Begriffe ausgedrückt werden."
+        },
+        {
+          "title": "„Ein Verzeichnis sagt mir, wer existiert – nicht immer, wer passt.“",
+          "detail": "Namen, Websites und Branchencodes sind hilfreich, verbinden aber einen konkreten Bedarf nicht vollständig mit der erforderlichen Fähigkeit."
+        },
+        {
+          "title": "„Der Kontext verschwindet, während der Prozess weiterläuft.“",
+          "detail": "E-Mail, Tabellen, Empfehlungen, Förderprogramme und Ausschreibungsportale enthalten häufig unterschiedliche Teile desselben Bedarfs."
+        }
+      ],
+      "closing": "The RFxchange wurde entwickelt, um diese Übersetzungslücke zu verringern."
+    },
+    "how": {
+      "eyebrow": "Von Alltagssprache zu Marktaktion",
+      "title": "Beginnen Sie mit dem, was Sie wissen. The Exchange hilft bei der Struktur.",
+      "description": "Sie sollten kein Klassifizierungssystem lernen müssen, bevor Sie erklären können, was Ihr Unternehmen braucht oder leisten kann.",
+      "ariaLabel": "Wie The RFxchange Geschäftssprache in Marktaktion überführt",
+      "steps": [
+        {
+          "kicker": "Beschreiben",
+          "title": "Sagen Sie, was Sie brauchen oder leisten können.",
+          "detail": "Beginnen Sie in normaler Geschäftssprache oder durchsuchen Sie strukturierte Fähigkeiten direkt."
+        },
+        {
+          "kicker": "Interpretieren",
+          "title": "Ermitteln Sie mögliche Marktkonzepte.",
+          "detail": "Unterstützung kann relevante AMACS-Konzepte abrufen und mögliche Beziehungen ordnen."
+        },
+        {
+          "kicker": "Bestätigen",
+          "title": "Sie entscheiden, was wahr ist.",
+          "detail": "Vorschläge werden erst dann zu verbindlichen Aussagen oder Anforderungen, wenn ein autorisierter Teilnehmer sie im jeweiligen Workflow bestätigt."
+        },
+        {
+          "kicker": "Entdecken",
+          "title": "Finden Sie potenzielle Passung mit aussagekräftigem Kontext.",
+          "detail": "Bestätigte Fähigkeiten, Geografie, Servicegebiet und autorisierte Profildaten unterstützen deterministische Entdeckung."
+        },
+        {
+          "kicker": "Verbinden",
+          "title": "Wechseln Sie in die richtige Geschäftsbeziehung.",
+          "detail": "Nutzen Sie veröffentlichte Empfehlungs- und Ressourcenworkflows unter Wahrung von Zweck, Einwilligung und minimal erforderlichem Kontext."
+        },
+        {
+          "kicker": "Lernen",
+          "title": "Machen Sie Aktivität zu besserem Marktverständnis.",
+          "detail": "Wenn künftige Funktionen geöffnet werden, können Antworten, Entscheidungen, Nachweise und Ergebnisse Marktinformationen verbessern, ohne Annahmen in Fakten umzuwandeln."
+        }
+      ]
+    },
+    "amacs": {
+      "eyebrow": "Der Standard unter The Exchange",
+      "title": "Eine gemeinsame Sprache für Marktaktivität.",
+      "description": "The RFxchange nutzt den Accel Market Activity and Capability Standard—AMACS—um mehr zu verbinden als nur das Angebot eines Unternehmens oder seine Branchenzugehörigkeit.",
+      "support": "AMACS gibt The Exchange eine gemeinsame Methode, den Bedarf des Marktes mit den tatsächlichen Fähigkeiten von Organisationen zu verbinden.",
+      "nodes": [
+        {
+          "title": "Bedarf",
+          "detail": "Was versucht der Markt zu erreichen?"
+        },
+        {
+          "title": "Fähigkeit",
+          "detail": "Was muss ein Anbieter leisten können?"
+        },
+        {
+          "title": "Nachweis",
+          "detail": "Was hilft, die relevante Eignung zu belegen?"
+        },
+        {
+          "title": "Antwort",
+          "detail": "Welche Informationen benötigt der Markt zurück?"
+        },
+        {
+          "title": "Entscheidung",
+          "detail": "Wie werden Alternativen bewertet?"
+        },
+        {
+          "title": "Ergebnis",
+          "detail": "Was ist letztlich geschehen?"
+        }
+      ],
+      "futureNote": "Bedarf und Fähigkeit sind bereits zentral im aktuellen Produkt. RFx, Entscheidung, Glaubwürdigkeit und Ergebnisse bleiben künftige Funktionen."
+    },
+    "ai": {
+      "eyebrow": "Unterstützung mit Autoritätsgrenzen",
+      "title": "KI kann vorschlagen. Menschen bestätigen.",
+      "description": "KI kann den Aufwand verringern, alltägliche Beschreibungen in strukturierte Marktinformationen zu überführen. Sie kann relevante AMACS-Konzepte vorschlagen und mögliche Beziehungen erklären – aber ein Vorschlag ist keine Markttatsache.",
+      "highlight": "Ein autorisierter Teilnehmer bestätigt, was die Organisation tatsächlich benötigt, anbietet oder darstellt, bevor sich der verbindliche Zustand ändert.",
+      "principles": [
+        "Normale Geschäftssprache bleibt ein zulässiger Ausgangspunkt.",
+        "Das Modell darf keine AMACS-Kennungen erfinden oder stillschweigend Aussagen erzeugen.",
+        "Abgelehnte oder ungeklärte Vorschläge dürfen verbindliche Entdeckung oder Zuordnung nicht beeinflussen.",
+        "Manuelles AMACS-Browsen und -Suchen bleibt verfügbar, wenn die Unterstützung deaktiviert oder nicht verfügbar ist."
+      ]
+    },
+    "network": {
+      "eyebrow": "Den Markt sehen",
+      "title": "Sehen Sie den Markt rund um Ihr Unternehmen.",
+      "description": "The RFxchange beginnt mit einer Organisation an einem Ort. Nach der Aktivierung erhält die Organisation eine bestätigte oder datenschutzgerechte Kartenposition und kann über bestätigte Marktinformationen entdeckt werden.",
+      "items": [
+        {
+          "title": "Unternehmen nach Fähigkeit finden.",
+          "detail": "Suchen Sie danach, was Organisationen leisten können – nicht nur nach ihrem Namen."
+        },
+        {
+          "title": "Geografie als Geschäftskontext nutzen.",
+          "detail": "Verstehen Sie, wo teilnehmende Organisationen ansässig sind und welche Gebiete sie autorisiert bedienen."
+        },
+        {
+          "title": "Die Organisation hinter dem Marker öffnen.",
+          "detail": "Wechseln Sie vom Standort in den zulässigen Fähigkeits-, Service- und Organisationskontext."
+        },
+        {
+          "title": "Von der Entdeckung zur Handlung wechseln.",
+          "detail": "Erstellen Sie einvernehmliche Empfehlungen und Anbieterverbindungen, ohne Entdeckung selbst als Ergebnis darzustellen."
+        }
+      ],
+      "imageNote": "Atmosphärisches Bild – kein Nachweis von Live-RFxchange-Marktaktivität."
+    },
+    "trust": {
+      "eyebrow": "Vertrauen Sie dem, was Sie sehen",
+      "title": "Glaubwürdigkeit sollte aus Nachweisen entstehen – nicht aus Bezahlung.",
+      "description": "RFxchange trennt Unternehmensaussagen, öffentliche Quellen, Anbieterzulassung, Verifizierung, Verbindungen, kommerzielle Anerkennung und Ergebnisse, statt alles in ein einziges Abzeichen zu pressen.",
+      "highlight": "Bezahlte Mitgliedschaft, Founding-Anerkennung oder Sponsoring kaufen keine bessere Fähigkeitszuordnung, Verifizierung, Qualifikation oder bevorzugte Platzierung in neutraler Entdeckung.",
+      "rules": [
+        "Eine selbst angegebene Fähigkeit ist nicht automatisch verifiziert.",
+        "Der Status Offizieller Ressourcenanbieter ist eine genehmigte institutionelle Rolle – keine Garantie für Passung oder Verfügbarkeit.",
+        "Eine Empfehlung oder Anbieterverbindung ist weder eine abgeschlossene Leistung noch ein erfolgreicher Ausgang.",
+        "Künftige Glaubwürdigkeits- und Ergebnissignale müssen Nachweis und Autorität benennen."
+      ]
+    },
+    "audience": {
+      "eyebrow": "Unterschiedliche Rollen · gemeinsamer Marktkontext",
+      "title": "Eine nützliche Position für jede Organisation, die Geschäft voranbringt.",
+      "items": [
+        {
+          "name": "Unternehmen",
+          "promise": "Gefunden werden. Finden, was Sie brauchen. Die Beziehung aufbauen.",
+          "detail": "Bestätigen Sie Fähigkeiten und nutzen Sie das Netzwerk als wiederverwendbare Geschäftsentwicklungsposition."
+        },
+        {
+          "name": "Ressourcenanbieter",
+          "promise": "Erreichen Sie Unternehmen im Kontext eines echten Bedarfs.",
+          "detail": "Zugelassene Anbieter können Dienstleistungen, Gebiete, Berechtigung, Aufnahme, Ressourcen und Verbindungspfade sichtbar machen."
+        },
+        {
+          "name": "Wirtschafts- + Gemeinschaftsverantwortliche",
+          "promise": "Sehen Sie, wie teilnehmende Marktbausteine zusammenhängen.",
+          "detail": "Nutzen Sie reale Organisations- und Netzwerkaktivität, ohne unvollständige Teilnahme mit der gesamten Wirtschaft gleichzusetzen."
+        }
+      ]
+    },
+    "founding": {
+      "eyebrow": "Die Founding 250",
+      "title": "Gestalten Sie das Netzwerk mit, das Ihr Unternehmen nutzen soll.",
+      "description": "Gründungsorganisationen bauen ihre Marktposition früh auf, beteiligen sich an strukturiertem Launch-Feedback und helfen sichtbar zu machen, wo RFxchange und AMACS klarer und nützlicher werden müssen.",
+      "primary": "Founding-Teilnahme erkunden",
+      "secondary": "Kostenlos beitreten",
+      "note": "Founding-Anerkennung bedeutet keine Verifizierung, Qualifikation, Empfehlung oder bevorzugte Suchbehandlung."
+    },
+    "cta": {
+      "eyebrow": "The RFxchange betreten",
+      "title": "Ihr Unternehmen besitzt bereits Fähigkeiten. Machen Sie sie für den Markt leichter verständlich.",
+      "description": "Richten Sie Ihre Organisation ein, bringen Sie sie auf die Karte und bauen Sie die Marktposition auf, die Ihre Leistungen mit dem Bedarf anderer Unternehmen verbindet.",
+      "primary": "Kostenlos beitreten",
+      "secondary": "Anmelden",
+      "promise": "Gefunden werden. Chancen finden. Die Verbindung aufbauen."
+    },
+    "images": {
+      "hero": "Luftaufnahme einer regionalen Stadt, Wasserwege und Wirtschaftsgeografie.",
+      "problem": "Fachleute besprechen operative Arbeit an einem Tisch.",
+      "ai": "Fachleute arbeiten gemeinsam an Geschäftsdokumenten.",
+      "network": "Handwerker kleiner Unternehmen arbeiten in einer Werkstatt.",
+      "audienceBusiness": "Fachkraft in einer Produktionsanlage.",
+      "audienceProvider": "Baufachleute prüfen Arbeiten auf einer aktiven Baustelle.",
+      "audienceLeader": "Regionale Stadt- und Wirtschaftslandschaft.",
+      "founding": "Fachleute arbeiten gemeinsam an einem Tisch.",
+      "cta": "Lagergänge voller Bestand."
+    }
+  },
+  "founding": {
+    "metadata": {
+      "title": "Teilnahme als Gründungsorganisation",
+      "description": "Treten Sie der ersten RFxchange-Unternehmenskohorte bei, richten Sie Ihre Organisation früh ein und helfen Sie, die Marktsprache und Workflows zu verbessern, die Bedarf und Fähigkeiten verbinden."
+    },
+    "hero": {
+      "eyebrow": "Die Founding 250",
+      "title": "Gestalten Sie einen Markt mit, in dem Unternehmen leichter zu verstehen und zu verbinden sind.",
+      "description": "Wir bilden die erste Organisationskohorte auf The RFxchange. Richten Sie Ihr Unternehmen früh ein, bestätigen Sie seine Marktfähigkeiten, nutzen Sie die Live-Netzwerkworkflows und helfen Sie, das System für nachfolgende Organisationen zu verbessern.",
+      "primary": "Mit Ihrer Organisation beginnen",
+      "secondary": "Sehen, was live ist",
+      "price": "Geplante Founding-Mitgliedschaft: 49 $/Monat",
+      "cap": "Begrenzt auf 250 Organisationen",
+      "readiness": "Die bezahlte Anmeldung öffnet erst, wenn die genehmigten Founding-Berechtigungen und die Abrechnung vollständig betriebsbereit sind. Nützliche Kernteilnahme bleibt kostenlos.",
+      "stockNote": "Fotografie dient nur der Atmosphäre. Sie zeigt keine Gründungsmitglieder, Ergebnisse oder Live-RFxchange-Aktivitäten."
+    },
+    "why": {
+      "eyebrow": "Warum jetzt teilnehmen",
+      "title": "Sie müssen nicht auf die vollständige Fertigstellung von The Exchange warten, um Wert zu schaffen.",
+      "description": "Der erste nützliche Schritt besteht darin, Ihre Organisation für den Markt verständlich zu machen. Je klarer bestätigte Fähigkeiten und Kontext sind, desto nützlicher werden spätere Entdeckungs- und Transaktionsworkflows.",
+      "items": [
+        {
+          "title": "Bauen Sie Ihre Position früh auf",
+          "detail": "Erstellen oder beanspruchen Sie die Organisation, bestätigen Sie ihre Geografie und bauen Sie eine strukturierte Fähigkeitsposition auf, bevor die umfassendere Transaktions-Engine öffnet."
+        },
+        {
+          "title": "Gestalten Sie praktische Workflows mit",
+          "detail": "Nutzen Sie reale Geschäftssituationen, um zu zeigen, wo Begriffe verwirren, Informationen belastend sind oder Verbindungen besseren Kontext benötigen."
+        },
+        {
+          "title": "Tragen Sie zu einer besseren Marktsprache bei",
+          "detail": "Reale Teilnahme kann Lücken sichtbar machen, die in RFxchange- und AMACS-Prüfung einfließen – ohne dass Nutzung den Standard stillschweigend umschreibt."
+        },
+        {
+          "title": "Werden Sie als Teil der Launch-Kohorte anerkannt",
+          "detail": "Die Anerkennung als Gründungsorganisation dokumentiert historische Teilnahme. Sie ist keine Verifizierung, Qualifikation, Empfehlung oder Aussage über höhere Leistung."
+        }
+      ]
+    },
+    "scenario": {
+      "eyebrow": "Das Problem, für das wir bauen",
+      "title": "Unternehmer sollten keine Beschaffungsexperten sein müssen, um einen Bedarf zu erklären.",
+      "quote": "„Unsere bisherige Bestandsverwaltung reicht nicht mehr aus, und wir brauchen Hilfe, ein besseres System zu finden.“",
+      "description": "Diese Aussage kann Prozessanalyse, Bestandssoftware, Systemintegration, Datenmigration, Schulung, Workflow-Design oder mehrere Fähigkeiten zusammen betreffen. RFxchange wird so aufgebaut, dass das Unternehmen mit dem verstandenen Problem beginnen und anschließend eine nützliche Struktur bestätigen kann."
+    },
+    "standard": {
+      "eyebrow": "Ein Standard – keine Blackbox",
+      "title": "KI hilft bei der Übersetzung. AMACS liefert die Struktur. Menschen liefern die Autorität.",
+      "description": "AMACS verbindet Bedarf, Fähigkeit, Nachweis, Antwort, Entscheidung und Ergebnis. KI kann relevante Konzepte vorschlagen, entscheidet aber nicht, was Ihr Unternehmen leisten kann, erzeugt nicht still eine Anforderung und erklärt keine andere Organisation für qualifiziert.",
+      "highlight": "Vorschläge reduzieren den Aufwand. Autorisierte Menschen bestätigen die Markttatsachen.",
+      "flow": [
+        "Bedarf",
+        "Fähigkeit",
+        "Nachweis",
+        "Antwort",
+        "Entscheidung",
+        "Ergebnis"
+      ]
+    },
+    "membership": {
+      "eyebrow": "Eine tiefere Beteiligungsebene",
+      "title": "Kostenlose Teilnahme schafft Dichte. Founding-Teilnahme unterstützt den Start.",
+      "description": "Ein nützlicher Markt darf Legitimität nicht hinter einer Bezahlschranke verstecken. Die Founding-Mitgliedschaft richtet sich an Organisationen, die nach erstem Produktnutzen eine tiefere Rolle im Start übernehmen möchten.",
+      "items": [
+        {
+          "title": "Anerkennung als Gründungsorganisation",
+          "detail": "Historische Anerkennung der Launch-Kohorte gemäß den geltenden Programmbedingungen."
+        },
+        {
+          "title": "Strukturiertes Founder-Feedback",
+          "detail": "Definierte Möglichkeiten, praktisches Feedback zu Fähigkeitsstruktur, Geschäftssprache und neu veröffentlichten Workflows zu geben."
+        },
+        {
+          "title": "Founder-Launch-Support",
+          "detail": "Spezifisches Onboarding und Release-Begleitung zum Aufbau einer nützlichen Organisationsposition."
+        },
+        {
+          "title": "Genehmigte erweiterte Werkzeuge",
+          "detail": "Früher Zugang zu ausgewählten bezahlten Produktivitätsfunktionen erst nach Implementierung und Genehmigung der jeweiligen Berechtigung."
+        }
+      ],
+      "readiness": "Nicht implementierte Vorteile werden nicht als aktive Berechtigungen beworben."
+    },
+    "comparison": {
+      "eyebrow": "Kostenlos oder Founding",
+      "title": "Sie müssen nicht bezahlen, um auf The RFxchange legitim zu sein.",
+      "description": "Kernmarktteilnahme und neutrale Entdeckung bleiben von kommerzieller Anerkennung getrennt.",
+      "free": {
+        "title": "Kostenlose Organisation",
+        "subtitle": "Für nützliche Teilnahme",
+        "items": [
+          "Organisation einrichten oder beanspruchen.",
+          "Kernprofil der Organisation und Fähigkeiten pflegen.",
+          "An zulässiger Fähigkeits- und Geografieentdeckung teilnehmen.",
+          "Ausgewiesene kostenlose Empfehlungs-, Ressourcen- und Bildungsworkflows nutzen.",
+          "Künftige substanzielle Glaubwürdigkeit nur durch Nachweise und Aktivität erwerben.",
+          "Keinen gekauften Vorteil bei Zuordnung oder Qualifikation erhalten."
+        ],
+        "cta": "Kostenlos beitreten"
+      },
+      "founding": {
+        "title": "Gründungsorganisation",
+        "subtitle": "Für tiefere Launch-Teilnahme",
+        "items": [
+          "Alles aus der nützlichen kostenlosen Teilnahme.",
+          "Anerkennung als Gründungsorganisation.",
+          "Strukturierte Teilnahme am Launch-Feedbackprogramm.",
+          "Founder-Launch-Support.",
+          "Früher Zugang zu ausgewählten genehmigten erweiterten Werkzeugen.",
+          "Keine bezahlte Veränderung von neutraler Entdeckung, Verifizierung oder Qualifikation."
+        ],
+        "price": "49 $/Monat, sobald die Anmeldung öffnet",
+        "cap": "Begrenzt auf 250 Organisationen",
+        "cta": "Mit Ihrer Organisation beginnen"
+      },
+      "footnote": "Gründungsorganisation ist Teilnahme und kommerzielle Anerkennung. Sie ist keine Verifizierung, kein Trusted-Status, keine Qualifikation, Empfehlung oder Garantie von Geschäftsergebnissen."
+    },
+    "contribution": {
+      "eyebrow": "Für Ihr Unternehmen bauen · zum Markt beitragen",
+      "title": "Jedes reale Unternehmen lehrt uns etwas, das ein hypothetisches nicht kann.",
+      "description": "Ein Unternehmen kann zeigen, dass zwei ähnliche Fähigkeiten wesentlich verschieden sind, dass ein Käufer eine von der aktuellen Struktur schlecht erkannte Sprache verwendet oder dass eine Empfehlung zusätzlichen Kontext braucht, um nützlich zu werden.",
+      "highlight": "Ihre Organisation erhält eine klarere Darstellung. Prüfung kann Markterkenntnisse in Verbesserungen für nachfolgende Organisationen überführen."
+    },
+    "boundaries": {
+      "eyebrow": "Kommerzielle Neutralität",
+      "title": "Geld macht ein Unternehmen nicht passender.",
+      "items": [
+        {
+          "title": "Kein Pay-to-rank",
+          "detail": "Founding-Status stellt eine Organisation in neutraler Entdeckung nicht über einen relevanteren Teilnehmer."
+        },
+        {
+          "title": "Kein Pay-to-verify",
+          "detail": "Mitgliedschaft beweist nicht, dass eine Fähigkeit, ein Nachweis oder eine Unternehmensaussage wahr ist."
+        },
+        {
+          "title": "Kein Pay-to-qualify",
+          "detail": "Founding-Status kann die Anforderungen einer konkreten Chance nicht ersetzen."
+        },
+        {
+          "title": "Kein garantiertes Geschäft",
+          "detail": "RFxchange garantiert keine Leads, Empfehlungen, Verträge, Umsätze, Zuschläge, Finanzierung oder Wachstum."
+        }
+      ],
+      "closing": "Kommerzielle Vorteile und Marktwahrheit bleiben bewusst getrennt."
+    },
+    "faq": {
+      "eyebrow": "Fragen vor dem Start",
+      "title": "Founding-Teilnahme klar erklärt.",
+      "items": [
+        {
+          "question": "Muss ich wissen, wie man eine RFP schreibt?",
+          "answer": "Nein. RFxchange ist breiter als formale Beschaffung. Sie können mit dem Bedarf beginnen, den Sie verstehen; spätere RFx-Workflows fügen die passende Transaktionsstruktur hinzu."
+        },
+        {
+          "question": "Muss ich AMACS-Codes verstehen?",
+          "answer": "Nein. Sie können strukturierte Konzepte durchsuchen, doch Alltagssprach-Unterstützung und Erklärungen machen den Standard nutzbar, ohne eine Taxonomie auswendig zu lernen."
+        },
+        {
+          "question": "Macht Founding-Teilnahme mein Unternehmen verifiziert?",
+          "answer": "Nein. Gründungsorganisation ist eine Anerkennung der Launch-Kohorte. Verifizierung erfordert die jeweils Nachweise und Verfahren."
+        },
+        {
+          "question": "Verbessert Founding-Mitgliedschaft mein Suchranking?",
+          "answer": "Nein. Zahlung verändert weder substanzielle Fähigkeitswahrheit noch neutrale Zuordnung, Qualifikation oder Glaubwürdigkeit."
+        },
+        {
+          "question": "Ist die gesamte RFxchange-Plattform live?",
+          "answer": "Nein. Das Netzwerk aus ist live. RFx Core, Bewertung, Glaubwürdigkeit, Ergebnisse und bezahlte Berechtigungen bleiben künftige Funktionen."
+        },
+        {
+          "question": "Warum teilnehmen, bevor alles fertig ist?",
+          "answer": "Weil eine nützliche Marktposition vor der finalen Transaktions-Engine beginnt. Sie können jetzt strukturierte Organisationsinformationen aufbauen und helfen, Verbesserungsbedarf in späteren Workflows zu erkennen."
+        },
+        {
+          "question": "Wie wird KI eingesetzt?",
+          "answer": "KI kann Alltagssprache interpretieren und relevante AMACS-Konzepte vorschlagen. Vorschläge bleiben unverbindlich, bis ein autorisierter Teilnehmer die jeweilige Bestätigungsaktion ausführt."
+        },
+        {
+          "question": "Was geschieht, wenn AMACS etwas nicht beschreibt, das mein Unternehmen tut?",
+          "answer": "Erzwingen Sie keine falsche Klassifizierung. Bewahren Sie die ungeklärte Bedeutung und nutzen Sie – sofern verfügbar – den Pfad für vorläufige Begriffe und Prüfung."
+        },
+        {
+          "question": "Kann ich teilnehmen, ohne Founder zu werden?",
+          "answer": "Ja. Nützliche kostenlose Organisationsteilnahme ist beabsichtigt. Founding ist eine tiefere Launch-Ebene, keine Maut vor legitimer Netzwerkaktivität."
+        }
+      ]
+    },
+    "cta": {
+      "eyebrow": "Die Founding 250",
+      "title": "Bauen Sie Ihre Position jetzt auf. Helfen Sie, den nächsten Markt zu verbessern.",
+      "description": "Richten Sie Ihre Organisation ein, bestätigen Sie, was Ihr Unternehmen tatsächlich leisten kann, und werden Sie Teil der Kohorte, die ein Live-Netzwerk zu einem verständlicheren Markt entwickelt.",
+      "primary": "Mit Ihrer Organisation beginnen",
+      "secondary": "Kostenlos beitreten",
+      "note": "Geplant für 49 $/Monat bei Öffnung der genehmigten kommerziellen Anmeldung · begrenzt auf 250 Organisationen · Kernteilnahme bleibt kostenlos."
+    },
+    "images": {
+      "hero": "Lagergänge voller Bestand.",
+      "contribution": "Fachleute arbeiten gemeinsam an Geschäftsdokumenten."
+    }
+  }
+}

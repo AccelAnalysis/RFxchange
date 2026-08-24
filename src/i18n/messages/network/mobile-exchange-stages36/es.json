@@ -37,6 +37,6 @@
   "disabledReasons": {
     "not-operational": "Esta función no tiene un controlador operativo en el Exchange actual.",
     "not-applicable": "Esta función no se aplica a la organización o al contexto de mercado actual.",
-    "not-authorized": "El estado autorizado actual del Exchange no permite esta función."
+    "not-authorized": "El información confirmada actual del Exchange no permite esta función."
   }
 }

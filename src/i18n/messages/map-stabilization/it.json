@@ -1,1 +1,7 @@
-{"plotCandidate":"Mostra questo risultato sulla mappa","confirmCandidate":"Conferma la posizione mostrata","spatialModelFailure":"La mappa della località autorizzata è temporaneamente non disponibile. I progressi di attivazione sono conservati; riprova per caricare la mappa richiesta.","homeSceneFailure":"Il tuo indicatore è attivo, ma la scena iniziale confermata è temporaneamente non disponibile. Non è stato inventato alcuno stato geografico; riprova per entrare nell’Exchange.","retry":"Riprova"}
+{
+  "plotCandidate": "Mostra questo risultato sulla mappa",
+  "confirmCandidate": "Conferma la posizione mostrata",
+  "spatialModelFailure": "La mappa della località autorizzata è temporaneamente non disponibile. I progressi di attivazione sono conservati; riprova per caricare la mappa richiesta.",
+  "homeSceneFailure": "Il tuo indicatore è attivo, ma la scena iniziale confermata è temporaneamente non disponibile. Non è stato inventato alcuno stato geografico; riprova per entrare nell’Exchange.",
+  "retry": "Riprova"
+}

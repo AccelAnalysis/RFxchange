@@ -4,9 +4,18 @@
   "title": "Impara l’Exchange con i tuoi tempi.",
   "intro": "Torna quando vuoi per un breve percorso tra gli strumenti RFxchange disponibili per la tua organizzazione. I progressi della guida non modificano le informazioni aziendali né i permessi.",
   "progress": "Progresso del percorso attuale",
-  "status": { "active": "In corso", "dismissed": "Nascosto · riapribile", "completed": "Completato · riapribile" },
+  "status": {
+    "active": "In corso",
+    "dismissed": "Nascosto · riapribile",
+    "completed": "Completato · riapribile"
+  },
   "valueSpineLabel": "Percorso di valore RFxchange",
-  "valueSpine": { "understandable": "Comprensibile", "discoverable": "Individuabile", "connectable": "Collegabile", "actionable": "Azionabile" },
+  "valueSpine": {
+    "understandable": "Comprensibile",
+    "discoverable": "Individuabile",
+    "connectable": "Collegabile",
+    "actionable": "Azionabile"
+  },
   "recommended": "Consigliato per questa organizzazione",
   "recommendationBoundary": "I consigli usano le informazioni attuali della tua organizzazione. Non modificano permessi, stato del fornitore, verifica, credibilità o vantaggi dell’adesione.",
   "catalogUpdate": "Questa guida contiene nuovi contenuti. I progressi precedenti restano visibili; consulta la versione attuale quando vuoi.",
@@ -25,63 +34,197 @@
   "explainerLabel": "Prima di continuare",
   "closeExplainer": "Chiudi spiegazione",
   "explainerDismissed": "Spiegazione chiusa. Puoi riaprirla qui in qualsiasi momento.",
-  "questions": { "what": "Che cos’è?", "why": "Perché è importante qui?", "happens": "Che cosa accade se lo faccio?", "next": "Che cosa accade dopo?" },
-  "states": { "saved": "Progresso della guida salvato.", "error": "Impossibile salvare il progresso. Ricarica e riprova." },
+  "questions": {
+    "what": "Che cos’è?",
+    "why": "Perché è importante qui?",
+    "happens": "Che cosa accade se lo faccio?",
+    "next": "Che cosa accade dopo?"
+  },
+  "states": {
+    "saved": "Progresso della guida salvato.",
+    "error": "Impossibile salvare il progresso. Ricarica e riprova."
+  },
   "quickStart": {
     "title": "Avvio rapido",
     "summary": "Segui il percorso di valore usando gli strumenti attualmente disponibili per la tua organizzazione.",
     "items": {
-      "understand": { "title": "Rendi comprensibile la tua organizzazione", "body": "Rivedi profilo, capacità, informazioni di supporto, visibilità e contesto operativo." },
-      "discover": { "title": "Scopri come le organizzazioni diventano individuabili", "body": "Usa la mappa e la ricerca dell’Exchange per trovare organizzazioni partecipanti nei luoghi rilevanti." },
-      "connect": { "title": "Crea un collegamento utile", "body": "Rivedi scopo, destinatario e informazioni condivise prima di inviare una segnalazione." },
-      "act": { "title": "Usa le risorse attuali", "body": "Trova servizi dei fornitori, invia una richiesta e usa risorse pubblicate." }
+      "understand": {
+        "title": "Rendi comprensibile la tua organizzazione",
+        "body": "Rivedi profilo, capacità, informazioni di supporto, visibilità e contesto operativo."
+      },
+      "discover": {
+        "title": "Scopri come le organizzazioni diventano individuabili",
+        "body": "Usa la mappa e la ricerca dell’Exchange per trovare organizzazioni partecipanti nei luoghi rilevanti."
+      },
+      "connect": {
+        "title": "Crea un collegamento utile",
+        "body": "Rivedi scopo, destinatario e informazioni condivise prima di inviare una segnalazione."
+      },
+      "act": {
+        "title": "Usa le risorse attuali",
+        "body": "Trova servizi dei fornitori, invia una richiesta e usa risorse pubblicate."
+      }
     }
   },
   "business": {
     "title": "Percorso Impresa",
     "summary": "Crea una presenza chiara dell’organizzazione, scopri capacità, crea collegamenti utili e usa risorse di supporto.",
     "items": {
-      "profile": { "title": "Conferma il profilo di mercato", "body": "Rivedi i suggerimenti e conferma solo le informazioni che rappresentano correttamente la tua organizzazione." },
-      "discovery": { "title": "Esplora l’Exchange", "body": "Cerca organizzazioni partecipanti per capacità, geografia e altro contesto di mercato utile." },
-      "referrals": { "title": "Invia o rispondi alle segnalazioni", "body": "Rivedi ciò che verrà condiviso, quindi monitora separatamente accettazione, rifiuto, contatto e chiusura." },
-      "resources": { "title": "Trova supporto dai fornitori", "body": "Confronta territorio di servizio, disponibilità, idoneità e perché un fornitore può essere adatto al bisogno." },
-      "rfx": { "title": "Crea o rispondi a una RFx", "body": "Usa gli strumenti RFx quando sono disponibili per la tua organizzazione. Le azioni non disponibili sono indicate nell’Exchange." },
-      "credibility": { "title": "Usa informazioni sulla credibilità", "body": "Le informazioni di supporto possono aggiungere contesto, ma non creano automaticamente verifica o credibilità." }
+      "profile": {
+        "title": "Conferma il profilo di mercato",
+        "body": "Rivedi i suggerimenti e conferma solo le informazioni che rappresentano correttamente la tua organizzazione."
+      },
+      "discovery": {
+        "title": "Esplora l’Exchange",
+        "body": "Cerca organizzazioni partecipanti per capacità, geografia e altro contesto di mercato utile."
+      },
+      "referrals": {
+        "title": "Invia o rispondi alle segnalazioni",
+        "body": "Rivedi ciò che verrà condiviso, quindi monitora separatamente accettazione, rifiuto, contatto e chiusura."
+      },
+      "resources": {
+        "title": "Trova supporto dai fornitori",
+        "body": "Confronta territorio di servizio, disponibilità, idoneità e perché un fornitore può essere adatto al bisogno."
+      },
+      "rfx": {
+        "title": "Crea o rispondi a una RFx",
+        "body": "Usa gli strumenti RFx quando sono disponibili per la tua organizzazione. Le azioni non disponibili sono indicate nell’Exchange."
+      },
+      "credibility": {
+        "title": "Usa informazioni sulla credibilità",
+        "body": "Le informazioni di supporto possono aggiungere contesto, ma non creano automaticamente verifica o credibilità."
+      }
     }
   },
   "issuer": {
     "title": "Percorso Emittente",
     "summary": "Usa ricerca di mercato ed esigenze aziendali per passare da Esigenza → Capacità a una RFx quando sono disponibili gli strumenti appropriati.",
     "items": {
-      "market": { "title": "Studia il mercato", "body": "Esplora capacità, sedi e risorse delle organizzazioni prima di definire un’esigenza." },
-      "resources": { "title": "Comprendi le risorse di supporto", "body": "Rivedi servizi dei fornitori e risorse pubblicate senza trattare un elenco come qualifica per un’opportunità." },
-      "rfx": { "title": "Redigi e pubblica una RFx", "body": "Crea, rivedi e pubblica una RFx quando queste azioni sono disponibili per la tua organizzazione." },
-      "evaluation": { "title": "Valuta risposte e risultati", "body": "Usa gli strumenti di risposta e valutazione quando sono disponibili; l’Exchange identifica le azioni che non lo sono ancora." }
+      "market": {
+        "title": "Studia il mercato",
+        "body": "Esplora capacità, sedi e risorse delle organizzazioni prima di definire un’esigenza."
+      },
+      "resources": {
+        "title": "Comprendi le risorse di supporto",
+        "body": "Rivedi servizi dei fornitori e risorse pubblicate senza trattare un elenco come qualifica per un’opportunità."
+      },
+      "rfx": {
+        "title": "Redigi e pubblica una RFx",
+        "body": "Crea, rivedi e pubblica una RFx quando queste azioni sono disponibili per la tua organizzazione."
+      },
+      "evaluation": {
+        "title": "Valuta risposte e risultati",
+        "body": "Usa gli strumenti di risposta e valutazione quando sono disponibili; l’Exchange identifica le azioni che non lo sono ancora."
+      }
     }
   },
   "resourceProvider": {
     "title": "Percorso Fornitore di risorse",
     "summary": "Comprendi candidatura, stato, servizi, richieste, comunicazioni e risorse del fornitore.",
     "items": {
-      "application": { "title": "Richiedi lo stato di Fornitore di risorse", "body": "Invia informazioni sulla tua organizzazione e sui servizi per la revisione. L’invio di una candidatura non la approva." },
-      "profile": { "title": "Mantieni il profilo dei servizi", "body": "Mantieni aggiornati categorie di servizio, idoneità, accesso, territorio e disponibilità." },
-      "discovery": { "title": "Rendi individuabili i servizi", "body": "Scegli quali servizi pubblicare affinché le aziende possano trovare il supporto che offri." },
-      "requests": { "title": "Rispondi alle richieste dei fornitori", "body": "Accetta, rifiuta, reindirizza o invia messaggi su una richiesta specifica mantenendo il collegamento separato dal risultato del servizio." },
-      "publication": { "title": "Pubblica risorse", "body": "Crea, pubblica, aggiorna, ritira o lascia scadere una risorsa secondo necessità." },
-      "credentials": { "title": "Formazione e certificazione", "body": "Formazione, certificazione, credibilità e vantaggi a pagamento compaiono qui solo quando queste funzioni sono disponibili." }
+      "application": {
+        "title": "Richiedi lo stato di Fornitore di risorse",
+        "body": "Invia informazioni sulla tua organizzazione e sui servizi per la revisione. L’invio di una candidatura non la approva."
+      },
+      "profile": {
+        "title": "Mantieni il profilo dei servizi",
+        "body": "Mantieni aggiornati categorie di servizio, idoneità, accesso, territorio e disponibilità."
+      },
+      "discovery": {
+        "title": "Rendi individuabili i servizi",
+        "body": "Scegli quali servizi pubblicare affinché le aziende possano trovare il supporto che offri."
+      },
+      "requests": {
+        "title": "Rispondi alle richieste dei fornitori",
+        "body": "Accetta, rifiuta, reindirizza o invia messaggi su una richiesta specifica mantenendo il collegamento separato dal risultato del servizio."
+      },
+      "publication": {
+        "title": "Pubblica risorse",
+        "body": "Crea, pubblica, aggiorna, ritira o lascia scadere una risorsa secondo necessità."
+      },
+      "credentials": {
+        "title": "Formazione e certificazione",
+        "body": "Formazione, certificazione, credibilità e vantaggi a pagamento compaiono qui solo quando queste funzioni sono disponibili."
+      }
     }
   },
   "explainers": {
-    "profile-confirmation": { "title": "Confermare informazioni del profilo", "what": "Questo aggiorna le informazioni che la tua organizzazione usa nel profilo e nell’attività dell’Exchange.", "why": "Informazioni accurate sull’organizzazione migliorano la scoperta e riducono la confusione.", "happens": "Viene controllato il tuo permesso attuale e le informazioni vengono salvate nella tua organizzazione.", "next": "Le informazioni compaiono solo dove la visibilità lo consente. Aggiornarle non crea verifica o credibilità." },
-    "capability-suggestion": { "title": "Rivedere un suggerimento di capacità", "what": "Questo è un suggerimento basato su AMACS, non una dichiarazione sulla tua organizzazione.", "why": "Sei tu a decidere se il concetto descrive correttamente ciò che la tua organizzazione può fare.", "happens": "Accetta, modifica, rifiuta o lascia irrisolto il suggerimento.", "next": "Una capacità diventa parte delle informazioni della tua organizzazione solo dopo che la confermi tramite l’azione appropriata." },
-    "credential-evidence": { "title": "Aggiungere credenziale o informazioni di supporto", "what": "Questo registra credenziali o informazioni di supporto fornite dalla tua organizzazione.", "why": "Le informazioni di supporto possono aiutare a comprendere una dichiarazione, ma non costituiscono automaticamente prova o verifica indipendente.", "happens": "Le informazioni vengono salvate nella tua organizzazione e seguono la visibilità che scegli.", "next": "Le decisioni di verifica o credibilità restano separate dal semplice inserimento di informazioni di supporto." },
-    "media-visibility": { "title": "Scegliere la visibilità dei media", "what": "Scegli se un contenuto dell’organizzazione resta privato o può essere visto da altri.", "why": "Il materiale caricato può contenere informazioni che non vuoi condividere ampiamente.", "happens": "La visibilità scelta viene salvata con il contenuto.", "next": "Puoi cambiare la visibilità in seguito. Pubblicare un contenuto non significa che RFxchange lo approvi." },
-    "additional-location": { "title": "Confermare una sede aggiuntiva", "what": "Aggiungi un’altra sede dell’organizzazione e scegli la visibilità appropriata.", "why": "Le sedi aggiuntive aiutano gli altri a capire dove opera la tua organizzazione.", "happens": "La sede viene controllata e salvata usando il livello di privacy selezionato.", "next": "Un marcatore appare solo quando la sede ha informazioni sufficienti e la visibilità lo consente." },
-    "referral-consent": { "title": "Inviare una segnalazione", "what": "Crea un’introduzione per il destinatario mostrato e le informazioni visibili prima dell’invio.", "why": "Una segnalazione utile deve contenere contesto sufficiente senza condividere più del necessario.", "happens": "La segnalazione viene inviata e il suo stato può essere monitorato.", "next": "Il destinatario può accettare o rifiutare. L’invio non prova contatto, servizio, qualifica o risultato." },
-    "referral-response": { "title": "Rispondere a una segnalazione", "what": "Accetta o rifiuta la segnalazione per la tua organizzazione.", "why": "La tua risposta indica al mittente se l’introduzione può proseguire.", "happens": "Lo stato della segnalazione viene aggiornato.", "next": "Accettazione, contatto, servizio e chiusura restano fasi separate." },
-    "provider-application": { "title": "Inviare informazioni da Fornitore di risorse", "what": "Fornisci informazioni sulla tua organizzazione, servizi, area di servizio e materiale di supporto.", "why": "Lo stato di Fornitore di risorse viene esaminato separatamente dal normale profilo dell’organizzazione.", "happens": "Puoi salvare una bozza e inviarla per la revisione quando è pronta.", "next": "Il revisore può chiedere altre informazioni, approvare la candidatura o rifiutarla." },
-    "provider-connection": { "title": "Connettersi a questo fornitore", "what": "Invia una richiesta al servizio del fornitore che hai scelto.", "why": "Area di servizio e disponibilità possono aiutare a spiegare l’idoneità, ma non promettono capacità, ammissibilità o servizio.", "happens": "L’organizzazione e il riepilogo della richiesta mostrati vengono condivisi con il fornitore.", "next": "Il fornitore può accettare, rifiutare, reindirizzare o inviare messaggi. Un collegamento non è un risultato di servizio." },
-    "provider-response": { "title": "Rispondere a una richiesta fornitore", "what": "Rispondi a questa richiesta specifica per la tua organizzazione Fornitore di risorse.", "why": "Una risposta si applica a questa richiesta e non promette disponibilità per tutte le richieste future.", "happens": "Accettare, rifiutare o reindirizzare aggiorna lo stato della richiesta.", "next": "I messaggi possono continuare dopo la risposta. Servizio, pagamento, verifica e risultato restano distinti." },
-    "provider-resource-publication": { "title": "Pubblicare una risorsa del fornitore", "what": "Rendi il contenuto creato dal fornitore disponibile al pubblico che scegli.", "why": "Il contenuto pubblicato da un fornitore è informazione del fornitore, non approvazione o qualifica RFxchange.", "happens": "La risorsa viene pubblicata con la visibilità e il periodo che scegli.", "next": "Puoi ritirarla o lasciarla scadere. La pubblicazione non crea classifica, badge di credibilità o risultato garantito." }
+    "profile-confirmation": {
+      "title": "Confermare informazioni del profilo",
+      "what": "Questo aggiorna le informazioni che la tua organizzazione usa nel profilo e nell’attività dell’Exchange.",
+      "why": "Informazioni accurate sull’organizzazione migliorano la scoperta e riducono la confusione.",
+      "happens": "Viene controllato il tuo permesso attuale e le informazioni vengono salvate nella tua organizzazione.",
+      "next": "Le informazioni compaiono solo dove la visibilità lo consente. Aggiornarle non crea verifica o credibilità."
+    },
+    "capability-suggestion": {
+      "title": "Rivedere un suggerimento di capacità",
+      "what": "Questo è un suggerimento basato su AMACS, non una dichiarazione sulla tua organizzazione.",
+      "why": "Sei tu a decidere se il concetto descrive correttamente ciò che la tua organizzazione può fare.",
+      "happens": "Accetta, modifica, rifiuta o lascia irrisolto il suggerimento.",
+      "next": "Una capacità diventa parte delle informazioni della tua organizzazione solo dopo che la confermi tramite l’azione appropriata."
+    },
+    "credential-evidence": {
+      "title": "Aggiungere credenziale o informazioni di supporto",
+      "what": "Questo registra credenziali o informazioni di supporto fornite dalla tua organizzazione.",
+      "why": "Le informazioni di supporto possono aiutare a comprendere una dichiarazione, ma non costituiscono automaticamente prova o verifica indipendente.",
+      "happens": "Le informazioni vengono salvate nella tua organizzazione e seguono la visibilità che scegli.",
+      "next": "Le decisioni di verifica o credibilità restano separate dal semplice inserimento di informazioni di supporto."
+    },
+    "media-visibility": {
+      "title": "Scegliere la visibilità dei media",
+      "what": "Scegli se un contenuto dell’organizzazione resta privato o può essere visto da altri.",
+      "why": "Il materiale caricato può contenere informazioni che non vuoi condividere ampiamente.",
+      "happens": "La visibilità scelta viene salvata con il contenuto.",
+      "next": "Puoi cambiare la visibilità in seguito. Pubblicare un contenuto non significa che RFxchange lo approvi."
+    },
+    "additional-location": {
+      "title": "Confermare una sede aggiuntiva",
+      "what": "Aggiungi un’altra sede dell’organizzazione e scegli la visibilità appropriata.",
+      "why": "Le sedi aggiuntive aiutano gli altri a capire dove opera la tua organizzazione.",
+      "happens": "La sede viene controllata e salvata usando il livello di privacy selezionato.",
+      "next": "Un marcatore appare solo quando la sede ha informazioni sufficienti e la visibilità lo consente."
+    },
+    "referral-consent": {
+      "title": "Inviare una segnalazione",
+      "what": "Crea un’introduzione per il destinatario mostrato e le informazioni visibili prima dell’invio.",
+      "why": "Una segnalazione utile deve contenere contesto sufficiente senza condividere più del necessario.",
+      "happens": "La segnalazione viene inviata e il suo stato può essere monitorato.",
+      "next": "Il destinatario può accettare o rifiutare. L’invio non prova contatto, servizio, qualifica o risultato."
+    },
+    "referral-response": {
+      "title": "Rispondere a una segnalazione",
+      "what": "Accetta o rifiuta la segnalazione per la tua organizzazione.",
+      "why": "La tua risposta indica al mittente se l’introduzione può proseguire.",
+      "happens": "Lo stato della segnalazione viene aggiornato.",
+      "next": "Accettazione, contatto, servizio e chiusura restano fasi separate."
+    },
+    "provider-application": {
+      "title": "Inviare informazioni da Fornitore di risorse",
+      "what": "Fornisci informazioni sulla tua organizzazione, servizi, area di servizio e materiale di supporto.",
+      "why": "Lo stato di Fornitore di risorse viene esaminato separatamente dal normale profilo dell’organizzazione.",
+      "happens": "Puoi salvare una bozza e inviarla per la revisione quando è pronta.",
+      "next": "Il revisore può chiedere altre informazioni, approvare la candidatura o rifiutarla."
+    },
+    "provider-connection": {
+      "title": "Connettersi a questo fornitore",
+      "what": "Invia una richiesta al servizio del fornitore che hai scelto.",
+      "why": "Area di servizio e disponibilità possono aiutare a spiegare l’idoneità, ma non promettono capacità, ammissibilità o servizio.",
+      "happens": "L’organizzazione e il riepilogo della richiesta mostrati vengono condivisi con il fornitore.",
+      "next": "Il fornitore può accettare, rifiutare, reindirizzare o inviare messaggi. Un collegamento non è un risultato di servizio."
+    },
+    "provider-response": {
+      "title": "Rispondere a una richiesta fornitore",
+      "what": "Rispondi a questa richiesta specifica per la tua organizzazione Fornitore di risorse.",
+      "why": "Una risposta si applica a questa richiesta e non promette disponibilità per tutte le richieste future.",
+      "happens": "Accettare, rifiutare o reindirizzare aggiorna lo stato della richiesta.",
+      "next": "I messaggi possono continuare dopo la risposta. Servizio, pagamento, verifica e risultato restano distinti."
+    },
+    "provider-resource-publication": {
+      "title": "Pubblicare una risorsa del fornitore",
+      "what": "Rendi il contenuto creato dal fornitore disponibile al pubblico che scegli.",
+      "why": "Il contenuto pubblicato da un fornitore è informazione del fornitore, non approvazione o qualifica RFxchange.",
+      "happens": "La risorsa viene pubblicata con la visibilità e il periodo che scegli.",
+      "next": "Puoi ritirarla o lasciarla scadere. La pubblicazione non crea classifica, badge di credibilità o risultato garantito."
+    }
   }
 }

@@ -6,7 +6,13 @@
     "countOne": "{count} capacidad confirmada",
     "countMany": "{count} capacidades confirmadas"
   },
-  "tabs": { "label": "Secciones del perfil de mercado", "capabilities": "Capacidades", "industry": "Industria", "experience": "Experiencia", "preferences": "Preferencias" },
+  "tabs": {
+    "label": "Secciones del perfil de mercado",
+    "capabilities": "Capacidades",
+    "industry": "Industria",
+    "experience": "Experiencia",
+    "preferences": "Preferencias"
+  },
   "common": {
     "refreshing": "Actualizando el perfil de mercado guardado…",
     "visibility": "Visibilidad",
@@ -43,7 +49,14 @@
     "reject": "Rechazar",
     "none": "Ninguna describe la actividad"
   },
-  "dispositions": { "suggested": "sugerida", "accepted": "aceptada", "edited": "editada", "rejected": "rechazada", "unresolved": "sin resolver", "withdrawn": "retirada" },
+  "dispositions": {
+    "suggested": "sugerida",
+    "accepted": "aceptada",
+    "edited": "editada",
+    "rejected": "rechazada",
+    "unresolved": "sin resolver",
+    "withdrawn": "retirada"
+  },
   "catalog": {
     "eyebrow": "Ruta manual completa",
     "title": "Explorar Dominio → Familia → Capacidad",
@@ -89,8 +102,8 @@
     "domain": "Dominio sugerido",
     "notSure": "No estoy seguro",
     "submit": "Enviar término provisional",
-    "countOne": "{count} término provisional espera revisión editorial gobernada.",
-    "countMany": "{count} términos provisionales esperan revisión editorial gobernada."
+    "countOne": "{count} término provisional espera revisión editorial.",
+    "countMany": "{count} términos provisionales esperan revisión editorial."
   },
   "industry": {
     "title": "Contexto industrial y NAICS",

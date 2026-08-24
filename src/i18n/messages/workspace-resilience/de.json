@@ -1,1 +1,11 @@
-{"geographyTitle":"Geografie und Marker","geographyLoading":"Autorisierte Geografie wird geladen…","geographyUnavailable":"Vorübergehend nicht verfügbar","marketProfileTitle":"Marktprofil","marketProfileLoading":"Marktprofil wird geladen…","marketProfileUnavailable":"Die Marktprofilinformationen sind vorübergehend nicht verfügbar. Ihr Organisationskonto bleibt verfügbar; laden Sie diese Seite erneut, um das Panel neu zu laden.","enrichmentTitle":"Organisationsanreicherung","enrichmentLoading":"Nachweise, Medien und Standorte werden geladen…","enrichmentUnavailable":"Die Anreicherung von Nachweisen, Medien und Standorten ist vorübergehend nicht verfügbar. Ihr Organisationskonto bleibt verfügbar; laden Sie diese Seite erneut, um das Panel neu zu laden."}
+{
+  "geographyTitle": "Geografie und Marker",
+  "geographyLoading": "Autorisierte Geografie wird geladen…",
+  "geographyUnavailable": "Vorübergehend nicht verfügbar",
+  "marketProfileTitle": "Marktprofil",
+  "marketProfileLoading": "Marktprofil wird geladen…",
+  "marketProfileUnavailable": "Die Marktprofilinformationen sind vorübergehend nicht verfügbar. Ihr Organisationskonto bleibt verfügbar; laden Sie diese Seite erneut, um das Panel neu zu laden.",
+  "enrichmentTitle": "Organisationsanreicherung",
+  "enrichmentLoading": "Nachweise, Medien und Standorte werden geladen…",
+  "enrichmentUnavailable": "Die Anreicherung von Nachweisen, Medien und Standorten ist vorübergehend nicht verfügbar. Ihr Organisationskonto bleibt verfügbar; laden Sie diese Seite erneut, um das Panel neu zu laden."
+}

@@ -1,6 +1,6 @@
 {
   "title": "Qualificatori strutturati",
-  "intro": "Aggiungi condizioni governate di testo, quantità, booleano o geografia a un requisito RFx.",
+  "intro": "Aggiungi condizioni di testo, quantità, booleano o geografia a un requisito RFx.",
   "requirement": "Requisito",
   "qualifierType": "Tipo di qualificatore",
   "type": {
@@ -17,8 +17,8 @@
   "requiredValue": "Valore richiesto",
   "yesTrue": "Sì / vero",
   "noFalse": "No / falso",
-  "localityIds": "Località governate",
-  "localityPlaceholder": "Seleziona località governate",
+  "localityIds": "Località",
+  "localityPlaceholder": "Seleziona località",
   "saving": "Salvataggio…",
   "addQualifier": "Aggiungi qualificatore",
   "removeQualifier": "Rimuovi qualificatore",
@@ -28,7 +28,7 @@
     "labelRequired": "L’etichetta del qualificatore è obbligatoria.",
     "valueRequired": "Il valore del qualificatore è obbligatorio.",
     "quantityRequired": "Sono richieste una quantità positiva e un’unità.",
-    "localityRequired": "È richiesta almeno una località governata.",
+    "localityRequired": "È richiesta almeno una località.",
     "save": "Impossibile salvare il qualificatore."
   }
 }

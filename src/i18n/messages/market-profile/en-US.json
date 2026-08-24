@@ -6,7 +6,13 @@
     "countOne": "{count} confirmed capability",
     "countMany": "{count} confirmed capabilities"
   },
-  "tabs": { "label": "Market profile sections", "capabilities": "Capabilities", "industry": "Industry", "experience": "Experience", "preferences": "Preferences" },
+  "tabs": {
+    "label": "Market profile sections",
+    "capabilities": "Capabilities",
+    "industry": "Industry",
+    "experience": "Experience",
+    "preferences": "Preferences"
+  },
   "common": {
     "refreshing": "Refreshing the saved market profile…",
     "visibility": "Visibility",
@@ -43,7 +49,14 @@
     "reject": "Reject",
     "none": "None of these describe it"
   },
-  "dispositions": { "suggested": "suggested", "accepted": "accepted", "edited": "edited", "rejected": "rejected", "unresolved": "unresolved", "withdrawn": "withdrawn" },
+  "dispositions": {
+    "suggested": "suggested",
+    "accepted": "accepted",
+    "edited": "edited",
+    "rejected": "rejected",
+    "unresolved": "unresolved",
+    "withdrawn": "withdrawn"
+  },
   "catalog": {
     "eyebrow": "Browse manually",
     "title": "Browse Domain → Family → Capability",

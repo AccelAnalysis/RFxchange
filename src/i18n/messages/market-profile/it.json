@@ -6,7 +6,13 @@
     "countOne": "{count} capacità confermata",
     "countMany": "{count} capacità confermate"
   },
-  "tabs": { "label": "Sezioni del profilo di mercato", "capabilities": "Capacità", "industry": "Settore", "experience": "Esperienza", "preferences": "Preferenze" },
+  "tabs": {
+    "label": "Sezioni del profilo di mercato",
+    "capabilities": "Capacità",
+    "industry": "Settore",
+    "experience": "Esperienza",
+    "preferences": "Preferenze"
+  },
   "common": {
     "refreshing": "Aggiornamento del profilo di mercato salvato…",
     "visibility": "Visibilità",
@@ -43,7 +49,14 @@
     "reject": "Rifiuta",
     "none": "Nessuna descrive l’attività"
   },
-  "dispositions": { "suggested": "suggerito", "accepted": "accettato", "edited": "modificato", "rejected": "rifiutato", "unresolved": "irrisolto", "withdrawn": "ritirato" },
+  "dispositions": {
+    "suggested": "suggerito",
+    "accepted": "accettato",
+    "edited": "modificato",
+    "rejected": "rifiutato",
+    "unresolved": "irrisolto",
+    "withdrawn": "ritirato"
+  },
   "catalog": {
     "eyebrow": "Percorso manuale completo",
     "title": "Esplora Dominio → Famiglia → Capacità",
@@ -52,7 +65,7 @@
     "domain": "Dominio",
     "family": "Famiglia",
     "resultsLabel": "Capacità AMACS",
-    "resultCount": "Mostrate {visible} di {total} capacità governate",
+    "resultCount": "Mostrate {visible} di {total} capacità",
     "showMore": "Mostra altre {count} capacità"
   },
   "claim": {
@@ -89,8 +102,8 @@
     "domain": "Dominio suggerito",
     "notSure": "Non so",
     "submit": "Invia termine provvisorio",
-    "countOne": "{count} termine provvisorio attende la revisione editoriale governata.",
-    "countMany": "{count} termini provvisori attendono la revisione editoriale governata."
+    "countOne": "{count} termine provvisorio attende la revisione editoriale.",
+    "countMany": "{count} termini provvisori attendono la revisione editoriale."
   },
   "industry": {
     "title": "Contesto di settore e NAICS",
@@ -99,18 +112,18 @@
     "code": "Codice NAICS",
     "naicsTitle": "Titolo NAICS",
     "version": "Versione",
-    "selectorTitle": "Selezione NAICS governata",
+    "selectorTitle": "Selezione NAICS",
     "selectorBody": "Seleziona un settore esatto a sei cifre dalla classificazione {version} pubblicata da {source}. Titoli e versioni non possono essere inseriti manualmente.",
     "search": "Cerca codice o titolo NAICS",
     "searchPlaceholder": "Ad esempio: 236220 o costruzione commerciale",
-    "resultsLabel": "Settori NAICS governati",
-    "resultCount": "Mostrati {visible} di {total} settori governati",
+    "resultsLabel": "Settori NAICS",
+    "resultCount": "Mostrati {visible} di {total} settori",
     "showMore": "Mostra altri {count} settori",
     "release": "NAICS {version}",
     "clear": "Cancella selezione NAICS",
-    "noneSelected": "Nessun settore NAICS governato selezionato.",
+    "noneSelected": "Nessun settore NAICS selezionato.",
     "existingTitle": "Classificazioni salvate in precedenza",
-    "existingBody": "Questi valori salvati non rientrano nella selezione governata esatta mostrata sopra. Conservali finché non scegli deliberatamente di sostituirli o rimuoverli.",
+    "existingBody": "Questi valori salvati non rientrano nella selezione esatta mostrata sopra. Conservali finché non scegli deliberatamente di sostituirli o rimuoverli.",
     "preserveExisting": "Conserva queste classificazioni salvate in precedenza",
     "sourceLink": "Apri il file sorgente di {source}",
     "boundaryTitle": "Classificazione descrittiva",

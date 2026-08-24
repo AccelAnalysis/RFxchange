@@ -1,1 +1,15 @@
-{"ariaLabel":"Ressourcennetzwerk","eyebrow":"Netzwerk offizieller Ressourcenanbieter","title":"Ressourcen für diesen Ort","supporting":"Ergebnisse verwenden das vom Anbieter gepflegte Gebiet und die Verfügbarkeit. Gründe werden angezeigt; Kapazität wird nie abgeleitet.","search":"Dienste suchen","availability":"Verfügbarkeit","providers":"Anbieter","empty":"Keine passenden veröffentlichten Anbieter","requests":"Anbieteranfragen","manage":"Sichtbarkeit und Ressourcen verwalten","applyFilters":"Filter anwenden","viewCommunication":"Kommunikation anzeigen","noMessages":"Für diese Anfrage wurden keine privaten Nachrichten erfasst."}
+{
+  "ariaLabel": "Ressourcennetzwerk",
+  "eyebrow": "Netzwerk offizieller Ressourcenanbieter",
+  "title": "Ressourcen für diesen Ort",
+  "supporting": "Ergebnisse verwenden das vom Anbieter gepflegte Gebiet und die Verfügbarkeit. Gründe werden angezeigt; Kapazität wird nie abgeleitet.",
+  "search": "Dienste suchen",
+  "availability": "Verfügbarkeit",
+  "providers": "Anbieter",
+  "empty": "Keine passenden veröffentlichten Anbieter",
+  "requests": "Anbieteranfragen",
+  "manage": "Sichtbarkeit und Ressourcen verwalten",
+  "applyFilters": "Filter anwenden",
+  "viewCommunication": "Kommunikation anzeigen",
+  "noMessages": "Für diese Anfrage wurden keine privaten Nachrichten erfasst."
+}

@@ -1,1 +1,58 @@
-{"eyebrow":"Paramètres de l’organisation","title":"Demander le statut de fournisseur de ressources","intro":"Demandez le statut distinct et encadré de Fournisseur officiel de ressources après avoir complété le profil.","boundary":"Ce statut ne signifie ni Organisation vérifiée, ni approbation, ni avantage payant, ni promesse d’éligibilité ou de capacité.","authoritative":"Références officielles de l’organisation","application":"Demande fournisseur","profile":"Profil de services fournisseur","history":"Historique de la demande","emptyHistory":"Aucune activité pour le moment.","fields":{"categories":"Catégories","other":"Description de l’autre catégorie","serviceName":"Nom du service ou programme","serviceDescription":"Description du service ou programme","capacityNote":"Note de capacité (facultative ; vide signifie inconnue)","served":"Organisations ou publics servis","eligibility":"Conditions d’éligibilité","intake":"Méthode d’admission ou d’orientation","modality":"Modalité","languages":"Langues prises en charge","contactName":"Nom du contact officiel","contactRole":"Fonction du contact","contactEmail":"E-mail du contact","contactPhone":"Téléphone du contact","evidence":"Identifiants de preuves privées (facultatif)","evidenceHint":"Séparés par des virgules ; propriété contrôlée et non publics.","response":"Réponse à la demande d’information","availability":"Disponibilité déclarée","attestation":"J’atteste être autorisé à représenter cette organisation."},"categories":{"economic-development":"Organisation de développement économique","business-association":"Chambre ou association d’entreprises","capital-provider":"Prêteur ou fournisseur de capitaux","education-workforce":"Établissement d’éducation ou d’emploi","government-assistance":"Programme d’aide publique","technical-assistance":"Fournisseur d’assistance technique","incubator-accelerator-coworking":"Incubateur, accélérateur ou espace de coworking","professional-support":"Soutien juridique, comptable ou professionnel","procurement-contracting-assistance":"Aide aux achats ou aux marchés","other":"Autre"},"actions":{"save":"Enregistrer le brouillon","submit":"Soumettre à examen","resubmit":"Renvoyer la réponse","update":"Mettre à jour le profil"},"states":{"saving":"Enregistrement…","saved":"Brouillon enregistré.","submitted":"Demande soumise.","resubmitted":"Réponse renvoyée.","updated":"Profil mis à jour.","error":"L’action a échoué. Vérifiez le formulaire ou rechargez la version actuelle."}}
+{
+  "eyebrow": "Paramètres de l’organisation",
+  "title": "Demander le statut de fournisseur de ressources",
+  "intro": "Demandez le statut distinct et encadré de Fournisseur officiel de ressources après avoir complété le profil.",
+  "boundary": "Ce statut ne signifie ni Organisation vérifiée, ni approbation, ni avantage payant, ni promesse d’éligibilité ou de capacité.",
+  "authoritative": "Références officielles de l’organisation",
+  "application": "Demande fournisseur",
+  "profile": "Profil de services fournisseur",
+  "history": "Historique de la demande",
+  "emptyHistory": "Aucune activité pour le moment.",
+  "fields": {
+    "categories": "Catégories",
+    "other": "Description de l’autre catégorie",
+    "serviceName": "Nom du service ou programme",
+    "serviceDescription": "Description du service ou programme",
+    "capacityNote": "Note de capacité (facultative; vide signifie inconnue)",
+    "served": "Organisations ou publics servis",
+    "eligibility": "Conditions d’éligibilité",
+    "intake": "Méthode d’admission ou d’orientation",
+    "modality": "Modalité",
+    "languages": "Langues prises en charge",
+    "contactName": "Nom du contact officiel",
+    "contactRole": "Fonction du contact",
+    "contactEmail": "E-mail du contact",
+    "contactPhone": "Téléphone du contact",
+    "evidence": "Identifiants de preuves privées (facultatif)",
+    "evidenceHint": "Séparés par des virgules; propriété contrôlée et non publics.",
+    "response": "Réponse à la demande d’information",
+    "availability": "Disponibilité déclarée",
+    "attestation": "J’atteste être autorisé à représenter cette organisation."
+  },
+  "categories": {
+    "economic-development": "Organisation de développement économique",
+    "business-association": "Chambre ou association d’entreprises",
+    "capital-provider": "Prêteur ou fournisseur de capitaux",
+    "education-workforce": "Établissement d’éducation ou d’emploi",
+    "government-assistance": "Programme d’aide publique",
+    "technical-assistance": "Fournisseur d’assistance technique",
+    "incubator-accelerator-coworking": "Incubateur, accélérateur ou espace de coworking",
+    "professional-support": "Soutien juridique, comptable ou professionnel",
+    "procurement-contracting-assistance": "Aide aux achats ou aux marchés",
+    "other": "Autre"
+  },
+  "actions": {
+    "save": "Enregistrer le brouillon",
+    "submit": "Soumettre à examen",
+    "resubmit": "Renvoyer la réponse",
+    "update": "Mettre à jour le profil"
+  },
+  "states": {
+    "saving": "Enregistrement…",
+    "saved": "Brouillon enregistré.",
+    "submitted": "Demande soumise.",
+    "resubmitted": "Réponse renvoyée.",
+    "updated": "Profil mis à jour.",
+    "error": "L’action a échoué. Vérifiez le formulaire ou rechargez la version actuelle."
+  }
+}
