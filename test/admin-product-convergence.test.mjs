@@ -28,7 +28,7 @@ test("the administrative product authority defines an attention-first restrained
 test("only truthful current admin runtimes remain registered", () => {
   assert.deepEqual(
     IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS,
-    ["organization-claims", "resource-providers"],
+    ["overview", "work-queues", "organization-claims", "resource-providers"],
   );
 });
 
@@ -36,8 +36,10 @@ test("live administrative surfaces share one product shell", async () => {
   const claimsPage = await read("app/admin/organization-claims/page.tsx");
   const providerPage = await read("app/admin/resource-providers/page.tsx");
   const organizationPage = await read("app/admin/organizations/[organizationId]/page.tsx");
+  const overviewPage = await read("app/admin/overview/page.tsx");
+  const queuesPage = await read("app/admin/work-queues/page.tsx");
 
-  for (const source of [claimsPage, providerPage, organizationPage]) {
+  for (const source of [claimsPage, providerPage, organizationPage, overviewPage, queuesPage]) {
     assert.match(source, /AdminPortalShell/);
   }
 
@@ -47,13 +49,16 @@ test("live administrative surfaces share one product shell", async () => {
   assert.doesNotMatch(organizationPage, /page\.module\.css/);
 });
 
-test("the shared shell keeps scope visible and uses compact responsive navigation", async () => {
+test("the shared shell keeps scope visible, exposes bounded search and uses compact responsive navigation", async () => {
   const shell = await read("src/components/admin/AdminPortalShell.tsx");
+  const commandBar = await read("src/components/admin/AdminPortalCommandBar.tsx");
   const navigation = await read("src/components/admin/AdminPortalNavigation.tsx");
   const styles = await read("src/components/admin/AdminPortalShell.module.css");
 
   assert.match(shell, /Current access/);
   assert.match(shell, /All authorized records/);
+  assert.match(commandBar, /\/admin\/search/);
+  assert.match(commandBar, /minLength=\{2\}/);
   assert.match(navigation, /aria-expanded=\{open\}/);
   assert.match(navigation, /Available now/);
   assert.match(styles, /\.navigation\[data-open="true"\] \.navigationBody/);
@@ -93,4 +98,29 @@ test("Organization 360 avoids a second dashboard shell and developer-facing prim
   assert.match(styles, /var\(--warm-ivory/);
   assert.match(styles, /box-shadow:\s*inset 3px 0 var\(--rf-gold/);
   assert.doesNotMatch(styles, /overflow-x:\s*auto/);
+});
+
+test("operating core uses real providers, canonical cases and responsive list-to-inspector continuity", async () => {
+  const runtime = await read("src/infrastructure/admin/operating-core-runtime.ts");
+  const queue = await read("src/components/admin/AdminWorkQueueWorkspace.tsx");
+  const casePage = await read("app/admin/cases/[caseId]/page.tsx");
+  const caseApi = await read("app/api/admin/cases/[caseId]/transition/route.ts");
+  const searchPage = await read("app/admin/search/page.tsx");
+  const styles = await read("src/components/admin/AdminOperatingCore.module.css");
+
+  for (const collection of [
+    "organizationAuthorityClaims",
+    "providerApplications",
+    "administrative",
+    "accessRestrictions",
+    "backgroundJobs",
+  ]) assert.match(runtime, new RegExp(collection));
+  assert.match(runtime, /authorityWithActiveGlobalGrants/);
+  assert.match(queue, /Open full case/);
+  assert.match(casePage, /CASE:/);
+  assert.match(caseApi, /expectedStatus/);
+  assert.match(searchPage, /universalAdminSearch/);
+  assert.match(styles, /\.queueLayout/);
+  assert.match(styles, /@media \(max-width: 980px\)/);
+  assert.doesNotMatch(queue, /<table/);
 });

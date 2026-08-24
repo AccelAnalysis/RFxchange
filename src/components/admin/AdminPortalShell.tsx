@@ -3,6 +3,7 @@ import type {
   ImplementedAdminRuntimeDestination,
   ImplementedAdminRuntimeDestinationKey,
 } from "../../application/admin/portal-navigation";
+import { AdminPortalCommandBar } from "./AdminPortalCommandBar";
 import { AdminPortalNavigation } from "./AdminPortalNavigation";
 
 import styles from "./AdminPortalShell.module.css";
@@ -11,6 +12,7 @@ export interface AdminPortalShellProps {
   readonly destinations: readonly ImplementedAdminRuntimeDestination[];
   readonly currentDestination?: ImplementedAdminRuntimeDestinationKey;
   readonly currentScope: string;
+  readonly navigationScope?: string;
   readonly children: ReactNode;
 }
 
@@ -37,6 +39,7 @@ export function AdminPortalShell({
   destinations,
   currentDestination,
   currentScope,
+  navigationScope,
   children,
 }: AdminPortalShellProps) {
   const navigationDestinations = destinations.map(({
@@ -56,13 +59,21 @@ export function AdminPortalShell({
     scopeTargetId: scope.kind === "GLOBAL" ? null : String(scope.targetId),
   }));
   const scope = scopePresentation(currentScope);
+  const globalWork = destinations.find(
+    (destination) => destination.key === "work-queues" && destination.scope.kind === "GLOBAL",
+  );
+  const searchAvailable = destinations.some(
+    (destination) =>
+      (destination.key === "overview" || destination.key === "work-queues") &&
+      destination.scope.kind === "GLOBAL",
+  );
 
   return (
     <div className={styles.shell}>
       <AdminPortalNavigation
         destinations={navigationDestinations}
         currentDestination={currentDestination}
-        currentScope={currentScope}
+        currentScope={navigationScope ?? currentScope}
       />
       <section className={styles.contentColumn}>
         <header className={styles.contextBar} aria-label="Administrative access context">
@@ -71,10 +82,10 @@ export function AdminPortalShell({
             <strong>{scope.label}</strong>
             {scope.detail ? <small>{scope.detail}</small> : null}
           </div>
-          <div className={styles.contextState}>
-            <span aria-hidden="true" />
-            Administration
-          </div>
+          <AdminPortalCommandBar
+            workHref={globalWork?.href ?? null}
+            searchAvailable={searchAvailable}
+          />
         </header>
         <main className={styles.main}>{children}</main>
       </section>

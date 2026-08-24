@@ -34,6 +34,8 @@
   "loadingExchangeTitle": "Exchange-Einstieg wird geladen",
   "loadingExchangeBody": "Das aktuell autorisierte Exchange-Ziel wird ermittelt.",
   "adminAriaLabel": "Navigation im Verwaltungsportal",
+  "adminOverview": "Übersicht",
+  "adminWorkQueues": "Arbeitswarteschlangen",
   "organizationClaims": "Organisationsansprüche",
   "resourceProviders": "Ressourcenanbieter",
   "participantAccount": "Teilnehmerkonto"

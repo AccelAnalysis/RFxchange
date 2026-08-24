@@ -34,6 +34,8 @@
   "loadingExchangeTitle": "Cargando la entrada a Exchange",
   "loadingExchangeBody": "Se está resolviendo el destino autorizado actual de Exchange.",
   "adminAriaLabel": "Navegación del portal de administración",
+  "adminOverview": "Resumen",
+  "adminWorkQueues": "Colas de trabajo",
   "organizationClaims": "Reclamaciones de organizaciones",
   "resourceProviders": "Proveedores de recursos",
   "participantAccount": "Cuenta de participante"

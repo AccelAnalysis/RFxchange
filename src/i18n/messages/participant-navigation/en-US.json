@@ -34,6 +34,8 @@
   "loadingExchangeTitle": "Loading the Exchange",
   "loadingExchangeBody": "Opening the right Exchange view for your account.",
   "adminAriaLabel": "Administrative portal navigation",
+  "adminOverview": "Overview",
+  "adminWorkQueues": "Work Queues",
   "organizationClaims": "Organization claims",
   "resourceProviders": "Resource Providers",
   "participantAccount": "Participant account"

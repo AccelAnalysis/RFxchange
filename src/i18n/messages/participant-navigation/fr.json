@@ -34,6 +34,8 @@
   "loadingExchangeTitle": "Chargement de l’entrée Exchange",
   "loadingExchangeBody": "La destination Exchange actuellement autorisée est en cours de résolution.",
   "adminAriaLabel": "Navigation du portail d’administration",
+  "adminOverview": "Vue d’ensemble",
+  "adminWorkQueues": "Files de travail",
   "organizationClaims": "Revendications d’organisation",
   "resourceProviders": "Fournisseurs de ressources",
   "participantAccount": "Compte participant"

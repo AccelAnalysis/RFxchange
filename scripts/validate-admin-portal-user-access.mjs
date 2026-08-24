@@ -24,6 +24,8 @@ const technical = resolveAuthorityContextFromAdminRolePreset("guard-tech", defau
 assert.equal(visibleAdminPortalSections(root).length, 19);
 assert.equal(visibleAdminPortalSections(technical).some((section) => section.key === "commerce"), false);
 assert.equal(visibleAdminPortalSections(technical).some((section) => section.key === "integrations-system"), true);
+assert.equal(visibleAdminPortalSections(technical).some((section) => section.key === "overview"), true);
+assert.equal(visibleAdminPortalSections(technical).some((section) => section.key === "work-queues"), true);
 
 const implementedGrants = [
   createAdminPermissionGrant({
@@ -41,7 +43,12 @@ const implementedGrants = [
     createdAt: "2026-08-10T12:00:00.000Z",
   }),
 ];
-assert.deepEqual(IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS, ["organization-claims", "resource-providers"]);
+assert.deepEqual(IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS, [
+  "overview",
+  "work-queues",
+  "organization-claims",
+  "resource-providers",
+]);
 assert.deepEqual(
   visibleImplementedAdminRuntimeDestinations(root, implementedGrants, "2026-08-10T12:30:00.000Z")
     .map((destination) => destination.key),
@@ -74,6 +81,16 @@ assert.match(entry, /resolveAdminPortalAccess/);
 assert.match(entry, /access\.destinations\[0\]\.href/);
 assert.doesNotMatch(entry, /redirect\("\/admin\/overview"\)/);
 assert.doesNotMatch(entry, /buildAdministrativeCommandCenter/);
+
+for (const operatingCorePath of [
+  "app/admin/overview/page.tsx",
+  "app/admin/work-queues/page.tsx",
+  "app/admin/cases/[caseId]/page.tsx",
+  "app/admin/search/page.tsx",
+  "src/infrastructure/admin/operating-core-runtime.ts",
+]) {
+  assert.ok((await readFile(operatingCorePath, "utf8")).length > 0, `${operatingCorePath} must exist.`);
+}
 
 const account = await readFile("app/organization-profile/page.tsx", "utf8");
 assert.doesNotMatch(
@@ -142,6 +159,7 @@ assert.match(presets, /user\.access\.manage/);
 for (const component of [
   "src/components/admin/AdminPortalNavigation.tsx",
   "src/components/admin/AdminPortalShell.tsx",
+  "src/components/admin/AdminPortalCommandBar.tsx",
   "src/components/admin/UserAccess360.tsx",
 ]) {
   const source = await readFile(component, "utf8");

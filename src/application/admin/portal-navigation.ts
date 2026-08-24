@@ -45,8 +45,8 @@ function P(...values: string[]): readonly AdminPermissionKey[] {
 }
 
 export const ADMIN_PORTAL_SECTIONS: readonly AdminPortalSection[] = Object.freeze([
-  Object.freeze({ key: "overview", label: "Overview", href: "/admin/overview", description: "Global command center.", visibilityPermissions: P("admin.authority.read", "analytics.dashboard.read") }),
-  Object.freeze({ key: "work-queues", label: "Work Queues", href: "/admin/work-queues", description: "Unified work requiring human action.", visibilityPermissions: P("support.case.read", "trust.report.read", "provider.application.read", "rfx.record.read") }),
+  Object.freeze({ key: "overview", label: "Overview", href: "/admin/overview", description: "Attention-first administrative command center.", visibilityPermissions: P("admin.authority.read", "analytics.dashboard.read", "organization.claim.read", "provider.application.read", "support.case.read", "trust.report.read", "rfx.record.read", "credibility.organization.verify", "commerce.account.read", "system.health.read") }),
+  Object.freeze({ key: "work-queues", label: "Work Queues", href: "/admin/work-queues", description: "Unified work requiring human action.", visibilityPermissions: P("organization.claim.read", "provider.application.read", "support.case.read", "trust.report.read", "rfx.record.read", "rfx.moderation.review", "credibility.organization.verify", "commerce.account.read", "system.health.read") }),
   Object.freeze({ key: "organizations", label: "Organizations", href: "/admin/organizations", description: "Organization records and Organization 360.", visibilityPermissions: P("organization.profile.read") }),
   Object.freeze({ key: "users-access", label: "Users & Access", href: "/admin/users-access", description: "User accounts, memberships, roles and permissions.", visibilityPermissions: P("user.access.read") }),
   Object.freeze({ key: "claims-verification", label: "Claims & Verification", href: "/admin/claims-verification", description: "Claims, identity verification and authority.", visibilityPermissions: P("credibility.organization.verify", "provider.application.review") }),
@@ -96,6 +96,8 @@ export function assertAdminPortalSectionAccess(
 }
 
 export const IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS = [
+  "overview",
+  "work-queues",
   "organization-claims",
   "resource-providers",
 ] as const;
@@ -103,11 +105,17 @@ export const IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS = [
 export type ImplementedAdminRuntimeDestinationKey =
   (typeof IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS)[number];
 
+type ImplementedAdminRuntimeLabelKey =
+  | "adminOverview"
+  | "adminWorkQueues"
+  | "organizationClaims"
+  | "resourceProviders";
+
 interface ImplementedAdminRuntimeRegistration {
   readonly key: ImplementedAdminRuntimeDestinationKey;
-  readonly labelKey: "organizationClaims" | "resourceProviders";
+  readonly labelKey: ImplementedAdminRuntimeLabelKey;
   readonly description: string;
-  readonly permission: AdminPermissionKey;
+  readonly permissions: readonly AdminPermissionKey[];
   readonly supportedScopeKinds: readonly AdminGrantScope["kind"][];
   readonly href: (scope: AdminGrantScope) => `/admin/${string}`;
 }
@@ -123,6 +131,21 @@ export interface ImplementedAdminRuntimeDestination {
   readonly href: `/admin/${string}`;
 }
 
+const OPERATING_CORE_VISIBILITY = P(
+  "admin.authority.read",
+  "analytics.dashboard.read",
+  "organization.claim.read",
+  "provider.application.read",
+  "support.case.read",
+  "trust.report.read",
+  "rfx.record.read",
+  "rfx.moderation.review",
+  "credibility.organization.verify",
+  "commerce.account.read",
+  "system.health.read",
+  "audit.event.read",
+);
+
 /**
  * Server-owned registry of protected administrative routes that have truthful production runtimes.
  * Specification-only portal sections intentionally remain outside this registry.
@@ -130,10 +153,26 @@ export interface ImplementedAdminRuntimeDestination {
 const IMPLEMENTED_ADMIN_RUNTIME_REGISTRY: readonly ImplementedAdminRuntimeRegistration[] =
   Object.freeze([
     Object.freeze({
+      key: "overview",
+      labelKey: "adminOverview",
+      description: "See the administrative work and operational conditions that need attention now.",
+      permissions: OPERATING_CORE_VISIBILITY,
+      supportedScopeKinds: Object.freeze(["GLOBAL"] as const),
+      href: () => "/admin/overview",
+    }),
+    Object.freeze({
+      key: "work-queues",
+      labelKey: "adminWorkQueues",
+      description: "Review canonical administrative cases within current global authority.",
+      permissions: OPERATING_CORE_VISIBILITY,
+      supportedScopeKinds: Object.freeze(["GLOBAL"] as const),
+      href: () => "/admin/work-queues",
+    }),
+    Object.freeze({
       key: "organization-claims",
       labelKey: "organizationClaims",
       description: "Review live organization authority claims within the active grant scope.",
-      permission: requireCataloguedAdminPermission("organization.claim.read"),
+      permissions: P("organization.claim.read"),
       supportedScopeKinds: Object.freeze(["GLOBAL", "GEOGRAPHY"] as const),
       href: (scope: AdminGrantScope): `/admin/${string}` => scope.kind === "GEOGRAPHY"
         ? `/admin/organization-claims?geographyId=${encodeURIComponent(String(scope.targetId))}`
@@ -143,7 +182,7 @@ const IMPLEMENTED_ADMIN_RUNTIME_REGISTRY: readonly ImplementedAdminRuntimeRegist
       key: "resource-providers",
       labelKey: "resourceProviders",
       description: "Review live Official Resource Provider applications within the active grant scope.",
-      permission: requireCataloguedAdminPermission("provider.application.read"),
+      permissions: P("provider.application.read"),
       supportedScopeKinds: Object.freeze(["GLOBAL", "ORGANIZATION"] as const),
       href: (scope: AdminGrantScope): `/admin/${string}` => scope.kind === "ORGANIZATION"
         ? `/admin/resource-providers?organizationId=${encodeURIComponent(String(scope.targetId))}`
@@ -157,7 +196,8 @@ function scopePriority(scope: AdminGrantScope): number {
 
 /**
  * Produces only destinations that are both implemented and authorized by a current exact grant.
- * The returned href preserves a bounded grant scope instead of widening it to GLOBAL.
+ * A multi-permission operating surface is registered once per distinct authorized scope, using
+ * the first matching permission in its declared priority order.
  */
 export function visibleImplementedAdminRuntimeDestinations(
   context: PlatformAdministratorAuthorityContext,
@@ -169,7 +209,7 @@ export function visibleImplementedAdminRuntimeDestinations(
       const candidateScopes = [...new Map(grants
         .filter((grant) =>
           grant.administratorId === context.administratorId &&
-          grant.permission === registration.permission &&
+          registration.permissions.includes(grant.permission) &&
           registration.supportedScopeKinds.includes(grant.scope.kind),
         )
         .map((grant) => [grant.scope.value, grant.scope] as const),
@@ -179,29 +219,29 @@ export function visibleImplementedAdminRuntimeDestinations(
         );
 
       return candidateScopes.flatMap((scope) => {
-        const decision = authorizeScopedAdministrativeAction(
-          context,
-          grants,
-          createScopedAdministrativeActionRequirement({
-            permission: registration.permission,
-            access: "read",
-            scope: scope.value,
-          }),
-          // The landing routes do not accept action-specific condition evidence. A conditioned
-          // grant therefore remains hidden until the destination can resolve that evidence too.
-          { now, satisfiedConditionKeys: Object.freeze([]) },
-        );
-        if (decision.kind === "allow") {
-          return [Object.freeze({
-            navigationId: `${registration.key}:${scope.value}`,
-            key: registration.key,
-            labelKey: registration.labelKey,
-            description: registration.description,
-            permission: registration.permission,
-            scope,
-            grantId: String(decision.grantId),
-            href: registration.href(scope),
-          })];
+        for (const permission of registration.permissions) {
+          const decision = authorizeScopedAdministrativeAction(
+            context,
+            grants,
+            createScopedAdministrativeActionRequirement({
+              permission,
+              access: "read",
+              scope: scope.value,
+            }),
+            { now, satisfiedConditionKeys: Object.freeze([]) },
+          );
+          if (decision.kind === "allow") {
+            return [Object.freeze({
+              navigationId: `${registration.key}:${scope.value}`,
+              key: registration.key,
+              labelKey: registration.labelKey,
+              description: registration.description,
+              permission,
+              scope,
+              grantId: String(decision.grantId),
+              href: registration.href(scope),
+            })];
+          }
         }
         return [];
       });

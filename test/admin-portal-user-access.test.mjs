@@ -74,6 +74,8 @@ test("navigation hides unauthorized domains and server guard blocks them", () =>
   assert.ok(visible.includes("integrations-system"));
   assert.ok(visible.includes("policies-configuration"));
   assert.ok(visible.includes("audit-security"));
+  assert.ok(visible.includes("overview"));
+  assert.ok(visible.includes("work-queues"));
   assert.equal(visible.includes("commerce"), false);
   assert.equal(visible.includes("credibility"), false);
   assert.equal(visible.includes("rfx-opportunities"), false);
@@ -83,6 +85,8 @@ test("navigation hides unauthorized domains and server guard blocks them", () =>
 
 test("implemented runtime registry exposes only live destinations with current exact grants", () => {
   assert.deepEqual(IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS, [
+    "overview",
+    "work-queues",
     "organization-claims",
     "resource-providers",
   ]);
@@ -97,10 +101,11 @@ test("implemented runtime registry exposes only live destinations with current e
   );
   assert.deepEqual(destinations.map((destination) => destination.key), IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS);
   assert.deepEqual(destinations.map((destination) => destination.href), [
+    "/admin/overview",
+    "/admin/work-queues",
     "/admin/organization-claims",
     "/admin/resource-providers",
   ]);
-  assert.equal(destinations.some((destination) => destination.href === "/admin/overview"), false);
 });
 
 test("implemented runtime navigation preserves bounded grant scope and filters future or dead sections", () => {
@@ -153,8 +158,8 @@ test("permission visibility without an active implemented-runtime grant grants n
       technical,
       [grant(technical, "system.health.read", "GLOBAL", "grant-system-health")],
       now,
-    ),
-    [],
+    ).map((destination) => destination.key),
+    ["overview", "work-queues"],
   );
   assert.deepEqual(
     visibleImplementedAdminRuntimeDestinations(
