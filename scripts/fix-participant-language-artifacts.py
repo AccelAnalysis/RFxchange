@@ -29,7 +29,7 @@ text = insert_before(
     text,
     '    [/\\bgobernad[ao]s?\\b/gi, ""],',
     '''    [/\\bestado del estado\\b/gi, "estado"],
-    [/^Los funciones\\b/gi, "Las funciones"],''',
+    [/\\bLos funciones\\b/gi, "Las funciones"],''',
 )
 text = insert_before(
     text,
@@ -41,12 +41,12 @@ text = insert_before(
     text,
     '    [/\\bgovernat[oaie]\\b/gi, ""],',
     '''    [/\\bstato del stato\\b/gi, "stato"],
-    [/^I funzionalità\\b/gi, "Le funzionalità"],''',
+    [/\\bI funzionalità\\b/gi, "Le funzionalità"],''',
 )
 text = insert_before(
     text,
     '    [/\\bgeregelte[nmrs]?\\b/gi, ""],',
-    '''    [/^künftige Funktionen\\b/gi, "Künftige Funktionen"],
+    '''    [/\\bkünftige Funktionen\\b/gi, "Künftige Funktionen"],
     [/\\bautorisiertem Kontext\\b/gi, "verfügbarem Kontext"],''',
 )
 
