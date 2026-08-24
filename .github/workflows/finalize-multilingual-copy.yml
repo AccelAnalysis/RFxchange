@@ -1,0 +1,47 @@
+name: finalize-multilingual-copy
+
+on:
+  push:
+    branches:
+      - fix/multilingual-participant-language-cleanup
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/multilingual-participant-language-cleanup
+          fetch-depth: 0
+      - name: Correct final localized grammar
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          replacements = {
+              Path('src/i18n/messages/marketing-pages/es.json'): {
+                  'Las funciones futuras permanecen claramente identificados.': 'Las funciones futuras permanecen claramente identificadas.',
+              },
+              Path('src/i18n/messages/marketing-pages/it.json'): {
+                  'I funzionalità future restano chiaramente identificati.': 'Le funzionalità future restano chiaramente identificate.',
+              },
+          }
+          for path, changes in replacements.items():
+              text = path.read_text()
+              for old, new in changes.items():
+                  if old not in text:
+                      raise SystemExit(f'Missing expected localized text in {path}: {old}')
+                  text = text.replace(old, new)
+              path.write_text(text)
+          PY
+      - name: Commit grammar corrections
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/i18n/messages/marketing-pages/es.json src/i18n/messages/marketing-pages/it.json
+          git commit -m "Polish Spanish and Italian participant copy"
+          git push origin HEAD:fix/multilingual-participant-language-cleanup
