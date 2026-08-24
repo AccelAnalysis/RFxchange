@@ -2,7 +2,7 @@
   "availability": {
     "eyebrow": "Disponibilité du produit",
     "title": "Le Réseau est actif. Le moteur transactionnel vient ensuite.",
-    "description": "Les organisations peuvent établir une position de marché structurée, découvrir les participants, créer des connexions consenties, trouver des ressources approuvées et rouvrir une aide contextuelle. Les fonctionnalités futures restent clairement identifiés.",
+    "description": "Les organisations peuvent établir une position de marché structurée, découvrir les participants, créer des connexions consenties, trouver des ressources approuvées et rouvrir une aide contextuelle. Les fonctionnalités futures restent clairement identifiées.",
     "items": [
       {
         "kind": "live",
@@ -14,13 +14,13 @@
         "kind": "live",
         "status": "Disponible maintenant",
         "title": "Découverte + recommandations",
-        "detail": "Découvrez les organisations participantes selon les capacités confirmées, la géographie et la zone de service. Créez des recommandations détenues par l’organisation avec motif, consentement, partage minimal nécessaire, statut de statut et continuité pour les destinataires externes."
+        "detail": "Découvrez les organisations participantes selon les capacités confirmées, la géographie et la zone de service. Créez des recommandations détenues par l’organisation avec motif, consentement, partage minimal nécessaire, statut et continuité pour les destinataires externes."
       },
       {
         "kind": "live",
         "status": "Disponible maintenant",
         "title": "Ressources + accompagnement persistant",
-        "detail": "Trouvez des prestataires de ressources approuvés selon le territoire, l’admissibilité et le contexte autorisé; créez des connexions consenties; consultez leurs ressources; et rouvrez le Démarrage rapide, les parcours par rôle et les explications de flux."
+        "detail": "Trouvez des prestataires de ressources approuvés selon le territoire, l’admissibilité et le contexte disponible; créez des connexions consenties; consultez leurs ressources; et rouvrez le Démarrage rapide, les parcours par rôle et les explications de flux."
       },
       {
         "kind": "planned",
@@ -198,7 +198,7 @@
         },
         {
           "title": "Ouvrez l’organisation derrière le marqueur.",
-          "detail": "Passez de la localisation au contexte autorisé de capacité, de service et d’organisation."
+          "detail": "Passez de la localisation au contexte disponible de capacité, de service et d’organisation."
         },
         {
           "title": "Passez de la découverte à l’action.",
@@ -299,7 +299,7 @@
         },
         {
           "title": "Contribuez à un meilleur langage de marché",
-          "detail": "La participation réelle peut révéler des lacunes soumises à l’examen gouverné de RFxchange et AMACS, sans laisser l’usage réécrire silencieusement le standard."
+          "detail": "La participation réelle peut révéler des lacunes soumises à l’examen de RFxchange et AMACS, sans laisser l’usage réécrire silencieusement le standard."
         },
         {
           "title": "Soyez reconnu dans la cohorte de lancement",
@@ -389,7 +389,7 @@
       "eyebrow": "Construisez pour votre entreprise · contribuez au marché",
       "title": "Chaque entreprise réelle nous apprend ce qu’une entreprise hypothétique ne peut pas nous apprendre.",
       "description": "Une entreprise peut révéler que deux capacités proches sont réellement différentes, qu’un acheteur utilise un langage mal reconnu par la structure actuelle ou qu’une recommandation nécessite davantage de contexte pour devenir utile.",
-      "highlight": "Votre organisation obtient une manière plus claire de se représenter. L’examen gouverné peut transformer les enseignements du marché en améliorations pour les organisations suivantes."
+      "highlight": "Votre organisation obtient une manière plus claire de se représenter. L’examen peut transformer les enseignements du marché en améliorations pour les organisations suivantes."
     },
     "boundaries": {
       "eyebrow": "Neutralité commerciale",
@@ -428,7 +428,7 @@
         },
         {
           "question": "La participation Fondatrice rend-elle mon entreprise Vérifiée?",
-          "answer": "Non. Organisation fondatrice est une reconnaissance de la cohorte de lancement. La vérification exige les preuves et le processus gouverné applicables."
+          "answer": "Non. Organisation fondatrice est une reconnaissance de la cohorte de lancement. La vérification exige les preuves et le processus applicables."
         },
         {
           "question": "L’adhésion Fondatrice améliorera-t-elle mon classement?",

@@ -102,8 +102,8 @@
     "domain": "Domaine suggéré",
     "notSure": "Je ne sais pas",
     "submit": "Soumettre le terme provisoire",
-    "countOne": "{count} terme provisoire attend un examen éditorial gouverné.",
-    "countMany": "{count} termes provisoires attendent un examen éditorial gouverné."
+    "countOne": "{count} terme provisoire attend un examen éditorial.",
+    "countMany": "{count} termes provisoires attendent un examen éditorial."
   },
   "industry": {
     "title": "Contexte sectoriel et NAICS",

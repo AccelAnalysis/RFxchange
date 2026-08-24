@@ -104,6 +104,8 @@ const localizedPhraseReplacements: Readonly<Record<Exclude<ParticipantLanguageLo
     [/\bautoridad actual\b/gi, "permisos actuales"],
     [/\bflujos publicados\b/gi, "flujos disponibles"],
     [/\bregulad[ao]s?\b/gi, ""],
+    [/\bestado del estado\b/gi, "estado"],
+    [/^Los funciones\b/gi, "Las funciones"],
     [/\bgobernad[ao]s?\b/gi, ""],
   ],
   fr: [
@@ -127,7 +129,7 @@ const localizedPhraseReplacements: Readonly<Record<Exclude<ParticipantLanguageLo
     [/\bSlice\s+\d+(?:\.\d+)?\b/gi, ""],
     [/\bparticipants autorisés\b/gi, "participants"],
     [/\borganisations autorisées\b/gi, "organisations participantes"],
-    [/\bcontexte autorisé\b/gi, "contexte disponible"],
+    [/\bcontexte autorisé/gi, "contexte disponible"],
     [/\bgéographie autorisée par le serveur\b/gi, "géographie sélectionnée"],
     [/\bgéographie contrôlée\b/gi, "géographie sélectionnée"],
     [/\blocalité contrôlée\b/gi, "localité sélectionnée"],
@@ -141,7 +143,9 @@ const localizedPhraseReplacements: Readonly<Record<Exclude<ParticipantLanguageLo
     [/\bautorité d’évaluation\b/gi, "permission d’évaluer"],
     [/\bautorité actuelle\b/gi, "autorisations actuelles"],
     [/\bflux publiés\b/gi, "flux disponibles"],
-    [/\bgouverné(?:e|es|s)?\b/gi, ""],
+    [/\bstatut de statut\b/gi, "statut"],
+    [/Les fonctionnalités futures restent clairement identifiés/gi, "Les fonctionnalités futures restent clairement identifiées"],
+    [/\bgouverné(?:e|es|s)?/gi, ""],
   ],
   it: [
     [/\bOnda(?:ta)?\s+3\s+è\s+completa\.?/gi, ""],
@@ -180,6 +184,8 @@ const localizedPhraseReplacements: Readonly<Record<Exclude<ParticipantLanguageLo
     [/\bautorità di valutazione\b/gi, "permesso di valutare"],
     [/\bautorità attuale\b/gi, "permessi attuali"],
     [/\bflussi rilasciati\b/gi, "flussi disponibili"],
+    [/\bstato del stato\b/gi, "stato"],
+    [/^I funzionalità\b/gi, "Le funzionalità"],
     [/\bgovernat[oaie]\b/gi, ""],
   ],
   de: [
@@ -216,6 +222,8 @@ const localizedPhraseReplacements: Readonly<Record<Exclude<ParticipantLanguageLo
     [/\bkanonisch(?:e|en|er|es)?\b/gi, "aktuell"],
     [/\bnicht autoritativ\b/gi, "vorgeschlagen"],
     [/\bAutorität\b/gi, "Berechtigung"],
+    [/^künftige Funktionen\b/gi, "Künftige Funktionen"],
+    [/\bautorisiertem Kontext\b/gi, "verfügbarem Kontext"],
     [/\bgeregelte[nmrs]?\b/gi, ""],
   ],
 };
