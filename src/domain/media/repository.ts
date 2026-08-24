@@ -1,5 +1,9 @@
 import type { OrganizationId } from "../organizations/model.ts";
 import type {
+  GovernedMediaMutationBundle,
+  GovernedMediaMutationCommand,
+} from "./mutation.ts";
+import type {
   OrganizationIntroductionMedia,
   OrganizationIntroductionMediaId,
   PublicMediaProjection,
@@ -37,6 +41,11 @@ export interface RfxAttachmentReferenceRepository {
   ): Promise<readonly RfxAttachmentReference[]>;
   create(reference: RfxAttachmentReference): Promise<void>;
   save(reference: RfxAttachmentReference): Promise<void>;
+}
+
+export interface GovernedMediaMutationUnitOfWork {
+  getCommand(id: string): Promise<GovernedMediaMutationCommand | null>;
+  commit(bundle: GovernedMediaMutationBundle): Promise<"created" | "replayed">;
 }
 
 export interface ExternalOrganizationVideoResolver {
