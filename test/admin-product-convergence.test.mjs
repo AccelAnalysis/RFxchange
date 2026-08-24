@@ -1,0 +1,75 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+
+import {
+  IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS,
+} from "../src/application/admin/portal-navigation.ts";
+
+function read(relativePath) {
+  return readFile(new URL(`../${relativePath}`, import.meta.url), "utf8");
+}
+
+test("the administrative product authority defines an attention-first restrained control plane", async () => {
+  const authority = await read("docs/design/ADMIN_PORTAL_PRODUCT_AUTHORITY.md");
+  assert.match(authority, /attention-first, scope-visible operating workspace/i);
+  assert.match(authority, /Less container chrome/);
+  assert.match(authority, /Human language over implementation language/);
+  assert.match(authority, /only destinations with a truthful implemented runtime/i);
+  assert.match(authority, /Authority is not verification/i);
+  assert.doesNotMatch(authority, /binary `isAdmin` authorization is permitted/i);
+});
+
+test("only truthful current admin runtimes remain registered", () => {
+  assert.deepEqual(
+    IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS,
+    ["organization-claims", "resource-providers"],
+  );
+});
+
+test("live administrative surfaces share one product shell", async () => {
+  const claimsPage = await read("app/admin/organization-claims/page.tsx");
+  const providerPage = await read("app/admin/resource-providers/page.tsx");
+  const organizationPage = await read("app/admin/organizations/[organizationId]/page.tsx");
+
+  for (const source of [claimsPage, providerPage, organizationPage]) {
+    assert.match(source, /AdminPortalShell/);
+  }
+
+  assert.doesNotMatch(claimsPage, /styles\.sidebar/);
+  assert.doesNotMatch(claimsPage, /Runtime convergence/);
+  assert.doesNotMatch(claimsPage, /Grant \{/);
+  assert.doesNotMatch(organizationPage, /page\.module\.css/);
+});
+
+test("the shared shell keeps scope visible and uses compact responsive navigation", async () => {
+  const shell = await read("src/components/admin/AdminPortalShell.tsx");
+  const navigation = await read("src/components/admin/AdminPortalNavigation.tsx");
+  const styles = await read("src/components/admin/AdminPortalShell.module.css");
+
+  assert.match(shell, /Current access/);
+  assert.match(shell, /All authorized records/);
+  assert.match(navigation, /aria-expanded=\{open\}/);
+  assert.match(navigation, /Available now/);
+  assert.match(styles, /\.navigation\[data-open="true"\] \.navigationBody/);
+  assert.match(styles, /var\(--warm-ivory/);
+  assert.match(styles, /var\(--rf-gold/);
+  assert.doesNotMatch(styles, /overflow-x:\s*auto/);
+});
+
+test("provider review presents organization identity and canonical action hierarchy", async () => {
+  const consoleSource = await read("src/components/resource-providers/ProviderReviewConsole.tsx");
+  const styles = await read("src/components/resource-providers/ProviderReviewConsole.module.css");
+
+  assert.match(consoleSource, /readonly displayName: string/);
+  assert.match(consoleSource, /application\.displayName/);
+  assert.match(consoleSource, /Decision workspace/);
+  assert.match(consoleSource, /primaryAction/);
+  assert.match(consoleSource, /secondaryAction/);
+  assert.match(consoleSource, /dangerAction/);
+  assert.doesNotMatch(consoleSource, /Minimum-necessary application/);
+  assert.doesNotMatch(consoleSource, /Protected application detail/);
+  assert.doesNotMatch(styles, /Georgia\s*,\s*serif/);
+  assert.doesNotMatch(styles, /#173a31/i);
+  assert.match(styles, /var\(--graphite/);
+});
