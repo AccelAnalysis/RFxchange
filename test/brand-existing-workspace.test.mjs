@@ -36,21 +36,18 @@ test("Brand B6a supports truthful localized loading and recovery boundaries", ()
   assert.match(component, /networkWorkspace\.status\.\$\{status\}\.title/);
   assert.equal(
     networkCatalog.status.error.body,
-    "No organization or geography state was changed. Retry the authenticated workspace or return to activation for recovery.",
+    "Your organization and location information were not changed. Retry or return to setup if you need to correct something.",
   );
   assert.match(networkCatalog.status.recovery.body, /without creating a duplicate organization/);
 });
 
-test("Brand B6a organization home evolves to bounded Network discovery without later domains", () => {
+test("Brand B6a organization home presents the current bounded Exchange scope without internal delivery language", () => {
   assert.equal(networkCatalog.home.eyebrow, "Organization home");
-  assert.equal(networkCatalog.home.activeNode, "Active organization node");
+  assert.equal(networkCatalog.home.activeNode, "Organization marker");
   assert.equal(networkCatalog.home.manageProfile, "Manage organization profile");
-  assert.equal(networkCatalog.provenance.eyebrow, "Data provenance");
-  assert.match(networkCatalog.home.scopeBody, /permitted Network organization discovery/);
-  assert.match(
-    networkCatalog.home.scopeBody,
-    /Opportunities, referrals, resource providers, credibility, and outcomes remain absent/,
-  );
+  assert.equal(networkCatalog.provenance.eyebrow, "Map information");
+  assert.match(networkCatalog.home.scopeBody, /Explore organizations, capabilities, geography, and the Exchange tools currently available/);
+  assert.match(networkCatalog.home.scopeBody, /Unavailable actions are identified where they appear/);
   assert.match(component, /networkWorkspace\.home\.scopeBody/);
 });
 

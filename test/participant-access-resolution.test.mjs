@@ -69,7 +69,7 @@ test("Join and the dedicated resolution page cannot transfer old organization li
   assert.match(resolution, /access\.options\.map/);
   assert.match(resolution, /selectedOrganizationId/);
   assert.match(resolution, /copy\.organizationBoundary/);
-  assert.match(englishRecovery, /does not grant that organization the previous organization’s activation authority/);
+  assert.match(englishRecovery, /does not transfer another organization’s setup or permissions/);
   assert.doesNotMatch(resolution, /access\.membership/);
   assert.doesNotMatch(classifier, /stateForMembership/);
   assert.doesNotMatch(classifier, /kind: "authorized"[\s\S]{0,500}governedMembershipRepair/);

@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const { dictionary } = await getRequestDictionary();
   const home = dictionary.marketingPages.home;
-  const differentiation = dictionary.home.difference;
+  const differentiation = dictionary.marketing.home.difference;
 
   return (
     <main className={styles.site}>
@@ -209,7 +209,7 @@ export default async function HomePage() {
             ))}
           </div>
           <p className={styles.provenanceLink}>
-            <Link href="/image-credits">{dictionary.home.evidence.link}</Link>
+            <Link href="/image-credits">{dictionary.marketing.home.evidence.link}</Link>
           </p>
         </div>
       </section>
