@@ -33,7 +33,15 @@ function collectShape(value, prefix = "") {
   return [{ path: prefix, type: typeof value, value }];
 }
 
-for (const namespace of catalogNamespaces) {
+const requestedNamespace = process.env.RFXCHANGE_I18N_NAMESPACE?.trim() || null;
+if (requestedNamespace && !catalogNamespaces.some(({ name }) => name === requestedNamespace)) {
+  throw new Error(`Unknown internationalization namespace: ${requestedNamespace}`);
+}
+const namespacesToValidate = requestedNamespace
+  ? catalogNamespaces.filter(({ name }) => name === requestedNamespace)
+  : catalogNamespaces;
+
+for (const namespace of namespacesToValidate) {
   for (const locale of expectedLocales) {
     const filePath = path.join(namespace.directory, `${locale}.json`);
     assert.ok(fs.existsSync(filePath), `Missing ${namespace.name} locale catalog: ${locale}`);
@@ -73,6 +81,7 @@ assert.match(dictionary, /marketProfile/, "Resolved dictionaries must include th
 assert.match(dictionary, /networkEducation/, "Resolved dictionaries must include the persistent Network education namespace");
 assert.match(dictionary, /recovery/, "Resolved dictionaries must include the shared recovery and access-resolution namespace");
 assert.match(dictionary, /participantNavigation/, "Resolved dictionaries must include the participant-navigation namespace");
+assert.match(dictionary, /applyParticipantLanguageFirewall/, "Resolved dictionaries must pass through the participant-language firewall");
 
 const layout = fs.readFileSync(path.join(root, "app", "layout.tsx"), "utf8");
 assert.match(layout, /<html lang=\{locale\}/, "Root layout must set the resolved locale on html");
@@ -93,4 +102,4 @@ assert.match(
   "The uploaded-document translation exclusion must remain canonical",
 );
 
-console.log("Internationalization foundation validated.");
+console.log(`Internationalization foundation validated${requestedNamespace ? ` for ${requestedNamespace}` : ""}.`);
