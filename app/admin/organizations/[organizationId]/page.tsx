@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
+import { visibleImplementedAdminRuntimeDestinations } from "@/src/application/admin/portal-navigation";
 import { buildOrganization360 } from "@/src/application/admin/organization-360";
+import { AdminPortalShell } from "@/src/components/admin/AdminPortalShell";
 import { Organization360 } from "@/src/components/admin/Organization360";
 import { hydrateEssentialOrganizationProfile } from "@/src/domain/organization-profile/model";
 import { organizationId as parseOrganizationId } from "@/src/domain/organizations/model";
@@ -16,8 +17,6 @@ import {
   createServerFirestoreFoundationRepositories,
   getServerFirestore,
 } from "@/src/infrastructure/firestore/runtime";
-
-import styles from "./page.module.css";
 
 export default async function Organization360Page({
   params,
@@ -97,17 +96,15 @@ export default async function Organization360Page({
       administrativeCases: Object.freeze([]),
     },
   );
+  const destinations = visibleImplementedAdminRuntimeDestinations(
+    access.authority,
+    access.grants,
+    new Date().toISOString(),
+  );
 
   return (
-    <main className={styles.page}>
-      <header className={styles.topbar}>
-        <Link href="/" className={styles.wordmark} aria-label="RFxchange home">
-          <span>RF</span>xchange<sup>™</sup>
-        </Link>
-        <strong>Platform administration</strong>
-        <span>Organization 360 · {access.scope.value}</span>
-      </header>
+    <AdminPortalShell destinations={destinations} currentScope={access.scope.value}>
       <Organization360 projection={projection} />
-    </main>
+    </AdminPortalShell>
   );
 }
