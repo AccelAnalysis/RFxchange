@@ -106,6 +106,8 @@ const localizedPhraseReplacements: Readonly<Record<Exclude<ParticipantLanguageLo
     [/\bregulad[ao]s?\b/gi, ""],
     [/\bestado del estado\b/gi, "estado"],
     [/^Los funciones\b/gi, "Las funciones"],
+    [/\bestado del estado\b/gi, "estado"],
+    [/\bLos funciones\b/gi, "Las funciones"],
     [/\bgobernad[ao]s?\b/gi, ""],
   ],
   fr: [
@@ -186,6 +188,8 @@ const localizedPhraseReplacements: Readonly<Record<Exclude<ParticipantLanguageLo
     [/\bflussi rilasciati\b/gi, "flussi disponibili"],
     [/\bstato del stato\b/gi, "stato"],
     [/^I funzionalità\b/gi, "Le funzionalità"],
+    [/\bstato del stato\b/gi, "stato"],
+    [/\bI funzionalità\b/gi, "Le funzionalità"],
     [/\bgovernat[oaie]\b/gi, ""],
   ],
   de: [
@@ -223,6 +227,8 @@ const localizedPhraseReplacements: Readonly<Record<Exclude<ParticipantLanguageLo
     [/\bnicht autoritativ\b/gi, "vorgeschlagen"],
     [/\bAutorität\b/gi, "Berechtigung"],
     [/^künftige Funktionen\b/gi, "Künftige Funktionen"],
+    [/\bautorisiertem Kontext\b/gi, "verfügbarem Kontext"],
+    [/\bkünftige Funktionen\b/gi, "Künftige Funktionen"],
     [/\bautorisiertem Kontext\b/gi, "verfügbarem Kontext"],
     [/\bgeregelte[nmrs]?\b/gi, ""],
   ],

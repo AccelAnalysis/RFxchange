@@ -2,7 +2,7 @@
   "availability": {
     "eyebrow": "Produktverfügbarkeit",
     "title": "Das Netzwerk ist live. Die Transaktions-Engine folgt.",
-    "description": "Organisationen können eine strukturierte Marktposition aufbauen, teilnehmende Organisationen entdecken, einvernehmliche Verbindungen herstellen, zugelassene Ressourcen finden und kontextbezogene Hilfe erneut öffnen. künftige Funktionen bleiben klar gekennzeichnet.",
+    "description": "Organisationen können eine strukturierte Marktposition aufbauen, teilnehmende Organisationen entdecken, einvernehmliche Verbindungen herstellen, zugelassene Ressourcen finden und kontextbezogene Hilfe erneut öffnen. Künftige Funktionen bleiben klar gekennzeichnet.",
     "items": [
       {
         "kind": "live",
@@ -26,7 +26,7 @@
         "kind": "planned",
         "status": "Kommende Funktionen",
         "title": "RFx Core, Glaubwürdigkeit + Handel",
-        "detail": "RFx-Erstellung und -Veröffentlichung, Antworten, Teaming, Bewertung, Glaubwürdigkeit, Ergebnisse, erweiterte Anbieterkapazität und bezahlte Berechtigungen bleiben künftige Funktionen. Sie werden heute nicht als live dargestellt."
+        "detail": "RFx-Erstellung und -Veröffentlichung, Antworten, Teaming, Bewertung, Glaubwürdigkeit, Ergebnisse, erweiterte Anbieterkapazität und bezahlte Berechtigungen bleiben Künftige Funktionen. Sie werden heute nicht als live dargestellt."
       }
     ]
   },
@@ -134,7 +134,7 @@
         {
           "kicker": "Lernen",
           "title": "Machen Sie Aktivität zu besserem Marktverständnis.",
-          "detail": "Wenn künftige Funktionen geöffnet werden, können Antworten, Entscheidungen, Nachweise und Ergebnisse Marktinformationen verbessern, ohne Annahmen in Fakten umzuwandeln."
+          "detail": "Wenn Künftige Funktionen geöffnet werden, können Antworten, Entscheidungen, Nachweise und Ergebnisse Marktinformationen verbessern, ohne Annahmen in Fakten umzuwandeln."
         }
       ]
     },
@@ -169,7 +169,7 @@
           "detail": "Was ist letztlich geschehen?"
         }
       ],
-      "futureNote": "Bedarf und Fähigkeit sind bereits zentral im aktuellen Produkt. RFx, Entscheidung, Glaubwürdigkeit und Ergebnisse bleiben künftige Funktionen."
+      "futureNote": "Bedarf und Fähigkeit sind bereits zentral im aktuellen Produkt. RFx, Entscheidung, Glaubwürdigkeit und Ergebnisse bleiben Künftige Funktionen."
     },
     "ai": {
       "eyebrow": "Unterstützung mit Autoritätsgrenzen",
@@ -436,7 +436,7 @@
         },
         {
           "question": "Ist die gesamte RFxchange-Plattform live?",
-          "answer": "Nein. Das Netzwerk aus ist live. RFx Core, Bewertung, Glaubwürdigkeit, Ergebnisse und bezahlte Berechtigungen bleiben künftige Funktionen."
+          "answer": "Nein. Das Netzwerk aus ist live. RFx Core, Bewertung, Glaubwürdigkeit, Ergebnisse und bezahlte Berechtigungen bleiben Künftige Funktionen."
         },
         {
           "question": "Warum teilnehmen, bevor alles fertig ist?",
