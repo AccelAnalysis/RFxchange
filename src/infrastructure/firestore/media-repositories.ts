@@ -182,6 +182,16 @@ export class FirestoreOrganizationIntroductionMediaRepository
   async getPublishedByOrganizationId(
     organizationId: OrganizationId,
   ): Promise<OrganizationIntroductionMedia | null> {
+    const slot = await this.db.doc(
+      governedMediaDocumentPath("organizationIntroductionPublishedSlots", organizationId),
+    ).get();
+    if (slot.exists) {
+      const slotData = normalize(slot.data()) as { mediaId?: string } | undefined;
+      if (!slotData?.mediaId) {
+        throw new Error("Organization introduction publication slot is inconsistent.");
+      }
+      return this.getById(slotData.mediaId as OrganizationIntroductionMediaId);
+    }
     const snapshot = await this.db
       .collection(governedMediaCollectionName("organizationIntroductionMedia"))
       .where("organizationId", "==", organizationId)
@@ -209,9 +219,13 @@ export class FirestoreOrganizationIntroductionMediaRepository
     const ref = this.db.doc(
       governedMediaDocumentPath("organizationIntroductionMedia", media.id),
     );
+    const slotRef = this.db.doc(
+      governedMediaDocumentPath("organizationIntroductionPublishedSlots", media.organizationId),
+    );
     await this.db.runTransaction(async (transaction) => {
+      const [recordSnapshot, slotSnapshot] = await transaction.getAll(ref, slotRef);
       const existing = record<OrganizationIntroductionMedia>(
-        await transaction.get(ref),
+        recordSnapshot,
         "Organization introduction media",
       );
       if (!existing) throw new Error("Organization introduction media does not exist.");
@@ -222,6 +236,21 @@ export class FirestoreOrganizationIntroductionMediaRepository
         "Organization introduction media",
       );
       assertStatusTransition(existing.status, media.status, "Organization introduction media");
+      const slot = slotSnapshot.exists
+        ? normalize(slotSnapshot.data()) as { mediaId?: string }
+        : null;
+      if (media.status === "published") {
+        if (slot?.mediaId && slot.mediaId !== media.id) {
+          throw new Error("Organization already has another published introduction media record.");
+        }
+        transaction.set(slotRef, payload({
+          id: media.organizationId,
+          organizationId: media.organizationId,
+          mediaId: media.id,
+        }));
+      } else if (media.status === "withdrawn" && slot?.mediaId === media.id) {
+        transaction.delete(slotRef);
+      }
       transaction.set(ref, payload(media));
     });
   }
@@ -296,6 +325,14 @@ export class FirestoreRfxAttachmentReferenceRepository
         ],
         "RFx attachment reference",
       );
+      if (
+        existing.status === "removed"
+        && reference.status === "removed"
+        && existing.revision === reference.revision
+        && same(existing) === same(reference)
+      ) {
+        return;
+      }
       if (
         reference.revision !== existing.revision + 1
         || existing.status !== "attached"
