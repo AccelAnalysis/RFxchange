@@ -157,7 +157,10 @@ function publicAssetKind(asset: StoredAsset): PublicMediaKind | null {
   return null;
 }
 
-function assertActiveAsset(asset: StoredAsset, organizationId: OrganizationId): void {
+function assertActiveAsset(
+  asset: StoredAsset,
+  organizationId: OrganizationId,
+): asserts asset is StoredAsset & Readonly<{ status: "active"; sha256: string }> {
   if (asset.organizationId !== organizationId) {
     throw new Error("Media source asset belongs to a different Organization.");
   }
