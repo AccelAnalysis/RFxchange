@@ -37,6 +37,8 @@ const OPEN_PROVIDER_STATUSES = new Set([
 ]);
 const FAILED_JOB_STATUSES = new Set(["retryable-failure", "terminal-failure"]);
 
+type FirestoreRecord = Readonly<Record<string, unknown> & { id: string }>;
+
 function metric(key: string, label: string, value: number): AdminHealthMetric {
   return Object.freeze({ key, label, value, unit: "count" as const });
 }
@@ -50,14 +52,22 @@ function containsAny(value: unknown, terms: readonly string[]): boolean {
   return terms.some((term) => text.includes(term));
 }
 
-async function collectionRecords(db: Firestore, collection: string) {
-  const snapshot = await db.collection(collection).get();
-  return snapshot.docs.map((document) => Object.freeze({ id: document.id, ...document.data() }));
+function firestoreRecord(id: string, data: Record<string, unknown>): FirestoreRecord {
+  return Object.freeze({ ...data, id });
 }
 
-async function boundedCollectionRecords(db: Firestore, collection: string, limit: number) {
+async function collectionRecords(db: Firestore, collection: string): Promise<readonly FirestoreRecord[]> {
+  const snapshot = await db.collection(collection).get();
+  return snapshot.docs.map((document) => firestoreRecord(document.id, document.data()));
+}
+
+async function boundedCollectionRecords(
+  db: Firestore,
+  collection: string,
+  limit: number,
+): Promise<readonly FirestoreRecord[]> {
   const snapshot = await db.collection(collection).limit(Math.max(1, Math.min(limit, 200))).get();
-  return snapshot.docs.map((document) => Object.freeze({ id: document.id, ...document.data() }));
+  return snapshot.docs.map((document) => firestoreRecord(document.id, document.data()));
 }
 
 function caseHasPermission(record: AdministrativeCase, permission: string): boolean {
