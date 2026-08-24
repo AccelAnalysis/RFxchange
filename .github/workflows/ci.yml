@@ -52,9 +52,25 @@ jobs:
         run: npm run validate:product-system
       - name: Domain architecture guardrails
         run: npm run validate:architecture
-      - name: Internationalization · base
+      - name: Internationalization · base · Spanish
         env:
           RFXCHANGE_I18N_NAMESPACE: base
+          RFXCHANGE_I18N_LOCALE: es
+        run: npm run validate:internationalization
+      - name: Internationalization · base · French
+        env:
+          RFXCHANGE_I18N_NAMESPACE: base
+          RFXCHANGE_I18N_LOCALE: fr
+        run: npm run validate:internationalization
+      - name: Internationalization · base · Italian
+        env:
+          RFXCHANGE_I18N_NAMESPACE: base
+          RFXCHANGE_I18N_LOCALE: it
+        run: npm run validate:internationalization
+      - name: Internationalization · base · German
+        env:
+          RFXCHANGE_I18N_NAMESPACE: base
+          RFXCHANGE_I18N_LOCALE: de
         run: npm run validate:internationalization
       - name: Internationalization · marketing pages
         env:
