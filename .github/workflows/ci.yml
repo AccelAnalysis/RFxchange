@@ -48,8 +48,14 @@ jobs:
           else
             git diff --check HEAD^ HEAD
           fi
-      - name: Repository guardrails
-        run: npm run validate
+      - name: Product and brand guardrails
+        run: npm run validate:product-system
+      - name: Domain architecture guardrails
+        run: npm run validate:architecture
+      - name: Internationalization guardrails
+        run: npm run validate:internationalization
+      - name: Firebase foundation guardrails
+        run: npm run validate:firebase-environment && npm run validate:firestore-schema && npm run validate:firestore-repositories && npm run validate:firestore-security-rules && npm run validate:firestore-indexes && npm run validate:firebase-auth-provider && npm run validate:firebase-user-resolution && npm run validate:firebase-server-session && npm run validate:firebase-authentication-lifecycle && npm run validate:firebase-auth-firestore-security-suite && npm run validate:first-persisted-authenticated-vertical-slice && npm run validate:transactional-email-provider-abstraction && npm run validate:firebase-functions-runtime && npm run validate:background-job-framework && npm run validate:firebase-storage-foundation
       - name: Cloud Functions build and unit tests
         run: npm run build:functions && npm run test:functions
       - name: Firebase Auth, Firestore, Functions and Storage emulator smoke tests
