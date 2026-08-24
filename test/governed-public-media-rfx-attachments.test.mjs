@@ -63,8 +63,8 @@ function activeAsset({
 function memoryDependencies(assets) {
   const byAsset = new Map(assets.map((asset) => [asset.id, asset]));
   const projections = new Map();
-  const introductions = new Map();
-  const attachments = new Map();
+  const introductionRecords = new Map();
+  const attachmentRecords = new Map();
   const bytesByPath = new Map();
   for (const asset of assets) {
     bytesByPath.set(asset.objectPath, new Uint8Array(asset.sizeBytes).fill(7));
@@ -118,38 +118,38 @@ function memoryDependencies(assets) {
     },
     introductions: {
       async getById(id) {
-        return introductions.get(id) ?? null;
+        return introductionRecords.get(id) ?? null;
       },
       async getPublishedByOrganizationId(organizationIdValue) {
-        return [...introductions.values()].find(
+        return [...introductionRecords.values()].find(
           (media) =>
             media.organizationId === organizationIdValue
             && media.status === "published",
         ) ?? null;
       },
       async create(media) {
-        introductions.set(media.id, media);
+        introductionRecords.set(media.id, media);
       },
       async save(media) {
-        introductions.set(media.id, media);
+        introductionRecords.set(media.id, media);
       },
     },
     attachments: {
       async getById(id) {
-        return attachments.get(id) ?? null;
+        return attachmentRecords.get(id) ?? null;
       },
       async listByRfxId(organizationIdValue, rfxId) {
-        return [...attachments.values()].filter(
+        return [...attachmentRecords.values()].filter(
           (attachment) =>
             attachment.organizationId === organizationIdValue
             && attachment.rfxId === rfxId,
         );
       },
       async create(attachment) {
-        attachments.set(attachment.id, attachment);
+        attachmentRecords.set(attachment.id, attachment);
       },
       async save(attachment) {
-        attachments.set(attachment.id, attachment);
+        attachmentRecords.set(attachment.id, attachment);
       },
     },
     externalVideos: {
@@ -164,8 +164,8 @@ function memoryDependencies(assets) {
       },
     },
     projections,
-    introductions,
-    attachments,
+    introductionRecords,
+    attachmentRecords,
     bytesByPath,
   };
 }
