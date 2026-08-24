@@ -19,15 +19,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24.18.0'
-      - name: Correct locale rewrite boundary
+      - name: Correct and expand locale rewrite boundary
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
           path = Path('src/i18n/participant-language-firewall.ts')
           text = path.read_text()
+
           text = text.replace(r'[/\bOnda\s+3\s+è\s+completa\.?/gi, ""]', r'[/\bOnda(?:ta)?\s+3\s+è\s+completa\.?/gi, ""]')
           text = text.replace(r'[/\bOnda\s+\d+(?:\.\d+)?\b/gi, ""]', r'[/\bOnda(?:ta)?\s+\d+(?:\.\d+)?\b/gi, ""]')
+
           old = '''export function rewriteParticipantText(value: string, locale: ParticipantLanguageLocale = "en-US"): string {
             let next = exactReplacements.get(value) ?? value;
 
@@ -55,9 +57,109 @@ jobs:
 
             return cleanSpacing(next);
           }'''
-          if old not in text:
-              raise SystemExit('rewriteParticipantText source block was not found')
-          path.write_text(text.replace(old, new))
+          if old in text:
+              text = text.replace(old, new)
+          elif new not in text:
+              raise SystemExit('rewriteParticipantText source block was not recognized')
+
+          additions = {
+            '    [/\\bgobernad[ao]s?\\b/gi, ""],': '''    [/^La\\s+Las organizaciones/gi, "Las organizaciones"],
+    [/\\bLa\\s+Wave\\s+3\\s+está\\s+completa\\.?\\s*/gi, ""],
+    [/\\bWave\\s+\\d+(?:\\.\\d+)?\\b/gi, ""],
+    [/\\bSlice\\s+\\d+(?:\\.\\d+)?\\b/gi, ""],
+    [/\\bparticipantes permitidos\\b/gi, "organizaciones participantes"],
+    [/\\borganizaciones permitidas\\b/gi, "organizaciones participantes"],
+    [/\\bcontexto autorizado\\b/gi, "contexto disponible"],
+    [/\\bautorizad[ao] por el servidor\\b/gi, "disponible"],
+    [/\\bgeografía autorizada por el servidor\\b/gi, "geografía seleccionada"],
+    [/\\bgeografía controlada\\b/gi, "geografía seleccionada"],
+    [/\\blocalidad controlada\\b/gi, "localidad seleccionada"],
+    [/\\bRed controlada\\b/gi, "Exchange"],
+    [/\\bciclo de vida\\b/gi, "estado"],
+    [/\\bproyección(?:es)?\\b/gi, "vista"],
+    [/\\bprocedencia\\b/gi, "información de origen"],
+    [/\\bcanónic[oa]s?\\b/gi, "actual"],
+    [/\\bno autoritativ[oa]s?\\b/gi, "sugerido"],
+    [/\\bautoritativ[oa]s?\\b/gi, "confirmado"],
+    [/\\bautoridad geográfica\\b/gi, "configuración geográfica"],
+    [/\\bautoridad de emisor\\b/gi, "permiso para emitir"],
+    [/\\bautoridad del evaluador\\b/gi, "permiso para evaluar"],
+    [/\\bautoridad actual\\b/gi, "permisos actuales"],
+    [/\\bflujos publicados\\b/gi, "flujos disponibles"],
+    [/\\bregulad[ao]s?\\b/gi, ""],
+    [/\\bgobernad[ao]s?\\b/gi, ""],''',
+            '    [/\\bgouverné(?:e|es|s)?\\b/gi, ""],': '''    [/^La\\s+est achevée\\.\\s*/gi, ""],
+    [/\\bLa\\s+Wave\\s+3\\s+est\\s+terminée\\.?\\s*/gi, ""],
+    [/\\bWave\\s+\\d+(?:\\.\\d+)?\\b/gi, ""],
+    [/\\bSlice\\s+\\d+(?:\\.\\d+)?\\b/gi, ""],
+    [/\\bparticipants autorisés\\b/gi, "participants"],
+    [/\\borganisations autorisées\\b/gi, "organisations participantes"],
+    [/\\bcontexte autorisé\\b/gi, "contexte disponible"],
+    [/\\bgéographie autorisée par le serveur\\b/gi, "géographie sélectionnée"],
+    [/\\bgéographie contrôlée\\b/gi, "géographie sélectionnée"],
+    [/\\blocalité contrôlée\\b/gi, "localité sélectionnée"],
+    [/\\bRéseau contrôlé\\b/gi, "Exchange"],
+    [/\\bcycle de vie\\b/gi, "statut"],
+    [/\\bprojection(?:s)?\\b/gi, "vue"],
+    [/\\bprovenance\\b/gi, "informations sur la source"],
+    [/\\bcanonique(?:s)?\\b/gi, "actuel"],
+    [/\\bnon contraignant(?:e|es|s)?\\b/gi, "suggéré"],
+    [/\\bautorité géographique\\b/gi, "configuration géographique"],
+    [/\\bautorité d’émetteur\\b/gi, "permission d’émettre"],
+    [/\\bautorité d’évaluation\\b/gi, "permission d’évaluer"],
+    [/\\bautorité actuelle\\b/gi, "autorisations actuelles"],
+    [/\\bflux publiés\\b/gi, "flux disponibles"],
+    [/\\bgouverné(?:e|es|s)?\\b/gi, ""],''',
+            '    [/\\bgovernat[oaie]\\b/gi, ""],': '''    [/\\bLa\\s+Wave\\s+3\\s+è\\s+completa\\.?\\s*/gi, ""],
+    [/\\bWave\\s+\\d+(?:\\.\\d+)?\\b/gi, ""],
+    [/\\bSlice\\s+\\d+(?:\\.\\d+)?\\b/gi, ""],
+    [/\\bpartecipanti autorizzati\\b/gi, "partecipanti"],
+    [/\\borganizzazioni autorizzate\\b/gi, "organizzazioni partecipanti"],
+    [/\\bcontesto autorizzato\\b/gi, "contesto disponibile"],
+    [/\\bgeografia autorizzata dal server\\b/gi, "geografia selezionata"],
+    [/\\bgeografia controllata\\b/gi, "geografia selezionata"],
+    [/\\blocalità controllata\\b/gi, "località selezionata"],
+    [/\\bRete controllata\\b/gi, "Exchange"],
+    [/\\bciclo di vita\\b/gi, "stato"],
+    [/\\bproiezione(?:i)?\\b/gi, "vista"],
+    [/\\bprovenienza\\b/gi, "informazioni sulla fonte"],
+    [/\\bcanonic[oaie]\\b/gi, "attuale"],
+    [/\\bnon autoritativ[oaie]\\b/gi, "suggerito"],
+    [/\\bautoritativ[oaie]\\b/gi, "confermato"],
+    [/\\bstato autorevole\\b/gi, "informazioni confermate"],
+    [/\\bautorità geografica\\b/gi, "configurazione geografica"],
+    [/\\bautorità di emittente\\b/gi, "permesso di pubblicare"],
+    [/\\bautorità di valutazione\\b/gi, "permesso di valutare"],
+    [/\\bautorità attuale\\b/gi, "permessi attuali"],
+    [/\\bflussi rilasciati\\b/gi, "flussi disponibili"],
+    [/\\bgovernat[oaie]\\b/gi, ""],''',
+            '    [/\\bgeregelte[nmrs]?\\b/gi, ""],': '''    [/\\bWave\\s+3\\s+ist\\s+abgeschlossen\\.?\\s*/gi, ""],
+    [/\\bWave\\s+\\d+(?:\\.\\d+)?\\b/gi, ""],
+    [/\\bSlice\\s+\\d+(?:\\.\\d+)?\\b/gi, ""],
+    [/\\bzulässige Teilnehmer\\b/gi, "teilnehmende Organisationen"],
+    [/\\bzulässige Organisationen\\b/gi, "teilnehmende Organisationen"],
+    [/\\bautorisierter Kontext\\b/gi, "verfügbarer Kontext"],
+    [/\\bserverseitig autorisierte Geografie\\b/gi, "ausgewählte Geografie"],
+    [/\\bkontrollierte Geografie\\b/gi, "ausgewählte Geografie"],
+    [/\\bkontrollierter Ort\\b/gi, "ausgewählter Ort"],
+    [/\\bkontrolliertes Netzwerk\\b/gi, "Exchange"],
+    [/\\bLebenszyklusstatus\\b/gi, "Status"],
+    [/\\bLebenszyklus\\b/gi, "Status"],
+    [/\\bProjektion(?:en)?\\b/gi, "Ansicht"],
+    [/\\bHerkunft\\b/gi, "Quellenangaben"],
+    [/\\bkanonisch(?:e|en|er|es)?\\b/gi, "aktuell"],
+    [/\\bnicht autoritativ\\b/gi, "vorgeschlagen"],
+    [/\\bAutorität\\b/gi, "Berechtigung"],
+    [/\\bgeregelte[nmrs]?\\b/gi, ""],''',
+          }
+          for anchor, replacement in additions.items():
+              if replacement in text:
+                  continue
+              if anchor not in text:
+                  raise SystemExit(f'locale rewrite anchor not found: {anchor}')
+              text = text.replace(anchor, replacement)
+
+          path.write_text(text)
           PY
       - name: Restore original localized sources while preserving hand rewrites
         shell: bash
@@ -80,5 +182,5 @@ jobs:
             echo "No regenerated changes needed."
             exit 0
           fi
-          git commit -m "Regenerate locale-safe participant copy"
+          git commit -m "Expand locale-safe participant copy cleanup"
           git push origin HEAD:fix/multilingual-participant-language-cleanup
