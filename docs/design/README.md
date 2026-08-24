@@ -60,6 +60,7 @@ Key target authorities include:
 ## Files in this directory
 
 - [`RFxchange_DESIGN_SYSTEM.md`](RFxchange_DESIGN_SYSTEM.md) — current product UI identity, color, typography, spacing, surfaces, controls, motion, accessibility and responsive behavior.
+- [`ADMIN_PORTAL_PRODUCT_AUTHORITY.md`](ADMIN_PORTAL_PRODUCT_AUTHORITY.md) — final protected administration product, shell, interaction, scope, truthfulness and incremental runtime-convergence authority.
 - [`MAP_VISUAL_SYSTEM.md`](MAP_VISUAL_SYSTEM.md) — current map/locality/marker/overlay/layer behavior, including the completed Wave 2 geography and marker baseline.
 - [`PRESENTATION_SYSTEM.md`](PRESENTATION_SYSTEM.md) — current presentation/deck visual hierarchy, composition, audience adaptation and claims discipline.
 
@@ -91,4 +92,4 @@ When the design changes:
 
 ## Codex reading rule
 
-Before implementing any user-facing UI, Codex must read this index, `RFxchange_DESIGN_SYSTEM.md`, `../brand/README.md` and the applicable brand guides. Before implementing a map/geography surface, also read `MAP_VISUAL_SYSTEM.md` and `../brand/MAP_AND_DATA_VISUAL_GRAMMAR.md`. Before creating or modifying presentation content, also read `PRESENTATION_SYSTEM.md`. Customer-facing copy and communications must read `../brand/CONTENT_AND_MESSAGING_SYSTEM.md`.
+Before implementing any user-facing UI, Codex must read this index, `RFxchange_DESIGN_SYSTEM.md`, `../brand/README.md` and the applicable brand guides. Before implementing protected administration, also read `ADMIN_PORTAL_PRODUCT_AUTHORITY.md` and `docs/context/ADMINISTRATION.md`. Before implementing a map/geography surface, also read `MAP_VISUAL_SYSTEM.md` and `../brand/MAP_AND_DATA_VISUAL_GRAMMAR.md`. Before creating or modifying presentation content, also read `PRESENTATION_SYSTEM.md`. Customer-facing copy and communications must read `../brand/CONTENT_AND_MESSAGING_SYSTEM.md`.
