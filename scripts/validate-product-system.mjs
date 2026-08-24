@@ -57,7 +57,7 @@ if (!home.includes("differentiation.items.map")) {
 const marketing = await read("src/content/marketing.ts");
 const marketingLower = marketing.toLowerCase();
 for (const requirement of [
-  "turn ordinary business meaning into governed, reusable market structure",
+  "turn ordinary business meaning into reusable market context",
   "more than a directory",
   "not a social feed",
   "broader than a bid portal",
