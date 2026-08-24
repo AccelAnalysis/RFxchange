@@ -21,6 +21,24 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+function normalizeCatalog(namespaceName, catalog) {
+  if (
+    namespaceName !== "base"
+    || catalog?.marketing?.home
+    || !catalog?.home
+  ) {
+    return catalog;
+  }
+  const { home, ...rest } = catalog;
+  return Object.freeze({
+    ...rest,
+    marketing: Object.freeze({
+      ...catalog.marketing,
+      home,
+    }),
+  });
+}
+
 function collectShape(value, prefix = "") {
   if (Array.isArray(value)) {
     return value.flatMap((entry, index) => collectShape(entry, `${prefix}[${index}]`));
@@ -60,11 +78,17 @@ for (const namespace of namespacesToValidate) {
     assert.ok(fs.existsSync(filePath), `Missing ${namespace.name} locale catalog: ${locale}`);
   }
 
-  const reference = readJson(path.join(namespace.directory, `${referenceLocale}.json`));
+  const reference = normalizeCatalog(
+    namespace.name,
+    readJson(path.join(namespace.directory, `${referenceLocale}.json`)),
+  );
   const referenceShape = normalizedShape(reference);
 
   for (const locale of localesToValidate) {
-    const catalog = readJson(path.join(namespace.directory, `${locale}.json`));
+    const catalog = normalizeCatalog(
+      namespace.name,
+      readJson(path.join(namespace.directory, `${locale}.json`)),
+    );
     const catalogShape = collectShape(catalog);
     assert.deepEqual(
       normalizedShape(catalog),
@@ -92,6 +116,7 @@ assert.match(dictionary, /networkEducation/, "Resolved dictionaries must include
 assert.match(dictionary, /recovery/, "Resolved dictionaries must include the shared recovery and access-resolution namespace");
 assert.match(dictionary, /participantNavigation/, "Resolved dictionaries must include the participant-navigation namespace");
 assert.match(dictionary, /applyParticipantLanguageFirewall/, "Resolved dictionaries must pass through the participant-language firewall");
+assert.match(dictionary, /normalizeBaseCatalog/, "Resolved dictionaries must normalize the legacy marketing-home locale structure");
 
 const layout = fs.readFileSync(path.join(root, "app", "layout.tsx"), "utf8");
 assert.match(layout, /<html lang=\{locale\}/, "Root layout must set the resolved locale on html");
