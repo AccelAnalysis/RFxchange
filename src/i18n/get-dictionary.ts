@@ -100,50 +100,113 @@ export type Dictionary = typeof enUS & Readonly<{
   marketReadyFoundingCommerce: typeof marketReadyFoundingCommerceEnUS;
 }>;
 
+export function normalizeBaseCatalog(base: unknown): typeof enUS {
+  const catalog = base as typeof enUS & Readonly<{
+    home?: typeof enUS.marketing.home;
+  }>;
+  if (catalog.marketing?.home) return catalog;
+  if (!catalog.home || !catalog.marketing) {
+    throw new Error("Base locale catalog is missing marketing home messages.");
+  }
+  const { home, ...rest } = catalog;
+  return Object.freeze({
+    ...rest,
+    marketing: Object.freeze({
+      ...catalog.marketing,
+      home,
+    }),
+  }) as typeof enUS;
+}
+
+export function resolveReferenceFallback(reference: unknown, localized: unknown): unknown {
+  if (Array.isArray(reference)) {
+    const values = Array.isArray(localized) ? localized : [];
+    return Object.freeze(
+      reference.map((entry, index) =>
+        resolveReferenceFallback(entry, values[index]),
+      ),
+    );
+  }
+  if (reference && typeof reference === "object") {
+    const values = localized && typeof localized === "object" && !Array.isArray(localized)
+      ? localized as Readonly<Record<string, unknown>>
+      : {};
+    return Object.freeze(
+      Object.fromEntries(
+        Object.entries(reference as Readonly<Record<string, unknown>>).map(
+          ([key, entry]) => [key, resolveReferenceFallback(entry, values[key])],
+        ),
+      ),
+    );
+  }
+  return localized !== undefined && typeof localized === typeof reference
+    ? localized
+    : reference;
+}
+
+function resolved<T>(reference: T, localized: unknown): T {
+  return resolveReferenceFallback(reference, localized) as T;
+}
+
 function dictionary(
-  base: typeof enUS,
-  marketingPages: typeof marketingPagesEnUS,
-  networkWorkspace: typeof networkEnUS,
-  marketProfile: typeof marketProfileEnUS,
-  organizationEnrichment: typeof organizationEnrichmentEnUS,
-  referralWorkspace: typeof referralEnUS,
-  resourceProviderWorkspace: typeof resourceProviderEnUS,
-  resourceNetworkWorkspace: typeof resourceNetworkEnUS,
-  networkEducation: typeof networkEducationEnUS,
-  recovery: typeof recoveryEnUS,
-  workspaceResilience: typeof workspaceResilienceEnUS,
-  mapStabilization: typeof mapStabilizationEnUS,
-  participantNavigation: typeof participantNavigationEnUS,
-  rfxWorkspace: typeof rfxWorkspaceEnUS,
-  rfxQualifier: typeof rfxQualifierEnUS,
-  marketReadyFoundingCommerce: typeof marketReadyFoundingCommerceEnUS,
+  base: unknown,
+  marketingPages: unknown,
+  networkWorkspace: unknown,
+  marketProfile: unknown,
+  organizationEnrichment: unknown,
+  referralWorkspace: unknown,
+  resourceProviderWorkspace: unknown,
+  resourceNetworkWorkspace: unknown,
+  networkEducation: unknown,
+  recovery: unknown,
+  workspaceResilience: unknown,
+  mapStabilization: unknown,
+  participantNavigation: unknown,
+  rfxWorkspace: unknown,
+  rfxQualifier: unknown,
+  marketReadyFoundingCommerce: unknown,
 ): Dictionary {
   return Object.freeze({
-    ...base,
-    marketingPages,
-    networkWorkspace,
-    marketProfile,
-    organizationEnrichment,
-    referralWorkspace,
-    resourceProviderWorkspace,
-    resourceNetworkWorkspace,
-    networkEducation,
-    recovery,
-    workspaceResilience,
-    mapStabilization,
-    participantNavigation,
-    rfxWorkspace,
-    rfxQualifier,
-    marketReadyFoundingCommerce,
+    ...resolved(enUS, normalizeBaseCatalog(base)),
+    marketingPages: resolved(marketingPagesEnUS, marketingPages),
+    networkWorkspace: resolved(networkEnUS, networkWorkspace),
+    marketProfile: resolved(marketProfileEnUS, marketProfile),
+    organizationEnrichment: resolved(
+      organizationEnrichmentEnUS,
+      organizationEnrichment,
+    ),
+    referralWorkspace: resolved(referralEnUS, referralWorkspace),
+    resourceProviderWorkspace: resolved(
+      resourceProviderEnUS,
+      resourceProviderWorkspace,
+    ),
+    resourceNetworkWorkspace: resolved(
+      resourceNetworkEnUS,
+      resourceNetworkWorkspace,
+    ),
+    networkEducation: resolved(networkEducationEnUS, networkEducation),
+    recovery: resolved(recoveryEnUS, recovery),
+    workspaceResilience: resolved(workspaceResilienceEnUS, workspaceResilience),
+    mapStabilization: resolved(mapStabilizationEnUS, mapStabilization),
+    participantNavigation: resolved(
+      participantNavigationEnUS,
+      participantNavigation,
+    ),
+    rfxWorkspace: resolved(rfxWorkspaceEnUS, rfxWorkspace),
+    rfxQualifier: resolved(rfxQualifierEnUS, rfxQualifier),
+    marketReadyFoundingCommerce: resolved(
+      marketReadyFoundingCommerceEnUS,
+      marketReadyFoundingCommerce,
+    ),
   });
 }
 
 const dictionaries: Readonly<Record<Locale, Dictionary>> = Object.freeze({
   "en-US": dictionary(enUS, marketingPagesEnUS, networkEnUS, marketProfileEnUS, organizationEnrichmentEnUS, referralEnUS, resourceProviderEnUS, resourceNetworkEnUS, networkEducationEnUS, recoveryEnUS, workspaceResilienceEnUS, mapStabilizationEnUS, participantNavigationEnUS, rfxWorkspaceEnUS, rfxQualifierEnUS, marketReadyFoundingCommerceEnUS),
-  es: dictionary(es as typeof enUS, marketingPagesEs as typeof marketingPagesEnUS, networkEs as typeof networkEnUS, marketProfileEs as typeof marketProfileEnUS, organizationEnrichmentEs as typeof organizationEnrichmentEnUS, referralEs as typeof referralEnUS, resourceProviderEs as typeof resourceProviderEnUS, resourceNetworkEs as typeof resourceNetworkEnUS, networkEducationEs as typeof networkEducationEnUS, recoveryEs as typeof recoveryEnUS, workspaceResilienceEs as typeof workspaceResilienceEnUS, mapStabilizationEs as typeof mapStabilizationEnUS, participantNavigationEs as typeof participantNavigationEnUS, rfxWorkspaceEs as typeof rfxWorkspaceEnUS, rfxQualifierEs as typeof rfxQualifierEnUS, marketReadyFoundingCommerceEs as typeof marketReadyFoundingCommerceEnUS),
-  fr: dictionary(fr as typeof enUS, marketingPagesFr as typeof marketingPagesEnUS, networkFr as typeof networkEnUS, marketProfileFr as typeof marketProfileEnUS, organizationEnrichmentFr as typeof organizationEnrichmentEnUS, referralFr as typeof referralEnUS, resourceProviderFr as typeof resourceProviderEnUS, resourceNetworkFr as typeof resourceNetworkEnUS, networkEducationFr as typeof networkEducationEnUS, recoveryFr as typeof recoveryEnUS, workspaceResilienceFr as typeof workspaceResilienceEnUS, mapStabilizationFr as typeof mapStabilizationEnUS, participantNavigationFr as typeof participantNavigationEnUS, rfxWorkspaceFr as typeof rfxWorkspaceEnUS, rfxQualifierFr as typeof rfxQualifierEnUS, marketReadyFoundingCommerceFr as typeof marketReadyFoundingCommerceEnUS),
-  it: dictionary(it as typeof enUS, marketingPagesIt as typeof marketingPagesEnUS, networkIt as typeof networkEnUS, marketProfileIt as typeof marketProfileEnUS, organizationEnrichmentIt as typeof organizationEnrichmentEnUS, referralIt as typeof referralEnUS, resourceProviderIt as typeof resourceProviderEnUS, resourceNetworkIt as typeof resourceNetworkEnUS, networkEducationIt as typeof networkEducationEnUS, recoveryIt as typeof recoveryEnUS, workspaceResilienceIt as typeof workspaceResilienceEnUS, mapStabilizationIt as typeof mapStabilizationEnUS, participantNavigationIt as typeof participantNavigationEnUS, rfxWorkspaceIt as typeof rfxWorkspaceEnUS, rfxQualifierIt as typeof rfxQualifierEnUS, marketReadyFoundingCommerceIt as typeof marketReadyFoundingCommerceEnUS),
-  de: dictionary(de as typeof enUS, marketingPagesDe as typeof marketingPagesEnUS, networkDe as typeof networkEnUS, marketProfileDe as typeof marketProfileEnUS, organizationEnrichmentDe as typeof organizationEnrichmentEnUS, referralDe as typeof referralEnUS, resourceProviderDe as typeof resourceProviderEnUS, resourceNetworkDe as typeof resourceNetworkEnUS, networkEducationDe as typeof networkEducationEnUS, recoveryDe as typeof recoveryEnUS, workspaceResilienceDe as typeof workspaceResilienceEnUS, mapStabilizationDe as typeof mapStabilizationEnUS, participantNavigationDe as typeof participantNavigationEnUS, rfxWorkspaceDe as typeof rfxWorkspaceEnUS, rfxQualifierDe as typeof rfxQualifierEnUS, marketReadyFoundingCommerceDe as typeof marketReadyFoundingCommerceEnUS),
+  es: dictionary(es, marketingPagesEs, networkEs, marketProfileEs, organizationEnrichmentEs, referralEs, resourceProviderEs, resourceNetworkEs, networkEducationEs, recoveryEs, workspaceResilienceEs, mapStabilizationEs, participantNavigationEs, rfxWorkspaceEs, rfxQualifierEs, marketReadyFoundingCommerceEs),
+  fr: dictionary(fr, marketingPagesFr, networkFr, marketProfileFr, organizationEnrichmentFr, referralFr, resourceProviderFr, resourceNetworkFr, networkEducationFr, recoveryFr, workspaceResilienceFr, mapStabilizationFr, participantNavigationFr, rfxWorkspaceFr, rfxQualifierFr, marketReadyFoundingCommerceFr),
+  it: dictionary(it, marketingPagesIt, networkIt, marketProfileIt, organizationEnrichmentIt, referralIt, resourceProviderIt, resourceNetworkIt, networkEducationIt, recoveryIt, workspaceResilienceIt, mapStabilizationIt, participantNavigationIt, rfxWorkspaceIt, rfxQualifierIt, marketReadyFoundingCommerceIt),
+  de: dictionary(de, marketingPagesDe, networkDe, marketProfileDe, organizationEnrichmentDe, referralDe, resourceProviderDe, resourceNetworkDe, networkEducationDe, recoveryDe, workspaceResilienceDe, mapStabilizationDe, participantNavigationDe, rfxWorkspaceDe, rfxQualifierDe, marketReadyFoundingCommerceDe),
 });
 
 export function getDictionary(locale: Locale): Dictionary {
