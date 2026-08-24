@@ -80,6 +80,7 @@ import marketReadyFoundingCommerceFr from "./messages/market-ready-founding-comm
 import marketReadyFoundingCommerceIt from "./messages/market-ready-founding-commerce/it.json";
 
 import type { Locale } from "./config";
+import { applyParticipantLanguageFirewall } from "./participant-language-firewall";
 
 export type Dictionary = typeof enUS & Readonly<{
   marketingPages: typeof marketingPagesEnUS;
@@ -146,5 +147,5 @@ const dictionaries: Readonly<Record<Locale, Dictionary>> = Object.freeze({
 });
 
 export function getDictionary(locale: Locale): Dictionary {
-  return dictionaries[locale];
+  return applyParticipantLanguageFirewall(dictionaries[locale], locale);
 }

@@ -46,25 +46,21 @@ test("Next artifact identity and production CI are bound to the checked-out exac
   assert.ok(workflow.includes('echo "sha=$actual_sha" >> "$GITHUB_OUTPUT"'));
   assert.ok(workflow.includes(`RFXCHANGE_BUILD_SHA: ${VALIDATED_SOURCE_SHA_EXPRESSION}`));
   assert.ok(workflow.includes(`RFXCHANGE_EXPECTED_BUILD_SHA: ${VALIDATED_SOURCE_SHA_EXPRESSION}`));
-  assert.match(workflow, /- name: Verify compiled and visible build identity/);
+  assert.match(workflow, /- name: Verify compiled build identity/);
   assert.ok(workflow.includes('test "$(cat .next/BUILD_ID)" = "$RFXCHANGE_EXPECTED_BUILD_SHA"'));
-  assert.match(workflow, /npm run start -- -H 127\.0\.0\.1 -p 3100/);
-  assert.ok(workflow.includes("curl --fail --silent http://127.0.0.1:3100/ --output /tmp/rfxchange-home.html"));
-  assert.ok(workflow.includes('grep -Fq "title=\\"$RFXCHANGE_EXPECTED_BUILD_SHA\\"" /tmp/rfxchange-home.html'));
-  assert.ok(workflow.includes("sed 's/<!-- -->//g' /tmp/rfxchange-home.html > /tmp/rfxchange-home-normalized.html"));
-  assert.ok(workflow.includes('grep -Fq ">SHA ${RFXCHANGE_EXPECTED_BUILD_SHA:0:12}</span>" /tmp/rfxchange-home-normalized.html'));
 });
 
-test("the compiled build SHA is visibly projected on public and authenticated surfaces", async () => {
-  const [marketing, account] = await Promise.all([
+test("build identity remains release-engineering data instead of participant-facing copy", async () => {
+  const [marketing, account, workflow] = await Promise.all([
     read("src/components/marketing/MarketingChrome.tsx"),
     read("app/organization-profile/page.tsx"),
+    read(".github/workflows/ci.yml"),
   ]);
 
-  assert.match(marketing, /currentBuildIdentity\(\)/);
-  assert.match(marketing, /title=\{buildIdentity\.commitSha\}/);
-  assert.match(marketing, /SHA \{buildIdentity\.shortSha\}/);
-  assert.match(account, /currentBuildIdentity\(\)/);
-  assert.match(account, /<dt>Build SHA<\/dt>/);
-  assert.match(account, /buildIdentity\?\.commitSha/);
+  assert.doesNotMatch(marketing, /currentBuildIdentity\(\)/);
+  assert.doesNotMatch(marketing, /commitSha|shortSha|>SHA\s/);
+  assert.doesNotMatch(account, /currentBuildIdentity\(\)/);
+  assert.doesNotMatch(account, /<dt>Build SHA<\/dt>|Current release boundary|approved slices/);
+  assert.doesNotMatch(workflow, /curl --fail --silent http:\/\/127\.0\.0\.1:3100\//);
+  assert.doesNotMatch(workflow, /rfxchange-home\.html|>SHA \$\{RFXCHANGE_EXPECTED_BUILD_SHA/);
 });

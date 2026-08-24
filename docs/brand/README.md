@@ -10,6 +10,8 @@ The governing product idea is:
 
 The platform should feel like a living market, not a conventional dashboard. Brand is expressed through positioning, real geography, truthful evidence, interface hierarchy, semantic color, typography, motion, optional sensory behavior, accessibility, responsiveness, performance, authorization, state preservation and recovery.
 
+For all ordinary public and participant-facing language, [`PARTICIPANT_LANGUAGE_FIREWALL.md`](PARTICIPANT_LANGUAGE_FIREWALL.md) is the governing interpretation boundary. It supersedes older prescribed customer-facing wording where that wording exposes internal governance, implementation, release, acceptance, build, or program-management language. Internal authority documents may retain those terms for development purposes; they must not be copied into participant UI merely to demonstrate truthfulness.
+
 ## Product architecture
 
 - **Product brand:** The RFxchange
@@ -78,7 +80,7 @@ Implemented Light Appearance locality fields, organization-node and subordinate-
 
 ### B4 — Public marketing and acquisition
 
-Implemented an image-led public edge with governed **By Accel Analysis** endorsement, dedicated bottom-matter routes, truthful current/in-development/planned availability, real-image provenance and no invented product evidence.
+Implemented an image-led public edge with **By Accel Analysis** endorsement, dedicated legal/information routes, truthful current/in-development/planned availability, image provenance and no invented product evidence.
 
 ### B5 — Activation experience
 
@@ -93,6 +95,7 @@ Implemented the authenticated organization home, one shared map search, responsi
 After current-task, security/domain, tracker/dependency and authorized-slice/gate authority:
 
 - `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md` defines lens hierarchy, workspace and appearance vocabulary for participant interaction;
+- `docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md` governs the boundary between internal development language and rendered participant language;
 - `docs/brand/` defines approved target experience and acceptance;
 - `docs/design/` defines implemented/converged design baseline; and
 - runtime is implementation evidence and compatibility context.
@@ -106,6 +109,7 @@ A brand rule never grants domain authority, creates a Feature-ID completion clai
 - naming and parent endorsement;
 - semantic color and typography;
 - truthful messaging and evidence integrity;
+- participant-language isolation from internal governance/build/release terminology;
 - loading, empty, success, error, permission, expired and recovery states;
 - accessibility, reduced motion, responsive behavior, state preservation and performance; and
 - precise lens/layer/appearance/workspace terminology.
@@ -184,6 +188,7 @@ Run only after authoritative credibility and outcome evidence domains exist. Pai
 | `MOTION_SYSTEM.md` | Timing, easing, interruption, reduced motion and motion acceptance. |
 | `SONIC_EXPERIENCE_SYSTEM.md` | Future optional sonic identity, event contracts, controls, rights and acceptance. |
 | `CONTENT_AND_MESSAGING_SYSTEM.md` | Voice, terminology, copy, status, empty/error recovery, claims and evidence language. |
+| `PARTICIPANT_LANGUAGE_FIREWALL.md` | Governing participant-language boundary: product accuracy without exposing internal governance, implementation, release, acceptance or build machinery. |
 | `VIEWING_MODES.md` | Current Light/Dark Appearance terminology, Intelligence-lens distinction, Presentation Mode and High Contrast boundaries. |
 | `BRAND_EXPERIENCE_ACCEPTANCE_MATRIX.md` | Brand, state, accessibility, performance, provenance and domain-boundary acceptance. |
 | `BRAND_IMPLEMENTATION_ROADMAP.md` | Completed and remaining Brand Gate sequence. |
@@ -204,6 +209,7 @@ Do not:
 - alter authorization, lifecycle, geography, marker or privacy truth for visual convenience;
 - display planned or synthetic objects as live;
 - invent organizations, opportunities, maps, statistics, outcomes, testimonials, provider availability or market activity;
+- expose internal governance, implementation, release, acceptance, verification, build, SHA or program-management vocabulary in ordinary participant UI merely to prove product truthfulness;
 - use Growth Green for publication, pursuit, invitation, referral acceptance or submission alone;
 - treat membership, payment, recognition, provider approval, verification, credibility or outcome as interchangeable;
 - use Intelligence as an appearance name;

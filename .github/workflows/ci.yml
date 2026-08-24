@@ -48,8 +48,56 @@ jobs:
           else
             git diff --check HEAD^ HEAD
           fi
-      - name: Repository guardrails
-        run: npm run validate
+      - name: Product and brand guardrails
+        run: npm run validate:product-system
+      - name: Domain architecture guardrails
+        run: npm run validate:architecture
+      - name: Internationalization · base · Spanish
+        env:
+          RFXCHANGE_I18N_NAMESPACE: base
+          RFXCHANGE_I18N_LOCALE: es
+        run: npm run validate:internationalization
+      - name: Internationalization · base · French
+        env:
+          RFXCHANGE_I18N_NAMESPACE: base
+          RFXCHANGE_I18N_LOCALE: fr
+        run: npm run validate:internationalization
+      - name: Internationalization · base · Italian
+        env:
+          RFXCHANGE_I18N_NAMESPACE: base
+          RFXCHANGE_I18N_LOCALE: it
+        run: npm run validate:internationalization
+      - name: Internationalization · base · German
+        env:
+          RFXCHANGE_I18N_NAMESPACE: base
+          RFXCHANGE_I18N_LOCALE: de
+        run: npm run validate:internationalization
+      - name: Internationalization · marketing pages
+        env:
+          RFXCHANGE_I18N_NAMESPACE: marketing-pages
+        run: npm run validate:internationalization
+      - name: Internationalization · Network
+        env:
+          RFXCHANGE_I18N_NAMESPACE: network
+        run: npm run validate:internationalization
+      - name: Internationalization · market profile
+        env:
+          RFXCHANGE_I18N_NAMESPACE: market-profile
+        run: npm run validate:internationalization
+      - name: Internationalization · Network education
+        env:
+          RFXCHANGE_I18N_NAMESPACE: network-education
+        run: npm run validate:internationalization
+      - name: Internationalization · recovery
+        env:
+          RFXCHANGE_I18N_NAMESPACE: recovery
+        run: npm run validate:internationalization
+      - name: Internationalization · participant navigation
+        env:
+          RFXCHANGE_I18N_NAMESPACE: participant-navigation
+        run: npm run validate:internationalization
+      - name: Firebase foundation guardrails
+        run: npm run validate:firebase-environment && npm run validate:firestore-schema && npm run validate:firestore-repositories && npm run validate:firestore-security-rules && npm run validate:firestore-indexes && npm run validate:firebase-auth-provider && npm run validate:firebase-user-resolution && npm run validate:firebase-server-session && npm run validate:firebase-authentication-lifecycle && npm run validate:firebase-auth-firestore-security-suite && npm run validate:first-persisted-authenticated-vertical-slice && npm run validate:transactional-email-provider-abstraction && npm run validate:firebase-functions-runtime && npm run validate:background-job-framework && npm run validate:firebase-storage-foundation
       - name: Cloud Functions build and unit tests
         run: npm run build:functions && npm run test:functions
       - name: Firebase Auth, Firestore, Functions and Storage emulator smoke tests
@@ -114,35 +162,10 @@ jobs:
         run: |
           git worktree remove --force /tmp/rfxchange-shell-base 2>/dev/null || true
           git worktree prune
-      - name: Verify compiled and visible build identity
+      - name: Verify compiled build identity
         env:
           RFXCHANGE_EXPECTED_BUILD_SHA: ${{ steps.build_identity.outputs.sha }}
         shell: bash
         run: |
+          set -euo pipefail
           test "$(cat .next/BUILD_ID)" = "$RFXCHANGE_EXPECTED_BUILD_SHA"
-          npm run start -- -H 127.0.0.1 -p 3100 > /tmp/rfxchange-next.log 2>&1 &
-          server_pid=$!
-          cleanup() {
-            kill "$server_pid" 2>/dev/null || true
-            wait "$server_pid" 2>/dev/null || true
-          }
-          trap cleanup EXIT
-          http_ok=false
-          for attempt in $(seq 1 30); do
-            if curl --fail --silent http://127.0.0.1:3100/ --output /tmp/rfxchange-home.html; then
-              http_ok=true
-              break
-            fi
-            if ! kill -0 "$server_pid" 2>/dev/null; then
-              cat /tmp/rfxchange-next.log
-              exit 1
-            fi
-            sleep 1
-          done
-          if [ "$http_ok" != true ]; then
-            cat /tmp/rfxchange-next.log
-            exit 1
-          fi
-          grep -Fq "title=\"$RFXCHANGE_EXPECTED_BUILD_SHA\"" /tmp/rfxchange-home.html
-          sed 's/<!-- -->//g' /tmp/rfxchange-home.html > /tmp/rfxchange-home-normalized.html
-          grep -Fq ">SHA ${RFXCHANGE_EXPECTED_BUILD_SHA:0:12}</span>" /tmp/rfxchange-home-normalized.html

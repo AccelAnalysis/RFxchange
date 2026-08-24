@@ -153,3 +153,30 @@ Do not replace the removed independent-verification requirement with another uni
 Use the smallest amount of governance necessary to ship the Exchange safely and truthfully.
 
 The objective is to keep the Exchange open, let participants use completed capabilities, keep unavailable individual functions truthful, and continue building without turning assurance mechanics into a product-delivery bottleneck.
+
+## 10. Execution and confirmation default
+
+An explicit participant/product-owner instruction to implement a bounded change is authorization to perform that change within the stated scope. Do not add a second generic `proceed?`, approval, acceptance, Control Room, or confirmation step merely because implementation is about to begin or has just been completed.
+
+For ordinary Standard work, the default execution path is:
+
+```text
+Implement → run proportionate tests → reconcile with current main → merge when sound → continue
+```
+
+Use repository history as the ordinary durable completion record. A commit/PR plus the applicable CI or focused test result is normally sufficient evidence for bounded presentation, copy, layout, discoverability, additive, and other low-risk changes. Do not require a separate evidence package, screenshot bundle, independent acceptance record, durable manifest, or manual completion ceremony unless the change itself creates a reason for one.
+
+Additional explicit human confirmation is reserved for decisions where it is materially necessary, including:
+
+- payments or new commercial commitments;
+- destructive or practically irreversible actions;
+- consequential privacy or security boundary changes;
+- legal or policy acceptance;
+- critical authentication, authorization, tenant-isolation, secrets, or data-integrity risk acceptance; or
+- genuine material ambiguity between different product outcomes that cannot be resolved from current authority and context.
+
+Routine copy changes, visual refinements, responsive fixes, navigation cleanup, ordinary workflow completion, implementation of already-directed features, non-destructive bug fixes, and proportionate test/merge activity do not require renewed product-owner confirmation.
+
+`Control Room confirmation` in older operating text means an objective current-state determination where one is still needed for coordination. It must not be interpreted as a universal extra approval layer.
+
+When a task can be completed safely from the explicit instruction and current repository authority, complete it rather than stopping for permission the participant/product owner already gave.
