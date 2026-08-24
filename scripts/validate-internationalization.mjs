@@ -33,6 +33,14 @@ function collectShape(value, prefix = "") {
   return [{ path: prefix, type: typeof value, value }];
 }
 
+function normalizedShape(value) {
+  return collectShape(value)
+    .map(({ path: messagePath, type }) => ({ path: messagePath, type }))
+    .sort((left, right) =>
+      left.path.localeCompare(right.path) || left.type.localeCompare(right.type),
+    );
+}
+
 const requestedNamespace = process.env.RFXCHANGE_I18N_NAMESPACE?.trim() || null;
 const requestedLocale = process.env.RFXCHANGE_I18N_LOCALE?.trim() || null;
 if (requestedNamespace && !catalogNamespaces.some(({ name }) => name === requestedNamespace)) {
@@ -53,18 +61,15 @@ for (const namespace of namespacesToValidate) {
   }
 
   const reference = readJson(path.join(namespace.directory, `${referenceLocale}.json`));
-  const referenceShape = collectShape(reference).map(({ path: messagePath, type }) => ({
-    path: messagePath,
-    type,
-  }));
+  const referenceShape = normalizedShape(reference);
 
   for (const locale of localesToValidate) {
     const catalog = readJson(path.join(namespace.directory, `${locale}.json`));
     const catalogShape = collectShape(catalog);
     assert.deepEqual(
-      catalogShape.map(({ path: messagePath, type }) => ({ path: messagePath, type })),
+      normalizedShape(catalog),
       referenceShape,
-      `${namespace.name}:${locale} must have the same message shape as ${referenceLocale}`,
+      `${namespace.name}:${locale} must have the same message paths and value types as ${referenceLocale}`,
     );
     for (const entry of catalogShape) {
       if (entry.type === "string") {
