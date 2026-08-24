@@ -1,0 +1,84 @@
+name: regenerate-participant-language-cleanup
+
+on:
+  push:
+    branches:
+      - fix/multilingual-participant-language-cleanup
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/multilingual-participant-language-cleanup
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - name: Correct locale rewrite boundary
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/i18n/participant-language-firewall.ts')
+          text = path.read_text()
+          text = text.replace(r'[/\bOnda\s+3\s+è\s+completa\.?/gi, ""]', r'[/\bOnda(?:ta)?\s+3\s+è\s+completa\.?/gi, ""]')
+          text = text.replace(r'[/\bOnda\s+\d+(?:\.\d+)?\b/gi, ""]', r'[/\bOnda(?:ta)?\s+\d+(?:\.\d+)?\b/gi, ""]')
+          old = '''export function rewriteParticipantText(value: string, locale: ParticipantLanguageLocale = "en-US"): string {
+            let next = exactReplacements.get(value) ?? value;
+
+            for (const [pattern, replacement] of englishPhraseReplacements) {
+              next = next.replace(pattern, replacement);
+            }
+
+            if (locale !== "en-US") {
+              for (const [pattern, replacement] of localizedPhraseReplacements[locale]) {
+                next = next.replace(pattern, replacement);
+              }
+            }
+
+            return cleanSpacing(next);
+          }'''
+          new = '''export function rewriteParticipantText(value: string, locale: ParticipantLanguageLocale = "en-US"): string {
+            let next = locale === "en-US" ? (exactReplacements.get(value) ?? value) : value;
+            const replacements = locale === "en-US"
+              ? englishPhraseReplacements
+              : localizedPhraseReplacements[locale];
+
+            for (const [pattern, replacement] of replacements) {
+              next = next.replace(pattern, replacement);
+            }
+
+            return cleanSpacing(next);
+          }'''
+          if old not in text:
+              raise SystemExit('rewriteParticipantText source block was not found')
+          path.write_text(text.replace(old, new))
+          PY
+      - name: Restore original localized sources while preserving hand rewrites
+        shell: bash
+        run: |
+          mkdir -p /tmp/rfx-preserve/base /tmp/rfx-preserve/network-education
+          cp src/i18n/messages/{es,fr,it,de}.json /tmp/rfx-preserve/base/
+          cp src/i18n/messages/network-education/{es,fr,it,de}.json /tmp/rfx-preserve/network-education/
+          git checkout 046863c4ba133ca259cd1c173ec29c299fb6d734 -- src/i18n/messages
+          cp /tmp/rfx-preserve/base/*.json src/i18n/messages/
+          cp /tmp/rfx-preserve/network-education/*.json src/i18n/messages/network-education/
+      - name: Apply locale-safe source cleanup
+        run: node --experimental-transform-types scripts/rewrite-participant-language-sources.mjs --write
+      - name: Commit regenerated sources
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/i18n/participant-language-firewall.ts src/i18n/messages
+          if git diff --cached --quiet; then
+            echo "No regenerated changes needed."
+            exit 0
+          fi
+          git commit -m "Regenerate locale-safe participant copy"
+          git push origin HEAD:fix/multilingual-participant-language-cleanup
