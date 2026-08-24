@@ -65,11 +65,12 @@ test("provider review presents organization identity and canonical action hierar
 
   assert.match(consoleSource, /readonly displayName: string/);
   assert.match(consoleSource, /application\.displayName/);
+  assert.match(consoleSource, /Minimum-necessary application projection/);
   assert.match(consoleSource, /Decision workspace/);
   assert.match(consoleSource, /primaryAction/);
   assert.match(consoleSource, /secondaryAction/);
   assert.match(consoleSource, /dangerAction/);
-  assert.doesNotMatch(consoleSource, /Minimum-necessary application/);
+  assert.doesNotMatch(consoleSource, />Minimum-necessary application</);
   assert.doesNotMatch(consoleSource, /Protected application detail/);
   assert.doesNotMatch(styles, /Georgia\s*,\s*serif/);
   assert.doesNotMatch(styles, /#173a31/i);
