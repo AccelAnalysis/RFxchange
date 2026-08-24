@@ -1,3 +1,5 @@
+export type ParticipantLanguageLocale = "en-US" | "es" | "fr" | "it" | "de";
+
 const exactReplacements = new Map<string, string>([
   ["Create a governed RFx draft", "Create an RFx draft"],
   ["Governed lifecycle", "Status"],
@@ -29,7 +31,7 @@ const exactReplacements = new Map<string, string>([
   ["Search saved with its current governed filters.", "Search saved with its current filters."],
 ]);
 
-const phraseReplacements: ReadonlyArray<readonly [RegExp, string]> = [
+const englishPhraseReplacements: ReadonlyArray<readonly [RegExp, string]> = [
   [/\bgoverned\s+/gi, ""],
   [/\bnon-authoritative\b/gi, "suggested"],
   [/\bauthoritative\b/gi, "confirmed"],
@@ -61,33 +63,118 @@ const phraseReplacements: ReadonlyArray<readonly [RegExp, string]> = [
   [/\bapproved slice(s)?\b/gi, "available feature$1"],
 ];
 
-export function rewriteParticipantText(value: string): string {
-  let next = exactReplacements.get(value) ?? value;
+const localizedPhraseReplacements: Readonly<Record<Exclude<ParticipantLanguageLocale, "en-US">, ReadonlyArray<readonly [RegExp, string]>>> = {
+  es: [
+    [/\bOla\s+3\s+está\s+completa\.?/gi, ""],
+    [/\bOla\s+\d+(?:\.\d+)?\b/gi, ""],
+    [/\bpróxima\s+vía\s+gobernada\b/gi, "Próximas funciones"],
+    [/\btrabajo\s+gobernado\s+posterior\b/gi, "funciones futuras"],
+    [/\bvías\s+gobernadas\s+posteriores\b/gi, "funciones futuras"],
+    [/\basistencia\s+gobernada\b/gi, "asistencia"],
+    [/\bactividad\s+gobernada\b/gi, "actividad"],
+    [/\brevisión\s+gobernada\b/gi, "revisión"],
+    [/\bservicios\s+gobernados\b/gi, "servicios"],
+    [/\bdominios\s+posteriores\b/gi, "funciones futuras"],
+    [/\bestado\s+autorizado\b/gi, "información confirmada"],
+    [/\borganización\s+real\b/gi, "organización"],
+    [/\blugar\s+real\b/gi, "lugar"],
+    [/\bposición\s+real\s+o\s+protegida\s+en\s+el\s+mapa\b/gi, "posición confirmada o protegida en el mapa"],
+    [/\bactividad\s+real\s+de\s+organizaciones\b/gi, "actividad de organizaciones"],
+    [/\bgobernad[ao]s?\b/gi, ""],
+  ],
+  fr: [
+    [/\bVague\s+3\s+est\s+terminée\.?/gi, ""],
+    [/\bVague\s+\d+(?:\.\d+)?\b/gi, ""],
+    [/\bprochaine\s+voie\s+gouvernée\b/gi, "Fonctionnalités à venir"],
+    [/\btravail\s+gouverné\s+ultérieur\b/gi, "fonctionnalités futures"],
+    [/\bvoies\s+gouvernées\s+ultérieures\b/gi, "fonctionnalités futures"],
+    [/\bassistance\s+gouvernée\b/gi, "assistance"],
+    [/\bactivité\s+gouvernée\b/gi, "activité"],
+    [/\brévision\s+gouvernée\b/gi, "révision"],
+    [/\bservices\s+gouvernés\b/gi, "services"],
+    [/\bdomaines\s+ultérieurs\b/gi, "fonctionnalités futures"],
+    [/\bétat\s+autorisé\b/gi, "information confirmée"],
+    [/\borganisation\s+réelle\b/gi, "organisation"],
+    [/\blieu\s+réel\b/gi, "lieu"],
+    [/\bposition\s+réelle\s+ou\s+protégée\s+sur\s+la\s+carte\b/gi, "position confirmée ou protégée sur la carte"],
+    [/\bgouverné(?:e|es|s)?\b/gi, ""],
+  ],
+  it: [
+    [/\bOnda\s+3\s+è\s+completa\.?/gi, ""],
+    [/\bOnda\s+\d+(?:\.\d+)?\b/gi, ""],
+    [/\bprossimo\s+percorso\s+governato\b/gi, "Funzionalità in arrivo"],
+    [/\blavoro\s+governato\s+successivo\b/gi, "funzionalità future"],
+    [/\bpercorsi\s+governati\s+successivi\b/gi, "funzionalità future"],
+    [/\bassistenza\s+governata\b/gi, "assistenza"],
+    [/\battività\s+governata\b/gi, "attività"],
+    [/\brevisione\s+governata\b/gi, "revisione"],
+    [/\bservizi\s+governati\b/gi, "servizi"],
+    [/\bdomini\s+successivi\b/gi, "funzionalità future"],
+    [/\bstato\s+autorizzato\b/gi, "informazione confermata"],
+    [/\borganizzazione\s+reale\b/gi, "organizzazione"],
+    [/\bluogo\s+reale\b/gi, "luogo"],
+    [/\bposizione\s+reale\s+o\s+protetta\s+sulla\s+mappa\b/gi, "posizione confermata o protetta sulla mappa"],
+    [/\bgovernat[oaie]\b/gi, ""],
+  ],
+  de: [
+    [/\bWelle\s+3\s+ist\s+abgeschlossen\.?/gi, ""],
+    [/\bWelle\s+\d+(?:\.\d+)?\b/gi, ""],
+    [/\bnächster\s+geregelter\s+Pfad\b/gi, "Kommende Funktionen"],
+    [/\bspätere\s+geregelte\s+Arbeit\b/gi, "künftige Funktionen"],
+    [/\bspätere\s+geregelte\s+Pfade\b/gi, "künftige Funktionen"],
+    [/\bgeregelte\s+Unterstützung\b/gi, "Unterstützung"],
+    [/\bgeregelte\s+Aktivität\b/gi, "Aktivität"],
+    [/\bgeregelte\s+Prüfung\b/gi, "Prüfung"],
+    [/\bgeregelte\s+Dienstleistungen\b/gi, "Dienstleistungen"],
+    [/\bspätere\s+Domänen\b/gi, "künftige Funktionen"],
+    [/\bverbindlicher\s+Zustand\b/gi, "bestätigte Information"],
+    [/\breale\s+Organisation\b/gi, "Organisation"],
+    [/\brealen\s+Organisation\b/gi, "Organisation"],
+    [/\brealer\s+Ort\b/gi, "Ort"],
+    [/\brealen\s+Ort\b/gi, "Ort"],
+    [/\breale\s+oder\s+datenschutzgerechte\s+Kartenposition\b/gi, "bestätigte oder datenschutzgerechte Kartenposition"],
+    [/\bgeregelte[nmrs]?\b/gi, ""],
+  ],
+};
 
-  for (const [pattern, replacement] of phraseReplacements) {
-    next = next.replace(pattern, replacement);
-  }
-
-  return next
+function cleanSpacing(value: string): string {
+  return value
     .replace(/\s{2,}/g, " ")
     .replace(/\s+([,.;:!?])/g, "$1")
+    .replace(/^\s*[.;,:-]+\s*/, "")
     .trim();
 }
 
-export function applyParticipantLanguageFirewall<T>(value: T): T {
+export function rewriteParticipantText(value: string, locale: ParticipantLanguageLocale = "en-US"): string {
+  let next = exactReplacements.get(value) ?? value;
+
+  for (const [pattern, replacement] of englishPhraseReplacements) {
+    next = next.replace(pattern, replacement);
+  }
+
+  if (locale !== "en-US") {
+    for (const [pattern, replacement] of localizedPhraseReplacements[locale]) {
+      next = next.replace(pattern, replacement);
+    }
+  }
+
+  return cleanSpacing(next);
+}
+
+export function applyParticipantLanguageFirewall<T>(value: T, locale: ParticipantLanguageLocale = "en-US"): T {
   if (typeof value === "string") {
-    return rewriteParticipantText(value) as T;
+    return rewriteParticipantText(value, locale) as T;
   }
 
   if (Array.isArray(value)) {
-    return value.map((item) => applyParticipantLanguageFirewall(item)) as T;
+    return value.map((item) => applyParticipantLanguageFirewall(item, locale)) as T;
   }
 
   if (value && typeof value === "object") {
     return Object.fromEntries(
       Object.entries(value as Record<string, unknown>).map(([key, item]) => [
         key,
-        applyParticipantLanguageFirewall(item),
+        applyParticipantLanguageFirewall(item, locale),
       ]),
     ) as T;
   }
