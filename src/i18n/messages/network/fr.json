@@ -4,10 +4,10 @@
     "ariaLabel": "État de l’espace de travail RFxchange",
     "loading": {
       "title": "Préparation de votre espace de travail Exchange",
-      "body": "L’organisation autorisée et la view de la localité sont en cours de chargement. Votre état d’activation reste préservé."
+      "body": "L’organisation autorisée et la projection de la localité sont en cours de chargement. Votre état d’activation reste préservé."
     },
     "empty": {
-      "title": "Aucune view d’organisation autorisée n’est disponible",
+      "title": "Aucune projection d’organisation autorisée n’est disponible",
       "body": "Revenez à l’activation pour compléter ou réparer les exigences relatives à l’organisation, à la géographie, au profil ou au marqueur.",
       "action": "Vérifier l’activation"
     },
@@ -28,7 +28,7 @@
     },
     "recovery": {
       "title": "La récupération de l’espace de travail est disponible",
-      "body": "Votre organisation reste intacte. Rouvrez l’activation pour résoudre la view manquante sans créer d’organisation en double.",
+      "body": "Votre organisation reste intacte. Rouvrez l’activation pour résoudre la projection manquante sans créer d’organisation en double.",
       "action": "Ouvrir la récupération"
     }
   },
@@ -63,7 +63,7 @@
     "visibleNow": "Visible maintenant",
     "positionTitle": "Votre position établie dans l’Exchange",
     "selected": "Sélectionné",
-    "projectionMetadata": "view observée dans l’espace de travail authentifié de l’organisation.",
+    "projectionMetadata": "Projection observée dans l’espace de travail authentifié de l’organisation.",
     "locality": "Localité d’origine",
     "visibleLocation": "Emplacement visible",
     "locationFallback": "Emplacement de l’organisation à {locality}",
@@ -105,7 +105,7 @@
     "exchange-action-unavailable": "Cette action n’est pas encore disponible. Vous pouvez continuer à explorer l’Exchange."
   },
   "provenance": {
-    "eyebrow": "source information des données",
+    "eyebrow": "Provenance des données",
     "title": "Sur quoi repose cette carte",
     "authority": "Autorité des limites",
     "vintage": "Millésime des limites",

@@ -2,7 +2,7 @@
   "availability": {
     "eyebrow": "Disponibilità del prodotto",
     "title": "La Rete è attiva. Il motore transazionale viene dopo.",
-    "description": "La current è completa. Le organizzazioni possono stabilire una posizione di mercato strutturata, scoprire partecipanti autorizzati, creare connessioni con consenso, trovare risorse approvate e riaprire indicazioni contestuali. I funzionalità future restano chiaramente identificati.",
+    "description": "La Wave 3 è completa. Le organizzazioni possono stabilire una posizione di mercato strutturata, scoprire partecipanti autorizzati, creare connessioni con consenso, trovare risorse approvate e riaprire indicazioni contestuali. I funzionalità future restano chiaramente identificati.",
     "items": [
       {
         "kind": "live",
@@ -436,7 +436,7 @@
         },
         {
           "question": "L’intera piattaforma RFxchange è attiva?",
-          "answer": "No. La Rete della current è attiva. RFx Core, valutazione, credibilità, risultati e diritti a pagamento restano funzionalità future."
+          "answer": "No. La Rete della Wave 3 è attiva. RFx Core, valutazione, credibilità, risultati e diritti a pagamento restano funzionalità future."
         },
         {
           "question": "Perché partecipare prima che tutto sia completo?",

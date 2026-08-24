@@ -100,8 +100,8 @@ const localizedPhraseReplacements: Readonly<Record<Exclude<ParticipantLanguageLo
     [/\bgouverné(?:e|es|s)?\b/gi, ""],
   ],
   it: [
-    [/\bOnda\s+3\s+è\s+completa\.?/gi, ""],
-    [/\bOnda\s+\d+(?:\.\d+)?\b/gi, ""],
+    [/\bOnda(?:ta)?\s+3\s+è\s+completa\.?/gi, ""],
+    [/\bOnda(?:ta)?\s+\d+(?:\.\d+)?\b/gi, ""],
     [/\bprossimo\s+percorso\s+governato\b/gi, "Funzionalità in arrivo"],
     [/\blavoro\s+governato\s+successivo\b/gi, "funzionalità future"],
     [/\bpercorsi\s+governati\s+successivi\b/gi, "funzionalità future"],
@@ -146,16 +146,13 @@ function cleanSpacing(value: string): string {
 }
 
 export function rewriteParticipantText(value: string, locale: ParticipantLanguageLocale = "en-US"): string {
-  let next = exactReplacements.get(value) ?? value;
+  let next = locale === "en-US" ? (exactReplacements.get(value) ?? value) : value;
+  const replacements = locale === "en-US"
+    ? englishPhraseReplacements
+    : localizedPhraseReplacements[locale];
 
-  for (const [pattern, replacement] of englishPhraseReplacements) {
+  for (const [pattern, replacement] of replacements) {
     next = next.replace(pattern, replacement);
-  }
-
-  if (locale !== "en-US") {
-    for (const [pattern, replacement] of localizedPhraseReplacements[locale]) {
-      next = next.replace(pattern, replacement);
-    }
   }
 
   return cleanSpacing(next);

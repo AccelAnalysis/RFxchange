@@ -201,7 +201,7 @@
   "publishedState": "Publié",
   "readinessEyebrow": "État de préparation et aperçu",
   "readinessTitle": "Vérifier avant publication",
-  "readinessIntro": "Le serveur vérifie le RFx, la géographie, l’autorité et la view répondant.",
+  "readinessIntro": "Le serveur vérifie le RFx, la géographie, l’autorité et la projection répondant.",
   "publicationAudience": "Audience de publication",
   "audience": {
     "public": "Public",
@@ -220,7 +220,7 @@
   "requirementBlocked": "Exigence à corriger",
   "previewStatus": "Aperçu — non publié",
   "previewVersion": "Version du brouillon",
-  "previewDigest": "Empreinte de view",
+  "previewDigest": "Empreinte de projection",
   "issuedBy": "Émis par",
   "geography": "Géographie",
   "responderRequirements": "Exigences répondant",
