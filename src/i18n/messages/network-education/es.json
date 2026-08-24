@@ -1,21 +1,21 @@
 {
-  "ariaLabel": "Formación persistente de la Red",
-  "eyebrow": "Inicio rápido · versión 1 del catálogo",
-  "title": "Conozca la Red a su ritmo.",
-  "intro": "Vuelva cuando quiera para seguir una ruta breve por los flujos activos de RFxchange disponibles para su organización. El progreso de la guía nunca concede permisos ni cambia registros comerciales.",
+  "ariaLabel": "Guía de aprendizaje de RFxchange",
+  "eyebrow": "Inicio rápido",
+  "title": "Conozca el Exchange a su ritmo.",
+  "intro": "Vuelva cuando quiera para seguir una ruta breve por las herramientas de RFxchange disponibles para su organización. El progreso de la guía no cambia su información comercial ni sus permisos.",
   "progress": "Progreso de la ruta actual",
   "status": { "active": "En curso", "dismissed": "Descartada · se puede reabrir", "completed": "Completada · se puede reabrir" },
   "valueSpineLabel": "Ruta de valor de RFxchange",
   "valueSpine": { "understandable": "Comprensible", "discoverable": "Localizable", "connectable": "Conectable", "actionable": "Accionable" },
   "recommended": "Recomendado para esta organización",
-  "recommendationBoundary": "La recomendación solo usa el contexto actual de la organización. No concede permisos, autoridad de emisor, estado de Proveedor Oficial de Recursos, verificación, credibilidad ni acceso comercial.",
-  "catalogUpdate": "Esta guía tiene contenido revisado nuevo. Su progreso anterior sigue visible; revise la versión actual cuando quiera.",
+  "recommendationBoundary": "Las recomendaciones usan la información actual de su organización. No cambian permisos, estado de proveedor, verificación, credibilidad ni beneficios de membresía.",
+  "catalogUpdate": "Esta guía tiene contenido nuevo. Su progreso anterior sigue visible; revise la versión actual cuando quiera.",
   "pathNavigation": "Inicio rápido y rutas de aprendizaje por función",
   "path": "Ruta de aprendizaje",
   "pathProgress": "{complete} de {total} elementos completados",
   "available": "Disponible ahora",
-  "planned": "Planificado · no disponible",
-  "openWorkflow": "Abrir flujo activo",
+  "planned": "Aún no disponible",
+  "openWorkflow": "Abrir flujo de trabajo",
   "unavailable": "Aún no disponible",
   "markComplete": "Marcar como completado",
   "completed": "Completado",
@@ -26,58 +26,62 @@
   "closeExplainer": "Cerrar explicación",
   "explainerDismissed": "Explicación cerrada. Puede reabrirla aquí en cualquier momento.",
   "questions": { "what": "¿Qué es esto?", "why": "¿Por qué importa aquí?", "happens": "¿Qué ocurre si hago esto?", "next": "¿Qué ocurre después?" },
-  "states": { "saved": "Progreso guardado para este usuario y organización.", "error": "No se pudo guardar el progreso. Recargue e inténtelo de nuevo." },
+  "states": { "saved": "Progreso de la guía guardado.", "error": "No se pudo guardar el progreso. Recargue e inténtelo de nuevo." },
   "quickStart": {
-    "title": "Inicio rápido", "summary": "Siga la ruta de valor de la Red usando solo flujos activos y autorizados de la Ola 3.",
+    "title": "Inicio rápido",
+    "summary": "Siga la ruta de valor usando las herramientas disponibles actualmente para su organización.",
     "items": {
-      "understand": { "title": "Haga comprensible su organización", "body": "Revise el perfil, las capacidades confirmadas, las pruebas, la visibilidad y el contexto operativo." },
-      "discover": { "title": "Vea cómo se localizan organizaciones", "body": "Use el mapa de localidad controlada y la búsqueda de la Red sin cambiar la autoridad geográfica." },
-      "connect": { "title": "Cree una conexión con consentimiento", "body": "Conozca el propósito, el destinatario exacto, los campos compartidos y el ciclo de vida antes de enviar." },
-      "act": { "title": "Actúe mediante recursos actuales", "body": "Encuentre servicios mantenidos, haga una solicitud exacta y use recursos publicados." }
+      "understand": { "title": "Haga comprensible su organización", "body": "Revise el perfil, las capacidades, la información de respaldo, la visibilidad y el contexto operativo." },
+      "discover": { "title": "Vea cómo se descubren organizaciones", "body": "Use el mapa y la búsqueda del Exchange para encontrar organizaciones participantes en lugares relevantes." },
+      "connect": { "title": "Cree una conexión útil", "body": "Revise el propósito, el destinatario y la información que se compartirá antes de enviar una recomendación." },
+      "act": { "title": "Use los recursos actuales", "body": "Encuentre servicios de proveedores, haga una solicitud y use recursos publicados." }
     }
   },
   "business": {
-    "title": "Ruta de empresa", "summary": "Cree una presencia clara, descubra capacidades, conecte con consentimiento y use recursos de apoyo actuales.",
+    "title": "Ruta de empresa",
+    "summary": "Cree una presencia clara de la organización, descubra capacidades, haga conexiones útiles y use recursos de apoyo.",
     "items": {
-      "profile": { "title": "Confirme su perfil de mercado", "body": "Las sugerencias no son autoritativas hasta que una persona autorizada confirma una declaración separada." },
-      "discovery": { "title": "Explore la Red controlada", "body": "Busque proyecciones publicadas dentro de la geografía autorizada por el servidor." },
-      "referrals": { "title": "Envíe o responda recomendaciones", "body": "Comparta solo el contexto mostrado y mantenga aceptación, rechazo, contacto y cierre como hechos separados." },
-      "resources": { "title": "Encuentre apoyo de proveedores", "body": "Compare territorio explícito, disponibilidad mantenida y razones de enrutamiento explicables." },
-      "rfx": { "title": "Cree o responda a una RFx", "body": "La creación y respuesta de RFx están planificadas para la Ola 4 y no están disponibles aquí." },
-      "credibility": { "title": "Use pruebas de credibilidad", "body": "Las puntuaciones y sellos de credibilidad se planifican aparte. Las pruebas del perfil no crean credibilidad." }
+      "profile": { "title": "Confirme su perfil de mercado", "body": "Revise las sugerencias y confirme solo la información que representa correctamente a su organización." },
+      "discovery": { "title": "Explore el Exchange", "body": "Busque organizaciones participantes por capacidad, geografía y otro contexto útil del mercado." },
+      "referrals": { "title": "Envíe o responda recomendaciones", "body": "Revise lo que se compartirá y luego haga seguimiento de aceptación, rechazo, contacto y cierre por separado." },
+      "resources": { "title": "Encuentre apoyo de proveedores", "body": "Compare territorio de servicio, disponibilidad, elegibilidad y por qué un proveedor puede ajustarse a la necesidad." },
+      "rfx": { "title": "Cree o responda a un RFx", "body": "Use las herramientas RFx cuando estén disponibles para su organización. Las acciones no disponibles se identifican en el Exchange." },
+      "credibility": { "title": "Use información de credibilidad", "body": "La información de respaldo puede añadir contexto, pero no crea automáticamente verificación ni credibilidad." }
     }
   },
   "issuer": {
-    "title": "Ruta de emisor", "summary": "Conozca la futura relación Necesidad → Capacidad usando solo investigación y recursos actuales.",
+    "title": "Ruta de emisor",
+    "summary": "Use investigación de mercado y necesidades comerciales para pasar de Necesidad → Capacidad a un RFx cuando estén disponibles las herramientas apropiadas.",
     "items": {
-      "market": { "title": "Investigue el mercado actual", "body": "Explore capacidades confirmadas y el contexto local antes de redactar una necesidad futura." },
-      "resources": { "title": "Comprenda los recursos de apoyo", "body": "Vea servicios y recursos publicados sin tratarlos como calificación del emisor." },
-      "rfx": { "title": "Redacte y publique una RFx", "body": "La redacción, requisitos, publicación y evaluación están planificados para la Ola 4 y no están disponibles." },
-      "evaluation": { "title": "Evalúe respuestas y resultados", "body": "La autoridad del evaluador, adjudicaciones, resultados y análisis no están implementados ni simulados." }
+      "market": { "title": "Investigue el mercado", "body": "Explore capacidades, ubicaciones y recursos de organizaciones antes de definir una necesidad." },
+      "resources": { "title": "Comprenda los recursos de apoyo", "body": "Revise servicios de proveedores y recursos publicados sin tratar una lista como calificación para una oportunidad." },
+      "rfx": { "title": "Redacte y publique un RFx", "body": "Cree, revise y publique un RFx cuando esas acciones estén disponibles para su organización." },
+      "evaluation": { "title": "Evalúe respuestas y resultados", "body": "Use herramientas de respuesta y evaluación cuando estén disponibles; el Exchange identifica las acciones que aún no lo están." }
     }
   },
   "resourceProvider": {
-    "title": "Ruta de Proveedor de Recursos", "summary": "Comprenda la solicitud controlada, el estado oficial, la publicación de servicios, solicitudes, mensajes y recursos.",
+    "title": "Ruta de Proveedor de Recursos",
+    "summary": "Comprenda la solicitud del proveedor, su estado, servicios, solicitudes, comunicaciones y recursos.",
     "items": {
-      "application": { "title": "Solicite mediante el flujo gobernado", "body": "La solicitud referencia identidad y pruebas actuales; no autoaprueba la organización." },
-      "profile": { "title": "Mantenga el perfil privado de servicios", "body": "Los gestores aprobados mantienen categorías, servicios, elegibilidad, ingreso, territorio y disponibilidad." },
-      "discovery": { "title": "Publique para el descubrimiento", "body": "Solo una publicación explícita hace visibles los servicios seleccionados; el estado oficial por sí solo no." },
-      "requests": { "title": "Responda solicitudes exactas", "body": "Acepte, rechace, redirija y envíe mensajes sin confundir conexión con resultado del servicio." },
-      "publication": { "title": "Publique recursos gobernados", "body": "Borrador, publicación, retirada y vencimiento son estados explícitos; se conserva el contenido del participante." },
-      "credentials": { "title": "Obtenga formación o certificación", "body": "Formación pagada, certificación, credibilidad y derechos comerciales se planifican aparte y no están disponibles." }
+      "application": { "title": "Solicite el estado de Proveedor de Recursos", "body": "Envíe información sobre su organización y servicios para revisión. Enviar una solicitud no la aprueba." },
+      "profile": { "title": "Mantenga su perfil de servicios", "body": "Mantenga actualizadas las categorías de servicio, elegibilidad, ingreso, territorio y disponibilidad." },
+      "discovery": { "title": "Haga visibles sus servicios", "body": "Elija qué servicios se publican para que las empresas puedan encontrar el apoyo que ofrece." },
+      "requests": { "title": "Responda solicitudes de proveedor", "body": "Acepte, rechace, redirija o envíe mensajes sobre una solicitud específica manteniendo la conexión separada del resultado del servicio." },
+      "publication": { "title": "Publique recursos", "body": "Cree, publique, actualice, retire o deje vencer un recurso según corresponda." },
+      "credentials": { "title": "Formación y certificación", "body": "La formación, certificación, credibilidad y beneficios pagados aparecen aquí solo cuando esas funciones están disponibles." }
     }
   },
   "explainers": {
-    "profile-confirmation": { "title": "Confirmar información del perfil", "what": "Escribe un dato de perfil o contexto de mercado propiedad de la organización.", "why": "El descubrimiento debe usar datos revisados, no texto provisional de la interfaz.", "happens": "El servidor vuelve a comprobar organización y permiso, valida el valor y registra pruebas versionadas.", "next": "El dato solo puede aparecer según su visibilidad; no crea verificación ni credibilidad." },
-    "capability-suggestion": { "title": "Revisar una sugerencia de capacidad", "what": "Es una sugerencia basada en AMACS 0.5.0, no una declaración de la organización.", "why": "La organización debe decidir si el concepto describe fielmente lo que hace.", "happens": "Acepte, edite, rechace o deje sin resolver. La disposición queda separada de la escritura autoritativa.", "next": "Solo un comando separado con autoridad actual puede confirmar la capacidad." },
-    "credential-evidence": { "title": "Añadir credencial o prueba", "what": "Registra metadatos de credencial o prueba aportados por la organización con procedencia.", "why": "La prueba ayuda a comprender, pero no demuestra automáticamente capacidad ni verificación independiente.", "happens": "Se guarda dentro de la organización y solo se publica con visibilidad explícita.", "next": "Las relaciones de prueba, verificación o credibilidad posteriores siguen separadas y gobernadas." },
-    "media-visibility": { "title": "Elegir visibilidad de contenido", "what": "Controla si un medio de la organización permanece privado o aparece en una proyección permitida.", "why": "El material subido puede contener información sensible o creada por participantes.", "happens": "Se guardan visibilidad y procedencia; el almacenamiento privado sigue autorizado por servidor.", "next": "La publicación puede cambiarse y no traduce ni avala el contenido creado." },
-    "additional-location": { "title": "Confirmar una ubicación adicional", "what": "Añade una ubicación subordinada con privacidad y geografía explícitas.", "why": "La ubicación afecta al mapa; la participación geográfica sigue controlada por servidor.", "happens": "El servidor valida el candidato y guarda reglas exactas, aproximadas o solo de localidad.", "next": "Un marcador subordinado solo aparece si cumple autoridad y privacidad." },
-    "referral-consent": { "title": "Enviar una recomendación con consentimiento", "what": "Crea una introducción de la organización para el destinatario exacto y los campos mostrados.", "why": "Comparte contexto comercial y no debe revelar más de lo revisado.", "happens": "El reconocimiento, la recomendación, el evento y la notificación se guardan por separado.", "next": "El destinatario puede aceptar o rechazar. Enviar no prueba contacto, servicio, calificación ni resultado." },
-    "referral-response": { "title": "Responder a una recomendación", "what": "Registra la decisión explícita de aceptar o rechazar de la organización destinataria.", "why": "La respuesta cambia el ciclo de vida, no la verdad de un resultado comercial.", "happens": "El servidor comprueba autoridad y versión antes de añadir la transición.", "next": "Aceptada, contactada y cerrada son estados separados; rechazar no crea una señal negativa de credibilidad." },
-    "provider-application": { "title": "Enviar información de Proveedor de Recursos", "what": "La solicitud gobernada referencia organización, autoridad, ubicación, geografía de servicio y pruebas actuales.", "why": "El estado oficial es una decisión administrativa separada de la autoridad y la Verificación.", "happens": "Un borrador se presenta para revisión; guardar o enviar nunca autoaprueba.", "next": "Un revisor autorizado puede pedir información, aprobar o denegar conservando pruebas." },
-    "provider-connection": { "title": "Conectar con este proveedor", "what": "Envía una solicitud al servicio publicado exacto seleccionado.", "why": "Territorio y disponibilidad explican el ajuste, pero no prometen capacidad, elegibilidad ni servicio.", "happens": "Tras el consentimiento se comparten la organización y el resumen mostrados.", "next": "El proveedor puede aceptar, rechazar, redirigir o escribir. La conexión no es un resultado de servicio." },
-    "provider-response": { "title": "Responder a una solicitud de proveedor", "what": "Registra la respuesta del Proveedor Oficial a una solicitud exacta.", "why": "No debe implicar una decisión general de disponibilidad o calificación.", "happens": "Aceptar, rechazar o redirigir añade una transición versionada tras comprobar autoridad.", "next": "Los mensajes pueden continuar; servicio, pago, verificación y resultado quedan fuera." },
-    "provider-resource-publication": { "title": "Publicar un recurso del proveedor", "what": "Mueve contenido creado por el proveedor de borrador a publicación explícita en la Red o pública.", "why": "Debe distinguirse contenido mantenido de aval o calificación de RFxchange.", "happens": "El servidor comprueba autoridad, versión, visibilidad, fechas y ciclo de publicación.", "next": "Puede retirarse o vencer. No crea clasificación, sello de credibilidad ni resultado garantizado." }
+    "profile-confirmation": { "title": "Confirmar información del perfil", "what": "Esto actualiza información que su organización usa en su perfil y en la actividad del Exchange.", "why": "La información correcta de la organización mejora el descubrimiento y reduce la confusión.", "happens": "Se comprueba su permiso actual y se guarda la información en su organización.", "next": "La información aparece solo donde su visibilidad lo permite. Actualizarla no crea verificación ni credibilidad." },
+    "capability-suggestion": { "title": "Revisar una sugerencia de capacidad", "what": "Esta es una sugerencia basada en AMACS, no una afirmación sobre su organización.", "why": "Usted decide si el concepto describe correctamente lo que su organización puede hacer.", "happens": "Acepte, edite, rechace o deje la sugerencia sin resolver.", "next": "Una capacidad pasa a formar parte de la información de su organización solo después de que usted la confirme mediante la acción correspondiente." },
+    "credential-evidence": { "title": "Añadir credencial o información de respaldo", "what": "Esto registra credenciales o información de respaldo aportada por su organización.", "why": "La información de respaldo puede ayudar a comprender una afirmación, pero no constituye automáticamente prueba ni verificación independiente.", "happens": "La información se guarda en su organización y sigue la visibilidad que usted elija.", "next": "Las decisiones de verificación o credibilidad permanecen separadas del simple hecho de añadir información de respaldo." },
+    "media-visibility": { "title": "Elegir visibilidad de contenido", "what": "Elija si un elemento multimedia de la organización permanece privado o puede ser visto por otros.", "why": "El material subido puede contener información que no desea compartir ampliamente.", "happens": "La visibilidad elegida se guarda con el elemento multimedia.", "next": "Puede cambiar la visibilidad después. Publicar contenido no significa que RFxchange lo avale." },
+    "additional-location": { "title": "Confirmar una ubicación adicional", "what": "Añada otra ubicación de la organización y elija la visibilidad apropiada.", "why": "Las ubicaciones adicionales ayudan a otros a comprender dónde opera su organización.", "happens": "La ubicación se comprueba y guarda usando el nivel de privacidad seleccionado.", "next": "Un marcador aparece solo cuando la ubicación tiene suficiente información y su visibilidad lo permite." },
+    "referral-consent": { "title": "Enviar una recomendación", "what": "Cree una introducción para el destinatario mostrado y la información visible antes de enviarla.", "why": "Una recomendación útil debe llevar suficiente contexto sin compartir más de lo necesario.", "happens": "La recomendación se envía y su estado puede seguirse.", "next": "El destinatario puede aceptar o rechazar. Enviar una recomendación no prueba contacto, servicio, calificación ni resultado." },
+    "referral-response": { "title": "Responder a una recomendación", "what": "Acepte o rechace la recomendación para su organización.", "why": "Su respuesta indica al remitente si la introducción puede avanzar.", "happens": "Se actualiza el estado de la recomendación.", "next": "Aceptación, contacto, servicio y cierre siguen siendo pasos separados." },
+    "provider-application": { "title": "Enviar información de Proveedor de Recursos", "what": "Proporcione información sobre su organización, servicios, área de servicio y material de respaldo.", "why": "El estado de Proveedor de Recursos se revisa por separado del perfil ordinario de su organización.", "happens": "Puede guardar un borrador y enviarlo para revisión cuando esté listo.", "next": "El revisor puede pedir más información, aprobar la solicitud o rechazarla." },
+    "provider-connection": { "title": "Conectar con este proveedor", "what": "Envíe una solicitud al servicio del proveedor que seleccionó.", "why": "El área de servicio y la disponibilidad pueden ayudar a explicar el ajuste, pero no prometen capacidad, elegibilidad ni servicio.", "happens": "La organización y el resumen de la solicitud que se le muestran se comparten con el proveedor.", "next": "El proveedor puede aceptar, rechazar, redirigir o enviar mensajes. Una conexión no es un resultado de servicio." },
+    "provider-response": { "title": "Responder a una solicitud de proveedor", "what": "Responda a esta solicitud específica para su organización de Proveedor de Recursos.", "why": "Una respuesta se aplica a esta solicitud y no promete disponibilidad para todas las solicitudes futuras.", "happens": "Aceptar, rechazar o redirigir actualiza el estado de la solicitud.", "next": "Los mensajes pueden continuar después de la respuesta. Servicio, pago, verificación y resultado son asuntos separados." },
+    "provider-resource-publication": { "title": "Publicar un recurso del proveedor", "what": "Haga que el contenido creado por el proveedor esté disponible para la audiencia que elija.", "why": "El contenido publicado por un proveedor es información del proveedor, no un aval ni una calificación de RFxchange.", "happens": "El recurso se publica con la visibilidad y el tiempo que elija.", "next": "Puede retirarlo o dejar que venza. La publicación no crea clasificación, distintivo de credibilidad ni resultado garantizado." }
   }
 }
