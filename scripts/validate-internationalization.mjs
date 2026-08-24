@@ -34,12 +34,17 @@ function collectShape(value, prefix = "") {
 }
 
 const requestedNamespace = process.env.RFXCHANGE_I18N_NAMESPACE?.trim() || null;
+const requestedLocale = process.env.RFXCHANGE_I18N_LOCALE?.trim() || null;
 if (requestedNamespace && !catalogNamespaces.some(({ name }) => name === requestedNamespace)) {
   throw new Error(`Unknown internationalization namespace: ${requestedNamespace}`);
+}
+if (requestedLocale && !expectedLocales.includes(requestedLocale)) {
+  throw new Error(`Unknown internationalization locale: ${requestedLocale}`);
 }
 const namespacesToValidate = requestedNamespace
   ? catalogNamespaces.filter(({ name }) => name === requestedNamespace)
   : catalogNamespaces;
+const localesToValidate = requestedLocale ? [requestedLocale] : expectedLocales;
 
 for (const namespace of namespacesToValidate) {
   for (const locale of expectedLocales) {
@@ -53,7 +58,7 @@ for (const namespace of namespacesToValidate) {
     type,
   }));
 
-  for (const locale of expectedLocales) {
+  for (const locale of localesToValidate) {
     const catalog = readJson(path.join(namespace.directory, `${locale}.json`));
     const catalogShape = collectShape(catalog);
     assert.deepEqual(
@@ -102,4 +107,6 @@ assert.match(
   "The uploaded-document translation exclusion must remain canonical",
 );
 
-console.log(`Internationalization foundation validated${requestedNamespace ? ` for ${requestedNamespace}` : ""}.`);
+console.log(
+  `Internationalization foundation validated${requestedNamespace ? ` for ${requestedNamespace}` : ""}${requestedLocale ? `:${requestedLocale}` : ""}.`,
+);
