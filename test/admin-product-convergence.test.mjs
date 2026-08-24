@@ -12,11 +12,13 @@ function read(relativePath) {
 
 test("the administrative product authority defines an attention-first restrained control plane", async () => {
   const authority = await read("docs/design/ADMIN_PORTAL_PRODUCT_AUTHORITY.md");
+  const context = await read("docs/context/ADMINISTRATION.md");
   assert.match(authority, /attention-first, scope-visible operating workspace/i);
   assert.match(authority, /Less container chrome/);
   assert.match(authority, /Human language over implementation language/);
   assert.match(authority, /only destinations with a truthful implemented runtime/i);
   assert.match(authority, /Authority is not verification/i);
+  assert.match(context, /ADMIN_PORTAL_PRODUCT_AUTHORITY\.md/);
   assert.doesNotMatch(authority, /binary `isAdmin` authorization is permitted/i);
 });
 
@@ -72,4 +74,19 @@ test("provider review presents organization identity and canonical action hierar
   assert.doesNotMatch(styles, /Georgia\s*,\s*serif/);
   assert.doesNotMatch(styles, /#173a31/i);
   assert.match(styles, /var\(--graphite/);
+});
+
+test("Organization 360 avoids a second dashboard shell and developer-facing primary copy", async () => {
+  const organizationSource = await read("src/components/admin/Organization360.tsx");
+  const styles = await read("src/components/admin/Organization360.module.css");
+
+  assert.match(organizationSource, /Authority|Account &amp; access/);
+  assert.match(organizationSource, /Separate from credibility and verification/);
+  assert.doesNotMatch(organizationSource, /Organization scope/);
+  assert.doesNotMatch(organizationSource, /Scoped context/);
+  assert.doesNotMatch(organizationSource, /fabricating future-domain data/);
+  assert.doesNotMatch(organizationSource, /<code>\{projection\.scope\.organizationId\}<\/code>/);
+  assert.match(styles, /var\(--warm-ivory/);
+  assert.match(styles, /box-shadow:\s*inset 3px 0 var\(--rf-gold/);
+  assert.doesNotMatch(styles, /overflow-x:\s*auto/);
 });
