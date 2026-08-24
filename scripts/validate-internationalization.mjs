@@ -106,22 +106,13 @@ for (const namespace of namespacesToValidate) {
     readJson(path.join(namespace.directory, `${referenceLocale}.json`)),
   );
   const referenceShape = normalizedShape(reference);
-  const referenceTypes = new Map(
-    referenceShape.map(({ path: messagePath, type }) => [messagePath, type]),
-  );
 
   for (const locale of localesToValidate) {
     const catalog = normalizeCatalog(
       namespace.name,
       readJson(path.join(namespace.directory, `${locale}.json`)),
     );
-    const catalogShape = collectShape(catalog);
-    for (const entry of catalogShape) {
-      assert.equal(
-        referenceTypes.get(entry.path),
-        entry.type,
-        `${namespace.name}:${locale}:${entry.path} must remain a current ${referenceLocale} message path with the same value type`,
-      );
+    for (const entry of collectShape(catalog)) {
       if (entry.type === "string") {
         assert.ok(entry.value.trim().length > 0, `${namespace.name}:${locale}:${entry.path} must not be empty`);
       }
@@ -130,7 +121,7 @@ for (const namespace of namespacesToValidate) {
     assert.deepEqual(
       normalizedShape(resolved),
       referenceShape,
-      `${namespace.name}:${locale} must resolve to the same message paths and value types as ${referenceLocale}`,
+      `${namespace.name}:${locale} must resolve to the same current message paths and value types as ${referenceLocale}`,
     );
   }
 }
@@ -149,7 +140,7 @@ assert.match(dictionary, /recovery/, "Resolved dictionaries must include the sha
 assert.match(dictionary, /participantNavigation/, "Resolved dictionaries must include the participant-navigation namespace");
 assert.match(dictionary, /applyParticipantLanguageFirewall/, "Resolved dictionaries must pass through the participant-language firewall");
 assert.match(dictionary, /normalizeBaseCatalog/, "Resolved dictionaries must normalize the legacy marketing-home locale structure");
-assert.match(dictionary, /resolveReferenceFallback/, "Resolved dictionaries must explicitly fill untranslated current keys from en-US");
+assert.match(dictionary, /resolveReferenceFallback/, "Resolved dictionaries must explicitly fill untranslated current keys from en-US and prune obsolete localized keys");
 
 const layout = fs.readFileSync(path.join(root, "app", "layout.tsx"), "utf8");
 assert.match(layout, /<html lang=\{locale\}/, "Root layout must set the resolved locale on html");
