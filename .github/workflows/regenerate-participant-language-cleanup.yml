@@ -21,6 +21,8 @@ jobs:
           node-version: '24.18.0'
       - name: Regenerate locale-safe participant sources
         run: python scripts/regenerate-participant-language-cleanup.py
+      - name: Fix localized copy artifacts
+        run: python scripts/fix-participant-language-artifacts.py
       - name: Commit regenerated sources
         shell: bash
         run: |
@@ -31,5 +33,5 @@ jobs:
             echo "No regenerated changes needed."
             exit 0
           fi
-          git commit -m "Expand locale-safe participant copy cleanup"
+          git commit -m "Polish locale-safe participant copy"
           git push origin HEAD:fix/multilingual-participant-language-cleanup
