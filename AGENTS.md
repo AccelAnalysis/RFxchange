@@ -38,6 +38,16 @@ Participant-facing truthfulness has four required dimensions:
 
 Development reporting adds the same truthfulness distinction between **implemented**, **merged**, **live**, and **Verified**. None of those states may be implied by another.
 
+### Participant-language boundary
+
+`docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md` governs what internal vocabulary may cross into ordinary public or participant-facing copy.
+
+> **Development governance is internal. Product truth is external.**
+
+Truthfulness protects the accuracy of what participants can see, do, rely upon, and expect. It does **not** require the product to narrate repository governance, release sequencing, slices, waves, gates, domains, runtime authority, acceptance mechanics, evidence manifests, verification debt, source/build SHA, CI, or other implementation machinery.
+
+Internal engineering terminology may remain in code, tests, logs, admin/developer tooling and repository documentation when it is useful there. Do not copy it into participant UI merely to prove that the product is truthful. Use ordinary business language and preserve the real boundary in behavior, permissions, state and concise copy.
+
 ## Source authority
 
 Use these sources together rather than treating one file as universally authoritative:
@@ -49,7 +59,7 @@ Use these sources together rather than treating one file as universally authorit
 5. The applicable `docs/slices/` execution authority defines the approved implementation boundary. A brief cannot mark a feature complete or waive documented acceptance intent.
 6. `docs/context/` contains normalized cross-cutting product rules. `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md`, originally merged through PR #150 and reconciled by the bounded shell gate, governs participant-facing lens hierarchy, structural/capability/state/continuity truthfulness, spatial continuity, workspace boundaries and truthful cross-lens behavior.
 7. `docs/rfx/` contains the converged RFx Core/AMACS/workspace/acceptance package.
-8. `docs/brand/` defines approved target brand architecture, semantic meaning, messaging, map/data grammar, motion, sensory rules, appearance/presentation authority and brand acceptance after Brand Gate B0.
+8. `docs/brand/` defines approved target brand architecture, semantic meaning, messaging, map/data grammar, motion, sensory rules, appearance/presentation authority and brand acceptance after Brand Gate B0. `docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md` specifically governs the boundary between internal implementation language and rendered participant language.
 9. `docs/design/` defines the currently implemented visual/UI/presentation baseline. For user-facing UI read `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`; map/geography work also requires `docs/design/MAP_VISUAL_SYSTEM.md`.
 10. Existing production architecture and merged architecture decisions govern implementation mechanics unless the current task intentionally changes them.
 11. `docs/reference/` contains provenance and visual/prototype references. Reference artifacts demonstrate product intent; they are not automatically production architecture.
@@ -60,7 +70,7 @@ Authority order for participant-facing work is:
 2. security, privacy, authorization, lifecycle, geography, domain, tracker and dependency authorities;
 3. Mobile Exchange Stages 3–6 authority, Four-Lens Completion Governance Amendment and applicable parallel-delivery/release authority;
 4. Exchange Interaction Architecture and applicable RFx Core authority;
-5. `docs/brand/` for approved target experience;
+5. `docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md` and the rest of `docs/brand/` for approved target experience;
 6. `docs/design/` for currently converged implementation baseline; and
 7. existing runtime as implementation evidence and compatibility context.
 
@@ -68,11 +78,13 @@ If sources appear to conflict, do not silently choose the easiest interpretation
 
 ## Build sequencing
 
+- An explicit participant/product-owner instruction to implement a bounded change is authorization to implement it within the stated scope. Do not insert a generic `proceed?`, approval, acceptance, Control Room or confirmation step before starting or after completing ordinary work when the instruction already supplied that authority.
+- For ordinary Standard work, prefer the smallest sound path: **Implement → Test proportionately → Reconcile with current `main` → Merge when sound → Continue.** Do not manufacture an evidence package, independent-review dependency or manual completion ceremony merely because a change was made.
 - Use the **Four-Lens parallel lane model** only for a declared work packet in `governance/four-lens-workstreams.json`. Work outside that authority retains the single-active-slice or single-active-gate default unless the current task explicitly authorizes otherwise.
 - Parallel work requires explicit lane ownership, exact base SHA, immutable requirement IDs, dependencies, owned/non-owned paths, completion/evidence obligations and stop boundary. A branch dependent on an unmerged candidate must name its exact SHA.
 - The governing Four-Lens completion progression is **Build → Test → Integrate → Release → Improve** under `docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`. Development may proceed in parallel; merge order remains dependency-aware; production release is risk-based; independent assurance is optional unless a separate later authority explicitly requires it for a named action.
 - Reconcile every candidate from current merged `main` and obtain fresh exact-head evidence after dependency changes.
-- Independent review is not a universal completion, tracker, merge, release or development prerequisite. A bounded candidate may be completed and merged as `Implemented — Not Verified` after authorized scope/dependency reconciliation, applicable exact-head CI/evidence, durable completion recording, and Control Room confirmation that no known material finding makes the claimed behavior unsafe or materially false.
+- Independent review is not a universal completion, tracker, merge, release or development prerequisite. A bounded candidate may be completed and merged as `Implemented — Not Verified` after authorized scope/dependency reconciliation, applicable exact-head CI/evidence, durable completion recording, and an objective current-state determination that no known material finding makes the claimed behavior unsafe or materially false. Do not treat the words `Control Room confirmation` in older text as a universal extra approval from the user.
 - Builders may report bounded work implemented/complete when objective delivery evidence supports that statement. Only an actual independent assurance event may be described as `Verified`; builders must not fabricate or self-label independent verification.
 - For the optional independent-assurance label only, only the Independent Acceptance lane may record `Verified`; this restriction governs the truthfulness of the `Verified` label, not whether ordinary work is complete.
 - Merge and deployment never imply `Verified`.
@@ -83,6 +95,8 @@ If sources appear to conflict, do not silently choose the easiest interpretation
 - Documentation-only planning and reconciliation do not authorize production implementation.
 - No deployment/release blocker becomes a product-domain dependency unless a current canonical dependency authority establishes that edge.
 - Shared participant behavior remains Lane 01-owned. Domain lanes submit a Shared Contract Request instead of creating a private divergent implementation.
+
+Additional explicit human confirmation is reserved for cases where it is materially necessary: payments or new commercial commitments; destructive or practically irreversible operations; consequential privacy/security changes; legal or policy acceptance; critical authentication/authorization/tenant/secrets/data-integrity risk acceptance; or genuine material ambiguity between materially different product outcomes that current authority cannot resolve. Routine copy, layout, visual, responsive, navigation, non-destructive bug, already-directed feature, test and merge work does not require renewed product-owner confirmation.
 
 ## Release sequencing
 
@@ -104,7 +118,7 @@ Wave 3 Slices 3.1 through 3.8 are complete via PRs #107, #120, #126, #128, #130,
 
 Brand Gates B0 through B6a are complete. B6b remains **Not Started / intentionally pending** because no bounded convergence gate is currently required. Real RFx publication now makes B6c eligible, but B6c remains Not Started and requires separate authority. Later appearance, sensory, presentation, credibility and outcome gates require separate authority.
 
-All independently executable work under Post-Wave 3 Stabilizations 1–7 is complete. **Stabilization 2C remains incomplete and isolated to release engineering.** The Firebase App Hosting backend `rfxchange`, project/repository connection, region `us-east4`, live branch `main`, root `/`, retained Web App and reserved App Hosting URL exist. The remaining blocker is trustworthy build-time source-SHA binding and an accepted same-SHA live rollout proving source SHA → `RFXCHANGE_BUILD_SHA`/build identity → rendered SHA. Do not solve 2C under a product slice, weaken `RFXCHANGE_BUILD_SHA`, change rollout architecture or claim 2C complete. It does not block RFx Core product development or otherwise-authorized production releases; source/build/rendered-SHA claims remain limited to evidence actually available.
+All independently executable work under Post-Wave 3 Stabilizations 1–7 is complete. **Stabilization 2C remains incomplete and isolated to release engineering.** The Firebase App Hosting backend `rfxchange`, project/repository connection, region `us-east4`, live branch `main`, root `/`, retained Web App and reserved App Hosting URL exist. The remaining blocker is trustworthy build-time source-SHA binding and an accepted same-SHA live rollout proving source SHA → `RFXCHANGE_BUILD_SHA`/build identity. Do not solve 2C under a product slice, weaken `RFXCHANGE_BUILD_SHA`, change rollout architecture or claim 2C complete. It does not block RFx Core product development or otherwise-authorized production releases; source/build/rendered-SHA claims remain limited to evidence actually available.
 
 PR #150 established the Exchange interaction architecture. PR #160 merged the post-PR-#159 participant convergence implementation; the Four-Lens Shared Experience backlog preserves its implementation evidence, final-head procedural failure and unresolved requirements without rewriting history. Slices 4.1–4.5 then implemented the first 18 RFx Core Feature IDs.
 
@@ -146,9 +160,9 @@ Before implementing any slice or Brand Gate:
 8. Read the specific slice, lens or Brand Gate authority.
 9. Read the context/RFx documents listed under the authority's **Must read** or governing section.
 10. Inspect existing production abstractions before designing new ones.
-11. If work creates or materially changes user-facing UI, read `docs/brand/README.md`, applicable brand guides, `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`.
+11. If work creates or materially changes user-facing UI, read `docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md`, `docs/brand/README.md`, applicable brand guides, `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`.
 12. If work changes map/geography UI, also read `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md` and `docs/design/MAP_VISUAL_SYSTEM.md`.
-13. If work creates customer-facing copy or communications, read `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md`.
+13. If work creates customer-facing copy or communications, read `docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md` and `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md`.
 14. If work introduces motion, sound, haptics, appearance or Presentation Mode, read the corresponding authority and confirm the capability is explicitly authorized.
 15. If work consumes AMACS or AI interpretation, read the current AMACS integration/reconciliation contracts and keep AMACS semantics separate from provider/model implementation provenance.
 
@@ -193,6 +207,8 @@ For Four-Lens packets, use the evidence types declared by each immutable require
 
 Run focused product/architecture/dependency/internationalization/emulator checks first where applicable. Production CI must pass on the exact candidate head before ordinary merge and again on merged `main`. Independent review is required only to truthfully claim optional `Verified` assurance, or where a separate current legal, contractual, regulatory or security authority explicitly requires it; it is not a universal Four-Lens completion, tracker, merge or release gate. Brand acceptance supplements and never replaces domain, security, lifecycle, geography, emulator or configured-browser evidence.
 
+For ordinary Standard presentation/copy/layout/discoverability/non-authorizing work, use proportionate focused checks and the repository's existing CI. Do not create additional browser runs, evidence manifests, screenshots, reviewer assignments or approval steps unless the change actually needs them or an applicable current authority explicitly requires them.
+
 ## Tracker discipline
 
 - Do not delete, rename or reorder approved Feature IDs casually.
@@ -218,22 +234,14 @@ Run focused product/architecture/dependency/internationalization/emulator checks
 
 ## Completion report
 
-At the end of implementation, reconciliation or release work, report:
+Use proportionate reporting. For ordinary bounded implementation, reconciliation or merge work, report only what is useful to establish the result:
 
-- starting merged `main` SHA;
-- relevant authority PR disposition and merge SHA;
-- packet branch, PR number, final candidate head, merge SHA, exact-head CI and post-merge CI;
-- merge state, production release state and optional independent-assurance state separately when assurance was requested or performed;
-- release risk class and release authorization/evidence when production deployment occurs;
-- final primary-lens order/availability and Account utility contents where applicable;
-- persistent-shell architecture, loading-boundary result and actual latency causes/corrections where applicable;
-- before/after transition and `Server-Timing` evidence where applicable;
-- exact files changed;
-- Feature IDs or Brand Gate/cross-cutting gate addressed;
-- dependency result;
-- automated, emulator, localization, accessibility and configured-browser evidence;
-- tracker changes made or intentionally not made;
-- Stabilization 2C and B6b status; and
-- explicit confirmation that dependency-ineligible or otherwise unauthorized runtime work was not begun.
+- what changed;
+- branch/PR and merge state;
+- the relevant focused/CI result;
+- any material unresolved defect or limitation; and
+- tracker/release impact when there is one.
 
-For Four-Lens program packets, also report the work-packet ID, lane, exact base/candidate SHA, requirement dispositions, optional assurance state (if any), material findings/correction debt, Shared Contract Requests, denominator effect, and whether any claimed independent assurance was actually independent. Do not create or maintain verification debt solely because Lane 06 did not act.
+Do not generate a universal evidence dossier merely because work was completed.
+
+Add detailed release, SHA, risk, rollback, emulator/browser, cross-lens, tracker, dependency or optional-assurance evidence only when the task actually involved those boundaries or the applicable current authority requires them. For a declared Four-Lens packet, include the packet/lane and requirement dispositions needed by that program record. Report `Verified` only when an actual independent assurance event occurred; absence of that optional event is not completion debt.

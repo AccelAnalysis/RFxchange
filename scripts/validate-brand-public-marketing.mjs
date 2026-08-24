@@ -44,13 +44,13 @@ const canonicalPublicSurface = [
 
 for (const statement of [
   "Available now",
-  "Next governed pathway",
-  "The Network is live. The transaction engine comes next.",
-  "Photography supplies atmosphere only",
+  "Coming next",
+  "Use what is available today. More tools are on the way.",
+  "Images are illustrative unless otherwise identified.",
   "AI can suggest. People confirm.",
   "Founding recognition does not imply",
 ]) {
-  assert.ok(canonicalPublicSurface.includes(statement), `Post-Wave 3 availability/evidence statement is missing: ${statement}.`);
+  assert.ok(canonicalPublicSurface.includes(statement), `Required customer-facing statement is missing: ${statement}.`);
 }
 
 assert.ok(
@@ -67,7 +67,7 @@ assert.ok(
   baseEnglishCatalog.includes("By Accel Analysis") &&
     baseEnglishCatalog.includes("© 2026 The RFxchange. By Accel Analysis.") &&
     !canonicalPublicSurface.includes("Hi-Coworking initiative"),
-  "Public marketing must use the governed parent endorsement and remove the legacy initiative label.",
+  "Public marketing must preserve the parent endorsement and remove the legacy initiative label.",
 );
 
 for (const policy of [
@@ -82,9 +82,8 @@ for (const policy of [
 }
 assert.ok(
   assets.includes('evidenceUse: "atmosphere-only"') &&
-    credits.includes("publicImageAssetList.map") &&
-    credits.includes("atmosphere only—not product evidence"),
-  "Public marketing must centralize and display image provenance and atmosphere-only evidence use.",
+    credits.includes("publicImageAssetList.map"),
+  "Public marketing must retain centralized image provenance.",
 );
 
 for (const prohibited of [
@@ -94,15 +93,23 @@ for (const prohibited of [
   "trusted businesses",
   "qualified routing",
   "A Hi-Coworking initiative",
+  "Next governed pathway",
+  "Wave 3 is complete",
+  "governed assistance",
+  "later governed work",
+  "authoritative state",
+  "controlled geography",
+  "approved slices",
+  "Bottom Matter",
 ]) {
-  assert.equal(canonicalPublicSurface.toLowerCase().includes(prohibited.toLowerCase()), false, `Prohibited or unsupported public claim remains: ${prohibited}.`);
+  assert.equal(canonicalPublicSurface.toLowerCase().includes(prohibited.toLowerCase()), false, `Prohibited or internal public language remains: ${prohibited}.`);
 }
 
 assert.equal(home.includes("NetworkField"), false, "Public marketing cannot present a synthetic network graphic as live product evidence.");
-assert.equal(home.includes("<video"), false, "Public marketing cannot introduce ungoverned public video.");
+assert.equal(home.includes("<video"), false, "Public marketing cannot introduce unapproved public video.");
 assert.equal(home.includes("<audio"), false, "Public marketing cannot introduce autoplay or public audio.");
 assert.ok(home.includes("<MarketingAvailability") && founding.includes("<MarketingAvailability"), "Both public pages must consume the shared availability source.");
-assert.ok(availability.includes('item.kind === "live"'), "Shared availability must visually distinguish current and later product state.");
+assert.ok(availability.includes('item.kind === "live"'), "Shared availability must visually distinguish current and upcoming product state.");
 
 const normalizedStyles = `${homeStyles}\n${foundingStyles}`.replace(/\s+/g, "").toLowerCase();
 for (const styleRequirement of [
@@ -120,5 +127,5 @@ assert.ok(
 );
 
 console.log(
-  "Post-Wave 3 public marketing validated: durable value proposition, truthful live/later availability, governed parent endorsement, real-image provenance, dedicated Founding conversion, acquisition routes, accessibility and sensory fallbacks.",
+  "Public marketing validated: customer-language value proposition, clear availability, parent endorsement, image provenance, Founding conversion, acquisition routes, accessibility and sensory fallbacks.",
 );

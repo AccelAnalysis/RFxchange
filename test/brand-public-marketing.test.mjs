@@ -16,10 +16,10 @@ const marketingCatalogText = await read("src/i18n/messages/marketing-pages/en-US
 const englishCatalog = JSON.parse(englishCatalogText);
 const marketingCatalog = JSON.parse(marketingCatalogText);
 
-test("Brand B4 clearly distinguishes post-Wave 3 live and later product state", () => {
+test("Brand B4 clearly distinguishes available and upcoming product state", () => {
   assert.match(marketing, /Available now/);
-  assert.match(marketing, /Next governed pathway/);
-  assert.match(marketing, /RFx Core, credibility, and commerce/);
+  assert.match(marketing, /Coming next/);
+  assert.match(marketing, /More Exchange workflows/);
   assert.match(availability, /item\.kind === "live"/);
   assert.equal(
     marketingCatalog.availability.items.filter((item) => item.kind === "live").length,
@@ -29,10 +29,7 @@ test("Brand B4 clearly distinguishes post-Wave 3 live and later product state", 
     marketingCatalog.availability.items.filter((item) => item.kind === "planned").length,
     1,
   );
-  assert.match(
-    marketingCatalog.home.hero.stockNote,
-    /Photography supplies atmosphere only/,
-  );
+  assert.match(marketingCatalog.home.hero.stockNote, /Images are illustrative/);
   assert.match(home, /<MarketingAvailability/);
   assert.match(founding, /<MarketingAvailability/);
 });
@@ -48,7 +45,7 @@ test("Brand B4 preserves public acquisition and dedicated information routes", (
   assert.match(founding, /href="#availability"/);
 });
 
-test("Brand B4 applies the governed parent endorsement", () => {
+test("Brand B4 applies the parent endorsement", () => {
   assert.equal(englishCatalog.marketing.footer.byline, "By Accel Analysis");
   assert.equal(
     englishCatalog.marketing.footer.copyright,
@@ -61,9 +58,10 @@ test("Brand B4 applies the governed parent endorsement", () => {
   );
 });
 
-test("Brand B4 public assets are provenance-governed and never product evidence", () => {
+test("Brand B4 public assets preserve provenance without turning diagnostics into customer copy", () => {
   assert.match(assets, /stockPhotographyIsProductEvidence: false/);
   assert.match(assets, /fabricatedScreensAllowed: false/);
   assert.match(assets, /fabricatedStatisticsAllowed: false/);
   assert.match(assets, /evidenceUse: "atmosphere-only"/);
+  assert.doesNotMatch(marketingCatalogText, /governed|Wave 3|authoritative|Next governed pathway/i);
 });

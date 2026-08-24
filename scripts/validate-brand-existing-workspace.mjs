@@ -69,17 +69,22 @@ assert.ok(
 );
 
 assert.equal(networkCatalog.home.eyebrow, "Organization home");
-assert.equal(networkCatalog.provenance.eyebrow, "Data provenance");
+assert.equal(networkCatalog.provenance.eyebrow, "Map information");
 assert.equal(networkCatalog.home.manageProfile, "Manage organization profile");
 assert.match(
   networkCatalog.home.scopeBody,
-  /permitted Network organization discovery/,
-  "The B6a workspace must truthfully describe the authorized Slice 3.2 Network capability.",
+  /Exchange tools currently available to your account/,
+  "The workspace must describe available participant tools in ordinary customer language.",
 );
 assert.match(
   networkCatalog.home.scopeBody,
-  /Opportunities, referrals, resource providers, credibility, and outcomes remain absent/,
-  "Later-domain absence must remain explicit after Slice 3.2.",
+  /Unavailable actions are identified where they appear/,
+  "Unavailable capabilities must remain clear at the point where a participant encounters them.",
+);
+assert.doesNotMatch(
+  networkCatalog.home.scopeBody,
+  /\b(?:Slice|Wave|authorized|permitted|governed|domain)\b/i,
+  "Workspace scope copy must not expose internal delivery or authority language.",
 );
 
 assert.ok(
@@ -136,5 +141,5 @@ assert.ok(
 );
 
 console.log(
-  "Brand Gate B6a existing workspace validated through Slice 3.2: authenticated organization home, deterministic UI-only state, responsive contextual sheets, provenance, recovery boundaries, server-authorized Network discovery and truthful absence of later RFx/provider/referral/credibility/outcome objects.",
+  "Brand Gate B6a existing workspace validated: authenticated organization home, deterministic UI-only state, responsive contextual sheets, map information, recovery boundaries, server-authorized discovery and participant-facing availability without internal delivery jargon.",
 );

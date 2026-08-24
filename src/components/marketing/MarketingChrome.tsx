@@ -3,7 +3,6 @@ import Link from "next/link";
 import { BrandWordmark } from "@/src/components/brand/BrandWordmark";
 import { LanguageSwitcher } from "@/src/components/i18n/LanguageSwitcher";
 import { getRequestDictionary } from "@/src/i18n/server";
-import { currentBuildIdentity } from "@/src/infrastructure/system/build-identity";
 
 import responsive from "./MarketingChromeResponsive.module.css";
 import styles from "./MarketingSite.module.css";
@@ -52,7 +51,6 @@ export async function MarketingHeader() {
 
 export async function MarketingFooter() {
   const { dictionary } = await getRequestDictionary();
-  const buildIdentity = currentBuildIdentity();
 
   return (
     <footer className={styles.footer}>
@@ -88,9 +86,6 @@ export async function MarketingFooter() {
       <div className={styles.footerBottom}>
         <span>{dictionary.marketing.footer.copyright}</span>
         <span>{dictionary.marketing.footer.tagline}</span>
-        {buildIdentity ? (
-          <span title={buildIdentity.commitSha}>SHA {buildIdentity.shortSha}</span>
-        ) : null}
       </div>
     </footer>
   );
