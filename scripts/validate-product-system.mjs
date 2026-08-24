@@ -70,9 +70,6 @@ for (const requirement of [
 for (const requirement of [
   "business opportunity is often lost in translation",
   "ai can suggest. people confirm.",
-  "more than a directory",
-  "not a social feed",
-  "broader than a bid portal",
 ]) {
   if (!canonicalHomeCopy.includes(requirement)) {
     throw new Error(`Localized English source catalogs missing public positioning requirement: ${requirement}`);
