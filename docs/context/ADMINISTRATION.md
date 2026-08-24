@@ -4,6 +4,8 @@
 
 The administrative portal is the operating control plane for the RFxchange. It governs organizations, users/access, geography, RFx activity, credibility, providers, referrals, commerce, support, trust/safety and network integrity.
 
+The final product shell, information architecture, visual hierarchy, interaction patterns, truthful runtime-registration rule and incremental convergence sequence are defined in `docs/design/ADMIN_PORTAL_PRODUCT_AUTHORITY.md`. That product authority does not replace the authorization, privacy, audit or domain rules below.
+
 ## Authority model
 
 Do not use a binary `isAdmin` security model. Administrative authority is evaluated from:

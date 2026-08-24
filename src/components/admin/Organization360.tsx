@@ -33,14 +33,13 @@ export function Organization360({ projection }: Organization360Props) {
     >
       <header className={`${styles.header} ${exceptional ? styles.exceptional : ""}`}>
         <div className={styles.scope}>
-          <p>Organization scope</p>
+          <p>Organization</p>
           <h1>{projection.scope.displayName}</h1>
-          <code>{projection.scope.organizationId}</code>
         </div>
         <div className={styles.accessState}>
           <span aria-hidden="true">{exceptional ? "!" : "✓"}</span>
           <div>
-            <small>Account & access</small>
+            <small>Account &amp; access</small>
             <strong>{label(projection.header.accountAccess)}</strong>
           </div>
         </div>
@@ -83,10 +82,10 @@ export function Organization360({ projection }: Organization360Props) {
         {projection.header.investigation === "active" ? (
           <div className={styles.caseBanner}>
             <div>
-              <strong>Active investigation / integrity context</strong>
+              <strong>Active investigation or integrity hold</strong>
               <p>
-                Restriction and investigation state remain separate from Verification,
-                provider, and commercial facts.
+                This state is separate from Verification, provider status, and commercial
+                participation.
               </p>
             </div>
             {projection.header.governingCase?.visible &&
@@ -95,14 +94,14 @@ export function Organization360({ projection }: Organization360Props) {
                 Open {projection.header.governingCase.caseNumber}
               </Link>
             ) : (
-              <span>Case detail requires additional permission</span>
+              <span>Case details are not available with this access.</span>
             )}
           </div>
         ) : null}
       </header>
 
       <div className={styles.body}>
-        <nav className={styles.tabs} aria-label="Organization 360 contexts">
+        <nav className={styles.tabs} aria-label="Organization contexts">
           {projection.tabs.map((tab) => (
             <button
               key={tab.key}
@@ -126,13 +125,12 @@ export function Organization360({ projection }: Organization360Props) {
           ))}
         </nav>
 
-        <main className={styles.content}>
+        <section className={styles.content}>
           <div className={styles.contentHeading}>
             <div>
-              <p>Scoped context · {projection.scope.displayName}</p>
+              <p>{projection.scope.displayName}</p>
               <h2>{current?.label ?? "Overview"}</h2>
             </div>
-            <span>{projection.scope.organizationId}</span>
           </div>
 
           {activeTab === "overview" ? (
@@ -161,39 +159,33 @@ export function Organization360({ projection }: Organization360Props) {
                   </strong>
                 </div>
                 <div>
-                  <p>Private location detail</p>
+                  <p>Private location</p>
                   <strong>
                     {projection.overview.privateLocation.visible
                       ? projection.overview.privateLocation.addressLine1
-                      : "Hidden · minimum-necessary permission required"}
+                      : "Available only with private-location access"}
                   </strong>
                 </div>
                 <div>
-                  <p>Founding / payment</p>
-                  <strong>Commercial fact only · no credibility effect</strong>
+                  <p>Commercial participation</p>
+                  <strong>Separate from credibility and verification</strong>
                 </div>
               </section>
             </>
           ) : current?.state === "empty" ? (
             <section className={styles.empty}>
               <span aria-hidden="true">○</span>
-              <h3>No stage-appropriate records yet.</h3>
-              <p>
-                This context preserves the selected organization scope without
-                fabricating future-domain data.
-              </p>
+              <h3>No {current.label.toLowerCase()} records yet.</h3>
+              <p>This organization does not currently have records available in this area.</p>
             </section>
           ) : (
             <section className={styles.empty}>
               <span aria-hidden="true">↗</span>
-              <h3>{current?.label} is available in this organization scope.</h3>
-              <p>
-                Queries and follow-on actions remain bound to{" "}
-                <code>{projection.scope.organizationId}</code>.
-              </p>
+              <h3>{current?.label}</h3>
+              <p>No additional summary is available in this view yet.</p>
             </section>
           )}
-        </main>
+        </section>
       </div>
     </section>
   );
