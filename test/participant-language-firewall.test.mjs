@@ -79,10 +79,10 @@ test("canonical English public marketing stays behind the participant-language f
   assert.equal(marketingPages.availability.items.at(-1)?.status, "Coming next");
 });
 
-test("legacy internal RFx strings are normalized before English dictionaries render", async () => {
+test("legacy internal strings are normalized before participant dictionaries render", async () => {
   const getDictionarySource = await read("src/i18n/get-dictionary.ts");
 
-  assert.match(getDictionarySource, /"en-US": applyParticipantLanguageFirewall\(dictionary\(/);
+  assert.match(getDictionarySource, /return applyParticipantLanguageFirewall\(dictionaries\[locale\], locale\)/);
   assert.equal(rewriteParticipantText("Create a governed RFx draft"), "Create an RFx draft");
   assert.equal(rewriteParticipantText("Governed lifecycle"), "Status");
   assert.equal(rewriteParticipantText("Projection digest"), "Preview reference");
@@ -95,6 +95,15 @@ test("legacy internal RFx strings are normalized before English dictionaries ren
     rewriteParticipantText("Search saved with its current governed filters."),
     "Search saved with its current filters.",
   );
+
+  assert.equal(rewriteParticipantText("Próxima vía gobernada", "es"), "Próximas funciones");
+  assert.equal(rewriteParticipantText("La asistencia gobernada ayuda.", "es"), "La asistencia ayuda.");
+  assert.equal(rewriteParticipantText("Prochaine voie gouvernée", "fr"), "Fonctionnalités à venir");
+  assert.equal(rewriteParticipantText("L’assistance gouvernée aide.", "fr"), "L’assistance aide.");
+  assert.equal(rewriteParticipantText("Prossimo percorso governato", "it"), "Funzionalità in arrivo");
+  assert.equal(rewriteParticipantText("L'assistenza governata aiuta.", "it"), "L'assistenza aiuta.");
+  assert.equal(rewriteParticipantText("Nächster geregelter Pfad", "de"), "Kommende Funktionen");
+  assert.equal(rewriteParticipantText("Geregelte Unterstützung hilft.", "de"), "Unterstützung hilft.");
 });
 
 test("public and participant chrome do not render build or release-engineering diagnostics", async () => {
