@@ -2,7 +2,7 @@
   "availability": {
     "eyebrow": "Disponibilidad del producto",
     "title": "La Red está activa. El motor transaccional viene después.",
-    "description": "La Las organizaciones pueden establecer una posición estructurada en el mercado, descubrir participantes permitidos, crear conexiones con consentimiento, encontrar recursos aprobados y volver a abrir orientación contextual. Los funciones futuras permanecen claramente identificados.",
+    "description": "Las organizaciones pueden establecer una posición estructurada en el mercado, descubrir organizaciones participantes, crear conexiones con consentimiento, encontrar recursos aprobados y volver a abrir orientación contextual. Los funciones futuras permanecen claramente identificados.",
     "items": [
       {
         "kind": "live",
@@ -14,13 +14,13 @@
         "kind": "live",
         "status": "Disponible ahora",
         "title": "Descubrimiento + referidos",
-        "detail": "Descubra organizaciones permitidas por capacidad confirmada, geografía y área de servicio. Cree referidos propiedad de la organización con propósito, consentimiento, intercambio mínimo necesario, estado del ciclo de vida y continuidad para destinatarios externos."
+        "detail": "Descubra organizaciones participantes por capacidad confirmada, geografía y área de servicio. Cree referidos propiedad de la organización con propósito, consentimiento, intercambio mínimo necesario, estado del estado y continuidad para destinatarios externos."
       },
       {
         "kind": "live",
         "status": "Disponible ahora",
         "title": "Recursos + orientación persistente",
-        "detail": "Encuentre proveedores de recursos aprobados por territorio de servicio, elegibilidad y contexto autorizado; cree conexiones con proveedores mediante consentimiento; consulte recursos del proveedor; y vuelva a abrir Inicio rápido, rutas por función y explicaciones de flujo."
+        "detail": "Encuentre proveedores de recursos aprobados por territorio de servicio, elegibilidad y contexto disponible; cree conexiones con proveedores mediante consentimiento; consulte recursos del proveedor; y vuelva a abrir Inicio rápido, rutas por función y explicaciones de flujo."
       },
       {
         "kind": "planned",
@@ -71,7 +71,7 @@
         {
           "kicker": "Accionable",
           "title": "Dé el siguiente paso adecuado.",
-          "detail": "Los flujos publicados convierten el contexto en acción y mantienen separados el ajuste potencial, la conexión, la decisión y el resultado."
+          "detail": "Los flujos disponibles convierten el contexto en acción y mantienen separados el ajuste potencial, la conexión, la decisión y el resultado."
         }
       ],
       "promise": "Sea encontrado. Encuentre oportunidades. Construya la conexión."
@@ -129,7 +129,7 @@
         {
           "kicker": "Conecte",
           "title": "Pase a la relación adecuada.",
-          "detail": "Utilice los flujos publicados de referidos y recursos preservando propósito, consentimiento y contexto mínimo necesario."
+          "detail": "Utilice los flujos disponibles de referidos y recursos preservando propósito, consentimiento y contexto mínimo necesario."
         },
         {
           "kicker": "Aprenda",

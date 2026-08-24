@@ -2,7 +2,7 @@
   "availability": {
     "eyebrow": "Produktverfügbarkeit",
     "title": "Das Netzwerk ist live. Die Transaktions-Engine folgt.",
-    "description": "Organisationen können eine strukturierte Marktposition aufbauen, zulässige Teilnehmer entdecken, einvernehmliche Verbindungen herstellen, zugelassene Ressourcen finden und kontextbezogene Hilfe erneut öffnen. künftige Funktionen bleiben klar gekennzeichnet.",
+    "description": "Organisationen können eine strukturierte Marktposition aufbauen, teilnehmende Organisationen entdecken, einvernehmliche Verbindungen herstellen, zugelassene Ressourcen finden und kontextbezogene Hilfe erneut öffnen. künftige Funktionen bleiben klar gekennzeichnet.",
     "items": [
       {
         "kind": "live",
@@ -14,7 +14,7 @@
         "kind": "live",
         "status": "Jetzt verfügbar",
         "title": "Entdeckung + Empfehlungen",
-        "detail": "Entdecken Sie zulässige Organisationen nach bestätigten Fähigkeiten, Geografie und Servicegebiet. Erstellen Sie organisationsbezogene Empfehlungen mit Zweck, Einwilligung, minimal erforderlicher Datenweitergabe, Lebenszyklusstatus und Kontinuität für externe Empfänger."
+        "detail": "Entdecken Sie teilnehmende Organisationen nach bestätigten Fähigkeiten, Geografie und Servicegebiet. Erstellen Sie organisationsbezogene Empfehlungen mit Zweck, Einwilligung, minimal erforderlicher Datenweitergabe, Status und Kontinuität für externe Empfänger."
       },
       {
         "kind": "live",
@@ -216,7 +216,7 @@
         "Eine selbst angegebene Fähigkeit ist nicht automatisch verifiziert.",
         "Der Status Offizieller Ressourcenanbieter ist eine genehmigte institutionelle Rolle – keine Garantie für Passung oder Verfügbarkeit.",
         "Eine Empfehlung oder Anbieterverbindung ist weder eine abgeschlossene Leistung noch ein erfolgreicher Ausgang.",
-        "Künftige Glaubwürdigkeits- und Ergebnissignale müssen Nachweis und Autorität benennen."
+        "Künftige Glaubwürdigkeits- und Ergebnissignale müssen Nachweis und Berechtigung benennen."
       ]
     },
     "audience": {
@@ -315,7 +315,7 @@
     },
     "standard": {
       "eyebrow": "Ein Standard – keine Blackbox",
-      "title": "KI hilft bei der Übersetzung. AMACS liefert die Struktur. Menschen liefern die Autorität.",
+      "title": "KI hilft bei der Übersetzung. AMACS liefert die Struktur. Menschen liefern die Berechtigung.",
       "description": "AMACS verbindet Bedarf, Fähigkeit, Nachweis, Antwort, Entscheidung und Ergebnis. KI kann relevante Konzepte vorschlagen, entscheidet aber nicht, was Ihr Unternehmen leisten kann, erzeugt nicht still eine Anforderung und erklärt keine andere Organisation für qualifiziert.",
       "highlight": "Vorschläge reduzieren den Aufwand. Autorisierte Menschen bestätigen die Markttatsachen.",
       "flow": [

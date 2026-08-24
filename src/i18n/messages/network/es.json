@@ -4,10 +4,10 @@
     "ariaLabel": "Estado del espacio de trabajo de RFxchange",
     "loading": {
       "title": "Preparando su espacio de trabajo del Exchange",
-      "body": "Se están cargando la organización autorizada y la proyección de la localidad. Su estado de activación permanece preservado."
+      "body": "Se están cargando la organización autorizada y la vista de la localidad. Su estado de activación permanece preservado."
     },
     "empty": {
-      "title": "No hay una proyección autorizada de la organización disponible",
+      "title": "No hay una vista autorizada de la organización disponible",
       "body": "Vuelva a la activación para completar o corregir los requisitos de organización, geografía, perfil o marcador.",
       "action": "Revisar activación"
     },
@@ -23,12 +23,12 @@
     },
     "expired": {
       "title": "Su sesión del espacio de trabajo ha vencido",
-      "body": "Inicie sesión de nuevo para volver a evaluar la autoridad actual de la organización y regresar al espacio permitido.",
+      "body": "Inicie sesión de nuevo para volver a evaluar la permisos actuales de la organización y regresar al espacio permitido.",
       "action": "Iniciar sesión"
     },
     "recovery": {
       "title": "La recuperación del espacio de trabajo está disponible",
-      "body": "Su organización permanece intacta. Vuelva a abrir la activación para resolver la proyección faltante sin crear una organización duplicada.",
+      "body": "Su organización permanece intacta. Vuelva a abrir la activación para resolver la vista faltante sin crear una organización duplicada.",
       "action": "Abrir recuperación"
     }
   },
@@ -41,7 +41,7 @@
     "anyServiceArea": "Cualquier área de servicio",
     "submit": "Buscar",
     "clear": "Limpiar",
-    "resultCount": "{count} organizaciones permitidas",
+    "resultCount": "{count} organizaciones participantes",
     "lowDensity": "Solo se muestran organizaciones reales autorizadas.",
     "listLabel": "Resultados de organizaciones de la Red",
     "noResultsTitle": "Ninguna organización permitida coincide con esta búsqueda",
@@ -63,7 +63,7 @@
     "visibleNow": "Visible ahora",
     "positionTitle": "Su posición establecida en el Exchange",
     "selected": "Seleccionado",
-    "projectionMetadata": "Proyección observada mediante el espacio autenticado de la organización.",
+    "projectionMetadata": "vista observada mediante el espacio autenticado de la organización.",
     "locality": "Localidad de origen",
     "visibleLocation": "Ubicación visible",
     "locationFallback": "Ubicación de la organización en {locality}",
@@ -105,7 +105,7 @@
     "exchange-action-unavailable": "Esta acción aún no está disponible. Puedes seguir explorando el Exchange."
   },
   "provenance": {
-    "eyebrow": "Procedencia de los datos",
+    "eyebrow": "información de origen de los datos",
     "title": "En qué se basa este mapa",
     "authority": "Autoridad de límites",
     "vintage": "Edición de límites",

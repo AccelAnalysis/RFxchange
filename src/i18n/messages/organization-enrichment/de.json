@@ -2,7 +2,7 @@
   "header": {
     "eyebrow": "Erweitertes Profil",
     "title": "Nachweise, Medien und Standorte",
-    "body": "Ergänzen Sie Angaben mit Herkunft und wählen Sie ausdrücklich, was veröffentlicht wird.",
+    "body": "Ergänzen Sie Angaben mit Quellenangaben und wählen Sie ausdrücklich, was veröffentlicht wird.",
     "boundary": "Von der Organisation gemeldete Angaben sind keine Verifizierung, Qualifikation, Empfehlung oder Vertrauensauszeichnung."
   },
   "tabs": {
@@ -54,7 +54,7 @@
     "issued": "Ausgestellt",
     "effective": "Gültig ab",
     "expires": "Läuft ab",
-    "source": "Herkunft",
+    "source": "Quellenangaben",
     "sourceUrl": "Quell-URL",
     "evidence": "Private Beleg-IDs · optional",
     "save": "Gemeldeten Nachweis speichern",
@@ -92,6 +92,6 @@
     "empty": "Keine weiteren Standorte bestätigt.",
     "confirm": "Offiziellen Adresstreffer bestätigen",
     "satellite": "Untergeordneter Standort",
-    "mapHelp": "Der Hauptknoten bleibt von untergeordneten Standorten unterscheidbar. Jeder Punkt nutzt seine genehmigte Projektion."
+    "mapHelp": "Der Hauptknoten bleibt von untergeordneten Standorten unterscheidbar. Jeder Punkt nutzt seine genehmigte Ansicht."
   }
 }

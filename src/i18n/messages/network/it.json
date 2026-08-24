@@ -4,10 +4,10 @@
     "ariaLabel": "Stato dell’area di lavoro RFxchange",
     "loading": {
       "title": "Preparazione dell’area di lavoro Exchange",
-      "body": "L’organizzazione autorizzata e la proiezione della località sono in caricamento. Il tuo stato di attivazione rimane preservato."
+      "body": "L’organizzazione autorizzata e la vista della località sono in caricamento. Il tuo stato di attivazione rimane preservato."
     },
     "empty": {
-      "title": "Non è disponibile una proiezione autorizzata dell’organizzazione",
+      "title": "Non è disponibile una vista autorizzata dell’organizzazione",
       "body": "Torna all’attivazione per completare o correggere i requisiti relativi a organizzazione, geografia, profilo o indicatore.",
       "action": "Verifica attivazione"
     },
@@ -23,12 +23,12 @@
     },
     "expired": {
       "title": "La sessione dell’area di lavoro è scaduta",
-      "body": "Accedi di nuovo per rivalutare l’autorità attuale dell’organizzazione e tornare all’area consentita.",
+      "body": "Accedi di nuovo per rivalutare l’permessi attuali dell’organizzazione e tornare all’area consentita.",
       "action": "Accedi"
     },
     "recovery": {
       "title": "È disponibile il recupero dell’area di lavoro",
-      "body": "La tua organizzazione rimane intatta. Riapri l’attivazione per risolvere la proiezione mancante senza creare un’organizzazione duplicata.",
+      "body": "La tua organizzazione rimane intatta. Riapri l’attivazione per risolvere la vista mancante senza creare un’organizzazione duplicata.",
       "action": "Apri recupero"
     }
   },
@@ -63,7 +63,7 @@
     "visibleNow": "Visibile ora",
     "positionTitle": "La tua posizione stabilita nell’Exchange",
     "selected": "Selezionato",
-    "projectionMetadata": "Proiezione osservata attraverso l’area di lavoro autenticata dell’organizzazione.",
+    "projectionMetadata": "vista osservata attraverso l’area di lavoro autenticata dell’organizzazione.",
     "locality": "Località di origine",
     "visibleLocation": "Posizione visibile",
     "locationFallback": "Posizione dell’organizzazione a {locality}",
@@ -105,7 +105,7 @@
     "exchange-action-unavailable": "Questa azione non è ancora disponibile. Puoi continuare a esplorare l’Exchange."
   },
   "provenance": {
-    "eyebrow": "Provenienza dei dati",
+    "eyebrow": "informazioni sulla fonte dei dati",
     "title": "Su cosa si basa questa mappa",
     "authority": "Autorità dei confini",
     "vintage": "Edizione dei confini",

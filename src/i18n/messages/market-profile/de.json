@@ -95,7 +95,7 @@
   },
   "provisional": {
     "summary": "Kein Katalogbegriff passt",
-    "body": "Reichen Sie einen redaktionellen Vorschlag ein, statt eine ungenaue Fähigkeit zu erzwingen. Er bleibt nicht kanonisch und kann keine Zuordnungsanforderung erfüllen.",
+    "body": "Reichen Sie einen redaktionellen Vorschlag ein, statt eine ungenaue Fähigkeit zu erzwingen. Er bleibt nicht aktuell und kann keine Zuordnungsanforderung erfüllen.",
     "term": "Vorgeschlagener Begriff",
     "definition": "Definition",
     "example": "Beispiel für Arbeit, Produkt oder Dienstleistung",
@@ -203,7 +203,7 @@
     "preferencesSavedBody": "Diese Präferenzen beschreiben nur Interessen. Sie erteilen keine Erlaubnis, versprechen keine Verfügbarkeit und schaffen keine Empfehlungs- oder Teambeziehung.",
     "preferencesErrorTitle": "Präferenzen nicht gespeichert",
     "provisionalSavedTitle": "Vorläufiger Begriff eingereicht",
-    "provisionalSavedBody": "Der Vorschlag wird als nicht kanonischer redaktioneller Beitrag vorgemerkt. Er kann keine kanonische Fähigkeitsanforderung erfüllen.",
+    "provisionalSavedBody": "Der Vorschlag wird als nicht aktuell redaktioneller Beitrag vorgemerkt. Er kann keine aktuell Fähigkeitsanforderung erfüllen.",
     "provisionalErrorTitle": "Vorläufiger Begriff nicht eingereicht"
   }
 }

@@ -12,8 +12,8 @@
   "empty": "Noch keine Entwürfe.",
   "version": "Version {version}",
   "draftState": "Entwurf",
-  "lifecycle": "Lebenszyklus",
-  "release": "Anfragetyp-Autorität",
+  "lifecycle": "Status",
+  "release": "Anfragetyp-Berechtigung",
   "versionLabel": "Entwurfsversion",
   "changeType": "Anfragetyp ändern",
   "nextBoundary": "Bedarf, Umfang, Ort, Wert, Anforderungen, Bereitschaft und Veröffentlichung werden erst in späteren Schritten verfügbar.",
@@ -298,7 +298,7 @@
       "next7": "Nächste 7 Tage",
       "next30": "Tage 8–30",
       "later": "Später",
-      "source": "Aus kanonischen Antwortfristen und der Serverzeit abgeleitet."
+      "source": "Aus aktuell Antwortfristen und der Serverzeit abgeleitet."
     },
     "saved": {
       "action": "Diese Suche speichern",
@@ -416,7 +416,7 @@
     "candidateBoundary": "Kandidaten sind aktuell zulässige Organisationsprojektionen mit exakter Übereinstimmung zur veröffentlichten Fähigkeit. Ihre Organisation bleibt für ihre Entscheidung verantwortlich.",
     "capacity": "Vorgeschlagene Rolle",
     "serviceArea": "Leistungsgebiet",
-    "currentGeography": "Aktuell kontrollierte Geografie",
+    "currentGeography": "Aktuell ausgewählte Geografie",
     "need": "Konkreter Unterstützungsbedarf",
     "search": "Suche aktualisieren",
     "candidates": "Potenzielle Teammitglieder",

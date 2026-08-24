@@ -36,7 +36,7 @@
     "button": "Organizza con AMACS",
     "busy": "Preparazione dei suggerimenti…",
     "help": "L’assistenza propone voci del catalogo; non certifica l’organizzazione e non aggiorna la ricerca.",
-    "suggestionsLabel": "Suggerimenti di capacità non autoritativi",
+    "suggestionsLabel": "Suggerimenti di capacità suggerito",
     "suggestion": "Suggerimento · {status}",
     "provisionalTerm": "Termine provvisorio",
     "clarify": "Chiarire:",
@@ -69,7 +69,7 @@
     "showMore": "Mostra altre {count} capacità"
   },
   "claim": {
-    "eyebrow": "Scrittura autoritativa separata",
+    "eyebrow": "Scrittura confermato separata",
     "title": "Rivedi la dichiarazione dell’organizzazione",
     "confirmedSuggestion": "Suggerimento confermato",
     "manualSelection": "Selezione manuale",
@@ -95,7 +95,7 @@
   },
   "provisional": {
     "summary": "Nessun termine del catalogo è adatto",
-    "body": "Invia una proposta editoriale invece di forzare una capacità inesatta. Resta non canonica e non può soddisfare i requisiti di corrispondenza.",
+    "body": "Invia una proposta editoriale invece di forzare una capacità inesatta. Resta non attuale e non può soddisfare i requisiti di corrispondenza.",
     "term": "Termine proposto",
     "definition": "Definizione",
     "example": "Esempio di lavoro, prodotto o servizio",
@@ -179,10 +179,10 @@
     "confirmedTitle": "Suggerimento confermato per la revisione",
     "confirmedBody": "Rivedi ambito, ruoli, geografia e visibilità, quindi salva la dichiarazione. La sola conferma non ha modificato la ricerca.",
     "editedTitle": "Modifica del partecipante registrata",
-    "editedBody": "La modifica resta non autoritativa. Usa il catalogo manuale per selezionare e rivedere la capacità corrente corretta prima di salvare una dichiarazione.",
+    "editedBody": "La modifica resta suggerito. Usa il catalogo manuale per selezionare e rivedere la capacità corrente corretta prima di salvare una dichiarazione.",
     "rejectedTitle": "Suggerimento rifiutato",
     "unresolvedTitle": "Suggerimento lasciato irrisolto",
-    "nonAuthoritativeBody": "Questo suggerimento resta non autoritativo e non può influire sulla ricerca o sulla corrispondenza.",
+    "nonAuthoritativeBody": "Questo suggerimento resta suggerito e non può influire sulla ricerca o sulla corrispondenza.",
     "dispositionErrorTitle": "Decisione non salvata",
     "dispositionErrorBody": "Aggiorna e rivedi nuovamente il suggerimento.",
     "closedTitle": "Suggerimenti chiusi",
@@ -203,7 +203,7 @@
     "preferencesSavedBody": "Queste preferenze descrivono solo interessi. Non concedono autorizzazioni, non promettono disponibilità e non creano rapporti di segnalazione o team.",
     "preferencesErrorTitle": "Preferenze non salvate",
     "provisionalSavedTitle": "Termine provvisorio inviato",
-    "provisionalSavedBody": "La proposta è accodata come contributo editoriale non canonico. Non può soddisfare un requisito di capacità canonico.",
+    "provisionalSavedBody": "La proposta è accodata come contributo editoriale non attuale. Non può soddisfare un requisito di capacità attuale.",
     "provisionalErrorTitle": "Termine provvisorio non inviato"
   }
 }

@@ -95,7 +95,7 @@
   },
   "provisional": {
     "summary": "Aucun terme du catalogue ne convient",
-    "body": "Soumettez une proposition éditoriale plutôt que d’imposer une capacité inexacte. Elle reste non canonique et ne peut satisfaire les exigences de correspondance.",
+    "body": "Soumettez une proposition éditoriale plutôt que d’imposer une capacité inexacte. Elle reste non actuel et ne peut satisfaire les exigences de correspondance.",
     "term": "Terme proposé",
     "definition": "Définition",
     "example": "Exemple de travail, produit ou service",
@@ -203,7 +203,7 @@
     "preferencesSavedBody": "Ces préférences décrivent uniquement des intérêts. Elles n’accordent aucune autorisation, ne promettent aucune disponibilité et ne créent aucune relation de recommandation ou d’équipe.",
     "preferencesErrorTitle": "Préférences non enregistrées",
     "provisionalSavedTitle": "Terme provisoire soumis",
-    "provisionalSavedBody": "La proposition est placée en attente comme contribution éditoriale non canonique. Elle ne peut pas satisfaire une exigence de capacité canonique.",
+    "provisionalSavedBody": "La proposition est placée en attente comme contribution éditoriale non actuel. Elle ne peut pas satisfaire une exigence de capacité actuel.",
     "provisionalErrorTitle": "Terme provisoire non soumis"
   }
 }

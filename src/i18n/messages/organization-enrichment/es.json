@@ -2,7 +2,7 @@
   "header": {
     "eyebrow": "Información ampliada",
     "title": "Credenciales, medios y ubicaciones",
-    "body": "Añada datos de la organización con procedencia y elija explícitamente qué se publica.",
+    "body": "Añada datos de la organización con información de origen y elija explícitamente qué se publica.",
     "boundary": "La información declarada por la organización no es verificación, cualificación, aval ni credencial de confianza."
   },
   "tabs": {
@@ -54,7 +54,7 @@
     "issued": "Emisión",
     "effective": "Vigencia",
     "expires": "Caducidad",
-    "source": "Procedencia",
+    "source": "información de origen",
     "sourceUrl": "URL de fuente",
     "evidence": "ID de evidencia privada · opcional",
     "save": "Guardar credencial declarada",
@@ -92,6 +92,6 @@
     "empty": "No hay ubicaciones adicionales confirmadas.",
     "confirm": "Confirmar coincidencia oficial",
     "satellite": "Ubicación subordinada",
-    "mapHelp": "El nodo principal se distingue de las ubicaciones subordinadas. Cada punto usa su proyección aprobada."
+    "mapHelp": "El nodo principal se distingue de las ubicaciones subordinadas. Cada punto usa su vista aprobada."
   }
 }

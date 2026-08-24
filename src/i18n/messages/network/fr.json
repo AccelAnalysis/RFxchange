@@ -4,10 +4,10 @@
     "ariaLabel": "État de l’espace de travail RFxchange",
     "loading": {
       "title": "Préparation de votre espace de travail Exchange",
-      "body": "L’organisation autorisée et la projection de la localité sont en cours de chargement. Votre état d’activation reste préservé."
+      "body": "L’organisation autorisée et la vue de la localité sont en cours de chargement. Votre état d’activation reste préservé."
     },
     "empty": {
-      "title": "Aucune projection d’organisation autorisée n’est disponible",
+      "title": "Aucune vue d’organisation autorisée n’est disponible",
       "body": "Revenez à l’activation pour compléter ou réparer les exigences relatives à l’organisation, à la géographie, au profil ou au marqueur.",
       "action": "Vérifier l’activation"
     },
@@ -23,12 +23,12 @@
     },
     "expired": {
       "title": "Votre session d’espace de travail a expiré",
-      "body": "Reconnectez-vous pour réévaluer l’autorité actuelle de l’organisation et revenir à l’espace autorisé.",
+      "body": "Reconnectez-vous pour réévaluer l’autorisations actuelles de l’organisation et revenir à l’espace autorisé.",
       "action": "Se connecter"
     },
     "recovery": {
       "title": "La récupération de l’espace de travail est disponible",
-      "body": "Votre organisation reste intacte. Rouvrez l’activation pour résoudre la projection manquante sans créer d’organisation en double.",
+      "body": "Votre organisation reste intacte. Rouvrez l’activation pour résoudre la vue manquante sans créer d’organisation en double.",
       "action": "Ouvrir la récupération"
     }
   },
@@ -41,7 +41,7 @@
     "anyServiceArea": "Toute zone de service",
     "submit": "Rechercher",
     "clear": "Effacer",
-    "resultCount": "{count} organisations autorisées",
+    "resultCount": "{count} organisations participantes",
     "lowDensity": "Seules les organisations réelles autorisées sont affichées.",
     "listLabel": "Résultats des organisations du Réseau",
     "noResultsTitle": "Aucune organisation autorisée ne correspond à cette recherche",
@@ -63,7 +63,7 @@
     "visibleNow": "Visible maintenant",
     "positionTitle": "Votre position établie dans l’Exchange",
     "selected": "Sélectionné",
-    "projectionMetadata": "Projection observée dans l’espace de travail authentifié de l’organisation.",
+    "projectionMetadata": "vue observée dans l’espace de travail authentifié de l’organisation.",
     "locality": "Localité d’origine",
     "visibleLocation": "Emplacement visible",
     "locationFallback": "Emplacement de l’organisation à {locality}",
@@ -105,7 +105,7 @@
     "exchange-action-unavailable": "Cette action n’est pas encore disponible. Vous pouvez continuer à explorer l’Exchange."
   },
   "provenance": {
-    "eyebrow": "Provenance des données",
+    "eyebrow": "informations sur la source des données",
     "title": "Sur quoi repose cette carte",
     "authority": "Autorité des limites",
     "vintage": "Millésime des limites",

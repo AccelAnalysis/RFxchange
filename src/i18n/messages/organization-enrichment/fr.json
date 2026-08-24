@@ -54,7 +54,7 @@
     "issued": "Délivrée",
     "effective": "Effective",
     "expires": "Expire",
-    "source": "Provenance",
+    "source": "informations sur la source",
     "sourceUrl": "URL source",
     "evidence": "ID de preuves privées · facultatif",
     "save": "Enregistrer la référence déclarée",
@@ -92,6 +92,6 @@
     "empty": "Aucun site supplémentaire confirmé.",
     "confirm": "Confirmer la correspondance officielle",
     "satellite": "Site subordonné",
-    "mapHelp": "Le nœud principal reste distinct des sites subordonnés. Chaque point utilise sa projection approuvée."
+    "mapHelp": "Le nœud principal reste distinct des sites subordonnés. Chaque point utilise sa vue approuvée."
   }
 }

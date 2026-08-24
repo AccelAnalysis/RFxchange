@@ -2,7 +2,7 @@
   "availability": {
     "eyebrow": "Disponibilité du produit",
     "title": "Le Réseau est actif. Le moteur transactionnel vient ensuite.",
-    "description": "La est achevée. Les organisations peuvent établir une position de marché structurée, découvrir les participants autorisés, créer des connexions consenties, trouver des ressources approuvées et rouvrir une aide contextuelle. Les fonctionnalités futures restent clairement identifiés.",
+    "description": "Les organisations peuvent établir une position de marché structurée, découvrir les participants, créer des connexions consenties, trouver des ressources approuvées et rouvrir une aide contextuelle. Les fonctionnalités futures restent clairement identifiés.",
     "items": [
       {
         "kind": "live",
@@ -14,7 +14,7 @@
         "kind": "live",
         "status": "Disponible maintenant",
         "title": "Découverte + recommandations",
-        "detail": "Découvrez les organisations autorisées selon les capacités confirmées, la géographie et la zone de service. Créez des recommandations détenues par l’organisation avec motif, consentement, partage minimal nécessaire, statut de cycle de vie et continuité pour les destinataires externes."
+        "detail": "Découvrez les organisations participantes selon les capacités confirmées, la géographie et la zone de service. Créez des recommandations détenues par l’organisation avec motif, consentement, partage minimal nécessaire, statut de statut et continuité pour les destinataires externes."
       },
       {
         "kind": "live",
@@ -71,7 +71,7 @@
         {
           "kicker": "Actionnable",
           "title": "Passez à la prochaine action appropriée.",
-          "detail": "Les flux publiés transforment le contexte en action tout en distinguant adéquation potentielle, connexion, décision et résultat."
+          "detail": "Les flux disponibles transforment le contexte en action tout en distinguant adéquation potentielle, connexion, décision et résultat."
         }
       ],
       "promise": "Soyez trouvé. Trouvez l’opportunité. Créez la connexion."
@@ -129,7 +129,7 @@
         {
           "kicker": "Connecter",
           "title": "Entrez dans la bonne relation.",
-          "detail": "Utilisez les flux publiés de recommandation et de ressources tout en préservant le motif, le consentement et le contexte minimal nécessaire."
+          "detail": "Utilisez les flux disponibles de recommandation et de ressources tout en préservant le motif, le consentement et le contexte minimal nécessaire."
         },
         {
           "kicker": "Apprendre",

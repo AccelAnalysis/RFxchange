@@ -2,7 +2,7 @@
   "availability": {
     "eyebrow": "Disponibilità del prodotto",
     "title": "La Rete è attiva. Il motore transazionale viene dopo.",
-    "description": "La Wave 3 è completa. Le organizzazioni possono stabilire una posizione di mercato strutturata, scoprire partecipanti autorizzati, creare connessioni con consenso, trovare risorse approvate e riaprire indicazioni contestuali. I funzionalità future restano chiaramente identificati.",
+    "description": "Le organizzazioni possono stabilire una posizione di mercato strutturata, scoprire partecipanti, creare connessioni con consenso, trovare risorse approvate e riaprire indicazioni contestuali. I funzionalità future restano chiaramente identificati.",
     "items": [
       {
         "kind": "live",
@@ -14,13 +14,13 @@
         "kind": "live",
         "status": "Disponibile ora",
         "title": "Scoperta + segnalazioni",
-        "detail": "Scopri organizzazioni autorizzate per capacità confermata, geografia e area di servizio. Crea segnalazioni di proprietà dell’organizzazione con scopo, consenso, condivisione minima necessaria, stato del ciclo di vita e continuità per destinatari esterni."
+        "detail": "Scopri organizzazioni partecipanti per capacità confermata, geografia e area di servizio. Crea segnalazioni di proprietà dell’organizzazione con scopo, consenso, condivisione minima necessaria, stato del stato e continuità per destinatari esterni."
       },
       {
         "kind": "live",
         "status": "Disponibile ora",
         "title": "Risorse + guida persistente",
-        "detail": "Trova fornitori di risorse approvati per territorio di servizio, idoneità e contesto autorizzato; crea connessioni con consenso; consulta le risorse del fornitore; e riapri Avvio rapido, percorsi per ruolo e spiegazioni dei flussi."
+        "detail": "Trova fornitori di risorse approvati per territorio di servizio, idoneità e contesto disponibile; crea connessioni con consenso; consulta le risorse del fornitore; e riapri Avvio rapido, percorsi per ruolo e spiegazioni dei flussi."
       },
       {
         "kind": "planned",
@@ -71,7 +71,7 @@
         {
           "kicker": "Azionabile",
           "title": "Compie il prossimo passo appropriato.",
-          "detail": "I flussi rilasciati trasformano il contesto in azione mantenendo distinti potenziale compatibilità, connessione, decisione e risultato."
+          "detail": "I flussi disponibili trasformano il contesto in azione mantenendo distinti potenziale compatibilità, connessione, decisione e risultato."
         }
       ],
       "promise": "Fatti trovare. Trova opportunità. Costruisci la connessione."
@@ -129,7 +129,7 @@
         {
           "kicker": "Connetti",
           "title": "Passa alla relazione giusta.",
-          "detail": "Usa i flussi rilasciati di segnalazione e risorse preservando scopo, consenso e contesto minimo necessario."
+          "detail": "Usa i flussi disponibili di segnalazione e risorse preservando scopo, consenso e contesto minimo necessario."
         },
         {
           "kicker": "Impara",
@@ -175,7 +175,7 @@
       "eyebrow": "Assistenza con confini di autorità",
       "title": "L’IA può suggerire. Le persone confermano.",
       "description": "L’IA può ridurre il lavoro necessario per trasformare descrizioni comuni in informazioni di mercato strutturate. Può suggerire concetti AMACS pertinenti e spiegare possibili relazioni, ma un suggerimento non è un fatto di mercato.",
-      "highlight": "Un partecipante autorizzato conferma ciò di cui l’organizzazione ha realmente bisogno, ciò che offre o ciò che rappresenta prima che cambi lo stato autorevole.",
+      "highlight": "Un partecipante autorizzato conferma ciò di cui l’organizzazione ha realmente bisogno, ciò che offre o ciò che rappresenta prima che cambi lo informazioni confermate.",
       "principles": [
         "Il linguaggio quotidiano rimane un punto di partenza valido.",
         "Il modello non può inventare identificatori AMACS né creare affermazioni silenziosamente.",
@@ -198,7 +198,7 @@
         },
         {
           "title": "Apri l’organizzazione dietro il marcatore.",
-          "detail": "Passa dalla posizione al contesto autorizzato di capacità, servizio e organizzazione."
+          "detail": "Passa dalla posizione al contesto disponibile di capacità, servizio e organizzazione."
         },
         {
           "title": "Passa dalla scoperta all’azione.",
@@ -436,7 +436,7 @@
         },
         {
           "question": "L’intera piattaforma RFxchange è attiva?",
-          "answer": "No. La Rete della Wave 3 è attiva. RFx Core, valutazione, credibilità, risultati e diritti a pagamento restano funzionalità future."
+          "answer": "No. La Rete della è attiva. RFx Core, valutazione, credibilità, risultati e diritti a pagamento restano funzionalità future."
         },
         {
           "question": "Perché partecipare prima che tutto sia completo?",

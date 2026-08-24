@@ -12,7 +12,7 @@
   "empty": "Aucun brouillon pour le moment.",
   "version": "Version {version}",
   "draftState": "Brouillon",
-  "lifecycle": "Cycle de vie gouverné",
+  "lifecycle": "statut gouverné",
   "release": "Autorité du type",
   "versionLabel": "Version du brouillon",
   "changeType": "Changer le type de demande",
@@ -201,7 +201,7 @@
   "publishedState": "Publié",
   "readinessEyebrow": "État de préparation et aperçu",
   "readinessTitle": "Vérifier avant publication",
-  "readinessIntro": "Le serveur vérifie le RFx, la géographie, l’autorité et la projection répondant.",
+  "readinessIntro": "Le serveur vérifie le RFx, la géographie, l’autorité et la vue répondant.",
   "publicationAudience": "Audience de publication",
   "audience": {
     "public": "Public",
@@ -220,7 +220,7 @@
   "requirementBlocked": "Exigence à corriger",
   "previewStatus": "Aperçu — non publié",
   "previewVersion": "Version du brouillon",
-  "previewDigest": "Empreinte de projection",
+  "previewDigest": "Empreinte de vue",
   "issuedBy": "Émis par",
   "geography": "Géographie",
   "responderRequirements": "Exigences répondant",
@@ -298,7 +298,7 @@
       "next7": "7 prochains jours",
       "next30": "Jours 8 à 30",
       "later": "Plus tard",
-      "source": "Dérivé des échéances canoniques et de l’horloge du serveur."
+      "source": "Dérivé des échéances actuel et de l’horloge du serveur."
     },
     "saved": {
       "action": "Enregistrer cette recherche",
@@ -413,10 +413,10 @@
     "title": "Trouver un coéquipier potentiel",
     "intro": "Utilisez l’écart RFx actuel et la découverte du Réseau pour identifier un appui possible. La découverte ne vaut ni qualification, ni recommandation, ni promesse de capacité.",
     "back": "Retour à l’évaluation de l’opportunité",
-    "candidateBoundary": "Les candidats sont des projections d’organisations actuellement autorisées présentant une correspondance exacte avec la capacité publiée. Votre organisation reste responsable de sa décision.",
+    "candidateBoundary": "Les candidats sont des vue d’organisations actuellement autorisées présentant une correspondance exacte avec la capacité publiée. Votre organisation reste responsable de sa décision.",
     "capacity": "Capacité proposée",
     "serviceArea": "Zone de service",
-    "currentGeography": "Géographie contrôlée actuelle",
+    "currentGeography": "géographie sélectionnée actuelle",
     "need": "Besoin d’appui précis",
     "search": "Actualiser la recherche",
     "candidates": "Coéquipiers potentiels",

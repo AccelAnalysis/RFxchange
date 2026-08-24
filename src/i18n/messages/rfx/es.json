@@ -12,7 +12,7 @@
   "empty": "Aún no hay borradores.",
   "version": "Versión {version}",
   "draftState": "Borrador",
-  "lifecycle": "Ciclo de vida",
+  "lifecycle": "estado",
   "release": "Autoridad del tipo",
   "versionLabel": "Versión del borrador",
   "changeType": "Cambiar tipo de solicitud",
@@ -201,7 +201,7 @@
   "publishedState": "Publicado",
   "readinessEyebrow": "Preparación y vista previa",
   "readinessTitle": "Revisar antes de publicar",
-  "readinessIntro": "El servidor comprueba el RFx, la geografía, la autoridad y la proyección para participantes.",
+  "readinessIntro": "El servidor comprueba el RFx, la geografía, la autoridad y la vista para participantes.",
   "publicationAudience": "Público de la publicación",
   "audience": {
     "public": "Público",
@@ -220,7 +220,7 @@
   "requirementBlocked": "Requisito pendiente",
   "previewStatus": "Vista previa — no publicada",
   "previewVersion": "Versión del borrador",
-  "previewDigest": "Resumen de proyección",
+  "previewDigest": "Resumen de vista",
   "issuedBy": "Emitido por",
   "geography": "Geografía",
   "responderRequirements": "Requisitos para participantes",
@@ -298,7 +298,7 @@
       "next7": "Próximos 7 días",
       "next30": "Días 8–30",
       "later": "Más adelante",
-      "source": "Derivado de las fechas límite canónicas y del reloj del servidor."
+      "source": "Derivado de las fechas límite actual y del reloj del servidor."
     },
     "saved": {
       "action": "Guardar esta búsqueda",
@@ -416,7 +416,7 @@
     "candidateBoundary": "Los candidatos son proyecciones permitidas actuales con una alineación exacta de capacidad publicada. Su organización sigue siendo responsable de la decisión.",
     "capacity": "Capacidad propuesta",
     "serviceArea": "Área de servicio",
-    "currentGeography": "Geografía controlada actual",
+    "currentGeography": "geografía seleccionada actual",
     "need": "Necesidad específica de apoyo",
     "search": "Actualizar búsqueda",
     "candidates": "Posibles compañeros",
