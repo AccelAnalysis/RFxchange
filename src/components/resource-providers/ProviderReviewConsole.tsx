@@ -51,6 +51,10 @@ function joined(values: readonly string[]): string {
   return values.length ? values.map(readable).join(", ") : "Unavailable";
 }
 
+/**
+ * Minimum-necessary application projection: this component receives only the fields already
+ * authorized by the server. Private evidence bytes remain behind their separate access boundary.
+ */
 export function ProviderReviewConsole({
   applications,
   detail,
