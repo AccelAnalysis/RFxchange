@@ -39,6 +39,29 @@ function normalizeCatalog(namespaceName, catalog) {
   });
 }
 
+function resolveReferenceFallback(reference, localized) {
+  if (Array.isArray(reference)) {
+    const values = Array.isArray(localized) ? localized : [];
+    return reference.map((entry, index) =>
+      resolveReferenceFallback(entry, values[index]),
+    );
+  }
+  if (reference && typeof reference === "object") {
+    const values = localized && typeof localized === "object" && !Array.isArray(localized)
+      ? localized
+      : {};
+    return Object.fromEntries(
+      Object.entries(reference).map(([key, entry]) => [
+        key,
+        resolveReferenceFallback(entry, values[key]),
+      ]),
+    );
+  }
+  return localized !== undefined && typeof localized === typeof reference
+    ? localized
+    : reference;
+}
+
 function collectShape(value, prefix = "") {
   if (Array.isArray(value)) {
     return value.flatMap((entry, index) => collectShape(entry, `${prefix}[${index}]`));
@@ -83,6 +106,9 @@ for (const namespace of namespacesToValidate) {
     readJson(path.join(namespace.directory, `${referenceLocale}.json`)),
   );
   const referenceShape = normalizedShape(reference);
+  const referenceTypes = new Map(
+    referenceShape.map(({ path: messagePath, type }) => [messagePath, type]),
+  );
 
   for (const locale of localesToValidate) {
     const catalog = normalizeCatalog(
@@ -90,16 +116,22 @@ for (const namespace of namespacesToValidate) {
       readJson(path.join(namespace.directory, `${locale}.json`)),
     );
     const catalogShape = collectShape(catalog);
-    assert.deepEqual(
-      normalizedShape(catalog),
-      referenceShape,
-      `${namespace.name}:${locale} must have the same message paths and value types as ${referenceLocale}`,
-    );
     for (const entry of catalogShape) {
+      assert.equal(
+        referenceTypes.get(entry.path),
+        entry.type,
+        `${namespace.name}:${locale}:${entry.path} must remain a current ${referenceLocale} message path with the same value type`,
+      );
       if (entry.type === "string") {
         assert.ok(entry.value.trim().length > 0, `${namespace.name}:${locale}:${entry.path} must not be empty`);
       }
     }
+    const resolved = resolveReferenceFallback(reference, catalog);
+    assert.deepEqual(
+      normalizedShape(resolved),
+      referenceShape,
+      `${namespace.name}:${locale} must resolve to the same message paths and value types as ${referenceLocale}`,
+    );
   }
 }
 
@@ -117,6 +149,7 @@ assert.match(dictionary, /recovery/, "Resolved dictionaries must include the sha
 assert.match(dictionary, /participantNavigation/, "Resolved dictionaries must include the participant-navigation namespace");
 assert.match(dictionary, /applyParticipantLanguageFirewall/, "Resolved dictionaries must pass through the participant-language firewall");
 assert.match(dictionary, /normalizeBaseCatalog/, "Resolved dictionaries must normalize the legacy marketing-home locale structure");
+assert.match(dictionary, /resolveReferenceFallback/, "Resolved dictionaries must explicitly fill untranslated current keys from en-US");
 
 const layout = fs.readFileSync(path.join(root, "app", "layout.tsx"), "utf8");
 assert.match(layout, /<html lang=\{locale\}/, "Root layout must set the resolved locale on html");
