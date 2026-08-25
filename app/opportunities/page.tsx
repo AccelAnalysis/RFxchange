@@ -8,6 +8,8 @@ import {
   RFXCHANGE_SESSION_COOKIE_NAME,
   resolveParticipantRoute,
 } from "@/src/infrastructure/auth/participant-route-runtime";
+import { createFirestoreFoundationRepositories } from "@/src/infrastructure/firestore/repositories";
+import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geography/participant-map-runtime";
 import { createServerOpportunityDiscoveryService } from "@/src/infrastructure/rfx/opportunity-discovery-runtime";
 
@@ -34,7 +36,11 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
   if (access.kind === "wrong-organization") redirect(access.state.controlledPlatformUrl ?? "/join");
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   if (access.state.lifecycleState !== "open-platform") redirect(access.state.controlledPlatformUrl ?? "/join");
-  const mapProjection = await loadAuthorizedParticipantMapProjection(access);
+  const db = getServerFirestore();
+  const [mapProjection, authorization] = await Promise.all([
+    loadAuthorizedParticipantMapProjection(access),
+    createFirestoreFoundationRepositories(db).organizationAuthorization.getByMembershipId(access.membership.id),
+  ]);
   if (!mapProjection) throw new ParticipantRouteDependencyUnavailableError("workspace-state", new Error("Authorized opportunity map projection is incomplete."));
   const geographyId = String(mapProjection.model.selectedGeography.id);
   const requestedLocalities = values(params.locality);
@@ -66,5 +72,6 @@ export default async function OpportunitiesPage({ searchParams }: Props) {
     }}
     result={result}
     selectedReference={selectedReference}
+    rfxCreateAuthorized={authorization?.permissions.includes("rfx.create") ?? false}
   />;
 }

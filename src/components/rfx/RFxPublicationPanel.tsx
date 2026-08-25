@@ -240,6 +240,9 @@ export function RFxPublicationPanel({
             <a className={styles.primary} href={`/opportunities/${published.reference}`}>
               {t("rfxWorkspace.openShareLink")}
             </a>
+            <a className={styles.secondary} data-rfx-manage-cycle href={`/opportunities/manage/${encodeURIComponent(aggregate.id)}/evaluate`}>
+              {t("rfxWorkspace.discovery.manage")}
+            </a>
           </>
         ) : null}
       </section>
