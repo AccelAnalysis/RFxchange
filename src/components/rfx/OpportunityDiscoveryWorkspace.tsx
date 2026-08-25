@@ -35,6 +35,7 @@ interface Props {
   readonly spatialScope: ParticipantSpatialScope;
   readonly result: OpportunityDiscoveryResult;
   readonly selectedReference: string | null;
+  readonly rfxCreateAuthorized: boolean;
 }
 
 function markerId(reference: string): string {
@@ -54,7 +55,7 @@ function queryHref(result: OpportunityDiscoveryResult, selectedReference?: strin
   return params.size ? `/opportunities?${params.toString()}` : "/opportunities";
 }
 
-export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope, result, selectedReference }: Props) {
+export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope, result, selectedReference, rfxCreateAuthorized }: Props) {
   const { t } = useI18n();
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
@@ -75,10 +76,10 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
     selectedOrganizationId: spatialScope.organizationId,
     selectedOrganizationIsOfficialResourceProvider: false,
     openPlatformActionsAuthorized: true,
-    actionAuthorization: Object.freeze({ rfxCreate: false, referralManage: false, resourceManage: false }),
+    actionAuthorization: Object.freeze({ rfxCreate: rfxCreateAuthorized, referralManage: false, resourceManage: false }),
     currentOpportunityReference: selected?.reference ?? null,
     currentOpportunityReturnTo: queryHref(result, selected?.reference ?? null),
-  }), [result, selected?.reference, spatialScope.organizationId]);
+  }), [result, rfxCreateAuthorized, selected?.reference, spatialScope.organizationId]);
   const opportunityMarkers: readonly ExchangeOpportunityMarker[] = useMemo(() => {
     const coordinate = [model.camera.center.longitude, model.camera.center.latitude] as const;
     return Object.freeze(result.items
