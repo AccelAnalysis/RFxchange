@@ -46,7 +46,12 @@ test("production CI keeps core checks mandatory while configured-browser evidenc
   assert.doesNotMatch(workflow, /contents: write/);
   assert.match(
     workflow,
-    /- name: Configured browser shell, accessibility and transition acceptance\n        id: configured_browser_acceptance\n        continue-on-error: true\n/,
+    /- name: Build exact pre-gate baseline\n        id: configured_browser_baseline\n        continue-on-error: true\n/,
+    "The browser-comparison baseline must remain diagnostic rather than a universal completion gate.",
+  );
+  assert.match(
+    workflow,
+    /- name: Configured browser shell, accessibility and transition acceptance\n        if: \$\{\{ steps\.configured_browser_baseline\.outcome == 'success' \}\}\n        id: configured_browser_acceptance\n        continue-on-error: true\n/,
     "Configured-browser acceptance must remain diagnostic rather than a universal completion gate.",
   );
   assert.equal(
