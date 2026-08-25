@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto";
 
-import type { Firestore } from "firebase-admin/firestore";
+import type { DocumentSnapshot, Firestore } from "firebase-admin/firestore";
 
 import { authorizeOrganizationOperation } from "../../application/auth/authorize-organization-operation.ts";
+import type { AuthenticatedServerContext } from "../../application/auth/server-session.ts";
 import type { OrganizationPermission } from "../../domain/authorization/model.ts";
 import type { OrganizationId } from "../../domain/organizations/model.ts";
 import {
@@ -15,6 +16,7 @@ import {
   responseReadiness,
   rfxAddendumId,
   rfxEvaluationId,
+  rfxOutcomeId,
   rfxQuestionId,
   rfxResponseId,
   submitRfxResponse,
@@ -34,7 +36,6 @@ import type { RfxPublicationSnapshot } from "../../domain/rfx/publication.ts";
 import type { TeamParticipation } from "../../domain/rfx/teaming.ts";
 import type { StoredAsset } from "../../domain/storage/model.ts";
 import type { OrganizationMembershipId, UserId } from "../../domain/users/model.ts";
-import type { AuthenticatedServerContext } from "../../application/auth/server-session.ts";
 import { createServerFirebaseAccountSecurityService } from "../auth/firebase-account-security-runtime.ts";
 import { createFirestoreFoundationRepositories } from "../firestore/repositories.ts";
 import { getServerFirestore } from "../firestore/runtime.ts";
@@ -44,6 +45,7 @@ const RECEIPTS = "rfxSubmissionReceipts";
 const QUESTIONS = "rfxResponseQuestions";
 const ADDENDA = "rfxAddenda";
 const EVALUATIONS = "rfxEvaluations";
+const SELECTIONS = "rfxSelections";
 const OUTCOMES = "rfxExecutionOutcomes";
 const PUBLICATIONS = "rfxPublicationSnapshots";
 const PURSUITS = "opportunityPursuits";
@@ -79,6 +81,8 @@ export interface RfxIssuerWorkspace {
   readonly addenda: readonly RfxAddendum[];
   readonly evaluations: readonly RfxEvaluation[];
   readonly outcomes: readonly RfxExecutionOutcome[];
+  readonly canManageRfx: boolean;
+  readonly canEvaluate: boolean;
 }
 
 function fingerprint(value: unknown): string {
@@ -97,12 +101,17 @@ function transactionId(prefix: string, ...values: readonly string[]): string {
   return `${prefix}_${createHash("sha256").update(values.join(":"), "utf8").digest("hex").slice(0, 40)}`;
 }
 
-function record<T>(snapshot: FirebaseFirestore.DocumentSnapshot): T | null {
+function record<T>(snapshot: DocumentSnapshot): T | null {
   return snapshot.exists ? snapshot.data() as T : null;
 }
 
 function sorted<T extends { readonly createdAt: string }>(items: readonly T[]): readonly T[] {
   return Object.freeze([...items].sort((a, b) => a.createdAt.localeCompare(b.createdAt)));
+}
+
+function deadlineOpen(snapshot: RfxPublicationSnapshot): boolean {
+  const deadline = snapshot.aggregate.package?.timing.responseDeadline;
+  return Boolean(deadline && Date.parse(`${deadline}T23:59:59.999Z`) > Date.now());
 }
 
 export class ServerRfxCycleService {
@@ -163,18 +172,17 @@ export class ServerRfxCycleService {
   }
 
   private assertDeadline(snapshot: RfxPublicationSnapshot): void {
-    const deadline = snapshot.aggregate.package?.timing.responseDeadline;
-    if (!deadline || Date.parse(`${deadline}T23:59:59.999Z`) <= Date.now()) {
+    if (!deadlineOpen(snapshot)) {
       throw new RfxCycleError("conflict", "The response deadline has passed or is unavailable.");
     }
   }
 
-  private async responderContext(actor: RfxCycleActor, reference: string) {
+  private async responderContext(actor: RfxCycleActor, reference: string, requireOpenDeadline = true) {
     const snapshot = await this.publicationByReference(reference);
     if (snapshot.issuerOrganizationId === actor.organizationId) {
       throw new RfxCycleError("forbidden", "The issuer cannot enter a responder workspace for its own RFx.");
     }
-    this.assertDeadline(snapshot);
+    if (requireOpenDeadline) this.assertDeadline(snapshot);
     const pursuitSnapshot = await this.db.collection(PURSUITS).doc(opportunityPursuitId(String(actor.organizationId), snapshot.reference)).get();
     const pursuit = record<OpportunityPursuit>(pursuitSnapshot);
     if (!pursuit || pursuit.organizationId !== actor.organizationId || pursuit.decision !== "pursue") {
@@ -190,11 +198,10 @@ export class ServerRfxCycleService {
   }
 
   private async teamFor(organizationId: OrganizationId, reference: string): Promise<readonly TeamParticipation[]> {
-    const query = await this.db.collection(PARTICIPATIONS)
-      .where("leadOrganizationId", "==", organizationId)
-      .where("opportunityReference", "==", reference)
-      .get();
-    return Object.freeze(query.docs.map((item) => item.data() as TeamParticipation));
+    const query = await this.db.collection(PARTICIPATIONS).where("leadOrganizationId", "==", organizationId).get();
+    return Object.freeze(query.docs
+      .map((item) => item.data() as TeamParticipation)
+      .filter((item) => item.opportunityReference === reference));
   }
 
   private async addendaFor(reference: string): Promise<readonly RfxAddendum[]> {
@@ -227,7 +234,7 @@ export class ServerRfxCycleService {
 
   async responderWorkspace(actor: RfxCycleActor, referenceValue: string): Promise<RfxResponderWorkspace> {
     await this.authorize(actor, "response.create");
-    const { snapshot } = await this.responderContext(actor, referenceValue);
+    const { snapshot } = await this.responderContext(actor, referenceValue, false);
     const responseId = rfxResponseId(String(actor.organizationId), snapshot.reference);
     const [responseSnapshot, addenda, questions, team, canSubmit] = await Promise.all([
       this.db.collection(RESPONSES).doc(responseId).get(),
@@ -242,13 +249,21 @@ export class ServerRfxCycleService {
       response.opportunityReference !== snapshot.reference ||
       response.rfxId !== snapshot.rfxId
     )) throw new RfxCycleError("conflict", "Response identity is inconsistent.");
-    const [receiptSnapshot, evaluationSnapshot, outcomeSnapshot] = response
-      ? await Promise.all([
-          response.submissionReceiptId ? this.db.collection(RECEIPTS).doc(response.submissionReceiptId).get() : Promise.resolve(null),
-          this.db.collection(EVALUATIONS).doc(rfxEvaluationId(response.id)).get(),
-          this.db.collection(OUTCOMES).doc(transactionId("rfxoutcome", response.id)).get(),
-        ])
-      : [null, null, null] as const;
+
+    let receipt: RfxSubmissionReceipt | null = null;
+    let evaluation: RfxEvaluation | null = null;
+    let outcome: RfxExecutionOutcome | null = null;
+    if (response) {
+      const [receiptSnapshot, evaluationSnapshot, outcomeSnapshot] = await Promise.all([
+        response.submissionReceiptId ? this.db.collection(RECEIPTS).doc(response.submissionReceiptId).get() : Promise.resolve(null),
+        this.db.collection(EVALUATIONS).doc(rfxEvaluationId(response.id)).get(),
+        this.db.collection(OUTCOMES).doc(rfxOutcomeId(response.id)).get(),
+      ]);
+      receipt = receiptSnapshot ? record<RfxSubmissionReceipt>(receiptSnapshot) : null;
+      evaluation = record<RfxEvaluation>(evaluationSnapshot);
+      outcome = record<RfxExecutionOutcome>(outcomeSnapshot);
+    }
+    const open = deadlineOpen(snapshot);
     return Object.freeze({
       snapshot,
       response,
@@ -256,11 +271,11 @@ export class ServerRfxCycleService {
       questions,
       addenda,
       team,
-      receipt: receiptSnapshot ? record<RfxSubmissionReceipt>(receiptSnapshot) : null,
-      evaluation: evaluationSnapshot ? record<RfxEvaluation>(evaluationSnapshot) : null,
-      outcome: outcomeSnapshot ? record<RfxExecutionOutcome>(outcomeSnapshot) : null,
-      canEdit: response?.status !== "submitted",
-      canSubmit,
+      receipt,
+      evaluation,
+      outcome,
+      canEdit: open && response?.status !== "submitted",
+      canSubmit: open && canSubmit,
     });
   }
 
@@ -396,9 +411,15 @@ export class ServerRfxCycleService {
   }
 
   async issuerWorkspace(actor: RfxCycleActor, rfxIdValue: string): Promise<RfxIssuerWorkspace> {
-    await this.authorize(actor, "evaluation.review");
+    const [canManageRfx, canEvaluate] = await Promise.all([
+      this.can(actor, "rfx.publish"),
+      this.can(actor, "evaluation.review"),
+    ]);
+    if (!canManageRfx && !canEvaluate) {
+      throw new RfxCycleError("forbidden", "Issuer RFx management or evaluation permission is required.");
+    }
     const snapshot = await this.publicationByRfxId(rfxIdValue);
-    if (snapshot.issuerOrganizationId !== actor.organizationId) throw new RfxCycleError("forbidden", "Evaluation is limited to the issuing organization.");
+    if (snapshot.issuerOrganizationId !== actor.organizationId) throw new RfxCycleError("forbidden", "Issuer workspace is limited to the issuing organization.");
     const [responseQuery, questionQuery, addendaQuery] = await Promise.all([
       this.db.collection(RESPONSES).where("opportunityReference", "==", snapshot.reference).get(),
       this.db.collection(QUESTIONS).where("opportunityReference", "==", snapshot.reference).get(),
@@ -408,7 +429,7 @@ export class ServerRfxCycleService {
     const [receipts, evaluations, outcomes] = await Promise.all([
       Promise.all(responses.flatMap((response) => response.submissionReceiptId ? [this.db.collection(RECEIPTS).doc(response.submissionReceiptId).get()] : [])),
       Promise.all(responses.map((response) => this.db.collection(EVALUATIONS).doc(rfxEvaluationId(response.id)).get())),
-      Promise.all(responses.map((response) => this.db.collection(OUTCOMES).doc(transactionId("rfxoutcome", response.id)).get())),
+      Promise.all(responses.map((response) => this.db.collection(OUTCOMES).doc(rfxOutcomeId(response.id)).get())),
     ]);
     return Object.freeze({
       snapshot,
@@ -418,6 +439,8 @@ export class ServerRfxCycleService {
       addenda: sorted(addendaQuery.docs.map((item) => item.data() as RfxAddendum)),
       evaluations: Object.freeze(evaluations.flatMap((item) => item.exists ? [item.data() as RfxEvaluation] : [])),
       outcomes: Object.freeze(outcomes.flatMap((item) => item.exists ? [item.data() as RfxExecutionOutcome] : [])),
+      canManageRfx,
+      canEvaluate,
     });
   }
 
@@ -512,11 +535,6 @@ export class ServerRfxCycleService {
     const evaluationRef = this.db.collection(EVALUATIONS).doc(rfxEvaluationId(response.id));
     const current = record<RfxEvaluation>(await evaluationRef.get());
     if (!current) throw new RfxCycleError("invalid", "Save at least one evaluator review before deciding.");
-    if (input.decision === "selected") {
-      const selected = await this.db.collection(EVALUATIONS).where("opportunityReference", "==", response.opportunityReference).get();
-      const other = selected.docs.map((item) => item.data() as RfxEvaluation).find((item) => item.id !== current.id && item.decision === "selected");
-      if (other) throw new RfxCycleError("conflict", "Another response has already been selected for this RFx.");
-    }
     const next = decideRfxEvaluation({
       current,
       expectedVersion: input.expectedVersion,
@@ -529,15 +547,35 @@ export class ServerRfxCycleService {
     });
     const outcome = input.decision === "selected" ? createSelectedOutcome({ evaluation: next, actorUserId: actor.userId, actorMembershipId: actor.membershipId, now: next.updatedAt }) : null;
     const outcomeRef = outcome ? this.db.collection(OUTCOMES).doc(outcome.id) : null;
+    const selectionRef = input.decision === "selected"
+      ? this.db.collection(SELECTIONS).doc(transactionId("rfxselection", response.opportunityReference))
+      : null;
     await this.db.runTransaction(async (transaction) => {
-      const latest = record<RfxEvaluation>(await transaction.get(evaluationRef));
+      const [latestEvaluation, existingSelection, existingOutcome] = await Promise.all([
+        transaction.get(evaluationRef),
+        selectionRef ? transaction.get(selectionRef) : Promise.resolve(null),
+        outcomeRef ? transaction.get(outcomeRef) : Promise.resolve(null),
+      ]);
+      const latest = record<RfxEvaluation>(latestEvaluation);
       if (!latest || latest.version !== current.version || latest.decision !== "under-review") throw new RfxCycleError("conflict", "Evaluation changed before selection was committed.");
+      if (existingSelection?.exists) throw new RfxCycleError("conflict", "Another response has already been selected for this RFx.");
+      if (existingOutcome?.exists) throw new RfxCycleError("conflict", "Execution outcome already exists.");
       transaction.set(evaluationRef, next);
-      if (outcomeRef && outcome) {
-        const existing = await transaction.get(outcomeRef);
-        if (existing.exists) throw new RfxCycleError("conflict", "Execution outcome already exists.");
-        transaction.create(outcomeRef, outcome);
+      if (selectionRef) {
+        transaction.create(selectionRef, Object.freeze({
+          schemaVersion: 1,
+          opportunityReference: response.opportunityReference,
+          rfxId: response.rfxId,
+          responseId: response.id,
+          evaluationId: next.id,
+          issuerOrganizationId: response.issuerOrganizationId,
+          responderOrganizationId: response.responderOrganizationId,
+          selectedByUserId: actor.userId,
+          selectedByMembershipId: actor.membershipId,
+          selectedAt: next.updatedAt,
+        }));
       }
+      if (outcomeRef && outcome) transaction.create(outcomeRef, outcome);
     });
     return Object.freeze({ evaluation: next, outcome });
   }
