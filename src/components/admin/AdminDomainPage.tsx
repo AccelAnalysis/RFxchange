@@ -5,6 +5,10 @@ import type { AdminDomainSurfaceKey } from "@/src/application/admin/domain-opera
 import type { ImplementedAdminRuntimeDestinationKey } from "@/src/application/admin/portal-navigation";
 import { AdminPortalShell } from "@/src/components/admin/AdminPortalShell";
 import { AdminDomainWorkspace } from "@/src/components/admin/AdminDomainWorkspace";
+import {
+  authorizeScopedAdministrativeAction,
+  createScopedAdministrativeActionRequirement,
+} from "@/src/domain/admin-authorization/grants";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
 import { resolveAdminPortalAccess } from "@/src/infrastructure/auth/admin-route-runtime";
 import { loadAdminDomainSurface } from "@/src/infrastructure/admin/domain-operations-runtime";
@@ -39,39 +43,30 @@ export async function AdminDomainPage({
   const access = await resolveAdminPortalAccess({ sessionCookie });
   const returnTo = encodeURIComponent(currentPath);
   if (access.kind === "unauthenticated") redirect(`/signin?returnTo=${returnTo}`);
-  if (access.kind === "privileged-access-denied" && access.reason === "recent-reauthentication-required") {
-    redirect(`/signin?returnTo=${returnTo}`);
-  }
+  if (access.kind === "privileged-access-denied" && access.reason === "recent-reauthentication-required") redirect(`/signin?returnTo=${returnTo}`);
   if (access.kind !== "authorized") notFound();
 
   const candidates = access.destinations.filter((candidate) => candidate.key === destinationKey);
-  const destination = (requestedScope
-    ? candidates.find((candidate) => candidate.scope.value === requestedScope)
-    : null) ?? candidates[0];
+  const destination = (requestedScope ? candidates.find((candidate) => candidate.scope.value === requestedScope) : null) ?? candidates[0];
   if (!destination) notFound();
 
+  const now = new Date().toISOString();
+  const permissions = access.authority.effectivePermissions.filter((permission) =>
+    authorizeScopedAdministrativeAction(
+      access.authority,
+      access.grants,
+      createScopedAdministrativeActionRequirement({ permission, access: "read", scope: destination.scope.value }),
+      { now, satisfiedConditionKeys: Object.freeze([]) },
+    ).kind === "allow",
+  );
+  if (surfaceKey === "users-access" && (!permissions.includes("user.profile.read") || !permissions.includes("user.access.read"))) notFound();
+
   const data = await loadAdminDomainSurface({
-    db: getServerFirestore(),
-    key: surfaceKey,
-    scope: destination.scope,
-    query: query || null,
-    status: status || null,
-    cursor: cursor || null,
+    db: getServerFirestore(), key: surfaceKey, scope: destination.scope, permissions,
+    query: query || null, status: status || null, cursor: cursor || null,
   });
 
-  return (
-    <AdminPortalShell
-      destinations={access.destinations}
-      currentDestination={destinationKey}
-      currentScope={destination.scope.value}
-    >
-      <AdminDomainWorkspace
-        data={data}
-        query={query}
-        status={status}
-        selectedId={selectedId}
-        currentPath={currentPath}
-      />
-    </AdminPortalShell>
-  );
+  return <AdminPortalShell destinations={access.destinations} currentDestination={destinationKey} currentScope={destination.scope.value}>
+    <AdminDomainWorkspace data={data} query={query} status={status} selectedId={selectedId} currentPath={currentPath}/>
+  </AdminPortalShell>;
 }
