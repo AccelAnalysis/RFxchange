@@ -8,6 +8,7 @@ import {
   OrganizationAssetUploadBoundaryError,
   readBoundedProfileAssetMultipartBody,
 } from "@/src/application/storage/organization-asset-upload-boundary";
+import { RfxResponseCollaborationError } from "@/src/domain/rfx/collaboration";
 import {
   activateStoredAsset,
   createStoredAssetDraft,
@@ -74,6 +75,35 @@ function responseProblem(request: NextRequest, error: unknown) {
       cause: error,
     });
   }
+  if (error instanceof RfxResponseCollaborationError) {
+    const status = error.code === "forbidden" ? 403
+      : error.code === "not-found" ? 404
+        : error.code === "conflict" ? 409
+          : error.code === "dependency-unavailable" ? 503
+            : 400;
+    return apiProblem(request, {
+      status,
+      code: error.code,
+      participantMessage: status === 403
+        ? "This attachment is outside your assigned response work."
+        : status === 409
+          ? "The response assignment changed. Refresh the collaboration task and try again."
+          : status === 404
+            ? "The assigned response attachment is unavailable."
+            : status === 400
+              ? "The response attachment request is invalid."
+              : "The collaboration attachment service is temporarily unavailable.",
+      cause: error,
+    });
+  }
+  if (error instanceof Error && /Stored asset id/.test(error.message)) {
+    return apiProblem(request, {
+      status: 400,
+      code: "invalid",
+      participantMessage: "The response attachment identity is invalid.",
+      cause: error,
+    });
+  }
   return apiProblem(request, {
     status: 500,
     code: "dependency-unavailable",
@@ -126,15 +156,21 @@ export async function POST(request: NextRequest) {
     const assetId = storedAssetId(`rfx_collab_${createHash("sha256").update(`${participant.organizationId}:${leadOrganizationId}:${reference}:${sectionId}:${commandId}`).digest("hex").slice(0, 48)}`);
     const assets = new FirestoreStoredAssetRepository(db);
     const existing = await assets.getById(assetId);
-    if (existing?.status === "active") {
-      if (existing.organizationId !== access.leadOrganizationId || existing.sha256 !== digest || existing.sizeBytes !== bytes.byteLength || existing.contentType !== contentType) {
-        return NextResponse.json({ error: "Attachment command identity was reused for different content." }, { status: 409 });
+    if (existing) {
+      if (
+        existing.status !== "active" ||
+        existing.organizationId !== access.leadOrganizationId ||
+        existing.sha256 !== digest ||
+        existing.sizeBytes !== bytes.byteLength ||
+        existing.contentType !== contentType
+      ) {
+        return NextResponse.json({ error: "Attachment command identity was reused or is no longer active." }, { status: 409 });
       }
       return NextResponse.json({ assetId: existing.id, filename: existing.originalFilename, replayed: true }, { headers: { "cache-control": "no-store" } });
     }
 
     const now = new Date().toISOString();
-    const draft = existing ?? createStoredAssetDraft({
+    const draft = createStoredAssetDraft({
       id: assetId,
       organizationId: access.leadOrganizationId,
       category: "rfx-response-attachment",
@@ -144,7 +180,7 @@ export async function POST(request: NextRequest) {
       createdByUserId: participant.userId,
       now,
     });
-    if (!existing) await assets.create(draft);
+    await assets.create(draft);
     const objects = new FirebasePrivateObjectStore(getFirebaseAdminApp(), firebaseStorageBucketFromEnvironment());
     const receipt = await objects.put({
       objectPath: draft.objectPath,
@@ -185,6 +221,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Response attachment is unavailable." }, { status: 404 });
     }
     const object = await new FirebasePrivateObjectStore(getFirebaseAdminApp(), firebaseStorageBucketFromEnvironment()).get(asset.objectPath);
+    if (object.contentType !== asset.contentType || object.bytes.byteLength !== asset.sizeBytes) {
+      return NextResponse.json({ error: "Response attachment no longer matches its stored record." }, { status: 503 });
+    }
     return new NextResponse(Buffer.from(object.bytes), {
       headers: {
         "content-type": asset.contentType,
