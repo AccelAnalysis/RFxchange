@@ -16,6 +16,7 @@ export const STORED_ASSET_CATEGORIES = [
   "authority-evidence",
   "verification-evidence",
   "rfx-document",
+  "rfx-response-attachment",
 ] as const;
 
 export type StoredAssetCategory = (typeof STORED_ASSET_CATEGORIES)[number];
@@ -93,6 +94,21 @@ export const STORED_ASSET_POLICIES: Readonly<Record<StoredAssetCategory, StoredA
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       ]),
       organizationPermission: "document.manage" as const,
+    }),
+    "rfx-response-attachment": Object.freeze({
+      category: "rfx-response-attachment" as const,
+      sensitivity: "standard" as const,
+      maximumBytes: 25 * MEBIBYTE,
+      permittedContentTypes: Object.freeze([
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "image/jpeg",
+        "image/png",
+      ]),
+      organizationPermission: "response.create" as const,
     }),
   });
 
