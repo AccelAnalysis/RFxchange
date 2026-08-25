@@ -3,6 +3,10 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  createRfxResponseSectionAssignment,
+  revokeRfxResponseSectionAssignment,
+} from "../src/domain/rfx/collaboration.ts";
+import {
   createRfxAddendum,
   createRfxResponse,
   createSelectedOutcome,
@@ -36,7 +40,7 @@ const snapshot = Object.freeze({
       }),
       evaluationDefinition: Object.freeze({
         factors: Object.freeze([
-          Object.freeze({ id: "factor-technical", order: 1, title: "Technical fit", treatment: "required-and-scored", weightBasisPoints: 10000 }),
+          Object.freeze({ id: "factor-technical", order: 1, title: "Technical fit", description: "Evaluate technical fit.", treatment: "required-and-scored", weightBasisPoints: 10000 }),
         ]),
       }),
     }),
@@ -55,8 +59,8 @@ function update(response, item, acknowledgedAddendumIds) {
   });
 }
 
-test("RSP-009/RSP-010/RSP-017 response workspace derives stable items and readiness", () => {
-  let response = createRfxResponse({
+function draftResponse() {
+  return createRfxResponse({
     snapshot,
     responderOrganizationId: "org-responder",
     collaboratorOrganizationIds: ["org-teammate"],
@@ -64,6 +68,10 @@ test("RSP-009/RSP-010/RSP-017 response workspace derives stable items and readin
     actorMembershipId: "membership-responder",
     now: NOW,
   });
+}
+
+test("RSP-009/RSP-010/RSP-017 response workspace derives stable items and readiness", () => {
+  let response = draftResponse();
   const addendum = createRfxAddendum({
     id: "addendum-fixture",
     snapshot,
@@ -85,6 +93,60 @@ test("RSP-009/RSP-010/RSP-017 response workspace derives stable items and readin
   const readiness = responseReadiness(response, [addendum]);
   assert.equal(readiness.status, "ready");
   assert.equal(readiness.completedRequiredCount, readiness.requiredCount);
+});
+
+test("external teammates receive response authority only through an explicit section assignment", () => {
+  const response = draftResponse();
+  const participation = Object.freeze({
+    schemaVersion: 1,
+    id: "participation-fixture",
+    invitationId: "invitation-fixture",
+    opportunityReference: snapshot.reference,
+    leadOrganizationId: "org-responder",
+    participantOrganizationId: "org-teammate",
+    proposedCapacity: "capability-contributor",
+    capabilityLabelSnapshot: "Systems integration",
+    boundaryVersion: 1,
+    boundaryCopyDigest: "b".repeat(64),
+    boundaryLocale: "en-US",
+    acceptedByUserId: "user-teammate",
+    acceptedByMembershipId: "membership-teammate",
+    acceptedAt: NOW,
+  });
+
+  const assignment = createRfxResponseSectionAssignment({
+    response,
+    participation,
+    sectionId: "section-narrative",
+    responsibilitySummary: "Draft the systems integration approach.",
+    actorUserId: "user-responder",
+    actorMembershipId: "membership-responder",
+    now: NOW,
+  });
+  assert.equal(assignment.leadOrganizationId, "org-responder");
+  assert.equal(assignment.participantOrganizationId, "org-teammate");
+  assert.equal(assignment.sectionId, "section-narrative");
+  assert.equal(assignment.status, "active");
+
+  assert.throws(() => createRfxResponseSectionAssignment({
+    response,
+    participation: { ...participation, leadOrganizationId: "org-other" },
+    sectionId: "section-narrative",
+    responsibilitySummary: "Attempt cross-tenant edit.",
+    actorUserId: "user-responder",
+    actorMembershipId: "membership-responder",
+    now: NOW,
+  }), /does not belong to this response/i);
+
+  const revoked = revokeRfxResponseSectionAssignment({
+    current: assignment,
+    expectedVersion: assignment.version,
+    actorUserId: "user-responder",
+    actorMembershipId: "membership-responder",
+    now: "2026-08-25T10:01:00.000Z",
+  });
+  assert.equal(revoked.status, "revoked");
+  assert.equal(revoked.version, 2);
 });
 
 test("RSP-018/RSP-019/RSP-020/RSP-021 hosted submission locks response and emits an immutable receipt", () => {
@@ -153,8 +215,11 @@ test("response attachments are first-class private responder assets", () => {
 test("live RFx actions no longer hard-code Create RFx unavailable and Pursue exposes Respond", async () => {
   const discovery = await readFile(new URL("../src/components/rfx/OpportunityDiscoveryWorkspace.tsx", import.meta.url), "utf8");
   const assessment = await readFile(new URL("../src/components/rfx/OpportunityAssessmentWorkspace.tsx", import.meta.url), "utf8");
+  const inbox = await readFile(new URL("../src/components/rfx/OpportunityTeamInvitationInbox.tsx", import.meta.url), "utf8");
   assert.doesNotMatch(discovery, /rfxCreate:\s*false/);
   assert.match(discovery, /rfxCreate:\s*rfxCreateAuthorized/);
   assert.match(assessment, /data-opportunity-respond/);
   assert.match(assessment, /\/respond\?returnTo=/);
+  assert.match(inbox, /data-rfx-collaboration-entry/);
+  assert.match(inbox, /\/collaborate\?lead=/);
 });
