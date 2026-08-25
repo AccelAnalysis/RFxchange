@@ -66,6 +66,7 @@ export function RfxResponseWorkspace({ initialWorkspace, returnHref }: Readonly<
   const [question, setQuestion] = useState("");
   const [questionBusy, setQuestionBusy] = useState(false);
   const [submitBusy, setSubmitBusy] = useState(false);
+  const [uploadingSection, setUploadingSection] = useState<string | null>(null);
   const [acknowledgedAddenda, setAcknowledgedAddenda] = useState<readonly string[]>(
     initialWorkspace.response?.acknowledgedAddendumIds ?? [],
   );
@@ -151,6 +152,42 @@ export function RfxResponseWorkspace({ initialWorkspace, returnHref }: Readonly<
     });
   }
 
+  async function uploadAttachment(sectionId: string, file: File | null) {
+    if (!file || !committedRef.current || committedRef.current.status !== "draft") return;
+    setUploadingSection(sectionId);
+    setNotice("Uploading attachment…");
+    try {
+      const form = new FormData();
+      form.set("commandId", `attachment:${crypto.randomUUID()}`);
+      form.set("reference", workspace.snapshot.reference);
+      form.set("sectionId", sectionId);
+      form.set("file", file);
+      const result = await fetch("/api/rfx-cycle/attachment", {
+        method: "POST",
+        credentials: "same-origin",
+        body: form,
+      });
+      const payload = await result.json() as { assetId?: string; filename?: string; error?: string };
+      if (!result.ok || !payload.assetId) throw new Error(payload.error ?? "The attachment could not be uploaded.");
+      const current = draftRef.current[sectionId];
+      if (!current) throw new Error("The response section changed while the attachment was uploading.");
+      setDraftItem(sectionId, { attachmentAssetIds: [...new Set([...current.attachmentAssetIds, payload.assetId])] });
+      queueMicrotask(() => queueSave(sectionId));
+      setNotice(`${payload.filename ?? file.name} attached.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "The attachment could not be uploaded.");
+    } finally {
+      setUploadingSection(null);
+    }
+  }
+
+  function removeAttachment(sectionId: string, assetId: string) {
+    const current = draftRef.current[sectionId];
+    if (!current) return;
+    setDraftItem(sectionId, { attachmentAssetIds: current.attachmentAssetIds.filter((id) => id !== assetId) });
+    queueMicrotask(() => queueSave(sectionId));
+  }
+
   function toggleAddendum(addendumId: string, checked: boolean) {
     const next = checked
       ? [...new Set([...acknowledgedAddenda, addendumId])]
@@ -221,12 +258,7 @@ export function RfxResponseWorkspace({ initialWorkspace, returnHref }: Readonly<
       </header>
 
       <nav className={styles.progress} aria-label="Response progress">
-        {[
-          "Start",
-          "Build",
-          "Review",
-          "Status",
-        ].map((label, index) => <span key={label} data-active={index === activeStep}>{label}</span>)}
+        {["Start", "Build", "Review", "Status"].map((label, index) => <span key={label} data-active={index === activeStep}>{label}</span>)}
       </nav>
 
       {!response ? <section className={styles.card}>
@@ -247,6 +279,7 @@ export function RfxResponseWorkspace({ initialWorkspace, returnHref }: Readonly<
           <h2>Build response</h2>
           {response.items.map((item) => {
             const value = draft[item.sectionId] ?? draftFrom(item);
+            const canAttach = item.format === "attachment" || item.attachmentsAllowed;
             return <article className={styles.card} key={item.sectionId} data-response-section={item.sectionId}>
               <div><p className={styles.eyebrow}>{item.required ? "Required" : "Optional"}</p><h3>{item.titleSnapshot}</h3></div>
               {item.instructionsSnapshot ? <p>{item.instructionsSnapshot}</p> : null}
@@ -256,10 +289,15 @@ export function RfxResponseWorkspace({ initialWorkspace, returnHref }: Readonly<
                 <label><span>Currency</span><input maxLength={3} value={value.currency} onChange={(event) => setDraftItem(item.sectionId, { currency: event.target.value.toUpperCase() })} onBlur={() => queueSave(item.sectionId)} /></label>
               </div> : null}
               {item.format === "narrative" || item.format === "structured-answer" ? <label><span>Your response</span><textarea maxLength={item.characterLimit ?? 20000} value={value.text} onChange={(event) => setDraftItem(item.sectionId, { text: event.target.value })} onBlur={() => queueSave(item.sectionId)} /></label> : null}
-              {item.format === "attachment" || item.attachmentsAllowed ? <div className={styles.notice}>
+              {canAttach ? <div className={styles.notice}>
                 <strong>Attachments</strong>
-                <p>Private response attachment upload is being connected to this section. Existing attachment references are preserved and validated before submission.</p>
-                {value.attachmentAssetIds.length ? <p>{value.attachmentAssetIds.length} attachment{value.attachmentAssetIds.length === 1 ? "" : "s"} attached.</p> : null}
+                <p>Add a document or capture an image from your phone. Files stay private to the response until submission.</p>
+                <div className={styles.actions}>
+                  <label className={styles.secondary}>Camera<input hidden type="file" accept="image/jpeg,image/png" capture="environment" disabled={uploadingSection !== null} onChange={(event) => { const file = event.currentTarget.files?.[0] ?? null; event.currentTarget.value = ""; void uploadAttachment(item.sectionId, file); }} /></label>
+                  <label className={styles.secondary}>File<input hidden type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,image/jpeg,image/png" disabled={uploadingSection !== null} onChange={(event) => { const file = event.currentTarget.files?.[0] ?? null; event.currentTarget.value = ""; void uploadAttachment(item.sectionId, file); }} /></label>
+                </div>
+                {uploadingSection === item.sectionId ? <p role="status">Uploading…</p> : null}
+                {value.attachmentAssetIds.length ? <ul>{value.attachmentAssetIds.map((assetId, index) => <li key={assetId}>Attachment {index + 1} <button type="button" data-secondary="true" onClick={() => removeAttachment(item.sectionId, assetId)}>Remove</button></li>)}</ul> : <p>No attachments yet.</p>}
               </div> : null}
             </article>;
           })}
@@ -297,7 +335,7 @@ export function RfxResponseWorkspace({ initialWorkspace, returnHref }: Readonly<
 
         {response.status === "draft" ? <div className={styles.sticky}>
           <div><strong>{workspace.readiness?.status === "ready" ? "Ready to submit" : "Keep building"}</strong><p className={styles.status} role="status">{notice ?? (saving ? "Saving…" : "Changes save as you work.")}</p></div>
-          <button className={styles.primary} type="button" disabled={submitBusy || saving || !workspace.canSubmit || workspace.readiness?.status !== "ready"} onClick={() => void submit()}>{submitBusy ? "Submitting…" : "Review & submit"}</button>
+          <button className={styles.primary} type="button" disabled={submitBusy || saving || uploadingSection !== null || !workspace.canSubmit || workspace.readiness?.status !== "ready"} onClick={() => void submit()}>{submitBusy ? "Submitting…" : "Review & submit"}</button>
         </div> : <p className={styles.status} role="status">{notice}</p>}
       </> : <p className={styles.status} role="status">{notice}</p>}
     </main>
