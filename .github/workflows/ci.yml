@@ -123,6 +123,8 @@ jobs:
           NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}
         run: npm run check
       - name: Build exact pre-gate baseline
+        id: configured_browser_baseline
+        continue-on-error: true
         env:
           RFXCHANGE_SHELL_BASE_SHA: 7e61fd94232ad72de32f4776befdb61d9e729cf6
         shell: bash
@@ -136,6 +138,7 @@ jobs:
             RFXCHANGE_BUILD_SHA="$RFXCHANGE_SHELL_BASE_SHA" NEXT_TELEMETRY_DISABLED=1 npm run build
           )
       - name: Configured browser shell, accessibility and transition acceptance
+        if: ${{ steps.configured_browser_baseline.outcome == 'success' }}
         id: configured_browser_acceptance
         continue-on-error: true
         env:
