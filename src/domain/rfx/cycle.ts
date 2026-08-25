@@ -15,6 +15,7 @@ export const RFX_EVALUATION_SCHEMA_VERSION = 1 as const;
 export const RFX_OUTCOME_SCHEMA_VERSION = 1 as const;
 
 export type RfxResponseStatus = "draft" | "submitted";
+export type RfxEvaluationGate = "not-reviewed" | "pass" | "fail";
 
 export interface RfxResponseItem {
   readonly sectionId: string;
@@ -119,8 +120,6 @@ export interface RfxAddendum {
   readonly createdAt: string;
 }
 
-export type RfxEvaluationGate = "not-reviewed" | "pass" | "fail";
-
 export interface RfxEvaluationFactorReview {
   readonly factorId: string;
   readonly titleSnapshot: string;
@@ -201,6 +200,13 @@ export class RfxCycleError extends Error {
     this.code = code;
   }
 }
+
+type EvaluationFactorInput = Readonly<{
+  factorId: string;
+  gate?: string;
+  scoreBasisPoints?: number | null;
+  note?: string;
+}>;
 
 function timestamp(value: string): string {
   const parsed = Date.parse(value);
@@ -303,11 +309,9 @@ export function createRfxResponse(input: Readonly<{
     publicationVersion: snapshot.aggregateVersion,
     publicationDigest: snapshot.projectionDigest,
     status: "draft" as const,
-    items: Object.freeze(
-      [...snapshot.aggregate.definition.responseStructure.sections]
-        .sort((left, right) => left.order - right.order)
-        .map((section) => itemFromSection(section, input.actorUserId, now)),
-    ),
+    items: Object.freeze([...snapshot.aggregate.definition.responseStructure.sections]
+      .sort((left, right) => left.order - right.order)
+      .map((section) => itemFromSection(section, input.actorUserId, now))),
     collaboratorOrganizationIds: Object.freeze([...new Set(input.collaboratorOrganizationIds ?? [])]),
     acknowledgedAddendumIds: Object.freeze([]),
     version: 1,
@@ -347,22 +351,21 @@ function completeItem(item: RfxResponseItem): boolean {
 
 export function responseReadiness(response: RfxResponse, requiredAddenda: readonly RfxAddendum[]): RfxResponseReadiness {
   const requiredItems = response.items.filter((item) => item.required);
+  const requiredAddendumItems = requiredAddenda.filter((item) => item.requiresAcknowledgment);
   const blocking = [
     ...requiredItems.filter((item) => !completeItem(item)).map((item) => Object.freeze({
       kind: "response-section" as const,
       reference: item.sectionId,
       label: item.titleSnapshot,
     })),
-    ...requiredAddenda
-      .filter((item) => item.requiresAcknowledgment && !response.acknowledgedAddendumIds.includes(item.id))
+    ...requiredAddendumItems
+      .filter((item) => !response.acknowledgedAddendumIds.includes(item.id))
       .map((item) => Object.freeze({ kind: "addendum" as const, reference: item.id, label: item.title })),
   ];
   return Object.freeze({
     status: blocking.length ? "blocked" as const : "ready" as const,
-    requiredCount: requiredItems.length + requiredAddenda.filter((item) => item.requiresAcknowledgment).length,
-    completedRequiredCount:
-      requiredItems.filter(completeItem).length +
-      requiredAddenda.filter((item) => item.requiresAcknowledgment && response.acknowledgedAddendumIds.includes(item.id)).length,
+    requiredCount: requiredItems.length + requiredAddendumItems.length,
+    completedRequiredCount: requiredItems.filter(completeItem).length + requiredAddendumItems.filter((item) => response.acknowledgedAddendumIds.includes(item.id)).length,
     blocking: Object.freeze(blocking),
   });
 }
@@ -391,13 +394,11 @@ export function updateRfxResponse(input: Readonly<{
   const currentItem = input.current.items.find((item) => item.sectionId === sectionId);
   if (!currentItem) throw new RfxCycleError("invalid", "Response section is unavailable.");
   const now = timestamp(input.now);
-  let next = currentItem;
+  let next: RfxResponseItem;
   if (currentItem.format === "acknowledgment") {
     next = Object.freeze({ ...currentItem, acknowledged: input.item.acknowledged === true, updatedByUserId: input.actorUserId, updatedAt: now });
   } else if (currentItem.format === "pricing") {
-    const priceMinor = input.item.priceMinor === null || input.item.priceMinor === undefined || input.item.priceMinor === ""
-      ? null
-      : Number(input.item.priceMinor);
+    const priceMinor = input.item.priceMinor === null || input.item.priceMinor === undefined || input.item.priceMinor === "" ? null : Number(input.item.priceMinor);
     if (priceMinor !== null && (!Number.isSafeInteger(priceMinor) || priceMinor < 0 || priceMinor > 9_000_000_000_000)) {
       throw new RfxCycleError("invalid", "Response price is invalid.");
     }
@@ -409,23 +410,18 @@ export function updateRfxResponse(input: Readonly<{
     next = Object.freeze({
       ...currentItem,
       text: text(input.item.text ?? "", "Response text", Math.min(maximum, 20_000)),
-      attachmentAssetIds: currentItem.attachmentsAllowed
-        ? normalizedAttachmentIds(input.item.attachmentAssetIds, currentItem.itemLimit)
-        : Object.freeze([]),
+      attachmentAssetIds: currentItem.attachmentsAllowed ? normalizedAttachmentIds(input.item.attachmentAssetIds, currentItem.itemLimit) : Object.freeze([]),
       updatedByUserId: input.actorUserId,
       updatedAt: now,
     });
   }
-  const addenda = input.acknowledgedAddendumIds
-    ? Object.freeze([...new Set(input.acknowledgedAddendumIds.map((item) => stable(item, "Addendum identity")))])
-    : input.current.acknowledgedAddendumIds;
   return Object.freeze({
     ...input.current,
     items: Object.freeze(input.current.items.map((item) => item.sectionId === sectionId ? next : item)),
-    collaboratorOrganizationIds: input.collaboratorOrganizationIds
-      ? Object.freeze([...new Set(input.collaboratorOrganizationIds)])
-      : input.current.collaboratorOrganizationIds,
-    acknowledgedAddendumIds: addenda,
+    collaboratorOrganizationIds: input.collaboratorOrganizationIds ? Object.freeze([...new Set(input.collaboratorOrganizationIds)]) : input.current.collaboratorOrganizationIds,
+    acknowledgedAddendumIds: input.acknowledgedAddendumIds
+      ? Object.freeze([...new Set(input.acknowledgedAddendumIds.map((item) => stable(item, "Addendum identity")))])
+      : input.current.acknowledgedAddendumIds,
     version: input.current.version + 1,
     updatedByUserId: input.actorUserId,
     updatedByMembershipId: input.actorMembershipId,
@@ -448,7 +444,7 @@ export function submitRfxResponse(input: Readonly<{
   const now = timestamp(input.now);
   const resultingVersion = input.current.version + 1;
   const receiptId = rfxSubmissionReceiptId(input.current.id, resultingVersion);
-  const response = Object.freeze({
+  const response: RfxResponse = Object.freeze({
     ...input.current,
     status: "submitted" as const,
     version: resultingVersion,
@@ -458,7 +454,7 @@ export function submitRfxResponse(input: Readonly<{
     submittedAt: now,
     submissionReceiptId: receiptId,
   });
-  const digest = createHash("sha256").update(JSON.stringify({
+  const responseDigest = createHash("sha256").update(JSON.stringify({
     responseId: response.id,
     opportunityReference: response.opportunityReference,
     publicationVersion: response.publicationVersion,
@@ -478,7 +474,7 @@ export function submitRfxResponse(input: Readonly<{
     publicationVersion: response.publicationVersion,
     publicationDigest: response.publicationDigest,
     responseVersion: response.version,
-    responseDigest: digest,
+    responseDigest,
     submittedByUserId: input.actorUserId,
     submittedByMembershipId: input.actorMembershipId,
     submittedAt: now,
@@ -558,12 +554,13 @@ export function createRfxAddendum(input: Readonly<{
   });
 }
 
-function reviewFactor(definition: RfxEvaluationFactor, input?: Partial<RfxEvaluationFactorReview>): RfxEvaluationFactorReview {
+function reviewFactor(definition: RfxEvaluationFactor, input?: EvaluationFactorInput): RfxEvaluationFactorReview {
   const gateValues = new Set<RfxEvaluationGate>(["not-reviewed", "pass", "fail"]);
-  const gate = gateValues.has(input?.gate as RfxEvaluationGate) ? input!.gate as RfxEvaluationGate : "not-reviewed";
-  const score = input?.scoreBasisPoints === null || input?.scoreBasisPoints === undefined
-    ? null
-    : Number(input.scoreBasisPoints);
+  const gateCandidate = input?.gate;
+  const gate: RfxEvaluationGate = gateCandidate && gateValues.has(gateCandidate as RfxEvaluationGate)
+    ? gateCandidate as RfxEvaluationGate
+    : "not-reviewed";
+  const score = input?.scoreBasisPoints === null || input?.scoreBasisPoints === undefined ? null : Number(input.scoreBasisPoints);
   if (score !== null && (!Number.isInteger(score) || score < 0 || score > 10_000)) {
     throw new RfxCycleError("invalid", "Evaluation score must be between 0 and 10000 basis points.");
   }
@@ -580,10 +577,14 @@ function reviewFactor(definition: RfxEvaluationFactor, input?: Partial<RfxEvalua
 
 function consensusFor(definitions: readonly RfxEvaluationFactor[], reviews: readonly RfxEvaluatorReview[]): readonly RfxEvaluationConsensusFactor[] {
   return Object.freeze(definitions.map((definition) => {
-    const values = reviews.map((review) => review.factors.find((factor) => factor.factorId === definition.id)).filter(Boolean) as RfxEvaluationFactorReview[];
+    const values = reviews
+      .map((review) => review.factors.find((factor) => factor.factorId === definition.id))
+      .filter((value): value is RfxEvaluationFactorReview => Boolean(value));
     const scores = values.flatMap((factor) => factor.scoreBasisPoints === null ? [] : [factor.scoreBasisPoints]);
     const gates = values.map((factor) => factor.gate);
-    const gate: RfxEvaluationGate = gates.includes("fail") ? "fail" : gates.length > 0 && gates.every((value) => value === "pass") ? "pass" : "not-reviewed";
+    const gate: RfxEvaluationGate = gates.includes("fail")
+      ? "fail"
+      : gates.length > 0 && gates.every((value) => value === "pass") ? "pass" : "not-reviewed";
     return Object.freeze({
       factorId: definition.id,
       titleSnapshot: definition.title,
@@ -600,7 +601,7 @@ export function upsertRfxEvaluationReview(input: Readonly<{
   current: RfxEvaluation | null;
   response: RfxResponse;
   snapshot: RfxPublicationSnapshot;
-  factorInputs: readonly Readonly<{ factorId: string; gate?: string; scoreBasisPoints?: number | null; note?: string }>[];
+  factorInputs: readonly EvaluationFactorInput[];
   overallNote: string;
   actorUserId: UserId;
   actorMembershipId: OrganizationMembershipId;
@@ -620,10 +621,7 @@ export function upsertRfxEvaluationReview(input: Readonly<{
     updatedAt: now,
   });
   const priorReviews = input.current?.reviews ?? [];
-  const reviews = Object.freeze([
-    ...priorReviews.filter((item) => item.evaluatorMembershipId !== input.actorMembershipId),
-    review,
-  ]);
+  const reviews = Object.freeze([...priorReviews.filter((item) => item.evaluatorMembershipId !== input.actorMembershipId), review]);
   return Object.freeze({
     schemaVersion: RFX_EVALUATION_SCHEMA_VERSION,
     id: input.current?.id ?? rfxEvaluationId(input.response.id),
@@ -651,12 +649,8 @@ export function upsertRfxEvaluationReview(input: Readonly<{
 function consensusReady(evaluation: RfxEvaluation): boolean {
   if (!evaluation.reviews.length) return false;
   return evaluation.consensus.every((factor) => {
-    if (factor.treatment === "required-condition" || factor.treatment === "required-and-scored") {
-      if (factor.gate !== "pass") return false;
-    }
-    if (factor.treatment === "scored-factor" || factor.treatment === "required-and-scored") {
-      if (factor.averageScoreBasisPoints === null) return false;
-    }
+    if ((factor.treatment === "required-condition" || factor.treatment === "required-and-scored") && factor.gate !== "pass") return false;
+    if ((factor.treatment === "scored-factor" || factor.treatment === "required-and-scored") && factor.averageScoreBasisPoints === null) return false;
     return true;
   });
 }
@@ -737,7 +731,9 @@ export function updateRfxOutcome(input: Readonly<{
     ...input.current,
     status: input.status,
     executionNote: text(input.executionNote, "Execution note", 6_000),
-    outcomeSummary: input.status === "completed" ? text(input.outcomeSummary, "Outcome summary", 8_000, true) : text(input.outcomeSummary, "Outcome summary", 8_000),
+    outcomeSummary: input.status === "completed"
+      ? text(input.outcomeSummary, "Outcome summary", 8_000, true)
+      : text(input.outcomeSummary, "Outcome summary", 8_000),
     outcomeValue: text(input.outcomeValue, "Outcome value", 2_000),
     version: input.current.version + 1,
     updatedByUserId: input.actorUserId,
