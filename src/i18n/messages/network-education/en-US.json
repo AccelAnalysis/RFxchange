@@ -4,9 +4,18 @@
   "title": "Learn the Exchange at your pace.",
   "intro": "Return any time for a short path through the RFxchange tools available to your organization. Guide progress does not change your business information or permissions.",
   "progress": "Current path progress",
-  "status": { "active": "In progress", "dismissed": "Dismissed · available to reopen", "completed": "Completed · available to reopen" },
+  "status": {
+    "active": "In progress",
+    "dismissed": "Dismissed · available to reopen",
+    "completed": "Completed · available to reopen"
+  },
   "valueSpineLabel": "RFxchange value path",
-  "valueSpine": { "understandable": "Understandable", "discoverable": "Discoverable", "connectable": "Connectable", "actionable": "Actionable" },
+  "valueSpine": {
+    "understandable": "Understandable",
+    "discoverable": "Discoverable",
+    "connectable": "Connectable",
+    "actionable": "Actionable"
+  },
   "recommended": "Recommended for this organization",
   "recommendationBoundary": "Recommendations use your current organization information. They do not change permissions, provider status, verification, credibility, or membership benefits.",
   "catalogUpdate": "This guide has new content. Your earlier progress remains visible; review the current version when ready.",
@@ -25,63 +34,197 @@
   "explainerLabel": "Before you continue",
   "closeExplainer": "Close explanation",
   "explainerDismissed": "Explanation closed. You can reopen it here at any time.",
-  "questions": { "what": "What is this?", "why": "Why does it matter here?", "happens": "What happens if I do this?", "next": "What happens next?" },
-  "states": { "saved": "Guide progress saved.", "error": "Guide progress could not be saved. Reload and try again." },
+  "questions": {
+    "what": "What is this?",
+    "why": "Why does it matter here?",
+    "happens": "What happens if I do this?",
+    "next": "What happens next?"
+  },
+  "states": {
+    "saved": "Guide progress saved.",
+    "error": "Guide progress could not be saved. Reload and try again."
+  },
   "quickStart": {
     "title": "Quick Start",
     "summary": "Follow the value path using the tools currently available to your organization.",
     "items": {
-      "understand": { "title": "Make your organization understandable", "body": "Review your profile, capabilities, supporting information, visibility, and operating context." },
-      "discover": { "title": "See how organizations become discoverable", "body": "Use the map and Exchange search to find participating organizations in relevant places." },
-      "connect": { "title": "Make a useful connection", "body": "Review the purpose, recipient, and information being shared before sending a referral." },
-      "act": { "title": "Use current resources", "body": "Find provider services, make a request, and use published resources." }
+      "understand": {
+        "title": "Make your organization understandable",
+        "body": "Review your profile, capabilities, supporting information, visibility, and operating context."
+      },
+      "discover": {
+        "title": "See how organizations become discoverable",
+        "body": "Use the map and Exchange search to find participating organizations in relevant places."
+      },
+      "connect": {
+        "title": "Make a useful connection",
+        "body": "Review the purpose, recipient, and information being shared before sending a referral."
+      },
+      "act": {
+        "title": "Use current resources",
+        "body": "Find provider services, make a request, and use published resources."
+      }
     }
   },
   "business": {
     "title": "Business path",
     "summary": "Build a clear organization presence, discover capabilities, make useful connections, and use support resources.",
     "items": {
-      "profile": { "title": "Confirm your market profile", "body": "Review suggestions and confirm only the information that accurately represents your organization." },
-      "discovery": { "title": "Explore the Exchange", "body": "Search participating organizations by capability, geography, and other useful market context." },
-      "referrals": { "title": "Send or respond to referrals", "body": "Review what will be shared, then track acceptance, decline, contact, and closure separately." },
-      "resources": { "title": "Find provider support", "body": "Compare service territory, availability, eligibility, and why a provider may fit the need." },
-      "rfx": { "title": "Create or respond to an RFx", "body": "Use RFx tools when they are available to your organization. Unavailable actions are identified in the Exchange." },
-      "credibility": { "title": "Use credibility information", "body": "Supporting information can add context, but it does not automatically create verification or credibility." }
+      "profile": {
+        "title": "Confirm your market profile",
+        "body": "Review suggestions and confirm only the information that accurately represents your organization."
+      },
+      "discovery": {
+        "title": "Explore the Exchange",
+        "body": "Search participating organizations by capability, geography, and other useful market context."
+      },
+      "referrals": {
+        "title": "Send or respond to referrals",
+        "body": "Review what will be shared, then track acceptance, decline, contact, and closure separately."
+      },
+      "resources": {
+        "title": "Find provider support",
+        "body": "Compare service territory, availability, eligibility, and why a provider may fit the need."
+      },
+      "rfx": {
+        "title": "Create or respond to an RFx",
+        "body": "Use RFx tools when they are available to your organization. Unavailable actions are identified in the Exchange."
+      },
+      "credibility": {
+        "title": "Use credibility information",
+        "body": "Supporting information can add context, but it does not automatically create verification or credibility."
+      }
     }
   },
   "issuer": {
     "title": "Issuer path",
     "summary": "Use market research and business needs to move from Need → Capability into an RFx when the appropriate tools are available.",
     "items": {
-      "market": { "title": "Research the market", "body": "Explore organization capabilities, locations, and resources before defining a need." },
-      "resources": { "title": "Understand support resources", "body": "Review provider services and published resources without treating a listing as qualification for an opportunity." },
-      "rfx": { "title": "Author and publish an RFx", "body": "Create, review, and publish an RFx when those actions are available to your organization." },
-      "evaluation": { "title": "Evaluate responses and outcomes", "body": "Use response and evaluation tools when available; the Exchange identifies actions that are not yet available." }
+      "market": {
+        "title": "Research the market",
+        "body": "Explore organization capabilities, locations, and resources before defining a need."
+      },
+      "resources": {
+        "title": "Understand support resources",
+        "body": "Review provider services and published resources without treating a listing as qualification for an opportunity."
+      },
+      "rfx": {
+        "title": "Author and publish an RFx",
+        "body": "Create, review, and publish an RFx when those actions are available to your organization."
+      },
+      "evaluation": {
+        "title": "Evaluate responses and outcomes",
+        "body": "Use response and evaluation tools when available; the Exchange identifies actions that are not yet available."
+      }
     }
   },
   "resourceProvider": {
     "title": "Resource Provider path",
     "summary": "Understand provider application, status, services, requests, communications, and resources.",
     "items": {
-      "application": { "title": "Apply for Resource Provider status", "body": "Submit information about your organization and services for review. Submitting an application does not approve it." },
-      "profile": { "title": "Maintain your service profile", "body": "Keep service categories, eligibility, intake, territory, and availability up to date." },
-      "discovery": { "title": "Make services discoverable", "body": "Choose which services are published so businesses can find the support you provide." },
-      "requests": { "title": "Respond to provider requests", "body": "Accept, decline, redirect, or message about a specific request while keeping the connection separate from the service outcome." },
-      "publication": { "title": "Publish resources", "body": "Create, publish, update, withdraw, or let a resource expire as appropriate." },
-      "credentials": { "title": "Training and certification", "body": "Training, certification, credibility, and paid benefits appear here only when those features are available." }
+      "application": {
+        "title": "Apply for Resource Provider status",
+        "body": "Submit information about your organization and services for review. Submitting an application does not approve it."
+      },
+      "profile": {
+        "title": "Maintain your service profile",
+        "body": "Keep service categories, eligibility, intake, territory, and availability up to date."
+      },
+      "discovery": {
+        "title": "Make services discoverable",
+        "body": "Choose which services are published so businesses can find the support you provide."
+      },
+      "requests": {
+        "title": "Respond to provider requests",
+        "body": "Accept, decline, redirect, or message about a specific request while keeping the connection separate from the service outcome."
+      },
+      "publication": {
+        "title": "Publish resources",
+        "body": "Create, publish, update, withdraw, or let a resource expire as appropriate."
+      },
+      "credentials": {
+        "title": "Training and certification",
+        "body": "Training, certification, credibility, and paid benefits appear here only when those features are available."
+      }
     }
   },
   "explainers": {
-    "profile-confirmation": { "title": "Confirm organization profile information", "what": "This updates information your organization uses in its profile and Exchange activity.", "why": "Accurate organization information improves discovery and reduces confusion.", "happens": "Your current permission is checked and the information is saved to your organization.", "next": "The information appears only where its visibility allows. Updating it does not create verification or credibility." },
-    "capability-suggestion": { "title": "Review a capability suggestion", "what": "This is an AMACS-based suggestion, not a claim about your organization.", "why": "You decide whether the concept accurately describes what your organization can do.", "happens": "Accept, edit, reject, or leave the suggestion unresolved.", "next": "A capability becomes part of your organization information only after you confirm it through the applicable action." },
-    "credential-evidence": { "title": "Add credential or supporting information", "what": "This records credential or supporting information provided by your organization.", "why": "Supporting information can help others understand a claim, but it is not automatically proof or independent verification.", "happens": "The information is saved to your organization and follows the visibility you choose.", "next": "Verification or credibility decisions remain separate from simply adding supporting information." },
-    "media-visibility": { "title": "Choose media visibility", "what": "Choose whether an organization media item stays private or can be seen by others.", "why": "Uploaded material may contain information you do not want to share broadly.", "happens": "The visibility you choose is saved with the media item.", "next": "You can change visibility later. Publishing media does not mean RFxchange endorses its content." },
-    "additional-location": { "title": "Confirm an additional location", "what": "Add another organization location and choose the appropriate location visibility.", "why": "Additional locations help others understand where your organization operates.", "happens": "The location is checked and saved using the selected privacy level.", "next": "A map marker appears only when the location has enough information and its visibility permits it." },
-    "referral-consent": { "title": "Send a referral", "what": "Create an introduction for the recipient shown and the information displayed before you send it.", "why": "A useful referral should carry enough context without sharing more than necessary.", "happens": "The referral is sent and its status can be tracked.", "next": "The recipient may accept or decline. Sending a referral does not prove contact, service, qualification, or outcome." },
-    "referral-response": { "title": "Respond to a referral", "what": "Accept or decline the referral for your organization.", "why": "Your response tells the sender whether the introduction can move forward.", "happens": "The referral status is updated.", "next": "Acceptance, contact, service, and closure remain separate steps." },
-    "provider-application": { "title": "Submit Resource Provider information", "what": "Provide information about your organization, services, service area, and supporting material.", "why": "Resource Provider status is reviewed separately from your ordinary organization profile.", "happens": "You can save a draft and submit it for review when ready.", "next": "The reviewer may request more information, approve the application, or decline it." },
-    "provider-connection": { "title": "Connect with this provider", "what": "Send a request to the provider service you selected.", "why": "Service area and availability can help explain fit, but they do not promise capacity, eligibility, or service.", "happens": "The organization and request summary shown to you are shared with the provider.", "next": "The provider may accept, decline, redirect, or message. A connection is not a service outcome." },
-    "provider-response": { "title": "Respond to a provider request", "what": "Respond to this specific request for your Resource Provider organization.", "why": "A response applies to this request and does not promise availability for every future request.", "happens": "Accept, decline, or redirect updates the request status.", "next": "Messages may continue after the response. Service delivery, payment, verification, and outcome are separate." },
-    "provider-resource-publication": { "title": "Publish a provider resource", "what": "Make provider-authored resource content available to the audience you select.", "why": "Published provider content is information from the provider, not an RFxchange endorsement or qualification.", "happens": "The resource is published with the visibility and timing you choose.", "next": "You can withdraw it or let it expire. Publication does not create ranking, a credibility badge, or a guaranteed result." }
+    "profile-confirmation": {
+      "title": "Confirm organization profile information",
+      "what": "This updates information your organization uses in its profile and Exchange activity.",
+      "why": "Accurate organization information improves discovery and reduces confusion.",
+      "happens": "Your current permission is checked and the information is saved to your organization.",
+      "next": "The information appears only where its visibility allows. Updating it does not create verification or credibility."
+    },
+    "capability-suggestion": {
+      "title": "Review a capability suggestion",
+      "what": "This is an AMACS-based suggestion, not a claim about your organization.",
+      "why": "You decide whether the concept accurately describes what your organization can do.",
+      "happens": "Accept, edit, reject, or leave the suggestion unresolved.",
+      "next": "A capability becomes part of your organization information only after you confirm it through the applicable action."
+    },
+    "credential-evidence": {
+      "title": "Add credential or supporting information",
+      "what": "This records credential or supporting information provided by your organization.",
+      "why": "Supporting information can help others understand a claim, but it is not automatically proof or independent verification.",
+      "happens": "The information is saved to your organization and follows the visibility you choose.",
+      "next": "Verification or credibility decisions remain separate from simply adding supporting information."
+    },
+    "media-visibility": {
+      "title": "Choose media visibility",
+      "what": "Choose whether an organization media item stays private or can be seen by others.",
+      "why": "Uploaded material may contain information you do not want to share broadly.",
+      "happens": "The visibility you choose is saved with the media item.",
+      "next": "You can change visibility later. Publishing media does not mean RFxchange endorses its content."
+    },
+    "additional-location": {
+      "title": "Confirm an additional location",
+      "what": "Add another organization location and choose the appropriate location visibility.",
+      "why": "Additional locations help others understand where your organization operates.",
+      "happens": "The location is checked and saved using the selected privacy level.",
+      "next": "A map marker appears only when the location has enough information and its visibility permits it."
+    },
+    "referral-consent": {
+      "title": "Send a referral",
+      "what": "Create an introduction for the recipient shown and the information displayed before you send it.",
+      "why": "A useful referral should carry enough context without sharing more than necessary.",
+      "happens": "The referral is sent and its status can be tracked.",
+      "next": "The recipient may accept or decline. Sending a referral does not prove contact, service, qualification, or outcome."
+    },
+    "referral-response": {
+      "title": "Respond to a referral",
+      "what": "Accept or decline the referral for your organization.",
+      "why": "Your response tells the sender whether the introduction can move forward.",
+      "happens": "The referral status is updated.",
+      "next": "Acceptance, contact, service, and closure remain separate steps."
+    },
+    "provider-application": {
+      "title": "Submit Resource Provider information",
+      "what": "Provide information about your organization, services, service area, and supporting material.",
+      "why": "Resource Provider status is reviewed separately from your ordinary organization profile.",
+      "happens": "You can save a draft and submit it for review when ready.",
+      "next": "The reviewer may request more information, approve the application, or decline it."
+    },
+    "provider-connection": {
+      "title": "Connect with this provider",
+      "what": "Send a request to the provider service you selected.",
+      "why": "Service area and availability can help explain fit, but they do not promise capacity, eligibility, or service.",
+      "happens": "The organization and request summary shown to you are shared with the provider.",
+      "next": "The provider may accept, decline, redirect, or message. A connection is not a service outcome."
+    },
+    "provider-response": {
+      "title": "Respond to a provider request",
+      "what": "Respond to this specific request for your Resource Provider organization.",
+      "why": "A response applies to this request and does not promise availability for every future request.",
+      "happens": "Accept, decline, or redirect updates the request status.",
+      "next": "Messages may continue after the response. Service delivery, payment, verification, and outcome are separate."
+    },
+    "provider-resource-publication": {
+      "title": "Publish a provider resource",
+      "what": "Make provider-authored resource content available to the audience you select.",
+      "why": "Published provider content is information from the provider, not an RFxchange endorsement or qualification.",
+      "happens": "The resource is published with the visibility and timing you choose.",
+      "next": "You can withdraw it or let it expire. Publication does not create ranking, a credibility badge, or a guaranteed result."
+    }
   }
 }

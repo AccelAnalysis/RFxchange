@@ -34,7 +34,7 @@ test("trusted lockfile mirrors root and Functions dependency manifests", async (
   assert.equal(lock.packages["node_modules/firebase-tools"].version, "15.24.0");
 });
 
-test("production CI requires immutable npm installs, locked tooling, read-only repository authority, and bounded evidence export", async () => {
+test("production CI keeps core checks mandatory while configured-browser evidence remains diagnostic", async () => {
   const workflow = await read(".github/workflows/ci.yml");
 
   assert.match(workflow, /permissions:\n  contents: read\n/);
@@ -44,11 +44,22 @@ test("production CI requires immutable npm installs, locked tooling, read-only r
   assert.doesNotMatch(workflow, /\bnpx\b[^\n]*firebase-tools/);
   assert.doesNotMatch(workflow, /firebase-tools@/);
   assert.doesNotMatch(workflow, /contents: write/);
+  assert.match(
+    workflow,
+    /- name: Build exact pre-gate baseline\n        id: configured_browser_baseline\n        continue-on-error: true\n/,
+    "The browser-comparison baseline must remain diagnostic rather than a universal completion gate.",
+  );
+  assert.match(
+    workflow,
+    /- name: Configured browser shell, accessibility and transition acceptance\n        if: \$\{\{ steps\.configured_browser_baseline\.outcome == 'success' \}\}\n        id: configured_browser_acceptance\n        continue-on-error: true\n/,
+    "Configured-browser acceptance must remain diagnostic rather than a universal completion gate.",
+  );
   assert.equal(
     workflow.match(/uses: actions\/upload-artifact@v4/g)?.length ?? 0,
     1,
-    "Only the bounded participant-shell evidence artifact may be exported.",
+    "Only the bounded participant-shell diagnostic artifact may be exported.",
   );
+  assert.match(workflow, /if: \$\{\{ steps\.configured_browser_acceptance\.outcome == 'success' \}\}/);
   assert.match(workflow, /name: exchange-shell-transition-evidence-\$\{\{ steps\.build_identity\.outputs\.sha \}\}/);
   assert.match(workflow, /path: artifacts\/exchange-shell-transition-evidence\.json/);
   assert.match(workflow, /if-no-files-found: error/);

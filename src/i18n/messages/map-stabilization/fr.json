@@ -1,1 +1,7 @@
-{"plotCandidate":"Afficher ce résultat sur la carte","confirmCandidate":"Confirmer la position affichée","spatialModelFailure":"La carte de la localité autorisée est temporairement indisponible. Votre progression d’activation est conservée ; réessayez pour charger la carte requise.","homeSceneFailure":"Votre marqueur est actif, mais la scène d’accueil confirmée est temporairement indisponible. Aucun état géographique n’a été inventé ; réessayez pour accéder à l’Exchange.","retry":"Réessayer"}
+{
+  "plotCandidate": "Afficher ce résultat sur la carte",
+  "confirmCandidate": "Confirmer la position affichée",
+  "spatialModelFailure": "La carte de la localité autorisée est temporairement indisponible. Votre progression d’activation est conservée; réessayez pour charger la carte requise.",
+  "homeSceneFailure": "Votre marqueur est actif, mais la scène d’accueil confirmée est temporairement indisponible. Aucun état géographique n’a été inventé; réessayez pour accéder à l’Exchange.",
+  "retry": "Réessayer"
+}

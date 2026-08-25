@@ -1,1 +1,227 @@
-{"metadata":{"title":"The RFxchange™","description":"A map-based business growth network for capability discovery, opportunities, referrals, partnerships, resources, and measured activity.","openGraphDescription":"Make business capability, opportunity, and connection easier to discover and act on."},"common":{"languageSelector":{"label":"Language","saving":"Changing language…"},"actions":{"joinFree":"Join Free","signIn":"Sign In","learnMore":"Learn more"}},"marketing":{"nav":{"ariaLabel":"Primary marketing navigation","howItWorks":"How It Works","businesses":"For Businesses","buyers":"For Buyers","resourceProviders":"For Resource Providers","about":"About"},"footer":{"summary":"A local business growth network that helps organizations be found, find opportunity, and build the right connections.","byline":"By Accel Analysis","explore":"Explore","foundingMembership":"Founding Membership","organization":"Organization","about":"About RFxchange","imageCredits":"Image Credits","bottomMatter":"Legal","terms":"Terms of Service","privacy":"Privacy Policy","rules":"Platform Rules","accessibility":"Accessibility","copyright":"© 2026 The RFxchange. By Accel Analysis.","tagline":"Visible · Connected · Actionable"},"home":{"hero":{"eyebrow":"A Local Business Growth Network · By Accel Analysis","titleBefore":"The local market is already moving.","titleAccent":"Make it visible.","summary":"The RFxchange helps organizations describe what they do, become easier to discover, and move into opportunities, referrals, teaming, and support as those features become available.","join":"Join the Exchange — Free","howItWorks":"See How It Works","evidenceNote":"Images are illustrative unless otherwise identified."},"availability":{"eyebrow":"Product availability","title":"See what you can use today—and what is coming next.","description":"Current features and upcoming product pathways are identified separately.","items":[{"status":"Available now","title":"Establish your organization","detail":"Create an account, choose your location, find or add your organization, confirm its details, add a meaningful capability, and finish setup."},{"status":"Available now","title":"Become visible on the map","detail":"Once setup is complete, your organization appears on the Exchange map at its confirmed or privacy-safe location."},{"status":"In development","title":"Discover more of the Exchange","detail":"Capability search, organization discovery, referrals, resource providers, and additional Exchange views are becoming available over time."},{"status":"Planned product pathway","title":"Move through RFx and outcomes","detail":"RFx response workflows, credibility information, and outcome tracking expand what organizations can do from the Exchange."}]},"live":{"eyebrow":"Available now","title":"Put your organization on the map.","description":"Setup connects your account, organization, location, and capabilities so others can find you for relevant reasons.","steps":[{"title":"Create the account","detail":"Create your sign-in and accept the platform terms."},{"title":"Select the locality","detail":"Tell us where your organization is based."},{"title":"Resolve the organization","detail":"Find your organization or add it if it is not listed."},{"title":"Confirm the location","detail":"Confirm the location shown on the map and use a privacy-safe option when available."},{"title":"Describe one capability","detail":"Add at least one capability that helps others understand what your organization can do."},{"title":"Enter the Exchange","detail":"Finish setup and enter the Exchange workspace."}]},"model":{"eyebrow":"Visible. Connected. Actionable.","title":"One market environment. From visibility to action.","description":"Organizations, opportunities, connections, workflows, and outcomes come together in one Exchange. Features appear as they become available.","label":"How the Exchange works","ariaLabel":"RFxchange product model","readMore":"Read the complete product pathway →","steps":[{"kicker":"Visible","title":"Organization","detail":"Show what your organization does and where it operates."},{"kicker":"Demand","title":"Opportunity","detail":"Business needs and RFx opportunities provide context for action."},{"kicker":"Fit","title":"Discovery","detail":"Explore potential fit without treating it as qualification or endorsement."},{"kicker":"Connect","title":"Relationship","detail":"Referrals, teams, and providers connect organizations around a specific need."},{"kicker":"Act","title":"Workflow","detail":"Take the next action available for that opportunity or connection."},{"kicker":"Evidence","title":"Outcome","detail":"Record outcomes when the supporting workflow and information are available."}]},"difference":{"eyebrow":"A living market—not a conventional dashboard","title":"Built around organizations, geography, and business action.","items":[{"label":"More than a directory","detail":"Organizations can be discovered by capability, geography, and business context, then carry that context into opportunities and connections."},{"label":"Not a social feed","detail":"The RFxchange focuses on organizations, capabilities, geography, and business workflows—not follower counts or general posting."},{"label":"Broader than a bid portal","detail":"RFx belongs inside a wider business network that also connects capabilities, resources, referrals, and intelligence."}]},"connection":{"eyebrow":"Build the connection","title":"Context should travel with the participant.","description":"The Exchange is designed to keep the reason for a connection attached as you move from discovery into referrals, teaming, resources, and RFx activity.","link":"Why The RFxchange exists"},"audience":{"eyebrow":"One network · different responsibilities","title":"A practical environment for the people who move local business.","items":[{"name":"Economic developers + civic leaders","promise":"Connective economic infrastructure","detail":"See participating organizations and capabilities in geographic context, then use expanding resource and market activity tools as they become available."},{"name":"Businesses","promise":"A reusable business-development position","detail":"Establish your organization and capabilities, then use Exchange workflows to discover and act on relevant connections."},{"name":"Resource providers","promise":"Contextual routing into support","detail":"Connect services to the business needs and service areas they are designed to support."}]},"evidence":{"eyebrow":"Trust what you see","title":"Clear signals, clear limits.","description":"The RFxchange distinguishes confirmed information, participant-provided information, and features that are not yet available.","link":"Review public image provenance →","rules":["Illustrative images are identified as such.","Tutorial examples are kept separate from Exchange records.","Features that are not yet available are labeled as planned or in development.","Public opportunity information does not provide private access.","Verification and outcomes appear only when the required information exists."]},"cta":{"eyebrow":"Enter The RFxchange","line1":"Be found.","line2":"Find opportunity.","line3":"Build the connection.","description":"Create your organization profile, confirm its location, add your capabilities, and enter the Exchange."},"images":{"construction":"Construction professionals reviewing work at an active site.","workshop":"Business owners collaborating in a workshop setting.","collaboration":"Professionals working together around a table.","region":"A regional city and business landscape.","manufacturing":"A manufacturing professional working in an industrial facility.","professional":"A professional business team in discussion.","warehouse":"A worker moving through a warehouse environment."}}}}
+{
+  "metadata": {
+    "title": "The RFxchange™",
+    "description": "A map-based business growth network for capability discovery, opportunities, referrals, partnerships, resources, and measured activity.",
+    "openGraphDescription": "Make business capability, opportunity, and connection easier to discover and act on."
+  },
+  "common": {
+    "languageSelector": {
+      "label": "Language",
+      "saving": "Changing language…"
+    },
+    "actions": {
+      "joinFree": "Join Free",
+      "signIn": "Sign In",
+      "learnMore": "Learn more"
+    }
+  },
+  "marketing": {
+    "nav": {
+      "ariaLabel": "Primary marketing navigation",
+      "howItWorks": "How It Works",
+      "businesses": "For Businesses",
+      "buyers": "For Buyers",
+      "resourceProviders": "For Resource Providers",
+      "about": "About"
+    },
+    "footer": {
+      "summary": "A local business growth network that helps organizations be found, find opportunity, and build the right connections.",
+      "byline": "By Accel Analysis",
+      "explore": "Explore",
+      "foundingMembership": "Founding Membership",
+      "organization": "Organization",
+      "about": "About RFxchange",
+      "imageCredits": "Image Credits",
+      "bottomMatter": "Legal",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "rules": "Platform Rules",
+      "accessibility": "Accessibility",
+      "copyright": "© 2026 The RFxchange. By Accel Analysis.",
+      "tagline": "Visible · Connected · Actionable"
+    },
+    "home": {
+      "hero": {
+        "eyebrow": "A Local Business Growth Network · By Accel Analysis",
+        "titleBefore": "The local market is already moving.",
+        "titleAccent": "Make it visible.",
+        "summary": "The RFxchange helps organizations describe what they do, become easier to discover, and move into opportunities, referrals, teaming, and support as those features become available.",
+        "join": "Join the Exchange — Free",
+        "howItWorks": "See How It Works",
+        "evidenceNote": "Images are illustrative unless otherwise identified."
+      },
+      "availability": {
+        "eyebrow": "Product availability",
+        "title": "See what you can use today—and what is coming next.",
+        "description": "Current features and upcoming product pathways are identified separately.",
+        "items": [
+          {
+            "status": "Available now",
+            "title": "Establish your organization",
+            "detail": "Create an account, choose your location, find or add your organization, confirm its details, add a meaningful capability, and finish setup."
+          },
+          {
+            "status": "Available now",
+            "title": "Become visible on the map",
+            "detail": "Once setup is complete, your organization appears on the Exchange map at its confirmed or privacy-safe location."
+          },
+          {
+            "status": "In development",
+            "title": "Discover more of the Exchange",
+            "detail": "Capability search, organization discovery, referrals, resource providers, and additional Exchange views are becoming available over time."
+          },
+          {
+            "status": "Planned product pathway",
+            "title": "Move through RFx and outcomes",
+            "detail": "RFx response workflows, credibility information, and outcome tracking expand what organizations can do from the Exchange."
+          }
+        ]
+      },
+      "live": {
+        "eyebrow": "Available now",
+        "title": "Put your organization on the map.",
+        "description": "Setup connects your account, organization, location, and capabilities so others can find you for relevant reasons.",
+        "steps": [
+          {
+            "title": "Create the account",
+            "detail": "Create your sign-in and accept the platform terms."
+          },
+          {
+            "title": "Select the locality",
+            "detail": "Tell us where your organization is based."
+          },
+          {
+            "title": "Resolve the organization",
+            "detail": "Find your organization or add it if it is not listed."
+          },
+          {
+            "title": "Confirm the location",
+            "detail": "Confirm the location shown on the map and use a privacy-safe option when available."
+          },
+          {
+            "title": "Describe one capability",
+            "detail": "Add at least one capability that helps others understand what your organization can do."
+          },
+          {
+            "title": "Enter the Exchange",
+            "detail": "Finish setup and enter the Exchange workspace."
+          }
+        ]
+      },
+      "model": {
+        "eyebrow": "Visible. Connected. Actionable.",
+        "title": "One market environment. From visibility to action.",
+        "description": "Organizations, opportunities, connections, workflows, and outcomes come together in one Exchange. Features appear as they become available.",
+        "label": "How the Exchange works",
+        "ariaLabel": "RFxchange product model",
+        "readMore": "Read the complete product pathway →",
+        "steps": [
+          {
+            "kicker": "Visible",
+            "title": "Organization",
+            "detail": "Show what your organization does and where it operates."
+          },
+          {
+            "kicker": "Demand",
+            "title": "Opportunity",
+            "detail": "Business needs and RFx opportunities provide context for action."
+          },
+          {
+            "kicker": "Fit",
+            "title": "Discovery",
+            "detail": "Explore potential fit without treating it as qualification or endorsement."
+          },
+          {
+            "kicker": "Connect",
+            "title": "Relationship",
+            "detail": "Referrals, teams, and providers connect organizations around a specific need."
+          },
+          {
+            "kicker": "Act",
+            "title": "Workflow",
+            "detail": "Take the next action available for that opportunity or connection."
+          },
+          {
+            "kicker": "Evidence",
+            "title": "Outcome",
+            "detail": "Record outcomes when the supporting workflow and information are available."
+          }
+        ]
+      },
+      "difference": {
+        "eyebrow": "A living market—not a conventional dashboard",
+        "title": "Built around organizations, geography, and business action.",
+        "items": [
+          {
+            "label": "More than a directory",
+            "detail": "Organizations can be discovered by capability, geography, and business context, then carry that context into opportunities and connections."
+          },
+          {
+            "label": "Not a social feed",
+            "detail": "The RFxchange focuses on organizations, capabilities, geography, and business workflows—not follower counts or general posting."
+          },
+          {
+            "label": "Broader than a bid portal",
+            "detail": "RFx belongs inside a wider business network that also connects capabilities, resources, referrals, and intelligence."
+          }
+        ]
+      },
+      "connection": {
+        "eyebrow": "Build the connection",
+        "title": "Context should travel with the participant.",
+        "description": "The Exchange is designed to keep the reason for a connection attached as you move from discovery into referrals, teaming, resources, and RFx activity.",
+        "link": "Why The RFxchange exists"
+      },
+      "audience": {
+        "eyebrow": "One network · different responsibilities",
+        "title": "A practical environment for the people who move local business.",
+        "items": [
+          {
+            "name": "Economic developers + civic leaders",
+            "promise": "Connective economic infrastructure",
+            "detail": "See participating organizations and capabilities in geographic context, then use expanding resource and market activity tools as they become available."
+          },
+          {
+            "name": "Businesses",
+            "promise": "A reusable business-development position",
+            "detail": "Establish your organization and capabilities, then use Exchange workflows to discover and act on relevant connections."
+          },
+          {
+            "name": "Resource providers",
+            "promise": "Contextual routing into support",
+            "detail": "Connect services to the business needs and service areas they are designed to support."
+          }
+        ]
+      },
+      "evidence": {
+        "eyebrow": "Trust what you see",
+        "title": "Clear signals, clear limits.",
+        "description": "The RFxchange distinguishes confirmed information, participant-provided information, and features that are not yet available.",
+        "link": "Review public image source information →",
+        "rules": [
+          "Illustrative images are identified as such.",
+          "Tutorial examples are kept separate from Exchange records.",
+          "Features that are not yet available are labeled as planned or in development.",
+          "Public opportunity information does not provide private access.",
+          "Verification and outcomes appear only when the required information exists."
+        ]
+      },
+      "cta": {
+        "eyebrow": "Enter The RFxchange",
+        "line1": "Be found.",
+        "line2": "Find opportunity.",
+        "line3": "Build the connection.",
+        "description": "Create your organization profile, confirm its location, add your capabilities, and enter the Exchange."
+      },
+      "images": {
+        "construction": "Construction professionals reviewing work at an active site.",
+        "workshop": "Business owners collaborating in a workshop setting.",
+        "collaboration": "Professionals working together around a table.",
+        "region": "A regional city and business landscape.",
+        "manufacturing": "A manufacturing professional working in an industrial facility.",
+        "professional": "A professional business team in discussion.",
+        "warehouse": "A worker moving through a warehouse environment."
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { test } from "node:test";
 
 import { rewriteParticipantText } from "../src/i18n/participant-language-firewall.ts";
@@ -8,6 +8,24 @@ const repoRoot = new URL("../", import.meta.url);
 
 async function read(path) {
   return readFile(new URL(path, repoRoot), "utf8");
+}
+
+async function filesUnder(path) {
+  const root = new URL(path, repoRoot);
+  const output = [];
+
+  async function walk(directory, relative) {
+    const entries = await readdir(directory, { withFileTypes: true });
+    for (const entry of entries) {
+      const child = new URL(`${entry.name}${entry.isDirectory() ? "/" : ""}`, directory);
+      const childRelative = `${relative}${entry.name}${entry.isDirectory() ? "/" : ""}`;
+      if (entry.isDirectory()) await walk(child, childRelative);
+      else output.push(childRelative);
+    }
+  }
+
+  await walk(root, path);
+  return output;
 }
 
 function collectStrings(value, path = "root", output = []) {
@@ -49,10 +67,30 @@ const prohibitedMarketingPatterns = [
   /\breal (?:organization|geography|map|marker|market activity)\b/i,
 ];
 
-function assertNoInternalParticipantLanguage(entries) {
+const multilingualSourcePatterns = [
+  /\bgovern(?:ed|ance|ed workflow|ed release|ed lifecycle)\b/i,
+  /\b(?:wave|slice)\s+\d+(?:\.\d+)?\b/i,
+  /\b(?:source|build)\s+sha\b/i,
+  /\bbuild identity\b/i,
+  /\bcurrent release boundary\b/i,
+  /\bapproved slices?\b/i,
+  /\bacceptance tests?\b/i,
+  /\bexact-head\b/i,
+  /\bgobernad[ao]s?\b/i,
+  /\bOla\s+\d+(?:\.\d+)?\b/i,
+  /\bgouverné(?:e|es|s)?\b/i,
+  /\bVague\s+\d+(?:\.\d+)?\b/i,
+  /\bgovernat[oaie]\b/i,
+  /\bOnda\s+\d+(?:\.\d+)?\b/i,
+  /\bgeregelte[nmrs]?\b/i,
+  /\bWelle\s+\d+(?:\.\d+)?\b/i,
+];
+
+function assertNoInternalParticipantLanguage(entries, patterns = prohibitedMarketingPatterns) {
   const violations = [];
   for (const entry of entries) {
-    for (const pattern of prohibitedMarketingPatterns) {
+    for (const pattern of patterns) {
+      pattern.lastIndex = 0;
       if (pattern.test(entry.value)) {
         violations.push(`${entry.path}: ${JSON.stringify(entry.value)} matched ${pattern}`);
       }
@@ -77,6 +115,25 @@ test("canonical English public marketing stays behind the participant-language f
   assertNoInternalParticipantLanguage(entries);
   assert.equal(baseDictionary.marketing.footer.bottomMatter, "Legal");
   assert.equal(marketingPages.availability.items.at(-1)?.status, "Coming next");
+});
+
+test("all localized participant message sources are source-clean, not merely runtime-filtered", async () => {
+  const messageFiles = (await filesUnder("src/i18n/messages/"))
+    .filter((path) => path.endsWith(".json"));
+  const directLocaleFiles = [
+    "src/application/rfx/rfx-mobile-task-locale.ts",
+  ];
+  const entries = [];
+
+  for (const path of messageFiles) {
+    const value = JSON.parse(await read(path));
+    entries.push(...collectStrings(value, path));
+  }
+  for (const path of directLocaleFiles) {
+    entries.push({ path, value: await read(path) });
+  }
+
+  assertNoInternalParticipantLanguage(entries, multilingualSourcePatterns);
 });
 
 test("legacy internal strings are normalized before participant dictionaries render", async () => {

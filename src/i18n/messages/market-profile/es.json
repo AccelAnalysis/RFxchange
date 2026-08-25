@@ -6,7 +6,13 @@
     "countOne": "{count} capacidad confirmada",
     "countMany": "{count} capacidades confirmadas"
   },
-  "tabs": { "label": "Secciones del perfil de mercado", "capabilities": "Capacidades", "industry": "Industria", "experience": "Experiencia", "preferences": "Preferencias" },
+  "tabs": {
+    "label": "Secciones del perfil de mercado",
+    "capabilities": "Capacidades",
+    "industry": "Industria",
+    "experience": "Experiencia",
+    "preferences": "Preferencias"
+  },
   "common": {
     "refreshing": "Actualizando el perfil de mercado guardado…",
     "visibility": "Visibilidad",
@@ -30,7 +36,7 @@
     "button": "Organizar con AMACS",
     "busy": "Preparando sugerencias…",
     "help": "La asistencia propone entradas del catálogo; no certifica a su organización ni actualiza el descubrimiento.",
-    "suggestionsLabel": "Sugerencias de capacidad no autoritativas",
+    "suggestionsLabel": "Sugerencias de capacidad sugerido",
     "suggestion": "Sugerencia · {status}",
     "provisionalTerm": "Término provisional",
     "clarify": "Aclarar:",
@@ -43,7 +49,14 @@
     "reject": "Rechazar",
     "none": "Ninguna describe la actividad"
   },
-  "dispositions": { "suggested": "sugerida", "accepted": "aceptada", "edited": "editada", "rejected": "rechazada", "unresolved": "sin resolver", "withdrawn": "retirada" },
+  "dispositions": {
+    "suggested": "sugerida",
+    "accepted": "aceptada",
+    "edited": "editada",
+    "rejected": "rechazada",
+    "unresolved": "sin resolver",
+    "withdrawn": "retirada"
+  },
   "catalog": {
     "eyebrow": "Ruta manual completa",
     "title": "Explorar Dominio → Familia → Capacidad",
@@ -52,11 +65,11 @@
     "domain": "Dominio",
     "family": "Familia",
     "resultsLabel": "Capacidades AMACS",
-    "resultCount": "Se muestran {visible} de {total} capacidades reguladas",
+    "resultCount": "Se muestran {visible} de {total} capacidades",
     "showMore": "Mostrar {count} capacidades más"
   },
   "claim": {
-    "eyebrow": "Escritura autoritativa separada",
+    "eyebrow": "Escritura confirmado separada",
     "title": "Revisar la declaración de la organización",
     "confirmedSuggestion": "Sugerencia confirmada",
     "manualSelection": "Selección manual",
@@ -82,15 +95,15 @@
   },
   "provisional": {
     "summary": "Ningún término del catálogo encaja",
-    "body": "Envíe una propuesta editorial en lugar de forzar una capacidad inexacta. No es canónica y no puede satisfacer requisitos de coincidencia.",
+    "body": "Envíe una propuesta editorial en lugar de forzar una capacidad inexacta. No es actual y no puede satisfacer requisitos de coincidencia.",
     "term": "Término propuesto",
     "definition": "Definición",
     "example": "Ejemplo de trabajo, producto o servicio",
     "domain": "Dominio sugerido",
     "notSure": "No estoy seguro",
     "submit": "Enviar término provisional",
-    "countOne": "{count} término provisional espera revisión editorial gobernada.",
-    "countMany": "{count} términos provisionales esperan revisión editorial gobernada."
+    "countOne": "{count} término provisional espera revisión editorial.",
+    "countMany": "{count} términos provisionales esperan revisión editorial."
   },
   "industry": {
     "title": "Contexto industrial y NAICS",
@@ -99,18 +112,18 @@
     "code": "Código NAICS",
     "naicsTitle": "Título NAICS",
     "version": "Versión",
-    "selectorTitle": "Selección NAICS regulada",
+    "selectorTitle": "Selección NAICS",
     "selectorBody": "Seleccione una industria exacta de seis dígitos de la clasificación {version} publicada por {source}. Los títulos y las versiones no se pueden introducir manualmente.",
     "search": "Buscar código o título NAICS",
     "searchPlaceholder": "Por ejemplo: 236220 o construcción comercial",
-    "resultsLabel": "Industrias NAICS reguladas",
-    "resultCount": "Se muestran {visible} de {total} industrias reguladas",
+    "resultsLabel": "Industrias NAICS",
+    "resultCount": "Se muestran {visible} de {total} industrias",
     "showMore": "Mostrar {count} industrias más",
     "release": "NAICS {version}",
     "clear": "Borrar selección NAICS",
-    "noneSelected": "No se ha seleccionado ninguna industria NAICS regulada.",
+    "noneSelected": "No se ha seleccionado ninguna industria NAICS.",
     "existingTitle": "Clasificaciones guardadas anteriormente",
-    "existingBody": "Estos valores almacenados están fuera de la selección regulada exacta que aparece arriba. Consérvalos hasta que decidas reemplazarlos o eliminarlos.",
+    "existingBody": "Estos valores almacenados están fuera de la selección exacta que aparece arriba. Consérvalos hasta que decidas reemplazarlos o eliminarlos.",
     "preserveExisting": "Conservar estas clasificaciones guardadas anteriormente",
     "sourceLink": "Abrir el archivo fuente de {source}",
     "boundaryTitle": "Clasificación descriptiva",
@@ -166,10 +179,10 @@
     "confirmedTitle": "Sugerencia confirmada para revisión",
     "confirmedBody": "Revise alcance, roles, geografía y visibilidad y luego guarde la declaración. La confirmación por sí sola no cambió el descubrimiento.",
     "editedTitle": "Edición del participante registrada",
-    "editedBody": "La edición no es autoritativa. Use el catálogo manual para seleccionar y revisar la capacidad vigente correcta antes de guardar una declaración.",
+    "editedBody": "La edición no es confirmado. Use el catálogo manual para seleccionar y revisar la capacidad vigente correcta antes de guardar una declaración.",
     "rejectedTitle": "Sugerencia rechazada",
     "unresolvedTitle": "Sugerencia sin resolver",
-    "nonAuthoritativeBody": "Esta sugerencia no es autoritativa y no puede afectar el descubrimiento ni la coincidencia.",
+    "nonAuthoritativeBody": "Esta sugerencia no es confirmado y no puede afectar el descubrimiento ni la coincidencia.",
     "dispositionErrorTitle": "No se guardó la decisión",
     "dispositionErrorBody": "Actualice y revise la sugerencia nuevamente.",
     "closedTitle": "Sugerencias cerradas",
@@ -190,7 +203,7 @@
     "preferencesSavedBody": "Estas preferencias solo describen intereses. No conceden permiso, prometen disponibilidad ni crean una relación de referencia o equipo.",
     "preferencesErrorTitle": "No se guardaron las preferencias",
     "provisionalSavedTitle": "Término provisional enviado",
-    "provisionalSavedBody": "La propuesta queda en cola como entrada editorial no canónica. No puede satisfacer un requisito de capacidad canónico.",
+    "provisionalSavedBody": "La propuesta queda en cola como entrada editorial no actual. No puede satisfacer un requisito de capacidad actual.",
     "provisionalErrorTitle": "No se envió el término provisional"
   }
 }

@@ -28,7 +28,7 @@
     },
     "recovery": {
       "title": "Arbeitsbereichswiederherstellung ist verfügbar",
-      "body": "Ihre Organisation bleibt unverändert. Öffnen Sie die Aktivierung erneut, um die fehlende Projektion zu beheben, ohne eine doppelte Organisation anzulegen.",
+      "body": "Ihre Organisation bleibt unverändert. Öffnen Sie die Aktivierung erneut, um die fehlende Ansicht zu beheben, ohne eine doppelte Organisation anzulegen.",
       "action": "Wiederherstellung öffnen"
     }
   },
@@ -41,7 +41,7 @@
     "anyServiceArea": "Beliebiges Servicegebiet",
     "submit": "Suchen",
     "clear": "Löschen",
-    "resultCount": "{count} zulässige Organisationen",
+    "resultCount": "{count} teilnehmende Organisationen",
     "lowDensity": "Es werden nur autorisierte reale Organisationen angezeigt.",
     "listLabel": "Ergebnisse der Netzwerkorganisationen",
     "noResultsTitle": "Keine zulässige Organisation entspricht dieser Suche",
@@ -63,7 +63,7 @@
     "visibleNow": "Jetzt sichtbar",
     "positionTitle": "Ihre etablierte Exchange-Position",
     "selected": "Ausgewählt",
-    "projectionMetadata": "Projektion aus dem authentifizierten Organisationsarbeitsbereich.",
+    "projectionMetadata": "Ansicht aus dem authentifizierten Organisationsarbeitsbereich.",
     "locality": "Heimatort",
     "visibleLocation": "Sichtbarer Standort",
     "locationFallback": "Organisationsstandort in {locality}",

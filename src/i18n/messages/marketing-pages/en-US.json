@@ -1,1 +1,456 @@
-{"availability":{"eyebrow":"Product availability","title":"Use what is available today. More tools are on the way.","description":"The Exchange shows current features separately from work that is still being added.","items":[{"kind":"live","status":"Available now","title":"Organization + market profile","detail":"Create or claim your organization, confirm its map position, and describe its capabilities, products, services, credentials, media, past performance, preferences, and locations."},{"kind":"live","status":"Available now","title":"Discovery + referrals","detail":"Find participating organizations by capability, geography, and service area, then create referrals that keep the purpose of the connection attached."},{"kind":"live","status":"Available now","title":"Resources + guidance","detail":"Find resource providers and services that fit the need, create provider connections, and return to Quick Start and contextual help when you need it."},{"kind":"planned","status":"Coming next","title":"More Exchange workflows","detail":"Additional RFx, credibility, outcome, capacity, and commerce tools will appear here as they become available."}]},"home":{"metadata":{"title":"Make Your Business Easier to Find and Understand","description":"The RFxchange helps businesses describe what they need, define what they can do, discover relevant organizations, and build better business connections through a shared market language."},"campaign":{"ariaLabel":"Founding Organization campaign","text":"The Founding 250 is forming.","link":"Help shape the first RFxchange business cohort."},"hero":{"eyebrow":"A Local Business Growth Network · By Accel Analysis","titleBefore":"Make your business easier to understand—","titleAccent":"and easier to do business with.","summary":"Describe what you need. Define what you can do. The RFxchange helps turn business meaning into useful market context so relevant organizations, resources, and next actions are easier to discover.","primary":"Put Your Business on the Map","secondary":"See How It Works","note":"Start free. Establish your organization, confirm its capabilities, and enter the Exchange.","stockNote":"Images are illustrative unless otherwise identified."},"value":{"ariaLabel":"RFxchange customer value progression","items":[{"kicker":"Understandable","title":"Express what your business actually does.","detail":"Begin with ordinary business language, then confirm the information that best represents your organization."},{"kicker":"Discoverable","title":"Be found for relevant reasons.","detail":"Capability, geography, and service context improve discovery beyond a name or broad category."},{"kicker":"Connectable","title":"Carry the reason into the relationship.","detail":"Referrals and provider connections preserve useful context instead of reducing the interaction to contact information."},{"kicker":"Actionable","title":"Take the appropriate next step.","detail":"Available workflows turn useful context into action while keeping fit, connection, decision, and outcome distinct."}],"promise":"Be found. Find opportunity. Build the connection."},"problem":{"eyebrow":"The problem","title":"Business opportunity is often lost in translation.","description":"Businesses usually know the outcome they want. They do not always know the right provider category, capability term, procurement language, or evidence to request. Capable providers face the same problem in reverse.","items":[{"title":"“I know what I need—but not what to call it.”","detail":"A business problem rarely arrives with the correct classification already attached."},{"title":"“We can do the work—but customers describe it differently.”","detail":"Similar capabilities can be expressed through different industries, services, and terminology."},{"title":"“A directory tells me who exists—not always who fits.”","detail":"Names, websites, and industry codes are useful, but they do not fully connect a specific need with the capability required."},{"title":"“The context disappears as the process moves.”","detail":"Email, spreadsheets, referrals, support programs, and bid systems often hold different pieces of the same need."}],"closing":"The RFxchange is designed to reduce that translation gap."},"how":{"eyebrow":"From ordinary language to market action","title":"Start with what you know. The Exchange helps organize it.","description":"You should not have to learn a classification system before explaining what your business needs or what it can provide.","ariaLabel":"How The RFxchange turns business language into market action","steps":[{"kicker":"Describe","title":"Say what you need or what you can do.","detail":"Begin in ordinary business language, or browse structured capabilities directly."},{"kicker":"Interpret","title":"Identify possible market concepts.","detail":"The Exchange can suggest relevant AMACS concepts and organize possible relationships."},{"kicker":"Confirm","title":"You decide what is true.","detail":"Suggestions remain suggestions until you confirm that they accurately describe your organization or need."},{"kicker":"Discover","title":"Find potential fit using meaningful context.","detail":"Capability, geography, service area, and profile information help surface relevant organizations and resources."},{"kicker":"Connect","title":"Move into the right relationship.","detail":"Use referrals and resource connections while keeping the reason for the connection attached."},{"kicker":"Learn","title":"Turn activity into better market understanding.","detail":"As more workflows become available, responses, decisions, evidence, and outcomes can add useful market context."}]},"amacs":{"eyebrow":"The standard underneath the Exchange","title":"A common language for market activity.","description":"The RFxchange uses the Accel Market Activity and Capability Standard—AMACS—to connect more than what a business sells or which industry it belongs to.","support":"AMACS gives the Exchange a common way to connect what the market needs with what organizations can actually do.","nodes":[{"title":"Need","detail":"What is the market trying to accomplish?"},{"title":"Capability","detail":"What must a provider be able to do?"},{"title":"Evidence","detail":"What information helps establish fit?"},{"title":"Response","detail":"What information does the market need back?"},{"title":"Decision","detail":"How will alternatives be evaluated?"},{"title":"Outcome","detail":"What ultimately happened?"}],"futureNote":"Need and capability are central to the Exchange. RFx, decision, credibility, and outcome tools expand that same market context as they become available."},"ai":{"eyebrow":"Helpful interpretation, human confirmation","title":"AI can suggest. People confirm.","description":"AI can reduce the work of turning ordinary descriptions into structured market information. It may suggest relevant AMACS concepts and explain possible relationships, but a suggestion is not a market fact.","highlight":"You confirm what accurately represents your organization or business need before it becomes part of your Exchange information.","principles":["Ordinary language is an acceptable starting point.","AI cannot silently add claims to your organization.","Rejected or unresolved suggestions do not change your organization information.","Manual AMACS browse and search remain available when assistance is disabled or unavailable."]},"network":{"eyebrow":"See the market","title":"See the market around your business.","description":"Put your organization on the map, describe its capabilities, and become easier to discover through useful business context.","items":[{"title":"Find businesses by capability.","detail":"Search for what organizations can do—not only what they are called."},{"title":"Use geography as business context.","detail":"Understand where participating organizations are based and the service areas they identify."},{"title":"Open the organization behind the marker.","detail":"Move from location into useful capability, service, and organization information."},{"title":"Move from discovery into action.","detail":"Create referrals and provider connections without treating a connection itself as a successful outcome."}],"imageNote":"Illustrative image."},"trust":{"eyebrow":"Trust what you see","title":"Credibility should come from evidence—not payment.","description":"RFxchange keeps business claims, public-source information, provider status, verification, connections, commercial recognition, and outcomes distinct.","highlight":"Paid membership, Founding recognition, or sponsorship does not buy better capability matching, verification, qualification, or preferred placement in neutral discovery.","rules":["A self-reported capability is not automatically verified.","Resource Provider status is not a guarantee of fit or availability.","A referral or provider connection is not a completed service or successful outcome.","Credibility and outcome signals should identify what supports them."]},"audience":{"eyebrow":"Different roles · shared market context","title":"A useful position for every organization that moves business forward.","items":[{"name":"Businesses","promise":"Be found. Find what you need. Build the relationship.","detail":"Establish your capabilities and use the Exchange as a reusable business-development position."},{"name":"Resource providers","promise":"Reach businesses in the context of an actual need.","detail":"Show services, territories, eligibility, intake, resources, and the best way to connect."},{"name":"Economic + community leaders","promise":"See how participating market pieces connect.","detail":"Use participating organization, capability, referral, and resource activity as one view into the local market."}]},"founding":{"eyebrow":"The Founding 250","title":"Help build the network you want your business to use.","description":"Founding Organizations establish their market position early, participate in structured launch feedback, and help make RFxchange and AMACS clearer and more useful.","primary":"Explore Founding Participation","secondary":"Join Free","note":"Founding recognition does not imply verification, qualification, endorsement, or preferred search treatment."},"cta":{"eyebrow":"Enter The RFxchange","title":"Your business already has capabilities. Make them easier for the market to understand.","description":"Establish your organization, put it on the map, and build the market position that connects what you do with what other businesses need.","primary":"Join Free","secondary":"Sign In","promise":"Be found. Find opportunity. Build the connection."},"images":{"hero":"Aerial view of a regional city, waterways, and business geography.","problem":"Professionals discussing operational work around a table.","ai":"Professionals collaborating around business documents.","network":"Small-business craftspeople working in a workshop.","audienceBusiness":"A manufacturing professional working in an industrial facility.","audienceProvider":"Construction professionals reviewing work at an active site.","audienceLeader":"A regional city and business landscape.","founding":"Professionals working together around a table.","cta":"Warehouse aisles filled with inventory."}},"founding":{"metadata":{"title":"Founding Organization Participation","description":"Join the first RFxchange business cohort, establish your organization early, and help improve the market language and workflows that connect business needs with capabilities."},"hero":{"eyebrow":"The Founding 250","title":"Help build a market where businesses are easier to understand—and easier to connect.","description":"We are forming the first cohort of organizations on The RFxchange. Establish your business early, confirm the capabilities you bring to the market, use the Exchange, and help improve the experience for the organizations that follow.","primary":"Start With Your Organization","secondary":"See What Is Available","price":"Planned Founding membership: $49/month","cap":"Capped at 250 organizations","readiness":"Paid enrollment opens when the Founding membership and billing experience are available. Useful core participation remains free.","stockNote":"Images are illustrative unless otherwise identified."},"why":{"eyebrow":"Why participate now","title":"You do not have to wait for every Exchange feature to create value.","description":"The first useful step is to make your organization understandable to the market. Clear capabilities and business context make discovery and future transactions more useful.","items":[{"title":"Establish your position early","detail":"Create or claim your organization, confirm its geography, and build a useful capability profile."},{"title":"Help shape practical workflows","detail":"Use actual business conditions to show where terminology is confusing, information is burdensome, or connections need better context."},{"title":"Contribute to a better market language","detail":"Participation can reveal gaps that help improve RFxchange and AMACS over time."},{"title":"Be recognized as part of the launch cohort","detail":"Founding Organization recognition records early participation. It is not verification, qualification, endorsement, or superior performance."}]},"scenario":{"eyebrow":"The problem we are building around","title":"Business owners should not need procurement expertise to explain a business need.","quote":"“We have outgrown the way we manage inventory and need help figuring out a better system.”","description":"That statement may involve process analysis, inventory technology, systems integration, data migration, training, workflow design, or several capabilities together. RFxchange lets the business begin with the problem it understands and then organize the useful details."},"standard":{"eyebrow":"A standard—not a black box","title":"AI helps with the translation. AMACS provides the structure. People confirm what is true.","description":"AMACS connects Need, Capability, Evidence, Response, Decision, and Outcome. AI may suggest relevant concepts, but it does not decide what your company can do or declare another organization qualified.","highlight":"Suggestions reduce the work. People confirm the business facts.","flow":["Need","Capability","Evidence","Response","Decision","Outcome"]},"membership":{"eyebrow":"A deeper participation layer","title":"Free participation builds density. Founding participation supports the launch.","description":"Useful market participation should not depend on paying for recognition. Founding membership is intended for organizations that want a deeper role in the launch.","items":[{"title":"Founding Organization recognition","detail":"Recognition as part of the launch cohort, subject to the applicable program terms."},{"title":"Structured founder feedback","detail":"Defined opportunities to give practical feedback on capability structure, business language, and new workflows."},{"title":"Founder launch support","detail":"Founder-specific onboarding and guidance for establishing a useful organization position."},{"title":"Enhanced tools","detail":"Access to selected paid productivity capabilities when those benefits become available."}],"readiness":"Benefits are shown as active only when they are actually available."},"comparison":{"eyebrow":"Free versus Founding","title":"You do not have to pay to be legitimate on The RFxchange.","description":"Core market participation and neutral discovery remain separate from commercial recognition.","free":{"title":"Free Organization","subtitle":"Built for useful participation","items":["Establish or claim the organization.","Maintain the core organization and capability profile.","Use capability and geography discovery.","Use designated free referrals, resources, and education workflows.","Build credibility through supporting information and activity, not payment.","Receive no purchased boost to matching or qualification."],"cta":"Join Free"},"founding":{"title":"Founding Organization","subtitle":"Built for deeper launch participation","items":["Everything included in useful free participation.","Founding Organization recognition.","Structured participation in launch feedback.","Founder launch support.","Access to selected enhanced tools when available.","No paid change to neutral discovery, verification, or qualification."],"price":"$49/month when enrollment opens","cap":"Limited to 250 organizations","cta":"Start With Your Organization"},"footnote":"Founding Organization is participation and commercial recognition. It is not verification, qualification, endorsement, or a guarantee of business results."},"contribution":{"eyebrow":"Build for your business · contribute to the market","title":"Every participating business can improve the Exchange.","description":"A business may reveal that two similar capabilities are meaningfully different, that buyers use unexpected language, or that a referral needs more context to become useful.","highlight":"Your organization gets a clearer way to represent itself, and what participants learn can inform improvements for the organizations that follow."},"boundaries":{"eyebrow":"Commercial neutrality","title":"Money does not make a business a better match.","items":[{"title":"No pay-to-rank","detail":"Founding status does not move an organization above a more relevant participant in neutral discovery."},{"title":"No pay-to-verify","detail":"Membership does not establish that a capability, credential, or business claim is true."},{"title":"No pay-to-qualify","detail":"Founding status cannot substitute for the requirements of a particular opportunity."},{"title":"No guaranteed business","detail":"RFxchange does not guarantee leads, referrals, contracts, revenue, awards, financing, or growth."}],"closing":"Commercial benefits and market truth remain separate by design."},"faq":{"eyebrow":"Questions before you begin","title":"Founding participation, clearly explained.","items":[{"question":"Do I need to know how to write an RFP?","answer":"No. RFxchange is broader than formal procurement. You can begin with the need you understand, and RFx workflows can add transaction structure where it is useful."},{"question":"Do I need to understand AMACS codes?","answer":"No. You may browse structured concepts, but ordinary-language assistance and explanations are designed to make the standard useful without memorizing a taxonomy."},{"question":"Does Founding participation make my business Verified?","answer":"No. Founding Organization is launch-cohort recognition. Verification is a separate process based on the information being verified."},{"question":"Will Founding membership improve my search ranking?","answer":"No. Payment does not change substantive capability information, neutral matching, qualification, or credibility."},{"question":"Is the $49 membership active now?","answer":"The page will identify enrollment as available when billing and the included Founding benefits are ready to use."}]},"cta":{"eyebrow":"Join the Founding 250","title":"Establish your organization now. Choose deeper participation when it is ready for you.","description":"Start with the useful free organization experience, then move into Founding participation when enrollment is available.","primary":"Start With Your Organization","secondary":"Join Free","note":"Founding recognition does not buy verification, qualification, preferred ranking, or guaranteed business."},"images":{"hero":"Warehouse aisles filled with inventory.","contribution":"Professionals working together around a table."}}}
+{
+  "availability": {
+    "eyebrow": "Product availability",
+    "title": "Use what is available today. More tools are on the way.",
+    "description": "The Exchange shows current features separately from work that is still being added.",
+    "items": [
+      {
+        "kind": "live",
+        "status": "Available now",
+        "title": "Organization + market profile",
+        "detail": "Create or claim your organization, confirm its map position, and describe its capabilities, products, services, credentials, media, past performance, preferences, and locations."
+      },
+      {
+        "kind": "live",
+        "status": "Available now",
+        "title": "Discovery + referrals",
+        "detail": "Find participating organizations by capability, geography, and service area, then create referrals that keep the purpose of the connection attached."
+      },
+      {
+        "kind": "live",
+        "status": "Available now",
+        "title": "Resources + guidance",
+        "detail": "Find resource providers and services that fit the need, create provider connections, and return to Quick Start and contextual help when you need it."
+      },
+      {
+        "kind": "planned",
+        "status": "Coming next",
+        "title": "More Exchange workflows",
+        "detail": "Additional RFx, credibility, outcome, capacity, and commerce tools will appear here as they become available."
+      }
+    ]
+  },
+  "home": {
+    "metadata": {
+      "title": "Make Your Business Easier to Find and Understand",
+      "description": "The RFxchange helps businesses describe what they need, define what they can do, discover relevant organizations, and build better business connections through a shared market language."
+    },
+    "campaign": {
+      "ariaLabel": "Founding Organization campaign",
+      "text": "The Founding 250 is forming.",
+      "link": "Help shape the first RFxchange business cohort."
+    },
+    "hero": {
+      "eyebrow": "A Local Business Growth Network · By Accel Analysis",
+      "titleBefore": "Make your business easier to understand—",
+      "titleAccent": "and easier to do business with.",
+      "summary": "Describe what you need. Define what you can do. The RFxchange helps turn business meaning into useful market context so relevant organizations, resources, and next actions are easier to discover.",
+      "primary": "Put Your Business on the Map",
+      "secondary": "See How It Works",
+      "note": "Start free. Establish your organization, confirm its capabilities, and enter the Exchange.",
+      "stockNote": "Images are illustrative unless otherwise identified."
+    },
+    "value": {
+      "ariaLabel": "RFxchange customer value progression",
+      "items": [
+        {
+          "kicker": "Understandable",
+          "title": "Express what your business actually does.",
+          "detail": "Begin with ordinary business language, then confirm the information that best represents your organization."
+        },
+        {
+          "kicker": "Discoverable",
+          "title": "Be found for relevant reasons.",
+          "detail": "Capability, geography, and service context improve discovery beyond a name or broad category."
+        },
+        {
+          "kicker": "Connectable",
+          "title": "Carry the reason into the relationship.",
+          "detail": "Referrals and provider connections preserve useful context instead of reducing the interaction to contact information."
+        },
+        {
+          "kicker": "Actionable",
+          "title": "Take the appropriate next step.",
+          "detail": "Available workflows turn useful context into action while keeping fit, connection, decision, and outcome distinct."
+        }
+      ],
+      "promise": "Be found. Find opportunity. Build the connection."
+    },
+    "problem": {
+      "eyebrow": "The problem",
+      "title": "Business opportunity is often lost in translation.",
+      "description": "Businesses usually know the outcome they want. They do not always know the right provider category, capability term, procurement language, or evidence to request. Capable providers face the same problem in reverse.",
+      "items": [
+        {
+          "title": "“I know what I need—but not what to call it.”",
+          "detail": "A business problem rarely arrives with the correct classification already attached."
+        },
+        {
+          "title": "“We can do the work—but customers describe it differently.”",
+          "detail": "Similar capabilities can be expressed through different industries, services, and terminology."
+        },
+        {
+          "title": "“A directory tells me who exists—not always who fits.”",
+          "detail": "Names, websites, and industry codes are useful, but they do not fully connect a specific need with the capability required."
+        },
+        {
+          "title": "“The context disappears as the process moves.”",
+          "detail": "Email, spreadsheets, referrals, support programs, and bid systems often hold different pieces of the same need."
+        }
+      ],
+      "closing": "The RFxchange is designed to reduce that translation gap."
+    },
+    "how": {
+      "eyebrow": "From ordinary language to market action",
+      "title": "Start with what you know. The Exchange helps organize it.",
+      "description": "You should not have to learn a classification system before explaining what your business needs or what it can provide.",
+      "ariaLabel": "How The RFxchange turns business language into market action",
+      "steps": [
+        {
+          "kicker": "Describe",
+          "title": "Say what you need or what you can do.",
+          "detail": "Begin in ordinary business language, or browse structured capabilities directly."
+        },
+        {
+          "kicker": "Interpret",
+          "title": "Identify possible market concepts.",
+          "detail": "The Exchange can suggest relevant AMACS concepts and organize possible relationships."
+        },
+        {
+          "kicker": "Confirm",
+          "title": "You decide what is true.",
+          "detail": "Suggestions remain suggestions until you confirm that they accurately describe your organization or need."
+        },
+        {
+          "kicker": "Discover",
+          "title": "Find potential fit using meaningful context.",
+          "detail": "Capability, geography, service area, and profile information help surface relevant organizations and resources."
+        },
+        {
+          "kicker": "Connect",
+          "title": "Move into the right relationship.",
+          "detail": "Use referrals and resource connections while keeping the reason for the connection attached."
+        },
+        {
+          "kicker": "Learn",
+          "title": "Turn activity into better market understanding.",
+          "detail": "As more workflows become available, responses, decisions, evidence, and outcomes can add useful market context."
+        }
+      ]
+    },
+    "amacs": {
+      "eyebrow": "The standard underneath the Exchange",
+      "title": "A common language for market activity.",
+      "description": "The RFxchange uses the Accel Market Activity and Capability Standard—AMACS—to connect more than what a business sells or which industry it belongs to.",
+      "support": "AMACS gives the Exchange a common way to connect what the market needs with what organizations can actually do.",
+      "nodes": [
+        {
+          "title": "Need",
+          "detail": "What is the market trying to accomplish?"
+        },
+        {
+          "title": "Capability",
+          "detail": "What must a provider be able to do?"
+        },
+        {
+          "title": "Evidence",
+          "detail": "What information helps establish fit?"
+        },
+        {
+          "title": "Response",
+          "detail": "What information does the market need back?"
+        },
+        {
+          "title": "Decision",
+          "detail": "How will alternatives be evaluated?"
+        },
+        {
+          "title": "Outcome",
+          "detail": "What ultimately happened?"
+        }
+      ],
+      "futureNote": "Need and capability are central to the Exchange. RFx, decision, credibility, and outcome tools expand that same market context as they become available."
+    },
+    "ai": {
+      "eyebrow": "Helpful interpretation, human confirmation",
+      "title": "AI can suggest. People confirm.",
+      "description": "AI can reduce the work of turning ordinary descriptions into structured market information. It may suggest relevant AMACS concepts and explain possible relationships, but a suggestion is not a market fact.",
+      "highlight": "You confirm what accurately represents your organization or business need before it becomes part of your Exchange information.",
+      "principles": [
+        "Ordinary language is an acceptable starting point.",
+        "AI cannot silently add claims to your organization.",
+        "Rejected or unresolved suggestions do not change your organization information.",
+        "Manual AMACS browse and search remain available when assistance is disabled or unavailable."
+      ]
+    },
+    "network": {
+      "eyebrow": "See the market",
+      "title": "See the market around your business.",
+      "description": "Put your organization on the map, describe its capabilities, and become easier to discover through useful business context.",
+      "items": [
+        {
+          "title": "Find businesses by capability.",
+          "detail": "Search for what organizations can do—not only what they are called."
+        },
+        {
+          "title": "Use geography as business context.",
+          "detail": "Understand where participating organizations are based and the service areas they identify."
+        },
+        {
+          "title": "Open the organization behind the marker.",
+          "detail": "Move from location into useful capability, service, and organization information."
+        },
+        {
+          "title": "Move from discovery into action.",
+          "detail": "Create referrals and provider connections without treating a connection itself as a successful outcome."
+        }
+      ],
+      "imageNote": "Illustrative image."
+    },
+    "trust": {
+      "eyebrow": "Trust what you see",
+      "title": "Credibility should come from evidence—not payment.",
+      "description": "RFxchange keeps business claims, public-source information, provider status, verification, connections, commercial recognition, and outcomes distinct.",
+      "highlight": "Paid membership, Founding recognition, or sponsorship does not buy better capability matching, verification, qualification, or preferred placement in neutral discovery.",
+      "rules": [
+        "A self-reported capability is not automatically verified.",
+        "Resource Provider status is not a guarantee of fit or availability.",
+        "A referral or provider connection is not a completed service or successful outcome.",
+        "Credibility and outcome signals should identify what supports them."
+      ]
+    },
+    "audience": {
+      "eyebrow": "Different roles · shared market context",
+      "title": "A useful position for every organization that moves business forward.",
+      "items": [
+        {
+          "name": "Businesses",
+          "promise": "Be found. Find what you need. Build the relationship.",
+          "detail": "Establish your capabilities and use the Exchange as a reusable business-development position."
+        },
+        {
+          "name": "Resource providers",
+          "promise": "Reach businesses in the context of an actual need.",
+          "detail": "Show services, territories, eligibility, intake, resources, and the best way to connect."
+        },
+        {
+          "name": "Economic + community leaders",
+          "promise": "See how participating market pieces connect.",
+          "detail": "Use participating organization, capability, referral, and resource activity as one view into the local market."
+        }
+      ]
+    },
+    "founding": {
+      "eyebrow": "The Founding 250",
+      "title": "Help build the network you want your business to use.",
+      "description": "Founding Organizations establish their market position early, participate in structured launch feedback, and help make RFxchange and AMACS clearer and more useful.",
+      "primary": "Explore Founding Participation",
+      "secondary": "Join Free",
+      "note": "Founding recognition does not imply verification, qualification, endorsement, or preferred search treatment."
+    },
+    "cta": {
+      "eyebrow": "Enter The RFxchange",
+      "title": "Your business already has capabilities. Make them easier for the market to understand.",
+      "description": "Establish your organization, put it on the map, and build the market position that connects what you do with what other businesses need.",
+      "primary": "Join Free",
+      "secondary": "Sign In",
+      "promise": "Be found. Find opportunity. Build the connection."
+    },
+    "images": {
+      "hero": "Aerial view of a regional city, waterways, and business geography.",
+      "problem": "Professionals discussing operational work around a table.",
+      "ai": "Professionals collaborating around business documents.",
+      "network": "Small-business craftspeople working in a workshop.",
+      "audienceBusiness": "A manufacturing professional working in an industrial facility.",
+      "audienceProvider": "Construction professionals reviewing work at an active site.",
+      "audienceLeader": "A regional city and business landscape.",
+      "founding": "Professionals working together around a table.",
+      "cta": "Warehouse aisles filled with inventory."
+    }
+  },
+  "founding": {
+    "metadata": {
+      "title": "Founding Organization Participation",
+      "description": "Join the first RFxchange business cohort, establish your organization early, and help improve the market language and workflows that connect business needs with capabilities."
+    },
+    "hero": {
+      "eyebrow": "The Founding 250",
+      "title": "Help build a market where businesses are easier to understand—and easier to connect.",
+      "description": "We are forming the first cohort of organizations on The RFxchange. Establish your business early, confirm the capabilities you bring to the market, use the Exchange, and help improve the experience for the organizations that follow.",
+      "primary": "Start With Your Organization",
+      "secondary": "See What Is Available",
+      "price": "Planned Founding membership: $49/month",
+      "cap": "Capped at 250 organizations",
+      "readiness": "Paid enrollment opens when the Founding membership and billing experience are available. Useful core participation remains free.",
+      "stockNote": "Images are illustrative unless otherwise identified."
+    },
+    "why": {
+      "eyebrow": "Why participate now",
+      "title": "You do not have to wait for every Exchange feature to create value.",
+      "description": "The first useful step is to make your organization understandable to the market. Clear capabilities and business context make discovery and future transactions more useful.",
+      "items": [
+        {
+          "title": "Establish your position early",
+          "detail": "Create or claim your organization, confirm its geography, and build a useful capability profile."
+        },
+        {
+          "title": "Help shape practical workflows",
+          "detail": "Use actual business conditions to show where terminology is confusing, information is burdensome, or connections need better context."
+        },
+        {
+          "title": "Contribute to a better market language",
+          "detail": "Participation can reveal gaps that help improve RFxchange and AMACS over time."
+        },
+        {
+          "title": "Be recognized as part of the launch cohort",
+          "detail": "Founding Organization recognition records early participation. It is not verification, qualification, endorsement, or superior performance."
+        }
+      ]
+    },
+    "scenario": {
+      "eyebrow": "The problem we are building around",
+      "title": "Business owners should not need procurement expertise to explain a business need.",
+      "quote": "“We have outgrown the way we manage inventory and need help figuring out a better system.”",
+      "description": "That statement may involve process analysis, inventory technology, systems integration, data migration, training, workflow design, or several capabilities together. RFxchange lets the business begin with the problem it understands and then organize the useful details."
+    },
+    "standard": {
+      "eyebrow": "A standard—not a black box",
+      "title": "AI helps with the translation. AMACS provides the structure. People confirm what is true.",
+      "description": "AMACS connects Need, Capability, Evidence, Response, Decision, and Outcome. AI may suggest relevant concepts, but it does not decide what your company can do or declare another organization qualified.",
+      "highlight": "Suggestions reduce the work. People confirm the business facts.",
+      "flow": [
+        "Need",
+        "Capability",
+        "Evidence",
+        "Response",
+        "Decision",
+        "Outcome"
+      ]
+    },
+    "membership": {
+      "eyebrow": "A deeper participation layer",
+      "title": "Free participation builds density. Founding participation supports the launch.",
+      "description": "Useful market participation should not depend on paying for recognition. Founding membership is intended for organizations that want a deeper role in the launch.",
+      "items": [
+        {
+          "title": "Founding Organization recognition",
+          "detail": "Recognition as part of the launch cohort, subject to the applicable program terms."
+        },
+        {
+          "title": "Structured founder feedback",
+          "detail": "Defined opportunities to give practical feedback on capability structure, business language, and new workflows."
+        },
+        {
+          "title": "Founder launch support",
+          "detail": "Founder-specific onboarding and guidance for establishing a useful organization position."
+        },
+        {
+          "title": "Enhanced tools",
+          "detail": "Access to selected paid productivity capabilities when those benefits become available."
+        }
+      ],
+      "readiness": "Benefits are shown as active only when they are actually available."
+    },
+    "comparison": {
+      "eyebrow": "Free versus Founding",
+      "title": "You do not have to pay to be legitimate on The RFxchange.",
+      "description": "Core market participation and neutral discovery remain separate from commercial recognition.",
+      "free": {
+        "title": "Free Organization",
+        "subtitle": "Built for useful participation",
+        "items": [
+          "Establish or claim the organization.",
+          "Maintain the core organization and capability profile.",
+          "Use capability and geography discovery.",
+          "Use designated free referrals, resources, and education workflows.",
+          "Build credibility through supporting information and activity, not payment.",
+          "Receive no purchased boost to matching or qualification."
+        ],
+        "cta": "Join Free"
+      },
+      "founding": {
+        "title": "Founding Organization",
+        "subtitle": "Built for deeper launch participation",
+        "items": [
+          "Everything included in useful free participation.",
+          "Founding Organization recognition.",
+          "Structured participation in launch feedback.",
+          "Founder launch support.",
+          "Access to selected enhanced tools when available.",
+          "No paid change to neutral discovery, verification, or qualification."
+        ],
+        "price": "$49/month when enrollment opens",
+        "cap": "Limited to 250 organizations",
+        "cta": "Start With Your Organization"
+      },
+      "footnote": "Founding Organization is participation and commercial recognition. It is not verification, qualification, endorsement, or a guarantee of business results."
+    },
+    "contribution": {
+      "eyebrow": "Build for your business · contribute to the market",
+      "title": "Every participating business can improve the Exchange.",
+      "description": "A business may reveal that two similar capabilities are meaningfully different, that buyers use unexpected language, or that a referral needs more context to become useful.",
+      "highlight": "Your organization gets a clearer way to represent itself, and what participants learn can inform improvements for the organizations that follow."
+    },
+    "boundaries": {
+      "eyebrow": "Commercial neutrality",
+      "title": "Money does not make a business a better match.",
+      "items": [
+        {
+          "title": "No pay-to-rank",
+          "detail": "Founding status does not move an organization above a more relevant participant in neutral discovery."
+        },
+        {
+          "title": "No pay-to-verify",
+          "detail": "Membership does not establish that a capability, credential, or business claim is true."
+        },
+        {
+          "title": "No pay-to-qualify",
+          "detail": "Founding status cannot substitute for the requirements of a particular opportunity."
+        },
+        {
+          "title": "No guaranteed business",
+          "detail": "RFxchange does not guarantee leads, referrals, contracts, revenue, awards, financing, or growth."
+        }
+      ],
+      "closing": "Commercial benefits and market truth remain separate by design."
+    },
+    "faq": {
+      "eyebrow": "Questions before you begin",
+      "title": "Founding participation, clearly explained.",
+      "items": [
+        {
+          "question": "Do I need to know how to write an RFP?",
+          "answer": "No. RFxchange is broader than formal procurement. You can begin with the need you understand, and RFx workflows can add transaction structure where it is useful."
+        },
+        {
+          "question": "Do I need to understand AMACS codes?",
+          "answer": "No. You may browse structured concepts, but ordinary-language assistance and explanations are designed to make the standard useful without memorizing a taxonomy."
+        },
+        {
+          "question": "Does Founding participation make my business Verified?",
+          "answer": "No. Founding Organization is launch-cohort recognition. Verification is a separate process based on the information being verified."
+        },
+        {
+          "question": "Will Founding membership improve my search ranking?",
+          "answer": "No. Payment does not change substantive capability information, neutral matching, qualification, or credibility."
+        },
+        {
+          "question": "Is the $49 membership active now?",
+          "answer": "The page will identify enrollment as available when billing and the included Founding benefits are ready to use."
+        }
+      ]
+    },
+    "cta": {
+      "eyebrow": "Join the Founding 250",
+      "title": "Establish your organization now. Choose deeper participation when it is ready for you.",
+      "description": "Start with the useful free organization experience, then move into Founding participation when enrollment is available.",
+      "primary": "Start With Your Organization",
+      "secondary": "Join Free",
+      "note": "Founding recognition does not buy verification, qualification, preferred ranking, or guaranteed business."
+    },
+    "images": {
+      "hero": "Warehouse aisles filled with inventory.",
+      "contribution": "Professionals working together around a table."
+    }
+  }
+}

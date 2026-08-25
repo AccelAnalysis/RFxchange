@@ -1,12 +1,78 @@
 {
-  "ariaLabel":"Espacio de referencias de RFxchange","eyebrow":"Referencias de la organización","title":"Red de referencias","create":"Nueva referencia",
-  "list":{"label":"Referencias comerciales"},"empty":{"title":"Aún no hay referencias","body":"Envía una referencia intencional a un destinatario identificado. La plataforma nunca inventa actividad."},
-  "roles":{"sender":"Organización remitente","recipient":"Organización destinataria"},"fields":{"purpose":"Propósito","urgency":"Urgencia","contact":"Contacto preferido","notification":"Notificación","expires":"Vence"},
-  "notificationStates":{"deliveryOutcomeUnknown":"Resultado de entrega desconocido: se requiere conciliación de soporte antes de otro intento."},
-  "detail":{"boundary":"Este contexto lo informa un participante. No es recomendación, resultado verificado, contrato ni venta."},
-  "path":{"label":"Ruta de referencia","visible":"Se muestra una ruta real autorizada para la referencia {status}.","unavailable":"No se dibuja una ruta porque falta un extremo autorizado y seguro o el estado no lo permite."},
-  "actions":{"accepted":"Aceptar referencia","declined":"Rechazar referencia","contacted":"Registrar contacto","closed":"Cerrar referencia","retry":"Reintentar notificación"},
-  "states":{"error":"No se pudo completar la acción. Actualiza e inténtalo de nuevo.","sent":"Referencia enviada. La entrega y la aceptación son estados distintos.","accepted":"Referencia aceptada.","declined":"Referencia rechazada.","contacted":"Contacto registrado.","closed":"Referencia cerrada con un resultado no verificado informado por un participante.","retryQueued":"La recuperación reutilizó la comunicación existente; no se duplicó la referencia."},
-  "composer":{"title":"Enviar una referencia comercial","close":"Cerrar formulario","recipientType":"Tipo de destinatario","existing":"Organización de RFxchange","external":"Invitar destinatario externo","organization":"Organización destinataria","choose":"Elige una organización","name":"Nombre del destinatario","email":"Correo del destinatario","summary":"Resumen de la referencia","consent":"Confirmo que este destinatario puede recibir exactamente el nombre de la organización y este resumen.","review":"Revisar datos y educación","back":"Atrás","sending":"Enviando…","acknowledge":"Confirmar y enviar"},
-  "education":{"eyebrow":"Educación inicial","title":"Comprende qué significa enviar","body":"Una referencia pertenece a tu organización y se dirige a un destinatario identificado para una presentación comercial.","recipient":"Destinatario","shared":"Datos exactos compartidos","sharedValue":"Nombre de la organización remitente y resumen escrito por el participante","states":"Envío, entrega, aceptación, contacto y resultado son estados separados. Ninguno implica recomendación o éxito.","next":"El destinatario puede aceptar o rechazar. La referencia puede vencer y los fallos de entrega se reintentan sin crear otra."}
+  "ariaLabel": "Espacio de referencias de RFxchange",
+  "eyebrow": "Referencias de la organización",
+  "title": "Red de referencias",
+  "create": "Nueva referencia",
+  "list": {
+    "label": "Referencias comerciales"
+  },
+  "empty": {
+    "title": "Aún no hay referencias",
+    "body": "Envía una referencia intencional a un destinatario identificado. La plataforma nunca inventa actividad."
+  },
+  "roles": {
+    "sender": "Organización remitente",
+    "recipient": "Organización destinataria"
+  },
+  "fields": {
+    "purpose": "Propósito",
+    "urgency": "Urgencia",
+    "contact": "Contacto preferido",
+    "notification": "Notificación",
+    "expires": "Vence"
+  },
+  "notificationStates": {
+    "deliveryOutcomeUnknown": "Resultado de entrega desconocido: se requiere conciliación de soporte antes de otro intento."
+  },
+  "detail": {
+    "boundary": "Este contexto lo informa un participante. No es recomendación, resultado verificado, contrato ni venta."
+  },
+  "path": {
+    "label": "Ruta de referencia",
+    "visible": "Se muestra una ruta real autorizada para la referencia {status}.",
+    "unavailable": "No se dibuja una ruta porque falta un extremo autorizado y seguro o el estado no lo permite."
+  },
+  "actions": {
+    "accepted": "Aceptar referencia",
+    "declined": "Rechazar referencia",
+    "contacted": "Registrar contacto",
+    "closed": "Cerrar referencia",
+    "retry": "Reintentar notificación"
+  },
+  "states": {
+    "error": "No se pudo completar la acción. Actualiza e inténtalo de nuevo.",
+    "sent": "Referencia enviada. La entrega y la aceptación son estados distintos.",
+    "accepted": "Referencia aceptada.",
+    "declined": "Referencia rechazada.",
+    "contacted": "Contacto registrado.",
+    "closed": "Referencia cerrada con un resultado no verificado informado por un participante.",
+    "retryQueued": "La recuperación reutilizó la comunicación existente; no se duplicó la referencia."
+  },
+  "composer": {
+    "title": "Enviar una referencia comercial",
+    "close": "Cerrar formulario",
+    "recipientType": "Tipo de destinatario",
+    "existing": "Organización de RFxchange",
+    "external": "Invitar destinatario externo",
+    "organization": "Organización destinataria",
+    "choose": "Elige una organización",
+    "name": "Nombre del destinatario",
+    "email": "Correo del destinatario",
+    "summary": "Resumen de la referencia",
+    "consent": "Confirmo que este destinatario puede recibir exactamente el nombre de la organización y este resumen.",
+    "review": "Revisar datos y educación",
+    "back": "Atrás",
+    "sending": "Enviando…",
+    "acknowledge": "Confirmar y enviar"
+  },
+  "education": {
+    "eyebrow": "Educación inicial",
+    "title": "Comprende qué significa enviar",
+    "body": "Una referencia pertenece a tu organización y se dirige a un destinatario identificado para una presentación comercial.",
+    "recipient": "Destinatario",
+    "shared": "Datos exactos compartidos",
+    "sharedValue": "Nombre de la organización remitente y resumen escrito por el participante",
+    "states": "Envío, entrega, aceptación, contacto y resultado son estados separados. Ninguno implica recomendación o éxito.",
+    "next": "El destinatario puede aceptar o rechazar. La referencia puede vencer y los fallos de entrega se reintentan sin crear otra."
+  }
 }

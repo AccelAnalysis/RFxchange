@@ -1,54 +1,230 @@
 {
-  "ariaLabel": "Dauerhafte Netzwerk-Einführung", "eyebrow": "Schnellstart · Katalogversion 1", "title": "Lernen Sie das Netzwerk in Ihrem Tempo kennen.",
-  "intro": "Kehren Sie jederzeit zu einem kurzen Pfad durch die aktiven RFxchange-Abläufe Ihrer Organisation zurück. Lernfortschritt erteilt keine Berechtigung und ändert keine Geschäftsdaten.",
-  "progress": "Fortschritt des aktuellen Pfads", "status": { "active": "In Bearbeitung", "dismissed": "Ausgeblendet · wieder öffnbar", "completed": "Abgeschlossen · wieder öffnbar" },
-  "valueSpineLabel": "RFxchange-Wertpfad", "valueSpine": { "understandable": "Verständlich", "discoverable": "Auffindbar", "connectable": "Verbindbar", "actionable": "Handlungsfähig" },
-  "recommended": "Für diese Organisation empfohlen", "recommendationBoundary": "Die Empfehlung nutzt nur den aktuellen Organisationskontext. Sie erteilt keine Berechtigung, Ausstellerbefugnis, offiziellen Anbieterstatus, Verifizierung, Glaubwürdigkeit oder kommerziellen Zugang.",
-  "catalogUpdate": "Dieser Leitfaden enthält neue geprüfte Inhalte. Ihr bisheriger Fortschritt bleibt sichtbar; prüfen Sie die aktuelle Version, wenn Sie bereit sind.",
-  "pathNavigation": "Schnellstart und Rollenpfade", "path": "Lernpfad", "pathProgress": "{complete} von {total} Elementen abgeschlossen",
-  "available": "Jetzt verfügbar", "planned": "Geplant · nicht verfügbar", "openWorkflow": "Aktiven Ablauf öffnen", "unavailable": "Noch nicht verfügbar", "markComplete": "Als abgeschlossen markieren", "completed": "Abgeschlossen", "dismiss": "Vorerst ausblenden", "reopen": "Leitfaden wieder öffnen", "completeGuide": "Leitfaden abschließen",
-  "explainerLabel": "Bevor Sie fortfahren", "closeExplainer": "Erklärung schließen", "explainerDismissed": "Erklärung geschlossen. Sie können sie hier jederzeit wieder öffnen.",
-  "questions": { "what": "Was ist das?", "why": "Warum ist das hier wichtig?", "happens": "Was geschieht, wenn ich das tue?", "next": "Was geschieht danach?" },
-  "states": { "saved": "Lernfortschritt für diesen Benutzer und diese Organisation gespeichert.", "error": "Lernfortschritt konnte nicht gespeichert werden. Laden Sie neu und versuchen Sie es erneut." },
-  "quickStart": { "title": "Schnellstart", "summary": "Folgen Sie dem Netzwerk-Wertpfad nur mit aktiven, autorisierten Abläufen aus Welle 3.", "items": {
-    "understand": { "title": "Machen Sie Ihre Organisation verständlich", "body": "Prüfen Sie Profil, bestätigte Fähigkeiten, Nachweise, Sichtbarkeit und Betriebskontext." },
-    "discover": { "title": "Verstehen Sie die Auffindbarkeit", "body": "Nutzen Sie kontrollierte Ortskarte und Netzwerksuche, ohne geografische Autorität zu ändern." },
-    "connect": { "title": "Stellen Sie eine einvernehmliche Verbindung her", "body": "Verstehen Sie Zweck, exakten Empfänger, geteilte Felder und Lebenszyklus vor dem Senden." },
-    "act": { "title": "Handeln Sie mit aktuellen Ressourcen", "body": "Finden Sie gepflegte Dienste, stellen Sie eine genaue Anfrage und nutzen Sie veröffentlichte Ressourcen." }
-  } },
-  "business": { "title": "Unternehmenspfad", "summary": "Schaffen Sie eine klare Präsenz, entdecken Sie Fähigkeiten, verbinden Sie sich mit Einwilligung und nutzen Sie aktuelle Hilfen.", "items": {
-    "profile": { "title": "Bestätigen Sie Ihr Marktprofil", "body": "Vorschläge bleiben unverbindlich, bis eine autorisierte Person eine separate Organisationsaussage bestätigt." },
-    "discovery": { "title": "Erkunden Sie das kontrollierte Netzwerk", "body": "Suchen Sie veröffentlichte Organisationsansichten in serverseitig autorisierter Geografie." },
-    "referrals": { "title": "Empfehlungen senden oder beantworten", "body": "Teilen Sie nur den angezeigten Kontext; Annahme, Ablehnung, Kontakt und Abschluss bleiben getrennte Fakten." },
-    "resources": { "title": "Anbieterunterstützung finden", "body": "Vergleichen Sie Dienstgebiet, gepflegte Verfügbarkeit und erklärbare Weiterleitungsgründe." },
-    "rfx": { "title": "Eine RFx erstellen oder beantworten", "body": "RFx-Erstellung und -Antwort sind für Welle 4 geplant und hier nicht verfügbar." },
-    "credibility": { "title": "Glaubwürdigkeitsnachweise nutzen", "body": "Bewertungen und Siegel sind separat geplant. Profilnachweise erzeugen keine Glaubwürdigkeit." }
-  } },
-  "issuer": { "title": "Ausstellerpfad", "summary": "Lernen Sie die künftige Beziehung Bedarf → Fähigkeit kennen und nutzen Sie nur aktuelle Recherche und Ressourcen.", "items": {
-    "market": { "title": "Aktuellen Markt untersuchen", "body": "Erkunden Sie bestätigte Fähigkeiten und Ortskontext, bevor künftig ein Bedarf verfasst wird." },
-    "resources": { "title": "Unterstützungsressourcen verstehen", "body": "Sehen Sie Dienste und Ressourcen, ohne sie als Ausstellerqualifikation zu behandeln." },
-    "rfx": { "title": "Eine RFx verfassen und veröffentlichen", "body": "Verfassen, Anforderungen, Freigabe und Bewertung sind für Welle 4 geplant und nicht verfügbar." },
-    "evaluation": { "title": "Antworten und Ergebnisse bewerten", "body": "Bewertungsbefugnis, Vergaben, Ergebnisse und Analysen sind weder implementiert noch simuliert." }
-  } },
-  "resourceProvider": { "title": "Ressourcenanbieter-Pfad", "summary": "Verstehen Sie kontrollierten Antrag, offiziellen Status, Dienstveröffentlichung, Anfragen, Nachrichten und Ressourcen.", "items": {
-    "application": { "title": "Im geregelten Ablauf beantragen", "body": "Der Antrag verweist auf aktuelle Identität und Nachweise; er genehmigt die Organisation nicht selbst." },
-    "profile": { "title": "Privates Dienstprofil pflegen", "body": "Genehmigte Verwalter pflegen Kategorien, Dienste, Eignung, Aufnahme, Gebiet und Verfügbarkeit." },
-    "discovery": { "title": "Zur Auffindbarkeit veröffentlichen", "body": "Nur ausdrückliche Veröffentlichung macht gewählte Dienste sichtbar; offizieller Status allein nicht." },
-    "requests": { "title": "Exakte Anfragen beantworten", "body": "Annehmen, ablehnen, weiterleiten und schreiben, ohne Verbindung mit Dienstergebnis gleichzusetzen." },
-    "publication": { "title": "Geregelte Ressourcen veröffentlichen", "body": "Entwurf, Veröffentlichung, Rücknahme und Ablauf sind explizit; verfasste Inhalte bleiben unverändert." },
-    "credentials": { "title": "Schulung oder Zertifizierung erwerben", "body": "Bezahlte Schulung, Zertifizierung, Glaubwürdigkeit und kommerzielle Rechte sind separat geplant und nicht verfügbar." }
-  } },
+  "ariaLabel": "RFxchange-Lernleitfaden",
+  "eyebrow": "Schnellstart",
+  "title": "Lernen Sie den Exchange in Ihrem Tempo kennen.",
+  "intro": "Kehren Sie jederzeit zu einem kurzen Pfad durch die RFxchange-Werkzeuge zurück, die Ihrer Organisation zur Verfügung stehen. Der Lernfortschritt ändert weder Geschäftsinformationen noch Berechtigungen.",
+  "progress": "Fortschritt des aktuellen Pfads",
+  "status": {
+    "active": "In Bearbeitung",
+    "dismissed": "Ausgeblendet · wieder öffnbar",
+    "completed": "Abgeschlossen · wieder öffnbar"
+  },
+  "valueSpineLabel": "RFxchange-Wertpfad",
+  "valueSpine": {
+    "understandable": "Verständlich",
+    "discoverable": "Auffindbar",
+    "connectable": "Verbindbar",
+    "actionable": "Handlungsfähig"
+  },
+  "recommended": "Für diese Organisation empfohlen",
+  "recommendationBoundary": "Empfehlungen verwenden die aktuellen Informationen Ihrer Organisation. Sie ändern weder Berechtigungen noch Anbieterstatus, Verifizierung, Glaubwürdigkeit oder Mitgliedschaftsvorteile.",
+  "catalogUpdate": "Dieser Leitfaden enthält neue Inhalte. Ihr bisheriger Fortschritt bleibt sichtbar; prüfen Sie die aktuelle Version, wenn Sie bereit sind.",
+  "pathNavigation": "Schnellstart und Lernpfade nach Rolle",
+  "path": "Lernpfad",
+  "pathProgress": "{complete} von {total} Elementen abgeschlossen",
+  "available": "Jetzt verfügbar",
+  "planned": "Noch nicht verfügbar",
+  "openWorkflow": "Arbeitsablauf öffnen",
+  "unavailable": "Noch nicht verfügbar",
+  "markComplete": "Als abgeschlossen markieren",
+  "completed": "Abgeschlossen",
+  "dismiss": "Vorerst ausblenden",
+  "reopen": "Leitfaden wieder öffnen",
+  "completeGuide": "Leitfaden abschließen",
+  "explainerLabel": "Bevor Sie fortfahren",
+  "closeExplainer": "Erklärung schließen",
+  "explainerDismissed": "Erklärung geschlossen. Sie können sie hier jederzeit wieder öffnen.",
+  "questions": {
+    "what": "Was ist das?",
+    "why": "Warum ist das hier wichtig?",
+    "happens": "Was geschieht, wenn ich das tue?",
+    "next": "Was geschieht danach?"
+  },
+  "states": {
+    "saved": "Lernfortschritt gespeichert.",
+    "error": "Lernfortschritt konnte nicht gespeichert werden. Laden Sie neu und versuchen Sie es erneut."
+  },
+  "quickStart": {
+    "title": "Schnellstart",
+    "summary": "Folgen Sie dem Wertpfad mit den Werkzeugen, die Ihrer Organisation derzeit zur Verfügung stehen.",
+    "items": {
+      "understand": {
+        "title": "Machen Sie Ihre Organisation verständlich",
+        "body": "Prüfen Sie Profil, Fähigkeiten, unterstützende Informationen, Sichtbarkeit und Betriebskontext."
+      },
+      "discover": {
+        "title": "Verstehen Sie die Auffindbarkeit",
+        "body": "Nutzen Sie Karte und Exchange-Suche, um teilnehmende Organisationen an relevanten Orten zu finden."
+      },
+      "connect": {
+        "title": "Stellen Sie eine nützliche Verbindung her",
+        "body": "Prüfen Sie Zweck, Empfänger und die zu teilenden Informationen, bevor Sie eine Empfehlung senden."
+      },
+      "act": {
+        "title": "Nutzen Sie aktuelle Ressourcen",
+        "body": "Finden Sie Anbieterdienste, stellen Sie eine Anfrage und nutzen Sie veröffentlichte Ressourcen."
+      }
+    }
+  },
+  "business": {
+    "title": "Unternehmenspfad",
+    "summary": "Schaffen Sie eine klare Organisationspräsenz, entdecken Sie Fähigkeiten, stellen Sie nützliche Verbindungen her und nutzen Sie Unterstützungsressourcen.",
+    "items": {
+      "profile": {
+        "title": "Bestätigen Sie Ihr Marktprofil",
+        "body": "Prüfen Sie Vorschläge und bestätigen Sie nur Informationen, die Ihre Organisation korrekt darstellen."
+      },
+      "discovery": {
+        "title": "Erkunden Sie den Exchange",
+        "body": "Suchen Sie teilnehmende Organisationen nach Fähigkeit, Geografie und weiterem nützlichem Marktkontext."
+      },
+      "referrals": {
+        "title": "Empfehlungen senden oder beantworten",
+        "body": "Prüfen Sie, was geteilt wird, und verfolgen Sie Annahme, Ablehnung, Kontakt und Abschluss getrennt."
+      },
+      "resources": {
+        "title": "Anbieterunterstützung finden",
+        "body": "Vergleichen Sie Dienstgebiet, Verfügbarkeit, Eignung und warum ein Anbieter zum Bedarf passen könnte."
+      },
+      "rfx": {
+        "title": "Eine RFx erstellen oder beantworten",
+        "body": "Nutzen Sie RFx-Werkzeuge, wenn sie Ihrer Organisation zur Verfügung stehen. Nicht verfügbare Aktionen werden im Exchange gekennzeichnet."
+      },
+      "credibility": {
+        "title": "Glaubwürdigkeitsinformationen nutzen",
+        "body": "Unterstützende Informationen können Kontext geben, erzeugen aber nicht automatisch Verifizierung oder Glaubwürdigkeit."
+      }
+    }
+  },
+  "issuer": {
+    "title": "Ausstellerpfad",
+    "summary": "Nutzen Sie Marktrecherche und Geschäftsbedarf, um von Bedarf → Fähigkeit zu einer RFx überzugehen, wenn die passenden Werkzeuge verfügbar sind.",
+    "items": {
+      "market": {
+        "title": "Markt untersuchen",
+        "body": "Erkunden Sie Fähigkeiten, Standorte und Ressourcen von Organisationen, bevor Sie einen Bedarf definieren."
+      },
+      "resources": {
+        "title": "Unterstützungsressourcen verstehen",
+        "body": "Prüfen Sie Anbieterdienste und veröffentlichte Ressourcen, ohne eine Auflistung als Qualifikation für eine Chance zu behandeln."
+      },
+      "rfx": {
+        "title": "Eine RFx verfassen und veröffentlichen",
+        "body": "Erstellen, prüfen und veröffentlichen Sie eine RFx, wenn diese Aktionen Ihrer Organisation zur Verfügung stehen."
+      },
+      "evaluation": {
+        "title": "Antworten und Ergebnisse bewerten",
+        "body": "Nutzen Sie Antwort- und Bewertungswerkzeuge, wenn sie verfügbar sind; der Exchange kennzeichnet Aktionen, die noch nicht verfügbar sind."
+      }
+    }
+  },
+  "resourceProvider": {
+    "title": "Ressourcenanbieter-Pfad",
+    "summary": "Verstehen Sie Anbieterantrag, Status, Dienste, Anfragen, Kommunikation und Ressourcen.",
+    "items": {
+      "application": {
+        "title": "Ressourcenanbieterstatus beantragen",
+        "body": "Reichen Sie Informationen zu Ihrer Organisation und Ihren Diensten zur Prüfung ein. Das Einreichen eines Antrags genehmigt ihn nicht."
+      },
+      "profile": {
+        "title": "Dienstprofil pflegen",
+        "body": "Halten Sie Dienstkategorien, Eignung, Aufnahme, Gebiet und Verfügbarkeit aktuell."
+      },
+      "discovery": {
+        "title": "Dienste auffindbar machen",
+        "body": "Wählen Sie aus, welche Dienste veröffentlicht werden, damit Unternehmen Ihre Unterstützung finden können."
+      },
+      "requests": {
+        "title": "Anbieteranfragen beantworten",
+        "body": "Nehmen Sie eine konkrete Anfrage an, lehnen Sie sie ab, leiten Sie sie weiter oder schreiben Sie dazu, während Verbindung und Dienstergebnis getrennt bleiben."
+      },
+      "publication": {
+        "title": "Ressourcen veröffentlichen",
+        "body": "Erstellen, veröffentlichen, aktualisieren, ziehen Sie eine Ressource zurück oder lassen Sie sie bei Bedarf ablaufen."
+      },
+      "credentials": {
+        "title": "Schulung und Zertifizierung",
+        "body": "Schulung, Zertifizierung, Glaubwürdigkeit und kostenpflichtige Vorteile erscheinen hier nur, wenn diese Funktionen verfügbar sind."
+      }
+    }
+  },
   "explainers": {
-    "profile-confirmation": { "title": "Profilinformationen bestätigen", "what": "Schreibt eine organisationseigene Profil- oder Marktkontextangabe.", "why": "Suche und Weiterleitung sollen geprüfte Fakten statt vorläufigem Oberflächentext nutzen.", "happens": "Der Server prüft Organisation und Berechtigung erneut, validiert und protokolliert versionierte Nachweise.", "next": "Die Angabe erscheint nur gemäß Sichtbarkeit; sie erzeugt keine Verifizierung oder Glaubwürdigkeit." },
-    "capability-suggestion": { "title": "Fähigkeitsvorschlag prüfen", "what": "Dies ist ein auf AMACS 0.5.0 gestützter Vorschlag, keine Organisationsaussage.", "why": "Die Organisation muss entscheiden, ob das Konzept ihre Tätigkeit richtig beschreibt.", "happens": "Annehmen, ändern, ablehnen oder offenlassen. Die Entscheidung bleibt vom autoritativen Schreiben getrennt.", "next": "Nur ein separater Befehl mit aktueller Autorität kann eine Fähigkeit bestätigen." },
-    "credential-evidence": { "title": "Nachweis oder Beleg hinzufügen", "what": "Erfasst von der Organisation bereitgestellte Metadaten mit Herkunft.", "why": "Nachweise helfen beim Verständnis, beweisen aber nicht automatisch Fähigkeit oder unabhängige Verifizierung.", "happens": "Der Datensatz bleibt im Organisationsbereich und wird nur bei expliziter Sichtbarkeit veröffentlicht.", "next": "Spätere Nachweisbeziehung, Verifizierung oder Glaubwürdigkeit bleibt separat geregelt." },
-    "media-visibility": { "title": "Mediensichtbarkeit wählen", "what": "Steuert, ob Organisationsmedien privat bleiben oder in einer erlaubten Ansicht erscheinen.", "why": "Uploads können sensible oder von Teilnehmern verfasste Informationen enthalten.", "happens": "Sichtbarkeit und Herkunft werden gespeichert; privater Speicher bleibt serverautorisiert.", "next": "Veröffentlichung kann geändert werden und übersetzt oder befürwortet Inhalte nicht." },
-    "additional-location": { "title": "Zusätzlichen Standort bestätigen", "what": "Fügt einen untergeordneten Standort mit explizitem Datenschutz und Geografie hinzu.", "why": "Der Standort beeinflusst die Karte; geografische Teilnahme bleibt serverseitig kontrolliert.", "happens": "Der Server validiert den Kandidaten und speichert genaue, ungefähre oder ortsbezogene Darstellung.", "next": "Ein untergeordneter Marker erscheint nur bei erfüllten Autoritäts- und Datenschutzbedingungen." },
-    "referral-consent": { "title": "Einvernehmliche Empfehlung senden", "what": "Erstellt eine Organisationseinführung für exakten Empfänger und angezeigte Felder.", "why": "Sie teilt Geschäftskontext und darf nicht mehr als das Geprüfte offenlegen.", "happens": "Bestätigung, Empfehlung, Ereignis und Benachrichtigungsabsicht werden getrennt gespeichert.", "next": "Der Empfänger kann annehmen oder ablehnen. Senden beweist keinen Kontakt, Dienst, Qualifikation oder Erfolg." },
-    "referral-response": { "title": "Auf eine Empfehlung antworten", "what": "Erfasst die ausdrückliche Annahme oder Ablehnung der Empfängerorganisation.", "why": "Die Antwort ändert den Lebenszyklus, nicht die Wahrheit eines Geschäftsergebnisses.", "happens": "Der Server prüft Empfängerautorität und Version vor der Transition.", "next": "Angenommen, kontaktiert und geschlossen bleiben getrennt; Ablehnung erzeugt kein negatives Glaubwürdigkeitssignal." },
-    "provider-application": { "title": "Ressourcenanbieter-Informationen einreichen", "what": "Der geregelte Antrag verweist auf Organisation, Autorität, Standort, Dienstgebiet und Nachweise.", "why": "Offizieller Status ist eine administrative Entscheidung getrennt von Autorität und Verifizierung.", "happens": "Ein Entwurf kann geprüft werden; Speichern oder Einreichen genehmigt niemals automatisch.", "next": "Berechtigte Prüfer können Informationen anfordern, genehmigen oder ablehnen und Nachweise bewahren." },
-    "provider-connection": { "title": "Mit diesem Anbieter verbinden", "what": "Sendet eine Anfrage an den exakt ausgewählten veröffentlichten Dienst.", "why": "Gebiet und Verfügbarkeit erklären Passung, versprechen aber keine Kapazität, Eignung oder Leistung.", "happens": "Nach Einwilligung werden angezeigte Organisation und Zusammenfassung geteilt.", "next": "Der Anbieter kann annehmen, ablehnen, weiterleiten oder schreiben. Verbindung ist kein Dienstergebnis." },
-    "provider-response": { "title": "Anbieteranfrage beantworten", "what": "Erfasst die Antwort des offiziellen Anbieters auf eine exakte Anfrage.", "why": "Sie darf keine allgemeine Verfügbarkeits- oder Qualifikationsentscheidung andeuten.", "happens": "Annahme, Ablehnung oder Weiterleitung fügt nach Autoritätsprüfung eine versionierte Transition hinzu.", "next": "Nachrichten können fortgesetzt werden; Dienst, Zahlung, Verifizierung und Ergebnis bleiben außerhalb." },
-    "provider-resource-publication": { "title": "Anbieterressource veröffentlichen", "what": "Überführt Anbieterinhalt vom Entwurf in eine explizite Netzwerk- oder öffentliche Veröffentlichung.", "why": "Gepflegter Inhalt muss von RFxchange-Befürwortung oder Qualifikation unterschieden werden.", "happens": "Der Server prüft Autorität, Version, Sichtbarkeit, Zeiten und Lebenszyklus.", "next": "Die Ressource kann zurückgezogen werden oder ablaufen. Sie erzeugt kein Ranking, Siegel oder garantiertes Ergebnis." }
+    "profile-confirmation": {
+      "title": "Profilinformationen bestätigen",
+      "what": "Dies aktualisiert Informationen, die Ihre Organisation im Profil und in der Exchange-Aktivität verwendet.",
+      "why": "Genaue Organisationsinformationen verbessern die Auffindbarkeit und reduzieren Missverständnisse.",
+      "happens": "Ihre aktuelle Berechtigung wird geprüft und die Information wird bei Ihrer Organisation gespeichert.",
+      "next": "Die Information erscheint nur dort, wo ihre Sichtbarkeit es erlaubt. Die Aktualisierung erzeugt keine Verifizierung oder Glaubwürdigkeit."
+    },
+    "capability-suggestion": {
+      "title": "Fähigkeitsvorschlag prüfen",
+      "what": "Dies ist ein AMACS-basierter Vorschlag, keine Aussage über Ihre Organisation.",
+      "why": "Sie entscheiden, ob das Konzept korrekt beschreibt, was Ihre Organisation kann.",
+      "happens": "Nehmen Sie den Vorschlag an, bearbeiten, lehnen Sie ihn ab oder lassen Sie ihn offen.",
+      "next": "Eine Fähigkeit wird erst dann Teil Ihrer Organisationsinformationen, wenn Sie sie über die passende Aktion bestätigen."
+    },
+    "credential-evidence": {
+      "title": "Nachweis oder unterstützende Information hinzufügen",
+      "what": "Dies erfasst einen Nachweis oder unterstützende Informationen Ihrer Organisation.",
+      "why": "Unterstützende Informationen können eine Aussage verständlicher machen, sind aber nicht automatisch Beweis oder unabhängige Verifizierung.",
+      "happens": "Die Information wird bei Ihrer Organisation gespeichert und folgt der von Ihnen gewählten Sichtbarkeit.",
+      "next": "Verifizierungs- oder Glaubwürdigkeitsentscheidungen bleiben vom bloßen Hinzufügen unterstützender Informationen getrennt."
+    },
+    "media-visibility": {
+      "title": "Mediensichtbarkeit wählen",
+      "what": "Wählen Sie, ob ein Medieninhalt der Organisation privat bleibt oder von anderen gesehen werden kann.",
+      "why": "Hochgeladenes Material kann Informationen enthalten, die Sie nicht breit teilen möchten.",
+      "happens": "Die gewählte Sichtbarkeit wird mit dem Medieninhalt gespeichert.",
+      "next": "Sie können die Sichtbarkeit später ändern. Eine Veröffentlichung bedeutet nicht, dass RFxchange den Inhalt befürwortet."
+    },
+    "additional-location": {
+      "title": "Zusätzlichen Standort bestätigen",
+      "what": "Fügen Sie einen weiteren Organisationsstandort hinzu und wählen Sie die passende Sichtbarkeit.",
+      "why": "Zusätzliche Standorte helfen anderen zu verstehen, wo Ihre Organisation tätig ist.",
+      "happens": "Der Standort wird geprüft und mit der gewählten Datenschutzstufe gespeichert.",
+      "next": "Ein Kartenmarker erscheint nur, wenn genügend Standortinformationen vorhanden sind und die Sichtbarkeit es erlaubt."
+    },
+    "referral-consent": {
+      "title": "Empfehlung senden",
+      "what": "Erstellen Sie eine Einführung für den angezeigten Empfänger mit den vor dem Senden sichtbaren Informationen.",
+      "why": "Eine nützliche Empfehlung sollte genügend Kontext enthalten, ohne mehr als nötig zu teilen.",
+      "happens": "Die Empfehlung wird gesendet und ihr Status kann verfolgt werden.",
+      "next": "Der Empfänger kann annehmen oder ablehnen. Das Senden beweist keinen Kontakt, Dienst, Qualifikation oder Erfolg."
+    },
+    "referral-response": {
+      "title": "Auf eine Empfehlung antworten",
+      "what": "Nehmen Sie die Empfehlung für Ihre Organisation an oder lehnen Sie sie ab.",
+      "why": "Ihre Antwort zeigt dem Absender, ob die Einführung fortgesetzt werden kann.",
+      "happens": "Der Empfehlungsstatus wird aktualisiert.",
+      "next": "Annahme, Kontakt, Dienst und Abschluss bleiben getrennte Schritte."
+    },
+    "provider-application": {
+      "title": "Ressourcenanbieter-Informationen einreichen",
+      "what": "Geben Sie Informationen zu Ihrer Organisation, Diensten, Dienstgebiet und unterstützendem Material an.",
+      "why": "Ressourcenanbieterstatus wird getrennt vom normalen Organisationsprofil geprüft.",
+      "happens": "Sie können einen Entwurf speichern und ihn zur Prüfung einreichen, wenn er bereit ist.",
+      "next": "Der Prüfer kann weitere Informationen anfordern, den Antrag genehmigen oder ablehnen."
+    },
+    "provider-connection": {
+      "title": "Mit diesem Anbieter verbinden",
+      "what": "Senden Sie eine Anfrage an den von Ihnen gewählten Anbieterdienst.",
+      "why": "Dienstgebiet und Verfügbarkeit können die Passung erklären, versprechen aber keine Kapazität, Eignung oder Leistung.",
+      "happens": "Die angezeigte Organisation und Anfragezusammenfassung werden mit dem Anbieter geteilt.",
+      "next": "Der Anbieter kann annehmen, ablehnen, weiterleiten oder schreiben. Eine Verbindung ist kein Dienstergebnis."
+    },
+    "provider-response": {
+      "title": "Anbieteranfrage beantworten",
+      "what": "Beantworten Sie diese konkrete Anfrage für Ihre Ressourcenanbieter-Organisation.",
+      "why": "Eine Antwort gilt für diese Anfrage und verspricht keine Verfügbarkeit für alle künftigen Anfragen.",
+      "happens": "Annahme, Ablehnung oder Weiterleitung aktualisiert den Anfragestatus.",
+      "next": "Nachrichten können nach der Antwort fortgesetzt werden. Dienst, Zahlung, Verifizierung und Ergebnis bleiben getrennt."
+    },
+    "provider-resource-publication": {
+      "title": "Anbieterressource veröffentlichen",
+      "what": "Machen Sie vom Anbieter erstellte Inhalte für die von Ihnen gewählte Zielgruppe verfügbar.",
+      "why": "Veröffentlichte Anbieterinhalte sind Informationen des Anbieters, keine RFxchange-Befürwortung oder Qualifikation.",
+      "happens": "Die Ressource wird mit der von Ihnen gewählten Sichtbarkeit und Laufzeit veröffentlicht.",
+      "next": "Sie können sie zurückziehen oder ablaufen lassen. Die Veröffentlichung erzeugt kein Ranking, Glaubwürdigkeitsabzeichen oder garantiertes Ergebnis."
+    }
   }
 }

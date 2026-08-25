@@ -1,1 +1,472 @@
-{"availability":{"eyebrow":"Disponibilité du produit","title":"Le Réseau est actif. Le moteur transactionnel vient ensuite.","description":"La Vague 3 est achevée. Les organisations peuvent établir une position de marché structurée, découvrir les participants autorisés, créer des connexions consenties, trouver des ressources approuvées et rouvrir une aide contextuelle. Les domaines ultérieurs restent clairement identifiés.","items":[{"kind":"live","status":"Disponible maintenant","title":"Organisation + profil de marché","detail":"Créez ou revendiquez une organisation, établissez sa position réelle ou respectueuse de la confidentialité sur la carte, puis confirmez les capacités fondées sur AMACS, les produits, services, données sectorielles, justificatifs, médias, expériences passées, préférences et implantations supplémentaires."},{"kind":"live","status":"Disponible maintenant","title":"Découverte + recommandations","detail":"Découvrez les organisations autorisées selon les capacités confirmées, la géographie et la zone de service. Créez des recommandations détenues par l’organisation avec motif, consentement, partage minimal nécessaire, statut de cycle de vie et continuité pour les destinataires externes."},{"kind":"live","status":"Disponible maintenant","title":"Ressources + accompagnement persistant","detail":"Trouvez des prestataires de ressources approuvés selon le territoire, l’admissibilité et le contexte autorisé ; créez des connexions consenties ; consultez leurs ressources ; et rouvrez le Démarrage rapide, les parcours par rôle et les explications de flux."},{"kind":"planned","status":"Prochaine voie gouvernée","title":"Noyau RFx, crédibilité + commerce","detail":"La création et la publication de RFx, les réponses, les équipes, l’évaluation, la crédibilité, les résultats, la capacité avancée des prestataires et les droits payants restent des travaux gouvernés ultérieurs. Ils ne sont pas présentés comme actifs aujourd’hui."}]},"home":{"metadata":{"title":"Rendez votre entreprise plus facile à trouver et à comprendre","description":"The RFxchange aide les entreprises à décrire leurs besoins, définir leurs capacités, découvrir les organisations pertinentes et créer de meilleures connexions grâce à un langage de marché partagé."},"campaign":{"ariaLabel":"Campagne Organisation fondatrice","text":"Les 250 Fondateurs se constituent.","link":"Aidez à façonner la première cohorte d’entreprises RFxchange."},"hero":{"eyebrow":"Un réseau local de croissance des entreprises · Par Accel Analysis","titleBefore":"Rendez votre entreprise plus facile à comprendre—","titleAccent":"et plus facile avec laquelle faire affaire.","summary":"Décrivez votre besoin. Définissez ce que vous savez faire. The RFxchange transforme le sens commercial confirmé en une structure de marché utile afin de faciliter la découverte d’organisations, de ressources et de prochaines actions pertinentes.","primary":"Placez votre entreprise sur la carte","secondary":"Voir comment cela fonctionne","note":"Commencez gratuitement. Établissez votre organisation, confirmez ses capacités et entrez dans le Réseau actif.","stockNote":"Les photographies créent uniquement une ambiance. Elles ne représentent ni participants, ni opportunités, ni résultats, ni témoignages, ni activité en direct de RFxchange."},"value":{"ariaLabel":"Progression de la valeur client RFxchange","items":[{"kicker":"Compréhensible","title":"Exprimez ce que votre entreprise sait réellement faire.","detail":"Commencez avec le langage courant de l’entreprise, puis confirmez la structure qui représente votre organisation."},{"kicker":"Découvrable","title":"Soyez trouvé pour les bonnes raisons.","detail":"Les capacités confirmées, la géographie et le contexte de service améliorent la découverte au-delà d’un nom ou d’une catégorie générale."},{"kicker":"Connectable","title":"Conservez le motif dans la relation.","detail":"Les recommandations et connexions avec des prestataires gardent un contexte utile au lieu de réduire l’échange à des coordonnées."},{"kicker":"Actionnable","title":"Passez à la prochaine action appropriée.","detail":"Les flux publiés transforment le contexte en action tout en distinguant adéquation potentielle, connexion, décision et résultat."}],"promise":"Soyez trouvé. Trouvez l’opportunité. Créez la connexion."},"problem":{"eyebrow":"Le problème","title":"Les opportunités commerciales se perdent souvent dans la traduction.","description":"Les entreprises connaissent généralement le résultat recherché. Elles ne connaissent pas toujours la bonne catégorie de prestataire, le terme de capacité, le langage d’achat ou la preuve à demander. Les prestataires compétents rencontrent le même problème en sens inverse.","items":[{"title":"« Je sais ce dont j’ai besoin, mais pas comment l’appeler. »","detail":"Un problème commercial arrive rarement avec la bonne classification déjà attachée."},{"title":"« Nous savons faire le travail, mais les clients le décrivent autrement. »","detail":"Des capacités proches peuvent être exprimées par des secteurs, services et termes différents."},{"title":"« Un annuaire me dit qui existe, pas toujours qui convient. »","detail":"Les noms, sites web et codes sectoriels sont utiles, mais ne relient pas entièrement un besoin précis à la capacité requise."},{"title":"« Le contexte disparaît à mesure que le processus avance. »","detail":"Courriels, feuilles de calcul, recommandations, programmes d’appui et portails d’appel d’offres contiennent souvent des parties différentes du même besoin."}],"closing":"The RFxchange est conçu pour réduire cet écart de traduction."},"how":{"eyebrow":"Du langage courant à l’action de marché","title":"Commencez avec ce que vous savez. The Exchange aide à créer la structure.","description":"Vous ne devriez pas devoir apprendre un système de classification avant d’expliquer ce dont votre entreprise a besoin ou ce qu’elle peut fournir.","ariaLabel":"Comment The RFxchange transforme le langage commercial en action de marché","steps":[{"kicker":"Décrire","title":"Dites ce dont vous avez besoin ou ce que vous savez faire.","detail":"Commencez en langage commercial courant ou parcourez directement les capacités structurées."},{"kicker":"Interpréter","title":"Identifiez des concepts de marché possibles.","detail":"Une assistance gouvernée peut retrouver des concepts AMACS pertinents et organiser les relations possibles."},{"kicker":"Confirmer","title":"Vous décidez de ce qui est vrai.","detail":"Les suggestions ne deviennent pas des déclarations ou exigences faisant autorité avant confirmation par un participant autorisé dans le flux applicable."},{"kicker":"Découvrir","title":"Trouvez une adéquation potentielle grâce à un contexte utile.","detail":"Les capacités confirmées, la géographie, la zone de service et les données de profil autorisées soutiennent une découverte déterministe."},{"kicker":"Connecter","title":"Entrez dans la bonne relation.","detail":"Utilisez les flux publiés de recommandation et de ressources tout en préservant le motif, le consentement et le contexte minimal nécessaire."},{"kicker":"Apprendre","title":"Transformez l’activité gouvernée en meilleure compréhension du marché.","detail":"À mesure que les domaines ultérieurs s’ouvrent, réponses, décisions, preuves et résultats peuvent améliorer l’intelligence de marché sans transformer des hypothèses en faits."}]},"amacs":{"eyebrow":"Le standard sous-jacent à The Exchange","title":"Un langage commun pour l’activité de marché.","description":"The RFxchange utilise l’Accel Market Activity and Capability Standard—AMACS—pour relier plus que ce qu’une entreprise vend ou le secteur auquel elle appartient.","support":"AMACS donne à The Exchange une manière commune de relier les besoins du marché à ce que les organisations savent réellement faire.","nodes":[{"title":"Besoin","detail":"Qu’essaie d’accomplir le marché ?"},{"title":"Capacité","detail":"Que doit savoir faire un prestataire ?"},{"title":"Preuve","detail":"Qu’est-ce qui aide à établir l’aptitude pertinente ?"},{"title":"Réponse","detail":"Quelles informations le marché doit-il recevoir ?"},{"title":"Décision","detail":"Comment les alternatives seront-elles évaluées ?"},{"title":"Résultat","detail":"Que s’est-il finalement passé ?"}],"futureNote":"Le besoin et la capacité sont déjà centraux dans le produit actuel. RFx, décision, crédibilité et résultats restent des voies gouvernées ultérieures."},"ai":{"eyebrow":"Assistance avec limites d’autorité","title":"L’IA peut suggérer. Les personnes confirment.","description":"L’IA peut réduire l’effort nécessaire pour transformer des descriptions courantes en informations de marché structurées. Elle peut suggérer des concepts AMACS pertinents et expliquer des relations possibles, mais une suggestion n’est pas un fait de marché.","highlight":"Un participant autorisé confirme ce dont l’organisation a réellement besoin, ce qu’elle fournit ou ce qu’elle représente avant toute modification de l’état faisant autorité.","principles":["Le langage courant reste un point de départ acceptable.","Le modèle ne peut ni inventer des identifiants AMACS ni créer silencieusement des déclarations.","Les suggestions rejetées ou non résolues ne peuvent pas influencer la découverte ou l’appariement faisant autorité.","La navigation et la recherche manuelles AMACS restent disponibles lorsque l’assistance est désactivée ou indisponible."]},"network":{"eyebrow":"Voir le marché","title":"Voyez le marché autour de votre entreprise.","description":"The RFxchange commence par une organisation réelle dans un lieu réel. Après activation, l’organisation reçoit une position réelle ou respectueuse de la confidentialité sur la carte et peut être découverte grâce à des informations de marché confirmées.","items":[{"title":"Trouvez des entreprises par capacité.","detail":"Recherchez ce que les organisations savent faire, pas seulement leur nom."},{"title":"Utilisez la géographie comme contexte commercial.","detail":"Comprenez où se trouvent les organisations participantes et les zones qu’elles sont autorisées à desservir."},{"title":"Ouvrez l’organisation derrière le marqueur.","detail":"Passez de la localisation au contexte autorisé de capacité, de service et d’organisation."},{"title":"Passez de la découverte à l’action.","detail":"Créez des recommandations et des connexions consenties sans présenter la découverte elle-même comme un résultat."}],"imageNote":"Image d’ambiance — pas une preuve de marché RFxchange en direct."},"trust":{"eyebrow":"Fiez-vous à ce que vous voyez","title":"La crédibilité doit venir des preuves, pas du paiement.","description":"RFxchange distingue déclarations d’entreprise, sources publiques, approbation de prestataire, vérification, connexions, reconnaissance commerciale et résultats au lieu de les réduire à un seul badge.","highlight":"Un abonnement payant, une reconnaissance Fondatrice ou un parrainage n’achètent ni meilleur appariement de capacités, ni vérification, ni qualification, ni placement préférentiel dans la découverte neutre.","rules":["Une capacité autodéclarée n’est pas automatiquement vérifiée.","Le statut de Prestataire officiel de ressources est un rôle institutionnel approuvé, pas une garantie d’adéquation ou de disponibilité.","Une recommandation ou une connexion avec un prestataire n’est pas un service achevé ni un résultat réussi.","Les futurs signaux de crédibilité et de résultat devront identifier leurs preuves et leur autorité."]},"audience":{"eyebrow":"Rôles différents · contexte de marché partagé","title":"Une position utile pour chaque organisation qui fait avancer l’activité.","items":[{"name":"Entreprises","promise":"Soyez trouvé. Trouvez ce qu’il vous faut. Construisez la relation.","detail":"Établissez des capacités confirmées et utilisez le Réseau comme une position réutilisable de développement commercial."},{"name":"Prestataires de ressources","promise":"Atteignez les entreprises dans le contexte d’un besoin réel.","detail":"Les prestataires approuvés peuvent présenter des services gouvernés, territoires, critères d’admissibilité, modalités d’accueil, ressources et voies de connexion."},{"name":"Responsables économiques + communautaires","promise":"Voyez comment les éléments participants du marché se relient.","detail":"Utilisez l’activité réelle des organisations et du Réseau sans traiter une participation incomplète comme l’ensemble de l’économie."}]},"founding":{"eyebrow":"Les 250 Fondateurs","title":"Aidez à construire le réseau que vous souhaitez utiliser pour votre entreprise.","description":"Les Organisations fondatrices établissent tôt leur position de marché, participent à des retours structurés de lancement et aident à révéler où RFxchange et AMACS doivent devenir plus clairs et utiles.","primary":"Découvrir la participation Fondatrice","secondary":"Rejoindre gratuitement","note":"La reconnaissance Fondatrice n’implique ni vérification, ni qualification, ni recommandation, ni traitement préférentiel dans la recherche."},"cta":{"eyebrow":"Entrez dans The RFxchange","title":"Votre entreprise possède déjà des capacités. Rendez-les plus faciles à comprendre pour le marché.","description":"Établissez votre organisation, placez-la sur la carte et construisez la position de marché qui relie ce que vous faites aux besoins des autres entreprises.","primary":"Rejoindre gratuitement","secondary":"Se connecter","promise":"Soyez trouvé. Trouvez l’opportunité. Créez la connexion."},"images":{"hero":"Vue aérienne d’une ville régionale, de voies navigables et de la géographie économique.","problem":"Professionnels discutant d’un travail opérationnel autour d’une table.","ai":"Professionnels collaborant autour de documents commerciaux.","network":"Artisans de petites entreprises travaillant dans un atelier.","audienceBusiness":"Professionnel de la fabrication dans une installation industrielle.","audienceProvider":"Professionnels de la construction examinant un chantier actif.","audienceLeader":"Paysage urbain et économique régional.","founding":"Professionnels travaillant ensemble autour d’une table.","cta":"Allées d’entrepôt remplies de stocks."}},"founding":{"metadata":{"title":"Participation d’Organisation fondatrice","description":"Rejoignez la première cohorte d’entreprises RFxchange, établissez votre organisation tôt et aidez à améliorer le langage de marché et les flux qui relient besoins et capacités."},"hero":{"eyebrow":"Les 250 Fondateurs","title":"Aidez à construire un marché où les entreprises sont plus faciles à comprendre et à connecter.","description":"Nous constituons la première cohorte d’organisations sur The RFxchange. Établissez votre entreprise tôt, confirmez les capacités que vous apportez au marché, utilisez les flux actifs du Réseau et aidez à améliorer le système pour les organisations suivantes.","primary":"Commencer avec votre organisation","secondary":"Voir ce qui est actif","price":"Adhésion Fondatrice prévue : 49 $/mois","cap":"Limitée à 250 organisations","readiness":"L’inscription payante n’ouvrira qu’une fois les droits Fondatrice approuvés et l’expérience de facturation opérationnels. Une participation de base utile restera gratuite.","stockNote":"Les photographies créent uniquement une ambiance. Elles ne représentent ni membres Fondateurs, ni résultats, ni activité en direct de RFxchange."},"why":{"eyebrow":"Pourquoi participer maintenant","title":"Vous n’avez pas besoin d’attendre que tout The Exchange soit terminé pour créer de la valeur.","description":"La première étape utile consiste à rendre votre organisation compréhensible pour le marché. Plus ses capacités confirmées et son contexte sont clairs, plus la découverte et les futurs flux transactionnels peuvent devenir utiles.","items":[{"title":"Établissez votre position tôt","detail":"Créez ou revendiquez l’organisation, confirmez sa géographie et construisez une position structurée de capacités avant l’ouverture du moteur transactionnel plus large."},{"title":"Aidez à façonner des flux pratiques","detail":"Utilisez des situations réelles pour montrer où la terminologie prête à confusion, où l’information est lourde et où les connexions nécessitent davantage de contexte."},{"title":"Contribuez à un meilleur langage de marché","detail":"La participation réelle peut révéler des lacunes soumises à l’examen gouverné de RFxchange et AMACS, sans laisser l’usage réécrire silencieusement le standard."},{"title":"Soyez reconnu dans la cohorte de lancement","detail":"La reconnaissance Organisation fondatrice consigne une participation historique. Ce n’est ni une vérification, ni une qualification, ni une recommandation, ni une preuve de performance supérieure."}]},"scenario":{"eyebrow":"Le problème autour duquel nous construisons","title":"Les dirigeants d’entreprise ne devraient pas avoir besoin d’expertise en achats pour expliquer un besoin.","quote":"« Notre manière de gérer les stocks n’est plus adaptée et nous avons besoin d’aide pour trouver un meilleur système. »","description":"Cette phrase peut impliquer analyse de processus, technologie de gestion des stocks, intégration de systèmes, migration de données, formation, conception de flux ou plusieurs capacités ensemble. RFxchange est conçu pour permettre à l’entreprise de partir du problème qu’elle comprend puis de confirmer une structure utile."},"standard":{"eyebrow":"Un standard, pas une boîte noire","title":"L’IA aide à traduire. AMACS fournit la structure. Les personnes fournissent l’autorité.","description":"AMACS relie Besoin, Capacité, Preuve, Réponse, Décision et Résultat. L’IA peut suggérer des concepts pertinents, mais elle ne décide pas de ce que votre entreprise sait faire, ne crée pas silencieusement une exigence et ne déclare pas une autre organisation qualifiée.","highlight":"Les suggestions réduisent le travail. Les personnes autorisées confirment les faits du marché.","flow":["Besoin","Capacité","Preuve","Réponse","Décision","Résultat"]},"membership":{"eyebrow":"Un niveau de participation plus profond","title":"La participation gratuite crée la densité. La participation Fondatrice soutient le lancement.","description":"Un marché utile ne peut pas placer la légitimité derrière un péage. L’adhésion Fondatrice s’adresse aux organisations qui souhaitent un rôle plus profond après avoir reçu une valeur réelle du produit.","items":[{"title":"Reconnaissance Organisation fondatrice","detail":"Reconnaissance historique de la cohorte de lancement, sous réserve des conditions applicables du programme."},{"title":"Retours structurés des Fondateurs","detail":"Occasions définies de fournir des retours pratiques sur la structure des capacités, le langage commercial et les flux nouvellement publiés."},{"title":"Soutien au lancement pour les Fondateurs","detail":"Intégration et accompagnement spécifiques pour établir une position organisationnelle utile."},{"title":"Outils améliorés approuvés","detail":"Accès anticipé à certaines capacités payantes de productivité uniquement après mise en œuvre et approbation de chaque droit."}],"readiness":"Les avantages non mis en œuvre ne sont pas annoncés comme des droits actifs."},"comparison":{"eyebrow":"Gratuit ou Fondatrice","title":"Vous n’avez pas besoin de payer pour être légitime sur The RFxchange.","description":"La participation fondamentale au marché et la découverte neutre restent séparées de la reconnaissance commerciale.","free":{"title":"Organisation gratuite","subtitle":"Conçue pour une participation utile","items":["Établir ou revendiquer l’organisation.","Maintenir le profil principal de l’organisation et de ses capacités.","Accéder à la découverte autorisée par capacité et géographie.","Utiliser les flux gratuits désignés de recommandations, ressources et éducation.","Obtenir une future crédibilité substantielle uniquement par les preuves et activités gouvernées.","Ne recevoir aucun avantage acheté dans l’appariement ou la qualification."],"cta":"Rejoindre gratuitement"},"founding":{"title":"Organisation fondatrice","subtitle":"Conçue pour une participation plus profonde au lancement","items":["Tout ce qui est inclus dans la participation gratuite utile.","Reconnaissance Organisation fondatrice.","Participation structurée au programme de retours de lancement.","Soutien au lancement pour les Fondateurs.","Accès anticipé à certains outils améliorés approuvés.","Aucun changement payant à la découverte neutre, à la vérification ou à la qualification."],"price":"49 $/mois à l’ouverture des inscriptions","cap":"Limité à 250 organisations","cta":"Commencer avec votre organisation"},"footnote":"Organisation fondatrice est une participation et une reconnaissance commerciale. Ce n’est ni une Vérification, ni un statut de confiance, ni une qualification, ni une recommandation, ni une garantie de résultats commerciaux."},"contribution":{"eyebrow":"Construisez pour votre entreprise · contribuez au marché","title":"Chaque entreprise réelle nous apprend ce qu’une entreprise hypothétique ne peut pas nous apprendre.","description":"Une entreprise peut révéler que deux capacités proches sont réellement différentes, qu’un acheteur utilise un langage mal reconnu par la structure actuelle ou qu’une recommandation nécessite davantage de contexte pour devenir utile.","highlight":"Votre organisation obtient une manière plus claire de se représenter. L’examen gouverné peut transformer les enseignements du marché en améliorations pour les organisations suivantes."},"boundaries":{"eyebrow":"Neutralité commerciale","title":"L’argent ne rend pas une entreprise plus pertinente.","items":[{"title":"Pas de paiement pour le classement","detail":"Le statut Fondatrice ne place pas une organisation au-dessus d’un participant plus pertinent dans la découverte neutre."},{"title":"Pas de paiement pour la vérification","detail":"L’adhésion ne prouve pas qu’une capacité, un justificatif ou une déclaration commerciale est vrai."},{"title":"Pas de paiement pour la qualification","detail":"Le statut Fondatrice ne peut pas remplacer les exigences d’une opportunité particulière."},{"title":"Aucune activité garantie","detail":"RFxchange ne garantit ni prospects, ni recommandations, ni contrats, ni revenus, ni attributions, ni financement, ni croissance."}],"closing":"Les avantages commerciaux et la vérité du marché restent séparés par conception."},"faq":{"eyebrow":"Questions avant de commencer","title":"La participation Fondatrice, expliquée clairement.","items":[{"question":"Dois-je savoir rédiger une RFP ?","answer":"Non. RFxchange est plus large que les achats formels. Vous pouvez commencer par le besoin que vous comprenez ; les futurs flux RFx ajouteront la structure transactionnelle appropriée."},{"question":"Dois-je comprendre les codes AMACS ?","answer":"Non. Vous pouvez parcourir les concepts structurés, mais l’assistance en langage courant et les explications rendent le standard utilisable sans mémoriser une taxonomie."},{"question":"La participation Fondatrice rend-elle mon entreprise Vérifiée ?","answer":"Non. Organisation fondatrice est une reconnaissance de la cohorte de lancement. La vérification exige les preuves et le processus gouverné applicables."},{"question":"L’adhésion Fondatrice améliorera-t-elle mon classement ?","answer":"Non. Le paiement ne modifie ni la réalité des capacités, ni l’appariement neutre, ni la qualification, ni la crédibilité."},{"question":"Toute la plateforme RFxchange est-elle active ?","answer":"Non. Le Réseau de la Vague 3 est actif. RFx Core, l’évaluation, la crédibilité, les résultats et les droits payants restent des voies gouvernées ultérieures."},{"question":"Pourquoi participer avant que tout soit terminé ?","answer":"Parce qu’une position utile sur le marché commence avant le moteur transactionnel final. Vous pouvez établir dès maintenant des informations structurées et aider à repérer les améliorations nécessaires aux flux futurs."},{"question":"Comment l’IA est-elle utilisée ?","answer":"L’IA peut aider à interpréter le langage courant et suggérer des concepts AMACS pertinents. Les suggestions restent non autoritaires jusqu’à l’action de confirmation applicable par un participant autorisé."},{"question":"Que se passe-t-il si AMACS ne décrit pas une activité de mon entreprise ?","answer":"Ne forcez pas une classification incorrecte. Conservez le sens non résolu et utilisez, lorsqu’elle est disponible, la voie gouvernée de terme provisoire et d’examen."},{"question":"Puis-je participer sans devenir Fondateur ?","answer":"Oui. Une participation gratuite utile est intentionnelle. Fondatrice est un niveau de lancement plus profond, pas un péage devant une activité légitime du Réseau."}]},"cta":{"eyebrow":"Les 250 Fondateurs","title":"Construisez votre position maintenant. Aidez à améliorer le marché qui vient ensuite.","description":"Établissez votre organisation, confirmez ce que votre entreprise sait réellement faire et rejoignez la cohorte qui transforme un Réseau actif en un marché plus compréhensible.","primary":"Commencer avec votre organisation","secondary":"Rejoindre gratuitement","note":"Prévu à 49 $/mois lors de l’ouverture commerciale approuvée · limité à 250 organisations · la participation principale reste gratuite."},"images":{"hero":"Allées d’entrepôt remplies de stocks.","contribution":"Professionnels collaborant autour de documents commerciaux."}}}
+{
+  "availability": {
+    "eyebrow": "Disponibilité du produit",
+    "title": "Le Réseau est actif. Le moteur transactionnel vient ensuite.",
+    "description": "Les organisations peuvent établir une position de marché structurée, découvrir les participants, créer des connexions consenties, trouver des ressources approuvées et rouvrir une aide contextuelle. Les fonctionnalités futures restent clairement identifiées.",
+    "items": [
+      {
+        "kind": "live",
+        "status": "Disponible maintenant",
+        "title": "Organisation + profil de marché",
+        "detail": "Créez ou revendiquez une organisation, établissez sa position réelle ou respectueuse de la confidentialité sur la carte, puis confirmez les capacités fondées sur AMACS, les produits, services, données sectorielles, justificatifs, médias, expériences passées, préférences et implantations supplémentaires."
+      },
+      {
+        "kind": "live",
+        "status": "Disponible maintenant",
+        "title": "Découverte + recommandations",
+        "detail": "Découvrez les organisations participantes selon les capacités confirmées, la géographie et la zone de service. Créez des recommandations détenues par l’organisation avec motif, consentement, partage minimal nécessaire, statut et continuité pour les destinataires externes."
+      },
+      {
+        "kind": "live",
+        "status": "Disponible maintenant",
+        "title": "Ressources + accompagnement persistant",
+        "detail": "Trouvez des prestataires de ressources approuvés selon le territoire, l’admissibilité et le contexte disponible; créez des connexions consenties; consultez leurs ressources; et rouvrez le Démarrage rapide, les parcours par rôle et les explications de flux."
+      },
+      {
+        "kind": "planned",
+        "status": "Fonctionnalités à venir",
+        "title": "Noyau RFx, crédibilité + commerce",
+        "detail": "La création et la publication de RFx, les réponses, les équipes, l’évaluation, la crédibilité, les résultats, la capacité avancée des prestataires et les droits payants restent des travaux ultérieurs. Ils ne sont pas présentés comme actifs aujourd’hui."
+      }
+    ]
+  },
+  "home": {
+    "metadata": {
+      "title": "Rendez votre entreprise plus facile à trouver et à comprendre",
+      "description": "The RFxchange aide les entreprises à décrire leurs besoins, définir leurs capacités, découvrir les organisations pertinentes et créer de meilleures connexions grâce à un langage de marché partagé."
+    },
+    "campaign": {
+      "ariaLabel": "Campagne Organisation fondatrice",
+      "text": "Les 250 Fondateurs se constituent.",
+      "link": "Aidez à façonner la première cohorte d’entreprises RFxchange."
+    },
+    "hero": {
+      "eyebrow": "Un réseau local de croissance des entreprises · Par Accel Analysis",
+      "titleBefore": "Rendez votre entreprise plus facile à comprendre—",
+      "titleAccent": "et plus facile avec laquelle faire affaire.",
+      "summary": "Décrivez votre besoin. Définissez ce que vous savez faire. The RFxchange transforme le sens commercial confirmé en une structure de marché utile afin de faciliter la découverte d’organisations, de ressources et de prochaines actions pertinentes.",
+      "primary": "Placez votre entreprise sur la carte",
+      "secondary": "Voir comment cela fonctionne",
+      "note": "Commencez gratuitement. Établissez votre organisation, confirmez ses capacités et entrez dans le Réseau actif.",
+      "stockNote": "Les photographies créent uniquement une ambiance. Elles ne représentent ni participants, ni opportunités, ni résultats, ni témoignages, ni activité en direct de RFxchange."
+    },
+    "value": {
+      "ariaLabel": "Progression de la valeur client RFxchange",
+      "items": [
+        {
+          "kicker": "Compréhensible",
+          "title": "Exprimez ce que votre entreprise sait réellement faire.",
+          "detail": "Commencez avec le langage courant de l’entreprise, puis confirmez la structure qui représente votre organisation."
+        },
+        {
+          "kicker": "Découvrable",
+          "title": "Soyez trouvé pour les bonnes raisons.",
+          "detail": "Les capacités confirmées, la géographie et le contexte de service améliorent la découverte au-delà d’un nom ou d’une catégorie générale."
+        },
+        {
+          "kicker": "Connectable",
+          "title": "Conservez le motif dans la relation.",
+          "detail": "Les recommandations et connexions avec des prestataires gardent un contexte utile au lieu de réduire l’échange à des coordonnées."
+        },
+        {
+          "kicker": "Actionnable",
+          "title": "Passez à la prochaine action appropriée.",
+          "detail": "Les flux disponibles transforment le contexte en action tout en distinguant adéquation potentielle, connexion, décision et résultat."
+        }
+      ],
+      "promise": "Soyez trouvé. Trouvez l’opportunité. Créez la connexion."
+    },
+    "problem": {
+      "eyebrow": "Le problème",
+      "title": "Les opportunités commerciales se perdent souvent dans la traduction.",
+      "description": "Les entreprises connaissent généralement le résultat recherché. Elles ne connaissent pas toujours la bonne catégorie de prestataire, le terme de capacité, le langage d’achat ou la preuve à demander. Les prestataires compétents rencontrent le même problème en sens inverse.",
+      "items": [
+        {
+          "title": "« Je sais ce dont j’ai besoin, mais pas comment l’appeler. »",
+          "detail": "Un problème commercial arrive rarement avec la bonne classification déjà attachée."
+        },
+        {
+          "title": "« Nous savons faire le travail, mais les clients le décrivent autrement. »",
+          "detail": "Des capacités proches peuvent être exprimées par des secteurs, services et termes différents."
+        },
+        {
+          "title": "« Un annuaire me dit qui existe, pas toujours qui convient. »",
+          "detail": "Les noms, sites web et codes sectoriels sont utiles, mais ne relient pas entièrement un besoin précis à la capacité requise."
+        },
+        {
+          "title": "« Le contexte disparaît à mesure que le processus avance. »",
+          "detail": "Courriels, feuilles de calcul, recommandations, programmes d’appui et portails d’appel d’offres contiennent souvent des parties différentes du même besoin."
+        }
+      ],
+      "closing": "The RFxchange est conçu pour réduire cet écart de traduction."
+    },
+    "how": {
+      "eyebrow": "Du langage courant à l’action de marché",
+      "title": "Commencez avec ce que vous savez. The Exchange aide à créer la structure.",
+      "description": "Vous ne devriez pas devoir apprendre un système de classification avant d’expliquer ce dont votre entreprise a besoin ou ce qu’elle peut fournir.",
+      "ariaLabel": "Comment The RFxchange transforme le langage commercial en action de marché",
+      "steps": [
+        {
+          "kicker": "Décrire",
+          "title": "Dites ce dont vous avez besoin ou ce que vous savez faire.",
+          "detail": "Commencez en langage commercial courant ou parcourez directement les capacités structurées."
+        },
+        {
+          "kicker": "Interpréter",
+          "title": "Identifiez des concepts de marché possibles.",
+          "detail": "Une assistance peut retrouver des concepts AMACS pertinents et organiser les relations possibles."
+        },
+        {
+          "kicker": "Confirmer",
+          "title": "Vous décidez de ce qui est vrai.",
+          "detail": "Les suggestions ne deviennent pas des déclarations ou exigences faisant autorité avant confirmation par un participant autorisé dans le flux applicable."
+        },
+        {
+          "kicker": "Découvrir",
+          "title": "Trouvez une adéquation potentielle grâce à un contexte utile.",
+          "detail": "Les capacités confirmées, la géographie, la zone de service et les données de profil autorisées soutiennent une découverte déterministe."
+        },
+        {
+          "kicker": "Connecter",
+          "title": "Entrez dans la bonne relation.",
+          "detail": "Utilisez les flux disponibles de recommandation et de ressources tout en préservant le motif, le consentement et le contexte minimal nécessaire."
+        },
+        {
+          "kicker": "Apprendre",
+          "title": "Transformez l’activité en meilleure compréhension du marché.",
+          "detail": "À mesure que les fonctionnalités futures s’ouvrent, réponses, décisions, preuves et résultats peuvent améliorer l’intelligence de marché sans transformer des hypothèses en faits."
+        }
+      ]
+    },
+    "amacs": {
+      "eyebrow": "Le standard sous-jacent à The Exchange",
+      "title": "Un langage commun pour l’activité de marché.",
+      "description": "The RFxchange utilise l’Accel Market Activity and Capability Standard—AMACS—pour relier plus que ce qu’une entreprise vend ou le secteur auquel elle appartient.",
+      "support": "AMACS donne à The Exchange une manière commune de relier les besoins du marché à ce que les organisations savent réellement faire.",
+      "nodes": [
+        {
+          "title": "Besoin",
+          "detail": "Qu’essaie d’accomplir le marché?"
+        },
+        {
+          "title": "Capacité",
+          "detail": "Que doit savoir faire un prestataire?"
+        },
+        {
+          "title": "Preuve",
+          "detail": "Qu’est-ce qui aide à établir l’aptitude pertinente?"
+        },
+        {
+          "title": "Réponse",
+          "detail": "Quelles informations le marché doit-il recevoir?"
+        },
+        {
+          "title": "Décision",
+          "detail": "Comment les alternatives seront-elles évaluées?"
+        },
+        {
+          "title": "Résultat",
+          "detail": "Que s’est-il finalement passé?"
+        }
+      ],
+      "futureNote": "Le besoin et la capacité sont déjà centraux dans le produit actuel. RFx, décision, crédibilité et résultats restent des fonctionnalités futures."
+    },
+    "ai": {
+      "eyebrow": "Assistance avec limites d’autorité",
+      "title": "L’IA peut suggérer. Les personnes confirment.",
+      "description": "L’IA peut réduire l’effort nécessaire pour transformer des descriptions courantes en informations de marché structurées. Elle peut suggérer des concepts AMACS pertinents et expliquer des relations possibles, mais une suggestion n’est pas un fait de marché.",
+      "highlight": "Un participant autorisé confirme ce dont l’organisation a réellement besoin, ce qu’elle fournit ou ce qu’elle représente avant toute modification de l’état faisant autorité.",
+      "principles": [
+        "Le langage courant reste un point de départ acceptable.",
+        "Le modèle ne peut ni inventer des identifiants AMACS ni créer silencieusement des déclarations.",
+        "Les suggestions rejetées ou non résolues ne peuvent pas influencer la découverte ou l’appariement faisant autorité.",
+        "La navigation et la recherche manuelles AMACS restent disponibles lorsque l’assistance est désactivée ou indisponible."
+      ]
+    },
+    "network": {
+      "eyebrow": "Voir le marché",
+      "title": "Voyez le marché autour de votre entreprise.",
+      "description": "The RFxchange commence par une organisation dans un lieu. Après activation, l’organisation reçoit une position réelle ou respectueuse de la confidentialité sur la carte et peut être découverte grâce à des informations de marché confirmées.",
+      "items": [
+        {
+          "title": "Trouvez des entreprises par capacité.",
+          "detail": "Recherchez ce que les organisations savent faire, pas seulement leur nom."
+        },
+        {
+          "title": "Utilisez la géographie comme contexte commercial.",
+          "detail": "Comprenez où se trouvent les organisations participantes et les zones qu’elles sont autorisées à desservir."
+        },
+        {
+          "title": "Ouvrez l’organisation derrière le marqueur.",
+          "detail": "Passez de la localisation au contexte disponible de capacité, de service et d’organisation."
+        },
+        {
+          "title": "Passez de la découverte à l’action.",
+          "detail": "Créez des recommandations et des connexions consenties sans présenter la découverte elle-même comme un résultat."
+        }
+      ],
+      "imageNote": "Image d’ambiance — pas une preuve de marché RFxchange en direct."
+    },
+    "trust": {
+      "eyebrow": "Fiez-vous à ce que vous voyez",
+      "title": "La crédibilité doit venir des preuves, pas du paiement.",
+      "description": "RFxchange distingue déclarations d’entreprise, sources publiques, approbation de prestataire, vérification, connexions, reconnaissance commerciale et résultats au lieu de les réduire à un seul badge.",
+      "highlight": "Un abonnement payant, une reconnaissance Fondatrice ou un parrainage n’achètent ni meilleur appariement de capacités, ni vérification, ni qualification, ni placement préférentiel dans la découverte neutre.",
+      "rules": [
+        "Une capacité autodéclarée n’est pas automatiquement vérifiée.",
+        "Le statut de Prestataire officiel de ressources est un rôle institutionnel approuvé, pas une garantie d’adéquation ou de disponibilité.",
+        "Une recommandation ou une connexion avec un prestataire n’est pas un service achevé ni un résultat réussi.",
+        "Les futurs signaux de crédibilité et de résultat devront identifier leurs preuves et leur autorité."
+      ]
+    },
+    "audience": {
+      "eyebrow": "Rôles différents · contexte de marché partagé",
+      "title": "Une position utile pour chaque organisation qui fait avancer l’activité.",
+      "items": [
+        {
+          "name": "Entreprises",
+          "promise": "Soyez trouvé. Trouvez ce qu’il vous faut. Construisez la relation.",
+          "detail": "Établissez des capacités confirmées et utilisez le Réseau comme une position réutilisable de développement commercial."
+        },
+        {
+          "name": "Prestataires de ressources",
+          "promise": "Atteignez les entreprises dans le contexte d’un besoin réel.",
+          "detail": "Les prestataires approuvés peuvent présenter des services, territoires, critères d’admissibilité, modalités d’accueil, ressources et voies de connexion."
+        },
+        {
+          "name": "Responsables économiques + communautaires",
+          "promise": "Voyez comment les éléments participants du marché se relient.",
+          "detail": "Utilisez l’activité réelle des organisations et du Réseau sans traiter une participation incomplète comme l’ensemble de l’économie."
+        }
+      ]
+    },
+    "founding": {
+      "eyebrow": "Les 250 Fondateurs",
+      "title": "Aidez à construire le réseau que vous souhaitez utiliser pour votre entreprise.",
+      "description": "Les Organisations fondatrices établissent tôt leur position de marché, participent à des retours structurés de lancement et aident à révéler où RFxchange et AMACS doivent devenir plus clairs et utiles.",
+      "primary": "Découvrir la participation Fondatrice",
+      "secondary": "Rejoindre gratuitement",
+      "note": "La reconnaissance Fondatrice n’implique ni vérification, ni qualification, ni recommandation, ni traitement préférentiel dans la recherche."
+    },
+    "cta": {
+      "eyebrow": "Entrez dans The RFxchange",
+      "title": "Votre entreprise possède déjà des capacités. Rendez-les plus faciles à comprendre pour le marché.",
+      "description": "Établissez votre organisation, placez-la sur la carte et construisez la position de marché qui relie ce que vous faites aux besoins des autres entreprises.",
+      "primary": "Rejoindre gratuitement",
+      "secondary": "Se connecter",
+      "promise": "Soyez trouvé. Trouvez l’opportunité. Créez la connexion."
+    },
+    "images": {
+      "hero": "Vue aérienne d’une ville régionale, de voies navigables et de la géographie économique.",
+      "problem": "Professionnels discutant d’un travail opérationnel autour d’une table.",
+      "ai": "Professionnels collaborant autour de documents commerciaux.",
+      "network": "Artisans de petites entreprises travaillant dans un atelier.",
+      "audienceBusiness": "Professionnel de la fabrication dans une installation industrielle.",
+      "audienceProvider": "Professionnels de la construction examinant un chantier actif.",
+      "audienceLeader": "Paysage urbain et économique régional.",
+      "founding": "Professionnels travaillant ensemble autour d’une table.",
+      "cta": "Allées d’entrepôt remplies de stocks."
+    }
+  },
+  "founding": {
+    "metadata": {
+      "title": "Participation d’Organisation fondatrice",
+      "description": "Rejoignez la première cohorte d’entreprises RFxchange, établissez votre organisation tôt et aidez à améliorer le langage de marché et les flux qui relient besoins et capacités."
+    },
+    "hero": {
+      "eyebrow": "Les 250 Fondateurs",
+      "title": "Aidez à construire un marché où les entreprises sont plus faciles à comprendre et à connecter.",
+      "description": "Nous constituons la première cohorte d’organisations sur The RFxchange. Établissez votre entreprise tôt, confirmez les capacités que vous apportez au marché, utilisez les flux actifs du Réseau et aidez à améliorer le système pour les organisations suivantes.",
+      "primary": "Commencer avec votre organisation",
+      "secondary": "Voir ce qui est actif",
+      "price": "Adhésion Fondatrice prévue: 49 $/mois",
+      "cap": "Limitée à 250 organisations",
+      "readiness": "L’inscription payante n’ouvrira qu’une fois les droits Fondatrice approuvés et l’expérience de facturation opérationnels. Une participation de base utile restera gratuite.",
+      "stockNote": "Les photographies créent uniquement une ambiance. Elles ne représentent ni membres Fondateurs, ni résultats, ni activité en direct de RFxchange."
+    },
+    "why": {
+      "eyebrow": "Pourquoi participer maintenant",
+      "title": "Vous n’avez pas besoin d’attendre que tout The Exchange soit terminé pour créer de la valeur.",
+      "description": "La première étape utile consiste à rendre votre organisation compréhensible pour le marché. Plus ses capacités confirmées et son contexte sont clairs, plus la découverte et les futurs flux transactionnels peuvent devenir utiles.",
+      "items": [
+        {
+          "title": "Établissez votre position tôt",
+          "detail": "Créez ou revendiquez l’organisation, confirmez sa géographie et construisez une position structurée de capacités avant l’ouverture du moteur transactionnel plus large."
+        },
+        {
+          "title": "Aidez à façonner des flux pratiques",
+          "detail": "Utilisez des situations réelles pour montrer où la terminologie prête à confusion, où l’information est lourde et où les connexions nécessitent davantage de contexte."
+        },
+        {
+          "title": "Contribuez à un meilleur langage de marché",
+          "detail": "La participation réelle peut révéler des lacunes soumises à l’examen de RFxchange et AMACS, sans laisser l’usage réécrire silencieusement le standard."
+        },
+        {
+          "title": "Soyez reconnu dans la cohorte de lancement",
+          "detail": "La reconnaissance Organisation fondatrice consigne une participation historique. Ce n’est ni une vérification, ni une qualification, ni une recommandation, ni une preuve de performance supérieure."
+        }
+      ]
+    },
+    "scenario": {
+      "eyebrow": "Le problème autour duquel nous construisons",
+      "title": "Les dirigeants d’entreprise ne devraient pas avoir besoin d’expertise en achats pour expliquer un besoin.",
+      "quote": "« Notre manière de gérer les stocks n’est plus adaptée et nous avons besoin d’aide pour trouver un meilleur système. »",
+      "description": "Cette phrase peut impliquer analyse de processus, technologie de gestion des stocks, intégration de systèmes, migration de données, formation, conception de flux ou plusieurs capacités ensemble. RFxchange est conçu pour permettre à l’entreprise de partir du problème qu’elle comprend puis de confirmer une structure utile."
+    },
+    "standard": {
+      "eyebrow": "Un standard, pas une boîte noire",
+      "title": "L’IA aide à traduire. AMACS fournit la structure. Les personnes fournissent l’autorité.",
+      "description": "AMACS relie Besoin, Capacité, Preuve, Réponse, Décision et Résultat. L’IA peut suggérer des concepts pertinents, mais elle ne décide pas de ce que votre entreprise sait faire, ne crée pas silencieusement une exigence et ne déclare pas une autre organisation qualifiée.",
+      "highlight": "Les suggestions réduisent le travail. Les personnes autorisées confirment les faits du marché.",
+      "flow": [
+        "Besoin",
+        "Capacité",
+        "Preuve",
+        "Réponse",
+        "Décision",
+        "Résultat"
+      ]
+    },
+    "membership": {
+      "eyebrow": "Un niveau de participation plus profond",
+      "title": "La participation gratuite crée la densité. La participation Fondatrice soutient le lancement.",
+      "description": "Un marché utile ne peut pas placer la légitimité derrière un péage. L’adhésion Fondatrice s’adresse aux organisations qui souhaitent un rôle plus profond après avoir reçu une valeur réelle du produit.",
+      "items": [
+        {
+          "title": "Reconnaissance Organisation fondatrice",
+          "detail": "Reconnaissance historique de la cohorte de lancement, sous réserve des conditions applicables du programme."
+        },
+        {
+          "title": "Retours structurés des Fondateurs",
+          "detail": "Occasions définies de fournir des retours pratiques sur la structure des capacités, le langage commercial et les flux nouvellement publiés."
+        },
+        {
+          "title": "Soutien au lancement pour les Fondateurs",
+          "detail": "Intégration et accompagnement spécifiques pour établir une position organisationnelle utile."
+        },
+        {
+          "title": "Outils améliorés approuvés",
+          "detail": "Accès anticipé à certaines capacités payantes de productivité uniquement après mise en œuvre et approbation de chaque droit."
+        }
+      ],
+      "readiness": "Les avantages non mis en œuvre ne sont pas annoncés comme des droits actifs."
+    },
+    "comparison": {
+      "eyebrow": "Gratuit ou Fondatrice",
+      "title": "Vous n’avez pas besoin de payer pour être légitime sur The RFxchange.",
+      "description": "La participation fondamentale au marché et la découverte neutre restent séparées de la reconnaissance commerciale.",
+      "free": {
+        "title": "Organisation gratuite",
+        "subtitle": "Conçue pour une participation utile",
+        "items": [
+          "Établir ou revendiquer l’organisation.",
+          "Maintenir le profil principal de l’organisation et de ses capacités.",
+          "Accéder à la découverte autorisée par capacité et géographie.",
+          "Utiliser les flux gratuits désignés de recommandations, ressources et éducation.",
+          "Obtenir une future crédibilité substantielle uniquement par les preuves et activités.",
+          "Ne recevoir aucun avantage acheté dans l’appariement ou la qualification."
+        ],
+        "cta": "Rejoindre gratuitement"
+      },
+      "founding": {
+        "title": "Organisation fondatrice",
+        "subtitle": "Conçue pour une participation plus profonde au lancement",
+        "items": [
+          "Tout ce qui est inclus dans la participation gratuite utile.",
+          "Reconnaissance Organisation fondatrice.",
+          "Participation structurée au programme de retours de lancement.",
+          "Soutien au lancement pour les Fondateurs.",
+          "Accès anticipé à certains outils améliorés approuvés.",
+          "Aucun changement payant à la découverte neutre, à la vérification ou à la qualification."
+        ],
+        "price": "49 $/mois à l’ouverture des inscriptions",
+        "cap": "Limité à 250 organisations",
+        "cta": "Commencer avec votre organisation"
+      },
+      "footnote": "Organisation fondatrice est une participation et une reconnaissance commerciale. Ce n’est ni une Vérification, ni un statut de confiance, ni une qualification, ni une recommandation, ni une garantie de résultats commerciaux."
+    },
+    "contribution": {
+      "eyebrow": "Construisez pour votre entreprise · contribuez au marché",
+      "title": "Chaque entreprise réelle nous apprend ce qu’une entreprise hypothétique ne peut pas nous apprendre.",
+      "description": "Une entreprise peut révéler que deux capacités proches sont réellement différentes, qu’un acheteur utilise un langage mal reconnu par la structure actuelle ou qu’une recommandation nécessite davantage de contexte pour devenir utile.",
+      "highlight": "Votre organisation obtient une manière plus claire de se représenter. L’examen peut transformer les enseignements du marché en améliorations pour les organisations suivantes."
+    },
+    "boundaries": {
+      "eyebrow": "Neutralité commerciale",
+      "title": "L’argent ne rend pas une entreprise plus pertinente.",
+      "items": [
+        {
+          "title": "Pas de paiement pour le classement",
+          "detail": "Le statut Fondatrice ne place pas une organisation au-dessus d’un participant plus pertinent dans la découverte neutre."
+        },
+        {
+          "title": "Pas de paiement pour la vérification",
+          "detail": "L’adhésion ne prouve pas qu’une capacité, un justificatif ou une déclaration commerciale est vrai."
+        },
+        {
+          "title": "Pas de paiement pour la qualification",
+          "detail": "Le statut Fondatrice ne peut pas remplacer les exigences d’une opportunité particulière."
+        },
+        {
+          "title": "Aucune activité garantie",
+          "detail": "RFxchange ne garantit ni prospects, ni recommandations, ni contrats, ni revenus, ni attributions, ni financement, ni croissance."
+        }
+      ],
+      "closing": "Les avantages commerciaux et la vérité du marché restent séparés par conception."
+    },
+    "faq": {
+      "eyebrow": "Questions avant de commencer",
+      "title": "La participation Fondatrice, expliquée clairement.",
+      "items": [
+        {
+          "question": "Dois-je savoir rédiger une RFP?",
+          "answer": "Non. RFxchange est plus large que les achats formels. Vous pouvez commencer par le besoin que vous comprenez; les futurs flux RFx ajouteront la structure transactionnelle appropriée."
+        },
+        {
+          "question": "Dois-je comprendre les codes AMACS?",
+          "answer": "Non. Vous pouvez parcourir les concepts structurés, mais l’assistance en langage courant et les explications rendent le standard utilisable sans mémoriser une taxonomie."
+        },
+        {
+          "question": "La participation Fondatrice rend-elle mon entreprise Vérifiée?",
+          "answer": "Non. Organisation fondatrice est une reconnaissance de la cohorte de lancement. La vérification exige les preuves et le processus applicables."
+        },
+        {
+          "question": "L’adhésion Fondatrice améliorera-t-elle mon classement?",
+          "answer": "Non. Le paiement ne modifie ni la réalité des capacités, ni l’appariement neutre, ni la qualification, ni la crédibilité."
+        },
+        {
+          "question": "Toute la plateforme RFxchange est-elle active?",
+          "answer": "Non. Le Réseau de la est actif. RFx Core, l’évaluation, la crédibilité, les résultats et les droits payants restent des fonctionnalités futures."
+        },
+        {
+          "question": "Pourquoi participer avant que tout soit terminé?",
+          "answer": "Parce qu’une position utile sur le marché commence avant le moteur transactionnel final. Vous pouvez établir dès maintenant des informations structurées et aider à repérer les améliorations nécessaires aux flux futurs."
+        },
+        {
+          "question": "Comment l’IA est-elle utilisée?",
+          "answer": "L’IA peut aider à interpréter le langage courant et suggérer des concepts AMACS pertinents. Les suggestions restent non autoritaires jusqu’à l’action de confirmation applicable par un participant autorisé."
+        },
+        {
+          "question": "Que se passe-t-il si AMACS ne décrit pas une activité de mon entreprise?",
+          "answer": "Ne forcez pas une classification incorrecte. Conservez le sens non résolu et utilisez, lorsqu’elle est disponible, la voie de terme provisoire et d’examen."
+        },
+        {
+          "question": "Puis-je participer sans devenir Fondateur?",
+          "answer": "Oui. Une participation gratuite utile est intentionnelle. Fondatrice est un niveau de lancement plus profond, pas un péage devant une activité légitime du Réseau."
+        }
+      ]
+    },
+    "cta": {
+      "eyebrow": "Les 250 Fondateurs",
+      "title": "Construisez votre position maintenant. Aidez à améliorer le marché qui vient ensuite.",
+      "description": "Établissez votre organisation, confirmez ce que votre entreprise sait réellement faire et rejoignez la cohorte qui transforme un Réseau actif en un marché plus compréhensible.",
+      "primary": "Commencer avec votre organisation",
+      "secondary": "Rejoindre gratuitement",
+      "note": "Prévu à 49 $/mois lors de l’ouverture commerciale approuvée · limité à 250 organisations · la participation principale reste gratuite."
+    },
+    "images": {
+      "hero": "Allées d’entrepôt remplies de stocks.",
+      "contribution": "Professionnels collaborant autour de documents commerciaux."
+    }
+  }
+}

@@ -1,1 +1,11 @@
-{"geographyTitle":"Geography & marker","geographyLoading":"Loading geography…","geographyUnavailable":"Temporarily unavailable","marketProfileTitle":"Market profile","marketProfileLoading":"Loading market profile…","marketProfileUnavailable":"Market profile information is temporarily unavailable. Your organization account remains available; retry this page to reload the panel.","enrichmentTitle":"Additional organization information","enrichmentLoading":"Loading credentials, media, and locations…","enrichmentUnavailable":"Credentials, media, and location information are temporarily unavailable. Your organization account remains available; retry this page to reload the panel."}
+{
+  "geographyTitle": "Geography & marker",
+  "geographyLoading": "Loading geography…",
+  "geographyUnavailable": "Temporarily unavailable",
+  "marketProfileTitle": "Market profile",
+  "marketProfileLoading": "Loading market profile…",
+  "marketProfileUnavailable": "Market profile information is temporarily unavailable. Your organization account remains available; retry this page to reload the panel.",
+  "enrichmentTitle": "Additional organization information",
+  "enrichmentLoading": "Loading credentials, media, and locations…",
+  "enrichmentUnavailable": "Credentials, media, and location information are temporarily unavailable. Your organization account remains available; retry this page to reload the panel."
+}

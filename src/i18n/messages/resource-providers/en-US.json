@@ -1,9 +1,58 @@
 {
-  "eyebrow":"Organization settings","title":"Request Resource Provider Status","intro":"Apply for Resource Provider status after completing your organization profile.",
-  "boundary":"Resource Provider status is separate from Organization Verification, endorsement, paid benefits, eligibility, and capacity.",
-  "authoritative":"Organization information","application":"Provider application","profile":"Provider service profile","history":"Application history","emptyHistory":"No application activity yet.",
-  "fields":{"categories":"Provider categories","other":"Other category description","serviceName":"Service or program name","serviceDescription":"Service or program description","capacityNote":"Capacity note (optional; capacity remains unknown when blank)","served":"Organizations or people served","eligibility":"Eligibility requirements","intake":"Intake or referral method","modality":"Availability modality","languages":"Supported languages","contactName":"Official contact name","contactRole":"Official contact role","contactEmail":"Official contact email","contactPhone":"Official contact phone","evidence":"Private supporting asset IDs (optional)","evidenceHint":"Comma separated; these references remain private.","response":"Response to information request","availability":"Current availability","attestation":"I confirm that I am allowed to represent this organization."},
-  "categories":{"economic-development":"Economic development organization","business-association":"Chamber or business association","capital-provider":"Lender or capital provider","education-workforce":"Education or workforce institution","government-assistance":"Government assistance program","technical-assistance":"Technical-assistance provider","incubator-accelerator-coworking":"Incubator, accelerator or coworking organization","professional-support":"Legal, accounting or professional support organization","procurement-contracting-assistance":"Procurement or contracting assistance organization","other":"Other"},
-  "actions":{"save":"Save draft","submit":"Submit for review","resubmit":"Resubmit response","update":"Update service profile"},
-  "states":{"saving":"Saving…","saved":"Draft saved.","submitted":"Application submitted.","resubmitted":"Response resubmitted.","updated":"Service profile updated.","error":"The action could not be completed. Review the form or reload the current version."}
+  "eyebrow": "Organization settings",
+  "title": "Request Resource Provider Status",
+  "intro": "Apply for Resource Provider status after completing your organization profile.",
+  "boundary": "Resource Provider status is separate from Organization Verification, endorsement, paid benefits, eligibility, and capacity.",
+  "authoritative": "Organization information",
+  "application": "Provider application",
+  "profile": "Provider service profile",
+  "history": "Application history",
+  "emptyHistory": "No application activity yet.",
+  "fields": {
+    "categories": "Provider categories",
+    "other": "Other category description",
+    "serviceName": "Service or program name",
+    "serviceDescription": "Service or program description",
+    "capacityNote": "Capacity note (optional; capacity remains unknown when blank)",
+    "served": "Organizations or people served",
+    "eligibility": "Eligibility requirements",
+    "intake": "Intake or referral method",
+    "modality": "Availability modality",
+    "languages": "Supported languages",
+    "contactName": "Official contact name",
+    "contactRole": "Official contact role",
+    "contactEmail": "Official contact email",
+    "contactPhone": "Official contact phone",
+    "evidence": "Private supporting asset IDs (optional)",
+    "evidenceHint": "Comma separated; these references remain private.",
+    "response": "Response to information request",
+    "availability": "Current availability",
+    "attestation": "I confirm that I am allowed to represent this organization."
+  },
+  "categories": {
+    "economic-development": "Economic development organization",
+    "business-association": "Chamber or business association",
+    "capital-provider": "Lender or capital provider",
+    "education-workforce": "Education or workforce institution",
+    "government-assistance": "Government assistance program",
+    "technical-assistance": "Technical-assistance provider",
+    "incubator-accelerator-coworking": "Incubator, accelerator or coworking organization",
+    "professional-support": "Legal, accounting or professional support organization",
+    "procurement-contracting-assistance": "Procurement or contracting assistance organization",
+    "other": "Other"
+  },
+  "actions": {
+    "save": "Save draft",
+    "submit": "Submit for review",
+    "resubmit": "Resubmit response",
+    "update": "Update service profile"
+  },
+  "states": {
+    "saving": "Saving…",
+    "saved": "Draft saved.",
+    "submitted": "Application submitted.",
+    "resubmitted": "Response resubmitted.",
+    "updated": "Service profile updated.",
+    "error": "The action could not be completed. Review the form or reload the current version."
+  }
 }

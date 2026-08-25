@@ -1,1 +1,15 @@
-{"ariaLabel":"Resource Network","eyebrow":"Official Resource Provider network","title":"Resources that serve this locality","supporting":"Results use provider-maintained service territory and availability. Match reasons are shown; capacity is never inferred.","search":"Search services","availability":"Availability","providers":"providers","empty":"No matching published providers","requests":"Provider requests","manage":"Manage provider discovery and resources","applyFilters":"Apply filters","viewCommunication":"View communication","noMessages":"No private messages have been recorded for this request."}
+{
+  "ariaLabel": "Resource Network",
+  "eyebrow": "Official Resource Provider network",
+  "title": "Resources that serve this locality",
+  "supporting": "Results use provider-maintained service territory and availability. Match reasons are shown; capacity is never inferred.",
+  "search": "Search services",
+  "availability": "Availability",
+  "providers": "providers",
+  "empty": "No matching published providers",
+  "requests": "Provider requests",
+  "manage": "Manage provider discovery and resources",
+  "applyFilters": "Apply filters",
+  "viewCommunication": "View communication",
+  "noMessages": "No private messages have been recorded for this request."
+}

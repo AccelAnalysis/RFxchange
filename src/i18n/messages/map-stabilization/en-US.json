@@ -1,1 +1,7 @@
-{"plotCandidate":"Plot this location","confirmCandidate":"Confirm map position","spatialModelFailure":"The locality map is temporarily unavailable. Your setup progress is saved; retry to load the map.","homeSceneFailure":"Your marker is active, but the map could not load your saved home view. Retry to enter the Exchange.","retry":"Retry"}
+{
+  "plotCandidate": "Plot this location",
+  "confirmCandidate": "Confirm map position",
+  "spatialModelFailure": "The locality map is temporarily unavailable. Your setup progress is saved; retry to load the map.",
+  "homeSceneFailure": "Your marker is active, but the map could not load your saved home view. Retry to enter the Exchange.",
+  "retry": "Retry"
+}

@@ -1,12 +1,78 @@
 {
-  "ariaLabel":"Area segnalazioni RFxchange","eyebrow":"Segnalazioni dell’organizzazione","title":"Rete di segnalazioni","create":"Nuova segnalazione",
-  "list":{"label":"Segnalazioni commerciali"},"empty":{"title":"Nessuna segnalazione","body":"Invia una segnalazione intenzionale a un destinatario nominato. La piattaforma non inventa attività."},
-  "roles":{"sender":"Organizzazione mittente","recipient":"Organizzazione destinataria"},"fields":{"purpose":"Scopo","urgency":"Urgenza","contact":"Contatto preferito","notification":"Notifica","expires":"Scade"},
-  "notificationStates":{"deliveryOutcomeUnknown":"Esito della consegna sconosciuto: è necessaria la riconciliazione dell’assistenza prima di un altro tentativo."},
-  "detail":{"boundary":"Questo contesto è dichiarato da un partecipante. Non è approvazione, risultato verificato, contratto o vendita."},
-  "path":{"label":"Percorso della segnalazione","visible":"È mostrato un percorso reale autorizzato per la segnalazione {status}.","unavailable":"Non viene tracciato alcun percorso perché manca un punto autorizzato e sicuro o lo stato non lo consente."},
-  "actions":{"accepted":"Accetta","declined":"Rifiuta","contacted":"Registra contatto","closed":"Chiudi","retry":"Riprova notifica"},
-  "states":{"error":"Impossibile completare l’azione. Aggiorna e riprova.","sent":"Segnalazione inviata. Consegna e accettazione restano separate.","accepted":"Segnalazione accettata.","declined":"Segnalazione rifiutata.","contacted":"Contatto registrato.","closed":"Segnalazione chiusa con esito non verificato dichiarato da un partecipante.","retryQueued":"Il recupero ha riutilizzato la comunicazione esistente senza duplicare la segnalazione."},
-  "composer":{"title":"Invia una segnalazione commerciale","close":"Chiudi compositore","recipientType":"Tipo di destinatario","existing":"Organizzazione RFxchange","external":"Invita destinatario esterno","organization":"Organizzazione destinataria","choose":"Scegli un’organizzazione","name":"Nome destinatario","email":"Email destinatario","summary":"Riepilogo segnalazione","consent":"Confermo che questo destinatario può ricevere esattamente il nome dell’organizzazione e questo riepilogo.","review":"Rivedi condivisione e formazione","back":"Indietro","sending":"Invio…","acknowledge":"Conferma e invia"},
-  "education":{"eyebrow":"Formazione iniziale","title":"Comprendi cosa significa inviare","body":"Una segnalazione appartiene alla tua organizzazione e riguarda un destinatario nominato per un’introduzione commerciale.","recipient":"Destinatario","shared":"Dati esatti condivisi","sharedValue":"Nome dell’organizzazione mittente e riepilogo scritto dal partecipante","states":"Invio, consegna, accettazione, contatto ed esito sono stati distinti. Nessuno implica approvazione o successo.","next":"Il destinatario può accettare o rifiutare. La segnalazione può scadere e la consegna può essere ritentata senza duplicati."}
+  "ariaLabel": "Area segnalazioni RFxchange",
+  "eyebrow": "Segnalazioni dell’organizzazione",
+  "title": "Rete di segnalazioni",
+  "create": "Nuova segnalazione",
+  "list": {
+    "label": "Segnalazioni commerciali"
+  },
+  "empty": {
+    "title": "Nessuna segnalazione",
+    "body": "Invia una segnalazione intenzionale a un destinatario nominato. La piattaforma non inventa attività."
+  },
+  "roles": {
+    "sender": "Organizzazione mittente",
+    "recipient": "Organizzazione destinataria"
+  },
+  "fields": {
+    "purpose": "Scopo",
+    "urgency": "Urgenza",
+    "contact": "Contatto preferito",
+    "notification": "Notifica",
+    "expires": "Scade"
+  },
+  "notificationStates": {
+    "deliveryOutcomeUnknown": "Esito della consegna sconosciuto: è necessaria la riconciliazione dell’assistenza prima di un altro tentativo."
+  },
+  "detail": {
+    "boundary": "Questo contesto è dichiarato da un partecipante. Non è approvazione, risultato verificato, contratto o vendita."
+  },
+  "path": {
+    "label": "Percorso della segnalazione",
+    "visible": "È mostrato un percorso reale autorizzato per la segnalazione {status}.",
+    "unavailable": "Non viene tracciato alcun percorso perché manca un punto autorizzato e sicuro o lo stato non lo consente."
+  },
+  "actions": {
+    "accepted": "Accetta",
+    "declined": "Rifiuta",
+    "contacted": "Registra contatto",
+    "closed": "Chiudi",
+    "retry": "Riprova notifica"
+  },
+  "states": {
+    "error": "Impossibile completare l’azione. Aggiorna e riprova.",
+    "sent": "Segnalazione inviata. Consegna e accettazione restano separate.",
+    "accepted": "Segnalazione accettata.",
+    "declined": "Segnalazione rifiutata.",
+    "contacted": "Contatto registrato.",
+    "closed": "Segnalazione chiusa con esito non verificato dichiarato da un partecipante.",
+    "retryQueued": "Il recupero ha riutilizzato la comunicazione esistente senza duplicare la segnalazione."
+  },
+  "composer": {
+    "title": "Invia una segnalazione commerciale",
+    "close": "Chiudi compositore",
+    "recipientType": "Tipo di destinatario",
+    "existing": "Organizzazione RFxchange",
+    "external": "Invita destinatario esterno",
+    "organization": "Organizzazione destinataria",
+    "choose": "Scegli un’organizzazione",
+    "name": "Nome destinatario",
+    "email": "Email destinatario",
+    "summary": "Riepilogo segnalazione",
+    "consent": "Confermo che questo destinatario può ricevere esattamente il nome dell’organizzazione e questo riepilogo.",
+    "review": "Rivedi condivisione e formazione",
+    "back": "Indietro",
+    "sending": "Invio…",
+    "acknowledge": "Conferma e invia"
+  },
+  "education": {
+    "eyebrow": "Formazione iniziale",
+    "title": "Comprendi cosa significa inviare",
+    "body": "Una segnalazione appartiene alla tua organizzazione e riguarda un destinatario nominato per un’introduzione commerciale.",
+    "recipient": "Destinatario",
+    "shared": "Dati esatti condivisi",
+    "sharedValue": "Nome dell’organizzazione mittente e riepilogo scritto dal partecipante",
+    "states": "Invio, consegna, accettazione, contatto ed esito sono stati distinti. Nessuno implica approvazione o successo.",
+    "next": "Il destinatario può accettare o rifiutare. La segnalazione può scadere e la consegna può essere ritentata senza duplicati."
+  }
 }

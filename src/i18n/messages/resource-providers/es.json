@@ -1,1 +1,58 @@
-{"eyebrow":"Configuración de la organización","title":"Solicitar estado de proveedor de recursos","intro":"Solicita el estado independiente y regulado de Proveedor Oficial de Recursos después de completar el perfil.","boundary":"Proveedor Oficial de Recursos no significa Organización Verificada, recomendación, beneficio pagado ni promesa de elegibilidad o capacidad.","authoritative":"Referencias autorizadas de la organización","application":"Solicitud de proveedor","profile":"Perfil de servicios del proveedor","history":"Historial de la solicitud","emptyHistory":"Aún no hay actividad.","fields":{"categories":"Categorías","other":"Descripción de otra categoría","serviceName":"Nombre del servicio o programa","serviceDescription":"Descripción del servicio o programa","capacityNote":"Nota de capacidad (opcional; en blanco significa desconocida)","served":"Organizaciones o personas atendidas","eligibility":"Requisitos de elegibilidad","intake":"Método de admisión o referencia","modality":"Modalidad","languages":"Idiomas admitidos","contactName":"Nombre del contacto oficial","contactRole":"Cargo del contacto","contactEmail":"Correo del contacto","contactPhone":"Teléfono del contacto","evidence":"IDs de pruebas privadas (opcional)","evidenceHint":"Separados por comas; se verifica la propiedad y no son públicos.","response":"Respuesta a la solicitud de información","availability":"Disponibilidad mantenida","attestation":"Confirmo que puedo representar a esta organización."},"categories":{"economic-development":"Organización de desarrollo económico","business-association":"Cámara o asociación empresarial","capital-provider":"Prestamista o proveedor de capital","education-workforce":"Institución educativa o laboral","government-assistance":"Programa de asistencia pública","technical-assistance":"Proveedor de asistencia técnica","incubator-accelerator-coworking":"Incubadora, aceleradora o coworking","professional-support":"Apoyo legal, contable o profesional","procurement-contracting-assistance":"Asistencia de compras o contratación","other":"Otra"},"actions":{"save":"Guardar borrador","submit":"Enviar a revisión","resubmit":"Reenviar respuesta","update":"Actualizar perfil"},"states":{"saving":"Guardando…","saved":"Borrador guardado.","submitted":"Solicitud enviada.","resubmitted":"Respuesta reenviada.","updated":"Perfil actualizado.","error":"No se pudo completar la acción. Revisa el formulario o actualiza la versión."}}
+{
+  "eyebrow": "Configuración de la organización",
+  "title": "Solicitar estado de proveedor de recursos",
+  "intro": "Solicita el estado independiente y de Proveedor Oficial de Recursos después de completar el perfil.",
+  "boundary": "Proveedor Oficial de Recursos no significa Organización Verificada, recomendación, beneficio pagado ni promesa de elegibilidad o capacidad.",
+  "authoritative": "Referencias autorizadas de la organización",
+  "application": "Solicitud de proveedor",
+  "profile": "Perfil de servicios del proveedor",
+  "history": "Historial de la solicitud",
+  "emptyHistory": "Aún no hay actividad.",
+  "fields": {
+    "categories": "Categorías",
+    "other": "Descripción de otra categoría",
+    "serviceName": "Nombre del servicio o programa",
+    "serviceDescription": "Descripción del servicio o programa",
+    "capacityNote": "Nota de capacidad (opcional; en blanco significa desconocida)",
+    "served": "Organizaciones o personas atendidas",
+    "eligibility": "Requisitos de elegibilidad",
+    "intake": "Método de admisión o referencia",
+    "modality": "Modalidad",
+    "languages": "Idiomas admitidos",
+    "contactName": "Nombre del contacto oficial",
+    "contactRole": "Cargo del contacto",
+    "contactEmail": "Correo del contacto",
+    "contactPhone": "Teléfono del contacto",
+    "evidence": "IDs de pruebas privadas (opcional)",
+    "evidenceHint": "Separados por comas; se verifica la propiedad y no son públicos.",
+    "response": "Respuesta a la solicitud de información",
+    "availability": "Disponibilidad mantenida",
+    "attestation": "Confirmo que puedo representar a esta organización."
+  },
+  "categories": {
+    "economic-development": "Organización de desarrollo económico",
+    "business-association": "Cámara o asociación empresarial",
+    "capital-provider": "Prestamista o proveedor de capital",
+    "education-workforce": "Institución educativa o laboral",
+    "government-assistance": "Programa de asistencia pública",
+    "technical-assistance": "Proveedor de asistencia técnica",
+    "incubator-accelerator-coworking": "Incubadora, aceleradora o coworking",
+    "professional-support": "Apoyo legal, contable o profesional",
+    "procurement-contracting-assistance": "Asistencia de compras o contratación",
+    "other": "Otra"
+  },
+  "actions": {
+    "save": "Guardar borrador",
+    "submit": "Enviar a revisión",
+    "resubmit": "Reenviar respuesta",
+    "update": "Actualizar perfil"
+  },
+  "states": {
+    "saving": "Guardando…",
+    "saved": "Borrador guardado.",
+    "submitted": "Solicitud enviada.",
+    "resubmitted": "Respuesta reenviada.",
+    "updated": "Perfil actualizado.",
+    "error": "No se pudo completar la acción. Revisa el formulario o actualiza la versión."
+  }
+}
