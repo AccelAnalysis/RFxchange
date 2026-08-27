@@ -9,6 +9,7 @@ import {
   authorizeScopedAdministrativeAction,
   createScopedAdministrativeActionRequirement,
 } from "@/src/domain/admin-authorization/grants";
+import { requireCataloguedAdminPermission } from "@/src/domain/admin-authorization/model";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
 import { resolveAdminPortalAccess } from "@/src/infrastructure/auth/admin-route-runtime";
 import { loadAdminDomainSurface } from "@/src/infrastructure/admin/domain-operations-runtime";
@@ -51,7 +52,7 @@ export async function AdminDomainPage({
   if (!destination) notFound();
 
   const now = new Date().toISOString();
-  const permissions = access.authority.effectivePermissions.filter((permission) =>
+  const permissions = access.authority.effectivePermissions.map(requireCataloguedAdminPermission).filter((permission) =>
     authorizeScopedAdministrativeAction(
       access.authority,
       access.grants,
