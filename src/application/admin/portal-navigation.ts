@@ -9,8 +9,8 @@ import {
 
 export const ADMIN_PORTAL_SECTION_KEYS = [
   "overview", "work-queues", "organizations", "users-access", "claims-verification",
-  "rfx-opportunities", "referrals-teaming", "resource-providers", "credibility", "trust-safety",
-  "geographies", "institutions-partners", "commerce", "support-feedback", "communications",
+  "geographies", "institutions-partners", "rfx-opportunities", "referrals-teaming",
+  "resource-providers", "credibility", "trust-safety", "commerce", "support-feedback", "communications",
   "analytics", "policies-configuration", "integrations-system", "audit-security",
 ] as const;
 export type AdminPortalSectionKey = (typeof ADMIN_PORTAL_SECTION_KEYS)[number];
