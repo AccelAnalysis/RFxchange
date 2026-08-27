@@ -86,7 +86,7 @@ export interface ImplementedAdminRuntimeDestination {
 
 const OPERATING=P("admin.authority.read","analytics.dashboard.read","organization.claim.read","provider.application.read","support.case.read","trust.report.read","rfx.record.read","rfx.moderation.review","credibility.organization.verify","commerce.account.read","system.health.read","audit.event.read");
 function href(path:`/admin/${string}`,scope:AdminGrantScope):`/admin/${string}` { return scope.kind==="GLOBAL"?path:`${path}?scope=${encodeURIComponent(scope.value)}` as `/admin/${string}`; }
-const R=(key:ImplementedAdminRuntimeDestinationKey,labelKey:ImplementedAdminRuntimeLabelKey,description:string,permissions:readonly AdminPermissionKey[],supportedScopeKinds:readonly AdminGrantScope["kind"][],path:`/admin/${string}`):ImplementedAdminRuntimeRegistration=>Object.freeze({key,labelKey,description,permissions,supportedScopeKinds:Object.freeze(supportedScopeKinds),href:(scope)=>href(path,scope)});
+const R=(key:ImplementedAdminRuntimeDestinationKey,labelKey:ImplementedAdminRuntimeLabelKey,description:string,permissions:readonly AdminPermissionKey[],supportedScopeKinds:readonly AdminGrantScope["kind"][],path:`/admin/${string}`):ImplementedAdminRuntimeRegistration=>Object.freeze({key,labelKey,description,permissions,supportedScopeKinds:Object.freeze(supportedScopeKinds),href:(scope:AdminGrantScope)=>href(path,scope)});
 
 const IMPLEMENTED_ADMIN_RUNTIME_REGISTRY: readonly ImplementedAdminRuntimeRegistration[] = Object.freeze([
   R("overview","adminOverview","See administrative work and operating conditions that need attention now.",OPERATING,["GLOBAL"],"/admin/overview"),
@@ -108,7 +108,7 @@ const IMPLEMENTED_ADMIN_RUNTIME_REGISTRY: readonly ImplementedAdminRuntimeRegist
   R("policies-configuration","adminPoliciesConfiguration","Inspect governed effective configuration and version history.",P("platform.policy.read","config.value.read"),["GLOBAL"],"/admin/configuration"),
   R("integrations-system","adminIntegrationsSystem","Inspect measured system health and background operations; unknown remains unknown.",P("system.health.read"),["GLOBAL"],"/admin/system"),
   R("audit-security","adminAuditSecurity","Inspect immutable administrative evidence and access oversight.",P("audit.event.read","admin.authority.read"),["GLOBAL","ORGANIZATION","CASE"],"/admin/audit-security"),
-  Object.freeze({key:"organization-claims",labelKey:"organizationClaims",description:"Supporting authority-claim adjudication workflow.",permissions:P("organization.claim.read"),supportedScopeKinds:Object.freeze(["GLOBAL","GEOGRAPHY"] as const),href:(scope:AdminGrantScope)=>scope.kind==="GEOGRAPHY"?`/admin/organization-claims?geographyId=${encodeURIComponent(String(scope.targetId))}`:"/admin/organization-claims"}),
+  Object.freeze({key:"organization-claims",labelKey:"organizationClaims",description:"Supporting authority-claim adjudication workflow.",permissions:P("organization.claim.read"),supportedScopeKinds:Object.freeze(["GLOBAL","GEOGRAPHY"] as const),href:(scope:AdminGrantScope)=>(scope.kind==="GEOGRAPHY"?`/admin/organization-claims?geographyId=${encodeURIComponent(String(scope.targetId))}`:"/admin/organization-claims") as `/admin/${string}`}),
 ]);
 
 function scopePriority(scope:AdminGrantScope):number{return scope.kind==="GLOBAL"?0:1;}
