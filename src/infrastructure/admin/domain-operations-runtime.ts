@@ -2,7 +2,7 @@ import { FieldPath, type Firestore } from "firebase-admin/firestore";
 
 import { adminDomainSurface, type AdminDomainSurfaceKey, type AdminDomainSurfaceDefinition } from "../../application/admin/domain-operations.ts";
 import type { AdminGrantScope } from "../../domain/admin-authorization/grants.ts";
-import type { AdminPermissionKey } from "../../domain/admin-authorization/model.ts";
+import { requireCataloguedAdminPermission, type AdminPermissionKey } from "../../domain/admin-authorization/model.ts";
 
 export interface AdminDomainFact { readonly label: string; readonly value: string; }
 export interface AdminDomainRecord {
@@ -43,7 +43,7 @@ function firstField(source: FirestoreRecord, fields: readonly string[]): string 
   return null;
 }
 function normalized(value: string | null): string { return (value ?? "").trim().toLowerCase(); }
-function has(permissions: readonly AdminPermissionKey[], permission: AdminPermissionKey): boolean { return permissions.includes(permission); }
+function has(permissions: readonly AdminPermissionKey[], permission: string): boolean { return permissions.includes(requireCataloguedAdminPermission(permission)); }
 function isAttention(status: string | null): boolean {
   const value = normalized(status);
   return ["submitted","conflict","evidence-requested","information-requested","needs-review","action-required","overdue","failed","retryable-failure","terminal-failure","restricted","suspended","integrity-hold","degraded","critical","unknown"].some((candidate) => value.includes(candidate));
