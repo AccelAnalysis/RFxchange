@@ -14,6 +14,7 @@ import {
   FirestoreUserIdentityRepository,
 } from "@/src/infrastructure/firestore/repositories";
 import type { OrganizationProfileId } from "@/src/domain/organizations/model";
+import { requireCataloguedAdminPermission } from "@/src/domain/admin-authorization/model";
 import styles from "@/src/components/admin/AdminDomainWorkspace.module.css";
 
 export default async function Page({params}:Readonly<{params:Promise<{userId:string}>}>){
@@ -22,12 +23,13 @@ export default async function Page({params}:Readonly<{params:Promise<{userId:str
   if(access.kind==="unauthenticated")redirect(`/signin?returnTo=${returnTo}`);
   if(access.kind==="privileged-access-denied"&&access.reason==="recent-reauthentication-required")redirect(`/signin?returnTo=${returnTo}`);
   if(access.kind!=="authorized")notFound();
-  if(!access.authority.effectivePermissions.includes("user.profile.read")||!access.authority.effectivePermissions.includes("user.access.read"))notFound();
+  const effectivePermissions=access.authority.effectivePermissions.map(requireCataloguedAdminPermission);
+  if(!effectivePermissions.includes(requireCataloguedAdminPermission("user.profile.read"))||!effectivePermissions.includes(requireCataloguedAdminPermission("user.access.read")))notFound();
   const destinations=access.destinations.filter((candidate)=>candidate.key==="users-access"); if(!destinations.length)notFound();
   const db=getServerFirestore(); const users=new FirestoreUserIdentityRepository(db); const membershipsRepo=new FirestoreOrganizationMembershipRepository(db); const authRepo=new FirestoreOrganizationUserAuthorizationRepository(db); const profilesRepo=new FirestoreOrganizationProfileRepository(db);
   const user=await users.getById(userId as Parameters<typeof users.getById>[0]); if(!user)notFound();
   const memberships=await membershipsRepo.listByUserId(user.id); const authorizations=await authRepo.listByUserId(user.id);
-  const allowed=destinations.find((destination)=>destination.scope.kind==="GLOBAL")??destinations.find((destination)=>destination.scope.kind==="ORGANIZATION"&&memberships.some((membership)=>String(membership.organizationId)===String(destination.scope.targetId))); if(!allowed)notFound();
+  const allowed=destinations.find((destination)=>destination.scope.kind==="GLOBAL")??destinations.find((destination)=>destination.scope.kind==="ORGANIZATION"&&memberships.some((membership)=>String(membership.organizationId)===String(destination.scope.kind==="ORGANIZATION"?destination.scope.targetId:""))); if(!allowed)notFound();
   const profiles=(await Promise.all(memberships.map(async(membership)=>{const snapshot=await db.collection("organizationProfiles").where("organizationId","==",membership.organizationId).limit(1).get();const id=snapshot.docs[0]?.id;return id?profilesRepo.getById(id as OrganizationProfileId):null;}))).filter((value):value is NonNullable<typeof value>=>value!==null);
   const projection=buildUserAccess360(access.authority,{user,memberships,organizationAuthorizations:authorizations,organizationProfiles:profiles,lastLoginAt:null});
   return <AdminPortalShell destinations={access.destinations} currentDestination="users-access" currentScope={allowed.scope.value}>
