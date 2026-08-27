@@ -108,13 +108,13 @@ const IMPLEMENTED_ADMIN_RUNTIME_REGISTRY: readonly ImplementedAdminRuntimeRegist
   R("policies-configuration","adminPoliciesConfiguration","Inspect governed effective configuration and version history.",P("platform.policy.read","config.value.read"),["GLOBAL"],"/admin/configuration"),
   R("integrations-system","adminIntegrationsSystem","Inspect measured system health and background operations; unknown remains unknown.",P("system.health.read"),["GLOBAL"],"/admin/system"),
   R("audit-security","adminAuditSecurity","Inspect immutable administrative evidence and access oversight.",P("audit.event.read","admin.authority.read"),["GLOBAL","ORGANIZATION","CASE"],"/admin/audit-security"),
-  Object.freeze({key:"organization-claims",labelKey:"organizationClaims",description:"Supporting authority-claim adjudication workflow.",permissions:P("organization.claim.read"),supportedScopeKinds:Object.freeze(["GLOBAL","GEOGRAPHY"] as const),href:(scope)=>scope.kind==="GEOGRAPHY"?`/admin/organization-claims?geographyId=${encodeURIComponent(String(scope.targetId))}`:"/admin/organization-claims"}),
+  Object.freeze({key:"organization-claims",labelKey:"organizationClaims",description:"Supporting authority-claim adjudication workflow.",permissions:P("organization.claim.read"),supportedScopeKinds:Object.freeze(["GLOBAL","GEOGRAPHY"] as const),href:(scope:AdminGrantScope)=>scope.kind==="GEOGRAPHY"?`/admin/organization-claims?geographyId=${encodeURIComponent(String(scope.targetId))}`:"/admin/organization-claims"}),
 ]);
 
 function scopePriority(scope:AdminGrantScope):number{return scope.kind==="GLOBAL"?0:1;}
 export function visibleImplementedAdminRuntimeDestinations(context:PlatformAdministratorAuthorityContext,grants:readonly AdminPermissionGrant[],now:string):readonly ImplementedAdminRuntimeDestination[]{
   return Object.freeze(IMPLEMENTED_ADMIN_RUNTIME_REGISTRY.flatMap((registration)=>{
-    const candidateScopes=[...new Map(grants.filter((grant)=>grant.administratorId===context.administratorId&&registration.permissions.includes(grant.permission)&&registration.supportedScopeKinds.includes(grant.scope.kind)).map((grant)=>[grant.scope.value,grant.scope] as const)).values()].sort((a,b)=>scopePriority(a)-scopePriority(b)||a.value.localeCompare(b.value));
+    const candidateScopes=[...new Map(grants.filter((grant)=>grant.administratorId===context.administratorId&&registration.permissions.includes(grant.permission)&&registration.supportedScopeKinds.includes(grant.scope.kind)).map((grant)=>[grant.scope.value,grant.scope] as const)).values()].sort((a:AdminGrantScope,b:AdminGrantScope)=>scopePriority(a)-scopePriority(b)||a.value.localeCompare(b.value));
     return candidateScopes.flatMap((scope)=>{
       for(const permission of registration.permissions){
         const decision=authorizeScopedAdministrativeAction(context,grants,createScopedAdministrativeActionRequirement({permission,access:"read",scope:scope.value}),{now,satisfiedConditionKeys:Object.freeze([])});
