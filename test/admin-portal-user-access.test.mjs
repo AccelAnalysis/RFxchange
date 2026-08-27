@@ -97,7 +97,13 @@ test("implemented runtime registry exposes only live destinations with current e
     ],
     now,
   );
-  assert.deepEqual(destinations.map((destination) => destination.key), IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS);
+  assert.deepEqual(destinations.map((destination) => destination.key), [
+    "overview",
+    "work-queues",
+    "claims-verification",
+    "resource-providers",
+    "organization-claims",
+  ]);
   assert.deepEqual(destinations.map((destination) => destination.href), [
     "/admin/overview",
     "/admin/work-queues",
