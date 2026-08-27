@@ -85,10 +85,8 @@ test("navigation hides unauthorized domains and server guard blocks them", () =>
 
 test("implemented runtime registry exposes only live destinations with current exact grants", () => {
   assert.deepEqual(IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS, [
-    "overview",
-    "work-queues",
+    ...ADMIN_PORTAL_SECTION_KEYS,
     "organization-claims",
-    "resource-providers",
   ]);
 
   const destinations = visibleImplementedAdminRuntimeDestinations(
@@ -103,8 +101,9 @@ test("implemented runtime registry exposes only live destinations with current e
   assert.deepEqual(destinations.map((destination) => destination.href), [
     "/admin/overview",
     "/admin/work-queues",
-    "/admin/organization-claims",
+    "/admin/claims-verification",
     "/admin/resource-providers",
+    "/admin/organization-claims",
   ]);
 });
 
@@ -126,7 +125,7 @@ test("implemented runtime navigation preserves bounded grant scope and filters f
   );
 
   assert.deepEqual(destinations.map((destination) => destination.key), ["resource-providers"]);
-  assert.equal(destinations[0].href, "/admin/resource-providers?organizationId=org-a");
+  assert.equal(destinations[0].href, "/admin/resource-providers?scope=ORGANIZATION%3Aorg-a");
   assert.equal(destinations[0].scope.value, "ORGANIZATION:org-a");
 });
 
@@ -146,8 +145,8 @@ test("implemented runtime navigation preserves every distinct authorized bounded
     "resource-providers:ORGANIZATION:org-b",
   ]);
   assert.deepEqual(destinations.map((destination) => destination.href), [
-    "/admin/resource-providers?organizationId=org-a",
-    "/admin/resource-providers?organizationId=org-b",
+    "/admin/resource-providers?scope=ORGANIZATION%3Aorg-a",
+    "/admin/resource-providers?scope=ORGANIZATION%3Aorg-b",
   ]);
 });
 
@@ -159,7 +158,7 @@ test("permission visibility without an active implemented-runtime grant grants n
       [grant(technical, "system.health.read", "GLOBAL", "grant-system-health")],
       now,
     ).map((destination) => destination.key),
-    ["overview", "work-queues"],
+    ["overview", "work-queues", "communications", "integrations-system"],
   );
   assert.deepEqual(
     visibleImplementedAdminRuntimeDestinations(
