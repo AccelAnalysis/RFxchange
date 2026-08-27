@@ -60,7 +60,7 @@ export async function AdminDomainPage({
       { now, satisfiedConditionKeys: Object.freeze([]) },
     ).kind === "allow",
   );
-  if (surfaceKey === "users-access" && (!permissions.includes("user.profile.read") || !permissions.includes("user.access.read"))) notFound();
+  if (surfaceKey === "users-access" && (!permissions.includes(requireCataloguedAdminPermission("user.profile.read")) || !permissions.includes(requireCataloguedAdminPermission("user.access.read")))) notFound();
 
   const data = await loadAdminDomainSurface({
     db: getServerFirestore(), key: surfaceKey, scope: destination.scope, permissions,
