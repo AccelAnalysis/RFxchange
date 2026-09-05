@@ -11,8 +11,9 @@ test("deployment discovery binds payment secrets only to the payment endpoint", 
 });
 
 test("an unconfigured payment webhook fails closed before provider or datastore work", async () => {
-  const saved = { mode: process.env.RFXCHANGE_STRIPE_MODE, secret: process.env.STRIPE_WEBHOOK_SECRET, fetch: globalThis.fetch };
+  const saved = { mode: process.env.RFXCHANGE_STRIPE_MODE, price: process.env.RFXCHANGE_FOUNDING_STRIPE_TEST_PRICE_ID, secret: process.env.STRIPE_WEBHOOK_SECRET, fetch: globalThis.fetch };
   process.env.RFXCHANGE_STRIPE_MODE = "test";
+  process.env.RFXCHANGE_FOUNDING_STRIPE_TEST_PRICE_ID = "price_deployment_isolation_test";
   delete process.env.STRIPE_WEBHOOK_SECRET;
   let providerCalls = 0;
   globalThis.fetch = async () => { providerCalls++; throw new Error("No provider call is permitted."); };
@@ -23,7 +24,7 @@ test("an unconfigured payment webhook fails closed before provider or datastore 
     assert.deepEqual(response.body, { error: "invalid-webhook" });
     assert.equal(providerCalls, 0);
   } finally {
-    for (const [key, value] of [["RFXCHANGE_STRIPE_MODE", saved.mode], ["STRIPE_WEBHOOK_SECRET", saved.secret]]) {
+    for (const [key, value] of [["RFXCHANGE_STRIPE_MODE", saved.mode], ["RFXCHANGE_FOUNDING_STRIPE_TEST_PRICE_ID", saved.price], ["STRIPE_WEBHOOK_SECRET", saved.secret]]) {
       if (value === undefined) delete process.env[key]; else process.env[key] = value;
     }
     globalThis.fetch = saved.fetch;
