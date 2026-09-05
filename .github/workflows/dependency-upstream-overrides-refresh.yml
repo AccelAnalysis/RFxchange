@@ -1,0 +1,63 @@
+name: dependency-upstream-overrides-refresh
+
+on:
+  push:
+    branches:
+      - codex/dependency-upstream-overrides-20260905
+    paths:
+      - .github/workflows/dependency-upstream-overrides-refresh.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/dependency-upstream-overrides-20260905
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+      - name: Add reviewed upstream security overrides
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+
+          function update(path, mutate) {
+            const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+            pkg.overrides = pkg.overrides ?? {};
+            mutate(pkg.overrides);
+            fs.writeFileSync(path, `${JSON.stringify(pkg, null, 2)}\n`);
+          }
+
+          update('package.json', (overrides) => {
+            overrides['@opentelemetry/core'] = '^2.8.0';
+            overrides.gaxios = { ...(typeof overrides.gaxios === 'object' ? overrides.gaxios : {}), uuid: '^11.1.1' };
+            overrides['firebase-admin'] = { ...(typeof overrides['firebase-admin'] === 'object' ? overrides['firebase-admin'] : {}), uuid: '^11.1.1' };
+          });
+
+          update('functions/package.json', (overrides) => {
+            overrides['firebase-admin'] = { ...(typeof overrides['firebase-admin'] === 'object' ? overrides['firebase-admin'] : {}), uuid: '^11.1.1' };
+          });
+          NODE
+      - name: Regenerate root workspace lock
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Regenerate standalone Functions lock
+        working-directory: functions
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Commit generated manifests and locks
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json functions/package.json functions/package-lock.json
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "No dependency changes were generated."
+            exit 0
+          fi
+          git commit -m "Apply upstream dependency security overrides"
+          git push origin HEAD:codex/dependency-upstream-overrides-20260905
