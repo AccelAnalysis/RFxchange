@@ -28,10 +28,10 @@ test("trusted lockfile mirrors root and Functions dependency manifests", async (
   assert.deepEqual(lock.packages.functions.devDependencies, functionsPackage.devDependencies);
   assert.deepEqual(lock.packages.functions.engines, functionsPackage.engines);
 
-  assert.equal(rootPackage.devDependencies?.["firebase-tools"], "15.24.0");
-  assert.equal(lock.packages[""].devDependencies?.["firebase-tools"], "15.24.0");
+  assert.equal(rootPackage.devDependencies?.["firebase-tools"], "15.29.0");
+  assert.equal(lock.packages[""].devDependencies?.["firebase-tools"], "15.29.0");
   assert.ok(lock.packages?.["node_modules/firebase-tools"], "Firebase CLI must resolve from the committed lockfile");
-  assert.equal(lock.packages["node_modules/firebase-tools"].version, "15.24.0");
+  assert.equal(lock.packages["node_modules/firebase-tools"].version, "15.29.0");
 });
 
 test("production CI keeps core checks mandatory while configured-browser evidence remains diagnostic", async () => {

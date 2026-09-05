@@ -42,19 +42,14 @@ export default async function RfxCollaboratePage({ params, searchParams }: Reado
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   if (access.state.lifecycleState !== "open-platform") redirect(access.state.controlledPlatformUrl ?? "/join");
 
+  let workspace;
   try {
-    const workspace = await createServerRfxResponseCollaborationService().workspace({
+    workspace = await createServerRfxResponseCollaborationService().workspace({
       context: access.context,
       organizationId: access.membership.organizationId,
       membershipId: access.membership.id,
       userId: access.context.user.id,
     }, { reference, leadOrganizationId: lead });
-    return <RfxResponseCollaborationWorkspace
-      initialWorkspace={workspace}
-      reference={reference}
-      leadOrganizationId={lead}
-      returnHref={returnHref}
-    />;
   } catch (error) {
     if (!(error instanceof RfxResponseCollaborationError)) throw error;
     return <ParticipantShell activeItem="opportunities-rfx"><main style={{ width: "min(100%, 42rem)", margin: "0 auto", padding: "1.5rem 1rem 6rem" }}>
@@ -64,4 +59,10 @@ export default async function RfxCollaboratePage({ params, searchParams }: Reado
       <p><Link href={returnHref}>Return to the RFx</Link></p>
     </main></ParticipantShell>;
   }
+  return <RfxResponseCollaborationWorkspace
+    initialWorkspace={workspace}
+    reference={reference}
+    leadOrganizationId={lead}
+    returnHref={returnHref}
+  />;
 }
