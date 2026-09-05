@@ -39,14 +39,14 @@ export default async function RespondPage({ params, searchParams }: Readonly<{
   if (access.kind === "restricted") redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
   if (access.state.lifecycleState !== "open-platform") redirect(access.state.controlledPlatformUrl ?? "/join");
 
+  let workspace;
   try {
-    const workspace = await createServerRfxCycleService().responderWorkspace({
+    workspace = await createServerRfxCycleService().responderWorkspace({
       context: access.context,
       organizationId: access.membership.organizationId,
       membershipId: access.membership.id,
       userId: access.context.user.id,
     }, reference);
-    return <RfxResponseWorkspace initialWorkspace={workspace} returnHref={returnHref} />;
   } catch (error) {
     if (!(error instanceof RfxCycleError)) throw error;
     return <ParticipantShell activeItem="opportunities-rfx">
@@ -58,4 +58,5 @@ export default async function RespondPage({ params, searchParams }: Readonly<{
       </main>
     </ParticipantShell>;
   }
+  return <RfxResponseWorkspace initialWorkspace={workspace} returnHref={returnHref} />;
 }

@@ -21,8 +21,8 @@ assert.equal(
 );
 assert.equal(functionsPackage.type, "module", "Cloud Functions package must use explicit ESM.");
 assert.equal(functionsPackage.main, "lib/index.js", "Cloud Functions deploy entrypoint must be compiled.");
-assert.equal(functionsPackage.dependencies?.["firebase-functions"], "7.3.0");
-assert.equal(functionsPackage.dependencies?.["firebase-admin"], "14.2.0");
+assert.equal(functionsPackage.dependencies?.["firebase-functions"], "7.3.2");
+assert.equal(functionsPackage.dependencies?.["firebase-admin"], "14.3.0");
 assert.match(functionsPackage.engines?.node ?? "", />=22/);
 
 assert.equal(firebaseConfig.functions?.source, "functions");
