@@ -24,6 +24,10 @@ These are explicit reachability dispositions, not a claim that npm audit is empt
 
 ## Release controls and scope
 
+The live sign-in page could not initialize Firebase because App Hosting lacked the Firebase web configuration. The committed `apphosting.yaml` now supplies the existing Web App's public SDK identifiers and explicit production project/origin/storage settings. The existing public Mapbox token is referenced through Secret Manager version 1, available only during the build. No privileged application credentials are committed. AI interpretation and Founding checkout remain disabled; missing optional integration credentials are not invented.
+
+Firebase Authentication's authorized domains now include the existing App Hosting hostname; email/password sign-in remains enabled. The deployed Firestore and Storage rules were audited against the repository: both previous and current versions deny all direct client reads/writes. The release synchronizes those rules and required indexes without changing that security boundary.
+
 The existing App Hosting backend is `rfxchange`, project `rfxchange`, region `us-east4`, connected to `AccelAnalysis/RFxchange`. The previous serving build is `build-2026-08-25-002` (Cloud Run revision `rfxchange-build-2026-08-25-002`), sourced from the starting commit above.
 
 Automatic rollouts were paused for this release using the App Hosting traffic resource's `rolloutPolicy.disabled` flag, preserving the connected branch, backend and current serving traffic. This prevents a merge from deploying before merged-main CI. After validation, deploy the exact merged commit with the repository-pinned Firebase CLI. The prior App Hosting build is the instant rollback target; no data migration is part of these repairs.
