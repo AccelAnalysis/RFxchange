@@ -6,14 +6,16 @@ const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
 test("trusted lockfile mirrors root and Functions dependency manifests", async () => {
-  const [rootPackageSource, functionsPackageSource, lockSource] = await Promise.all([
+  const [rootPackageSource, functionsPackageSource, lockSource, functionsLockSource] = await Promise.all([
     read("package.json"),
     read("functions/package.json"),
     read("package-lock.json"),
+    read("functions/package-lock.json"),
   ]);
   const rootPackage = JSON.parse(rootPackageSource);
   const functionsPackage = JSON.parse(functionsPackageSource);
   const lock = JSON.parse(lockSource);
+  const functionsLock = JSON.parse(functionsLockSource);
 
   assert.equal(lock.lockfileVersion, 3);
   assert.equal(lock.requires, true);
@@ -27,6 +29,15 @@ test("trusted lockfile mirrors root and Functions dependency manifests", async (
   assert.deepEqual(lock.packages.functions.dependencies, functionsPackage.dependencies);
   assert.deepEqual(lock.packages.functions.devDependencies, functionsPackage.devDependencies);
   assert.deepEqual(lock.packages.functions.engines, functionsPackage.engines);
+  // Firebase uploads functions/ alone; the workspace-root lockfile is outside that artifact.
+  assert.equal(functionsLock.lockfileVersion, 3);
+  assert.deepEqual(functionsLock.packages[""].dependencies, functionsPackage.dependencies);
+  assert.deepEqual(functionsLock.packages[""].devDependencies, functionsPackage.devDependencies);
+  assert.deepEqual(functionsLock.packages[""].engines, functionsPackage.engines);
+  assert.deepEqual(functionsPackage.overrides, rootPackage.overrides);
+  for (const dependency of ["firebase-admin", "firebase-functions", "qs"]) {
+    assert.equal(functionsLock.packages[`node_modules/${dependency}`].version, lock.packages[`node_modules/${dependency}`].version, `Deployed Functions must retain the reviewed ${dependency} version.`);
+  }
 
   assert.equal(rootPackage.devDependencies?.["firebase-tools"], "15.29.0");
   assert.equal(lock.packages[""].devDependencies?.["firebase-tools"], "15.29.0");
