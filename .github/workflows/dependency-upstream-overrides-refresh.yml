@@ -40,6 +40,7 @@ jobs:
           });
 
           update('functions/package.json', (overrides) => {
+            overrides.gaxios = { ...(typeof overrides.gaxios === 'object' ? overrides.gaxios : {}), uuid: '^11.1.1' };
             overrides['firebase-admin'] = { ...(typeof overrides['firebase-admin'] === 'object' ? overrides['firebase-admin'] : {}), uuid: '^11.1.1' };
           });
           NODE
@@ -47,7 +48,7 @@ jobs:
         run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
       - name: Regenerate standalone Functions lock
         working-directory: functions
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund --workspaces=false
       - name: Commit generated manifests and locks
         shell: bash
         run: |
@@ -59,5 +60,5 @@ jobs:
             echo "No dependency changes were generated."
             exit 0
           fi
-          git commit -m "Apply upstream dependency security overrides"
+          git commit -m "Refresh standalone Functions dependency overrides"
           git push origin HEAD:codex/dependency-upstream-overrides-20260905
