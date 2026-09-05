@@ -1,0 +1,42 @@
+# Production configuration for the existing rfxchange App Hosting backend.
+# Firebase web identifiers are public; privileged credentials never belong here.
+env:
+  - variable: RFXCHANGE_ENV
+    value: "production"
+    availability: [ BUILD, RUNTIME ]
+  - variable: RFXCHANGE_EXPECTED_PROJECT_ID
+    value: "rfxchange"
+    availability: [ BUILD, RUNTIME ]
+  - variable: RFXCHANGE_PUBLIC_ORIGIN
+    value: "https://rfxchange--rfxchange.us-east4.hosted.app"
+    availability: [ BUILD, RUNTIME ]
+  - variable: RFXCHANGE_FIREBASE_STORAGE_BUCKET
+    value: "rfxchange.firebasestorage.app"
+    availability: [ BUILD, RUNTIME ]
+  - variable: RFXCHANGE_FOUNDING_CHECKOUT_RELEASE_MODE
+    value: "closed"
+    availability: [ BUILD, RUNTIME ]
+  - variable: RFXCHANGE_AI_INTERPRETATION_ENABLED
+    value: "false"
+    availability: [ BUILD, RUNTIME ]
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyDVtxEGzJLdPOyihhlWLnLB_pMGd_FcODY"
+    availability: [ BUILD, RUNTIME ]
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:820964688242:web:c6135b13f98d4055e1ddeb"
+    availability: [ BUILD, RUNTIME ]
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "rfxchange.firebaseapp.com"
+    availability: [ BUILD, RUNTIME ]
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "rfxchange"
+    availability: [ BUILD, RUNTIME ]
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: "rfxchange.firebasestorage.app"
+    availability: [ BUILD, RUNTIME ]
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "820964688242"
+    availability: [ BUILD, RUNTIME ]
+  - variable: NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+    secret: rfxchange-mapbox-public-token@1
+    availability: [ BUILD ]

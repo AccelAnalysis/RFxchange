@@ -67,7 +67,7 @@ export interface RfxResponderWorkspace {
   readonly addenda: readonly RfxAddendum[];
   readonly team: readonly TeamParticipation[];
   readonly receipt: RfxSubmissionReceipt | null;
-  readonly evaluation: RfxEvaluation | null;
+  readonly evaluation: Readonly<Pick<RfxEvaluation, "decision">> | null;
   readonly outcome: RfxExecutionOutcome | null;
   readonly canEdit: boolean;
   readonly canSubmit: boolean;
@@ -251,7 +251,7 @@ export class ServerRfxCycleService {
     )) throw new RfxCycleError("conflict", "Response identity is inconsistent.");
 
     let receipt: RfxSubmissionReceipt | null = null;
-    let evaluation: RfxEvaluation | null = null;
+    let evaluation: RfxResponderWorkspace["evaluation"] = null;
     let outcome: RfxExecutionOutcome | null = null;
     if (response) {
       const [receiptSnapshot, evaluationSnapshot, outcomeSnapshot] = await Promise.all([
@@ -260,7 +260,10 @@ export class ServerRfxCycleService {
         this.db.collection(OUTCOMES).doc(rfxOutcomeId(response.id)).get(),
       ]);
       receipt = receiptSnapshot ? record<RfxSubmissionReceipt>(receiptSnapshot) : null;
-      evaluation = record<RfxEvaluation>(evaluationSnapshot);
+      // Issuer reviews, scores, private notes and evaluator identities must never
+      // cross the responder API or server-component serialization boundary.
+      const issuerEvaluation = record<RfxEvaluation>(evaluationSnapshot);
+      evaluation = issuerEvaluation ? Object.freeze({ decision: issuerEvaluation.decision }) : null;
       outcome = record<RfxExecutionOutcome>(outcomeSnapshot);
     }
     const open = deadlineOpen(snapshot);

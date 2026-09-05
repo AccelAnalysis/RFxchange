@@ -28,7 +28,7 @@ const firebaseAdmin = await read("src/infrastructure/firebase/admin.ts");
 assert.equal(packageJson.dependencies?.firebase, "12.16.0", "AUTH-001 must pin the reviewed Firebase Web SDK.");
 assert.equal(
   packageJson.dependencies?.["firebase-admin"],
-  "14.2.0",
+  "14.3.0",
   "AUTH-001 must preserve the reviewed Firebase Admin SDK version.",
 );
 

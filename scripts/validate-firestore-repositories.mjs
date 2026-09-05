@@ -33,7 +33,7 @@ async function sourceFiles(directory) {
 const packageJson = JSON.parse(await read(branchFiles.package));
 assert.equal(
   packageJson.dependencies?.["firebase-admin"],
-  "14.2.0",
+  "14.3.0",
   "INF-002 must pin the reviewed Firebase Admin SDK version.",
 );
 
