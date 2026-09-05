@@ -91,23 +91,23 @@ const R=(key:ImplementedAdminRuntimeDestinationKey,labelKey:ImplementedAdminRunt
 const IMPLEMENTED_ADMIN_RUNTIME_REGISTRY: readonly ImplementedAdminRuntimeRegistration[] = Object.freeze([
   R("overview","adminOverview","See administrative work and operating conditions that need attention now.",OPERATING,["GLOBAL"],"/admin/overview"),
   R("work-queues","adminWorkQueues","Review canonical administrative cases within current authority.",OPERATING,["GLOBAL"],"/admin/work-queues"),
-  R("organizations","adminOrganizations","Find canonical organizations and continue into Organization 360.",P("organization.profile.read"),["GLOBAL","GEOGRAPHY","ORGANIZATION"],"/admin/organizations"),
+  R("organizations","adminOrganizations","Find canonical organizations and continue into Organization 360.",P("organization.profile.read"),["GLOBAL","ORGANIZATION"],"/admin/organizations"),
   R("users-access","adminUsersAccess","Inspect individual identity, memberships and access state.",P("user.profile.read","user.access.read"),["GLOBAL","ORGANIZATION"],"/admin/users"),
-  R("claims-verification","adminClaimsVerification","Review authority and independent verification as separate facts.",P("organization.claim.read","credibility.organization.verify"),["GLOBAL","GEOGRAPHY","ORGANIZATION","CASE"],"/admin/claims-verification"),
+  R("claims-verification","adminClaimsVerification","Review authority and independent verification as separate facts.",P("organization.claim.read","credibility.organization.verify"),["GLOBAL","GEOGRAPHY","ORGANIZATION"],"/admin/claims-verification"),
   R("geographies","adminGeographies","Operate canonical physical geography and separate market overlays.",P("geography.definition.read","geography.release.read"),["GLOBAL","GEOGRAPHY"],"/admin/geographies"),
   R("institutions-partners","adminInstitutionsPartners","Inspect persisted delegated geography and program authority.",P("geography.release.read"),["GLOBAL","GEOGRAPHY"],"/admin/institutions"),
-  R("rfx-opportunities","adminRfxOpportunities","Inspect RFx lifecycle, publication and exceptions without invented response state.",P("rfx.record.read"),["GLOBAL","GEOGRAPHY","ORGANIZATION","CASE"],"/admin/rfx"),
-  R("referrals-teaming","adminReferralsTeaming","Operate governed referral and teaming relationships.",P("referral.record.read"),["GLOBAL","ORGANIZATION","CASE"],"/admin/referrals-teaming"),
+  R("rfx-opportunities","adminRfxOpportunities","Inspect RFx lifecycle, publication and exceptions without invented response state.",P("rfx.record.read"),["GLOBAL","ORGANIZATION"],"/admin/rfx"),
+  R("referrals-teaming","adminReferralsTeaming","Operate governed referral and teaming relationships.",P("referral.record.read"),["GLOBAL","ORGANIZATION"],"/admin/referrals-teaming"),
   R("resource-providers","adminResourceProviders","Review provider applications and lifecycle within current authority.",P("provider.application.read"),["GLOBAL","GEOGRAPHY","ORGANIZATION","CASE"],"/admin/resource-providers"),
-  R("credibility","adminCredibility","Inspect verification and credential facts without hidden ranking.",P("credibility.organization.verify","credibility.badge.award"),["GLOBAL","ORGANIZATION","CASE"],"/admin/credibility"),
-  R("trust-safety","adminTrustSafety","Inspect reports, restrictions and governed safety cases.",P("trust.report.read","trust.case.review"),["GLOBAL","ORGANIZATION","CASE"],"/admin/trust-safety"),
-  R("commerce","adminCommerce","Inspect RFxchange commercial state and billing exceptions.",P("commerce.account.read"),["GLOBAL","ORGANIZATION","CASE"],"/admin/commerce"),
+  R("credibility","adminCredibility","Inspect verification and credential facts without hidden ranking.",P("credibility.organization.verify"),["GLOBAL","ORGANIZATION"],"/admin/credibility"),
+  R("trust-safety","adminTrustSafety","Inspect reports, restrictions and governed safety cases.",P("trust.case.review"),["GLOBAL","ORGANIZATION"],"/admin/trust-safety"),
+  R("commerce","adminCommerce","Inspect RFxchange commercial state and billing exceptions.",P("commerce.account.read"),["GLOBAL","ORGANIZATION"],"/admin/commerce"),
   R("support-feedback","adminSupportFeedback","Operate support through the canonical administrative case lifecycle.",P("support.case.read"),["GLOBAL","ORGANIZATION","CASE"],"/admin/support"),
-  R("communications","adminCommunications","Inspect transactional communications and delivery failures.",P("admin.authority.read","system.health.read"),["GLOBAL"],"/admin/communications"),
-  R("analytics","adminAnalytics","Review privacy-safe operating intelligence with protected drill-through.",P("analytics.dashboard.read"),["GLOBAL","GEOGRAPHY"],"/admin/analytics"),
-  R("policies-configuration","adminPoliciesConfiguration","Inspect governed effective configuration and version history.",P("platform.policy.read","config.value.read"),["GLOBAL"],"/admin/configuration"),
+  R("communications","adminCommunications","Inspect transactional communications and delivery failures.",P("system.health.read"),["GLOBAL"],"/admin/communications"),
+  R("analytics","adminAnalytics","Review privacy-safe operating intelligence with protected drill-through.",P("analytics.dashboard.read"),["GLOBAL"],"/admin/analytics"),
+  R("policies-configuration","adminPoliciesConfiguration","Inspect governed effective configuration and version history.",P("config.value.read"),["GLOBAL"],"/admin/configuration"),
   R("integrations-system","adminIntegrationsSystem","Inspect measured system health and background operations; unknown remains unknown.",P("system.health.read"),["GLOBAL"],"/admin/system"),
-  R("audit-security","adminAuditSecurity","Inspect immutable administrative evidence and access oversight.",P("audit.event.read","admin.authority.read"),["GLOBAL","ORGANIZATION","CASE"],"/admin/audit-security"),
+  R("audit-security","adminAuditSecurity","Inspect immutable administrative evidence and access oversight.",P("audit.event.read"),["GLOBAL","ORGANIZATION","CASE"],"/admin/audit-security"),
   Object.freeze({key:"organization-claims",labelKey:"organizationClaims",description:"Supporting authority-claim adjudication workflow.",permissions:P("organization.claim.read"),supportedScopeKinds:Object.freeze(["GLOBAL","GEOGRAPHY"] as const),href:(scope:AdminGrantScope)=>(scope.kind==="GEOGRAPHY"?`/admin/organization-claims?geographyId=${encodeURIComponent(String(scope.targetId))}`:"/admin/organization-claims") as `/admin/${string}`}),
 ]);
 
@@ -116,7 +116,11 @@ export function visibleImplementedAdminRuntimeDestinations(context:PlatformAdmin
   return Object.freeze(IMPLEMENTED_ADMIN_RUNTIME_REGISTRY.flatMap((registration)=>{
     const candidateScopes=[...new Map(grants.filter((grant)=>grant.administratorId===context.administratorId&&registration.permissions.includes(grant.permission)&&registration.supportedScopeKinds.includes(grant.scope.kind)).map((grant)=>[grant.scope.value,grant.scope] as const)).values()].sort((a:AdminGrantScope,b:AdminGrantScope)=>scopePriority(a)-scopePriority(b)||a.value.localeCompare(b.value));
     return candidateScopes.flatMap((scope)=>{
+      if (registration.key === "users-access" && !registration.permissions.every((permission) =>
+        authorizeScopedAdministrativeAction(context, grants, createScopedAdministrativeActionRequirement({ permission, access: "read", scope: scope.value }), { now, satisfiedConditionKeys: Object.freeze([]) }).kind === "allow"
+      )) return [];
       for(const permission of registration.permissions){
+        if (registration.key === "claims-verification" && scope.kind === "GEOGRAPHY" && permission !== requireCataloguedAdminPermission("organization.claim.read")) continue;
         const decision=authorizeScopedAdministrativeAction(context,grants,createScopedAdministrativeActionRequirement({permission,access:"read",scope:scope.value}),{now,satisfiedConditionKeys:Object.freeze([])});
         if(decision.kind==="allow")return[Object.freeze({navigationId:`${registration.key}:${scope.value}`,key:registration.key,labelKey:registration.labelKey,description:registration.description,permission,scope,grantId:String(decision.grantId),href:registration.href(scope)})];
       }

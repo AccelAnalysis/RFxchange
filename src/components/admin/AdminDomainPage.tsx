@@ -42,13 +42,17 @@ export async function AdminDomainPage({
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
   const access = await resolveAdminPortalAccess({ sessionCookie });
-  const returnTo = encodeURIComponent(currentPath);
+  const returnParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (typeof value === "string") returnParams.set(key, value);
+  }
+  const returnTo = encodeURIComponent(`${currentPath}${returnParams.size ? `?${returnParams}` : ""}`);
   if (access.kind === "unauthenticated") redirect(`/signin?returnTo=${returnTo}`);
   if (access.kind === "privileged-access-denied" && access.reason === "recent-reauthentication-required") redirect(`/signin?returnTo=${returnTo}`);
   if (access.kind !== "authorized") notFound();
 
   const candidates = access.destinations.filter((candidate) => candidate.key === destinationKey);
-  const destination = (requestedScope ? candidates.find((candidate) => candidate.scope.value === requestedScope) : null) ?? candidates[0];
+  const destination = requestedScope ? candidates.find((candidate) => candidate.scope.value === requestedScope) : candidates[0];
   if (!destination) notFound();
 
   const now = new Date().toISOString();
@@ -68,6 +72,6 @@ export async function AdminDomainPage({
   });
 
   return <AdminPortalShell destinations={access.destinations} currentDestination={destinationKey} currentScope={destination.scope.value}>
-    <AdminDomainWorkspace data={data} query={query} status={status} selectedId={selectedId} currentPath={currentPath}/>
+    <AdminDomainWorkspace data={data} query={query} status={status} selectedId={selectedId} currentPath={currentPath} scope={destination.scope.value} cursor={cursor}/>
   </AdminPortalShell>;
 }

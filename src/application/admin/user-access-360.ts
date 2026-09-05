@@ -1,3 +1,4 @@
+import type { AdminGrantScope } from "../../domain/admin-authorization/grants.ts";
 import type { PlatformAdministratorAccount } from "../../domain/admin-authorization/administrator-lifecycle.ts";
 import {
   authorizeAdministrativeAction,
@@ -201,4 +202,20 @@ export function buildUserAccess360(
     ),
     recentActions: Object.freeze([...(input.recentActions ?? [])]),
   });
+}
+
+/** Limit User 360 organization data before any profile hydration or projection. */
+export function scopeUserAccess360OrganizationData(
+  input: Pick<UserAccess360Input, "memberships" | "organizationAuthorizations">,
+  scope: AdminGrantScope,
+): Pick<UserAccess360Input, "memberships" | "organizationAuthorizations"> {
+  const memberships = input.memberships.filter((membership) =>
+    scope.kind === "GLOBAL" || (scope.kind === "ORGANIZATION" && String(membership.organizationId) === String(scope.targetId)),
+  );
+  const membershipIds = new Set(memberships.map((membership) => membership.id));
+  const organizationAuthorizations = input.organizationAuthorizations.filter((authorization) =>
+    membershipIds.has(authorization.membershipId) && memberships.some((membership) =>
+      membership.id === authorization.membershipId && membership.userId === authorization.userId && membership.organizationId === authorization.organizationId),
+  );
+  return Object.freeze({ memberships: Object.freeze(memberships), organizationAuthorizations: Object.freeze(organizationAuthorizations) });
 }
