@@ -112,8 +112,8 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
                     return;
                   }
                   router.replace("/join");
-                } catch (caught) {
-                  setError(caught instanceof Error ? caught.message : "Sign-in failed.");
+                } catch {
+                  setError("Sign-in could not be completed. Check your email and password, then try again.");
                   setBusy(false);
                 }
               })();

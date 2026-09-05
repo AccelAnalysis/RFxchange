@@ -38,4 +38,6 @@ The Firebase CLI resolves codebase-wide secret parameters before applying indivi
 
 The first Functions build also exposed a packaging gap: Firebase uploads `functions/` without the workspace-root lockfile. A standalone Functions lockfile and the same reviewed qs override now accompany that artifact. Cross-manifest validation requires the deployed Firebase SDK and qs versions to match the reviewed workspace. A clean production-only install and SDK import check exercise the isolated artifact. Artifact cleanup is opted out for the new Functions repository to preserve rollback images; this does not alter App Hosting's retained builds.
 
+The deployed sign-in probe now reaches Firebase and rejects the reserved non-account input instead of failing on missing configuration. Its failure copy uses ordinary participant language rather than rendering raw provider errors or internal configuration details.
+
 Stabilization 2C remains incomplete. App Hosting's external source commit is evidence of source selection, not proof that the compiled `RFXCHANGE_BUILD_SHA` matches it. This release does not weaken build identity, add public diagnostics, or change rollout architecture. No tracker totals or optional `Verified` labels change.
