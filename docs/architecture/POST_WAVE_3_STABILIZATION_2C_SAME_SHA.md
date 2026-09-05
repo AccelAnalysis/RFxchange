@@ -1,8 +1,8 @@
 # Post-Wave 3 Stabilization 2C — same-SHA App Hosting proof
 
-**Scope:** release engineering only  
-**Backend:** `projects/rfxchange/locations/us-east4/backends/rfxchange`  
-**Production origin:** `https://rfxchange--rfxchange.us-east4.hosted.app`  
+**Scope:** release engineering only
+**Backend:** `projects/rfxchange/locations/us-east4/backends/rfxchange`
+**Production origin:** `https://rfxchange--rfxchange.us-east4.hosted.app`
 **Automatic rollouts:** remain paused
 
 ## Why the earlier blocker can now be closed
