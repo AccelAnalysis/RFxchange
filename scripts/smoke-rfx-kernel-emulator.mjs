@@ -55,7 +55,8 @@ const adminDb = getAdminFirestore(adminApp);
 const clientDb = getFirestore(clientApp);
 connectFirestoreEmulator(clientDb, "127.0.0.1", 8080);
 const repository = new FirestoreRfxRepository(adminDb);
-const now = "2026-08-12T12:00:00.000Z";
+const now = new Date().toISOString();
+const dateAfterDays = (days) => new Date(Date.parse(now) + days * 86_400_000).toISOString().slice(0, 10);
 const organizationId = `org-rfx-${suffix}`;
 const aggregateId = `rfx-${suffix}`;
 const geographyId = `geo-rfx-${suffix}`.toLowerCase();
@@ -280,8 +281,8 @@ try {
     title: "Regional facilities resilience",
     marketNeed: { sourceStatement: "Improve continuity.", observedCondition: "Recovery is inconsistent.", desiredOutcome: "Restore service within four hours.", affectedContext: "Three public facilities.", successMeasures: ["Four-hour recovery"], knownFacts: ["Three sites"], assumptions: [], constraints: [], solutionPosture: "solution-open", proposedApproaches: [], prohibitedApproaches: [], unresolvedQuestions: [], interpretationRecordIds: [] },
     scope: "Assess, plan, and implement continuity improvements.",
-    requestedOutputs: [{ id: "output-1", title: "Continuity plan", description: "Reviewed plan.", quantity: { amount: 1, unit: "plan" }, dueDate: "2026-10-01" }],
-    timing: { anticipatedStartDate: "2026-09-01", anticipatedCompletionDate: "2026-12-01", responseDeadline: "2026-08-28" },
+    requestedOutputs: [{ id: "output-1", title: "Continuity plan", description: "Reviewed plan.", quantity: { amount: 1, unit: "plan" }, dueDate: dateAfterDays(45) }],
+    timing: { anticipatedStartDate: dateAfterDays(20), anticipatedCompletionDate: dateAfterDays(90), responseDeadline: dateAfterDays(16) },
     performanceLocation: performanceLocationFromLocality({ localityId: geographyId, localityLabel: "Arlington County", bounds: { west: -77.18, south: 38.82, east: -77.03, north: 38.93 } }),
     estimatedValue: { mode: "range", currency: "USD", minimumMinor: 1000000, maximumMinor: 2500000 },
     engagementTerm: { mode: "fixed", duration: { value: 3, unit: "months" }, note: null },
