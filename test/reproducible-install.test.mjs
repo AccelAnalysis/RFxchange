@@ -34,7 +34,17 @@ test("trusted lockfile mirrors root and Functions dependency manifests", async (
   assert.deepEqual(functionsLock.packages[""].dependencies, functionsPackage.dependencies);
   assert.deepEqual(functionsLock.packages[""].devDependencies, functionsPackage.devDependencies);
   assert.deepEqual(functionsLock.packages[""].engines, functionsPackage.engines);
-  assert.deepEqual(functionsPackage.overrides, rootPackage.overrides);
+
+  // Root tooling and the standalone Functions artifact intentionally do not share an identical
+  // override graph. Functions carries only overrides that apply to its production dependency tree:
+  // gaxios and firebase-admin both need the patched uuid line, while OpenTelemetry is root-only CLI
+  // tooling and must not be pulled into the deployed artifact.
+  assert.deepEqual(functionsPackage.overrides, {
+    qs: rootPackage.overrides.qs,
+    gaxios: rootPackage.overrides.gaxios,
+    "firebase-admin": rootPackage.overrides["firebase-admin"],
+  });
+  assert.equal(functionsPackage.overrides?.["@opentelemetry/core"], undefined);
   for (const dependency of ["firebase-admin", "firebase-functions", "qs"]) {
     assert.equal(functionsLock.packages[`node_modules/${dependency}`].version, lock.packages[`node_modules/${dependency}`].version, `Deployed Functions must retain the reviewed ${dependency} version.`);
   }

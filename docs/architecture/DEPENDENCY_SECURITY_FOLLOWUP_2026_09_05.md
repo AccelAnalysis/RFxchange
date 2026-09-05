@@ -1,43 +1,35 @@
 # Dependency security follow-up — 2026-09-05
 
-This follow-up turns the residual moderate findings in `PRODUCTION_READINESS_2026_09_05.md` into an executable boundary instead of treating the audit prose as a permanent exemption.
+This follow-up turns the residual moderate findings in `PRODUCTION_READINESS_2026_09_05.md` into executable dependency boundaries and records which findings were actually remediated after the readiness audit.
 
 ## Current disposition
 
-### `uuid` — GHSA-w5hq-g745-h8pq
+### `uuid` — GHSA-w5hq-g745-h8pq — remediated
 
-The standalone Functions install still resolves `uuid@9.0.1` through the Google Cloud Storage dependency chain used by Firebase Admin. The reviewed parents are `gaxios` and `teeny-request`; the RFxchange audit found those consumers using UUID v4 for multipart/request boundaries rather than the caller-supplied output-buffer paths involved in the advisory.
+RFxchange now applies a reviewed transitive override to the Google HTTP dependency path used under Firebase Admin. Both the root workspace lock and the standalone Functions production lock resolve the shared `uuid` package to `11.1.1`, which is on the patched line for this advisory.
 
-The upstream fix is `uuid >=11.1.1`, but current Firebase Admin `14.3.0` still declares the current Storage 7 line. A newer Storage 8 major exists; RFxchange does not force that unsupported major underneath Firebase Admin merely to make the audit count disappear.
+The Functions manifest keeps the override scoped to the Firebase/Google request path rather than forcing unrelated package majors. The root manifest uses the same compatible override approach for the development tooling graph.
 
-`scripts/validate-dependency-security-dispositions.mjs` now fails if:
+`scripts/validate-dependency-security-dispositions.mjs` remains in place as a regression guard. If the vulnerable UUID line reappears or the dependency shape changes in a way that invalidates the reviewed assumptions, the canonical architecture test gate fails.
 
-- the vulnerable resolved `uuid` changes without review;
-- an unexpected package begins depending on that vulnerable root `uuid`; or
-- the Functions production artifact's vulnerable UUID dependency is no longer confined to the reviewed `gaxios`/`teeny-request` chain.
+### `@opentelemetry/core` — GHSA-8988-4f7v-96qf — remediated
 
-When Firebase Admin adopts a compatible dependency chain that resolves `uuid >=11.1.1`, the validator automatically stops requiring the temporary vulnerable-version confinement and this disposition should be removed.
+The root workspace now resolves `@opentelemetry/core` to `2.11.0`, which is on the patched `>=2.8.0` line. It remains development-only through Firebase CLI tooling and is absent from the standalone Functions production lockfile.
 
-### `@opentelemetry/core` — GHSA-8988-4f7v-96qf
+The validator continues to enforce that OpenTelemetry does not enter the Functions production artifact.
 
-The resolved vulnerable package remains development-only through Firebase CLI tooling. It is not present in the standalone Functions production lockfile.
+### `stream-json` — GHSA-528h-pc64-c93x — constrained tooling-only residual
 
-The validator now enforces both properties. If the package enters the Functions artifact, the canonical architecture test gate fails.
+The repository still resolves `stream-json 1.9.1` through Firebase CLI tooling. The package is development-only and absent from the standalone Functions production lockfile.
 
-The upstream patched line is `@opentelemetry/core >=2.8.0`. The current Firebase CLI dependency graph still carries an older major; RFxchange does not cross-major override the CLI's telemetry stack without upstream compatibility.
+The advisory is fixed in `stream-json 3.5.0`, but the current CLI dependency graph remains on the 1.x line. RFxchange therefore keeps the trusted-input/local-tooling disposition rather than forcing an unsupported cross-major parser override into deployment tooling.
 
-### `stream-json` — GHSA-528h-pc64-c93x
-
-The resolved package remains development-only through Firebase CLI tooling and is absent from the standalone Functions production lockfile.
-
-The advisory is fixed in `stream-json 3.5.0`; the repository currently receives the 1.x line through the CLI. RFxchange therefore keeps the trusted-input/local-tooling disposition rather than forcing a cross-major parser override into deployment tooling.
-
-The validator now fails if `stream-json` enters the Functions production artifact.
+The validator fails if `stream-json` enters the Functions production artifact.
 
 ## Release rule
 
-These findings remain **known moderate findings with constrained reachability**, not "no vulnerabilities" and not a permanent waiver.
+The readiness-audit dependency state is now reduced to one known moderate tooling-only residual: `stream-json`. `uuid` and `@opentelemetry/core` are remediated in the resolved dependency graph.
 
-Every dependency update must continue through the normal exact-head gate. If Firebase Admin, Google Cloud Storage, Firebase CLI, `gaxios`, `teeny-request`, OpenTelemetry or `stream-json` changes, the executable disposition forces re-review whenever the assumptions above stop matching the lockfiles.
+Every dependency update must continue through the normal exact-head gate. If Firebase Admin, Google Cloud Storage, Firebase CLI, `gaxios`, `teeny-request`, OpenTelemetry, `uuid`, or `stream-json` changes, the executable disposition forces re-review whenever the lockfile assumptions stop matching.
 
 Do not apply `npm audit fix --force` or a Firebase major downgrade/unsupported transitive major override solely to reduce the audit count.
