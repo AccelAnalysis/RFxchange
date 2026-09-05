@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 import {
+  ADMIN_PORTAL_SECTION_KEYS,
   IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS,
 } from "../src/application/admin/portal-navigation.ts";
 
@@ -17,19 +18,16 @@ test("the administrative product authority defines an attention-first restrained
   assert.match(authority, /Less container chrome/);
   assert.match(authority, /Human language over implementation language/);
   assert.match(authority, /only destinations with a truthful implemented runtime/i);
-  assert.match(
-    authority,
-    /authority, verification, provider status, commerce, and credibility remain visibly separate/i,
-  );
+  assert.match(authority, /authority, verification, provider status, commerce, and credibility remain visibly separate/i);
   assert.match(context, /ADMIN_PORTAL_PRODUCT_AUTHORITY\.md/);
   assert.doesNotMatch(authority, /binary `isAdmin` authorization is permitted/i);
 });
 
 test("only truthful current admin runtimes remain registered", () => {
-  assert.deepEqual(
-    IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS,
-    ["overview", "work-queues", "organization-claims", "resource-providers"],
-  );
+  assert.equal(ADMIN_PORTAL_SECTION_KEYS.length, 19);
+  for (const key of ADMIN_PORTAL_SECTION_KEYS) {
+    assert.ok(IMPLEMENTED_ADMIN_RUNTIME_DESTINATION_KEYS.includes(key));
+  }
 });
 
 test("live administrative surfaces share one product shell", async () => {
@@ -38,11 +36,7 @@ test("live administrative surfaces share one product shell", async () => {
   const organizationPage = await read("app/admin/organizations/[organizationId]/page.tsx");
   const overviewPage = await read("app/admin/overview/page.tsx");
   const queuesPage = await read("app/admin/work-queues/page.tsx");
-
-  for (const source of [claimsPage, providerPage, organizationPage, overviewPage, queuesPage]) {
-    assert.match(source, /AdminPortalShell/);
-  }
-
+  for (const source of [claimsPage, providerPage, organizationPage, overviewPage, queuesPage]) assert.match(source, /AdminPortalShell/);
   assert.doesNotMatch(claimsPage, /styles\.sidebar/);
   assert.doesNotMatch(claimsPage, /Runtime convergence/);
   assert.doesNotMatch(claimsPage, /Grant \{/);
@@ -54,7 +48,6 @@ test("the shared shell keeps scope visible, exposes bounded search and uses comp
   const commandBar = await read("src/components/admin/AdminPortalCommandBar.tsx");
   const navigation = await read("src/components/admin/AdminPortalNavigation.tsx");
   const styles = await read("src/components/admin/AdminPortalShell.module.css");
-
   assert.match(shell, /Current access/);
   assert.match(shell, /All authorized records/);
   assert.match(commandBar, /\/admin\/search/);
@@ -70,7 +63,6 @@ test("the shared shell keeps scope visible, exposes bounded search and uses comp
 test("provider review presents organization identity and canonical action hierarchy", async () => {
   const consoleSource = await read("src/components/resource-providers/ProviderReviewConsole.tsx");
   const styles = await read("src/components/resource-providers/ProviderReviewConsole.module.css");
-
   assert.match(consoleSource, /readonly displayName: string/);
   assert.match(consoleSource, /application\.displayName/);
   assert.match(consoleSource, /Minimum-necessary application projection/);
@@ -88,7 +80,6 @@ test("provider review presents organization identity and canonical action hierar
 test("Organization 360 avoids a second dashboard shell and developer-facing primary copy", async () => {
   const organizationSource = await read("src/components/admin/Organization360.tsx");
   const styles = await read("src/components/admin/Organization360.module.css");
-
   assert.match(organizationSource, /Authority|Account &amp; access/);
   assert.match(organizationSource, /Separate from credibility and verification/);
   assert.doesNotMatch(organizationSource, /Organization scope/);
@@ -107,14 +98,7 @@ test("operating core uses real providers, canonical cases and responsive list-to
   const caseApi = await read("app/api/admin/cases/[caseId]/transition/route.ts");
   const searchPage = await read("app/admin/search/page.tsx");
   const styles = await read("src/components/admin/AdminOperatingCore.module.css");
-
-  for (const collection of [
-    "organizationAuthorityClaims",
-    "providerApplications",
-    "administrative",
-    "accessRestrictions",
-    "backgroundJobs",
-  ]) assert.match(runtime, new RegExp(collection));
+  for (const collection of ["organizationAuthorityClaims", "providerApplications", "administrative", "accessRestrictions", "backgroundJobs"]) assert.match(runtime, new RegExp(collection));
   assert.match(runtime, /authorityWithActiveGlobalGrants/);
   assert.match(queue, /Open full case/);
   assert.match(casePage, /CASE:/);
