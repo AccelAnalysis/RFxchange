@@ -1,4 +1,3 @@
-import { defineSecret } from "firebase-functions/params";
 import { onRequest } from "firebase-functions/v2/https";
 
 import { createBackgroundJobRequest, executeBackgroundJob, terminalBackgroundJobError } from "./application/background-jobs.js";
@@ -20,8 +19,13 @@ import {
   stripeObjectReference,
 } from "./runtime/market-ready-founding-commerce-stripe.js";
 
-const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
-const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
+// Bind secrets to this endpoint without registering codebase-wide deploy parameters.
+// Health-only deployments must not require credentials for an unconfigured webhook.
+function requiredStripeSecret(name: "STRIPE_SECRET_KEY" | "STRIPE_WEBHOOK_SECRET"): string {
+  const value = process.env[name]?.trim();
+  if (!value) throw new Error(`${name} is unavailable.`);
+  return value;
+}
 const SUPPORTED_EVENTS = new Set([
   "customer.subscription.created",
   "customer.subscription.updated",
@@ -54,7 +58,7 @@ function checkoutReservationId(object: Readonly<Record<string, unknown>>): strin
 export const marketReadyFoundingCommerceWebhook = onRequest(
   {
     invoker: "public",
-    secrets: [stripeSecretKey, stripeWebhookSecret],
+    secrets: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"],
     timeoutSeconds: 60,
     memory: "256MiB",
     maxInstances: 1,
@@ -83,7 +87,7 @@ export const marketReadyFoundingCommerceWebhook = onRequest(
       const event = parseVerifiedStripeEvent({
         rawBody,
         signatureHeader: signature,
-        webhookSecret: stripeWebhookSecret.value(),
+        webhookSecret: requiredStripeSecret("STRIPE_WEBHOOK_SECRET"),
         expectedMode: mode,
       });
       if (!SUPPORTED_EVENTS.has(event.type)) {
@@ -123,7 +127,7 @@ export const marketReadyFoundingCommerceWebhook = onRequest(
             const subscriptionId = stripeObjectReference(event.object, "id");
             if (!subscriptionId) throw terminalBackgroundJobError("subscription-id-missing", "Stripe subscription event is missing its id.");
             const snapshot = await retrieveCurrentFoundingSubscription(
-              stripeSecretKey.value(),
+              requiredStripeSecret("STRIPE_SECRET_KEY"),
               subscriptionId,
               expectedPriceId,
             );
@@ -161,7 +165,7 @@ export const marketReadyFoundingCommerceWebhook = onRequest(
 
           const reservationId = checkoutReservationId(event.object);
           const hasSubscription = await providerHasNonTerminalFoundingSubscription({
-            secretKey: stripeSecretKey.value(),
+            secretKey: requiredStripeSecret("STRIPE_SECRET_KEY"),
             customerId,
             organizationId,
             expectedPriceId,
