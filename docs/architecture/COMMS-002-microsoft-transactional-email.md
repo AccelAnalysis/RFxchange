@@ -7,13 +7,13 @@ COMMS-002 implements a production-oriented Microsoft Graph adapter behind the CO
 no acquisition, claim, membership, authority, Verification, or commercial workflow sends email in
 this slice.
 
-The implementation follows Microsoft's current application-only flow:
+The implementation follows Microsoft's application-only flow:
 
 - a confidential server workload obtains a token from the tenant-specific Microsoft identity
   endpoint using the OAuth 2.0 client credentials grant and the
   `https://graph.microsoft.com/.default` scope;
-- the registered application requires administrator-approved Microsoft Graph `Mail.Send`
-  application permission;
+- Exchange Online Application RBAC grants the service principal the `Application Mail.Send` role
+  only inside the approved sender mailbox scope;
 - delivery uses `POST /v1.0/users/{approved sender}/sendMail`; and
 - an HTTP `202 Accepted` response is recorded as provider acceptance. It does not prove mailbox
   delivery, because Microsoft documents that Exchange processing continues after acceptance.
@@ -22,7 +22,7 @@ Primary references:
 
 - [Microsoft Graph sendMail v1.0](https://learn.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0)
 - [Microsoft identity client credentials flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow)
-- [Microsoft Graph Mail.Send permission](https://learn.microsoft.com/en-us/graph/permissions-reference#mail-send)
+- [Exchange Online Application RBAC](https://learn.microsoft.com/en-us/exchange/permissions-exo/application-rbac)
 - [Microsoft Graph throttling guidance](https://learn.microsoft.com/en-us/graph/throttling)
 
 ## Boundaries
@@ -58,9 +58,15 @@ credentials or message data to another origin. The secret is neither committed n
 receipts, error messages, or acceptance output. A certificate or workload identity can replace the
 shared-secret token source in a later hardening slice without changing the COMMS-001 contract.
 
-In Microsoft 365, the application permission should be constrained to the approved sender mailbox
-with the tenant's supported application access controls. The endpoint also fixes the sender to the
-configured mailbox instead of accepting sender identity from feature input.
+Production sender authorization uses Exchange Online Application RBAC. The Entra service principal
+is registered in Exchange, assigned `Application Mail.Send`, and constrained by a custom recipient
+scope whose direct membership contains only the approved RFxchange sender mailbox. The application
+should not also receive an organization-wide Microsoft Graph `Mail.Send` application permission in
+Entra: Entra application permissions and Exchange Application RBAC grants are additive, so an
+unscoped Entra grant would broaden the effective permission beyond the custom mailbox scope.
+
+The Graph endpoint also fixes the sender to the configured mailbox instead of accepting sender
+identity from feature input.
 
 ## Result and failure semantics
 
@@ -112,6 +118,7 @@ body data. Deterministic tests use HTTP doubles to prove token acquisition, appr
 Graph payload translation, 202 response recording, token reuse, throttling/permanent error
 classification, and INF-007 composition without contacting or spamming a real recipient.
 
-Live delivery additionally requires a provisioned tenant, sender mailbox, app registration,
-administrator-approved `Mail.Send`, mailbox-scoped access controls, and managed credential. These
-external production values are deliberately absent from the repository.
+Live delivery requires a provisioned tenant, sender mailbox, Entra app/service principal, scoped
+Exchange `Application Mail.Send` role assignment, and managed credential. Non-secret production
+identifiers may be committed as reviewed App Hosting configuration; the client secret remains only
+in managed Secret Manager.

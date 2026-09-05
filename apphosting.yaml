@@ -40,3 +40,24 @@ env:
   - variable: NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
     secret: rfxchange-mapbox-public-token@1
     availability: [ BUILD ]
+  - variable: OPENAI_API_KEY
+    secret: OPENAI_API_KEY@2
+    availability: [ RUNTIME ]
+  - variable: RFXCHANGE_MICROSOFT_EXPECTED_ENV
+    value: "production"
+    availability: [ RUNTIME ]
+  - variable: RFXCHANGE_MICROSOFT_TENANT_ID
+    value: "7cf1b000-13b6-4309-9c09-1df328524ae3"
+    availability: [ RUNTIME ]
+  - variable: RFXCHANGE_MICROSOFT_CLIENT_ID
+    value: "c41a21c6-e758-48cd-8acb-b5b2207a2f51"
+    availability: [ RUNTIME ]
+  - variable: RFXCHANGE_MICROSOFT_CLIENT_SECRET
+    secret: RFXCHANGE_MICROSOFT_CLIENT_SECRET@2
+    availability: [ RUNTIME ]
+  - variable: RFXCHANGE_MICROSOFT_APPROVED_SENDER
+    value: "jholman@accelanalysis.com"
+    availability: [ RUNTIME ]
+  - variable: RFXCHANGE_MICROSOFT_GRAPH_TIMEOUT_MS
+    value: "15000"
+    availability: [ RUNTIME ]
