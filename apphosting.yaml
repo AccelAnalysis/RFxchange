@@ -53,7 +53,7 @@ env:
     value: "c41a21c6-e758-48cd-8acb-b5b2207a2f51"
     availability: [ RUNTIME ]
   - variable: RFXCHANGE_MICROSOFT_CLIENT_SECRET
-    secret: RFXCHANGE_MICROSOFT_CLIENT_SECRET@1
+    secret: RFXCHANGE_MICROSOFT_CLIENT_SECRET@2
     availability: [ RUNTIME ]
   - variable: RFXCHANGE_MICROSOFT_APPROVED_SENDER
     value: "jholman@accelanalysis.com"
