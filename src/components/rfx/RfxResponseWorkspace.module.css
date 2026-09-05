@@ -1,0 +1,207 @@
+.workspace {
+  width: min(100%, 58rem);
+  margin: 0 auto;
+  padding: 1rem 1rem 7rem;
+}
+
+.header {
+  display: grid;
+  gap: .5rem;
+  margin-bottom: 1rem;
+}
+
+.header h1,
+.section h2,
+.section h3,
+.card h3 {
+  margin: 0;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: .78rem;
+  font-weight: 750;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .7;
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .4rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.progress span {
+  padding: .55rem .35rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 7%, transparent);
+  text-align: center;
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.progress [data-active="true"] {
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.section {
+  display: grid;
+  gap: .8rem;
+  margin: 1rem 0;
+}
+
+.card {
+  display: grid;
+  gap: .65rem;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, Canvas 94%, transparent);
+  box-shadow: 0 .4rem 1.2rem rgba(0, 0, 0, .05);
+}
+
+.card p,
+.header p,
+.section p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.card label {
+  display: grid;
+  gap: .4rem;
+  font-weight: 650;
+}
+
+.card textarea,
+.card input,
+.card select,
+.question textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: .75rem;
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: .75rem;
+  background: Canvas;
+  color: CanvasText;
+  font: inherit;
+}
+
+.card textarea,
+.question textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+.inline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7rem;
+  gap: .6rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  align-items: center;
+}
+
+.primary,
+.secondary,
+.actions button,
+.question button {
+  min-height: 2.8rem;
+  padding: .7rem 1rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  background: CanvasText;
+  color: Canvas;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.secondary,
+.actions button[data-secondary="true"] {
+  background: Canvas;
+  color: CanvasText;
+}
+
+.primary:disabled,
+.secondary:disabled,
+.actions button:disabled,
+.question button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.status {
+  min-height: 1.4rem;
+  font-size: .86rem;
+}
+
+.readiness {
+  display: grid;
+  gap: .6rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.readiness strong {
+  font-size: 1.05rem;
+}
+
+.readiness ul,
+.questionList,
+.teamList,
+.addendumList {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.question {
+  display: grid;
+  gap: .6rem;
+}
+
+.questionList li,
+.addendumList li,
+.teamList li {
+  margin: .55rem 0;
+  line-height: 1.4;
+}
+
+.notice {
+  padding: .8rem 1rem;
+  border-radius: .8rem;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.error {
+  color: #8f1d1d;
+  font-weight: 650;
+}
+
+.sticky {
+  position: sticky;
+  bottom: calc(4.4rem + env(safe-area-inset-bottom));
+  z-index: 4;
+  display: grid;
+  gap: .55rem;
+  margin-top: 1.2rem;
+  padding: .8rem;
+  border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, Canvas 92%, transparent);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .08);
+}
+
+@media (min-width: 48rem) {
+  .workspace { padding: 1.5rem 1.5rem 4rem; }
+  .section[data-grid="true"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sticky { bottom: 1rem; grid-template-columns: 1fr auto; align-items: center; }
+}
