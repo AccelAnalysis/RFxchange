@@ -7,8 +7,8 @@ import {
 
 const THIRTY_DAYS_SECONDS = 60 * 60 * 24 * 30;
 
-export async function GET(request: Request) {
-  const response = NextResponse.redirect(new URL("/join", request.url));
+export async function GET() {
+  const response = new NextResponse(null, { status: 307, headers: { Location: "/join", "Cache-Control": "private, no-store" } });
   response.cookies.set({
     name: RFXCHANGE_FOUNDING_ACQUISITION_COOKIE_NAME,
     value: RFXCHANGE_FOUNDING_ACQUISITION_INTENT,

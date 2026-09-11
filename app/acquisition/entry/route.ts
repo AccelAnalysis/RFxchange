@@ -10,7 +10,9 @@ export function GET(request: NextRequest) {
   const target = new URL(intent === "signin" ? "/signin" : "/join", request.url);
   const returnTo = marketingReturnPath(request.nextUrl.searchParams.get("returnTo"));
   if (intent === "signin" && returnTo) target.searchParams.set("returnTo", returnTo);
-  const response = NextResponse.redirect(target, 303);
+  // App Hosting may expose its internal listener in request.url. A relative Location
+  // keeps this fixed, validated path on the browser’s public Exchange origin.
+  const response = new NextResponse(null, { status: 303, headers: { Location: target.pathname + target.search } });
   response.headers.set("Cache-Control", "private, no-store");
   response.headers.set("Referrer-Policy", "no-referrer");
   const campaign = marketingCampaignReference(request.nextUrl.searchParams.get("campaign"));
