@@ -52,14 +52,15 @@ try {
   assert.match(handoff.headers.get("cache-control"), /no-store/);
   const receiver = await fetch(exchange + destination.pathname + destination.search, { redirect: "manual" });
   assert.equal(receiver.status, 303);
-  assert.equal(new URL(receiver.headers.get("location")).pathname, "/signin");
+  assert.match(receiver.headers.get("location"), /^\/signin(?:\?|$)/, "Receiver must use a relative Location behind App Hosting");
+  assert.equal(new URL(receiver.headers.get("location"), exchange).pathname, "/signin");
   assert.match(receiver.headers.get("set-cookie"), /rfx_marketing_campaign=regional-launch/);
   assert.match(receiver.headers.get("set-cookie"), /rfx-locale=fr/);
   assert.doesNotMatch(receiver.headers.get("set-cookie"), /Domain=/i);
   const unsafe = await fetch(exchange + "/acquisition/entry?intent=signin&returnTo=https%3A%2F%2Fevil.example&campaign=second", {
     redirect: "manual", headers: { cookie: "rfx_marketing_campaign=original" },
   });
-  assert.equal(new URL(unsafe.headers.get("location")).search, "");
+  assert.equal(new URL(unsafe.headers.get("location"), exchange).search, "");
   assert.equal(unsafe.headers.get("set-cookie"), null, "Existing campaign attribution must not be overwritten");
   const admin = await fetch(marketing + "/admin", { redirect: "manual" });
   assert.equal(admin.status, 404, "Marketing ships no Admin route");
