@@ -9,13 +9,13 @@ export const exchangeLightBasemapConfig = Object.freeze({
 } as const);
 
 export const exchangeLightCartography = Object.freeze({
-  landFallback: "#e3e0d7",
+  landFallback: "#e8edf2",
   spatialFallback: "#d7e4e8",
   nonFocusMask: "#59606a",
   nonFocusMaskOpacity: 0.3,
   selectedLocalityFill: "#d6a23a",
   selectedLocalityFillOpacity: 0.075,
-  selectedLocalityContrast: "#0b0b0d",
+  selectedLocalityContrast: "#1b2430",
   selectedLocalityContrastOpacity: 0.86,
   selectedLocalityContrastWidth: 5,
   selectedLocalityAccent: "#d6a23a",
@@ -25,12 +25,12 @@ export const exchangeLightCartography = Object.freeze({
   searchFillOpacity: 0.09,
   searchLine: "#2e5eaa",
   searchLineWidth: 2.5,
-  organizationNodeFill: "#0b0b0d",
+  organizationNodeFill: "#1b2430",
   organizationNodeRing: "#d6a23a",
-  organizationNodeForeground: "#f7f3ea",
+  organizationNodeForeground: "#ffffff",
   organizationNodeHalo: "rgba(214,162,58,0.18)",
-  additionalLocationFill: "#f7f3ea",
-  additionalLocationRing: "#8a6418",
+  additionalLocationFill: "#ffffff",
+  additionalLocationRing: "#7a5710",
   candidateNodeFill: "#2e5eaa",
   confirmedNodeFill: "#3b7b57",
   lowContrastBuildingOpacity: 0.42,
@@ -45,7 +45,7 @@ export const progressiveMapDetail = Object.freeze({
 } as const);
 
 export const proprietaryDensityGradient = Object.freeze([
-  Object.freeze({ density: 0, color: "rgba(247,243,234,0)" }),
+  Object.freeze({ density: 0, color: "rgba(255, 255, 255,0)" }),
   Object.freeze({ density: 0.25, color: "rgba(46,94,170,0.10)" }),
   Object.freeze({ density: 0.55, color: "rgba(46,94,170,0.22)" }),
   Object.freeze({ density: 0.8, color: "rgba(214,162,58,0.30)" }),

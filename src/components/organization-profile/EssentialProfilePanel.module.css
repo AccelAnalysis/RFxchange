@@ -14,7 +14,7 @@
   min-width: 0;
   overflow: hidden;
   border-radius: 20px;
-  box-shadow: 0 22px 60px rgba(11, 11, 13, 0.12);
+  box-shadow: 0 22px 60px rgba(27, 36, 48, 0.12);
 }
 
 .mapNote {
@@ -36,7 +36,7 @@
 
 .sheet {
   padding: 8px 0 36px;
-  color: #0b0b0d;
+  color: #1b2430;
 }
 
 .eyebrow {
@@ -80,7 +80,7 @@
 }
 
 .progress li[data-current="true"] {
-  color: #0b0b0d;
+  color: #1b2430;
   border-top-color: #d6a23a;
 }
 
@@ -139,7 +139,7 @@
   padding: 10px 12px;
   border: 1px solid rgba(37, 41, 50, 0.2);
   border-radius: 10px;
-  color: #0b0b0d;
+  color: #1b2430;
   background: #fff;
 }
 
@@ -241,14 +241,14 @@
 .primary {
   flex: 1;
   border: 0;
-  color: #f7f3ea;
-  background: #0b0b0d;
+  color: #ffffff;
+  background: #1b2430;
   font-weight: 800;
 }
 
 .secondary {
   border: 1px solid rgba(37, 41, 50, 0.2);
-  color: #252932;
+  color: #1b2430;
   background: transparent;
   font-weight: 760;
 }

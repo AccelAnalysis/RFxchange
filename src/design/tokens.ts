@@ -1,18 +1,24 @@
+/** Design System v2. Legacy property names remain compatibility aliases. */
 export const brandPalette = {
-  exchangeBlack: "#0B0B0D",
-  warmIvory: "#F7F3EA",
-  graphite: "#252932",
+  canvasCloud: "#F8FAFC",
+  surfaceWhite: "#FFFFFF",
+  surfaceMist: "#F1F4F8",
+  exchangeSlate: "#1B2430",
+  secondarySlate: "#475467",
+  exchangeBlack: "#1B2430",
+  warmIvory: "#F8FAFC",
+  graphite: "#1B2430",
   rfGold: "#D6A23A",
-  accessibleDarkGold: "#8A6418",
+  accessibleDarkGold: "#7A5710",
   signalBlue: "#2E5EAA",
   growthGreen: "#3B7B57",
 } as const;
 
 export const supportPalette = {
   white: "#FFFFFF",
-  mutedInk: "#62656D",
+  mutedInk: "#667085",
   atmosphericBlue: "#D7E4E8",
-  warmSand: "#EFE6D4",
+  warmSand: "#F1F4F8",
   transparent: "transparent",
 } as const;
 
@@ -32,23 +38,23 @@ export const colorUsage = {
 export const semanticColorModes = {
   exchangeLight: {
     canvas: {
-      base: brandPalette.warmIvory,
+      base: brandPalette.canvasCloud,
       elevated: supportPalette.white,
-      dense: brandPalette.graphite,
+      dense: brandPalette.surfaceMist,
       inverse: brandPalette.exchangeBlack,
       spatialFallback: supportPalette.atmosphericBlue,
     },
     surface: {
-      glass: "rgba(247, 243, 234, 0.84)",
-      glassStrong: "rgba(247, 243, 234, 0.94)",
+      glass: "rgba(255, 255, 255, 0.78)",
+      glassStrong: "rgba(255, 255, 255, 0.94)",
       control: "rgba(255, 255, 255, 0.55)",
       intelligenceSubtle: "rgba(46, 94, 170, 0.08)",
       connectionSubtle: "rgba(214, 162, 58, 0.16)",
       outcomeSubtle: "rgba(59, 123, 87, 0.08)",
     },
     text: {
-      primary: brandPalette.exchangeBlack,
-      secondary: brandPalette.graphite,
+      primary: brandPalette.exchangeSlate,
+      secondary: brandPalette.secondarySlate,
       muted: supportPalette.mutedInk,
       inverse: supportPalette.white,
       connectionSmall: brandPalette.accessibleDarkGold,
@@ -56,19 +62,19 @@ export const semanticColorModes = {
       outcome: brandPalette.growthGreen,
     },
     border: {
-      subtle: "rgba(37, 41, 50, 0.14)",
-      strong: "rgba(37, 41, 50, 0.28)",
+      subtle: "#DDE3EA",
+      strong: "#C7D0DA",
       inverse: "rgba(255, 255, 255, 0.16)",
-      glass: "rgba(247, 243, 234, 0.66)",
-      focus: brandPalette.rfGold,
+      glass: "rgba(27, 36, 48, 0.08)",
+      focus: brandPalette.signalBlue,
     },
     action: {
-      primaryBackground: brandPalette.exchangeBlack,
-      primaryForeground: supportPalette.white,
+      primaryBackground: brandPalette.rfGold,
+      primaryForeground: brandPalette.exchangeSlate,
       selectedBackground: brandPalette.rfGold,
       selectedForeground: brandPalette.exchangeBlack,
       link: brandPalette.signalBlue,
-      focusRing: brandPalette.rfGold,
+      focusRing: brandPalette.signalBlue,
     },
     state: {
       information: brandPalette.signalBlue,
@@ -76,7 +82,7 @@ export const semanticColorModes = {
       connectionFocus: brandPalette.rfGold,
       connectionText: brandPalette.accessibleDarkGold,
       neutral: brandPalette.graphite,
-      disabled: "rgba(37, 41, 50, 0.48)",
+      disabled: "rgba(27, 36, 48, 0.48)",
       restricted: brandPalette.graphite,
     },
   },
@@ -101,19 +107,19 @@ export const spacing = {
 
 export const radii = {
   square: 0,
-  compact: 10,
-  control: 14,
-  panel: 18,
+  compact: 8,
+  control: 12,
+  panel: 16,
   immersive: 24,
   pill: 999,
 } as const;
 
 export const elevation = {
   none: "none",
-  soft: "0 24px 70px rgba(11, 11, 13, 0.08)",
-  control: "0 12px 34px rgba(11, 11, 13, 0.12)",
-  overlay: "0 24px 72px rgba(11, 11, 13, 0.20)",
-  focus: "0 0 0 4px rgba(214, 162, 58, 0.18)",
+  soft: "0 8px 30px rgba(27, 36, 48, 0.10)",
+  control: "0 4px 16px rgba(27, 36, 48, 0.08)",
+  overlay: "0 24px 72px rgba(27, 36, 48, 0.16)",
+  focus: "0 0 0 4px rgba(46, 94, 170, 0.18)",
 } as const;
 
 export const borders = {
@@ -137,8 +143,8 @@ export const focus = {
 } as const;
 
 export const fontFamilies = {
-  display: '"Aptos Display", "Aptos", "Segoe UI", Helvetica, Arial, sans-serif',
-  interface: '"Aptos", "Segoe UI", Helvetica, Arial, sans-serif',
+  display: '"Aptos Display", "Aptos", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  interface: '"Aptos", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 } as const;
 
 export const typographyRoles = {
@@ -242,7 +248,7 @@ export const objectSemanticTokens = {
     opportunity: {
       fill: brandPalette.signalBlue,
       foreground: supportPalette.white,
-      focusRing: brandPalette.rfGold,
+      focusRing: brandPalette.signalBlue,
     },
   },
   field: {
@@ -251,11 +257,11 @@ export const objectSemanticTokens = {
       outline: brandPalette.rfGold,
     },
     localitySurrounding: {
-      fill: "rgba(37, 41, 50, 0.04)",
-      outline: "rgba(37, 41, 50, 0.30)",
+      fill: "rgba(27, 36, 48, 0.04)",
+      outline: "rgba(27, 36, 48, 0.30)",
     },
     localityRestricted: {
-      fill: "rgba(37, 41, 50, 0.12)",
+      fill: "rgba(27, 36, 48, 0.12)",
       outline: brandPalette.graphite,
     },
     serviceTerritory: {
@@ -284,14 +290,14 @@ export const objectSemanticTokens = {
       foreground: supportPalette.white,
     },
     unavailable: {
-      structure: "rgba(37, 41, 50, 0.40)",
+      structure: "rgba(27, 36, 48, 0.40)",
       foreground: brandPalette.graphite,
     },
   },
   locality: {
     selected: brandPalette.rfGold,
     released: brandPalette.signalBlue,
-    surrounding: "rgba(37, 41, 50, 0.30)",
+    surrounding: "rgba(27, 36, 48, 0.30)",
     limited: brandPalette.accessibleDarkGold,
     restricted: brandPalette.graphite,
   },

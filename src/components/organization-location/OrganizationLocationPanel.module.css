@@ -1,5 +1,5 @@
 .sheet {
-  color: #0b0b0d;
+  color: #1b2430;
 }
 
 .eyebrow {
@@ -42,7 +42,7 @@
 }
 
 .progress li[data-active="true"] {
-  color: #0b0b0d;
+  color: #1b2430;
   border-top-color: #d6a23a;
 }
 
@@ -90,7 +90,7 @@
   padding: 10px 12px;
   border: 1px solid rgba(37, 41, 50, 0.2);
   border-radius: 10px;
-  color: #0b0b0d;
+  color: #1b2430;
   background: #fff;
 }
 
@@ -156,7 +156,7 @@
 .candidate {
   padding: 15px 16px;
   border-left: 3px solid #d6a23a;
-  color: #252932;
+  color: #1b2430;
   background: rgba(46, 94, 170, 0.07);
 }
 
@@ -180,14 +180,14 @@
   min-height: 48px;
   border: 0;
   border-radius: 11px;
-  color: #f7f3ea;
-  background: #0b0b0d;
+  color: #ffffff;
+  background: #1b2430;
   font: 800 0.9rem/1 inherit;
   cursor: pointer;
 }
 
 .form button:disabled {
-  color: #252932;
+  color: #1b2430;
   background: rgba(59, 123, 87, 0.18);
   cursor: default;
 }

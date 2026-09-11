@@ -426,7 +426,7 @@ export function MapboxLocalityCanvas({
     const accent = model.layers.find((layer) => layer.id === "selected-outline-accent")?.style;
     return {
       fill: fill ?? { fill: "#d6a23a", fillOpacity: 0.08, stroke: "none", strokeOpacity: 0, strokeWidth: 0 },
-      contrast: contrast ?? { fill: "none", fillOpacity: 0, stroke: "#0b0b0d", strokeOpacity: 0.9, strokeWidth: 5 },
+      contrast: contrast ?? { fill: "none", fillOpacity: 0, stroke: "#1b2430", strokeOpacity: 0.9, strokeWidth: 5 },
       accent: accent ?? { fill: "none", fillOpacity: 0, stroke: "#d6a23a", strokeOpacity: 1, strokeWidth: 2.5 },
     };
   }, [model.layers]);

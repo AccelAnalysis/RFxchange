@@ -72,7 +72,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: #f7f3ea;
+  color: #ffffff;
   background: #d6a23a;
   font-size: .68rem;
   font-weight: 840;
@@ -143,8 +143,8 @@
   font: 780 0.8rem/1 var(--font-body);
 }
 
-.primary { width: 100%; border: 1px solid #0b0b0d; color: #f7f3ea; background: #0b0b0d; }
-.secondary { width: 100%; border: 1px solid rgba(37,41,50,.2); color: #252932; background: rgba(255,255,255,.5); }
+.primary { width: 100%; border: 1px solid #1b2430; color: #ffffff; background: #1b2430; }
+.secondary { width: 100%; border: 1px solid rgba(37,41,50,.2); color: #1b2430; background: rgba(255,255,255,.5); }
 .textButton { min-height: 38px; margin-top: 8px; border: 0; color: var(--signal-blue); background: transparent; }
 .primary:disabled, .secondary:disabled, .textButton:disabled { opacity: .52; cursor: default; }
 .primary:focus-visible, .secondary:focus-visible, .textButton:focus-visible { outline: var(--focus-ring); outline-offset: 3px; }

@@ -51,14 +51,14 @@ function palette(kind: ExchangeBeaconKind, state: ExchangeBeaconState) {
   const own = kind === "own";
   const selected = state === "selected" || state === "selected-approximate";
   return Object.freeze({
-    faceTop: own ? "#fffaf0" : selected ? "#404652" : "#343a45",
-    faceMid: own ? "#f1e8d8" : "#252932",
-    faceBottom: own ? "#cbbfa9" : "#111419",
-    sideTop: own ? "#b49a63" : "#171a20",
+    faceTop: own ? "#ffffff" : selected ? "#344054" : "#475467",
+    faceMid: own ? "#f1f4f8" : "#1b2430",
+    faceBottom: own ? "#dde3ea" : "#1b2430",
+    sideTop: own ? "#98a2b3" : "#344054",
     sideBottom: "#08090c",
     rim: selected ? "#f3cf73" : "#d6a23a",
     rimDark: "#755014",
-    glyph: own ? "#1b1d22" : "#fff9ec",
+    glyph: own ? "#1b2430" : "#ffffff",
     flare: kind === "opportunities-rfx" && selected,
   });
 }

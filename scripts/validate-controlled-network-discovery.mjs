@@ -71,7 +71,7 @@ assert.match(state, /serverRevalidatesSelectedObjectsAndActions: true/);
 assert.match(map, /NETWORK_MARKER_SOURCE_ID/);
 assert.match(map, /rfx-spatial-scene-network-organizations/);
 assert.match(map, /NETWORK_MARKER_CORE_LAYER_ID/);
-assert.match(map, /"circle-color": "#252932"/);
+assert.match(map, /"circle-color": "#1b2430"/);
 assert.match(map, /"circle-stroke-color": "#d6a23a"/);
 assert.match(map, /onOrganizationMarkerSelectRef\.current/);
 // Slice 4.5 owns the now-authorized real opportunity object. Network discovery must still not

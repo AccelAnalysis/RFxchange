@@ -5,7 +5,7 @@
   min-height: 420px;
   margin: 0;
   overflow: hidden;
-  color: #0b0b0d;
+  color: #1b2430;
   background: #d8e4e8;
 }
 
@@ -19,7 +19,7 @@
 .controls button {
   width: 44px;
   height: 44px;
-  color: #0b0b0d;
+  color: #1b2430;
   border: 0;
   background: transparent;
   font: inherit;
@@ -71,13 +71,13 @@
 
 .labels {
   paint-order: stroke;
-  stroke: rgba(247, 243, 234, 0.88);
+  stroke: rgba(255, 255, 255, 0.88);
   stroke-width: 4px;
   stroke-linejoin: round;
 }
 
 .selectedLabel {
-  fill: #0b0b0d;
+  fill: #1b2430;
   font-size: 23px;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -91,7 +91,7 @@
 }
 
 .locationPoints {
-  filter: drop-shadow(0 5px 8px rgba(11, 11, 13, 0.34));
+  filter: drop-shadow(0 5px 8px rgba(27, 36, 48, 0.34));
 }
 
 .candidateHalo {
@@ -99,13 +99,13 @@
 }
 
 .candidatePoint {
-  fill: #f7f3ea;
-  stroke: #0b0b0d;
+  fill: #ffffff;
+  stroke: #1b2430;
   stroke-width: 2;
 }
 
 .confirmedPoint {
-  fill: #0b0b0d;
+  fill: #1b2430;
   stroke: none;
 }
 
@@ -114,7 +114,7 @@
 }
 
 .organizationMarkers {
-  filter: drop-shadow(0 8px 10px rgba(11, 11, 13, 0.34));
+  filter: drop-shadow(0 8px 10px rgba(27, 36, 48, 0.34));
 }
 
 .organizationMarker {
@@ -137,7 +137,7 @@
 .organizationMarker:focus-visible .markerHalo,
 .organizationMarker:focus-visible .markerHaloSelected {
   fill: rgba(214, 162, 58, 0.3);
-  stroke: #0b0b0d;
+  stroke: #1b2430;
   stroke-width: 2;
 }
 
@@ -153,12 +153,12 @@
 }
 
 .organizationPin {
-  fill: #252932;
+  fill: #1b2430;
   stroke: none;
 }
 
 .organizationGlyph {
-  fill: #f7f3ea;
+  fill: #ffffff;
 }
 
 @keyframes markerActivation {
@@ -182,9 +182,9 @@
   flex-wrap: wrap;
   gap: 13px;
   padding: 10px 12px;
-  border: 1px solid rgba(247, 243, 234, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.68);
   border-radius: 14px;
-  color: #252932;
+  color: #1b2430;
   background: var(--ivory-glass);
   box-shadow: var(--shadow-control);
   backdrop-filter: blur(20px) saturate(120%);
@@ -207,7 +207,7 @@
 .selectedSwatch {
   border: 2px solid #d6a23a;
   background: #5d8b70;
-  box-shadow: 0 0 0 1px #0b0b0d;
+  box-shadow: 0 0 0 1px #1b2430;
 }
 
 .surroundingSwatch {
@@ -217,7 +217,7 @@
 
 .organizationSwatch {
   border-radius: 50% 50% 50% 0 !important;
-  background: #252932;
+  background: #1b2430;
   transform: rotate(-45deg);
 }
 
@@ -228,8 +228,8 @@
   bottom: 12px;
   padding: 5px 7px;
   border-radius: 6px;
-  color: rgba(11, 11, 13, 0.72);
-  background: rgba(247, 243, 234, 0.82);
+  color: rgba(27, 36, 48, 0.72);
+  background: rgba(255, 255, 255, 0.82);
   font-size: 0.62rem;
   text-decoration: none;
 }
@@ -239,7 +239,7 @@
   flex-wrap: wrap;
   gap: 8px 16px;
   margin-top: 8px;
-  color: #252932;
+  color: #1b2430;
 }
 
 .pointSummary span {

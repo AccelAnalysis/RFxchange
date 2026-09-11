@@ -17,7 +17,7 @@
 
 .eyebrow {
   margin: 0 0 14px;
-  color: #8a6418;
+  color: #7a5710;
   font-size: 0.76rem;
   font-weight: 750;
   letter-spacing: 0.13em;
@@ -53,7 +53,7 @@
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.54);
 }
-.memberships li[data-selected="true"] { border-color: #8a6418; }
+.memberships li[data-selected="true"] { border-color: #7a5710; }
 .memberships strong,
 .memberships small { display: block; }
 .memberships small { margin-top: 4px; color: var(--muted-ink); }
@@ -61,7 +61,7 @@
 .select,
 .selected { font-size: 0.86rem; font-weight: 720; }
 .select { color: var(--exchange-black); }
-.selected { color: #8a6418; }
+.selected { color: #7a5710; }
 
 .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
 .primary,

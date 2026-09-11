@@ -1,56 +1,60 @@
 :root {
   color-scheme: light;
 
-  /* Approved brand palette. Legacy aliases remain in app/globals.css for compatibility. */
-  --brand-exchange-black: #0b0b0d;
-  --brand-warm-ivory: #f7f3ea;
-  --brand-graphite: #252932;
+  /* Design System v2. Legacy names resolve to the bright palette for compatibility. */
+  --brand-canvas-cloud: #f8fafc;
+  --brand-surface-mist: #f1f4f8;
+  --brand-exchange-slate: #1b2430;
+  --brand-secondary-slate: #475467;
+  --brand-exchange-black: #1b2430;
+  --brand-warm-ivory: #f8fafc;
+  --brand-graphite: #1b2430;
   --brand-rf-gold: #d6a23a;
-  --brand-accessible-dark-gold: #8a6418;
+  --brand-accessible-dark-gold: #7a5710;
   --brand-signal-blue: #2e5eaa;
   --brand-growth-green: #3b7b57;
   --brand-white: #ffffff;
-  --brand-muted-ink: #62656d;
+  --brand-muted-ink: #667085;
 
   /* Exchange Light semantic color roles. B7 dark mode is not authorized by B1/B2. */
-  --semantic-canvas: var(--brand-warm-ivory);
+  --semantic-canvas: var(--brand-canvas-cloud);
   --semantic-canvas-elevated: var(--brand-white);
-  --semantic-canvas-dense: var(--brand-graphite);
+  --semantic-canvas-dense: var(--brand-surface-mist);
   --semantic-canvas-inverse: var(--brand-exchange-black);
   --semantic-spatial-fallback: #d7e4e8;
 
-  --semantic-surface-glass: rgba(247, 243, 234, 0.84);
-  --semantic-surface-glass-strong: rgba(247, 243, 234, 0.94);
+  --semantic-surface-glass: rgba(255, 255, 255, 0.78);
+  --semantic-surface-glass-strong: rgba(255, 255, 255, 0.94);
   --semantic-surface-control: rgba(255, 255, 255, 0.55);
   --semantic-surface-intelligence-subtle: rgba(46, 94, 170, 0.08);
   --semantic-surface-connection-subtle: rgba(214, 162, 58, 0.16);
   --semantic-surface-outcome-subtle: rgba(59, 123, 87, 0.08);
   --semantic-surface-elevated: var(--semantic-canvas-elevated);
-  --semantic-surface-subtle: rgba(37, 41, 50, 0.04);
+  --semantic-surface-subtle: rgba(27, 36, 48, 0.04);
   --semantic-surface-information: var(--semantic-surface-intelligence-subtle);
   --semantic-surface-connection: var(--semantic-surface-connection-subtle);
   --semantic-surface-outcome: var(--semantic-surface-outcome-subtle);
 
   --semantic-text-primary: var(--brand-exchange-black);
-  --semantic-text-secondary: var(--brand-graphite);
+  --semantic-text-secondary: var(--brand-secondary-slate);
   --semantic-text-muted: var(--brand-muted-ink);
   --semantic-text-inverse: var(--brand-white);
   --semantic-text-connection-small: var(--brand-accessible-dark-gold);
   --semantic-text-intelligence: var(--brand-signal-blue);
   --semantic-text-outcome: var(--brand-growth-green);
 
-  --semantic-border-subtle: rgba(37, 41, 50, 0.14);
-  --semantic-border-strong: rgba(37, 41, 50, 0.28);
+  --semantic-border-subtle: #dde3ea;
+  --semantic-border-strong: #c7d0da;
   --semantic-border-inverse: rgba(255, 255, 255, 0.16);
-  --semantic-border-glass: rgba(247, 243, 234, 0.66);
-  --semantic-border-focus: var(--brand-rf-gold);
+  --semantic-border-glass: rgba(27, 36, 48, 0.08);
+  --semantic-border-focus: var(--brand-signal-blue);
 
-  --semantic-action-primary-background: var(--brand-exchange-black);
-  --semantic-action-primary-foreground: var(--brand-white);
+  --semantic-action-primary-background: var(--brand-rf-gold);
+  --semantic-action-primary-foreground: var(--brand-exchange-slate);
   --semantic-action-selected-background: var(--brand-rf-gold);
   --semantic-action-selected-foreground: var(--brand-exchange-black);
   --semantic-action-link: var(--brand-signal-blue);
-  --semantic-focus-ring-color: var(--brand-rf-gold);
+  --semantic-focus-ring-color: var(--brand-signal-blue);
 
   --semantic-state-information: var(--brand-signal-blue);
   --semantic-state-positive-resolution: var(--brand-growth-green);
@@ -58,7 +62,7 @@
   --semantic-state-connection-text: var(--brand-accessible-dark-gold);
   --semantic-state-connection: var(--semantic-state-connection-focus);
   --semantic-state-neutral: var(--brand-graphite);
-  --semantic-state-disabled: rgba(37, 41, 50, 0.48);
+  --semantic-state-disabled: rgba(27, 36, 48, 0.48);
   --semantic-state-restricted: var(--brand-graphite);
 
   /* Spacing scale. */
@@ -77,17 +81,17 @@
   --space-3xl: var(--space-section);
 
   /* Radius, elevation, border, and focus roles. */
-  --radius-compact: 10px;
-  --radius-control: 14px;
-  --radius-panel: 18px;
+  --radius-compact: 8px;
+  --radius-control: 12px;
+  --radius-panel: 16px;
   --radius-immersive: 24px;
   --radius-panel-large: var(--radius-immersive);
   --radius-pill: 999px;
-  --elevation-soft: 0 24px 70px rgba(11, 11, 13, 0.08);
+  --elevation-soft: 0 8px 30px rgba(27, 36, 48, 0.10);
   --elevation-card: var(--elevation-soft);
-  --elevation-control: 0 12px 34px rgba(11, 11, 13, 0.12);
-  --elevation-overlay: 0 24px 72px rgba(11, 11, 13, 0.2);
-  --elevation-focus: 0 0 0 4px rgba(214, 162, 58, 0.18);
+  --elevation-control: 0 4px 16px rgba(27, 36, 48, 0.08);
+  --elevation-overlay: 0 24px 72px rgba(27, 36, 48, 0.16);
+  --elevation-focus: 0 0 0 4px rgba(46, 94, 170, 0.18);
   --border-hairline: 1px;
   --border-emphasis: 2px;
   --focus-outline-width: 3px;
@@ -95,8 +99,8 @@
   --focus-outline-offset-high: 4px;
 
   /* Aptos/system-safe roles only. No font assets are bundled by B1/B2. */
-  --type-display-family: "Aptos Display", "Aptos", "Segoe UI", Helvetica, Arial, sans-serif;
-  --type-interface-family: "Aptos", "Segoe UI", Helvetica, Arial, sans-serif;
+  --type-display-family: "Aptos Display", "Aptos", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --type-interface-family: "Aptos", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --type-display-hero-weight: 750;
   --type-display-section-weight: 700;
   --type-heading-weight: 700;
@@ -106,9 +110,9 @@
   --type-status-weight: 750;
   --type-data-weight: 600;
   --type-eyebrow-size: 0.67rem;
-  --type-caption-size: 0.72rem;
+  --type-caption-size: 0.75rem;
   --type-label-size: 0.78rem;
-  --type-body-size: 0.9rem;
+  --type-body-size: 1rem;
   --type-title-size: 1.22rem;
   --type-heading-size: 1.45rem;
   --type-eyebrow-tracking: 0.12em;
@@ -136,9 +140,9 @@
   --object-beacon-opportunity-fill: var(--brand-signal-blue);
   --object-field-locality-selected-fill: rgba(214, 162, 58, 0.1);
   --object-field-locality-selected-outline: var(--brand-rf-gold);
-  --object-field-locality-surrounding-fill: rgba(37, 41, 50, 0.04);
-  --object-field-locality-surrounding-outline: rgba(37, 41, 50, 0.3);
-  --object-field-locality-restricted-fill: rgba(37, 41, 50, 0.12);
+  --object-field-locality-surrounding-fill: rgba(27, 36, 48, 0.04);
+  --object-field-locality-surrounding-outline: rgba(27, 36, 48, 0.3);
+  --object-field-locality-restricted-fill: rgba(27, 36, 48, 0.12);
   --object-field-locality-restricted-outline: var(--brand-graphite);
   --object-field-service-fill: rgba(46, 94, 170, 0.12);
   --object-field-service-outline: var(--brand-signal-blue);
@@ -151,4 +155,11 @@
   --object-locality-released: var(--brand-signal-blue);
   --object-locality-limited: var(--brand-accessible-dark-gold);
   --object-locality-restricted: var(--brand-graphite);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  :root { --semantic-surface-glass: #fff; --semantic-surface-glass-strong: #fff; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root { --semantic-surface-glass: #fff; --semantic-surface-glass-strong: #fff; }
 }

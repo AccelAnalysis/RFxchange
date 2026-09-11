@@ -5,7 +5,7 @@
   padding: clamp(1.15rem, 3vw, 2rem);
   border-radius: 1rem;
   background: rgb(255 255 255 / 72%);
-  box-shadow: 0 1rem 3rem rgb(11 11 13 / 7%);
+  box-shadow: 0 1rem 3rem rgb(27 36 48 / 7%);
 }
 
 .panel h3,
@@ -25,7 +25,7 @@
 .field select { min-height: 44px; padding: .65rem .8rem; border: 1px solid rgb(37 41 50 / 25%); border-radius: .6rem; background: #fff; font: inherit; }
 .primary,
 .secondary { min-height: 44px; width: fit-content; padding: .7rem 1rem; border-radius: .65rem; font: inherit; font-weight: 760; cursor: pointer; }
-.primary { border: 0; background: var(--color-rf-gold, #d6a23a); color: #0b0b0d; text-decoration: none; }
+.primary { border: 0; background: var(--color-rf-gold, #d6a23a); color: #1b2430; text-decoration: none; }
 .secondary { border: 1px solid rgb(37 41 50 / 30%); background: transparent; color: inherit; }
 .primary:focus-visible,
 .secondary:focus-visible,
@@ -42,7 +42,7 @@
 .readiness li span,
 .requirements span { padding: .18rem .45rem; border-radius: 999px; background: rgb(37 41 50 / 9%); font-size: .75rem; }
 .requirements { display: flex; flex-wrap: wrap; gap: .45rem; }
-.preview { display: grid; gap: 1rem; padding: clamp(1rem, 3vw, 1.6rem); border-radius: .8rem; background: var(--color-warm-ivory, #f7f3ea); }
+.preview { display: grid; gap: 1rem; padding: clamp(1rem, 3vw, 1.6rem); border-radius: .8rem; background: var(--color-warm-ivory, #ffffff); }
 .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .9rem; margin: 0; }
 .summary div { display: grid; gap: .2rem; }
 .summary dt { color: rgb(37 41 50 / 65%); font-size: .78rem; font-weight: 700; text-transform: uppercase; }

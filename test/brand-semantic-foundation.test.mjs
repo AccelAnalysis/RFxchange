@@ -39,13 +39,18 @@ function contrast(foreground, background) {
   return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 }
 
-test("Brand B1 preserves the exact approved RFxchange palette and legacy access", () => {
+test("Design System v2 preserves the bright palette and legacy access", () => {
   assert.deepEqual(brandPalette, {
-    exchangeBlack: "#0B0B0D",
-    warmIvory: "#F7F3EA",
-    graphite: "#252932",
+    canvasCloud: "#F8FAFC",
+    surfaceWhite: "#FFFFFF",
+    surfaceMist: "#F1F4F8",
+    exchangeSlate: "#1B2430",
+    secondarySlate: "#475467",
+    exchangeBlack: "#1B2430",
+    warmIvory: "#F8FAFC",
+    graphite: "#1B2430",
     rfGold: "#D6A23A",
-    accessibleDarkGold: "#8A6418",
+    accessibleDarkGold: "#7A5710",
     signalBlue: "#2E5EAA",
     growthGreen: "#3B7B57",
   });
@@ -66,7 +71,7 @@ test("Brand B1 defines Exchange Light through semantic roles rather than raw com
   assert.equal(semanticTokenPolicy.darkModeAuthorized, false);
 });
 
-test("Accessible Dark Gold is the normal-text gold role on Warm Ivory", () => {
+test("Gold Text is the normal-text gold role on Canvas Cloud", () => {
   assert.ok(contrast(brandPalette.accessibleDarkGold, brandPalette.warmIvory) >= 4.5);
   assert.ok(contrast(brandPalette.rfGold, brandPalette.warmIvory) < 4.5);
 });
@@ -85,10 +90,10 @@ test("Brand B1 defines complete structural, focus, type and motion token familie
     "section",
     "immersive",
   ]);
-  assert.equal(radii.panel, 18);
-  assert.equal(elevation.overlay, "0 24px 72px rgba(11, 11, 13, 0.20)");
+  assert.equal(radii.panel, 16);
+  assert.equal(elevation.overlay, "0 24px 72px rgba(27, 36, 48, 0.16)");
   assert.equal(borders.width.focus, 3);
-  assert.equal(focus.outlineColor, brandPalette.rfGold);
+  assert.equal(focus.outlineColor, brandPalette.signalBlue);
   assert.equal(typography.display, fontFamilies.display);
   assert.equal(typography.body, fontFamilies.interface);
   assert.equal(typographyRoles.data.fontVariantNumeric, "tabular-nums");

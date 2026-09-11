@@ -1,5 +1,5 @@
 .panel {
-  color: #0b0b0d;
+  color: #1b2430;
 }
 
 .progress,
@@ -79,7 +79,7 @@
 
 .search input {
   min-width: 0;
-  color: #0b0b0d;
+  color: #1b2430;
   border: 0;
   outline: 0;
   padding: 12px 14px;
@@ -93,11 +93,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #f7f3ea;
+  color: #ffffff;
   border: 0;
   border-radius: 10px;
   padding: 12px 16px;
-  background: #0b0b0d;
+  background: #1b2430;
   font: inherit;
   font-size: 0.78rem;
   font-weight: 800;
@@ -138,7 +138,7 @@
   width: 52px;
   height: 52px;
   place-items: center;
-  color: #f7f3ea;
+  color: #ffffff;
   border: 0;
   border-radius: 14px;
   background: #3b7b57;
@@ -222,7 +222,7 @@
 }
 
 .matchCard a {
-  color: #f7f3ea;
+  color: #ffffff;
   background: #2e5eaa;
 }
 

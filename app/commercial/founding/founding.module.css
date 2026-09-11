@@ -3,8 +3,8 @@
   display: grid;
   place-items: center;
   padding: clamp(1.25rem, 4vw, 4rem);
-  background: var(--surface-page, #f7f3ea);
-  color: var(--text-primary, #0b0b0d);
+  background: var(--surface-page, #ffffff);
+  color: var(--text-primary, #1b2430);
 }
 
 .shell :global(.commerce-card) {
@@ -15,7 +15,7 @@
   border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
   border-radius: 1.25rem;
   background: var(--surface-card, #fffdf8);
-  box-shadow: 0 1.25rem 3.5rem rgb(11 11 13 / 8%);
+  box-shadow: 0 1.25rem 3.5rem rgb(27 36 48 / 8%);
 }
 
 .shell :global(.commerce-card h1),
@@ -83,9 +83,9 @@
 
 .shell :global(.commerce-actions button),
 .shell :global(.commerce-card > button) {
-  border: 1px solid #0b0b0d;
-  background: #0b0b0d;
-  color: #f7f3ea;
+  border: 1px solid #1b2430;
+  background: #1b2430;
+  color: #ffffff;
   cursor: pointer;
 }
 

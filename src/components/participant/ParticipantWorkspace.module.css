@@ -15,7 +15,7 @@
   justify-content: space-between;
   gap: 28px;
   border-bottom: 1px solid var(--line);
-  background: rgba(247, 243, 234, 0.94);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(24px) saturate(120%);
 }
 
@@ -128,7 +128,7 @@
   padding: clamp(24px, 2.8vw, 34px);
   overflow: auto;
   overscroll-behavior: contain;
-  border: 1px solid rgba(247, 243, 234, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.62);
   border-radius: var(--radius-lg);
   color: var(--exchange-black);
   background: var(--ivory-glass-strong);
@@ -154,7 +154,7 @@
   align-items: center;
   min-height: 44px;
   overflow: hidden;
-  border: 1px solid rgba(247, 243, 234, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.66);
   border-radius: 14px;
   color: var(--exchange-black);
   background: var(--ivory-glass);
@@ -165,7 +165,7 @@
 .localityStatus {
   min-width: 210px;
   padding: 15px 17px;
-  border: 1px solid rgba(247, 243, 234, 0.64);
+  border: 1px solid rgba(255, 255, 255, 0.64);
   border-radius: 16px;
   background: var(--ivory-glass);
   box-shadow: var(--shadow-control);
@@ -210,7 +210,7 @@
 .searchFilter > label,
 .filterDisclosure > summary {
   min-height: 48px;
-  border: 1px solid rgba(247, 243, 234, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 15px;
   background: var(--ivory-glass);
   box-shadow: var(--shadow-control);
@@ -284,7 +284,7 @@
   right: 0;
   width: min(320px, calc(100vw - 36px));
   padding: 18px;
-  border: 1px solid rgba(247, 243, 234, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 16px;
   background: var(--ivory-glass-strong);
   box-shadow: var(--shadow-overlay);
@@ -367,7 +367,7 @@
     width: min(260px, calc(100vw - 32px));
     padding: 10px;
     display: grid;
-    border: 1px solid rgba(247, 243, 234, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.72);
     border-radius: 16px;
     background: var(--ivory-glass-strong);
     box-shadow: var(--shadow-overlay);

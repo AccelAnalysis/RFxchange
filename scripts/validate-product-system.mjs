@@ -4,18 +4,18 @@ const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
 const expectedColors = {
-  "--exchange-black": "#0b0b0d",
+  "--exchange-black": "#1b2430",
   "--rf-gold": "#d6a23a",
-  "--warm-ivory": "#f7f3ea",
-  "--graphite": "#252932",
+  "--warm-ivory": "#f8fafc",
+  "--graphite": "#1B2430",
   "--signal-blue": "#2e5eaa",
   "--growth-green": "#3b7b57",
 };
 
 const css = (await read("app/globals.css")).toLowerCase();
 for (const [token, value] of Object.entries(expectedColors)) {
-  if (!css.includes(`${token}: ${value}`)) {
-    throw new Error(`BRD-003 missing or changed brand token ${token}: ${value}`);
+  if (!css.includes(`${token}: ${value.toLowerCase()}`)) {
+    throw new Error(`BRD-003 missing or changed brand token ${token}: ${value.toLowerCase()}`);
   }
 }
 
@@ -122,8 +122,8 @@ if (trademarkSurfaces.includes("®")) {
   throw new Error("BRD-014 registered mark may not be used in product/public surfaces until counsel approval is recorded.");
 }
 
-const network = await read("src/components/marketing/NetworkField.tsx");
-if (!network.includes("#D6A23A")) throw new Error("Golden connection path language is missing.");
+const tokens = await read("src/design/tokens.ts");
+if (!tokens.includes("stroke: brandPalette.rfGold")) throw new Error("Golden connection path language is missing.");
 
 await import("./validate-brand-semantic-foundation.mjs");
 await import("./validate-brand-shared-primitives.mjs");
