@@ -55,7 +55,8 @@ test("the shared shell keeps scope visible, exposes bounded search and uses comp
   assert.match(navigation, /aria-expanded=\{open\}/);
   assert.match(navigation, /Available now/);
   assert.match(styles, /\.navigation\[data-open="true"\] \.navigationBody/);
-  assert.match(styles, /var\(--warm-ivory/);
+  assert.match(styles, /#f8fafc/i);
+  assert.doesNotMatch(styles, /#f7f3ea|#0b0b0d/i);
   assert.match(styles, /var\(--rf-gold/);
   assert.doesNotMatch(styles, /overflow-x:\s*auto/);
 });

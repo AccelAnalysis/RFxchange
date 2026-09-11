@@ -34,7 +34,10 @@ function internalReturnTarget(returnTo: string | null | undefined): string | nul
   return returnTo;
 }
 
-export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }>) {
+export function SignInClient({ returnTo, audience = "exchange" }: Readonly<{
+  returnTo?: string | null;
+  audience?: "exchange" | "admin";
+}>) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,16 +48,17 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
     <main className={styles.page}>
       <header className={styles.header}>
         <BrandWordmark compact />
-        <Link href="/join">Join</Link>
+        {audience === "exchange" ? <Link href="/join">Join</Link> : <span>Administration</span>}
       </header>
 
       <section className={styles.shell}>
         <div className={styles.intro}>
-          <p className={styles.eyebrow}>Returning user</p>
-          <h1>Sign in to RFxchange.</h1>
+          <p className={styles.eyebrow}>{audience === "admin" ? "RFxchange Admin" : "Returning user"}</p>
+          <h1>{audience === "admin" ? "Sign in to administration." : "Sign in to RFxchange."}</h1>
           <p>
-            If your organization activation is incomplete, we will resume exactly where you left
-            off. If activation is complete, you will enter the Exchange.
+            {audience === "admin"
+              ? "Use your RFxchange account. Your administrative access determines which workspaces are available."
+              : "If your organization activation is incomplete, we will resume exactly where you left off. If activation is complete, you will enter the Exchange."}
           </p>
         </div>
 
@@ -144,9 +148,9 @@ export function SignInClient({ returnTo }: Readonly<{ returnTo?: string | null }
               {busy ? "Signing in…" : "Sign in"}
             </button>
           </form>
-          <p className={styles.hint}>
+          {audience === "exchange" ? <p className={styles.hint}>
             New to RFxchange? <Link href="/join">Join and create your organization account.</Link>
-          </p>
+          </p> : <p className={styles.hint}>Administrative access is granted separately from Exchange membership.</p>}
         </section>
       </section>
     </main>

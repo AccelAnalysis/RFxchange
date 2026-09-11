@@ -1,0 +1,16 @@
+.container { padding: 8px 0 0; }
+.container button {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #dde3ea;
+  border-radius: 999px;
+  color: #475467;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.container button:hover { background: #f1f4f8; }
+.container button:focus-visible { outline: 3px solid #2e5eaa; outline-offset: 3px; }
+.container button:disabled { opacity: .65; cursor: wait; }
+.container p { color: #b42318; font-size: .875rem; }
