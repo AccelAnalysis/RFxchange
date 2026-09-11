@@ -23,7 +23,10 @@ const adminDb = getAdminFirestore(adminApp);
 const clientDb = getFirestore(clientApp);
 connectFirestoreEmulator(clientDb, "127.0.0.1", 8080);
 const repository = new FirestoreReferralRepository(adminDb);
-const now = "2026-08-08T15:00:00.000Z";
+// Delivery claims use the repository's wall clock, so the referral fixtures must
+// stay valid relative to this run instead of expiring on a fixed calendar date.
+const now = new Date().toISOString();
+const referralExpiresAt = new Date(Date.parse(now) + 30 * 24 * 60 * 60 * 1_000).toISOString();
 const referralId = `ref-${suffix}`;
 const externalReferralId = `ref-external-${suffix}`;
 const atomicCommandId = `command-create-send-${suffix}`;
@@ -123,7 +126,7 @@ try {
     actorUserId: `user-sender-${suffix}`,
     actorMembershipId: `membership-sender-${suffix}`,
     now,
-    expiresAt: "2026-09-07T15:00:00.000Z",
+    expiresAt: referralExpiresAt,
   });
   const sent = transitionReferral({
     referral: draft,
@@ -175,7 +178,7 @@ try {
     }),
     browserSecretDigest: "a".repeat(64),
     issuedAt: now,
-    expiresAt: "2026-09-07T15:00:00.000Z",
+    expiresAt: referralExpiresAt,
   });
   const acquisitionEvent = createAcquisitionContextEvent({
     id: acquisitionEventId,
@@ -203,7 +206,7 @@ try {
     actorUserId: `user-sender-${suffix}`,
     actorMembershipId: `membership-sender-${suffix}`,
     now,
-    expiresAt: "2026-09-07T15:00:00.000Z",
+    expiresAt: referralExpiresAt,
   });
   const externalSent = transitionReferral({
     referral: externalDraft,

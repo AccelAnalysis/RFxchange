@@ -32,7 +32,12 @@ export function verifyAppHostingSameShaEvidence(evidence) {
   const ciSha = requiredSha(evidence?.ci?.sourceSha, "ci.sourceSha");
   assert.equal(ciSha, expectedSha, "Exact-head CI source SHA must equal expectedSha.");
   assert.equal(evidence?.ci?.conclusion, "success", "Exact-head CI must have succeeded.");
-  requiredString(evidence?.ci?.runUrl, "ci.runUrl");
+  assert.match(requiredString(evidence?.ci?.runUrl, "ci.runUrl"), /^https:\/\/github\.com\/AccelAnalysis\/RFxchange\/actions\/runs\/\d+$/, "CI URL must identify this repository.");
+  assert.equal(evidence?.ci?.status, "completed", "CI run must be completed.");
+  assert.equal(evidence?.ci?.workflow, "production-ci", "CI must use production-ci.");
+  assert.equal(evidence?.ci?.branch, "main", "CI must target main.");
+  assert.equal(evidence?.ci?.event, "push", "CI must verify merged source.");
+  assert.equal(evidence?.ci?.repository, "AccelAnalysis/RFxchange", "CI must belong to this repository.");
 
   const backendName = requiredString(evidence?.backend?.name, "backend.name");
   assert.equal(backendName, EXPECTED_BACKEND, "Evidence must target the existing production App Hosting backend.");
@@ -64,6 +69,7 @@ export function verifyAppHostingSameShaEvidence(evidence) {
 
   const rollbackBuild = requiredString(evidence?.rollback?.build, "rollback.build");
   assert.ok(rollbackBuild.startsWith(`${EXPECTED_BACKEND}/builds/`), "Rollback build must belong to the same backend.");
+  assert.equal(evidence?.rollback?.state, "READY", "Rollback build must be READY.");
   assert.notEqual(rollbackBuild, buildName, "Rollback target must be distinct from the new build.");
 
   return Object.freeze({
