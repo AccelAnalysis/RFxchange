@@ -1,6 +1,6 @@
 # RFxchange Platform Solution Architecture Document
 
-**In-Place Modernization Architecture Baseline**  
+**In-Place Modernization Architecture Baseline**
 
 
 > **Architecture in one sentence:** RFxchange will be one shared platform core with three deliberately separated application surfaces — Marketing & Acquisition, Exchange, and Admin — using common identity, organization, event, billing, communications, and data services while preserving clean responsibility and deployment boundaries.

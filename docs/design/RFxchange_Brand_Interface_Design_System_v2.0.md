@@ -1,10 +1,10 @@
 # RFxchange Brand & Interface Design System
 
-**Version:** 2.0 — In-Place Modernization Target  
-**Status:** Adopted visual and interaction target for modernization in AccelAnalysis/RFxchange; runtime convergence is tracked separately  
-**Applies to:** Exchange, Marketing & Acquisition Suite, Admin Console, Identity & Onboarding  
-**Architecture authority:** RFxchange Platform Solution Architecture Document (SAD)  
-**Supersedes on adoption:** conflicting visual guidance in `docs/design/RFxchange_DESIGN_SYSTEM.md`, `docs/product-system/BRAND_SYSTEM.md`, `src/design/tokens.ts`, and legacy screen-specific styling.  
+**Version:** 2.0 — In-Place Modernization Target
+**Status:** Adopted visual and interaction target for modernization in AccelAnalysis/RFxchange; runtime convergence is tracked separately
+**Applies to:** Exchange, Marketing & Acquisition Suite, Admin Console, Identity & Onboarding
+**Architecture authority:** RFxchange Platform Solution Architecture Document (SAD)
+**Supersedes on adoption:** conflicting visual guidance in `docs/design/RFxchange_DESIGN_SYSTEM.md`, `docs/product-system/BRAND_SYSTEM.md`, `src/design/tokens.ts`, and legacy screen-specific styling.
 
 ## 0. Authority and purpose
 
@@ -1006,4 +1006,3 @@ Feature teams may extend domain behavior. They may not create private visual sys
 # 37. Adoption decision
 
 On adoption, this document becomes the visual and interaction authority for the RFxchange modernization. The SAD remains the solution architecture authority. Screen/flow specifications and implementation PRs must conform to both.
-
