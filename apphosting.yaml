@@ -16,6 +16,15 @@ env:
   - variable: RFXCHANGE_FOUNDING_CHECKOUT_RELEASE_MODE
     value: "closed"
     availability: [ BUILD, RUNTIME ]
+  - variable: RFXCHANGE_STRIPE_MODE
+    value: "live"
+    availability: [ RUNTIME ]
+  - variable: RFXCHANGE_FOUNDING_STRIPE_PRICE_ID
+    value: "price_1U44szPNrfGaFz2qxcWEKKRl"
+    availability: [ RUNTIME ]
+  - variable: STRIPE_SECRET_KEY
+    secret: STRIPE_SECRET_KEY@1
+    availability: [ RUNTIME ]
   - variable: RFXCHANGE_AI_INTERPRETATION_ENABLED
     value: "false"
     availability: [ BUILD, RUNTIME ]

@@ -2,7 +2,10 @@ import { onRequest } from "firebase-functions/v2/https";
 
 import { createBackgroundJobRequest, executeBackgroundJob, terminalBackgroundJobError } from "./application/background-jobs.js";
 import { foundingPriceIdForMode } from "./application/market-ready-founding-commerce-reconcile.js";
-import { functionsRuntimeContextFromEnvironment } from "./runtime/environment.js";
+import {
+  functionsRuntimeContextFromEnvironment,
+  RFXCHANGE_FUNCTIONS_REGION,
+} from "./runtime/environment.js";
 import { FirestoreBackgroundJobStore } from "./runtime/firestore-background-job-store.js";
 import { backgroundJobPayloadFingerprint } from "./runtime/background-job-identifiers.js";
 import { getFunctionsFirestore } from "./runtime/firebase-admin.js";
@@ -57,6 +60,7 @@ function checkoutReservationId(object: Readonly<Record<string, unknown>>): strin
 
 export const marketReadyFoundingCommerceWebhook = onRequest(
   {
+    region: RFXCHANGE_FUNCTIONS_REGION,
     invoker: "public",
     secrets: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"],
     timeoutSeconds: 60,
