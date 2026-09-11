@@ -80,7 +80,7 @@ export function MarketingStoryPage({
       {showCta ? (
         <section className={styles.storyCta}>
           <div className={styles.storyCtaInner}>
-            
+
             {ctaTitle ? <h2>{ctaTitle}</h2> : null}
             {ctaBody ? <p>{ctaBody}</p> : null}
             <div className={styles.ctaActions}>

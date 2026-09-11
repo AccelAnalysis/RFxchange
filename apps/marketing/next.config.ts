@@ -1,6 +1,6 @@
 import path from "node:path";
 import type { NextConfig } from "next";
-import exchangeConfig from "../../next.config.ts";
+import exchangeConfig from "../../src/config/next-config.ts";
 
 const repositoryRoot = path.resolve(__dirname, "../..");
 

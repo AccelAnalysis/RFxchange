@@ -85,9 +85,9 @@
     "test:architecture": "node --test test/*.test.mjs",
     "validate": "npm run validate:product-system && npm run validate:architecture && npm run validate:internationalization && npm run validate:firebase-environment && npm run validate:firestore-schema && npm run validate:firestore-repositories && npm run validate:firestore-security-rules && npm run validate:firestore-indexes && npm run validate:firebase-auth-provider && npm run validate:firebase-user-resolution && npm run validate:firebase-server-session && npm run validate:firebase-authentication-lifecycle && npm run validate:firebase-auth-firestore-security-suite && npm run validate:first-persisted-authenticated-vertical-slice && npm run validate:transactional-email-provider-abstraction && npm run validate:firebase-functions-runtime && npm run validate:background-job-framework && npm run validate:firebase-storage-foundation",
     "check": "npm run validate && npm run build:functions && npm run test:functions && npm run test:architecture && npm run typecheck && npm run lint && npm run build && npm run typecheck:admin && npm run build:admin && node scripts/smoke-admin-application.mjs && npm run typecheck:marketing && npm run build:marketing && node scripts/smoke-marketing-application.mjs",
-    "build:admin": "npm --workspace @rfxchange/admin run build",
+    "build:admin": "nx run rfxchange-admin:build",
     "typecheck:admin": "npm --workspace @rfxchange/admin run typecheck",
-    "build:marketing": "npm --workspace @rfxchange/marketing run build",
+    "build:marketing": "nx run rfxchange-marketing:build",
     "typecheck:marketing": "npm --workspace @rfxchange/marketing run typecheck"
   },
   "dependencies": {
@@ -107,6 +107,7 @@
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.4",
     "firebase-tools": "15.29.0",
+    "nx": "23.2.1",
     "typescript": "6.0.3"
   },
   "overrides": {
@@ -118,5 +119,6 @@
     "firebase-admin": {
       "uuid": "^11.1.1"
     }
-  }
+  },
+  "packageManager": "npm@11.9.0"
 }

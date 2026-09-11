@@ -1,0 +1,10 @@
+{
+  "defaultProject": "rfxchange",
+  "neverConnectToCloud": true,
+  "parallel": 1,
+  "targetDefaults": {
+    "build": {
+      "cache": false
+    }
+  }
+}

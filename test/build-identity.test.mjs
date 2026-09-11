@@ -25,11 +25,14 @@ test("build identity accepts only a complete Git commit SHA and normalizes it", 
 
 test("Next artifact identity and production CI are bound to the checked-out exact source commit", async () => {
   const [config, workflow, source] = await Promise.all([
-    read("next.config.ts"),
+    read("src/config/next-config.ts"),
     read(".github/workflows/ci.yml"),
     read("src/infrastructure/system/build-identity.ts"),
   ]);
 
+  for (const entry of ["next.config.ts", "apps/admin/next.config.ts", "apps/marketing/next.config.ts"]) {
+    assert.match(await read(entry), /src\/config\/next-config\.ts/, `${entry} shares the release identity configuration`);
+  }
   assert.match(config, /RFXCHANGE_BUILD_SHA/);
   assert.match(config, /GITHUB_SHA/);
   assert.match(config, /FULL_GIT_SHA/);
