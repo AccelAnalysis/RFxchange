@@ -1,0 +1,43 @@
+.site { min-height: 100vh; color: #1b2430; background: #fff; }
+.header { position: sticky; top: 0; z-index: 50; background: rgb(255 255 255 / 94%); backdrop-filter: blur(20px); border-bottom: 1px solid #dde3ea; }
+.nav { width: min(calc(100% - 48px),1320px); min-height: 80px; margin-inline: auto; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; }
+.navLinks,.navActions { display: flex; align-items: center; gap: 18px; }
+.navLinks { justify-content: center; }
+.navActions { gap: 10px; }
+.nav a,.footer a { text-decoration: none; }
+.navLinks a { color: #475467; font-size: .875rem; font-weight: 650; padding-block: 14px; }
+.navLinks a:hover,.footer a:hover { text-decoration: underline; text-underline-offset: 5px; }
+.buttonGold,.buttonLight,.buttonOutline { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 10px 22px; border-radius: 999px; font-weight: 700; text-decoration: none; line-height: 1.35; }
+.buttonGold { background: #d6a23a; color: #1b2430; }
+.buttonGold:hover { background: #c99324; }
+.buttonLight,.buttonOutline { background: #fff; color: #1b2430; box-shadow: inset 0 0 0 1px #c7d0da; }
+.buttonLight:hover,.buttonOutline:hover { background: #f1f4f8; }
+.storyWrap,.wrap { width: min(calc(100% - 48px),1200px); margin-inline: auto; }
+.storySection { padding-block: 64px; border-bottom: 1px solid #dde3ea; }
+.storyGrid { display: grid; grid-template-columns: minmax(180px,1fr) 3fr; gap: 48px; }
+.storyNumber { color: #7a5710; font-size: .875rem; font-weight: 700; }
+.storyBody h2,.sectionHead h2 { font-size: clamp(1.75rem,3vw,2.7rem); line-height: 1.2; letter-spacing: -.035em; margin: 0 0 22px; }
+.storyBody p,.storyBody li,.sectionHead p { color: #475467; font-size: 1.0625rem; line-height: 1.75; }
+.storyBody li + li { margin-top: 10px; }
+.storyCta { padding: 72px 24px; background: #f1f4f8; text-align: center; }
+.storyCtaInner { max-width: 760px; margin-inline: auto; }
+.storyCtaInner h2 { font-size: clamp(2rem,3.5vw,3rem); line-height: 1.2; }
+.storyCtaInner p { color: #475467; line-height: 1.7; }
+.ctaActions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 28px; }
+.footer { padding: 64px max(24px,calc((100vw - 1200px)/2)) 24px; background: #fff; color: #475467; border-top: 1px solid #dde3ea; }
+.footerGrid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+.footerBrand p { max-width: 340px; line-height: 1.65; }
+.footerCol { display: flex; align-items: flex-start; flex-direction: column; }
+.footerCol h3 { font-size: .875rem; color: #1b2430; letter-spacing: 0; margin-bottom: 12px; }
+.footerCol a { display: flex; align-items: center; min-height: 44px; font-size: .875rem; }
+.footerBottom { margin-top: 40px; padding-top: 24px; border-top: 1px solid #dde3ea; display: flex; justify-content: space-between; gap: 20px; color: #667085; font-size: .8125rem; }
+.section { padding-block: 72px; }
+.sectionHead { max-width: 740px; margin-bottom: 36px; }
+.creditGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
+.creditCard { border-top: 1px solid #dde3ea; padding-top: 24px; }
+.creditCard h3 { font-size: 1.125rem; line-height: 1.4; }
+.creditCard p { color: #475467; line-height: 1.65; }
+.creditCard a { color: #2e5eaa; }
+@media(max-width:1000px) { .footerGrid { grid-template-columns: 2fr 1fr 1fr; } .footerBrand { grid-column: 1/-1; } }
+@media(max-width:720px) { .storyWrap,.wrap { width: calc(100% - 32px); } .storyGrid { grid-template-columns: 1fr; gap: 20px; } .storySection { padding-block: 40px; } .footerGrid { grid-template-columns: 1fr 1fr; gap: 24px; } .footerBottom { flex-direction: column; } .creditGrid { grid-template-columns: 1fr; } }
+@media(prefers-reduced-transparency:reduce) { .header { background: #fff; backdrop-filter: none; } }

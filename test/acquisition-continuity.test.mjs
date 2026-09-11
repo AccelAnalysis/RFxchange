@@ -349,3 +349,18 @@ test("ACQ-002/003 UI and route boundaries remain responsive and server-authorita
   assert.match(activation, /controlledPlatformUrl: participantLifecycleDestination/);
   assert.doesNotMatch(activation, /\/acquisition\/continue/);
 });
+
+test("Marketing campaign attribution binds as direct entry and grants no referral or organization authority", async () => {
+  const subject = fixture();
+  const user = participant();
+  const journey = accessJourneyId("activation-marketing");
+  const token = await subject.service.issueMarketingEntry("regional-launch-2026");
+  const bound = await subject.service.bind({ token, userId: user.id, accessJourneyId: journey });
+  assert.equal(bound.intent.kind, "direct");
+  assert.equal(bound.intent.subjectReference, null);
+  assert.equal(bound.source.channel, "direct");
+  assert.equal(bound.source.sourceReference, "regional-launch-2026");
+  assert.equal(bound.boundUserId, user.id);
+  await assert.rejects(subject.service.bind({ token, userId: participant("other").id, accessJourneyId: journey }));
+  await assert.rejects(subject.service.issueMarketingEntry("https://untrusted.example/referral"), /invalid/);
+});

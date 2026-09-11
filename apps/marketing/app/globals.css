@@ -1,0 +1,26 @@
+:root {
+  --exchange-black: #1b2430;
+  --warm-ivory: #f8fafc;
+  --graphite: #1b2430;
+  --muted-ink: #667085;
+  --brand-exchange-black: #1b2430;
+  --brand-warm-ivory: #f8fafc;
+  --brand-graphite: #475467;
+  --brand-muted-ink: #667085;
+  --brand-accessible-dark-gold: #7a5710;
+  --semantic-canvas: #f8fafc;
+  --semantic-canvas-dense: #f1f4f8;
+  --semantic-text-primary: #1b2430;
+  --semantic-text-secondary: #475467;
+  --semantic-surface-glass: rgb(255 255 255 / 78%);
+  --semantic-surface-glass-strong: rgb(255 255 255 / 94%);
+  --line: #dde3ea;
+  --font-body: "Aptos", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Aptos Display", var(--font-body);
+}
+
+body { background: var(--semantic-canvas); color: var(--semantic-text-primary); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid #2e5eaa;
+  outline-offset: 3px;
+}

@@ -1,0 +1,33 @@
+.pricePanel { margin-top: 28px; padding: 20px; display: grid; gap: 12px; border-radius: 16px; background: #fff; border: 1px solid #dde3ea; }
+.pricePanel strong { color: #7a5710; }
+.pricePanel span,.pricePanel p { color: #475467; margin: 0; font-size: .875rem; line-height: 1.6; }
+.fourGrid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 28px; margin-top: 40px; }
+.numberedCard,.benefitCard,.boundaryCard { border-top: 1px solid #dde3ea; padding-top: 24px; }
+.numberedCard > span { color: #7a5710; font-weight: 700; font-size: .875rem; }
+.numberedCard h3,.benefitCard h3,.boundaryCard h3 { font-size: 1.25rem; line-height: 1.35; margin-top: 18px; }
+.numberedCard p,.benefitCard p,.boundaryCard p { color: #475467; line-height: 1.7; }
+.scenarioSection,.comparisonSection,.boundarySection { padding-block: 72px; background: #f1f4f8; }
+.scenarioGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.scenarioGrid h2 { font-size: clamp(2rem,3.5vw,3rem); line-height: 1.2; }
+.scenarioGrid p { color: #475467; line-height: 1.7; }
+.scenarioGrid blockquote { margin: 0; padding: 24px 32px; border-left: 3px solid #d6a23a; font-size: clamp(1.5rem,2.6vw,2.25rem); line-height: 1.4; }
+.comparisonGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 36px; }
+.planCard { padding: 32px; border-radius: 20px; background: #fff; border: 1px solid #dde3ea; }
+.planCard h3 { font-size: 1.5rem; }
+.planCard p,.planCard li { color: #475467; line-height: 1.7; }
+.foundingPlan { border-top: 3px solid #d6a23a; }
+.planPrice { font-size: 1.25rem; font-weight: 700; color: #1b2430; }
+.readinessNote,.footnote,.boundaryClosing { color: #667085; font-size: .875rem; line-height: 1.7; margin-top: 24px; }
+.standardSection,.faqSection { padding-block: 72px; }
+.flow { display: flex; flex-wrap: wrap; gap: 16px; padding: 0; list-style: none; margin-top: 32px; }
+.flow > * { flex: 1; min-width: 160px; padding: 20px 0; border-top: 2px solid #d6a23a; }
+.contributionSection { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 64px max(24px,calc((100vw - 1200px)/2)); background: #f8fafc; align-items: center; }
+.contributionSection img { width: 100%; height: 440px; object-fit: cover; border-radius: 20px; }
+.contributionSection h2 { font-size: clamp(2rem,3vw,3rem); line-height: 1.2; }
+.contributionSection p { color: #475467; line-height: 1.7; }
+.faqList { margin-top: 36px; }
+.faqList details { padding: 16px 0; border-top: 1px solid #dde3ea; }
+.faqList summary { cursor: pointer; min-height: 44px; padding-block: 12px; font-weight: 650; }
+.faqList p { max-width: 820px; color: #475467; line-height: 1.7; }
+@media(max-width:1000px) { .fourGrid { grid-template-columns: 1fr 1fr; } }
+@media(max-width:720px) { .fourGrid,.comparisonGrid,.scenarioGrid,.contributionSection { grid-template-columns: 1fr; gap: 28px; } .contributionSection img { height: 320px; } .planCard { padding: 24px; } }
