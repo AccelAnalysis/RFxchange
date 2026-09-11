@@ -1,0 +1,2 @@
+import { AdminDomainPage } from "@/src/components/admin/AdminDomainPage";
+export default async function Page({searchParams}:Readonly<{searchParams?:Promise<Readonly<Record<string,string|string[]|undefined>>>}>){return <AdminDomainPage destinationKey="policies-configuration" currentPath="/admin/configuration" searchParams={searchParams}/>;}
