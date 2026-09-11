@@ -1,0 +1,17 @@
+{
+  "name": "rfxchange-marketing",
+  "root": "apps/marketing",
+  "sourceRoot": "apps/marketing/app",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "next build",
+        "cwd": "apps/marketing",
+        "forwardAllArgs": false
+      },
+      "cache": false
+    }
+  }
+}

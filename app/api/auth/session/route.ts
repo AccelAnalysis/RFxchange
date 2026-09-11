@@ -8,6 +8,7 @@ import {
   type AcquisitionContextToken,
 } from "@/src/application/acquisition/acquisition-context";
 import { parseOpaqueOpportunityCandidate } from "@/src/application/acquisition/opaque-opportunity-candidate";
+import { MARKETING_CAMPAIGN_COOKIE, marketingCampaignReference } from "@/src/application/acquisition/marketing-entry";
 import { accessJourneyId } from "@/src/domain/lifecycle/model";
 import {
   AcquisitionContextBindingError,
@@ -136,6 +137,7 @@ export async function POST(request: NextRequest) {
     let boundAcquisition: BoundAcquisitionContext | null = null;
     let acquisitionAttached = false;
     const acquisitionCookie = request.cookies.get(RFXCHANGE_ACQUISITION_COOKIE_NAME)?.value;
+    const marketingCampaign = marketingCampaignReference(request.cookies.get(MARKETING_CAMPAIGN_COOKIE)?.value);
 
     if (acquisitionCookie && canBootstrapActivation) {
       const persistentToken = parseAcquisitionContextToken(acquisitionCookie);
@@ -168,6 +170,21 @@ export async function POST(request: NextRequest) {
       }
     } else if (acquisitionCookie && !parseAcquisitionContextToken(acquisitionCookie) && !parseOpaqueOpportunityCandidate(acquisitionCookie)) {
       acquisitionStatus = "rejected";
+    }
+
+    if (canBootstrapActivation && marketingCampaign && !acquisitionCookie && !existingContext?.acquisitionContext) {
+      try {
+        const service = createServerAcquisitionContextService();
+        const token = await service.issueMarketingEntry(marketingCampaign);
+        boundAcquisition = await service.bind({
+          token,
+          userId: issued.context.user.id,
+          accessJourneyId: accessJourneyId(activationJourneyIdForUser(issued.context.user.id)),
+        });
+        acquisitionStatus = "bound";
+      } catch {
+        acquisitionStatus = "unavailable";
+      }
     }
 
     if (canBootstrapActivation) {
@@ -213,6 +230,9 @@ export async function POST(request: NextRequest) {
         ...acquisitionCookieOptions(),
         maxAge: 0,
       });
+    }
+    if (marketingCampaign && (acquisitionAttached || existingContext?.acquisitionContext)) {
+      response.cookies.set(MARKETING_CAMPAIGN_COOKIE, "", { ...acquisitionCookieOptions(), maxAge: 0 });
     }
     return timing.apply(response);
   } catch (error) {

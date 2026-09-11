@@ -1,0 +1,13 @@
+.section { padding: 72px 0; color: #1b2430; background: #f8fafc; }
+.wrap { width: min(calc(100% - 48px),1200px); margin-inline: auto; }
+.header { max-width: 760px; }
+.eyebrow { color: #7a5710; font-size: .75rem; letter-spacing: .12em; font-weight: 750; text-transform: uppercase; }
+.header h2 { font-size: clamp(2rem,3.5vw,3rem); line-height: 1.2; letter-spacing: -.035em; }
+.header > p:last-child,.card p { color: #475467; line-height: 1.7; }
+.grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 28px; margin-top: 32px; }
+.card { padding: 24px 0; border-top: 1px solid #c7d0da; }
+.card > span { display: inline-block; color: #475467; font-size: .75rem; font-weight: 700; padding: 6px 10px; border-radius: 999px; background: #e5eaf0; }
+.live > span { color: #245a3a; background: #e4f0e9; }
+.planned > span { color: #475467; }
+.card h3 { font-size: 1.25rem; line-height: 1.35; margin-top: 18px; }
+@media(max-width:720px) { .grid { grid-template-columns: 1fr; gap: 12px; } .wrap { width: calc(100% - 32px); } }

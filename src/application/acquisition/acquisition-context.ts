@@ -1,3 +1,4 @@
+import { marketingCampaignReference } from "./marketing-entry.ts";
 import type { AccessJourneyId } from "../../domain/lifecycle/model.ts";
 import type { UserId } from "../../domain/users/model.ts";
 import {
@@ -138,6 +139,17 @@ export class AcquisitionContextService {
    */
   async issueTrusted(input: TrustedAcquisitionInput): Promise<AcquisitionContextToken> {
     return this.issue(input);
+  }
+
+  /** Reported Marketing campaign attribution is direct entry, never a trusted referral or invitation. */
+  async issueMarketingEntry(campaignReference: string): Promise<AcquisitionContextToken> {
+    const reference = marketingCampaignReference(campaignReference);
+    if (!reference) throw new Error("Marketing campaign reference is invalid.");
+    return this.issue({
+      kind: "direct",
+      channel: "direct",
+      sourceReference: reference,
+    });
   }
 
   /**

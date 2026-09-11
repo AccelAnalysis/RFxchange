@@ -43,3 +43,8 @@ next-env.d.ts
 /apps/*/.next/
 /apps/*/node_modules/
 /apps/*/out/
+
+# Nx local build state
+.nx/
+
+/.apphosting/

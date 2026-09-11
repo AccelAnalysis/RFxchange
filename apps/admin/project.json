@@ -1,0 +1,17 @@
+{
+  "name": "rfxchange-admin",
+  "root": "apps/admin",
+  "sourceRoot": "apps/admin/app",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "next build",
+        "cwd": "apps/admin",
+        "forwardAllArgs": false
+      },
+      "cache": false
+    }
+  }
+}

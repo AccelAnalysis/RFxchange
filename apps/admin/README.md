@@ -21,3 +21,5 @@ Before a production rollout, bind the existing Admin Web App to the new App Host
 The root application's Admin routes remain available during the deployment transition. Remove those superseded route implementations and switch old entry points only after the separate application passes hosted sign-in, permitted-operation, denied-access and rollback checks. Do not delete data, Auth users or Firebase resources as part of route extraction.
 
 `npm run check` includes this application's build and HTTP smoke checks. Existing administrative authorization, scope, lifecycle and audit regression tests remain required.
+
+App Hosting recognizes the root `nx.json` and per-application `project.json` files, so it installs from the repository lockfile and retains shared sources. Each Nx build target executes the existing Next.js build in its own directory; build caching and Nx Cloud are disabled for release builds. Shared Next configuration lives in `src/config/next-config.ts`, outside the entry file rewritten by the Firebase adapter.

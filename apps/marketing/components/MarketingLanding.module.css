@@ -1,0 +1,66 @@
+.site { color: #1b2430; background: #fff; }
+.wrap, .heroInner { width: min(calc(100% - 64px), 1200px); margin-inline: auto; }
+.campaignBar { display: flex; justify-content: center; gap: 16px; padding: 12px 24px; background: #f1f4f8; color: #475467; font-size: .875rem; }
+.campaignBar a { color: #7a5710; font-weight: 700; }
+.hero { position: relative; display: grid; align-items: center; min-height: 690px; padding-block: 72px; background: #f8fafc; overflow: hidden; }
+.heroMedia { position: absolute; inset: 32px 24px 32px 57%; border-radius: 24px; overflow: hidden; }
+.heroMedia img, .splitMedia img, .networkMedia img, .audienceMedia img, .foundingMedia img { width: 100%; height: 100%; object-fit: cover; }
+.heroInner { position: relative; }
+.heroCopy { width: 51%; }
+.hero h1 { margin: 20px 0 24px; font-size: clamp(2.7rem,4.3vw,4.5rem); line-height: 1.06; letter-spacing: -.045em; }
+.heroDeck, .lede { color: #475467; font-size: 1.125rem; line-height: 1.65; }
+.eyebrow, .gold { color: #7a5710; }
+.eyebrow { font-size: .75rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+.heroActions, .ctaActions { display: flex; flex-wrap: wrap; gap: 12px; margin-block: 28px 16px; }
+.buttonGold, .buttonLight, .buttonDark { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 24px; border-radius: 999px; font-weight: 700; line-height: 1.35; text-decoration: none; }
+.buttonGold { background: #d6a23a; color: #1b2430; }
+.buttonGold:hover { background: #c99324; }
+.buttonLight, .buttonDark { background: #fff; color: #1b2430; box-shadow: inset 0 0 0 1px #c7d0da; }
+.buttonLight:hover, .buttonDark:hover { background: #f1f4f8; }
+.heroNote, .evidenceNote, .foundingNote, .provenanceLink, .amacsNote { font-size: .875rem; line-height: 1.6; color: #667085; }
+.valueBand { padding-block: 64px; border-bottom: 1px solid #dde3ea; }
+.valueGrid, .stepGrid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 32px; }
+.valueItem h2, .stepGrid h3 { font-size: 1.25rem; line-height: 1.3; letter-spacing: -.02em; margin: 16px 0 10px; }
+.valueItem > span, .stepGrid li > span, .amacsFlow article > span { color: #7a5710; font-size: .75rem; font-weight: 750; }
+.valueItem p, .stepGrid p, .amacsFlow p, .audienceBody p, .networkList p, .differenceCard p { color: #475467; line-height: 1.65; }
+.promise { margin: 40px 0 0; text-align: center; color: #475467; }
+.section, .amacsSection, .trustSection { padding-block: 88px; }
+.sectionHead { max-width: 740px; margin-bottom: 40px; }
+.sectionHead h1, .sectionHead h2, .splitCopy h2, .amacsIntro h2, .foundingCopy h2, .cta h2 { font-size: clamp(2rem,3.4vw,3rem); line-height: 1.15; letter-spacing: -.035em; margin-block: 16px 24px; }
+.sectionHead > p, .amacsIntro > p, .foundingCopy > p, .ctaInner > p { color: #475467; line-height: 1.65; }
+.splitSection, .foundingSection { display: grid; grid-template-columns: 1fr 1fr; background: #f8fafc; }
+.splitMedia, .foundingMedia { margin: 0; min-height: 550px; }
+.splitCopy, .foundingCopy { padding: clamp(36px,5vw,80px); align-self: center; }
+.problemList, .differenceGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.problemList h3, .differenceCard h3, .networkList h3 { font-size: 1.125rem; line-height: 1.4; letter-spacing: -.01em; }
+.problemList p { color: #475467; line-height: 1.6; }
+.closingStatement, .highlight { color: #1b2430; font-weight: 650; line-height: 1.65; }
+.stepGrid { padding: 0; list-style: none; counter-reset: steps; }
+.stepGrid li { padding-top: 20px; border-top: 2px solid #d6a23a; }
+.amacsSection, .trustSection { background: #f1f4f8; }
+.amacsIntro { max-width: 760px; }
+.amacsFlow { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 32px; margin-top: 40px; }
+.amacsFlow article { border-top: 1px solid #c7d0da; padding-top: 20px; }
+.amacsFlow h3 { font-size: 1.25rem; margin: 14px 0; }
+.ruleList { padding-left: 20px; color: #475467; line-height: 1.8; }
+.ruleList li + li { margin-top: 12px; }
+.networkGrid, .trustGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.networkMedia { position: relative; min-height: 580px; align-self: stretch; margin: 0; overflow: hidden; border-radius: 20px; }
+.networkMedia img { position: absolute; inset: 0; }
+.networkMedia figcaption { position: absolute; inset: auto 16px 16px; padding: 14px; border-radius: 12px; background: rgb(255 255 255 / 94%); color: #475467; font-size: .875rem; }
+.networkList article { padding-block: 20px; border-top: 1px solid #dde3ea; }
+.differenceCard { border-top: 1px solid #dde3ea; padding-top: 24px; }
+.audienceGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 28px; }
+.audienceCard { overflow: hidden; border-radius: 16px; background: #f8fafc; }
+.audienceMedia { height: 230px; }
+.audienceBody { padding: 28px; }
+.audienceBody > span { color: #7a5710; font-weight: 700; font-size: .875rem; }
+.audienceBody h3 { font-size: 1.375rem; line-height: 1.35; margin-top: 14px; }
+.cta { padding: 88px 24px; text-align: center; background: #f1f4f8; }
+.ctaMedia, .heroGrid { display: none; }
+.ctaInner { max-width: 780px; margin-inline: auto; }
+.ctaActions { justify-content: center; }
+.ctaInner > strong { display: block; margin-top: 30px; color: #475467; }
+@media (max-width: 1000px) { .hero { min-height: 610px; } .heroMedia { left: 60%; } .heroCopy { width: 56%; } .valueGrid,.stepGrid { grid-template-columns: 1fr 1fr; } .networkGrid,.trustGrid { gap: 32px; } }
+@media (max-width: 720px) { .wrap,.heroInner { width: calc(100% - 32px); } .campaignBar { display: block; text-align: center; } .campaignBar a { display: block; margin-top: 4px; } .hero { padding: 40px 0 20px; display: flex; flex-direction: column; gap: 32px; } .heroInner { order: 0; } .heroCopy { width: 100%; } .heroMedia { order: 1; position: static; height: 320px; width: calc(100% - 32px); } .hero h1 { font-size: clamp(2.5rem,10vw,3.7rem); } .section,.amacsSection,.trustSection,.cta { padding-block: 56px; } .splitSection,.foundingSection,.networkGrid,.trustGrid,.audienceGrid,.amacsFlow,.problemList,.differenceGrid { grid-template-columns: 1fr; } .splitMedia,.foundingMedia { min-height: 320px; max-height: 420px; } .splitCopy,.foundingCopy { padding: 36px 20px; } .networkMedia { min-height: 400px; } .valueGrid,.stepGrid { gap: 24px; } .aiSection .splitCopy { order: 1; } .aiSection .splitMedia { order: 0; } }
+@media (max-width: 420px) { .valueGrid,.stepGrid { grid-template-columns: 1fr; } .heroActions { flex-direction: column; } }
