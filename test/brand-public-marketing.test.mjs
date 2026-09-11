@@ -5,11 +5,11 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
-const home = await read("app/page.tsx");
-const founding = await read("app/founding/page.tsx");
-const availability = await read("src/components/marketing/MarketingAvailability.tsx");
+const home = await read("apps/marketing/app/page.tsx");
+const founding = await read("apps/marketing/app/founding/page.tsx");
+const availability = await read("apps/marketing/components/MarketingAvailability.tsx");
 const marketing = await read("src/content/marketing.ts");
-const chrome = await read("src/components/marketing/MarketingChrome.tsx");
+const chrome = await read("apps/marketing/components/MarketingChrome.tsx");
 const assets = await read("src/content/public-assets.ts");
 const englishCatalogText = await read("src/i18n/messages/en-US.json");
 const marketingCatalogText = await read("src/i18n/messages/marketing-pages/en-US.json");

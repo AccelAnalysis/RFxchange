@@ -11,7 +11,7 @@ const [model, service, persistence, schema, rules, participantUi, adminUi, archi
     read("src/infrastructure/firestore/schema.ts"),
     read("firestore.rules"),
     read("src/components/onboarding/ActivationJourneyClient.tsx"),
-    read("app/admin/organization-claims/page.tsx"),
+    read("apps/admin/app/admin/organization-claims/page.tsx"),
     read("docs/architecture/WAVE_2_SLICE_2_5.md"),
     read("docs/architecture/ACTIVATION_JOURNEY_INTEGRATION_GATE.md"),
     read(".github/workflows/ci.yml"),

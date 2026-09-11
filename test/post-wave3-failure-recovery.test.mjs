@@ -7,7 +7,7 @@ const read = (path) => readFileSync(new URL(path, root), "utf8");
 const exists = (path) => existsSync(new URL(path, root));
 
 const convergedRoutes = [
-  "app/api/admin/provider-applications/route.ts",
+  "src/infrastructure/admin/http/provider-applications.ts",
   "app/api/ai/amacs/disposition/route.ts",
   "app/api/ai/amacs/interpret/route.ts",
   "app/api/auth/session/route.ts",

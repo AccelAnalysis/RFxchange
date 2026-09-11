@@ -31,11 +31,11 @@ test("only truthful current admin runtimes remain registered", () => {
 });
 
 test("live administrative surfaces share one product shell", async () => {
-  const claimsPage = await read("app/admin/organization-claims/page.tsx");
-  const providerPage = await read("app/admin/resource-providers/page.tsx");
-  const organizationPage = await read("app/admin/organizations/[organizationId]/page.tsx");
-  const overviewPage = await read("app/admin/overview/page.tsx");
-  const queuesPage = await read("app/admin/work-queues/page.tsx");
+  const claimsPage = await read("apps/admin/app/admin/organization-claims/page.tsx");
+  const providerPage = await read("apps/admin/app/admin/resource-providers/page.tsx");
+  const organizationPage = await read("apps/admin/app/admin/organizations/[organizationId]/page.tsx");
+  const overviewPage = await read("apps/admin/app/admin/overview/page.tsx");
+  const queuesPage = await read("apps/admin/app/admin/work-queues/page.tsx");
   for (const source of [claimsPage, providerPage, organizationPage, overviewPage, queuesPage]) assert.match(source, /AdminPortalShell/);
   assert.doesNotMatch(claimsPage, /styles\.sidebar/);
   assert.doesNotMatch(claimsPage, /Runtime convergence/);
@@ -95,9 +95,9 @@ test("Organization 360 avoids a second dashboard shell and developer-facing prim
 test("operating core uses real providers, canonical cases and responsive list-to-inspector continuity", async () => {
   const runtime = await read("src/infrastructure/admin/operating-core-runtime.ts");
   const queue = await read("src/components/admin/AdminWorkQueueWorkspace.tsx");
-  const casePage = await read("app/admin/cases/[caseId]/page.tsx");
-  const caseApi = await read("app/api/admin/cases/[caseId]/transition/route.ts");
-  const searchPage = await read("app/admin/search/page.tsx");
+  const casePage = await read("apps/admin/app/admin/cases/[caseId]/page.tsx");
+  const caseApi = await read("src/infrastructure/admin/http/case-transition.ts");
+  const searchPage = await read("apps/admin/app/admin/search/page.tsx");
   const styles = await read("src/components/admin/AdminOperatingCore.module.css");
   for (const collection of ["organizationAuthorityClaims", "providerApplications", "administrative", "accessRestrictions", "backgroundJobs"]) assert.match(runtime, new RegExp(collection));
   assert.match(runtime, /authorityWithActiveGlobalGrants/);

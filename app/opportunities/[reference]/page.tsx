@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
-import { MarketingFooter, MarketingHeader } from "@/src/components/marketing/MarketingChrome";
+import { PublicExchangeFooter as MarketingFooter, PublicExchangeHeader as MarketingHeader } from "@/src/components/brand/PublicExchangeChrome";
 import { PublicOpportunityView } from "@/src/components/rfx/PublicOpportunityView";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,

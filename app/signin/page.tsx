@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { applicationOrigins } from "@/src/application/platform/application-origins";
+import { administrativeReturnPath } from "@/src/application/admin/return-path";
 import { SignInClient } from "@/src/components/auth/SignInClient";
 
 interface SignInPageProps {
@@ -15,5 +18,11 @@ function safeReturnTo(value: string | string[] | undefined): string | null {
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
   const params = searchParams ? await searchParams : {};
-  return <SignInClient returnTo={safeReturnTo(params.returnTo)} />;
+  const returnTo = safeReturnTo(params.returnTo);
+  if (returnTo === "/admin" || returnTo?.startsWith("/admin/")) {
+    const destination = new URL("/signin", applicationOrigins.admin);
+    destination.searchParams.set("returnTo", administrativeReturnPath(returnTo));
+    redirect(destination.href);
+  }
+  return <SignInClient returnTo={returnTo} />;
 }

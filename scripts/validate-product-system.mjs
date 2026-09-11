@@ -33,7 +33,7 @@ for (const typographyRequirement of [
   }
 }
 
-const home = (await read("app/page.tsx")).toLowerCase();
+const home = (await read("apps/marketing/app/page.tsx")).toLowerCase();
 const baseEnglishCatalogText = await read("src/i18n/messages/en-US.json");
 const marketingEnglishCatalogText = await read("src/i18n/messages/marketing-pages/en-US.json");
 const baseEnglishCatalog = JSON.parse(baseEnglishCatalogText);
@@ -77,8 +77,8 @@ for (const requirement of [
 }
 
 const publicCopy = [
-  await read("app/page.tsx"),
-  await read("app/founding/page.tsx"),
+  await read("apps/marketing/app/page.tsx"),
+  await read("apps/marketing/app/founding/page.tsx"),
   marketing,
   baseEnglishCatalogText,
   marketingEnglishCatalogText,
@@ -116,7 +116,7 @@ for (const styleRequirement of [
   }
 }
 
-const trademarkSurfaces = [wordmark, await read("app/page.tsx"), marketing, baseEnglishCatalogText, marketingEnglishCatalogText].join("\n");
+const trademarkSurfaces = [wordmark, await read("apps/marketing/app/page.tsx"), marketing, baseEnglishCatalogText, marketingEnglishCatalogText].join("\n");
 if (!wordmark.includes("™")) throw new Error("BRD-014 requires the trademark mark in the primary wordmark.");
 if (trademarkSurfaces.includes("®")) {
   throw new Error("BRD-014 registered mark may not be used in product/public surfaces until counsel approval is recorded.");

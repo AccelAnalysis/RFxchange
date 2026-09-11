@@ -18,7 +18,7 @@ The Admin layout excludes the participant map shell. Its sign-in uses the existi
 
 Before a production rollout, bind the existing Admin Web App to the new App Hosting backend, review its runtime identity's required backend access, and set its public origin and exact `RFXCHANGE_BUILD_SHA`. Keep automatic rollouts paused. The configured Exchange link is an ordinary cross-origin navigation; it does not copy tokens or cookies between applications.
 
-The root application's Admin routes remain available during the deployment transition. Remove those superseded route implementations and switch old entry points only after the separate application passes hosted sign-in, permitted-operation, denied-access and rollback checks. Do not delete data, Auth users or Firebase resources as part of route extraction.
+The cutover redirects old Exchange `/admin` entry points to this application and removes their duplicate page implementations. Deploy that cutover only after this application passes hosted sign-in, permitted-operation, denied-access and rollback checks. Both protected API entry points consume shared handlers under `src/infrastructure/admin/http`. Do not delete data, Auth users or Firebase resources as part of route extraction.
 
 `npm run check` includes this application's build and HTTP smoke checks. Existing administrative authorization, scope, lifecycle and audit regression tests remain required.
 

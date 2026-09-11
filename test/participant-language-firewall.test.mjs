@@ -165,7 +165,7 @@ test("legacy internal strings are normalized before participant dictionaries ren
 
 test("public and participant chrome do not render build or release-engineering diagnostics", async () => {
   const [chrome, profile] = await Promise.all([
-    read("src/components/marketing/MarketingChrome.tsx"),
+    read("apps/marketing/components/MarketingChrome.tsx"),
     read("app/organization-profile/page.tsx"),
   ]);
 
