@@ -9,7 +9,7 @@
   background: var(--semantic-canvas);
 }
 .map { position: absolute; inset: 0; width: 100%; height: 100%; }
-.scene::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, color-mix(in srgb, var(--semantic-canvas) 12%, transparent), transparent 38%), linear-gradient(180deg, rgba(11,11,13,.04), transparent 24%, rgba(11,11,13,.06)); }
+.scene::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, color-mix(in srgb, var(--semantic-canvas) 12%, transparent), transparent 38%), linear-gradient(180deg, rgba(27, 36, 48,.04), transparent 24%, rgba(27, 36, 48,.06)); }
 .scene[data-interactive="true"]::after { display: none; }
 
 .tokenNotice { position: fixed; inset: 0; display: grid; place-items: center; padding: var(--space-lg); background: var(--semantic-canvas); color: var(--semantic-text-muted); text-align: center; }

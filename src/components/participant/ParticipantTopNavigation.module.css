@@ -238,9 +238,9 @@
 .lensLabel {
   display: block;
   overflow: hidden;
-  font: 720 clamp(0.56rem, 2.1vw, 0.66rem)/1.05 var(--type-interface-family);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font: 600 0.75rem/1.15 var(--type-interface-family);
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .liveStatus {
@@ -283,7 +283,7 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 8px;
     border-bottom-color: transparent;
-    background: linear-gradient(to bottom, rgb(247 243 234 / 96%), rgb(247 243 234 / 72%) 72%, transparent);
+    background: linear-gradient(to bottom, rgb(255 255 255 / 96%), rgb(255 255 255 / 72%) 72%, transparent);
     box-shadow: none;
     pointer-events: none;
   }
@@ -307,7 +307,7 @@
     gap: 2px;
     border-top: 1px solid var(--semantic-border-subtle);
     background: color-mix(in srgb, var(--semantic-canvas-elevated) 96%, transparent);
-    box-shadow: 0 -8px 28px rgb(11 11 13 / 14%);
+    box-shadow: 0 -8px 28px rgb(27 36 48 / 14%);
     backdrop-filter: blur(22px) saturate(120%);
     -webkit-backdrop-filter: blur(22px) saturate(120%);
   }
@@ -319,7 +319,7 @@
     z-index: 108;
     inset: 0;
     display: block;
-    background: rgb(11 11 13 / 34%);
+    background: rgb(27 36 48 / 34%);
   }
 
   .mobileMenuSurface {
@@ -338,7 +338,7 @@
     border-bottom: 0;
     border-radius: 24px 24px 0 0;
     background: var(--semantic-surface-glass-strong);
-    box-shadow: 0 -18px 50px rgb(11 11 13 / 24%);
+    box-shadow: 0 -18px 50px rgb(27 36 48 / 24%);
     backdrop-filter: blur(24px) saturate(120%);
     -webkit-backdrop-filter: blur(24px) saturate(120%);
   }
@@ -372,8 +372,8 @@
   .mobileMenuHeader span { color: var(--semantic-text-muted); font-size: 0.72rem; }
 
   .mobileMenuHeader button {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     display: grid;
     place-items: center;
     border: 0;

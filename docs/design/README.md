@@ -1,6 +1,8 @@
 # RFxchange Design System Index
 
-**Status: CANONICAL IMPLEMENTED VISUAL / UI DESIGN BASELINE**
+**Current authority: [Brand & Interface Design System v2.0](RFxchange_Brand_Interface_Design_System_v2.0.md)**
+
+The authorized in-place modernization supersedes the ivory/black palette and older lens descriptions below. Runtime tokens retain compatibility names while resolving to Canvas Cloud, Surface White/Mist, Exchange Slate and restrained RF Gold. The mounted map, sliding results sheet and persistent **RFx | Resources | Intelligence | Capabilities | Menu** navigation remain canonical. Lens identity uses labels, icons and selection, not competing colors. The older design and brand-gate documents preserve provenance; v2 governs current visual primitives.
 
 This directory defines the currently implemented and converged visual system for RFxchange product interfaces, map experiences and presentations. It normalizes the current brand/presentation provenance together with map-first UI decisions and the completed Wave 2 implementation.
 
@@ -28,9 +30,9 @@ A domain-dependent brand expression may ship only when its authoritative domain 
 
 ## Implemented baseline and successor target
 
-The no-Feature-ID Exchange-shell truthfulness gate and Stage 2 establish the currently merged participant navigation and loading baseline. Until the successor migration packet merges, that runtime retains `Opportunities/RFx | Resources | Intelligence | Referrals`.
+The no-Feature-ID Exchange-shell truthfulness gate and Stage 2 establish the currently merged participant navigation and loading baseline. The current runtime uses `Opportunities/RFx | Resources | Intelligence | Capabilities`, with Menu as the utility gateway.
 
-The Stage 3–6 authority sets the target architecture; it is not yet an implementation claim:
+The Stage 3–6 authority and current modernization preserve these interaction boundaries:
 
 - the primary lens sequence is exactly `Opportunities/RFx | Resources | Intelligence | Capabilities`;
 - Referrals is a governed cross-lens function and Menu/Account destination, not a primary lens;

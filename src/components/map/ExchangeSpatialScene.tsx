@@ -1192,7 +1192,7 @@ export function ExchangeSpatialScene({
         type: "line",
         source: LOCALITY_SOURCE_ID,
         paint: {
-          "line-color": "#0b0b0d",
+          "line-color": "#1b2430",
           "line-opacity": 0.86,
           "line-width": 5,
         },
@@ -1319,7 +1319,7 @@ export function ExchangeSpatialScene({
         paint: {
           "circle-radius": 11,
           "circle-color": ["match", ["get", "role"], "issuer", "#d6a23a", "responder", "#2e5eaa", "teammate", "#3b7b57", "#8f3c32"],
-          "circle-stroke-color": "#f7f3ea",
+          "circle-stroke-color": "#ffffff",
           "circle-stroke-width": 2.5,
         },
       });
@@ -1331,7 +1331,7 @@ export function ExchangeSpatialScene({
           "text-field": ["get", "glyph"], "text-size": 11, "text-allow-overlap": true,
           "text-ignore-placement": true, "text-pitch-alignment": "viewport",
         },
-        paint: { "text-color": "#f7f3ea" },
+        paint: { "text-color": "#ffffff" },
       });
       map.addLayer({
         id: TUTORIAL_NODE_LABEL_LAYER_ID,
@@ -1344,7 +1344,7 @@ export function ExchangeSpatialScene({
           "text-pitch-alignment": "viewport",
         },
         paint: {
-          "text-color": "#0b0b0d", "text-halo-color": "rgba(247,243,234,0.96)",
+          "text-color": "#1b2430", "text-halo-color": "rgba(255, 255, 255,0.96)",
           "text-halo-width": 2,
         },
       });
@@ -1376,7 +1376,7 @@ export function ExchangeSpatialScene({
         filter: ["has", "point_count"],
         paint: {
           "circle-radius": ["step", ["get", "point_count"], 14, 10, 18, 40, 22],
-          "circle-color": "#252932",
+          "circle-color": "#1b2430",
           "circle-opacity": 0.97,
           "circle-stroke-color": "#d6a23a",
           "circle-stroke-width": 2.25,
@@ -1393,7 +1393,7 @@ export function ExchangeSpatialScene({
           "text-allow-overlap": true,
           "text-ignore-placement": true,
         },
-        paint: { "text-color": "#f7f3ea" },
+        paint: { "text-color": "#ffffff" },
       });
       map.addSource(NETWORK_SELECTED_MARKER_SOURCE_ID, {
         type: "geojson",
@@ -1451,7 +1451,7 @@ export function ExchangeSpatialScene({
           "text-pitch-alignment": "viewport",
           "text-rotation-alignment": "viewport",
         },
-        paint: { "text-color": "#f7f3ea" },
+        paint: { "text-color": "#ffffff" },
       });
       map.addLayer({
         id: NETWORK_MARKER_LABEL_LAYER_ID,
@@ -1468,8 +1468,8 @@ export function ExchangeSpatialScene({
           "text-rotation-alignment": "viewport",
         },
         paint: {
-          "text-color": "#0b0b0d",
-          "text-halo-color": "rgba(247,243,234,0.96)",
+          "text-color": "#1b2430",
+          "text-halo-color": "rgba(255, 255, 255,0.96)",
           "text-halo-width": 2,
         },
       });
@@ -1501,7 +1501,7 @@ export function ExchangeSpatialScene({
         filter: ["has", "point_count"],
         paint: {
           "circle-radius": ["step", ["get", "point_count"], 15, 10, 19, 40, 23],
-          "circle-color": "#252932",
+          "circle-color": "#1b2430",
           "circle-opacity": 0.97,
           "circle-stroke-color": "#d6a23a",
           "circle-stroke-width": 2.25,
@@ -1567,7 +1567,7 @@ export function ExchangeSpatialScene({
         source: OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
         minzoom: 7,
         layout: { "text-field": ["get", "label"], "text-size": 12, "text-offset": [0, 3.65], "text-anchor": "top", "text-allow-overlap": false, "text-pitch-alignment": "viewport" },
-        paint: { "text-color": "#0b0b0d", "text-halo-color": "rgba(247,243,234,0.98)", "text-halo-width": 2 },
+        paint: { "text-color": "#1b2430", "text-halo-color": "rgba(255, 255, 255,0.98)", "text-halo-width": 2 },
       });
 
       map.addLayer({
@@ -1590,7 +1590,7 @@ export function ExchangeSpatialScene({
         filter: ["==", ["get", "kind"], "cluster"],
         paint: {
           "circle-radius": ["step", ["get", "count"], 14, 10, 18, 40, 22],
-          "circle-color": "#252932",
+          "circle-color": "#1b2430",
           "circle-opacity": 0.97,
           "circle-stroke-color": "#d6a23a",
           "circle-stroke-width": 2.25,
@@ -1602,7 +1602,7 @@ export function ExchangeSpatialScene({
         source: LENS_PROJECTION_SOURCE_ID,
         filter: ["==", ["get", "kind"], "cluster"],
         layout: { "text-field": ["get", "count"], "text-size": 11, "text-allow-overlap": true },
-        paint: { "text-color": "#f7f3ea" },
+        paint: { "text-color": "#ffffff" },
       });
       map.addLayer({
         id: LENS_PROJECTION_SELECTED_HALO_LAYER_ID,
@@ -1644,7 +1644,7 @@ export function ExchangeSpatialScene({
           "text-anchor": "top",
           "text-allow-overlap": false,
         },
-        paint: { "text-color": "#0b0b0d", "text-halo-color": "rgba(247,243,234,0.98)", "text-halo-width": 2 },
+        paint: { "text-color": "#1b2430", "text-halo-color": "rgba(255, 255, 255,0.98)", "text-halo-width": 2 },
       });
 
       map.addSource(HOME_MARKER_SOURCE_ID, { type: "geojson", data: homeMarkerGeoJsonRef.current });
@@ -1686,7 +1686,7 @@ export function ExchangeSpatialScene({
           "text-rotation-alignment": "viewport",
         },
         paint: {
-          "text-color": "#f7f3ea",
+          "text-color": "#ffffff",
         },
       });
       map.addLayer({
@@ -1704,8 +1704,8 @@ export function ExchangeSpatialScene({
           "text-rotation-alignment": "viewport",
         },
         paint: {
-          "text-color": "#0b0b0d",
-          "text-halo-color": "rgba(247,243,234,0.96)",
+          "text-color": "#1b2430",
+          "text-halo-color": "rgba(255, 255, 255,0.96)",
           "text-halo-width": 2.2,
           "text-halo-blur": 0.5,
         },

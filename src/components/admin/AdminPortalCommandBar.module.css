@@ -17,10 +17,10 @@
   width: 100%;
   min-height: 40px;
   padding: 0 12px;
-  border: 1px solid color-mix(in srgb, var(--graphite, #252932) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 18%, transparent);
   border-radius: 10px;
   color: var(--semantic-text-primary, #17191d);
-  background: color-mix(in srgb, white 76%, var(--warm-ivory, #f7f3ea));
+  background: color-mix(in srgb, white 76%, var(--warm-ivory, #ffffff));
   font: 650 0.78rem/1 var(--font-body, sans-serif);
 }
 
@@ -31,9 +31,9 @@
   align-items: center;
   justify-content: center;
   padding: 0 12px;
-  border: 1px solid color-mix(in srgb, var(--graphite, #252932) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 18%, transparent);
   border-radius: 10px;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   background: transparent;
   font: 760 0.74rem/1 var(--font-body, sans-serif);
   text-decoration: none;
@@ -42,7 +42,7 @@
 
 .search button:hover,
 .workLink:hover {
-  background: color-mix(in srgb, var(--graphite, #252932) 6%, transparent);
+  background: color-mix(in srgb, var(--graphite, #1b2430) 6%, transparent);
 }
 
 .search input:focus-visible,

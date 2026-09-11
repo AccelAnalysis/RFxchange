@@ -16,11 +16,11 @@ const [tokens, semanticCss, layout, globals, brandSystem, roadmap] = await Promi
 ]);
 
 const approvedPalette = Object.freeze({
-  exchangeBlack: "#0B0B0D",
-  warmIvory: "#F7F3EA",
-  graphite: "#252932",
+  exchangeBlack: "#1B2430",
+  warmIvory: "#F8FAFC",
+  graphite: "#1B2430",
   rfGold: "#D6A23A",
-  accessibleDarkGold: "#8A6418",
+  accessibleDarkGold: "#7A5710",
   signalBlue: "#2E5EAA",
   growthGreen: "#3B7B57",
 });
@@ -102,15 +102,15 @@ assert.ok(
 );
 
 for (const [legacyName, value] of Object.entries({
-  "--exchange-black": "#0b0b0d",
+  "--exchange-black": "#1b2430",
   "--rf-gold": "#d6a23a",
-  "--warm-ivory": "#f7f3ea",
-  "--graphite": "#252932",
+  "--warm-ivory": "#f8fafc",
+  "--graphite": "#1B2430",
   "--signal-blue": "#2e5eaa",
   "--growth-green": "#3b7b57",
 })) {
   assert.ok(
-    globals.toLowerCase().includes(`${legacyName}: ${value}`),
+    globals.toLowerCase().includes(`${legacyName}: ${value.toLowerCase()}`),
     `Brand B1 must retain legacy raw-token compatibility for ${legacyName}.`,
   );
 }
@@ -135,21 +135,21 @@ function contrast(foreground, background) {
 
 assert.ok(
   contrast(approvedPalette.accessibleDarkGold, approvedPalette.warmIvory) >= 4.5,
-  "Accessible Dark Gold must meet WCAG AA normal-text contrast on Warm Ivory.",
+  "Gold Text must meet WCAG AA normal-text contrast on Canvas Cloud.",
 );
 assert.ok(
   contrast(approvedPalette.rfGold, approvedPalette.warmIvory) < 4.5,
-  "RF Gold must not be mistaken for the approved small-text gold on Warm Ivory.",
+  "RF Gold must not be mistaken for the approved small-text gold on Canvas Cloud.",
 );
 assert.ok(
   tokens.includes("connectionSmall: brandPalette.accessibleDarkGold") &&
     semanticCss.includes("--semantic-text-connection-small: var(--brand-accessible-dark-gold)"),
-  "Small gold-family text must resolve through Accessible Dark Gold.",
+  "Small gold-family text must resolve through Gold Text.",
 );
 
 assert.ok(
   tokens.includes('display: \'"Aptos Display", "Aptos"') &&
-    tokens.includes('interface: \'"Aptos", "Segoe UI"'),
+    tokens.includes('interface: \'"Aptos", system-ui'),
   "Brand B1 must preserve Aptos/system-safe typography roles.",
 );
 assert.equal(tokens.includes("@font-face"), false, "Brand B1 cannot bundle or declare a font face.");

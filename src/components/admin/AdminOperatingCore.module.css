@@ -22,7 +22,7 @@
 
 .pageHeader h1 {
   margin: 7px 0 0;
-  color: var(--exchange-black, #0b0b0d);
+  color: var(--exchange-black, #1b2430);
   font-size: clamp(2.35rem, 5vw, 4.6rem);
   line-height: 0.94;
   letter-spacing: -0.06em;
@@ -48,7 +48,7 @@
 }
 
 .summary strong {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 2.35rem;
   line-height: 1;
   letter-spacing: -0.05em;
@@ -67,8 +67,8 @@
   gap: 18px;
   margin-top: 34px;
   padding: 18px 0;
-  border-top: 1px solid color-mix(in srgb, var(--graphite, #252932) 13%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #252932) 13%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 13%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 13%, transparent);
 }
 
 .highlightStrip div {
@@ -88,7 +88,7 @@
 .highlightStrip strong {
   display: block;
   margin-top: 3px;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 1.4rem;
 }
 
@@ -106,7 +106,7 @@
 
 .sectionHeader h2 {
   margin: 5px 0 0;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 1.25rem;
   letter-spacing: -0.03em;
 }
@@ -135,7 +135,7 @@
   align-items: center;
   gap: 16px;
   min-height: 62px;
-  border-top: 1px solid color-mix(in srgb, var(--graphite, #252932) 11%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 11%, transparent);
 }
 
 .attentionRow {
@@ -151,14 +151,14 @@
 .attentionRow strong,
 .healthRow strong,
 .searchResult strong {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.88rem;
 }
 
 .attentionCount {
   min-width: 36px;
   text-align: right;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 1rem;
   font-weight: 800;
 }
@@ -198,8 +198,8 @@
   align-items: end;
   margin-top: 30px;
   padding: 18px 0;
-  border-top: 1px solid color-mix(in srgb, var(--graphite, #252932) 12%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #252932) 12%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 12%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 12%, transparent);
 }
 
 .filters label {
@@ -220,20 +220,20 @@
 .filters select {
   min-height: 42px;
   padding: 0 10px;
-  border: 1px solid color-mix(in srgb, var(--graphite, #252932) 17%, transparent);
+  border: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 17%, transparent);
   border-radius: 9px;
-  color: var(--graphite, #252932);
-  background: color-mix(in srgb, white 74%, var(--warm-ivory, #f7f3ea));
+  color: var(--graphite, #1b2430);
+  background: color-mix(in srgb, white 74%, var(--warm-ivory, #ffffff));
 }
 
 .filters button,
 .primaryAction {
   min-height: 42px;
   padding: 0 15px;
-  border: 1px solid var(--graphite, #252932);
+  border: 1px solid var(--graphite, #1b2430);
   border-radius: 9px;
-  color: var(--warm-ivory, #f7f3ea);
-  background: var(--graphite, #252932);
+  color: var(--warm-ivory, #ffffff);
+  background: var(--graphite, #1b2430);
   font-size: 0.74rem;
   font-weight: 780;
   cursor: pointer;
@@ -249,9 +249,9 @@
 
 .queuePanel,
 .inspector {
-  border: 1px solid color-mix(in srgb, var(--graphite, #252932) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 10%, transparent);
   border-radius: 16px;
-  background: color-mix(in srgb, white 70%, var(--warm-ivory, #f7f3ea));
+  background: color-mix(in srgb, white 70%, var(--warm-ivory, #ffffff));
 }
 
 .queuePanel {
@@ -266,13 +266,13 @@
 .queuePanelHeader h2,
 .inspectorHeader h2 {
   margin: 4px 0 0;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 1.15rem;
   letter-spacing: -0.03em;
 }
 
 .queueItem + .queueItem {
-  border-top: 1px solid color-mix(in srgb, var(--graphite, #252932) 9%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 9%, transparent);
 }
 
 .queueItem a {
@@ -296,7 +296,7 @@
 }
 
 .queueItem strong {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.86rem;
 }
 
@@ -321,7 +321,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
-  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #252932) 9%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 9%, transparent);
 }
 
 .statusPill {
@@ -344,12 +344,12 @@
 
 .fact {
   padding: 15px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #252932) 8%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 8%, transparent);
 }
 
 .fact dd {
   margin: 5px 0 0;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.82rem;
   overflow-wrap: anywhere;
 }
@@ -366,8 +366,8 @@
   align-items: center;
   padding: 0 13px;
   border-radius: 9px;
-  color: var(--warm-ivory, #f7f3ea);
-  background: var(--graphite, #252932);
+  color: var(--warm-ivory, #ffffff);
+  background: var(--graphite, #1b2430);
   font-size: 0.73rem;
   font-weight: 770;
   text-decoration: none;
@@ -380,7 +380,7 @@
 
 .empty strong {
   display: block;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
 }
 
 .empty p {
@@ -392,8 +392,8 @@
 .caseHeader {
   margin-top: 28px;
   padding: 22px 0;
-  border-top: 1px solid color-mix(in srgb, var(--graphite, #252932) 12%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #252932) 12%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 12%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 12%, transparent);
 }
 
 .caseMeta {
@@ -404,7 +404,7 @@
 }
 
 .caseMeta strong {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.78rem;
   text-transform: capitalize;
 }
@@ -420,7 +420,7 @@
 .timeline li {
   position: relative;
   padding: 0 0 20px 20px;
-  border-left: 1px solid color-mix(in srgb, var(--graphite, #252932) 18%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 18%, transparent);
 }
 
 .timeline li::before {
@@ -441,7 +441,7 @@
 }
 
 .timeline strong {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.82rem;
 }
 
@@ -458,14 +458,14 @@
 
 .transition {
   padding: 22px;
-  border: 1px solid color-mix(in srgb, var(--graphite, #252932) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 10%, transparent);
   border-radius: 16px;
-  background: color-mix(in srgb, white 70%, var(--warm-ivory, #f7f3ea));
+  background: color-mix(in srgb, white 70%, var(--warm-ivory, #ffffff));
 }
 
 .transition h2 {
   margin: 4px 0 0;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 1.08rem;
 }
 
@@ -482,10 +482,10 @@
   min-height: 98px;
   resize: vertical;
   padding: 10px;
-  border: 1px solid color-mix(in srgb, var(--graphite, #252932) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 18%, transparent);
   border-radius: 9px;
-  color: var(--graphite, #252932);
-  background: var(--warm-ivory, #f7f3ea);
+  color: var(--graphite, #1b2430);
+  background: var(--warm-ivory, #ffffff);
   line-height: 1.45;
 }
 
@@ -512,20 +512,20 @@
   min-width: 0;
   min-height: 44px;
   padding: 0 13px;
-  border: 1px solid color-mix(in srgb, var(--graphite, #252932) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 18%, transparent);
   border-radius: 10px;
-  color: var(--graphite, #252932);
-  background: color-mix(in srgb, white 74%, var(--warm-ivory, #f7f3ea));
+  color: var(--graphite, #1b2430);
+  background: color-mix(in srgb, white 74%, var(--warm-ivory, #ffffff));
   font: inherit;
 }
 
 .searchForm button {
   min-height: 44px;
   padding: 0 15px;
-  border: 1px solid var(--graphite, #252932);
+  border: 1px solid var(--graphite, #1b2430);
   border-radius: 10px;
-  color: var(--warm-ivory, #f7f3ea);
-  background: var(--graphite, #252932);
+  color: var(--warm-ivory, #ffffff);
+  background: var(--graphite, #1b2430);
   font-weight: 760;
 }
 

@@ -8,7 +8,7 @@ The Firebase Console accepted an exact-commit manual rollout of merged main `731
 
 App Hosting now marks `build-2026-09-11-000` as **Current**, with that source commit. The preceding `build-2026-09-05-002` remains the known-good rollback candidate. The public origin loads and `/admin` redirects an unauthenticated visitor to sign-in. Automatic rollouts remain disabled; the backend SHA override was set to the exact source before the rollout.
 
-**2C is not yet complete.** The successful console release does not substitute for the resolved build/rollout API evidence required by `POST_WAVE_3_STABILIZATION_2C_SAME_SHA.md`. Google sign-in and consent succeeded, but the cloud browser blocked the CLI localhost callback. No credential was copied into chat or source. The source hash, resolved build environment, rollout binding and READY rollback evidence still need authenticated API capture and the existing verifier.
+**2C is not yet complete.** The successful console release does not substitute for the resolved build/rollout API evidence required by `POST_WAVE_3_STABILIZATION_2C_SAME_SHA.md`. Google sign-in and consent succeeded, but the cloud browser blocked the CLI localhost callback. No credential was copied into chat or source. A scoped console read confirms the completed build’s resolved `RFXCHANGE_BUILD_SHA` equals `731521d98587860ca2a6ae7c4fb7e912fb798e0e`, with source Firebase console. Formal source/availability/rollout/READY rollback evidence still needs authenticated API capture and the existing verifier.
 
 ## Admin application
 
@@ -22,7 +22,7 @@ PR #270 is merged as `953abdbbe5731f162800f5b96fefb8ff1e39ce0d`; its main CI run
 
 Registration/sign-in handoffs point to the configured Exchange origin and preserve only bounded campaign, supported locale and safe participant return context. Marketing never copies a session cookie. The new Exchange receiver establishes host-only context before registration; authenticated activation binds reported campaign attribution as direct entry, preserving existing referral/invitation/opportunity context and authorization.
 
-The full local gate passed with 954 architecture tests, Functions tests, all three production builds and Admin/Marketing HTTP smoke checks. Marketing smoke covers five locales, public routes, first-touch campaign behavior, credential-free redirects, the Exchange receiver and absence of Admin routes. Candidate CI, merge, deployment and hosted visual checks remain pending. Deploy Exchange's new receiver before making the Marketing handoff public.
+The full local gate passed with 954 architecture tests, Functions tests, all three production builds and Admin/Marketing HTTP smoke checks. Marketing smoke covers five locales, public routes, first-touch campaign behavior, credential-free redirects, the Exchange receiver and absence of Admin routes. PR #271 candidate CI [34647266191](https://github.com/AccelAnalysis/RFxchange/actions/runs/34647266191) passed and it merged as `43b48439e16a15f8c4c9891c5acc519599f160b3`. Main CI and deployment remain in progress. The `rfxchange-marketing` backend is created in `us-east4`, bound to the existing Marketing Web App and `apps/marketing`, with automatic rollouts disabled. Hosted visual checks remain pending. Deploy Exchange's new receiver before making the Marketing handoff public.
 
 ## Remaining delivery
 
@@ -32,3 +32,7 @@ The full local gate passed with 954 architecture tests, Functions tests, all thr
 - Apply Design System v2 to Exchange while preserving its mounted map, sliding sheet, four lenses and Menu; remove superseded UI only after callers migrate.
 
 No Feature-ID completion or independent-assurance label is changed by this record.
+
+## Exchange convergence candidate
+
+The shared runtime now applies Design System v2 colors, bright glass, type fallback, readable lens labels and focus treatment. Cartography keeps authoritative geometry, object semantics and camera behavior while replacing ivory/black presentation. The persistent map and sliding sheet composition and RFx/Resources/Intelligence/Capabilities/Menu navigation remain unchanged. Admin and Marketing consume the same shared palette instead of duplicating root overrides. Unused conceptual NetworkField/JourneyRail components and their obsolete global marketing layout are removed; connection semantics remain governed by the shared object tokens. Historical palette checks are reconciled to the approved v2 amendment. The full local gate passed: 954 architecture tests, Functions tests, types, lint, three production builds and Admin/Marketing HTTP smoke checks. Exact-head CI, merge and deployment remain pending.

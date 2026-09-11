@@ -182,7 +182,7 @@
   justify-content: space-between;
   gap: 24px;
   padding: 10px clamp(20px, 3vw, 44px);
-  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #252932) 11%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 11%, transparent);
   background: color-mix(in srgb, #f8fafc 90%, transparent);
   backdrop-filter: blur(18px);
 }
@@ -204,7 +204,7 @@
 }
 
 .contextCopy strong {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.84rem;
   font-weight: 760;
 }

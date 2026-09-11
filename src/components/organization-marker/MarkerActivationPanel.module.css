@@ -13,7 +13,7 @@
 
 .success h1 {
   margin: 15px 0 0;
-  color: #0b0b0d;
+  color: #1b2430;
   font-size: clamp(2.55rem, 4.2vw, 4.35rem);
   line-height: 0.93;
   letter-spacing: -0.06em;
@@ -48,7 +48,7 @@
 
 .activationDetailContent dd {
   margin: 0;
-  color: #252932;
+  color: #1b2430;
   font-weight: 720;
 }
 
@@ -59,7 +59,7 @@
   margin-top: 24px;
   padding: 17px 0 0;
   border-top: 1px solid rgba(37, 41, 50, 0.12);
-  color: #252932;
+  color: #1b2430;
 }
 
 .note > span {
@@ -69,7 +69,7 @@
   flex: 0 0 38px;
   place-items: center;
   border-radius: 50%;
-  color: #0b0b0d;
+  color: #1b2430;
   background: #d6a23a;
 }
 

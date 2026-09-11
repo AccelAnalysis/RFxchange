@@ -46,7 +46,7 @@
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.55);
   color: var(--exchange-black);
-  box-shadow: 0 22px 64px rgba(11, 11, 13, 0.1);
+  box-shadow: 0 22px 64px rgba(27, 36, 48, 0.1);
 }
 
 .pathwayHeader {

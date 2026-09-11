@@ -35,7 +35,7 @@
 
 .header h1 {
   margin: 7px 0 0;
-  color: var(--exchange-black, #0b0b0d);
+  color: var(--exchange-black, #1b2430);
   font-size: clamp(2.35rem, 5vw, 4.6rem);
   line-height: 0.94;
   letter-spacing: -0.06em;
@@ -61,7 +61,7 @@
 }
 
 .summary strong {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 2.2rem;
   line-height: 1;
   letter-spacing: -0.05em;
@@ -84,9 +84,9 @@
 
 .queue,
 .detail {
-  border: 1px solid color-mix(in srgb, var(--graphite, #252932) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 10%, transparent);
   border-radius: 18px;
-  background: color-mix(in srgb, white 72%, var(--warm-ivory, #f7f3ea));
+  background: color-mix(in srgb, white 72%, var(--warm-ivory, #ffffff));
 }
 
 .queue {
@@ -102,7 +102,7 @@
 .section h3,
 .exchange h3,
 .actions h3 {
-  color: var(--exchange-black, #0b0b0d);
+  color: var(--exchange-black, #1b2430);
   letter-spacing: -0.035em;
 }
 
@@ -112,7 +112,7 @@
 }
 
 .queueList {
-  border-top: 1px solid color-mix(in srgb, var(--graphite, #252932) 9%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 9%, transparent);
 }
 
 .queueItem {
@@ -124,7 +124,7 @@
   padding: 14px 18px;
   color: inherit;
   text-decoration: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #252932) 8%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 8%, transparent);
   transition: background-color 140ms ease, box-shadow 140ms ease;
 }
 
@@ -159,7 +159,7 @@
 
 .queueItem strong {
   overflow: hidden;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.86rem;
   letter-spacing: -0.02em;
   text-overflow: ellipsis;
@@ -176,7 +176,7 @@
 }
 
 .queueItem > span {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.64rem;
   font-weight: 760;
   text-align: right;
@@ -184,11 +184,11 @@
 
 .emptyQueue {
   padding: 28px 22px;
-  border-top: 1px solid color-mix(in srgb, var(--graphite, #252932) 9%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 9%, transparent);
 }
 
 .emptyQueue strong {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.86rem;
 }
 
@@ -204,7 +204,7 @@
   display: grid;
   gap: 28px;
   padding: clamp(22px, 3vw, 34px);
-  box-shadow: 0 22px 60px rgb(11 11 13 / 6%);
+  box-shadow: 0 22px 60px rgb(27 36 48 / 6%);
 }
 
 .title {
@@ -235,8 +235,8 @@
 .signals {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid color-mix(in srgb, var(--graphite, #252932) 11%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #252932) 11%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 11%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 11%, transparent);
 }
 
 .signals div {
@@ -246,7 +246,7 @@
 
 .signals div + div {
   padding-left: 14px;
-  border-left: 1px solid color-mix(in srgb, var(--graphite, #252932) 8%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 8%, transparent);
 }
 
 .signals small,
@@ -265,7 +265,7 @@
 .signals strong {
   margin-top: 6px;
   overflow-wrap: anywhere;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.78rem;
   line-height: 1.4;
 }
@@ -281,18 +281,18 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
   margin: 12px 0 0;
-  border-top: 1px solid color-mix(in srgb, var(--graphite, #252932) 9%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 9%, transparent);
 }
 
 .facts > div {
   min-width: 0;
   padding: 14px 14px 14px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #252932) 8%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 8%, transparent);
 }
 
 .facts > div:nth-child(even) {
   padding-left: 14px;
-  border-left: 1px solid color-mix(in srgb, var(--graphite, #252932) 8%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 8%, transparent);
 }
 
 .facts > .wideFact {
@@ -312,7 +312,7 @@
 .facts dd {
   margin: 6px 0 0;
   overflow-wrap: anywhere;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.76rem;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -328,7 +328,7 @@
 }
 
 .exchange strong {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.72rem;
 }
 
@@ -346,12 +346,12 @@
   margin: 12px 0 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid color-mix(in srgb, var(--graphite, #252932) 9%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 9%, transparent);
 }
 
 .history li {
   padding: 13px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #252932) 8%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 8%, transparent);
 }
 
 .history strong,
@@ -360,7 +360,7 @@
 }
 
 .history strong {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.75rem;
 }
 
@@ -381,7 +381,7 @@
   display: grid;
   gap: 12px;
   padding-top: 20px;
-  border-top: 1px solid color-mix(in srgb, var(--graphite, #252932) 11%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 11%, transparent);
 }
 
 .actions > div:first-child {
@@ -397,7 +397,7 @@
 }
 
 .actions label {
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 0.72rem;
   font-weight: 720;
 }
@@ -407,10 +407,10 @@
   min-height: 96px;
   resize: vertical;
   padding: 12px;
-  border: 1px solid color-mix(in srgb, var(--graphite, #252932) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 20%, transparent);
   border-radius: 10px;
-  color: var(--graphite, #252932);
-  background: color-mix(in srgb, white 70%, var(--warm-ivory, #f7f3ea));
+  color: var(--graphite, #1b2430);
+  background: color-mix(in srgb, white 70%, var(--warm-ivory, #ffffff));
   font: 0.78rem/1.5 var(--font-body, sans-serif);
 }
 
@@ -441,23 +441,23 @@
 }
 
 .primaryAction {
-  border: 1px solid var(--graphite, #252932);
-  color: var(--warm-ivory, #f7f3ea);
-  background: var(--graphite, #252932);
+  border: 1px solid var(--graphite, #1b2430);
+  color: var(--warm-ivory, #ffffff);
+  background: var(--graphite, #1b2430);
 }
 
 .primaryAction:hover:not(:disabled) {
-  background: var(--exchange-black, #0b0b0d);
+  background: var(--exchange-black, #1b2430);
 }
 
 .secondaryAction {
-  border: 1px solid color-mix(in srgb, var(--graphite, #252932) 22%, transparent);
-  color: var(--graphite, #252932);
+  border: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 22%, transparent);
+  color: var(--graphite, #1b2430);
   background: transparent;
 }
 
 .secondaryAction:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--graphite, #252932) 6%, transparent);
+  background: color-mix(in srgb, var(--graphite, #1b2430) 6%, transparent);
 }
 
 .dangerAction {
@@ -499,7 +499,7 @@
 
 .empty h2 {
   margin: 12px 0 0;
-  color: var(--graphite, #252932);
+  color: var(--graphite, #1b2430);
   font-size: 1.2rem;
 }
 
@@ -554,7 +554,7 @@
   .facts > div:nth-child(even) {
     padding: 13px 0;
     border-left: 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--graphite, #252932) 8%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--graphite, #1b2430) 8%, transparent);
   }
 
   .signals div:last-child,

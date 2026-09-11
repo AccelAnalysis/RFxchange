@@ -42,16 +42,16 @@
   min-width: 150px;
   padding: 20px;
   border-radius: 18px;
-  background: var(--exchange-black);
-  color: var(--warm-ivory);
+  background: var(--semantic-canvas-elevated);
+  color: var(--semantic-text-primary);
 }
 
 .status small,
 .status strong,
 .status span { display: block; }
-.status small { color: rgba(247, 243, 234, 0.68); }
+.status small { color: var(--semantic-text-secondary); }
 .status strong { margin: 7px 0; font: 760 2.25rem/1 var(--font-display); }
-.status span { color: var(--rf-gold); font-weight: 740; }
+.status span { color: var(--semantic-text-connection-small); font-weight: 740; }
 
 .spine {
   display: grid;
