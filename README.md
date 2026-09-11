@@ -2,6 +2,16 @@
 
 Production repository for **The RFxchange™**, a map-based local business growth network connecting organizations, opportunities, referrals, partners, resources, and measurable activity.
 
+## In-place modernization
+
+The existing repository and Firebase project `rfxchange` (project number `820964688242`) remain the production foundation. The adopted target is three independently deployable applications—Exchange, Admin, and Marketing—over the existing identities, canonical data, server authorization and audit services.
+
+- [SAD v1.1](docs/architecture/RFxchange_Platform_Solution_Architecture_Document_v1.1.md) records the three existing Web App IDs, application boundaries, cross-origin identity/acquisition rules and in-place cutover sequence.
+- [Brand & Interface Design System v2](docs/design/RFxchange_Brand_Interface_Design_System_v2.0.md) is the adopted visual target: bright cool-neutral surfaces, restrained gold and the persistent map/results/four-lens/Menu composition. Current runtime tokens still require convergence; the document is not a deployment claim.
+- [Production hosting / 2C procedure](docs/architecture/POST_WAVE_3_STABILIZATION_2C_SAME_SHA.md) governs exact-commit build identity and rollout checks.
+
+AccelPO supplies reference provenance only. Do not create a replacement production project or migrate production data as part of frontend extraction.
+
 ## Build strategy
 
 Development follows the build waves in the RFxchange Master Feature Build Tracker. Changes should be delivered through reviewed branches and pull requests rather than pushed directly to `main`.

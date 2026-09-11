@@ -91,7 +91,9 @@ node scripts/capture-app-hosting-same-sha-evidence.mjs
 node scripts/verify-app-hosting-same-sha-evidence.mjs artifacts/app-hosting-same-sha-evidence.json
 ```
 
-The capture command reads the backend, rollout and build from the official App Hosting REST API, confirms the production origin is reachable, writes the evidence file, and then runs the same fail-closed verifier used by repository tests.
+The capture command first retrieves the specified run from GitHub and requires a completed, successful `production-ci` push run on `main` for the exact source SHA in `AccelAnalysis/RFxchange`. The URL alone is not accepted as proof. Public-repository CI reads do not require a GitHub token; an existing `GITHUB_TOKEN` may be used when needed for API access.
+
+It then reads the backend, rollout, build and distinct rollback build from the official App Hosting REST API, requires the rollback build to be `READY`, confirms the production origin is reachable, writes the evidence file, and runs the same fail-closed verifier used by repository tests. The evidence contains only the source/build/rollout identity and the resolved `RFXCHANGE_BUILD_SHA` variable; other resolved environment variables are deliberately omitted.
 
 Do not put OAuth tokens, service-account JSON, Stripe credentials, Microsoft credentials, OpenAI credentials or other secrets into the evidence file.
 

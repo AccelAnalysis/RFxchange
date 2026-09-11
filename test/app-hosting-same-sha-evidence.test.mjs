@@ -12,6 +12,7 @@ function evidence(overrides = {}) {
     ci: {
       sourceSha: SHA,
       conclusion: "success",
+      status: "completed", workflow: "production-ci", branch: "main", event: "push", repository: "AccelAnalysis/RFxchange",
       runUrl: "https://github.com/AccelAnalysis/RFxchange/actions/runs/123",
     },
     backend: { name: BACKEND },
@@ -40,6 +41,7 @@ function evidence(overrides = {}) {
     },
     rollback: {
       build: `${BACKEND}/builds/build-prior-good`,
+      state: "READY",
     },
     ...overrides,
   };
@@ -92,4 +94,12 @@ test("rejects a rollout that does not point to the verified build", () => {
     })),
     /exact verified build/,
   );
+});
+
+
+test("rejects unrelated or unmerged CI and unavailable rollback", () => {
+  for (const patch of [{event: "pull_request"}, {repository: "other/repo"}, {status: "in_progress"}, {branch: "feature"}, {workflow: "other-ci"}]) {
+    assert.throws(() => verifyAppHostingSameShaEvidence(evidence({ci: {...evidence().ci, ...patch}})));
+  }
+  assert.throws(() => verifyAppHostingSameShaEvidence(evidence({rollback: {...evidence().rollback, state: "FAILED"}})));
 });
