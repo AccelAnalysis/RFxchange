@@ -2,12 +2,15 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
-const [model, service, repository, route, delivery, storage, rules, schema, component, mapCss, authority, slice, tracker, dependency, dictionary] = await Promise.all([
+const [model, service, repository, route, delivery, storage, rules, schema, component, taskSheet, taskSheetCss, profilePage, portal, copy, mapCss, authority, slice, tracker, dependency, dictionary] = await Promise.all([
   read("src/domain/organization-enrichment/model.ts"), read("src/application/organization-enrichment/organization-enrichment.ts"),
   read("src/infrastructure/firestore/organization-enrichment.ts"), read("app/api/organization-enrichment/route.ts"),
   read("app/api/organization-enrichment/assets/[assetId]/route.ts"), read("src/domain/storage/model.ts"),
   read("firestore.rules"), read("src/infrastructure/firestore/schema.ts"),
   read("src/components/organization-enrichment/OrganizationEnrichmentPanel.tsx"),
+  read("src/components/account/ProfileTaskSheet.tsx"), read("src/components/account/ProfileTaskSheet.module.css"),
+  read("app/organization-profile/page.tsx"), read("src/components/account/OrganizationProfilePortal.tsx"),
+  read("src/i18n/messages/organization-enrichment/en-US.json"),
   read("src/components/map/MapboxLocalityCanvas.module.css"), read("docs/slices/SLICE_3_4_EXECUTION_AUTHORITY.md"),
   read("docs/slices/SLICE_3_4_CREDENTIAL_MEDIA_AND_LOCATION_ENRICHMENT.md"),
   read("docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md"), read("docs/tracking/RFxchange_DEPENDENCY_MAP.md"),
@@ -43,10 +46,36 @@ assert.match(component, /MapboxLocalityCanvas/);
 assert.match(component, /kind: "subordinate-location"/);
 assert.match(mapCss, /data-kind="subordinate-location"/);
 for (const locale of ["EnUS", "Es", "Fr", "It", "De"]) assert.ok(dictionary.includes(`organizationEnrichment${locale}`));
+
+assert.match(profilePage, /OrganizationProfilePortal/);
+for (const section of ["overview", "capabilities", "credentials", "locations", "media", "preferences"]) {
+  assert.match(profilePage, new RegExp(`${section}=`), `Organization profile must project the ${section} portal section.`);
+  assert.match(portal, new RegExp(`"${section}"`), `Portal tab registry must include ${section}.`);
+}
+assert.match(profilePage, /role="progressbar"/);
+assert.match(profilePage, /publicPreview/);
+assert.match(profilePage, /projectPublicCredential/);
+assert.match(profilePage, /projectPublicProfileAsset/);
+assert.match(profilePage, /ProfileTaskSheet/);
+assert.match(profilePage, /portal\.addCredential/);
+assert.match(profilePage, /portal\.addLocation/);
+assert.match(profilePage, /portal\.uploadMedia/);
+assert.match(taskSheet, /<dialog/);
+assert.match(taskSheet, /showModal\(\)/);
+assert.match(taskSheetCss, /input\[name="sourceLabel"\]/);
+assert.match(taskSheetCss, /textarea\[name="evidenceAssetIds"\]/);
+assert.match(taskSheetCss, /display: none !important/);
+assert.match(copy, /"add": "Add credential"/);
+assert.match(copy, /"empty": "No credentials yet\."/);
+assert.match(copy, /"add": "Add location"/);
+assert.match(copy, /Uploads start private/);
+assert.doesNotMatch(copy, /Private supporting asset IDs/);
+assert.doesNotMatch(copy, /administrator-review process/);
+
 assert.match(authority, /Slice 3\.5 was then recalculated and separately authorized/);
 assert.match(slice, /COMPLETE VIA PR #128/);
 assert.match(tracker, /438 total · \d+ Done · \d+ Not Started/);
 assert.match(tracker, /Network completion is \*\*38\/38\*\*/);
 assert.match(dependency, /Slice 3\.4[^\n]+COMPLETE/);
 assert.match(dependency, /Slice 3\.5[^\n]+COMPLETE VIA PR #130/);
-console.log("Slice 3.4 credential, media, publication, private storage, additional-location privacy, subordinate-map, localization, and sequencing architecture validated.");
+console.log("Slice 3.4 credential, media, publication, private storage, and additional-location architecture validated with focused profile task sheets and public-preview boundaries.");
