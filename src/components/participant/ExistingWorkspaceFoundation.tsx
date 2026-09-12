@@ -631,6 +631,7 @@ export function ExistingWorkspaceFoundation({
           interactive
           showSearch={false}
           workspaceOverlay="right"
+          adaptiveWorkspace
         />
 
         {discovery ? (

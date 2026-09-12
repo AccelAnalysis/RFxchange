@@ -88,6 +88,24 @@ replaceOnce(
     assert.equal(before.panelOpen, true, "Phase 2 detail surface was not open before reopen acceptance.");`,
 );
 
+// The close test deliberately selects an external organization. Subsequent URL
+// continuity must preserve that subject while the signed-in actor remains unchanged.
+replaceOnce(
+  "capture the selected subject before a utility exit",
+  '    observations.push(await clickLens(cdp, "resources", "/resources", { candidate: true, latencyMs: 450 }));',
+  '    observations.push(await clickLens(cdp, "resources", "/resources", { candidate: true, latencyMs: 450 }));\n    const selectedSubjectBeforeUtilityExit = (await exchangeRoomLensSnapshot(cdp)).selection?.organizationId ?? organizationId;',
+);
+replaceOnce(
+  "preserve the selected subject on the Intelligence return URL",
+  '`?query=shell-acceptance&selectedOrganization=${organizationId}`,\n      "Returning to Intelligence discarded safe URL-derived map/query context."',
+  '`?query=shell-acceptance&selectedOrganization=${selectedSubjectBeforeUtilityExit}`,\n      "Returning to Intelligence discarded safe URL-derived map/query context."',
+);
+replaceOnce(
+  "retain the selected subject during an in-content route exit",
+  '`/geography/canvas?query=shell-in-content&selectedOrganization=${organizationId}`;',
+  '`/geography/canvas?query=shell-in-content&selectedOrganization=${selectedSubjectBeforeUtilityExit}`;',
+);
+
 await writeFile(adaptedUrl, source, "utf8");
 try {
   await import(`${adaptedUrl.href}?phase4=${encodeURIComponent(process.env.RFXCHANGE_ACCEPTANCE_CANDIDATE_SHA ?? "local")}`);

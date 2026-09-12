@@ -37,6 +37,7 @@ import {
   readMapRotationPreference,
 } from "./map-motion-preference";
 
+import { workspaceMapPadding } from "./workspaceMapPadding";
 import { useI18n } from "../i18n/I18nProvider";
 import styles from "./ExchangeSpatialScene.module.css";
 
@@ -96,6 +97,7 @@ export interface ExchangeSpatialSceneProps {
   readonly interactive?: boolean;
   readonly activationOverlay?: boolean;
   readonly workspaceOverlay?: "left" | "right" | null;
+  readonly adaptiveWorkspace?: boolean;
   readonly showSearch?: boolean;
   readonly tutorialOverlay?: SyntheticOrientationMapOverlay | null;
   readonly continuousMotion?: ExchangeContinuousMotion | null;
@@ -577,18 +579,16 @@ function searchZoom(featureType: string): number {
   }
 }
 
-function cameraPadding(activationOverlay: boolean, workspaceOverlay: "left" | "right" | null) {
-  const overlay = workspaceOverlay ?? (activationOverlay ? "left" : null);
-  if (!overlay) {
-    return { top: 84, right: 36, bottom: 36, left: 36 };
-  }
-  if (typeof window !== "undefined" && window.matchMedia("(max-width: 760px)").matches) {
-    return { top: 72, right: 22, bottom: Math.min(window.innerHeight * 0.58, 520), left: 22 };
-  }
-  const panelSpace = Math.min(window.innerWidth * 0.48, 620);
-  return overlay === "left"
-    ? { top: 88, right: 72, bottom: 62, left: panelSpace }
-    : { top: 88, right: panelSpace, bottom: 62, left: 72 };
+function cameraPadding(
+  activationOverlay: boolean,
+  workspaceOverlay: "left" | "right" | null,
+  adaptiveWorkspace = false,
+) {
+  return workspaceMapPadding(
+    workspaceOverlay ?? (activationOverlay ? "left" : null),
+    { width: typeof window === "undefined" ? 1280 : window.innerWidth, height: typeof window === "undefined" ? 800 : window.innerHeight },
+    adaptiveWorkspace,
+  );
 }
 
 function renderedMapPadding(map: mapboxgl.Map) {
@@ -621,6 +621,7 @@ export function ExchangeSpatialScene({
   interactive = false,
   activationOverlay = false,
   workspaceOverlay = null,
+  adaptiveWorkspace = false,
   showSearch = interactive,
   tutorialOverlay = null,
   continuousMotion = null,
@@ -689,7 +690,8 @@ export function ExchangeSpatialScene({
   const activationOverlayRef = useRef(activationOverlay);
   const continuousMotionRef = useRef(continuousMotion);
   const workspaceOverlayRef = useRef(workspaceOverlay);
-  const appliedOverlayRef = useRef({ activationOverlay, workspaceOverlay });
+  const adaptiveWorkspaceRef = useRef(adaptiveWorkspace);
+  const appliedOverlayRef = useRef({ activationOverlay, workspaceOverlay, adaptiveWorkspace });
   const homeGeoJsonRef = useRef(localityGeoJson(model));
   const homeMaskGeoJsonRef = useRef(localityMaskGeoJson(model));
   const homeMarkerGeoJsonRef = useRef(markerGeoJson(sceneMarker));
@@ -788,6 +790,7 @@ export function ExchangeSpatialScene({
   activationOverlayRef.current = activationOverlay;
   continuousMotionRef.current = continuousMotion;
   workspaceOverlayRef.current = workspaceOverlay;
+  adaptiveWorkspaceRef.current = adaptiveWorkspace;
   homeGeoJsonRef.current = homeGeoJson;
   homeMaskGeoJsonRef.current = homeMaskGeoJson;
   homeMarkerGeoJsonRef.current = homeMarkerGeoJson;
@@ -825,7 +828,7 @@ export function ExchangeSpatialScene({
         return;
       }
       paddingRepairFrameRef.current = null;
-      const expectedPadding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current);
+      const expectedPadding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current, adaptiveWorkspaceRef.current);
       const actualPadding = renderedMapPadding(map);
       const paddingIsSettled = (["top", "right", "bottom", "left"] as const).every(
         (side) => Math.abs(actualPadding[side] - expectedPadding[side]) < 0.5,
@@ -903,7 +906,7 @@ export function ExchangeSpatialScene({
 
     stopOrbit();
     manuallyPausedRef.current = false;
-    const padding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current);
+    const padding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current, adaptiveWorkspaceRef.current);
     const activeMode = modeRef.current;
     const activeMarker = markerRef.current;
     setLocalityLayerVisibility(activeMode !== "regional");
@@ -968,7 +971,7 @@ export function ExchangeSpatialScene({
     pauseForInteraction();
     setLocalityLayerVisibility(true);
     map.fitBounds(localityBounds(modelRef.current), {
-      padding: cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current),
+      padding: cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current, adaptiveWorkspaceRef.current),
       pitch: map.getPitch(),
       bearing: map.getBearing(),
       maxZoom: 12.2,
@@ -1957,11 +1960,12 @@ export function ExchangeSpatialScene({
     if (
       previous.activationOverlay === activationOverlay
       && previous.workspaceOverlay === workspaceOverlay
+      && previous.adaptiveWorkspace === adaptiveWorkspace
     ) return;
-    appliedOverlayRef.current = { activationOverlay, workspaceOverlay };
-    map.jumpTo({ padding: cameraPadding(activationOverlay, workspaceOverlay) });
+    appliedOverlayRef.current = { activationOverlay, workspaceOverlay, adaptiveWorkspace };
+    map.jumpTo({ padding: cameraPadding(activationOverlay, workspaceOverlay, adaptiveWorkspace) });
     setSettledPadding(renderedMapPadding(map));
-  }, [activationOverlay, mapReady, workspaceOverlay]);
+  }, [activationOverlay, adaptiveWorkspace, mapReady, workspaceOverlay]);
 
   if (!token.startsWith("pk.")) {
     return (
@@ -1980,6 +1984,7 @@ export function ExchangeSpatialScene({
       data-scene={mode}
       data-interactive={interactive}
       data-workspace-overlay={workspaceOverlay ?? "none"}
+      data-adaptive-workspace={adaptiveWorkspace || undefined}
       data-map-view-mode={viewMode}
       data-map-basemap={basemapPreset}
       data-map-pitch={settledPitch.toFixed(2)}

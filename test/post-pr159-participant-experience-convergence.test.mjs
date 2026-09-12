@@ -257,13 +257,13 @@ test("Exchange participant routing skips orientation and release reads", () => {
 
 test("overlay-side changes update real Mapbox padding without recomposing the camera", () => {
   const scene = read("src/components/map/ExchangeSpatialScene.tsx");
-  assert.match(scene, /map\.jumpTo\(\{ padding: cameraPadding\(activationOverlay, workspaceOverlay\) \}\)/);
-  assert.match(scene, /map\.jumpTo\(\{ padding: cameraPadding\(activationOverlay, workspaceOverlay\) \}\);[\s\S]*setSettledPadding\(renderedMapPadding\(map\)\)/);
+  assert.match(scene, /map\.jumpTo\(\{ padding: cameraPadding\(activationOverlay, workspaceOverlay, adaptiveWorkspace\) \}\)/);
+  assert.match(scene, /map\.jumpTo\(\{ padding: cameraPadding\(activationOverlay, workspaceOverlay, adaptiveWorkspace\) \}\);[\s\S]*setSettledPadding\(renderedMapPadding\(map\)\)/);
   assert.match(scene, /persistedCamera[\s\S]*map\.jumpTo\([\s\S]*setSettledPadding\(renderedMapPadding\(map\)\)/);
-  assert.match(scene, /if \(!mapLoadedRef\.current \|\| !map \|\| !mapReady\) return;[\s\S]*const previous = appliedOverlayRef\.current[\s\S]*appliedOverlayRef\.current = \{ activationOverlay, workspaceOverlay \}/);
+  assert.match(scene, /if \(!mapLoadedRef\.current \|\| !map \|\| !mapReady\) return;[\s\S]*const previous = appliedOverlayRef\.current[\s\S]*appliedOverlayRef\.current = \{ activationOverlay, workspaceOverlay, adaptiveWorkspace \}/);
   assert.match(scene, /repairGovernedPaddingAfterMovement[\s\S]*if \(map\.isMoving\(\)\)[\s\S]*requestAnimationFrame\(repair\)[\s\S]*if \(paddingIsSettled\) return;[\s\S]*map\.jumpTo\(\{ padding: expectedPadding \}\)/);
   assert.match(scene, /map\.on\("moveend"[\s\S]*repairGovernedPaddingAfterMovement\(\)/);
-  assert.match(scene, /\[activationOverlay, mapReady, workspaceOverlay\]/);
+  assert.match(scene, /\[activationOverlay, adaptiveWorkspace, mapReady, workspaceOverlay\]/);
   assert.doesNotMatch(scene, /\[activationOverlay, applyScene, continuousMotion, mode\]/);
   assert.match(scene, /data-map-padding=/);
 });

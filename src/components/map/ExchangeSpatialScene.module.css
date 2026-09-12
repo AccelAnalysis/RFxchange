@@ -84,3 +84,7 @@
 .mapOptions summary:focus-visible { outline: 2px solid white; box-shadow: 0 0 0 5px var(--semantic-border-focus); }
 @media (max-width: 1024px) { .mapOptions, .scene[data-workspace-overlay="right"] .mapOptions { top: 136px; right: 12px; } }
 @media (prefers-reduced-transparency: reduce) { .mapOptions > summary { background: var(--semantic-canvas-elevated); } }
+
+.scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-right) { right: clamp(420px, 32vw, 480px); }
+@media (min-width: 761px) and (max-width: 1024px) { .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-right) { right: 0; bottom: calc(min(54dvh, 540px) + 12px); } }
+@media (max-width: 760px) { .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-right) { right: 0; bottom: calc(min(54dvh, 540px) + var(--participant-mobile-nav-height, 74px) + env(safe-area-inset-bottom, 0px) + 12px); } }
