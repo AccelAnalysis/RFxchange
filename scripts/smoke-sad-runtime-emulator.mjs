@@ -10,7 +10,7 @@ import { runPersistedPublicEnrichment } from "../functions/lib/runtime/public-en
 import { normalizeTelnyxEvent, persistTelnyxEvent, reconcileTelnyxEvent } from "../src/infrastructure/communications/telnyx-events.ts";
 import { communicationAddressKey } from "../src/infrastructure/communications/address-key.ts";
 import { dispatchLifecycleCommunications, currentLifecycleState } from "../src/infrastructure/communications/lifecycle-runtime.ts";
-import { DEFAULT_LIFECYCLE_POLICY, COMMUNICATION_CONSENT_VERSION } from "../src/domain/communications/lifecycle.ts";
+import { DEFAULT_LIFECYCLE_POLICY, COMMUNICATION_CONSENT_VERSION, chooseLifecycleJourney } from "../src/domain/communications/lifecycle.ts";
 import { SmsProviderError } from "../src/infrastructure/communications/telnyx-sms.ts";
 
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, "127.0.0.1:8080");
@@ -155,6 +155,12 @@ try {
   assert.equal(active.state.accountAvailable, true);
   assert.equal(active.state.active, true);
   assert.equal(active.state.lastActivityAt, new Date(now).toISOString(), "Canonical product events refresh activity without another sign-in.");
+  await db.collection("lifecycleEnrollments").doc(unknown).update({ lastActivityAt: "2026-07-01T12:00:00Z" });
+  accounts.get(unknown).metadata.lastSignInTime = "2026-07-01T12:00:00Z";
+  await db.collection("accessJourneys").doc(`journey-${suffix}`).update({ updatedAt: new Date(now).toISOString() });
+  const newlyActivated = await currentLifecycleState(db, unknown, fakeAuth);
+  assert.equal(newlyActivated.state.lastActivityAt, new Date(now).toISOString());
+  assert.equal(chooseLifecycleJourney(newlyActivated.state, { ...DEFAULT_LIFECYCLE_POLICY, enabled: true }, now), null, "Activation in a retained session must not immediately trigger retention/win-back.");
   assert.equal(communicationAddressKey("email", "UPPER@Example.test"), communicationAddressKey("email", "upper@example.test"));
   console.log("SAD runtime emulator acceptance passed: tenant boundaries, lease fencing, consent revocation, send replay, retries, quiet hours, webhook scope/dedup/order/reconciliation and direct-client denial.");
 } finally {

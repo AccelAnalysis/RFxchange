@@ -20,10 +20,12 @@ export async function currentLifecycleState(db: Firestore, userId: string, auth:
   const enrollment = await db.collection("lifecycleEnrollments").doc(userId).get();
   const signInAt = account.metadata.lastSignInTime ? new Date(account.metadata.lastSignInTime).toISOString() : iso(user.get("createdAt"));
   const observedActivity = iso(enrollment.get("lastActivityAt"));
-  const lastActivityAt = observedActivity && Date.parse(observedActivity) > Date.parse(signInAt) ? observedActivity : signInAt;
+  let lastActivityAt = observedActivity && Date.parse(observedActivity) > Date.parse(signInAt) ? observedActivity : signInAt;
   const activation = await db.collection("activationJourneyContexts").doc(userId).get();
   const journeyId = activation.get("accessJourneyId");
   const journey = typeof journeyId === "string" ? await db.collection("accessJourneys").doc(journeyId).get() : null;
+  const journeyUpdatedAt = iso(journey?.get("updatedAt"));
+  if (journeyUpdatedAt && Date.parse(journeyUpdatedAt) > Date.parse(lastActivityAt)) lastActivityAt = journeyUpdatedAt;
   const organizationId = typeof activation.get("organizationId") === "string" ? activation.get("organizationId") as string : null;
   let restricted = activation.exists && (!journey?.exists || journey.get("userId") !== userId);
   restricted ||= journey?.get("state") === "open-platform" && !organizationId;

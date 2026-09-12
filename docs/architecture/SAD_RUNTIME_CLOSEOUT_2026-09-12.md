@@ -25,6 +25,8 @@ New collections are enumerated in `src/infrastructure/firestore/sad-runtime-sche
 
 Production sending is **disabled** in `apphosting.yaml`, and the persisted lifecycle policy defaults to disabled. No provider message, production enrichment lookup, Stripe checkout, payment, webhook creation or deployment was performed by this packet.
 
+The owner supplied the SMS/MMS sender `+18337391819` on September 12; it is now the Exchange runtime sender configuration. The owner reports having a Telnyx API key and public key, but their values/storage location have not been provided to this worker. The API key remains a Secret Manager runtime binding. The messaging profile assignment, public-key configuration and toll-free verification status still require provider-side inspection. This packet dispatches text-only SMS lifecycle templates; an MMS attachment workflow is not claimed complete merely because the number supports SMS/MMS.
+
 | Runtime | Required configuration | Acceptance before activation |
 | --- | --- | --- |
 | Exchange lifecycle worker | `RFXCHANGE_LIFECYCLE_WORKER_SECRET` from Secret Manager; `RFXCHANGE_LIFECYCLE_SEND_MODE=enabled`; HTTPS `RFXCHANGE_EXCHANGE_ORIGIN`; operator-enabled lifecycle policy | Invalid worker credentials denied; allowed, opted-in recipient receives the selected template; withdrawal/STOP and obsolete journey prevent sending; accepted/failed delivery visible |
@@ -88,5 +90,6 @@ Shared presentation edits are limited to one account link row, one Marketing foo
 - [Telnyx webhook verification](https://developers.telnyx.com/docs/development/api-fundamentals/webhooks/receiving-webhooks)
 - [Telnyx messaging callbacks](https://developers.telnyx.com/docs/messaging/messages/receiving-webhooks)
 - [Telnyx send-message API](https://developers.telnyx.com/api-reference/messages/send-a-message)
+- [Telnyx toll-free verification](https://developers.telnyx.com/docs/messaging/toll-free-verification)
 - [GSA SAM entity API](https://open.gsa.gov/api/entity-api/)
 - [USAspending spending-by-award contract](https://github.com/fedspendingtransparency/usaspending-api/blob/master/usaspending_api/api_contracts/contracts/v2/search/spending_by_award.md)
