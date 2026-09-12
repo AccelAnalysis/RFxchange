@@ -3,8 +3,12 @@ export const EXCHANGE_LIGHT_MAPBOX_STYLE = "mapbox://styles/mapbox/standard" as 
 export const exchangeLightBasemapConfig = Object.freeze({
   lightPreset: "day",
   theme: "faded",
-  showPointOfInterestLabels: true,
+  showPointOfInterestLabels: false,
+  showRoadLabels: false,
+  showPlaceLabels: false,
   showTransitLabels: false,
+  // 3D remains available as an explicit map option. The ordinary Exchange workspace
+  // supplies a 2D camera by default instead of opening in a pitched scene.
   show3dObjects: true,
 } as const);
 
