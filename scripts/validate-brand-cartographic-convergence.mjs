@@ -37,7 +37,13 @@ for (const quietDefault of [
   assert.ok(contract.includes(quietDefault), `Exchange Light baseline must keep ${quietDefault}.`);
   assert.ok(spatialScene.includes(quietDefault), `Exchange workspace renderer must keep ${quietDefault}.`);
 }
-assert.ok(workspace.includes('viewMode: "2d"') && workspace.includes("pitch: 0") && workspace.includes("bearing: 0"), "Ordinary Exchange workspaces must open flat unless the participant has a persisted camera preference.");
+assert.ok(
+  workspace.includes("initialCamera={spatialContext.camera}") &&
+    !workspace.includes('viewMode: "2d" as const') &&
+    spatialScene.includes("ORGANIZATION_ORBIT_PITCH = 75") &&
+    spatialScene.includes('setViewMode("3d")'),
+  "Ordinary Exchange workspaces must preserve the original default 3D orbit while restoring a persisted participant camera when present.",
+);
 
 for (const renderer of [mapboxCanvas, spatialScene]) {
   for (const requirement of [
@@ -121,9 +127,9 @@ for (const prohibitedLayer of [
 assert.ok(
   roadmap.includes("Brand Gate B3 — Mapbox/cartographic convergence") &&
     roadmap.includes("real marker remains anchored and visible in default 3D, 2D, Fit home and manual interaction"),
-  "Brand B3 implementation must remain aligned with canonical acceptance while the ordinary participant workspace now chooses a flat initial camera.",
+  "Brand B3 implementation must remain aligned with canonical acceptance and the original default 3D Exchange vision.",
 );
 
 console.log(
-  "Brand Gate B3 cartographic convergence validated: quiet Exchange defaults, preserved optional 3D controls, Exchange Light locality fields, proprietary organization nodes, progressive detail and density contracts, and no fabricated later-domain map objects.",
+  "Brand Gate B3 cartographic convergence validated: restrained Exchange labels, restored default 3D orbit, preserved 2D/Perspective controls, Exchange Light locality fields, proprietary organization nodes, and no fabricated later-domain map objects.",
 );
