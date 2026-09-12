@@ -302,7 +302,9 @@
         "timeZone": "Zeitzone",
         "timing": "Optionale Mitteilungen werden zwischen 9 und 20 Uhr in Ihrer Zeitzone gesendet, höchstens einmal täglich. Sicherheitsmeldungen und notwendige Servicenachrichten werden separat verwaltet.",
         "save": "Einstellungen speichern",
-        "saved": "Ihre Einstellungen wurden gespeichert."
+        "saved": "Ihre Einstellungen wurden gespeichert.",
+        "disclosuresChanged": "Unsere Hinweise zu Mitteilungen haben sich geändert. Prüfen und speichern Sie Ihre Auswahl, um optionale Neuigkeiten zu erhalten.",
+        "smsUpdates": "SMS-Neuigkeiten"
       },
       "data": {
         "title": "Öffentliche Unternehmensdaten",

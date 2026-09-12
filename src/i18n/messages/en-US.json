@@ -302,7 +302,9 @@
         "timeZone": "Time zone",
         "timing": "Optional updates are sent between 9 AM and 8 PM in your time zone, at most once a day. Security and essential service messages are managed separately.",
         "save": "Save preferences",
-        "saved": "Your preferences are saved."
+        "saved": "Your preferences are saved.",
+        "disclosuresChanged": "Our communication disclosures have changed. Review and save your choices to receive optional updates.",
+        "smsUpdates": "SMS updates"
       },
       "data": {
         "title": "Public business data",

@@ -15,7 +15,7 @@ export interface LifecyclePolicy {
 export const DEFAULT_LIFECYCLE_POLICY: LifecyclePolicy = {
   enabled: false, setupDelayHours: 24, retentionDays: 14, winBackDays: 30, minimumIntervalHours: 168,
 };
-export const COMMUNICATION_CONSENT_VERSION = "rfxchange-communications-2026-09-12";
+export const COMMUNICATION_CONSENT_VERSION = "rfxchange-communications-2026-09-12-v2";
 export function validateLifecyclePolicy(input: unknown): LifecyclePolicy {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Invalid lifecycle policy.");
   const p = input as Record<string, unknown>;

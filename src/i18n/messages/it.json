@@ -302,7 +302,9 @@
         "timeZone": "Fuso orario",
         "timing": "Gli aggiornamenti facoltativi vengono inviati tra le 9:00 e le 20:00 nel tuo fuso orario, al massimo una volta al giorno. I messaggi di sicurezza e di servizio essenziali sono gestiti separatamente.",
         "save": "Salva preferenze",
-        "saved": "Le tue preferenze sono state salvate."
+        "saved": "Le tue preferenze sono state salvate.",
+        "disclosuresChanged": "Le nostre informative sulle comunicazioni sono cambiate. Rivedi e salva le tue scelte per ricevere aggiornamenti facoltativi.",
+        "smsUpdates": "Aggiornamenti SMS"
       },
       "data": {
         "title": "Dati aziendali pubblici",

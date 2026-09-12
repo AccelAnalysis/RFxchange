@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useI18n } from "@/src/components/i18n/I18nProvider";
 import { COMMUNICATION_CONSENT_VERSION, type CommunicationPreferences } from "@/src/domain/communications/lifecycle";
 import styles from "./ServiceSettings.module.css";
+import { SMS_PROGRAM } from "../../content/sms";
+import { SmsConsentDisclosure } from "./SmsConsentDisclosure";
 
 export function CommunicationPreferencesForm() {
   const { dictionary } = useI18n();
@@ -19,12 +21,14 @@ export function CommunicationPreferencesForm() {
       const body = await response.json();
       if (!response.ok) throw new Error(common.loadError);
       setSmsAvailable(body.smsAvailable);
-      setPreferences(body.preferences ?? { userId: "", version: 0, email: false, sms: false, marketingConsent: false, phone: null,
+      const saved = body.preferences as CommunicationPreferences | null;
+      setPreferences(saved ? { ...saved, ...(saved.consentTextVersion !== COMMUNICATION_CONSENT_VERSION ? { marketingConsent: false, email: false, sms: false } : {}), consentTextVersion: COMMUNICATION_CONSENT_VERSION } : { userId: "", version: 0, email: false, sms: false, marketingConsent: false, phone: null,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, consentTextVersion: COMMUNICATION_CONSENT_VERSION, updatedAt: "" });
+      if (saved && saved.consentTextVersion !== COMMUNICATION_CONSENT_VERSION) setStatus(copy.disclosuresChanged);
       setReady(true);
     }).catch(() => { if (!controller.signal.aborted) setStatus(common.loadError); });
     return () => controller.abort();
-  }, [common.loadError]);
+  }, [common.loadError, copy.disclosuresChanged]);
   return <section className={styles.panel}>
     <Link href="/organization-profile">{common.back}</Link>
     <h1>{copy.title}</h1>
@@ -45,8 +49,9 @@ export function CommunicationPreferencesForm() {
         <legend>{copy.optional}</legend>
         <label><input type="checkbox" checked={preferences?.marketingConsent ?? false} onChange={(e) => setPreferences(p => p && ({ ...p, marketingConsent: e.target.checked }))}/> {copy.consent}</label>
         <label><input type="checkbox" checked={preferences?.email ?? false} onChange={(e) => setPreferences(p => p && ({ ...p, email: e.target.checked }))}/> {copy.email}</label>
-        <label><input type="checkbox" disabled={!smsAvailable} checked={preferences?.sms ?? false} onChange={(e) => setPreferences(p => p && ({ ...p, sms: e.target.checked }))}/> {copy.sms}</label>
-        <p>{smsAvailable ? copy.smsAvailable : copy.smsUnavailable}</p>
+        <label><input type="checkbox" aria-label={copy.sms} disabled={!smsAvailable} checked={preferences?.sms ?? false} onChange={(e) => setPreferences(p => p && ({ ...p, sms: e.target.checked }))}/> {SMS_PROGRAM.consent}</label>
+        <SmsConsentDisclosure />
+        {!smsAvailable ? <p>{copy.smsUnavailable} <a href={`mailto:${SMS_PROGRAM.supportEmail}`}>{SMS_PROGRAM.supportEmail}</a></p> : null}
         <label>{copy.timeZone}<input required value={preferences?.timeZone ?? ""} onChange={(e) => setPreferences(p => p && ({ ...p, timeZone: e.target.value }))}/></label>
         <p>{copy.timing}</p>
       </fieldset>

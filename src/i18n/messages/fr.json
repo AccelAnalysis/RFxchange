@@ -302,7 +302,9 @@
         "timeZone": "Fuseau horaire",
         "timing": "Les informations facultatives sont envoyées entre 9 h et 20 h dans votre fuseau horaire, au maximum une fois par jour. Les messages de sécurité et de service essentiels sont gérés séparément.",
         "save": "Enregistrer les préférences",
-        "saved": "Vos préférences sont enregistrées."
+        "saved": "Vos préférences sont enregistrées.",
+        "disclosuresChanged": "Nos informations sur les communications ont changé. Vérifiez et enregistrez vos choix pour recevoir les actualités facultatives.",
+        "smsUpdates": "Actualités par SMS"
       },
       "data": {
         "title": "Données publiques de l’organisation",

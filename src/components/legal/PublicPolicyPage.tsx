@@ -19,13 +19,14 @@ export function PublicPolicyPage({ policy }: Readonly<{ policy: PublicPolicyDocu
       </header>
 
       <article className={styles.document}>
-        <p className={styles.eyebrow}>Current published policy</p>
+        <p className={styles.eyebrow}>{policy.version === "2026.07.31" ? "Archived policy" : "Current published policy"}</p>
         <h1>{policy.title}</h1>
         <div className={styles.meta}>
           <span>Version {policy.version}</span>
           <span>Effective {policy.effectiveDate}</span>
         </div>
         <p className={styles.summary}>{policy.summary}</p>
+        {policy.version !== "2026.07.31" ? <p><Link href={`/policies/2026-07-31/${policy.shortTitle === "Terms of Service" ? "terms" : policy.shortTitle === "Privacy Policy" ? "privacy" : "platform-rules"}`}>Read the previous policy</Link> · <Link href="/sms">SMS updates and consent</Link></p> : <p><Link href={policy.shortTitle === "Terms of Service" ? "/terms" : policy.shortTitle === "Privacy Policy" ? "/privacy" : "/platform-rules"}>Read the current policy</Link></p>}
 
         <div className={styles.sections}>
           {policy.sections.map((section) => (

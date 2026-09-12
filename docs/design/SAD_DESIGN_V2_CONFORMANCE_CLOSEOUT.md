@@ -2,7 +2,7 @@
 
 Date: 2026-09-12. Base: `177c8fd283e7f82c602ac261471bfb4a84c08fc0` (PR #276).
 
-Continuation: reconciled with `f0b1c022c4837e37fbe8f485a8b65281501dd821` after PRs #278–#280. Those PRs supply real service implementations and app releases for the lifecycle, Telnyx, enrichment and curated-help foundation. Their remaining provider/configuration and domain boundaries are recorded in [SAD runtime closeout](../architecture/SAD_RUNTIME_CLOSEOUT_2026-09-12.md); the original assessment that these services existed only in the SAD is no longer current.
+Continuation: reconciled with `0792558769f0ad15cfdbb9f33aeed8681d9bfa8f` after PRs #278–#281. The SMS consent wording, renewed-consent gate and current/archived policies from #281 are preserved verbatim; legal publication remains in its canonical English copy. Those PRs supply real service implementations and app releases for the lifecycle, Telnyx, enrichment and curated-help foundation. Their remaining provider/configuration and domain boundaries are recorded in [SAD runtime closeout](../architecture/SAD_RUNTIME_CLOSEOUT_2026-09-12.md); the original assessment that these services existed only in the SAD is no longer current.
 
 The in-place three-app modernization and core v2 token foundation are deployed. This candidate addresses interface hierarchy. It does not certify the complete SAD, earn optional independent `Verified` assurance, change Feature-ID completion, or establish a production release.
 

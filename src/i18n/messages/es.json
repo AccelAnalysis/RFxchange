@@ -302,7 +302,9 @@
         "timeZone": "Zona horaria",
         "timing": "Las actualizaciones opcionales se envían entre las 9:00 y las 20:00 de tu zona horaria, como máximo una vez al día. Los mensajes de seguridad y de servicios esenciales se gestionan por separado.",
         "save": "Guardar preferencias",
-        "saved": "Tus preferencias se han guardado."
+        "saved": "Tus preferencias se han guardado.",
+        "disclosuresChanged": "Nuestras condiciones de comunicación han cambiado. Revisa y guarda tus preferencias para recibir novedades opcionales.",
+        "smsUpdates": "Novedades por SMS"
       },
       "data": {
         "title": "Datos empresariales públicos",
