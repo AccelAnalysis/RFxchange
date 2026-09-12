@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
-const [contract, localityModel, mapViewContract, mapboxCanvas, mapboxStyles, spatialScene, spatialStyles, roadmap] = await Promise.all([
+const [contract, localityModel, mapViewContract, mapboxCanvas, mapboxStyles, spatialScene, spatialStyles, roadmap, workspace] = await Promise.all([
   read("src/design/cartography.ts"),
   read("src/application/geography/controlled-locality-map.ts"),
   read("src/application/geography/map-view.ts"),
@@ -13,6 +13,7 @@ const [contract, localityModel, mapViewContract, mapboxCanvas, mapboxStyles, spa
   read("src/components/map/ExchangeSpatialScene.tsx"),
   read("src/components/map/ExchangeSpatialScene.module.css"),
   read("docs/brand/BRAND_IMPLEMENTATION_ROADMAP.md"),
+  read("src/components/participant/ExistingWorkspaceFoundation.tsx"),
 ]);
 
 for (const requirement of [
@@ -26,6 +27,17 @@ for (const requirement of [
 ]) {
   assert.ok(contract.includes(requirement), `Brand B3 cartography contract is missing ${requirement}.`);
 }
+
+for (const quietDefault of [
+  "showPointOfInterestLabels: false",
+  "showRoadLabels: false",
+  "showPlaceLabels: false",
+  "showTransitLabels: false",
+]) {
+  assert.ok(contract.includes(quietDefault), `Exchange Light baseline must keep ${quietDefault}.`);
+  assert.ok(spatialScene.includes(quietDefault), `Exchange workspace renderer must keep ${quietDefault}.`);
+}
+assert.ok(workspace.includes('viewMode: "2d"') && workspace.includes("pitch: 0") && workspace.includes("bearing: 0"), "Ordinary Exchange workspaces must open flat unless the participant has a persisted camera preference.");
 
 for (const renderer of [mapboxCanvas, spatialScene]) {
   for (const requirement of [
@@ -109,9 +121,9 @@ for (const prohibitedLayer of [
 assert.ok(
   roadmap.includes("Brand Gate B3 — Mapbox/cartographic convergence") &&
     roadmap.includes("real marker remains anchored and visible in default 3D, 2D, Fit home and manual interaction"),
-  "Brand B3 implementation must remain aligned with canonical acceptance.",
+  "Brand B3 implementation must remain aligned with canonical acceptance while the ordinary participant workspace now chooses a flat initial camera.",
 );
 
 console.log(
-  "Brand Gate B3 cartographic convergence validated: Exchange Light locality fields, proprietary organization nodes, subordinate-location grammar, progressive detail and density contracts, preserved PR #99 camera/marker behavior, and no fabricated later-domain map objects.",
+  "Brand Gate B3 cartographic convergence validated: quiet Exchange defaults, preserved optional 3D controls, Exchange Light locality fields, proprietary organization nodes, progressive detail and density contracts, and no fabricated later-domain map objects.",
 );
