@@ -74,6 +74,7 @@ interface ExistingWorkspaceFoundationProps {
   readonly discovery?: NetworkDiscoveryProjection | null;
   readonly discoveryUnavailableReason?: DiscoveryUnavailableReason | null;
   readonly focusedOrganization?: NetworkDiscoveryOrganization | null;
+  readonly showFocusedOrganizationDetail?: boolean;
   readonly serviceAreaOptions?: readonly NetworkServiceAreaOption[];
   readonly officialResourceProviderOrganizationIds?: readonly string[];
   readonly operationalActionsAvailable?: boolean;
@@ -88,12 +89,14 @@ function buildDiscoveryUrl(input: Readonly<{
   serviceAreaId: string | null;
   selectedOrganizationId?: string | null;
   page?: number;
+  view?: "results";
 }>): string {
   const params = new URLSearchParams({ organizationId: input.organizationId });
   if (input.capability) params.set("q", input.capability);
   if (input.serviceAreaId) params.set("serviceArea", input.serviceAreaId);
   if (input.selectedOrganizationId) params.set("selectedOrganization", input.selectedOrganizationId);
   if (input.page && input.page > 1) params.set("page", String(input.page));
+  if (input.view) params.set("view", input.view);
   return `/geography/canvas?${params.toString()}`;
 }
 
@@ -180,6 +183,7 @@ export function ExistingWorkspaceFoundation({
   discovery = null,
   discoveryUnavailableReason = null,
   focusedOrganization = null,
+  showFocusedOrganizationDetail = true,
   serviceAreaOptions = [],
   officialResourceProviderOrganizationIds = [],
   operationalActionsAvailable = true,
@@ -195,11 +199,12 @@ export function ExistingWorkspaceFoundation({
     ? "intelligence"
     : spatialContext.activeLens;
   const focusedOrganizationId = focusedOrganization ? String(focusedOrganization.organizationId) : null;
-  const [mobileDetailOpen, setMobileDetailOpen] = useState(Boolean(focusedOrganizationId));
-  const [appliedDetailRouteId, setAppliedDetailRouteId] = useState(focusedOrganizationId);
-  if (appliedDetailRouteId !== focusedOrganizationId) {
-    setAppliedDetailRouteId(focusedOrganizationId);
-    setMobileDetailOpen(Boolean(focusedOrganizationId));
+  const detailRouteId = showFocusedOrganizationDetail ? focusedOrganizationId : null;
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(Boolean(detailRouteId));
+  const [appliedDetailRouteId, setAppliedDetailRouteId] = useState(detailRouteId);
+  if (appliedDetailRouteId !== detailRouteId) {
+    setAppliedDetailRouteId(detailRouteId);
+    setMobileDetailOpen(Boolean(detailRouteId));
   }
   const networkSearchInputRef = useRef<HTMLInputElement | null>(null);
   const cardRefs = useRef(new Map<string, HTMLElement>());
@@ -386,6 +391,8 @@ export function ExistingWorkspaceFoundation({
     organizationId,
     capability: "",
     serviceAreaId: null,
+    selectedOrganizationId: selectedOrganizationQueryId,
+    view: "results",
   });
   const locationLabels = {
     near: t("networkWorkspace.detail.nearLocation", { locality }),
@@ -629,6 +636,8 @@ export function ExistingWorkspaceFoundation({
         {discovery ? (
           <form className={styles.exchangeSearch} role="search" method="get" action="/geography/canvas">
             <input type="hidden" name="organizationId" value={organizationId} />
+            <input type="hidden" name="view" value="results" />
+            {selectedOrganizationQueryId ? <input type="hidden" name="selectedOrganization" value={selectedOrganizationQueryId} /> : null}
             <label className={styles.searchInput}>
               <span className={styles.srOnly}>{t("networkWorkspace.search.capabilityLabel")}</span>
               <input ref={networkSearchInputRef} type="search" name="q" defaultValue={capability} placeholder={t("networkWorkspace.search.placeholder")} autoComplete="off" />
@@ -740,6 +749,8 @@ export function ExistingWorkspaceFoundation({
                       organizationId,
                       capability,
                       serviceAreaId,
+                      selectedOrganizationId: selectedOrganizationQueryId,
+                      view: "results",
                       page: discovery.page - 1,
                     })}>{t("networkWorkspace.search.previous")}</Link>
                   ) : <span />}
@@ -749,6 +760,8 @@ export function ExistingWorkspaceFoundation({
                       organizationId,
                       capability,
                       serviceAreaId,
+                      selectedOrganizationId: selectedOrganizationQueryId,
+                      view: "results",
                       page: discovery.page + 1,
                     })}>{t("networkWorkspace.search.next")}</Link>
                   ) : <span />}
