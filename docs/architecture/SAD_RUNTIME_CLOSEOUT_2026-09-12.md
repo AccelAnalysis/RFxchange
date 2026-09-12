@@ -58,6 +58,8 @@ The new Functions secret bindings belong only to the functions that need them; e
 
 ## Remaining SAD work — no silent omissions
 
+The successor [platform work register](SAD_PLATFORM_WORK_REGISTER_2026-09-12.md) groups work that needs no new provider credentials and records the next implementation batch. Its explicit remaining list supersedes no canonical Feature-ID completion requirement.
+
 | SAD area | Remaining closure work |
 | --- | --- |
 | Three apps / in-place cutover (5–8, 16–18, 21) | Baseline implementation/deployment evidence is retained. New changes still need their own exact-source builds and production acceptance. No replacement Firebase project or record normalization is introduced |

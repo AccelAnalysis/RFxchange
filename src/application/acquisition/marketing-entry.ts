@@ -1,4 +1,5 @@
 /** Reported campaign metadata only; never an invitation, referral credit or permission. */
+export const MARKETING_LAST_CAMPAIGN_COOKIE = "rfx_marketing_last_campaign";
 export const MARKETING_CAMPAIGN_COOKIE = "rfx_marketing_campaign";
 
 export function marketingCampaignReference(value: string | null | undefined): string | null {

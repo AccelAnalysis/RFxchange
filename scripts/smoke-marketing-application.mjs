@@ -40,6 +40,11 @@ try {
   }
   assert.equal((await fetch(exchange + "/api/internal/lifecycle", { method: "POST", headers: { authorization: "Bearer untrusted" } })).status, 403, "Unconfigured/invalid worker credentials fail closed");
   assert.ok([401, 503].includes((await fetch(exchange + "/api/communications/telnyx", { method: "POST", body: "{}" })).status), "Unconfigured/unsigned SMS callbacks fail closed");
+  const unsubscribe = await fetch(exchange + "/communications/unsubscribe/" + "a".repeat(43));
+  assert.equal(unsubscribe.status, 200, "Withdrawal confirmation does not require sign-in");
+  assert.match(await unsubscribe.text(), /method="post"/);
+  assert.equal((await fetch(exchange + "/api/communications/unsubscribe")).status, 405, "GET cannot withdraw consent");
+  assert.equal((await fetch(exchange + "/api/communications/unsubscribe", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: "token=invalid" })).status, 400);
   for (const locale of ["en-US", "es", "fr", "it", "de"]) {
     for (const route of ["/", "/membership", "/founding", "/help"]) {
       const response = await fetch(marketing + route, { headers: { cookie: `rfx-locale=${locale}` } });
@@ -81,7 +86,7 @@ try {
   const destination = new URL(handoff.headers.get("location"));
   assert.equal(destination.origin, "https://exchange.example");
   assert.equal(destination.pathname, "/acquisition/entry");
-  assert.deepEqual(Object.fromEntries(destination.searchParams), { intent: "signin", campaign: "regional-launch", locale: "fr", returnTo: "/opportunities" });
+  assert.deepEqual(Object.fromEntries(destination.searchParams), { intent: "signin", campaign: "regional-launch", lastCampaign: "second", locale: "fr", returnTo: "/opportunities" });
   assert.match(handoff.headers.get("cache-control"), /no-store/);
   const receiver = await fetch(exchange + destination.pathname + destination.search, { redirect: "manual" });
   assert.equal(receiver.status, 303);
@@ -94,7 +99,8 @@ try {
     redirect: "manual", headers: { cookie: "rfx_marketing_campaign=original" },
   });
   assert.equal(new URL(unsafe.headers.get("location"), exchange).search, "");
-  assert.equal(unsafe.headers.get("set-cookie"), null, "Existing campaign attribution must not be overwritten");
+  assert.doesNotMatch(unsafe.headers.get("set-cookie"), /(?:^|, )rfx_marketing_campaign=/, "Existing first-touch attribution must not be overwritten");
+  assert.match(unsafe.headers.get("set-cookie"), /rfx_marketing_last_campaign=second/, "Last touch is independently refreshed");
   const admin = await fetch(marketing + "/admin", { redirect: "manual" });
   assert.equal(admin.status, 404, "Marketing ships no Admin route");
   const oldAdmin = await fetch(exchange + "/admin/organizations?token=must-not-leak", { redirect: "manual" });

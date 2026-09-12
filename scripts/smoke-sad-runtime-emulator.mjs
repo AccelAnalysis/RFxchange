@@ -13,6 +13,12 @@ import { dispatchLifecycleCommunications, currentLifecycleState } from "../src/i
 import { DEFAULT_LIFECYCLE_POLICY, COMMUNICATION_CONSENT_VERSION, chooseLifecycleJourney } from "../src/domain/communications/lifecycle.ts";
 import { SmsProviderError } from "../src/infrastructure/communications/telnyx-sms.ts";
 
+import { saveCampaign } from "../src/infrastructure/acquisition/campaigns.ts";
+import { recordMarketingAttribution } from "../src/infrastructure/acquisition/marketing-attribution.ts";
+import { applyCommunicationOperation } from "../src/infrastructure/communications/operations.ts";
+import { createEmailUnsubscribeUrl, unsubscribeEmail, unsubscribeTokenDigest } from "../src/infrastructure/communications/unsubscribe.ts";
+import { defaultAdminRolePreset, resolveAuthorityContextFromAdminRolePreset } from "../src/domain/admin-authorization/role-presets.ts";
+
 assert.equal(process.env.FIRESTORE_EMULATOR_HOST, "127.0.0.1:8080");
 assert.equal(process.env.FIREBASE_AUTH_EMULATOR_HOST, "127.0.0.1:9099");
 const projectId = "demo-rfxchange";
@@ -121,6 +127,56 @@ try {
     return fakeAuth.getUser(subject);
   } } });
   assert.equal(sends, 1, "Consent withdrawal after reservation still prevents the provider call.");
+  const operator = resolveAuthorityContextFromAdminRolePreset(`operator-${suffix}`, defaultAdminRolePreset("super-admin"));
+  const campaignCommand = { campaign: { id: `campaign-${suffix}`, status: "draft", title: "Fixture campaign", summary: "Fixture public content", actionLabel: "Join" }, expectedVersion: 0, commandId: randomUUID(), reason: "Fixture publication" };
+  const campaign = await saveCampaign(db, operator, campaignCommand);
+  assert.equal(campaign.version, 1);
+  assert.equal((await saveCampaign(db, operator, campaignCommand)).version, 1);
+  await assert.rejects(saveCampaign(db, operator, { ...campaignCommand, reason: "Changed replay" }), /command-conflict/);
+  await assert.rejects(saveCampaign(db, operator, { ...campaignCommand, commandId: randomUUID() }), /version-conflict/);
+  await saveCampaign(db, operator, { ...campaignCommand, commandId: randomUUID(), expectedVersion: 1, campaign: { ...campaignCommand.campaign, status: "published" } });
+  const attributedUser = `attributed-${suffix}`;
+  await recordMarketingAttribution(db, attributedUser, "first-campaign", "second-campaign", new Date(now).toISOString());
+  await recordMarketingAttribution(db, attributedUser, "later-campaign", "latest-campaign", new Date(now + 1000).toISOString());
+  const attribution = await db.collection("marketingAttribution").doc(attributedUser).get();
+  assert.equal(attribution.get("firstTouch.campaign"), "first-campaign");
+  assert.equal(attribution.get("lastTouch.campaign"), "latest-campaign");
+  assert.equal(attribution.get("classification"), "reported-not-authoritative");
+  const held = await fixture("held");
+  const hold = { commandId: randomUUID(), action: "hold", targetId: held, expectedVersion: 0, reason: "Investigate account delivery" };
+  assert.equal((await applyCommunicationOperation(db, operator, hold)).version, 1);
+  assert.equal((await applyCommunicationOperation(db, operator, hold)).version, 1);
+  await assert.rejects(applyCommunicationOperation(db, operator, { ...hold, reason: "Changed replay" }), /command-conflict/);
+  await assert.rejects(applyCommunicationOperation(db, operator, { ...hold, commandId: randomUUID() }), /version-conflict/);
+  await dispatchLifecycleCommunications(db, deps);
+  assert.equal(sends, 1, "Support hold prevents optional sends.");
+  const heldAddress = communicationAddressKey("email", "held@example.test");
+  await set("communicationSuppressions", heldAddress, { suppressed: true, source: "provider", channel: "email" });
+  await applyCommunicationOperation(db, operator, { ...hold, commandId: randomUUID(), action: "release-hold", expectedVersion: 1 });
+  assert.equal((await db.collection("communicationSuppressions").doc(heldAddress).get()).get("suppressed"), true, "Releasing a support hold cannot clear provider suppression.");
+  await db.collection("lifecycleEnrollments").doc(held).delete();
+  const heldAfterReserve = await fixture("held-after-reserve");
+  let holdReads = 0;
+  await dispatchLifecycleCommunications(db, { ...deps, auth: { async getUser(subject) {
+    if (subject === heldAfterReserve && ++holdReads === 2) await set("communicationSupportHolds", subject, { held: true });
+    return fakeAuth.getUser(subject);
+  } } });
+  assert.equal(sends, 1, "A hold placed after reservation is rechecked before provider use.");
+  await db.collection("lifecycleEnrollments").doc(heldAfterReserve).delete();
+  const unsubscribeAddress = communicationAddressKey("email", "unsubscribe@example.test");
+  touched.add(`communicationSuppressions/${unsubscribeAddress}`);
+  const unsubscribeUrl = await createEmailUnsubscribeUrl(db, { userId: held, addressKey: unsubscribeAddress, origin: environment.RFXCHANGE_EXCHANGE_ORIGIN, now });
+  const token = new URL(unsubscribeUrl).pathname.split("/").at(-1);
+  const grant = await db.collection("communicationUnsubscribeTokens").doc(unsubscribeTokenDigest(token)).get();
+  assert.equal(JSON.stringify(grant.data()).includes(token), false, "Only a token digest is persisted.");
+  await unsubscribeEmail(db, token, now);
+  await unsubscribeEmail(db, token, now);
+  assert.equal((await db.collection("communicationSuppressions").doc(unsubscribeAddress).get()).get("suppressed"), true);
+  await db.collection("communicationSuppressions").doc(unsubscribeAddress).update({ suppressed: false });
+  await unsubscribeEmail(db, token, now);
+  assert.equal((await db.collection("communicationSuppressions").doc(unsubscribeAddress).get()).get("suppressed"), false, "Replaying an already-used withdrawal cannot undo a later re-subscription.");
+  await assert.rejects(unsubscribeEmail(db, "invalid", now), /invalid-token/);
+  await assert.rejects(unsubscribeEmail(db, token, now + 366 * 86_400_000), /link-unavailable/);
   now = Date.parse("2026-09-12T22:00:00Z");
   const quiet = await fixture("quiet");
   await dispatchLifecycleCommunications(db, deps);
@@ -144,6 +200,11 @@ try {
   assert.equal(unknownCalls, 1, "Ambiguous outcomes need reconciliation and never retry blindly.");
   const unknownJobs = await db.collection("lifecycleCommunicationJobs").where("userId", "==", unknown).get();
   assert.equal(unknownJobs.docs[0].get("status"), "needs-reconciliation");
+  const close = { commandId: randomUUID(), action: "close-job", targetId: unknownJobs.docs[0].id, expectedVersion: 0, reason: "Reviewed unknown outcome; do not resend" };
+  await applyCommunicationOperation(db, operator, close);
+  await applyCommunicationOperation(db, operator, close);
+  assert.equal((await unknownJobs.docs[0].ref.get()).get("status"), "closed-by-operator");
+  await assert.rejects(applyCommunicationOperation(db, operator, { ...close, commandId: randomUUID(), targetId: retryJobs.docs[0].id }), /job-not-closable/);
   await set("activationJourneyContexts", unknown, { userId: unknown, accessJourneyId: `journey-${suffix}`, organizationId: `org-${suffix}`, membershipId: `membership-${suffix}` });
   await set("organizations", `org-${suffix}`, { id: `org-${suffix}` });
   await set("accessJourneys", `journey-${suffix}`, { userId: unknown, state: "open-platform" });
@@ -165,7 +226,7 @@ try {
   console.log("SAD runtime emulator acceptance passed: tenant boundaries, lease fencing, consent revocation, send replay, retries, quiet hours, webhook scope/dedup/order/reconciliation and direct-client denial.");
 } finally {
   for (const path of touched) await db.doc(path).delete();
-  for (const name of ["publicEnrichmentRuns", "publicEnrichmentEvents", "lifecycleCommunicationJobs", "lifecycleCommunicationEvents", "communicationWebhookEvents", "communicationProviderReferences"]) {
+  for (const name of ["publicEnrichmentRuns", "publicEnrichmentEvents", "lifecycleCommunicationJobs", "lifecycleCommunicationEvents", "communicationWebhookEvents", "communicationProviderReferences", "communicationSupportHolds", "communicationUnsubscribeTokens", "communicationConsentEvents", "platformAdministrativeAuditEvents", "marketingCampaigns", "marketingAttribution"]) {
     const docs = await db.collection(name).get();
     for (const item of docs.docs) if (JSON.stringify(item.data()).includes(suffix)) await item.ref.delete();
   }

@@ -1,3 +1,6 @@
+import { validateCampaign } from "../src/domain/acquisition/campaign.ts";
+import { publicReviewDisposition } from "../src/domain/enrichment/public-review.ts";
+import { communicationOperation, canCloseCommunicationJob } from "../src/domain/communications/operations.ts";
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { generateKeyPairSync, sign } from 'node:crypto';
@@ -83,4 +86,38 @@ test('lifecycle links use a configured HTTPS origin and carry no private record 
 test('chunked request bodies are bounded even without content-length', async () => {
   const request = new Request('https://example.test', { method: 'POST', body: new ReadableStream({ start(c) { c.enqueue(new Uint8Array(5)); c.enqueue(new Uint8Array(8)); c.close(); } }), duplex: 'half' });
   await assert.rejects(boundedRequestBytes(request, 10), /request-too-large/);
+});
+
+
+test('all five lifecycle languages preserve safe action, preference and withdrawal destinations', () => {
+  const url = `https://exchange.example/communications/unsubscribe/${'a'.repeat(43)}`;
+  const subjects = new Set();
+  for (const locale of ['en-US', 'es', 'fr', 'it', 'de']) {
+    for (const journey of ['finish-setup', 'retention', 'win-back']) {
+      const c = lifecycleContent(journey, 'https://exchange.example', { locale, unsubscribeUrl: url });
+      subjects.add(c.subject);
+      assert.ok(c.text.includes(url)); assert.ok(c.sms.includes('STOP'));
+      assert.ok(!c.sms.includes(url));
+    }
+  }
+  assert.equal(subjects.size, 15);
+  assert.throws(() => lifecycleContent('retention', 'https://exchange.example?evil=1'));
+  assert.throws(() => lifecycleContent('retention', 'https://exchange.example', { unsubscribeUrl: 'https://evil.example' }));
+});
+
+
+test('operator commands refuse unsupported actions, missing reasons and active-job closure', () => {
+  const c = { commandId: 'command-123', action: 'close-job', targetId: 'job-1', expectedVersion: 0, reason: 'Reviewed provider outcome' };
+  assert.equal(communicationOperation(c).action, 'close-job');
+  for (const patch of [{ action: 'resend' }, { reason: '' }, { expectedVersion: -1 }, { targetId: '../job' }]) assert.throws(() => communicationOperation({ ...c, ...patch }));
+  for (const status of ['sending', 'accepted', 'suppressed', 'closed-by-operator']) assert.equal(canCloseCommunicationJob(status), false);
+  assert.equal(canCloseCommunicationJob('needs-reconciliation'), true);
+});
+test('campaign and source review inputs cannot invent a destination, lifecycle state or canonical acceptance', () => {
+  const c = { id: 'campaign-one', status: 'draft', title: 'Business opportunities', summary: 'Learn about the exchange.', actionLabel: 'Join' };
+  assert.deepEqual(validateCampaign({ ...c, redirect: 'https://evil.example' }), c);
+  assert.throws(() => validateCampaign({ ...c, id: '../admin' }));
+  assert.throws(() => validateCampaign({ ...c, status: 'paid' }));
+  assert.equal(publicReviewDisposition('request-correction'), 'request-correction');
+  assert.throws(() => publicReviewDisposition('accept-as-verified'));
 });

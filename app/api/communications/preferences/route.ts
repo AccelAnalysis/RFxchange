@@ -7,6 +7,9 @@ import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebas
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 import { boundedRequestBytes } from "@/src/infrastructure/http/bounded-request";
 
+import { isLocale } from "@/src/i18n/config";
+import { communicationAddressKey } from "@/src/infrastructure/communications/address-key";
+
 export const runtime = "nodejs";
 async function authenticate(request: NextRequest) {
   try { return await createServerAuthenticationBoundary().authenticateSessionCookie({ sessionCookie: request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value ?? "", now: new Date().toISOString() }); }
@@ -16,7 +19,9 @@ export async function GET(request: NextRequest) {
   const context = await authenticate(request);
   if (!context) return NextResponse.json({ error: "Sign in to manage communications." }, { status: 401 });
   const [preferences, account] = await Promise.all([getServerFirestore().collection("communicationPreferences").doc(String(context.user.id)).get(), getServerFirebaseAuth().getUser(context.authentication.subject)]);
-  return NextResponse.json({ preferences: preferences.data() ?? null, smsAvailable: Boolean(account.phoneNumber), consentTextVersion: COMMUNICATION_CONSENT_VERSION }, { headers: { "cache-control": "no-store" } });
+  const suppression = account.email ? await getServerFirestore().collection("communicationSuppressions").doc(communicationAddressKey("email", account.email)).get() : null;
+  const saved = preferences.data();
+  return NextResponse.json({ preferences: saved ? { ...saved, ...(suppression?.get("suppressed") ? { email: false } : {}) } : null, smsAvailable: Boolean(account.phoneNumber), consentTextVersion: COMMUNICATION_CONSENT_VERSION }, { headers: { "cache-control": "no-store" } });
 }
 export async function POST(request: NextRequest) {
   if (request.headers.get("origin") !== request.nextUrl.origin) return NextResponse.json({ error: "Request origin required." }, { status: 403 });
@@ -26,6 +31,7 @@ export async function POST(request: NextRequest) {
   try {
     body = JSON.parse((await boundedRequestBytes(request, 4096)).toString("utf8"));
     if (!body || typeof body.email !== "boolean" || typeof body.sms !== "boolean" || typeof body.marketingConsent !== "boolean" || body.consentTextVersion !== COMMUNICATION_CONSENT_VERSION || !Number.isInteger(body.expectedVersion) || typeof body.timeZone !== "string") throw new Error("invalid");
+    if (body.locale !== undefined && (typeof body.locale !== "string" || !isLocale(body.locale))) throw new Error("invalid-locale");
     new Intl.DateTimeFormat("en-US", { timeZone: body.timeZone }).format();
   } catch { return NextResponse.json({ error: "Review your communication choices and time zone." }, { status: 400 }); }
   const account = await getServerFirebaseAuth().getUser(context.authentication.subject);
@@ -35,12 +41,18 @@ export async function POST(request: NextRequest) {
   try {
     const result = await db.runTransaction(async (tx) => {
       const previous = await tx.get(ref);
+      const suppressionRef = account.email ? db.collection("communicationSuppressions").doc(communicationAddressKey("email", account.email)) : null;
+      const suppression = suppressionRef ? await tx.get(suppressionRef) : null;
       const version = previous.get("version") ?? 0;
       if (version !== body.expectedVersion) throw new Error("conflict");
       const preferences: CommunicationPreferences = { userId: String(context.user.id), version: version + 1,
         email: body.email as boolean, sms: body.sms as boolean, marketingConsent: body.marketingConsent as boolean,
+        locale: typeof body.locale === "string" ? body.locale : "en-US",
         phone: body.sms ? account.phoneNumber ?? null : null, timeZone: body.timeZone as string,
         consentTextVersion: COMMUNICATION_CONSENT_VERSION, updatedAt: new Date().toISOString() };
+      if (body.email && body.marketingConsent && suppressionRef && suppression?.get("source") === "email-unsubscribe") {
+        tx.set(suppressionRef, { suppressed: false, source: "explicit-preference", occurredAt: preferences.updatedAt }, { merge: true });
+      }
       tx.set(ref, preferences);
       tx.create(db.collection("communicationConsentEvents").doc(randomUUID()), { userId: preferences.userId, version: preferences.version,
         email: preferences.email, sms: preferences.sms, marketingConsent: preferences.marketingConsent, consentTextVersion: COMMUNICATION_CONSENT_VERSION, occurredAt: preferences.updatedAt });

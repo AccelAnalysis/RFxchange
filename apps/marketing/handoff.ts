@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { exchangeOrigin } from "@/src/application/platform/exchange-origin";
-import { MARKETING_CAMPAIGN_COOKIE, marketingCampaignReference, marketingReturnPath } from "@/src/application/acquisition/marketing-entry";
+import { MARKETING_LAST_CAMPAIGN_COOKIE, MARKETING_CAMPAIGN_COOKIE, marketingCampaignReference, marketingReturnPath } from "@/src/application/acquisition/marketing-entry";
 import { isLocale, localeCookieName } from "@/src/i18n/config";
 
 export function handoffToExchange(request: NextRequest, intent: "join" | "signin" | "founding") {
@@ -10,6 +10,8 @@ export function handoffToExchange(request: NextRequest, intent: "join" | "signin
   target.searchParams.set("intent", intent);
   const campaign = marketingCampaignReference(request.cookies.get(MARKETING_CAMPAIGN_COOKIE)?.value)
     ?? marketingCampaignReference(request.nextUrl.searchParams.get("utm_campaign"));
+  const lastCampaign = marketingCampaignReference(request.nextUrl.searchParams.get("utm_campaign")) ?? marketingCampaignReference(request.cookies.get(MARKETING_LAST_CAMPAIGN_COOKIE)?.value) ?? campaign;
+  if (lastCampaign) target.searchParams.set("lastCampaign", lastCampaign);
   if (campaign) target.searchParams.set("campaign", campaign);
   const locale = request.cookies.get(localeCookieName)?.value;
   if (isLocale(locale)) target.searchParams.set("locale", locale);
