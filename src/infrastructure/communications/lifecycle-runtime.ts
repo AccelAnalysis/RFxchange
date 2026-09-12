@@ -8,6 +8,7 @@ import { lifecycleContent } from "../../application/communications/lifecycle-con
 import { getServerFirebaseAuth } from "../auth/firebase-server.ts";
 import { MicrosoftGraphTransactionalEmailProvider, microsoftGraphTransactionalEmailConfigurationFromEnvironment } from "./microsoft-graph-transactional-email.ts";
 import { SmsProviderError, TelnyxSmsProvider } from "./telnyx-sms.ts";
+import { createEmailUnsubscribeUrl } from "./unsubscribe.ts";
 import { communicationAddressKey } from "./address-key.ts";
 
 const iso = (value: unknown): string => typeof value === "string" ? value : value && typeof value === "object" && "toDate" in value && typeof value.toDate === "function" ? value.toDate().toISOString() : "";
@@ -81,8 +82,9 @@ export async function dispatchLifecycleCommunications(db: Firestore, dependencie
       const key = createHash("sha256").update(`${userId}:${journey}:${state.lastActivityAt}`).digest("hex");
       const jobRef = db.collection("lifecycleCommunicationJobs").doc(key);
       const suppressionRef = db.collection("communicationSuppressions").doc(communicationAddressKey(channel, address));
+      const holdRef = db.collection("communicationSupportHolds").doc(userId);
       const reserved = await db.runTransaction(async (tx) => {
-        const [job, freshPrefs, suppression, freshEnrollment, freshConfig] = await tx.getAll(jobRef, prefRef, suppressionRef, enrollment.ref, configuration.ref);
+        const [job, freshPrefs, suppression, freshEnrollment, freshConfig, hold] = await tx.getAll(jobRef, prefRef, suppressionRef, enrollment.ref, configuration.ref, holdRef);
         const retry = job.exists && job.get("status") === "retryable-failure" && Number(job.get("attemptCount")) < 3;
         if (job.exists && !retry) {
           if (job.get("status") === "sending" && now - Date.parse(job.get("updatedAt")) > 300_000) tx.update(jobRef, { status: "needs-reconciliation", reason: "worker-interrupted", updatedAt: new Date(now).toISOString() });
@@ -91,7 +93,7 @@ export async function dispatchLifecycleCommunications(db: Firestore, dependencie
         }
         const currentPolicy = freshConfig.exists ? validateLifecyclePolicy(freshConfig.get("policy")) : DEFAULT_LIFECYCLE_POLICY;
         const decision = communicationSendDecision({ preferences: freshPrefs.exists ? freshPrefs.data() as CommunicationPreferences : null, policy: currentPolicy, state, journey, channel,
-          suppressed: suppression.get("suppressed") === true, lastSentAt: retry ? null : freshEnrollment.get("lastSentAt") ?? null, now });
+          suppressed: suppression.get("suppressed") === true || hold.get("held") === true, lastSentAt: retry ? null : freshEnrollment.get("lastSentAt") ?? null, now });
         if (decision) { tx.update(enrollment.ref, { nextEvaluationAt: decision === "quiet-hours" ? new Date(now + 3_600_000).toISOString() : nextEvaluationAt, status: "waiting", reason: decision }); return false; }
         tx.set(jobRef, { id: key, attemptCount: retry ? Number(job.get("attemptCount")) + 1 : 1, userId, organizationId: state.organizationId, journey, channel, purpose: "marketing", templateKey: `${journey}.v1`,
           status: "sending", addressKey: suppressionRef.id, createdAt: job.get("createdAt") ?? new Date(now).toISOString(), updatedAt: new Date(now).toISOString(), providerReference: null });
@@ -99,26 +101,32 @@ export async function dispatchLifecycleCommunications(db: Firestore, dependencie
         return true;
       });
       if (!reserved) continue;
+      let providerInvoked = false;
       try {
         // Recheck revocation and journey movement immediately before touching the provider.
         const fresh = await currentLifecycleState(db, userId, dependencies.auth);
-        const [freshPrefs, suppression, freshConfig] = await db.getAll(prefRef, suppressionRef, configuration.ref);
+        const [freshPrefs, suppression, freshConfig, hold] = await db.getAll(prefRef, suppressionRef, configuration.ref, holdRef);
         const finalDecision = communicationSendDecision({ preferences: freshPrefs.exists ? freshPrefs.data() as CommunicationPreferences : null,
           policy: freshConfig.exists ? validateLifecyclePolicy(freshConfig.get("policy")) : DEFAULT_LIFECYCLE_POLICY,
-          state: fresh.state, journey, channel, suppressed: suppression.get("suppressed") === true, lastSentAt: null, now: clock() });
+          state: fresh.state, journey, channel, suppressed: suppression.get("suppressed") === true || hold.get("held") === true, lastSentAt: null, now: clock() });
         if (finalDecision || (channel === "email" ? fresh.email : fresh.phone) !== address || (channel === "sms" && freshPrefs.get("phone") !== address)) {
           await jobRef.update({ status: "suppressed", reason: finalDecision ?? "address-changed", updatedAt: new Date().toISOString() }); continue;
         }
-        const content = lifecycleContent(journey, env.RFXCHANGE_EXCHANGE_ORIGIN ?? "");
+        const origin = env.RFXCHANGE_EXCHANGE_ORIGIN ?? "";
+        const unsubscribeUrl = channel === "email" ? await createEmailUnsubscribeUrl(db, { userId, addressKey: suppressionRef.id, origin, now: clock() }) : undefined;
+        const content = lifecycleContent(journey, origin, { locale: freshPrefs.get("locale"), unsubscribeUrl });
         const request = createTransactionalEmailRequest({ id: key, purpose: "marketing", recipientEmail: email,
           eventKey: `lifecycle.${journey}`, templateKey: `lifecycle.${journey}.v1`, correlationId: randomUUID(), idempotencyKey: key, requestedAt: new Date(clock()).toISOString(), userId, organizationId: state.organizationId });
         let receipt: { providerKey: string; externalReference: string | null };
         if (dependencies.deliver) {
+          providerInvoked = true;
           receipt = await dependencies.deliver({ channel, address, content, request });
         } else if (channel === "sms") {
+          providerInvoked = true;
           receipt = await new TelnyxSmsProvider({ apiKey: env.TELNYX_API_KEY ?? "", from: env.TELNYX_FROM_NUMBER ?? "", messagingProfileId: env.TELNYX_MESSAGING_PROFILE_ID ?? "" }).send(address, content.sms);
         } else {
           // Purpose/consent are enforced above; reuse the one existing Microsoft transport.
+          providerInvoked = true;
           receipt = await new MicrosoftGraphTransactionalEmailProvider(microsoftGraphTransactionalEmailConfigurationFromEnvironment(env), { async render() { return content; } }).deliver(request);
         }
         await db.runTransaction(async (tx) => {
@@ -128,10 +136,10 @@ export async function dispatchLifecycleCommunications(db: Firestore, dependencie
         });
       } catch (error) {
         const classified = error instanceof SmsProviderError || error instanceof TransactionalEmailProviderError;
-        const ambiguous = !classified || (error instanceof SmsProviderError ? error.outcome === "unknown" : error.deliveryOutcome === "unknown");
+        const ambiguous = providerInvoked && (!classified || (error instanceof SmsProviderError ? error.outcome === "unknown" : error.deliveryOutcome === "unknown"));
         const attempts = Number((await jobRef.get()).get("attemptCount"));
         const retryable = classified && !ambiguous && error.retryable && attempts < 3;
-        await jobRef.update({ status: ambiguous ? "needs-reconciliation" : retryable ? "retryable-failure" : "failed", reason: ambiguous ? "delivery-outcome-unknown" : error.code, updatedAt: new Date().toISOString() });
+        await jobRef.update({ status: ambiguous ? "needs-reconciliation" : retryable ? "retryable-failure" : "failed", reason: ambiguous ? "delivery-outcome-unknown" : classified ? error.code : "preparation-failed", updatedAt: new Date().toISOString() });
         if (retryable) await enrollment.ref.update({ nextEvaluationAt: new Date(clock() + 3_600_000).toISOString() });
       }
       processed++;

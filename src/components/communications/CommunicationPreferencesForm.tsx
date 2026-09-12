@@ -8,7 +8,7 @@ import { SMS_PROGRAM } from "../../content/sms";
 import { SmsConsentDisclosure } from "./SmsConsentDisclosure";
 
 export function CommunicationPreferencesForm() {
-  const { dictionary } = useI18n();
+  const { dictionary, locale } = useI18n();
   const { common, preferences: copy } = dictionary.interface.services;
   const [preferences, setPreferences] = useState<CommunicationPreferences | null>(null);
   const [smsAvailable, setSmsAvailable] = useState(false);
@@ -38,7 +38,7 @@ export function CommunicationPreferencesForm() {
       event.preventDefault(); if (!preferences) return;
       setBusy(true); setStatus("");
       try {
-        const response = await fetch("/api/communications/preferences", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...preferences, expectedVersion: preferences.version }) });
+        const response = await fetch("/api/communications/preferences", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...preferences, locale, expectedVersion: preferences.version }) });
         const body = await response.json();
         if (!response.ok) throw new Error(response.status === 409 ? common.conflict : response.status === 401 || response.status === 403 ? common.denied : common.saveError);
         setPreferences(body.preferences); setStatus(copy.saved);

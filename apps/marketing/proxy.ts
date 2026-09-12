@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MARKETING_CAMPAIGN_COOKIE, marketingCampaignReference } from "@/src/application/acquisition/marketing-entry";
+import { MARKETING_LAST_CAMPAIGN_COOKIE, MARKETING_CAMPAIGN_COOKIE, marketingCampaignReference } from "@/src/application/acquisition/marketing-entry";
 import { applicationOrigins } from "@/src/application/platform/application-origins";
 
 import { isLocale, localeCookieName, localeCookieMaxAge } from "@/src/i18n/config";
@@ -22,6 +22,10 @@ export function proxy(request: NextRequest) {
     response.cookies.set(MARKETING_CAMPAIGN_COOKIE, campaign, {
       httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 30 * 86400,
     });
+  }
+  if (campaign) {
+    response.cookies.set(MARKETING_LAST_CAMPAIGN_COOKIE, campaign, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 30 * 86400 });
+    response.headers.set("Cache-Control", "private, no-store");
   }
   return response;
 }

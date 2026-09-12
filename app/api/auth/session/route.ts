@@ -1,3 +1,4 @@
+import { recordMarketingAttribution } from "@/src/infrastructure/acquisition/marketing-attribution";
 import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -8,7 +9,7 @@ import {
   type AcquisitionContextToken,
 } from "@/src/application/acquisition/acquisition-context";
 import { parseOpaqueOpportunityCandidate } from "@/src/application/acquisition/opaque-opportunity-candidate";
-import { MARKETING_CAMPAIGN_COOKIE, marketingCampaignReference } from "@/src/application/acquisition/marketing-entry";
+import { MARKETING_LAST_CAMPAIGN_COOKIE, MARKETING_CAMPAIGN_COOKIE, marketingCampaignReference } from "@/src/application/acquisition/marketing-entry";
 import { accessJourneyId } from "@/src/domain/lifecycle/model";
 import {
   AcquisitionContextBindingError,
@@ -139,6 +140,11 @@ export async function POST(request: NextRequest) {
     const acquisitionCookie = request.cookies.get(RFXCHANGE_ACQUISITION_COOKIE_NAME)?.value;
     const marketingCampaign = marketingCampaignReference(request.cookies.get(MARKETING_CAMPAIGN_COOKIE)?.value);
 
+    try {
+      await recordMarketingAttribution(getServerFirestore(), String(issued.context.user.id), marketingCampaign ?? undefined,
+        request.cookies.get(MARKETING_LAST_CAMPAIGN_COOKIE)?.value, new Date().toISOString());
+    } catch { console.warn("marketing-attribution-unavailable"); }
+
     if (acquisitionCookie && canBootstrapActivation) {
       const persistentToken = parseAcquisitionContextToken(acquisitionCookie);
       const candidate = parseOpaqueOpportunityCandidate(acquisitionCookie);
@@ -232,6 +238,7 @@ export async function POST(request: NextRequest) {
       });
     }
     if (marketingCampaign && (acquisitionAttached || existingContext?.acquisitionContext)) {
+      response.cookies.set(MARKETING_LAST_CAMPAIGN_COOKIE, "", { ...acquisitionCookieOptions(), maxAge: 0 });
       response.cookies.set(MARKETING_CAMPAIGN_COOKIE, "", { ...acquisitionCookieOptions(), maxAge: 0 });
     }
     return timing.apply(response);

@@ -110,4 +110,4 @@ export {
 export { marketReadyFoundingCommerceWebhook } from "./market-ready-founding-commerce-functions.js";
 
 export { organizationPublicEnrichment } from "./public-enrichment-functions.js";
-export { lifecycleEnrollmentFromAccount, lifecycleEnrollmentFromActivation, lifecycleActivityFromRfx, lifecycleActivityFromReferral, scheduledLifecycleCommunications } from "./lifecycle-functions.js";
+export { lifecycleEnrollmentFromAccount, lifecycleEnrollmentFromActivation, lifecycleActivityFromRfx, lifecycleActivityFromReferral, lifecycleActivityFromProfile, lifecycleActivityFromResource, scheduledLifecycleCommunications } from "./lifecycle-functions.js";
