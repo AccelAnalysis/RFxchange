@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CURRENT_PLATFORM_POLICY_VERSION } from "../../domain/legal/model";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ActivationJourneyState, ActivationJourneyStep } from "../../application/onboarding/activation-journey";
@@ -470,12 +471,12 @@ export function ActivationJourneyClient({
             <h2>Accept the participation policies.</h2>
             <p>Review the current published policies before continuing.</p>
             <div className={styles.checkList}>
-              <label><input type="checkbox" checked={legalChecks.terms} onChange={(event) => setLegalChecks((value) => ({ ...value, terms: event.target.checked }))} /><span>I accept the current RFxchange <Link className={styles.policyLink} href="/terms" target="_blank" rel="noreferrer">Terms of Service</Link>.</span></label>
+              <label><input type="checkbox" checked={legalChecks.terms} onChange={(event) => setLegalChecks((value) => ({ ...value, terms: event.target.checked }))} /><span>I accept the current RFxchange <Link className={styles.policyLink} href="/terms" target="_blank" rel="noreferrer">Terms of Service</Link>, including binding arbitration and limits on liability, subject to applicable law.</span></label>
               <label><input type="checkbox" checked={legalChecks.rules} onChange={(event) => setLegalChecks((value) => ({ ...value, rules: event.target.checked }))} /><span>I agree to the <Link className={styles.policyLink} href="/platform-rules" target="_blank" rel="noreferrer">Platform Rules / conduct requirements</Link>.</span></label>
               <label><input type="checkbox" checked={legalChecks.privacy} onChange={(event) => setLegalChecks((value) => ({ ...value, privacy: event.target.checked }))} /><span>I acknowledge the <Link className={styles.policyLink} href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</Link>.</span></label>
             </div>
             <button className={styles.primary} disabled={busy || !legalChecks.terms || !legalChecks.rules || !legalChecks.privacy} onClick={() => run(async () => {
-              const result = await postAction<{ state: ActivationJourneyState }>("accept-legal");
+              const result = await postAction<{ state: ActivationJourneyState }>("accept-legal", { policyVersion: CURRENT_PLATFORM_POLICY_VERSION });
               applyState(result.state);
             })}>Continue</button>
           </section>

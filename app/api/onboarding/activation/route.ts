@@ -7,6 +7,7 @@ import {
 } from "@/src/application/onboarding/activation-journey";
 import { OrganizationResolutionError } from "@/src/application/organization-resolution/organization-resolution";
 import { isCurrentActivationLegalAcceptance } from "@/src/domain/onboarding/model";
+import { CURRENT_PLATFORM_POLICY_VERSION } from "@/src/domain/legal/model";
 import {
   RFXCHANGE_SESSION_COOKIE_NAME,
 } from "@/src/infrastructure/auth/firebase-server-session";
@@ -192,6 +193,9 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case "accept-legal": {
+        if (body.policyVersion !== CURRENT_PLATFORM_POLICY_VERSION) {
+          return timing.apply(apiProblem(request, { status: 409, participantMessage: "The policies have changed. Refresh and review the current terms before accepting.", code: "policy-version-changed" }));
+        }
         const sessionCookie = request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
         const access = await timing.measure(
           "legal-access",

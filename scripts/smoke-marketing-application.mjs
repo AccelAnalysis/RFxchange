@@ -48,9 +48,23 @@ try {
       assert.doesNotMatch(visibleText(html), /\$\s*49|49\s*\$/);
     }
   }
-  for (const route of ["/help", "/how-it-works", "/businesses", "/buyers", "/resource-providers", "/about", "/terms", "/privacy", "/platform-rules", "/accessibility", "/image-credits"]) {
+  for (const route of ["/sms", "/policies/2026-07-31/terms", "/policies/2026-07-31/privacy", "/policies/2026-07-31/platform-rules", "/help", "/how-it-works", "/businesses", "/buyers", "/resource-providers", "/about", "/terms", "/privacy", "/platform-rules", "/accessibility", "/image-credits"]) {
     assert.equal((await fetch(marketing + route)).status, 200, route);
   }
+  const smsPage = await (await fetch(marketing + "/sms")).text();
+  assert.match(visibleText(smsPage), /not a condition of purchase/);
+  assert.match(smsPage, /account\/communications/);
+  assert.match(smsPage, /Reply STOP/);
+  assert.match(smsPage, /\/terms/);
+  assert.match(smsPage, /\/privacy/);
+  assert.doesNotMatch(smsPage, /<input[^>]+checked/);
+  assert.equal((await fetch(marketing + "/policies/2026-07-31/nonexistent")).status, 404);
+  const currentTerms = visibleText(await (await fetch(marketing + "/terms")).text());
+  const oldTerms = visibleText(await (await fetch(marketing + "/policies/2026-07-31/terms")).text());
+  assert.match(currentTerms, /2026\.09\.12/);
+  assert.match(currentTerms, /binding arbitration/i);
+  assert.match(oldTerms, /2026\.07\.31/);
+  assert.doesNotMatch(oldTerms, /binding arbitration/i);
   const landing = await fetch(marketing + "/?utm_campaign=regional-launch");
   assert.match(landing.headers.get("set-cookie"), /rfx_marketing_campaign=regional-launch/);
   assert.doesNotMatch(landing.headers.get("set-cookie"), /Domain=/i);
