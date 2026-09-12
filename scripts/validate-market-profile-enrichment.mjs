@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
-const [model, service, repository, runtime, route, page, panel, styles, discovery, workspace, rules, schema, tests, smoke, slice, copy] = await Promise.all([
+const [model, service, repository, runtime, route, page, panel, styles, discovery, workspace, rules, schema, tests, smoke, slice, copy, taskSheet] = await Promise.all([
   read("src/domain/market-profile/model.ts"), read("src/application/market-profile/market-profile.ts"),
   read("src/infrastructure/firestore/market-profile.ts"), read("src/infrastructure/market-profile/runtime.ts"),
   read("app/api/organization-market-profile/route.ts"), read("app/organization-profile/page.tsx"),
@@ -10,7 +10,7 @@ const [model, service, repository, runtime, route, page, panel, styles, discover
   read("src/application/network-discovery/network-discovery.ts"), read("src/components/participant/ExistingWorkspaceFoundation.tsx"),
   read("firestore.rules"), read("src/infrastructure/firestore/schema.ts"), read("test/market-profile-enrichment.test.mjs"),
   read("scripts/smoke-market-profile-enrichment-emulator.mjs"), read("docs/slices/SLICE_3_3_MARKET_PROFILE_ENRICHMENT.md"),
-  read("src/i18n/messages/market-profile/en-US.json"),
+  read("src/i18n/messages/market-profile/en-US.json"), read("src/components/account/ProfileTaskSheet.tsx"),
 ]);
 
 for (const id of ["ORG-013", "ORG-014", "ORG-016", "ORG-017"]) assert.match(slice, new RegExp(id));
@@ -40,6 +40,13 @@ assert.match(route, /resolveParticipantRoute/);
 assert.match(route, /requestedOrganizationId/);
 assert.match(page, /loadAuthorizedMarketProfile/);
 assert.match(page, /MarketProfilePanel/);
+assert.match(page, /OrganizationProfilePortal/);
+assert.match(page, /ProfileTaskSheet/);
+assert.match(page, /portal\.manageCapabilities/);
+assert.match(page, /portal\.editIndustry/);
+assert.match(page, /portal\.addExperience/);
+assert.match(page, /portal\.editPreferences/);
+assert.match(taskSheet, /showModal\(\)/);
 assert.match(panel, /marketProfile\.catalog\.title/);
 assert.match(panel, /marketProfile\.assistance\.saveEdit/);
 assert.match(panel, /disposition\(envelope, "edited"/);
@@ -48,14 +55,16 @@ assert.match(panel, /aria-pressed/);
 assert.match(panel, /marketProfile\.catalog\.resultCount/);
 assert.match(panel, /marketProfile\.industry\.selectorTitle/);
 assert.doesNotMatch(panel, /name="naicsTitle"|name="naicsVersion"/);
-assert.match(copy, /Browse Domain → Family → Capability/);
+assert.match(copy, /"title": "Browse capabilities"/);
 assert.match(copy, /Search all 615 capabilities/);
-assert.match(copy, /None of these describe it/);
-assert.match(copy, /Organization-provided capability/);
-assert.match(copy, /Verification, RFx qualification, and credibility are separate/);
-assert.match(copy, /Assistance is unavailable/);
+assert.match(copy, /None of these fit/);
+assert.match(copy, /"boundaryTitle": "Profile capability"/);
+assert.match(copy, /Saving adds this capability to your organization profile/);
+assert.match(copy, /Suggestions are unavailable/);
 assert.match(copy, /Save capability/);
-assert.match(copy, /not independently verified/i);
+assert.doesNotMatch(copy, /Browse Domain → Family → Capability/);
+assert.doesNotMatch(copy, /Verification, RFx qualification, and credibility are separate/);
+assert.doesNotMatch(copy, /not independently verified/i);
 assert.doesNotMatch(copy, /Organization-claimed information|Save organization claim|authoritative write|governed NAICS/i);
 assert.match(styles, /@media \(max-width: 520px\)/);
 assert.match(styles, /prefers-reduced-motion/);
@@ -75,4 +84,4 @@ assert.match(tests, /wrong organization/);
 assert.match(tests, /viewer without profile-management permission/);
 assert.match(smoke, /permission-denied/);
 assert.match(smoke, /idempotency/);
-console.log("Slice 3.3 Market Profile Enrichment architecture validated with customer-language capability confirmation boundaries.");
+console.log("Slice 3.3 Market Profile Enrichment validated with focused capability tasks and simplified participant language while preserving domain truth.");
