@@ -25,6 +25,9 @@ env:
   - variable: TELNYX_FROM_NUMBER
     value: "+18337391819"
     availability: [ RUNTIME ]
+  - variable: TELNYX_API_KEY
+    secret: TELNYX_API_KEY@1
+    availability: [ RUNTIME ]
   - variable: RFXCHANGE_AI_INTERPRETATION_ENABLED
     value: "false"
     availability: [ BUILD, RUNTIME ]
