@@ -1,0 +1,22 @@
+.portal { display: grid; gap: 24px; }
+.tabScroller { overflow-x: auto; scrollbar-width: thin; }
+.tabs { min-width: max-content; display: flex; gap: 4px; border-bottom: 1px solid var(--semantic-border-subtle); }
+.tabs button {
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--semantic-text-secondary);
+  background: transparent;
+  cursor: pointer;
+  font: 650 0.9rem/1.25 var(--type-interface-family);
+}
+.tabs button[aria-selected="true"] { color: var(--semantic-text-primary); border-bottom-color: var(--semantic-action-selected-background); }
+.tabs button:focus-visible { outline: 2px solid white; box-shadow: 0 0 0 5px var(--semantic-border-focus); border-radius: 8px 8px 0 0; }
+.panel { min-width: 0; outline: none; }
+.panel[hidden] { display: none; }
+.panel:focus-visible { outline: none; }
+@media (max-width: 760px) {
+  .portal { gap: 18px; }
+  .tabs button { min-height: 46px; padding-inline: 12px; }
+}
