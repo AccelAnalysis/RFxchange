@@ -24,6 +24,7 @@ import {
 } from "../../application/participant/participant-spatial-context";
 import { ExchangeLensIcon } from "./ExchangeLensIcon";
 
+import { useWideExchangeLayout } from "./useWideExchangeLayout";
 import styles from "./MobileExchangePrimitives.module.css";
 
 const SNAP_INDEX = Object.freeze({ peek: 0, partial: 1, expanded: 2 } as const);
@@ -62,7 +63,8 @@ function nextSnapPoint(
 export function ExchangeBottomSheet({
   labelledBy,
   labels,
-  snapPoint,
+  snapPoint: requestedSnapPoint,
+  desktopPanel = false,
   summary,
   actionRail,
   children,
@@ -73,6 +75,7 @@ export function ExchangeBottomSheet({
   labelledBy: string;
   labels: ExchangeSheetLabels;
   snapPoint: ParticipantSheetSnapPoint;
+  desktopPanel?: boolean;
   summary: ReactNode;
   actionRail: ReactNode;
   children: ReactNode;
@@ -80,6 +83,8 @@ export function ExchangeBottomSheet({
   onSnapPointChange(next: ParticipantSheetSnapPoint): void;
   onScrollPositionChange?(scrollTop: number): void;
 }>) {
+  const wideLayout = useWideExchangeLayout();
+  const snapPoint = desktopPanel && wideLayout ? "expanded" : requestedSnapPoint;
   const contentRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<Readonly<{
     pointerId: number;
@@ -149,6 +154,8 @@ export function ExchangeBottomSheet({
   return (
     <aside
       className={styles.sheet}
+      data-desktop-panel={desktopPanel || undefined}
+      data-has-action-rail={Boolean(actionRail)}
       data-mobile-exchange-sheet
       data-snap-point={snapPoint}
       data-dragging={dragging ? "true" : undefined}
@@ -183,7 +190,7 @@ export function ExchangeBottomSheet({
           ))}
         </div>
       </div>
-      <div className={styles.actionRailSlot}>{actionRail}</div>
+      {actionRail ? <div className={styles.actionRailSlot}>{actionRail}</div> : null}
       <div
         ref={contentRef}
         className={styles.sheetContent}
@@ -361,6 +368,7 @@ export function ExchangeResultCard({
   return (
     <article
       className={styles.card}
+      data-presentation="row"
       data-exchange-result-card
       data-selection-key={card.identity.selectionKey}
       data-lens={card.lens}
@@ -380,6 +388,7 @@ export function ExchangeResultCard({
       <button
         type="button"
         className={styles.cardOpen}
+        data-card-open
         aria-label={`${labels.openDetail}: ${card.title}`}
         onFocus={onSelect}
         onPointerEnter={onSelect}

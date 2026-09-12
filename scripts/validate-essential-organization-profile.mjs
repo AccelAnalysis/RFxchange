@@ -141,10 +141,10 @@ for (const required of [
   "resolveParticipantRoute",
   "hydrateEssentialOrganizationProfile",
   "getByOrganizationId",
-  "Profile Complete",
-  "Opportunity participation",
-  "Resource Provider status",
-  "capability.category",
+  "account.minimumProfile",
+  "account.capabilities",
+  "account.applyProvider",
+  "projectOrganizationCapabilityClaim",
 ]) {
   assert.ok(route.includes(required), `Authenticated Account profile route is missing ${required}.`);
 }

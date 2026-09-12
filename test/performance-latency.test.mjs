@@ -98,19 +98,18 @@ test("account marker status remains authoritative even when map projection is un
   assert.doesNotMatch(profilePage, /mapProjection \? "Active" : "Not active"/);
 });
 
-test("client transitions avoid full browser reloads and activation entry is immediately available", async () => {
+test("participant transitions avoid full browser reloads and activation entry is immediately available", async () => {
   const paths = [
     "src/components/auth/SignInClient.tsx",
-    "src/components/auth/SignOutButton.tsx",
     "src/components/first-value/FirstValueChoiceClient.tsx",
     "src/components/onboarding/SpatialActivationExperience.tsx",
   ];
   const sources = await Promise.all(paths.map(source));
   for (const [index, value] of sources.entries()) {
-    assert.doesNotMatch(value, /window\.location\.assign/, `${paths[index]} must use Next.js navigation.`);
+    assert.doesNotMatch(value, /window\.location\.(?:assign|replace)/, `${paths[index]} must use Next.js navigation.`);
   }
 
-  const spatial = sources[3];
+  const spatial = sources[2];
   assert.match(spatial, /router\.prefetch\(workspaceUrl\)/);
   assert.match(spatial, /router\.replace\(workspaceUrl\)/);
   assert.match(spatial, /reducedMotion \? 50 : 900/);
@@ -135,4 +134,10 @@ test("critical server paths expose named latency measurements", async () => {
   }
   assert.match(spatialModel, /"map-model"/);
   assert.match(participantMap, /"map-model"/);
+});
+
+test("sign out clears participant context and requests session invalidation before the public-app handoff", async () => {
+  const signOut = await source("src/components/auth/SignOutButton.tsx");
+  assert.match(signOut, /clearParticipantIntelligenceContext\(\);[\s\S]*clearParticipantSpatialContexts\(\);[\s\S]*await fetch\("\/api\/auth\/session", \{ method: "DELETE" \}\)[\s\S]*window\.location\.replace\("\/"\)/);
+  assert.doesNotMatch(signOut, /router\.replace/);
 });

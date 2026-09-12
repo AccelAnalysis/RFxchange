@@ -353,8 +353,9 @@ for (const requirement of [
 assert.ok(
   geographyRoute.includes("organizationId={authenticated.mapProjection.organizationId}") &&
     geographyRoute.includes("loadAuthorizedNetworkDiscovery") &&
-    existingWorkspace.includes("networkWorkspace.home.scopeBody"),
-  "B6a/Slice 3.2 must receive server-authorized organization identity, add bounded Network discovery, and preserve truthful localized scope messaging.",
+    existingWorkspace.includes("projectExchangeRoomActions") &&
+    existingWorkspace.includes("networkWorkspace.status.permission.body"),
+  "B6a/Slice 3.2 must receive server-authorized organization identity, add bounded Network discovery, and preserve server-projected actions and localized restricted-access messaging.",
 );
 assert.equal(
   geographyRoute.includes("map remains usable as a preview"),

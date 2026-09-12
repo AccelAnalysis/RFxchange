@@ -168,7 +168,7 @@ export function ExchangeRoomActionController({
   actions,
   onNetworkFocus,
   onActionIntent,
-  placement = "workspace",
+  placement = "sheet",
 }: Readonly<{
   activeLens: ParticipantLensId;
   actions: readonly ExchangeRoomActionProjection[];

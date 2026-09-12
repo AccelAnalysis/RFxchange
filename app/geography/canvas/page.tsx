@@ -195,6 +195,7 @@ export default async function GeographyCanvasPage({
         discovery={authorizedDiscovery.available ? authorizedDiscovery.projection : null}
         discoveryUnavailableReason={authorizedDiscovery.available ? null : authorizedDiscovery.reason}
         focusedOrganization={focusedOrganization}
+        showFocusedOrganizationDetail={firstSearchParam(params.view) !== "results"}
         serviceAreaOptions={authorizedDiscovery.available ? authorizedDiscovery.serviceAreaOptions : []}
         officialResourceProviderOrganizationIds={officialResourceProviderOrganizationIds}
         operationalActionsAvailable={authenticated.access.state.lifecycleState === "open-platform"}

@@ -54,6 +54,15 @@
   --semantic-action-selected-background: var(--brand-rf-gold);
   --semantic-action-selected-foreground: var(--brand-exchange-black);
   --semantic-action-link: var(--brand-signal-blue);
+  --semantic-action-primary-hover: #c99324;
+  --semantic-action-primary-pressed: #b9831d;
+  --semantic-text-link: var(--semantic-action-link);
+  --semantic-text-on-emphasis: var(--semantic-text-inverse);
+  --semantic-accent-gold-accessible: var(--brand-accessible-dark-gold);
+  --semantic-border-control: var(--semantic-border-strong);
+  --semantic-radius-control: var(--radius-control);
+  --semantic-surface-selected: var(--semantic-surface-connection);
+  --semantic-status-danger: #b42318;
   --semantic-focus-ring-color: var(--brand-signal-blue);
 
   --semantic-state-information: var(--brand-signal-blue);

@@ -4,7 +4,12 @@ import { loadPublishedPublicHelp } from "@/src/infrastructure/communications/pub
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 import { PUBLIC_HELP_ARTICLES } from "@/src/application/support/public-help";
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Help | RFxchange", description: "Answers about joining RFxchange and using the Exchange." };
+import { getMarketingDictionary } from "@/apps/marketing/dictionary";
+export async function generateMetadata() {
+  const { dictionary } = await getMarketingDictionary();
+  const copy = dictionary.interface.services.help;
+  return { title: copy.nav, description: copy.intro };
+}
 export default async function Page() {
   let articles = PUBLIC_HELP_ARTICLES;
   try { articles = await loadPublishedPublicHelp(getServerFirestore()); }

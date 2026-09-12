@@ -4,7 +4,7 @@
 
 The authorized in-place modernization supersedes the ivory/black palette and older lens descriptions below. Runtime tokens retain compatibility names while resolving to Canvas Cloud, Surface White/Mist, Exchange Slate and restrained RF Gold. The mounted map, sliding results sheet and persistent **RFx | Resources | Intelligence | Capabilities | Menu** navigation remain canonical. Lens identity uses labels, icons and selection, not competing colors. The older design and brand-gate documents preserve provenance; v2 governs current visual primitives.
 
-This directory defines the currently implemented and converged visual system for RFxchange product interfaces, map experiences and presentations. It normalizes the current brand/presentation provenance together with map-first UI decisions and the completed Wave 2 implementation.
+This directory records the implemented visual foundation and the target rules for RFxchange product interfaces, map experiences and presentations. Adoption of v2 tokens and the three-app cutover do not certify every screen or the full SAD runtime. See [SAD + Design v2 conformance closeout](SAD_DESIGN_V2_CONFORMANCE_CLOSEOUT.md) for the current interface candidate, acceptance still required, and separate service backlog.
 
 Brand Gate B0 adds `docs/brand/` as the approved target Brand Experience System. The two directories have different responsibilities:
 

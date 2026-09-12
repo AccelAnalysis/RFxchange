@@ -23,7 +23,7 @@
 .body dl > div { display: grid; gap: 3px; }
 .body dt { font-size: 0.72rem; font-weight: 820; }
 .body dd { margin: 0; color: var(--muted-ink); font-size: 0.84rem; line-height: 1.48; }
-.body button { margin-top: 14px; min-height: 40px; padding: 8px 12px; border: 1px solid rgba(37, 41, 50, 0.18); border-radius: 10px; background: #fffdf8; color: inherit; font-weight: 720; }
+.body button { margin-top: 14px; min-height: 40px; padding: 8px 12px; border: 1px solid rgba(37, 41, 50, 0.18); border-radius: 10px; background: var(--semantic-canvas-elevated); color: inherit; font-weight: 720; }
 .body p { color: var(--muted-ink); font-size: 0.78rem; }
 
 @media (min-width: 760px) {

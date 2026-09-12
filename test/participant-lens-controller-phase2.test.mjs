@@ -44,11 +44,11 @@ test("lens changes preserve the map, camera and selected organization substrate"
   assert.match(workspace, /selectedOrganizationId: selectedOrganizationQueryId/);
 });
 
-test("the four-action projection has desktop and sheet placements over the same active-lens state", () => {
+test("one four-action projection follows the selected record into the edge panel or sheet", () => {
   const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
   const controllerMatches = workspace.match(/<ExchangeRoomActionController/g) ?? [];
-  assert.equal(controllerMatches.length, 2);
-  assert.match(workspace, /placement="workspace"/);
+  assert.equal(controllerMatches.length, 1);
+  assert.doesNotMatch(workspace, /placement="workspace"/);
   assert.match(workspace, /placement="sheet"/);
   assert.match(workspace, /actions=\{exchangeRoomActions\}/g);
   assert.match(workspace, /onClick=\{\(\) => \{[\s\S]*panelOpen: false/);
@@ -69,7 +69,7 @@ test("390px uses four permanent lenses plus Menu in the persistent bottom naviga
   assert.match(navigationStyles, /@media \(max-width: 390px\)/);
   assert.doesNotMatch(controllerStyles, /\[data-participant-navigation\]/);
   assert.doesNotMatch(controller, /stopPropagation/);
-  assert.match(controllerStyles, /@media \(max-width: 760px\)[\s\S]*?action-rail-placement="sheet"[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
+  assert.match(controllerStyles, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
 });
 
 test("disabled Phase 2 actions are non-actionable without visible status prose", () => {
@@ -79,7 +79,7 @@ test("disabled Phase 2 actions are non-actionable without visible status prose",
   assert.match(controller, /<button[^>]*className=\{styles\.disabledAction\}[^>]*\bdisabled\b[^>]*data-action-state="disabled"[^>]*>/s);
   assert.match(controller, /data-disabled-reason=\{reason\}/);
   assert.doesNotMatch(controller, /Coming soon|Unavailable|In development|Not yet available/i);
-  assert.match(styles, /border-style: dashed/);
+  assert.match(styles, /opacity: 1/);
   assert.match(styles, /cursor: not-allowed/);
 });
 

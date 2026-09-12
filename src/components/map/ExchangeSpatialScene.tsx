@@ -37,6 +37,8 @@ import {
   readMapRotationPreference,
 } from "./map-motion-preference";
 
+import { workspaceMapPadding } from "./workspaceMapPadding";
+import { useI18n } from "../i18n/I18nProvider";
 import styles from "./ExchangeSpatialScene.module.css";
 
 export type ExchangeSpatialSceneMode = "regional" | "locality" | "organization";
@@ -95,6 +97,7 @@ export interface ExchangeSpatialSceneProps {
   readonly interactive?: boolean;
   readonly activationOverlay?: boolean;
   readonly workspaceOverlay?: "left" | "right" | null;
+  readonly adaptiveWorkspace?: boolean;
   readonly showSearch?: boolean;
   readonly tutorialOverlay?: SyntheticOrientationMapOverlay | null;
   readonly continuousMotion?: ExchangeContinuousMotion | null;
@@ -119,12 +122,14 @@ type MapBasemapPreset = Readonly<{
   lightPreset: "day";
   theme: "faded" | "default";
   showTransitLabels: boolean;
+  showRoadLabels: boolean;
+  showPlaceLabels: boolean;
   showPointOfInterestLabels: boolean;
 }>;
 
 export const MAP_BASEMAP_PRESETS: readonly MapBasemapPreset[] = Object.freeze([
-  Object.freeze({ id: "exchange", label: "Exchange", lightPreset: "day", theme: "faded", showTransitLabels: false, showPointOfInterestLabels: true }),
-  Object.freeze({ id: "street", label: "Street", lightPreset: "day", theme: "default", showTransitLabels: true, showPointOfInterestLabels: true }),
+  Object.freeze({ id: "exchange", label: "Exchange", lightPreset: "day", theme: "faded", showTransitLabels: false, showRoadLabels: false, showPlaceLabels: false, showPointOfInterestLabels: false }),
+  Object.freeze({ id: "street", label: "Street", lightPreset: "day", theme: "default", showTransitLabels: true, showRoadLabels: true, showPlaceLabels: true, showPointOfInterestLabels: true }),
 ]);
 
 const LOCALITY_SOURCE_ID = "rfx-spatial-scene-locality";
@@ -574,18 +579,16 @@ function searchZoom(featureType: string): number {
   }
 }
 
-function cameraPadding(activationOverlay: boolean, workspaceOverlay: "left" | "right" | null) {
-  const overlay = workspaceOverlay ?? (activationOverlay ? "left" : null);
-  if (!overlay) {
-    return { top: 84, right: 36, bottom: 36, left: 36 };
-  }
-  if (typeof window !== "undefined" && window.matchMedia("(max-width: 760px)").matches) {
-    return { top: 72, right: 22, bottom: Math.min(window.innerHeight * 0.58, 520), left: 22 };
-  }
-  const panelSpace = Math.min(window.innerWidth * 0.48, 620);
-  return overlay === "left"
-    ? { top: 88, right: 72, bottom: 62, left: panelSpace }
-    : { top: 88, right: panelSpace, bottom: 62, left: 72 };
+function cameraPadding(
+  activationOverlay: boolean,
+  workspaceOverlay: "left" | "right" | null,
+  adaptiveWorkspace = false,
+) {
+  return workspaceMapPadding(
+    workspaceOverlay ?? (activationOverlay ? "left" : null),
+    { width: typeof window === "undefined" ? 1280 : window.innerWidth, height: typeof window === "undefined" ? 800 : window.innerHeight },
+    adaptiveWorkspace,
+  );
 }
 
 function renderedMapPadding(map: mapboxgl.Map) {
@@ -618,11 +621,13 @@ export function ExchangeSpatialScene({
   interactive = false,
   activationOverlay = false,
   workspaceOverlay = null,
+  adaptiveWorkspace = false,
   showSearch = interactive,
   tutorialOverlay = null,
   continuousMotion = null,
   className,
 }: ExchangeSpatialSceneProps) {
+  const { t } = useI18n();
   if (lensProjection && (organizationMarkers.length > 0 || opportunityMarkers.length > 0 || serviceFields.length > 0)) {
     throw new Error("A shared lens projection cannot be combined with legacy domain overlay props.");
   }
@@ -685,7 +690,8 @@ export function ExchangeSpatialScene({
   const activationOverlayRef = useRef(activationOverlay);
   const continuousMotionRef = useRef(continuousMotion);
   const workspaceOverlayRef = useRef(workspaceOverlay);
-  const appliedOverlayRef = useRef({ activationOverlay, workspaceOverlay });
+  const adaptiveWorkspaceRef = useRef(adaptiveWorkspace);
+  const appliedOverlayRef = useRef({ activationOverlay, workspaceOverlay, adaptiveWorkspace });
   const homeGeoJsonRef = useRef(localityGeoJson(model));
   const homeMaskGeoJsonRef = useRef(localityMaskGeoJson(model));
   const homeMarkerGeoJsonRef = useRef(markerGeoJson(sceneMarker));
@@ -784,6 +790,7 @@ export function ExchangeSpatialScene({
   activationOverlayRef.current = activationOverlay;
   continuousMotionRef.current = continuousMotion;
   workspaceOverlayRef.current = workspaceOverlay;
+  adaptiveWorkspaceRef.current = adaptiveWorkspace;
   homeGeoJsonRef.current = homeGeoJson;
   homeMaskGeoJsonRef.current = homeMaskGeoJson;
   homeMarkerGeoJsonRef.current = homeMarkerGeoJson;
@@ -821,7 +828,7 @@ export function ExchangeSpatialScene({
         return;
       }
       paddingRepairFrameRef.current = null;
-      const expectedPadding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current);
+      const expectedPadding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current, adaptiveWorkspaceRef.current);
       const actualPadding = renderedMapPadding(map);
       const paddingIsSettled = (["top", "right", "bottom", "left"] as const).every(
         (side) => Math.abs(actualPadding[side] - expectedPadding[side]) < 0.5,
@@ -899,7 +906,7 @@ export function ExchangeSpatialScene({
 
     stopOrbit();
     manuallyPausedRef.current = false;
-    const padding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current);
+    const padding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current, adaptiveWorkspaceRef.current);
     const activeMode = modeRef.current;
     const activeMarker = markerRef.current;
     setLocalityLayerVisibility(activeMode !== "regional");
@@ -964,7 +971,7 @@ export function ExchangeSpatialScene({
     pauseForInteraction();
     setLocalityLayerVisibility(true);
     map.fitBounds(localityBounds(modelRef.current), {
-      padding: cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current),
+      padding: cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current, adaptiveWorkspaceRef.current),
       pitch: map.getPitch(),
       bearing: map.getBearing(),
       maxZoom: 12.2,
@@ -992,6 +999,8 @@ export function ExchangeSpatialScene({
     map.setConfigProperty("basemap", "lightPreset", preset.lightPreset);
     map.setConfigProperty("basemap", "theme", preset.theme);
     map.setConfigProperty("basemap", "showTransitLabels", preset.showTransitLabels);
+    map.setConfigProperty("basemap", "showRoadLabels", preset.showRoadLabels);
+    map.setConfigProperty("basemap", "showPlaceLabels", preset.showPlaceLabels);
     map.setConfigProperty("basemap", "showPointOfInterestLabels", preset.showPointOfInterestLabels);
     setBasemapPreset(nextPreset);
   }, [pauseForInteraction]);
@@ -1109,7 +1118,9 @@ export function ExchangeSpatialScene({
         basemap: {
           lightPreset: "day",
           theme: "faded",
-          showPointOfInterestLabels: true,
+          showPointOfInterestLabels: false,
+          showRoadLabels: false,
+          showPlaceLabels: false,
           showTransitLabels: false,
           show3dObjects: true,
         },
@@ -1949,16 +1960,17 @@ export function ExchangeSpatialScene({
     if (
       previous.activationOverlay === activationOverlay
       && previous.workspaceOverlay === workspaceOverlay
+      && previous.adaptiveWorkspace === adaptiveWorkspace
     ) return;
-    appliedOverlayRef.current = { activationOverlay, workspaceOverlay };
-    map.jumpTo({ padding: cameraPadding(activationOverlay, workspaceOverlay) });
+    appliedOverlayRef.current = { activationOverlay, workspaceOverlay, adaptiveWorkspace };
+    map.jumpTo({ padding: cameraPadding(activationOverlay, workspaceOverlay, adaptiveWorkspace) });
     setSettledPadding(renderedMapPadding(map));
-  }, [activationOverlay, mapReady, workspaceOverlay]);
+  }, [activationOverlay, adaptiveWorkspace, mapReady, workspaceOverlay]);
 
   if (!token.startsWith("pk.")) {
     return (
       <div className={`${styles.tokenNotice} ${className ?? ""}`} role="status">
-        Mapbox public access token required for the spatial activation background.
+        {t("interface.map.unavailable")}
       </div>
     );
   }
@@ -1972,6 +1984,7 @@ export function ExchangeSpatialScene({
       data-scene={mode}
       data-interactive={interactive}
       data-workspace-overlay={workspaceOverlay ?? "none"}
+      data-adaptive-workspace={adaptiveWorkspace || undefined}
       data-map-view-mode={viewMode}
       data-map-basemap={basemapPreset}
       data-map-pitch={settledPitch.toFixed(2)}
@@ -2019,7 +2032,7 @@ export function ExchangeSpatialScene({
             <div className={styles.homeContext}>
               <span>Home locality</span>
               <strong>{model.selectedGeography.name}</strong>
-              <button type="button" onClick={fitHomeLocality}>Fit home</button>
+              <button type="button" onClick={fitHomeLocality}>{t("interface.map.fitHome")}</button>
             </div>
             {searchStatus === "error" ? (
               <p className={styles.searchMessage} role="status">
@@ -2052,7 +2065,9 @@ export function ExchangeSpatialScene({
             </p>
           </section> : null}
 
-          <div className={styles.viewModeControl} role="group" aria-label="Map view">
+          <details className={styles.mapOptions}>
+            <summary>{t("interface.map.options")}</summary>
+          <div className={styles.viewModeControl} role="group" aria-label={t("interface.map.options")}>
             {PARTICIPANT_MAP_VIEW_OPTIONS.map((option) => (
               <button
                 key={option.id}
@@ -2061,35 +2076,31 @@ export function ExchangeSpatialScene({
                 aria-pressed={viewMode === option.id}
                 onClick={() => selectViewMode(option.id)}
               >
-                {option.label}
+                {t(`interface.map.${option.id}`)}
               </button>
             ))}
             <span className={styles.controlDivider} aria-hidden="true" />
-            <span className={styles.basemapLabel}>Map</span>
+            <span className={styles.basemapLabel}>{t("interface.map.basemapLabel")}</span>
             {MAP_BASEMAP_PRESETS.map((preset) => (
               <button
                 key={preset.id}
                 type="button"
                 data-active={basemapPreset === preset.id}
                 aria-pressed={basemapPreset === preset.id}
-                aria-label={`Use ${preset.label} map appearance`}
                 onClick={() => selectBasemapPreset(preset.id)}
               >
-                {preset.label}
+                {t(`interface.map.${preset.id}`)}
               </button>
             ))}
-            <button type="button" onClick={fitHomeLocality}>Fit home</button>
+            <button type="button" onClick={fitHomeLocality}>{t("interface.map.fitHome")}</button>
           </div>
+          </details>
         </>
       ) : null}
 
       <figcaption className={styles.srOnly}>
-        Edge-to-edge RFxchange map. {continuousMotion
-          ? "This instructional or milestone scene may use a 225-second ambient orbit."
-          : "This daily workspace scene settles into a stable interactive camera."} Locality scenes use a
-        60-degree pitch and fit the authoritative locality bounds. Organization scenes use a
-        75-degree pitch at zoom 16 and preserve the persistent organization marker.
-        {tutorialOverlay ? ` ${tutorialOverlay.accessibleSummary} All tutorial entities are synthetic and are not live Exchange activity.` : ""}
+        {t("interface.map.description")}
+        {tutorialOverlay ? ` ${tutorialOverlay.accessibleSummary} ${t("interface.map.tutorialNotice")}` : ""}
       </figcaption>
     </figure>
   );

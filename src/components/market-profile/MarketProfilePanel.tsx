@@ -105,6 +105,7 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
   }, [deferredQuery, effectiveFamilyId, props.catalog.capabilities]);
   const visibleCapabilities = matchingCapabilities.slice(0, capabilityResultLimit);
   const [selectedCapabilityId, setSelectedCapabilityId] = useState("");
+  const [capabilityEntry, setCapabilityEntry] = useState<"catalog" | "assistance">("catalog");
   const selectedCapability = props.catalog.capabilities.find((capability) => capability.conceptId === selectedCapabilityId) ?? null;
   const [claimSource, setClaimSource] = useState<
     | Readonly<{ kind: "manual" }>
@@ -343,11 +344,10 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
     <section className={styles.workspace} aria-labelledby="market-profile-title">
       <header className={styles.header}>
         <div>
-          <p className={styles.eyebrow}>{t("marketProfile.header.eyebrow", { version: props.catalog.release.version })}</p>
-          <h2 id="market-profile-title">{t("marketProfile.header.title", { organizationName: props.organizationName })}</h2>
-          <p>{t("marketProfile.header.body")}</p>
+          <h2 id="market-profile-title">{t("interface.account.marketTitle")}</h2>
+          <p>{t("interface.account.marketBody")}</p>
         </div>
-        <StatusPill tone="information">{t(props.snapshot.claims.length === 1 ? "marketProfile.header.countOne" : "marketProfile.header.countMany", { count: new Intl.NumberFormat(locale).format(props.snapshot.claims.length) })}</StatusPill>
+        <span>{t(props.snapshot.claims.length === 1 ? "marketProfile.header.countOne" : "marketProfile.header.countMany", { count: new Intl.NumberFormat(locale).format(props.snapshot.claims.length) })}</span>
       </header>
 
       <nav className={styles.tabs} aria-label={t("marketProfile.tabs.label")}>
@@ -361,7 +361,16 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
 
       {tab === "capabilities" ? (
         <div className={styles.sectionGrid}>
-          <section className={styles.primarySection} aria-labelledby="describe-capability-title">
+          <section className={styles.fullWidthSection} aria-labelledby="confirmed-claims-title">
+            <h3 id="confirmed-claims-title">{t("marketProfile.confirmed.title")}</h3>
+            {props.snapshot.claims.length ? <ul className={styles.recordList}>{props.snapshot.claims.map((claim) => <li key={claim.id}><div><strong>{claim.labelSnapshot}</strong><span>{claim.domainLabelSnapshot} → {claim.familyLabelSnapshot}</span></div><span>{t(`marketProfile.common.${claim.visibility}`)}</span></li>)}</ul> : <p className={styles.help}>{t("marketProfile.confirmed.emptyBody")}</p>}
+          </section>
+
+          <div className={styles.entryChoice} role="group" aria-label={t("marketProfile.tabs.capabilities")}>
+            <button type="button" aria-pressed={capabilityEntry === "catalog"} onClick={() => setCapabilityEntry("catalog")}>{t("marketProfile.catalog.eyebrow")}</button>
+            <button type="button" aria-pressed={capabilityEntry === "assistance"} onClick={() => setCapabilityEntry("assistance")}>{t("marketProfile.assistance.title")}</button>
+          </div>
+          <section hidden={capabilityEntry !== "assistance"} className={styles.primarySection} aria-labelledby="describe-capability-title">
             <p className={styles.eyebrow}>{t("marketProfile.assistance.eyebrow")}</p>
             <h3 id="describe-capability-title">{t("marketProfile.assistance.title")}</h3>
             <label>{t("marketProfile.assistance.input")}
@@ -386,8 +395,7 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
             ) : null}
           </section>
 
-          <section className={styles.primarySection} aria-labelledby="manual-catalog-title">
-            <p className={styles.eyebrow}>{t("marketProfile.catalog.eyebrow")}</p>
+          <section hidden={capabilityEntry !== "catalog"} className={styles.primarySection} aria-labelledby="manual-catalog-title">
             <h3 id="manual-catalog-title">{t("marketProfile.catalog.title")}</h3>
             <label>{t("marketProfile.catalog.search")}
               <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setCapabilityResultLimit(GOVERNED_RESULT_INCREMENT); }} placeholder={t("marketProfile.catalog.placeholder")} />
@@ -422,10 +430,6 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
             </form>
           ) : null}
 
-          <section className={styles.fullWidthSection} aria-labelledby="confirmed-claims-title">
-            <h3 id="confirmed-claims-title">{t("marketProfile.confirmed.title")}</h3>
-            {props.snapshot.claims.length ? <ul className={styles.recordList}>{props.snapshot.claims.map((claim) => <li key={claim.id}><div><strong>{claim.labelSnapshot}</strong><span>{claim.domainLabelSnapshot} → {claim.familyLabelSnapshot}</span></div><div><StatusPill tone="connection">{t("marketProfile.common.organizationClaimed")}</StatusPill><StatusPill tone="neutral">{t(`marketProfile.common.${claim.visibility}`)}</StatusPill></div></li>)}</ul> : <StatePanel state="empty" title={t("marketProfile.confirmed.emptyTitle")}>{t("marketProfile.confirmed.emptyBody")}</StatePanel>}
-          </section>
 
           <form className={styles.fullWidthSection} onSubmit={saveProvisional}>
             <details><summary>{t("marketProfile.provisional.summary")}</summary><div className={styles.detailsBody}><p>{t("marketProfile.provisional.body")}</p><label>{t("marketProfile.provisional.term")}<input name="proposedLabel" required /></label><label>{t("marketProfile.provisional.definition")}<textarea name="proposedDefinition" minLength={20} required /></label><label>{t("marketProfile.provisional.example")}<textarea name="exampleWork" minLength={10} required /></label><label>{t("marketProfile.provisional.domain")}<select name="suggestedDomainId" defaultValue=""><option value="">{t("marketProfile.provisional.notSure")}</option>{props.catalog.domains.map((domain) => <option key={domain.domainId} value={domain.domainId}>{domain.preferredLabel}</option>)}</select></label><button className={styles.primaryButton} type="submit">{t("marketProfile.provisional.submit")}</button></div></details>

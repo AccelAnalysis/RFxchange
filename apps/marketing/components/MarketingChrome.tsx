@@ -79,9 +79,9 @@ export async function MarketingFooter() {
         <div className={styles.footerCol}>
           <h3>{dictionary.marketing.footer.bottomMatter}</h3>
           <Link href="/terms">{dictionary.marketing.footer.terms}</Link>
-          <Link href="/help">Help</Link>
+          <Link href="/help">{dictionary.interface.services.help.nav}</Link>
           <Link href="/privacy">{dictionary.marketing.footer.privacy}</Link>
-          <Link href="/sms">SMS updates</Link>
+          <Link href="/sms">{dictionary.interface.services.preferences.smsUpdates}</Link>
           <Link href="/platform-rules">{dictionary.marketing.footer.rules}</Link>
           <Link href="/accessibility">{dictionary.marketing.footer.accessibility}</Link>
         </div>

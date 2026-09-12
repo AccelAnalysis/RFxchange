@@ -223,5 +223,191 @@
         "warehouse": "A worker moving through a warehouse environment."
       }
     }
+  },
+  "interface": {
+    "map": {
+      "options": "Map options",
+      "unavailable": "The map is temporarily unavailable. You can still use the results and organization details.",
+      "fitHome": "Home locality",
+      "basemapLabel": "Map appearance",
+      "exchange": "Exchange",
+      "street": "Street",
+      "perspective": "Perspective",
+      "description": "RFxchange map showing your home locality and visible organizations.",
+      "tutorialNotice": "Illustration only. Tutorial entities do not represent live Exchange activity.",
+      "2d": "2D",
+      "3d": "3D"
+    },
+    "search": {
+      "filters": "Filters",
+      "apply": "Apply filters",
+      "empty": "No results. Try another search or adjust the filters."
+    },
+    "organization": {
+      "viewProfile": "View profile"
+    },
+    "account": {
+      "title": "Organization account",
+      "intro": "Manage how your organization appears in the Exchange.",
+      "identity": "Identity",
+      "capabilities": "AMACS capabilities",
+      "publicPresence": "Public presence & badges",
+      "enrichment": "Locations & profile details",
+      "settings": "Preferences & access",
+      "minimumProfile": "Minimum profile",
+      "ready": "Ready",
+      "incomplete": "Incomplete",
+      "mapVisibility": "Map visibility",
+      "visible": "Visible",
+      "inactive": "Not active",
+      "manageCapabilities": "Manage capabilities",
+      "reviewPublicPresence": "Review public presence",
+      "organizationType": "Organization type",
+      "notRecorded": "Not recorded",
+      "website": "Website",
+      "publicContact": "Public contact",
+      "confirmedCapabilities": "Confirmed capabilities",
+      "confirmedBody": "Capabilities you have chosen to share publicly. Network-only, private and suspended claims are not shown here.",
+      "badges": "Badges",
+      "badgesUnavailable": "Badge setup is not available yet. Profile readiness and map visibility do not award verification badges.",
+      "provider": "Resource Provider",
+      "applyProvider": "Apply for Resource Provider status",
+      "mapPreferences": "Map preferences",
+      "role": "Your role",
+      "homeLocality": "Home locality",
+      "locationVisibility": "Location visibility",
+      "marketTitle": "Capabilities and experience",
+      "marketBody": "Review your capabilities, industry, and past work.",
+      "publicCapabilitiesEmpty": "No capabilities are shared publicly yet."
+    },
+    "services": {
+      "common": {
+        "back": "Back to your organization",
+        "loading": "Loading…",
+        "saving": "Saving…",
+        "loadError": "This information could not be loaded. Please try again.",
+        "saveError": "Your changes could not be saved. Please try again.",
+        "conflict": "This information has changed. Reload the page before trying again.",
+        "denied": "Your current access does not allow this action."
+      },
+      "preferences": {
+        "title": "Communication preferences",
+        "intro": "Choose how RFxchange keeps in touch. You can turn these messages off at any time.",
+        "optional": "Optional updates",
+        "consent": "I agree to receive organization setup reminders, community updates and invitations to return to RFxchange.",
+        "email": "Email",
+        "sms": "Text messages",
+        "smsAvailable": "Texts go to your verified phone number. Reply STOP to opt out. Message and data rates may apply.",
+        "smsUnavailable": "Text messages require a verified phone number on your account.",
+        "timeZone": "Time zone",
+        "timing": "Optional updates are sent between 9 AM and 8 PM in your time zone, at most once a day. Security and essential service messages are managed separately.",
+        "save": "Save preferences",
+        "saved": "Your preferences are saved.",
+        "disclosuresChanged": "Our communication disclosures have changed. Review and save your choices to receive optional updates.",
+        "smsUpdates": "SMS updates"
+      },
+      "data": {
+        "title": "Public business data",
+        "intro": "Review what public sources report about your organization. Findings do not change your profile or establish verification.",
+        "reason": "Reason for the next check or review",
+        "uei": "UEI, if your organization has one",
+        "ueiHelp": "A UEI helps identify the correct government registration and award history.",
+        "check": "Check public sources",
+        "checking": "Checking…",
+        "checked": "Check complete. Review the source findings below.",
+        "empty": "No public-data checks yet.",
+        "runTitle": "Check from {date}",
+        "inProgress": "Check in progress",
+        "reviewed": "Reviewed",
+        "ready": "Ready to review",
+        "unavailable": "This source is unavailable. Your organization setup can continue.",
+        "noMatch": "No matching record found.",
+        "skipped": "Enter a UEI to check award history.",
+        "findings": "Source findings",
+        "source": "View source",
+        "conflicts": "Some findings differ from your organization information. Review the sources before changing your profile.",
+        "markReviewed": "Mark reviewed"
+      },
+      "help": {
+        "title": "How can we help?",
+        "nav": "Help",
+        "intro": "Find answers about joining RFxchange and using the Exchange.",
+        "question": "Your question",
+        "search": "Find an answer",
+        "readMore": "Read more",
+        "common": "Common questions",
+        "results": "Answers",
+        "empty": "I don’t have an answer to that in the help guide. Try a question about joining, access, capabilities or membership.",
+        "articles": {
+          "join": {
+            "title": "How do I join?",
+            "answer": "Start with Join Free. Create your account, find your organization, and follow the setup steps. If your organization is already listed, select it so you can establish access without creating a duplicate.",
+            "keywords": "join register signup start account"
+          },
+          "organization": {
+            "title": "My organization is already listed",
+            "answer": "Search for your organization during setup. Selecting a listing starts the access process; it does not automatically verify your organization. If someone already manages it, request access or ask them for an invitation.",
+            "keywords": "organization claim listed duplicate invitation"
+          },
+          "capabilities": {
+            "title": "What are capabilities?",
+            "answer": "Capabilities describe what your organization can provide. Choose the entries that fit your business and confirm any suggestions before they become part of your profile.",
+            "keywords": "capability capabilities amacs profile services"
+          },
+          "opportunities": {
+            "title": "How do I find opportunities?",
+            "answer": "After setup, use the RFx lens to explore available opportunities. Search and filter results, inspect the details, and use the actions available for that opportunity.",
+            "keywords": "rfx opportunity opportunities search respond"
+          },
+          "pricing": {
+            "title": "Where can I review membership options?",
+            "answer": "Review the membership page for the current offer and availability. Membership does not establish organization verification or guarantee a business outcome.",
+            "keywords": "price pricing cost membership billing subscription"
+          },
+          "privacy": {
+            "title": "Who can see my information?",
+            "answer": "Public information and private account information are handled separately. Review the privacy policy for details. This help assistant cannot look up accounts, private organization records, or billing information.",
+            "keywords": "privacy private data information security"
+          },
+          "signin": {
+            "title": "I need help signing in",
+            "answer": "Use Sign in to access your account. Use the password recovery option there if needed. This assistant cannot change your password or grant access to an organization.",
+            "keywords": "signin login password access locked"
+          }
+        }
+      },
+      "admin": {
+        "communications": "Communications",
+        "lifecycle": "Message schedules",
+        "lifecycleIntro": "Configure setup, retention and return messages. Every send requires current consent and channel availability.",
+        "manageHelp": "Manage public help answers",
+        "timing": "Journey timing",
+        "enable": "Enable journeys when sending is configured",
+        "setupDelayHours": "Setup reminder after (hours)",
+        "retentionDays": "Retention after inactivity (days)",
+        "winBackDays": "Return invitation after inactivity (days)",
+        "minimumIntervalHours": "Minimum interval between messages (hours)",
+        "reason": "Reason for change",
+        "save": "Save configuration",
+        "saved": "Configuration saved.",
+        "helpTitle": "Public help guide",
+        "helpIntro": "Publish approved public answers. Account records and private support cases are excluded.",
+        "answers": "Public answers",
+        "answerNumber": "Answer {number}",
+        "question": "Question",
+        "answer": "Answer",
+        "keywords": "Search keywords",
+        "remove": "Remove answer",
+        "add": "Add answer",
+        "publicationReason": "Reason for publication",
+        "confirmPublic": "These answers are approved for everyone to read and contain no private account or support information.",
+        "publish": "Publish public help",
+        "published": "Public help published.",
+        "system": "Integrations & system",
+        "enrichment": "Organization enrichment review",
+        "organizationId": "Organization ID",
+        "openReview": "Open review"
+      }
+    }
   }
 }

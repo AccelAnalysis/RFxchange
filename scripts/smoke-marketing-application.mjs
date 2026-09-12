@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const children = [];
@@ -40,12 +41,17 @@ try {
   assert.equal((await fetch(exchange + "/api/internal/lifecycle", { method: "POST", headers: { authorization: "Bearer untrusted" } })).status, 403, "Unconfigured/invalid worker credentials fail closed");
   assert.ok([401, 503].includes((await fetch(exchange + "/api/communications/telnyx", { method: "POST", body: "{}" })).status), "Unconfigured/unsigned SMS callbacks fail closed");
   for (const locale of ["en-US", "es", "fr", "it", "de"]) {
-    for (const route of ["/", "/membership", "/founding"]) {
+    for (const route of ["/", "/membership", "/founding", "/help"]) {
       const response = await fetch(marketing + route, { headers: { cookie: `rfx-locale=${locale}` } });
       assert.equal(response.status, 200, `${locale} ${route}`);
       const html = await response.text();
       assert.match(html, new RegExp(`<html lang="${locale}"`));
       assert.doesNotMatch(visibleText(html), /\$\s*49|49\s*\$/);
+      if (route === "/help") {
+        const copy = JSON.parse(readFileSync(path.join(root, "src/i18n/messages", `${locale}.json`), "utf8")).interface.services.help;
+        assert.ok(visibleText(html).includes(copy.title), `${locale} help title`);
+        assert.ok(visibleText(html).includes(copy.search), `${locale} help search action`);
+      }
     }
   }
   for (const route of ["/sms", "/policies/2026-07-31/terms", "/policies/2026-07-31/privacy", "/policies/2026-07-31/platform-rules", "/help", "/how-it-works", "/businesses", "/buyers", "/resource-providers", "/about", "/terms", "/privacy", "/platform-rules", "/accessibility", "/image-credits"]) {

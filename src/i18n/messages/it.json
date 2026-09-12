@@ -223,5 +223,191 @@
       "professional": "Un team di professionisti in conversazione.",
       "warehouse": "Una persona lavora in un magazzino."
     }
+  },
+  "interface": {
+    "map": {
+      "options": "Opzioni mappa",
+      "unavailable": "La mappa è temporaneamente non disponibile. Puoi consultare i risultati e i profili.",
+      "fitHome": "Località di origine",
+      "basemapLabel": "Aspetto della mappa",
+      "exchange": "Exchange",
+      "street": "Strade",
+      "perspective": "Prospettiva",
+      "description": "Mappa RFxchange con la tua località di origine e le organizzazioni visibili.",
+      "tutorialNotice": "Solo a scopo illustrativo. Le entità del tutorial non rappresentano attività reali di Exchange.",
+      "2d": "2D",
+      "3d": "3D"
+    },
+    "search": {
+      "filters": "Filtri",
+      "apply": "Applica filtri",
+      "empty": "Nessun risultato. Prova un’altra ricerca o modifica i filtri."
+    },
+    "organization": {
+      "viewProfile": "Visualizza profilo"
+    },
+    "account": {
+      "title": "Account organizzazione",
+      "intro": "Gestisci la presenza della tua organizzazione nell’Exchange.",
+      "identity": "Identità",
+      "capabilities": "Capacità AMACS",
+      "publicPresence": "Presenza pubblica e badge",
+      "enrichment": "Sedi e dettagli del profilo",
+      "settings": "Preferenze e accesso",
+      "minimumProfile": "Profilo minimo",
+      "ready": "Pronto",
+      "incomplete": "Incompleto",
+      "mapVisibility": "Visibilità sulla mappa",
+      "visible": "Visibile",
+      "inactive": "Non attivo",
+      "manageCapabilities": "Gestisci capacità",
+      "reviewPublicPresence": "Controlla presenza pubblica",
+      "organizationType": "Tipo di organizzazione",
+      "notRecorded": "Non registrato",
+      "website": "Sito web",
+      "publicContact": "Contatto pubblico",
+      "confirmedCapabilities": "Capacità confermate",
+      "confirmedBody": "Capacità che hai scelto di condividere pubblicamente. Le dichiarazioni private, sospese o riservate alla rete non sono mostrate qui.",
+      "badges": "Badge",
+      "badgesUnavailable": "La configurazione dei badge non è ancora disponibile. Il completamento del profilo e la visibilità sulla mappa non assegnano badge di verifica.",
+      "provider": "Fornitore di risorse",
+      "applyProvider": "Richiedi lo stato di fornitore di risorse",
+      "mapPreferences": "Preferenze mappa",
+      "role": "Il tuo ruolo",
+      "homeLocality": "Località di origine",
+      "locationVisibility": "Visibilità della sede",
+      "marketTitle": "Capacità ed esperienza",
+      "marketBody": "Controlla le tue capacità, il settore e i lavori precedenti.",
+      "publicCapabilitiesEmpty": "Nessuna capacità è ancora condivisa pubblicamente."
+    },
+    "services": {
+      "common": {
+        "back": "Torna alla tua organizzazione",
+        "loading": "Caricamento…",
+        "saving": "Salvataggio…",
+        "loadError": "Impossibile caricare queste informazioni. Riprova.",
+        "saveError": "Impossibile salvare le modifiche. Riprova.",
+        "conflict": "Queste informazioni sono cambiate. Ricarica la pagina prima di riprovare.",
+        "denied": "Il tuo accesso attuale non consente questa azione."
+      },
+      "preferences": {
+        "title": "Preferenze di comunicazione",
+        "intro": "Scegli come ricevere comunicazioni da RFxchange. Puoi disattivare questi messaggi in qualsiasi momento.",
+        "optional": "Aggiornamenti facoltativi",
+        "consent": "Acconsento a ricevere promemoria per configurare la mia organizzazione, notizie della comunità e inviti a tornare su RFxchange.",
+        "email": "Email",
+        "sms": "SMS",
+        "smsAvailable": "Gli SMS sono inviati al tuo numero verificato. Rispondi STOP per annullare l’iscrizione. Potrebbero essere applicati costi per messaggi e dati.",
+        "smsUnavailable": "Gli SMS richiedono un numero di telefono verificato nel tuo account.",
+        "timeZone": "Fuso orario",
+        "timing": "Gli aggiornamenti facoltativi vengono inviati tra le 9:00 e le 20:00 nel tuo fuso orario, al massimo una volta al giorno. I messaggi di sicurezza e di servizio essenziali sono gestiti separatamente.",
+        "save": "Salva preferenze",
+        "saved": "Le tue preferenze sono state salvate.",
+        "disclosuresChanged": "Le nostre informative sulle comunicazioni sono cambiate. Rivedi e salva le tue scelte per ricevere aggiornamenti facoltativi.",
+        "smsUpdates": "Aggiornamenti SMS"
+      },
+      "data": {
+        "title": "Dati aziendali pubblici",
+        "intro": "Esamina le informazioni pubbliche sulla tua organizzazione. I risultati non modificano il profilo né attestano una verifica.",
+        "reason": "Motivo della prossima ricerca o revisione",
+        "uei": "UEI, se la tua organizzazione ne ha uno",
+        "ueiHelp": "Un UEI aiuta a identificare la registrazione governativa e lo storico delle aggiudicazioni corretti.",
+        "check": "Consulta le fonti pubbliche",
+        "checking": "Ricerca…",
+        "checked": "Ricerca completata. Esamina i risultati qui sotto.",
+        "empty": "Nessuna ricerca di dati pubblici effettuata.",
+        "runTitle": "Ricerca del {date}",
+        "inProgress": "Ricerca in corso",
+        "reviewed": "Esaminato",
+        "ready": "Da esaminare",
+        "unavailable": "Questa fonte non è disponibile. Puoi continuare a configurare la tua organizzazione.",
+        "noMatch": "Nessun record corrispondente trovato.",
+        "skipped": "Inserisci un UEI per consultare lo storico delle aggiudicazioni.",
+        "findings": "Risultati della fonte",
+        "source": "Visualizza fonte",
+        "conflicts": "Alcuni risultati differiscono dai dati della tua organizzazione. Consulta le fonti prima di modificare il profilo.",
+        "markReviewed": "Segna come esaminato"
+      },
+      "help": {
+        "title": "Come possiamo aiutarti?",
+        "nav": "Aiuto",
+        "intro": "Trova risposte sull’iscrizione a RFxchange e sull’uso dell’Exchange.",
+        "question": "La tua domanda",
+        "search": "Trova una risposta",
+        "readMore": "Scopri di più",
+        "common": "Domande frequenti",
+        "results": "Risposte",
+        "empty": "La guida non contiene una risposta a questa domanda. Prova a chiedere dell’iscrizione, dell’accesso, delle capacità o dell’abbonamento.",
+        "articles": {
+          "join": {
+            "title": "Come mi iscrivo?",
+            "answer": "Seleziona Iscriviti gratis. Crea il tuo account, cerca la tua organizzazione e segui i passaggi di configurazione. Se è già presente, selezionala per ottenere accesso senza creare un duplicato.",
+            "keywords": "iscrivo iscrizione registrazione iniziare account"
+          },
+          "organization": {
+            "title": "La mia organizzazione è già presente",
+            "answer": "Cerca la tua organizzazione durante la configurazione. Selezionare una voce avvia la procedura di accesso; non verifica automaticamente l’organizzazione. Se qualcuno la gestisce già, richiedi accesso o un invito.",
+            "keywords": "organizzazione azienda presente duplicato invito"
+          },
+          "capabilities": {
+            "title": "Che cosa sono le capacità?",
+            "answer": "Le capacità descrivono ciò che la tua organizzazione può fornire. Scegli le voci adatte alla tua attività e conferma i suggerimenti prima che entrino a far parte del profilo.",
+            "keywords": "capacità competenze amacs profilo servizi"
+          },
+          "opportunities": {
+            "title": "Come trovo le opportunità?",
+            "answer": "Dopo la configurazione, usa la vista RFx per esplorare le opportunità disponibili. Cerca e filtra i risultati, esamina i dettagli e usa le azioni disponibili per ciascuna opportunità.",
+            "keywords": "rfx opportunità ricerca cercare rispondere"
+          },
+          "pricing": {
+            "title": "Dove consulto le opzioni di abbonamento?",
+            "answer": "Consulta la pagina degli abbonamenti per conoscere l’offerta e la disponibilità attuali. L’abbonamento non attesta la verifica dell’organizzazione né garantisce risultati commerciali.",
+            "keywords": "prezzo prezzi costo abbonamento fatturazione iscrizioni"
+          },
+          "privacy": {
+            "title": "Chi può vedere le mie informazioni?",
+            "answer": "Le informazioni pubbliche e i dati privati dell’account sono gestiti separatamente. Consulta l’informativa sulla privacy. Questo assistente non può consultare account, dati privati delle organizzazioni o informazioni di fatturazione.",
+            "keywords": "privacy privato dati informazioni sicurezza"
+          },
+          "signin": {
+            "title": "Ho bisogno di aiuto per accedere",
+            "answer": "Seleziona Accedi per entrare nel tuo account. Se necessario, usa l’opzione di recupero della password. Questo assistente non può cambiare la password né concedere accesso a un’organizzazione.",
+            "keywords": "accesso accedere password bloccato entrare"
+          }
+        }
+      },
+      "admin": {
+        "communications": "Comunicazioni",
+        "lifecycle": "Percorsi di comunicazione",
+        "lifecycleIntro": "Configura i messaggi di avvio, fidelizzazione e ritorno. Ogni invio richiede consenso valido e un canale disponibile.",
+        "manageHelp": "Gestisci le risposte dell’aiuto pubblico",
+        "timing": "Tempistiche dei percorsi",
+        "enable": "Attiva i percorsi quando l’invio è configurato",
+        "setupDelayHours": "Promemoria di configurazione dopo (ore)",
+        "retentionDays": "Fidelizzazione dopo inattività (giorni)",
+        "winBackDays": "Invito a tornare dopo inattività (giorni)",
+        "minimumIntervalHours": "Intervallo minimo tra i messaggi (ore)",
+        "reason": "Motivo della modifica",
+        "save": "Salva configurazione",
+        "saved": "Configurazione salvata.",
+        "helpTitle": "Guida di aiuto pubblico",
+        "helpIntro": "Pubblica risposte pubbliche approvate. I dati degli account e i casi di assistenza privati sono esclusi.",
+        "answers": "Risposte pubbliche",
+        "answerNumber": "Risposta {number}",
+        "question": "Domanda",
+        "answer": "Risposta",
+        "keywords": "Parole chiave di ricerca",
+        "remove": "Rimuovi risposta",
+        "add": "Aggiungi risposta",
+        "publicationReason": "Motivo della pubblicazione",
+        "confirmPublic": "Queste risposte sono approvate per la lettura pubblica e non contengono informazioni private di account o assistenza.",
+        "publish": "Pubblica l’aiuto pubblico",
+        "published": "Aiuto pubblico pubblicato.",
+        "system": "Integrazioni e sistema",
+        "enrichment": "Revisione dei dati dell’organizzazione",
+        "organizationId": "ID organizzazione",
+        "openReview": "Apri revisione"
+      }
+    }
   }
 }

@@ -10,8 +10,9 @@ export const PUBLIC_HELP_ARTICLES: readonly PublicHelpArticle[] = [
 ];
 /** Closed public knowledge corpus. Questions never reach a private data store or general model. */
 export function findPublicHelp(question: string, articles: readonly PublicHelpArticle[] = PUBLIC_HELP_ARTICLES): readonly PublicHelpArticle[] {
-  const terms = question.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean).slice(0, 50);
-  return articles.map(article => ({ article, score: article.keywords.filter(word => terms.includes(word)).length }))
+  const normalize = (value: string) => value.toLowerCase().normalize("NFKD").replace(/\p{M}/gu, "");
+  const terms = normalize(question).replace(/[^\p{L}\p{N}\s]/gu, " ").split(/\s+/).filter(Boolean).slice(0, 50);
+  return articles.map(article => ({ article, score: article.keywords.filter(word => terms.includes(normalize(word))).length }))
     .filter(item => item.score > 0).sort((a, b) => b.score - a.score || a.article.id.localeCompare(b.article.id)).slice(0, 3).map(item => item.article);
 }
 
@@ -29,7 +30,7 @@ export function validatePublicHelpArticles(input: unknown): PublicHelpArticle[] 
       if (typeof article[field] !== "string" || !article[field].trim() || article[field].length > limit) throw new Error("An article needs a short title and a public answer.");
     }
     if (!PUBLIC_HELP_PATHS.includes(article.path as typeof PUBLIC_HELP_PATHS[number])) throw new Error("Choose a known public destination.");
-    if (!Array.isArray(article.keywords) || !article.keywords.length || article.keywords.length > 30 || article.keywords.some(word => typeof word !== "string" || !/^[a-z0-9-]{1,40}$/.test(word))) throw new Error("Use up to thirty simple search keywords.");
+    if (!Array.isArray(article.keywords) || !article.keywords.length || article.keywords.length > 30 || article.keywords.some(word => typeof word !== "string" || !/^[\p{L}\p{N}-]{1,40}$/u.test(word))) throw new Error("Use up to thirty simple search keywords.");
     return { id: article.id, title: (article.title as string).trim(), answer: (article.answer as string).trim(), path: article.path as string, keywords: [...new Set(article.keywords as string[])] };
   });
 }

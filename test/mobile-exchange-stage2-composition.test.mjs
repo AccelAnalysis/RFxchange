@@ -33,14 +33,14 @@ test("MOB-02 keeps the mobile Exchange map-first with floating search, dynamic v
     read(paths.shellCss),
   ]);
   assert.match(workspace, /<ExchangeSpatialScene/);
-  assert.match(workspace, /className=\{styles\.mobileSearchOverlay\}/);
-  assert.match(workspaceCss, /\.mobileSearchOverlay\s*\{[\s\S]*position: fixed/);
+  assert.match(workspace, /className=\{styles\.exchangeSearch\}/);
+  assert.match(workspaceCss, /\.exchangeSearch\s*\{[\s\S]*position: fixed/);
   assert.match(workspaceCss, /env\(safe-area-inset-top/);
   assert.match(shellCss, /100svh/);
   assert.match(shellCss, /100dvh/);
   assert.match(shellCss, /env\(safe-area-inset-bottom/);
-  assert.match(workspace, /desktopSearchOverlay/);
-  assert.match(workspace, /desktopDetailSheet/);
+  assert.equal((workspace.match(/role="search"/g) ?? []).length, 1);
+  assert.match(workspace, /desktopPanel/);
   assert.match(workspace, /networkWorkspace\.match\.disclaimer/);
 });
 
@@ -103,7 +103,7 @@ test("MOB-05 renders the existing 16-action projection as four stable sheet posi
   assert.match(controller, /data-authorized/);
   assert.match(controller, /data-disabled-reason/);
   assert.match(controller, /disabled/);
-  assert.match(css, /data-action-rail-placement="sheet"/);
+  assert.match(css, /position: static/);
   assert.match(css, /grid-template-columns: repeat\(4/);
 });
 
@@ -125,7 +125,8 @@ test("shared cards, media, favorites, detail, and marker selection converge on o
   assert.match(i18nProvider, /mobileExchangeRecordActionLabel\(locale, key\)/);
   assert.match(workspace, /focusedMarkerId=\{selectedObjectId\}/);
   assert.match(workspace, /data-mobile-result-stream/);
-  assert.match(workspace, /onOrganizationMarkerSelect=\{\(markerId\) => selectObject\(markerId\)\}/);
+  assert.match(workspace, /onOrganizationMarkerSelect=\{\(markerId\) => \{\s*selectObject\(markerId\);/);
+  assert.match(workspace, /onOrganizationMarkerSelect=\{\(markerId\) => \{\s*selectObject\(markerId\);\s*setMobileDetailOpen\(true\);/);
   assert.match(workspace, /onSelect=\{\(\) => selectObject\(organization\.marker\.id, index\)\}/);
   assert.match(workspace, /cardRefs\.current\.get\(selectedObjectId\)/);
   assert.match(workspace, /setMobileDetailOpen\(true\)/);

@@ -62,24 +62,22 @@ test("permission refresh cannot reactivate a non-operational privileged action",
   assert.match(registry, /id: "capabilities\.evidence-refer"[^\n]*operational: false[^\n]*handler: null/);
 });
 
-test("desktop and mobile share the same four-action projection without coupling it to detail visibility", () => {
+test("desktop edge panel and responsive sheet use one contextual action projection", () => {
   const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
   const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
-  assert.equal((workspace.match(/<ExchangeRoomActionController/g) ?? []).length, 2);
-  assert.match(workspace, /placement="workspace"/);
+  assert.equal((workspace.match(/<ExchangeRoomActionController/g) ?? []).length, 1);
+  assert.doesNotMatch(workspace, /placement="workspace"/);
   assert.match(workspace, /placement="sheet"/);
   assert.match(workspace, /onClick=\{\(\) => \{/);
   assert.match(workspace, /panelOpen: false/);
-  assert.match(styles, /\.actionGrid \{[\s\S]*?position: absolute;[\s\S]*?z-index: 40;/);
+  assert.match(styles, /\.actionGrid \{[\s\S]*?position: static;/);
+  assert.match(workspace, /actionRail=\{contextualActions\}/);
 });
 
-test("action rail reserves tablet clearance and stays four-position inside the Stage 2 sheet", () => {
+test("action rail stays in document flow with four accessible positions", () => {
   const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
-  assert.match(
-    styles,
-    /@media \(max-width: 1024px\) and \(min-width: 761px\) \{[\s\S]*?data-ui-sheet[\s\S]*?padding-bottom: calc\(116px \+ env\(safe-area-inset-bottom, 0px\)\);[\s\S]*?scroll-padding-bottom: calc\(116px \+ env\(safe-area-inset-bottom, 0px\)\);/,
-  );
-  assert.match(styles, /@media \(max-width: 760px\) \{[\s\S]*?action-rail-placement="sheet"[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/);
+  assert.match(styles, /position: static/);
+  assert.match(styles, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
 });
 
 test("ordinary mobile lens selection is in-place through the persistent bottom navigation", () => {

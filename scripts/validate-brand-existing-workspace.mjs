@@ -53,8 +53,9 @@ assert.ok(
 for (const requirement of [
   "ExistingWorkspaceFoundation",
   "ExchangeSpatialScene",
-  'workspaceOverlay={panelOpen ? "right" : "left"}',
-  "ResponsiveEdgeSheet",
+  'workspaceOverlay="right"',
+  "ExchangeBottomSheet",
+  "desktopPanel",
   "authorizedObjectIds",
 ]) {
   assert.ok(component.includes(requirement), `Brand B6a workspace implementation is missing ${requirement}.`);
@@ -114,7 +115,7 @@ assert.equal(
 );
 assert.ok(
   styles.includes("focus-visible") &&
-    styles.includes("@media (max-width: 760px)") &&
+    styles.includes("@media (max-width: 1024px)") &&
     styles.includes("@media (prefers-reduced-motion: reduce)") &&
     styles.includes("@media (prefers-reduced-transparency: reduce)"),
   "Brand B6a must preserve keyboard, mobile, reduced-motion and reduced-transparency behavior.",

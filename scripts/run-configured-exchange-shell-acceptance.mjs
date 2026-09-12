@@ -5,7 +5,7 @@ import { readFile, rm, writeFile } from "node:fs/promises";
 
 // Phase 4 activates current RFxchange destinations and the mobile Menu. Keep the historical
 // configured-browser harness intact, but adapt only assertions that still encode the prior
-// unavailable-Capabilities / desktop-Account-on-mobile contract. Every other browser,
+// unavailable-Capabilities / desktop-Account-on-mobile contract, initial detail layout and expired fixture dates. Every other browser,
 // accessibility, transition, authorization, Firebase, RFx, and build-identity check still runs.
 const sourceUrl = new URL("./acceptance-exchange-shell-emulator.mjs", import.meta.url);
 const adaptedUrl = new URL("./.phase4-acceptance-exchange-shell-emulator.mjs", import.meta.url);
@@ -66,6 +66,71 @@ replaceOnce(
   "configured acceptance route chain",
   '    routeChain: ["Intelligence", "Opportunities/RFx", "Resources", "Capabilities (unavailable)", "Referrals (Menu)", "Intelligence", "Account", "Quick Start"],',
   '    routeChain: ["Intelligence", "Opportunities/RFx", "Resources", "Capabilities", "Referrals (Menu)", "Intelligence", "Account", "Quick Start"],',
+);
+
+// The v2 edge panel initially shows results. Exercise a real selected record before
+// asserting detail-close behavior, preserving the same close, lens and authority checks.
+replaceOnce(
+  "open a selected record before detail-close acceptance",
+  '  if (!exchangeRoomReopenEvidenceCaptured) {\n    assert.equal(before.panelOpen, true, "Phase 2 detail surface was not open before reopen acceptance.");',
+  `  if (!exchangeRoomReopenEvidenceCaptured) {
+    const adaptiveResults = await evaluate(cdp, \`Boolean(document.querySelector('[data-desktop-panel="true"]'))\`);
+    if (adaptiveResults) {
+      const opened = await evaluate(cdp, \`(() => {
+        const record = document.querySelector('[data-card-open]');
+        if (!record) return false;
+        record.click();
+        return true;
+      })()\`);
+      assert.equal(opened, true, "Adaptive results did not expose an authorized record to open.");
+      await waitForExpression(cdp, 'Boolean(document.querySelector("#organization-detail-panel"))', "selected record detail before close acceptance");
+    }
+    assert.equal(before.panelOpen, true, "Phase 2 detail surface was not open before reopen acceptance.");`,
+);
+
+// The close test deliberately selects an external organization. Subsequent URL
+// continuity must preserve that subject while the signed-in actor remains unchanged.
+replaceOnce(
+  "capture the selected subject before a utility exit",
+  '    observations.push(await clickLens(cdp, "resources", "/resources", { candidate: true, latencyMs: 450 }));',
+  '    observations.push(await clickLens(cdp, "resources", "/resources", { candidate: true, latencyMs: 450 }));\n    const selectedSubjectBeforeUtilityExit = (await exchangeRoomLensSnapshot(cdp)).selection?.organizationId ?? organizationId;',
+);
+replaceOnce(
+  "preserve the selected subject on the Intelligence return URL",
+  '`?query=shell-acceptance&selectedOrganization=${organizationId}`,\n      "Returning to Intelligence discarded safe URL-derived map/query context."',
+  '`?query=shell-acceptance&selectedOrganization=${selectedSubjectBeforeUtilityExit}`,\n      "Returning to Intelligence discarded safe URL-derived map/query context."',
+);
+replaceOnce(
+  "retain the selected subject during an in-content route exit",
+  '`/geography/canvas?query=shell-in-content&selectedOrganization=${organizationId}`;',
+  '`/geography/canvas?query=shell-in-content&selectedOrganization=${selectedSubjectBeforeUtilityExit}`;',
+);
+
+// Observe Exchange storage before sign-out crosses into the separate Marketing origin.
+replaceOnce(
+  "clear Exchange context before the sign-out handoff",
+  "    await evaluate(cdp, `document.querySelector('[role=\"menu\"] button[role=\"menuitem\"]')?.click()`);\n    await waitForExpression(cdp, `location.pathname === \"/\"`, \"signed-out public entry\");",
+  "    const clearedExchangeContext = await evaluate(cdp, `(() => {\n      document.querySelector('[role=\"menu\"] button[role=\"menuitem\"]')?.click();\n      return {\n        intelligence: sessionStorage.getItem(${JSON.stringify(PARTICIPANT_INTELLIGENCE_CONTEXT_STORAGE_KEY)}),\n        spatial: Object.keys(sessionStorage).filter((key) => key.startsWith(${JSON.stringify(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)})),\n        referralIntent: sessionStorage.getItem(${JSON.stringify(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY)}),\n      };\n    })()`);\n    assert.deepEqual(clearedExchangeContext, { intelligence: null, spatial: [], referralIntent: null }, \"Sign out retained participant context on the Exchange origin before the public-app handoff.\");\n    await waitForExpression(cdp, `location.pathname === \"/\"`, \"signed-out public entry\");",
+);
+
+// Publication correctly rejects past response deadlines. Keep the live-clock fixture
+// in the future instead of letting the historical August 2026 dates expire.
+replaceOnce(
+  "future RFx package timing",
+  "      set('[data-rfx-start-date]', '2026-09-01');\n      set('[data-rfx-completion-date]', '2026-12-01');\n      set('[data-rfx-response-deadline]', '2026-08-28');",
+  "      const futureDate = (days) => new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);\n      set('[data-rfx-start-date]', futureDate(21));\n      set('[data-rfx-completion-date]', futureDate(112));\n      set('[data-rfx-response-deadline]', futureDate(14));",
+);
+replaceOnce(
+  "report RFx readiness failure before preview timeout",
+  '    await waitForExpression(cdp, `Boolean(document.querySelector(\'[data-rfx-preview-digest]\'))`, "RFx responder preview");',
+  `    const initialReadiness = await waitForExpression(cdp, \`(() => {
+      if (document.querySelector('[data-rfx-preview-digest]')) return { kind: 'preview' };
+      const error = document.querySelector('[data-rfx-publication="draft"] [role="alert"]');
+      if (error) return { kind: 'error', text: error.textContent };
+      const blocked = document.querySelector('[data-readiness-status="blocked"]');
+      return blocked ? { kind: 'blocked', text: blocked.textContent } : null;
+    })()\`, "RFx responder preview or explicit readiness failure");
+    assert.equal(initialReadiness.kind, 'preview', 'RFx preview readiness failed: ' + JSON.stringify(initialReadiness));`,
 );
 
 await writeFile(adaptedUrl, source, "utf8");
