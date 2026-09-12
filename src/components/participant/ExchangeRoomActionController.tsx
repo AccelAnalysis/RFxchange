@@ -169,12 +169,14 @@ export function ExchangeRoomActionController({
   onNetworkFocus,
   onActionIntent,
   placement = "sheet",
+  hideUnavailable = false,
 }: Readonly<{
   activeLens: ParticipantLensId;
   actions: readonly ExchangeRoomActionProjection[];
   onNetworkFocus(intent: "organizations" | "capabilities"): void;
   onActionIntent?: (intent: ExchangeRoomActionIntent) => void;
-  placement?: "workspace" | "sheet";
+  placement?: "workspace" | "sheet" | "popover";
+  hideUnavailable?: boolean;
 }>) {
   const { locale } = useI18n();
   const messages = exchangeRoomLocaleCatalog(locale);
@@ -283,6 +285,9 @@ export function ExchangeRoomActionController({
                 : activeHandler?.kind === "intent" && !onActionIntent
                   ? "not-operational" as const
                   : action.disabledReason ?? "not-operational";
+
+        if (hideUnavailable) return null;
+
         return (
           <button
             key={action.id}
