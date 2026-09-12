@@ -11,6 +11,8 @@ const [
   rules,
   panel,
   route,
+  portal,
+  portalCss,
   activationUi,
   tests,
   architecture,
@@ -23,6 +25,8 @@ const [
   read("firestore.rules"),
   read("src/components/organization-profile/EssentialProfilePanel.tsx"),
   read("app/organization-profile/page.tsx"),
+  read("src/components/account/OrganizationProfilePortal.tsx"),
+  read("src/components/account/OrganizationProfilePortal.module.css"),
   read("src/components/onboarding/ActivationJourneyClient.tsx"),
   read("test/essential-organization-profile.test.mjs"),
   read("docs/architecture/WAVE_2_SLICE_2_7.md"),
@@ -75,16 +79,8 @@ for (const category of [
 assert.ok(model.includes("GENERIC_CAPABILITY_NAMES"));
 assert.equal(model.includes("commercialStatus"), false);
 assert.equal(model.includes("verificationStatus"), false);
-assert.equal(
-  model.includes('missing.push("organization-type")'),
-  false,
-  "Organization type must not remain a Profile Complete requirement.",
-);
-assert.equal(
-  model.includes('missing.push("participation-role")'),
-  false,
-  "Participation role must not remain a Profile Complete requirement.",
-);
+assert.equal(model.includes('missing.push("organization-type")'), false, "Organization type must not remain a Profile Complete requirement.");
+assert.equal(model.includes('missing.push("participation-role")'), false, "Participation role must not remain a Profile Complete requirement.");
 
 for (const required of [
   "authorizeOrganizationOperation",
@@ -107,10 +103,7 @@ for (const collection of [
 }
 assert.ok(persistence.includes("runTransaction"));
 assert.ok(persistence.includes("expectedProfileUpdatedAt"));
-for (const collection of [
-  "organizationProfileCompletions",
-  "organizationProfileEvents",
-]) {
+for (const collection of ["organizationProfileCompletions", "organizationProfileEvents"]) {
   assert.ok(schema.includes(collection), `Firestore schema is missing ${collection}.`);
   assert.ok(rules.includes(`/${collection}/{documentId}`), `Firestore rules are missing ${collection}.`);
 }
@@ -126,32 +119,44 @@ for (const required of [
 ]) {
   assert.ok(panel.includes(required), `Reference essential-profile component is missing ${required}.`);
 }
-assert.equal(
-  panel.includes("<legend>Participation roles</legend>"),
-  false,
-  "Reference essential registration must not collect participant roles.",
-);
-assert.equal(
-  panel.includes("<legend>Business objectives</legend>"),
-  false,
-  "Reference essential registration must not collect business objectives.",
-);
+assert.equal(panel.includes("<legend>Participation roles</legend>"), false);
+assert.equal(panel.includes("<legend>Business objectives</legend>"), false);
 
 for (const required of [
   "resolveParticipantRoute",
   "hydrateEssentialOrganizationProfile",
   "getByOrganizationId",
-  "account.minimumProfile",
-  "account.capabilities",
-  "account.applyProvider",
+  "OrganizationProfilePortal",
+  "portal.overview",
+  "portal.capabilities",
+  "portal.credentials",
+  "portal.locations",
+  "portal.media",
+  "portal.preferences",
+  "role=\"progressbar\"",
+  "publicPreview",
   "projectOrganizationCapabilityClaim",
+  "projectPublicCredential",
+  "projectPublicProfileAsset",
 ]) {
-  assert.ok(route.includes(required), `Authenticated Account profile route is missing ${required}.`);
+  assert.ok(route.includes(required), `Authenticated organization profile portal is missing ${required}.`);
 }
 assert.equal(route.includes("EssentialProfilePanel"), false);
 assert.equal(route.includes("Harborlight"), false);
 assert.equal(route.includes("<h2>Participation roles</h2>"), false);
 assert.equal(route.includes("<h2>Business objectives</h2>"), false);
+assert.equal(route.includes("Granted capabilities"), false, "Participant profile must not expose internal authorization-count language.");
+assert.equal(route.includes("Authorization role"), false, "Organization profile must not read like an authorization console.");
+
+for (const section of ["overview", "capabilities", "credentials", "locations", "media", "preferences"]) {
+  assert.ok(portal.includes(`"${section}"`), `OrganizationProfilePortal is missing ${section}.`);
+}
+assert.match(portal, /role="tablist"/);
+assert.match(portal, /role="tabpanel"/);
+assert.match(portal, /ArrowRight/);
+assert.match(portal, /Home/);
+assert.match(portalCss, /min-height: 48px/);
+
 for (const required of [
   "ORGANIZATION_CAPABILITY_CATEGORIES.map",
   "Capability category",
@@ -181,13 +186,9 @@ assert.ok(
   "Slice 2.7 architecture must retain the canonical Feature-ID lineage while documenting the corrected registration boundary.",
 );
 assert.ok(
-  architecture.includes("optional enrichment") &&
-    architecture.includes("not a Profile Complete requirement"),
+  architecture.includes("optional enrichment") && architecture.includes("not a Profile Complete requirement"),
   "Slice 2.7 architecture must distinguish optional classification from completion requirements.",
 );
-assert.ok(
-  ci.includes("smoke-essential-organization-profile-emulator.mjs"),
-  "CI must run the Slice 2.7 Firestore emulator acceptance.",
-);
+assert.ok(ci.includes("smoke-essential-organization-profile-emulator.mjs"), "CI must run the Slice 2.7 Firestore emulator acceptance.");
 
-console.log("Slice 2.7 essential organization profile, categorized capability, corrected Profile Complete, and authenticated Account runtime validated.");
+console.log("Slice 2.7 essential organization profile validated with the Overview/Capabilities/Credentials/Locations/Media/Preferences management portal and public-preview hierarchy.");
