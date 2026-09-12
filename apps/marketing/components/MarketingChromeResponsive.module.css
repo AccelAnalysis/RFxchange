@@ -4,6 +4,16 @@
   justify-self: end;
 }
 
+/* Translated navigation outgrows the fixed desktop header width. Keep each
+   destination readable in the existing disclosure instead of wrapping labels. */
+.nav:not(:lang(en)) .desktopLinks {
+  display: none !important;
+}
+
+.nav:not(:lang(en)) .navMenu {
+  display: block;
+}
+
 .navMenu summary {
   min-height: 44px;
   padding-inline: 16px;
