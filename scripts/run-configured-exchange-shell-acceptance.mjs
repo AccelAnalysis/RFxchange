@@ -5,7 +5,7 @@ import { readFile, rm, writeFile } from "node:fs/promises";
 
 // Phase 4 activates current RFxchange destinations and the mobile Menu. Keep the historical
 // configured-browser harness intact, but adapt only assertions that still encode the prior
-// unavailable-Capabilities / desktop-Account-on-mobile contract and the initial detail layout. Every other browser,
+// unavailable-Capabilities / desktop-Account-on-mobile contract, initial detail layout and expired fixture dates. Every other browser,
 // accessibility, transition, authorization, Firebase, RFx, and build-identity check still runs.
 const sourceUrl = new URL("./acceptance-exchange-shell-emulator.mjs", import.meta.url);
 const adaptedUrl = new URL("./.phase4-acceptance-exchange-shell-emulator.mjs", import.meta.url);
@@ -111,6 +111,26 @@ replaceOnce(
   "clear Exchange context before the sign-out handoff",
   "    await evaluate(cdp, `document.querySelector('[role=\"menu\"] button[role=\"menuitem\"]')?.click()`);\n    await waitForExpression(cdp, `location.pathname === \"/\"`, \"signed-out public entry\");",
   "    const clearedExchangeContext = await evaluate(cdp, `(() => {\n      document.querySelector('[role=\"menu\"] button[role=\"menuitem\"]')?.click();\n      return {\n        intelligence: sessionStorage.getItem(${JSON.stringify(PARTICIPANT_INTELLIGENCE_CONTEXT_STORAGE_KEY)}),\n        spatial: Object.keys(sessionStorage).filter((key) => key.startsWith(${JSON.stringify(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)})),\n        referralIntent: sessionStorage.getItem(${JSON.stringify(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY)}),\n      };\n    })()`);\n    assert.deepEqual(clearedExchangeContext, { intelligence: null, spatial: [], referralIntent: null }, \"Sign out retained participant context on the Exchange origin before the public-app handoff.\");\n    await waitForExpression(cdp, `location.pathname === \"/\"`, \"signed-out public entry\");",
+);
+
+// Publication correctly rejects past response deadlines. Keep the live-clock fixture
+// in the future instead of letting the historical August 2026 dates expire.
+replaceOnce(
+  "future RFx package timing",
+  "      set('[data-rfx-start-date]', '2026-09-01');\n      set('[data-rfx-completion-date]', '2026-12-01');\n      set('[data-rfx-response-deadline]', '2026-08-28');",
+  "      const futureDate = (days) => new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);\n      set('[data-rfx-start-date]', futureDate(21));\n      set('[data-rfx-completion-date]', futureDate(112));\n      set('[data-rfx-response-deadline]', futureDate(14));",
+);
+replaceOnce(
+  "report RFx readiness failure before preview timeout",
+  '    await waitForExpression(cdp, `Boolean(document.querySelector(\'[data-rfx-preview-digest]\'))`, "RFx responder preview");',
+  `    const initialReadiness = await waitForExpression(cdp, \`(() => {
+      if (document.querySelector('[data-rfx-preview-digest]')) return { kind: 'preview' };
+      const error = document.querySelector('[data-rfx-publication="draft"] [role="alert"]');
+      if (error) return { kind: 'error', text: error.textContent };
+      const blocked = document.querySelector('[data-readiness-status="blocked"]');
+      return blocked ? { kind: 'blocked', text: blocked.textContent } : null;
+    })()\`, "RFx responder preview or explicit readiness failure");
+    assert.equal(initialReadiness.kind, 'preview', 'RFx preview readiness failed: ' + JSON.stringify(initialReadiness));`,
 );
 
 await writeFile(adaptedUrl, source, "utf8");
