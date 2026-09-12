@@ -39,5 +39,5 @@ test("NAICS catalog rejects duplicate, malformed, or metadata-inconsistent proje
 test("industry revision conflicts refresh and rehydrate the governed selector", () => {
   assert.match(marketProfilePanel, /error instanceof MarketProfileRequestError && error\.status === 409/);
   assert.match(marketProfilePanel, /startTransition\(\(\) => router\.refresh\(\)\)/);
-  assert.match(organizationProfilePage, /key=\{`\$\{organizationId\}:industry:\$\{marketProfile\.snapshot\.industry\?\.revision \?\? 0\}`\}/);
+  assert.match(organizationProfilePage, /key=\{`\$\{editorKey\}:\$\{organizationId\}:\$\{marketProfile\.snapshot\.industry\?\.revision \?\? 0\}`\}/);
 });

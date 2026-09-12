@@ -4,9 +4,9 @@ import assert from "node:assert/strict";
 import { readFile, rm, writeFile } from "node:fs/promises";
 
 // Phase 4 activates current RFxchange destinations and the mobile Menu. Keep the historical
-// configured-browser harness intact, but adapt only assertions that still encode the prior
-// unavailable-Capabilities / desktop-Account-on-mobile contract, initial detail layout and expired fixture dates. Every other browser,
-// accessibility, transition, authorization, Firebase, RFx, and build-identity check still runs.
+// configured-browser harness intact, but adapt only assertions that still encode prior
+// availability, presentation, navigation or fixture-date contracts. Every other browser,
+// accessibility, transition, authorization, Firebase, RFx and build-identity check still runs.
 const sourceUrl = new URL("./acceptance-exchange-shell-emulator.mjs", import.meta.url);
 const adaptedUrl = new URL("./.phase4-acceptance-exchange-shell-emulator.mjs", import.meta.url);
 let source = await readFile(sourceUrl, "utf8");
@@ -66,6 +66,128 @@ replaceOnce(
   "configured acceptance route chain",
   '    routeChain: ["Intelligence", "Opportunities/RFx", "Resources", "Capabilities (unavailable)", "Referrals (Menu)", "Intelligence", "Account", "Quick Start"],',
   '    routeChain: ["Intelligence", "Opportunities/RFx", "Resources", "Capabilities", "Referrals (Menu)", "Intelligence", "Account", "Quick Start"],',
+);
+
+// The HIG simplification makes actions contextual to a selected marker/detail rather than
+// keeping a permanent map rail. The historical baseline keeps its old rail contract; the
+// candidate must preserve the participant's current detail disclosure while switching lenses.
+replaceOnce(
+  "candidate-aware Room activation signature",
+  'async function clickExchangeRoomLens(cdp, id, href, expectedPath, { latencyMs = 0 } = {}) {',
+  'async function clickExchangeRoomLens(cdp, id, href, expectedPath, { candidate = false, latencyMs = 0 } = {}) {',
+);
+replaceOnce(
+  "contextual Room snapshot identity",
+  '      phase2: Boolean(grid),',
+  '      phase2: Boolean(grid) || Boolean(document.querySelector(\'[data-participant-shell="persistent"]\') && spatial?.scope),',
+);
+replaceOnce(
+  "spatial active-lens truth",
+  '      activeLens: grid?.dataset.activeLens || currentLens?.dataset.participantLens || null,',
+  '      activeLens: spatial?.activeLens || grid?.dataset.activeLens || currentLens?.dataset.participantLens || null,',
+);
+replaceOnce(
+  "contextual detail close acceptance",
+  [
+    "    await waitForExpression(",
+    "      cdp,",
+    "      `!document.querySelector('#organization-detail-panel')",
+    "        && Boolean(document.querySelector('[data-exchange-room-action-grid]'))`,",
+    '      "closed Exchange Room detail surface with persistent action rail",',
+    "    );",
+  ].join("\n"),
+  [
+    "    await waitForExpression(",
+    "      cdp,",
+    "      candidate",
+    "        ? `!document.querySelector('#organization-detail-panel')",
+    "          && !document.querySelector('[data-exchange-room-action-grid]')`",
+    "        : `!document.querySelector('#organization-detail-panel')",
+    "          && Boolean(document.querySelector('[data-exchange-room-action-grid]'))`,",
+    "      candidate",
+    '        ? "closed Exchange Room detail surface without persistent actions"',
+    '        : "closed Exchange Room detail surface with legacy action rail",',
+    "    );",
+  ].join("\n"),
+);
+replaceOnce(
+  "contextual lens settlement acceptance",
+  [
+    "  await waitForExpression(",
+    "    cdp,",
+    "    `(() => {",
+    "      const grids = [...document.querySelectorAll('[data-exchange-room-action-grid]')];",
+    "      return grids.length > 0 && grids.every((grid) => (",
+    "        grid.dataset.activeLens === ${JSON.stringify(id)}",
+    "        && grid.querySelectorAll('[data-exchange-room-action]').length === 4",
+    "      ));",
+    "    })()`,",
+    "    `${id} in-Room lens/action projection`,",
+    "  );",
+  ].join("\n"),
+  [
+    "  await waitForExpression(",
+    "    cdp,",
+    "    candidate",
+    "      ? `(() => {",
+    "          const currentLens = document.querySelector('[data-participant-navigation] a[data-participant-lens][aria-current=\"page\"]');",
+    '          const activeKey = sessionStorage.getItem("rfxchange:participant-spatial:active");',
+    '          const spatial = activeKey ? JSON.parse(sessionStorage.getItem(activeKey) || "null") : null;',
+    "          return currentLens?.dataset.participantLens === ${JSON.stringify(id)}",
+    "            && spatial?.activeLens === ${JSON.stringify(id)};",
+    "        })()`",
+    "      : `(() => {",
+    "          const grids = [...document.querySelectorAll('[data-exchange-room-action-grid]')];",
+    "          return grids.length > 0 && grids.every((grid) => (",
+    "            grid.dataset.activeLens === ${JSON.stringify(id)}",
+    "            && grid.querySelectorAll('[data-exchange-room-action]').length === 4",
+    "          ));",
+    "        })()`,",
+    "    `${id} in-Room lens projection`,",
+    "  );",
+  ].join("\n"),
+);
+replaceOnce(
+  "contextual action identity acceptance",
+  [
+    "  assert.deepEqual(",
+    "    after.actions.map((action) => action.id),",
+    "    EXCHANGE_ROOM_ACTION_IDS_BY_LENS[id],",
+    "    `${id} did not expose the canonical ordered four-action identity contract.`,",
+    "  );",
+  ].join("\n"),
+  [
+    "  if (!candidate || after.actions.length > 0) {",
+    "    assert.deepEqual(",
+    "      after.actions.map((action) => action.id),",
+    "      EXCHANGE_ROOM_ACTION_IDS_BY_LENS[id],",
+    "      `${id} did not expose the canonical ordered four-action identity contract when its detail action surface was visible.`,",
+    "    );",
+    "  }",
+  ].join("\n"),
+);
+replaceOnce(
+  "preserve candidate detail disclosure",
+  '  assert.equal(after.panelOpen, true, `${id} did not reopen the Exchange Room detail surface.`);',
+  [
+    "  assert.equal(",
+    "    after.panelOpen,",
+    "    candidate ? continuityBefore.panelOpen : true,",
+    "    candidate",
+    "      ? `${id} did not preserve the current Exchange Room detail disclosure.`",
+    "      : `${id} did not reopen the legacy Exchange Room detail surface.`,",
+    "  );",
+  ].join("\n"),
+);
+replaceOnce(
+  "candidate Room detection without permanent actions",
+  "  const phase2 = await evaluate(cdp, `Boolean(document.querySelector('[data-exchange-room-action-grid]'))`);",
+  [
+    "  const phase2 = options.candidate",
+    "    ? await evaluate(cdp, `Boolean(document.querySelector('[data-participant-shell=\"persistent\"]')",
+    '        && sessionStorage.getItem("rfxchange:participant-spatial:active"))`)',
+    "    : await evaluate(cdp, `Boolean(document.querySelector('[data-exchange-room-action-grid]'))`);",
+  ].join("\n"),
 );
 
 // The v2 edge panel initially shows results. Exercise a real selected record before

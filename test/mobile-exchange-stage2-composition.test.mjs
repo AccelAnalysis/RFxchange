@@ -41,7 +41,8 @@ test("MOB-02 keeps the mobile Exchange map-first with floating search, dynamic v
   assert.match(shellCss, /env\(safe-area-inset-bottom/);
   assert.equal((workspace.match(/role="search"/g) ?? []).length, 1);
   assert.match(workspace, /desktopPanel/);
-  assert.match(workspace, /networkWorkspace\.match\.disclaimer/);
+  assert.doesNotMatch(workspace, /networkWorkspace\.match\.disclaimer/);
+  assert.match(workspace, /networkWorkspace\.search\.noResultsTitle/);
 });
 
 test("MOB-03 preserves the four permanent successor lenses and adds Menu as a separate fifth mobile utility", async () => {
@@ -126,11 +127,14 @@ test("shared cards, media, favorites, detail, and marker selection converge on o
   assert.match(workspace, /focusedMarkerId=\{selectedObjectId\}/);
   assert.match(workspace, /data-mobile-result-stream/);
   assert.match(workspace, /onOrganizationMarkerSelect=\{\(markerId\) => \{\s*selectObject\(markerId\);/);
-  assert.match(workspace, /onOrganizationMarkerSelect=\{\(markerId\) => \{\s*selectObject\(markerId\);\s*setMobileDetailOpen\(true\);/);
-  assert.match(workspace, /onSelect=\{\(\) => selectObject\(organization\.marker\.id, index\)\}/);
+  assert.match(workspace, /if \(wideLayout && lastMapPointerRef\.current\)/);
+  assert.match(workspace, /setMarkerPopoverPoint\(lastMapPointerRef\.current\)/);
+  assert.match(workspace, /setMobileDetailOpen\(false\);\s*return;/);
+  assert.match(workspace, /setMarkerPopoverPoint\(null\);\s*setMobileDetailOpen\(true\);/);
+  assert.match(workspace, /onSelect=\{\(\) => \{[\s\S]*?selectObject\(organization\.marker\.id, index\);[\s\S]*?\}\}/);
   assert.match(workspace, /cardRefs\.current\.get\(selectedObjectId\)/);
-  assert.match(workspace, /setMobileDetailOpen\(true\)/);
   assert.match(workspace, /sheetSnapPoint: "expanded"/);
+  assert.match(workspace, /initialCamera=\{spatialContext\.camera\}/);
   assert.doesNotMatch(workspace, /synthetic|fixture/i);
 });
 

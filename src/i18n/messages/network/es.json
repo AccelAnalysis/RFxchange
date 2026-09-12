@@ -90,7 +90,8 @@
     "website": "Visitar el sitio web de la organización",
     "profileEvidenceTitle": "Límite de evidencia del perfil",
     "profileEvidence": "La información del perfil y las capacidades es proporcionada por la organización salvo que se identifique por separado como verificada. El descubrimiento no certifica capacidad, desempeño ni elegibilidad.",
-    "actions": "Acciones de la organización"
+    "actions": "Acciones de la organización",
+    "viewProfile": "Ver perfil"
   },
   "actions": {
     "manage-profile": "Administrar perfil",

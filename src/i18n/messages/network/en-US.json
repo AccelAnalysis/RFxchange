@@ -4,48 +4,48 @@
     "ariaLabel": "RFxchange workspace status",
     "loading": {
       "title": "Preparing your Exchange workspace",
-      "body": "Your organization and locality are loading. Your setup progress is saved."
+      "body": "Your organization and locality are loading."
     },
     "empty": {
-      "title": "Your organization is not ready to display here yet",
-      "body": "Review your organization, location, profile, or marker setup to finish preparing the workspace.",
+      "title": "Finish setting up your organization",
+      "body": "Review your organization and location to finish preparing the Exchange.",
       "action": "Review setup"
     },
     "error": {
-      "title": "The workspace could not be prepared",
-      "body": "Your organization and location information were not changed. Retry or return to setup if you need to correct something.",
-      "action": "Retry workspace"
+      "title": "The Exchange could not be loaded",
+      "body": "Your information was not changed. Try again or review your setup.",
+      "action": "Try again"
     },
     "permission": {
-      "title": "This organization workspace is not available to your account",
-      "body": "Access depends on your current organization membership. Private organization details are not shown.",
+      "title": "This organization is not available to your account",
+      "body": "Return to the organization available through your current membership.",
       "action": "Return to your workspace"
     },
     "expired": {
-      "title": "Your workspace session has expired",
-      "body": "Sign in again to return to the organization workspace available to your account.",
+      "title": "Your session has expired",
+      "body": "Sign in again to return to the Exchange.",
       "action": "Sign in"
     },
     "recovery": {
-      "title": "Workspace recovery is available",
-      "body": "Your organization is still saved. Return to setup to repair the missing information without creating a duplicate organization.",
-      "action": "Open recovery"
+      "title": "Your organization is still saved",
+      "body": "Return to setup to finish the missing information.",
+      "action": "Review setup"
     }
   },
   "search": {
     "ariaLabel": "Search and filter the Exchange",
     "capabilityLabel": "Capabilities, services, products, or organization",
-    "placeholder": "Search capabilities or organizations",
+    "placeholder": "Search organizations or capabilities",
     "basedIn": "Based in",
     "serviceArea": "Service area",
     "anyServiceArea": "Any service area",
     "submit": "Search",
-    "clear": "Clear",
+    "clear": "Clear filters",
     "resultCount": "{count} organizations",
-    "lowDensity": "Only organizations available in your current Exchange view are shown.",
+    "lowDensity": "Showing organizations available in this area.",
     "listLabel": "Organization results",
-    "noResultsTitle": "No organizations match this search",
-    "noResultsBody": "Try a broader capability or remove the service-area filter.",
+    "noResultsTitle": "No matches in this area",
+    "noResultsBody": "Try a broader search or clear a filter.",
     "paginationLabel": "Organization result pages",
     "previous": "Previous",
     "page": "Page {page} of {pageCount}",
@@ -55,41 +55,42 @@
     "capability": "Capability match",
     "organizationName": "Organization name match",
     "browse": "Organization",
-    "disclaimer": "Matching explains profile overlap. It is not qualification, endorsement, or guaranteed eligibility."
+    "disclaimer": "Matches are based on organization-provided profile information. They do not verify a business."
   },
   "home": {
-    "eyebrow": "Organization home",
-    "activeNode": "Organization marker",
-    "visibleNow": "Visible now",
-    "positionTitle": "Your Exchange position",
-    "selected": "Selected",
-    "projectionMetadata": "Shown from your current organization workspace.",
-    "locality": "Home locality",
-    "visibleLocation": "Visible location",
+    "eyebrow": "Your organization",
+    "activeNode": "On the Exchange",
+    "visibleNow": "Visible",
+    "positionTitle": "Your organization",
+    "selected": "Current",
+    "projectionMetadata": "Organization profile",
+    "locality": "Based in",
+    "visibleLocation": "Location shown",
     "locationFallback": "{locality} organization location",
     "mapSource": "Map source",
     "viewport": "Map view",
-    "viewportBody": "Your organization home view is restored when you return.",
-    "manageProfile": "Manage organization profile",
-    "scopeTitle": "What you can do here",
-    "scopeBody": "Explore organizations, capabilities, geography, and the Exchange tools currently available to your account. Unavailable actions are identified where they appear."
+    "viewportBody": "The map returns to this view when you come back.",
+    "manageProfile": "Manage profile",
+    "scopeTitle": "Explore the Exchange",
+    "scopeBody": "Find organizations and capabilities, then choose an available action."
   },
   "detail": {
     "eyebrow": "Organization",
-    "close": "Close organization details",
-    "baseLocality": "Base locality",
-    "visibleLocation": "Visible location",
+    "close": "Close profile",
+    "viewProfile": "View profile",
+    "baseLocality": "Based in",
+    "visibleLocation": "Location shown",
     "serviceAreas": "Service areas",
-    "noServiceAreas": "No public service areas are listed.",
+    "noServiceAreas": "No public service areas listed.",
     "nearLocation": "Near {locality}",
     "inLocality": "In {locality}",
     "capabilities": "Capabilities",
-    "capabilityEvidence": "What this organization says it can do",
-    "publicContact": "Public contact",
-    "contactUnavailable": "No public contact is listed",
-    "website": "Visit organization website",
+    "capabilityEvidence": "Capabilities",
+    "publicContact": "Contact",
+    "contactUnavailable": "No public contact listed",
+    "website": "Visit website",
     "profileEvidenceTitle": "About this information",
-    "profileEvidence": "Organization profile and capability information is provided by the organization unless it is specifically identified as verified. Discovery does not certify capability, performance, or eligibility.",
+    "profileEvidence": "This information comes from the organization unless a specific verification badge says otherwise.",
     "actions": "Organization actions"
   },
   "actions": {
@@ -100,9 +101,9 @@
   },
   "actionReasons": {
     "self-only": "Only members of this organization can manage its profile.",
-    "not-an-official-provider": "This organization has no published Resource Provider services.",
-    "rfx-runtime-unavailable": "Opportunities/RFx is not yet available.",
-    "exchange-action-unavailable": "This action is not available yet. You can continue exploring the Exchange."
+    "not-an-official-provider": "No published Resource Provider services are available for this organization.",
+    "rfx-runtime-unavailable": "Opportunities/RFx is not available yet.",
+    "exchange-action-unavailable": "This action is not available yet."
   },
   "provenance": {
     "eyebrow": "Map information",

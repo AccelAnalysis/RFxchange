@@ -10,9 +10,12 @@ const route = read("app/geography/canvas/page.tsx");
 const service = read("src/application/network-discovery/network-discovery.ts");
 const runtime = read("src/infrastructure/network-discovery/runtime.ts");
 const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
+const workspaceCss = read("src/components/participant/ExistingWorkspaceFoundation.module.css");
+const actions = read("src/components/participant/ExchangeRoomActionController.tsx");
 const map = read("src/components/map/ExchangeSpatialScene.tsx");
 const state = read("src/application/participant/participant-spatial-context.ts");
 const slice = read("docs/slices/SLICE_3_2_CONTROLLED_NETWORK_ENTRY_AND_DISCOVERY.md");
+const english = JSON.parse(read("src/i18n/messages/network/en-US.json"));
 
 assert.match(slice, /GEO-012/);
 assert.match(slice, /DSC-001/);
@@ -61,8 +64,28 @@ assert.match(workspace, /role="search"/);
 assert.match(workspace, /name="serviceArea"/);
 assert.match(workspace, /selected=\{selected\}/);
 assert.match(read("src/components/participant/MobileExchangePrimitives.tsx"), /aria-current=\{selected \? "true" : undefined\}/);
-assert.match(workspace, /networkWorkspace\.match\.disclaimer/);
+assert.doesNotMatch(workspace, /networkWorkspace\.match\.disclaimer/);
+assert.doesNotMatch(workspace, /actionRail=\{contextualActions\}/);
+assert.match(workspace, /className=\{styles\.markerPopover\}/);
+assert.match(workspace, /placement="popover"/);
+assert.match(workspace, /hideUnavailable/);
+assert.match(actions, /hideUnavailable/);
+assert.match(workspace, /networkWorkspace\.search\.noResultsTitle/);
+assert.match(workspace, /networkWorkspace\.search\.noResultsBody/);
+assert.match(workspace, /initialCamera=\{spatialContext\.camera\}/);
+assert.doesNotMatch(workspace, /viewMode: "2d" as const/);
+assert.match(map, /ORGANIZATION_ORBIT_PITCH = 75/);
+assert.match(map, /setViewMode\("3d"\)/);
+assert.match(workspaceCss, /\.markerPopover/);
+assert.match(workspaceCss, /transform: translate\(-50%, calc\(-100% - 18px\)\)/);
 assert.doesNotMatch(workspace, /firebase-admin|firebase\/firestore/);
+
+assert.equal(english.search.noResultsTitle, "No matches in this area");
+assert.equal(english.home.eyebrow, "Your organization");
+assert.equal(english.detail.viewProfile, "View profile");
+assert.ok(!JSON.stringify(english).includes("Matching explains profile overlap"));
+assert.ok(!JSON.stringify(english).includes("Organization home"));
+assert.ok(!JSON.stringify(english).includes("What you can do here"));
 
 assert.match(state, /storesAuthorization: false/);
 assert.match(state, /storesPrivateCoordinates: false/);
@@ -75,8 +98,6 @@ assert.match(map, /NETWORK_MARKER_CORE_LAYER_ID/);
 assert.match(map, /"circle-color": "#1b2430"/);
 assert.match(map, /"circle-stroke-color": "#d6a23a"/);
 assert.match(map, /onOrganizationMarkerSelectRef\.current/);
-// Slice 4.5 owns the now-authorized real opportunity object. Network discovery must still not
-// introduce provider-field or credibility expressions that remain separately governed.
 assert.doesNotMatch(map, /provider-service-field|credibility-seal/);
 
 for (const locale of ["en-US", "es", "fr", "it", "de"]) {
@@ -93,4 +114,4 @@ assert.match(workspace, /useI18n/);
 assert.match(workspace, /networkWorkspace\.search\.capabilityLabel/);
 assert.match(workspace, /networkWorkspace\.detail\.profileEvidence/);
 
-console.log("Slice 3.2 controlled Network discovery architecture validated.");
+console.log("Slice 3.2 controlled Network discovery validated with marker-context actions, restrained empty states, restored default 3D map behavior, and simplified participant language.");

@@ -22,44 +22,26 @@ function readJson(filePath) {
 }
 
 function normalizeCatalog(namespaceName, catalog) {
-  if (
-    namespaceName !== "base"
-    || catalog?.marketing?.home
-    || !catalog?.home
-  ) {
-    return catalog;
-  }
+  if (namespaceName !== "base" || catalog?.marketing?.home || !catalog?.home) return catalog;
   const { home, ...rest } = catalog;
   return Object.freeze({
     ...rest,
-    marketing: Object.freeze({
-      ...catalog.marketing,
-      home,
-    }),
+    marketing: Object.freeze({ ...catalog.marketing, home }),
   });
 }
 
 function resolveReferenceFallback(reference, localized) {
   if (Array.isArray(reference)) {
     const values = Array.isArray(localized) ? localized : [];
-    return reference.map((entry, index) =>
-      resolveReferenceFallback(entry, values[index]),
-    );
+    return reference.map((entry, index) => resolveReferenceFallback(entry, values[index]));
   }
   if (reference && typeof reference === "object") {
-    const values = localized && typeof localized === "object" && !Array.isArray(localized)
-      ? localized
-      : {};
+    const values = localized && typeof localized === "object" && !Array.isArray(localized) ? localized : {};
     return Object.fromEntries(
-      Object.entries(reference).map(([key, entry]) => [
-        key,
-        resolveReferenceFallback(entry, values[key]),
-      ]),
+      Object.entries(reference).map(([key, entry]) => [key, resolveReferenceFallback(entry, values[key])]),
     );
   }
-  return localized !== undefined && typeof localized === typeof reference
-    ? localized
-    : reference;
+  return localized !== undefined && typeof localized === typeof reference ? localized : reference;
 }
 
 function collectShape(value, prefix = "") {
@@ -67,9 +49,7 @@ function collectShape(value, prefix = "") {
     return value.flatMap((entry, index) => collectShape(entry, `${prefix}[${index}]`));
   }
   if (value && typeof value === "object") {
-    return Object.entries(value).flatMap(([key, entry]) =>
-      collectShape(entry, prefix ? `${prefix}.${key}` : key),
-    );
+    return Object.entries(value).flatMap(([key, entry]) => collectShape(entry, prefix ? `${prefix}.${key}` : key));
   }
   return [{ path: prefix, type: typeof value, value }];
 }
@@ -77,9 +57,7 @@ function collectShape(value, prefix = "") {
 function normalizedShape(value) {
   return collectShape(value)
     .map(({ path: messagePath, type }) => ({ path: messagePath, type }))
-    .sort((left, right) =>
-      left.path.localeCompare(right.path) || left.type.localeCompare(right.type),
-    );
+    .sort((left, right) => left.path.localeCompare(right.path) || left.type.localeCompare(right.type));
 }
 
 const requestedNamespace = process.env.RFXCHANGE_I18N_NAMESPACE?.trim() || null;
@@ -101,17 +79,11 @@ for (const namespace of namespacesToValidate) {
     assert.ok(fs.existsSync(filePath), `Missing ${namespace.name} locale catalog: ${locale}`);
   }
 
-  const reference = normalizeCatalog(
-    namespace.name,
-    readJson(path.join(namespace.directory, `${referenceLocale}.json`)),
-  );
+  const reference = normalizeCatalog(namespace.name, readJson(path.join(namespace.directory, `${referenceLocale}.json`)));
   const referenceShape = normalizedShape(reference);
 
   for (const locale of localesToValidate) {
-    const catalog = normalizeCatalog(
-      namespace.name,
-      readJson(path.join(namespace.directory, `${locale}.json`)),
-    );
+    const catalog = normalizeCatalog(namespace.name, readJson(path.join(namespace.directory, `${locale}.json`)));
     for (const entry of collectShape(catalog)) {
       if (entry.type === "string") {
         assert.ok(entry.value.trim().length > 0, `${namespace.name}:${locale}:${entry.path} must not be empty`);
@@ -146,21 +118,44 @@ const layout = fs.readFileSync(path.join(root, "app", "layout.tsx"), "utf8");
 assert.match(layout, /<html lang=\{locale\}/, "Root layout must set the resolved locale on html");
 assert.match(layout, /I18nProvider/, "Root layout must provide the locale dictionary");
 
-const boundary = fs.readFileSync(
-  path.join(root, "docs", "architecture", "INTERNATIONALIZATION_FOUNDATION.md"),
-  "utf8",
-);
-assert.match(
-  boundary,
-  /Participant-authored content is never translated/,
-  "The participant-content translation exclusion must remain canonical",
-);
-assert.match(
-  boundary,
-  /Uploaded documents are never translated/,
-  "The uploaded-document translation exclusion must remain canonical",
-);
+const boundary = fs.readFileSync(path.join(root, "docs", "architecture", "INTERNATIONALIZATION_FOUNDATION.md"), "utf8");
+assert.match(boundary, /Participant-authored content is never translated/, "The participant-content translation exclusion must remain canonical");
+assert.match(boundary, /Uploaded documents are never translated/, "The uploaded-document translation exclusion must remain canonical");
+
+// Product-simplification regression guard. These exact phrases were technically
+// descriptive but exposed internal/system language or overloaded ordinary tasks.
+const participantEnglishSurfaces = [
+  path.join(messageDirectory, "network", "en-US.json"),
+  path.join(messageDirectory, "market-profile", "en-US.json"),
+  path.join(messageDirectory, "organization-enrichment", "en-US.json"),
+  path.join(messageDirectory, "resource-providers", "en-US.json"),
+  path.join(root, "app", "organization-profile", "page.tsx"),
+].map((filePath) => fs.readFileSync(filePath, "utf8")).join("\n");
+
+for (const phrase of [
+  "Matching explains profile overlap",
+  "Browse Domain → Family → Capability",
+  "Private supporting asset IDs",
+  "During minimum activation",
+  "Granted capabilities",
+  "Market profile · AMACS",
+  "What you can do here",
+  "Organization marker",
+  "Your Exchange position",
+  "Verification, RFx qualification, and credibility are separate",
+]) {
+  assert.ok(
+    !participantEnglishSurfaces.includes(phrase),
+    `Participant-facing English must not regress to system-heavy copy: ${phrase}`,
+  );
+}
+
+assert.match(participantEnglishSurfaces, /No matches in this area/);
+assert.match(participantEnglishSurfaces, /Browse capabilities/);
+assert.match(participantEnglishSurfaces, /No credentials yet/);
+assert.match(participantEnglishSurfaces, /Public profile preview/);
+assert.match(participantEnglishSurfaces, /Supporting documents \(optional\)/);
 
 console.log(
-  `Internationalization foundation validated${requestedNamespace ? ` for ${requestedNamespace}` : ""}${requestedLocale ? `:${requestedLocale}` : ""}.`,
+  `Internationalization foundation and participant-language simplification validated${requestedNamespace ? ` for ${requestedNamespace}` : ""}${requestedLocale ? `:${requestedLocale}` : ""}.`,
 );

@@ -89,10 +89,13 @@ test("live workspace sources retain bounded hydration, scoped refresh, and strea
     assert.match(resourceWorkspace, new RegExp(`"${parameter}"`));
   }
   assert.match(accountPage, /settleOptionalWorkspacePanel/);
-  assert.ok((accountPage.match(/<Suspense/g) ?? []).length >= 3);
-  assert.doesNotMatch(accountPage, /Promise\.all\(\[pendingEnrichment, pendingMap\]\)/);
-  assert.match(accountPage, /const enrichmentResult = await pendingEnrichment/);
-  assert.match(accountPage, /<EnrichmentLocationMapSection/);
+  assert.ok((accountPage.match(/<Suspense/g) ?? []).length >= 6);
+  for (const panel of ["OverviewPanel", "CapabilitiesPanel", "CredentialsPanel", "LocationsPanel", "MediaPanel", "PreferencesPanel"]) {
+    assert.match(accountPage, new RegExp(`async function ${panel}`));
+  }
+  assert.match(accountPage, /pendingMarket=\{pending\.market\}/);
+  assert.match(accountPage, /pendingEnrichment=\{pending\.enrichment\}/);
+  assert.match(accountPage, /pendingMap=\{pending\.map\}/);
   assert.match(marketProfileRuntime, /geographyDefinitions\.getById\(id\)/);
   assert.match(accountPage, /serviceGeographies=\{marketProfile\.serviceGeographies\}/);
   assert.doesNotMatch(accountPage, /label:\s*id/);

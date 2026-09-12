@@ -36,18 +36,20 @@ test("Brand B6a supports truthful localized loading and recovery boundaries", ()
   assert.match(component, /networkWorkspace\.status\.\$\{status\}\.title/);
   assert.equal(
     networkCatalog.status.error.body,
-    "Your organization and location information were not changed. Retry or return to setup if you need to correct something.",
+    "Your information was not changed. Try again or review your setup.",
   );
-  assert.match(networkCatalog.status.recovery.body, /without creating a duplicate organization/);
+  assert.equal(
+    networkCatalog.status.recovery.body,
+    "Return to setup to finish the missing information.",
+  );
 });
 
 test("Brand B6a organization home presents the current bounded Exchange scope without internal delivery language", () => {
-  assert.equal(networkCatalog.home.eyebrow, "Organization home");
-  assert.equal(networkCatalog.home.activeNode, "Organization marker");
-  assert.equal(networkCatalog.home.manageProfile, "Manage organization profile");
+  assert.equal(networkCatalog.home.eyebrow, "Your organization");
+  assert.equal(networkCatalog.home.activeNode, "On the Exchange");
+  assert.equal(networkCatalog.home.manageProfile, "Manage profile");
   assert.equal(networkCatalog.provenance.eyebrow, "Map information");
-  assert.match(networkCatalog.home.scopeBody, /Explore organizations, capabilities, geography, and the Exchange tools currently available/);
-  assert.match(networkCatalog.home.scopeBody, /Unavailable actions are identified where they appear/);
+  assert.equal(networkCatalog.home.scopeBody, "Find organizations and capabilities, then choose an available action.");
   assert.doesNotMatch(component, /networkWorkspace\.home\.scopeBody|<ObjectCard|<StatusPill/);
 });
 

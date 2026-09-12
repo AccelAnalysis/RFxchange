@@ -12,12 +12,6 @@ import {
   PARTICIPANT_LENS_IDS,
   type ParticipantLensId,
 } from "../../application/participant/participant-lens-registry";
-import {
-  PARTICIPANT_SPATIAL_ACTIVE_KEY,
-  PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT,
-  readActiveParticipantSpatialContext,
-  serializeParticipantSpatialContext,
-} from "../../application/participant/participant-spatial-context";
 import { useI18n } from "../i18n/I18nProvider";
 
 import styles from "./ExchangeRoomActionController.module.css";
@@ -114,24 +108,6 @@ function isOrdinaryPrimaryActivation(event: globalThis.MouseEvent): boolean {
     && !event.shiftKey;
 }
 
-function reopenActiveExchangeRoomSurface(): void {
-  const current = readActiveParticipantSpatialContext();
-  if (!current) return;
-  try {
-    const storageKey = window.sessionStorage.getItem(PARTICIPANT_SPATIAL_ACTIVE_KEY);
-    if (!storageKey) return;
-    const reopened = Object.freeze({
-      ...current,
-      panelOpen: true,
-      sheetSnapPoint: current.sheetSnapPoint === "peek" ? "partial" : current.sheetSnapPoint,
-    });
-    window.sessionStorage.setItem(storageKey, serializeParticipantSpatialContext(reopened));
-    window.dispatchEvent(new CustomEvent(PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT, { detail: storageKey }));
-  } catch {
-    // Optional continuity state is non-authorizing and never changes protected-route authority.
-  }
-}
-
 export function useExchangeRoomLensController(onLensSelect: (lens: ParticipantLensId) => void): void {
   useEffect(() => {
     const handleLensActivation = (event: globalThis.MouseEvent) => {
@@ -144,7 +120,6 @@ export function useExchangeRoomLensController(onLensSelect: (lens: ParticipantLe
       if (!isParticipantLensId(lens)) return;
       event.preventDefault();
       onLensSelect(lens);
-      reopenActiveExchangeRoomSurface();
     };
     document.addEventListener("click", handleLensActivation, true);
     return () => document.removeEventListener("click", handleLensActivation, true);
@@ -169,12 +144,14 @@ export function ExchangeRoomActionController({
   onNetworkFocus,
   onActionIntent,
   placement = "sheet",
+  hideUnavailable = false,
 }: Readonly<{
   activeLens: ParticipantLensId;
   actions: readonly ExchangeRoomActionProjection[];
   onNetworkFocus(intent: "organizations" | "capabilities"): void;
   onActionIntent?: (intent: ExchangeRoomActionIntent) => void;
-  placement?: "workspace" | "sheet";
+  placement?: "workspace" | "sheet" | "popover";
+  hideUnavailable?: boolean;
 }>) {
   const { locale } = useI18n();
   const messages = exchangeRoomLocaleCatalog(locale);
@@ -283,6 +260,9 @@ export function ExchangeRoomActionController({
                 : activeHandler?.kind === "intent" && !onActionIntent
                   ? "not-operational" as const
                   : action.disabledReason ?? "not-operational";
+
+        if (hideUnavailable) return null;
+
         return (
           <button
             key={action.id}

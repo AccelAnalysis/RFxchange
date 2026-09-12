@@ -90,7 +90,8 @@
     "website": "Website der Organisation besuchen",
     "profileEvidenceTitle": "Nachweisgrenze des Profils",
     "profileEvidence": "Profil- und Fähigkeitsinformationen werden von der Organisation bereitgestellt, sofern sie nicht gesondert als verifiziert gekennzeichnet sind. Die Entdeckung bestätigt weder Fähigkeit noch Leistung oder Eignung.",
-    "actions": "Organisationsaktionen"
+    "actions": "Organisationsaktionen",
+    "viewProfile": "Profil anzeigen"
   },
   "actions": {
     "manage-profile": "Profil verwalten",

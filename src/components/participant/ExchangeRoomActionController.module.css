@@ -11,14 +11,14 @@
 
 .activeAction,
 .disabledAction {
-  min-height: 48px;
+  min-height: 44px;
   padding: var(--space-sm) var(--space-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: var(--border-hairline) solid var(--semantic-border-subtle);
   border-radius: var(--radius-control);
-  font: 760 0.86rem/1.2 var(--type-interface-family);
+  font: 700 0.82rem/1.2 var(--type-interface-family);
   text-align: center;
 }
 
@@ -48,13 +48,31 @@
   opacity: 1;
 }
 
-
 .activeAction:active { background: var(--semantic-surface-connection); }
+
+.actionGrid[data-action-rail-placement="popover"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.actionGrid[data-action-rail-placement="popover"] .activeAction {
+  min-height: 40px;
+  padding: 8px 11px;
+  border-color: transparent;
+  background: transparent;
+  font-size: .8rem;
+}
+
+.actionGrid[data-action-rail-placement="popover"] .activeAction:hover,
+.actionGrid[data-action-rail-placement="popover"] .activeAction:focus-visible {
+  background: var(--semantic-surface-subtle);
+}
 
 @media (max-width: 1024px) {
   .activeAction, .disabledAction {
     min-width: 0;
-    min-height: 48px;
+    min-height: 44px;
     padding: 8px 4px;
     overflow-wrap: anywhere;
     font-size: 0.75rem;

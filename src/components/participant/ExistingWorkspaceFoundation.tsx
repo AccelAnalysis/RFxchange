@@ -66,6 +66,8 @@ export type ExistingWorkspaceStatus =
 
 type DiscoveryUnavailableReason = "geography-not-permitted";
 
+type MarkerPopoverPoint = Readonly<{ x: number; y: number }>;
+
 interface ExistingWorkspaceFoundationProps {
   readonly model: ControlledLocalityMapModel;
   readonly homeMarker: ExchangeHomeMarker;
@@ -202,6 +204,9 @@ export function ExistingWorkspaceFoundation({
   const detailRouteId = showFocusedOrganizationDetail ? focusedOrganizationId : null;
   const [mobileDetailOpen, setMobileDetailOpen] = useState(Boolean(detailRouteId));
   const [appliedDetailRouteId, setAppliedDetailRouteId] = useState(detailRouteId);
+  const [wideLayout, setWideLayout] = useState(false);
+  const [markerPopoverPoint, setMarkerPopoverPoint] = useState<MarkerPopoverPoint | null>(null);
+  const lastMapPointerRef = useRef<MarkerPopoverPoint | null>(null);
   if (appliedDetailRouteId !== detailRouteId) {
     setAppliedDetailRouteId(detailRouteId);
     setMobileDetailOpen(Boolean(detailRouteId));
@@ -210,6 +215,25 @@ export function ExistingWorkspaceFoundation({
   const cardRefs = useRef(new Map<string, HTMLElement>());
   const appliedFocusedOrganizationIdRef = useRef<string | null>(null);
   const discoveryRestricted = discoveryUnavailableReason === "geography-not-permitted";
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1025px)");
+    const update = () => setWideLayout(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    const captureMapPointer = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element) || !target.closest(".mapboxgl-canvas-container")) return;
+      lastMapPointerRef.current = Object.freeze({ x: event.clientX, y: event.clientY });
+      setMarkerPopoverPoint(null);
+    };
+    document.addEventListener("pointerdown", captureMapPointer, true);
+    return () => document.removeEventListener("pointerdown", captureMapPointer, true);
+  }, []);
 
   const organizationsByMarkerId = useMemo(() => new Map(
     [
@@ -284,6 +308,7 @@ export function ExistingWorkspaceFoundation({
 
   const selectLens = useCallback((lens: ParticipantLensId) => {
     if (lens === "capabilities") return;
+    setMarkerPopoverPoint(null);
     updateSpatialContext((current) => {
       if (current.activeLens === lens) return current;
       return Object.freeze({
@@ -299,6 +324,7 @@ export function ExistingWorkspaceFoundation({
   const focusNetwork = useCallback((intent: "organizations" | "capabilities") => {
     selectLens("intelligence");
     setMobileDetailOpen(false);
+    setMarkerPopoverPoint(null);
     updateSpatialContext((current) => Object.freeze({
       ...current,
       sheetSnapPoint: current.sheetSnapPoint === "peek" ? "partial" : current.sheetSnapPoint,
@@ -483,6 +509,27 @@ export function ExistingWorkspaceFoundation({
       placement="sheet"
     />
   );
+  const popoverActions = !selectedHome ? (
+    <ExchangeRoomActionController
+      activeLens={activeLens}
+      actions={exchangeRoomActions}
+      onNetworkFocus={focusNetwork}
+      placement="popover"
+      hideUnavailable
+    />
+  ) : null;
+
+  const openSelectedDetail = () => {
+    setMarkerPopoverPoint(null);
+    setMobileDetailOpen(true);
+    updateSpatialContext((current) => Object.freeze({
+      ...current,
+      panelOpen: true,
+      sheetSnapPoint: "expanded",
+    }));
+    window.requestAnimationFrame(() => document.getElementById("organization-detail-panel")?.focus({ preventScroll: true }));
+  };
+
   const detailContent = (
     <div
       id="organization-detail-panel"
@@ -525,7 +572,7 @@ export function ExistingWorkspaceFoundation({
 
       {selectedOrganization ? (
         <>
-          <p className={styles.detailMetadata}>{matchLabel(selectedOrganization, t)} · {locality}</p>
+          <p className={styles.detailMetadata}>{matchLabel(selectedOrganization, t)} · {selectedOrganization.profile.location.localityName}</p>
           <dl className={styles.organizationFacts}>
             <div>
               <dt>{t("networkWorkspace.detail.baseLocality")}</dt>
@@ -583,11 +630,14 @@ export function ExistingWorkspaceFoundation({
               </p>
             ) : null}
           </section>
-          <p className={styles.detailMetadata}>{t("networkWorkspace.match.disclaimer")}</p>
+          <details className={styles.provenance}>
+            <summary>{t("networkWorkspace.detail.profileEvidenceTitle")}</summary>
+            <p className={styles.detailMetadata}>{t("networkWorkspace.detail.profileEvidence")}</p>
+          </details>
+          <div className={styles.detailActions}>{contextualActions}</div>
         </>
       ) : (
         <>
-          <p className={styles.detailMetadata}>{t("networkWorkspace.home.activeNode")} · {locality}</p>
           <dl className={styles.organizationFacts}>
             <div><dt>{t("networkWorkspace.home.locality")}</dt><dd>{locality}</dd></div>
             <div><dt>{t("networkWorkspace.home.visibleLocation")}</dt><dd>{locationLabel}</dd></div>
@@ -623,6 +673,12 @@ export function ExistingWorkspaceFoundation({
           focusedMarkerId={selectedObjectId}
           onOrganizationMarkerSelect={(markerId) => {
             selectObject(markerId);
+            if (wideLayout && lastMapPointerRef.current) {
+              setMarkerPopoverPoint(lastMapPointerRef.current);
+              setMobileDetailOpen(false);
+              return;
+            }
+            setMarkerPopoverPoint(null);
             setMobileDetailOpen(true);
             window.requestAnimationFrame(() => document.getElementById("organization-detail-panel")?.focus({ preventScroll: true }));
           }}
@@ -663,6 +719,44 @@ export function ExistingWorkspaceFoundation({
           </form>
         ) : null}
 
+        {wideLayout && markerPopoverPoint ? (
+          <aside
+            className={styles.markerPopover}
+            style={{ left: markerPopoverPoint.x, top: markerPopoverPoint.y }}
+            role="dialog"
+            aria-label={selectedOrganization?.profile.displayName ?? homeMarker.label}
+          >
+            <button
+              type="button"
+              className={styles.popoverClose}
+              onClick={() => setMarkerPopoverPoint(null)}
+              aria-label={t("networkWorkspace.detail.close")}
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+            <p className={styles.eyebrow}>{selectedHome ? t("networkWorkspace.home.eyebrow") : t("networkWorkspace.detail.eyebrow")}</p>
+            <h2>{selectedOrganization?.profile.displayName ?? homeMarker.label}</h2>
+            <p className={styles.popoverLocation}>
+              {selectedOrganization?.profile.location.localityName ?? locality}
+            </p>
+            {selectedOrganization && capabilitySummary(selectedOrganization) ? (
+              <p className={styles.popoverSummary}>{capabilitySummary(selectedOrganization)}</p>
+            ) : null}
+            <div className={styles.popoverPrimaryRow}>
+              {selectedHome ? (
+                <Link className={styles.primaryAction} href="/organization-profile">
+                  {t("networkWorkspace.home.manageProfile")}
+                </Link>
+              ) : (
+                <button type="button" className={styles.primaryAction} onClick={openSelectedDetail}>
+                  {t("networkWorkspace.detail.viewProfile")}
+                </button>
+              )}
+            </div>
+            {popoverActions}
+          </aside>
+        ) : null}
+
         <ExchangeBottomSheet
           desktopPanel
           labelledBy="mobile-exchange-sheet-title"
@@ -694,7 +788,6 @@ export function ExistingWorkspaceFoundation({
               <span>{detailOpen ? t("networkWorkspace.detail.eyebrow") : locality}</span>
             </>
           )}
-          actionRail={contextualActions}
         >
           {detailOpen ? detailContent : discoveryRestricted ? (
             <StatePanel state="permission" title={t("networkWorkspace.status.permission.title")}>
@@ -725,8 +818,12 @@ export function ExistingWorkspaceFoundation({
                       card={card}
                       labels={cardLabels}
                       selected={selected}
-                      onSelect={() => selectObject(organization.marker.id, index)}
+                      onSelect={() => {
+                        setMarkerPopoverPoint(null);
+                        selectObject(organization.marker.id, index);
+                      }}
                       onOpen={() => {
+                        setMarkerPopoverPoint(null);
                         selectObject(organization.marker.id, index);
                         setMobileDetailOpen(true);
                         window.requestAnimationFrame(() => document.getElementById("organization-detail-panel")?.focus({ preventScroll: true }));
@@ -741,7 +838,9 @@ export function ExistingWorkspaceFoundation({
                   </div>
                 );
               }) : (
-                <p className={styles.emptyResults} role="status">{t("interface.search.empty")}</p>
+                <p className={styles.emptyResults} role="status">
+                  {t("networkWorkspace.search.noResultsTitle")} · {t("networkWorkspace.search.noResultsBody")}
+                </p>
               )}
               {discovery && discovery.pageCount > 1 ? (
                 <nav className={styles.networkPagination} aria-label={t("networkWorkspace.search.paginationLabel")}>

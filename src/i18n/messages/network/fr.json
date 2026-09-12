@@ -90,7 +90,8 @@
     "website": "Visiter le site de l’organisation",
     "profileEvidenceTitle": "Limite de preuve du profil",
     "profileEvidence": "Les informations du profil et des capacités sont fournies par l’organisation, sauf si elles sont identifiées séparément comme vérifiées. La découverte ne certifie ni la capacité, ni la performance, ni l’éligibilité.",
-    "actions": "Actions de l’organisation"
+    "actions": "Actions de l’organisation",
+    "viewProfile": "Voir le profil"
   },
   "actions": {
     "manage-profile": "Gérer le profil",
