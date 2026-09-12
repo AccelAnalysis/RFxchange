@@ -38,10 +38,7 @@ assert.ok(
 );
 
 for (const status of ["loading", "empty", "error", "permission", "expired", "recovery"]) {
-  assert.ok(
-    networkCatalog.status?.[status]?.title && networkCatalog.status?.[status]?.body,
-    `Brand B6a localized state boundary is missing ${status}.`,
-  );
+  assert.ok(networkCatalog.status?.[status]?.title && networkCatalog.status?.[status]?.body, `Brand B6a localized state boundary is missing ${status}.`);
 }
 assert.ok(
   component.includes('t(`networkWorkspace.status.${status}.title`)') &&
@@ -57,6 +54,9 @@ for (const requirement of [
   "ExchangeBottomSheet",
   "desktopPanel",
   "authorizedObjectIds",
+  "styles.markerPopover",
+  'placement="popover"',
+  "hideUnavailable",
 ]) {
   assert.ok(component.includes(requirement), `Brand B6a workspace implementation is missing ${requirement}.`);
 }
@@ -69,24 +69,22 @@ assert.ok(
   "Brand B6a workspace continuity must use the canonical authority-safe participant spatial context.",
 );
 
-assert.equal(networkCatalog.home.eyebrow, "Organization home");
+assert.equal(networkCatalog.home.eyebrow, "Your organization");
 assert.equal(networkCatalog.provenance.eyebrow, "Map information");
-assert.equal(networkCatalog.home.manageProfile, "Manage organization profile");
-assert.match(
-  networkCatalog.home.scopeBody,
-  /Exchange tools currently available to your account/,
-  "The workspace must describe available participant tools in ordinary customer language.",
+assert.equal(networkCatalog.home.manageProfile, "Manage profile");
+assert.equal(networkCatalog.search.noResultsTitle, "No matches in this area");
+assert.match(networkCatalog.home.scopeBody, /Find organizations and capabilities/);
+assert.doesNotMatch(networkCatalog.home.scopeBody, /\b(?:Slice|Wave|authorized|permitted|governed|domain)\b/i);
+assert.ok(!networkCatalog.match.disclaimer.includes("Matching explains profile overlap"));
+
+assert.ok(
+  component.includes("viewMode: \"2d\"") && component.includes("pitch: 0") && component.includes("bearing: 0"),
+  "The ordinary Exchange must settle into a quiet 2D default while preserving explicitly chosen camera state.",
 );
-assert.match(
-  networkCatalog.home.scopeBody,
-  /Unavailable actions are identified where they appear/,
-  "Unavailable capabilities must remain clear at the point where a participant encounters them.",
-);
-assert.doesNotMatch(
-  networkCatalog.home.scopeBody,
-  /\b(?:Slice|Wave|authorized|permitted|governed|domain)\b/i,
-  "Workspace scope copy must not expose internal delivery or authority language.",
-);
+assert.equal(component.includes("actionRail={contextualActions}"), false, "Record actions must not remain as a permanent floating bottom rail.");
+assert.equal(component.includes("networkWorkspace.match.disclaimer"), false, "Matching caveats must not persist as ambient map copy.");
+assert.match(styles, /\.markerPopover/);
+assert.match(styles, /\.emptyResults/);
 
 assert.ok(
   page.includes("ExistingWorkspaceFoundation") &&
@@ -96,23 +94,15 @@ assert.ok(
   "The authenticated map route must consume the B6a workspace foundation and server-authorized discovery rather than rebuilding the scene.",
 );
 assert.ok(
-  runtime.includes("readonly organizationId: string") &&
-    runtime.includes("organizationId,") &&
-    runtime.includes("access.membership.organizationId"),
+  runtime.includes("readonly organizationId: string") && runtime.includes("organizationId,") && runtime.includes("access.membership.organizationId"),
   "B6a must receive organization identity from the authenticated server projection.",
 );
 assert.ok(
-  !networkRuntime.includes("open-required") &&
-    networkRuntime.includes("evaluateGeographyParticipation") &&
-    networkRuntime.includes('"network-participation"'),
+  !networkRuntime.includes("open-required") && networkRuntime.includes("evaluateGeographyParticipation") && networkRuntime.includes('"network-participation"'),
   "The map shell must remain available to controlled participants while geography authority is revalidated on the server.",
 );
 
-assert.equal(
-  /#(?:0b0b0d|f7f3ea|252932|d6a23a|8a6418|2e5eaa|3b7b57)\b/i.test(styles),
-  false,
-  "Brand B6a workspace styling must consume semantic tokens rather than approved raw palette literals.",
-);
+assert.equal(/#(?:0b0b0d|f7f3ea|252932|d6a23a|8a6418|2e5eaa|3b7b57)\b/i.test(styles), false, "Brand B6a workspace styling must consume semantic tokens rather than approved raw palette literals.");
 assert.ok(
   styles.includes("focus-visible") &&
     styles.includes("@media (max-width: 1024px)") &&
@@ -141,6 +131,4 @@ assert.ok(
   "Brand B6a must remain aligned with canonical acceptance.",
 );
 
-console.log(
-  "Brand Gate B6a existing workspace validated: authenticated organization home, deterministic UI-only state, responsive contextual sheets, map information, recovery boundaries, server-authorized discovery and participant-facing availability without internal delivery jargon.",
-);
+console.log("Brand Gate B6a existing workspace validated with marker-context selection, quiet default camera, contextual actions, restrained empty states, authority-safe continuity, and simplified participant language.");
