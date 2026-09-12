@@ -305,14 +305,6 @@ export function ExistingWorkspaceFoundation({
   const locationLabel = homeMarker.accessibleLocationLabel ?? `${locality} organization location`;
   const serviceAreaNames = new Map(serviceAreaOptions.map((option) => [option.id, option.name]));
   const networkMarkers = [...organizationsByMarkerId.values()].map((organization) => organization.marker);
-  const defaultCamera = spatialContext.camera ?? Object.freeze({
-    longitude: homeMarker.coordinate[0],
-    latitude: homeMarker.coordinate[1],
-    zoom: Math.min(model.selectedGeography.defaultCamera.maximumZoom, 11.5),
-    pitch: 0,
-    bearing: 0,
-    viewMode: "2d" as const,
-  });
 
   const selectLens = useCallback((lens: ParticipantLensId) => {
     if (lens === "capabilities") return;
@@ -690,7 +682,7 @@ export function ExistingWorkspaceFoundation({
             setMobileDetailOpen(true);
             window.requestAnimationFrame(() => document.getElementById("organization-detail-panel")?.focus({ preventScroll: true }));
           }}
-          initialCamera={defaultCamera}
+          initialCamera={spatialContext.camera}
           onCameraChange={(camera) => updateSpatialContext((current) => Object.freeze({ ...current, camera }))}
           interactive
           showSearch={false}
