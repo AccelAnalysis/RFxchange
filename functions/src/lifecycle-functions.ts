@@ -16,6 +16,7 @@ export const lifecycleEnrollmentFromActivation = onDocumentWritten({ document: "
 function activityTrigger(document: string, actorField: "actorUserId" | "actor" = "actorUserId") {
   return onDocumentCreated({ document, region: RFXCHANGE_FUNCTIONS_REGION, retry: true }, async event => {
     const data = event.data?.data();
+    if (!data) return;
     const actorUserId = actorField === "actor" ? data?.actor?.userId : data?.actorUserId;
     if (typeof actorUserId !== "string" || typeof data.occurredAt !== "string" || !Number.isFinite(Date.parse(data.occurredAt))) return;
     const ref = getFunctionsFirestore().collection("lifecycleEnrollments").doc(actorUserId);

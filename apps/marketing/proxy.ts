@@ -23,7 +23,10 @@ export function proxy(request: NextRequest) {
       httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 30 * 86400,
     });
   }
-  if (campaign) response.cookies.set(MARKETING_LAST_CAMPAIGN_COOKIE, campaign, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 30 * 86400 });
+  if (campaign) {
+    response.cookies.set(MARKETING_LAST_CAMPAIGN_COOKIE, campaign, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 30 * 86400 });
+    response.headers.set("Cache-Control", "private, no-store");
+  }
   return response;
 }
 
