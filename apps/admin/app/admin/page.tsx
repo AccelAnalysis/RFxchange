@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
+import { AdminAccessRecovery } from "@/src/components/admin/AdminAccessRecovery";
 
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
 import { resolveAdminPortalAccess } from "@/src/infrastructure/auth/admin-route-runtime";
@@ -19,7 +20,7 @@ export default async function AdminEntryPage() {
   ) {
     redirect("/signin?returnTo=%2Fadmin");
   }
-  if (access.kind !== "authorized") notFound();
+  if (access.kind !== "authorized") return <AdminAccessRecovery access={access} />;
 
   // Registry order intentionally prefers the truthful operating core when a GLOBAL grant permits it.
   redirect(access.destinations[0].href);

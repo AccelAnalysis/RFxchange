@@ -1,0 +1,13 @@
+.page { min-height: 100dvh; background: var(--semantic-canvas); color: var(--semantic-text-primary); }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; border-bottom: 1px solid var(--semantic-border-subtle); background: var(--semantic-canvas-elevated); }
+.header > span { color: var(--semantic-text-secondary); font-size: .875rem; }
+.card { width: min(calc(100% - 32px), 680px); margin: 64px auto; padding: clamp(24px, 5vw, 48px); border: 1px solid var(--semantic-border-subtle); border-radius: 24px; background: var(--semantic-canvas-elevated); box-shadow: var(--elevation-card); }
+.eyebrow { color: var(--semantic-text-secondary); font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.card h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.15; letter-spacing: -.03em; margin: 16px 0 24px; }
+.card p { line-height: 1.65; color: var(--semantic-text-secondary); }
+.identity { overflow-wrap: anywhere; }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.actions a { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 10px 20px; border: 1px solid var(--semantic-border-strong); border-radius: 14px; color: var(--semantic-text-primary); font-weight: 650; }
+.actions .primary { background: var(--semantic-action-primary-background); border-color: transparent; color: var(--semantic-action-primary-foreground); }
+.actions a:focus-visible { outline: var(--focus-outline-width) solid var(--semantic-border-focus); outline-offset: var(--focus-outline-offset); }
+@media (max-width: 480px) { .card { margin-block: 32px; } .actions { align-items: stretch; flex-direction: column; } }

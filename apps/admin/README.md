@@ -23,3 +23,7 @@ The root application's Admin routes remain available during the deployment trans
 `npm run check` includes this application's build and HTTP smoke checks. Existing administrative authorization, scope, lifecycle and audit regression tests remain required.
 
 App Hosting recognizes the root `nx.json` and per-application `project.json` files, so it installs from the repository lockfile and retains shared sources. Each Nx build target executes the existing Next.js build in its own directory; build caching and Nx Cloud are disabled for release builds. Shared Next configuration lives in `src/config/next-config.ts`, outside the entry file rewritten by the Firebase adapter.
+
+## Signed-in entry recovery
+
+The `/admin` entry route distinguishes missing administrator setup, absent active workspace grants and privileged-security restrictions from a missing page. An authenticated account that cannot enter receives a recovery view with its own account email, a fresh access check and sign-out. Authorized administrators still enter the first currently permitted destination. The resolver, scoped grants, privileged-security evaluation, operational pages/APIs and audit behavior are unchanged. This view never creates an administrator, grants permissions, relaxes MFA or unlocks an account.
