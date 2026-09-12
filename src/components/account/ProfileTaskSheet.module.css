@@ -1,0 +1,125 @@
+.primaryTrigger,
+.secondaryTrigger {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: var(--radius-control);
+  font: 650 0.9375rem/1.3 var(--type-interface-family);
+  cursor: pointer;
+}
+
+.primaryTrigger {
+  border: 0;
+  color: var(--semantic-action-primary-foreground);
+  background: var(--semantic-action-primary-background);
+}
+
+.secondaryTrigger {
+  border: 1px solid var(--semantic-border-subtle);
+  color: var(--semantic-text-primary);
+  background: var(--semantic-canvas-elevated);
+}
+
+.primaryTrigger:focus-visible,
+.secondaryTrigger:focus-visible,
+.close:focus-visible {
+  outline: 2px solid white;
+  box-shadow: 0 0 0 5px var(--semantic-border-focus);
+}
+
+.dialog {
+  width: min(760px, calc(100vw - 32px));
+  max-width: 760px;
+  max-height: min(88dvh, 900px);
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--semantic-border-subtle);
+  border-radius: 22px;
+  color: var(--semantic-text-primary);
+  background: var(--semantic-canvas-elevated);
+  box-shadow: var(--elevation-overlay);
+}
+
+.dialog::backdrop {
+  background: rgba(27, 36, 48, 0.36);
+  backdrop-filter: blur(4px);
+}
+
+.header {
+  min-height: 64px;
+  padding: 12px 14px 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--semantic-border-subtle);
+  background: var(--semantic-canvas-elevated);
+}
+
+.header h2 {
+  margin: 0;
+  font: 700 1.125rem/1.3 var(--type-display-family);
+}
+
+.close {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 50%;
+  color: var(--semantic-text-secondary);
+  background: var(--semantic-surface-subtle);
+  cursor: pointer;
+  font-size: 1.45rem;
+}
+
+.body {
+  max-height: calc(min(88dvh, 900px) - 65px);
+  padding: 20px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* A focused task sheet supplies its own title and task boundary. Hide the legacy
+   page-level heading and tab chooser so the participant sees only the selected task. */
+.body[data-hide-child-chrome="true"] > section > header,
+.body[data-hide-child-chrome="true"] > section > nav,
+.body[data-hide-child-chrome="true"] > section > [role="tablist"] {
+  display: none !important;
+}
+
+.body[data-hide-child-chrome="true"] > section {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* These legacy credential inputs are implementation details. Source provenance is
+   recorded by the application; raw storage IDs are not participant-editable. */
+.body label:has(input[name="sourceLabel"]),
+.body label:has(textarea[name="evidenceAssetIds"]) {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .dialog {
+    width: 100vw;
+    max-width: none;
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px));
+    margin: auto 0 0;
+    border-radius: 22px 22px 0 0;
+  }
+
+  .body {
+    max-height: calc(100dvh - 65px - env(safe-area-inset-top, 0px));
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .dialog::backdrop { backdrop-filter: none; }
+}
