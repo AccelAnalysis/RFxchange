@@ -7,8 +7,7 @@ export const exchangeLightBasemapConfig = Object.freeze({
   showRoadLabels: false,
   showPlaceLabels: false,
   showTransitLabels: false,
-  // 3D remains available as an explicit map option. The ordinary Exchange workspace
-  // supplies a 2D camera by default instead of opening in a pitched scene.
+  // Keep the basemap restrained while preserving the original 3D Exchange camera as the default experience.
   show3dObjects: true,
 } as const);
 
