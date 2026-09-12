@@ -96,6 +96,7 @@ const PERSISTENT_PARTICIPANT_PATH_PREFIXES = Object.freeze([
   "/capabilities",
   "/referrals",
   "/organization-profile",
+  "/account/communications",
   "/quick-start",
   "/provider-application",
   "/commercial/founding",
@@ -120,6 +121,7 @@ export function participantLensForPathname(pathname: string): ParticipantLensId 
 export function participantUtilityForPathname(pathname: string): ParticipantUtilityId | null {
   if (
     matchesPrefix(pathname, PARTICIPANT_UTILITY_DESTINATIONS.account.href)
+    || matchesPrefix(pathname, "/account/communications")
     || matchesPrefix(pathname, "/provider-application")
   ) {
     return "account";

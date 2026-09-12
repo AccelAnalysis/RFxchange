@@ -279,6 +279,133 @@
       "marketTitle": "Fähigkeiten und Erfahrung",
       "marketBody": "Prüfen Sie Ihre Fähigkeiten, Branche und bisherigen Projekte.",
       "publicCapabilitiesEmpty": "Noch keine öffentlich geteilten Fähigkeiten."
+    },
+    "services": {
+      "common": {
+        "back": "Zurück zu Ihrer Organisation",
+        "loading": "Wird geladen…",
+        "saving": "Wird gespeichert…",
+        "loadError": "Diese Informationen konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+        "saveError": "Ihre Änderungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+        "conflict": "Diese Informationen haben sich geändert. Laden Sie die Seite neu, bevor Sie es erneut versuchen.",
+        "denied": "Ihr aktueller Zugriff erlaubt diese Aktion nicht."
+      },
+      "preferences": {
+        "title": "Kommunikationseinstellungen",
+        "intro": "Wählen Sie, wie RFxchange Sie kontaktiert. Sie können diese Nachrichten jederzeit abbestellen.",
+        "optional": "Optionale Mitteilungen",
+        "consent": "Ich möchte Erinnerungen zur Einrichtung meiner Organisation, Neuigkeiten aus der Community und Einladungen zur Rückkehr zu RFxchange erhalten.",
+        "email": "E-Mail",
+        "sms": "SMS",
+        "smsAvailable": "SMS werden an Ihre bestätigte Telefonnummer gesendet. Antworten Sie mit STOP, um sich abzumelden. Es können Nachrichten- und Datengebühren anfallen.",
+        "smsUnavailable": "Für SMS ist eine bestätigte Telefonnummer in Ihrem Konto erforderlich.",
+        "timeZone": "Zeitzone",
+        "timing": "Optionale Mitteilungen werden zwischen 9 und 20 Uhr in Ihrer Zeitzone gesendet, höchstens einmal täglich. Sicherheitsmeldungen und notwendige Servicenachrichten werden separat verwaltet.",
+        "save": "Einstellungen speichern",
+        "saved": "Ihre Einstellungen wurden gespeichert."
+      },
+      "data": {
+        "title": "Öffentliche Unternehmensdaten",
+        "intro": "Prüfen Sie die Angaben öffentlicher Quellen zu Ihrer Organisation. Ergebnisse ändern Ihr Profil nicht und gelten nicht als Verifizierung.",
+        "reason": "Grund für die nächste Abfrage oder Prüfung",
+        "uei": "UEI, falls Ihre Organisation eine hat",
+        "ueiHelp": "Eine UEI hilft, die richtige behördliche Registrierung und Vergabehistorie zu finden.",
+        "check": "Öffentliche Quellen abfragen",
+        "checking": "Abfrage läuft…",
+        "checked": "Abfrage abgeschlossen. Prüfen Sie die Ergebnisse unten.",
+        "empty": "Noch keine Abfragen öffentlicher Daten.",
+        "runTitle": "Abfrage vom {date}",
+        "inProgress": "Abfrage läuft",
+        "reviewed": "Geprüft",
+        "ready": "Bereit zur Prüfung",
+        "unavailable": "Diese Quelle ist nicht verfügbar. Sie können Ihre Organisation weiter einrichten.",
+        "noMatch": "Kein passender Eintrag gefunden.",
+        "skipped": "Geben Sie eine UEI ein, um die Vergabehistorie abzufragen.",
+        "findings": "Quellenergebnisse",
+        "source": "Quelle ansehen",
+        "conflicts": "Einige Ergebnisse weichen von Ihren Organisationsdaten ab. Prüfen Sie die Quellen, bevor Sie Ihr Profil ändern.",
+        "markReviewed": "Als geprüft markieren"
+      },
+      "help": {
+        "title": "Wie können wir Ihnen helfen?",
+        "nav": "Hilfe",
+        "intro": "Finden Sie Antworten zur Anmeldung bei RFxchange und zur Nutzung des Exchange.",
+        "question": "Ihre Frage",
+        "search": "Antwort finden",
+        "readMore": "Mehr erfahren",
+        "common": "Häufige Fragen",
+        "results": "Antworten",
+        "empty": "Der Hilfeleitfaden enthält dazu keine Antwort. Versuchen Sie eine Frage zur Anmeldung, zum Zugriff, zu Fähigkeiten oder zur Mitgliedschaft.",
+        "articles": {
+          "join": {
+            "title": "Wie melde ich mich an?",
+            "answer": "Wählen Sie Kostenlos beitreten. Erstellen Sie Ihr Konto, suchen Sie Ihre Organisation und folgen Sie den Einrichtungsschritten. Ist Ihre Organisation bereits aufgeführt, wählen Sie sie aus, um Zugriff zu erhalten, ohne einen doppelten Eintrag anzulegen.",
+            "keywords": "beitreten anmelden anmeldung registrieren starten konto"
+          },
+          "organization": {
+            "title": "Meine Organisation ist bereits aufgeführt",
+            "answer": "Suchen Sie Ihre Organisation während der Einrichtung. Die Auswahl eines Eintrags startet den Zugriffsprozess; sie verifiziert Ihre Organisation nicht automatisch. Wird der Eintrag bereits verwaltet, bitten Sie um Zugriff oder eine Einladung.",
+            "keywords": "organisation unternehmen aufgeführt doppelt einladung"
+          },
+          "capabilities": {
+            "title": "Was sind Fähigkeiten?",
+            "answer": "Fähigkeiten beschreiben, was Ihre Organisation anbieten kann. Wählen Sie passende Einträge für Ihr Unternehmen und bestätigen Sie Vorschläge, bevor diese Teil Ihres Profils werden.",
+            "keywords": "fähigkeit fähigkeiten kompetenzen amacs profil leistungen"
+          },
+          "opportunities": {
+            "title": "Wie finde ich Geschäftsmöglichkeiten?",
+            "answer": "Nutzen Sie nach der Einrichtung die RFx-Ansicht, um verfügbare Geschäftsmöglichkeiten zu erkunden. Suchen und filtern Sie Ergebnisse, prüfen Sie die Details und verwenden Sie die jeweils verfügbaren Aktionen.",
+            "keywords": "rfx möglichkeit möglichkeiten chancen suchen antworten"
+          },
+          "pricing": {
+            "title": "Wo finde ich die Mitgliedschaftsoptionen?",
+            "answer": "Auf der Mitgliedschaftsseite finden Sie das aktuelle Angebot und seine Verfügbarkeit. Eine Mitgliedschaft verifiziert Ihre Organisation nicht und garantiert keinen geschäftlichen Erfolg.",
+            "keywords": "preis preise kosten mitgliedschaft abrechnung abonnement"
+          },
+          "privacy": {
+            "title": "Wer kann meine Informationen sehen?",
+            "answer": "Öffentliche Informationen und private Kontodaten werden getrennt behandelt. Einzelheiten finden Sie in der Datenschutzerklärung. Dieser Assistent kann keine Konten, privaten Organisationsdaten oder Abrechnungsinformationen abrufen.",
+            "keywords": "datenschutz privat daten informationen sicherheit"
+          },
+          "signin": {
+            "title": "Ich brauche Hilfe bei der Anmeldung",
+            "answer": "Wählen Sie Anmelden, um auf Ihr Konto zuzugreifen. Nutzen Sie bei Bedarf die Passwortwiederherstellung. Dieser Assistent kann Ihr Passwort nicht ändern und keinen Zugriff auf eine Organisation gewähren.",
+            "keywords": "anmelden anmeldung login passwort zugriff gesperrt"
+          }
+        }
+      },
+      "admin": {
+        "communications": "Kommunikation",
+        "lifecycle": "Kommunikationsabläufe",
+        "lifecycleIntro": "Konfigurieren Sie Nachrichten zur Einrichtung, Bindung und Rückkehr. Jeder Versand erfordert eine aktuelle Einwilligung und einen verfügbaren Kanal.",
+        "manageHelp": "Öffentliche Hilfeantworten verwalten",
+        "timing": "Zeitplanung der Abläufe",
+        "enable": "Abläufe aktivieren, sobald der Versand eingerichtet ist",
+        "setupDelayHours": "Einrichtungserinnerung nach (Stunden)",
+        "retentionDays": "Bindungsnachricht nach Inaktivität (Tagen)",
+        "winBackDays": "Rückkehreinladung nach Inaktivität (Tagen)",
+        "minimumIntervalHours": "Mindestabstand zwischen Nachrichten (Stunden)",
+        "reason": "Grund der Änderung",
+        "save": "Konfiguration speichern",
+        "saved": "Konfiguration gespeichert.",
+        "helpTitle": "Öffentlicher Hilfeleitfaden",
+        "helpIntro": "Veröffentlichen Sie freigegebene öffentliche Antworten. Kontodaten und private Supportfälle sind ausgeschlossen.",
+        "answers": "Öffentliche Antworten",
+        "answerNumber": "Antwort {number}",
+        "question": "Frage",
+        "answer": "Antwort",
+        "keywords": "Suchbegriffe",
+        "remove": "Antwort entfernen",
+        "add": "Antwort hinzufügen",
+        "publicationReason": "Grund der Veröffentlichung",
+        "confirmPublic": "Diese Antworten sind für alle freigegeben und enthalten keine privaten Konto- oder Supportinformationen.",
+        "publish": "Öffentliche Hilfe veröffentlichen",
+        "published": "Öffentliche Hilfe veröffentlicht.",
+        "system": "Integrationen und System",
+        "enrichment": "Prüfung der Organisationsdaten",
+        "organizationId": "Organisations-ID",
+        "openReview": "Prüfung öffnen"
+      }
     }
   }
 }

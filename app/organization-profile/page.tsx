@@ -353,6 +353,7 @@ export default async function OrganizationProfilePage() {
           <details className={styles.section} id="organization-locations">
             <summary>{account.enrichment}</summary>
             <div className={styles.sectionBody}>
+              <Link className={styles.quietLink} href="/organization-profile/public-data">{dictionary.interface.services.data.title}</Link>
               <Suspense fallback={<OptionalPanelState title={copy.geographyTitle} message={copy.geographyLoading} />}>
                 <GeographyCard pendingMap={pendingMap} markerActive={markerActivation?.status === "active"} locationVisibility={location?.visibility ?? null} copy={copy} account={account} />
               </Suspense>
@@ -365,6 +366,7 @@ export default async function OrganizationProfilePage() {
           <details className={styles.section} id="organization-settings">
             <summary>{account.settings}</summary>
             <div className={styles.sectionBody}>
+              <Link className={styles.quietLink} href="/account/communications">{dictionary.interface.services.preferences.title}</Link>
               <h2>{account.mapPreferences}</h2>
               <MapMotionPreferenceToggle />
               <dl className={styles.definitionList}>

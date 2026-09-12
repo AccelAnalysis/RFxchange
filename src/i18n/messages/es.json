@@ -279,6 +279,133 @@
       "marketTitle": "Capacidades y experiencia",
       "marketBody": "Revisa tus capacidades, sector y trabajos anteriores.",
       "publicCapabilitiesEmpty": "Aún no compartes capacidades públicamente."
+    },
+    "services": {
+      "common": {
+        "back": "Volver a tu organización",
+        "loading": "Cargando…",
+        "saving": "Guardando…",
+        "loadError": "No se pudo cargar esta información. Inténtalo de nuevo.",
+        "saveError": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+        "conflict": "Esta información ha cambiado. Recarga la página antes de volver a intentarlo.",
+        "denied": "Tu acceso actual no permite esta acción."
+      },
+      "preferences": {
+        "title": "Preferencias de comunicación",
+        "intro": "Elige cómo quieres recibir noticias de RFxchange. Puedes desactivar estos mensajes cuando quieras.",
+        "optional": "Actualizaciones opcionales",
+        "consent": "Acepto recibir recordatorios para configurar mi organización, novedades de la comunidad e invitaciones para volver a RFxchange.",
+        "email": "Correo electrónico",
+        "sms": "Mensajes de texto",
+        "smsAvailable": "Los mensajes se envían a tu teléfono verificado. Responde STOP para cancelar. Pueden aplicarse tarifas de mensajes y datos.",
+        "smsUnavailable": "Los mensajes de texto requieren un número de teléfono verificado en tu cuenta.",
+        "timeZone": "Zona horaria",
+        "timing": "Las actualizaciones opcionales se envían entre las 9:00 y las 20:00 de tu zona horaria, como máximo una vez al día. Los mensajes de seguridad y de servicios esenciales se gestionan por separado.",
+        "save": "Guardar preferencias",
+        "saved": "Tus preferencias se han guardado."
+      },
+      "data": {
+        "title": "Datos empresariales públicos",
+        "intro": "Revisa lo que las fuentes públicas indican sobre tu organización. Los resultados no modifican tu perfil ni constituyen una verificación.",
+        "reason": "Motivo de la próxima consulta o revisión",
+        "uei": "UEI, si tu organización tiene uno",
+        "ueiHelp": "Un UEI ayuda a identificar el registro gubernamental y el historial de adjudicaciones correctos.",
+        "check": "Consultar fuentes públicas",
+        "checking": "Consultando…",
+        "checked": "Consulta completada. Revisa los resultados a continuación.",
+        "empty": "Aún no hay consultas de datos públicos.",
+        "runTitle": "Consulta del {date}",
+        "inProgress": "Consulta en curso",
+        "reviewed": "Revisado",
+        "ready": "Listo para revisar",
+        "unavailable": "Esta fuente no está disponible. Puedes continuar configurando tu organización.",
+        "noMatch": "No se encontraron registros coincidentes.",
+        "skipped": "Introduce un UEI para consultar el historial de adjudicaciones.",
+        "findings": "Resultados de la fuente",
+        "source": "Ver fuente",
+        "conflicts": "Algunos resultados difieren de los datos de tu organización. Revisa las fuentes antes de cambiar tu perfil.",
+        "markReviewed": "Marcar como revisado"
+      },
+      "help": {
+        "title": "¿Cómo podemos ayudarte?",
+        "nav": "Ayuda",
+        "intro": "Encuentra respuestas sobre cómo unirte a RFxchange y usar el Exchange.",
+        "question": "Tu pregunta",
+        "search": "Buscar respuesta",
+        "readMore": "Más información",
+        "common": "Preguntas frecuentes",
+        "results": "Respuestas",
+        "empty": "La guía de ayuda no tiene una respuesta para eso. Prueba con una pregunta sobre registro, acceso, capacidades o membresía.",
+        "articles": {
+          "join": {
+            "title": "¿Cómo me registro?",
+            "answer": "Selecciona Unirse gratis. Crea tu cuenta, busca tu organización y sigue los pasos de configuración. Si ya aparece en la lista, selecciónala para establecer acceso sin crear un duplicado.",
+            "keywords": "unirme registrarme registro empezar cuenta unir"
+          },
+          "organization": {
+            "title": "Mi organización ya aparece en la lista",
+            "answer": "Busca tu organización durante la configuración. Seleccionar una entrada inicia el proceso de acceso; no verifica automáticamente la organización. Si alguien ya la administra, solicita acceso o una invitación.",
+            "keywords": "organización empresa reclamar listado duplicado invitación"
+          },
+          "capabilities": {
+            "title": "¿Qué son las capacidades?",
+            "answer": "Las capacidades describen lo que tu organización puede ofrecer. Elige las entradas que correspondan a tu negocio y confirma cualquier sugerencia antes de incorporarla al perfil.",
+            "keywords": "capacidad capacidades amacs perfil servicios"
+          },
+          "opportunities": {
+            "title": "¿Cómo encuentro oportunidades?",
+            "answer": "Tras la configuración, usa la vista RFx para explorar las oportunidades disponibles. Busca y filtra resultados, revisa los detalles y utiliza las acciones disponibles para cada oportunidad.",
+            "keywords": "rfx oportunidad oportunidades buscar responder"
+          },
+          "pricing": {
+            "title": "¿Dónde consulto las opciones de membresía?",
+            "answer": "Consulta la página de membresía para conocer la oferta y disponibilidad actuales. La membresía no constituye una verificación de la organización ni garantiza resultados comerciales.",
+            "keywords": "precio precios coste membresía facturación suscripción"
+          },
+          "privacy": {
+            "title": "¿Quién puede ver mis datos?",
+            "answer": "La información pública y la información privada de la cuenta se gestionan por separado. Consulta la política de privacidad. Este asistente no puede consultar cuentas, registros privados de organizaciones ni datos de facturación.",
+            "keywords": "privacidad privado datos información seguridad"
+          },
+          "signin": {
+            "title": "Necesito ayuda para iniciar sesión",
+            "answer": "Selecciona Iniciar sesión para acceder a tu cuenta. Usa la opción de recuperación de contraseña si la necesitas. Este asistente no puede cambiar tu contraseña ni conceder acceso a una organización.",
+            "keywords": "sesión acceso contraseña entrar bloqueado"
+          }
+        }
+      },
+      "admin": {
+        "communications": "Comunicaciones",
+        "lifecycle": "Secuencias de comunicación",
+        "lifecycleIntro": "Configura mensajes de inicio, retención y regreso. Cada envío requiere consentimiento vigente y un canal disponible.",
+        "manageHelp": "Gestionar respuestas de ayuda pública",
+        "timing": "Plazos de comunicación",
+        "enable": "Activar secuencias cuando el envío esté configurado",
+        "setupDelayHours": "Recordatorio de inicio después de (horas)",
+        "retentionDays": "Retención tras inactividad (días)",
+        "winBackDays": "Invitación de regreso tras inactividad (días)",
+        "minimumIntervalHours": "Intervalo mínimo entre mensajes (horas)",
+        "reason": "Motivo del cambio",
+        "save": "Guardar configuración",
+        "saved": "Configuración guardada.",
+        "helpTitle": "Guía de ayuda pública",
+        "helpIntro": "Publica respuestas públicas aprobadas. Los registros de cuentas y los casos privados de soporte quedan excluidos.",
+        "answers": "Respuestas públicas",
+        "answerNumber": "Respuesta {number}",
+        "question": "Pregunta",
+        "answer": "Respuesta",
+        "keywords": "Palabras clave de búsqueda",
+        "remove": "Eliminar respuesta",
+        "add": "Añadir respuesta",
+        "publicationReason": "Motivo de la publicación",
+        "confirmPublic": "Estas respuestas están aprobadas para lectura pública y no contienen información privada de cuentas ni de soporte.",
+        "publish": "Publicar ayuda pública",
+        "published": "Ayuda pública publicada.",
+        "system": "Integraciones y sistema",
+        "enrichment": "Revisión de datos de la organización",
+        "organizationId": "ID de organización",
+        "openReview": "Abrir revisión"
+      }
     }
   }
 }

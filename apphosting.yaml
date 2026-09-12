@@ -16,6 +16,24 @@ env:
   - variable: RFXCHANGE_FOUNDING_CHECKOUT_RELEASE_MODE
     value: "closed"
     availability: [ BUILD, RUNTIME ]
+  - variable: RFXCHANGE_LIFECYCLE_SEND_MODE
+    value: "disabled"
+    availability: [ RUNTIME ]
+  - variable: RFXCHANGE_EXCHANGE_ORIGIN
+    value: "https://rfxchange--rfxchange.us-east4.hosted.app"
+    availability: [ RUNTIME ]
+  - variable: TELNYX_FROM_NUMBER
+    value: "+18337391819"
+    availability: [ RUNTIME ]
+  - variable: TELNYX_MESSAGING_PROFILE_ID
+    value: "4001a095-92f2-46be-963b-35b48e986600"
+    availability: [ RUNTIME ]
+  - variable: TELNYX_PUBLIC_KEY
+    value: "YwRdhu3lhvntQ7f40ArwEv4hgQLzy0WBghOaPfHUdF0="
+    availability: [ RUNTIME ]
+  - variable: TELNYX_API_KEY
+    secret: TELNYX_API_KEY@1
+    availability: [ RUNTIME ]
   - variable: RFXCHANGE_AI_INTERPRETATION_ENABLED
     value: "false"
     availability: [ BUILD, RUNTIME ]

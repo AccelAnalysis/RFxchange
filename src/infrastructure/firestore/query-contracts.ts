@@ -106,3 +106,6 @@ export const FIRESTORE_AUTOMATIC_INDEX_CONTRACTS = Object.freeze(
 export const FIRESTORE_MANUAL_INDEX_CONTRACTS = Object.freeze(
   FIRESTORE_QUERY_CONTRACTS.filter((query) => query.indexStrategy === "manual-composite"),
 );
+
+// Service-owned query extensions are enumerated alongside their persistence boundaries.
+export { SAD_RUNTIME_MANUAL_INDEXES } from "./sad-runtime-schema";

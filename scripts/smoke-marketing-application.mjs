@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const children = [];
@@ -26,13 +27,31 @@ const visibleText = html => html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, 
 try {
   await start(".", 3015);
   await start("apps/marketing", 3014, { NEXT_PUBLIC_RFXCHANGE_EXCHANGE_ORIGIN: "https://exchange.example" });
+  for (const route of ["/account/communications", "/organization-profile/public-data"]) {
+    const response = await fetch(exchange + route, { redirect: "manual" });
+    assert.equal(response.status, 307, `${route} requires authentication`);
+    assert.match(response.headers.get("location"), /^\/signin\?returnTo=/);
+  }
+  for (const route of ["/api/communications/preferences", "/api/organization-enrichment/public-data?organizationId=untrusted"]) {
+    for (const method of ["GET", "POST"]) {
+      const response = await fetch(exchange + route, { method, headers: { origin: exchange, "content-type": "application/json" }, ...(method === "POST" ? { body: JSON.stringify({ commandId: "untrusted-command" }) } : {}) });
+      assert.ok([401, 403].includes(response.status), `${method} ${route} denies anonymous access even with a valid Origin`);
+    }
+  }
+  assert.equal((await fetch(exchange + "/api/internal/lifecycle", { method: "POST", headers: { authorization: "Bearer untrusted" } })).status, 403, "Unconfigured/invalid worker credentials fail closed");
+  assert.ok([401, 503].includes((await fetch(exchange + "/api/communications/telnyx", { method: "POST", body: "{}" })).status), "Unconfigured/unsigned SMS callbacks fail closed");
   for (const locale of ["en-US", "es", "fr", "it", "de"]) {
-    for (const route of ["/", "/membership", "/founding"]) {
+    for (const route of ["/", "/membership", "/founding", "/help"]) {
       const response = await fetch(marketing + route, { headers: { cookie: `rfx-locale=${locale}` } });
       assert.equal(response.status, 200, `${locale} ${route}`);
       const html = await response.text();
       assert.match(html, new RegExp(`<html lang="${locale}"`));
       assert.doesNotMatch(visibleText(html), /\$\s*49|49\s*\$/);
+      if (route === "/help") {
+        const copy = JSON.parse(readFileSync(path.join(root, "src/i18n/messages", `${locale}.json`), "utf8")).interface.services.help;
+        assert.ok(visibleText(html).includes(copy.title), `${locale} help title`);
+        assert.ok(visibleText(html).includes(copy.search), `${locale} help search action`);
+      }
     }
   }
   for (const route of ["/how-it-works", "/businesses", "/buyers", "/resource-providers", "/about", "/terms", "/privacy", "/platform-rules", "/accessibility", "/image-credits"]) {

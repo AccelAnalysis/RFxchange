@@ -279,6 +279,133 @@
       "marketTitle": "Capacités et expérience",
       "marketBody": "Consultez vos capacités, votre secteur et vos projets passés.",
       "publicCapabilitiesEmpty": "Aucune capacité partagée publiquement pour le moment."
+    },
+    "services": {
+      "common": {
+        "back": "Retour à votre organisation",
+        "loading": "Chargement…",
+        "saving": "Enregistrement…",
+        "loadError": "Impossible de charger ces informations. Veuillez réessayer.",
+        "saveError": "Impossible d’enregistrer vos modifications. Veuillez réessayer.",
+        "conflict": "Ces informations ont changé. Rechargez la page avant de réessayer.",
+        "denied": "Votre accès actuel ne permet pas cette action."
+      },
+      "preferences": {
+        "title": "Préférences de communication",
+        "intro": "Choisissez comment RFxchange vous contacte. Vous pouvez désactiver ces messages à tout moment.",
+        "optional": "Informations facultatives",
+        "consent": "J’accepte de recevoir des rappels pour configurer mon organisation, des nouvelles de la communauté et des invitations à revenir sur RFxchange.",
+        "email": "E-mail",
+        "sms": "SMS",
+        "smsAvailable": "Les SMS sont envoyés à votre numéro vérifié. Répondez STOP pour vous désinscrire. Des frais de messagerie et de données peuvent s’appliquer.",
+        "smsUnavailable": "Les SMS nécessitent un numéro de téléphone vérifié sur votre compte.",
+        "timeZone": "Fuseau horaire",
+        "timing": "Les informations facultatives sont envoyées entre 9 h et 20 h dans votre fuseau horaire, au maximum une fois par jour. Les messages de sécurité et de service essentiels sont gérés séparément.",
+        "save": "Enregistrer les préférences",
+        "saved": "Vos préférences sont enregistrées."
+      },
+      "data": {
+        "title": "Données publiques de l’organisation",
+        "intro": "Consultez les informations des sources publiques sur votre organisation. Les résultats ne modifient pas votre profil et ne constituent pas une vérification.",
+        "reason": "Motif de la prochaine consultation ou révision",
+        "uei": "UEI, si votre organisation en possède un",
+        "ueiHelp": "Un UEI aide à identifier l’inscription officielle et l’historique des marchés correspondants.",
+        "check": "Consulter les sources publiques",
+        "checking": "Consultation…",
+        "checked": "Consultation terminée. Examinez les résultats ci-dessous.",
+        "empty": "Aucune consultation de données publiques pour le moment.",
+        "runTitle": "Consultation du {date}",
+        "inProgress": "Consultation en cours",
+        "reviewed": "Examiné",
+        "ready": "À examiner",
+        "unavailable": "Cette source est indisponible. Vous pouvez poursuivre la configuration de votre organisation.",
+        "noMatch": "Aucun enregistrement correspondant trouvé.",
+        "skipped": "Saisissez un UEI pour consulter l’historique des marchés.",
+        "findings": "Résultats de la source",
+        "source": "Voir la source",
+        "conflicts": "Certains résultats diffèrent des informations de votre organisation. Consultez les sources avant de modifier votre profil.",
+        "markReviewed": "Marquer comme examiné"
+      },
+      "help": {
+        "title": "Comment pouvons-nous vous aider?",
+        "nav": "Aide",
+        "intro": "Trouvez des réponses sur l’inscription à RFxchange et l’utilisation de l’Exchange.",
+        "question": "Votre question",
+        "search": "Trouver une réponse",
+        "readMore": "En savoir plus",
+        "common": "Questions fréquentes",
+        "results": "Réponses",
+        "empty": "Le guide d’aide ne contient pas de réponse à cette question. Essayez une question sur l’inscription, l’accès, les capacités ou l’adhésion.",
+        "articles": {
+          "join": {
+            "title": "Comment m’inscrire?",
+            "answer": "Sélectionnez Rejoindre gratuitement. Créez votre compte, recherchez votre organisation et suivez les étapes de configuration. Si elle est déjà répertoriée, sélectionnez-la pour établir votre accès sans créer de doublon.",
+            "keywords": "inscrire inscription rejoindre commencer compte"
+          },
+          "organization": {
+            "title": "Mon organisation est déjà répertoriée",
+            "answer": "Recherchez votre organisation lors de la configuration. Sélectionner une fiche lance la procédure d’accès; cela ne vérifie pas automatiquement votre organisation. Si quelqu’un la gère déjà, demandez un accès ou une invitation.",
+            "keywords": "organisation entreprise répertoriée doublon invitation"
+          },
+          "capabilities": {
+            "title": "Que sont les capacités?",
+            "answer": "Les capacités décrivent ce que votre organisation peut fournir. Choisissez les entrées adaptées à votre activité et confirmez les suggestions avant de les intégrer à votre profil.",
+            "keywords": "capacité capacités amacs profil services"
+          },
+          "opportunities": {
+            "title": "Comment trouver des opportunités?",
+            "answer": "Après la configuration, utilisez la vue RFx pour explorer les opportunités disponibles. Recherchez et filtrez les résultats, consultez les détails et utilisez les actions proposées pour chaque opportunité.",
+            "keywords": "rfx opportunité opportunités recherche répondre"
+          },
+          "pricing": {
+            "title": "Où consulter les options d’adhésion?",
+            "answer": "Consultez la page d’adhésion pour connaître l’offre actuelle et sa disponibilité. L’adhésion ne constitue pas une vérification de l’organisation et ne garantit aucun résultat commercial.",
+            "keywords": "prix tarif tarifs coût adhésion facturation abonnement"
+          },
+          "privacy": {
+            "title": "Qui peut voir mes informations?",
+            "answer": "Les informations publiques et les données privées du compte sont traitées séparément. Consultez la politique de confidentialité. Cet assistant ne peut pas consulter les comptes, les dossiers privés des organisations ni les informations de facturation.",
+            "keywords": "confidentialité privé données informations sécurité"
+          },
+          "signin": {
+            "title": "J’ai besoin d’aide pour me connecter",
+            "answer": "Sélectionnez Se connecter pour accéder à votre compte. Utilisez l’option de récupération du mot de passe si nécessaire. Cet assistant ne peut pas modifier votre mot de passe ni accorder l’accès à une organisation.",
+            "keywords": "connexion connecter passe accès bloqué"
+          }
+        }
+      },
+      "admin": {
+        "communications": "Communications",
+        "lifecycle": "Parcours de communication",
+        "lifecycleIntro": "Configurez les messages de démarrage, de fidélisation et de retour. Chaque envoi nécessite un consentement actuel et un canal disponible.",
+        "manageHelp": "Gérer les réponses de l’aide publique",
+        "timing": "Calendrier des parcours",
+        "enable": "Activer les parcours lorsque l’envoi est configuré",
+        "setupDelayHours": "Rappel de configuration après (heures)",
+        "retentionDays": "Fidélisation après inactivité (jours)",
+        "winBackDays": "Invitation à revenir après inactivité (jours)",
+        "minimumIntervalHours": "Intervalle minimal entre les messages (heures)",
+        "reason": "Motif de la modification",
+        "save": "Enregistrer la configuration",
+        "saved": "Configuration enregistrée.",
+        "helpTitle": "Guide d’aide publique",
+        "helpIntro": "Publiez des réponses publiques approuvées. Les dossiers de compte et les demandes d’assistance privées sont exclus.",
+        "answers": "Réponses publiques",
+        "answerNumber": "Réponse {number}",
+        "question": "Question",
+        "answer": "Réponse",
+        "keywords": "Mots-clés de recherche",
+        "remove": "Supprimer la réponse",
+        "add": "Ajouter une réponse",
+        "publicationReason": "Motif de la publication",
+        "confirmPublic": "Ces réponses sont approuvées pour une lecture publique et ne contiennent aucune information privée de compte ou d’assistance.",
+        "publish": "Publier l’aide publique",
+        "published": "Aide publique publiée.",
+        "system": "Intégrations et système",
+        "enrichment": "Examen des données de l’organisation",
+        "organizationId": "Identifiant de l’organisation",
+        "openReview": "Ouvrir l’examen"
+      }
     }
   }
 }
