@@ -2,6 +2,14 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { declaredParams } from "firebase-functions/params";
 import { runtimeFoundationHealth, scheduledBackgroundJobHeartbeat, marketReadyFoundingCommerceWebhook } from "../lib/index.js";
+import { scheduledLifecycleCommunications, organizationPublicEnrichment, lifecycleEnrollmentFromAccount } from "../lib/index.js";
+
+test("SAD provider secrets stay scoped to their consumers without discovery-time secret resolution", () => {
+  assert.deepEqual(scheduledLifecycleCommunications.__endpoint.secretEnvironmentVariables.map(secret => secret.key), ["RFXCHANGE_LIFECYCLE_WORKER_SECRET"]);
+  assert.deepEqual(organizationPublicEnrichment.__endpoint.secretEnvironmentVariables.map(secret => secret.key), ["SAM_API_KEY"]);
+  assert.deepEqual(lifecycleEnrollmentFromAccount.__endpoint.secretEnvironmentVariables ?? [], []);
+  assert.equal(declaredParams.some(param => ["RFXCHANGE_LIFECYCLE_WORKER_SECRET", "SAM_API_KEY", "TELNYX_API_KEY"].includes(param.name)), false);
+});
 
 test("deployment discovery binds payment secrets only to the payment endpoint", () => {
   assert.deepEqual(runtimeFoundationHealth.__endpoint.secretEnvironmentVariables ?? [], []);

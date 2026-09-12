@@ -16,6 +16,12 @@ env:
   - variable: RFXCHANGE_FOUNDING_CHECKOUT_RELEASE_MODE
     value: "closed"
     availability: [ BUILD, RUNTIME ]
+  - variable: RFXCHANGE_LIFECYCLE_SEND_MODE
+    value: "disabled"
+    availability: [ RUNTIME ]
+  - variable: RFXCHANGE_EXCHANGE_ORIGIN
+    value: "https://rfxchange--rfxchange.us-east4.hosted.app"
+    availability: [ RUNTIME ]
   - variable: RFXCHANGE_AI_INTERPRETATION_ENABLED
     value: "false"
     availability: [ BUILD, RUNTIME ]

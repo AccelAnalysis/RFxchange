@@ -35,7 +35,7 @@ try {
       assert.doesNotMatch(visibleText(html), /\$\s*49|49\s*\$/);
     }
   }
-  for (const route of ["/how-it-works", "/businesses", "/buyers", "/resource-providers", "/about", "/terms", "/privacy", "/platform-rules", "/accessibility", "/image-credits"]) {
+  for (const route of ["/help", "/how-it-works", "/businesses", "/buyers", "/resource-providers", "/about", "/terms", "/privacy", "/platform-rules", "/accessibility", "/image-credits"]) {
     assert.equal((await fetch(marketing + route)).status, 200, route);
   }
   const landing = await fetch(marketing + "/?utm_campaign=regional-launch");
