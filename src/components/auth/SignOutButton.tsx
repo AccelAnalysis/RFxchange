@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { useI18n } from "../i18n/I18nProvider";
@@ -12,7 +11,6 @@ export function SignOutButton({
   className,
   role,
 }: Readonly<{ className?: string; role?: "menuitem" }>) {
-  const router = useRouter();
   const { t } = useI18n();
   const [busy, setBusy] = useState(false);
 
@@ -35,7 +33,8 @@ export function SignOutButton({
             }
             await fetch("/api/auth/session", { method: "DELETE" }).catch(() => undefined);
           } finally {
-            router.replace("/");
+            // The public entry redirects to the separate Marketing application.
+            window.location.replace("/");
           }
         })();
       }}

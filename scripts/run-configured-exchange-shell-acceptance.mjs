@@ -106,6 +106,13 @@ replaceOnce(
   '`/geography/canvas?query=shell-in-content&selectedOrganization=${selectedSubjectBeforeUtilityExit}`;',
 );
 
+// Observe Exchange storage before sign-out crosses into the separate Marketing origin.
+replaceOnce(
+  "clear Exchange context before the sign-out handoff",
+  "    await evaluate(cdp, `document.querySelector('[role=\"menu\"] button[role=\"menuitem\"]')?.click()`);\n    await waitForExpression(cdp, `location.pathname === \"/\"`, \"signed-out public entry\");",
+  "    const clearedExchangeContext = await evaluate(cdp, `(() => {\n      document.querySelector('[role=\"menu\"] button[role=\"menuitem\"]')?.click();\n      return {\n        intelligence: sessionStorage.getItem(${JSON.stringify(PARTICIPANT_INTELLIGENCE_CONTEXT_STORAGE_KEY)}),\n        spatial: Object.keys(sessionStorage).filter((key) => key.startsWith(${JSON.stringify(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)})),\n        referralIntent: sessionStorage.getItem(${JSON.stringify(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY)}),\n      };\n    })()`);\n    assert.deepEqual(clearedExchangeContext, { intelligence: null, spatial: [], referralIntent: null }, \"Sign out retained participant context on the Exchange origin before the public-app handoff.\");\n    await waitForExpression(cdp, `location.pathname === \"/\"`, \"signed-out public entry\");",
+);
+
 await writeFile(adaptedUrl, source, "utf8");
 try {
   await import(`${adaptedUrl.href}?phase4=${encodeURIComponent(process.env.RFXCHANGE_ACCEPTANCE_CANDIDATE_SHA ?? "local")}`);
