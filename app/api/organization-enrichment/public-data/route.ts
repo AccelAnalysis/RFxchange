@@ -71,5 +71,5 @@ export async function POST(request: NextRequest) {
   } catch { return NextResponse.json({ error: "This check is already running or its request changed. Refresh to see its progress." }, { status: 409 }); }
 }
 function publicRun(run: Record<string, unknown>) {
-  return Object.fromEntries(Object.entries(run).filter(([key]) => !["fingerprint", "leaseUntil", "leaseOwner"].includes(key)));
+  return Object.fromEntries(Object.entries(run).filter(([key]) => !["fingerprint", "leaseUntil", "leaseOwner", "reviewReason", "reviewedByAdministratorId"].includes(key)));
 }

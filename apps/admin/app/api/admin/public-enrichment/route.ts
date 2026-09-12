@@ -1,3 +1,4 @@
+import { publicReviewDisposition } from "@/src/domain/enrichment/public-review";
 import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createPlatformAdministrativeAuditEvent } from "@/src/domain/admin-authorization/admin-audit";
@@ -35,6 +36,7 @@ export async function POST(request: NextRequest) {
     if (!organizationId || typeof body.commandId !== "string" || !/^[A-Za-z0-9._:-]{8,128}$/.test(body.commandId) || typeof body.reason !== "string" || !body.reason.trim() || body.reason.length > 1000 ||
       (body.action != null && !["check", "review"].includes(body.action)) || (body.uei != null && (typeof body.uei !== "string" || !/^[A-Z0-9]{12}$/.test(body.uei))) ||
       (body.action === "review" && (typeof body.runId !== "string" || !/^[a-f0-9]{64}$/.test(body.runId)))) throw new Error("invalid");
+    if (body.action === "review") body.disposition = publicReviewDisposition(body.disposition);
   } catch { return NextResponse.json({ error: "Review the organization, request and reason." }, { status: 400 }); }
   const db = getServerFirestore();
   const profiles = await db.collection("organizationProfiles").where("organizationId", "==", organizationId).limit(1).get();
@@ -43,7 +45,7 @@ export async function POST(request: NextRequest) {
   const commandId = `admin:${body.commandId}`;
   const auditId = createHash("sha256").update(`${organizationId}:${commandId}`).digest("hex");
   const auditRef = db.collection("platformAdministrativeAuditEvents").doc(auditId);
-  const fingerprint = createHash("sha256").update(JSON.stringify({ organizationId, commandId, action: body.action ?? "check", runId: body.runId ?? null, uei: body.uei ?? null, reason: body.reason })).digest("hex");
+  const fingerprint = createHash("sha256").update(JSON.stringify({ organizationId, commandId, action: body.action ?? "check", runId: body.runId ?? null, uei: body.uei ?? null, reason: body.reason, disposition: body.disposition ?? null, expectedReviewVersion: body.expectedReviewVersion ?? null })).digest("hex");
   try {
     await db.runTransaction(async tx => {
       const previous = await tx.get(auditRef);
@@ -54,12 +56,13 @@ export async function POST(request: NextRequest) {
       const runRef = body.action === "review" ? db.collection("publicEnrichmentRuns").doc(body.runId) : null;
       const run = runRef ? await tx.get(runRef) : null;
       if (runRef && (!run?.exists || run.get("organizationId") !== organizationId || !run.get("completedAt"))) throw new Error("review-unavailable");
+      if (run && Number(run.get("reviewVersion") ?? 0) !== body.expectedReviewVersion) throw new Error("version-conflict");
       const audit = createPlatformAdministrativeAuditEvent(access.authority, { id: auditId, permissionsExercised: ["organization.profile.update"],
         target: { objectType: "organization-public-enrichment", objectId: body.runId ?? organizationId, organizationId },
         action: body.action === "review" ? "enrichment.reviewed" : "enrichment.requested", reason: body.reason,
         priorState: run ? { reviewStatus: run.get("reviewStatus") } : null,
-        newState: { requestFingerprint: fingerprint, commandId, ...(run ? { reviewStatus: "reviewed" } : {}) }, occurredAt: new Date().toISOString() });
-      if (runRef) tx.update(runRef, { reviewStatus: "reviewed", reviewedAt: audit.occurredAt, reviewedByAdministratorId: access.authority.administratorId });
+        newState: { disposition: body.disposition ?? null, requestFingerprint: fingerprint, commandId, ...(run ? { reviewStatus: "reviewed" } : {}) }, occurredAt: new Date().toISOString() });
+      if (runRef) tx.update(runRef, { reviewDisposition: body.disposition, reviewReason: body.reason, reviewVersion: Number(run?.get("reviewVersion") ?? 0) + 1, reviewStatus: "reviewed", reviewedAt: audit.occurredAt, reviewedByAdministratorId: access.authority.administratorId });
       tx.create(auditRef, { schemaVersion: 1, ...audit });
     });
     if (body.action === "review") return NextResponse.json({ reviewed: true });

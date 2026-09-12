@@ -30,6 +30,9 @@ export interface PublicEnrichmentRun {
   sourceResults: EnrichmentSourceResult[];
   conflicts: { field: string; currentValue: string; proposedValue: string; source: EnrichmentSource }[];
   reviewStatus: "pending" | "reviewed";
+  reviewVersion?: number;
+  reviewDisposition?: "retain-current" | "dismiss-source" | "request-correction";
+  reviewReason?: string;
 }
 
 /** Source failures are isolated. Findings never mutate profile, capability or credibility truth. */

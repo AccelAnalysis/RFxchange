@@ -3,7 +3,7 @@ export type LifecycleJourney = "finish-setup" | "retention" | "win-back";
 export interface CommunicationPreferences {
   userId: string; version: number; email: boolean; sms: boolean;
   marketingConsent: boolean; phone: string | null; timeZone: string;
-  consentTextVersion: string; updatedAt: string;
+  consentTextVersion: string; updatedAt: string; locale?: string;
 }
 export interface LifecycleState {
   userId: string; organizationId: string | null; active: boolean;

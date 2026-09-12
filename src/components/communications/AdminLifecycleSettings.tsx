@@ -22,7 +22,8 @@ export function AdminLifecycleSettings() {
     return () => controller.abort();
   }, [common]);
   return <section className={styles.panel}><Link href="/admin/communications">{copy.communications}</Link><h1>{copy.lifecycle}</h1>
-    <p>{copy.lifecycleIntro}</p><p><Link href="/admin/communications/help">{copy.manageHelp}</Link></p>
+    <p>{copy.lifecycleIntro}</p><p><Link href="/admin/communications/help">{copy.manageHelp}</Link></p><p><Link href="/admin/campaigns">Marketing campaigns</Link>
+      <Link href="/admin/communications/operations">Delivery operations and account holds</Link></p>
     {!loaded && !message ? <p role="status">{common.loading}</p> : null}
     <form onSubmit={async event => {
       event.preventDefault(); setBusy(true); setMessage("");

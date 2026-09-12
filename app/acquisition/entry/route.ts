@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MARKETING_CAMPAIGN_COOKIE, marketingCampaignReference, marketingReturnPath } from "@/src/application/acquisition/marketing-entry";
+import { MARKETING_LAST_CAMPAIGN_COOKIE, MARKETING_CAMPAIGN_COOKIE, marketingCampaignReference, marketingReturnPath } from "@/src/application/acquisition/marketing-entry";
 import { acquisitionCookieOptions } from "@/src/infrastructure/acquisition/runtime";
 import { RFXCHANGE_FOUNDING_ACQUISITION_COOKIE_NAME, RFXCHANGE_FOUNDING_ACQUISITION_INTENT } from "@/src/infrastructure/acquisition/founding-intent";
 import { isLocale, localeCookieName, localeCookieMaxAge } from "@/src/i18n/config";
@@ -19,6 +19,8 @@ export function GET(request: NextRequest) {
   if (campaign && !marketingCampaignReference(request.cookies.get(MARKETING_CAMPAIGN_COOKIE)?.value)) {
     response.cookies.set(MARKETING_CAMPAIGN_COOKIE, campaign, acquisitionCookieOptions());
   }
+  const lastCampaign = marketingCampaignReference(request.nextUrl.searchParams.get("lastCampaign")) ?? campaign;
+  if (lastCampaign) response.cookies.set(MARKETING_LAST_CAMPAIGN_COOKIE, lastCampaign, acquisitionCookieOptions());
   if (intent === "founding") {
     response.cookies.set(RFXCHANGE_FOUNDING_ACQUISITION_COOKIE_NAME, RFXCHANGE_FOUNDING_ACQUISITION_INTENT, acquisitionCookieOptions());
   }

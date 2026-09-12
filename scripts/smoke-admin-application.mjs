@@ -23,13 +23,13 @@ try {
     child.once("error", reject);
     child.once("exit", (code) => { clearTimeout(timer); reject(new Error(`Admin exited with ${code}.`)); });
   });
-  for (const route of ["/admin", "/admin/overview", "/admin/organizations", "/admin/audit-security", "/admin/communications/lifecycle", "/admin/communications/help", "/admin/enrichment"]) {
+  for (const route of ["/admin", "/admin/overview", "/admin/organizations", "/admin/audit-security", "/admin/communications/operations", "/admin/campaigns", "/admin/communications/lifecycle", "/admin/communications/help", "/admin/enrichment"]) {
     const response = await fetch(`${origin}${route}`, { redirect: "manual" });
     assert.equal(response.status, 307, `${route} requires authentication`);
     assert.match(response.headers.get("location"), /^\/signin\?returnTo=/);
     assert.match(response.headers.get("cache-control"), /no-store/);
   }
-  for (const route of ["/api/admin/lifecycle", "/api/admin/public-help", "/api/admin/public-enrichment?organizationId=untrusted"]) {
+  for (const route of ["/api/admin/campaigns", "/api/admin/communication-operations", "/api/admin/lifecycle", "/api/admin/public-help", "/api/admin/public-enrichment?organizationId=untrusted"]) {
     for (const method of ["GET", "POST"]) {
       const response = await fetch(`${origin}${route}`, { method, redirect: "manual", headers: { origin, "content-type": "application/json" }, ...(method === "POST" ? { body: "{}" } : {}) });
       assert.equal(response.status, 403, `${method} ${route} denies anonymous configuration/data access even with a valid Origin`);
