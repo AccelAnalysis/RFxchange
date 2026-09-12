@@ -62,9 +62,9 @@ test("Slice 3.2 browser persistence remains UI-only and fails closed for stale s
 });
 
 test("Slice 3.2 keeps the Stage 2 mobile search and result surface legible over the map", () => {
-  assert.match(workspaceStyles, /@media \(max-width: 760px\)[\s\S]*\.mobileSearchOverlay[\s\S]*semantic-surface-glass-strong/);
-  assert.match(workspaceStyles, /\.mobileSearchOverlay[\s\S]*elevation-overlay/);
-  assert.match(workspaceStyles, /prefers-reduced-transparency[\s\S]*\.mobileSearchOverlay[\s\S]*backdrop-filter: none/);
+  assert.match(workspaceStyles, /\.exchangeSearch[\s\S]*semantic-surface-glass-strong/);
+  assert.match(workspaceStyles, /\.exchangeSearch[\s\S]*elevation-control/);
+  assert.match(workspaceStyles, /prefers-reduced-transparency[\s\S]*\.exchangeSearch[\s\S]*backdrop-filter: none/);
 });
 
 test("Slice 3.2 does not fabricate provider, referral, or credibility objects", () => {

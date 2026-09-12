@@ -223,5 +223,62 @@
       "professional": "Ein professionelles Team im Gespräch.",
       "warehouse": "Eine Person arbeitet in einem Lager."
     }
+  },
+  "interface": {
+    "map": {
+      "options": "Kartenoptionen",
+      "unavailable": "Die Karte ist vorübergehend nicht verfügbar. Ergebnisse und Organisationsprofile bleiben zugänglich.",
+      "fitHome": "Heimatort",
+      "basemapLabel": "Kartendarstellung",
+      "exchange": "Exchange",
+      "street": "Straßen",
+      "perspective": "Perspektive",
+      "description": "RFxchange-Karte mit Ihrem Heimatort und sichtbaren Organisationen.",
+      "tutorialNotice": "Nur zur Veranschaulichung. Die Tutorial-Elemente stellen keine echten Exchange-Aktivitäten dar.",
+      "2d": "2D",
+      "3d": "3D"
+    },
+    "search": {
+      "filters": "Filter",
+      "apply": "Filter anwenden",
+      "empty": "Keine Ergebnisse. Ändern Sie die Suche oder die Filter."
+    },
+    "organization": {
+      "viewProfile": "Profil ansehen"
+    },
+    "account": {
+      "title": "Organisationskonto",
+      "intro": "Verwalten Sie die Darstellung Ihrer Organisation im Exchange.",
+      "identity": "Identität",
+      "capabilities": "AMACS-Fähigkeiten",
+      "publicPresence": "Öffentliches Profil und Abzeichen",
+      "enrichment": "Standorte und Profildetails",
+      "settings": "Einstellungen und Zugriff",
+      "minimumProfile": "Mindestprofil",
+      "ready": "Bereit",
+      "incomplete": "Unvollständig",
+      "mapVisibility": "Kartensichtbarkeit",
+      "visible": "Sichtbar",
+      "inactive": "Nicht aktiv",
+      "manageCapabilities": "Fähigkeiten verwalten",
+      "reviewPublicPresence": "Öffentliches Profil prüfen",
+      "organizationType": "Organisationstyp",
+      "notRecorded": "Nicht erfasst",
+      "website": "Website",
+      "publicContact": "Öffentlicher Kontakt",
+      "confirmedCapabilities": "Bestätigte Fähigkeiten",
+      "confirmedBody": "Fähigkeiten, die Sie öffentlich teilen. Private, gesperrte oder nur im Netzwerk geteilte Angaben werden hier nicht angezeigt.",
+      "badges": "Abzeichen",
+      "badgesUnavailable": "Abzeichen können noch nicht eingerichtet werden. Profilvollständigkeit und Kartensichtbarkeit verleihen keine Verifizierungsabzeichen.",
+      "provider": "Ressourcenanbieter",
+      "applyProvider": "Status als Ressourcenanbieter beantragen",
+      "mapPreferences": "Karteneinstellungen",
+      "role": "Ihre Rolle",
+      "homeLocality": "Heimatgemeinde",
+      "locationVisibility": "Standortsichtbarkeit",
+      "marketTitle": "Fähigkeiten und Erfahrung",
+      "marketBody": "Prüfen Sie Ihre Fähigkeiten, Branche und bisherigen Projekte.",
+      "publicCapabilitiesEmpty": "Noch keine öffentlich geteilten Fähigkeiten."
+    }
   }
 }

@@ -35,10 +35,7 @@ import {
   type ExchangeHomeMarker,
 } from "../map/ExchangeSpatialScene";
 import {
-  AlertBanner,
-  ObjectCard,
   StatePanel,
-  StatusPill,
 } from "../ui";
 import {
   ExchangeRoomActionController,
@@ -51,9 +48,7 @@ import {
   type ExchangeSheetLabels,
 } from "./MobileExchangePrimitives";
 import {
-  MapOverlaySurface,
   ParticipantShell,
-  ResponsiveEdgeSheet,
   SpatialWorkspace,
 } from "./ParticipantWorkspace";
 
@@ -199,8 +194,13 @@ export function ExistingWorkspaceFoundation({
   const activeLens = spatialContext.activeLens === "capabilities"
     ? "intelligence"
     : spatialContext.activeLens;
-  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
-  const resultListRef = useRef<HTMLUListElement | null>(null);
+  const focusedOrganizationId = focusedOrganization ? String(focusedOrganization.organizationId) : null;
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(Boolean(focusedOrganizationId));
+  const [appliedDetailRouteId, setAppliedDetailRouteId] = useState(focusedOrganizationId);
+  if (appliedDetailRouteId !== focusedOrganizationId) {
+    setAppliedDetailRouteId(focusedOrganizationId);
+    setMobileDetailOpen(Boolean(focusedOrganizationId));
+  }
   const networkSearchInputRef = useRef<HTMLInputElement | null>(null);
   const cardRefs = useRef(new Map<string, HTMLElement>());
   const appliedFocusedOrganizationIdRef = useRef<string | null>(null);
@@ -255,7 +255,7 @@ export function ExistingWorkspaceFoundation({
     }));
   }, [focusedOrganization, updateSpatialContext]);
 
-  const panelOpen = spatialContext.panelOpen;
+  const detailOpen = mobileDetailOpen;
   const selectedHome = selectedObjectId === homeMarker.id;
   const selectedOrganization = organizationsByMarkerId.get(selectedObjectId) ?? null;
   const selectedOrganizationId = selectedOrganization
@@ -293,15 +293,19 @@ export function ExistingWorkspaceFoundation({
 
   const focusNetwork = useCallback((intent: "organizations" | "capabilities") => {
     selectLens("intelligence");
+    setMobileDetailOpen(false);
     updateSpatialContext((current) => Object.freeze({
       ...current,
       sheetSnapPoint: current.sheetSnapPoint === "peek" ? "partial" : current.sheetSnapPoint,
+      panelOpen: false,
+      sheetScrollTop: intent === "organizations" ? 0 : current.sheetScrollTop,
+      lensState: intent === "organizations" ? Object.freeze({
+        ...current.lensState,
+        intelligence: Object.freeze({ ...current.lensState.intelligence, listScrollTop: 0 }),
+      }) : current.lensState,
     }));
     window.requestAnimationFrame(() => {
       networkSearchInputRef.current?.focus();
-      if (intent === "organizations" && !networkSearchInputRef.current?.value) {
-        resultListRef.current?.scrollTo({ top: 0, behavior: "auto" });
-      }
     });
   }, [selectLens, updateSpatialContext]);
 
@@ -378,17 +382,10 @@ export function ExistingWorkspaceFoundation({
     });
   }, [capability, organizationId, query?.page, selectedOrganizationQueryId, serviceAreaId, updateSpatialContext]);
 
-  useEffect(() => {
-    if (resultListRef.current) {
-      resultListRef.current.scrollTop = spatialContext.lensState.intelligence.listScrollTop;
-    }
-  }, [spatialContext.lensState.intelligence.listScrollTop]);
-
   const clearHref = buildDiscoveryUrl({
     organizationId,
     capability: "",
     serviceAreaId: null,
-    selectedOrganizationId: selectedOrganizationQueryId,
   });
   const locationLabels = {
     near: t("networkWorkspace.detail.nearLocation", { locality }),
@@ -471,11 +468,20 @@ export function ExistingWorkspaceFoundation({
     );
   }
 
+  const contextualActions = (
+    <ExchangeRoomActionController
+      activeLens={activeLens}
+      actions={exchangeRoomActions}
+      onNetworkFocus={focusNetwork}
+      placement="sheet"
+    />
+  );
   const detailContent = (
     <div
       id="organization-detail-panel"
       className={styles.organizationHome}
       data-selected-organization-id={selectedOrganizationId}
+      tabIndex={-1}
     >
       <div className={styles.sheetHeader}>
         <div>
@@ -498,6 +504,11 @@ export function ExistingWorkspaceFoundation({
               panelOpen: false,
               sheetSnapPoint: "partial",
             }));
+            window.requestAnimationFrame(() => {
+              const row = cardRefs.current.get(selectedObjectId);
+              const target = row?.querySelector<HTMLButtonElement>("[data-card-open]");
+              (target ?? networkSearchInputRef.current)?.focus({ preventScroll: true });
+            });
           }}
         >
           <span aria-hidden="true">×</span>
@@ -507,10 +518,7 @@ export function ExistingWorkspaceFoundation({
 
       {selectedOrganization ? (
         <>
-          <div className={styles.statusRow}>
-            <StatusPill tone="information">{matchLabel(selectedOrganization, t)}</StatusPill>
-            <StatusPill tone="connection">{locality}</StatusPill>
-          </div>
+          <p className={styles.detailMetadata}>{matchLabel(selectedOrganization, t)} · {locality}</p>
           <dl className={styles.organizationFacts}>
             <div>
               <dt>{t("networkWorkspace.detail.baseLocality")}</dt>
@@ -532,8 +540,7 @@ export function ExistingWorkspaceFoundation({
             </div>
           </dl>
           <section className={styles.capabilitySection} aria-labelledby="capability-list-title">
-            <p className={styles.eyebrow}>{t("networkWorkspace.detail.capabilities")}</p>
-            <h2 id="capability-list-title">{t("networkWorkspace.detail.capabilityEvidence")}</h2>
+            <h2 id="capability-list-title">{t("networkWorkspace.detail.capabilities")}</h2>
             <ul className={styles.capabilityList}>
               {selectedOrganization.capabilities.length > 0
                 ? selectedOrganization.capabilities.map((capabilityItem) => (
@@ -569,52 +576,29 @@ export function ExistingWorkspaceFoundation({
               </p>
             ) : null}
           </section>
-          <AlertBanner title={t("networkWorkspace.detail.profileEvidenceTitle")} tone="information">
-            {t("networkWorkspace.detail.profileEvidence")}
-          </AlertBanner>
+          <p className={styles.detailMetadata}>{t("networkWorkspace.match.disclaimer")}</p>
         </>
       ) : (
         <>
-          <div className={styles.statusRow}>
-            <StatusPill tone="positive">{t("networkWorkspace.home.activeNode")}</StatusPill>
-            <StatusPill tone="connection">{locality}</StatusPill>
-          </div>
-          <ObjectCard
-            eyebrow={t("networkWorkspace.home.visibleNow")}
-            title={t("networkWorkspace.home.positionTitle")}
-            tone="connection"
-            status={selectedHome ? (
-              <StatusPill tone="information">{t("networkWorkspace.home.selected")}</StatusPill>
-            ) : null}
-            metadata={<span>{t("networkWorkspace.home.projectionMetadata")}</span>}
-          >
-            <dl className={styles.organizationFacts}>
-              <div><dt>{t("networkWorkspace.home.locality")}</dt><dd>{locality}</dd></div>
-              <div><dt>{t("networkWorkspace.home.visibleLocation")}</dt><dd>{locationLabel}</dd></div>
-              <div><dt>{t("networkWorkspace.home.mapSource")}</dt><dd>{model.attribution.label} · {model.attribution.vintage}</dd></div>
-              <div><dt>{t("networkWorkspace.home.viewport")}</dt><dd>{t("networkWorkspace.home.viewportBody")}</dd></div>
-            </dl>
-            <div className={styles.cardActions}>
-              <Link className={styles.primaryAction} href="/organization-profile">
-                {t("networkWorkspace.home.manageProfile")}
-              </Link>
-            </div>
-          </ObjectCard>
-          <AlertBanner title={t("networkWorkspace.home.scopeTitle")} tone="information">
-            {t("networkWorkspace.home.scopeBody")}
-          </AlertBanner>
+          <p className={styles.detailMetadata}>{t("networkWorkspace.home.activeNode")} · {locality}</p>
+          <dl className={styles.organizationFacts}>
+            <div><dt>{t("networkWorkspace.home.locality")}</dt><dd>{locality}</dd></div>
+            <div><dt>{t("networkWorkspace.home.visibleLocation")}</dt><dd>{locationLabel}</dd></div>
+          </dl>
+          <Link className={styles.primaryAction} href="/organization-profile">
+            {t("networkWorkspace.home.manageProfile")}
+          </Link>
         </>
       )}
 
-      <section className={styles.provenance} aria-labelledby="provenance-title">
-        <p className={styles.eyebrow}>{t("networkWorkspace.provenance.eyebrow")}</p>
-        <h2 id="provenance-title">{t("networkWorkspace.provenance.title")}</h2>
+      <details className={styles.provenance}>
+        <summary>{t("networkWorkspace.provenance.title")}</summary>
         <dl>
           <div><dt>{t("networkWorkspace.provenance.authority")}</dt><dd>{model.attribution.label}</dd></div>
           <div><dt>{t("networkWorkspace.provenance.vintage")}</dt><dd>{model.attribution.vintage}</dd></div>
           <div><dt>{t("networkWorkspace.provenance.retrieved")}</dt><dd>{formatDate(locale, model.attribution.retrievedAt)}</dd></div>
         </dl>
-      </section>
+      </details>
     </div>
   );
 
@@ -630,177 +614,58 @@ export function ExistingWorkspaceFoundation({
           marker={homeMarker}
           organizationMarkers={networkMarkers}
           focusedMarkerId={selectedObjectId}
-          onOrganizationMarkerSelect={(markerId) => selectObject(markerId)}
+          onOrganizationMarkerSelect={(markerId) => {
+            selectObject(markerId);
+            setMobileDetailOpen(true);
+            window.requestAnimationFrame(() => document.getElementById("organization-detail-panel")?.focus({ preventScroll: true }));
+          }}
           initialCamera={spatialContext.camera}
           onCameraChange={(camera) => updateSpatialContext((current) => Object.freeze({ ...current, camera }))}
           interactive
           showSearch={false}
-          workspaceOverlay={panelOpen ? "right" : "left"}
+          workspaceOverlay="right"
         />
 
-        {discoveryRestricted ? (
-          <div className={styles.desktopSearchOverlay}>
-            <MapOverlaySurface position="top-left">
-              <StatePanel state="permission" title={t("networkWorkspace.status.permission.title")}>
-                {t("networkWorkspace.status.permission.body")}
-              </StatePanel>
-            </MapOverlaySurface>
-          </div>
-        ) : discovery ? (
-          <>
-            <form className={styles.mobileSearchOverlay} role="search" method="get" action="/geography/canvas">
-              <input type="hidden" name="organizationId" value={organizationId} />
-              {selectedOrganizationQueryId ? (
-                <input type="hidden" name="selectedOrganization" value={selectedOrganizationQueryId} />
-              ) : null}
-              <label>
-                <span className={styles.srOnly}>{t("networkWorkspace.search.capabilityLabel")}</span>
-                <input
-                  type="search"
-                  name="q"
-                  defaultValue={capability}
-                  placeholder={t("networkWorkspace.search.placeholder")}
-                  autoComplete="off"
-                />
-              </label>
-              <label className={styles.mobileFilterControl}>
-                <span className={styles.srOnly}>{t("networkWorkspace.search.serviceArea")}</span>
-                <select name="serviceArea" defaultValue={serviceAreaId ?? ""}>
-                  <option value="">{t("networkWorkspace.search.anyServiceArea")}</option>
-                  {serviceAreaOptions.map((option) => (
-                    <option key={option.id} value={option.id}>{option.name}</option>
-                  ))}
-                </select>
-              </label>
-              <button type="submit" aria-label={t("networkWorkspace.search.submit")}>⌕</button>
-            </form>
-
-            <div className={styles.desktopSearchOverlay}>
-              <MapOverlaySurface position="top-left">
-                <section className={styles.networkSearch} aria-label={t("networkWorkspace.search.ariaLabel")}>
-                  <form className={styles.networkForm} role="search" method="get" action="/geography/canvas">
-                    <input type="hidden" name="organizationId" value={organizationId} />
-                    {selectedOrganizationQueryId ? (
-                      <input type="hidden" name="selectedOrganization" value={selectedOrganizationQueryId} />
-                    ) : null}
-                    <label className={styles.networkField}>
-                      <span>{t("networkWorkspace.search.capabilityLabel")}</span>
-                      <input
-                        ref={networkSearchInputRef}
-                        type="search"
-                        name="q"
-                        defaultValue={capability}
-                        placeholder={t("networkWorkspace.search.placeholder")}
-                        autoComplete="off"
-                      />
-                    </label>
-                    <div className={styles.networkFilterGrid}>
-                      <div className={styles.networkField}>
-                        <span>{t("networkWorkspace.search.basedIn")}</span>
-                        <strong>{locality}</strong>
-                      </div>
-                      <label className={styles.networkField}>
-                        <span>{t("networkWorkspace.search.serviceArea")}</span>
-                        <select name="serviceArea" defaultValue={serviceAreaId ?? ""}>
-                          <option value="">{t("networkWorkspace.search.anyServiceArea")}</option>
-                          {serviceAreaOptions.map((option) => (
-                            <option key={option.id} value={option.id}>{option.name}</option>
-                          ))}
-                        </select>
-                      </label>
-                    </div>
-                    <div className={styles.networkSearchActions}>
-                      <button className={styles.primaryAction} type="submit">{t("networkWorkspace.search.submit")}</button>
-                      {(capability || serviceAreaId) ? (
-                        <Link className={styles.secondaryAction} href={clearHref}>{t("networkWorkspace.search.clear")}</Link>
-                      ) : null}
-                    </div>
-                  </form>
-                  <div className={styles.networkResultSummary} aria-live="polite">
-                    <strong>{t("networkWorkspace.search.resultCount", { count: discovery.totalMatched })}</strong>
-                    <span>{t("networkWorkspace.search.lowDensity")}</span>
-                  </div>
-                  {discovery.organizations.length > 0 ? (
-                    <ul
-                      ref={resultListRef}
-                      className={styles.networkResults}
-                      aria-label={t("networkWorkspace.search.listLabel")}
-                      onScroll={(event) => {
-                        const listScrollTop = Math.max(0, Math.round(event.currentTarget.scrollTop));
-                        updateSpatialContext((current) => Object.freeze({
-                          ...current,
-                          lensState: Object.freeze({
-                            ...current.lensState,
-                            intelligence: Object.freeze({
-                              ...current.lensState.intelligence,
-                              listScrollTop,
-                            }),
-                          }),
-                        }));
-                      }}
-                    >
-                      {discovery.organizations.map((organization, resultIndex) => {
-                        const selected = organization.marker.id === selectedObjectId;
-                        return (
-                          <li key={organization.organizationId}>
-                            <button
-                              type="button"
-                              className={styles.networkResultButton}
-                              data-organization-id={String(organization.organizationId)}
-                              data-marker-id={organization.marker.id}
-                              data-selected={selected}
-                              aria-pressed={selected}
-                              onClick={() => selectObject(organization.marker.id, resultIndex)}
-                            >
-                              <span className={styles.resultHeading}>
-                                <strong>{organization.profile.displayName}</strong>
-                                <small>{matchLabel(organization, t)}</small>
-                              </span>
-                              <span className={styles.resultCapabilities}>{capabilitySummary(organization)}</span>
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  ) : (
-                    <StatePanel state="empty" title={t("networkWorkspace.search.noResultsTitle")}>
-                      {t("networkWorkspace.search.noResultsBody")}
-                    </StatePanel>
-                  )}
-                  <p className={styles.matchDisclaimer}>{t("networkWorkspace.match.disclaimer")}</p>
-                </section>
-              </MapOverlaySurface>
-            </div>
-          </>
-        ) : null}
-
-        <ExchangeRoomActionController
-          activeLens={activeLens}
-          actions={exchangeRoomActions}
-          onNetworkFocus={focusNetwork}
-          placement="workspace"
-        />
-
-        {panelOpen && !mobileDetailOpen ? (
-          <div className={styles.desktopDetailSheet}>
-            <ResponsiveEdgeSheet ariaLabelledBy="organization-detail-title" side="right" width="standard">
-              {detailContent}
-            </ResponsiveEdgeSheet>
-          </div>
+        {discovery ? (
+          <form className={styles.exchangeSearch} role="search" method="get" action="/geography/canvas">
+            <input type="hidden" name="organizationId" value={organizationId} />
+            <label className={styles.searchInput}>
+              <span className={styles.srOnly}>{t("networkWorkspace.search.capabilityLabel")}</span>
+              <input ref={networkSearchInputRef} type="search" name="q" defaultValue={capability} placeholder={t("networkWorkspace.search.placeholder")} autoComplete="off" />
+            </label>
+            <button className={styles.searchSubmit} type="submit" aria-label={t("networkWorkspace.search.submit")}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="10" cy="10" r="6" /><path d="m15 15 6 6" /></svg>
+            </button>
+            <details className={styles.searchFilters}>
+              <summary>{t("interface.search.filters")}{serviceAreaId ? " · 1" : ""}</summary>
+              <div>
+                <label className={styles.networkField}>
+                  <span>{t("networkWorkspace.search.serviceArea")}</span>
+                  <select name="serviceArea" defaultValue={serviceAreaId ?? ""}>
+                    <option value="">{t("networkWorkspace.search.anyServiceArea")}</option>
+                    {serviceAreaOptions.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
+                  </select>
+                </label>
+                <button className={styles.primaryAction} type="submit">{t("interface.search.apply")}</button>
+                {(capability || serviceAreaId) ? <Link href={clearHref}>{t("networkWorkspace.search.clear")}</Link> : null}
+              </div>
+            </details>
+          </form>
         ) : null}
 
         <ExchangeBottomSheet
+          desktopPanel
           labelledBy="mobile-exchange-sheet-title"
           labels={sheetLabels}
           snapPoint={spatialContext.sheetSnapPoint}
-          initialScrollTop={mobileDetailOpen ? 0 : spatialContext.sheetScrollTop}
+          initialScrollTop={detailOpen ? 0 : spatialContext.sheetScrollTop}
           onSnapPointChange={(sheetSnapPoint) => updateSpatialContext((current) => Object.freeze({
             ...current,
             sheetSnapPoint,
             panelOpen: true,
           }))}
           onScrollPositionChange={(sheetScrollTop) => {
-            if (mobileDetailOpen) return;
+            if (detailOpen) return;
             updateSpatialContext((current) => (
               current.sheetScrollTop === sheetScrollTop
                 ? current
@@ -810,37 +675,30 @@ export function ExistingWorkspaceFoundation({
           summary={(
             <>
               <strong id="mobile-exchange-sheet-title">
-                {mobileDetailOpen
+                {detailOpen
                   ? selectedOrganization?.profile.displayName ?? homeMarker.label
                   : discoveryRestricted
                     ? t("networkWorkspace.status.permission.title")
                     : t("networkWorkspace.search.resultCount", { count: discovery?.totalMatched ?? 0 })}
               </strong>
-              <span>{mobileDetailOpen ? t("networkWorkspace.detail.eyebrow") : locality}</span>
+              <span>{detailOpen ? t("networkWorkspace.detail.eyebrow") : locality}</span>
             </>
           )}
-          actionRail={(
-            <ExchangeRoomActionController
-              activeLens={activeLens}
-              actions={exchangeRoomActions}
-              onNetworkFocus={focusNetwork}
-              placement="sheet"
-            />
-          )}
+          actionRail={contextualActions}
         >
-          {mobileDetailOpen ? detailContent : discoveryRestricted ? (
+          {detailOpen ? detailContent : discoveryRestricted ? (
             <StatePanel state="permission" title={t("networkWorkspace.status.permission.title")}>
               {t("networkWorkspace.status.permission.body")}
             </StatePanel>
           ) : (
             <div className={styles.mobileResultStream} data-mobile-result-stream>
               <div className={styles.mobileResultUtilityRow}>
-                <span>{t("networkWorkspace.search.lowDensity")}</span>
+                <span>{t("networkWorkspace.search.resultCount", { count: discovery?.totalMatched ?? 0 })}</span>
                 {(capability || serviceAreaId) ? (
                   <Link href={clearHref}>{t("networkWorkspace.search.clear")}</Link>
                 ) : null}
               </div>
-              <p className={styles.matchDisclaimer}>{t("networkWorkspace.match.disclaimer")}</p>
+
               {cards.length > 0 ? cards.map((card, index) => {
                 const organization = discovery?.organizations[index];
                 if (!organization) return null;
@@ -861,6 +719,7 @@ export function ExistingWorkspaceFoundation({
                       onOpen={() => {
                         selectObject(organization.marker.id, index);
                         setMobileDetailOpen(true);
+                        window.requestAnimationFrame(() => document.getElementById("organization-detail-panel")?.focus({ preventScroll: true }));
                         updateSpatialContext((current) => Object.freeze({
                           ...current,
                           panelOpen: true,
@@ -872,9 +731,7 @@ export function ExistingWorkspaceFoundation({
                   </div>
                 );
               }) : (
-                <StatePanel state="empty" title={t("networkWorkspace.search.noResultsTitle")}>
-                  {t("networkWorkspace.search.noResultsBody")}
-                </StatePanel>
+                <p className={styles.emptyResults} role="status">{t("interface.search.empty")}</p>
               )}
               {discovery && discovery.pageCount > 1 ? (
                 <nav className={styles.networkPagination} aria-label={t("networkWorkspace.search.paginationLabel")}>
@@ -883,7 +740,6 @@ export function ExistingWorkspaceFoundation({
                       organizationId,
                       capability,
                       serviceAreaId,
-                      selectedOrganizationId: selectedOrganizationQueryId,
                       page: discovery.page - 1,
                     })}>{t("networkWorkspace.search.previous")}</Link>
                   ) : <span />}
@@ -893,7 +749,6 @@ export function ExistingWorkspaceFoundation({
                       organizationId,
                       capability,
                       serviceAreaId,
-                      selectedOrganizationId: selectedOrganizationQueryId,
                       page: discovery.page + 1,
                     })}>{t("networkWorkspace.search.next")}</Link>
                   ) : <span />}

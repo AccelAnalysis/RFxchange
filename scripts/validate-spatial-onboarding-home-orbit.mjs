@@ -83,7 +83,7 @@ assert.match(files.workspaceRoute, /loadAuthorizedNetworkDiscovery/);
 assert.match(files.workspace, /mode="organization"/);
 assert.match(files.workspace, /marker=\{homeMarker\}/);
 assert.match(files.workspace, /organizationMarkers=\{networkMarkers\}/);
-assert.match(files.workspace, /workspaceOverlay=\{panelOpen \? "right" : "left"\}/);
+assert.match(files.workspace, /workspaceOverlay="right"/);
 assert.match(files.workspace, /authorizedObjectIds\.has\(spatialContext\.selection\.markerId\)/);
 
 assert.match(files.architecture, /225 seconds/);

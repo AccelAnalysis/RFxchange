@@ -37,6 +37,7 @@ import {
   readMapRotationPreference,
 } from "./map-motion-preference";
 
+import { useI18n } from "../i18n/I18nProvider";
 import styles from "./ExchangeSpatialScene.module.css";
 
 export type ExchangeSpatialSceneMode = "regional" | "locality" | "organization";
@@ -119,12 +120,14 @@ type MapBasemapPreset = Readonly<{
   lightPreset: "day";
   theme: "faded" | "default";
   showTransitLabels: boolean;
+  showRoadLabels: boolean;
+  showPlaceLabels: boolean;
   showPointOfInterestLabels: boolean;
 }>;
 
 export const MAP_BASEMAP_PRESETS: readonly MapBasemapPreset[] = Object.freeze([
-  Object.freeze({ id: "exchange", label: "Exchange", lightPreset: "day", theme: "faded", showTransitLabels: false, showPointOfInterestLabels: true }),
-  Object.freeze({ id: "street", label: "Street", lightPreset: "day", theme: "default", showTransitLabels: true, showPointOfInterestLabels: true }),
+  Object.freeze({ id: "exchange", label: "Exchange", lightPreset: "day", theme: "faded", showTransitLabels: false, showRoadLabels: false, showPlaceLabels: false, showPointOfInterestLabels: false }),
+  Object.freeze({ id: "street", label: "Street", lightPreset: "day", theme: "default", showTransitLabels: true, showRoadLabels: true, showPlaceLabels: true, showPointOfInterestLabels: true }),
 ]);
 
 const LOCALITY_SOURCE_ID = "rfx-spatial-scene-locality";
@@ -623,6 +626,7 @@ export function ExchangeSpatialScene({
   continuousMotion = null,
   className,
 }: ExchangeSpatialSceneProps) {
+  const { t } = useI18n();
   if (lensProjection && (organizationMarkers.length > 0 || opportunityMarkers.length > 0 || serviceFields.length > 0)) {
     throw new Error("A shared lens projection cannot be combined with legacy domain overlay props.");
   }
@@ -992,6 +996,8 @@ export function ExchangeSpatialScene({
     map.setConfigProperty("basemap", "lightPreset", preset.lightPreset);
     map.setConfigProperty("basemap", "theme", preset.theme);
     map.setConfigProperty("basemap", "showTransitLabels", preset.showTransitLabels);
+    map.setConfigProperty("basemap", "showRoadLabels", preset.showRoadLabels);
+    map.setConfigProperty("basemap", "showPlaceLabels", preset.showPlaceLabels);
     map.setConfigProperty("basemap", "showPointOfInterestLabels", preset.showPointOfInterestLabels);
     setBasemapPreset(nextPreset);
   }, [pauseForInteraction]);
@@ -1109,7 +1115,9 @@ export function ExchangeSpatialScene({
         basemap: {
           lightPreset: "day",
           theme: "faded",
-          showPointOfInterestLabels: true,
+          showPointOfInterestLabels: false,
+          showRoadLabels: false,
+          showPlaceLabels: false,
           showTransitLabels: false,
           show3dObjects: true,
         },
@@ -1958,7 +1966,7 @@ export function ExchangeSpatialScene({
   if (!token.startsWith("pk.")) {
     return (
       <div className={`${styles.tokenNotice} ${className ?? ""}`} role="status">
-        Mapbox public access token required for the spatial activation background.
+        {t("interface.map.unavailable")}
       </div>
     );
   }
@@ -2019,7 +2027,7 @@ export function ExchangeSpatialScene({
             <div className={styles.homeContext}>
               <span>Home locality</span>
               <strong>{model.selectedGeography.name}</strong>
-              <button type="button" onClick={fitHomeLocality}>Fit home</button>
+              <button type="button" onClick={fitHomeLocality}>{t("interface.map.fitHome")}</button>
             </div>
             {searchStatus === "error" ? (
               <p className={styles.searchMessage} role="status">
@@ -2052,7 +2060,9 @@ export function ExchangeSpatialScene({
             </p>
           </section> : null}
 
-          <div className={styles.viewModeControl} role="group" aria-label="Map view">
+          <details className={styles.mapOptions}>
+            <summary>{t("interface.map.options")}</summary>
+          <div className={styles.viewModeControl} role="group" aria-label={t("interface.map.options")}>
             {PARTICIPANT_MAP_VIEW_OPTIONS.map((option) => (
               <button
                 key={option.id}
@@ -2061,35 +2071,31 @@ export function ExchangeSpatialScene({
                 aria-pressed={viewMode === option.id}
                 onClick={() => selectViewMode(option.id)}
               >
-                {option.label}
+                {t(`interface.map.${option.id}`)}
               </button>
             ))}
             <span className={styles.controlDivider} aria-hidden="true" />
-            <span className={styles.basemapLabel}>Map</span>
+            <span className={styles.basemapLabel}>{t("interface.map.basemapLabel")}</span>
             {MAP_BASEMAP_PRESETS.map((preset) => (
               <button
                 key={preset.id}
                 type="button"
                 data-active={basemapPreset === preset.id}
                 aria-pressed={basemapPreset === preset.id}
-                aria-label={`Use ${preset.label} map appearance`}
                 onClick={() => selectBasemapPreset(preset.id)}
               >
-                {preset.label}
+                {t(`interface.map.${preset.id}`)}
               </button>
             ))}
-            <button type="button" onClick={fitHomeLocality}>Fit home</button>
+            <button type="button" onClick={fitHomeLocality}>{t("interface.map.fitHome")}</button>
           </div>
+          </details>
         </>
       ) : null}
 
       <figcaption className={styles.srOnly}>
-        Edge-to-edge RFxchange map. {continuousMotion
-          ? "This instructional or milestone scene may use a 225-second ambient orbit."
-          : "This daily workspace scene settles into a stable interactive camera."} Locality scenes use a
-        60-degree pitch and fit the authoritative locality bounds. Organization scenes use a
-        75-degree pitch at zoom 16 and preserve the persistent organization marker.
-        {tutorialOverlay ? ` ${tutorialOverlay.accessibleSummary} All tutorial entities are synthetic and are not live Exchange activity.` : ""}
+        {t("interface.map.description")}
+        {tutorialOverlay ? ` ${tutorialOverlay.accessibleSummary} ${t("interface.map.tutorialNotice")}` : ""}
       </figcaption>
     </figure>
   );

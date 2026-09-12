@@ -8,11 +8,11 @@ const read = (path) => readFileSync(new URL(path, root), "utf8");
 test("Stage 2 action surfaces consume the validated spatial presentation state", () => {
   const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
   assert.match(workspace, /snapPoint=\{spatialContext\.sheetSnapPoint\}/);
-  assert.match(workspace, /initialScrollTop=\{mobileDetailOpen \? 0 : spatialContext\.sheetScrollTop\}/);
-  assert.match(workspace, /onScrollPositionChange=\{\(sheetScrollTop\) => \{\s*if \(mobileDetailOpen\) return;/);
+  assert.match(workspace, /initialScrollTop=\{detailOpen \? 0 : spatialContext\.sheetScrollTop\}/);
+  assert.match(workspace, /onScrollPositionChange=\{\(sheetScrollTop\) => \{\s*if \(detailOpen\) return;/);
   assert.match(workspace, /onSnapPointChange=\{\(sheetSnapPoint\)/);
   assert.match(workspace, /panelOpen: true/);
-  assert.match(workspace, /placement="workspace"/);
+  assert.doesNotMatch(workspace, /placement="workspace"/);
   assert.match(workspace, /placement="sheet"/);
 });
 

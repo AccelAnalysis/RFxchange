@@ -13,6 +13,7 @@ import {
   OperationalWorkspace,
   ParticipantShell,
 } from "@/src/components/participant/ParticipantWorkspace";
+import { projectOrganizationCapabilityClaim } from "@/src/domain/market-profile/model";
 import { hydrateEssentialOrganizationProfile } from "@/src/domain/organization-profile/model";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import {
@@ -76,11 +77,13 @@ async function GeographyCard({
   markerActive,
   locationVisibility,
   copy,
+  account,
 }: Readonly<{
   pendingMap: Promise<MapProjectionResult>;
   markerActive: boolean;
   locationVisibility: string | null;
   copy: WorkspaceResilienceCopy;
+  account: Awaited<ReturnType<typeof getRequestDictionary>>["dictionary"]["interface"]["account"];
 }>) {
   const result = await pendingMap;
   const selectedGeography = result.available
@@ -91,28 +94,17 @@ async function GeographyCard({
     <article className={styles.card}>
       <h2>{copy.geographyTitle}</h2>
       <dl className={styles.definitionList}>
-        <dt>Home locality</dt>
+        <dt>{account.homeLocality}</dt>
         <dd>
           {result.available
-            ? selectedGeography?.name ?? "Not recorded"
+            ? selectedGeography?.name ?? account.notRecorded
             : copy.geographyUnavailable}
         </dd>
-        <dt>Location visibility</dt>
-        <dd>{locationVisibility ? readable(locationVisibility) : "Not recorded"}</dd>
-        <dt>Marker</dt>
-        <dd>{markerActive ? "Active" : "Not active"}</dd>
-        <dt>Initial service geography</dt>
-        <dd>
-          {result.available
-            ? selectedGeography?.name ?? "Not recorded"
-            : copy.geographyUnavailable}
-        </dd>
+        <dt>{account.locationVisibility}</dt>
+        <dd>{locationVisibility ? readable(locationVisibility) : account.notRecorded}</dd>
+        <dt>{account.mapVisibility}</dt>
+        <dd>{markerActive ? account.visible : account.inactive}</dd>
       </dl>
-      <p className={styles.empty}>
-        During minimum activation, RFxchange initializes the confirmed home locality as the
-        organization&apos;s initial service geography. Expanded service territories remain a
-        separate profile concept and can be refined in later profile enrichment.
-      </p>
     </article>
   );
 }
@@ -150,6 +142,31 @@ async function MarketProfileSection({
       serviceGeographies={marketProfile.serviceGeographies}
     />
   );
+}
+
+async function PublicCapabilities({
+  pendingMarketProfile,
+  account,
+  copy,
+}: Readonly<{
+  pendingMarketProfile: Promise<MarketProfileResult>;
+  account: Awaited<ReturnType<typeof getRequestDictionary>>["dictionary"]["interface"]["account"];
+  copy: WorkspaceResilienceCopy;
+}>) {
+  const result = await pendingMarketProfile;
+  if (!result.available) return <p role="status">{copy.marketProfileUnavailable}</p>;
+  const claims = result.value.snapshot.claims.flatMap((claim) => {
+    const visible = projectOrganizationCapabilityClaim(claim, "public");
+    return visible ? [visible] : [];
+  });
+  return <>
+    <p>{account.confirmedBody}</p>
+    {claims.length ? (
+      <ul className={styles.capabilityList}>
+        {claims.map((claim) => <li key={claim.id}>{claim.label}</li>)}
+      </ul>
+    ) : <p>{account.publicCapabilitiesEmpty}</p>}
+  </>;
 }
 
 async function EnrichmentSection({
@@ -283,145 +300,78 @@ export default async function OrganizationProfilePage() {
 
   const copy = dictionary.workspaceResilience;
   const profile = hydrateEssentialOrganizationProfile(profileRecord);
-  const workspaceStatus = access.state.lifecycleState === "open-platform" ? "Open" : "Active";
+  const account = dictionary.interface.account;
 
   return (
     <ParticipantShell activeItem="account" organizationName={profile.displayName}>
-      <OperationalWorkspace ariaLabel="Organization account workspace">
+      <OperationalWorkspace ariaLabel={account.title}>
         <section className={styles.page}>
           <header className={styles.header}>
-            <div>
-              <p className={styles.eyebrow}>Account · RFxchange</p>
-              <h1>{profile.displayName}</h1>
-              <p>
-                Manage the organization identity and market information that permitted participants
-                can use to discover what your organization says it does.
-              </p>
-            </div>
+            <p className={styles.eyebrow}>{account.title}</p>
+            <h1>{profile.displayName}</h1>
+            <p>{account.intro}</p>
           </header>
 
-          <section className={styles.grid}>
-            <article className={styles.card}>
-              <h2>Organization identity</h2>
+          <dl className={styles.progress}>
+            <div><dt>{account.minimumProfile}</dt><dd>{profileCompletion?.status === "active" ? account.ready : account.incomplete}</dd></div>
+            <div><dt>{account.mapVisibility}</dt><dd>{markerActivation?.status === "active" ? account.visible : account.inactive}</dd></div>
+          </dl>
+
+          <details className={styles.section} id="organization-identity">
+            <summary>{account.identity}</summary>
+            <div className={styles.sectionBody}>
               <dl className={styles.definitionList}>
-                <dt>Organization ID</dt>
-                <dd>{String(access.membership.organizationId)}</dd>
-                <dt>Organization type</dt>
-                <dd>
-                  {profile.organizationType
-                    ? readable(profile.organizationType)
-                    : "Optional enrichment not recorded"}
-                </dd>
-                <dt>Profile status</dt>
-                <dd>
-                  {profileCompletion?.status === "active" ? "Profile Complete" : "Incomplete"}
-                </dd>
-                <dt>Workspace state</dt>
-                <dd><span className={styles.status}>{workspaceStatus}</span></dd>
+                <dt>{account.organizationType}</dt><dd>{profile.organizationType ? readable(profile.organizationType) : account.notRecorded}</dd>
+                <dt>{account.website}</dt><dd>{profile.website?.url ? <a href={profile.website.url} target="_blank" rel="noreferrer">{profile.website.url}</a> : account.notRecorded}</dd>
+                <dt>{account.publicContact}</dt><dd>{profile.mainContact?.displayName ?? account.notRecorded}</dd>
               </dl>
-            </article>
+            </div>
+          </details>
 
-            <Suspense
-              fallback={(
-                <article className={styles.card}>
-                  <h2>{copy.geographyTitle}</h2>
-                  <p className={styles.empty}>{copy.geographyLoading}</p>
-                </article>
-              )}
-            >
-              <GeographyCard
-                pendingMap={pendingMap}
-                markerActive={markerActivation?.status === "active"}
-                locationVisibility={location?.visibility ?? null}
-                copy={copy}
-              />
-            </Suspense>
+          <details className={styles.section} id="organization-capabilities" open>
+            <summary>{account.capabilities}</summary>
+            <div className={styles.sectionBody}>
+              <Suspense fallback={<OptionalPanelState title={copy.marketProfileTitle} message={copy.marketProfileLoading} />}>
+                <MarketProfileSection pendingMarketProfile={pendingMarketProfile} organizationId={String(organizationId)} organizationName={profile.displayName} copy={copy} />
+              </Suspense>
+            </div>
+          </details>
 
-            <article className={styles.card}>
-              <h2>Capabilities</h2>
-              {profile.capabilities.length ? (
-                <ul className={styles.tags}>
-                  {profile.capabilities.map((capability) => (
-                    <li key={String(capability.id)}>
-                      {capability.name} · {capability.category === "other"
-                        ? capability.otherCategory
-                        : readable(capability.category)}
-                    </li>
-                  ))}
-                </ul>
-              ) : <p className={styles.empty}>No capability has been recorded.</p>}
-            </article>
+          <details className={styles.section} id="organization-public-presence">
+            <summary>{account.publicPresence}</summary>
+            <div className={styles.sectionBody}>
+              <h2>{profile.displayName}</h2>
+              <Suspense fallback={<p role="status">{copy.marketProfileLoading}</p>}>
+                <PublicCapabilities pendingMarketProfile={pendingMarketProfile} account={account} copy={copy} />
+              </Suspense>
+              <h3>{account.badges}</h3>
+              <p>{account.badgesUnavailable}</p>
+              <Link className={styles.quietLink} href="/provider-application">{account.applyProvider}</Link>
+            </div>
+          </details>
 
-            <article className={styles.card}>
-              <h2>Opportunity participation</h2>
-              <p className={styles.empty}>
-                Every RFxchange organization can discover and respond to opportunities and can also
-                create and issue opportunities. These transaction roles do not require a permanent
-                buyer or supplier classification.
-              </p>
-            </article>
+          <details className={styles.section} id="organization-locations">
+            <summary>{account.enrichment}</summary>
+            <div className={styles.sectionBody}>
+              <Suspense fallback={<OptionalPanelState title={copy.geographyTitle} message={copy.geographyLoading} />}>
+                <GeographyCard pendingMap={pendingMap} markerActive={markerActivation?.status === "active"} locationVisibility={location?.visibility ?? null} copy={copy} account={account} />
+              </Suspense>
+              <Suspense fallback={<OptionalPanelState title={copy.enrichmentTitle} message={copy.enrichmentLoading} />}>
+                <EnrichmentSection pendingEnrichment={pendingEnrichment} pendingMap={pendingMap} organizationId={String(organizationId)} copy={copy} />
+              </Suspense>
+            </div>
+          </details>
 
-            <article className={styles.card}>
-              <h2>Map settings</h2>
+          <details className={styles.section} id="organization-settings">
+            <summary>{account.settings}</summary>
+            <div className={styles.sectionBody}>
+              <h2>{account.mapPreferences}</h2>
               <MapMotionPreferenceToggle />
-            </article>
-
-            <article className={styles.card}>
-              <h2>Your organization relationship</h2>
               <dl className={styles.definitionList}>
-                <dt>Membership</dt>
-                <dd>Active</dd>
-                <dt>Authorization role</dt>
-                <dd>
-                  {authorization
-                    ? readable(String(authorization.roleKey))
-                    : "No authorization role recorded"}
-                </dd>
-                <dt>Granted capabilities</dt>
-                <dd>{authorization?.permissions.length ?? 0}</dd>
+                <dt>{account.role}</dt><dd>{authorization ? readable(String(authorization.roleKey)) : account.notRecorded}</dd>
               </dl>
-            </article>
-
-            <article className={styles.card}>
-              <h2>Resource Provider status</h2>
-              <p className={styles.empty}>
-                Official Resource Provider status is a separate application and administrator-review
-                process. It is not selected during registration and is not implied by Profile Complete.
-              </p>
-              <Link href="/provider-application">Request Resource Provider Status</Link>
-            </article>
-          </section>
-
-          <Suspense
-            fallback={(
-              <OptionalPanelState
-                title={copy.marketProfileTitle}
-                message={copy.marketProfileLoading}
-              />
-            )}
-          >
-            <MarketProfileSection
-              pendingMarketProfile={pendingMarketProfile}
-              organizationId={String(access.membership.organizationId)}
-              organizationName={profile.displayName}
-              copy={copy}
-            />
-          </Suspense>
-          <Suspense
-            fallback={(
-              <OptionalPanelState
-                title={copy.enrichmentTitle}
-                message={copy.enrichmentLoading}
-              />
-            )}
-          >
-            <EnrichmentSection
-              pendingEnrichment={pendingEnrichment}
-              pendingMap={pendingMap}
-              organizationId={String(access.membership.organizationId)}
-              copy={copy}
-            />
-          </Suspense>
+            </div>
+          </details>
         </section>
       </OperationalWorkspace>
     </ParticipantShell>

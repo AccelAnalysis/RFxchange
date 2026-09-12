@@ -223,5 +223,62 @@
         "warehouse": "A worker moving through a warehouse environment."
       }
     }
+  },
+  "interface": {
+    "map": {
+      "options": "Map options",
+      "unavailable": "The map is temporarily unavailable. You can still use the results and organization details.",
+      "fitHome": "Home locality",
+      "basemapLabel": "Map appearance",
+      "exchange": "Exchange",
+      "street": "Street",
+      "perspective": "Perspective",
+      "description": "RFxchange map showing your home locality and visible organizations.",
+      "tutorialNotice": "Illustration only. Tutorial entities do not represent live Exchange activity.",
+      "2d": "2D",
+      "3d": "3D"
+    },
+    "search": {
+      "filters": "Filters",
+      "apply": "Apply filters",
+      "empty": "No results. Try another search or adjust the filters."
+    },
+    "organization": {
+      "viewProfile": "View profile"
+    },
+    "account": {
+      "title": "Organization account",
+      "intro": "Manage how your organization appears in the Exchange.",
+      "identity": "Identity",
+      "capabilities": "AMACS capabilities",
+      "publicPresence": "Public presence & badges",
+      "enrichment": "Locations & profile details",
+      "settings": "Preferences & access",
+      "minimumProfile": "Minimum profile",
+      "ready": "Ready",
+      "incomplete": "Incomplete",
+      "mapVisibility": "Map visibility",
+      "visible": "Visible",
+      "inactive": "Not active",
+      "manageCapabilities": "Manage capabilities",
+      "reviewPublicPresence": "Review public presence",
+      "organizationType": "Organization type",
+      "notRecorded": "Not recorded",
+      "website": "Website",
+      "publicContact": "Public contact",
+      "confirmedCapabilities": "Confirmed capabilities",
+      "confirmedBody": "Capabilities you have chosen to share publicly. Network-only, private and suspended claims are not shown here.",
+      "badges": "Badges",
+      "badgesUnavailable": "Badge setup is not available yet. Profile readiness and map visibility do not award verification badges.",
+      "provider": "Resource Provider",
+      "applyProvider": "Apply for Resource Provider status",
+      "mapPreferences": "Map preferences",
+      "role": "Your role",
+      "homeLocality": "Home locality",
+      "locationVisibility": "Location visibility",
+      "marketTitle": "Capabilities and experience",
+      "marketBody": "Review your capabilities, industry, and past work.",
+      "publicCapabilitiesEmpty": "No capabilities are shared publicly yet."
+    }
   }
 }

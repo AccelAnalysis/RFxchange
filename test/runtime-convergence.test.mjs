@@ -18,8 +18,8 @@ test("participant account is real authenticated organization state rather than a
   const account = await source("app/organization-profile/page.tsx");
   assert.match(account, /resolveParticipantRoute/);
   assert.match(account, /getByOrganizationId/);
-  assert.match(account, /Opportunity participation/);
-  assert.match(account, /Every RFxchange organization can discover and respond/);
+  assert.match(account, /account\.capabilities/);
+  assert.match(account, /account\.badgesUnavailable/);
   assert.doesNotMatch(account, /EssentialProfilePanel/);
   assert.doesNotMatch(account, /Harborlight/i);
   assert.doesNotMatch(account, />Participation roles</);

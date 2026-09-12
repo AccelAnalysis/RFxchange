@@ -48,7 +48,7 @@ test("Brand B6a organization home presents the current bounded Exchange scope wi
   assert.equal(networkCatalog.provenance.eyebrow, "Map information");
   assert.match(networkCatalog.home.scopeBody, /Explore organizations, capabilities, geography, and the Exchange tools currently available/);
   assert.match(networkCatalog.home.scopeBody, /Unavailable actions are identified where they appear/);
-  assert.match(component, /networkWorkspace\.home\.scopeBody/);
+  assert.doesNotMatch(component, /networkWorkspace\.home\.scopeBody|<ObjectCard|<StatusPill/);
 });
 
 test("Brand B6a authenticated route receives server-authorized organization identity and Network projection", () => {
@@ -64,7 +64,7 @@ test("Brand B6a authenticated route receives server-authorized organization iden
 
 test("Brand B6a workspace is responsive, keyboard-visible, and sensory-safe", () => {
   assert.match(styles, /focus-visible/);
-  assert.match(styles, /max-width: 760px/);
+  assert.match(styles, /max-width: 1024px/);
   assert.match(styles, /prefers-reduced-motion: reduce/);
   assert.match(styles, /prefers-reduced-transparency: reduce/);
   assert.doesNotMatch(styles, /#(?:0b0b0d|f7f3ea|252932|d6a23a|8a6418|2e5eaa|3b7b57)\b/i);

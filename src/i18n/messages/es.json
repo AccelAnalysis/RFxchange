@@ -223,5 +223,62 @@
       "professional": "Un equipo profesional en conversación.",
       "warehouse": "Una persona trabajando en un entorno de almacén."
     }
+  },
+  "interface": {
+    "map": {
+      "options": "Opciones del mapa",
+      "unavailable": "El mapa no está disponible temporalmente. Puedes consultar los resultados y los perfiles.",
+      "fitHome": "Localidad de origen",
+      "basemapLabel": "Apariencia del mapa",
+      "exchange": "Exchange",
+      "street": "Calles",
+      "perspective": "Perspectiva",
+      "description": "Mapa de RFxchange con tu localidad de origen y las organizaciones visibles.",
+      "tutorialNotice": "Solo ilustración. Las entidades del tutorial no representan actividad real de Exchange.",
+      "2d": "2D",
+      "3d": "3D"
+    },
+    "search": {
+      "filters": "Filtros",
+      "apply": "Aplicar filtros",
+      "empty": "Sin resultados. Prueba otra búsqueda o ajusta los filtros."
+    },
+    "organization": {
+      "viewProfile": "Ver perfil"
+    },
+    "account": {
+      "title": "Cuenta de la organización",
+      "intro": "Gestiona cómo aparece tu organización en el Exchange.",
+      "identity": "Identidad",
+      "capabilities": "Capacidades AMACS",
+      "publicPresence": "Presencia pública e insignias",
+      "enrichment": "Ubicaciones y detalles del perfil",
+      "settings": "Preferencias y acceso",
+      "minimumProfile": "Perfil mínimo",
+      "ready": "Listo",
+      "incomplete": "Incompleto",
+      "mapVisibility": "Visibilidad en el mapa",
+      "visible": "Visible",
+      "inactive": "Inactivo",
+      "manageCapabilities": "Gestionar capacidades",
+      "reviewPublicPresence": "Revisar presencia pública",
+      "organizationType": "Tipo de organización",
+      "notRecorded": "Sin registrar",
+      "website": "Sitio web",
+      "publicContact": "Contacto público",
+      "confirmedCapabilities": "Capacidades confirmadas",
+      "confirmedBody": "Capacidades que has elegido compartir públicamente. Las declaraciones privadas, suspendidas o solo para la red no se muestran aquí.",
+      "badges": "Insignias",
+      "badgesUnavailable": "La configuración de insignias aún no está disponible. Completar el perfil o aparecer en el mapa no otorga insignias de verificación.",
+      "provider": "Proveedor de recursos",
+      "applyProvider": "Solicitar el estado de proveedor de recursos",
+      "mapPreferences": "Preferencias del mapa",
+      "role": "Tu función",
+      "homeLocality": "Localidad de origen",
+      "locationVisibility": "Visibilidad de la ubicación",
+      "marketTitle": "Capacidades y experiencia",
+      "marketBody": "Revisa tus capacidades, sector y trabajos anteriores.",
+      "publicCapabilitiesEmpty": "Aún no compartes capacidades públicamente."
+    }
   }
 }

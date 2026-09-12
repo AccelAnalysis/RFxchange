@@ -59,7 +59,8 @@ assert.match(workspace, /onOrganizationMarkerSelect/);
 assert.match(workspace, /showSearch=\{false\}/);
 assert.match(workspace, /role="search"/);
 assert.match(workspace, /name="serviceArea"/);
-assert.match(workspace, /aria-pressed=\{selected\}/);
+assert.match(workspace, /selected=\{selected\}/);
+assert.match(read("src/components/participant/MobileExchangePrimitives.tsx"), /aria-current=\{selected \? "true" : undefined\}/);
 assert.match(workspace, /networkWorkspace\.match\.disclaimer/);
 assert.doesNotMatch(workspace, /firebase-admin|firebase\/firestore/);
 

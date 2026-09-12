@@ -223,5 +223,62 @@
       "professional": "Une équipe professionnelle en discussion.",
       "warehouse": "Une personne travaille dans un entrepôt."
     }
+  },
+  "interface": {
+    "map": {
+      "options": "Options de la carte",
+      "unavailable": "La carte est temporairement indisponible. Les résultats et les profils restent accessibles.",
+      "fitHome": "Localité d’origine",
+      "basemapLabel": "Apparence de la carte",
+      "exchange": "Exchange",
+      "street": "Rues",
+      "perspective": "Perspective",
+      "description": "Carte RFxchange affichant votre localité d’origine et les organisations visibles.",
+      "tutorialNotice": "Illustration uniquement. Les entités du tutoriel ne représentent pas l’activité réelle d’Exchange.",
+      "2d": "2D",
+      "3d": "3D"
+    },
+    "search": {
+      "filters": "Filtres",
+      "apply": "Appliquer les filtres",
+      "empty": "Aucun résultat. Essayez une autre recherche ou modifiez les filtres."
+    },
+    "organization": {
+      "viewProfile": "Voir le profil"
+    },
+    "account": {
+      "title": "Compte de l’organisation",
+      "intro": "Gérez la présentation de votre organisation dans l’Exchange.",
+      "identity": "Identité",
+      "capabilities": "Capacités AMACS",
+      "publicPresence": "Présence publique et badges",
+      "enrichment": "Implantations et profil",
+      "settings": "Préférences et accès",
+      "minimumProfile": "Profil minimal",
+      "ready": "Prêt",
+      "incomplete": "Incomplet",
+      "mapVisibility": "Visibilité sur la carte",
+      "visible": "Visible",
+      "inactive": "Inactif",
+      "manageCapabilities": "Gérer les capacités",
+      "reviewPublicPresence": "Voir la présence publique",
+      "organizationType": "Type d’organisation",
+      "notRecorded": "Non renseigné",
+      "website": "Site web",
+      "publicContact": "Contact public",
+      "confirmedCapabilities": "Capacités confirmées",
+      "confirmedBody": "Capacités que vous avez choisi de partager publiquement. Les déclarations privées, suspendues ou réservées au réseau ne figurent pas ici.",
+      "badges": "Badges",
+      "badgesUnavailable": "La configuration des badges n’est pas encore disponible. Un profil complet ou visible sur la carte n’attribue pas de badge de vérification.",
+      "provider": "Fournisseur de ressources",
+      "applyProvider": "Demander le statut de fournisseur de ressources",
+      "mapPreferences": "Préférences de la carte",
+      "role": "Votre rôle",
+      "homeLocality": "Localité d’origine",
+      "locationVisibility": "Visibilité du lieu",
+      "marketTitle": "Capacités et expérience",
+      "marketBody": "Consultez vos capacités, votre secteur et vos projets passés.",
+      "publicCapabilitiesEmpty": "Aucune capacité partagée publiquement pour le moment."
+    }
   }
 }

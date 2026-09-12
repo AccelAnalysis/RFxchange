@@ -74,3 +74,13 @@
 .controlDivider { width: 1px; min-height: 26px; align-self: center; background: var(--semantic-border-subtle); }
 .basemapLabel { align-self: center; padding-inline: 5px 2px; color: var(--semantic-text-muted); font: 800 0.62rem/1 var(--type-interface-family); letter-spacing: 0.09em; text-transform: uppercase; }
 @media (max-width: 760px) { .viewModeControl { max-width: calc(100vw - 20px); flex-wrap: wrap; justify-content: flex-end; } .basemapLabel { display: none; } .controlDivider { min-height: 22px; } }
+
+/* Secondary map choices stay behind one disclosure. */
+.mapOptions { position: absolute; z-index: 46; top: 16px; right: 16px; }
+.scene[data-workspace-overlay="right"] .mapOptions { right: clamp(436px, calc(32vw + 16px), 496px); top: 88px; }
+.mapOptions > summary { min-height: 44px; padding: 12px 16px; border: 1px solid var(--semantic-border-glass); border-radius: 24px; color: var(--semantic-text-primary); background: var(--semantic-surface-glass-strong); box-shadow: var(--elevation-control); cursor: pointer; font: 650 .875rem/1.4 var(--type-interface-family); }
+.mapOptions .viewModeControl, .scene[data-workspace-overlay="right"] .mapOptions .viewModeControl { position: absolute; top: calc(100% + 8px); right: 0; bottom: auto; left: auto; width: 248px; padding: 12px; flex-wrap: wrap; background: var(--semantic-canvas-elevated); backdrop-filter: none; }
+.mapOptions .viewModeControl button { min-height: 44px; font-size: .875rem; }
+.mapOptions summary:focus-visible { outline: 2px solid white; box-shadow: 0 0 0 5px var(--semantic-border-focus); }
+@media (max-width: 1024px) { .mapOptions, .scene[data-workspace-overlay="right"] .mapOptions { top: 136px; right: 12px; } }
+@media (prefers-reduced-transparency: reduce) { .mapOptions > summary { background: var(--semantic-canvas-elevated); } }

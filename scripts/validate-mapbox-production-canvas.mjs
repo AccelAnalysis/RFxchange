@@ -82,7 +82,7 @@ for (const requirement of [
   "maxZoom: 24",
   "search/searchbox/v1/forward",
   "Search moves the camera only and never changes your home locality.",
-  "Fit home",
+  't("interface.map.fitHome")',
   "PARTICIPANT_MAP_VIEW_OPTIONS",
   "map.easeTo",
   "aria-pressed",
@@ -128,20 +128,18 @@ assert.ok(
     geographyRoute.includes("loadAuthorizedNetworkDiscovery") &&
     existingWorkspace.includes("role=\"search\"") &&
     existingWorkspace.includes("showSearch={false}") &&
-    existingWorkspace.includes('workspaceOverlay={panelOpen ? "right" : "left"}'),
+    existingWorkspace.includes('workspaceOverlay="right"'),
   "Slice 3.2 must preserve authorized organization identity, one operational Network search per responsive viewport, and contextual map controls.",
 );
 assert.ok(!geographyRoute.includes("SearchFilterOverlay"), "Intelligence must avoid a decorative duplicate search control.");
 const responsiveSearchRoles = existingWorkspace.match(/role="search"/g)?.length ?? 0;
 assert.ok(
   !existingWorkspace.includes("SearchFilterOverlay") &&
-    responsiveSearchRoles === 2 &&
-    existingWorkspace.includes("styles.mobileSearchOverlay") &&
-    existingWorkspace.includes("styles.desktopSearchOverlay") &&
-    /\.mobileSearchOverlay,\s*\.mobileResultStream\s*\{\s*display:\s*none;/.test(existingWorkspaceCss) &&
-    /@media \(max-width: 760px\)[\s\S]*\.desktopSearchOverlay,\s*\.desktopDetailSheet\s*\{\s*display:\s*none;/.test(existingWorkspaceCss) &&
-    /@media \(max-width: 760px\)[\s\S]*\.mobileSearchOverlay\s*\{[\s\S]*display:\s*grid;/.test(existingWorkspaceCss),
-  "The authenticated Spatial Workspace must expose one operational search/filter surface per responsive viewport rather than simultaneous duplicate controls.",
+    responsiveSearchRoles === 1 &&
+    existingWorkspace.includes("styles.exchangeSearch") &&
+    existingWorkspace.includes("desktopPanel") &&
+    /@media \(max-width: 1024px\)/.test(existingWorkspaceCss),
+  "Intelligence must share one search form and one adaptive results/detail surface across viewports.",
 );
 
 assert.ok(
