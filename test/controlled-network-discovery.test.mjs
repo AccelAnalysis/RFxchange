@@ -12,6 +12,7 @@ const workspace = await read("src/components/participant/ExistingWorkspaceFounda
 const workspaceStyles = await read("src/components/participant/ExistingWorkspaceFoundation.module.css");
 const map = await read("src/components/map/ExchangeSpatialScene.tsx");
 const state = await read("src/application/participant/participant-spatial-context.ts");
+const networkCopy = JSON.parse(await read("src/i18n/messages/network/en-US.json"));
 
 test("Slice 3.2 revalidates controlled and OPEN participants plus geography authority on the server", () => {
   assert.match(route, /resolveParticipantRoute/);
@@ -34,14 +35,18 @@ test("Slice 3.2 discovery projects only eligible real organization records", () 
   assert.match(service, /projectPublicOrganizationMarker/);
 });
 
-test("Slice 3.2 search is capability-first and service-area bounded", () => {
+test("Slice 3.2 search is capability-first and service-area bounded without ambient disclaimer copy", () => {
   assert.match(service, /capabilityCorpus/);
   assert.match(service, /kind: "capability"/);
   assert.match(service, /kind: "organization-name"/);
   assert.match(service, /serviceGeographyIds\.includes/);
   assert.match(route, /params\.serviceArea/);
   assert.match(workspace, /name="serviceArea"/);
-  assert.match(workspace, /networkWorkspace\.match\.disclaimer/);
+  assert.doesNotMatch(workspace, /networkWorkspace\.match\.disclaimer/);
+  assert.equal(networkCopy.search.noResultsTitle, "No matches in this area");
+  assert.match(networkCopy.match.disclaimer, /organization-provided profile information/i);
+  assert.match(networkCopy.match.disclaimer, /do not verify a business/i);
+  assert.doesNotMatch(networkCopy.match.disclaimer, /profile overlap/i);
 });
 
 test("Slice 3.2 keeps map list and detail on one authorized selection identity", () => {
