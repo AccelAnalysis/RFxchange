@@ -5,7 +5,7 @@ import { readFile, rm, writeFile } from "node:fs/promises";
 
 // Phase 4 activates current RFxchange destinations and the mobile Menu. Keep the historical
 // configured-browser harness intact, but adapt only assertions that still encode the prior
-// unavailable-Capabilities / desktop-Account-on-mobile contract. Every other browser,
+// unavailable-Capabilities / desktop-Account-on-mobile contract and the initial detail layout. Every other browser,
 // accessibility, transition, authorization, Firebase, RFx, and build-identity check still runs.
 const sourceUrl = new URL("./acceptance-exchange-shell-emulator.mjs", import.meta.url);
 const adaptedUrl = new URL("./.phase4-acceptance-exchange-shell-emulator.mjs", import.meta.url);
@@ -66,6 +66,26 @@ replaceOnce(
   "configured acceptance route chain",
   '    routeChain: ["Intelligence", "Opportunities/RFx", "Resources", "Capabilities (unavailable)", "Referrals (Menu)", "Intelligence", "Account", "Quick Start"],',
   '    routeChain: ["Intelligence", "Opportunities/RFx", "Resources", "Capabilities", "Referrals (Menu)", "Intelligence", "Account", "Quick Start"],',
+);
+
+// The v2 edge panel initially shows results. Exercise a real selected record before
+// asserting detail-close behavior, preserving the same close, lens and authority checks.
+replaceOnce(
+  "open a selected record before detail-close acceptance",
+  '  if (!exchangeRoomReopenEvidenceCaptured) {\n    assert.equal(before.panelOpen, true, "Phase 2 detail surface was not open before reopen acceptance.");',
+  `  if (!exchangeRoomReopenEvidenceCaptured) {
+    const adaptiveResults = await evaluate(cdp, \`Boolean(document.querySelector('[data-desktop-panel="true"]'))\`);
+    if (adaptiveResults) {
+      const opened = await evaluate(cdp, \`(() => {
+        const record = document.querySelector('[data-card-open]');
+        if (!record) return false;
+        record.click();
+        return true;
+      })()\`);
+      assert.equal(opened, true, "Adaptive results did not expose an authorized record to open.");
+      await waitForExpression(cdp, 'Boolean(document.querySelector("#organization-detail-panel"))', "selected record detail before close acceptance");
+    }
+    assert.equal(before.panelOpen, true, "Phase 2 detail surface was not open before reopen acceptance.");`,
 );
 
 await writeFile(adaptedUrl, source, "utf8");
