@@ -27,7 +27,7 @@ test("ordinary permanent-lens activation preserves the current detail disclosure
   assert.doesNotMatch(controller, /location\.(assign|replace)|window\.location/);
 });
 
-test("configured-browser acceptance preserves the canonical harness while adapting contextual actions", () => {
+test("configured-browser acceptance preserves the historical baseline while adapting candidate contextual actions", () => {
   const runner = read("scripts/run-configured-exchange-shell-acceptance.mjs");
   const acceptance = read("scripts/acceptance-exchange-shell-emulator.mjs");
   assert.match(runner, /new URL\("\.\/acceptance-exchange-shell-emulator\.mjs", import\.meta\.url\)/);
@@ -41,16 +41,14 @@ test("configured-browser acceptance preserves the canonical harness while adapti
   assert.match(runner, /primary Capabilities availability/);
   assert.match(runner, /mobile Menu trigger metrics/);
   assert.match(runner, /localized Capabilities route/);
-  assert.match(acceptance, /!document\.querySelector\('#organization-detail-panel'\)/);
-  assert.match(acceptance, /!document\.querySelector\('\[data-exchange-room-action-grid\]'\)/);
-  assert.match(acceptance, /closed Exchange Room detail surface without persistent actions/);
-  assert.match(acceptance, /preserve the current Exchange Room detail disclosure/);
-  assert.doesNotMatch(acceptance, /persistent action rail/);
-  assert.doesNotMatch(
-    acceptance,
-    /grids\.length > 0 && grids\.every\(\(grid\) => \([\s\S]*grid\.querySelectorAll\('\[data-exchange-room-action\]'\)\.length === 4/,
-    "configured acceptance must not require a permanent four-position action surface when detail is closed",
-  );
+  assert.match(runner, /candidate-aware Room activation signature/);
+  assert.match(runner, /contextual detail close acceptance/);
+  assert.match(runner, /closed Exchange Room detail surface without persistent actions/);
+  assert.match(runner, /contextual lens settlement acceptance/);
+  assert.match(runner, /preserve candidate detail disclosure/);
+  assert.match(runner, /candidate Room detection without permanent actions/);
+  assert.match(runner, /candidate \? continuityBefore\.panelOpen : true/);
+  assert.match(acceptance, /closed Exchange Room detail surface with persistent action rail/);
   assert.match(acceptance, /nav\[data-mobile-lens-navigation="persistent-bottom"\]/);
   assert.match(acceptance, /bottomNavigationLenses/);
   assert.match(acceptance, /legacyLensMenuPresent/);
