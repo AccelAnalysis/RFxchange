@@ -1,0 +1,53 @@
+{
+  "expectedSha": "99517050b4602b2a8385c3c3c0430172f3ce5502",
+  "ci": {
+    "sourceSha": "99517050b4602b2a8385c3c3c0430172f3ce5502",
+    "conclusion": "success",
+    "status": "completed",
+    "workflow": "production-ci",
+    "branch": "main",
+    "event": "push",
+    "repository": "AccelAnalysis/RFxchange",
+    "runUrl": "https://github.com/AccelAnalysis/RFxchange/actions/runs/34667537618"
+  },
+  "backend": {
+    "name": "projects/rfxchange/locations/us-east4/backends/rfxchange"
+  },
+  "build": {
+    "name": "projects/rfxchange/locations/us-east4/backends/rfxchange/builds/build-2026-09-12-001",
+    "state": "READY",
+    "source": {
+      "codebase": {
+        "hash": "99517050b4602b2a8385c3c3c0430172f3ce5502"
+      }
+    },
+    "config": {
+      "effectiveEnv": [
+        {
+          "variable": "RFXCHANGE_BUILD_SHA",
+          "value": "99517050b4602b2a8385c3c3c0430172f3ce5502",
+          "origin": "BACKEND_OVERRIDES",
+          "availability": [
+            "BUILD",
+            "RUNTIME"
+          ]
+        }
+      ]
+    }
+  },
+  "rollout": {
+    "name": "projects/rfxchange/locations/us-east4/backends/rfxchange/rollouts/rollout-2026-09-12-001",
+    "state": "SUCCEEDED",
+    "build": "projects/rfxchange/locations/us-east4/backends/rfxchange/builds/build-2026-09-12-001"
+  },
+  "rollback": {
+    "build": "projects/rfxchange/locations/us-east4/backends/rfxchange/builds/build-2026-09-12-000",
+    "state": "READY"
+  },
+  "hosted": {
+    "origin": "https://rfxchange--rfxchange.us-east4.hosted.app",
+    "observedAt": "2026-09-12T02:45:54.719073+00:00",
+    "reachable": true,
+    "status": 200
+  }
+}

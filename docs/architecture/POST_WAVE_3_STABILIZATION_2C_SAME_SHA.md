@@ -5,6 +5,31 @@
 **Production origin:** `https://rfxchange--rfxchange.us-east4.hosted.app`
 **Automatic rollouts:** remain paused
 
+## Completion record — 2026-09-12
+
+**Stabilization 2C is complete.** The production release from [PR #274](https://github.com/AccelAnalysis/RFxchange/pull/274) satisfies every acceptance criterion below. The repository verifier accepted the [captured release evidence](evidence/app-hosting-2c-2026-09-12.json) with status `same-sha-evidence-accepted`.
+
+| Evidence | Accepted value |
+| --- | --- |
+| Merged `main` source | `99517050b4602b2a8385c3c3c0430172f3ce5502` |
+| Exact-source CI | [production-ci run 34667537618](https://github.com/AccelAnalysis/RFxchange/actions/runs/34667537618), successful completed `push` on `main` |
+| Build | `build-2026-09-12-001`, `READY` |
+| Source and resolved build identity | Both equal the merged source SHA; `RFXCHANGE_BUILD_SHA` originates from `BACKEND_OVERRIDES` and is available at `BUILD` and `RUNTIME` |
+| Rollout | `rollout-2026-09-12-001`, `SUCCEEDED`, bound to that build |
+| Retained rollback | `build-2026-09-12-000`, `READY`, distinct from the released build |
+| Hosted observation | Production origin returned HTTP 200 at `2026-09-12T02:45:54.719073+00:00` |
+
+The product owner supplied the read-only capture from the official App Hosting API using the authorized local Google Cloud account. GitHub API reads separately confirmed PR #274's merge SHA and the successful exact-source CI run. The saved JSON normalizes only chat presentation artifacts: Markdown URL wrappers, escaped underscores and whitespace. No source, state, resource identity or observation value was changed.
+
+Reproduce the repository acceptance check:
+
+```bash
+node scripts/verify-app-hosting-same-sha-evidence.mjs docs/architecture/evidence/app-hosting-2c-2026-09-12.json
+node --test test/app-hosting-same-sha-evidence.test.mjs
+```
+
+Both commands passed at closeout, including all five verifier tests. This is the completion record for the captured production release, not evidence that a later commit has been deployed. Recording this evidence changes documentation only and does not require a new application rollout. Future releases still follow the exact-commit sequence and ongoing rule below. No independent assurance label is claimed.
+
 ## Why the earlier blocker can now be closed
 
 The original 2C stop was correct at the time: RFxchange had no documented immutable source-commit value inside the managed App Hosting build that could safely be treated as `RFXCHANGE_BUILD_SHA`.
