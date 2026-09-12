@@ -128,6 +128,7 @@ const participantEnglishSurfaces = [
   path.join(messageDirectory, "network", "en-US.json"),
   path.join(messageDirectory, "market-profile", "en-US.json"),
   path.join(messageDirectory, "organization-enrichment", "en-US.json"),
+  path.join(messageDirectory, "resource-providers", "en-US.json"),
   path.join(root, "app", "organization-profile", "page.tsx"),
 ].map((filePath) => fs.readFileSync(filePath, "utf8")).join("\n");
 
@@ -153,6 +154,7 @@ assert.match(participantEnglishSurfaces, /No matches in this area/);
 assert.match(participantEnglishSurfaces, /Browse capabilities/);
 assert.match(participantEnglishSurfaces, /No credentials yet/);
 assert.match(participantEnglishSurfaces, /Public profile preview/);
+assert.match(participantEnglishSurfaces, /Supporting documents \(optional\)/);
 
 console.log(
   `Internationalization foundation and participant-language simplification validated${requestedNamespace ? ` for ${requestedNamespace}` : ""}${requestedLocale ? `:${requestedLocale}` : ""}.`,
