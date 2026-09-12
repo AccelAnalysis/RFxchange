@@ -17,7 +17,7 @@ Authority: [Brand & Interface Design System v2.0](RFxchange_Brand_Interface_Desi
 | Public capability summary | Uses the existing public capability projection. Private, network-only and suspended claims are excluded. | No new disclosure policy or invented verification badge. Badge setup remains unavailable. |
 | Shared presentation | Additional legacy participant color literals use semantic v2 tokens. Missing token aliases are supplied. New copy exists in all five governed locales. | Domain status semantics, membership, scoped access and the three-app separation. |
 
-The adaptive Intelligence panel switches at 1025px. Existing other-lens mobile panels retain their own 760px switch, preventing duplicate intermediate-width panels. The permanent lens composition remains RFx / Resources / Intelligence / Capabilities / Menu.
+The adaptive Intelligence panel switches at 1025px. Shared mobile sheets used by other lenses retain their 760px switch, preventing duplicate intermediate-width surfaces introduced by this change. Existing lens-specific panel breakpoints remain unchanged. The permanent lens composition remains RFx / Resources / Intelligence / Capabilities / Menu.
 
 ## Acceptance and release state
 
