@@ -4,11 +4,12 @@ import { readFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const read = (path) => readFile(new URL(path, root), "utf8");
 
-const [state, spatialState, spatialHook, component, styles, page, runtime, networkRuntime, roadmap, networkCatalogText] = await Promise.all([
+const [state, spatialState, spatialHook, component, spatialScene, styles, page, runtime, networkRuntime, roadmap, networkCatalogText] = await Promise.all([
   read("src/application/participant/existing-workspace-state.ts"),
   read("src/application/participant/participant-spatial-context.ts"),
   read("src/components/participant/useParticipantSpatialContext.ts"),
   read("src/components/participant/ExistingWorkspaceFoundation.tsx"),
+  read("src/components/map/ExchangeSpatialScene.tsx"),
   read("src/components/participant/ExistingWorkspaceFoundation.module.css"),
   read("app/geography/canvas/page.tsx"),
   read("src/infrastructure/geography/participant-map-runtime.ts"),
@@ -78,8 +79,11 @@ assert.doesNotMatch(networkCatalog.home.scopeBody, /\b(?:Slice|Wave|authorized|p
 assert.ok(!networkCatalog.match.disclaimer.includes("Matching explains profile overlap"));
 
 assert.ok(
-  component.includes("viewMode: \"2d\"") && component.includes("pitch: 0") && component.includes("bearing: 0"),
-  "The ordinary Exchange must settle into a quiet 2D default while preserving explicitly chosen camera state.",
+  component.includes("initialCamera={spatialContext.camera}") &&
+    !component.includes('viewMode: "2d" as const') &&
+    spatialScene.includes("const ORGANIZATION_ORBIT_PITCH = 75") &&
+    spatialScene.includes('setViewMode("3d")'),
+  "The ordinary Exchange must preserve the original default 3D organization orbit while restoring an explicitly chosen camera when present.",
 );
 assert.equal(component.includes("actionRail={contextualActions}"), false, "Record actions must not remain as a permanent floating bottom rail.");
 assert.equal(component.includes("networkWorkspace.match.disclaimer"), false, "Matching caveats must not persist as ambient map copy.");
@@ -131,4 +135,4 @@ assert.ok(
   "Brand B6a must remain aligned with canonical acceptance.",
 );
 
-console.log("Brand Gate B6a existing workspace validated with marker-context selection, quiet default camera, contextual actions, restrained empty states, authority-safe continuity, and simplified participant language.");
+console.log("Brand Gate B6a existing workspace validated with marker-context selection, restrained basemap labels, the original default 3D camera, contextual actions, authority-safe continuity, and simplified participant language.");
