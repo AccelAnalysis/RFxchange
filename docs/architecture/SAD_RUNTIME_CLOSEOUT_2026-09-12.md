@@ -62,6 +62,8 @@ The new Functions secret bindings belong only to the functions that need them; e
 
 Focused tests cover state/consent/frequency/quiet-hour decisions, signature/body/timestamp tampering, ambiguous send failures, public-help destination restrictions, response size bounds and enrichment identity/source minimization.
 
+The full local `npm run check` passed (964 architecture tests, 50 Functions tests, all three production builds and Admin/Marketing production smokes). Expanded production HTTP smokes also passed for every new authenticated page and configuration/data API, including anonymous calls with valid Origin headers, invalid worker credentials and unsigned/unconfigured Telnyx callbacks. These are local runtime checks, not live-provider or authenticated-operator acceptance.
+
 `scripts/smoke-sad-runtime-emulator.mjs` exercises the real Firestore transaction adapters against the demo project: anonymous/authenticated direct-client denial, command replay/tenant separation, concurrent and expired enrichment leases, callback identity conflict, wrong messaging profile, out-of-order STOP/START and delivery events, late/unmapped callback reconciliation, simultaneous workers, consent withdrawal after reservation, retry limits, unknown outcomes and stale organization authority. Provider delivery in this suite is an injected fixture; it sends no live communication. CI runs this suite explicitly.
 
 Run with Java 21 and Node 24:

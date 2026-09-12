@@ -26,6 +26,19 @@ const visibleText = html => html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, 
 try {
   await start(".", 3015);
   await start("apps/marketing", 3014, { NEXT_PUBLIC_RFXCHANGE_EXCHANGE_ORIGIN: "https://exchange.example" });
+  for (const route of ["/account/communications", "/organization-profile/public-data"]) {
+    const response = await fetch(exchange + route, { redirect: "manual" });
+    assert.equal(response.status, 307, `${route} requires authentication`);
+    assert.match(response.headers.get("location"), /^\/signin\?returnTo=/);
+  }
+  for (const route of ["/api/communications/preferences", "/api/organization-enrichment/public-data?organizationId=untrusted"]) {
+    for (const method of ["GET", "POST"]) {
+      const response = await fetch(exchange + route, { method, headers: { origin: exchange, "content-type": "application/json" }, ...(method === "POST" ? { body: JSON.stringify({ commandId: "untrusted-command" }) } : {}) });
+      assert.ok([401, 403].includes(response.status), `${method} ${route} denies anonymous access even with a valid Origin`);
+    }
+  }
+  assert.equal((await fetch(exchange + "/api/internal/lifecycle", { method: "POST", headers: { authorization: "Bearer untrusted" } })).status, 403, "Unconfigured/invalid worker credentials fail closed");
+  assert.ok([401, 503].includes((await fetch(exchange + "/api/communications/telnyx", { method: "POST", body: "{}" })).status), "Unconfigured/unsigned SMS callbacks fail closed");
   for (const locale of ["en-US", "es", "fr", "it", "de"]) {
     for (const route of ["/", "/membership", "/founding"]) {
       const response = await fetch(marketing + route, { headers: { cookie: `rfx-locale=${locale}` } });
