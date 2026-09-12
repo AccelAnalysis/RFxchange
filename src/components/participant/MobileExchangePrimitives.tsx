@@ -77,7 +77,7 @@ export function ExchangeBottomSheet({
   snapPoint: ParticipantSheetSnapPoint;
   desktopPanel?: boolean;
   summary: ReactNode;
-  actionRail: ReactNode;
+  actionRail?: ReactNode;
   children: ReactNode;
   initialScrollTop?: number;
   onSnapPointChange(next: ParticipantSheetSnapPoint): void;
