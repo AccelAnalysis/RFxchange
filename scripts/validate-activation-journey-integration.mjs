@@ -26,7 +26,7 @@ const [
   activationContext,
   architecture,
 ] = await Promise.all([
-  read("app/page.tsx"),
+  read("apps/marketing/app/page.tsx"),
   read("src/i18n/messages/en-US.json"),
   read("app/join/page.tsx"),
   read("src/components/onboarding/SpatialActivationExperience.tsx"),

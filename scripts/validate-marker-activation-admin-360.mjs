@@ -30,7 +30,7 @@ const [
   source("src/components/map/ControlledLocalityCanvas.module.css"),
   source("app/organization-activation/page.tsx"),
   source("src/components/onboarding/ActivationJourneyClient.tsx"),
-  source("app/admin/organizations/[organizationId]/page.tsx"),
+  source("apps/admin/app/admin/organizations/[organizationId]/page.tsx"),
   source("firestore.rules"),
   source("src/infrastructure/firestore/schema.ts"),
   source("test/marker-activation-organization-360.test.mjs"),

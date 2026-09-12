@@ -52,7 +52,7 @@ try {
   assert.match(handoff.headers.get("cache-control"), /no-store/);
   const receiver = await fetch(exchange + destination.pathname + destination.search, { redirect: "manual" });
   assert.equal(receiver.status, 303);
-  assert.match(receiver.headers.get("location"), /^\/signin(?:\?|$)/, "Receiver must use a relative Location behind App Hosting");
+  assert.match(receiver.headers.get("location"), /^\/signin(?:\?|$)/, "Receiver must redirect on the public origin, never an internal hosting listener");
   assert.equal(new URL(receiver.headers.get("location"), exchange).pathname, "/signin");
   assert.match(receiver.headers.get("set-cookie"), /rfx_marketing_campaign=regional-launch/);
   assert.match(receiver.headers.get("set-cookie"), /rfx-locale=fr/);
@@ -64,6 +64,21 @@ try {
   assert.equal(unsafe.headers.get("set-cookie"), null, "Existing campaign attribution must not be overwritten");
   const admin = await fetch(marketing + "/admin", { redirect: "manual" });
   assert.equal(admin.status, 404, "Marketing ships no Admin route");
+  const oldAdmin = await fetch(exchange + "/admin/organizations?token=must-not-leak", { redirect: "manual" });
+  assert.equal(oldAdmin.status, 307);
+  assert.equal(oldAdmin.headers.get("location"), "https://rfxchange-admin--rfxchange.us-east4.hosted.app/admin/organizations");
+  assert.match(oldAdmin.headers.get("cache-control"), /no-store/);
+  const oldPublic = await fetch(exchange + "/businesses?utm_campaign=launch&token=must-not-leak", {
+    redirect: "manual", headers: { cookie: "rfx-locale=fr; rfx_session=must-not-leak" },
+  });
+  const publicDestination = new URL(oldPublic.headers.get("location"));
+  assert.equal(publicDestination.origin, "https://rfxchange-marketing--rfxchange.us-east4.hosted.app");
+  assert.deepEqual(Object.fromEntries(publicDestination.searchParams), { utm_campaign: "launch", locale: "fr" });
+  const localeEntry = await fetch(marketing + "/businesses?locale=fr", { redirect: "manual" });
+  assert.equal(localeEntry.status, 307);
+  assert.match(localeEntry.headers.get("set-cookie"), /rfx-locale=fr/);
+  assert.equal(new URL(localeEntry.headers.get("location"), marketing).search, "");
+  assert.equal(new URL(localeEntry.headers.get("location"), marketing).origin, "https://rfxchange-marketing--rfxchange.us-east4.hosted.app");
   console.log("Marketing production builds: public pages, five locales, first-touch campaign, safe cross-origin handoff, Exchange receiver and no Admin surface passed.");
 } catch (error) {
   console.error(logs.join(""));

@@ -34,9 +34,9 @@ const boundedDestinations=visibleImplementedAdminRuntimeDestinations(root,[
 ],"2026-08-10T12:30:00.000Z").filter((destination)=>destination.key==="resource-providers");
 assert.deepEqual(boundedDestinations.map((destination)=>destination.scope.value),["ORGANIZATION:org-a","ORGANIZATION:org-b"]);
 
-const entry=await readFile("app/admin/page.tsx","utf8");
+const entry=await readFile("apps/admin/app/admin/page.tsx","utf8");
 assert.match(entry,/resolveAdminPortalAccess/);assert.match(entry,/access\.destinations\[0\]\.href/);assert.doesNotMatch(entry,/redirect\("\/admin\/overview"\)/);assert.doesNotMatch(entry,/buildAdministrativeCommandCenter/);
-for(const path of ["app/admin/overview/page.tsx","app/admin/work-queues/page.tsx","app/admin/cases/[caseId]/page.tsx","app/admin/search/page.tsx","src/infrastructure/admin/operating-core-runtime.ts","app/admin/organizations/page.tsx","app/admin/users/page.tsx","app/admin/claims-verification/page.tsx"])assert.ok((await readFile(path,"utf8")).length>0,`${path} must exist.`);
+for(const path of ["apps/admin/app/admin/overview/page.tsx","apps/admin/app/admin/work-queues/page.tsx","apps/admin/app/admin/cases/[caseId]/page.tsx","apps/admin/app/admin/search/page.tsx","src/infrastructure/admin/operating-core-runtime.ts","apps/admin/app/admin/organizations/page.tsx","apps/admin/app/admin/users/page.tsx","apps/admin/app/admin/claims-verification/page.tsx"])assert.ok((await readFile(path,"utf8")).length>0,`${path} must exist.`);
 
 const account=await readFile("app/organization-profile/page.tsx","utf8");
 assert.doesNotMatch(account,/resolveAdminPortalAccess|accountAdministrationHref|administrationHref=/,"Optional administrative access resolution must not block the participant Account page.");

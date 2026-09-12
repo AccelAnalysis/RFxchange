@@ -18,15 +18,15 @@ const [
   baseEnglishCatalog,
   marketingEnglishCatalog,
 ] = await Promise.all([
-  read("app/page.tsx"),
-  read("app/founding/page.tsx"),
-  read("src/components/marketing/MarketingAvailability.tsx"),
+  read("apps/marketing/app/page.tsx"),
+  read("apps/marketing/app/founding/page.tsx"),
+  read("apps/marketing/components/MarketingAvailability.tsx"),
   read("src/content/marketing.ts"),
-  read("src/components/marketing/MarketingChrome.tsx"),
+  read("apps/marketing/components/MarketingChrome.tsx"),
   read("src/content/public-assets.ts"),
-  read("app/image-credits/page.tsx"),
-  read("app/home-b4.module.css"),
-  read("app/founding/founding.module.css"),
+  read("apps/marketing/app/image-credits/page.tsx"),
+  read("apps/marketing/components/MarketingLanding.module.css"),
+  read("apps/marketing/app/founding/founding.module.css"),
   read("docs/brand/BRAND_IMPLEMENTATION_ROADMAP.md"),
   read("src/i18n/messages/en-US.json"),
   read("src/i18n/messages/marketing-pages/en-US.json"),
@@ -111,7 +111,7 @@ assert.equal(home.includes("<audio"), false, "Public marketing cannot introduce 
 assert.ok(home.includes("<MarketingAvailability") && founding.includes("<MarketingAvailability"), "Both public pages must consume the shared availability source.");
 assert.ok(availability.includes('item.kind === "live"'), "Shared availability must visually distinguish current and upcoming product state.");
 
-const normalizedStyles = `${homeStyles}\n${foundingStyles}`.replace(/\s+/g, "").toLowerCase();
+const normalizedStyles = `${homeStyles}\n${foundingStyles}\n${await read("app/globals.css")}\n${await read("src/design/semantic-tokens.css")}`.replace(/\s+/g, "").toLowerCase();
 for (const styleRequirement of [
   "object-fit:cover",
   "@media(prefers-reduced-motion:reduce)",

@@ -13,9 +13,9 @@ const [client, route, directory, boundaries, join, map, mapRuntime, terms, rules
   source("app/join/page.tsx"),
   source("app/geography/canvas/page.tsx"),
   source("src/infrastructure/geography/participant-map-runtime.ts"),
-  source("app/terms/page.tsx"),
-  source("app/platform-rules/page.tsx"),
-  source("app/privacy/page.tsx"),
+  source("apps/marketing/app/terms/page.tsx"),
+  source("apps/marketing/app/platform-rules/page.tsx"),
+  source("apps/marketing/app/privacy/page.tsx"),
 ]);
 
 assert.match(client, /href="\/terms" target="_blank"/);

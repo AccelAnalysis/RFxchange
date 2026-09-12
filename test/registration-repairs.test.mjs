@@ -68,7 +68,7 @@ test("registration policy acceptances link to readable public policies", async (
   assert.match(client, /href="\/terms" target="_blank"/);
   assert.match(client, /href="\/platform-rules" target="_blank"/);
   assert.match(client, /href="\/privacy" target="_blank"/);
-  for (const path of ["app/terms/page.tsx", "app/platform-rules/page.tsx", "app/privacy/page.tsx"]) {
+  for (const path of ["apps/marketing/app/terms/page.tsx", "apps/marketing/app/platform-rules/page.tsx", "apps/marketing/app/privacy/page.tsx"]) {
     const page = await source(path);
     assert.match(page, /PublicPolicyPage/);
   }

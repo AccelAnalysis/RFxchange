@@ -50,12 +50,12 @@ test("administrative routes require persisted authority permissions and scoped g
   assert.match(runtime, /listByAdministratorId/);
   assert.doesNotMatch(runtime, /isAdmin/);
 
-  const claims = await source("app/admin/organization-claims/page.tsx");
+  const claims = await source("apps/admin/app/admin/organization-claims/page.tsx");
   assert.match(claims, /organization\.claim\.read/);
   assert.match(claims, /GEOGRAPHY:/);
   assert.doesNotMatch(claims, /Harborlight/i);
 
-  const organization360 = await source("app/admin/organizations/[organizationId]/page.tsx");
+  const organization360 = await source("apps/admin/app/admin/organizations/[organizationId]/page.tsx");
   assert.match(organization360, /organization\.profile\.read/);
   assert.match(organization360, /ORGANIZATION:/);
   assert.match(organization360, /buildOrganization360/);
@@ -138,7 +138,7 @@ test("customer-facing activation copy enters the Exchange without internal termi
 });
 
 test("public root preserves distinct Join and Sign in entry points", async () => {
-  const root = await source("app/page.tsx");
+  const root = await source("apps/marketing/app/page.tsx");
   assert.match(root, /href="\/join"/);
   assert.match(root, /href="\/signin"/);
 });

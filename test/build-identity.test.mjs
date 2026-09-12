@@ -55,7 +55,7 @@ test("Next artifact identity and production CI are bound to the checked-out exac
 
 test("build identity remains release-engineering data instead of participant-facing copy", async () => {
   const [marketing, account, workflow] = await Promise.all([
-    read("src/components/marketing/MarketingChrome.tsx"),
+    read("apps/marketing/components/MarketingChrome.tsx"),
     read("app/organization-profile/page.tsx"),
     read(".github/workflows/ci.yml"),
   ]);
