@@ -7,7 +7,7 @@ export type TransactionalEmailEventKey = Brand<string, "TransactionalEmailEventK
 export type TransactionalEmailCorrelationId = Brand<string, "TransactionalEmailCorrelationId">;
 export type TransactionalEmailIdempotencyKey = Brand<string, "TransactionalEmailIdempotencyKey">;
 
-export type TransactionalEmailPurpose = "transactional" | "administrative";
+export type TransactionalEmailPurpose = "transactional" | "administrative" | "marketing";
 export type TransactionalEmailVariable = string | number | boolean | null;
 export type TransactionalEmailDeliveryStatus = "accepted" | "rejected";
 
@@ -153,7 +153,7 @@ export function createTransactionalEmailRequest(input: Readonly<{
   relatedObjectId?: string | null;
   tags?: readonly string[];
 }>): TransactionalEmailRequest {
-  if (input.purpose !== "transactional" && input.purpose !== "administrative") {
+  if (input.purpose !== "transactional" && input.purpose !== "administrative" && input.purpose !== "marketing") {
     throw new Error(`Unsupported transactional email purpose: ${String(input.purpose)}.`);
   }
   const relatedObjectType = optionalReference(input.relatedObjectType, "Transactional email related object type", 96);

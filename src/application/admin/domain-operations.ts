@@ -144,12 +144,13 @@ export const ADMIN_DOMAIN_SURFACES: Readonly<Record<AdminDomainSurfaceKey, Admin
   }),
   communications: Object.freeze({
     key: "communications", eyebrow: "Business Operations", title: "Communications",
-    description: "Inspect transactional delivery state and failures. Broad outbound sending remains absent until a dedicated mutation permission and workflow exist.",
-    searchPlaceholder: "Delivery, template, event or provider reference", collections: Object.freeze([C("transactionalEmailDeliveries", "delivery", "Transactional delivery")]),
+    description: "Inspect transactional and lifecycle communication state, suppression and delivery failures.",
+    searchPlaceholder: "Delivery, template, event or provider reference", collections: Object.freeze([C("transactionalEmailDeliveries", "delivery", "Transactional delivery"), C("lifecycleCommunicationJobs", "lifecycle", "Lifecycle communication"), C("communicationWebhookEvents", "callback", "Communication callback")]),
     titleFields: Object.freeze(["templateKey", "eventKey", "messageKey"]), subtitleFields: Object.freeze(["providerReference", "organizationId"]), statusFields: Object.freeze(["status", "deliveryState"]),
     searchFields: Object.freeze(["templateKey", "eventKey", "messageKey", "providerReference", "organizationId", "status"]),
     facts: Object.freeze([F("Template", "templateKey", "templateVersion"), F("Event", "eventKey", "eventVersion"), F("State", "status", "deliveryState"), F("Updated", "updatedAt")]),
-    emptyTitle: "No delivery records", emptyBody: "No transactional communication records match the current scope.", detailKind: "inline",
+    emptyTitle: "No delivery records", emptyBody: "No communication records match the current scope.", detailKind: "inline",
+    relatedAction: Object.freeze({ label: "Configure lifecycle journeys", href: "/admin/communications/lifecycle" }),
   }),
   analytics: Object.freeze({
     key: "analytics", eyebrow: "Business Operations", title: "Analytics",
@@ -169,11 +170,12 @@ export const ADMIN_DOMAIN_SURFACES: Readonly<Record<AdminDomainSurfaceKey, Admin
   "integrations-system": Object.freeze({
     key: "integrations-system", eyebrow: "Platform", title: "Integrations & System",
     description: "Inspect current background work and system conditions. Unmeasured health stays Unknown rather than being reported as healthy.",
-    searchPlaceholder: "Job, integration or operation", collections: Object.freeze([C("backgroundJobs", "job", "Background job")]),
+    searchPlaceholder: "Job, integration or operation", collections: Object.freeze([C("backgroundJobs", "job", "Background job"), C("publicEnrichmentRuns", "enrichment", "Public data enrichment")]),
     titleFields: Object.freeze(["jobName", "operation", "name"]), subtitleFields: Object.freeze(["correlationId", "environment"]), statusFields: Object.freeze(["status"]),
     searchFields: Object.freeze(["jobName", "operation", "name", "correlationId", "status", "environment"]),
     facts: Object.freeze([F("Operation", "operation", "jobName"), F("State", "status"), F("Attempts", "attempts", "attempt"), F("Updated", "updatedAt", "finishedAt")]),
     emptyTitle: "No background operations", emptyBody: "No persisted background operations match the current filters. Missing telemetry must still be treated as Unknown.", detailKind: "inline",
+    relatedAction: Object.freeze({ label: "Review organization enrichment", href: "/admin/enrichment" }),
   }),
   "audit-security": Object.freeze({
     key: "audit-security", eyebrow: "Platform", title: "Audit & Security",

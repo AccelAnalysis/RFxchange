@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { SAD_RUNTIME_MANUAL_INDEXES } from "../src/infrastructure/firestore/sad-runtime-schema.ts";
 
 const firebaseConfig = JSON.parse(
   await readFile(new URL("../firebase.json", import.meta.url), "utf8"),
@@ -35,7 +36,7 @@ test("firebase configuration source-controls Firestore indexes", () => {
 });
 
 test("foundation queries rely only on automatic Firestore indexing", () => {
-  assert.deepEqual(indexConfig.indexes, []);
+  assert.deepEqual(indexConfig.indexes, SAD_RUNTIME_MANUAL_INDEXES);
   assert.deepEqual(indexConfig.fieldOverrides, []);
   assert.match(queryContracts, /automatic-single-field/);
   assert.match(queryContracts, /automatic-equality-merge/);

@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { SAD_RUNTIME_MANUAL_INDEXES } from "../src/infrastructure/firestore/sad-runtime-schema.ts";
 
 const firebaseConfig = JSON.parse(
   await readFile(new URL("../firebase.json", import.meta.url), "utf8"),
@@ -99,13 +100,10 @@ if (/\.orderBy\s*\(/.test(organizationResolutionRepositories)) {
 const currentManualIndexes = Array.isArray(indexConfig.indexes) ? indexConfig.indexes : [];
 const fieldOverrides = Array.isArray(indexConfig.fieldOverrides) ? indexConfig.fieldOverrides : [];
 
-// The approved foundation query set is equality-only. Firestore automatic indexes support
-// these queries, including compound equality through index merging. No manual indexes are
-// justified until a repository query introduces a shape that automatic indexes cannot serve.
-if (currentManualIndexes.length !== 0) {
-  failures.push(
-    "The current equality-only repository contracts require no manual Firestore indexes; remove speculative index entries.",
-  );
+// Foundation equality queries remain automatic. The SAD source-review query adds one
+// tenant equality plus descending time index. Reject any unregistered index or drift.
+if (JSON.stringify(currentManualIndexes) !== JSON.stringify(SAD_RUNTIME_MANUAL_INDEXES)) {
+  failures.push("Manual Firestore indexes must exactly match the implemented SAD query contracts.");
 }
 
 if (fieldOverrides.length !== 0) {

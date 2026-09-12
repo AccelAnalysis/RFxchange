@@ -293,6 +293,7 @@ export default async function OrganizationProfilePage() {
             <div>
               <p className={styles.eyebrow}>Account · RFxchange</p>
               <h1>{profile.displayName}</h1>
+              <p><Link href="/account/communications">Communication preferences</Link> · <Link href="/organization-profile/public-data">Review public business data</Link></p>
               <p>
                 Manage the organization identity and market information that permitted participants
                 can use to discover what your organization says it does.
