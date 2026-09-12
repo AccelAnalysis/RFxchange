@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { MapMotionPreferenceToggle } from "@/src/components/account/MapMotionPreferenceToggle";
 import { OrganizationProfilePortal } from "@/src/components/account/OrganizationProfilePortal";
@@ -37,7 +38,10 @@ import { loadAuthorizedParticipantMapProjection } from "@/src/infrastructure/geo
 import { loadAuthorizedMarketProfile } from "@/src/infrastructure/market-profile/runtime";
 import { loadAuthorizedOrganizationEnrichment } from "@/src/infrastructure/organization-enrichment/runtime";
 import { getRequestDictionary } from "@/src/i18n/server";
-import { settleOptionalWorkspacePanel } from "@/src/application/workspace/optional-workspace-panel";
+import {
+  settleOptionalWorkspacePanel,
+  type OptionalWorkspacePanelResult,
+} from "@/src/application/workspace/optional-workspace-panel";
 
 import styles from "./page.module.css";
 
@@ -49,82 +53,98 @@ function readable(value: string): string {
     .join(" ");
 }
 
-export default async function OrganizationProfilePage() {
-  const sessionCookie = (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
-  const access = await resolveParticipantRoute({ sessionCookie });
+type Dictionary = Awaited<ReturnType<typeof getRequestDictionary>>["dictionary"];
+type EssentialProfile = ReturnType<typeof hydrateEssentialOrganizationProfile>;
+type MarketProfileData = Awaited<ReturnType<typeof loadAuthorizedMarketProfile>>;
+type EnrichmentData = Awaited<ReturnType<typeof loadAuthorizedOrganizationEnrichment>>;
+type MapProjectionData = Awaited<ReturnType<typeof loadAuthorizedParticipantMapProjection>>;
+type MarketProfileResult = OptionalWorkspacePanelResult<MarketProfileData>;
+type EnrichmentResult = OptionalWorkspacePanelResult<EnrichmentData>;
+type MapProjectionResult = OptionalWorkspacePanelResult<MapProjectionData>;
+type WorkspaceResilienceCopy = Dictionary["workspaceResilience"];
 
-  if (access.kind === "unauthenticated") {
-    redirect("/signin?returnTo=%2Forganization-profile");
-  }
-  if (access.kind === "access-resolution-required") {
-    redirect(participantEntryDestination(access));
-  }
-  if (access.kind === "activation-required") {
-    redirect(participantEntryDestination(access));
-  }
-  if (access.kind === "wrong-organization") {
-    redirect(access.state.controlledPlatformUrl ?? "/join");
-  }
-  if (access.kind === "restricted") {
-    redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
-  }
+type PendingProfilePanels = Readonly<{
+  market: Promise<MarketProfileResult>;
+  enrichment: Promise<EnrichmentResult>;
+  map: Promise<MapProjectionResult>;
+}>;
 
-  const pendingMarketProfile = settleOptionalWorkspacePanel(
-    "market-profile",
-    loadAuthorizedMarketProfile(access),
+function OptionalPanelState({
+  title,
+  message,
+}: Readonly<{ title: string; message: string }>) {
+  return (
+    <section className={styles.unavailable} role="status">
+      <h2>{title}</h2>
+      <p>{message}</p>
+    </section>
   );
-  const pendingEnrichment = settleOptionalWorkspacePanel(
-    "organization-enrichment",
-    loadAuthorizedOrganizationEnrichment(access),
-  );
-  const pendingMap = settleOptionalWorkspacePanel(
-    "participant-map",
-    loadAuthorizedParticipantMapProjection(access),
-  );
+}
 
-  const db = getServerFirestore();
-  const foundation = createServerFirestoreFoundationRepositories(db);
-  const locations = createFirestoreOrganizationLocationRepositories(db);
-  const markerRepositories = createFirestoreOrganizationMarkerRepositories(db);
-  const profileRepositories = createFirestoreEssentialOrganizationProfileRepositories(db);
-  const organizationId = access.membership.organizationId;
+function MarketEditor({
+  marketProfile,
+  editorKey,
+  organizationId,
+  organizationName,
+}: Readonly<{
+  marketProfile: MarketProfileData;
+  editorKey: string;
+  organizationId: string;
+  organizationName: string;
+}>) {
+  return (
+    <MarketProfilePanel
+      key={`${editorKey}:${organizationId}:${marketProfile.snapshot.industry?.revision ?? 0}`}
+      organizationId={organizationId}
+      organizationName={organizationName}
+      snapshot={marketProfile.snapshot}
+      catalog={marketProfile.catalog}
+      naicsCatalog={marketProfile.naics}
+      marketRoles={marketProfile.marketRoles}
+      serviceGeographies={marketProfile.serviceGeographies}
+    />
+  );
+}
 
-  const [
-    profileRecord,
-    markerActivation,
-    profileCompletion,
-    location,
-    { dictionary },
-    marketProfileResult,
-    enrichmentResult,
-    mapResult,
-  ] = await Promise.all([
-    foundation.organizations.profiles.getByOrganizationId(organizationId),
-    markerRepositories.activations.getByOrganizationId(organizationId),
-    profileRepositories.completions.getByOrganizationId(organizationId),
-    locations.locations.getByOrganizationId(organizationId),
-    getRequestDictionary(),
-    pendingMarketProfile,
-    pendingEnrichment,
-    pendingMap,
+function EnrichmentEditor({
+  enrichment,
+  organizationId,
+}: Readonly<{
+  enrichment: EnrichmentData;
+  organizationId: string;
+}>) {
+  return (
+    <OrganizationEnrichmentPanel
+      organizationId={organizationId}
+      snapshot={enrichment.snapshot}
+      locationMap={null}
+    />
+  );
+}
+
+async function OverviewPanel({
+  pending,
+  dictionary,
+  profile,
+  profileCompletionActive,
+  markerVisible,
+}: Readonly<{
+  pending: PendingProfilePanels;
+  dictionary: Dictionary;
+  profile: EssentialProfile;
+  profileCompletionActive: boolean;
+  markerVisible: boolean;
+}>) {
+  const [marketResult, enrichmentResult, mapResult] = await Promise.all([
+    pending.market,
+    pending.enrichment,
+    pending.map,
   ]);
-
-  if (!profileRecord) {
-    throw new ParticipantRouteDependencyUnavailableError(
-      "workspace-state",
-      new Error("Authorized organization profile identity is incomplete."),
-    );
-  }
-
-  const profile = hydrateEssentialOrganizationProfile(profileRecord);
-  const account = dictionary.interface.account;
-  const portal = dictionary.organizationEnrichment.portal;
-  const copy = dictionary.workspaceResilience;
-  const marketProfile = marketProfileResult.available ? marketProfileResult.value : null;
+  const marketProfile = marketResult.available ? marketResult.value : null;
   const enrichment = enrichmentResult.available ? enrichmentResult.value : null;
   const mapData = mapResult.available ? mapResult.value : null;
-  const organizationIdValue = String(organizationId);
-
+  const account = dictionary.interface.account;
+  const portal = dictionary.organizationEnrichment.portal;
   const claims = marketProfile?.snapshot.claims ?? [];
   const publicClaims = claims.flatMap((claim) => {
     const projected = projectOrganizationCapabilityClaim(claim, "public");
@@ -140,12 +160,9 @@ export default async function OrganizationProfilePage() {
     const projected = projectPublicProfileAsset(record);
     return projected ? [projected] : [];
   });
-  const activeLocations = enrichment?.snapshot.additionalLocations.filter((record) => record.lifecycleStatus === "active") ?? [];
   const selectedGeography = mapData?.model.selectedGeography ?? null;
-  const markerVisible = markerActivation?.status === "active";
-
   const progressSignals = [
-    profileCompletion?.status === "active",
+    profileCompletionActive,
     claims.length > 0,
     activeCredentials.length > 0,
     Boolean(selectedGeography && markerVisible),
@@ -167,38 +184,7 @@ export default async function OrganizationProfilePage() {
               ? portal.preferencesNext
               : portal.identityReady;
 
-  const marketEditor = (key: string) => marketProfile ? (
-    <MarketProfilePanel
-      key={`${key}:${organizationIdValue}:${marketProfile.snapshot.industry?.revision ?? 0}`}
-      organizationId={organizationIdValue}
-      organizationName={profile.displayName}
-      snapshot={marketProfile.snapshot}
-      catalog={marketProfile.catalog}
-      naicsCatalog={marketProfile.naics}
-      marketRoles={marketProfile.marketRoles}
-      serviceGeographies={marketProfile.serviceGeographies}
-    />
-  ) : (
-    <section className={styles.unavailable} role="status">
-      <h2>{copy.marketProfileTitle}</h2>
-      <p>{copy.marketProfileUnavailable}</p>
-    </section>
-  );
-
-  const enrichmentEditor = enrichment ? (
-    <OrganizationEnrichmentPanel
-      organizationId={organizationIdValue}
-      snapshot={enrichment.snapshot}
-      locationMap={null}
-    />
-  ) : (
-    <section className={styles.unavailable} role="status">
-      <h2>{copy.enrichmentTitle}</h2>
-      <p>{copy.enrichmentUnavailable}</p>
-    </section>
-  );
-
-  const overview = (
+  return (
     <div className={styles.stack}>
       <section className={styles.overviewGrid}>
         <div className={styles.progressPanel}>
@@ -273,8 +259,29 @@ export default async function OrganizationProfilePage() {
       </section>
     </div>
   );
+}
 
-  const capabilities = (
+async function CapabilitiesPanel({
+  pendingMarket,
+  dictionary,
+  organizationId,
+  organizationName,
+}: Readonly<{
+  pendingMarket: Promise<MarketProfileResult>;
+  dictionary: Dictionary;
+  organizationId: string;
+  organizationName: string;
+}>) {
+  const result = await pendingMarket;
+  const copy = dictionary.workspaceResilience;
+  if (!result.available) {
+    return <OptionalPanelState title={copy.marketProfileTitle} message={copy.marketProfileUnavailable} />;
+  }
+  const marketProfile = result.value;
+  const portal = dictionary.organizationEnrichment.portal;
+  const claims = marketProfile.snapshot.claims;
+
+  return (
     <div className={styles.stack}>
       <section className={styles.flatSection}>
         <div className={styles.sectionHeader}>
@@ -288,7 +295,7 @@ export default async function OrganizationProfilePage() {
             hideChildChrome
             tone="primary"
           >
-            {marketEditor("capabilities")}
+            <MarketEditor marketProfile={marketProfile} editorKey="capabilities" organizationId={organizationId} organizationName={organizationName} />
           </ProfileTaskSheet>
         </div>
         {claims.length ? (
@@ -312,7 +319,7 @@ export default async function OrganizationProfilePage() {
             activateSelector="nav button:nth-of-type(2)"
             hideChildChrome
           >
-            {marketEditor("industry")}
+            <MarketEditor marketProfile={marketProfile} editorKey="industry" organizationId={organizationId} organizationName={organizationName} />
           </ProfileTaskSheet>
           <ProfileTaskSheet
             title={dictionary.marketProfile.experience.title}
@@ -320,14 +327,33 @@ export default async function OrganizationProfilePage() {
             activateSelector="nav button:nth-of-type(3)"
             hideChildChrome
           >
-            {marketEditor("experience")}
+            <MarketEditor marketProfile={marketProfile} editorKey="experience" organizationId={organizationId} organizationName={organizationName} />
           </ProfileTaskSheet>
         </div>
       </section>
     </div>
   );
+}
 
-  const credentials = (
+async function CredentialsPanel({
+  pendingEnrichment,
+  dictionary,
+  organizationId,
+}: Readonly<{
+  pendingEnrichment: Promise<EnrichmentResult>;
+  dictionary: Dictionary;
+  organizationId: string;
+}>) {
+  const result = await pendingEnrichment;
+  const copy = dictionary.workspaceResilience;
+  if (!result.available) {
+    return <OptionalPanelState title={copy.enrichmentTitle} message={copy.enrichmentUnavailable} />;
+  }
+  const enrichment = result.value;
+  const portal = dictionary.organizationEnrichment.portal;
+  const activeCredentials = enrichment.snapshot.credentials.filter((record) => record.status !== "retired");
+
+  return (
     <div className={styles.stack}>
       <section className={styles.flatSection}>
         <div className={styles.sectionHeader}>
@@ -342,7 +368,7 @@ export default async function OrganizationProfilePage() {
             hideChildChrome
             tone="primary"
           >
-            {enrichmentEditor}
+            <EnrichmentEditor enrichment={enrichment} organizationId={organizationId} />
           </ProfileTaskSheet>
         </div>
         {activeCredentials.length ? (
@@ -371,8 +397,35 @@ export default async function OrganizationProfilePage() {
       </section>
     </div>
   );
+}
 
-  const locationsPanel = (
+async function LocationsPanel({
+  pendingEnrichment,
+  pendingMap,
+  dictionary,
+  organizationId,
+  locationVisibility,
+  markerVisible,
+}: Readonly<{
+  pendingEnrichment: Promise<EnrichmentResult>;
+  pendingMap: Promise<MapProjectionResult>;
+  dictionary: Dictionary;
+  organizationId: string;
+  locationVisibility: string | null;
+  markerVisible: boolean;
+}>) {
+  const [enrichmentResult, mapResult] = await Promise.all([pendingEnrichment, pendingMap]);
+  const copy = dictionary.workspaceResilience;
+  if (!enrichmentResult.available) {
+    return <OptionalPanelState title={copy.enrichmentTitle} message={copy.enrichmentUnavailable} />;
+  }
+  const enrichment = enrichmentResult.value;
+  const mapData = mapResult.available ? mapResult.value : null;
+  const portal = dictionary.organizationEnrichment.portal;
+  const activeLocations = enrichment.snapshot.additionalLocations.filter((record) => record.lifecycleStatus === "active");
+  const selectedGeography = mapData?.model.selectedGeography ?? null;
+
+  return (
     <div className={styles.stack}>
       <section className={styles.flatSection}>
         <div className={styles.sectionHeader}>
@@ -387,11 +440,11 @@ export default async function OrganizationProfilePage() {
             hideChildChrome
             tone="primary"
           >
-            {enrichmentEditor}
+            <EnrichmentEditor enrichment={enrichment} organizationId={organizationId} />
           </ProfileTaskSheet>
         </div>
         <div className={styles.statusRow}>
-          <div><strong>{selectedGeography?.name ?? portal.notRecorded}</strong><span>{location?.visibility ? readable(location.visibility) : portal.notRecorded}</span></div>
+          <div><strong>{selectedGeography?.name ?? portal.notRecorded}</strong><span>{locationVisibility ? readable(locationVisibility) : portal.notRecorded}</span></div>
           <span>{markerVisible ? portal.visible : portal.notVisible}</span>
         </div>
         {activeLocations.length ? (
@@ -405,7 +458,7 @@ export default async function OrganizationProfilePage() {
           </ul>
         ) : <p className={styles.empty}>{dictionary.organizationEnrichment.locations.empty}</p>}
       </section>
-      {enrichment && mapData ? (
+      {mapData ? (
         <section className={styles.mapSection}>
           <OrganizationEnrichmentLocationMap
             snapshot={enrichment.snapshot}
@@ -420,8 +473,27 @@ export default async function OrganizationProfilePage() {
       )}
     </div>
   );
+}
 
-  const media = (
+async function MediaPanel({
+  pendingEnrichment,
+  dictionary,
+  organizationId,
+}: Readonly<{
+  pendingEnrichment: Promise<EnrichmentResult>;
+  dictionary: Dictionary;
+  organizationId: string;
+}>) {
+  const result = await pendingEnrichment;
+  const copy = dictionary.workspaceResilience;
+  if (!result.available) {
+    return <OptionalPanelState title={copy.enrichmentTitle} message={copy.enrichmentUnavailable} />;
+  }
+  const enrichment = result.value;
+  const portal = dictionary.organizationEnrichment.portal;
+  const activeAssets = enrichment.snapshot.profileAssets.filter((record) => record.publicationStatus !== "retired");
+
+  return (
     <section className={styles.flatSection}>
       <div className={styles.sectionHeader}>
         <div>
@@ -435,7 +507,7 @@ export default async function OrganizationProfilePage() {
           hideChildChrome
           tone="primary"
         >
-          {enrichmentEditor}
+          <EnrichmentEditor enrichment={enrichment} organizationId={organizationId} />
         </ProfileTaskSheet>
       </div>
       {activeAssets.length ? (
@@ -450,8 +522,24 @@ export default async function OrganizationProfilePage() {
       ) : <p className={styles.empty}>{dictionary.organizationEnrichment.media.empty}</p>}
     </section>
   );
+}
 
-  const preferences = (
+async function PreferencesPanel({
+  pendingMarket,
+  dictionary,
+  organizationId,
+  organizationName,
+}: Readonly<{
+  pendingMarket: Promise<MarketProfileResult>;
+  dictionary: Dictionary;
+  organizationId: string;
+  organizationName: string;
+}>) {
+  const result = await pendingMarket;
+  const copy = dictionary.workspaceResilience;
+  const portal = dictionary.organizationEnrichment.portal;
+
+  return (
     <div className={styles.stack}>
       <section className={styles.flatSection}>
         <div className={styles.sectionHeader}>
@@ -459,16 +547,19 @@ export default async function OrganizationProfilePage() {
             <h2>{portal.preferences}</h2>
             <p>{portal.preferencesIntro}</p>
           </div>
-          <ProfileTaskSheet
-            title={dictionary.marketProfile.preferences.title}
-            triggerLabel={portal.editPreferences}
-            activateSelector="nav button:nth-of-type(4)"
-            hideChildChrome
-            tone="primary"
-          >
-            {marketEditor("preferences")}
-          </ProfileTaskSheet>
+          {result.available ? (
+            <ProfileTaskSheet
+              title={dictionary.marketProfile.preferences.title}
+              triggerLabel={portal.editPreferences}
+              activateSelector="nav button:nth-of-type(4)"
+              hideChildChrome
+              tone="primary"
+            >
+              <MarketEditor marketProfile={result.value} editorKey="preferences" organizationId={organizationId} organizationName={organizationName} />
+            </ProfileTaskSheet>
+          ) : null}
         </div>
+        {!result.available ? <p className={styles.empty}>{copy.marketProfileUnavailable}</p> : null}
         <Link className={styles.quietLink} href="/account/communications">{portal.communications}</Link>
       </section>
       <section className={styles.flatSection}>
@@ -477,6 +568,68 @@ export default async function OrganizationProfilePage() {
       </section>
     </div>
   );
+}
+
+export default async function OrganizationProfilePage() {
+  const sessionCookie = (await cookies()).get(RFXCHANGE_SESSION_COOKIE_NAME)?.value;
+  const access = await resolveParticipantRoute({ sessionCookie });
+
+  if (access.kind === "unauthenticated") {
+    redirect("/signin?returnTo=%2Forganization-profile");
+  }
+  if (access.kind === "access-resolution-required") {
+    redirect(participantEntryDestination(access));
+  }
+  if (access.kind === "activation-required") {
+    redirect(participantEntryDestination(access));
+  }
+  if (access.kind === "wrong-organization") {
+    redirect(access.state.controlledPlatformUrl ?? "/join");
+  }
+  if (access.kind === "restricted") {
+    redirect(`/join?access=${encodeURIComponent(access.restrictionState)}`);
+  }
+
+  const pending: PendingProfilePanels = Object.freeze({
+    market: settleOptionalWorkspacePanel("market-profile", loadAuthorizedMarketProfile(access)),
+    enrichment: settleOptionalWorkspacePanel("organization-enrichment", loadAuthorizedOrganizationEnrichment(access)),
+    map: settleOptionalWorkspacePanel("participant-map", loadAuthorizedParticipantMapProjection(access)),
+  });
+
+  const db = getServerFirestore();
+  const foundation = createServerFirestoreFoundationRepositories(db);
+  const locations = createFirestoreOrganizationLocationRepositories(db);
+  const markerRepositories = createFirestoreOrganizationMarkerRepositories(db);
+  const profileRepositories = createFirestoreEssentialOrganizationProfileRepositories(db);
+  const organizationId = access.membership.organizationId;
+
+  const [
+    profileRecord,
+    markerActivation,
+    profileCompletion,
+    location,
+    { dictionary },
+  ] = await Promise.all([
+    foundation.organizations.profiles.getByOrganizationId(organizationId),
+    markerRepositories.activations.getByOrganizationId(organizationId),
+    profileRepositories.completions.getByOrganizationId(organizationId),
+    locations.locations.getByOrganizationId(organizationId),
+    getRequestDictionary(),
+  ]);
+
+  if (!profileRecord) {
+    throw new ParticipantRouteDependencyUnavailableError(
+      "workspace-state",
+      new Error("Authorized organization profile identity is incomplete."),
+    );
+  }
+
+  const profile = hydrateEssentialOrganizationProfile(profileRecord);
+  const account = dictionary.interface.account;
+  const portal = dictionary.organizationEnrichment.portal;
+  const copy: WorkspaceResilienceCopy = dictionary.workspaceResilience;
+  const organizationIdValue = String(organizationId);
+  const markerVisible = markerActivation?.status === "active";
 
   return (
     <ParticipantShell activeItem="account" organizationName={profile.displayName}>
@@ -498,12 +651,67 @@ export default async function OrganizationProfilePage() {
               media: portal.media,
               preferences: portal.preferences,
             }}
-            overview={overview}
-            capabilities={capabilities}
-            credentials={credentials}
-            locations={locationsPanel}
-            media={media}
-            preferences={preferences}
+            overview={(
+              <Suspense fallback={<OptionalPanelState title={portal.overview} message={copy.marketProfileLoading} />}>
+                <OverviewPanel
+                  pending={pending}
+                  dictionary={dictionary}
+                  profile={profile}
+                  profileCompletionActive={profileCompletion?.status === "active"}
+                  markerVisible={markerVisible}
+                />
+              </Suspense>
+            )}
+            capabilities={(
+              <Suspense fallback={<OptionalPanelState title={copy.marketProfileTitle} message={copy.marketProfileLoading} />}>
+                <CapabilitiesPanel
+                  pendingMarket={pending.market}
+                  dictionary={dictionary}
+                  organizationId={organizationIdValue}
+                  organizationName={profile.displayName}
+                />
+              </Suspense>
+            )}
+            credentials={(
+              <Suspense fallback={<OptionalPanelState title={copy.enrichmentTitle} message={copy.enrichmentLoading} />}>
+                <CredentialsPanel
+                  pendingEnrichment={pending.enrichment}
+                  dictionary={dictionary}
+                  organizationId={organizationIdValue}
+                />
+              </Suspense>
+            )}
+            locations={(
+              <Suspense fallback={<OptionalPanelState title={copy.geographyTitle} message={copy.geographyLoading} />}>
+                <LocationsPanel
+                  pendingEnrichment={pending.enrichment}
+                  pendingMap={pending.map}
+                  dictionary={dictionary}
+                  organizationId={organizationIdValue}
+                  locationVisibility={location?.visibility ?? null}
+                  markerVisible={markerVisible}
+                />
+              </Suspense>
+            )}
+            media={(
+              <Suspense fallback={<OptionalPanelState title={copy.enrichmentTitle} message={copy.enrichmentLoading} />}>
+                <MediaPanel
+                  pendingEnrichment={pending.enrichment}
+                  dictionary={dictionary}
+                  organizationId={organizationIdValue}
+                />
+              </Suspense>
+            )}
+            preferences={(
+              <Suspense fallback={<OptionalPanelState title={copy.marketProfileTitle} message={copy.marketProfileLoading} />}>
+                <PreferencesPanel
+                  pendingMarket={pending.market}
+                  dictionary={dictionary}
+                  organizationId={organizationIdValue}
+                  organizationName={profile.displayName}
+                />
+              </Suspense>
+            )}
           />
         </section>
       </OperationalWorkspace>
