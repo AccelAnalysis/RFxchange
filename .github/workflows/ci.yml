@@ -122,6 +122,8 @@ jobs:
           RFXCHANGE_BUILD_SHA: ${{ steps.build_identity.outputs.sha }}
           NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}
         run: npm run build
+      - name: PWA installation assets and launch
+        run: node scripts/smoke-pwa-application.mjs
       - name: Canonical full gate
         env:
           RFXCHANGE_BUILD_SHA: ${{ steps.build_identity.outputs.sha }}
