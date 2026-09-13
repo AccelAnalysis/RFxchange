@@ -16,7 +16,7 @@ const marketingCatalogText = await read("src/i18n/messages/marketing-pages/en-US
 const englishCatalog = JSON.parse(englishCatalogText);
 const marketingCatalog = JSON.parse(marketingCatalogText);
 
-test("Brand B4 keeps availability detail off the acquisition homepage", () => {
+test("Brand B4 keeps availability concise on the acquisition homepage", () => {
   assert.match(marketing, /Available now/);
   assert.match(marketing, /Coming next/);
   assert.match(marketing, /More Exchange workflows/);
@@ -31,6 +31,10 @@ test("Brand B4 keeps availability detail off the acquisition homepage", () => {
   );
   assert.match(marketingCatalog.home.hero.stockNote, /Images are illustrative/);
   assert.doesNotMatch(home, /<MarketingAvailability/);
+  assert.match(home, /styles\.stateStrip/);
+  assert.match(home, /availability\.items\.filter/);
+  assert.match(home, /availability\.items\.find/);
+  assert.match(home, /home\.hero\.stockNote/);
   assert.match(founding, /<MarketingAvailability/);
 });
 
