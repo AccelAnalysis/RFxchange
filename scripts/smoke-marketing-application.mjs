@@ -23,6 +23,7 @@ async function start(directory, port, env = {}) {
 }
 const marketing = "http://127.0.0.1:3014";
 const exchange = "http://127.0.0.1:3015";
+const publicExchangeOrigin = "https://rfxchange--rfxchange.us-east4.hosted.app";
 const visibleText = html => html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "").replace(/<[^>]+>/g, " ");
 try {
   await start(".", 3015);
@@ -34,9 +35,30 @@ try {
   }
   for (const route of ["/api/communications/preferences", "/api/organization-enrichment/public-data?organizationId=untrusted"]) {
     for (const method of ["GET", "POST"]) {
-      const response = await fetch(exchange + route, { method, headers: { origin: exchange, "content-type": "application/json" }, ...(method === "POST" ? { body: JSON.stringify({ commandId: "untrusted-command" }) } : {}) });
+      const response = await fetch(exchange + route, { method, headers: { origin: publicExchangeOrigin, "content-type": "application/json" }, ...(method === "POST" ? { body: JSON.stringify({ commandId: "untrusted-command" }) } : {}) });
       assert.ok([401, 403].includes(response.status), `${method} ${route} denies anonymous access even with a valid Origin`);
+      assert.notEqual((await response.json()).error, "Request origin required.", "Public origin passes CSRF behind an internal listener; session checks remain required");
     }
+  }
+  const anonymousCommands = [
+    ["/api/organization-market-profile", { organizationId: "untrusted", commandId: "untrusted-command", action: "update-industry", input: {} }],
+    ["/api/organization-enrichment", { organizationId: "untrusted", commandId: "untrusted-command", action: "upsert-credential", input: {} }],
+    ["/api/ai/amacs/interpret", { organizationId: "untrusted", purpose: "capabilities", sources: [] }],
+    ["/api/ai/amacs/disposition", { organizationId: "untrusted", recordId: "untrusted", decision: {} }],
+    ["/api/rfx-cycle/collaboration/attachment", {}],
+  ];
+  for (const [route, body] of anonymousCommands) {
+    const response = await fetch(exchange + route, { method: "POST", headers: { origin: publicExchangeOrigin, "content-type": "application/json" }, body: JSON.stringify(body) });
+    assert.equal(response.status, 401, `${route} reaches session checks behind the internal listener`);
+  }
+  const attachment = new FormData();
+  attachment.set("commandId", "untrusted-command"); attachment.set("reference", "untrusted-reference");
+  attachment.set("sectionId", "untrusted-section"); attachment.set("file", new Blob(["untrusted"], { type: "text/plain" }), "test.txt");
+  assert.equal((await fetch(exchange + "/api/rfx-cycle/attachment", { method: "POST", headers: { origin: publicExchangeOrigin }, body: attachment })).status, 401);
+  for (const route of [...anonymousCommands.map(([route]) => route), "/api/rfx-cycle/attachment", "/api/communications/preferences", "/api/organization-enrichment/public-data"]) {
+    const response = await fetch(exchange + route, { method: "POST", headers: { origin: "https://attacker.example", "x-forwarded-host": new URL(publicExchangeOrigin).host }, body: "{}" });
+    assert.equal(response.status, 403, `${route} rejects a forged forwarded host`);
+    assert.match((await response.json()).error, /origin required|Same-origin request required/);
   }
   assert.equal((await fetch(exchange + "/api/internal/lifecycle", { method: "POST", headers: { authorization: "Bearer untrusted" } })).status, 403, "Unconfigured/invalid worker credentials fail closed");
   assert.ok([401, 503].includes((await fetch(exchange + "/api/communications/telnyx", { method: "POST", body: "{}" })).status), "Unconfigured/unsigned SMS callbacks fail closed");
