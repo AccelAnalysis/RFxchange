@@ -1,0 +1,15 @@
+{
+  "hrva-gather-workspaces": {
+    "address": "500 East Main Street, 16th Floor, Norfolk, VA 23510",
+    "locality": "Norfolk",
+    "coordinate": [-76.288408395834, 36.845866009403],
+    "addressSource": "https://gatherworkspaces.com/",
+    "sourceLocationKey": "hrva-gather-workspaces-loc-2",
+    "geocodeSource": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=500+East+Main+Street+Norfolk+VA+23510&benchmark=Public_AR_Current&format=json",
+    "matchedAddress": "500 E MAIN ST, NORFOLK, VA, 23510",
+    "tigerLineId": "122151423",
+    "matchCount": 1,
+    "checkedAt": "2026-09-13",
+    "acceptance": "Existing sourced public office; current first-party address and single Census state/ZIP match. Applies only to the public listing, not account or provider promotion."
+  }
+}

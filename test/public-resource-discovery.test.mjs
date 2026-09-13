@@ -15,13 +15,14 @@ const input = {
   locale: "en-US", search: "", availability: "all",
 };
 
-test("source catalog exposes all 32 public records and only the 22 accepted coordinates", async () => {
+test("source catalog exposes all 32 public records and only the 23 accepted coordinates", async () => {
   const geocodes = JSON.parse(await readFile(new URL("../data/convergence/hampton-roads-va/geocodes.json", import.meta.url)));
+  const supplemental = JSON.parse(await readFile(new URL("../data/resources/public-resource-locations.json", import.meta.url)));
   assert.equal(listings.length, 32);
-  assert.equal(listings.filter((listing) => listing.coordinate).length, 22);
+  assert.equal(listings.filter((listing) => listing.coordinate).length, 23);
   for (const listing of listings) {
     const accepted = geocodes.accepted[listing.id];
-    assert.deepEqual(listing.coordinate, accepted ? [accepted.longitude, accepted.latitude] : null);
+    assert.deepEqual(listing.coordinate, accepted ? [accepted.longitude, accepted.latitude] : supplemental[listing.id]?.coordinate ?? null);
     assert.equal("organizationId" in listing, false);
     assert.equal("intendedClaimState" in listing, false);
     assert.equal("primarySourceId" in listing, false);
@@ -70,8 +71,8 @@ test("normal renderer clusters distant zooms, expands with zoom, and preserves s
   const close = createLensProjectionRenderModel(adapter, [], { zoom: 16 });
   assert.ok(wide.clusterByRenderId.size > 0);
   assert.ok(wide.data.features.length < close.data.features.length);
-  assert.equal(close.selectableByRenderId.size, 22);
-  assert.equal(wide.data.features.reduce((sum, feature) => sum + (feature.properties.kind === "cluster" ? feature.properties.count : 1), 0), 22);
+  assert.equal(close.selectableByRenderId.size, 23);
+  assert.equal(wide.data.features.reduce((sum, feature) => sum + (feature.properties.kind === "cluster" ? feature.properties.count : 1), 0), 23);
   const listing = listings.find((entry) => entry.coordinate);
   const selected = buildResourcesMobileProjection({ ...input, selection: { resourceId: listing.id } });
   const rendered = createLensProjectionRenderModel(adaptLensMapProjection(selected.discovery.map, selected.selection), [], { zoom: 8 });

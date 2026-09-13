@@ -572,8 +572,11 @@
     "serviceAreas": [
       "Hampton Roads, Virginia"
     ],
-    "locality": "Newport News",
-    "address": null,
-    "coordinate": null
+    "locality": "Norfolk",
+    "address": "500 East Main Street, 16th Floor, Norfolk, VA 23510",
+    "coordinate": [
+      -76.288408395834,
+      36.845866009403
+    ]
   }
 ]
