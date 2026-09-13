@@ -45,11 +45,11 @@ export const semanticColorModes = {
       spatialFallback: supportPalette.atmosphericBlue,
     },
     surface: {
-      glass: "rgba(255, 255, 255, 0.78)",
-      glassStrong: "rgba(255, 255, 255, 0.94)",
+      glass: "rgba(255, 255, 255, 0.71)",
+      glassStrong: "rgba(255, 255, 255, 0.87)",
       control: "rgba(255, 255, 255, 0.55)",
       intelligenceSubtle: "rgba(46, 94, 170, 0.08)",
-      connectionSubtle: "rgba(214, 162, 58, 0.16)",
+      connectionSubtle: "rgba(46, 94, 170, 0.12)",
       outcomeSubtle: "rgba(59, 123, 87, 0.08)",
     },
     text: {
@@ -69,9 +69,9 @@ export const semanticColorModes = {
       focus: brandPalette.signalBlue,
     },
     action: {
-      primaryBackground: brandPalette.rfGold,
-      primaryForeground: brandPalette.exchangeSlate,
-      selectedBackground: brandPalette.rfGold,
+      primaryBackground: brandPalette.signalBlue,
+      primaryForeground: supportPalette.white,
+      selectedBackground: brandPalette.signalBlue,
       selectedForeground: brandPalette.exchangeBlack,
       link: brandPalette.signalBlue,
       focusRing: brandPalette.signalBlue,
@@ -79,7 +79,7 @@ export const semanticColorModes = {
     state: {
       information: brandPalette.signalBlue,
       positiveResolution: brandPalette.growthGreen,
-      connectionFocus: brandPalette.rfGold,
+      connectionFocus: brandPalette.signalBlue,
       connectionText: brandPalette.accessibleDarkGold,
       neutral: brandPalette.graphite,
       disabled: "rgba(27, 36, 48, 0.48)",
@@ -234,7 +234,7 @@ export const objectSemanticTokens = {
     organization: {
       fill: brandPalette.graphite,
       foreground: supportPalette.white,
-      selectedRing: brandPalette.rfGold,
+      selectedRing: brandPalette.signalBlue,
       mutedOpacity: 0.52,
     },
     additionalLocation: {
@@ -253,8 +253,8 @@ export const objectSemanticTokens = {
   },
   field: {
     localitySelected: {
-      fill: "rgba(214, 162, 58, 0.10)",
-      outline: brandPalette.rfGold,
+      fill: "rgba(46, 94, 170, 0.06)",
+      outline: brandPalette.signalBlue,
     },
     localitySurrounding: {
       fill: "rgba(27, 36, 48, 0.04)",
@@ -295,7 +295,7 @@ export const objectSemanticTokens = {
     },
   },
   locality: {
-    selected: brandPalette.rfGold,
+    selected: brandPalette.signalBlue,
     released: brandPalette.signalBlue,
     surrounding: "rgba(27, 36, 48, 0.30)",
     limited: brandPalette.accessibleDarkGold,

@@ -1,7 +1,7 @@
 {
   "sheet": {
     "region": "Résultats et détails de l’Exchange",
-    "dragHandle": "Faites glisser pour redimensionner le panneau de l’Exchange",
+    "dragHandle": "Redimensionnez les résultats: faites glisser ou touchez. Utilisez les flèches haut et bas pour agrandir ou réduire.",
     "peek": "Aperçu",
     "partial": "Résultats",
     "expanded": "Développer"

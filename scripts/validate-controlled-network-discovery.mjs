@@ -96,7 +96,7 @@ assert.match(map, /NETWORK_MARKER_SOURCE_ID/);
 assert.match(map, /rfx-spatial-scene-network-organizations/);
 assert.match(map, /NETWORK_MARKER_CORE_LAYER_ID/);
 assert.match(map, /"circle-color": "#1b2430"/);
-assert.match(map, /"circle-stroke-color": "#d6a23a"/);
+assert.match(map, /"circle-stroke-color": "#2e5eaa"/);
 assert.match(map, /onOrganizationMarkerSelectRef\.current/);
 assert.doesNotMatch(map, /provider-service-field|credibility-seal/);
 

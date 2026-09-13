@@ -83,8 +83,11 @@ test("MOB-04 implements three sheet states, touch dragging, accessible controls,
   assert.match(primitives, /onPointerDown=\{beginDrag\}/);
   assert.match(primitives, /onPointerMove=\{moveDrag\}/);
   assert.match(primitives, /velocityY/);
-  assert.match(primitives, /data-snap-control=\{point\}/);
-  assert.match(primitives, /aria-pressed=\{snapPoint === point\}/);
+  assert.match(primitives, /aria-expanded=\{snapPoint !== "peek"\}/);
+  assert.match(primitives, /onKeyDown/);
+  assert.match(primitives, /event.key === "ArrowUp"/);
+  assert.match(primitives, /event.key === "ArrowDown"/);
+  assert.match(primitives, /suppressClickRef/);
   assert.match(primitives, /data-sheet-scroll-region/);
   assert.match(css, /overscroll-behavior: contain/);
   assert.match(css, /touch-action: pan-y/);

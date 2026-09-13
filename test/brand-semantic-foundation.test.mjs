@@ -66,7 +66,7 @@ test("Brand B1 defines Exchange Light through semantic roles rather than raw com
   assert.equal(mode.text.connectionSmall, brandPalette.accessibleDarkGold);
   assert.equal(mode.text.intelligence, brandPalette.signalBlue);
   assert.equal(mode.text.outcome, brandPalette.growthGreen);
-  assert.equal(mode.action.selectedBackground, brandPalette.rfGold);
+  assert.equal(mode.action.selectedBackground, brandPalette.signalBlue);
   assert.equal(mode.action.selectedForeground, brandPalette.exchangeBlack);
   assert.equal(semanticTokenPolicy.darkModeAuthorized, false);
 });
@@ -106,7 +106,7 @@ test("Brand B1 defines complete structural, focus, type and motion token familie
 
 test("Brand B1 object semantics preserve meaning without granting domain state", () => {
   assert.equal(objectSemanticTokens.node.organization.fill, brandPalette.graphite);
-  assert.equal(objectSemanticTokens.node.organization.selectedRing, brandPalette.rfGold);
+  assert.equal(objectSemanticTokens.node.organization.selectedRing, brandPalette.signalBlue);
   assert.equal(objectSemanticTokens.beacon.opportunity.fill, brandPalette.signalBlue);
   assert.equal(objectSemanticTokens.path.connection.stroke, brandPalette.rfGold);
   assert.equal(objectSemanticTokens.path.information.stroke, brandPalette.signalBlue);

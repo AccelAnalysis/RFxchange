@@ -425,9 +425,9 @@ export function MapboxLocalityCanvas({
     const contrast = model.layers.find((layer) => layer.id === "selected-outline-contrast")?.style;
     const accent = model.layers.find((layer) => layer.id === "selected-outline-accent")?.style;
     return {
-      fill: fill ?? { fill: "#d6a23a", fillOpacity: 0.08, stroke: "none", strokeOpacity: 0, strokeWidth: 0 },
-      contrast: contrast ?? { fill: "none", fillOpacity: 0, stroke: "#1b2430", strokeOpacity: 0.9, strokeWidth: 5 },
-      accent: accent ?? { fill: "none", fillOpacity: 0, stroke: "#d6a23a", strokeOpacity: 1, strokeWidth: 2.5 },
+      fill: fill ?? { fill: "#2e5eaa", fillOpacity: 0.04, stroke: "none", strokeOpacity: 0, strokeWidth: 0 },
+      contrast: contrast ?? { fill: "none", fillOpacity: 0, stroke: "#1b2430", strokeOpacity: 0, strokeWidth: 5 },
+      accent: accent ?? { fill: "none", fillOpacity: 0, stroke: "#2e5eaa", strokeOpacity: 1, strokeWidth: 2.5 },
     };
   }, [model.layers]);
 
@@ -625,7 +625,6 @@ export function MapboxLocalityCanvas({
       new mapboxgl.NavigationControl({ visualizePitch: true, showZoom: true, showCompass: true }),
       mobileControlPosition === "bottom" ? "bottom-right" : "top-right",
     );
-    map.addControl(new mapboxgl.ScaleControl({ maxWidth: 120, unit: "imperial" }), "bottom-right");
 
     const popups: mapboxgl.Popup[] = [];
 

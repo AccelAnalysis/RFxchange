@@ -23,11 +23,11 @@
   --semantic-canvas-inverse: var(--brand-exchange-black);
   --semantic-spatial-fallback: #d7e4e8;
 
-  --semantic-surface-glass: rgba(255, 255, 255, 0.78);
-  --semantic-surface-glass-strong: rgba(255, 255, 255, 0.94);
+  --semantic-surface-glass: rgba(255, 255, 255, 0.71);
+  --semantic-surface-glass-strong: rgba(255, 255, 255, 0.87);
   --semantic-surface-control: rgba(255, 255, 255, 0.55);
   --semantic-surface-intelligence-subtle: rgba(46, 94, 170, 0.08);
-  --semantic-surface-connection-subtle: rgba(214, 162, 58, 0.16);
+  --semantic-surface-connection-subtle: rgba(46, 94, 170, 0.12);
   --semantic-surface-outcome-subtle: rgba(59, 123, 87, 0.08);
   --semantic-surface-elevated: var(--semantic-canvas-elevated);
   --semantic-surface-subtle: rgba(27, 36, 48, 0.04);
@@ -49,13 +49,13 @@
   --semantic-border-glass: rgba(27, 36, 48, 0.08);
   --semantic-border-focus: var(--brand-signal-blue);
 
-  --semantic-action-primary-background: var(--brand-rf-gold);
-  --semantic-action-primary-foreground: var(--brand-exchange-slate);
-  --semantic-action-selected-background: var(--brand-rf-gold);
+  --semantic-action-primary-background: var(--brand-signal-blue);
+  --semantic-action-primary-foreground: var(--brand-white);
+  --semantic-action-selected-background: var(--brand-signal-blue);
   --semantic-action-selected-foreground: var(--brand-exchange-black);
   --semantic-action-link: var(--brand-signal-blue);
-  --semantic-action-primary-hover: #c99324;
-  --semantic-action-primary-pressed: #b9831d;
+  --semantic-action-primary-hover: #254d8c;
+  --semantic-action-primary-pressed: #1d3d70;
   --semantic-text-link: var(--semantic-action-link);
   --semantic-text-on-emphasis: var(--semantic-text-inverse);
   --semantic-accent-gold-accessible: var(--brand-accessible-dark-gold);
@@ -67,7 +67,7 @@
 
   --semantic-state-information: var(--brand-signal-blue);
   --semantic-state-positive-resolution: var(--brand-growth-green);
-  --semantic-state-connection-focus: var(--brand-rf-gold);
+  --semantic-state-connection-focus: var(--brand-signal-blue);
   --semantic-state-connection-text: var(--brand-accessible-dark-gold);
   --semantic-state-connection: var(--semantic-state-connection-focus);
   --semantic-state-neutral: var(--brand-graphite);
@@ -144,11 +144,11 @@
   /* Proprietary object grammar. These variables do not authorize runtime objects. */
   --object-node-organization-fill: var(--brand-graphite);
   --object-node-organization-foreground: var(--brand-white);
-  --object-node-selected-ring: var(--brand-rf-gold);
+  --object-node-selected-ring: var(--brand-signal-blue);
   --object-node-additional-location-ring: var(--brand-accessible-dark-gold);
   --object-beacon-opportunity-fill: var(--brand-signal-blue);
-  --object-field-locality-selected-fill: rgba(214, 162, 58, 0.1);
-  --object-field-locality-selected-outline: var(--brand-rf-gold);
+  --object-field-locality-selected-fill: rgba(46, 94, 170, 0.06);
+  --object-field-locality-selected-outline: var(--brand-signal-blue);
   --object-field-locality-surrounding-fill: rgba(27, 36, 48, 0.04);
   --object-field-locality-surrounding-outline: rgba(27, 36, 48, 0.3);
   --object-field-locality-restricted-fill: rgba(27, 36, 48, 0.12);
@@ -160,7 +160,7 @@
   --object-path-outcome: var(--brand-growth-green);
   --object-seal-evidence-structure: var(--brand-graphite);
   --object-seal-evidence-accent: var(--brand-rf-gold);
-  --object-locality-selected: var(--brand-rf-gold);
+  --object-locality-selected: var(--brand-signal-blue);
   --object-locality-released: var(--brand-signal-blue);
   --object-locality-limited: var(--brand-accessible-dark-gold);
   --object-locality-restricted: var(--brand-graphite);

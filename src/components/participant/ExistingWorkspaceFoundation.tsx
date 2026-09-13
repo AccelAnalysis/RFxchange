@@ -52,6 +52,7 @@ import {
   SpatialWorkspace,
 } from "./ParticipantWorkspace";
 
+import { useWideExchangeLayout } from "./useWideExchangeLayout";
 import styles from "./ExistingWorkspaceFoundation.module.css";
 import { useParticipantSpatialContext } from "./useParticipantSpatialContext";
 
@@ -204,7 +205,7 @@ export function ExistingWorkspaceFoundation({
   const detailRouteId = showFocusedOrganizationDetail ? focusedOrganizationId : null;
   const [mobileDetailOpen, setMobileDetailOpen] = useState(Boolean(detailRouteId));
   const [appliedDetailRouteId, setAppliedDetailRouteId] = useState(detailRouteId);
-  const [wideLayout, setWideLayout] = useState(false);
+  const wideLayout = useWideExchangeLayout();
   const [markerPopoverPoint, setMarkerPopoverPoint] = useState<MarkerPopoverPoint | null>(null);
   const lastMapPointerRef = useRef<MarkerPopoverPoint | null>(null);
   if (appliedDetailRouteId !== detailRouteId) {
@@ -215,14 +216,6 @@ export function ExistingWorkspaceFoundation({
   const cardRefs = useRef(new Map<string, HTMLElement>());
   const appliedFocusedOrganizationIdRef = useRef<string | null>(null);
   const discoveryRestricted = discoveryUnavailableReason === "geography-not-permitted";
-
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 1025px)");
-    const update = () => setWideLayout(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
 
   useEffect(() => {
     const captureMapPointer = (event: PointerEvent) => {
@@ -688,6 +681,7 @@ export function ExistingWorkspaceFoundation({
           showSearch={false}
           workspaceOverlay="right"
           adaptiveWorkspace
+          homeLocalityFocus={serviceAreaId === model.selectedGeography.id}
         />
 
         {discovery ? (

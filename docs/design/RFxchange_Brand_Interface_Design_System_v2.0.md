@@ -6,6 +6,12 @@
 **Architecture authority:** RFxchange Platform Solution Architecture Document (SAD)
 **Supersedes on adoption:** conflicting visual guidance in `docs/design/RFxchange_DESIGN_SYSTEM.md`, `docs/product-system/BRAND_SYSTEM.md`, `src/design/tokens.ts`, and legacy screen-specific styling.
 
+## September 13 mobile refinement
+
+Explicit product-owner direction supersedes the gold interaction and locality-focus treatments below: use Signal Blue for primary buttons (white text), selected navigation, selected marker accents and a single locality outline. Retain RF Gold in the wordmark and existing relationship/recognition semantics. Shared glass opacity decreases by seven percentage points (78→71%, 94→87%; the result sheet and bottom dock 96→89%). Solid/reduced-transparency fallbacks remain available.
+
+The map fills all viewport safe areas. Navigation, search, map controls, attribution and sheet content respect device insets. Short landscape viewports (height ≤520px) retain mobile navigation and collapsible sheets regardless of width. The handle is the only sheet resizing control: drag, tap, Enter/Space, Up/Down, Home/End and Escape remain accessible. Expanded sheets render in front of search. The mobile primary lens label is RFx, and all tab labels stay on one line. Map navigation controls sit near the top; no mileage scale is shown. Home-locality dimming/fill/outline appear only for explicit home-locality focus and disappear for unscoped/other-area searches; this changes presentation only, never server geography authorization.
+
 ## 0. Authority and purpose
 
 This document defines how RFxchange must **look, feel, and behave** across the in-place modernization. The SAD continues to own application boundaries, data, security, integrations, deployment, and system architecture. This Design System owns the shared visual and interaction language: brand identity, color, typography, geometry, spacing, materials, glass treatments, navigation, controls, component states, map UI, motion, accessibility, responsive behavior, and cross-application consistency.

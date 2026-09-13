@@ -55,7 +55,6 @@
 
 .viewModeControl { position: absolute; z-index: 20; right: var(--space-lg); bottom: 26px; padding: 5px; display: inline-flex; gap: 4px; border: var(--border-hairline) solid var(--semantic-border-glass); border-radius: var(--radius-control); background: var(--semantic-surface-glass); box-shadow: var(--elevation-control); backdrop-filter: blur(20px) saturate(125%); -webkit-backdrop-filter: blur(20px) saturate(125%); }
 .scene[data-workspace-overlay="right"] .viewModeControl { right: min(466px, calc(100vw - 172px)); }
-.scene[data-workspace-overlay="right"] :global(.mapboxgl-ctrl-bottom-right) { right: 448px; }
 .viewModeControl button { min-height: 36px; padding: 0 var(--space-sm); border-color: transparent; border-radius: var(--radius-compact); }
 .viewModeControl button[data-active="true"] { color: var(--semantic-action-selected-foreground); background: var(--semantic-surface-connection); box-shadow: inset 0 2px 0 var(--semantic-action-selected-background); }
 .searchForm button:focus-visible, .homeContext button:focus-visible, .clearSearch:focus-visible, .searchResults button:focus-visible, .viewModeControl button:focus-visible { outline: var(--focus-outline-width) solid var(--semantic-border-focus); outline-offset: var(--focus-outline-offset); }
@@ -65,7 +64,6 @@
   .searchPanel { top: 76px; left: 10px; width: calc(100vw - 20px); max-height: min(calc(50vh - 112px), calc(100vh - 104px)); border-radius: var(--radius-panel); }
   .viewModeControl { right: 10px; bottom: calc(18px + env(safe-area-inset-bottom)); }
   .scene[data-workspace-overlay="right"] .viewModeControl { right: auto; left: 10px; bottom: calc(min(68svh, 590px) + 24px + env(safe-area-inset-bottom)); }
-  .scene[data-workspace-overlay="right"] :global(.mapboxgl-ctrl-bottom-right) { right: 0; bottom: calc(min(68svh, 590px) + 12px + env(safe-area-inset-bottom)); }
 }
 @media (max-width: 430px) { .searchForm { grid-template-columns: minmax(0,1fr) 78px; } .homeContext { grid-template-columns: 1fr auto; } .homeContext span { grid-column: 1 / -1; } .viewModeControl button { padding-inline: 9px; font-size: 0.7rem; } }
 @media (prefers-reduced-transparency: reduce) { .searchPanel, .viewModeControl { background: var(--semantic-canvas); backdrop-filter: none; -webkit-backdrop-filter: none; } }
@@ -82,9 +80,39 @@
 .mapOptions .viewModeControl, .scene[data-workspace-overlay="right"] .mapOptions .viewModeControl { position: absolute; top: calc(100% + 8px); right: 0; bottom: auto; left: auto; width: 248px; padding: 12px; flex-wrap: wrap; background: var(--semantic-canvas-elevated); backdrop-filter: none; }
 .mapOptions .viewModeControl button { min-height: 44px; font-size: .875rem; }
 .mapOptions summary:focus-visible { outline: 2px solid white; box-shadow: 0 0 0 5px var(--semantic-border-focus); }
-@media (max-width: 1024px) { .mapOptions, .scene[data-workspace-overlay="right"] .mapOptions { top: 136px; right: 12px; } }
+
 @media (prefers-reduced-transparency: reduce) { .mapOptions > summary { background: var(--semantic-canvas-elevated); } }
 
+
+/* Insets protect controls and attribution; the map remains edge-to-edge. */
+.scene :global(.mapboxgl-ctrl-top-right) { top: 144px; right: 6px; }
+.scene :global(.mapboxgl-ctrl-bottom-left) { left: env(safe-area-inset-left, 0px); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+.scene :global(.mapboxgl-ctrl-bottom-right) { right: env(safe-area-inset-right, 0px); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+.scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-top-right),
 .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-right) { right: clamp(420px, 32vw, 480px); }
-@media (min-width: 761px) and (max-width: 1024px) { .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-right) { right: 0; bottom: calc(min(54dvh, 540px) + 12px); } }
-@media (max-width: 760px) { .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-right) { right: 0; bottom: calc(min(54dvh, 540px) + var(--participant-mobile-nav-height, 74px) + env(safe-area-inset-bottom, 0px) + 12px); } }
+.scene :global(.mapboxgl-ctrl-group) { background: var(--semantic-surface-glass-strong); }
+@media (min-width: 761px) and (max-width: 1024px) and (min-height: 521px) {
+  .mapOptions, .scene[data-workspace-overlay="right"] .mapOptions { top: 136px; right: 12px; }
+  .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-top-right) { top: 192px; right: 6px; }
+  .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-right),
+  .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-left) { bottom: calc(var(--exchange-visible-sheet-height, 84px) + 8px + env(safe-area-inset-bottom, 0px)); }
+  .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-right) { right: 0; }
+}
+@media (max-width: 760px), (orientation: landscape) and (max-height: 520px) {
+  .mapOptions, .scene[data-workspace-overlay="right"] .mapOptions { top: calc(128px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); }
+  .scene :global(.mapboxgl-ctrl-top-right),
+  .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-top-right) { top: calc(184px + env(safe-area-inset-top, 0px)); right: calc(2px + env(safe-area-inset-right, 0px)); }
+  .scene :global(.mapboxgl-ctrl-group button) { width: 44px; height: 44px; }
+  .scene :global(.mapboxgl-ctrl-bottom-left), .scene :global(.mapboxgl-ctrl-bottom-right),
+  .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-left),
+  .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-right) { bottom: calc(var(--exchange-visible-sheet-height, 0px) + var(--participant-mobile-nav-height, 74px) + env(safe-area-inset-bottom, 0px) + 8px); }
+  .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-bottom-right) { right: env(safe-area-inset-right, 0px); }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .mapOptions, .scene[data-workspace-overlay="right"] .mapOptions { top: calc(8px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); }
+  .mapOptions > summary { padding-block: 10px; white-space: nowrap; }
+  .scene :global(.mapboxgl-ctrl-top-right), .scene[data-adaptive-workspace="true"] :global(.mapboxgl-ctrl-top-right) { top: calc(58px + env(safe-area-inset-top, 0px)); }
+  .scene :global(.mapboxgl-ctrl-group) { display: flex; }
+  .scene :global(.mapboxgl-ctrl-group button + button) { border-top: 0; border-left: 1px solid var(--semantic-border-subtle); }
+  .mapOptions .viewModeControl { max-height: calc(100dvh - 130px - env(safe-area-inset-bottom, 0px)); overflow-y: auto; }
+}

@@ -1,7 +1,7 @@
 {
   "sheet": {
     "region": "Exchange results and details",
-    "dragHandle": "Drag to resize the Exchange sheet",
+    "dragHandle": "Resize results: drag or tap. Use Up and Down arrows to expand or collapse.",
     "peek": "Peek",
     "partial": "Results",
     "expanded": "Expand"

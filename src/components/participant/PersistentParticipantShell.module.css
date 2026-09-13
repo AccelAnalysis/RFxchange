@@ -14,7 +14,7 @@
   min-height: calc(100dvh - var(--participant-nav-height));
 }
 
-@media (max-width: 760px) {
+@media (max-width: 760px), (orientation: landscape) and (max-height: 520px) {
   .shell {
     min-height: 100svh;
     min-height: 100dvh;
@@ -37,4 +37,16 @@
   .shell {
     overflow-x: hidden;
   }
+}
+
+.shell:has([data-mobile-exchange-sheet][data-snap-point="peek"]) { --exchange-visible-sheet-height: 84px; }
+.shell:has([data-mobile-exchange-sheet][data-snap-point="partial"]) { --exchange-visible-sheet-height: min(54dvh, 540px); }
+.shell:has([data-mobile-exchange-sheet][data-snap-point="expanded"]) { --exchange-visible-sheet-height: calc(100dvh - var(--participant-mobile-nav-height) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 60px); }
+@media (orientation: landscape) and (max-height: 520px) {
+  .shell:has([data-mobile-exchange-sheet][data-snap-point="partial"]) { --exchange-visible-sheet-height: min(46dvh, 240px); }
+  .shell:has([data-mobile-exchange-sheet][data-snap-point="expanded"]) { --exchange-visible-sheet-height: calc(100dvh - var(--participant-mobile-nav-height) - env(safe-area-inset-bottom, 0px) - 8px); }
+}
+
+@media (max-width: 760px), (orientation: landscape) and (max-height: 520px) {
+  .content:has([data-participant-workspace="spatial"]) { height: 100dvh; min-height: 0; padding-bottom: 0; overflow: hidden; }
 }

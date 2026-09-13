@@ -1,7 +1,7 @@
 {
   "sheet": {
     "region": "Resultados y detalles del Exchange",
-    "dragHandle": "Arrastra para cambiar el tamaño del panel del Exchange",
+    "dragHandle": "Ajusta los resultados: arrastra o toca. Usa las flechas arriba y abajo para expandir o contraer.",
     "peek": "Vista",
     "partial": "Resultados",
     "expanded": "Ampliar"
