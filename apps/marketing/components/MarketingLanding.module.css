@@ -89,17 +89,24 @@
   max-width: 850px;
 }
 
-.eyebrow,
 .gold {
   color: #d6a23a;
 }
 
 .eyebrow {
   margin: 0 0 16px;
+  color: #7a5710;
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.hero .eyebrow,
+.splitDark .eyebrow,
+.audienceSection .eyebrow,
+.fullBleedCta .eyebrow {
+  color: #d6a23a;
 }
 
 .hero h1,
@@ -264,6 +271,13 @@
   backdrop-filter: blur(12px);
 }
 
+.imageNote {
+  margin: 14px 0 0;
+  color: #667085;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
 .problemBand,
 .split,
 .foundingBand {
@@ -413,6 +427,35 @@
 
 .flow b {
   color: #d6a23a;
+}
+
+.stateStrip {
+  display: grid;
+  gap: 12px;
+  margin: 22px 0 6px;
+  padding: 18px 0;
+  border-top: 1px solid rgb(255 255 255 / 14%);
+  border-bottom: 1px solid rgb(255 255 255 / 14%);
+}
+
+.stateStrip > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: baseline;
+}
+
+.stateStrip strong {
+  color: #d6a23a;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.stateStrip span {
+  color: rgb(255 255 255 / 76%);
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
 .resourceStrip {
