@@ -446,7 +446,7 @@
 
 @media (orientation: landscape) and (max-height: 520px) {
   .sheet {
-    --exchange-sheet-partial-height: min(46dvh, 240px);
+    --exchange-sheet-partial-height: min(76dvh, var(--exchange-sheet-expanded-height));
     --exchange-sheet-expanded-height: calc(100dvh - var(--participant-mobile-nav-height, 62px) - env(safe-area-inset-bottom, 0px) - 8px);
   }
 
