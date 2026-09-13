@@ -25,16 +25,19 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const { dictionary } = await getRequestDictionary();
   const home = dictionary.marketingPages.home;
+  const availability = dictionary.marketingPages.availability;
   const differentiation = dictionary.marketing.home.difference;
+  const liveAvailability = availability.items.filter((item) => item.kind === "live");
+  const plannedAvailability = availability.items.find((item) => item.kind === "planned");
   const valueImages = [
-    publicImageAssets.manufacturing,
-    publicImageAssets.construction,
-    publicImageAssets.collaboration,
+    { ...publicImageAssets.manufacturing, alt: home.images.audienceBusiness },
+    { ...publicImageAssets.construction, alt: home.images.audienceProvider },
+    { ...publicImageAssets.collaboration, alt: home.images.ai },
   ] as const;
   const audienceImages = [
-    publicImageAssets.workshop,
-    publicImageAssets.professional,
-    publicImageAssets.region,
+    { ...publicImageAssets.manufacturing, alt: home.images.audienceBusiness },
+    { ...publicImageAssets.construction, alt: home.images.audienceProvider },
+    { ...publicImageAssets.region, alt: home.images.audienceLeader },
   ] as const;
   const mosaicImages = [
     publicImageAssets.manufacturing,
@@ -93,12 +96,13 @@ export default async function HomePage() {
               </figure>
             ))}
           </div>
+          <p className={styles.imageNote}>{home.hero.stockNote}</p>
         </div>
       </section>
 
       <section className={styles.problemBand} aria-labelledby="problem-title">
         <div className={styles.problemMedia}>
-          <img src={publicImageAssets.workshop.src} alt={home.images.problem} loading="lazy" decoding="async" />
+          <img src={publicImageAssets.professional.src} alt={home.images.problem} loading="lazy" decoding="async" />
         </div>
         <div className={styles.problemCopy}>
           <p className={styles.eyebrow}>{home.problem.eyebrow}</p>
@@ -148,6 +152,18 @@ export default async function HomePage() {
               </span>
             ))}
           </div>
+          <div className={styles.stateStrip} aria-label={availability.eyebrow}>
+            <div>
+              <strong>{liveAvailability[0]?.status}</strong>
+              <span>{liveAvailability.map((item) => item.title).join(" · ")}</span>
+            </div>
+            {plannedAvailability ? (
+              <div>
+                <strong>{plannedAvailability.status}</strong>
+                <span>{plannedAvailability.title}</span>
+              </div>
+            ) : null}
+          </div>
           <p><Link className={styles.buttonGold} href="/how-it-works">{home.hero.secondary}</Link></p>
         </div>
       </section>
@@ -155,7 +171,7 @@ export default async function HomePage() {
       <section className={styles.section} aria-labelledby="network-actions-title">
         <div className={`${styles.wrap} ${styles.resourceStrip}`}>
           <div className={styles.resourcePhoto}>
-            <img src={publicImageAssets.professional.src} alt={home.images.network} loading="lazy" decoding="async" />
+            <img src={publicImageAssets.workshop.src} alt={home.images.network} loading="lazy" decoding="async" />
           </div>
           <div className={styles.resourceList}>
             <p className={styles.eyebrow}>{home.network.eyebrow}</p>
