@@ -32,7 +32,7 @@
 .mobileResultUtilityRow a, .networkPagination a { display: inline-flex; align-items: center; min-height: 44px; color: var(--semantic-text-link); }
 .emptyResults { margin: 8px 0; color: var(--semantic-text-secondary); font-size: .875rem; line-height: 1.5; }
 .networkPagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; font-size: .875rem; }
-.exchangeSearch { position: absolute; z-index: 44; top: 16px; left: 16px; width: min(520px, calc(100% - 528px)); display: flex; align-items: center; gap: 8px; padding: 4px 8px 4px 16px; border: 1px solid var(--semantic-border-glass); border-radius: 28px; background: var(--semantic-surface-glass-strong); box-shadow: var(--elevation-control); backdrop-filter: blur(20px); }
+.exchangeSearch { position: absolute; z-index: 44; top: 16px; left: 16px; width: min(520px, calc(100% - clamp(420px, 32vw, 480px) - 196px)); display: flex; align-items: center; gap: 8px; padding: 4px 8px 4px 16px; border: 1px solid var(--semantic-border-glass); border-radius: 28px; background: var(--semantic-surface-glass-strong); box-shadow: var(--elevation-control); backdrop-filter: blur(20px); }
 .searchInput { min-width: 0; flex: 1; }
 .searchInput input { width: 100%; min-height: 48px; border: 0; color: var(--semantic-text-primary); background: transparent; font: inherit; font-size: 1rem; }
 .searchSubmit { min-width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; color: var(--semantic-text-primary); background: var(--semantic-surface-subtle); cursor: pointer; }

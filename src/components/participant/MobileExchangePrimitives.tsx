@@ -154,6 +154,7 @@ export function ExchangeBottomSheet({
       setDragOffset(0);
       return;
     }
+    if (!suppressClickRef.current) { setDragOffset(0); return; }
     setSnap(nextSnapPoint(snapPoint, event.clientY - current.startY, current.velocityY));
   };
 
@@ -180,8 +181,9 @@ export function ExchangeBottomSheet({
           aria-label={labels.dragHandle}
           aria-controls={contentId}
           aria-expanded={snapPoint !== "peek"}
-          onClick={() => {
-            if (suppressClickRef.current) { suppressClickRef.current = false; return; }
+          onClick={(event) => {
+            if (suppressClickRef.current && event.detail !== 0) { suppressClickRef.current = false; return; }
+            suppressClickRef.current = false;
             setSnap(PARTICIPANT_SHEET_SNAP_POINTS[(SNAP_INDEX[snapPoint] + 1) % 3]!);
           }}
           onKeyDown={(event) => {

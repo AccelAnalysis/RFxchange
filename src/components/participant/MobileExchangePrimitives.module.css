@@ -1,7 +1,7 @@
 .sheet {
   --exchange-sheet-peek-height: 84px;
   --exchange-sheet-partial-height: min(54dvh, 540px);
-  --exchange-sheet-expanded-height: calc(100dvh - var(--participant-mobile-nav-height, 74px) - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px) - 8px);
+  --exchange-sheet-expanded-height: calc(100dvh - var(--participant-mobile-nav-height, 74px) - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px) - 60px);
   position: fixed;
   z-index: 60;
   right: 0;

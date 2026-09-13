@@ -41,9 +41,10 @@
 
 .shell:has([data-mobile-exchange-sheet][data-snap-point="peek"]) { --exchange-visible-sheet-height: 84px; }
 .shell:has([data-mobile-exchange-sheet][data-snap-point="partial"]) { --exchange-visible-sheet-height: min(54dvh, 540px); }
-.shell:has([data-mobile-exchange-sheet][data-snap-point="expanded"]) { --exchange-visible-sheet-height: calc(100dvh - var(--participant-mobile-nav-height) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 8px); }
+.shell:has([data-mobile-exchange-sheet][data-snap-point="expanded"]) { --exchange-visible-sheet-height: calc(100dvh - var(--participant-mobile-nav-height) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 60px); }
 @media (orientation: landscape) and (max-height: 520px) {
   .shell:has([data-mobile-exchange-sheet][data-snap-point="partial"]) { --exchange-visible-sheet-height: min(46dvh, 240px); }
+  .shell:has([data-mobile-exchange-sheet][data-snap-point="expanded"]) { --exchange-visible-sheet-height: calc(100dvh - var(--participant-mobile-nav-height) - env(safe-area-inset-bottom, 0px) - 8px); }
 }
 
 @media (max-width: 760px), (orientation: landscape) and (max-height: 520px) {
