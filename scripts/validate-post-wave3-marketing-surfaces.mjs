@@ -25,7 +25,9 @@ assert.match(home, /marketingPages\.home/, "Home must consume the localized mark
 assert.match(founding, /marketingPages\.founding/, "Founding must consume the localized marketing-pages namespace");
 assert.doesNotMatch(home, /<MarketingAvailability/, "Home must remain acquisition-focused instead of becoming an availability document");
 assert.match(founding, /<MarketingAvailability/, "Founding must use the shared availability component");
-assert.ok((home.match(/<img/g) ?? []).length >= 10, "Home must preserve the image-led public composition");
+for (const renderedImageContract of [/mosaicImages\.map/, /differentiation\.items\.map/, /home\.audience\.items\.map/]) {
+  assert.match(home, renderedImageContract, "Home must preserve the image-led public composition");
+}
 for (const visualContract of [/styles\.marketMosaic/, /styles\.visualCard/, /styles\.audienceCard/, /styles\.fullBleedCta/]) {
   assert.match(home, visualContract, "Home must preserve the image-led marketing composition");
 }
