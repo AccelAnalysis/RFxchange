@@ -44,3 +44,13 @@ These items are not blocked merely because a provider account is unfinished. The
 Focused domain tests and the Firestore emulator exercise no live communications or payments. New collections remain denied to direct clients. Production sending remains disabled. Rollback reverts this app release; retain consent records, suppressions and audit history. Never clear suppressions or reset ambiguous jobs to retry to undo a rollout.
 
 Implementation, merge, app release, Functions release and actual-provider acceptance are distinct states. Release evidence belongs here when observed, not inferred from a successful build.
+
+## Release and hosted-write correction
+
+PR #282 merged as `3b390843856b7a0dc0be7681dc34d3a02b8e366e`. Exact-head CI `34718463781` and merged-main CI `34718758532` passed. Exchange `build-2026-09-12-005`, Marketing `build-2026-09-12-004`, and Admin `build-2026-09-12-005` each succeeded with source and resolved `RFXCHANGE_BUILD_SHA` equal to that merge. Automatic rollouts remained disabled; Exchange resolved lifecycle send mode remained `disabled`. Later design/PWA releases may supersede these historical rollouts.
+
+Production acceptance reached authenticated campaign and communication-operations pages and the public email-withdrawal confirmation page. Saving an unpublished organization-setup campaign exposed a `403 POST /api/admin/campaigns` in App Hosting runtime/CDN logs; a fresh campaign list remained empty. This is a material acceptance failure, not a completed save journey.
+
+The follow-up corrects the seven SAD browser-write routes to compare Origin with the fixed application-specific public origin, rather than App Hosting's internal request URL. Host and forwarding headers never select the trusted origin. Cross-app, missing, malformed and attacker origins fail closed; loopback development is unavailable in production. Existing session, permission, grant and transaction checks remain mandatory. Campaign error feedback now preserves the server's bounded error explanation instead of collapsing origin/permission failures into a version-conflict message.
+
+Regression coverage includes simulated internal-listener requests, forged forwarding headers, cross-app rejection and actual production-build HTTP requests that pass the Origin boundary but still deny anonymous writes. The corrected hosted save journey and release remain pending until observed; no provider messaging or payment is used for this acceptance.

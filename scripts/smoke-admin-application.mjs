@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const port = 3013;
 const origin = `http://127.0.0.1:${port}`;
+const publicAdminOrigin = "https://rfxchange-admin--rfxchange.us-east4.hosted.app";
 const child = spawn(process.execPath, [path.join(root, "node_modules/next/dist/bin/next"), "start", "--port", String(port), "--hostname", "127.0.0.1"], {
   cwd: path.join(root, "apps/admin"),
   stdio: ["ignore", "pipe", "pipe"],
@@ -31,8 +32,19 @@ try {
   }
   for (const route of ["/api/admin/campaigns", "/api/admin/communication-operations", "/api/admin/lifecycle", "/api/admin/public-help", "/api/admin/public-enrichment?organizationId=untrusted"]) {
     for (const method of ["GET", "POST"]) {
-      const response = await fetch(`${origin}${route}`, { method, redirect: "manual", headers: { origin, "content-type": "application/json" }, ...(method === "POST" ? { body: "{}" } : {}) });
+      const response = await fetch(`${origin}${route}`, { method, redirect: "manual", headers: { origin: publicAdminOrigin, "content-type": "application/json" }, ...(method === "POST" ? { body: "{}" } : {}) });
       assert.equal(response.status, 403, `${method} ${route} denies anonymous configuration/data access even with a valid Origin`);
+      assert.notEqual((await response.json()).error, "Request origin required.", "Public origin passes CSRF behind an internal listener but still requires authorization");
+    }
+  }
+  for (const route of ["/api/admin/campaigns", "/api/admin/communication-operations", "/api/admin/lifecycle", "/api/admin/public-help", "/api/admin/public-enrichment"]) {
+    for (const untrusted of ["https://attacker.example", "https://rfxchange--rfxchange.us-east4.hosted.app", origin]) {
+      const response = await fetch(`${origin}${route}`, { method: "POST", headers: {
+        origin: untrusted, "x-forwarded-host": new URL(publicAdminOrigin).host,
+        "x-forwarded-proto": "https", "content-type": "application/json",
+      }, body: "{}" });
+      assert.equal(response.status, 403);
+      assert.equal((await response.json()).error, "Request origin required.");
     }
   }
   for (const [route, method] of [["/api/admin/provider-applications", "GET"], ["/api/admin/cases/unknown/transition", "POST"]]) {

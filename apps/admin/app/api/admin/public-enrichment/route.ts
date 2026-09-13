@@ -1,3 +1,4 @@
+import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { publicReviewDisposition } from "@/src/domain/enrichment/public-review";
 import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ runs: runs.docs.map(run => project(run.data())) }, { headers: { "cache-control": "no-store" } });
 }
 export async function POST(request: NextRequest) {
-  if (request.headers.get("origin") !== request.nextUrl.origin) return NextResponse.json({ error: "Request origin required." }, { status: 403 });
+  if (!isApplicationRequestOrigin(request, "admin")) return NextResponse.json({ error: "Request origin required." }, { status: 403 });
   const access = await authorize(request, true);
   if (access.kind !== "authorized") return NextResponse.json({ error: "Organization management access required." }, { status: 403 });
   const organizationId = organization(request);

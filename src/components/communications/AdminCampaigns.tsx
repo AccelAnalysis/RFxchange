@@ -23,7 +23,10 @@ export function AdminCampaigns() {
       e.preventDefault(); setBusy(true); setMessage("");
       try {
         const r = await fetch("/api/admin/campaigns", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ campaign, expectedVersion: campaign.version, commandId: crypto.randomUUID(), reason }) });
-        if (!r.ok) throw Error("Campaign changed or could not be saved. Reload it and review the fields.");
+        if (!r.ok) {
+          const failure = await r.json().catch(() => null);
+          throw Error(typeof failure?.error === "string" ? failure.error : "Campaign could not be saved. Reload it and review the fields.");
+        }
         setCampaign((await r.json()).campaign); setReason("");
         const refreshed = await fetch("/api/admin/campaigns"); if (!refreshed.ok) throw Error("Saved; refresh the list."); setRows((await refreshed.json()).campaigns); setMessage("Campaign saved.");
       } catch (error) { setMessage(error instanceof Error ? error.message : "Save unavailable."); } finally { setBusy(false); }

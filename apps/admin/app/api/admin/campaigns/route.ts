@@ -1,3 +1,4 @@
+import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { NextRequest, NextResponse } from "next/server";
 import { resolveAdminRoute } from "@/src/infrastructure/auth/admin-route-runtime";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/firebase-server-session";
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
   } })), sampleLimit: 500, sampledAt: new Date().toISOString() }, { headers: { "cache-control": "no-store" } });
 }
 export async function POST(request: NextRequest) {
-  if (request.headers.get("origin") !== request.nextUrl.origin) return NextResponse.json({ error: "Request origin required." }, { status: 403 });
+  if (!isApplicationRequestOrigin(request, "admin")) return NextResponse.json({ error: "Request origin required." }, { status: 403 });
   const authorized = await access(request, true);
   if (authorized.kind !== "authorized") return NextResponse.json({ error: "Campaign management access required." }, { status: 403 });
   let input;

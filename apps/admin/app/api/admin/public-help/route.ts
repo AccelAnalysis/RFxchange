@@ -1,3 +1,4 @@
+import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { PUBLIC_HELP_ARTICLES, validatePublicHelpArticles } from "@/src/application/support/public-help";
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ articles: snapshot.get("articles") ?? PUBLIC_HELP_ARTICLES, version: snapshot.get("version") ?? 0 }, { headers: { "cache-control": "no-store" } });
 }
 export async function POST(request: NextRequest) {
-  if (request.headers.get("origin") !== request.nextUrl.origin) return NextResponse.json({ error: "Request origin required." }, { status: 403 });
+  if (!isApplicationRequestOrigin(request, "admin")) return NextResponse.json({ error: "Request origin required." }, { status: 403 });
   const access = await authorize(request, true);
   if (access.kind !== "authorized") return NextResponse.json({ error: "Configuration management access required." }, { status: 403 });
   let body, articles;

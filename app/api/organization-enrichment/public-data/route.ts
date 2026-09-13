@@ -1,3 +1,4 @@
+import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeOrganizationOperation } from "@/src/application/auth/authorize-organization-operation";
 import { createServerFirebaseAccountSecurityService } from "@/src/infrastructure/auth/firebase-account-security-runtime";
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
   }) }, { headers: { "cache-control": "no-store" } });
 }
 export async function POST(request: NextRequest) {
-  if (request.headers.get("origin") !== request.nextUrl.origin) return NextResponse.json({ error: "Request origin required." }, { status: 403 });
+  if (!isApplicationRequestOrigin(request, "exchange")) return NextResponse.json({ error: "Request origin required." }, { status: 403 });
   let raw: string;
   try { raw = (await boundedRequestBytes(request, 2048)).toString("utf8"); } catch { return NextResponse.json({ error: "Request too large." }, { status: 413 }); }
   let body: Record<string, unknown>;
