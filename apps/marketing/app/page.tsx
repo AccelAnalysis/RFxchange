@@ -25,6 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const { dictionary } = await getRequestDictionary();
   const home = dictionary.marketingPages.home;
+  const differentiation = dictionary.marketing.home.difference;
   const valueImages = [
     publicImageAssets.manufacturing,
     publicImageAssets.construction,
@@ -113,16 +114,16 @@ export default async function HomePage() {
       <section className={`${styles.section} ${styles.valueSection}`} aria-labelledby="value-title">
         <div className={styles.wrap}>
           <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>{dictionary.marketing.home.difference.eyebrow}</p>
+            <p className={styles.eyebrow}>{differentiation.eyebrow}</p>
             <h2 id="value-title">{home.value.promise}</h2>
           </div>
           <div className={styles.visualGrid}>
-            {home.value.items.slice(0, 3).map((item, index) => (
-              <article className={styles.visualCard} key={item.kicker}>
+            {differentiation.items.map((item, index) => (
+              <article className={styles.visualCard} key={item.label}>
                 <img src={valueImages[index].src} alt={valueImages[index].alt} loading="lazy" decoding="async" />
                 <div className={styles.cardContent}>
-                  <span className={styles.cardIndex}>{String(index + 1).padStart(2, "0")} · {item.kicker}</span>
-                  <h3>{item.title}</h3>
+                  <span className={styles.cardIndex}>{String(index + 1).padStart(2, "0")}</span>
+                  <h3>{item.label}</h3>
                   <p>{item.detail}</p>
                 </div>
               </article>
