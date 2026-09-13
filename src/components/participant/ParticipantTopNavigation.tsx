@@ -270,7 +270,7 @@ function LensItems({
   const scopeId = useId().replaceAll(":", "");
 
   return PARTICIPANT_LENSES.map((lens) => {
-    const label = t(lens.labelKey);
+    const label = mobile && lens.id === "opportunities-rfx" ? "RFx" : t(lens.labelKey);
     const unavailable = lens.availability === "unavailable" || unavailableLensIds.includes(lens.id);
     if (unavailable) {
       const descriptionId = `${scopeId}-${lens.id}-availability`;

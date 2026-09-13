@@ -109,7 +109,7 @@ assert.ok(
 assert.equal(/#(?:0b0b0d|f7f3ea|252932|d6a23a|8a6418|2e5eaa|3b7b57)\b/i.test(styles), false, "Brand B6a workspace styling must consume semantic tokens rather than approved raw palette literals.");
 assert.ok(
   styles.includes("focus-visible") &&
-    styles.includes("@media (max-width: 1024px)") &&
+    styles.includes("(max-width: 1024px)") && styles.includes("(orientation: landscape) and (max-height: 520px)") &&
     styles.includes("@media (prefers-reduced-motion: reduce)") &&
     styles.includes("@media (prefers-reduced-transparency: reduce)"),
   "Brand B6a must preserve keyboard, mobile, reduced-motion and reduced-transparency behavior.",

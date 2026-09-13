@@ -99,6 +99,7 @@ export interface ExchangeSpatialSceneProps {
   readonly workspaceOverlay?: "left" | "right" | null;
   readonly adaptiveWorkspace?: boolean;
   readonly showSearch?: boolean;
+  readonly homeLocalityFocus?: boolean;
   readonly tutorialOverlay?: SyntheticOrientationMapOverlay | null;
   readonly continuousMotion?: ExchangeContinuousMotion | null;
   readonly className?: string;
@@ -136,7 +137,6 @@ const LOCALITY_SOURCE_ID = "rfx-spatial-scene-locality";
 const LOCALITY_MASK_SOURCE_ID = "rfx-spatial-scene-locality-mask";
 const LOCALITY_MASK_LAYER_ID = "rfx-spatial-scene-locality-mask-fill";
 const LOCALITY_FILL_LAYER_ID = "rfx-spatial-scene-locality-fill";
-const LOCALITY_OUTLINE_CONTRAST_LAYER_ID = "rfx-spatial-scene-locality-outline-contrast";
 const LOCALITY_OUTLINE_LAYER_ID = "rfx-spatial-scene-locality-outline";
 const NETWORK_MARKER_SOURCE_ID = "rfx-spatial-scene-network-organizations";
 const NETWORK_SELECTED_MARKER_SOURCE_ID = "rfx-spatial-scene-selected-network-organization";
@@ -623,6 +623,7 @@ export function ExchangeSpatialScene({
   workspaceOverlay = null,
   adaptiveWorkspace = false,
   showSearch = interactive,
+  homeLocalityFocus = !interactive,
   tutorialOverlay = null,
   continuousMotion = null,
   className,
@@ -692,6 +693,8 @@ export function ExchangeSpatialScene({
   const workspaceOverlayRef = useRef(workspaceOverlay);
   const adaptiveWorkspaceRef = useRef(adaptiveWorkspace);
   const appliedOverlayRef = useRef({ activationOverlay, workspaceOverlay, adaptiveWorkspace });
+  const homeLocalityFocusRef = useRef(homeLocalityFocus);
+  homeLocalityFocusRef.current = homeLocalityFocus;
   const homeGeoJsonRef = useRef(localityGeoJson(model));
   const homeMaskGeoJsonRef = useRef(localityMaskGeoJson(model));
   const homeMarkerGeoJsonRef = useRef(markerGeoJson(sceneMarker));
@@ -893,7 +896,6 @@ export function ExchangeSpatialScene({
     for (const layerId of [
       LOCALITY_MASK_LAYER_ID,
       LOCALITY_FILL_LAYER_ID,
-      LOCALITY_OUTLINE_CONTRAST_LAYER_ID,
       LOCALITY_OUTLINE_LAYER_ID,
     ]) {
       if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", visibility);
@@ -909,7 +911,7 @@ export function ExchangeSpatialScene({
     const padding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current, adaptiveWorkspaceRef.current);
     const activeMode = modeRef.current;
     const activeMarker = markerRef.current;
-    setLocalityLayerVisibility(activeMode !== "regional");
+    setLocalityLayerVisibility(homeLocalityFocusRef.current && activeMode !== "regional");
 
     const persistedCamera = initialCameraRef.current;
     if (persistedCamera) {
@@ -1019,6 +1021,7 @@ export function ExchangeSpatialScene({
     pauseForInteraction();
     clearSearchHighlight();
     setActiveSearchResultId(result.id);
+    setLocalityLayerVisibility(false);
 
     searchMarkerRef.current = new mapboxgl.Marker({ color: "#2e5eaa", scale: 0.9 })
       .setLngLat([result.center[0], result.center[1]])
@@ -1040,7 +1043,7 @@ export function ExchangeSpatialScene({
         duration: reducedMotionRef.current ? 0 : 850,
       });
     }
-  }, [clearSearchHighlight, pauseForInteraction]);
+  }, [clearSearchHighlight, pauseForInteraction, setLocalityLayerVisibility]);
 
   const submitMapSearch = useCallback(async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -1162,9 +1165,8 @@ export function ExchangeSpatialScene({
     if (interactive) {
       map.addControl(
         new mapboxgl.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: true }),
-        "bottom-right",
+        "top-right",
       );
-      map.addControl(new mapboxgl.ScaleControl({ maxWidth: 120, unit: "imperial" }), "bottom-right");
     }
 
     map.on("dragstart", pauseForInteraction);
@@ -1194,18 +1196,8 @@ export function ExchangeSpatialScene({
         type: "fill",
         source: LOCALITY_SOURCE_ID,
         paint: {
-          "fill-color": "#d6a23a",
-          "fill-opacity": 0.075,
-        },
-      });
-      map.addLayer({
-        id: LOCALITY_OUTLINE_CONTRAST_LAYER_ID,
-        type: "line",
-        source: LOCALITY_SOURCE_ID,
-        paint: {
-          "line-color": "#1b2430",
-          "line-opacity": 0.86,
-          "line-width": 5,
+          "fill-color": "#2e5eaa",
+          "fill-opacity": 0.04,
         },
       });
       map.addLayer({
@@ -1213,7 +1205,7 @@ export function ExchangeSpatialScene({
         type: "line",
         source: LOCALITY_SOURCE_ID,
         paint: {
-          "line-color": "#d6a23a",
+          "line-color": "#2e5eaa",
           "line-opacity": 0.96,
           "line-width": 2.5,
         },
@@ -1389,7 +1381,7 @@ export function ExchangeSpatialScene({
           "circle-radius": ["step", ["get", "point_count"], 14, 10, 18, 40, 22],
           "circle-color": "#1b2430",
           "circle-opacity": 0.97,
-          "circle-stroke-color": "#d6a23a",
+          "circle-stroke-color": "#2e5eaa",
           "circle-stroke-width": 2.25,
         },
       });
@@ -1416,8 +1408,8 @@ export function ExchangeSpatialScene({
         source: NETWORK_SELECTED_MARKER_SOURCE_ID,
         paint: {
           "circle-radius": 18,
-          "circle-color": "rgba(214,162,58,0.18)",
-          "circle-stroke-color": "rgba(214,162,58,0.5)",
+          "circle-color": "rgba(46,94,170,0.18)",
+          "circle-stroke-color": "rgba(46,94,170,0.5)",
           "circle-stroke-width": 2,
         },
       });
@@ -1514,7 +1506,7 @@ export function ExchangeSpatialScene({
           "circle-radius": ["step", ["get", "point_count"], 15, 10, 19, 40, 23],
           "circle-color": "#1b2430",
           "circle-opacity": 0.97,
-          "circle-stroke-color": "#d6a23a",
+          "circle-stroke-color": "#2e5eaa",
           "circle-stroke-width": 2.25,
         },
       });
@@ -1551,8 +1543,8 @@ export function ExchangeSpatialScene({
         source: OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
         paint: {
           "circle-radius": 23,
-          "circle-color": "rgba(214,162,58,0.16)",
-          "circle-stroke-color": "rgba(214,162,58,0.55)",
+          "circle-color": "rgba(46,94,170,0.16)",
+          "circle-stroke-color": "rgba(46,94,170,0.55)",
           "circle-stroke-width": 2,
           "circle-translate": [0, -18],
           "circle-translate-anchor": "viewport",
@@ -1603,7 +1595,7 @@ export function ExchangeSpatialScene({
           "circle-radius": ["step", ["get", "count"], 14, 10, 18, 40, 22],
           "circle-color": "#1b2430",
           "circle-opacity": 0.97,
-          "circle-stroke-color": "#d6a23a",
+          "circle-stroke-color": "#2e5eaa",
           "circle-stroke-width": 2.25,
         },
       });
@@ -1622,8 +1614,8 @@ export function ExchangeSpatialScene({
         filter: ["all", ["in", ["get", "kind"], ["literal", ["organization", "record"]]], ["==", ["get", "selected"], 1]],
         paint: {
           "circle-radius": 17,
-          "circle-color": "rgba(214,162,58,0.18)",
-          "circle-stroke-color": "rgba(214,162,58,0.55)",
+          "circle-color": "rgba(46,94,170,0.18)",
+          "circle-stroke-color": "rgba(46,94,170,0.55)",
           "circle-stroke-width": 2,
         },
       });
@@ -1665,8 +1657,8 @@ export function ExchangeSpatialScene({
         source: HOME_MARKER_SOURCE_ID,
         paint: {
           "circle-radius": 20,
-          "circle-color": "rgba(214,162,58,0.18)",
-          "circle-stroke-color": "rgba(214,162,58,0.42)",
+          "circle-color": "rgba(46,94,170,0.18)",
+          "circle-stroke-color": "rgba(46,94,170,0.42)",
           "circle-stroke-width": 2,
         },
       });
@@ -1906,6 +1898,11 @@ export function ExchangeSpatialScene({
       map.remove();
     };
   }, [applyScene, interactive, pauseForInteraction, repairGovernedPaddingAfterMovement, stopOrbit, token]);
+
+  useEffect(() => {
+    if (!mapReady) return;
+    setLocalityLayerVisibility(homeLocalityFocus && mode !== "regional" && !activeSearchResultId);
+  }, [homeLocalityFocus, mode, activeSearchResultId, mapReady, setLocalityLayerVisibility]);
 
   useEffect(() => {
     const map = mapRef.current;

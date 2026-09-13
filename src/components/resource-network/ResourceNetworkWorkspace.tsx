@@ -32,6 +32,7 @@ import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
 import { ExchangeBottomSheet, ExchangeResultCard } from "../participant/MobileExchangePrimitives";
 import { useParticipantSpatialContext } from "../participant/useParticipantSpatialContext";
+import { useWideExchangeLayout } from "../participant/useWideExchangeLayout";
 import {
   clearRetryStableCommand,
   resolveRetryStableCommand,
@@ -97,6 +98,7 @@ function browserSessionStorage(): Storage | null {
 
 export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, organizations, providers, resources, listings = [], referrals, owner, adjunctState, authorization, commandRecoveryScope, queryState, selectedMessages, selectedMessagesUnavailable }: Props) {
   const { t, locale } = useI18n();
+  const wideLayout = useWideExchangeLayout();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [notice, setNotice] = useState<string | null>(null);
@@ -461,6 +463,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
         interactive
         showSearch={false}
         workspaceOverlay="right"
+        adaptiveWorkspace
       />
       <aside
         ref={panelRef}
@@ -530,6 +533,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
         {selectedRequest ? <section className={styles.requests}><h2>{mobileCopy.communicationTitle}</h2><article><strong>{selectedRequest.role === "recipient" ? selectedRequest.senderOrganizationName : selectedRequest.recipientLabel}</strong>{selectedMessagesUnavailable ? <p className={styles.notice} role="status">{mobileCopy.messagesUnavailable}</p> : selectedMessages.length ? <ol>{selectedMessages.map((message) => <li key={message.id}><small>{requestPartyLabel(selectedRequest, String(message.authorOrganizationId), mobileCopy.yourOrganization)} · {new Date(message.createdAt).toLocaleString(locale)}</small><p>{message.body}</p></li>)}</ol> : <p>{t("resourceNetworkWorkspace.noMessages")}</p>}</article></section> : null}
       </aside>
       <ExchangeBottomSheet
+        desktopPanel={!wideLayout}
         labelledBy="resources-mobile-results"
         labels={{ region: mobileCopy.results, dragHandle: mobileCopy.results, peek: mobileCopy.peek, partial: mobileCopy.partial, expanded: mobileCopy.expanded }}
         snapPoint={spatialContext.sheetSnapPoint}

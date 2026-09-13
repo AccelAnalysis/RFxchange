@@ -11,6 +11,7 @@ import { getRequestDictionary } from "@/src/i18n/server";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: "#F8FAFC",
 };
 
@@ -27,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
     appleWebApp: {
       capable: true,
       title: "RFxchange",
-      statusBarStyle: "default",
+      statusBarStyle: "black-translucent",
     },
     openGraph: {
       title: dictionary.metadata.title,

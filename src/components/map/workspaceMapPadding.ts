@@ -5,8 +5,10 @@ export function workspaceMapPadding(
   adaptiveWorkspace = false,
 ) {
   if (!overlay) return { top: 84, right: 36, bottom: 36, left: 36 };
-  if (viewport.width <= (adaptiveWorkspace ? 1024 : 760)) {
-    const sheetSpace = Math.min(viewport.height * 0.54, 540) + (viewport.width <= 760 ? 74 : 0) + 12;
+  const shortLandscape = viewport.height <= 520 && viewport.width > viewport.height;
+  if (viewport.width <= (adaptiveWorkspace ? 1024 : 760) || shortLandscape) {
+    const sheetSpace = Math.min(viewport.height * (shortLandscape ? 0.46 : 0.54), 540)
+      + (shortLandscape ? 62 : viewport.width <= 760 ? 74 : 0) + 12;
     const bottom = adaptiveWorkspace
       ? Math.min(sheetSpace, Math.max(0, viewport.height - 152))
       : Math.min(viewport.height * 0.58, 520);
