@@ -43,8 +43,8 @@
 .inlineForm label { display: grid; gap: .3rem; font-size: .8rem; font-weight: 700; }
 .inlineForm input, .inlineForm select, .inlineForm textarea { padding: .55rem; border: 1px solid var(--semantic-border-strong); border-radius: .5rem; background: var(--semantic-canvas-elevated); }
 .mobileOperations { display: none; }
-@media (max-width: 760px) { .panel { display: none; } .columns, .filters { grid-template-columns: 1fr; } .workspace { min-height: 100vh; } .actionRail { grid-template-columns: repeat(4,minmax(4.5rem,1fr)); overflow-x: auto; } }
-@media (max-width: 760px) {
+@media (max-width: 760px), (orientation: landscape) and (max-height: 520px) { .panel { display: none; } .columns, .filters { grid-template-columns: 1fr; } .workspace { min-height: 100vh; } .actionRail { grid-template-columns: repeat(4,minmax(4.5rem,1fr)); overflow-x: auto; } }
+@media (max-width: 760px), (orientation: landscape) and (max-height: 520px) {
   .mobileOperations { display: grid; gap: 1rem; padding-bottom: 1rem; }
   .mobileOperations button { padding: .62rem .85rem; border: 1px solid var(--semantic-text-primary); border-radius: 999px; background: var(--semantic-text-primary); color: white; font-weight: 700; cursor: pointer; }
   .mobileOperations button:disabled { opacity: .5; }

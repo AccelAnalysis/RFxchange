@@ -52,5 +52,5 @@
 .detail section li { display: grid; gap: .2rem; border-top: 1px solid var(--semantic-border-subtle); padding-top: .6rem; }
 .detail section li span { color: var(--semantic-text-secondary); }
 .disclaimer { border-top: 1px solid var(--semantic-border-subtle); padding-top: .8rem; color: var(--semantic-text-secondary); font-size: .85rem; }
-@media (max-width: 760px) { .search { width: calc(100vw - 1rem); max-height: min(44dvh, 29rem); padding: .8rem; } .form { grid-template-columns: 1fr; } .form label, .form label:first-child, .check, .actions { grid-column: 1; } .detail dl { grid-template-columns: 1fr; } }
+@media (max-width: 760px), (orientation: landscape) and (max-height: 520px) { .search { width: calc(100vw - 1rem); max-height: min(44dvh, 29rem); padding: .8rem; } .form { grid-template-columns: 1fr; } .form label, .form label:first-child, .check, .actions { grid-column: 1; } .detail dl { grid-template-columns: 1fr; } }
 @media (prefers-reduced-transparency: reduce) { .search { background: var(--semantic-canvas-elevated); backdrop-filter: none; } }

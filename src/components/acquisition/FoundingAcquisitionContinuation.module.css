@@ -39,7 +39,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-pill);
-  color: var(--semantic-action-selected-foreground);
+  color: var(--semantic-action-primary-foreground);
   background: var(--semantic-action-selected-background);
   font-weight: 800;
   text-decoration: none;
