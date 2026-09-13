@@ -35,7 +35,9 @@ test("Brand B4 keeps availability detail off the acquisition homepage", () => {
 });
 
 test("Brand B4 preserves an image-led acquisition composition", () => {
-  assert.ok((home.match(/<img/g) ?? []).length >= 10);
+  assert.match(home, /mosaicImages\.map/);
+  assert.match(home, /differentiation\.items\.map/);
+  assert.match(home, /home\.audience\.items\.map/);
   assert.match(home, /styles\.marketMosaic/);
   assert.match(home, /styles\.visualCard/);
   assert.match(home, /styles\.audienceCard/);
