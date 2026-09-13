@@ -173,7 +173,7 @@ export async function renderResourcesPage({
   );
   const selectedResourceId = authorizedWorkspaceSelection(
     queryState.resourceId,
-    (resourceProjection.available ? resourceProjection.projection.resources : []).map((resource) => resource.id),
+    (resourceProjection.available ? [...resourceProjection.projection.resources, ...resourceProjection.projection.listings] : []).map((resource) => resource.id),
   );
   const selectedMessagesResult = selectedRequestId
     ? await service.messages(actor, selectedRequestId).then(
@@ -207,6 +207,7 @@ export async function renderResourcesPage({
       })) : []}
       providers={providers}
       resources={resourceProjection.available ? resourceProjection.projection.resources : []}
+      listings={resourceProjection.available ? resourceProjection.projection.listings : []}
       referrals={referrals}
       owner={owner}
       adjunctState={Object.freeze({

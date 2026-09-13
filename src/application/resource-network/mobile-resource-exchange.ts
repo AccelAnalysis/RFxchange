@@ -33,6 +33,7 @@ import type {
 } from "../../domain/resource-network/model.ts";
 import type { RecipientReferralProjection, SenderReferralProjection } from "../../domain/referrals/model.ts";
 import { matchesResourceDiscoveryTerms, resourceDiscoveryTerms } from "./resource-discovery-query.ts";
+import { matchesPublicResourceListing, type PublicResourceListing } from "./public-resource-listing.ts";
 
 type RequestProjection = SenderReferralProjection | RecipientReferralProjection;
 type ProviderRequest = RequestProjection & Readonly<{
@@ -215,6 +216,20 @@ function identityForResource(resource: ProviderResourceProjection) {
   return createExchangeSubjectIdentity({ subjectKind: "record", selectionKey: resourceKey(resource.id), organizationId: String(resource.organizationId), recordType: "provider-resource", recordId: resource.id });
 }
 
+function identityForListing(listing: PublicResourceListing) {
+  return createExchangeSubjectIdentity({ subjectKind: "record", selectionKey: `public-resource:${listing.id}`, organizationId: null, recordType: "public-resource", recordId: listing.id });
+}
+
+function listingCard(listing: PublicResourceListing, authorization: ResourcesMobileAuthorization, context?: ResourcesMobileNavigationContext) {
+  const href = resourcesHref({ resource: listing.id }, context);
+  return createLensResultCardModel({
+    lens: "resources", identity: identityForListing(listing), title: listing.name,
+    organizationIdentity: null, locality: listing.locality, summary: excerpt(listing.summary),
+    favorite: favorite(), canonicalHref: href, returnLens: "resources",
+    recordActions: [projectRecordAction({ id: "resources.view-resource", labelKey: RESOURCES_MOBILE_RECORD_ACTION_KEYS.viewResource, operational: true, applicable: true, authorized: authorization.openPlatform, handler: { kind: "href", href } })],
+  });
+}
+
 function identityForRequest(request: ProviderRequest) {
   return createExchangeSubjectIdentity({ subjectKind: "record", selectionKey: requestKey(request.id), organizationId: String(request.providerContext.providerOrganizationId), recordType: "provider-request", recordId: request.id });
 }
@@ -293,6 +308,14 @@ function isProviderRequest(request: RequestProjection): request is ProviderReque
 
 function selectionFor(input: ResourcesMobileProjectionInput, providers: readonly ProviderDiscoveryProjection[], resources: readonly ProviderResourceProjection[], requests: readonly ProviderRequest[]): ExchangeSelectionState {
   const source = input.selection?.source ?? "restored";
+  const listing = input.listings?.find((candidate) => candidate.id === input.selection?.resourceId);
+  if (listing) {
+    const selectionKey = `public-resource:${listing.id}`;
+    return createExchangeSelectionState({ kind: "record", source,
+      selectedRecord: { selectionKey, recordType: "public-resource", recordId: listing.id, organizationId: null },
+      selectedMarker: listing.coordinate ? { selectionKey, markerId: selectionKey, role: "focal" } : null,
+    });
+  }
   const resource = resources.find((candidate) => candidate.id === input.selection?.resourceId);
   if (resource) {
     const organizationId = String(resource.organizationId);
@@ -317,12 +340,13 @@ function actionProjection(
   selection: ExchangeSelectionState,
 ): ExchangeRoomActionProjection {
   const selectedOrganizationId = selection.selectedOrganization?.organizationId ?? input.viewerOrganizationId;
-  const own = selectedOrganizationId === input.viewerOrganizationId;
+  const publicListing = selection.selectedRecord?.recordType === "public-resource";
+  const own = !publicListing && selectedOrganizationId === input.viewerOrganizationId;
   const variant = own ? "own" as const : "external" as const;
   const selectedResource = selection.selectedRecord?.recordType === "provider-resource";
   const operational = definition.id === "resources.offer-request" || definition.id === "resources.manage-view";
   const applicable = definition.id === "resources.offer-request"
-    ? (own || selection.selectedOrganization !== null)
+    ? (!publicListing && (own || selection.selectedOrganization !== null))
     : definition.id === "resources.manage-view"
       ? (!own && selectedResource)
       : true;
@@ -369,6 +393,7 @@ export interface ResourcesMobileProjectionInput {
   readonly geography: Readonly<{ id: string; label: string | null }>;
   readonly providers: readonly ProviderDiscoveryProjection[];
   readonly resources: readonly ProviderResourceProjection[];
+  readonly listings?: readonly PublicResourceListing[];
   readonly requests: readonly RequestProjection[];
   readonly authorization: ResourcesMobileAuthorization;
   readonly locale: Locale;
@@ -381,6 +406,8 @@ export interface ResourcesMobileProjectionInput {
 
 export function buildResourcesMobileProjection(input: ResourcesMobileProjectionInput): ResourcesMobileProjection {
   const terms = resourceDiscoveryTerms(input.search);
+  const listings = input.authorization.openPlatform && ["all", "unknown"].includes(input.availability)
+    ? (input.listings ?? []).filter((listing) => matchesPublicResourceListing(listing, input.search)) : [];
   const eligibleResources = input.authorization.openPlatform
     ? input.resources.filter((resource) => resource.status === "published")
     : [];
@@ -421,11 +448,11 @@ export function buildResourcesMobileProjection(input: ResourcesMobileProjectionI
         request.status,
       ], terms))
     : []);
-  const selection = selectionFor(input, providers, filteredResources, requests);
+  const selection = selectionFor({ ...input, listings }, providers, filteredResources, requests);
   const providerCards = Object.freeze(providers.map((provider) => providerCard(provider, input.authorization, input.locale, input.navigationContext)));
   const resourceCards = Object.freeze(filteredResources.map((resource) => resourceCard(resource, providers.find((provider) => provider.organizationId === resource.organizationId) ?? null, input.authorization, input.locale, input.navigationContext)));
   const requestCards = Object.freeze(requests.map((request) => requestCard(request, input.authorization, input.locale, input.navigationContext)));
-  const cards = Object.freeze([...providerCards, ...resourceCards, ...requestCards]);
+  const cards = Object.freeze([...providerCards, ...listings.map((listing) => listingCard(listing, input.authorization, input.navigationContext)), ...resourceCards, ...requestCards]);
   const territoryProviders = new Map<string, ProviderDiscoveryProjection[]>();
   for (const provider of providers) {
     const key = `${provider.territory.geographyId}:${JSON.stringify(provider.territory.geometry)}`;
@@ -439,13 +466,22 @@ export function buildResourcesMobileProjection(input: ResourcesMobileProjectionI
   }));
   const providerObjects = providers.flatMap((provider) => provider.marker ? [createExchangeMapObjectProjection({ identity: identityForProvider(provider), markerId: provider.marker.id, coordinate: { longitude: provider.marker.coordinate[0], latitude: provider.marker.coordinate[1] }, privacy: provider.marker.privacyTreatment, accessibleLabel: provider.marker.accessibleLocationLabel, selectable: true, layerIds: [RESOURCES_MOBILE_LAYER_IDS.providers] })] : []);
   const spatialResults: ExchangeResultSpatialDisposition[] = [
+    ...listings.map((listing) => listing.coordinate
+      ? ({ kind: "mapped" as const, identity: identityForListing(listing), markerId: `public-resource:${listing.id}` })
+      : ({ kind: "list-only" as const, identity: identityForListing(listing), reason: "missing-authoritative-coordinate" as const, explanationKey: "mobileExchange.results.listOnly.missingCoordinate" })),
     ...providers.map((provider) => provider.marker ? ({ kind: "mapped" as const, identity: identityForProvider(provider), markerId: provider.marker.id }) : ({ kind: "list-only" as const, identity: identityForProvider(provider), reason: "missing-authoritative-coordinate" as const, explanationKey: "mobileExchange.results.listOnly.missingCoordinate" })),
     ...filteredResources.map((resource) => ({ kind: "list-only" as const, identity: identityForResource(resource), reason: "non-point-record" as const, explanationKey: "mobileExchange.results.listOnly.nonPointRecord" })),
     ...requests.map((request) => ({ kind: "list-only" as const, identity: identityForRequest(request), reason: "non-point-record" as const, explanationKey: "mobileExchange.results.listOnly.nonPointRecord" })),
   ];
   const resultSetId = `resources:${input.geography.id}:${input.search}:${input.availability}`.slice(0, 240);
   const results = createLensResultSetState({ status: cards.length ? "ready" : "empty", lens: "resources", resultSetId, cards: cards.length ? cards : undefined, messageKey: cards.length ? null : "resourceNetworkWorkspace.empty" });
-  const map = createLensMapProjection({ lens: "resources", geography: createExchangeGeographyContext({ geographyId: input.geography.id, label: input.geography.label, serverRevalidated: true }), objects: cards.length ? [...providerObjects, ...serviceTerritories.map((binding) => binding.area)] : [], activeLayerIds: [RESOURCES_MOBILE_LAYER_IDS.providers, RESOURCES_MOBILE_LAYER_IDS.serviceTerritories], layerStateAuthority: "domain-revalidated", camera: input.camera ?? null });
+  const listingObjects = listings.flatMap((listing) => listing.coordinate ? [createExchangeMapObjectProjection({
+    identity: identityForListing(listing), markerId: `public-resource:${listing.id}`,
+    coordinate: { longitude: listing.coordinate[0], latitude: listing.coordinate[1] }, privacy: "exact",
+    accessibleLabel: `${listing.name}${listing.address ? ` · ${listing.address}` : ""}`,
+    selectable: true, layerIds: [RESOURCES_MOBILE_LAYER_IDS.providers],
+  })] : []);
+  const map = createLensMapProjection({ lens: "resources", geography: createExchangeGeographyContext({ geographyId: input.geography.id, label: input.geography.label, serverRevalidated: true }), objects: cards.length ? [...providerObjects, ...listingObjects, ...serviceTerritories.map((binding) => binding.area)] : [], activeLayerIds: [RESOURCES_MOBILE_LAYER_IDS.providers, RESOURCES_MOBILE_LAYER_IDS.serviceTerritories], layerStateAuthority: "domain-revalidated", camera: input.camera ?? null });
   const discovery = createLensDiscoveryProjection({ lens: "resources", queryId: resultSetId, map, results, spatialResults: cards.length ? spatialResults : [] });
   const actionRail = mobileLensActionRail("resources", exchangeRoomActionDefinitionsForLens("resources").map((definition) => actionProjection(definition, input, selection)));
   return Object.freeze({ discovery, selection, actionRail, serviceTerritories, providerCards, resourceCards, requestCards });

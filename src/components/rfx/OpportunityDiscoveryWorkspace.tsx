@@ -213,6 +213,7 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
         <ExchangeSpatialScene
           model={model}
           mode="locality"
+          homeLocalityFocus={result.query.localityIds.length === 1 && result.query.localityIds[0] === String(model.selectedGeography.id)}
           marker={homeMarker}
           opportunityMarkers={opportunityMarkers}
           focusedMarkerId={selectedMarkerId}

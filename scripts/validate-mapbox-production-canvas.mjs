@@ -138,8 +138,9 @@ assert.ok(
     responsiveSearchRoles === 1 &&
     existingWorkspace.includes("styles.exchangeSearch") &&
     existingWorkspace.includes("desktopPanel") &&
-    /\(max-width: 1024px\)/.test(existingWorkspaceCss) &&
-    /\(orientation: landscape\) and \(max-height: 520px\)/.test(existingWorkspaceCss),
+    /@media \(min-width: 761px\) and \(max-width: 1024px\) and \(min-height: 521px\)/.test(existingWorkspaceCss) &&
+    /@media \(max-width: 760px\), \(orientation: landscape\) and \(max-height: 520px\)/.test(existingWorkspaceCss) &&
+    existingWorkspace.includes("useWideExchangeLayout()"),
   "Intelligence must share one search form and one adaptive results/detail surface across viewports.",
 );
 

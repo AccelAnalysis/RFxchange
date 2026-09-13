@@ -1,0 +1,582 @@
+[
+  {
+    "id": "hrva-hampton-roads-alliance",
+    "name": "Hampton Roads Alliance",
+    "service": "Regional economic development support",
+    "summary": "Regional economic-development, business-attraction, and site-selection support for Hampton Roads.",
+    "website": "https://hamptonroadsalliance.com/",
+    "aliases": [],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Norfolk",
+    "address": null,
+    "coordinate": null
+  },
+  {
+    "id": "hrva-hampton-roads-chamber",
+    "name": "Hampton Roads Chamber",
+    "service": "Business chamber and member network",
+    "summary": "Business networking, advocacy, and education serving businesses across the Chamber's Hampton Roads service area.",
+    "website": "https://hrchamber.com/",
+    "aliases": [
+      "Hampton Roads Chamber of Commerce"
+    ],
+    "serviceAreas": [
+      "Chesapeake",
+      "Norfolk",
+      "Portsmouth",
+      "Suffolk",
+      "Virginia Beach"
+    ],
+    "locality": "Norfolk",
+    "address": "101 W Main Street, Suite 800, Norfolk, VA 23510",
+    "coordinate": [
+      -76.292458234297,
+      36.846314895047
+    ]
+  },
+  {
+    "id": "hrva-hampton-roads-sbdc",
+    "name": "Hampton Roads Small Business Development Center",
+    "service": "Small-business counseling and assistance",
+    "summary": "Small-business counseling and assistance including access to capital and government-contracting support.",
+    "website": "https://hrsbdc.com/",
+    "aliases": [
+      "Hampton Roads SBDC",
+      "HRSBDC"
+    ],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Norfolk",
+    "address": "101 W Main Street, Suite 800, Norfolk, VA 23510",
+    "coordinate": [
+      -76.292458234297,
+      36.846314895047
+    ]
+  },
+  {
+    "id": "hrva-hampton-roads-workforce-council",
+    "name": "Hampton Roads Workforce Council",
+    "service": "Workforce and employer services",
+    "summary": "Workforce-development and employer services supporting recruitment, training, and talent needs in Hampton Roads.",
+    "website": "https://www.theworkforcecouncil.org/",
+    "aliases": [
+      "HRWC"
+    ],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Norfolk",
+    "address": "999 Waterside Drive, Suite 1314, Norfolk, VA 23510",
+    "coordinate": [
+      -76.28794804085,
+      36.844003956764
+    ]
+  },
+  {
+    "id": "hrva-odu-iie",
+    "name": "Old Dominion University Institute for Innovation & Entrepreneurship",
+    "service": "Entrepreneurship and innovation support",
+    "summary": "Business counseling, entrepreneurship, innovation, and commercialization support through Old Dominion University.",
+    "website": "https://www.odu.edu/iie",
+    "aliases": [
+      "ODU IIE",
+      "Institute for Innovation & Entrepreneurship"
+    ],
+    "serviceAreas": [
+      "Hampton Roads, Virginia",
+      "Virginia"
+    ],
+    "locality": "Norfolk",
+    "address": "112 Bank Street, Norfolk, VA 23510",
+    "coordinate": [
+      -76.289432736405,
+      36.845983152454
+    ]
+  },
+  {
+    "id": "hrva-757-collab",
+    "name": "757 Collab",
+    "service": "Startup support and founder programs",
+    "summary": "Startup support, founder programming, mentorship, and entrepreneurship resources for southeastern Virginia.",
+    "website": "https://757collab.org/",
+    "aliases": [
+      "757 Accelerate",
+      "757 Startup Studios"
+    ],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Norfolk",
+    "address": "400 Granby St, Norfolk, VA 23510",
+    "coordinate": [
+      -76.289718192821,
+      36.85124301871
+    ]
+  },
+  {
+    "id": "hrva-retail-alliance",
+    "name": "Retail Alliance",
+    "service": "Retail business association and support",
+    "summary": "Business education, networking, advocacy, and retail-support resources for the Hampton Roads business community.",
+    "website": "https://retailalliance.com/",
+    "aliases": [],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Norfolk",
+    "address": "101 W Main Street, Suite 905, Norfolk, VA 23510",
+    "coordinate": [
+      -76.292458234297,
+      36.846314895047
+    ]
+  },
+  {
+    "id": "hrva-virginia-maritime-association",
+    "name": "Virginia Maritime Association",
+    "service": "Maritime industry business network",
+    "summary": "Maritime-industry association and member network supporting Virginia's port and maritime business community.",
+    "website": "https://vamaritime.com/",
+    "aliases": [
+      "VMA"
+    ],
+    "serviceAreas": [
+      "Hampton Roads, Virginia",
+      "Virginia"
+    ],
+    "locality": "Norfolk",
+    "address": "236 East Plume Street, Norfolk, VA 23510",
+    "coordinate": [
+      -76.29067204692,
+      36.847055751894
+    ]
+  },
+  {
+    "id": "hrva-greater-williamsburg-chamber",
+    "name": "Greater Williamsburg Chamber of Commerce",
+    "service": "Business chamber and member network",
+    "summary": "Business networking, advocacy, and education for the Greater Williamsburg business community.",
+    "website": "https://www.williamsburgchamber.com/",
+    "aliases": [
+      "Greater Williamsburg Chamber"
+    ],
+    "serviceAreas": [
+      "Greater Williamsburg, Virginia"
+    ],
+    "locality": "Williamsburg",
+    "address": "421 N Boundary St, Williamsburg, VA 23185",
+    "coordinate": [
+      -76.707719053085,
+      37.275335461748
+    ]
+  },
+  {
+    "id": "hrva-virginia-peninsula-chamber",
+    "name": "Virginia Peninsula Chamber",
+    "service": "Business chamber and member network",
+    "summary": "Business networking, advocacy, and education serving the Virginia Peninsula business community.",
+    "website": "https://www.virginiapeninsulachamber.com/",
+    "aliases": [],
+    "serviceAreas": [
+      "Hampton",
+      "Newport News",
+      "Poquoson",
+      "James City County",
+      "York County"
+    ],
+    "locality": "Newport News",
+    "address": null,
+    "coordinate": null
+  },
+  {
+    "id": "hrva-launchpad-incubator",
+    "name": "Launchpad Greater Williamsburg Business Incubator",
+    "service": "Business incubation and startup support",
+    "summary": "Business-incubation and entrepreneurship support provided through the Greater Williamsburg Launchpad initiative.",
+    "website": "https://www.jamescitycountyva.gov/2976/Launchpad-Incubator",
+    "aliases": [
+      "Launchpad Incubator"
+    ],
+    "serviceAreas": [
+      "James City County",
+      "City of Williamsburg",
+      "York County"
+    ],
+    "locality": "Williamsburg",
+    "address": "249 Richmond Road, Williamsburg, VA 23185",
+    "coordinate": [
+      -76.710948467039,
+      37.272787758889
+    ]
+  },
+  {
+    "id": "hrva-bloom-coworking",
+    "name": "Bloom Coworking",
+    "service": "Coworking and meeting space",
+    "summary": "Community-oriented coworking, shared workspace, and meeting-space resources in Portsmouth.",
+    "website": "https://bloomcoworking.org/",
+    "aliases": [],
+    "serviceAreas": [
+      "Portsmouth",
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Portsmouth",
+    "address": "739 High Street, Portsmouth, VA 23704",
+    "coordinate": [
+      -76.305691609883,
+      36.835175010739
+    ]
+  },
+  {
+    "id": "hrva-hampton-reaktor",
+    "name": "Hampton REaKTOR Technology Innovation Center",
+    "service": "Technology incubation and innovation support",
+    "summary": "Business-incubation and technology-innovation support provided through the City of Hampton.",
+    "website": "https://www.hampton.gov/2362/Business-Incubators",
+    "aliases": [
+      "REaKTOR"
+    ],
+    "serviceAreas": [
+      "Hampton",
+      "Hampton Roads, Virginia"
+    ],
+    "locality": null,
+    "address": null,
+    "coordinate": null
+  },
+  {
+    "id": "hrva-virginia-beach-hive",
+    "name": "The HIVE",
+    "service": "Small-business resource hub",
+    "summary": "Small-business resource navigation, entrepreneurship support, workspace, and business programming provided by Virginia Beach Economic Development.",
+    "website": "https://yesvirginiabeach.com/the-hive",
+    "aliases": [
+      "Virginia Beach HIVE"
+    ],
+    "serviceAreas": [
+      "Virginia Beach"
+    ],
+    "locality": "Virginia Beach",
+    "address": "140 Independence Blvd, Virginia Beach, VA 23462",
+    "coordinate": [
+      -76.136676399382,
+      36.840400121506
+    ]
+  },
+  {
+    "id": "hrva-norfolk-economic-development",
+    "name": "Norfolk Department of Economic Development",
+    "service": "Economic development and business support",
+    "summary": "Economic-development, business-retention, site-selection, and business-support services for Norfolk.",
+    "website": "https://norfolkdevelopment.com/",
+    "aliases": [
+      "Norfolk Economic Development"
+    ],
+    "serviceAreas": [
+      "Norfolk"
+    ],
+    "locality": "Norfolk",
+    "address": "999 Waterside Drive, Suite 2430, Norfolk, VA 23510",
+    "coordinate": [
+      -76.28794804085,
+      36.844003956764
+    ]
+  },
+  {
+    "id": "hrva-virginia-beach-economic-development",
+    "name": "Virginia Beach Department of Economic Development",
+    "service": "Economic development and business support",
+    "summary": "Economic-development, business-retention, site-selection, and small-business support for Virginia Beach.",
+    "website": "https://yesvirginiabeach.com/",
+    "aliases": [
+      "Virginia Beach Economic Development"
+    ],
+    "serviceAreas": [
+      "Virginia Beach"
+    ],
+    "locality": "Virginia Beach",
+    "address": null,
+    "coordinate": null
+  },
+  {
+    "id": "hrva-chesapeake-economic-development",
+    "name": "Chesapeake Economic Development",
+    "service": "Economic development and business support",
+    "summary": "Economic-development, business-retention, site-selection, and small-business support for Chesapeake.",
+    "website": "https://chesapeakeva.biz/",
+    "aliases": [],
+    "serviceAreas": [
+      "Chesapeake"
+    ],
+    "locality": "Chesapeake",
+    "address": null,
+    "coordinate": null
+  },
+  {
+    "id": "hrva-portsmouth-economic-development",
+    "name": "Portsmouth Economic Development",
+    "service": "Economic development and business support",
+    "summary": "Economic-development, business-retention, site-selection, and small-business support for Portsmouth.",
+    "website": "https://www.accessportsmouthva.com/",
+    "aliases": [],
+    "serviceAreas": [
+      "Portsmouth"
+    ],
+    "locality": "Portsmouth",
+    "address": "200 High Street, Suite 200, Portsmouth, VA 23704",
+    "coordinate": [
+      -76.297933263584,
+      36.835462854397
+    ]
+  },
+  {
+    "id": "hrva-hampton-economic-development",
+    "name": "Hampton Economic Development",
+    "service": "Economic development and business support",
+    "summary": "Economic-development, business-retention, site-selection, and small-business support for Hampton.",
+    "website": "https://www.hampton.gov/4072/Economic-Development",
+    "aliases": [
+      "Hampton Economic Development Department"
+    ],
+    "serviceAreas": [
+      "Hampton"
+    ],
+    "locality": "Hampton",
+    "address": "One Franklin Street, Suite 600, Hampton, VA 23669",
+    "coordinate": [
+      -76.347794291919,
+      37.025005872248
+    ]
+  },
+  {
+    "id": "hrva-newport-news-economic-development-authority",
+    "name": "Newport News Economic Development Authority",
+    "service": "Economic development and business support",
+    "summary": "Economic-development, business-retention, site-selection, and investment-support services for Newport News.",
+    "website": "https://newportnewsva.com/",
+    "aliases": [
+      "Newport News EDA"
+    ],
+    "serviceAreas": [
+      "Newport News"
+    ],
+    "locality": "Newport News",
+    "address": null,
+    "coordinate": null
+  },
+  {
+    "id": "hrva-isle-of-wight-economic-development",
+    "name": "Isle of Wight County Economic Development",
+    "service": "Economic development and business support",
+    "summary": "Economic-development, business-retention, site-selection, and small-business support for Isle of Wight County.",
+    "website": "https://www.insidetheisle.com/",
+    "aliases": [],
+    "serviceAreas": [
+      "Isle of Wight County"
+    ],
+    "locality": "Isle of Wight",
+    "address": null,
+    "coordinate": null
+  },
+  {
+    "id": "hrva-james-city-county-economic-development",
+    "name": "James City County Office of Economic Development",
+    "service": "Economic development and business support",
+    "summary": "Economic-development, business-retention, site-selection, and small-business support for James City County.",
+    "website": "https://www.jamescitycountyva.gov/3160/Contact-Us",
+    "aliases": [
+      "James City County Economic Development"
+    ],
+    "serviceAreas": [
+      "James City County"
+    ],
+    "locality": "Williamsburg",
+    "address": "101 Mounts Bay Road, Building D, Williamsburg, VA 23185",
+    "coordinate": [
+      -76.679746832533,
+      37.24366955176
+    ]
+  },
+  {
+    "id": "hrva-york-county-economic-tourism-development",
+    "name": "York County Department of Economic & Tourism Development",
+    "service": "Economic development and business support",
+    "summary": "Economic-development, business-retention, site-selection, and small-business support for York County.",
+    "website": "https://www.yorkcounty.gov/239/Economic-Development",
+    "aliases": [
+      "York County Economic Development"
+    ],
+    "serviceAreas": [
+      "York County"
+    ],
+    "locality": null,
+    "address": null,
+    "coordinate": null
+  },
+  {
+    "id": "hrva-williamsburg-economic-development-authority",
+    "name": "Williamsburg Economic Development Authority",
+    "service": "Economic development and business support",
+    "summary": "Economic-development and business-support activities of the Williamsburg Economic Development Authority.",
+    "website": "https://williamsburgva.gov/408/Economic-Development-Authority-EDA",
+    "aliases": [
+      "Williamsburg EDA"
+    ],
+    "serviceAreas": [
+      "Williamsburg"
+    ],
+    "locality": "Williamsburg",
+    "address": "401 Lafayette Street, Williamsburg, VA 23185",
+    "coordinate": [
+      -76.709081965795,
+      37.275634838627
+    ]
+  },
+  {
+    "id": "hrva-townebank",
+    "name": "TowneBank",
+    "service": "Business banking and commercial finance",
+    "summary": "Business-banking and commercial-finance services available through TowneBank in Hampton Roads.",
+    "website": "https://www.townebank.com/",
+    "aliases": [
+      "Old Point National Bank",
+      "The Old Point National Bank of Phoebus",
+      "Old Point National Bank, a Division of TowneBank"
+    ],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Portsmouth",
+    "address": "5716 W High Street, Suite 100, Portsmouth, VA 23703",
+    "coordinate": [
+      -76.392097343651,
+      36.860649621436
+    ]
+  },
+  {
+    "id": "hrva-langley-federal-credit-union",
+    "name": "Langley Federal Credit Union",
+    "service": "Business banking and SBA lending",
+    "summary": "Business-banking, commercial-lending, and SBA-lending services offered by Langley Federal Credit Union.",
+    "website": "https://www.langleyfcu.org/",
+    "aliases": [
+      "Langley FCU"
+    ],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Newport News",
+    "address": "721 Lakefront Commons, Suite 102, Newport News, VA 23606",
+    "coordinate": [
+      -76.473829174857,
+      37.088158024551
+    ]
+  },
+  {
+    "id": "hrva-bayport-credit-union",
+    "name": "BayPort Credit Union",
+    "service": "Business banking and commercial lending",
+    "summary": "Business-banking and lending services offered by BayPort Credit Union.",
+    "website": "https://www.bayportcu.org/",
+    "aliases": [],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Newport News",
+    "address": null,
+    "coordinate": null
+  },
+  {
+    "id": "hrva-first-advantage-federal-credit-union",
+    "name": "1st Advantage Federal Credit Union",
+    "service": "Business banking and commercial lending",
+    "summary": "Business accounts, business loans, and SBA-related services offered by 1st Advantage Federal Credit Union.",
+    "website": "https://www.1stadvantage.org/",
+    "aliases": [
+      "1st Advantage FCU"
+    ],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Yorktown",
+    "address": "110 Cybernetics Way, Yorktown, VA 23693",
+    "coordinate": [
+      -76.467779050885,
+      37.118382591836
+    ]
+  },
+  {
+    "id": "hrva-chartway-credit-union",
+    "name": "Chartway Credit Union",
+    "service": "Business banking and commercial services",
+    "summary": "Business accounts and business services offered by Chartway Credit Union.",
+    "website": "https://www.chartway.com/",
+    "aliases": [],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Virginia Beach",
+    "address": "5700 Cleveland Street, Virginia Beach, VA 23462",
+    "coordinate": [
+      -76.175883744305,
+      36.847134065391
+    ]
+  },
+  {
+    "id": "hrva-abnb-federal-credit-union",
+    "name": "ABNB Federal Credit Union",
+    "service": "Business banking and commercial services",
+    "summary": "Business-banking and business-service offerings from ABNB Federal Credit Union.",
+    "website": "https://www.abnbfcu.org/",
+    "aliases": [
+      "ABNB FCU"
+    ],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Chesapeake",
+    "address": "830 Greenbrier Circle, Chesapeake, VA 23320",
+    "coordinate": [
+      -76.229066599937,
+      36.79058084745
+    ]
+  },
+  {
+    "id": "hrva-atlantic-union-bank",
+    "name": "Atlantic Union Bank",
+    "service": "Business banking and commercial finance",
+    "summary": "Business-banking and commercial-finance services available through Atlantic Union Bank in Hampton Roads.",
+    "website": "https://www.atlanticunionbank.com/",
+    "aliases": [],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Norfolk",
+    "address": "999 Waterside Drive, Suite 900, Norfolk, VA 23510",
+    "coordinate": [
+      -76.28794804085,
+      36.844003956764
+    ]
+  },
+  {
+    "id": "hrva-gather-workspaces",
+    "name": "Gather Workspaces",
+    "service": "Coworking, meeting, and office space",
+    "summary": "Commercial coworking, meeting, and office-space locations in Newport News, Norfolk, and Virginia Beach.",
+    "website": "https://gatherworkspaces.com/",
+    "aliases": [
+      "Gather"
+    ],
+    "serviceAreas": [
+      "Hampton Roads, Virginia"
+    ],
+    "locality": "Norfolk",
+    "address": "500 East Main Street, 16th Floor, Norfolk, VA 23510",
+    "coordinate": [
+      -76.288408395834,
+      36.845866009403
+    ]
+  }
+]

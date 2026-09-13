@@ -7,6 +7,7 @@ import { createFirestoreOrganizationLocationRepositories } from "../firestore/or
 import { getServerFirestore } from "../firestore/runtime.ts";
 import type { AuthenticatedMapProjection } from "../geography/participant-map-runtime.ts";
 import { createServerResourceNetworkService } from "./runtime.ts";
+import { discoverPublicResourceListings } from "../../application/resource-network/public-resource-catalog.ts";
 
 type AuthorizedParticipant = Extract<ParticipantRouteResolution, { readonly kind: "authorized" }>;
 
@@ -74,5 +75,9 @@ export async function loadAuthorizedResourceDiscovery(input: Readonly<{
     });
   }))).flatMap((candidate) => candidate ? [candidate] : []));
   const projection = await createServerResourceNetworkService().discover({ viewerOrganizationId: String(input.access.membership.organizationId), selectedGeography: selected, selectedGeometry: feature.boundary.geometry, query: input.query, modality: input.modality, language: input.language, availability: input.availability, markers });
-  return Object.freeze({ available: true as const, projection });
+  const listings = discoverPublicResourceListings({
+    geographyId: String(selected.id), releaseState: selected.releaseState,
+    query: input.query, availability: input.availability,
+  });
+  return Object.freeze({ available: true as const, projection: Object.freeze({ ...projection, listings }) });
 }
