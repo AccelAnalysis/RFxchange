@@ -8,11 +8,11 @@
 
 ## 1. Purpose
 
-The RFxchange must be truthful without narrating its internal development or governance machinery to participants.
+The RFxchange must be accurate without narrating its internal development or governance machinery to participants.
 
 The governing distinction is:
 
-> **Development governance is internal. Product truth is external.**
+> **Development governance is internal. Product accuracy is external.**
 
 Participant-facing accuracy means the interface accurately communicates what a participant can see, do, rely upon, and expect. It does not require the interface to expose how implementation, release, acceptance, evidence, governance, architecture, or program management produced that state.
 
@@ -31,7 +31,7 @@ Participant-facing copy must accurately communicate, when relevant:
 - whether information is confirmed, unknown, unavailable, planned, or incomplete when that distinction matters; and
 - the next useful action or recovery path.
 
-Truthfulness should normally be expressed through product behavior and concise business language rather than explanatory governance prose.
+Accuracy and state integrity should normally be expressed through product behavior and concise business language rather than explanatory governance prose.
 
 Examples:
 
@@ -40,7 +40,7 @@ Examples:
 - If information has not been confirmed, say that directly.
 - If an organization has a meaningful verification state, show that specific state where it affects the participant.
 
-Do not add an explanation of release mechanics, acceptance criteria, implementation provenance, or internal authority merely to prove the interface is truthful.
+Do not add an explanation of release mechanics, acceptance criteria, implementation provenance, or internal authority merely to prove the interface is accurate.
 
 ## 3. Internal-language firewall
 
@@ -79,14 +79,14 @@ Before customer-facing copy is accepted, ask:
 1. Would a business owner understand this without knowing RFxchange's repository or governance model?
 2. Does the statement tell the participant something they need to know or do?
 3. Is the statement accurate to the actual product state?
-4. Could the same truth be communicated more simply in ordinary business language?
+4. Could the same information be communicated more simply in ordinary business language?
 5. Does the copy accidentally expose implementation, governance, verification, release, or build machinery?
 
 If item 5 is yes, rewrite the copy unless that internal concept is genuinely necessary to the participant's decision.
 
 ## 6. Public marketing rule
 
-Public marketing should lead with customer value, market meaning, and available customer actions.
+Public marketing should lead with customer value, market meaning, imagery, and available customer actions.
 
 Do not use public marketing to explain:
 
@@ -95,6 +95,8 @@ Do not use public marketing to explain:
 - that organizations/geography are `real` merely to contrast them with prohibited fabricated development data;
 - repository provenance or build metadata; or
 - internal governance as a product benefit.
+
+Accuracy and state integrity do **not** require an availability catalog, disclaimer block, governance narrative, or status-heavy module on an acquisition page. When a marketing claim would otherwise materially imply that an unavailable capability is live, use the smallest clear cue needed to distinguish current from upcoming behavior, or move the detail to the appropriate deeper information surface.
 
 Planned or unavailable product behavior may be labeled simply and accurately, for example `Coming soon`, `In development`, or `Planned`, when that information benefits the prospect.
 

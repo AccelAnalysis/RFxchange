@@ -183,7 +183,7 @@ test("brand authority makes the participant-language firewall governing", async 
   const firewall = await read("docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md");
 
   assert.match(brandReadme, /PARTICIPANT_LANGUAGE_FIREWALL\.md/);
-  assert.match(firewall, /Development governance is internal\. Product truth is external\./);
+  assert.match(firewall, /Development governance is internal\. Product accuracy is external\./);
   assert.match(firewall, /must not be rendered in ordinary public or participant chrome/i);
 });
 

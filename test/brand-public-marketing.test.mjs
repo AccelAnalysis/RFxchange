@@ -16,7 +16,7 @@ const marketingCatalogText = await read("src/i18n/messages/marketing-pages/en-US
 const englishCatalog = JSON.parse(englishCatalogText);
 const marketingCatalog = JSON.parse(marketingCatalogText);
 
-test("Brand B4 clearly distinguishes available and upcoming product state", () => {
+test("Brand B4 keeps availability concise on the acquisition homepage", () => {
   assert.match(marketing, /Available now/);
   assert.match(marketing, /Coming next/);
   assert.match(marketing, /More Exchange workflows/);
@@ -30,8 +30,23 @@ test("Brand B4 clearly distinguishes available and upcoming product state", () =
     1,
   );
   assert.match(marketingCatalog.home.hero.stockNote, /Images are illustrative/);
-  assert.match(home, /<MarketingAvailability/);
+  assert.doesNotMatch(home, /<MarketingAvailability/);
+  assert.match(home, /styles\.stateStrip/);
+  assert.match(home, /availability\.items\.filter/);
+  assert.match(home, /availability\.items\.find/);
+  assert.match(home, /home\.hero\.stockNote/);
   assert.match(founding, /<MarketingAvailability/);
+});
+
+test("Brand B4 preserves an image-led acquisition composition", () => {
+  assert.match(home, /mosaicImages\.map/);
+  assert.match(home, /differentiation\.items\.map/);
+  assert.match(home, /home\.audience\.items\.map/);
+  assert.match(home, /styles\.marketMosaic/);
+  assert.match(home, /styles\.visualCard/);
+  assert.match(home, /styles\.audienceCard/);
+  assert.match(home, /styles\.fullBleedCta/);
+  assert.doesNotMatch(home, /home\.amacs|home\.ai|home\.trust/);
 });
 
 test("Brand B4 preserves public acquisition and dedicated information routes", () => {
@@ -40,7 +55,7 @@ test("Brand B4 preserves public acquisition and dedicated information routes", (
   assert.match(publicNavigation, /href="\/signin"/);
   assert.match(home, /href="#how-it-works"/);
   assert.match(chrome, /href="\/how-it-works"/);
-  assert.match(home, /href="\/image-credits"/);
+  assert.match(chrome, /href="\/image-credits"/);
   assert.match(home, /href="\/founding"/);
   assert.match(founding, /href="#availability"/);
 });
