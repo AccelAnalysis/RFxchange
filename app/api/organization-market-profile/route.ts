@@ -1,3 +1,4 @@
+import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { NextRequest, NextResponse } from "next/server";
 
 import { MarketProfileError } from "@/src/application/market-profile/market-profile";
@@ -39,8 +40,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export async function POST(request: NextRequest) {
-  const origin = request.headers.get("origin");
-  if (!origin || origin !== request.nextUrl.origin) return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
+  if (!isApplicationRequestOrigin(request, "exchange")) return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
   if (Number(request.headers.get("content-length") ?? 0) > 131_072) return NextResponse.json({ error: "Market profile request is too large." }, { status: 413 });
   const body = await request.json().catch(() => null) as RequestBody | null;
   if (!body || typeof body.organizationId !== "string" || typeof body.commandId !== "string" || typeof body.action !== "string" || !isRecord(body.input)) {

@@ -1,3 +1,4 @@
+import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { NextRequest, NextResponse } from "next/server";
 
 import { InterpretationGatewayError } from "@/src/application/ai-interpretation/gateway";
@@ -46,8 +47,7 @@ function responseFor(request: NextRequest, error: unknown) {
 }
 
 export async function POST(request: NextRequest) {
-  const origin = request.headers.get("origin");
-  if (!origin || origin !== request.nextUrl.origin) return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
+  if (!isApplicationRequestOrigin(request, "exchange")) return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
   if (Number(request.headers.get("content-length") ?? 0) > 131_072) return NextResponse.json({ error: "Interpretation request is too large." }, { status: 413 });
   const body = await request.json().catch(() => null) as null | Readonly<{ organizationId?: unknown; purpose?: unknown; subjectRef?: unknown; sources?: unknown }>;
   if (!body || typeof body.organizationId !== "string" || typeof body.purpose !== "string" || !Array.isArray(body.sources)) return NextResponse.json({ error: "Organization, purpose, and sources are required." }, { status: 400 });

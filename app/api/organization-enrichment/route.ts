@@ -1,3 +1,4 @@
+import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
@@ -179,8 +180,7 @@ async function upload(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const origin = request.headers.get("origin");
-  if (!origin || origin !== request.nextUrl.origin) return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
+  if (!isApplicationRequestOrigin(request, "exchange")) return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
   try {
     if (request.headers.get("content-type")?.startsWith("multipart/form-data")) {
       return await upload(request);

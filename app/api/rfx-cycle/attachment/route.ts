@@ -1,3 +1,4 @@
+import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
 
@@ -73,8 +74,7 @@ function problem(request: NextRequest, error: unknown) {
 }
 
 export async function POST(request: NextRequest) {
-  const origin = request.headers.get("origin");
-  if (!origin || origin !== request.nextUrl.origin) {
+  if (!isApplicationRequestOrigin(request, "exchange")) {
     return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
   }
   try {

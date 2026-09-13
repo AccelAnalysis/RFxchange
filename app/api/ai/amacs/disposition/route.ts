@@ -1,3 +1,4 @@
+import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { NextRequest, NextResponse } from "next/server";
 
 import { InterpretationGatewayError } from "@/src/application/ai-interpretation/gateway";
@@ -9,8 +10,7 @@ import { apiProblem } from "@/src/infrastructure/http/api-problem";
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
-  const origin = request.headers.get("origin");
-  if (!origin || origin !== request.nextUrl.origin) return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
+  if (!isApplicationRequestOrigin(request, "exchange")) return NextResponse.json({ error: "Same-origin request required." }, { status: 403 });
   if (Number(request.headers.get("content-length") ?? 0) > 16_384) return NextResponse.json({ error: "Disposition request is too large." }, { status: 413 });
   const body = await request.json().catch(() => null) as null | Readonly<{ organizationId?: unknown; recordId?: unknown; candidateId?: unknown; expectedUpdatedAt?: unknown; decision?: unknown }>;
   if (!body || typeof body.organizationId !== "string" || typeof body.recordId !== "string" || !body.decision || typeof body.decision !== "object") return NextResponse.json({ error: "Organization, record, and decision are required." }, { status: 400 });

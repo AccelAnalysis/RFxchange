@@ -1,3 +1,4 @@
+import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { COMMUNICATION_CONSENT_VERSION, type CommunicationPreferences } from "@/src/domain/communications/lifecycle";
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ preferences: saved ? { ...saved, ...(suppression?.get("suppressed") ? { email: false } : {}) } : null, smsAvailable: Boolean(account.phoneNumber), consentTextVersion: COMMUNICATION_CONSENT_VERSION }, { headers: { "cache-control": "no-store" } });
 }
 export async function POST(request: NextRequest) {
-  if (request.headers.get("origin") !== request.nextUrl.origin) return NextResponse.json({ error: "Request origin required." }, { status: 403 });
+  if (!isApplicationRequestOrigin(request, "exchange")) return NextResponse.json({ error: "Request origin required." }, { status: 403 });
   const context = await authenticate(request);
   if (!context) return NextResponse.json({ error: "Sign in to manage communications." }, { status: 401 });
   let body: Record<string, unknown>;
