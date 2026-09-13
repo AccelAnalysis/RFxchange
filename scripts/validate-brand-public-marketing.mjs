@@ -109,6 +109,11 @@ assert.equal(home.includes("NetworkField"), false, "Public marketing cannot pres
 assert.equal(home.includes("<video"), false, "Public marketing cannot introduce unapproved public video.");
 assert.equal(home.includes("<audio"), false, "Public marketing cannot introduce autoplay or public audio.");
 assert.equal(home.includes("<MarketingAvailability"), false, "The acquisition homepage must not regress into an availability/status document.");
+assert.ok(
+  home.includes("styles.stateStrip") && home.includes("availability.items.filter") && home.includes("availability.items.find"),
+  "The acquisition homepage must retain a compact current/upcoming state cue without restoring the full status module.",
+);
+assert.ok(home.includes("home.hero.stockNote"), "The image-led homepage must visibly identify illustrative photography.");
 assert.ok(foundingUsesAvailability(founding), "The dedicated Founding surface must retain current/upcoming availability context.");
 assert.ok(availability.includes('item.kind === "live"'), "Shared availability must visually distinguish current and upcoming product state.");
 for (const visualContract of [
@@ -139,7 +144,7 @@ assert.ok(
 );
 
 console.log(
-  "Public marketing validated: image-led acquisition, customer-language value proposition, parent endorsement, image provenance, Founding conversion, acquisition routes, accessibility and sensory fallbacks.",
+  "Public marketing validated: image-led acquisition, concise product-state cues, customer-language value proposition, parent endorsement, image provenance, Founding conversion, acquisition routes, accessibility and sensory fallbacks.",
 );
 
 function foundingUsesAvailability(source) {
