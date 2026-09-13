@@ -20,4 +20,3 @@ export function matchesPublicResourceListing(listing: PublicResourceListing, que
     ...listing.aliases, ...listing.serviceAreas,
   ], resourceDiscoveryTerms(query));
 }
-
