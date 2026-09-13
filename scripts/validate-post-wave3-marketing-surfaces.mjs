@@ -24,6 +24,10 @@ const english = JSON.parse(englishText);
 assert.match(home, /marketingPages\.home/, "Home must consume the localized marketing-pages namespace");
 assert.match(founding, /marketingPages\.founding/, "Founding must consume the localized marketing-pages namespace");
 assert.doesNotMatch(home, /<MarketingAvailability/, "Home must remain acquisition-focused instead of becoming an availability document");
+assert.match(home, /styles\.stateStrip/, "Home must retain a compact current/upcoming product-state cue");
+assert.match(home, /availability\.items\.filter/, "Home must derive current product-state labels from the localized availability catalog");
+assert.match(home, /availability\.items\.find/, "Home must derive the upcoming product-state label from the localized availability catalog");
+assert.match(home, /home\.hero\.stockNote/, "Home must identify illustrative imagery without turning provenance into a full content section");
 assert.match(founding, /<MarketingAvailability/, "Founding must use the shared availability component");
 for (const renderedImageContract of [/mosaicImages\.map/, /differentiation\.items\.map/, /home\.audience\.items\.map/]) {
   assert.match(home, renderedImageContract, "Home must preserve the image-led public composition");
