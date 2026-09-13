@@ -23,8 +23,12 @@ const english = JSON.parse(englishText);
 
 assert.match(home, /marketingPages\.home/, "Home must consume the localized marketing-pages namespace");
 assert.match(founding, /marketingPages\.founding/, "Founding must consume the localized marketing-pages namespace");
-assert.match(home, /<MarketingAvailability/, "Home must use the shared availability component");
+assert.doesNotMatch(home, /<MarketingAvailability/, "Home must remain acquisition-focused instead of becoming an availability document");
 assert.match(founding, /<MarketingAvailability/, "Founding must use the shared availability component");
+assert.ok((home.match(/<img/g) ?? []).length >= 10, "Home must preserve the image-led public composition");
+for (const visualContract of [/styles\.marketMosaic/, /styles\.visualCard/, /styles\.audienceCard/, /styles\.fullBleedCta/]) {
+  assert.match(home, visualContract, "Home must preserve the image-led marketing composition");
+}
 assert.match(foundersRedirect, /permanentRedirect\("\/founding"\)/, "/founders must permanently redirect to canonical /founding");
 assert.match(founding, /foundingActivationHref = "\/acquisition\/founding"/, "Founding conversion actions must enter the persisted acquisition path");
 assert.match(foundingEntry, /httpOnly: true/, "Founding campaign intent must be persisted server-side");
@@ -45,11 +49,11 @@ assert.match(responsiveChrome, /max-width: 520px/, "Narrow mobile controls must 
 assert.match(availability, /item\.kind === "live"/, "Availability must distinguish current from upcoming pathways");
 assert.match(marketing, /publicValueProgression/, "Public content must retain the customer-value progression");
 assert.equal(english.home.value.items.length, 4, "Home value progression must contain four stages");
-assert.equal(english.home.how.steps.length, 6, "Home explanation must contain six customer-facing stages");
+assert.equal(english.home.how.steps.length, 6, "How It Works content must retain six customer-facing stages for the dedicated explanation surface");
 assert.equal(english.availability.items.filter((item) => item.kind === "live").length, 3, "Exactly three availability groups should be current");
-assert.equal(english.availability.items.filter((item) => item.kind === "planned").length, 1, "Upcoming tools must remain visibly identified");
-assert.match(english.home.ai.title, /AI can suggest\. People confirm\./, "AI human-confirmation boundary must remain explicit");
-assert.match(english.founding.hero.readiness, /Paid enrollment opens when/, "Founding billing readiness must remain truthful");
+assert.equal(english.availability.items.filter((item) => item.kind === "planned").length, 1, "Upcoming tools must remain visibly identified where availability is presented");
+assert.match(english.home.ai.title, /AI can suggest\. People confirm\./, "AI human-confirmation boundary must remain available to deeper explanatory content");
+assert.match(english.founding.hero.readiness, /Paid enrollment opens when/, "Founding billing readiness must remain accurate");
 assert.match(english.founding.comparison.footnote, /not verification/i, "Founding recognition must remain separate from verification");
 assert.doesNotMatch(englishText, /Next governed pathway|Wave 3 is complete|governed assistance|authoritative state|later governed work/i, "Marketing localization must not expose internal delivery language");
 assert.doesNotMatch(home, /guaranteed leads/i, "Home must not introduce guaranteed-activity claims");
