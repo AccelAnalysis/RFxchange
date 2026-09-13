@@ -1,7 +1,7 @@
 {
   "sheet": {
     "region": "Exchange-Ergebnisse und Details",
-    "dragHandle": "Ziehen, um das Exchange-Panel zu vergrößern oder zu verkleinern",
+    "dragHandle": "Ergebnisse anpassen: ziehen oder tippen. Mit Pfeil auf und ab erweitern oder einklappen.",
     "peek": "Vorschau",
     "partial": "Ergebnisse",
     "expanded": "Erweitern"

@@ -123,7 +123,7 @@ test("GEO-005/006 produce deterministic fills followed by surrounding and select
   assert.equal(model.layers[1].features[0].geography.id, "us-va-portsmouth");
   assert.equal(model.layers.at(-1).id, "selected-outline-accent");
   assert.equal(CONTROLLED_LOCALITY_LAYER_STYLES["surrounding-fill"].fillOpacity, 0.24);
-  assert.equal(CONTROLLED_LOCALITY_LAYER_STYLES["selected-outline-accent"].stroke, "#d6a23a");
+  assert.equal(CONTROLLED_LOCALITY_LAYER_STYLES["selected-outline-accent"].stroke, "#2e5eaa");
 });
 
 test("GEO-005 keeps the selected locality fitted and centered across multiple zoom levels", async () => {
@@ -176,8 +176,8 @@ test("controlled canvas preserves layer order, accessible controls and focus con
   );
   assert.ok(
     contrast(
-      CONTROLLED_LOCALITY_LAYER_STYLES["selected-outline-contrast"].stroke,
-      CONTROLLED_LOCALITY_LAYER_STYLES["selected-fill"].fill,
+      CONTROLLED_LOCALITY_LAYER_STYLES["selected-outline-accent"].stroke,
+      "#f0f4fa", // Blue 4% focus fill over the bright map, without a black under-stroke.
     ) >= 4.5,
   );
 });

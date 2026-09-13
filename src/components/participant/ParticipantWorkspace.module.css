@@ -326,7 +326,7 @@
   border: 0;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 760px), (orientation: landscape) and (max-height: 520px) {
   .navigation {
     height: var(--participant-nav-height-mobile);
     padding-inline: 16px;
@@ -464,4 +464,8 @@
     background: var(--warm-ivory);
     backdrop-filter: none;
   }
+}
+
+@media (max-width: 760px), (orientation: landscape) and (max-height: 520px) {
+  .spatialWorkspace { height: 100dvh; min-height: 0; background: transparent; }
 }

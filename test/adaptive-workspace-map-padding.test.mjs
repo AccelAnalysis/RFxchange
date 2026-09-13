@@ -28,6 +28,9 @@ test("the opt-in adaptive layout preserves other scene padding contracts", () =>
 });
 
 test("short viewports retain usable map space", () => {
-  const padding = workspaceMapPadding("right", { width: 640, height: 360 }, true);
-  assert.ok(360 - padding.top - padding.bottom >= 80);
+  for (const width of [640, 852, 932, 1180]) {
+    const padding = workspaceMapPadding("right", { width, height: 360 }, true);
+    assert.equal(padding.left, padding.right);
+    assert.ok(360 - padding.top - padding.bottom >= 80);
+  }
 });

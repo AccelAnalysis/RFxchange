@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useId,
   useRef,
   useState,
   type CSSProperties,
@@ -85,6 +86,8 @@ export function ExchangeBottomSheet({
 }>) {
   const wideLayout = useWideExchangeLayout();
   const snapPoint = desktopPanel && wideLayout ? "expanded" : requestedSnapPoint;
+  const contentId = useId();
+  const suppressClickRef = useRef(false);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<Readonly<{
     pointerId: number;
@@ -109,6 +112,7 @@ export function ExchangeBottomSheet({
 
   const beginDrag = (event: PointerEvent<HTMLButtonElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
+    suppressClickRef.current = false;
     event.currentTarget.setPointerCapture(event.pointerId);
     dragState.current = Object.freeze({
       pointerId: event.pointerId,
@@ -127,6 +131,7 @@ export function ExchangeBottomSheet({
     const elapsed = Math.max(1, now - current.lastAt);
     const velocityY = (event.clientY - current.lastY) / elapsed;
     const deltaY = event.clientY - current.startY;
+    if (Math.abs(deltaY) > 6) suppressClickRef.current = true;
     dragState.current = Object.freeze({
       ...current,
       lastY: event.clientY,
@@ -143,6 +148,11 @@ export function ExchangeBottomSheet({
     setDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (event.type === "pointercancel") {
+      suppressClickRef.current = true;
+      setDragOffset(0);
+      return;
     }
     setSnap(nextSnapPoint(snapPoint, event.clientY - current.startY, current.velocityY));
   };
@@ -168,6 +178,19 @@ export function ExchangeBottomSheet({
           type="button"
           className={styles.dragHandle}
           aria-label={labels.dragHandle}
+          aria-controls={contentId}
+          aria-expanded={snapPoint !== "peek"}
+          onClick={() => {
+            if (suppressClickRef.current) { suppressClickRef.current = false; return; }
+            setSnap(PARTICIPANT_SHEET_SNAP_POINTS[(SNAP_INDEX[snapPoint] + 1) % 3]!);
+          }}
+          onKeyDown={(event) => {
+            const next = event.key === "ArrowUp" ? PARTICIPANT_SHEET_SNAP_POINTS[Math.min(2, SNAP_INDEX[snapPoint] + 1)]
+              : event.key === "ArrowDown" ? PARTICIPANT_SHEET_SNAP_POINTS[Math.max(0, SNAP_INDEX[snapPoint] - 1)]
+                : event.key === "Home" || event.key === "Escape" ? "peek"
+                  : event.key === "End" ? "expanded" : null;
+            if (next) { event.preventDefault(); setSnap(next); }
+          }}
           onPointerDown={beginDrag}
           onPointerMove={moveDrag}
           onPointerUp={endDrag}
@@ -176,22 +199,10 @@ export function ExchangeBottomSheet({
           <span aria-hidden="true" />
         </button>
         <div className={styles.sheetSummary}>{summary}</div>
-        <div className={styles.snapControls} role="group" aria-label={labels.region}>
-          {PARTICIPANT_SHEET_SNAP_POINTS.map((point) => (
-            <button
-              key={point}
-              type="button"
-              data-snap-control={point}
-              aria-pressed={snapPoint === point}
-              onClick={() => setSnap(point)}
-            >
-              {labels[point]}
-            </button>
-          ))}
-        </div>
       </div>
       {actionRail ? <div className={styles.actionRailSlot}>{actionRail}</div> : null}
       <div
+        id={contentId}
         ref={contentRef}
         className={styles.sheetContent}
         data-sheet-scroll-region

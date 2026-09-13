@@ -1,7 +1,7 @@
 {
   "sheet": {
     "region": "Risultati e dettagli dell’Exchange",
-    "dragHandle": "Trascina per ridimensionare il pannello dell’Exchange",
+    "dragHandle": "Ridimensiona i risultati: trascina o tocca. Usa le frecce su e giù per espandere o comprimere.",
     "peek": "Anteprima",
     "partial": "Risultati",
     "expanded": "Espandi"

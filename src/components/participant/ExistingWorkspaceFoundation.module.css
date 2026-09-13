@@ -76,13 +76,21 @@
 .popoverPrimaryRow { margin-top: 14px; display: flex; }
 .markerPopover :global([data-exchange-room-action-grid]) { margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--semantic-border-subtle); }
 
-@media (max-width: 1024px) {
-  .exchangeSearch { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 64px); left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); width: auto; }
-  .organizationFacts > div { grid-template-columns: 1fr; gap: 4px; }
+@media (min-width: 761px) and (max-width: 1024px) and (min-height: 521px) {
+  .exchangeSearch { width: calc(100% - 32px); }
   .markerPopover { display: none; }
 }
-@media (min-width: 761px) and (max-width: 1024px) { .exchangeSearch { position: absolute; top: 16px; } }
-@media (max-width: 760px) and (orientation: landscape) and (max-height: 520px) { .exchangeSearch { right: 140px; } }
+@media (max-width: 760px), (orientation: landscape) and (max-height: 520px) {
+  .exchangeSearch { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 64px); left: calc(12px + env(safe-area-inset-left, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); width: auto; }
+  .organizationFacts > div { grid-template-columns: 1fr; gap: 4px; }
+  .markerPopover { display: none; }
+  .searchFilters > div { max-height: calc(100dvh - 220px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); overflow-y: auto; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .exchangeSearch { top: calc(8px + env(safe-area-inset-top, 0px)); right: calc(164px + env(safe-area-inset-right, 0px)); padding-block: 0; }
+  .searchInput input { min-height: 44px; }
+  .searchFilters > div { max-height: calc(100dvh - 132px - env(safe-area-inset-bottom, 0px)); }
+}
 @media (prefers-reduced-transparency: reduce) { .exchangeSearch, .markerPopover { background: var(--semantic-canvas-elevated); backdrop-filter: none; } .markerPopover::after { background: var(--semantic-canvas-elevated); } }
 @supports not (backdrop-filter: blur(1px)) { .exchangeSearch, .markerPopover { background: var(--semantic-canvas-elevated); } .markerPopover::after { background: var(--semantic-canvas-elevated); } }
 @media (prefers-reduced-motion: reduce) { .organizationHome, .exchangeSearch { scroll-behavior: auto; } }
