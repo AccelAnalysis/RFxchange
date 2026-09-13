@@ -29,13 +29,6 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "RFxchange",
       statusBarStyle: "default",
     },
-    icons: {
-      icon: [
-        { url: "/icons/rf-32.png", sizes: "32x32", type: "image/png" },
-        { url: "/icons/rf-192.png", sizes: "192x192", type: "image/png" },
-      ],
-      apple: { url: "/icons/rf-180.png", sizes: "180x180", type: "image/png" },
-    },
     openGraph: {
       title: dictionary.metadata.title,
       description: dictionary.metadata.openGraphDescription,

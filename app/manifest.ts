@@ -14,9 +14,9 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#F8FAFC",
     prefer_related_applications: false,
     icons: [
-      { src: "/icons/rf-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/icons/rf-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: "/icons/rf-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/icon1.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icon2.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/icon2.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }

@@ -6,6 +6,14 @@ Home Screen metadata. The icon follows the existing `RFMark` primitive and
 Design System v2 slate/gold colors. The maskable icon keeps its lettering
 inside the central safe area.
 
+Icons use Next.js file-based metadata routes (`app/icon*.png` and
+`app/apple-icon.png`) so they are compiled into the server artifact. The first
+hosted release served its manifest but returned 404 for `public/icons/*`, despite
+those files passing local HTTP checks. Compiling the icons as metadata routes
+removes that dependency on public-directory packaging. The browser icon tags
+are generated from the same files; the 512px image also meets maskable safe-area
+requirements. The source SVG is retained at `docs/design/rf-app-icon.svg`.
+
 Installation starts at `/geography/canvas`, not `/`: the root intentionally
 redirects to the separately hosted Marketing application. The existing
 Exchange route still enforces sign-in, activation and organization access.
@@ -26,6 +34,10 @@ referenced PNGs publicly, emits the manifest/Apple metadata on sign-in, and
 redirects an unauthenticated manifest launch to sign-in on the same origin.
 Repeat these checks on the released origin. Device-level Home Screen launch
 still needs an actual iPhone/iPad; desktop HTTP checks do not establish it.
+
+Run `node scripts/smoke-pwa-application.mjs` after a production build. Set
+`RFXCHANGE_PWA_SMOKE_ORIGIN` to check a deployed Exchange instead. CI runs this
+HTTP check after its production build, including actual icon bytes/dimensions.
 
 References: [Next.js PWA guide](https://nextjs.org/docs/app/guides/progressive-web-apps),
 [MDN installability](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable).
