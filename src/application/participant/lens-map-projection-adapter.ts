@@ -1,4 +1,5 @@
 import {
+  createExchangeMapClusterProjection,
   selectionMatchesMapObject,
   type ExchangeMapAreaProjection,
   type ExchangeMapClusterProjection,
@@ -6,6 +7,45 @@ import {
   type ExchangeSelectionState,
   type LensMapProjection,
 } from "./mobile-exchange-contracts.ts";
+
+/** Density changes presentation only; the full authorized result set stays intact. */
+export function clusterResourceMapPoints(
+  points: readonly ExchangeSpatialProjectionPoint[], zoom: number,
+): readonly ExchangeSpatialProjectionPoint[] {
+  if (!Number.isFinite(zoom) || zoom >= 16) return points;
+  const scale = 512 * 2 ** Math.max(0, zoom);
+  const project = (point: ExchangeSpatialProjectionPoint) => {
+    const latitude = Math.max(-85, Math.min(85, point.coordinate[1])) * Math.PI / 180;
+    return [(point.coordinate[0] + 180) / 360 * scale,
+      (1 - Math.log(Math.tan(latitude) + 1 / Math.cos(latitude)) / Math.PI) / 2 * scale] as const;
+  };
+  const remaining = points.filter((point) => !point.selected && point.projection.kind !== "cluster");
+  const output = points.filter((point) => point.selected || point.projection.kind === "cluster");
+  while (remaining.length) {
+    const anchor = remaining.shift()!;
+    const origin = project(anchor);
+    const members = [anchor];
+    for (let index = remaining.length - 1; index >= 0; index--) {
+      const position = project(remaining[index]!);
+      if (Math.hypot(position[0] - origin[0], position[1] - origin[1]) <= 48) {
+        members.push(remaining.splice(index, 1)[0]!);
+      }
+    }
+    if (members.length === 1) { output.push(anchor); continue; }
+    const coordinate = Object.freeze([
+      members.reduce((sum, point) => sum + point.coordinate[0], 0) / members.length,
+      members.reduce((sum, point) => sum + point.coordinate[1], 0) / members.length,
+    ] as const);
+    const clusterId = `resources:${anchor.renderId}`;
+    const projection = createExchangeMapClusterProjection({ clusterId,
+      coordinate: { longitude: coordinate[0], latitude: coordinate[1] }, count: members.length,
+      accessibleLabel: members.map((point) => point.accessibleLabel).join(" · ").slice(0, 240),
+    });
+    output.push(Object.freeze({ renderId: `cluster:${clusterId}`, projection, coordinate,
+      accessibleLabel: projection.accessibleLabel, selected: false, selectable: false, count: members.length }));
+  }
+  return Object.freeze(output);
+}
 
 export type ExchangeSpatialProjectionPoint = Readonly<{
   renderId: string;
@@ -203,14 +243,16 @@ function beaconImage(
 export function createLensProjectionRenderModel(
   adapter: ExchangeSpatialProjectionAdapter,
   geometries: readonly ExchangeGovernedAreaGeometry[],
-  options: Readonly<{ ownOrganizationId?: string | null }> = Object.freeze({}),
+  options: Readonly<{ ownOrganizationId?: string | null; zoom?: number }> = Object.freeze({}),
 ): ExchangeLensProjectionRenderModel {
   const selectableByRenderId = new Map<string, ExchangeLensSelectableProjection>();
   const clusterByRenderId = new Map<string, ExchangeSpatialProjectionPoint>();
   const features: ExchangeLensProjectionRenderModel["data"]["features"] = [];
   const ownOrganizationId = options.ownOrganizationId?.trim() || null;
 
-  for (const point of adapter.points) {
+  const points = adapter.lens === "resources" && options.zoom !== undefined
+    ? clusterResourceMapPoints(adapter.points, options.zoom) : adapter.points;
+  for (const point of points) {
     const projection = point.projection;
     const renderId = point.renderId;
     if (projection.kind === "cluster") clusterByRenderId.set(renderId, point);

@@ -652,9 +652,9 @@ export function ExchangeSpatialScene({
     () => createLensProjectionRenderModel(
       lensProjectionAdapter,
       governedAreaGeometries,
-      { ownOrganizationId: marker?.organizationId ?? null },
+      { ownOrganizationId: marker?.organizationId ?? null, zoom: lensProjection?.camera?.zoom ?? initialCamera?.zoom ?? ORGANIZATION_ORBIT_ZOOM },
     ),
-    [governedAreaGeometries, lensProjectionAdapter, marker?.organizationId],
+    [governedAreaGeometries, initialCamera?.zoom, lensProjection?.camera?.zoom, lensProjectionAdapter, marker?.organizationId],
   );
   const homeMarkerIsProjected = useMemo(
     () => marker !== null && lensProjectionContainsOrganizationMarker(
