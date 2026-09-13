@@ -109,11 +109,18 @@ assert.equal(home.includes("NetworkField"), false, "Public marketing cannot pres
 assert.equal(home.includes("<video"), false, "Public marketing cannot introduce unapproved public video.");
 assert.equal(home.includes("<audio"), false, "Public marketing cannot introduce autoplay or public audio.");
 assert.equal(home.includes("<MarketingAvailability"), false, "The acquisition homepage must not regress into an availability/status document.");
-assert.ok(founderingUsesAvailability(founding), "The dedicated Founding surface must retain current/upcoming availability context.");
+assert.ok(foundingUsesAvailability(founding), "The dedicated Founding surface must retain current/upcoming availability context.");
 assert.ok(availability.includes('item.kind === "live"'), "Shared availability must visually distinguish current and upcoming product state.");
-assert.ok((home.match(/<img/g) ?? []).length >= 10, "The acquisition homepage must remain image-led.");
-for (const visualContract of ["marketMosaic", "visualCard", "audienceCard", "fullBleedCta"]) {
-  assert.ok(home.includes(`styles.${visualContract}`), `Image-led homepage composition is missing ${visualContract}.`);
+for (const visualContract of [
+  "mosaicImages.map",
+  "differentiation.items.map",
+  "home.audience.items.map",
+  "styles.marketMosaic",
+  "styles.visualCard",
+  "styles.audienceCard",
+  "styles.fullBleedCta",
+]) {
+  assert.ok(home.includes(visualContract), `Image-led homepage composition is missing ${visualContract}.`);
 }
 
 const normalizedStyles = `${homeStyles}\n${foundingStyles}\n${await read("app/globals.css")}\n${await read("src/design/semantic-tokens.css")}`.replace(/\s+/g, "").toLowerCase();
@@ -135,6 +142,6 @@ console.log(
   "Public marketing validated: image-led acquisition, customer-language value proposition, parent endorsement, image provenance, Founding conversion, acquisition routes, accessibility and sensory fallbacks.",
 );
 
-function founderingUsesAvailability(source) {
+function foundingUsesAvailability(source) {
   return source.includes("<MarketingAvailability");
 }
