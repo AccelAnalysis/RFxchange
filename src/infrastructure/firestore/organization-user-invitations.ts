@@ -1,6 +1,9 @@
 import { FieldValue, type Firestore } from "firebase-admin/firestore";
 
-import { parseSharedSeatEntitlements } from "../../application/accelpo/entitlement-billing.ts";
+import {
+  entitlementGuardDocumentPath,
+  parseSharedSeatEntitlements,
+} from "../../application/accelpo/entitlement-billing.ts";
 import type {
   OrganizationInvitationAcceptanceCommit,
   OrganizationInvitationAcceptanceUnitOfWork,
@@ -107,6 +110,9 @@ function appendOnlyPayload(record: object): object {
  * If the shared commercial account publishes seat entitlements, the same transaction also prevents
  * activation beyond that entitlement. Organizations without numeric seat entitlements retain the
  * pre-CP-10 shared membership behavior rather than receiving an inferred plan limit.
+ *
+ * The CP-10 organization coordination revision is read and bumped in the same transaction so an
+ * invite, acceptance, or seat release cannot succeed concurrently from the same stale seat snapshot.
  */
 export class FirestoreOrganizationInvitationAcceptanceUnitOfWork
   implements OrganizationInvitationAcceptanceUnitOfWork
@@ -130,6 +136,9 @@ export class FirestoreOrganizationInvitationAcceptanceUnitOfWork
     const commercialRef = this.db.doc(
       firestoreDocumentPath("organizationCommercialAccounts", input.invitation.organizationId),
     );
+    const entitlementGuardRef = this.db.doc(
+      entitlementGuardDocumentPath(String(input.invitation.organizationId)),
+    );
     const organizationMembershipsQuery = this.db
       .collection(firestoreCollectionName("organizationMemberships"))
       .where("organizationId", "==", input.invitation.organizationId);
@@ -143,6 +152,7 @@ export class FirestoreOrganizationInvitationAcceptanceUnitOfWork
         existingMembership,
         existingAuthorization,
         commercialAccount,
+        entitlementGuard,
         organizationMemberships,
         ...existingLegal
       ] = await Promise.all([
@@ -150,6 +160,7 @@ export class FirestoreOrganizationInvitationAcceptanceUnitOfWork
         transaction.get(membershipRef),
         transaction.get(authorizationRef),
         transaction.get(commercialRef),
+        transaction.get(entitlementGuardRef),
         transaction.get(organizationMembershipsQuery),
         ...legalRefs.map((ref) => transaction.get(ref)),
       ]);
@@ -192,6 +203,19 @@ export class FirestoreOrganizationInvitationAcceptanceUnitOfWork
         throw new Error("Invitation legal acknowledgements do not match the accepted membership context.");
       }
 
+      const guardData = entitlementGuard.data();
+      const guardRevision = guardData?.revision;
+      if (
+        entitlementGuard.exists && (
+          guardData?.organizationId !== input.invitation.organizationId ||
+          typeof guardRevision !== "number" ||
+          !Number.isSafeInteger(guardRevision) ||
+          guardRevision < 1
+        )
+      ) {
+        throw new Error("Organization seat coordination data is invalid.");
+      }
+
       const rawEntitlementKeys = commercialAccount.data()?.entitlementKeys;
       const entitlementKeys = Array.isArray(rawEntitlementKeys)
         ? rawEntitlementKeys.filter((value): value is string => typeof value === "string")
@@ -207,6 +231,20 @@ export class FirestoreOrganizationInvitationAcceptanceUnitOfWork
         }
       }
 
+      if (entitlementGuard.exists) {
+        transaction.update(entitlementGuardRef, {
+          organizationId: input.invitation.organizationId,
+          revision: Number(guardRevision) + 1,
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      } else {
+        transaction.create(entitlementGuardRef, {
+          organizationId: input.invitation.organizationId,
+          revision: 1,
+          createdAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      }
       transaction.set(
         invitationRef,
         mutablePayload(input.invitation, stored?.createdAt ?? FieldValue.serverTimestamp()),
