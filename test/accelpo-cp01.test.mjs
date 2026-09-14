@@ -44,7 +44,7 @@ test("deep-link restoration rejects external and authentication return targets",
   assert.equal(signInDestination("https://attacker.example/steal"), "/signin");
 });
 
-function identityDependencies({ membership, authorization }) {
+function identityDependencies({ membership, authorization, organizationMemberships = [membership] }) {
   const organization = { id: membership.organizationId };
   const profile = { id: "profile-one", organizationId: membership.organizationId, displayName: "One Org" };
   return {
@@ -68,6 +68,7 @@ function identityDependencies({ membership, authorization }) {
     },
     memberships: {
       listActiveByUserId: async () => [membership],
+      listByOrganizationId: async () => organizationMemberships,
       getById: async () => membership,
     },
     authorizations: {
@@ -121,6 +122,21 @@ test("server projection selects only the authenticated user's active membership"
   assert.equal(ready.kind, "ready");
   assert.equal(ready.projection.activeOrganization.organizationId, "org-one");
   assert.deepEqual(ready.projection.permissions, ["purchasing.request"]);
+});
+
+test("server projection counts seats from the selected organization rather than the user's organization list", async () => {
+  const ready = await projectIdentityContext(context, "org-one", identityDependencies({
+    membership,
+    authorization,
+    organizationMemberships: [
+      membership,
+      { id: "membership-two", userId: "user-two", organizationId: "org-one", status: "active" },
+      { id: "membership-old", userId: "user-old", organizationId: "org-one", status: "inactive" },
+    ],
+  }));
+  assert.equal(ready.kind, "ready");
+  assert.equal(ready.projection.seat.activeSeats, 2);
+  assert.equal(ready.projection.seat.ownerCountsAsSeat, true);
 });
 
 test("server projection fails closed when authorization belongs to another membership", async () => {
