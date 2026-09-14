@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   createAddSeatBillingHandoff,
+  entitlementGuardDocumentPath,
   parseSharedSeatEntitlements,
   planMemberSeatRelease,
   resolveEntitlementBilling,
@@ -52,6 +53,11 @@ test("CP-10 parses seat quantities from shared entitlement keys, never a plan-na
     "organization.seats.included:3",
     "organization.seats.included:10",
   ]), null);
+});
+
+test("seat transition guard is one organization-scoped coordination document, not a seat ledger", () => {
+  assert.equal(entitlementGuardDocumentPath("org-one"), "accelPoEntitlementGuards/org-one");
+  assert.throws(() => entitlementGuardDocumentPath("../org-one"));
 });
 
 test("owner and every active member consume a seat while only live pending invitations reserve seats", () => {
@@ -146,10 +152,14 @@ function record(path, data) {
   return { path, exists: data != null, data };
 }
 
-function commandContext({ definition, payload, memberships, invitations, commercialKeys }) {
+function commandContext({ definition, payload, memberships, invitations, commercialKeys, guard = null }) {
   const created = [];
+  const updated = [];
   const transaction = {
     async get(path) {
+      if (path === "accelPoEntitlementGuards/org-one") {
+        return record(path, guard);
+      }
       if (path === "organizationRoleBundles/buyer-role") {
         return record(path, {
           key: "buyer-role",
@@ -168,7 +178,7 @@ function commandContext({ definition, payload, memberships, invitations, commerc
     },
     create(path, data) { created.push({ path, data }); },
     set() {},
-    update() {},
+    update(path, data) { updated.push({ path, data }); },
   };
   return {
     context: {
@@ -189,6 +199,7 @@ function commandContext({ definition, payload, memberships, invitations, commerc
       transaction,
     },
     created,
+    updated,
   };
 }
 
@@ -214,9 +225,36 @@ test("seat-backed invitation command reserves atomically and rejects exhausted c
     commercialKeys: seatKeys({ included: 2 }),
   });
   const outcome = await invite.handle(allowed.context);
-  assert.equal(allowed.created.length, 1);
+  assert.equal(allowed.created.length, 2);
+  assert.equal(allowed.created[0].path, "accelPoEntitlementGuards/org-one");
+  assert.deepEqual(allowed.created[0].data, {
+    organizationId: "org-one",
+    revision: 1,
+    createdAt: "2026-09-14T20:00:00.000Z",
+    updatedAt: "2026-09-14T20:00:00.000Z",
+  });
+  assert.match(allowed.created[1].path, /^organizationUserInvitations\/accelpo_inv_/);
   assert.equal(outcome.data.seats.reservedSeats, 1);
   assert.equal(outcome.data.seats.availableSeats, 0);
+
+  const existingGuard = commandContext({
+    definition: invite,
+    payload,
+    memberships: oneActive,
+    invitations: [],
+    commercialKeys: seatKeys({ included: 2 }),
+    guard: { organizationId: "org-one", revision: 4 },
+  });
+  await invite.handle(existingGuard.context);
+  assert.equal(existingGuard.created.length, 1);
+  assert.deepEqual(existingGuard.updated, [{
+    path: "accelPoEntitlementGuards/org-one",
+    data: {
+      organizationId: "org-one",
+      revision: 5,
+      updatedAt: "2026-09-14T20:00:00.000Z",
+    },
+  }]);
 
   const exhausted = commandContext({
     definition: invite,
@@ -233,6 +271,7 @@ test("seat-backed invitation command reserves atomically and rejects exhausted c
       error.details.addSeatActionAllowed === true,
   );
   assert.equal(exhausted.created.length, 0);
+  assert.equal(exhausted.updated.length, 0);
 });
 
 test("CP-10 is registered on the shared chassis and its writes remain CP-03 commands", () => {
