@@ -2,6 +2,7 @@ import type { AccelPOConnectionPoint, AccelPOPartContract } from "./ports.ts";
 import { CP01_IDENTITY_CONTEXT_PART } from "../identity-context/part.ts";
 import { CP03_COMMAND_PORT_PART } from "../command-port/part.ts";
 import { CP04_QUERY_PROJECTION_PART } from "../query-projection/part.ts";
+import { CP10_ENTITLEMENT_BILLING_PART } from "../entitlement-billing/part.ts";
 
 /** Small composition registry used by the shell. Parts register themselves; the shell owns the registry. */
 export class AccelPOPartRegistry {
@@ -48,7 +49,7 @@ export const CP02_ROUTE_SURFACE_PART: AccelPOPartContract = Object.freeze({
 });
 
 /**
- * Creates the current chassis registry with the bounded CP-03 write and CP-04 read boundaries registered.
+ * Creates the current chassis registry with the bounded chassis connection points registered.
  * Later parts should add themselves through the same registry rather than creating another router
  * or query service.
  */
@@ -59,5 +60,6 @@ export function createAccelPOPartRegistry(): AccelPOPartRegistry {
   registry.register(CP01_IDENTITY_CONTEXT_PART);
   registry.register(CP03_COMMAND_PORT_PART);
   registry.register(CP04_QUERY_PROJECTION_PART);
+  registry.register(CP10_ENTITLEMENT_BILLING_PART);
   return registry;
 }
