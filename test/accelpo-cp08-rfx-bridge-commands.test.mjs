@@ -98,11 +98,35 @@ test("CP-08 CP-03 definitions target/version the Purchase Case and delegate only
     commandId: "accelpo_cmd_test",
     actor: { userId: "user-1", membershipId: "membership-1", organizationId: ORG },
     permission: "rfx.publish",
-    target: { path: `accelpoPurchaseCases/${CASE}`, exists: true, data: { organizationId: ORG, version: 0 } },
+    target: {
+      path: `accelpoPurchaseCases/${CASE}`,
+      exists: true,
+      data: {
+        organizationId: ORG,
+        version: 0,
+        sourcingFlow: "source-first",
+        sourcingPublicationAuthorized: true,
+      },
+    },
     currentVersion: 0,
     now: "2026-09-14T23:00:00.000Z",
     transaction: {
-      async get() { throw new Error("not expected"); },
+      async get(path) {
+        assert.equal(path, "accelpoEvidence/evidence-public");
+        return {
+          path,
+          exists: true,
+          data: {
+            organizationId: ORG,
+            purchaseCaseId: CASE,
+            status: "uploaded",
+            releaseStatus: "released",
+            originalFilename: "specification.pdf",
+            contentType: "application/pdf",
+            size: 1024,
+          },
+        };
+      },
       create(path, data) { writes.push({ method: "create", path, data }); },
       set(path, data) { writes.push({ method: "set", path, data }); },
       update(path, data) { writes.push({ method: "update", path, data }); },
@@ -159,6 +183,7 @@ test("CP-08 command definitions reject a mismatched canonical opportunity link b
           version: 1,
           canonicalOpportunityId: "rfx-canonical-200",
           sourcingFlow: "source-first",
+          sourcingPublicationAuthorized: true,
         },
       },
       currentVersion: 1,
@@ -166,6 +191,135 @@ test("CP-08 command definitions reject a mismatched canonical opportunity link b
       transaction: { async get() { throw new Error("not expected"); }, create() {}, set() {}, update() {} },
     }),
     /linked RFxchange opportunity is unavailable/,
+  );
+  assert.equal(called, false);
+});
+
+test("CP-08 server command rejects forged file release state before calling RFxchange", async () => {
+  let called = false;
+  const definitions = createCP08RFxBridgeCommandDefinitions({
+    async createOpportunity() { called = true; throw new Error("not expected"); },
+    async updateOpportunity() { throw new Error("not expected"); },
+    async closeOpportunity() { throw new Error("not expected"); },
+    async withdrawOpportunity() { throw new Error("not expected"); },
+  });
+  const create = definitions[0];
+  await assert.rejects(
+    () => create.handle({
+      command: {
+        commandName: CP08_RFX_BRIDGE_COMMANDS.CREATE_OPPORTUNITY,
+        organizationContext: { organizationId: ORG },
+        payload: {
+          bridgeVersion: 1,
+          purchaseCaseId: CASE,
+          flow: "source-first",
+          supplierSafeNeed: supplierSafePayload(),
+        },
+        expectedVersion: 0,
+        idempotencyKey: "create-forged-file",
+        requestId: "command-request-3",
+        actor: { userId: "user-1", membershipId: "membership-1", organizationId: ORG },
+      },
+      commandId: "accelpo_cmd_test_3",
+      actor: { userId: "user-1", membershipId: "membership-1", organizationId: ORG },
+      permission: "rfx.publish",
+      target: {
+        path: `accelpoPurchaseCases/${CASE}`,
+        exists: true,
+        data: {
+          organizationId: ORG,
+          version: 0,
+          sourcingFlow: "source-first",
+          sourcingPublicationAuthorized: true,
+        },
+      },
+      currentVersion: 0,
+      now: "2026-09-14T23:00:00.000Z",
+      transaction: {
+        async get(path) {
+          return {
+            path,
+            exists: true,
+            data: {
+              organizationId: ORG,
+              purchaseCaseId: CASE,
+              status: "uploaded",
+              releaseStatus: "private",
+              originalFilename: "specification.pdf",
+              contentType: "application/pdf",
+              size: 1024,
+            },
+          };
+        },
+        create() {}, set() {}, update() {},
+      },
+    }),
+    /released sourcing file is unavailable/,
+  );
+  assert.equal(called, false);
+});
+
+test("CP-08 server command binds sourcing flow and publish authority to the Purchase Case", async () => {
+  let called = false;
+  const create = createCP08RFxBridgeCommandDefinitions({
+    async createOpportunity() { called = true; throw new Error("not expected"); },
+    async updateOpportunity() { throw new Error("not expected"); },
+    async closeOpportunity() { throw new Error("not expected"); },
+    async withdrawOpportunity() { throw new Error("not expected"); },
+  })[0];
+  const base = {
+    command: {
+      commandName: CP08_RFX_BRIDGE_COMMANDS.CREATE_OPPORTUNITY,
+      organizationContext: { organizationId: ORG },
+      payload: {
+        bridgeVersion: 1,
+        purchaseCaseId: CASE,
+        flow: "source-first",
+        supplierSafeNeed: supplierSafePayload(),
+      },
+      expectedVersion: 0,
+      idempotencyKey: "create-policy-check",
+      requestId: "command-request-4",
+      actor: { userId: "user-1", membershipId: "membership-1", organizationId: ORG },
+    },
+    commandId: "accelpo_cmd_test_4",
+    actor: { userId: "user-1", membershipId: "membership-1", organizationId: ORG },
+    permission: "rfx.publish",
+    currentVersion: 0,
+    now: "2026-09-14T23:00:00.000Z",
+    transaction: { async get() { throw new Error("not expected"); }, create() {}, set() {}, update() {} },
+  };
+  await assert.rejects(
+    () => create.handle({
+      ...base,
+      target: {
+        path: `accelpoPurchaseCases/${CASE}`,
+        exists: true,
+        data: {
+          organizationId: ORG,
+          version: 0,
+          sourcingFlow: "authorize-first",
+          sourcingPublicationAuthorized: true,
+        },
+      },
+    }),
+    /sourcing flow is not authorized/,
+  );
+  await assert.rejects(
+    () => create.handle({
+      ...base,
+      target: {
+        path: `accelpoPurchaseCases/${CASE}`,
+        exists: true,
+        data: {
+          organizationId: ORG,
+          version: 0,
+          sourcingFlow: "source-first",
+          sourcingPublicationAuthorized: false,
+        },
+      },
+    }),
+    /Community sourcing is not authorized/,
   );
   assert.equal(called, false);
 });
