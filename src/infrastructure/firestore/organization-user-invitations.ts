@@ -1,5 +1,6 @@
 import { FieldValue, type Firestore } from "firebase-admin/firestore";
 
+import { parseSharedSeatEntitlements } from "../../application/accelpo/entitlement-billing.ts";
 import type {
   OrganizationInvitationAcceptanceCommit,
   OrganizationInvitationAcceptanceUnitOfWork,
@@ -103,6 +104,9 @@ function appendOnlyPayload(record: object): object {
 /**
  * Makes invitation acceptance visible atomically: accepted invitation + organization membership +
  * membership authorization + individual legal acknowledgement evidence either all commit or none do.
+ * If the shared commercial account publishes seat entitlements, the same transaction also prevents
+ * activation beyond that entitlement. Organizations without numeric seat entitlements retain the
+ * pre-CP-10 shared membership behavior rather than receiving an inferred plan limit.
  */
 export class FirestoreOrganizationInvitationAcceptanceUnitOfWork
   implements OrganizationInvitationAcceptanceUnitOfWork
@@ -123,18 +127,32 @@ export class FirestoreOrganizationInvitationAcceptanceUnitOfWork
     const authorizationRef = this.db.doc(
       firestoreDocumentPath("organizationAuthorizations", input.authorization.membershipId),
     );
+    const commercialRef = this.db.doc(
+      firestoreDocumentPath("organizationCommercialAccounts", input.invitation.organizationId),
+    );
+    const organizationMembershipsQuery = this.db
+      .collection(firestoreCollectionName("organizationMemberships"))
+      .where("organizationId", "==", input.invitation.organizationId);
     const legalRefs = input.legalAcknowledgements.map((record) =>
       this.db.doc(firestoreDocumentPath("legalAcknowledgements", record.id)),
     );
 
     await this.db.runTransaction(async (transaction) => {
-      const [storedInvitation, existingMembership, existingAuthorization, ...existingLegal] =
-        await Promise.all([
-          transaction.get(invitationRef),
-          transaction.get(membershipRef),
-          transaction.get(authorizationRef),
-          ...legalRefs.map((ref) => transaction.get(ref)),
-        ]);
+      const [
+        storedInvitation,
+        existingMembership,
+        existingAuthorization,
+        commercialAccount,
+        organizationMemberships,
+        ...existingLegal
+      ] = await Promise.all([
+        transaction.get(invitationRef),
+        transaction.get(membershipRef),
+        transaction.get(authorizationRef),
+        transaction.get(commercialRef),
+        transaction.get(organizationMembershipsQuery),
+        ...legalRefs.map((ref) => transaction.get(ref)),
+      ]);
 
       if (!storedInvitation.exists) throw new Error("Organization invitation no longer exists.");
       const stored = storedInvitation.data();
@@ -172,6 +190,21 @@ export class FirestoreOrganizationInvitationAcceptanceUnitOfWork
         )
       ) {
         throw new Error("Invitation legal acknowledgements do not match the accepted membership context.");
+      }
+
+      const rawEntitlementKeys = commercialAccount.data()?.entitlementKeys;
+      const entitlementKeys = Array.isArray(rawEntitlementKeys)
+        ? rawEntitlementKeys.filter((value): value is string => typeof value === "string")
+        : [];
+      const seatEntitlement = parseSharedSeatEntitlements(entitlementKeys);
+      if (seatEntitlement) {
+        const activeSeats = organizationMemberships.docs.filter(
+          (document) => document.data().status === "active",
+        ).length;
+        const entitledSeats = seatEntitlement.includedSeats + seatEntitlement.addOnSeatAllowance;
+        if (activeSeats >= entitledSeats) {
+          throw new Error("Organization seat entitlement does not allow another active member.");
+        }
       }
 
       transaction.set(
