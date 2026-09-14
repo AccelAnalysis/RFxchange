@@ -125,6 +125,7 @@ const DOMAIN_TIMESTAMP_EXPOSURE: Readonly<Record<FirestoreCollectionKey, DomainT
     commercialFoundingCapacity: Object.freeze({ createdAt: true, updatedAt: true }),
     commercialProviderEvents: Object.freeze({ createdAt: true, updatedAt: false }),
     commercialSubscriptionReconciliations: Object.freeze({ createdAt: true, updatedAt: true }),
+    accelPoCommandReceipts: Object.freeze({ createdAt: true, updatedAt: false }),
   });
 
 function asDocumentData(record: object): DocumentData {

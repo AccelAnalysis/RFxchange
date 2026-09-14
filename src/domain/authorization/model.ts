@@ -25,6 +25,17 @@ export const ORGANIZATION_PERMISSION_CATALOG = [
   "resource.manage",
   "credibility.manage",
   "billing.manage",
+  "organization.people.manage",
+  "purchasing.request",
+  "purchasing.case.view-all",
+  "purchasing.approve",
+  "purchasing.budget.view",
+  "purchasing.budget.manage",
+  "purchasing.sourcing.view",
+  "purchasing.award",
+  "purchasing.order",
+  "purchasing.documentation.review",
+  "purchasing.configure",
 ] as const;
 
 export type OrganizationPermission = (typeof ORGANIZATION_PERMISSION_CATALOG)[number];

@@ -101,6 +101,7 @@ export const FIRESTORE_COLLECTIONS = {
   commercialFoundingCapacity: "commercialFoundingCapacity",
   commercialProviderEvents: "commercialProviderEvents",
   commercialSubscriptionReconciliations: "commercialSubscriptionReconciliations",
+  accelPoCommandReceipts: "accelPoCommandReceipts",
 } as const;
 
 export type FirestoreCollectionKey = keyof typeof FIRESTORE_COLLECTIONS;
@@ -235,6 +236,7 @@ export const FIRESTORE_COLLECTION_CONVENTIONS: Readonly<
   commercialFoundingCapacity: Object.freeze({ collection: FIRESTORE_COLLECTIONS.commercialFoundingCapacity, documentIdSource: "reference", scope: "platform-scoped", organizationIdRequired: false, appendOnly: false, mutable: true }),
   commercialProviderEvents: Object.freeze({ collection: FIRESTORE_COLLECTIONS.commercialProviderEvents, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
   commercialSubscriptionReconciliations: Object.freeze({ collection: FIRESTORE_COLLECTIONS.commercialSubscriptionReconciliations, documentIdSource: "organizationId", scope: "organization-scoped", organizationIdRequired: true, appendOnly: false, mutable: true }),
+  accelPoCommandReceipts: Object.freeze({ collection: FIRESTORE_COLLECTIONS.accelPoCommandReceipts, documentIdSource: "id", scope: "organization-scoped", organizationIdRequired: true, appendOnly: true, mutable: false }),
 });
 
 export const FIRESTORE_SYSTEM_FIELDS = Object.freeze({
