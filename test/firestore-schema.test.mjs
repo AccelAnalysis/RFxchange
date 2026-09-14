@@ -114,6 +114,7 @@ test("defines schema version and canonical collection names", () => {
     commercialFoundingCapacity: "commercialFoundingCapacity",
     commercialProviderEvents: "commercialProviderEvents",
     commercialSubscriptionReconciliations: "commercialSubscriptionReconciliations",
+    accelPoCommandReceipts: "accelPoCommandReceipts",
   });
 });
 
@@ -144,7 +145,7 @@ test("organization-scoped collections explicitly require organizationId", () => 
     "providerResources", "providerNetworkEvents", "providerNetworkCommands", "providerAcquisitionInvitations", "networkEducationProgress",
     "networkEducationEvents", "networkEducationCommands", "aiInterpretationRecords", "aiInterpretationCandidates",
     "aiInterpretationProvenance", "aiInterpretationUsageEvents", "aiInterpretationEvents", "organizationCommercialAccounts",
-    "commercialProviderEvents", "commercialSubscriptionReconciliations",
+    "commercialProviderEvents", "commercialSubscriptionReconciliations", "accelPoCommandReceipts",
   ]) {
     assert.equal(FIRESTORE_COLLECTION_CONVENTIONS[key].organizationIdRequired, true);
     assert.throws(() => assertOrganizationScopedFirestoreRecord(key, ""), /require an explicit organizationId/);
@@ -175,7 +176,7 @@ test("append-only domain and operational history remains non-mutable", () => {
     "opportunityPursuitEvents", "referralEducationAcknowledgements", "providerApplicationVersions", "providerApplicationEvents",
     "providerApplicationCommands", "providerNetworkEvents", "providerNetworkCommands", "providerRequestMessages",
     "orientationJourneyEvents", "activationReleaseEvents", "aiInterpretationProvenance", "aiInterpretationUsageEvents",
-    "aiInterpretationEvents", "commercialProviderEvents",
+    "aiInterpretationEvents", "commercialProviderEvents", "accelPoCommandReceipts",
   ]) {
     const convention = FIRESTORE_COLLECTION_CONVENTIONS[key];
     assert.equal(convention.appendOnly, true, `${key} must be append-only`);
