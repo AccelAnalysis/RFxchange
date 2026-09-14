@@ -91,3 +91,11 @@ committed.
 allowlist, trusted tenant/actor context, deterministic replay identity, CP-03 staging, retry-state
 isolation, chassis registration, absence of a client route/permission, and drift between the typed
 contract and the Functions delivery projection.
+
+## Deployment boundary
+
+CP-09 has no participant-facing route. Feature-branch deployment therefore validates integration
+through the repository's AccelPO GitHub Pages preview while production Firebase Functions remain a
+release/integration action. The current root `firebase.json` defines Functions, Firestore, Storage,
+and emulators but does not yet define the `rfxchange-purchasing.web.app` Hosting target; CP-09 does
+not invent a parallel hosting configuration to work around that missing shared deployment contract.
