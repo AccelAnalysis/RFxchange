@@ -1,4 +1,5 @@
 import {
+  entitlementGuardDocumentPath,
   invitationReservesSeat,
   parseSharedSeatEntitlements,
   planMemberSeatRelease,
@@ -10,6 +11,7 @@ import {
   type AccelPoCommandRegistry,
   type AnyCommandDefinition,
   type CommandHandlerContext,
+  type CommandRecordSnapshot,
   type CommandTransaction,
   type JsonObject,
   type JsonValue,
@@ -45,6 +47,12 @@ export interface CP10CommandDependencies {
     }>,
   ) => Promise<ResponsibilityResolution>;
 }
+
+type EntitlementGuard = Readonly<{
+  path: string;
+  exists: boolean;
+  revision: number;
+}>;
 
 function validation(message: string, details: Record<string, string | number | boolean | null> | null = null): never {
   throw new AccelPoCommandError("validation-failure", message, details);
@@ -105,6 +113,56 @@ function liveReservationCount(
       expiresAt: typeof data.expiresAt === "string" ? data.expiresAt : null,
     }, now);
   }).length;
+}
+
+async function readEntitlementGuard(
+  context: CommandHandlerContext<JsonObject>,
+): Promise<EntitlementGuard> {
+  const path = entitlementGuardDocumentPath(context.actor.organizationId);
+  const record: CommandRecordSnapshot = await context.transaction.get(path);
+  if (!record.exists) return Object.freeze({ path, exists: false, revision: 0 });
+
+  const organizationId = record.data?.organizationId;
+  const revision = record.data?.revision;
+  if (
+    organizationId !== context.actor.organizationId ||
+    typeof revision !== "number" ||
+    !Number.isSafeInteger(revision) ||
+    revision < 1
+  ) {
+    throw new AccelPoCommandError(
+      "unavailable-service",
+      "Seat coordination data is unavailable. Retry after organization access data is reconciled.",
+    );
+  }
+  return Object.freeze({ path, exists: true, revision });
+}
+
+function bumpEntitlementGuard(
+  context: CommandHandlerContext<JsonObject>,
+  guard: EntitlementGuard,
+): void {
+  const next = guard.revision + 1;
+  if (!Number.isSafeInteger(next)) {
+    throw new AccelPoCommandError(
+      "unavailable-service",
+      "Seat coordination data is unavailable. Retry after organization access data is reconciled.",
+    );
+  }
+  if (guard.exists) {
+    context.transaction.update(guard.path, {
+      organizationId: context.actor.organizationId,
+      revision: next,
+      updatedAt: context.now,
+    });
+    return;
+  }
+  context.transaction.create(guard.path, {
+    organizationId: context.actor.organizationId,
+    revision: 1,
+    createdAt: context.now,
+    updatedAt: context.now,
+  });
 }
 
 async function organizationSeatSets(context: CommandHandlerContext<JsonObject>) {
@@ -178,6 +236,9 @@ function createInviteDefinition(): AnyCommandDefinition {
       const expiresAt = futureTimestamp(context.command.payload, "expiresAt", "Invitation expiration", context.now);
       const invitationId = `accelpo_inv_${context.commandId.replace(/^accelpo_cmd_/, "").slice(0, 48)}`;
 
+      // Every seat-consuming transition reads the same organization guard before any writes. A
+      // concurrent invite/accept/remove changes the guard and forces Firestore to retry this work.
+      const guard = await readEntitlementGuard(context);
       const existing = await context.transaction.get(`${INVITATION_COLLECTION}/${invitationId}`);
       if (existing.exists) {
         throw new AccelPoCommandError(
@@ -224,6 +285,7 @@ function createInviteDefinition(): AnyCommandDefinition {
         });
       }
 
+      bumpEntitlementGuard(context, guard);
       context.transaction.create(`${INVITATION_COLLECTION}/${invitationId}`, {
         schemaVersion: 1,
         id: invitationId,
@@ -269,12 +331,14 @@ function revokeInvitationDefinition(): AnyCommandDefinition {
       recordId: identifier(payload, "invitationId", "Invitation"),
       organizationField: "organizationId",
     }),
-    handle(context: CommandHandlerContext<JsonObject>) {
+    async handle(context: CommandHandlerContext<JsonObject>) {
       const target = context.target?.data;
       if (!target) throw new AccelPoCommandError("not-found", "The invitation is unavailable.");
       if (target.status !== "pending") {
         validation("Only a pending invitation can be revoked.");
       }
+      const guard = await readEntitlementGuard(context);
+      bumpEntitlementGuard(context, guard);
       context.transaction.update(context.target!.path, {
         status: "revoked",
         revokedAt: context.now,
@@ -314,6 +378,7 @@ function deactivateMembershipDefinition(
         });
       }
 
+      const guard = await readEntitlementGuard(context);
       const membershipId = context.target!.path.split("/").at(-1) ?? "";
       const authorization = await context.transaction.get(`${AUTHORIZATION_COLLECTION}/${membershipId}`);
       const authorizationData = authorization.data;
@@ -359,6 +424,7 @@ function deactivateMembershipDefinition(
         );
       }
 
+      bumpEntitlementGuard(context, guard);
       context.transaction.update(context.target!.path, {
         status: "inactive",
         updatedAt: context.now,
