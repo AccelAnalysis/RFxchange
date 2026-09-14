@@ -12,6 +12,23 @@ export const SHARED_SEAT_ENTITLEMENT_KEYS = Object.freeze({
   addOnCurrencyPrefix: "organization.seats.addon.currency:",
 } as const);
 
+/**
+ * One organization-scoped revision document serializes seat-consuming transitions. It carries no
+ * seat totals, prices, plan facts, or membership truth; those remain in the shared canonical
+ * sources. The revision only prevents concurrent Firestore transactions from both succeeding on
+ * the same pre-insert query snapshot.
+ */
+export const ACCELPO_ENTITLEMENT_GUARD_COLLECTION = "accelPoEntitlementGuards" as const;
+const ENTITLEMENT_GUARD_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{1,190}$/;
+
+export function entitlementGuardDocumentPath(organizationId: string): string {
+  const normalized = organizationId.trim();
+  if (!ENTITLEMENT_GUARD_ID.test(normalized)) {
+    throw new Error("Organization identity is invalid for entitlement coordination.");
+  }
+  return `${ACCELPO_ENTITLEMENT_GUARD_COLLECTION}/${normalized}`;
+}
+
 const MAX_SEAT_COUNT = 1_000_000;
 const ISO_CURRENCY = /^[a-z]{3}$/;
 
