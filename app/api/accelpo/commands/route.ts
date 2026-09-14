@@ -4,6 +4,7 @@ import {
   AccelPoCommandError,
 } from "@/src/application/accelpo/command-port";
 import { ServerSessionError } from "@/src/application/auth/server-session";
+import { ensureCP10CommandRegistration } from "@/src/accelpo/cp10/commands";
 import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
 import { RFXCHANGE_SESSION_COOKIE_NAME } from "@/src/infrastructure/auth/participant-route-runtime";
@@ -13,6 +14,7 @@ import { apiProblem } from "@/src/infrastructure/http/api-problem";
 export const runtime = "nodejs";
 
 const MAX_COMMAND_BODY_BYTES = 262_144;
+ensureCP10CommandRegistration();
 
 function bearerToken(request: NextRequest): string | null {
   const header = request.headers.get("authorization")?.trim() ?? "";
