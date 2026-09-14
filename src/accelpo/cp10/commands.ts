@@ -316,7 +316,21 @@ function deactivateMembershipDefinition(
 
       const membershipId = context.target!.path.split("/").at(-1) ?? "";
       const authorization = await context.transaction.get(`${AUTHORIZATION_COLLECTION}/${membershipId}`);
-      const roleKey = typeof authorization.data?.roleKey === "string" ? authorization.data.roleKey : "";
+      const authorizationData = authorization.data;
+      const roleKey = typeof authorizationData?.roleKey === "string" ? authorizationData.roleKey.trim() : "";
+      if (
+        !authorization.exists ||
+        !authorizationData ||
+        authorizationData.organizationId !== context.actor.organizationId ||
+        authorizationData.membershipId !== membershipId ||
+        authorizationData.userId !== userId ||
+        !roleKey
+      ) {
+        throw new AccelPoCommandError(
+          "unavailable-service",
+          "Team member authorization data is unavailable. Reconcile access before removing this member.",
+        );
+      }
       const responsibilities = dependencies.resolveResponsibilities
         ? await dependencies.resolveResponsibilities({
             organizationId: context.actor.organizationId,
