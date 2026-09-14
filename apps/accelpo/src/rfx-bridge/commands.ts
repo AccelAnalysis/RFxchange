@@ -11,6 +11,7 @@ import {
   RFxBridgeError,
   type CanonicalRFxBridgePort,
   type RFxBridgeFlow,
+  type RFxBridgeOpportunityState,
   type SupplierSafeNeedProjection,
 } from "./contracts.ts";
 import { createSupplierSafeNeedProjection } from "./supplier-safe.ts";
@@ -112,6 +113,41 @@ function canonicalError(error: unknown): never {
   throw new AccelPoCommandError("unavailable-service", "RFxchange is temporarily unavailable.");
 }
 
+function canonicalOpportunityId(value: unknown, expected?: string): string {
+  if (typeof value !== "string" || !IDENTIFIER.test(value)) {
+    throw new AccelPoCommandError(
+      "unavailable-service",
+      "RFxchange returned an invalid opportunity identity.",
+    );
+  }
+  if (expected !== undefined && value !== expected) {
+    throw new AccelPoCommandError(
+      "unavailable-service",
+      "RFxchange returned a different opportunity than the linked Purchase Case.",
+    );
+  }
+  return value;
+}
+
+function canonicalState(
+  value: unknown,
+  expected?: "closed" | "withdrawn",
+): RFxBridgeOpportunityState {
+  if (value !== "open" && value !== "closed" && value !== "withdrawn") {
+    throw new AccelPoCommandError(
+      "unavailable-service",
+      "RFxchange returned an invalid opportunity state.",
+    );
+  }
+  if (expected !== undefined && value !== expected) {
+    throw new AccelPoCommandError(
+      "unavailable-service",
+      "RFxchange returned an unexpected opportunity state.",
+    );
+  }
+  return value;
+}
+
 function nextVersion(context: CommandHandlerContext): number {
   if (context.currentVersion === null) {
     throw new AccelPoCommandError("version-conflict", "Purchase Case version is unavailable.");
@@ -178,14 +214,14 @@ async function verifiedSupplierSafeNeed(
 
 function result(
   purchaseCaseId: string,
-  canonicalOpportunityId: string,
+  opportunityId: string,
   sourcingFlow: RFxBridgeFlow,
-  state: "open" | "closed" | "withdrawn",
+  state: RFxBridgeOpportunityState,
 ) {
   return Object.freeze({
     bridgeVersion: CP08_RFX_BRIDGE_VERSION,
     purchaseCaseId,
-    canonicalOpportunityId,
+    canonicalOpportunityId: opportunityId,
     flow: sourcingFlow,
     state,
   });
@@ -197,7 +233,7 @@ function updateCaseLink(
     purchaseCaseId: string;
     canonicalOpportunityId: string;
     flow: RFxBridgeFlow;
-    state: "open" | "closed" | "withdrawn";
+    state: RFxBridgeOpportunityState;
     version: number;
   }>,
 ): void {
@@ -240,21 +276,18 @@ export function createCP08RFxBridgeCommandDefinitions(
           supplierSafeNeed: await verifiedSupplierSafeNeed(context, purchaseCaseId),
           idempotencyKey: context.command.idempotencyKey ?? context.commandId,
         });
+        const returnedOpportunityId = canonicalOpportunityId(canonicalResult.canonicalOpportunityId);
+        const state = canonicalState(canonicalResult.state);
         const version = nextVersion(context);
         updateCaseLink(context, {
           purchaseCaseId,
-          canonicalOpportunityId: canonicalResult.canonicalOpportunityId,
+          canonicalOpportunityId: returnedOpportunityId,
           flow: sourcingFlow,
-          state: canonicalResult.state,
+          state,
           version,
         });
         return Object.freeze({
-          data: result(
-            purchaseCaseId,
-            canonicalResult.canonicalOpportunityId,
-            sourcingFlow,
-            canonicalResult.state,
-          ),
+          data: result(purchaseCaseId, returnedOpportunityId, sourcingFlow, state),
           resultingVersion: version,
         });
       } catch (error) {
@@ -271,33 +304,33 @@ export function createCP08RFxBridgeCommandDefinitions(
     target,
     handle: async (context: CommandHandlerContext) => {
       const purchaseCaseId = identifier(context.command.payload, "purchaseCaseId");
-      const canonicalOpportunityId = identifier(context.command.payload, "canonicalOpportunityId");
+      const linkedOpportunityId = identifier(context.command.payload, "canonicalOpportunityId");
       const sourcingFlow = authorizedSourcingFlow(context, flow(context.command.payload));
-      ensureLinkedOpportunity(context, canonicalOpportunityId);
+      ensureLinkedOpportunity(context, linkedOpportunityId);
       try {
         const canonicalResult = await canonical.updateOpportunity({
           organizationId: context.actor.organizationId,
           actorUserId: context.actor.userId,
           actorMembershipId: context.actor.membershipId,
-          canonicalOpportunityId,
+          canonicalOpportunityId: linkedOpportunityId,
           supplierSafeNeed: await verifiedSupplierSafeNeed(context, purchaseCaseId),
           idempotencyKey: context.command.idempotencyKey ?? context.commandId,
         });
+        const returnedOpportunityId = canonicalOpportunityId(
+          canonicalResult.canonicalOpportunityId,
+          linkedOpportunityId,
+        );
+        const state = canonicalState(canonicalResult.state);
         const version = nextVersion(context);
         updateCaseLink(context, {
           purchaseCaseId,
-          canonicalOpportunityId: canonicalResult.canonicalOpportunityId,
+          canonicalOpportunityId: returnedOpportunityId,
           flow: sourcingFlow,
-          state: canonicalResult.state,
+          state,
           version,
         });
         return Object.freeze({
-          data: result(
-            purchaseCaseId,
-            canonicalResult.canonicalOpportunityId,
-            sourcingFlow,
-            canonicalResult.state,
-          ),
+          data: result(purchaseCaseId, returnedOpportunityId, sourcingFlow, state),
           resultingVersion: version,
         });
       } catch (error) {
@@ -317,40 +350,43 @@ export function createCP08RFxBridgeCommandDefinitions(
       target,
       handle: async (context: CommandHandlerContext) => {
         const purchaseCaseId = identifier(context.command.payload, "purchaseCaseId");
-        const canonicalOpportunityId = identifier(context.command.payload, "canonicalOpportunityId");
-        ensureLinkedOpportunity(context, canonicalOpportunityId);
+        const linkedOpportunityId = identifier(context.command.payload, "canonicalOpportunityId");
+        ensureLinkedOpportunity(context, linkedOpportunityId);
         const sourcingFlow = linkedFlow(context);
         try {
+          const expectedState = name === CP08_RFX_BRIDGE_COMMANDS.CLOSE_OPPORTUNITY
+            ? "closed" as const
+            : "withdrawn" as const;
           const canonicalResult = name === CP08_RFX_BRIDGE_COMMANDS.CLOSE_OPPORTUNITY
             ? await canonical.closeOpportunity({
                 organizationId: context.actor.organizationId,
                 actorUserId: context.actor.userId,
                 actorMembershipId: context.actor.membershipId,
-                canonicalOpportunityId,
+                canonicalOpportunityId: linkedOpportunityId,
                 idempotencyKey: context.command.idempotencyKey ?? context.commandId,
               })
             : await canonical.withdrawOpportunity({
                 organizationId: context.actor.organizationId,
                 actorUserId: context.actor.userId,
                 actorMembershipId: context.actor.membershipId,
-                canonicalOpportunityId,
+                canonicalOpportunityId: linkedOpportunityId,
                 idempotencyKey: context.command.idempotencyKey ?? context.commandId,
               });
+          const returnedOpportunityId = canonicalOpportunityId(
+            canonicalResult.canonicalOpportunityId,
+            linkedOpportunityId,
+          );
+          const state = canonicalState(canonicalResult.state, expectedState);
           const version = nextVersion(context);
           updateCaseLink(context, {
             purchaseCaseId,
-            canonicalOpportunityId: canonicalResult.canonicalOpportunityId,
+            canonicalOpportunityId: returnedOpportunityId,
             flow: sourcingFlow,
-            state: canonicalResult.state,
+            state,
             version,
           });
           return Object.freeze({
-            data: result(
-              purchaseCaseId,
-              canonicalResult.canonicalOpportunityId,
-              sourcingFlow,
-              canonicalResult.state,
-            ),
+            data: result(purchaseCaseId, returnedOpportunityId, sourcingFlow, state),
             resultingVersion: version,
           });
         } catch (error) {
