@@ -127,7 +127,7 @@ export interface RFxBridgePublishInput {
   readonly flow: RFxBridgeFlow;
   readonly supplierSafeNeed: SupplierSafeNeedProjection;
   readonly requestId: string;
-  readonly expectedVersion?: number;
+  readonly expectedVersion: number;
   readonly idempotencyKey?: string;
 }
 
@@ -142,7 +142,7 @@ export interface RFxBridgeStateChangeInput {
   readonly purchaseCaseId: string;
   readonly canonicalOpportunityId: string;
   readonly requestId: string;
-  readonly expectedVersion?: number;
+  readonly expectedVersion: number;
   /** Stable user/domain intent identity. Retrying the same intent must reuse this value. */
   readonly mutationId: string;
 }
