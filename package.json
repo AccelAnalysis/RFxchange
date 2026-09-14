@@ -88,7 +88,11 @@
     "build:admin": "nx run rfxchange-admin:build",
     "typecheck:admin": "npm --workspace @rfxchange/admin run typecheck",
     "build:marketing": "nx run rfxchange-marketing:build",
-    "typecheck:marketing": "npm --workspace @rfxchange/marketing run typecheck"
+    "typecheck:marketing": "npm --workspace @rfxchange/marketing run typecheck",
+    "validate:accelpo": "node scripts/validate-accelpo-chassis.mjs",
+    "typecheck:accelpo": "tsc -p apps/accelpo/tsconfig.json",
+    "test:accelpo": "node --experimental-transform-types --test test/accelpo-cp*.test.mjs",
+    "test:accelpo-cp04": "node --experimental-transform-types --test test/accelpo-cp04-query-projection.test.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",

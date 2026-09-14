@@ -1,0 +1,43 @@
+name: AccelPO GitHub Pages preview
+
+on:
+  push:
+    branches:
+      - "feat/accelpo-*"
+      - "accelpo/**"
+      - "codex/accelpo-*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: accelpo-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Validate AccelPO shell
+        run: |
+          test -f apps/accelpo/index.html
+          test -f apps/accelpo/app.js
+          test -f apps/accelpo/manifest.webmanifest
+          node --check apps/accelpo/app.js
+          node --check apps/accelpo/sw.js
+          node scripts/validate-accelpo-chassis.mjs
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/accelpo
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

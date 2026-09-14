@@ -29,6 +29,7 @@ export interface ApiProblemInput {
   readonly status: number;
   readonly participantMessage: string;
   readonly code?: string;
+  readonly details?: Readonly<Record<string, string | number | boolean | null>>;
   readonly cause?: unknown;
 }
 
@@ -111,6 +112,7 @@ export function apiProblem(
     {
       error: participantMessage,
       ...(code ? { code } : {}),
+      ...(input.details ? { details: input.details } : {}),
       correlationId,
       supportId,
     },

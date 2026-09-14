@@ -160,6 +160,10 @@ service cloud.firestore {
     match /commercialProviderEvents/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
     match /commercialSubscriptionReconciliations/{documentId} { allow read, write: if serverManagedOnly(); }
 
+    // AccelPO CP-03 command receipts are immutable, organization-scoped replay evidence. All
+    // browser writes remain denied; the trusted command boundary is the only writer.
+    match /accelPoCommandReceipts/{documentId} { allow read, create: if serverManagedOnly(); allow update, delete: if false; }
+
     match /storedAssets/{documentId} { allow read, write: if serverManagedOnly(); }
 
     match /{document=**} { allow read, write: if false; }

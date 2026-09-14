@@ -6,6 +6,7 @@ export const applicationOrigins = Object.freeze({
   exchange: "https://rfxchange--rfxchange.us-east4.hosted.app",
   admin: "https://rfxchange-admin--rfxchange.us-east4.hosted.app",
   marketing: "https://rfxchange-marketing--rfxchange.us-east4.hosted.app",
+  purchasing: "https://rfxchange-purchasing.web.app",
 });
 
 const publicPaths = new Set([

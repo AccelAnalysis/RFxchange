@@ -8,7 +8,7 @@ import { applicationOrigins } from "../../application/platform/application-origi
  */
 export function isApplicationRequestOrigin(
   request: Pick<Request, "headers" | "url">,
-  application: "admin" | "exchange",
+  application: "admin" | "exchange" | "purchasing",
 ): boolean {
   const origin = request.headers.get("origin");
   if (origin === applicationOrigins[application]) return true;
