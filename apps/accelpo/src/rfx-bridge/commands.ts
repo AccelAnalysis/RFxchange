@@ -1,5 +1,6 @@
 import {
   AccelPoCommandError,
+  type AccelPoCommandRegistry,
   type AnyCommandDefinition,
   type CommandHandlerContext,
   type JsonObject,
@@ -15,6 +16,7 @@ import {
 import { createSupplierSafeNeedProjection } from "./supplier-safe.ts";
 
 const PURCHASE_CASE_COLLECTION = "accelpoPurchaseCases" as const;
+const EVIDENCE_COLLECTION = "accelpoEvidence" as const;
 const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._:-]{1,190}$/;
 
 function record(value: unknown): Readonly<Record<string, unknown>> | null {
@@ -127,16 +129,51 @@ function ensureLinkedOpportunity(context: CommandHandlerContext, canonicalOpport
 function linkedFlow(context: CommandHandlerContext): RFxBridgeFlow {
   const value = context.target?.data?.sourcingFlow;
   if (value !== "source-first" && value !== "authorize-first") {
-    throw new AccelPoCommandError("unavailable-service", "The linked sourcing flow is unavailable.");
+    throw new AccelPoCommandError("unavailable-service", "The Purchase Case sourcing flow is unavailable.");
   }
   return value;
 }
 
-function ensureFlow(context: CommandHandlerContext, requested: RFxBridgeFlow): void {
-  const existing = context.target?.data?.sourcingFlow;
-  if (existing !== undefined && existing !== null && existing !== requested) {
-    throw new AccelPoCommandError("validation-failure", "The sourcing flow cannot be changed after publication.");
+function authorizedSourcingFlow(
+  context: CommandHandlerContext,
+  requested: RFxBridgeFlow,
+): RFxBridgeFlow {
+  const resolved = linkedFlow(context);
+  if (resolved !== requested) {
+    throw new AccelPoCommandError("forbidden", "That sourcing flow is not authorized for this Purchase Case.");
   }
+  if (context.target?.data?.sourcingPublicationAuthorized !== true) {
+    throw new AccelPoCommandError("forbidden", "Community sourcing is not authorized for this Purchase Case.");
+  }
+  return resolved;
+}
+
+async function verifiedSupplierSafeNeed(
+  context: CommandHandlerContext,
+  purchaseCaseId: string,
+): Promise<SupplierSafeNeedProjection> {
+  const safe = supplierSafeNeed(context.command.payload);
+  for (const file of safe.releasedFiles) {
+    const snapshot = await context.transaction.get(`${EVIDENCE_COLLECTION}/${file.evidenceId}`);
+    const data = snapshot.data;
+    if (
+      !snapshot.exists ||
+      !data ||
+      data.organizationId !== context.actor.organizationId ||
+      data.purchaseCaseId !== purchaseCaseId ||
+      data.status !== "uploaded" ||
+      data.releaseStatus !== "released" ||
+      data.originalFilename !== file.originalFilename ||
+      data.contentType !== file.contentType ||
+      data.size !== file.size
+    ) {
+      throw new AccelPoCommandError(
+        "validation-failure",
+        "A released sourcing file is unavailable or no longer approved for supplier access.",
+      );
+    }
+  }
+  return safe;
 }
 
 function result(
@@ -189,7 +226,7 @@ export function createCP08RFxBridgeCommandDefinitions(
     target,
     handle: async (context: CommandHandlerContext) => {
       const purchaseCaseId = identifier(context.command.payload, "purchaseCaseId");
-      const sourcingFlow = flow(context.command.payload);
+      const sourcingFlow = authorizedSourcingFlow(context, flow(context.command.payload));
       if (context.target?.data?.canonicalOpportunityId) {
         throw new AccelPoCommandError("validation-failure", "This Purchase Case is already linked to RFxchange.");
       }
@@ -200,7 +237,7 @@ export function createCP08RFxBridgeCommandDefinitions(
           actorMembershipId: context.actor.membershipId,
           purchaseCaseId,
           flow: sourcingFlow,
-          supplierSafeNeed: supplierSafeNeed(context.command.payload),
+          supplierSafeNeed: await verifiedSupplierSafeNeed(context, purchaseCaseId),
           idempotencyKey: context.command.idempotencyKey ?? context.commandId,
         });
         const version = nextVersion(context);
@@ -235,16 +272,15 @@ export function createCP08RFxBridgeCommandDefinitions(
     handle: async (context: CommandHandlerContext) => {
       const purchaseCaseId = identifier(context.command.payload, "purchaseCaseId");
       const canonicalOpportunityId = identifier(context.command.payload, "canonicalOpportunityId");
-      const sourcingFlow = flow(context.command.payload);
+      const sourcingFlow = authorizedSourcingFlow(context, flow(context.command.payload));
       ensureLinkedOpportunity(context, canonicalOpportunityId);
-      ensureFlow(context, sourcingFlow);
       try {
         const canonicalResult = await canonical.updateOpportunity({
           organizationId: context.actor.organizationId,
           actorUserId: context.actor.userId,
           actorMembershipId: context.actor.membershipId,
           canonicalOpportunityId,
-          supplierSafeNeed: supplierSafeNeed(context.command.payload),
+          supplierSafeNeed: await verifiedSupplierSafeNeed(context, purchaseCaseId),
           idempotencyKey: context.command.idempotencyKey ?? context.commandId,
         });
         const version = nextVersion(context);
@@ -330,4 +366,13 @@ export function createCP08RFxBridgeCommandDefinitions(
     terminalDefinition(CP08_RFX_BRIDGE_COMMANDS.CLOSE_OPPORTUNITY),
     terminalDefinition(CP08_RFX_BRIDGE_COMMANDS.WITHDRAW_OPPORTUNITY),
   ]);
+}
+
+export function registerCP08RFxBridgeCommands(
+  registry: AccelPoCommandRegistry,
+  canonical: CanonicalRFxBridgePort,
+): void {
+  for (const definition of createCP08RFxBridgeCommandDefinitions(canonical)) {
+    registry.register(definition);
+  }
 }
