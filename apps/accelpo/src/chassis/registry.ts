@@ -3,6 +3,7 @@ import { CP01_IDENTITY_CONTEXT_PART } from "../identity-context/part.ts";
 import { CP03_COMMAND_PORT_PART } from "../command-port/part.ts";
 import { CP04_QUERY_PROJECTION_PART } from "../query-projection/part.ts";
 import { CP05_POLICY_RESOLVER_PART } from "../policy-resolver/part.ts";
+import { CP06_TASK_NOTIFICATION_PART } from "../task-notification/part.ts";
 import { CP08_RFX_BRIDGE_PART } from "../rfx-bridge/part.ts";
 
 /** Small composition registry used by the shell. Parts register themselves; the shell owns the registry. */
@@ -50,10 +51,9 @@ export const CP02_ROUTE_SURFACE_PART: AccelPOPartContract = Object.freeze({
 });
 
 /**
- * Creates the current chassis registry with the bounded CP-03 write, CP-04 read, CP-05 policy,
- * and CP-08 RFx bridge boundaries registered. Later parts should add themselves through the same
- * registry rather than creating another router, command boundary, query service, policy engine,
- * or supplier marketplace.
+ * Creates the current chassis registry with bounded CP-03 write, CP-04 read, CP-05 policy,
+ * CP-06 task/notification, and CP-08 RFx bridge boundaries registered. Later parts should add
+ * themselves through this registry rather than creating parallel infrastructure.
  */
 export function createAccelPOPartRegistry(): AccelPOPartRegistry {
   const registry = new AccelPOPartRegistry();
@@ -63,6 +63,7 @@ export function createAccelPOPartRegistry(): AccelPOPartRegistry {
   registry.register(CP03_COMMAND_PORT_PART);
   registry.register(CP04_QUERY_PROJECTION_PART);
   registry.register(CP05_POLICY_RESOLVER_PART);
+  registry.register(CP06_TASK_NOTIFICATION_PART);
   registry.register(CP08_RFX_BRIDGE_PART);
   return registry;
 }
