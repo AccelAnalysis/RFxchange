@@ -2,6 +2,7 @@ import type { AccelPOConnectionPoint, AccelPOPartContract } from "./ports.ts";
 import { CP01_IDENTITY_CONTEXT_PART } from "../identity-context/part.ts";
 import { CP03_COMMAND_PORT_PART } from "../command-port/part.ts";
 import { CP04_QUERY_PROJECTION_PART } from "../query-projection/part.ts";
+import { CP08_RFX_BRIDGE_PART } from "../rfx-bridge/part.ts";
 
 /** Small composition registry used by the shell. Parts register themselves; the shell owns the registry. */
 export class AccelPOPartRegistry {
@@ -59,5 +60,6 @@ export function createAccelPOPartRegistry(): AccelPOPartRegistry {
   registry.register(CP01_IDENTITY_CONTEXT_PART);
   registry.register(CP03_COMMAND_PORT_PART);
   registry.register(CP04_QUERY_PROJECTION_PART);
+  registry.register(CP08_RFX_BRIDGE_PART);
   return registry;
 }
