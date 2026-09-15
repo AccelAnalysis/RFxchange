@@ -16,6 +16,10 @@ const files = [
   "src/chassis/route-registry.js",
   "src/chassis/ports.ts",
   "src/chassis/registry.ts",
+  "src/organization-settings/part.ts",
+  "src/organization-settings/runtime.js",
+  "src/organization-settings/surfaces.js",
+  "src/organization-settings/surfaces.css",
 ];
 
 for (const file of files) await read(file);
@@ -40,8 +44,21 @@ assert.equal(manifest.start_url, "./#home");
 assert.match(index, /name="viewport"/);
 assert.match(index, /rel="manifest"/);
 assert.match(index, /type="module"/);
+assert.match(index, /organization-settings\/surfaces\.js/);
 
-for (const route of ["home", "purchases", "new", "tasks", "organization", "purchaseDetail"]) {
+for (const route of [
+  "home",
+  "purchases",
+  "new",
+  "tasks",
+  "organization",
+  "organizationDetails",
+  "organizationPeople",
+  "organizationPurchasing",
+  "organizationProviders",
+  "organizationBilling",
+  "purchaseDetail",
+]) {
   assert.match(routes, new RegExp(`\\b${route}\\b`));
 }
 for (const connectionPoint of [
@@ -89,7 +106,9 @@ for (const internalTerm of [
   assert.doesNotMatch(`${index}\n${app}`, new RegExp(internalTerm));
 }
 
-assert.match(worker, /accelpo-chassis-v2/);
+assert.match(worker, /accelpo-chassis-v3/);
+assert.match(worker, /organization-settings\/runtime\.js/);
+assert.match(worker, /organization-settings\/surfaces\.js/);
 assert.doesNotMatch(worker, /cache\.put\(event\.request/);
 assert.match(app, /serviceWorker\.register\("\.\/sw\.js", \{ scope: "\.\/" \}\)/);
 assert.doesNotMatch(app, /<canvas|mapbox|leaflet/i);

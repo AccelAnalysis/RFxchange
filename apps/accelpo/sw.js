@@ -1,5 +1,16 @@
-const CACHE_NAME = "accelpo-chassis-v2";
-const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./src/chassis/route-registry.js", "./manifest.webmanifest", "./icon.svg"];
+const CACHE_NAME = "accelpo-chassis-v3";
+const APP_SHELL = [
+  "./",
+  "./index.html",
+  "./styles.css",
+  "./app.js",
+  "./src/chassis/route-registry.js",
+  "./src/organization-settings/runtime.js",
+  "./src/organization-settings/surfaces.js",
+  "./src/organization-settings/surfaces.css",
+  "./manifest.webmanifest",
+  "./icon.svg",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));

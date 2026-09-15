@@ -11,10 +11,35 @@ test("CP-02 registers the task-first AccelPO route surface", async () => {
   const app = await read("apps/accelpo/app.js");
 
   assert.match(registry, /id: "CP-02"/);
-  for (const route of ["/", "/purchases", "/new", "/tasks", "/organization", "/purchases/:caseId"]) {
+  for (const route of [
+    "/",
+    "/purchases",
+    "/new",
+    "/tasks",
+    "/organization",
+    "/organization/details",
+    "/organization/people",
+    "/organization/purchasing",
+    "/organization/providers",
+    "/organization/billing",
+    "/purchases/:caseId",
+  ]) {
     assert.match(registry, new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
-  for (const route of ["home", "purchases", "new", "tasks", "organization", "purchaseDetail", "registerRouteContribution"]) {
+  for (const route of [
+    "home",
+    "purchases",
+    "new",
+    "tasks",
+    "organization",
+    "organizationDetails",
+    "organizationPeople",
+    "organizationPurchasing",
+    "organizationProviders",
+    "organizationBilling",
+    "purchaseDetail",
+    "registerRouteContribution",
+  ]) {
     assert.match(routes, new RegExp(`\\b${route}\\b`));
   }
   assert.match(app, /route-registry\.js/);
@@ -33,17 +58,23 @@ test("CP-02 keeps install metadata and a single scoped service worker", async ()
   assert.equal(manifest.start_url, "./#home");
   assert.equal((index.match(/rel="manifest"/g) ?? []).length, 1);
   assert.match(index, /mobile-web-app-capable/);
-  assert.match(serviceWorker, /accelpo-chassis-v2/);
+  assert.match(serviceWorker, /accelpo-chassis-v3/);
+  assert.match(serviceWorker, /organization-settings\/surfaces\.js/);
   assert.doesNotMatch(serviceWorker, /cache\.put\(event\.request/);
 });
 
-test("Purchase Case deep links resolve without adding another router", async () => {
+test("Purchase Case and Organization deep links resolve without adding another router", async () => {
   const source = await read("apps/accelpo/src/chassis/route-registry.js");
   const routes = await import(`data:text/javascript,${encodeURIComponent(source)}`);
 
   assert.deepEqual(routes.routeFromHash("#home"), { view: "home", caseId: null });
   assert.deepEqual(routes.routeFromHash("#purchase/chairs"), { view: "purchase-detail", caseId: "chairs" });
+  assert.deepEqual(routes.routeFromHash("#organization/people"), { view: "organization-people", caseId: null });
+  assert.deepEqual(routes.routeFromHash("#organization/purchasing"), { view: "organization-purchasing", caseId: null });
+  assert.deepEqual(routes.routeFromHash("#organization/providers"), { view: "organization-providers", caseId: null });
+  assert.deepEqual(routes.routeFromHash("#organization/billing"), { view: "organization-billing", caseId: null });
   assert.equal(routes.hashForRoute("purchase-detail", "office chairs"), "purchase/office%20chairs");
+  assert.equal(routes.hashForRoute("organization-people"), "organization/people");
 
   routes.registerRouteContribution("P3", [{ id: "review", label: "Review", icon: "check", hash: "review", showInNavigation: false }]);
   assert.deepEqual(routes.routeFromHash("#review"), { view: "review", caseId: null });

@@ -11,6 +11,11 @@ export const ACCELPO_ROUTES = Object.freeze({
   new: Object.freeze({ id: "new", label: "New purchase", icon: "plus", hash: "new", showInNavigation: true }),
   tasks: Object.freeze({ id: "tasks", label: "Tasks", icon: "check", hash: "tasks", showInNavigation: true }),
   organization: Object.freeze({ id: "organization", label: "Organization", icon: "building", hash: "organization", showInNavigation: true }),
+  organizationDetails: Object.freeze({ id: "organization-details", label: "Organization details", icon: null, hash: "organization/details", showInNavigation: false }),
+  organizationPeople: Object.freeze({ id: "organization-people", label: "People & seats", icon: null, hash: "organization/people", showInNavigation: false }),
+  organizationPurchasing: Object.freeze({ id: "organization-purchasing", label: "Approval & spending", icon: null, hash: "organization/purchasing", showInNavigation: false }),
+  organizationProviders: Object.freeze({ id: "organization-providers", label: "Providers", icon: null, hash: "organization/providers", showInNavigation: false }),
+  organizationBilling: Object.freeze({ id: "organization-billing", label: "Plan & billing", icon: null, hash: "organization/billing", showInNavigation: false }),
   purchaseDetail: Object.freeze({ id: "purchase-detail", label: "Purchase details", icon: null, hash: "purchase/:caseId", showInNavigation: false }),
 });
 
