@@ -318,7 +318,7 @@ app.addEventListener("click", (event) => {
   if (action === "filter") { state.filter = actionElement.dataset.filter; return render(); }
   if (action === "clear-filters") { state.filter = "All"; state.query = ""; return render(); }
   if (action === "sort") return showNotice("Purchases are sorted by recent activity.");
-  if (["workspace", "profile", "notifications", "task-filter", "edit-org", "people", "policy", "providers", "billing", "case-note", "detail-next"].includes(action)) return showNotice("This preview is ready for the next connected step.");
+  if (["workspace", "profile", "notifications", "task-filter", "case-note", "detail-next"].includes(action)) return showNotice("This preview is ready for the next connected step.");
   if (action === "back-to-need") { state.newStep = 1; return render(); }
   if (action === "view-purchases") return navigate("purchases");
   if (action === "choose-source") {
