@@ -68,6 +68,7 @@ function identityDependencies({ membership, authorization }) {
     },
     memberships: {
       listActiveByUserId: async () => [membership],
+      listByOrganizationId: async () => [membership],
       getById: async () => membership,
     },
     authorizations: {
@@ -121,6 +122,9 @@ test("server projection selects only the authenticated user's active membership"
   assert.equal(ready.kind, "ready");
   assert.equal(ready.projection.activeOrganization.organizationId, "org-one");
   assert.deepEqual(ready.projection.permissions, ["purchasing.request"]);
+  assert.equal(ready.projection.seat.ownerCountsAsSeat, true);
+  assert.equal(ready.projection.seat.activeSeats, 1);
+  assert.equal(ready.projection.seat.source, "shared-membership-count");
 });
 
 test("server projection fails closed when authorization belongs to another membership", async () => {
