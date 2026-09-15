@@ -101,6 +101,7 @@ const state = {
 
 const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[character]));
 const money = (value) => value ? `$${Number(value).toLocaleString("en-US", { maximumFractionDigits: 0 })}` : "—";
+const todayLabel = new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date());
 
 function icon(name, size = 20) {
   const paths = {
@@ -120,7 +121,7 @@ function icon(name, size = 20) {
     sparkle: '<path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3ZM19 16l.6 2.4L22 19l-2.4.6L19 22l-.6-2.4L16 19l2.4-.6L19 16Z"/>',
     people: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
     card: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/>',
-    settings: '<path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="m19.4 15 .1.1a2 2 0 1 1-2.8 2.8l-.1-.1a2 2 0 0 0-3.4 1.4v.3a2 2 0 1 1-4 0v-.2a2 2 0 0 0-3.4-1.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A2 2 0 0 0 1.7 12H1.5a2 2 0 1 1 0-4h.2a2 2 0 0 0 1.4-3.4L3 4.5a2 2 0 1 1 2.8-2.8l.1.1A2 2 0 0 0 9.3.4V.2a2 2 0 1 1 4 0v.2a2 2 0 0 0 3.4 1.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A2 2 0 0 0 20.9 8h.2a2 2 0 1 1 0 4h-.2a2 2 0 0 0-1.5 3Z"/>',
+    settings: '<path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="m19.4 15 .1.1a2 2 0 1 1-2.8 2.8l-.1-.1a2 2 0 0 0-3.4 1.4v.3a2 2 0 1 1-4 0v-.2a2 2 0 0 0-3.4-1.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A2 2 0 0 0 1.7 12H1.5a2 2 0 1 1 0-4h.2a2 2 0 0 0 1.4-3.4L3 4.5a2 2 0 1 1 2.8-2.8l.1.1A2 2 0 0 0 9.3.4V.2a2 2 0 1 1 4 0v.2a2 2 0 0 0 3.4 1.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A2 2 0 0 0 20.9 8h.2a2 2 0 1 1 0 4h-.2a2 2 0 1 0 0 4Z"/>',
     dots: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
     external: '<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/>',
   };
@@ -156,8 +157,7 @@ function renderTopbar() {
       <span class="brand-mark">AP</span><span class="brand-name">Accel<span>PO</span></span>
     </button>
     <div class="topbar-center">
-      <span class="preview-label">Preview</span>
-      <button class="workspace-switcher" data-action="workspace"><span class="workspace-dot"></span><span>Preview workspace</span>${icon("chevron", 16)}</button>
+      <button class="workspace-switcher" data-action="workspace"><span class="workspace-dot"></span><span>Your organization</span>${icon("chevron", 16)}</button>
     </div>
     <div class="topbar-actions">
       <button class="icon-button" data-action="notifications" aria-label="Notifications"><span class="notification-dot"></span>${icon("bell", 20)}</button>
@@ -169,14 +169,9 @@ function renderTopbar() {
 function renderSidebar() {
   return `<aside class="sidebar" aria-label="Primary navigation">
     <div class="sidebar-section">
-      <p class="sidebar-caption">Workspace</p>
       ${navLink("home")}${navLink("purchases")}
       <button class="new-nav" data-action="new"><span class="new-nav-icon">${icon("plus", 18)}</span><span>New purchase</span></button>
       ${navLink("tasks")}${navLink("organization")}
-    </div>
-    <div class="sidebar-bottom">
-      <div class="sidebar-note"><span class="note-icon">${icon("sparkle", 17)}</span><div><strong>Start with a need</strong><span>Keep each purchase in one place.</span></div></div>
-      <div class="sidebar-version">AccelPO · purchasing</div>
     </div>
   </aside>`;
 }
@@ -205,7 +200,7 @@ function renderHome() {
   const attention = previewCases.find((item) => item.id === "chairs");
   return `<div class="page page-home">
     <div class="page-header">
-      <div><p class="eyebrow">Monday, September 14</p><h1>Good morning, Jonathan</h1><p class="page-subtitle">Here’s what needs your attention.</p></div>
+      <div><p class="eyebrow">${esc(todayLabel)}</p><h1>Good morning, Jonathan</h1></div>
       <button class="primary-button" data-action="new">${icon("plus", 18)} New purchase</button>
     </div>
     <section class="home-grid" aria-label="Today">
@@ -218,12 +213,11 @@ function renderHome() {
       </article>
       <article class="setup-card">
         <div class="setup-art"><span>${icon("building", 23)}</span><span>${icon("people", 20)}</span><span>${icon("check", 20)}</span></div>
-        <p class="eyebrow">A quick start</p><h3>Make your workspace yours</h3><p>Invite your team and set the way purchases move through your organization.</p>
+        <p class="eyebrow">Setup</p><h3>Set up your team</h3><p>Invite people and set approval rules.</p>
         <button class="quiet-button" data-action="navigate" data-view="organization">Open organization <span>${icon("arrow", 16)}</span></button>
       </article>
     </section>
-    <section class="section-block"><div class="section-heading"><div><p class="eyebrow">Your activity</p><h2>Recent purchases</h2></div><button class="quiet-button" data-action="navigate" data-view="purchases">See all ${icon("arrow", 16)}</button></div><div class="case-list">${previewCases.slice(0, 3).map((item) => caseCard(item, true)).join("")}</div></section>
-    <section class="insight-strip"><span class="insight-mark">${icon("sparkle", 18)}</span><div><strong>One place from need to closeout</strong><p>Start with the item or service. AccelPO keeps the next step clear.</p></div><button class="icon-button light" data-action="new" aria-label="Start a new purchase">${icon("arrow", 19)}</button></section>
+    <section class="section-block"><div class="section-heading"><div><p class="eyebrow">Activity</p><h2>Recent purchases</h2></div><button class="quiet-button" data-action="navigate" data-view="purchases">See all ${icon("arrow", 16)}</button></div><div class="case-list">${previewCases.slice(0, 3).map((item) => caseCard(item, true)).join("")}</div></section>
   </div>`;
 }
 
@@ -235,7 +229,7 @@ function renderPurchases() {
   });
   const filters = ["All", "Needs attention", "In progress", "Complete"];
   return `<div class="page page-list">
-    <div class="page-header"><div><p class="eyebrow">Your organization</p><h1>Purchases</h1><p class="page-subtitle">Every request, in one continuous view.</p></div><button class="primary-button" data-action="new">${icon("plus", 18)} New purchase</button></div>
+    <div class="page-header"><div><p class="eyebrow">Your organization</p><h1>Purchases</h1></div><button class="primary-button" data-action="new">${icon("plus", 18)} New purchase</button></div>
     <div class="toolbar"><label class="search-field">${icon("search", 19)}<input data-field="query" value="${esc(state.query)}" placeholder="Search purchases" aria-label="Search purchases" /></label><div class="filter-row" role="tablist" aria-label="Purchase filters">${filters.map((filter) => `<button class="filter-button${state.filter === filter ? " active" : ""}" data-action="filter" data-filter="${esc(filter)}" role="tab" aria-selected="${state.filter === filter}">${esc(filter)}</button>`).join("")}</div></div>
     <div class="list-summary"><span>${filtered.length} ${filtered.length === 1 ? "purchase" : "purchases"}</span><button class="sort-button" data-action="sort">Recently updated ${icon("chevron", 15)}</button></div>
     <div class="case-list large-list">${filtered.length ? filtered.map((item) => caseCard(item)).join("") : `<div class="empty-state"><span class="empty-icon">${icon("search", 24)}</span><h3>No purchases found</h3><p>Try another search or clear the filter.</p><button class="quiet-button" data-action="clear-filters">Clear filters</button></div>`}</div>
@@ -244,22 +238,21 @@ function renderPurchases() {
 
 function renderTasks() {
   return `<div class="page page-list">
-    <div class="page-header"><div><p class="eyebrow">Your work queue</p><h1>Tasks</h1><p class="page-subtitle">The next actions that keep purchases moving.</p></div><button class="quiet-button task-filter" data-action="task-filter">All tasks ${icon("chevron", 15)}</button></div>
+    <div class="page-header"><div><p class="eyebrow">Work queue</p><h1>Tasks</h1></div><button class="quiet-button task-filter" data-action="task-filter">All tasks ${icon("chevron", 15)}</button></div>
     <section class="task-summary"><div><span class="summary-number">3</span><span class="summary-label">open tasks</span></div><div class="summary-rule"></div><div><span class="summary-number">1</span><span class="summary-label">due today</span></div><div class="summary-rule"></div><div><span class="summary-number">2</span><span class="summary-label">purchases moving</span></div></section>
-    <section class="section-block task-block"><div class="section-heading"><div><p class="eyebrow">Needs your attention</p><h2>Open tasks</h2></div></div><div class="task-list">${previewTasks.map((task) => `<button class="task-row" data-action="case" data-case-id="${task.caseId}"><span class="task-icon ${task.tone}">${icon(task.tone === "green" ? "check" : "sparkle", 19)}</span><span class="task-copy"><span class="task-type">${esc(task.type)}</span><strong>${esc(task.title)}</strong><span>${esc(task.detail)}</span></span><span class="task-arrow">${icon("arrow", 17)}</span></button>`).join("")}</div></section>
-    <section class="callout"><span class="callout-icon">${icon("bell", 19)}</span><div><strong>Notifications keep you in the loop</strong><p>Updates stay here even when you’re away.</p></div><button class="quiet-button" data-action="notifications">View updates ${icon("arrow", 16)}</button></section>
+    <section class="section-block task-block"><div class="section-heading"><div><p class="eyebrow">Needs attention</p><h2>Open tasks</h2></div></div><div class="task-list">${previewTasks.map((task) => `<button class="task-row" data-action="case" data-case-id="${task.caseId}"><span class="task-icon ${task.tone}">${icon(task.tone === "green" ? "check" : "sparkle", 19)}</span><span class="task-copy"><span class="task-type">${esc(task.type)}</span><strong>${esc(task.title)}</strong><span>${esc(task.detail)}</span></span><span class="task-arrow">${icon("arrow", 17)}</span></button>`).join("")}</div></section>
   </div>`;
 }
 
 function renderOrganization() {
   return `<div class="page page-organization">
-    <div class="page-header"><div><p class="eyebrow">Workspace</p><h1>Organization</h1><p class="page-subtitle">Set up how your team purchases.</p></div><button class="quiet-button" data-action="workspace">${icon("dots", 17)} More</button></div>
-    <section class="organization-hero"><div class="org-monogram">PW</div><div><p class="eyebrow">Preview workspace</p><h2>Your organization</h2><p>Purchasing workspace · United States</p></div><button class="secondary-button" data-action="edit-org">Edit details ${icon("arrow", 16)}</button></section>
+    <div class="page-header"><div><p class="eyebrow">Workspace</p><h1>Organization</h1></div><button class="quiet-button" data-action="workspace">${icon("dots", 17)} More</button></div>
+    <section class="organization-hero"><div class="org-monogram">YO</div><div><p class="eyebrow">Organization</p><h2>Your organization</h2><p>United States</p></div><button class="secondary-button" data-action="edit-org">Edit details ${icon("arrow", 16)}</button></section>
     <section class="org-grid">
       <button class="org-card" data-action="people"><span class="org-card-icon blue">${icon("people", 22)}</span><span><strong>People & seats</strong><small>3 of 3 seats in use</small></span>${icon("arrow", 17)}</button>
       <button class="org-card" data-action="policy"><span class="org-card-icon gold">${icon("settings", 22)}</span><span><strong>Approval & spending</strong><small>Set who reviews purchases</small></span>${icon("arrow", 17)}</button>
       <button class="org-card" data-action="providers"><span class="org-card-icon green">${icon("building", 22)}</span><span><strong>Providers</strong><small>Add the providers you use</small></span>${icon("arrow", 17)}</button>
-      <button class="org-card" data-action="billing"><span class="org-card-icon slate">${icon("card", 22)}</span><span><strong>Plan & billing</strong><small>View your plan details</small></span>${icon("arrow", 17)}</button>
+      <button class="org-card" data-action="billing"><span class="org-card-icon slate">${icon("card", 22)}</span><span><strong>Plan & billing</strong><small>View plan and seats</small></span>${icon("arrow", 17)}</button>
     </section>
     <section class="org-progress"><div class="progress-heading"><div><p class="eyebrow">Getting started</p><h3>Make your first purchase</h3></div><strong>2 of 4</strong></div><div class="progress-track"><span style="width:50%"></span></div><div class="progress-steps"><span class="done">Workspace created</span><span class="done">First request started</span><span>Invite your team</span><span>Set approval rules</span></div></section>
   </div>`;
@@ -272,18 +265,18 @@ function renderSheet() {
     return `<div class="sheet-backdrop" data-action="close-sheet"><section class="sheet detail-sheet" data-sheet-surface role="dialog" aria-modal="true" aria-labelledby="detail-title"><div class="sheet-handle" aria-hidden="true"></div><div class="sheet-header"><div><p class="eyebrow">Purchase</p><h2 id="detail-title">${esc(item.title)}</h2></div><button class="icon-button sheet-close" data-action="close-sheet" aria-label="Close">${icon("close", 20)}</button></div><div class="detail-intro">${statusChip(item.status, item.tone)}<span class="detail-category">${esc(item.category)} · ${esc(item.location)}</span></div><div class="detail-next"><span class="next-label">Next action</span><strong>${esc(item.next)}</strong><button class="primary-button small" data-action="detail-next">${esc(item.next)} ${icon("arrow", 16)}</button></div><div class="detail-facts"><div><span>Estimated total</span><strong>${money(item.amount)}</strong></div><div><span>Needed by</span><strong>${esc(item.neededBy)}</strong></div><div><span>Requester</span><strong>${esc(item.requester)}</strong></div></div><div class="timeline"><div class="section-heading"><div><p class="eyebrow">Progress</p><h3>Purchase journey</h3></div></div>${item.timeline.map(([label, detail, status]) => `<div class="timeline-row ${status}"><span class="timeline-marker">${status === "done" ? icon("check", 13) : ""}</span><span><strong>${esc(label)}</strong><small>${esc(detail)}</small></span></div>`).join("")}</div><div class="sheet-footer"><button class="quiet-button" data-action="close-sheet">Close</button><button class="secondary-button" data-action="case-note">Add note ${icon("plus", 16)}</button></div></section></div>`;
   }
   if (state.sheet === "success") {
-    return `<div class="sheet-backdrop centered" data-action="close-sheet"><section class="sheet success-sheet" data-sheet-surface role="dialog" aria-modal="true" aria-labelledby="success-title"><div class="success-mark">${icon("check", 30)}</div><p class="eyebrow">Purchase started</p><h2 id="success-title">You’re on your way.</h2><p class="success-copy">${esc(state.draft.title || "Your purchase")} is saved in your workspace. You can come back to it at any time.</p><div class="success-preview"><span class="case-icon blue">${icon("bag", 18)}</span><span><strong>${esc(state.draft.title || "New purchase")}</strong><small>Draft · ${esc(state.draft.neededBy || "Needed date to be set")}</small></span></div><button class="primary-button full" data-action="view-purchases">View purchases ${icon("arrow", 17)}</button><button class="quiet-button full" data-action="close-sheet">Done</button></section></div>`;
+    return `<div class="sheet-backdrop centered" data-action="close-sheet"><section class="sheet success-sheet" data-sheet-surface role="dialog" aria-modal="true" aria-labelledby="success-title"><div class="success-mark">${icon("check", 30)}</div><p class="eyebrow">Purchase started</p><h2 id="success-title">Purchase saved</h2><p class="success-copy">Saved as a draft.</p><div class="success-preview"><span class="case-icon blue">${icon("bag", 18)}</span><span><strong>${esc(state.draft.title || "New purchase")}</strong><small>Draft · ${esc(state.draft.neededBy || "Needed date to be set")}</small></span></div><button class="primary-button full" data-action="view-purchases">View purchases ${icon("arrow", 17)}</button><button class="quiet-button full" data-action="close-sheet">Done</button></section></div>`;
   }
   const isChoice = state.newStep === 2;
   return `<div class="sheet-backdrop" data-action="close-sheet"><section class="sheet new-sheet" data-sheet-surface role="dialog" aria-modal="true" aria-labelledby="new-title"><div class="sheet-handle" aria-hidden="true"></div><div class="sheet-header"><div><p class="eyebrow">New purchase <span class="step-count">${isChoice ? "2 of 2" : "1 of 2"}</span></p><h2 id="new-title">${isChoice ? "How will you purchase this?" : "What do you need?"}</h2></div><button class="icon-button sheet-close" data-action="close-sheet" aria-label="Close">${icon("close", 20)}</button></div>${isChoice ? renderPurchaseChoice() : renderNeedForm()}</section></div>`;
 }
 
 function renderNeedForm() {
-  return `<form class="new-form" data-action="need-form"><p class="form-lead">Start with the item or service. You can fill in the details as you go.</p><label class="field-label" for="need-title">Item or service <span>Required</span></label><input id="need-title" class="text-input large" data-field="draft-title" value="${esc(state.draft.title)}" placeholder="e.g. Office chairs" autocomplete="off" required /><label class="field-label" for="need-description">A little more detail <span>Optional</span></label><textarea id="need-description" class="text-input" data-field="draft-description" placeholder="What should your team know?">${esc(state.draft.description)}</textarea><div class="form-row"><label class="field-label" for="need-amount">Estimated amount <span>Optional</span><input id="need-amount" class="text-input" data-field="draft-amount" inputmode="decimal" value="${esc(state.draft.amount)}" placeholder="$ 0" /></label><label class="field-label" for="need-date">Needed by <span>Optional</span><input id="need-date" class="text-input" data-field="draft-neededBy" value="${esc(state.draft.neededBy)}" placeholder="mm / dd / yyyy" /></label></div><label class="field-label" for="need-location">Where should it go? <span>Optional</span></label><div class="input-with-icon">${icon("pin", 18)}<input id="need-location" class="text-input" data-field="draft-location" value="${esc(state.draft.location)}" placeholder="Location or delivery method" /></div><div class="form-footer"><button type="button" class="quiet-button" data-action="close-sheet">Cancel</button><button type="submit" class="primary-button">Continue ${icon("arrow", 17)}</button></div></form>`;
+  return `<form class="new-form" data-action="need-form"><label class="field-label" for="need-title">Item or service <span>Required</span></label><input id="need-title" class="text-input large" data-field="draft-title" value="${esc(state.draft.title)}" placeholder="e.g. Office chairs" autocomplete="off" required /><label class="field-label" for="need-description">Details <span>Optional</span></label><textarea id="need-description" class="text-input" data-field="draft-description" placeholder="What should your team know?">${esc(state.draft.description)}</textarea><div class="form-row"><label class="field-label" for="need-amount">Estimated amount <span>Optional</span><input id="need-amount" class="text-input" data-field="draft-amount" inputmode="decimal" value="${esc(state.draft.amount)}" placeholder="$ 0" /></label><label class="field-label" for="need-date">Needed by <span>Optional</span><input id="need-date" class="text-input" data-field="draft-neededBy" value="${esc(state.draft.neededBy)}" placeholder="mm / dd / yyyy" /></label></div><label class="field-label" for="need-location">Location <span>Optional</span></label><div class="input-with-icon">${icon("pin", 18)}<input id="need-location" class="text-input" data-field="draft-location" value="${esc(state.draft.location)}" placeholder="Location or delivery method" /></div><div class="form-footer"><button type="button" class="quiet-button" data-action="close-sheet">Cancel</button><button type="submit" class="primary-button">Continue ${icon("arrow", 17)}</button></div></form>`;
 }
 
 function renderPurchaseChoice() {
-  return `<div class="choice-body"><p class="form-lead">You can use a provider you already know or invite offers through RFxchange.</p><div class="choice-list"><button class="choice-card" data-action="choose-source" data-source="existing"><span class="choice-icon blue">${icon("building", 22)}</span><span><strong>Use an existing provider</strong><small>Keep the purchase in AccelPO and add the provider details next.</small></span>${icon("arrow", 17)}</button><button class="choice-card" data-action="choose-source" data-source="community"><span class="choice-icon gold">${icon("sparkle", 22)}</span><span><strong>Source through RFxchange</strong><small>Share a supplier-safe need and bring offers back here.</small></span>${icon("external", 17)}</button></div><div class="choice-note"><span>${icon("check", 16)}</span><p>Your request stays in one place whichever path you choose.</p></div><button class="quiet-button back-button" data-action="back-to-need">${icon("arrow", 16)} Back</button></div>`;
+  return `<div class="choice-body"><p class="form-lead">Choose a provider or RFxchange.</p><div class="choice-list"><button class="choice-card" data-action="choose-source" data-source="existing"><span class="choice-icon blue">${icon("building", 22)}</span><span><strong>Use an existing provider</strong><small>Add provider details next.</small></span>${icon("arrow", 17)}</button><button class="choice-card" data-action="choose-source" data-source="community"><span class="choice-icon gold">${icon("sparkle", 22)}</span><span><strong>Source through RFxchange</strong><small>Request offers from the RFxchange community.</small></span>${icon("external", 17)}</button></div><button class="quiet-button back-button" data-action="back-to-need">${icon("arrow", 16)} Back</button></div>`;
 }
 
 function renderMain() {
@@ -317,8 +310,8 @@ app.addEventListener("click", (event) => {
   if (action === "case") return navigate("purchase-detail", actionElement.dataset.caseId);
   if (action === "filter") { state.filter = actionElement.dataset.filter; return render(); }
   if (action === "clear-filters") { state.filter = "All"; state.query = ""; return render(); }
-  if (action === "sort") return showNotice("Purchases are sorted by recent activity.");
-  if (["workspace", "profile", "notifications", "task-filter", "case-note", "detail-next"].includes(action)) return showNotice("This preview is ready for the next connected step.");
+  if (action === "sort") return showNotice("Sorted by recent activity.");
+  if (["workspace", "profile", "notifications", "task-filter", "case-note", "detail-next"].includes(action)) return showNotice("Not available yet.");
   if (action === "back-to-need") { state.newStep = 1; return render(); }
   if (action === "view-purchases") return navigate("purchases");
   if (action === "choose-source") {
