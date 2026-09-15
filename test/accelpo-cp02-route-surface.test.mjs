@@ -58,7 +58,8 @@ test("CP-02 keeps install metadata and a single scoped service worker", async ()
   assert.equal(manifest.start_url, "./#home");
   assert.equal((index.match(/rel="manifest"/g) ?? []).length, 1);
   assert.match(index, /mobile-web-app-capable/);
-  assert.match(serviceWorker, /accelpo-chassis-v2/);
+  assert.match(serviceWorker, /accelpo-chassis-v3/);
+  assert.match(serviceWorker, /organization-settings\/surfaces\.js/);
   assert.doesNotMatch(serviceWorker, /cache\.put\(event\.request/);
 });
 
