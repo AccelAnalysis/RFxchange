@@ -111,3 +111,4 @@ export { marketReadyFoundingCommerceWebhook } from "./market-ready-founding-comm
 
 export { organizationPublicEnrichment } from "./public-enrichment-functions.js";
 export { lifecycleEnrollmentFromAccount, lifecycleEnrollmentFromActivation, lifecycleActivityFromRfx, lifecycleActivityFromReferral, lifecycleActivityFromProfile, lifecycleActivityFromResource, scheduledLifecycleCommunications } from "./lifecycle-functions.js";
+export { deliverAccelPoMarketingLifecycleSignal } from "./accelpo-marketing-event-functions.js";
