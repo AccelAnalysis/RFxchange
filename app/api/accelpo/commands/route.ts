@@ -4,6 +4,7 @@ import {
   AccelPoCommandError,
 } from "@/src/application/accelpo/command-port";
 import { registerCP06TaskNotificationCommands } from "@/src/accelpo/cp06/commands";
+import { createCP07ServerCommandRegistry } from "@/src/accelpo/cp07/server-runtime";
 import { ServerSessionError } from "@/src/application/auth/server-session";
 import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
@@ -15,7 +16,7 @@ export const runtime = "nodejs";
 
 const MAX_COMMAND_BODY_BYTES = 262_144;
 
-// CP-06 extends the one CP-03 registry; no additional write endpoint is introduced.
+// CP-06 extends the one CP-03 registry; CP-07 composes from that registry per request.
 registerCP06TaskNotificationCommands();
 
 function bearerToken(request: NextRequest): string | null {
@@ -100,7 +101,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const context = await authenticate(request);
-    const result = await createServerAccelPoCommandPort().execute(body, context);
+    const result = await createServerAccelPoCommandPort({
+      registry: createCP07ServerCommandRegistry(),
+    }).execute(body, context);
     return NextResponse.json(result, {
       status: result.replayed ? 200 : 201,
       headers: { "cache-control": "no-store" },
