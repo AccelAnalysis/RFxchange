@@ -3,7 +3,9 @@ import type { AccelPOCommandRequest, AccelPOCommandResult, CommandJsonObject } f
 import type { EvidenceMetadataProjection, QueryProjectionInput, QueryProjectionResult } from "../query-projection/contracts.ts";
 import {
   FILE_EVIDENCE_COMMANDS,
+  fileEvidenceUploadAuthority,
   normalizeFileEvidencePurpose,
+  selectFileEvidenceUploadAuthority,
   validateFileEvidenceDescriptor,
   type FileEvidenceCommandData,
   type FileEvidenceReference,
@@ -44,6 +46,7 @@ function reference(data: FileEvidenceCommandData): FileEvidenceReference {
     organizationId: data.organizationId,
     purchaseCaseId: data.purchaseCaseId,
     purpose: data.purpose,
+    uploadAuthority: data.uploadAuthority,
     originalFilename: data.originalFilename,
     contentType: data.contentType,
     size: data.size,
@@ -96,9 +99,10 @@ export class AccelPOFileEvidenceClient
       contentType: file.type,
       size: file.size,
     });
+    const authority = selectFileEvidenceUploadAuthority(context.capabilities);
     const operationId = this.idFactory();
     const initiated = commandData(await this.commandPort.execute(command(
-      FILE_EVIDENCE_COMMANDS.initiateUpload,
+      authority.initiateCommand,
       context.organizationId,
       Object.freeze({
         purchaseCaseId: context.purchaseCaseId,
@@ -110,6 +114,8 @@ export class AccelPOFileEvidenceClient
       `file-init-${operationId}`,
       `file-init-${operationId}`,
     )));
+    const initiatedAuthority = fileEvidenceUploadAuthority(initiated.uploadAuthority);
+    if (!initiatedAuthority) throw new Error("The file action returned an invalid upload authority.");
 
     const form = new FormData();
     form.set("organizationId", context.organizationId);
@@ -121,6 +127,7 @@ export class AccelPOFileEvidenceClient
       credentials: "include",
       headers: {
         "x-accelpo-upload-id": operationId,
+        "x-accelpo-upload-authority": initiatedAuthority.key,
         ...(token ? { authorization: `Bearer ${token}` } : {}),
       },
     });
@@ -133,7 +140,7 @@ export class AccelPOFileEvidenceClient
     }
 
     const completed = commandData(await this.commandPort.execute(command(
-      FILE_EVIDENCE_COMMANDS.completeUpload,
+      initiatedAuthority.completeCommand,
       context.organizationId,
       Object.freeze({ evidenceId: initiated.evidenceId }),
       `file-complete-${operationId}`,
