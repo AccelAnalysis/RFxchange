@@ -8,7 +8,9 @@ import {
 import {
   FILE_EVIDENCE_COMMANDS,
   FILE_EVIDENCE_MAX_BYTES,
+  FILE_EVIDENCE_UPLOAD_AUTHORITIES,
   fileEvidenceObjectPath,
+  selectFileEvidenceUploadAuthority,
   validateFileEvidenceDescriptor,
 } from "../apps/accelpo/src/file-evidence/contracts.ts";
 import { AccelPOFileEvidenceClient, releasedEvidenceReference } from "../apps/accelpo/src/file-evidence/client.ts";
@@ -65,7 +67,7 @@ test("CP-07 uses tenant-scoped private object paths and bounded file validation"
   assert.throws(() => validateFileEvidenceDescriptor({ originalFilename: "large.pdf", contentType: "application/pdf", size: FILE_EVIDENCE_MAX_BYTES + 1 }));
 });
 
-test("CP-07 initiation is private by default and attached to the Purchase Case", async () => {
+test("CP-07 requester initiation stays owner-bound and private by default", async () => {
   const command = definition(FILE_EVIDENCE_COMMANDS.initiateUpload);
   assert.equal(command.permission, "purchasing.request");
   assert.equal(command.idempotency, "required");
@@ -84,13 +86,56 @@ test("CP-07 initiation is private by default and attached to the Purchase Case",
   const outcome = await command.handle(execution.value);
   assert.equal(outcome.data.status, "pending-upload");
   assert.equal(outcome.data.releaseStatus, "private");
+  assert.equal(outcome.data.uploadAuthority, "requester");
   assert.equal(outcome.data.purchaseCaseId, "case-one");
   assert.equal(execution.creates.length, 2);
   const metadata = execution.creates.find((entry) => entry.path.startsWith("accelpoEvidence/"));
   assert.equal(metadata.data.releaseStatus, "private");
+  assert.equal(metadata.data.uploadAuthority, "requester");
   assert.equal(metadata.data.owningRecord.id, "case-one");
   assert.equal("downloadUrl" in metadata.data, false);
   assert.equal("publicUrl" in metadata.data, false);
+});
+
+test("CP-07 authorizes non-requester closeout roles without weakening tenant scope", async () => {
+  const closeoutAuthorities = FILE_EVIDENCE_UPLOAD_AUTHORITIES.filter((authority) => authority.key !== "requester");
+  assert.deepEqual(closeoutAuthorities.map((authority) => authority.permission), [
+    "purchasing.order",
+    "purchasing.documentation.review",
+    "purchasing.budget.manage",
+    "purchasing.configure",
+  ]);
+
+  for (const authority of closeoutAuthorities) {
+    const initiate = definition(authority.initiateCommand);
+    const authorize = definition(authority.authorizeCommand);
+    const complete = definition(authority.completeCommand);
+    assert.equal(initiate.permission, authority.permission);
+    assert.equal(authorize.permission, authority.permission);
+    assert.equal(complete.permission, authority.permission);
+    assert.equal(initiate.target({ purchaseCaseId: "case-one" }).owner, undefined);
+    assert.deepEqual(authorize.target({ evidenceId: "evidence-one" }).owner, {
+      field: "uploaderUserId",
+      kind: "user",
+    });
+  }
+
+  const documentation = FILE_EVIDENCE_UPLOAD_AUTHORITIES.find((authority) => authority.key === "documentation");
+  const execution = context({
+    payload: {
+      purchaseCaseId: "case-one",
+      purpose: "service-completion",
+      originalFilename: "completion.pdf",
+      contentType: "application/pdf",
+      size: 2048,
+    },
+  });
+  const outcome = await definition(documentation.initiateCommand).handle(execution.value);
+  assert.equal(outcome.data.uploadAuthority, "documentation");
+  const metadata = execution.creates.find((entry) => entry.path.startsWith("accelpoEvidence/"));
+  assert.equal(metadata.data.uploaderUserId, "user-one");
+  assert.equal(metadata.data.uploadPermission, "purchasing.documentation.review");
+  assert.equal(metadata.data.releaseStatus, "private");
 });
 
 test("CP-07 completion verifies the upload receipt and preserves metadata history", async () => {
@@ -101,6 +146,7 @@ test("CP-07 completion verifies the upload receipt and preserves metadata histor
     organizationId: "org-one",
     purchaseCaseId: "case-one",
     uploaderUserId: "user-one",
+    uploadAuthority: "requester",
     purpose: "receipt",
     originalFilename: "receipt.pdf",
     contentType: "application/pdf",
@@ -134,8 +180,40 @@ test("CP-07 completion verifies the upload receipt and preserves metadata histor
   assert.equal(outcome.resultingVersion, 1);
   assert.equal(outcome.data.status, "uploaded");
   assert.equal(outcome.data.releaseStatus, "private");
+  assert.equal(outcome.data.uploadAuthority, "requester");
   assert.equal(execution.updates[0].data.version, 1);
   assert.ok(execution.creates.some((entry) => entry.path.startsWith("accelpoEvidenceHistory/")));
+});
+
+test("CP-07 cannot switch upload authority after initiation", async () => {
+  const documentation = FILE_EVIDENCE_UPLOAD_AUTHORITIES.find((authority) => authority.key === "documentation");
+  const order = FILE_EVIDENCE_UPLOAD_AUTHORITIES.find((authority) => authority.key === "order");
+  const evidenceId = "evidence-authority";
+  const target = {
+    path: `accelpoEvidence/${evidenceId}`,
+    exists: true,
+    data: {
+      id: evidenceId,
+      organizationId: "org-one",
+      purchaseCaseId: "case-one",
+      uploaderUserId: "user-one",
+      uploadAuthority: "documentation",
+      purpose: "receipt",
+      originalFilename: "receipt.pdf",
+      contentType: "application/pdf",
+      size: 100,
+      status: "pending-upload",
+      releaseStatus: "private",
+      version: 0,
+    },
+  };
+  const execution = context({ payload: { evidenceId }, target });
+  await assert.rejects(
+    () => definition(order.authorizeCommand).handle(execution.value),
+    (error) => error?.code === "forbidden",
+  );
+  const accepted = await definition(documentation.authorizeCommand).handle(execution.value);
+  assert.equal(accepted.data.authorized, true);
 });
 
 test("CP-07 supplier release is explicit, versioned, and reversible", async () => {
@@ -147,6 +225,7 @@ test("CP-07 supplier release is explicit, versioned, and reversible", async () =
     organizationId: "org-one",
     purchaseCaseId: "case-one",
     uploaderUserId: "user-one",
+    uploadAuthority: "documentation",
     purpose: "quote",
     originalFilename: "quote.pdf",
     contentType: "application/pdf",
@@ -189,7 +268,7 @@ test("CP-07 supplier release is explicit, versioned, and reversible", async () =
   }), null);
 });
 
-test("CP-07 browser client sequences initiate, private upload, and completion without exposing storage URLs", async () => {
+test("CP-07 browser client sequences requester upload without exposing storage URLs", async () => {
   const seen = [];
   const commandPort = {
     async execute(command) {
@@ -208,6 +287,7 @@ test("CP-07 browser client sequences initiate, private upload, and completion wi
             organizationId: "org-one",
             purchaseCaseId: "case-one",
             purpose: "photo",
+            uploadAuthority: "requester",
             originalFilename: "photo.png",
             contentType: "image/png",
             size: 8,
@@ -230,6 +310,7 @@ test("CP-07 browser client sequences initiate, private upload, and completion wi
           organizationId: "org-one",
           purchaseCaseId: "case-one",
           purpose: "photo",
+          uploadAuthority: "requester",
           originalFilename: "photo.png",
           contentType: "image/png",
           size: 8,
@@ -241,12 +322,14 @@ test("CP-07 browser client sequences initiate, private upload, and completion wi
     },
   };
   let uploadUrl = null;
+  let uploadAuthority = null;
   const client = new AccelPOFileEvidenceClient({
     commandPort,
     queryProjection: { async read() { throw new Error("not used"); } },
     idFactory: () => "operation-one",
-    fetcher: async (url) => {
+    fetcher: async (url, init) => {
       uploadUrl = String(url);
+      uploadAuthority = init.headers["x-accelpo-upload-authority"];
       return new Response(JSON.stringify({ evidenceId: "evidence-client", status: "uploaded" }), { status: 201, headers: { "content-type": "application/json" } });
     },
   });
@@ -254,17 +337,79 @@ test("CP-07 browser client sequences initiate, private upload, and completion wi
   const result = await client.upload({ organizationId: "org-one", purchaseCaseId: "case-one", purpose: "photo" }, file);
   assert.equal(result.status, "uploaded");
   assert.equal(result.releaseStatus, "private");
+  assert.equal(result.uploadAuthority, "requester");
   assert.equal(seen[0].commandName, FILE_EVIDENCE_COMMANDS.initiateUpload);
   assert.equal(seen[1].commandName, FILE_EVIDENCE_COMMANDS.completeUpload);
   assert.equal(seen[1].expectedVersion, 0);
+  assert.equal(uploadAuthority, "requester");
   assert.equal(uploadUrl, "/api/accelpo/evidence/evidence-client/content");
   assert.equal("objectPath" in result, false);
   assert.equal("downloadUrl" in result, false);
 });
 
-test("CP-07 registers only service connection points and no user-facing route", () => {
+test("CP-07 browser client selects a server-authorized closeout command variant", async () => {
+  const documentation = selectFileEvidenceUploadAuthority(["purchasing.documentation.review"]);
+  assert.equal(documentation.key, "documentation");
+  const seen = [];
+  const commandPort = {
+    async execute(command) {
+      seen.push(command);
+      const pending = command.commandName === documentation.initiateCommand;
+      return {
+        commandPortVersion: 1,
+        commandId: pending ? "cmd-init-doc" : "cmd-complete-doc",
+        commandName: command.commandName,
+        requestId: command.requestId,
+        status: "committed",
+        replayed: false,
+        resultingVersion: pending ? null : 1,
+        data: {
+          evidenceId: "evidence-doc",
+          organizationId: "org-one",
+          purchaseCaseId: "case-two",
+          purpose: "service-completion",
+          uploadAuthority: "documentation",
+          originalFilename: "completion.pdf",
+          contentType: "application/pdf",
+          size: 5,
+          status: pending ? "pending-upload" : "uploaded",
+          releaseStatus: "private",
+          version: pending ? 0 : 1,
+        },
+      };
+    },
+  };
+  let headerAuthority = null;
+  const client = new AccelPOFileEvidenceClient({
+    commandPort,
+    queryProjection: { async read() { throw new Error("not used"); } },
+    idFactory: () => "operation-doc",
+    fetcher: async (_url, init) => {
+      headerAuthority = init.headers["x-accelpo-upload-authority"];
+      return new Response("{}", { status: 201 });
+    },
+  });
+  const file = new File([new Uint8Array([37,80,68,70,45])], "completion.pdf", { type: "application/pdf" });
+  const result = await client.upload({
+    organizationId: "org-one",
+    purchaseCaseId: "case-two",
+    purpose: "service-completion",
+    capabilities: ["purchasing.documentation.review"],
+  }, file);
+  assert.equal(seen[0].commandName, documentation.initiateCommand);
+  assert.equal(seen[1].commandName, documentation.completeCommand);
+  assert.equal(headerAuthority, "documentation");
+  assert.equal(result.uploadAuthority, "documentation");
+});
+
+test("CP-07 registers closeout capabilities and no user-facing route", () => {
   assert.equal(CP07_FILE_EVIDENCE_PART.id, "CP-07");
   assert.deepEqual(CP07_FILE_EVIDENCE_PART.routes, []);
+  assert.ok(CP07_FILE_EVIDENCE_PART.permissions.includes("purchasing.request"));
+  assert.ok(CP07_FILE_EVIDENCE_PART.permissions.includes("purchasing.order"));
+  assert.ok(CP07_FILE_EVIDENCE_PART.permissions.includes("purchasing.documentation.review"));
+  assert.ok(CP07_FILE_EVIDENCE_PART.permissions.includes("purchasing.budget.manage"));
+  assert.ok(CP07_FILE_EVIDENCE_PART.permissions.includes("purchasing.configure"));
   assert.ok(CP07_FILE_EVIDENCE_PART.connectionPoints.includes("FileEvidence"));
   assert.ok(CP07_FILE_EVIDENCE_PART.connectionPoints.includes("CommandPort"));
   assert.ok(CP07_FILE_EVIDENCE_PART.connectionPoints.includes("QueryProjection"));

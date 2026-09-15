@@ -34,6 +34,73 @@ export const FILE_EVIDENCE_COMMANDS = Object.freeze({
   makePrivate: "file-evidence.make-private",
 } as const);
 
+export const FILE_EVIDENCE_UPLOAD_AUTHORITIES = Object.freeze([
+  Object.freeze({
+    key: "requester",
+    permission: "purchasing.request",
+    initiateCommand: FILE_EVIDENCE_COMMANDS.initiateUpload,
+    authorizeCommand: FILE_EVIDENCE_COMMANDS.authorizeUpload,
+    completeCommand: FILE_EVIDENCE_COMMANDS.completeUpload,
+    requesterOwned: true,
+  }),
+  Object.freeze({
+    key: "order",
+    permission: "purchasing.order",
+    initiateCommand: "file-evidence.initiate-upload-order",
+    authorizeCommand: "file-evidence.authorize-upload-order",
+    completeCommand: "file-evidence.complete-upload-order",
+    requesterOwned: false,
+  }),
+  Object.freeze({
+    key: "documentation",
+    permission: "purchasing.documentation.review",
+    initiateCommand: "file-evidence.initiate-upload-documentation",
+    authorizeCommand: "file-evidence.authorize-upload-documentation",
+    completeCommand: "file-evidence.complete-upload-documentation",
+    requesterOwned: false,
+  }),
+  Object.freeze({
+    key: "finance",
+    permission: "purchasing.budget.manage",
+    initiateCommand: "file-evidence.initiate-upload-finance",
+    authorizeCommand: "file-evidence.authorize-upload-finance",
+    completeCommand: "file-evidence.complete-upload-finance",
+    requesterOwned: false,
+  }),
+  Object.freeze({
+    key: "configure",
+    permission: "purchasing.configure",
+    initiateCommand: "file-evidence.initiate-upload-configure",
+    authorizeCommand: "file-evidence.authorize-upload-configure",
+    completeCommand: "file-evidence.complete-upload-configure",
+    requesterOwned: false,
+  }),
+] as const);
+
+export type FileEvidenceUploadAuthority = (typeof FILE_EVIDENCE_UPLOAD_AUTHORITIES)[number];
+export type FileEvidenceUploadAuthorityKey = FileEvidenceUploadAuthority["key"];
+
+export function fileEvidenceUploadAuthority(value: string): FileEvidenceUploadAuthority | null {
+  return FILE_EVIDENCE_UPLOAD_AUTHORITIES.find((authority) => authority.key === value) ?? null;
+}
+
+export function selectFileEvidenceUploadAuthority(
+  capabilities: readonly string[] = [],
+): FileEvidenceUploadAuthority {
+  const priority: readonly FileEvidenceUploadAuthorityKey[] = Object.freeze([
+    "documentation",
+    "order",
+    "finance",
+    "configure",
+    "requester",
+  ]);
+  for (const key of priority) {
+    const authority = FILE_EVIDENCE_UPLOAD_AUTHORITIES.find((candidate) => candidate.key === key)!;
+    if (capabilities.includes(authority.permission)) return authority;
+  }
+  return FILE_EVIDENCE_UPLOAD_AUTHORITIES[0];
+}
+
 export interface FileEvidenceDescriptor {
   readonly originalFilename: string;
   readonly contentType: FileEvidenceContentType;
@@ -45,6 +112,7 @@ export interface FileEvidenceReference extends FileEvidenceDescriptor {
   readonly organizationId: string;
   readonly purchaseCaseId: string;
   readonly purpose: FileEvidencePurpose;
+  readonly uploadAuthority: FileEvidenceUploadAuthorityKey;
   readonly status: FileEvidenceStatus;
   readonly releaseStatus: FileEvidenceReleaseStatus;
   readonly version: number;
@@ -54,6 +122,8 @@ export interface FileEvidenceUploadContext {
   readonly organizationId: string;
   readonly purchaseCaseId: string;
   readonly purpose: FileEvidencePurpose;
+  /** CP-01 capability facts choose the command variant only; CP-03 re-authorizes server-side. */
+  readonly capabilities?: readonly string[];
 }
 
 export interface InitiateFileEvidencePayload extends CommandJsonObject {
@@ -77,6 +147,7 @@ export interface FileEvidenceCommandData extends CommandJsonObject {
   readonly organizationId: string;
   readonly purchaseCaseId: string;
   readonly purpose: FileEvidencePurpose;
+  readonly uploadAuthority: FileEvidenceUploadAuthorityKey;
   readonly originalFilename: string;
   readonly contentType: FileEvidenceContentType;
   readonly size: number;

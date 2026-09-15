@@ -4,8 +4,8 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import {
-  FILE_EVIDENCE_COMMANDS,
   fileEvidenceObjectPath,
+  fileEvidenceUploadAuthority,
   validateFileEvidenceDescriptor,
   FileEvidenceValidationError,
 } from "@/apps/accelpo/src/file-evidence/contracts";
@@ -81,11 +81,16 @@ async function authorizeUpload(
   organizationId: string,
   evidenceId: string,
   requestId: string,
+  authorityKey: string,
 ): Promise<void> {
+  const authority = fileEvidenceUploadAuthority(authorityKey);
+  if (!authority) {
+    throw new AccelPoCommandError("validation-failure", "The file upload authority is invalid.");
+  }
   await createServerAccelPoCommandPort({
     registry: createCP07ServerCommandRegistry(),
   }).execute(Object.freeze({
-    commandName: FILE_EVIDENCE_COMMANDS.authorizeUpload,
+    commandName: authority.authorizeCommand,
     organizationContext: Object.freeze({ organizationId }),
     payload: Object.freeze({ evidenceId }),
     requestId,
@@ -170,7 +175,8 @@ export async function POST(
     }
 
     const uploadRequestId = machineId(request.headers.get("x-accelpo-upload-id") ?? "") ?? `upload-${evidenceId}`;
-    await authorizeUpload(context, organizationId, evidenceId, `authorize-${uploadRequestId}`);
+    const uploadAuthority = request.headers.get("x-accelpo-upload-authority")?.trim() || "requester";
+    await authorizeUpload(context, organizationId, evidenceId, `authorize-${uploadRequestId}`, uploadAuthority);
 
     const descriptor = validateFileEvidenceDescriptor({
       originalFilename: file.name,
@@ -217,6 +223,7 @@ export async function POST(
         size: descriptor.size,
         sha256,
         uploadedByUserId: String(context.user.id),
+        uploadAuthority,
         status: "uploading",
         createdAt: new Date().toISOString(),
         uploadedAt: null,
