@@ -45,6 +45,7 @@ test("Organization controls no longer use the generic preview placeholder", asyn
 
 test("People & seats uses CP-04 reads and CP-03/CP-10 seat commands", async () => {
   const runtime = await read("apps/accelpo/src/organization-settings/runtime.js");
+  const surfaces = await read("apps/accelpo/src/organization-settings/surfaces.js");
 
   assert.match(runtime, /\/api\/accelpo\/query/);
   assert.match(runtime, /\/api\/accelpo\/commands/);
@@ -55,7 +56,7 @@ test("People & seats uses CP-04 reads and CP-03/CP-10 seat commands", async () =
   assert.match(runtime, /"entitlement\.membership\.deactivate"/);
   assert.match(runtime, /ownerCountsAsSeat: true/);
   assert.match(runtime, /addSeatActionAllowed/);
-  assert.match(runtime, /does not charge a card|does not implement payment processing/i);
+  assert.match(`${runtime}\n${surfaces}`, /does not charge a card|does not implement payment processing/i);
 });
 
 test("Purchasing configuration stays data-driven and does not invent a universal threshold", async () => {
