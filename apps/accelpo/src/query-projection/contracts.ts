@@ -87,9 +87,16 @@ export interface TrustedProjectionActor {
   readonly organizationDisplayName?: string | null;
   readonly planName?: string | null;
   readonly billingPeriod?: string | null;
+  readonly includedSeats?: number | null;
   readonly activeSeats?: number | null;
   readonly reservedSeats?: number | null;
   readonly availableSeats?: number | null;
+  readonly addOnSeatAllowance?: number | null;
+  readonly addOnSeatPriceMinor?: number | null;
+  readonly addOnSeatCurrency?: string | null;
+  readonly addSeatActionAllowed?: boolean;
+  readonly entitlementVersion?: string | null;
+  readonly ownerCountsAsSeat?: boolean;
 }
 
 export type ProjectionAccessResolution =
@@ -152,9 +159,18 @@ export interface OrganizationContextProjection {
     readonly billingPeriod: string | null;
   }>;
   readonly seats: Readonly<{
+    readonly included: number | null;
     readonly active: number | null;
     readonly reserved: number | null;
     readonly available: number | null;
+    readonly addOnAllowance: number | null;
+    readonly addOnPricing: Readonly<{
+      readonly amountMinor: number;
+      readonly currency: string;
+    }> | null;
+    readonly addSeatActionAllowed: boolean;
+    readonly entitlementVersion: string | null;
+    readonly ownerCountsAsSeat: boolean;
   }>;
 }
 

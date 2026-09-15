@@ -4,6 +4,7 @@ import type {
   DocumentData,
   DocumentSnapshot,
   Firestore,
+  Query,
   Transaction,
 } from "firebase-admin/firestore";
 import { FieldValue } from "firebase-admin/firestore";
@@ -24,6 +25,7 @@ import {
   type AnyCommandDefinition,
   type ClientCommandEnvelope,
   type CommandHandlerContext,
+  type CommandOrganizationQuery,
   type CommandPortResult,
   type CommandRecordSnapshot,
   type CommandTargetDescriptor,
@@ -43,6 +45,11 @@ const COMMAND_RECEIPTS_COLLECTION = "accelPoCommandReceipts";
 const COMMAND_RECEIPT_SCHEMA_VERSION = 1 as const;
 const MAX_RESULT_BYTES = 64 * 1024;
 const MAX_DOCUMENT_PATH_SEGMENTS = 12;
+const MAX_ORGANIZATION_QUERY_FILTERS = 6;
+const MAX_ORGANIZATION_QUERY_RESULTS = 500;
+const COLLECTION_PATTERN = /^[A-Za-z][A-Za-z0-9_-]{0,127}$/;
+const QUERY_FIELD_PATTERN = /^[A-Za-z][A-Za-z0-9_.]{0,127}$/;
+const QUERY_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,190}$/;
 
 interface PersistedCommandReceipt {
   readonly id: string;
@@ -119,6 +126,51 @@ function snapshotFromDocument(snapshot: DocumentSnapshot): CommandRecordSnapshot
   });
 }
 
+function organizationQuery(input: CommandOrganizationQuery): Readonly<{
+  collection: string;
+  organizationId: string;
+  filters: readonly Readonly<{ field: string; value: string | number | boolean | null }>[];
+  limit: number;
+}> {
+  const collection = input.collection.trim();
+  const organizationIdValue = input.organizationId.trim();
+  if (!COLLECTION_PATTERN.test(collection) || !QUERY_ID_PATTERN.test(organizationIdValue)) {
+    throw new AccelPoCommandError("validation-failure", "The transactional organization query is invalid.");
+  }
+  const filters = input.filters ?? [];
+  if (!Array.isArray(filters) || filters.length > MAX_ORGANIZATION_QUERY_FILTERS) {
+    throw new AccelPoCommandError("validation-failure", "The transactional organization query has too many filters.");
+  }
+  const normalizedFilters = filters.map((filter) => {
+    const field = filter.field.trim();
+    if (!QUERY_FIELD_PATTERN.test(field) || field === "organizationId") {
+      throw new AccelPoCommandError("validation-failure", "The transactional organization query filter is invalid.");
+    }
+    if (
+      filter.value !== null &&
+      typeof filter.value !== "string" &&
+      typeof filter.value !== "number" &&
+      typeof filter.value !== "boolean"
+    ) {
+      throw new AccelPoCommandError("validation-failure", "The transactional organization query value is invalid.");
+    }
+    if (typeof filter.value === "number" && !Number.isFinite(filter.value)) {
+      throw new AccelPoCommandError("validation-failure", "The transactional organization query value is invalid.");
+    }
+    return Object.freeze({ field, value: filter.value });
+  });
+  const limit = input.limit ?? MAX_ORGANIZATION_QUERY_RESULTS;
+  if (!Number.isSafeInteger(limit) || limit < 1 || limit > MAX_ORGANIZATION_QUERY_RESULTS) {
+    throw new AccelPoCommandError("validation-failure", "The transactional organization query limit is invalid.");
+  }
+  return Object.freeze({
+    collection,
+    organizationId: organizationIdValue,
+    filters: Object.freeze(normalizedFilters),
+    limit,
+  });
+}
+
 class FirestoreCommandTransaction implements CommandTransaction {
   constructor(
     private readonly db: Firestore,
@@ -128,6 +180,20 @@ class FirestoreCommandTransaction implements CommandTransaction {
   async get(path: string): Promise<CommandRecordSnapshot> {
     const snapshot = await this.transaction.get(this.db.doc(documentPath(path)));
     return snapshotFromDocument(snapshot);
+  }
+
+  async listOrganizationRecords(
+    input: CommandOrganizationQuery,
+  ): Promise<readonly CommandRecordSnapshot[]> {
+    const normalized = organizationQuery(input);
+    let query: Query = this.db
+      .collection(normalized.collection)
+      .where("organizationId", "==", normalized.organizationId);
+    for (const filter of normalized.filters) {
+      query = query.where(filter.field, "==", filter.value);
+    }
+    const snapshot = await this.transaction.get(query.limit(normalized.limit));
+    return Object.freeze(snapshot.docs.map((document) => snapshotFromDocument(document)));
   }
 
   create(path: string, data: Readonly<Record<string, unknown>>): void {

@@ -3,6 +3,7 @@ import { createServerFirebaseAccountSecurityService } from "../../infrastructure
 import { createFirestoreFoundationRepositories } from "../../infrastructure/firestore/repositories.ts";
 import { getServerFirestore } from "../../infrastructure/firestore/runtime.ts";
 import { FirestoreOrganizationCommercialAccountRepository } from "../../infrastructure/firestore/commercial-account-repository.ts";
+import { createServerEntitlementBillingReader } from "../cp10/server-runtime.ts";
 import { projectIdentityContext } from "./identity-projection.ts";
 
 /**
@@ -26,6 +27,7 @@ export async function loadServerIdentityProjection(input: Readonly<{
       authorizations: repositories.organizationAuthorization,
       restrictions: repositories.lifecycle.restrictions,
       commercialAccounts: new FirestoreOrganizationCommercialAccountRepository(db),
+      entitlementBilling: createServerEntitlementBillingReader(db),
     },
   );
 }

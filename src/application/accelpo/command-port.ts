@@ -80,6 +80,18 @@ export interface CommandRecordSnapshot {
   readonly data: Readonly<Record<string, unknown>> | null;
 }
 
+export interface CommandOrganizationQueryFilter {
+  readonly field: string;
+  readonly value: JsonPrimitive;
+}
+
+export interface CommandOrganizationQuery {
+  readonly collection: string;
+  readonly organizationId: string;
+  readonly filters?: readonly CommandOrganizationQueryFilter[];
+  readonly limit?: number;
+}
+
 /**
  * Provider-neutral transaction surface exposed to a registered AccelPO command handler.
  * Implementations must be backed by one server transaction. Handlers receive no direct client
@@ -87,6 +99,8 @@ export interface CommandRecordSnapshot {
  */
 export interface CommandTransaction {
   get(path: string): Promise<CommandRecordSnapshot>;
+  /** Server-only, organization-constrained reads used when a transaction must reason over a set. */
+  listOrganizationRecords(query: CommandOrganizationQuery): Promise<readonly CommandRecordSnapshot[]>;
   create(path: string, data: Readonly<Record<string, unknown>>): void;
   set(path: string, data: Readonly<Record<string, unknown>>): void;
   update(path: string, data: Readonly<Record<string, unknown>>): void;

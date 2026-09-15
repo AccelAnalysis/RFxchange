@@ -115,9 +115,17 @@ test("CP-04 can return the already-authorized organization context without a dup
             ...ACTOR,
             organizationDisplayName: "Alpha Organization",
             planName: "Growth",
+            billingPeriod: "2026-10-01T00:00:00.000Z",
+            includedSeats: 3,
             activeSeats: 2,
             reservedSeats: 1,
             availableSeats: 0,
+            addOnSeatAllowance: 0,
+            addOnSeatPriceMinor: 1095,
+            addOnSeatCurrency: "USD",
+            addSeatActionAllowed: true,
+            entitlementVersion: "2026-09-14T19:00:00.000Z",
+            ownerCountsAsSeat: true,
           },
         };
       },
@@ -131,7 +139,17 @@ test("CP-04 can return the already-authorized organization context without a dup
   assert.equal(result.outcome, "success");
   assert.equal(result.items[0].displayName, "Alpha Organization");
   assert.equal(result.items[0].plan.name, "Growth");
-  assert.deepEqual(result.items[0].seats, { active: 2, reserved: 1, available: 0 });
+  assert.deepEqual(result.items[0].seats, {
+    included: 3,
+    active: 2,
+    reserved: 1,
+    available: 0,
+    addOnAllowance: 0,
+    addOnPricing: { amountMinor: 1095, currency: "USD" },
+    addSeatActionAllowed: true,
+    entitlementVersion: "2026-09-14T19:00:00.000Z",
+    ownerCountsAsSeat: true,
+  });
   assert.deepEqual(source.calls, []);
 });
 

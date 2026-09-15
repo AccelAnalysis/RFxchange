@@ -1,13 +1,14 @@
 import type { AuthenticationAccountSecurityReader } from "../../application/auth/authorize-organization-operation.ts";
 import { authorizeOrganizationParticipation } from "../../application/auth/authorize-organization-operation.ts";
 import type { AuthenticatedServerContext } from "../../application/auth/server-session.ts";
+import type { EntitlementBillingProjection } from "../../application/accelpo/entitlement-billing.ts";
 import type { OrganizationUserAuthorizationRepository } from "../../domain/authorization/repository.ts";
 import type { AccessRestrictionRepository } from "../../domain/lifecycle/repository.ts";
 import type { OrganizationId } from "../../domain/organizations/model.ts";
 import type { OrganizationAccountRepository, OrganizationProfileRepository } from "../../domain/organizations/repository.ts";
 import type { OrganizationCommercialAccountRepository } from "../../domain/commercial/repository.ts";
 import type { OrganizationMembership, OrganizationMembershipRepository } from "../../domain/users";
-import type { IdentityProjectionResponse, IdentityOrganizationOption, IdentityMembershipProjection, IdentityForbiddenReason, AccelPOCapability } from "./identity-context.ts";
+import type { IdentityProjectionResponse, IdentityOrganizationOption, IdentityMembershipProjection, IdentityForbiddenReason, AccelPOCapability, IdentitySeatContext } from "./identity-context.ts";
 
 export interface IdentityProjectionDependencies {
   readonly accountSecurity: AuthenticationAccountSecurityReader;
@@ -17,6 +18,9 @@ export interface IdentityProjectionDependencies {
   readonly authorizations: OrganizationUserAuthorizationRepository;
   readonly restrictions: AccessRestrictionRepository;
   readonly commercialAccounts?: OrganizationCommercialAccountRepository;
+  readonly entitlementBilling?: Readonly<{
+    read(organizationId: string): Promise<EntitlementBillingProjection>;
+  }>;
 }
 
 function forbidden(reason: IdentityForbiddenReason): IdentityProjectionResponse {
@@ -103,6 +107,45 @@ async function planSummary(
   });
 }
 
+async function seatContext(
+  organizationId: OrganizationId,
+  dependencies: IdentityProjectionDependencies,
+): Promise<IdentitySeatContext> {
+  if (dependencies.entitlementBilling) {
+    const entitlement = await dependencies.entitlementBilling.read(String(organizationId));
+    if (entitlement.organizationId !== String(organizationId)) {
+      throw new Error("Entitlement billing projection returned a different organization.");
+    }
+    return Object.freeze({
+      ownerCountsAsSeat: true as const,
+      includedSeats: entitlement.includedSeats,
+      activeSeats: entitlement.activeSeats,
+      reservedSeats: entitlement.reservedSeats,
+      availableSeats: entitlement.availableSeats,
+      addOnSeatAllowance: entitlement.addOnSeatAllowance,
+      addOnSeatPricing: entitlement.addOnSeatPricing,
+      addSeatActionAllowed: entitlement.addSeatActionAllowed,
+      entitlementVersion: entitlement.entitlementVersion,
+      source: "cp-10-entitlement" as const,
+    });
+  }
+
+  // Fallback is organization-scoped, never the signed-in user's cross-organization membership count.
+  const memberships = await dependencies.memberships.listByOrganizationId(organizationId);
+  return Object.freeze({
+    ownerCountsAsSeat: true as const,
+    includedSeats: null,
+    activeSeats: memberships.filter((membership) => membership.status === "active").length,
+    reservedSeats: null,
+    availableSeats: null,
+    addOnSeatAllowance: null,
+    addOnSeatPricing: null,
+    addSeatActionAllowed: false,
+    entitlementVersion: null,
+    source: "shared-membership-count" as const,
+  });
+}
+
 /**
  * Server-authorized identity projection used by CP-01. The requested organization is only a
  * selection hint; every membership and organization is re-read from trusted repositories.
@@ -160,10 +203,10 @@ export async function projectIdentityContext(
     roleKey: String(authorization.roleKey),
     capabilities: selectedCapabilities,
   });
-  const plan = await planSummary(
-    String(selectedMembership.organizationId),
-    dependencies.commercialAccounts,
-  );
+  const [plan, seat] = await Promise.all([
+    planSummary(String(selectedMembership.organizationId), dependencies.commercialAccounts),
+    seatContext(selectedMembership.organizationId, dependencies),
+  ]);
 
   return Object.freeze({
     kind: "ready" as const,
@@ -177,13 +220,7 @@ export async function projectIdentityContext(
       membership,
       activeMemberships: options,
       permissions: selectedCapabilities,
-      seat: Object.freeze({
-        ownerCountsAsSeat: true as const,
-        activeSeats: activeMemberships.length,
-        reservedSeats: null,
-        availableSeats: null,
-        source: "shared-membership-count" as const,
-      }),
+      seat,
       plan,
     }),
   });
