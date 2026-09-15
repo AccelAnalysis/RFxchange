@@ -19,7 +19,7 @@ const DEFAULT_PREVIEW = Object.freeze({
       "purchasing.configure",
       "purchase.budget.view",
     ]),
-    plan: Object.freeze({ name: "Preview plan", billingPeriod: null }),
+    plan: Object.freeze({ name: "Growth", billingPeriod: null }),
     seats: Object.freeze({
       included: 3,
       active: 3,
