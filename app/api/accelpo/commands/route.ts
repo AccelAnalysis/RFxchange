@@ -5,6 +5,7 @@ import {
 } from "@/src/application/accelpo/command-port";
 import { registerCP06TaskNotificationCommands } from "@/src/accelpo/cp06/commands";
 import { createCP07ServerCommandRegistry } from "@/src/accelpo/cp07/server-runtime";
+import { ensureCP10CommandRegistration } from "@/src/accelpo/cp10/commands";
 import { ServerSessionError } from "@/src/application/auth/server-session";
 import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
@@ -16,8 +17,9 @@ export const runtime = "nodejs";
 
 const MAX_COMMAND_BODY_BYTES = 262_144;
 
-// CP-06 extends the one CP-03 registry; CP-07 composes from that registry per request.
+// CP-06 and CP-10 extend the one CP-03 registry; CP-07 composes from that registry per request.
 registerCP06TaskNotificationCommands();
+ensureCP10CommandRegistration();
 
 function bearerToken(request: NextRequest): string | null {
   const header = request.headers.get("authorization")?.trim() ?? "";

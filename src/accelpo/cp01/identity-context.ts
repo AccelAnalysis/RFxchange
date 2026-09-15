@@ -1,3 +1,5 @@
+import type { AddOnSeatPricing } from "../../application/accelpo/entitlement-billing.ts";
+
 export const CP01_IDENTITY_CONTEXT_PART_ID = "CP-01" as const;
 export const ACCELPO_IDENTITY_STORAGE_PREFIX = "accelpo.identity.organization.v1" as const;
 
@@ -43,9 +45,14 @@ export interface IdentityMembershipProjection extends IdentityOrganizationOption
 
 export interface IdentitySeatContext {
   readonly ownerCountsAsSeat: true;
+  readonly includedSeats: number | null;
   readonly activeSeats: number;
   readonly reservedSeats: number | null;
   readonly availableSeats: number | null;
+  readonly addOnSeatAllowance: number | null;
+  readonly addOnSeatPricing: AddOnSeatPricing | null;
+  readonly addSeatActionAllowed: boolean;
+  readonly entitlementVersion: string | null;
   readonly source: "shared-membership-count" | "cp-10-entitlement";
 }
 

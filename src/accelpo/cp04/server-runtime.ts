@@ -49,9 +49,16 @@ class IdentityProjectionAccessResolver implements ProjectionAccessResolver {
       organizationDisplayName: projection.activeOrganization.displayName,
       planName: projection.plan.plan,
       billingPeriod: projection.plan.billingPeriodEndsAt,
+      includedSeats: projection.seat.includedSeats,
       activeSeats: projection.seat.activeSeats,
       reservedSeats: projection.seat.reservedSeats,
       availableSeats: projection.seat.availableSeats,
+      addOnSeatAllowance: projection.seat.addOnSeatAllowance,
+      addOnSeatPriceMinor: projection.seat.addOnSeatPricing?.amountMinor ?? null,
+      addOnSeatCurrency: projection.seat.addOnSeatPricing?.currency ?? null,
+      addSeatActionAllowed: projection.seat.addSeatActionAllowed,
+      entitlementVersion: projection.seat.entitlementVersion,
+      ownerCountsAsSeat: projection.seat.ownerCountsAsSeat,
     });
     return Object.freeze({ kind: "authorized" as const, actor });
   }

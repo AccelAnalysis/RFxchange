@@ -326,6 +326,8 @@ function projectOrganizationContext(
   actor: TrustedProjectionActor,
   record: ProjectionRecord,
 ): OrganizationContextProjection {
+  const addOnPriceMinor = actor.addOnSeatPriceMinor ?? recordNumber(record, "addOnSeatPriceMinor");
+  const addOnCurrency = actor.addOnSeatCurrency ?? recordString(record, "addOnSeatCurrency");
   return Object.freeze({
     organizationId: actor.organizationId,
     displayName: actor.organizationDisplayName ?? recordString(record, "displayName") ?? "Organization",
@@ -337,9 +339,18 @@ function projectOrganizationContext(
       billingPeriod: actor.billingPeriod ?? recordString(record, "billingPeriod"),
     }),
     seats: Object.freeze({
+      included: actor.includedSeats ?? recordNumber(record, "includedSeats"),
       active: actor.activeSeats ?? recordNumber(record, "activeSeats"),
       reserved: actor.reservedSeats ?? recordNumber(record, "reservedSeats"),
       available: actor.availableSeats ?? recordNumber(record, "availableSeats"),
+      addOnAllowance: actor.addOnSeatAllowance ?? recordNumber(record, "addOnSeatAllowance"),
+      addOnPricing: addOnPriceMinor !== null && addOnCurrency !== null
+        ? Object.freeze({ amountMinor: addOnPriceMinor, currency: addOnCurrency })
+        : null,
+      addSeatActionAllowed:
+        actor.addSeatActionAllowed ?? recordBoolean(record, "addSeatActionAllowed") ?? false,
+      entitlementVersion: actor.entitlementVersion ?? recordString(record, "entitlementVersion"),
+      ownerCountsAsSeat: true,
     }),
   });
 }

@@ -7,6 +7,7 @@ import { CP06_TASK_NOTIFICATION_PART } from "../task-notification/part.ts";
 import { CP07_FILE_EVIDENCE_PART } from "../file-evidence/part.ts";
 import { CP08_RFX_BRIDGE_PART } from "../rfx-bridge/part.ts";
 import { CP09_MARKETING_EVENT_PART } from "../marketing-event/part.ts";
+import { CP10_ENTITLEMENT_BILLING_PART } from "../entitlement-billing/part.ts";
 
 /** Small composition registry used by the shell. Parts register themselves; the shell owns the registry. */
 export class AccelPOPartRegistry {
@@ -54,8 +55,9 @@ export const CP02_ROUTE_SURFACE_PART: AccelPOPartContract = Object.freeze({
 
 /**
  * Creates the current chassis registry with bounded CP-03 write, CP-04 read, CP-05 policy,
- * CP-06 task/notification, CP-07 private-file, CP-08 RFx bridge, and CP-09 lifecycle-event boundaries registered.
- * Later parts should add themselves through this registry rather than creating parallel infrastructure.
+ * CP-06 task/notification, CP-07 private-file, CP-08 RFx bridge, CP-09 lifecycle-event, and
+ * CP-10 entitlement/billing boundaries registered. Later parts should add themselves through
+ * this registry rather than creating parallel infrastructure.
  */
 export function createAccelPOPartRegistry(): AccelPOPartRegistry {
   const registry = new AccelPOPartRegistry();
@@ -69,5 +71,6 @@ export function createAccelPOPartRegistry(): AccelPOPartRegistry {
   registry.register(CP07_FILE_EVIDENCE_PART);
   registry.register(CP08_RFX_BRIDGE_PART);
   registry.register(CP09_MARKETING_EVENT_PART);
+  registry.register(CP10_ENTITLEMENT_BILLING_PART);
   return registry;
 }
