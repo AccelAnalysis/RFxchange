@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   AccelPoCommandError,
 } from "@/src/application/accelpo/command-port";
+import { registerCP06TaskNotificationCommands } from "@/src/accelpo/cp06/commands";
 import { ServerSessionError } from "@/src/application/auth/server-session";
 import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
 import { createServerAuthenticationBoundary } from "@/src/infrastructure/auth/firebase-session-runtime";
@@ -13,6 +14,9 @@ import { apiProblem } from "@/src/infrastructure/http/api-problem";
 export const runtime = "nodejs";
 
 const MAX_COMMAND_BODY_BYTES = 262_144;
+
+// CP-06 extends the one CP-03 registry; no additional write endpoint is introduced.
+registerCP06TaskNotificationCommands();
 
 function bearerToken(request: NextRequest): string | null {
   const header = request.headers.get("authorization")?.trim() ?? "";
