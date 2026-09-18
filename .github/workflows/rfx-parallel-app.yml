@@ -1,0 +1,46 @@
+name: RFx parallel app
+on:
+  push:
+    branches: [codex/rfx-parallel-exchange-20260918]
+    paths: ['apps/rfx/**', '.github/workflows/rfx-parallel-app.yml']
+  pull_request:
+    paths: ['apps/rfx/**', '.github/workflows/rfx-parallel-app.yml']
+permissions:
+  contents: read
+concurrency:
+  group: rfx-parallel-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RFXCHANGE_ENV: development
+      RFXCHANGE_EXPECTED_PROJECT_ID: demo-rfxchange
+      RFXCHANGE_PUBLIC_ORIGIN: http://localhost:3003
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+          cache: npm
+      - run: npm ci
+      - run: npm --prefix apps/rfx test
+      - run: npm --prefix apps/rfx run typecheck
+      - run: npm --prefix apps/rfx run build
+      - run: node apps/rfx/test/server-smoke.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install playwright==1.55.0
+      - run: python -m playwright install --with-deps chromium
+      - name: Browser contract checks with test data
+        run: |
+          export CHROMIUM_PATH=$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')
+          python apps/rfx/test/browser.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rfx-parallel-browser-${{ github.sha }}
+          path: apps/rfx/test-output/
+          if-no-files-found: ignore

@@ -1,0 +1,4 @@
+{
+  "name":"rfxchange-rfx", "root":"apps/rfx", "sourceRoot":"apps/rfx/app", "projectType":"application",
+  "targets":{"build":{"executor":"nx:run-commands","options":{"command":"npm run build","cwd":"apps/rfx","forwardAllArgs":false},"cache":false}}
+}

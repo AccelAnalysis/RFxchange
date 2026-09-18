@@ -1,0 +1,8 @@
+.next/
+node_modules/
+.env.local
+.env
+next-env.d.ts
+*.tsbuildinfo
+public/runtime-config.json
+test-output/

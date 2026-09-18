@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F8FAFC"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="description" content="Discover organizations, capabilities, resources and RFx in one connected Exchange.">
+<title>RFxchange RFx</title><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/exchange.css"><script type="module" src="/exchange.mjs"></script>
+</head>
+<body>
+<svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M8 4v6m8 4v6"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+<symbol id="i-rfx" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6ZM14 3v6h6M8 13h8M8 17h5"/></symbol>
+<symbol id="i-resource" viewBox="0 0 24 24"><path d="m12 3 9 5v9l-9 5-9-5V8l9-5Zm0 9 9-4M3 8l9 4v10M7.5 5.5l9 5"/></symbol>
+<symbol id="i-po" viewBox="0 0 24 24"><path d="M8 5H5a2 2 0 0 0-2 2v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2h-3M8 3h8v5H8V3ZM8 15l3 3 6-7"/></symbol>
+<symbol id="i-intel" viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7M2 20h20"/></symbol>
+<symbol id="i-capability" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4M5 5l3 3m8 8 3 3M19 5l-3 3M8 16l-3 3"/></symbol>
+<symbol id="i-location" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="m14 5-7 7 7 7"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="m8 4 12 8-12 8V4Z"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+</defs></svg>
+<div id="exchange" data-app="rfxchange-rfx">
+<div id="map" aria-label="Exchange map"><div id="map-message" class="map-message">Your Exchange, in one place.</div></div>
+<header class="top-controls" aria-label="Exchange controls">
+<button class="menu-toggle icon-button glass" id="menu-toggle" aria-label="Menu" aria-haspopup="dialog"><svg><use href="#i-menu"/></svg></button>
+<form id="search-form" class="search-capsule glass" role="search">
+<button type="button" id="filter-toggle" class="icon-button capsule-end" aria-label="Filters" aria-haspopup="dialog"><svg><use href="#i-filter"/></svg><span id="filter-badge" class="filter-badge" hidden></span></button>
+<div class="search-center"><label class="wordmark" for="query"><b>RF</b>xchange<span class="tm">™</span></label><span class="search-divider" aria-hidden="true"></span><input id="query" name="q" type="search" placeholder="Search RFx or capabilities" maxlength="120" enterkeyhint="search" autocomplete="off" aria-label="Search the Exchange"></div>
+<button type="button" id="map-toggle" class="icon-button capsule-end" aria-label="Map options" aria-haspopup="dialog"><svg><use href="#i-layers"/></svg></button>
+</form>
+</header>
+<button id="recenter" class="recenter icon-button glass" aria-label="Recenter on my organization" title="Recenter on my organization" disabled><svg><use href="#i-location"/></svg></button>
+<main id="sheet" class="result-surface glass" data-snap="partial" aria-label="Exchange results">
+<button id="drag-handle" class="drag-handle" aria-label="Resize results. Use up and down arrows to expand or collapse." aria-controls="sheet-body" aria-expanded="true"><span></span></button>
+<div class="result-heading"><div><p id="geography-label" class="eyebrow">YOUR EXCHANGE</p><h1 id="lens-heading">RFx</h1></div><span id="result-count" class="result-count" hidden></span><button id="panel-toggle" class="icon-button" aria-label="Collapse results"><svg><use href="#i-close"/></svg></button></div>
+<div id="sheet-body" class="sheet-body"><div id="status" class="state-panel" role="status" aria-live="polite"><h2>Find your next opportunity.</h2><p>Connecting to your Exchange…</p></div><div id="result-list" class="result-list"></div><button id="load-more" class="secondary load-more" hidden>Load more</button><section id="detail" class="detail" hidden aria-label="Record details" tabindex="-1"></section></div>
+</main>
+<button id="show-panel" class="show-panel glass" hidden>Show results</button>
+<nav class="bottom-nav glass" aria-label="Primary navigation">
+<button data-lens="rfx" aria-current="page"><svg><use href="#i-rfx"/></svg><span>RFx</span></button>
+<button data-lens="resources"><svg><use href="#i-resource"/></svg><span>Resources</span></button>
+<a id="accelpo-link" class="accelpo" aria-label="Open AccelPO purchasing"><span class="po-symbol"><svg><use href="#i-po"/></svg></span><span>AccelPO</span></a>
+<button data-lens="intelligence"><svg><use href="#i-intel"/></svg><span>Intelligence</span></button>
+<button data-lens="capabilities"><svg><use href="#i-capability"/></svg><span>Capabilities</span></button>
+</nav>
+</div>
+<dialog id="filters" class="side-dialog" aria-labelledby="filters-title"><header><button class="icon-button" data-close aria-label="Close filters"><svg><use href="#i-back"/></svg></button><h2 id="filters-title">Filters</h2><button class="text-button" id="reset-filters">Reset</button></header><form id="filters-form" class="dialog-content"><p class="muted">Refine this lens. Your map and results stay in place.</p><label>Search<input name="search" type="search" maxlength="120" placeholder="Organization, service or capability"></label><fieldset id="rfx-filters"><legend>Response deadline</legend><label><select name="deadline"><option value="">Any open deadline</option><option value="next-7-days">Next 7 days</option><option value="next-30-days">Next 30 days</option></select></label><label class="check-row"><input name="watched" type="checkbox">Watched RFx only</label></fieldset><fieldset id="resource-filters" hidden><legend>Availability</legend><label><select name="availability"><option value="">Any availability</option><option value="available">Available</option><option value="limited">Limited</option></select></label></fieldset><p id="filter-geography" class="muted"></p><footer><button type="submit" class="primary">Show results <svg><use href="#i-arrow"/></svg></button></footer></form></dialog>
+<dialog id="map-options" class="options-dialog" aria-labelledby="map-title"><header><h2 id="map-title">Map options</h2><button class="icon-button" data-close aria-label="Close map options"><svg><use href="#i-close"/></svg></button></header><div class="dialog-content"><fieldset><legend>Map style</legend><div class="segmented"><button data-style="streets" aria-pressed="true">Map</button><button data-style="satellite" aria-pressed="false">Satellite</button></div></fieldset><label class="check-row"><input type="checkbox" id="map-clusters" checked>Group nearby markers</label><label class="check-row"><input type="checkbox" id="map-boundaries" checked>Locality boundaries</label><label class="check-row"><input type="checkbox" id="map-pitch">3D perspective</label><button class="secondary" id="north-up">Reset north / level view</button><p class="muted">Pinch to zoom, drag to pan, and use two fingers to rotate. Map display never changes which records you can access.</p></div></dialog>
+<dialog id="menu" class="side-dialog menu-dialog" aria-labelledby="menu-title"><header><h2 id="menu-title">Your Exchange</h2><button class="icon-button" data-close aria-label="Close menu"><svg><use href="#i-close"/></svg></button></header><div class="dialog-content"><p id="viewer-name" class="viewer-name">RFxchange</p><div id="menu-links" class="menu-links"></div><button id="signout" class="secondary">Sign out</button><p class="muted">AccelPO opens as a separate app. No account credentials are passed in the link.</p></div></dialog>
+<dialog id="signin" class="signin-dialog" aria-labelledby="signin-title"><form id="signin-form" class="dialog-content"><div class="wordmark auth-brand"><b>RF</b>xchange</div><h1 id="signin-title">Welcome to your Exchange.</h1><p class="muted">Sign in with your existing RFxchange account.</p><label>Email<input type="email" name="email" autocomplete="username" required></label><label>Password<input type="password" name="password" autocomplete="current-password" required></label><p id="signin-error" role="alert" hidden></p><button class="primary" type="submit">Sign in <svg><use href="#i-arrow"/></svg></button><a id="join-link" class="text-link">Create an account or finish setup</a></form></dialog>
+<div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+<noscript><p>JavaScript is required to use the interactive Exchange.</p></noscript>
+</body></html>
