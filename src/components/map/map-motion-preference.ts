@@ -1,13 +1,15 @@
+import type { Map } from "mapbox-gl";
+
 export const MAP_ROTATION_STORAGE_KEY = "rfxchange:map-rotation-enabled";
 export const MAP_ROTATION_PREFERENCE_EVENT = "rfxchange:map-rotation-preference";
 
 export function readMapRotationPreference(): boolean {
-  if (typeof window === "undefined") return true;
+  if (typeof window === "undefined") return false;
   try {
     const value = window.localStorage.getItem(MAP_ROTATION_STORAGE_KEY);
-    return value === null ? true : value === "true";
+    return value === "true";
   } catch {
-    return true;
+    return false;
   }
 }
 
@@ -32,4 +34,25 @@ export function writeMapRotationPreference(enabled: boolean): void {
   window.dispatchEvent(
     new CustomEvent<boolean>(MAP_ROTATION_PREFERENCE_EVENT, { detail: enabled }),
   );
+}
+
+/** Native camera easing owns animation. A single listener continues the optional ambient scene. */
+export function startAmbientMapRotation(
+  map: Pick<Map, "on" | "off" | "easeTo" | "getBearing" | "stop">,
+  allowed: () => boolean,
+): () => void {
+  let active = true;
+  let moving = false;
+  const rotate = () => {
+    if (!active || !allowed()) return;
+    moving = true;
+    map.easeTo({ bearing: map.getBearing() + 90, duration: 56_250, easing: (t: number) => t, essential: false });
+  };
+  map.on("moveend", rotate);
+  rotate();
+  return () => {
+    active = false;
+    map.off("moveend", rotate);
+    if (moving) map.stop();
+  };
 }

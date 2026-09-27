@@ -3,15 +3,12 @@ import {
   type ParticipantMapCamera,
 } from "../geography/map-view.ts";
 import {
-  migrateLegacyParticipantLensId,
   type ParticipantLensId,
 } from "./participant-lens-registry.ts";
 
 export const PARTICIPANT_SPATIAL_CONTEXT_VERSION = 2 as const;
 export const PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX = "rfxchange:participant-spatial:v2:";
-export const LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX = "rfxchange:participant-spatial:v1:";
 export const PARTICIPANT_SPATIAL_ACTIVE_KEY = "rfxchange:participant-spatial:active";
-export const PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY = "rfxchange:participant-spatial:legacy-referral-intent";
 export const PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT = "rfxchange:participant-spatial-changed";
 
 export const PARTICIPANT_SHEET_SNAP_POINTS = Object.freeze([
@@ -64,7 +61,6 @@ export interface ParticipantSpatialContext {
 
 const LENSES = ["opportunities-rfx", "resources", "intelligence", "capabilities"] as const;
 type AvailableParticipantLens = (typeof LENSES)[number];
-type LegacyParticipantLens = Exclude<AvailableParticipantLens, "capabilities"> | "referrals";
 
 function required(value: string, label: string): string {
   const normalized = value.trim();
@@ -74,11 +70,6 @@ function required(value: string, label: string): string {
 
 function isAvailableLens(value: unknown): value is AvailableParticipantLens {
   return typeof value === "string" && LENSES.includes(value as AvailableParticipantLens);
-}
-
-function migratedLens(value: unknown, legacy: boolean): AvailableParticipantLens | null {
-  if (isAvailableLens(value)) return value;
-  return legacy ? migrateLegacyParticipantLensId(value) : null;
 }
 
 function isSheetSnapPoint(value: unknown): value is ParticipantSheetSnapPoint {
@@ -108,16 +99,6 @@ export function participantSpatialScope(input: ParticipantSpatialScope): Partici
 export function participantSpatialStorageKey(scopeInput: ParticipantSpatialScope): string {
   const scope = participantSpatialScope(scopeInput);
   return `${PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX}${[
-    scope.participantId,
-    scope.membershipId,
-    scope.organizationId,
-    scope.geographyId,
-  ].map(encodeURIComponent).join(":")}`;
-}
-
-export function legacyParticipantSpatialStorageKey(scopeInput: ParticipantSpatialScope): string {
-  const scope = participantSpatialScope(scopeInput);
-  return `${LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX}${[
     scope.participantId,
     scope.membershipId,
     scope.organizationId,
@@ -205,19 +186,14 @@ export function parseParticipantSpatialContext(
     const parsed = JSON.parse(serialized) as Omit<Partial<ParticipantSpatialContext>,
       "version" | "activeLens" | "originLens" | "lensState"> & Readonly<{
       version?: number;
-      activeLens?: ParticipantLensId | LegacyParticipantLens;
-      originLens?: ParticipantLensId | LegacyParticipantLens;
-      lensState?: Partial<Record<ParticipantLensId | LegacyParticipantLens, ParticipantSpatialLensState>>;
+      activeLens?: ParticipantLensId;
+      originLens?: ParticipantLensId;
+      lensState?: Partial<Record<ParticipantLensId, ParticipantSpatialLensState>>;
       workflowState?: Partial<ParticipantSpatialWorkflowState>;
     }>;
-    const legacy = parsed.version === 1;
-    if ((!legacy && parsed.version !== PARTICIPANT_SPATIAL_CONTEXT_VERSION) || !parsed.scope) return null;
-    const capabilitiesState = parseLensState(
-      legacy ? parsed.lensState?.referrals : parsed.lensState?.capabilities,
-    );
-    const referralWorkflowState = parseLensState(
-      legacy ? parsed.lensState?.referrals : parsed.workflowState?.referrals,
-    );
+    if (parsed.version !== PARTICIPANT_SPATIAL_CONTEXT_VERSION || !parsed.scope) return null;
+    const capabilitiesState = parseLensState(parsed.lensState?.capabilities);
+    const referralWorkflowState = parseLensState(parsed.workflowState?.referrals);
     if (!parseLensState(parsed.lensState?.resources)
       || !parseLensState(parsed.lensState?.intelligence)
       || !capabilitiesState
@@ -226,8 +202,8 @@ export function parseParticipantSpatialContext(
     if (Object.keys(expectedScope).some(
       (key) => scope[key as keyof ParticipantSpatialScope] !== expectedScope[key as keyof ParticipantSpatialScope],
     )) return null;
-    const activeLens = migratedLens(parsed.activeLens, legacy);
-    const originLens = migratedLens(parsed.originLens, legacy);
+    const activeLens = isAvailableLens(parsed.activeLens) ? parsed.activeLens : null;
+    const originLens = isAvailableLens(parsed.originLens) ? parsed.originLens : null;
     if (!activeLens || !originLens) return null;
     if (!parsed.selection || typeof parsed.selection.organizationId !== "string" || typeof parsed.selection.markerId !== "string") return null;
     if (parsed.selection.relationshipId !== null && typeof parsed.selection.relationshipId !== "string") return null;
@@ -254,7 +230,6 @@ export function parseParticipantSpatialContext(
       }),
       workflowState: Object.freeze({ referrals: referralWorkflowState }),
       panelOpen: parsed.panelOpen,
-      // Backward-compatible defaults preserve valid Stage 1 contexts already stored in browsers.
       sheetSnapPoint: isSheetSnapPoint(parsed.sheetSnapPoint)
         ? parsed.sheetSnapPoint
         : parsed.panelOpen ? "partial" : "peek",
@@ -289,18 +264,7 @@ export interface ParticipantSpatialStorage {
 
 export interface ParticipantSpatialStorageResolution {
   readonly serialized: string;
-  readonly source: "successor" | "legacy" | "fallback";
-  readonly legacyReferralLensIntent: boolean;
-}
-
-function hasLegacyReferralLensIntent(serialized: string | null): boolean {
-  if (!serialized) return false;
-  try {
-    const parsed = JSON.parse(serialized) as Readonly<{ version?: unknown; activeLens?: unknown }>;
-    return parsed.version === 1 && parsed.activeLens === "referrals";
-  } catch {
-    return false;
-  }
+  readonly source: "current" | "fallback";
 }
 
 export function resolveParticipantSpatialStorage(
@@ -312,17 +276,7 @@ export function resolveParticipantSpatialStorage(
   if (parseParticipantSpatialContext(successor, scope)) {
     return Object.freeze({
       serialized: successor!,
-      source: "successor" as const,
-      legacyReferralLensIntent: false,
-    });
-  }
-  const legacy = storage.getItem(legacyParticipantSpatialStorageKey(scope));
-  const migrated = parseParticipantSpatialContext(legacy, scope);
-  if (migrated) {
-    return Object.freeze({
-      serialized: serializeParticipantSpatialContext(migrated),
-      source: "legacy" as const,
-      legacyReferralLensIntent: hasLegacyReferralLensIntent(legacy),
+      source: "current" as const,
     });
   }
   if (!parseParticipantSpatialContext(fallbackSerialized, scope)) {
@@ -331,7 +285,6 @@ export function resolveParticipantSpatialStorage(
   return Object.freeze({
     serialized: fallbackSerialized,
     source: "fallback" as const,
-    legacyReferralLensIntent: false,
   });
 }
 
@@ -340,30 +293,10 @@ export function commitParticipantSpatialStorage(
   scope: ParticipantSpatialScope,
   resolution: ParticipantSpatialStorageResolution,
 ): void {
-  const successorKey = participantSpatialStorageKey(scope);
-  const legacyKey = legacyParticipantSpatialStorageKey(scope);
-  // Publish the pointer only after a valid successor value and optional route discriminator exist.
-  storage.setItem(successorKey, resolution.serialized);
-  if (resolution.legacyReferralLensIntent) {
-    storage.setItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY, successorKey);
-  } else if (
-    resolution.source === "fallback"
-    && storage.getItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY) === successorKey
-  ) {
-    storage.removeItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY);
-  }
-  storage.removeItem(legacyKey);
-  storage.setItem(PARTICIPANT_SPATIAL_ACTIVE_KEY, successorKey);
-}
-
-export function consumeLegacyReferralLensIntent(
-  storage: ParticipantSpatialStorage,
-  scope: ParticipantSpatialScope,
-): boolean {
-  const successorKey = participantSpatialStorageKey(scope);
-  if (storage.getItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY) !== successorKey) return false;
-  storage.removeItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY);
-  return true;
+  const key = participantSpatialStorageKey(scope);
+  if (!parseParticipantSpatialContext(resolution.serialized, scope)) throw new Error("Invalid spatial scope.");
+  storage.setItem(key, resolution.serialized);
+  storage.setItem(PARTICIPANT_SPATIAL_ACTIVE_KEY, key);
 }
 
 export function clearParticipantSpatialContexts(): void {
@@ -371,13 +304,11 @@ export function clearParticipantSpatialContexts(): void {
   try {
     for (let index = window.sessionStorage.length - 1; index >= 0; index -= 1) {
       const key = window.sessionStorage.key(index);
-      if (key?.startsWith(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)
-        || key?.startsWith(LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)) {
+      if (key?.startsWith("rfxchange:participant-spatial:")) {
         window.sessionStorage.removeItem(key);
       }
     }
     window.sessionStorage.removeItem(PARTICIPANT_SPATIAL_ACTIVE_KEY);
-    window.sessionStorage.removeItem(PARTICIPANT_SPATIAL_LEGACY_REFERRAL_INTENT_KEY);
   } catch {
     // Optional continuity state never affects sign-out or participant authority.
   }
@@ -388,8 +319,7 @@ export function readActiveParticipantSpatialContext(): ParticipantSpatialContext
   if (typeof window === "undefined") return null;
   try {
     const key = window.sessionStorage.getItem(PARTICIPANT_SPATIAL_ACTIVE_KEY);
-    if (!key?.startsWith(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)
-      && !key?.startsWith(LEGACY_PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)) return null;
+    if (!key?.startsWith(PARTICIPANT_SPATIAL_CONTEXT_STORAGE_PREFIX)) return null;
     const serialized = window.sessionStorage.getItem(key);
     if (!serialized) return null;
     const parsed = JSON.parse(serialized) as Partial<ParticipantSpatialContext>;

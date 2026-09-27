@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { RfxResponseCollaborationWorkspace } from "@/src/components/rfx/RfxResponseCollaborationWorkspace";
-import { ParticipantShell } from "@/src/components/participant/ParticipantWorkspace";
+import { ParticipantPage } from "@/src/components/participant/WorkspacePrimitives";
 import { RfxResponseCollaborationError } from "@/src/domain/rfx/collaboration";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
@@ -52,12 +52,12 @@ export default async function RfxCollaboratePage({ params, searchParams }: Reado
     }, { reference, leadOrganizationId: lead });
   } catch (error) {
     if (!(error instanceof RfxResponseCollaborationError)) throw error;
-    return <ParticipantShell activeItem="opportunities-rfx"><main style={{ width: "min(100%, 42rem)", margin: "0 auto", padding: "1.5rem 1rem 6rem" }}>
+    return <ParticipantPage activeItem="opportunities-rfx"><main style={{ width: "min(100%, 42rem)", margin: "0 auto", padding: "1.5rem 1rem 6rem" }}>
       <p style={{ fontWeight: 750 }}>Collaboration unavailable</p>
       <h1>Response work has not been assigned here yet</h1>
       <p>{error.code === "not-found" ? "The lead organization must start its response before assigning teammate work." : error.message}</p>
       <p><Link href={returnHref}>Return to the RFx</Link></p>
-    </main></ParticipantShell>;
+    </main></ParticipantPage>;
   }
   return <RfxResponseCollaborationWorkspace
     initialWorkspace={workspace}

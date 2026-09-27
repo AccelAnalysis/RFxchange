@@ -17,10 +17,10 @@ import { ExchangeSpatialScene, type ExchangeHomeMarker } from "../map/ExchangeSp
 import { ExchangeRoomActionController } from "../participant/ExchangeRoomActionController";
 import {
   MapOverlaySurface,
-  ParticipantShell,
+  ParticipantPage,
   ResponsiveEdgeSheet,
   SpatialWorkspace,
-} from "../participant/ParticipantWorkspace";
+} from "../participant/WorkspacePrimitives";
 
 import styles from "./CapabilitiesWorkspace.module.css";
 
@@ -89,7 +89,7 @@ export function CapabilitiesWorkspace({
   };
 
   return (
-    <ParticipantShell activeItem="capabilities" organizationName={homeMarker.label}>
+    <ParticipantPage activeItem="capabilities" organizationName={homeMarker.label}>
       <SpatialWorkspace ariaLabel={copy.title} className={styles.workspace}>
         <ExchangeSpatialScene
           model={model}
@@ -196,7 +196,7 @@ export function CapabilitiesWorkspace({
           </ResponsiveEdgeSheet>
         ) : null}
       </SpatialWorkspace>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }
 

@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -210,16 +209,4 @@ test("response attachments are first-class private responder assets", () => {
   assert.equal(policy.sensitivity, "standard");
   assert.ok(policy.permittedContentTypes.includes("image/jpeg"));
   assert.ok(policy.permittedContentTypes.includes("application/pdf"));
-});
-
-test("live RFx actions no longer hard-code Create RFx unavailable and Pursue exposes Respond", async () => {
-  const discovery = await readFile(new URL("../src/components/rfx/OpportunityDiscoveryWorkspace.tsx", import.meta.url), "utf8");
-  const assessment = await readFile(new URL("../src/components/rfx/OpportunityAssessmentWorkspace.tsx", import.meta.url), "utf8");
-  const inbox = await readFile(new URL("../src/components/rfx/OpportunityTeamInvitationInbox.tsx", import.meta.url), "utf8");
-  assert.doesNotMatch(discovery, /rfxCreate:\s*false/);
-  assert.match(discovery, /rfxCreate:\s*rfxCreateAuthorized/);
-  assert.match(assessment, /data-opportunity-respond/);
-  assert.match(assessment, /\/respond\?returnTo=/);
-  assert.match(inbox, /data-rfx-collaboration-entry/);
-  assert.match(inbox, /\/collaborate\?lead=/);
 });

@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { PROVIDER_CATEGORIES, PROVIDER_MODALITIES, type OfficialResourceProviderApplication, type OfficialResourceProviderStatus, type ProviderApplicationEvent, type ProviderServiceProfile } from "../../domain/resource-providers/model";
 import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
-import { OperationalWorkspace, ParticipantShell } from "../participant/ParticipantWorkspace";
+import { OperationalWorkspace, ParticipantPage } from "../participant/WorkspacePrimitives";
 
 import styles from "./ProviderApplicationWorkspace.module.css";
 
@@ -57,7 +57,7 @@ export function ProviderApplicationWorkspace({ initialSnapshot }: Readonly<{ ini
   const firstService = source?.services[0];
 
   return (
-    <ParticipantShell activeItem="Account">
+    <ParticipantPage activeItem="Account">
       <OperationalWorkspace ariaLabel={t("resourceProviderWorkspace.title")} className={styles.workspace}>
         <header className={styles.hero}>
           <div><p>{t("resourceProviderWorkspace.eyebrow")}</p><h1>{t("resourceProviderWorkspace.title")}</h1><span>{t("resourceProviderWorkspace.intro")}</span></div>
@@ -102,6 +102,6 @@ export function ProviderApplicationWorkspace({ initialSnapshot }: Readonly<{ ini
           <section className={styles.card} aria-labelledby="history-heading"><h2 id="history-heading">{t("resourceProviderWorkspace.history")}</h2>{snapshot.history.length ? <ol className={styles.history}>{[...snapshot.history].reverse().map((event) => <li key={String(event.id)}><strong>{readable(event.kind)}</strong><span>{new Date(event.occurredAt).toLocaleString()} · {event.actorKind}</span>{event.note ? <p>{event.note}</p> : null}</li>)}</ol> : <p>{t("resourceProviderWorkspace.emptyHistory")}</p>}</section>
         </div>
       </OperationalWorkspace>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }

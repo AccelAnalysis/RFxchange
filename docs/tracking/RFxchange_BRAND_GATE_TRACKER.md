@@ -41,6 +41,6 @@ Brand Gate work through B6a and the later no-Feature-ID AMACS reconciliation cha
 
 B2, B3, and B6a satisfied the non-Feature prerequisites for Wave 3 Slice 3.2. B4 and B5 are also complete under the adopted numerical execution sequence. Slice 3.2 is complete via PR #120, the no-Feature-ID AMACS 0.5.0 reconciliation is complete via PR #123, and the no-Feature-ID AI/AMACS Interpretation Foundation is complete via PR #124.
 
-**Current accepted product boundary:** Wave 3 Network is complete at **38/38**. Slice 3.8 final-head CI run `31303588724` passed, PR #139 merged at `2727b6111d1582225e8ece409d015b8696a8cce7`, post-merge `main` run `31303727886` passed, and the separate configured-browser/zero-residual exit is recorded in `docs/architecture/WAVE_3_CLOSEOUT.md`.
+**Current accepted product boundary:** Wave 3 Network is complete at **38/38**. Slice 3.8 final-head CI run `31303588724` passed, PR #139 merged at `2727b6111d1582225e8ece409d015b8696a8cce7`, post-merge `main` run `31303727886` passed, and the separate configured-browser/zero-residual exit is recorded in `docs/archive/architecture/WAVE_3_CLOSEOUT.md`.
 
 The post-Slice-3.7 B6b evaluation intentionally left that optional convergence gate pending, and the integrated Wave 3 closeout found no new convergence defect. Slice 4.1 adds only the private RFx kernel and draft entry. B6c remains ineligible before authoritative Slice 4.4 publication; later Wave 4 slices remain unimplemented.

@@ -2,7 +2,7 @@
 
 ## Result
 
-Slice 4.1 implements `ISS-001`, `ISS-002` and `ISS-003` at the boundary defined by `docs/slices/SLICE_4_1_EXECUTION_AUTHORITY.md`.
+Slice 4.1 implements `ISS-001`, `ISS-002` and `ISS-003` at the boundary defined by `docs/archive/slices/SLICE_4_1_EXECUTION_AUTHORITY.md`.
 
 The implementation adds one private, organization-owned RFx aggregate with:
 

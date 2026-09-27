@@ -286,7 +286,11 @@ export function stableCommandSerialization(value: JsonValue): string {
   const object = value as JsonObject;
   return `{${Object.keys(object)
     .sort()
-    .map((key) => `${JSON.stringify(key)}:${stableCommandSerialization(object[key])}`)
+    .map((key) => {
+      const item = object[key];
+      if (item === undefined) throw new Error("Cannot serialize an undefined command value.");
+      return `${JSON.stringify(key)}:${stableCommandSerialization(item)}`;
+    })
     .join(",")}}`;
 }
 

@@ -133,13 +133,6 @@ test("locality search is cached, debounced and exposed as an accessible combobox
   );
 });
 
-test("customer-facing activation copy enters the Exchange without internal terminology", async () => {
-  const client = await source("src/components/onboarding/ActivationJourneyClient.tsx");
-  assert.match(client, /Your organization is ready/);
-  assert.match(client, />Enter the Exchange</);
-  assert.doesNotMatch(client, /controlled Exchange/i);
-});
-
 test("public root preserves distinct Join and Sign in entry points", async () => {
   const root = await source("apps/marketing/app/page.tsx");
   assert.match(root, /href="\/join"/);

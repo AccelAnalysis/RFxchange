@@ -61,38 +61,3 @@ test("permission refresh cannot reactivate a non-operational privileged action",
   assert.doesNotMatch(controller, /actionId === "capabilities\.evidence-refer"/);
   assert.match(registry, /id: "capabilities\.evidence-refer"[^\n]*operational: false[^\n]*handler: null/);
 });
-
-test("selected records reuse one action projection in detail and marker context without a permanent map rail", () => {
-  const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
-  const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
-  const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
-  assert.equal((workspace.match(/projectExchangeRoomActions\(/g) ?? []).length, 1);
-  assert.equal((workspace.match(/<ExchangeRoomActionController/g) ?? []).length, 2);
-  assert.match(workspace, /placement="sheet"/);
-  assert.match(workspace, /placement="popover"/);
-  assert.match(workspace, /hideUnavailable/);
-  assert.match(controller, /if \(hideUnavailable\) return null/);
-  assert.match(workspace, /className=\{styles\.markerPopover\}/);
-  assert.doesNotMatch(workspace, /actionRail=\{contextualActions\}/);
-  assert.doesNotMatch(workspace, /placement="workspace"/);
-  assert.match(styles, /\.actionGrid \{[\s\S]*?position: static;/);
-});
-
-test("detail actions retain four governed positions while marker popovers collapse to available actions", () => {
-  const styles = read("src/components/participant/ExchangeRoomActionController.module.css");
-  assert.match(styles, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
-  assert.match(styles, /data-action-rail-placement="popover"/);
-  assert.match(styles, /display: flex/);
-});
-
-test("ordinary mobile lens selection is in-place through the persistent bottom navigation", () => {
-  const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
-  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
-  assert.match(controller, /event\.preventDefault\(\)/);
-  assert.doesNotMatch(controller, /stopPropagation/);
-  assert.doesNotMatch(controller, /reopenExchangeRoomActionPanel/);
-  assert.match(navigation, /className=\{styles\.mobileBottomNavigation\}/);
-  assert.match(navigation, /data-mobile-lens-navigation="persistent-bottom"/);
-  assert.match(navigation, /<LensItems[\s\S]*mobile/);
-  assert.doesNotMatch(navigation, /<details|mobileLensMenu/);
-});

@@ -8,7 +8,7 @@ const authorization = await readFile(
 const applicationIndex = await readFile("src/application/auth/index.ts", "utf8");
 const rules = await readFile("firestore.rules", "utf8");
 const smoke = await readFile("scripts/smoke-firebase-auth-firestore-security-emulator.mjs", "utf8");
-const workflow = await readFile(".github/workflows/ci.yml", "utf8");
+const workflow = (await readFile(".github/workflows/ci.yml", "utf8")) + (await readFile("scripts/run-firebase-smoke.mjs", "utf8")) + (await readFile("package.json", "utf8"));
 const packageJson = JSON.parse(await readFile("package.json", "utf8"));
 
 assert.equal(
@@ -75,7 +75,7 @@ for (const required of [
 }
 
 assert.ok(
-  workflow.includes("node scripts/smoke-firebase-auth-firestore-security-emulator.mjs"),
+  workflow.includes("scripts/smoke-firebase-auth-firestore-security-emulator.mjs"),
   "AUTH-005 emulator suite must run in CI.",
 );
 assert.ok(

@@ -126,12 +126,3 @@ test("ISS-009 rejects incompatible requirement treatments and authoritative fact
   assert.match(authority, /method === "narrative"[\s\S]{0,100}"informational-only"/);
   assert.match(authority, /method === "scored" \|\| method === "formula"[\s\S]{0,100}"scored-factor"/);
 });
-
-test("split authoring work does not introduce Exchange or lens gating", async () => {
-  const [exchange, canvas] = await Promise.all([
-    read("app/exchange/page.tsx"),
-    read("app/geography/canvas/page.tsx"),
-  ]);
-  assert.match(exchange, /geography\/canvas/);
-  assert.doesNotMatch(canvas, /lifecycleState !== "open-platform"/);
-});

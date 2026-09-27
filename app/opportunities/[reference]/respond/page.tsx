@@ -7,7 +7,7 @@ import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/in
 import { RfxCycleError } from "@/src/domain/rfx/cycle";
 import { createServerRfxCycleService } from "@/src/infrastructure/rfx/rfx-cycle-runtime";
 import { RfxResponseWorkspace } from "@/src/components/rfx/RfxResponseWorkspace";
-import { ParticipantShell } from "@/src/components/participant/ParticipantWorkspace";
+import { ParticipantPage } from "@/src/components/participant/WorkspacePrimitives";
 
 export const dynamic = "force-dynamic";
 
@@ -49,14 +49,14 @@ export default async function RespondPage({ params, searchParams }: Readonly<{
     }, reference);
   } catch (error) {
     if (!(error instanceof RfxCycleError)) throw error;
-    return <ParticipantShell activeItem="opportunities-rfx">
+    return <ParticipantPage activeItem="opportunities-rfx">
       <main style={{ width: "min(100%, 42rem)", margin: "0 auto", padding: "1.5rem 1rem 6rem" }}>
         <p style={{ fontWeight: 750 }}>Response unavailable</p>
         <h1>Review the pursuit before responding</h1>
         <p>{error.code === "conflict" ? error.message : "This response action is not available for the current organization membership."}</p>
         <p><Link href={returnHref}>Return to the opportunity</Link></p>
       </main>
-    </ParticipantShell>;
+    </ParticipantPage>;
   }
   return <RfxResponseWorkspace initialWorkspace={workspace} returnHref={returnHref} />;
 }

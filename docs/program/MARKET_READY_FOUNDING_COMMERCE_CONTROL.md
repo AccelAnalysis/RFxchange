@@ -61,7 +61,7 @@ Before live configuration, the builder must reconcile the current marketing copy
 
 ## Existing foundation
 
-`docs/architecture/WAVE_1_SLICE_1_30.md` establishes:
+`docs/archive/architecture/WAVE_1_SLICE_1_30.md` establishes:
 
 - organization-owned `OrganizationCommercialAccount` state;
 - provider-neutral plan/subscription/entitlement concepts;

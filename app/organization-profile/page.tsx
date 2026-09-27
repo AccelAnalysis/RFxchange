@@ -13,8 +13,8 @@ import {
 } from "@/src/components/organization-enrichment/OrganizationEnrichmentPanel";
 import {
   OperationalWorkspace,
-  ParticipantShell,
-} from "@/src/components/participant/ParticipantWorkspace";
+  ParticipantPage,
+} from "@/src/components/participant/WorkspacePrimitives";
 import { projectOrganizationCapabilityClaim } from "@/src/domain/market-profile/model";
 import {
   projectPublicCredential,
@@ -632,7 +632,7 @@ export default async function OrganizationProfilePage() {
   const markerVisible = markerActivation?.status === "active";
 
   return (
-    <ParticipantShell activeItem="account" organizationName={profile.displayName}>
+    <ParticipantPage activeItem="account" organizationName={profile.displayName}>
       <OperationalWorkspace ariaLabel={account.title}>
         <section className={styles.page}>
           <header className={styles.header}>
@@ -715,6 +715,6 @@ export default async function OrganizationProfilePage() {
           />
         </section>
       </OperationalWorkspace>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }

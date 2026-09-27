@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 
 import type { RfxResponseItem } from "../../domain/rfx/cycle";
 import type { RfxResponseCollaborationWorkspace as CollaborationWorkspace } from "../../infrastructure/rfx/rfx-response-collaboration-runtime";
-import { ParticipantShell } from "../participant/ParticipantWorkspace";
+import { ParticipantPage } from "../participant/WorkspacePrimitives";
 import styles from "./RfxResponseCollaborationWorkspace.module.css";
 
 type ItemDraft = Readonly<{
@@ -172,7 +172,7 @@ export function RfxResponseCollaborationWorkspace({
     } finally { setBusy(null); }
   }
 
-  return <ParticipantShell activeItem="opportunities-rfx">
+  return <ParticipantPage activeItem="opportunities-rfx">
     <main className={styles.workspace} data-rfx-response-collaboration={workspace.role}>
       <header className={styles.header}>
         <p className={styles.eyebrow}>RFx response collaboration</p>
@@ -224,5 +224,5 @@ export function RfxResponseCollaborationWorkspace({
       </section>}
       <p className={styles.status} role="status">{notice ?? (busy ? "Working…" : "")}</p>
     </main>
-  </ParticipantShell>;
+  </ParticipantPage>;
 }

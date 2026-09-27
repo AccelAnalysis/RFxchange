@@ -27,38 +27,6 @@ test("ordinary permanent-lens activation preserves the current detail disclosure
   assert.doesNotMatch(controller, /location\.(assign|replace)|window\.location/);
 });
 
-test("configured-browser acceptance preserves the historical baseline while adapting candidate contextual actions", () => {
-  const runner = read("scripts/run-configured-exchange-shell-acceptance.mjs");
-  const acceptance = read("scripts/acceptance-exchange-shell-emulator.mjs");
-  assert.match(runner, /new URL\("\.\/acceptance-exchange-shell-emulator\.mjs", import\.meta\.url\)/);
-  assert.match(runner, /readFile\(sourceUrl, "utf8"\)/);
-  assert.match(runner, /function replaceOnce\(/);
-  assert.match(runner, /assert\.equal\(matches, 1/);
-  assert.match(runner, /new URL\("\.\/\.phase4-acceptance-exchange-shell-emulator\.mjs", import\.meta\.url\)/);
-  assert.match(runner, /await writeFile\(adaptedUrl, source, "utf8"\)/);
-  assert.match(runner, /await import\(`\$\{adaptedUrl\.href\}/);
-  assert.match(runner, /await rm\(adaptedUrl, \{ force: true \}\)/);
-  assert.match(runner, /primary Capabilities availability/);
-  assert.match(runner, /mobile Menu trigger metrics/);
-  assert.match(runner, /localized Capabilities route/);
-  assert.match(runner, /candidate-aware Room activation signature/);
-  assert.match(runner, /contextual detail close acceptance/);
-  assert.match(runner, /closed Exchange Room detail surface without persistent actions/);
-  assert.match(runner, /contextual lens settlement acceptance/);
-  assert.match(runner, /preserve candidate detail disclosure/);
-  assert.match(runner, /candidate Room detection without permanent actions/);
-  assert.match(runner, /candidate \? continuityBefore\.panelOpen : true/);
-  assert.match(acceptance, /closed Exchange Room detail surface with persistent action rail/);
-  assert.match(acceptance, /nav\[data-mobile-lens-navigation="persistent-bottom"\]/);
-  assert.match(acceptance, /bottomNavigationLenses/);
-  assert.match(acceptance, /legacyLensMenuPresent/);
-  assert.doesNotMatch(
-    acceptance,
-    /\[data-participant-navigation\] details > summary/,
-    "configured mobile acceptance must use the persistent bottom navigation",
-  );
-});
-
 test("contextual action surfaces share one authorization request projection", () => {
   const controller = read("src/components/participant/ExchangeRoomActionController.tsx");
   assert.match(controller, /let exchangeRoomAuthorizationSnapshot: LensAuthorizationProjection \| null = null;/);

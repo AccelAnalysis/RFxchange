@@ -24,6 +24,15 @@ import {
 } from "./ParticipantTopNavigation";
 
 import styles from "./PersistentParticipantShell.module.css";
+import { ExchangeSceneContext, ExchangeSpatialRenderer, type ExchangeSpatialSceneProps } from "../map/ExchangeSpatialScene";
+
+interface ParticipantPageProps {
+  readonly activeItem?: ParticipantNavigationItem;
+  readonly organizationName?: string;
+  readonly unavailableLensIds?: readonly ParticipantLensId[];
+  readonly unavailableUtilityIds?: readonly ParticipantUtilityId[];
+  readonly children: ReactNode;
+}
 
 interface PersistentParticipantShellContextValue {
   readonly persistent: boolean;
@@ -69,8 +78,60 @@ export function usePersistentParticipantShellContext(): PersistentParticipantShe
   return useContext(PersistentParticipantShellContext);
 }
 
+export function ParticipantPage({
+  activeItem,
+  organizationName,
+  unavailableLensIds,
+  unavailableUtilityIds,
+  children,
+}: ParticipantPageProps) {
+  const {
+    persistent,
+    registerExplicitActiveItem,
+    registerUnavailableDestinations,
+    reportAuthorizedOrganizationName,
+    reportAuthorizedParticipant,
+  } = usePersistentParticipantShellContext();
+
+  useEffect(() => {
+    if (persistent) reportAuthorizedParticipant();
+  }, [persistent, reportAuthorizedParticipant]);
+
+  useEffect(() => {
+    if (persistent && organizationName) {
+      reportAuthorizedOrganizationName(organizationName);
+    }
+  }, [organizationName, persistent, reportAuthorizedOrganizationName]);
+
+  useEffect(() => {
+    if (!persistent || activeItem === undefined) return;
+    return registerExplicitActiveItem(activeItem);
+  }, [activeItem, persistent, registerExplicitActiveItem]);
+
+  useEffect(() => {
+    if (!persistent || (!unavailableLensIds?.length && !unavailableUtilityIds?.length)) return;
+    return registerUnavailableDestinations({
+      lensIds: unavailableLensIds,
+      utilityIds: unavailableUtilityIds,
+    });
+  }, [
+    persistent,
+    registerUnavailableDestinations,
+    unavailableLensIds,
+    unavailableUtilityIds,
+  ]);
+
+  return <>{children}</>;
+}
+
 function MountedPersistentParticipantShell({ children }: Readonly<{ children: ReactNode }>) {
   const shellInstanceId = useId();
+  const [scene, setScene] = useState<Readonly<{ token: symbol; props: ExchangeSpatialSceneProps }> | null>(null);
+  const registerScene = useCallback((props: ExchangeSpatialSceneProps) => {
+    const token = Symbol("exchange-scene");
+    setScene({ token, props });
+    return () => setScene((current) => current?.token === token ? null : current);
+  }, []);
   const [authorizedParticipant, setAuthorizedParticipant] = useState(false);
   const [organizationName, setOrganizationName] = useState<string | null>(null);
   const [explicitActiveItem, setExplicitActiveItem] = useState<ExplicitActiveItemRegistration>();
@@ -123,12 +184,14 @@ function MountedPersistentParticipantShell({ children }: Readonly<{ children: Re
 
   return (
     <PersistentParticipantShellContext.Provider value={context}>
+      <ExchangeSceneContext.Provider value={registerScene}>
       <div
-        className={authorizedParticipant ? styles.shell : undefined}
+        className={styles.shell}
         data-participant-shell={authorizedParticipant ? "persistent" : undefined}
         data-participant-shell-instance={authorizedParticipant ? shellInstanceId : undefined}
         data-participant-authorized={authorizedParticipant ? "true" : "false"}
       >
+        {authorizedParticipant && scene ? <ExchangeSpatialRenderer {...scene.props} /> : null}
         {authorizedParticipant ? (
           <ParticipantTopNavigation
             activeItem={explicitActiveItem?.activeItem}
@@ -138,29 +201,19 @@ function MountedPersistentParticipantShell({ children }: Readonly<{ children: Re
           />
         ) : null}
         <div
-          className={authorizedParticipant ? styles.content : undefined}
+          className={styles.content}
           data-participant-content-region={authorizedParticipant ? "" : undefined}
         >
           {children}
         </div>
       </div>
+      </ExchangeSceneContext.Provider>
     </PersistentParticipantShellContext.Provider>
   );
 }
 
-/**
- * Root-layout boundary for the authenticated Exchange.
- *
- * The component itself stays mounted with the root layout. Its participant shell remains the same
- * React/DOM shell while the pathname moves among authenticated market lenses and Account utilities.
- * Transitional, public, administrative, and recovery routes remain outside this participant shell.
- * Navigation remains absent until an already-authorized page projection reports into this in-memory
- * context, preventing a protected pathname's streamed loading state from presenting a participant
- * shell to a signed-out visitor. Authorized pages may then report organization identity and
- * compatibility-route navigation state without repeated participant-route verification or
- * organization hydration. Leaving the participant route family unmounts the inner shell so its
- * in-memory state cannot leak into a later participant session.
- */
+/** One root-layout shell. Authorized pages supply display context without a second auth read.
+ * Leaving the route family unmounts participant state. Navigation never grants authority. */
 export function PersistentParticipantShell({ children }: Readonly<{ children: ReactNode }>) {
   const pathname = usePathname();
   const persistent = isPersistentParticipantPath(pathname);

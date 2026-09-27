@@ -2,7 +2,7 @@
 
 ## Result
 
-Slice 4.5 implements `DSC-004`, `DSC-005`, `DSC-006`, `DSC-007` and `DSC-008` at the boundary defined by `docs/slices/SLICE_4_5_EXECUTION_AUTHORITY.md` on the documentation baseline merged at `426300e8d94a6370e2dea040b204da0889014102`.
+Slice 4.5 implements `DSC-004`, `DSC-005`, `DSC-006`, `DSC-007` and `DSC-008` at the boundary defined by `docs/archive/slices/SLICE_4_5_EXECUTION_AUTHORITY.md` on the documentation baseline merged at `426300e8d94a6370e2dea040b204da0889014102`.
 
 The permanent Opportunities/RFx lens now resolves to one real participant Spatial Workspace backed only by accepted Slice 4.4 publication projections. Issuer definition remains a private Operational Workspace at `/opportunities/manage`. No draft, preview, seeded fixture or browser state enters discovery.
 

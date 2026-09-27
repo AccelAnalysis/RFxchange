@@ -87,6 +87,7 @@ export function ProviderReviewConsole({
       const body = await response.json() as { error?: string };
       if (!response.ok) throw new Error(body.error ?? "Review action failed.");
       setNotice(`${readable(action)} saved.`);
+      // This transition changes server-derived permissions and available workflow actions.
       router.refresh();
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Review action failed.");

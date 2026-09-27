@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 
 import {
   OperationalWorkspace,
-  ParticipantShell,
-} from "@/src/components/participant/ParticipantWorkspace";
+  ParticipantPage,
+} from "@/src/components/participant/WorkspacePrimitives";
 import type { AcquisitionIntentKind } from "@/src/domain/acquisition/model";
 import { accessJourneyId } from "@/src/domain/lifecycle/model";
 import {
@@ -114,7 +114,7 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
     : mapUrl === "/exchange" ? "Enter the Exchange" : "Continue setup";
 
   return (
-    <ParticipantShell activeItem={acquisition.kind === "team-invitation" ? "opportunities-rfx" : acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Network"}>
+    <ParticipantPage activeItem={acquisition.kind === "team-invitation" ? "opportunities-rfx" : acquisition.kind === "referral" ? "Referrals" : acquisition.kind === "provider" ? "Resources" : "Network"}>
       <OperationalWorkspace ariaLabel="Saved acquisition context">
         <section className={styles.wrap}>
           <p className={styles.eyebrow}>Context recovered</p>
@@ -157,6 +157,6 @@ export default async function AcquisitionContinuationPage({ searchParams }: Prop
           </div>
         </section>
       </OperationalWorkspace>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }

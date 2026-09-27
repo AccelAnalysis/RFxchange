@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { ProviderApplicationWorkspace } from "@/src/components/resource-providers/ProviderApplicationWorkspace";
-import { OperationalWorkspace, ParticipantShell } from "@/src/components/participant/ParticipantWorkspace";
+import { OperationalWorkspace, ParticipantPage } from "@/src/components/participant/WorkspacePrimitives";
 import { ResourceProviderFoundationError } from "@/src/application/resource-providers/provider-foundation";
 import { participantEntryDestination } from "@/src/infrastructure/auth/participant-route-destination";
 import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
@@ -25,7 +25,7 @@ export default async function ProviderApplicationPage() {
     if (!(error instanceof ResourceProviderFoundationError) || error.code !== "forbidden") throw error;
   }
   if (!initialSnapshot) {
-    return <ParticipantShell activeItem="Account"><OperationalWorkspace ariaLabel="Resource Provider permission required"><section style={{ margin: "clamp(1rem, 5vw, 4rem) auto", maxWidth: 720, padding: "clamp(1rem, 4vw, 2rem)", background: "#fffdf8", border: "1px solid #d8d3c8", borderRadius: 16 }}><p style={{ textTransform: "uppercase", letterSpacing: ".1em", color: "#577068" }}>Organization permission</p><h1>Resource Provider access is unavailable.</h1><p>A current organization manager with the <strong>resource.manage</strong> permission can request or maintain Resource Provider status. Your membership remains active, but it does not authorize this operation.</p></section></OperationalWorkspace></ParticipantShell>;
+    return <ParticipantPage activeItem="Account"><OperationalWorkspace ariaLabel="Resource Provider permission required"><section style={{ margin: "clamp(1rem, 5vw, 4rem) auto", maxWidth: 720, padding: "clamp(1rem, 4vw, 2rem)", background: "#fffdf8", border: "1px solid #d8d3c8", borderRadius: 16 }}><p style={{ textTransform: "uppercase", letterSpacing: ".1em", color: "#577068" }}>Organization permission</p><h1>Resource Provider access is unavailable.</h1><p>A current organization manager with the <strong>resource.manage</strong> permission can request or maintain Resource Provider status. Your membership remains active, but it does not authorize this operation.</p></section></OperationalWorkspace></ParticipantPage>;
   }
   return <ProviderApplicationWorkspace initialSnapshot={initialSnapshot} />;
 }

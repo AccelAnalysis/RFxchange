@@ -47,11 +47,11 @@ Before editing code, read:
 - `docs/context/RFX_TRANSACTION_CYCLE.md`;
 - `docs/context/CREDIBILITY_SYSTEM.md`;
 - canonical master tracker and dependency map;
-- `docs/slices/WAVE_3_ROADMAP.md`;
+- `docs/archive/slices/WAVE_3_ROADMAP.md`;
 - the applicable Slice 3.2–3.5 brief for each phase;
 - `docs/rfx/AMACS_INTEGRATION_CONTRACT.md`;
 - `docs/rfx/AMACS_0_5_RECONCILIATION.md`;
-- `docs/slices/AI_AMACS_INTERPRETATION_FOUNDATION.md`;
+- `docs/archive/slices/AI_AMACS_INTERPRETATION_FOUNDATION.md`;
 - `docs/rfx/RFX_CORE_ACCEPTANCE_MATRIX.md` where applicable;
 - applicable geography, acquisition, user-journey, brand and design authorities; and
 - actual merged abstractions and tests before creating new ones.

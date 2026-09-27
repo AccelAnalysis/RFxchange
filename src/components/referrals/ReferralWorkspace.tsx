@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import {
-  consumeLegacyReferralLensIntent,
   type ParticipantSpatialScope,
 } from "../../application/participant/participant-spatial-context";
 import type { SenderReferralProjection, RecipientReferralProjection, ReferralStatus } from "../../domain/referrals/model";
@@ -16,7 +15,7 @@ import {
 } from "../map/ExchangeSpatialScene";
 import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
-import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
+import { ParticipantPage, SpatialWorkspace } from "../participant/WorkspacePrimitives";
 import { useParticipantSpatialContext } from "../participant/useParticipantSpatialContext";
 import {
   clearRetryStableCommand,
@@ -50,7 +49,6 @@ interface ReferralWorkspaceProps {
   readonly requestedReferralId?: string | null;
   readonly requestedOrganizationId?: string | null;
   readonly preferOrganizationSelection?: boolean;
-  readonly legacyBareLensIntent?: boolean;
 }
 
 const REFERRAL_CREATE_SEND_STORAGE_KEY = "rfxchange:referral-create-and-send";
@@ -95,7 +93,7 @@ function browserSessionStorage(): Storage | null {
   }
 }
 
-export function ReferralWorkspace({ model, homeMarker, spatialScope, initialReferrals, organizations, commandRecoveryScope, requestedReferralId, requestedOrganizationId, preferOrganizationSelection = false, legacyBareLensIntent = false }: ReferralWorkspaceProps) {
+export function ReferralWorkspace({ model, homeMarker, spatialScope, initialReferrals, organizations, commandRecoveryScope, requestedReferralId, requestedOrganizationId, preferOrganizationSelection = false }: ReferralWorkspaceProps) {
   const { t } = useI18n();
   const pathname = usePathname();
   const router = useRouter();
@@ -144,12 +142,6 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
     label: organization.displayName,
     accessibleLocationLabel: organization.marker.accessibleLocationLabel,
   })), [organizations]);
-  useEffect(() => {
-    if (!legacyBareLensIntent) return;
-    const storage = browserSessionStorage();
-    if (!storage || !consumeLegacyReferralLensIntent(storage, spatialScope)) return;
-    startNavigation(() => router.replace("/geography/canvas?lens=capabilities", { scroll: false }));
-  }, [legacyBareLensIntent, router, spatialScope]);
   useEffect(() => {
     if (panelRef.current) panelRef.current.scrollTop = spatialContext.workflowState.referrals.listScrollTop;
   }, [spatialContext.workflowState.referrals.listScrollTop]);
@@ -404,7 +396,7 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
   const hasPath = Boolean(selected && ["sent", "accepted", "contacted", "closed"].includes(selected.status) && otherOrganization(selected, organizations));
 
   return (
-    <ParticipantShell activeItem="Referrals">
+    <ParticipantPage activeItem="Referrals">
       <SpatialWorkspace ariaLabel={t("referralWorkspace.ariaLabel")} className={styles.workspace}>
         <ExchangeSpatialScene
           model={model}
@@ -476,6 +468,6 @@ export function ReferralWorkspace({ model, homeMarker, spatialScope, initialRefe
           </div>}
         </section></div> : null}
       </SpatialWorkspace>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }

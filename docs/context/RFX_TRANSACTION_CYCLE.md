@@ -57,7 +57,7 @@ An interpretation record or candidate is never an organization capability assert
 
 RFxchange snapshots the applicable AMACS release and labels at publication while retaining stable IDs for joins and governed migrations. Organization capability assertions remain RFxchange records and are not verified merely because they reference AMACS.
 
-See `docs/rfx/README.md`, `docs/rfx/AMACS_0_5_RECONCILIATION.md`, `docs/rfx/AMACS_INTEGRATION_CONTRACT.md` and `docs/slices/AI_AMACS_INTERPRETATION_FOUNDATION.md`.
+See `docs/rfx/README.md`, `docs/rfx/AMACS_0_5_RECONCILIATION.md`, `docs/rfx/AMACS_INTEGRATION_CONTRACT.md` and `docs/archive/slices/AI_AMACS_INTERPRETATION_FOUNDATION.md`.
 
 ## Need, solution and outcome boundaries
 

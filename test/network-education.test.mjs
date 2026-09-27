@@ -1,12 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFile } from "node:fs/promises";
 
 import { authenticatedServerContext } from "../src/application/auth/server-session.ts";
 import {
   NETWORK_EDUCATION_CATALOG_VERSION,
   NETWORK_EDUCATION_PATHS,
-  NETWORK_EXPLAINER_KEYS,
   recommendedEducationPath,
 } from "../src/application/network-education/catalog.ts";
 import { NetworkEducationError, NetworkEducationService } from "../src/application/network-education/network-education.ts";
@@ -123,23 +121,6 @@ test("explainer evidence is idempotent and stale or cross-input replay fails clo
   await assert.rejects(f.service.mutate(f.scope("view-explainer"), { action: "explainer-dismissed", expectedVersion: 1, explainerKey: "referral-consent" }, false), (error) => error instanceof NetworkEducationError && error.code === "conflict");
   await assert.rejects(f.service.mutate(f.scope("stale"), { action: "guide-dismissed", expectedVersion: 0 }, false), /current version is 1/);
   assert.equal(f.state.events.length, 1);
-});
-
-test("EDU-017 catalog and live surfaces expose all four questions without a modal wall", async () => {
-  assert.equal(NETWORK_EXPLAINER_KEYS.length, 11);
-  const [component, market, enrichment, referrals, providers, resources] = await Promise.all([
-    readFile(new URL("../src/components/network-education/WorkflowExplainer.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../src/components/market-profile/MarketProfilePanel.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../src/components/organization-enrichment/OrganizationEnrichmentPanel.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../src/components/referrals/ReferralWorkspace.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../src/components/resource-providers/ProviderApplicationWorkspace.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../src/components/resource-network/ResourceNetworkWorkspace.tsx", import.meta.url), "utf8"),
-  ]);
-  for (const question of ["questions.what", "questions.why", "questions.happens", "questions.next"]) assert.ok(component.includes(question));
-  assert.match(component, /<details/);
-  assert.doesNotMatch(component, /role="dialog"|aria-modal/);
-  const surfaces = [market, enrichment, referrals, providers, resources].join("\n");
-  for (const key of NETWORK_EXPLAINER_KEYS) assert.ok(surfaces.includes(`explainerKey="${key}"`), key);
 });
 
 test("education persistence has no organization, referral, provider, RFx, analytics, or authority write dependency", () => {

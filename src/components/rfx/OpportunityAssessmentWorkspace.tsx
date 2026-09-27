@@ -9,7 +9,7 @@ import type { EngagementTerm, EstimatedValue, StructuredDuration } from "../../d
 import type { ParticipantGapStatus, PursuitAssessment, PursuitAssessmentState, PursuitDecision } from "../../domain/rfx/pursuit";
 import type { Locale } from "../../i18n/config";
 import { currencyValueFromMinorUnits, formatCurrency, formatDate, formatNumber } from "../../i18n/format";
-import { OperationalWorkspace, ParticipantShell } from "../participant/ParticipantWorkspace";
+import { OperationalWorkspace, ParticipantPage } from "../participant/WorkspacePrimitives";
 import { useI18n } from "../i18n/I18nProvider";
 import { StatusPill } from "../ui";
 import styles from "./OpportunityAssessmentWorkspace.module.css";
@@ -87,7 +87,7 @@ export function OpportunityAssessmentWorkspace({ workspace, returnHref }: Readon
     finally { setBusy(false); }
   }
 
-  return <ParticipantShell activeItem="opportunities-rfx">
+  return <ParticipantPage activeItem="opportunities-rfx">
     <OperationalWorkspace ariaLabel={t("rfxWorkspace.discovery.pursuit.ariaLabel")} className={styles.workspace}>
       <div data-opportunity-assessment-reference={explanation.opportunityReference}>
       <header className={styles.header}>
@@ -108,5 +108,5 @@ export function OpportunityAssessmentWorkspace({ workspace, returnHref }: Readon
       <footer className={styles.actions}><div><span>{t("rfxWorkspace.discovery.pursuit.current")} <strong>{currentPursuit ? t(`rfxWorkspace.discovery.pursuit.${currentPursuit.decision}`) : t("rfxWorkspace.pursuitFormat.undecided")}</strong></span>{notice ? <p role="status">{notice}</p> : null}{!workspace.canManage ? <p role="note">{t("rfxWorkspace.pursuitReadOnly")}</p> : null}</div><div><button type="button" disabled={busy || !workspace.canManage || staleReviewRequired} onClick={() => save("watch")}>{t("rfxWorkspace.discovery.pursuit.watch")}</button><button type="button" disabled={busy || !workspace.canManage || staleReviewRequired} onClick={() => save("decline")}>{t("rfxWorkspace.discovery.pursuit.decline")}</button><button type="button" disabled={busy || !workspace.canManage || staleReviewRequired} data-opportunity-pursue onClick={() => save("pursue")}>{t("rfxWorkspace.discovery.pursuit.pursue")}</button></div>{currentPursuit?.decision === "pursue" ? <Link data-opportunity-respond href={responseHref}>Build response</Link> : <small>{t("rfxWorkspace.discovery.pursuit.responseUnavailable")}</small>}</footer>
       </div>
     </OperationalWorkspace>
-  </ParticipantShell>;
+  </ParticipantPage>;
 }

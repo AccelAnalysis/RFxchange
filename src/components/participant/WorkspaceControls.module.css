@@ -1,0 +1,45 @@
+.searchField,
+.filterSummary {
+  min-height: 48px;
+  border: var(--border-hairline) solid var(--semantic-border-glass);
+  border-radius: var(--radius-control);
+  background: var(--semantic-surface-glass);
+  box-shadow: var(--elevation-control);
+  backdrop-filter: blur(22px) saturate(120%);
+}
+
+.searchField {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchField input {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  padding: 0 var(--space-md) 0 0;
+  border: 0;
+  outline: 0;
+  color: var(--semantic-text-primary);
+  background: transparent;
+  font: 680 0.83rem/1 var(--type-interface-family);
+}
+
+.searchField input::placeholder {
+  color: var(--semantic-text-muted);
+}
+
+.searchField:focus-within,
+.filterSummary:focus-visible {
+  outline: var(--focus-outline-width) solid var(--semantic-border-focus);
+  outline-offset: var(--focus-outline-offset);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .searchField,
+  .filterSummary {
+    background: var(--semantic-canvas);
+    backdrop-filter: none;
+  }
+}

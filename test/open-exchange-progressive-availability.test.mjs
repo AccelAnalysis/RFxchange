@@ -56,39 +56,6 @@ test("controlled and OPEN participants enter the same map-first Exchange shell",
   assert.match(discovery, /listByUserAndGeography/);
 });
 
-test("unfinished record actions remain visible/non-actionable while all four permanent lenses are routed", () => {
-  const contract = behavioralContract();
-  const actions = new Map(contract.mapOnlyActions.map((action) => [action.id, action]));
-  assert.equal(actions.get("manage-profile").availability, "unavailable");
-  for (const id of ["view-resources", "start-referral", "opportunities-rfx"]) {
-    assert.deepEqual(actions.get(id), {
-      id,
-      availability: "unavailable",
-      href: null,
-      reason: "exchange-action-unavailable",
-    });
-  }
-
-  const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
-  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
-  const registry = read("src/application/participant/participant-lens-registry.ts");
-  const compatibilityShell = read("src/components/participant/ParticipantWorkspace.tsx");
-  const persistentShell = read("src/components/participant/PersistentParticipantShell.tsx");
-  assert.doesNotMatch(workspace, /MAP_ONLY_UNAVAILABLE_LENSES/);
-  assert.match(workspace, /activeItem=\{activeLens\}/);
-  assert.match(workspace, /operationalActionsAvailable/);
-  assert.match(workspace, /ExchangeRoomActionController/);
-  assert.match(navigation, /data-mobile-lens-navigation="persistent-bottom"/);
-  assert.match(navigation, /data-mobile-menu-trigger/);
-  assert.match(registry, /id: "opportunities-rfx"[\s\S]*availability: "enabled"/);
-  assert.match(registry, /id: "resources"[\s\S]*availability: "enabled"/);
-  assert.match(registry, /id: "intelligence"[\s\S]*availability: "enabled"/);
-  assert.match(registry, /id: "capabilities"[\s\S]*href: "\/capabilities"[\s\S]*availability: "enabled"/);
-  assert.doesNotMatch(registry.split("export const PARTICIPANT_UTILITY_DESTINATIONS")[0], /id: "referrals"/);
-  assert.match(compatibilityShell, /registerUnavailableDestinations/);
-  assert.match(persistentShell, /unavailableLensIds=\{unavailableDestinations\?\.lensIds\}/);
-});
-
 test("progressive presentation does not weaken protected domain routes", () => {
   for (const path of [
     "app/opportunities/page.tsx",

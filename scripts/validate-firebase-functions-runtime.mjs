@@ -8,7 +8,7 @@ const application = await readFile("functions/src/application/runtime-foundation
 const environment = await readFile("functions/src/runtime/environment.ts", "utf8");
 const observability = await readFile("functions/src/runtime/observability.ts", "utf8");
 const entrypoint = await readFile("functions/src/index.ts", "utf8");
-const workflow = await readFile(".github/workflows/ci.yml", "utf8");
+const workflow = (await readFile(".github/workflows/ci.yml", "utf8")) + (await readFile("scripts/run-firebase-smoke.mjs", "utf8")) + (await readFile("package.json", "utf8"));
 
 assert.ok(
   rootPackage.workspaces?.includes("functions"),

@@ -16,7 +16,7 @@ The exact reconciled head is the PR #171 head containing this document and is re
 
 ## Result
 
-The candidate implements `RSP-001`, `RSP-002`, `RSP-003`, `RSP-004` and `RSP-006` at the boundary defined by `docs/slices/SLICE_4_6_EXECUTION_AUTHORITY.md`.
+The candidate implements `RSP-001`, `RSP-002`, `RSP-003`, `RSP-004` and `RSP-006` at the boundary defined by `docs/archive/slices/SLICE_4_6_EXECUTION_AUTHORITY.md`.
 
 A currently authorized responder organization can open a real permitted published opportunity in an Operational Workspace, inspect exact canonical capability alignments and explicit gaps, record its private six-dimension assessment and choose one organization-owned Watch, Pursue or Decline state. This is decision support, not qualification, eligibility, endorsement, profitability or award prediction.
 

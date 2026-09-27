@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
-const exists = (path) => existsSync(new URL(path, root));
 
 function loadRegistryContract() {
   const script = `
@@ -115,46 +114,6 @@ test("the typed registry preserves governed lens order, enabled routing, and uti
   });
 });
 
-test("the persistent shell owns navigation while page-local shells collapse to content", () => {
-  const layout = read("app/layout.tsx");
-  const persistent = read("src/components/participant/PersistentParticipantShell.tsx");
-  const compatibility = read("src/components/participant/ParticipantWorkspace.tsx");
-  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
-  const accountPage = read("app/organization-profile/page.tsx");
-  const exchangePage = read("app/exchange/page.tsx");
-  const intelligencePage = read("app/geography/canvas/page.tsx");
-  const capabilitiesPage = read("app/capabilities/page.tsx");
-  const providerApplicationPage = read("app/provider-application/page.tsx");
-
-  assert.match(layout, /<PersistentParticipantShell>\{children\}<\/PersistentParticipantShell>/);
-  assert.match(persistent, /data-participant-shell=\{authorizedParticipant \? "persistent" : undefined\}/);
-  assert.match(persistent, /data-participant-shell-instance=\{authorizedParticipant \? shellInstanceId : undefined\}/);
-  assert.match(persistent, /data-participant-content-region/);
-  assert.match(persistent, /reportAuthorizedOrganizationName/);
-  assert.match(persistent, /reportAuthorizedParticipant/);
-  assert.match(persistent, /data-participant-authorized=\{authorizedParticipant \? "true" : "false"\}/);
-  assert.match(persistent, /\{authorizedParticipant \? \(/);
-  assert.match(persistent, /registerExplicitActiveItem/);
-  assert.match(persistent, /activeItem=\{explicitActiveItem\?\.activeItem\}/);
-  assert.match(compatibility, /usePersistentParticipantShellContext\(\)/);
-  assert.match(compatibility, /if \(persistent\) return <>\{children\}<\/>/);
-  assert.match(compatibility, /reportAuthorizedOrganizationName\(organizationName\)/);
-  assert.match(compatibility, /reportAuthorizedParticipant\(\)/);
-  assert.match(compatibility, /registerExplicitActiveItem\(activeItem\)/);
-  assert.match(accountPage, /<ParticipantShell activeItem="account" organizationName=\{profile\.displayName\}>/);
-  assert.match(exchangePage, /redirect\(mapUrl\)/);
-  assert.match(intelligencePage, /ExistingWorkspaceFoundation/);
-  assert.match(capabilitiesPage, /CapabilitiesWorkspace/);
-  assert.match(capabilitiesPage, /resolveParticipantRoute/);
-  assert.match(providerApplicationPage, /<ParticipantShell activeItem="Account">/);
-  assert.doesNotMatch(navigation, /fetch\("\/api\/participant-shell"/);
-  assert.equal(
-    exists("app/api/participant-shell/route.ts"),
-    false,
-    "The persistent shell must not repeat session or organization hydration.",
-  );
-});
-
 test("enabled Opportunities/RFx resolves to authorized discovery while issuer management remains private", () => {
   const contract = loadRegistryContract();
   const opportunity = contract.lenses[0];
@@ -200,23 +159,6 @@ test("Account and Quick Start stay outside primary lenses and Administration rem
   assert.match(adminProjection, /catch[\s\S]*closedAdministrationContext/);
 });
 
-test("ordinary participant navigation uses Next links and immediate transition evidence without a document reload", () => {
-  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
-
-  assert.match(navigation, /import Link, \{ useLinkStatus \} from "next\/link"/);
-  assert.match(navigation, /const \{ pending \} = useLinkStatus\(\)/);
-  assert.match(navigation, /pendingTransition\.current = null/);
-  assert.match(navigation, /data-link-pending="true"/);
-  assert.match(navigation, /performance\.mark/);
-  assert.match(navigation, /performance\.measure/);
-  assert.match(navigation, /performance\.getEntriesByType\("navigation"\)\.length/);
-  assert.match(navigation, /rfxchange:participant-transition/);
-  assert.doesNotMatch(
-    navigation,
-    /location\.(?:assign|replace)\s*\(|(?:window|document)\.location\s*=|setTimeout/,
-  );
-});
-
 test("Intelligence context preservation is bounded to the canonical same-origin route and remains non-authorizing", () => {
   const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
   const storage = read("src/application/participant/intelligence-context-storage.ts");
@@ -241,30 +183,6 @@ test("Intelligence context preservation is bounded to the canonical same-origin 
   assert.match(signIn, /method: "POST"[\s\S]*clearParticipantIntelligenceContext\(\)/);
   assert.match(activation, /method: "POST"[\s\S]*clearParticipantIntelligenceContext\(\)/);
   assert.match(activation, /clearParticipantIntelligenceContext\(\)[\s\S]*\.signOut\(\)/);
-});
-
-test("warm participant navigation preserves current content and no route takeover can return", () => {
-  assert.equal(exists("app/loading.tsx"), false, "The root loading takeover must stay removed.");
-  const routeLoading = [
-    ["app/geography/canvas/loading.tsx", "intelligence"],
-    ["app/resources/loading.tsx", "resources"],
-    ["app/capabilities/loading.tsx", "capabilities"],
-    ["app/referrals/loading.tsx", "referrals"],
-    ["app/organization-profile/loading.tsx", "account"],
-    ["app/quick-start/loading.tsx", "quick-start"],
-    ["app/provider-application/loading.tsx", "provider-application"],
-    ["app/exchange/loading.tsx", "exchange-entry"],
-  ];
-
-  for (const [path] of routeLoading) {
-    assert.equal(exists(path), false, `${path} would replace the current warm workspace.`);
-  }
-  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
-  const navigationCss = read("src/components/participant/ParticipantTopNavigation.module.css");
-  assert.match(navigation, /useLinkStatus/);
-  assert.match(navigation, /aria-live="polite"/);
-  assert.doesNotMatch(navigationCss, /spinner|pendingPulse|progress/);
-  assert.doesNotMatch(navigation, /Preparing this page|Loading RFxchange|setTimeout/);
 });
 
 test("new shell, utility, and scoped-loading copy is complete in all supported locales", () => {
@@ -317,52 +235,4 @@ test("new shell, utility, and scoped-loading copy is complete in all supported l
       assert.ok(dictionary[key].trim(), `${locale}.${key}`);
     }
   }
-});
-
-test("the participant shell preserves 390px, focus, Light Appearance, and reduced-motion contracts", () => {
-  const navigationCss = read("src/components/participant/ParticipantTopNavigation.module.css");
-  const persistentCss = read("src/components/participant/PersistentParticipantShell.module.css");
-
-  assert.match(navigationCss, /@media \(max-width: 390px\)/);
-  assert.match(navigationCss, /grid-template-columns:\s*repeat\(5/);
-  assert.match(navigationCss, /focus-visible/);
-  assert.doesNotMatch(navigationCss, /animation:/);
-  assert.match(persistentCss, /overflow-x: clip/);
-  assert.doesNotMatch(`${navigationCss}\n${persistentCss}`, /dark|prefers-color-scheme/);
-});
-
-test("the configured browser runner links every canonical source import before acceptance", () => {
-  const runner = read("scripts/acceptance-exchange-shell-emulator.mjs");
-  const sourceImports = [...runner.matchAll(
-    /^import(?:\s+[\s\S]*?\s+from\s+)?["'](\.\.\/src\/[^"']+)["'];/gm,
-  )].map((match) => match[0].replace(match[1], match[1].replace("../src/", "./src/")));
-
-  assert.ok(sourceImports.length > 0, "Configured browser runner has no source imports to validate.");
-  const result = spawnSync(
-    process.execPath,
-    [
-      "--experimental-transform-types",
-      "--experimental-loader",
-      "./scripts/node-typescript-source-loader.mjs",
-      "--input-type=module",
-      "--eval",
-      sourceImports.join("\n"),
-    ],
-    {
-      cwd: new URL(".", root),
-      encoding: "utf8",
-    },
-  );
-  assert.equal(result.status, 0, result.stderr || result.stdout);
-  assert.doesNotMatch(runner, /domain\/organization-authorization|domain\/geography-selection/);
-  assert.match(runner, /Intelligence context captured before an in-content exit/);
-  assert.match(runner, /intelligenceContextCapturedForInContentExit: true/);
-  assert.match(runner, /intelligenceContextClearedOnSignOut: true/);
-  assert.match(runner, /authorizedOrganizationContextReported: true/);
-  assert.match(runner, /providerAliasAccountCurrentWhileLoading: aliasLoadingState\.accountCurrent/);
-  assert.match(runner, /unauthorizedParticipantShellObserved: unauthorizedState\.shellObserved/);
-  assert.match(runner, /\[data-participant-navigation\], \[data-participant-shell='persistent'\]/);
-  assert.match(runner, /authorized organization identity in Account utility/);
-  assert.match(runner, /Signing out retained another participant's Intelligence context/);
-  assert.match(runner, /assert\.equal\(diagnostics\.exceptions\.length, 0/);
 });

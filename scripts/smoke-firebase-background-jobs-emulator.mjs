@@ -42,6 +42,26 @@ async function eventsFor(jobId) {
 }
 
 try {
+  // Exercise an actual Firestore-triggered runtime, not just the HTTP job probe.
+  // Named internal emulator apps must not prevent default Admin initialization.
+  const userId = `lifecycle-runtime-${runId}`;
+  const userRef = db.collection("users").doc(userId);
+  const enrollmentRef = db.collection("lifecycleEnrollments").doc(userId);
+  try {
+    await userRef.set({ id: userId });
+    let enrollment;
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      enrollment = (await enrollmentRef.get()).data();
+      if (enrollment) break;
+      await delay(500);
+    }
+    assert.equal(enrollment?.userId, userId, "Account trigger must persist lifecycle enrollment.");
+    assert.ok(Number.isFinite(Date.parse(enrollment.nextEvaluationAt)));
+  } finally {
+    await userRef.delete();
+    await enrollmentRef.delete();
+  }
+
   const successKey = `success-${runId}`;
   const success = await invoke("success", successKey);
   assert.equal(success.outcome, "succeeded");

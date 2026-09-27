@@ -8,47 +8,6 @@ export const EXCHANGE_ROOM_ACTION_IDS = [
 ] as const;
 export type ExchangeRoomActionId = (typeof EXCHANGE_ROOM_ACTION_IDS)[number];
 
-export const LEGACY_EXCHANGE_ROOM_ACTION_IDS = [
-  "opportunities.find", "opportunities.create-rfx", "opportunities.pursue-respond", "opportunities.team",
-  "resources.find-providers", "resources.browse-resources", "resources.my-requests", "resources.provider-status",
-  "intelligence.organizations", "intelligence.capabilities", "intelligence.locations", "intelligence.layers",
-  "referrals.new", "referrals.sent", "referrals.received", "referrals.starred",
-] as const;
-export type LegacyExchangeRoomActionId = (typeof LEGACY_EXCHANGE_ROOM_ACTION_IDS)[number];
-
-export type LegacyExchangeRoomActionDisposition =
-  | Readonly<{ kind: "action"; actionId: ExchangeRoomActionId }>
-  | Readonly<{ kind: "lens"; lens: ParticipantLensId }>
-  | Readonly<{ kind: "utility"; href: string }>
-  | Readonly<{
-      kind: "deferred-utility";
-      utility: "referrals";
-      view: "sent" | "received" | "starred";
-      reason: "not-operational";
-    }>
-  | Readonly<{ kind: "filter"; lens: "intelligence"; intent: "locations" | "layers" }>;
-
-export const LEGACY_EXCHANGE_ROOM_ACTION_DISPOSITIONS: Readonly<
-  Record<LegacyExchangeRoomActionId, LegacyExchangeRoomActionDisposition>
-> = Object.freeze({
-  "opportunities.find": Object.freeze({ kind: "action", actionId: "opportunities.create-view" }),
-  "opportunities.create-rfx": Object.freeze({ kind: "action", actionId: "opportunities.create-view" }),
-  "opportunities.pursue-respond": Object.freeze({ kind: "action", actionId: "opportunities.manage-respond" }),
-  "opportunities.team": Object.freeze({ kind: "action", actionId: "opportunities.team" }),
-  "resources.find-providers": Object.freeze({ kind: "action", actionId: "resources.offer-request" }),
-  "resources.browse-resources": Object.freeze({ kind: "action", actionId: "resources.manage-view" }),
-  "resources.my-requests": Object.freeze({ kind: "utility", href: "/resources" }),
-  "resources.provider-status": Object.freeze({ kind: "utility", href: "/provider-application" }),
-  "intelligence.organizations": Object.freeze({ kind: "action", actionId: "intelligence.add-view" }),
-  "intelligence.capabilities": Object.freeze({ kind: "lens", lens: "capabilities" }),
-  "intelligence.locations": Object.freeze({ kind: "filter", lens: "intelligence", intent: "locations" }),
-  "intelligence.layers": Object.freeze({ kind: "filter", lens: "intelligence", intent: "layers" }),
-  "referrals.new": Object.freeze({ kind: "utility", href: "/referrals?intent=manage" }),
-  "referrals.sent": Object.freeze({ kind: "deferred-utility", utility: "referrals", view: "sent", reason: "not-operational" }),
-  "referrals.received": Object.freeze({ kind: "deferred-utility", utility: "referrals", view: "received", reason: "not-operational" }),
-  "referrals.starred": Object.freeze({ kind: "deferred-utility", utility: "referrals", view: "starred", reason: "not-operational" }),
-});
-
 export type ExchangeRoomActionDisabledReason = "not-operational" | "not-applicable" | "not-authorized";
 export type ExchangeRoomActionVariant = "own" | "external";
 export type ExchangeRoomActionLabelKey = `${ExchangeRoomActionId}.${ExchangeRoomActionVariant}`;
