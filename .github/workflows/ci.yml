@@ -27,13 +27,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 0
+          fetch-depth: 1
       - name: Determine affected checks
         id: scope
         env:
           RFXCHANGE_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
           RFXCHANGE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: node scripts/ci-scope.mjs
+        run: |
+          if [ -n "$RFXCHANGE_BASE_SHA" ] && ! [[ "$RFXCHANGE_BASE_SHA" =~ ^0+$ ]]; then
+            git fetch --no-tags --depth=1 origin "$RFXCHANGE_BASE_SHA"
+          fi
+          node scripts/ci-scope.mjs
       - uses: actions/setup-node@v4
         with:
           node-version: 24.18.0

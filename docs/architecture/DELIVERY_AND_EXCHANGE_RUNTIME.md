@@ -16,7 +16,7 @@ Spatial continuity stores only current version-2 presentation state scoped to pa
 
 - `npm run check:fast`: application typechecks, lint, Functions compile, unit/behavior tests, Functions tests, security configuration and locale checks, each once.
 - `npm run test:firebase`: one Auth/Firestore/Functions/Storage emulator process runs all existing smoke programs plus commercial direct-client denial tests. Run `npm run build:functions` first when running this command by itself. Local Java 21 is required.
-- `npm run test:browser`: Chromium lifecycle tests of actual React shell/map code with explicitly synthetic data and a Mapbox SDK double. Install the locked Playwright Chromium first. These tests cover map ownership, projection updates, disposal, reduced-motion defaults and three viewport sizes; they do not measure real GPU/network performance.
+- `npm run test:browser`: Chromium lifecycle tests of actual React shell/map code with Next's CSS compiler, explicitly synthetic data and a Mapbox SDK double. Install the locked Playwright Chromium first. These tests cover map ownership, projection updates, disposal, reduced-motion defaults and three viewport sizes; they do not measure real GPU/network performance.
 - `npm run check:build`: one production build and HTTP smoke test per Exchange, Admin and Marketing app.
 - `npm run check`: fast, Firebase and production checks without repeating a gate.
 
