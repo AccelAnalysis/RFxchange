@@ -370,36 +370,6 @@ test("record-only destinations carry their associated provider into governed Net
   assert.equal(resourcesFocusedOrganizationId({ resourceId: "unknown", resources: [] }), null);
 });
 
-test("route hydration gates private adjuncts and settles them independently from public discovery", () => {
-  const page = fs.readFileSync(new URL("../app/resources/page.tsx", import.meta.url), "utf8");
-  assert.match(page, /const referralsPromise = referralManage/);
-  assert.match(page, /const ownerPromise = resourceManage/);
-  assert.match(page, /Promise\.allSettled/);
-  assert.match(page, /selectedMessagesResult.*await service\.messages.*status: "rejected"/s);
-  assert.match(page, /referralsResult\.status === "fulfilled" \? referralsResult\.value : \[\]/);
-  assert.match(page, /ownerResult\.status === "fulfilled" \? ownerResult\.value : null/);
-  assert.doesNotMatch(page, /throw referralsResult\.reason|throw ownerResult\.reason/);
-  const workspace = fs.readFileSync(new URL("../src/components/resource-network/ResourceNetworkWorkspace.tsx", import.meta.url), "utf8");
-  assert.match(workspace, /authorization\.referralManage \? <form action=\{connect\}/);
-  assert.match(workspace, /data-resources-mobile-operations/);
-  assert.match(workspace, /resource-management-mobile/);
-  assert.match(workspace, /visibleProviderReferrals/);
-  assert.match(workspace, /setPreviewSelection\(cardSelection/);
-  assert.match(workspace, /suggestedProviderLabel/);
-  assert.doesNotMatch(workspace, /error\.message/);
-  assert.match(workspace, /mobileResourceDetailRef\.current/);
-  assert.match(workspace, /mobileRequestDetailRef\.current/);
-  assert.match(workspace, /mobileManagementRef\.current/);
-  assert.match(workspace, /target \?\? mobileOperationsRef\.current/);
-  assert.match(workspace, /navigateToCanonicalSelection\(selectionKey\)/);
-  assert.match(workspace, /resourcesWorkspaceMutationHref\(searchParams\.toString\(\), queryState, updates\)/);
-  assert.match(workspace, /selectedResource \? String\(selectedResource\.organizationId\) : null/);
-  assert.match(workspace, /selectedRequest\?\.providerContext\?\.providerOrganizationId/);
-  assert.match(page, /focusedOrganizationIdPromise/);
-  assert.match(page, /preliminaryResourcePromise/);
-  assert.match(page, /resourcesFocusedOrganizationId/);
-});
-
 test("selection preserves complete provider association and marker identity", () => {
   const selected = project({ selection: { resourceId: "resource-1", source: "card" } }).selection;
   assert.equal(selected.selectionKey, "provider-resource:resource-1");

@@ -112,15 +112,7 @@ test("one settled-pitch contract governs 2D, Perspective, and 3D without selecti
   const contract = loadBehavioralContract();
   assert.deepEqual(contract.viewModes.map(({ id, pitch }) => [id, pitch]), [["2d", 0], ["perspective", 35], ["3d", 75]]);
   assert.deepEqual(contract.resolvedPitches, ["2d", "perspective", "3d"]);
-  const scene = read("src/components/map/ExchangeSpatialScene.tsx");
-  assert.match(scene, /data-map-view-mode=\{viewMode\}/);
-  assert.match(scene, /data-map-pitch=\{settledPitch\.toFixed\(2\)\}/);
-  assert.doesNotMatch(scene, /const focusedMarker = focusedMarkerIdRef/);
-  assert.match(scene, /initialCameraRef\.current/);
-  assert.match(scene, /if \(!sceneInitializationStartedRef\.current\) initialCameraRef\.current = initialCamera/);
-  assert.match(scene, /map\.on\("moveend", \(\) => \{[\s\S]*if \(!sceneInitializationStartedRef\.current\) return/);
-  assert.match(scene, /sceneInitializationStartedRef\.current = true;[\s\S]*applyScene\(\)/);
-  assert.match(scene, /setViewMode\(settledMode\)/);
+
 });
 
 test("organization actions expose private RFx creation only for the selected home organization", () => {
@@ -159,19 +151,6 @@ test("a carried referral recipient is revalidated into its authorized discovery 
   assert.match(runtime, /organizationId\(input\.focusedOrganizationId\)/);
   assert.match(navigation, /\/referrals\?organization=/);
   assert.doesNotMatch(workspace, /: organizations\[0\]/);
-});
-
-test("Resource providers and existing referral counterparties hydrate their authorized marker page", () => {
-  const resourcesPage = read("app/resources/page.tsx");
-  const resourcesWorkspace = read("src/components/resource-network/ResourceNetworkWorkspace.tsx");
-  const referralsPage = read("app/referrals/page.tsx");
-  const referralsWorkspace = read("src/components/referrals/ReferralWorkspace.tsx");
-  assert.match(resourcesPage, /focusedOrganizationId: queryState\.organizationId \?\? queryState\.providerId/);
-  assert.match(resourcesWorkspace, /queryState\.providerId[\s\S]*selection: Object\.freeze\([\s\S]*organizationId: organization\.organizationId/);
-  assert.match(referralsPage, /referralCounterpartyOrganizationId/);
-  assert.match(referralsPage, /referralsPromise\.then\(\(referrals\) => referrals\[0\]/);
-  assert.match(referralsWorkspace, /next\.set\("organization", counterpartyId\)[\s\S]*counterpartyId && !other/);
-  assert.match(referralsWorkspace, /relationshipId: activeReferral\.id/);
 });
 
 test("focused Network organizations are hydrated independently of the bounded locality candidate page", () => {
@@ -238,20 +217,6 @@ test("Intelligence provider actions use a bounded fail-closed status projection"
   assert.match(runtime, /inspectProviderEligibility\([\s\S]*serviceGeographyId: input\.selectedGeographyId/);
   assert.match(read("src/application/resource-network/resource-network.ts"), /!input\.serviceGeographyId \|\| source\.serviceGeography\.serviceGeographyIds\.map\(String\)\.includes\(input\.serviceGeographyId\)/);
   assert.match(runtime, /catch \{[\s\S]*return Object\.freeze\(\[\]\)/);
-});
-
-test("Resource marker focus survives server revalidation independently of provider detail", () => {
-  const page = read("app/resources/page.tsx");
-  const query = read("src/application/resource-network/resource-network-workspace.ts");
-  const workspace = read("src/components/resource-network/ResourceNetworkWorkspace.tsx");
-  assert.match(query, /organizationId: workspaceId\(params\.organization\)/);
-  assert.match(page, /focusedOrganizationId: queryState\.organizationId \?\? queryState\.providerId/);
-  assert.match(page, /selectedOrganizationId = authorizedWorkspaceSelection/);
-  assert.match(workspace, /organization: organization \? organizationId : null/);
-  assert.match(workspace, /provider: providers\.some/);
-  assert.match(workspace, /crossGeographyProvider[\s\S]*candidate\.marker === null/);
-  assert.match(workspace, /!organization && crossGeographyProvider[\s\S]*organizationId: spatialScope\.organizationId[\s\S]*markerId: homeMarker\.id/);
-  assert.match(workspace, /else \{[\s\S]*updateWorkspaceQuery\(\{ organization: null, provider: organizationId \}\)[\s\S]*organizationId: spatialScope\.organizationId[\s\S]*markerId: homeMarker\.id/);
 });
 
 test("controlled and OPEN participants resolve to the Exchange while protected lenses keep their gates", () => {

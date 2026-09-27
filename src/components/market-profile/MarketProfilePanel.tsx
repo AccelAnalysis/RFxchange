@@ -1,11 +1,10 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useDeferredValue, useMemo, useState, useTransition, type FormEvent } from "react";
 
 import type { AiInterpretationCandidateEnvelope } from "../../domain/ai-interpretation/model";
 import type { AmacsCapability, AmacsDomain, AmacsFamily, AmacsReleaseMetadata } from "../../domain/amacs/model";
-import type { NaicsCatalogProjection } from "../../domain/naics/model";
 import type {
   OrganizationCapabilityClaim,
   OrganizationIndustryProfile,
@@ -13,6 +12,7 @@ import type {
   OrganizationPastPerformance,
   OrganizationProvisionalTerm,
 } from "../../domain/market-profile/model";
+import type { NaicsCatalogProjection } from "../../domain/naics/model";
 import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 import { AlertBanner, StatePanel, StatusPill } from "../ui";
@@ -78,6 +78,21 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
   const router = useRouter();
   const { locale, t } = useI18n();
   const numberFormat = useMemo(() => new Intl.NumberFormat(locale), [locale]);
+  const [localSnapshot, setLocalSnapshot] = useState<{ source: MarketProfilePanelProps["snapshot"]; value: MarketProfilePanelProps["snapshot"] } | null>(null);
+  const snapshot = localSnapshot?.source === props.snapshot ? localSnapshot.value : props.snapshot;
+  async function reloadSnapshot() {
+    try {
+      const response = await fetch(`/api/organization-market-profile?organizationId=${encodeURIComponent(props.organizationId)}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("projection-unavailable");
+      const value = await response.json() as MarketProfilePanelProps["snapshot"];
+      if (value.industry?.revision !== snapshot.industry?.revision) {
+        const canonical = (value.industry?.naics ?? []).filter(isCanonicalNaics);
+        setSelectedNaicsCodes([...new Set(canonical.map((descriptor) => descriptor.code))]);
+        setPreserveExistingNaics((value.industry?.naics.length ?? 0) > canonical.length);
+      }
+      setLocalSnapshot({ source: props.snapshot, value });
+    } catch { router.refresh(); } // Exceptional recovery preserves successful command feedback.
+  }
   const [tab, setTab] = useState<Tab>("capabilities");
   const [notice, setNotice] = useState<Notice>(null);
   const [isPending, startTransition] = useTransition();
@@ -124,7 +139,7 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
     () => new Map(props.naicsCatalog.entries.map((industry) => [industry.code, industry])),
     [props.naicsCatalog.entries],
   );
-  const canonicalSnapshotNaics = useMemo(() => props.snapshot.industry?.naics.filter((descriptor) => {
+  function isCanonicalNaics(descriptor: NonNullable<MarketProfilePanelProps["snapshot"]["industry"]>["naics"][number]) {
     const industry = naicsByCode.get(descriptor.code);
     return Boolean(
       industry &&
@@ -134,11 +149,9 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
       descriptor.source === "participant_selected" &&
       descriptor.provenance === `Participant selected from ${props.naicsCatalog.release.sourceName} ${props.naicsCatalog.release.version} NAICS`
     );
-  }) ?? [], [naicsByCode, props.naicsCatalog.release, props.snapshot.industry?.naics]);
-  const preservedSnapshotNaics = useMemo(
-    () => props.snapshot.industry?.naics.filter((descriptor) => !canonicalSnapshotNaics.includes(descriptor)) ?? [],
-    [canonicalSnapshotNaics, props.snapshot.industry?.naics],
-  );
+  }
+  const canonicalSnapshotNaics = (snapshot.industry?.naics ?? []).filter(isCanonicalNaics);
+  const preservedSnapshotNaics = snapshot.industry?.naics.filter((descriptor) => !canonicalSnapshotNaics.includes(descriptor)) ?? [];
   const [selectedNaicsCodes, setSelectedNaicsCodes] = useState<readonly string[]>(
     () => Object.freeze([...new Set(canonicalSnapshotNaics.map((descriptor) => descriptor.code))]),
   );
@@ -160,7 +173,7 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
 
   const refreshAfter = (message: Notice) => {
     setNotice(message);
-    startTransition(() => router.refresh());
+    startTransition(() => reloadSnapshot());
   };
 
   async function requestAssistance() {
@@ -270,12 +283,12 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
     const industries = splitLines(String(data.get("industries") ?? "")).map((label, index) => ({ id: `industry-${index + 1}-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 60)}`, label, visibility: String(data.get("visibility") ?? "network") }));
     const naics = selectedNaics.map((industry) => ({ code: industry.code, version: props.naicsCatalog.release.version, visibility: String(data.get("visibility") ?? "network") }));
     try {
-      await postJson("/api/organization-market-profile", { organizationId: props.organizationId, commandId: commandId("industry"), action: "update-industry", input: { industries, naics, preserveExistingNaics, expectedIndustryRevision: props.snapshot.industry?.revision ?? 0 } });
+      await postJson("/api/organization-market-profile", { organizationId: props.organizationId, commandId: commandId("industry"), action: "update-industry", input: { industries, naics, preserveExistingNaics, expectedIndustryRevision: snapshot.industry?.revision ?? 0 } });
       refreshAfter({ tone: "success", title: t("marketProfile.notices.industrySavedTitle"), body: t("marketProfile.notices.industrySavedBody") });
     } catch (error) {
       if (error instanceof MarketProfileRequestError && error.status === 409) {
         setNotice({ tone: "information", title: t("marketProfile.notices.industryConflictTitle"), body: t("marketProfile.notices.industryConflictBody") });
-        startTransition(() => router.refresh());
+        startTransition(() => reloadSnapshot());
         return;
       }
       setNotice({ tone: "error", title: t("marketProfile.notices.industryErrorTitle"), body: t("marketProfile.notices.genericSaveError") });
@@ -347,7 +360,7 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
           <h2 id="market-profile-title">{t("interface.account.marketTitle")}</h2>
           <p>{t("interface.account.marketBody")}</p>
         </div>
-        <span>{t(props.snapshot.claims.length === 1 ? "marketProfile.header.countOne" : "marketProfile.header.countMany", { count: new Intl.NumberFormat(locale).format(props.snapshot.claims.length) })}</span>
+        <span>{t(snapshot.claims.length === 1 ? "marketProfile.header.countOne" : "marketProfile.header.countMany", { count: new Intl.NumberFormat(locale).format(snapshot.claims.length) })}</span>
       </header>
 
       <nav className={styles.tabs} aria-label={t("marketProfile.tabs.label")}>
@@ -363,7 +376,7 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
         <div className={styles.sectionGrid}>
           <section className={styles.fullWidthSection} aria-labelledby="confirmed-claims-title">
             <h3 id="confirmed-claims-title">{t("marketProfile.confirmed.title")}</h3>
-            {props.snapshot.claims.length ? <ul className={styles.recordList}>{props.snapshot.claims.map((claim) => <li key={claim.id}><div><strong>{claim.labelSnapshot}</strong><span>{claim.domainLabelSnapshot} → {claim.familyLabelSnapshot}</span></div><span>{t(`marketProfile.common.${claim.visibility}`)}</span></li>)}</ul> : <p className={styles.help}>{t("marketProfile.confirmed.emptyBody")}</p>}
+            {snapshot.claims.length ? <ul className={styles.recordList}>{snapshot.claims.map((claim) => <li key={claim.id}><div><strong>{claim.labelSnapshot}</strong><span>{claim.domainLabelSnapshot} → {claim.familyLabelSnapshot}</span></div><span>{t(`marketProfile.common.${claim.visibility}`)}</span></li>)}</ul> : <p className={styles.help}>{t("marketProfile.confirmed.emptyBody")}</p>}
           </section>
 
           <div className={styles.entryChoice} role="group" aria-label={t("marketProfile.tabs.capabilities")}>
@@ -433,15 +446,15 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
 
           <form className={styles.fullWidthSection} onSubmit={saveProvisional}>
             <details><summary>{t("marketProfile.provisional.summary")}</summary><div className={styles.detailsBody}><p>{t("marketProfile.provisional.body")}</p><label>{t("marketProfile.provisional.term")}<input name="proposedLabel" required /></label><label>{t("marketProfile.provisional.definition")}<textarea name="proposedDefinition" minLength={20} required /></label><label>{t("marketProfile.provisional.example")}<textarea name="exampleWork" minLength={10} required /></label><label>{t("marketProfile.provisional.domain")}<select name="suggestedDomainId" defaultValue=""><option value="">{t("marketProfile.provisional.notSure")}</option>{props.catalog.domains.map((domain) => <option key={domain.domainId} value={domain.domainId}>{domain.preferredLabel}</option>)}</select></label><button className={styles.primaryButton} type="submit">{t("marketProfile.provisional.submit")}</button></div></details>
-            {props.snapshot.provisionalTerms.length ? <p className={styles.help}>{t(props.snapshot.provisionalTerms.length === 1 ? "marketProfile.provisional.countOne" : "marketProfile.provisional.countMany", { count: new Intl.NumberFormat(locale).format(props.snapshot.provisionalTerms.length) })}</p> : null}
+            {snapshot.provisionalTerms.length ? <p className={styles.help}>{t(snapshot.provisionalTerms.length === 1 ? "marketProfile.provisional.countOne" : "marketProfile.provisional.countMany", { count: new Intl.NumberFormat(locale).format(snapshot.provisionalTerms.length) })}</p> : null}
           </form>
         </div>
       ) : null}
 
       {tab === "industry" ? (
-        <form className={styles.singleForm} onSubmit={saveIndustry}>
+        <form key={snapshot.industry?.revision ?? 0} className={styles.singleForm} onSubmit={saveIndustry}>
           <h3>{t("marketProfile.industry.title")}</h3><p>{t("marketProfile.industry.body")}</p>
-          <label>{t("marketProfile.industry.industries")}<textarea name="industries" defaultValue={props.snapshot.industry?.industries.map((item) => item.label).join("\n") ?? ""} /></label>
+          <label>{t("marketProfile.industry.industries")}<textarea name="industries" defaultValue={snapshot.industry?.industries.map((item) => item.label).join("\n") ?? ""} /></label>
           <fieldset className={styles.governedSelector}>
             <legend>{t("marketProfile.industry.selectorTitle")}</legend>
             <p className={styles.help}>{t("marketProfile.industry.selectorBody", { version: props.naicsCatalog.release.version, source: props.naicsCatalog.release.sourceName })}</p>
@@ -461,7 +474,7 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
             {preservedSnapshotNaics.length ? <div className={styles.selectionSummary}><strong>{t("marketProfile.industry.existingTitle")}</strong><span>{t("marketProfile.industry.existingBody")}</span>{preservedSnapshotNaics.map((descriptor, index) => <span key={`${descriptor.id}:${descriptor.version}:${descriptor.code}:${index}`}>{descriptor.code} · {descriptor.title} · {descriptor.version}</span>)}<label><input type="checkbox" checked={preserveExistingNaics} onChange={(event) => setPreserveExistingNaics(event.target.checked)} />{t("marketProfile.industry.preserveExisting")}</label></div> : null}
             <a href={props.naicsCatalog.release.sourceUrl} target="_blank" rel="noreferrer">{t("marketProfile.industry.sourceLink", { source: props.naicsCatalog.release.sourceName })}</a>
           </fieldset>
-          <label>{t("marketProfile.common.visibility")}<select name="visibility" defaultValue={props.snapshot.industry?.industries[0]?.visibility ?? "network"}><option value="network">{t("marketProfile.common.network")}</option><option value="public">{t("marketProfile.common.public")}</option><option value="private">{t("marketProfile.common.private")}</option></select></label>
+          <label>{t("marketProfile.common.visibility")}<select name="visibility" defaultValue={snapshot.industry?.industries[0]?.visibility ?? "network"}><option value="network">{t("marketProfile.common.network")}</option><option value="public">{t("marketProfile.common.public")}</option><option value="private">{t("marketProfile.common.private")}</option></select></label>
           <AlertBanner title={t("marketProfile.industry.boundaryTitle")} tone="information">{t("marketProfile.industry.boundaryBody")}</AlertBanner>
           <button className={styles.primaryButton} type="submit">{t("marketProfile.industry.save")}</button>
         </form>
@@ -477,23 +490,23 @@ export function MarketProfilePanel(props: MarketProfilePanelProps) {
             <div className={styles.threeColumns}><label>{t("marketProfile.experience.started")}<input name="startedOn" type="date" /></label><label>{t("marketProfile.experience.ended")}<input name="endedOn" type="date" /></label><label>{t("marketProfile.experience.value")}<input name="exactDollars" inputMode="decimal" /></label></div>
             <label className={styles.inlineCheck}><input type="checkbox" name="discloseValue" /> {t("marketProfile.experience.disclose")}</label>
             <div className={styles.twoColumns}><label>{t("marketProfile.experience.outputs")}<textarea name="outputs" /></label><label>{t("marketProfile.experience.outcomes")}<textarea name="outcomes" /></label></div>
-            {props.snapshot.claims.length ? <fieldset><legend>{t("marketProfile.experience.related")}</legend><div className={styles.checkGrid}>{props.snapshot.claims.map((claim) => <label key={claim.id}><input type="checkbox" name="supportingCapabilityClaimIds" value={claim.id} /><span>{claim.labelSnapshot}</span></label>)}</div></fieldset> : null}
+            {snapshot.claims.length ? <fieldset><legend>{t("marketProfile.experience.related")}</legend><div className={styles.checkGrid}>{snapshot.claims.map((claim) => <label key={claim.id}><input type="checkbox" name="supportingCapabilityClaimIds" value={claim.id} /><span>{claim.labelSnapshot}</span></label>)}</div></fieldset> : null}
             <label>{t("marketProfile.common.visibility")}<select name="visibility" defaultValue="private"><option value="private">{t("marketProfile.common.private")}</option><option value="network">{t("marketProfile.common.network")}</option><option value="public">{t("marketProfile.common.public")}</option></select></label>
             <AlertBanner title={t("marketProfile.experience.boundaryTitle")} tone="information">{t("marketProfile.experience.boundaryBody")}</AlertBanner>
             <button className={styles.primaryButton} type="submit">{t("marketProfile.experience.save")}</button>
           </form>
-          <section className={styles.fullWidthSection}><h3>{t("marketProfile.experience.recorded")}</h3>{props.snapshot.pastPerformance.length ? <ul className={styles.recordList}>{props.snapshot.pastPerformance.map((item) => <li key={item.id}><div><strong>{item.title}</strong><span>{item.role} · {item.customerOrSector ?? t("marketProfile.experience.customerUndisclosed")}</span></div><div><StatusPill tone="neutral">{t("marketProfile.common.selfReported")}</StatusPill><StatusPill tone="neutral">{t(`marketProfile.common.${item.visibility}`)}</StatusPill></div></li>)}</ul> : <StatePanel state="empty" title={t("marketProfile.experience.emptyTitle")}>{t("marketProfile.experience.emptyBody")}</StatePanel>}</section>
+          <section className={styles.fullWidthSection}><h3>{t("marketProfile.experience.recorded")}</h3>{snapshot.pastPerformance.length ? <ul className={styles.recordList}>{snapshot.pastPerformance.map((item) => <li key={item.id}><div><strong>{item.title}</strong><span>{item.role} · {item.customerOrSector ?? t("marketProfile.experience.customerUndisclosed")}</span></div><div><StatusPill tone="neutral">{t("marketProfile.common.selfReported")}</StatusPill><StatusPill tone="neutral">{t(`marketProfile.common.${item.visibility}`)}</StatusPill></div></li>)}</ul> : <StatePanel state="empty" title={t("marketProfile.experience.emptyTitle")}>{t("marketProfile.experience.emptyBody")}</StatePanel>}</section>
         </div>
       ) : null}
 
       {tab === "preferences" ? (
         <form className={styles.singleForm} onSubmit={savePreferences}>
           <h3>{t("marketProfile.preferences.title")}</h3><p>{t("marketProfile.preferences.body")}</p>
-          <fieldset><legend>{t("marketProfile.preferences.deliveryRoles")}</legend><div className={styles.checkGrid}>{(["prime", "subcontractor", "supplier", "referral_partner"] as const).map((role) => <label key={role}><input type="checkbox" name="deliveryRoleInterests" value={role} defaultChecked={props.snapshot.preferences?.deliveryRoleInterests.includes(role)} /><span>{t(`marketProfile.common.${role === "referral_partner" ? "referralPartner" : role}`)}</span></label>)}</div></fieldset>
-          <div className={styles.twoColumns}><label>{t("marketProfile.preferences.team")}<textarea name="teamPreferences" defaultValue={props.snapshot.preferences?.teamPreferences.join("\n") ?? ""} /></label><label>{t("marketProfile.preferences.referral")}<textarea name="referralPreferences" defaultValue={props.snapshot.preferences?.referralPreferences.join("\n") ?? ""} /></label></div>
-          <label>{t("marketProfile.preferences.resources")}<textarea name="resourceNeeds" defaultValue={props.snapshot.preferences?.resourceNeeds.join("\n") ?? ""} /></label>
-          <div className={styles.twoColumns}><label>{t("marketProfile.preferences.contact")}<select name="contactPreference" defaultValue={props.snapshot.preferences?.contactPreference ?? "organization_contact"}><option value="organization_contact">{t("marketProfile.preferences.organizationContact")}</option><option value="member_contact">{t("marketProfile.preferences.memberContact")}</option><option value="structured_intake">{t("marketProfile.preferences.structuredIntake")}</option></select></label><label>{t("marketProfile.common.visibility")}<select name="visibility" defaultValue={props.snapshot.preferences?.visibility ?? "network"}><option value="network">{t("marketProfile.common.network")}</option><option value="public">{t("marketProfile.common.public")}</option><option value="private">{t("marketProfile.common.private")}</option></select></label></div>
-          <label>{t("marketProfile.preferences.notes")}<textarea name="intakeNotes" defaultValue={props.snapshot.preferences?.intakeNotes ?? ""} /></label>
+          <fieldset><legend>{t("marketProfile.preferences.deliveryRoles")}</legend><div className={styles.checkGrid}>{(["prime", "subcontractor", "supplier", "referral_partner"] as const).map((role) => <label key={role}><input type="checkbox" name="deliveryRoleInterests" value={role} defaultChecked={snapshot.preferences?.deliveryRoleInterests.includes(role)} /><span>{t(`marketProfile.common.${role === "referral_partner" ? "referralPartner" : role}`)}</span></label>)}</div></fieldset>
+          <div className={styles.twoColumns}><label>{t("marketProfile.preferences.team")}<textarea name="teamPreferences" defaultValue={snapshot.preferences?.teamPreferences.join("\n") ?? ""} /></label><label>{t("marketProfile.preferences.referral")}<textarea name="referralPreferences" defaultValue={snapshot.preferences?.referralPreferences.join("\n") ?? ""} /></label></div>
+          <label>{t("marketProfile.preferences.resources")}<textarea name="resourceNeeds" defaultValue={snapshot.preferences?.resourceNeeds.join("\n") ?? ""} /></label>
+          <div className={styles.twoColumns}><label>{t("marketProfile.preferences.contact")}<select name="contactPreference" defaultValue={snapshot.preferences?.contactPreference ?? "organization_contact"}><option value="organization_contact">{t("marketProfile.preferences.organizationContact")}</option><option value="member_contact">{t("marketProfile.preferences.memberContact")}</option><option value="structured_intake">{t("marketProfile.preferences.structuredIntake")}</option></select></label><label>{t("marketProfile.common.visibility")}<select name="visibility" defaultValue={snapshot.preferences?.visibility ?? "network"}><option value="network">{t("marketProfile.common.network")}</option><option value="public">{t("marketProfile.common.public")}</option><option value="private">{t("marketProfile.common.private")}</option></select></label></div>
+          <label>{t("marketProfile.preferences.notes")}<textarea name="intakeNotes" defaultValue={snapshot.preferences?.intakeNotes ?? ""} /></label>
           <button className={styles.primaryButton} type="submit">{t("marketProfile.preferences.save")}</button>
         </form>
       ) : null}

@@ -1,25 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import type { TeamInvitationView } from "../../application/rfx/opportunity-teaming-service";
-import { TEAMING_BOUNDARY_VERSION } from "../../domain/rfx/teaming";
+import { TEAMING_BOUNDARY_VERSION } from "../../domain/rfx/teaming-boundary";
 import { formatDate } from "../../i18n/format";
 import { useI18n } from "../i18n/I18nProvider";
 import { OperationalWorkspace, ParticipantPage } from "../participant/WorkspacePrimitives";
 import styles from "./OpportunityTeamInvitationReview.module.css";
 
-export function OpportunityTeamInvitationReview({ invitation }: Readonly<{ invitation: TeamInvitationView }>) {
-  const { locale, t } = useI18n(); const router = useRouter();
+export function OpportunityTeamInvitationReview({ invitation: serverInvitation }: Readonly<{ invitation: TeamInvitationView }>) {
+  const { locale, t } = useI18n();
+  const [localInvitation, setLocalInvitation] = useState<{ source: TeamInvitationView; value: TeamInvitationView } | null>(null);
+  const invitation = localInvitation?.source === serverInvitation ? localInvitation.value : serverInvitation;
   const [acknowledged, setAcknowledged] = useState(false); const [busy, setBusy] = useState(false); const [notice, setNotice] = useState<string | null>(null);
   async function decide(action: "accept" | "decline") {
     setBusy(true); setNotice(null);
     try {
       const response = await fetch("/api/opportunities/teaming", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, commandId: crypto.randomUUID(), invitationId: invitation.id, expectedVersion: invitation.version, boundaryVersion: action === "accept" ? TEAMING_BOUNDARY_VERSION : null, boundaryLocale: action === "accept" ? locale : null }) });
       if (!response.ok) throw new Error("decision-failed");
-      setNotice(t(`rfxWorkspace.teamInvitation.${action === "accept" ? "accepted" : "declined"}`)); router.refresh();
+      const result = await response.json() as { invitation: TeamInvitationView };
+      setLocalInvitation({ source: serverInvitation, value: result.invitation });
+      setNotice(t(`rfxWorkspace.teamInvitation.${action === "accept" ? "accepted" : "declined"}`));
     } catch { setNotice(t("rfxWorkspace.teamInvitation.error")); }
     finally { setBusy(false); }
   }

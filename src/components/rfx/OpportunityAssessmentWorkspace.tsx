@@ -4,13 +4,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import type { OpportunityPursuitWorkspace, ParticipantOpportunityPursuit } from "../../application/rfx/opportunity-pursuit-service";
+import type {
+  OpportunityPursuitWorkspace,
+  ParticipantOpportunityPursuit,
+} from "../../application/rfx/opportunity-pursuit-service";
 import type { EngagementTerm, EstimatedValue, StructuredDuration } from "../../domain/rfx/model";
-import type { ParticipantGapStatus, PursuitAssessment, PursuitAssessmentState, PursuitDecision } from "../../domain/rfx/pursuit";
+import type {
+  ParticipantGapStatus,
+  PursuitAssessment,
+  PursuitAssessmentState,
+  PursuitDecision,
+} from "../../domain/rfx/pursuit";
 import type { Locale } from "../../i18n/config";
 import { currencyValueFromMinorUnits, formatCurrency, formatDate, formatNumber } from "../../i18n/format";
-import { OperationalWorkspace, ParticipantPage } from "../participant/WorkspacePrimitives";
 import { useI18n } from "../i18n/I18nProvider";
+import { OperationalWorkspace, ParticipantPage } from "../participant/WorkspacePrimitives";
 import { StatusPill } from "../ui";
 import styles from "./OpportunityAssessmentWorkspace.module.css";
 
@@ -49,9 +57,11 @@ function engagementTermLabel(term: EngagementTerm, locale: Locale, t: Translate)
   });
 }
 
-export function OpportunityAssessmentWorkspace({ workspace, returnHref }: Readonly<{ workspace: OpportunityPursuitWorkspace; returnHref: string }>) {
+export function OpportunityAssessmentWorkspace({ workspace: serverWorkspace, returnHref }: Readonly<{ workspace: OpportunityPursuitWorkspace; returnHref: string }>) {
   const { locale, t } = useI18n();
   const router = useRouter();
+  const [localWorkspace, setLocalWorkspace] = useState<{ source: OpportunityPursuitWorkspace; value: OpportunityPursuitWorkspace } | null>(null);
+  const workspace = localWorkspace?.source === serverWorkspace ? localWorkspace.value : serverWorkspace;
   const [assessment, setAssessment] = useState<PursuitAssessment>(workspace.pursuit?.assessment ?? emptyAssessment());
   const [currentPursuit, setCurrentPursuit] = useState<ParticipantOpportunityPursuit | null>(workspace.pursuit);
   const [gapResolutions, setGapResolutions] = useState<Readonly<Record<string, ParticipantGapStatus>>>(() => Object.freeze(Object.fromEntries(workspace.gaps.filter((gap) => gap.current).map((gap) => [gap.reference, gap.status as ParticipantGapStatus]))));
@@ -82,7 +92,16 @@ export function OpportunityAssessmentWorkspace({ workspace, returnHref }: Readon
       setAssessment(result.pursuit.assessment);
       setStaleInputsConfirmed(false);
       setNotice(t(`rfxWorkspace.discovery.pursuit.saved.${nextDecision}`));
-      router.refresh();
+      try {
+        const projection = await fetch(`/api/opportunities/pursuit?reference=${encodeURIComponent(explanation.opportunityReference)}`, { cache: "no-store" });
+        if (!projection.ok) throw new Error("projection-unavailable");
+        const value = await projection.json() as OpportunityPursuitWorkspace;
+        setLocalWorkspace({ source: serverWorkspace, value });
+        setGapResolutions(Object.fromEntries(value.gaps.filter(gap => gap.current).map(gap => [gap.reference, gap.status as ParticipantGapStatus])));
+      } catch {
+        // A confirmed save stays successful; server recovery is exceptional.
+        router.refresh();
+      }
     } catch { setNotice(t("rfxWorkspace.discovery.pursuit.error")); }
     finally { setBusy(false); }
   }

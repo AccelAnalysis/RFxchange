@@ -1,3 +1,4 @@
+import { verifyUpdates } from "../test/browser/verify-updates.mjs";
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -50,6 +51,7 @@ try {
     console.log(`Exchange lifecycle passed at ${viewport.width}x${viewport.height} (SDK/data doubles).`);
     await page.close();
   }
+  await verifyUpdates(browser, `http://127.0.0.1:${server.address().port}`);
 } finally {
   await browser?.close();
   if (server) await new Promise(resolve => server.close(resolve));

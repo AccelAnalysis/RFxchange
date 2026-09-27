@@ -1,3 +1,9 @@
+import { FIRESTORE_COLLECTIONS } from "../src/infrastructure/firestore/schema.ts";
+import { COMMUNICATIONS_FIRESTORE_COLLECTIONS } from "../src/infrastructure/firestore/communications-schema.ts";
+import { GEOGRAPHY_FABRIC_FIRESTORE_COLLECTIONS } from "../src/infrastructure/firestore/geography-fabric-schema.ts";
+import { GOVERNED_MEDIA_FIRESTORE_COLLECTIONS } from "../src/infrastructure/firestore/media-schema.ts";
+import { PROVIDER_SEED_PROMOTION_FIRESTORE_COLLECTIONS } from "../src/infrastructure/firestore/provider-seed-promotion-schema.ts";
+import { SAD_RUNTIME_COLLECTIONS } from "../src/infrastructure/firestore/sad-runtime-schema.ts";
 import assert from "node:assert/strict";
 import { deleteApp as deleteClientApp, initializeApp as initializeClientApp } from "firebase/app";
 import { connectAuthEmulator, inMemoryPersistence, initializeAuth } from "firebase/auth";
@@ -7,6 +13,7 @@ import {
   getDoc,
   getFirestore as getClientFirestore,
   setDoc,
+  updateDoc, deleteDoc, getDocs, collection,
 } from "firebase/firestore";
 import { deleteApp as deleteAdminApp, initializeApp as initializeAdminApp } from "firebase-admin/app";
 import { getAuth as getAdminAuth } from "firebase-admin/auth";
@@ -417,6 +424,25 @@ try {
     }),
     "Authenticated direct client write must remain denied by the server-managed rules boundary.",
   );
+
+  // Assert access behavior across all canonical collections and an undeclared nested path.
+  // Renaming a deny helper or changing comments must not affect this test.
+  const closedCollections = [...new Set([...Object.values(FIRESTORE_COLLECTIONS), ...Object.values(COMMUNICATIONS_FIRESTORE_COLLECTIONS), ...Object.values(GEOGRAPHY_FABRIC_FIRESTORE_COLLECTIONS), ...Object.values(GOVERNED_MEDIA_FIRESTORE_COLLECTIONS), ...Object.values(PROVIDER_SEED_PROMOTION_FIRESTORE_COLLECTIONS), ...Object.keys(SAD_RUNTIME_COLLECTIONS), "storedAssets", "unregisteredRulesProbe", "unregisteredRulesProbe/parent/nested"])];
+  for (const name of closedCollections) {
+    const id = "rules_probe";
+    const existing = adminDb.collection(name).doc(id);
+    await existing.set({ sentinel: "private", organizationId: orgA.id });
+    try {
+      for (const client of [anonymous, alice]) {
+        const reference = doc(client.firestore, name, id);
+        await expectPermissionDenied(getDoc(reference), `${name}: direct read`);
+        await expectPermissionDenied(getDocs(collection(client.firestore, name)), `${name}: direct list`);
+        await expectPermissionDenied(setDoc(doc(client.firestore, name, "rules_new"), { forged: true }), `${name}: direct create`);
+        await expectPermissionDenied(updateDoc(reference, { forged: true }), `${name}: direct update`);
+        await expectPermissionDenied(deleteDoc(reference), `${name}: direct delete`);
+      }
+    } finally { await existing.delete(); }
+  }
 
   console.log("AUTH-005 Firebase Auth and Firestore security suite passed.");
 } finally {

@@ -1,37 +1,60 @@
-import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-import test from "node:test";
+import assert from 'node:assert/strict';
+import { register } from 'node:module';
+import test from 'node:test';
+register('../scripts/node-typescript-source-loader.mjs', import.meta.url);
+const { installSceneInteractions } = await import('../src/components/map/exchange-scene-interactions.ts');
+const data = await import('../src/components/map/exchange-scene-data.ts');
 
-const scene = await readFile(new URL("../src/components/map/ExchangeSpatialScene.tsx", import.meta.url), "utf8");
-const adapter = await readFile(new URL("../src/application/participant/lens-map-projection-adapter.ts", import.meta.url), "utf8");
+function scene() {
+  const handlers = new Map(), selected = [], cameras = [], organizations = [];
+  const state = { selectable: new Map(), clusters: new Map(), reducedMotion: true, markerId: 'home' };
+  let collisions = [];
+  const map = {
+    on: (event, layer, fn) => handlers.set(`${event}:${layer}`, fn),
+    getCanvas: () => ({ style: {} }), getZoom: () => 17, getMaxZoom: () => 18,
+    queryRenderedFeatures: () => collisions, easeTo: camera => cameras.push(camera),
+    getSource: () => ({ getClusterExpansionZoom: (_, callback) => callback(null, 12) }),
+  };
+  installSceneInteractions(map, () => state, () => {}, id => organizations.push(id), () => {}, item => selected.push(item));
+  return { state, selected, cameras, organizations, overlap: value => { collisions = value; }, click: (layer, properties, coordinates = [1, 2]) => handlers.get(`click:${layer}`)({ point: {}, features: [{ properties, geometry: { coordinates } }] }) };
+}
 
-test("the existing spatial scene consumes one non-clustered shared projection source", () => {
-  assert.match(scene, /LENS_PROJECTION_SOURCE_ID = "rfx-spatial-scene-lens-projection"/);
-  assert.match(scene, /map\.addSource\(LENS_PROJECTION_SOURCE_ID, \{\s*type: "geojson",\s*data: lensProjectionGeoJsonRef\.current/);
-  assert.doesNotMatch(scene, /map\.addSource\(LENS_PROJECTION_SOURCE_ID,[\s\S]{0,160}cluster: true/);
-  assert.match(scene, /lensProjectionSource\?\.setData\(lensProjectionRenderModel\.data\)/);
+test('map selections resolve the current authorized projection without stale closures or fabricated records', () => {
+  const s = scene();
+  const original = { kind: 'organization', id: 'authorized-a' }, updated = { ...original, label: 'Updated' };
+  s.state.selectable.set('render-a', original);
+  s.click(data.LENS_PROJECTION_OBJECT_LAYER_ID, { renderId: 'render-a' });
+  assert.equal(s.selected[0], original);
+  s.state.selectable = new Map([['render-a', updated]]);
+  s.click(data.LENS_PROJECTION_OBJECT_LAYER_ID, { renderId: 'render-a' });
+  assert.equal(s.selected[1], updated);
+  s.click(data.LENS_PROJECTION_OBJECT_LAYER_ID, { renderId: 'unknown' });
+  assert.equal(s.selected.length, 2);
+  s.click(data.NETWORK_MARKER_CORE_LAYER_ID, { id: 'network-marker' });
+  assert.deepEqual(s.organizations, ['network-marker']);
 });
 
-test("selection callbacks use the original projection lookup and clusters only move the camera", () => {
-  assert.match(scene, /lensProjectionSelectableRef\.current\.get\(renderId\)/);
-  assert.match(scene, /onLensProjectionSelectRef\.current\?\.\(projection\)/);
-  assert.match(scene, /lensProjectionClusterRef\.current\.get\(renderId\)/);
-  assert.match(scene, /zoom: Math\.min\(map\.getZoom\(\) \+ 2, map\.getMaxZoom\(\)\)/);
-  assert.doesNotMatch(scene, /lensProjectionClusterRef[\s\S]{0,500}onLensProjectionSelectRef/);
-  assert.match(scene, /layers: \[\s*LENS_PROJECTION_OBJECT_LAYER_ID,\s*HOME_MARKER_CORE_LAYER_ID,\s*LENS_PROJECTION_CLUSTER_LAYER_ID/);
-  assert.match(scene, /layers: \[LENS_PROJECTION_OBJECT_LAYER_ID, HOME_MARKER_CORE_LAYER_ID\]/);
-  assert.doesNotMatch(scene, /map\.on\("click", HOME_MARKER_CORE_LAYER_ID[\s\S]{0,500}LENS_PROJECTION_(?:CLUSTER|AREA)/);
-  assert.match(scene, /properties\?\.selectable === true/);
+test('clusters only move the camera, clamp zoom and respect reduced motion', () => {
+  const s = scene();
+  s.state.clusters.set('cluster-a', { projection: { kind: 'cluster' }, coordinate: [1, 2] });
+  s.click(data.LENS_PROJECTION_CLUSTER_LAYER_ID, { renderId: 'cluster-a' });
+  assert.deepEqual(s.cameras, [{ center: [1, 2], zoom: 18, duration: 0 }]);
+  s.click(data.NETWORK_CLUSTER_CORE_LAYER_ID, { cluster_id: 1 });
+  assert.equal(s.cameras[1].zoom, 12);
+  assert.deepEqual(s.selected, []);
+  assert.deepEqual(s.organizations, []);
 });
 
-test("governed areas require exact authority keys and legacy overlays cannot duplicate the shared projection", () => {
-  assert.match(adapter, /candidate\.areaId === area\.areaId[\s\S]*candidate\.geographyId === area\.geographyId[\s\S]*candidate\.geometryReference === area\.geometryReference/);
-  assert.match(scene, /A shared lens projection cannot be combined with legacy domain overlay props/);
-  assert.match(scene, /data-lens-projection-list-only-count/);
-  assert.match(scene, /lensProjectionContainsOrganizationMarker\([\s\S]{0,120}marker\.id,[\s\S]{0,80}marker\.organizationId/);
-  assert.match(scene, /const sceneMarker = homeMarkerIsProjected \? null : marker/);
-  assert.match(scene, /const markerRef = useRef\(marker\)/);
-  assert.match(scene, /markerRef\.current = marker/);
-  assert.match(scene, /markerGeoJson\(sceneMarker\)/);
-  assert.match(scene, /data-lens-projection-deduplicated-home-marker/);
+test('overlapping points take precedence over area and cluster selection', () => {
+  const s = scene();
+  s.state.selectable.set('area-a', { kind: 'area' });
+  s.state.clusters.set('cluster-a', { projection: { kind: 'cluster' }, coordinate: [1, 2] });
+  s.overlap([{}]);
+  s.click(data.LENS_PROJECTION_AREA_FILL_LAYER_ID, { renderId: 'area-a' });
+  s.click(data.LENS_PROJECTION_CLUSTER_LAYER_ID, { renderId: 'cluster-a' });
+  s.click(data.HOME_MARKER_CORE_LAYER_ID, {});
+  assert.deepEqual([s.selected, s.cameras, s.organizations], [[], [], []]);
+  s.overlap([]);
+  s.click(data.LENS_PROJECTION_AREA_FILL_LAYER_ID, { renderId: 'area-a' });
+  assert.equal(s.selected.length, 1);
 });

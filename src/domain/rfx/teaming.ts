@@ -7,7 +7,8 @@ import type { OrganizationId } from "../organizations/model.ts";
 import type { OrganizationMembershipId, UserId } from "../users/model.ts";
 import type { OpportunityGapKind } from "./pursuit.ts";
 
-export const TEAMING_BOUNDARY_VERSION = 1 as const;
+import { TEAMING_BOUNDARY_VERSION } from "./teaming-boundary.ts";
+export { TEAMING_BOUNDARY_VERSION } from "./teaming-boundary.ts";
 
 export const TEAMING_BOUNDARY_COPY =
   "Accepting this invitation records RFx-scoped participation in The RFxchange. It does not create a subcontract, joint venture, teaming agreement, exclusivity, compensation obligation, promise to submit, or authority to bind another organization.";

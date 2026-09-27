@@ -1,613 +1,70 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useLayoutEffect,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type FormEvent,
-} from "react";
-import type mapboxgl from "mapbox-gl";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import {
   PARTICIPANT_MAP_VIEW_OPTIONS,
   mapViewModeForPitch,
   type MapViewMode,
-  type ParticipantMapCamera,
 } from "../../application/geography/map-view";
-import type { SyntheticOrientationMapOverlay } from "../../application/orientation/synthetic-scenario";
 import {
   adaptLensMapProjection,
   createLensProjectionRenderModel,
   lensProjectionContainsOrganizationMarker,
-  type ExchangeGovernedAreaGeometry,
-  type ExchangeLensSelectableProjection,
-  type ExchangeSpatialGeometry,
-  type ExchangeSpatialProjectionAdapter,
 } from "../../application/participant/lens-map-projection-adapter";
-import type {
-  ExchangeSelectionState,
-  LensMapProjection,
-} from "../../application/participant/mobile-exchange-contracts";
-import { beaconImageId, registerExchangeBeaconImages } from "./exchange-beacon-images";
 import {
   MAP_ROTATION_PREFERENCE_EVENT,
   readMapRotationPreference,
   startAmbientMapRotation,
 } from "./map-motion-preference";
 
-import { workspaceMapPadding } from "./workspaceMapPadding";
 import { useI18n } from "../i18n/I18nProvider";
+import {
+  EMPTY_LENS_PROJECTION_ADAPTER,
+  HAMPTON_ROADS_BOUNDS,
+  HOME_MARKER_SOURCE_ID,
+  LENS_PROJECTION_SOURCE_ID,
+  LOCALITY_FILL_LAYER_ID,
+  LOCALITY_MASK_LAYER_ID,
+  LOCALITY_MASK_SOURCE_ID,
+  LOCALITY_OUTLINE_LAYER_ID,
+  LOCALITY_SOURCE_ID,
+  MAP_BASEMAP_PRESETS,
+  MapBasemapPresetId,
+  NETWORK_MARKER_SOURCE_ID,
+  NETWORK_SELECTED_MARKER_SOURCE_ID,
+  OPPORTUNITY_MARKER_SOURCE_ID,
+  OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
+  ORGANIZATION_ORBIT_ZOOM,
+  RELATIONSHIP_PATH_SOURCE_ID,
+  SERVICE_FIELD_SOURCE_ID,
+  TUTORIAL_NODE_SOURCE_ID,
+  TUTORIAL_PATH_SOURCE_ID,
+  cameraPadding,
+  localityBounds,
+  localityGeoJson,
+  localityMaskGeoJson,
+  markerGeoJson,
+  opportunityMarkerGeoJson,
+  organizationMarkerGeoJson,
+  relationshipPathGeoJson,
+  renderedMapPadding,
+  serviceFieldGeoJson,
+  tutorialNodeGeoJson,
+  tutorialPathGeoJson,
+} from "./exchange-scene-data";
+import { installSceneInteractions } from "./exchange-scene-interactions";
+import { installSceneLayers } from "./exchange-scene-layers";
+import type { ExchangeSpatialSceneProps } from "./exchange-scene-types";
+import { ExchangeMapSearch } from "./ExchangeMapSearch";
 import styles from "./ExchangeSpatialScene.module.css";
-
-export type ExchangeSpatialSceneMode = "regional" | "locality" | "organization";
-export type ExchangeContinuousMotion = "instructional" | "milestone";
-
-export interface ExchangeHomeMarker {
-  readonly id: string;
-  readonly organizationId?: string;
-  readonly coordinate: readonly [longitude: number, latitude: number];
-  readonly label: string;
-  readonly accessibleLocationLabel?: string;
-  readonly precision?: "exact" | "approximate";
-}
-
-export type ExchangeOrganizationMarker = ExchangeHomeMarker;
-export type ExchangeOpportunityMarker = ExchangeHomeMarker;
-
 export type {
   ExchangeGovernedAreaGeometry,
   ExchangeLensSelectableProjection,
   ExchangeSpatialGeometry,
 } from "../../application/participant/lens-map-projection-adapter";
+export type * from "./exchange-scene-types";
 
-export interface ExchangeRelationshipPath {
-  readonly id: string;
-  readonly from: readonly [number, number];
-  readonly to: readonly [number, number];
-  readonly label: string;
-  readonly status: "sent" | "accepted" | "contacted" | "closed";
-}
-
-export interface ExchangeServiceField {
-  readonly id: string;
-  readonly label: string;
-  readonly geometry: ExchangeSpatialGeometry;
-  readonly selected?: boolean;
-}
-
-export interface ExchangeSpatialSceneProps {
-  readonly model: ControlledLocalityMapModel;
-  readonly mode: ExchangeSpatialSceneMode;
-  readonly marker?: ExchangeHomeMarker | null;
-  readonly organizationMarkers?: readonly ExchangeOrganizationMarker[];
-  readonly opportunityMarkers?: readonly ExchangeOpportunityMarker[];
-  readonly relationshipPaths?: readonly ExchangeRelationshipPath[];
-  readonly serviceFields?: readonly ExchangeServiceField[];
-  readonly lensProjection?: LensMapProjection | null;
-  readonly lensSelection?: ExchangeSelectionState | null;
-  readonly governedAreaGeometries?: readonly ExchangeGovernedAreaGeometry[];
-  readonly onLensProjectionSelect?: (projection: ExchangeLensSelectableProjection) => void;
-  readonly focusedMarkerId?: string | null;
-  readonly onOrganizationMarkerSelect?: (markerId: string) => void;
-  readonly onOpportunityMarkerSelect?: (markerId: string) => void;
-  readonly initialCamera?: ParticipantMapCamera | null;
-  readonly onCameraChange?: (camera: ParticipantMapCamera) => void;
-  readonly interactive?: boolean;
-  readonly activationOverlay?: boolean;
-  readonly workspaceOverlay?: "left" | "right" | null;
-  readonly adaptiveWorkspace?: boolean;
-  readonly showSearch?: boolean;
-  readonly homeLocalityFocus?: boolean;
-  readonly tutorialOverlay?: SyntheticOrientationMapOverlay | null;
-  readonly continuousMotion?: ExchangeContinuousMotion | null;
-  readonly className?: string;
-  readonly embedded?: boolean;
-}
-
-type LocalityGeometry = ExchangeSpatialGeometry;
-
-type MapSearchResult = Readonly<{
-  id: string;
-  name: string;
-  context: string;
-  featureType: string;
-  center: readonly [number, number];
-  bbox: readonly [number, number, number, number] | null;
-}>;
-
-type MapBasemapPresetId = "exchange" | "street";
-type MapBasemapPreset = Readonly<{
-  id: MapBasemapPresetId;
-  label: string;
-  lightPreset: "day";
-  theme: "faded" | "default";
-  showTransitLabels: boolean;
-  showRoadLabels: boolean;
-  showPlaceLabels: boolean;
-  showPointOfInterestLabels: boolean;
-}>;
-
-export const MAP_BASEMAP_PRESETS: readonly MapBasemapPreset[] = Object.freeze([
-  Object.freeze({ id: "exchange", label: "Exchange", lightPreset: "day", theme: "faded", showTransitLabels: false, showRoadLabels: false, showPlaceLabels: false, showPointOfInterestLabels: false }),
-  Object.freeze({ id: "street", label: "Street", lightPreset: "day", theme: "default", showTransitLabels: true, showRoadLabels: true, showPlaceLabels: true, showPointOfInterestLabels: true }),
-]);
-
-const LOCALITY_SOURCE_ID = "rfx-spatial-scene-locality";
-const LOCALITY_MASK_SOURCE_ID = "rfx-spatial-scene-locality-mask";
-const LOCALITY_MASK_LAYER_ID = "rfx-spatial-scene-locality-mask-fill";
-const LOCALITY_FILL_LAYER_ID = "rfx-spatial-scene-locality-fill";
-const LOCALITY_OUTLINE_LAYER_ID = "rfx-spatial-scene-locality-outline";
-const NETWORK_MARKER_SOURCE_ID = "rfx-spatial-scene-network-organizations";
-const NETWORK_SELECTED_MARKER_SOURCE_ID = "rfx-spatial-scene-selected-network-organization";
-const NETWORK_CLUSTER_BACK_LAYER_ID = "rfx-spatial-scene-network-cluster-back";
-const NETWORK_CLUSTER_CORE_LAYER_ID = "rfx-spatial-scene-network-cluster-core";
-const NETWORK_CLUSTER_COUNT_LAYER_ID = "rfx-spatial-scene-network-cluster-count";
-const NETWORK_MARKER_HALO_LAYER_ID = "rfx-spatial-scene-network-organization-halo";
-const NETWORK_MARKER_CORE_LAYER_ID = "rfx-spatial-scene-network-organization-core";
-const NETWORK_SELECTED_MARKER_CORE_LAYER_ID = "rfx-spatial-scene-selected-network-organization-core";
-const NETWORK_MARKER_IDENTITY_LAYER_ID = "rfx-spatial-scene-network-organization-identity";
-const NETWORK_MARKER_LABEL_LAYER_ID = "rfx-spatial-scene-network-organization-label";
-const OPPORTUNITY_MARKER_SOURCE_ID = "rfx-spatial-scene-opportunities";
-const OPPORTUNITY_SELECTED_MARKER_SOURCE_ID = "rfx-spatial-scene-selected-opportunity";
-const OPPORTUNITY_CLUSTER_BACK_LAYER_ID = "rfx-spatial-scene-opportunity-cluster-back";
-const OPPORTUNITY_CLUSTER_LAYER_ID = "rfx-spatial-scene-opportunity-cluster";
-const OPPORTUNITY_CLUSTER_COUNT_LAYER_ID = "rfx-spatial-scene-opportunity-cluster-count";
-const OPPORTUNITY_MARKER_LAYER_ID = "rfx-spatial-scene-opportunity-beacon";
-const OPPORTUNITY_SELECTED_HALO_LAYER_ID = "rfx-spatial-scene-selected-opportunity-halo";
-const OPPORTUNITY_SELECTED_MARKER_LAYER_ID = "rfx-spatial-scene-selected-opportunity-beacon";
-const OPPORTUNITY_SELECTED_LABEL_LAYER_ID = "rfx-spatial-scene-selected-opportunity-label";
-const LENS_PROJECTION_SOURCE_ID = "rfx-spatial-scene-lens-projection";
-const LENS_PROJECTION_AREA_FILL_LAYER_ID = "rfx-spatial-scene-lens-area-fill";
-const LENS_PROJECTION_AREA_LINE_LAYER_ID = "rfx-spatial-scene-lens-area-line";
-const LENS_PROJECTION_CLUSTER_BACK_LAYER_ID = "rfx-spatial-scene-lens-cluster-back";
-const LENS_PROJECTION_CLUSTER_LAYER_ID = "rfx-spatial-scene-lens-cluster";
-const LENS_PROJECTION_CLUSTER_COUNT_LAYER_ID = "rfx-spatial-scene-lens-cluster-count";
-const LENS_PROJECTION_OBJECT_LAYER_ID = "rfx-spatial-scene-lens-object";
-const LENS_PROJECTION_SELECTED_HALO_LAYER_ID = "rfx-spatial-scene-lens-selected-halo";
-const LENS_PROJECTION_SELECTED_LABEL_LAYER_ID = "rfx-spatial-scene-lens-selected-label";
-const EMPTY_LENS_PROJECTION_ADAPTER: ExchangeSpatialProjectionAdapter = Object.freeze({
-  lens: "opportunities-rfx",
-  points: Object.freeze([]),
-  areas: Object.freeze([]),
-  listOnlyObjects: Object.freeze([]),
-  omittedObjects: Object.freeze([]),
-  activeLayerIds: Object.freeze([]),
-});
-const HOME_MARKER_SOURCE_ID = "rfx-spatial-scene-home-marker";
-const HOME_MARKER_HALO_LAYER_ID = "rfx-spatial-scene-home-marker-halo";
-const HOME_MARKER_CORE_LAYER_ID = "rfx-spatial-scene-home-marker-core";
-const HOME_MARKER_IDENTITY_LAYER_ID = "rfx-spatial-scene-home-marker-identity";
-const HOME_MARKER_LABEL_LAYER_ID = "rfx-spatial-scene-home-marker-label";
-const SEARCH_AREA_SOURCE_ID = "rfx-spatial-scene-search-area";
-const SEARCH_AREA_FILL_LAYER_ID = "rfx-spatial-scene-search-fill";
-const SEARCH_AREA_LINE_LAYER_ID = "rfx-spatial-scene-search-line";
-const TUTORIAL_PATH_SOURCE_ID = "rfx-spatial-scene-tutorial-paths";
-const TUTORIAL_PATH_LAYER_ID = "rfx-spatial-scene-tutorial-paths-line";
-const TUTORIAL_NODE_SOURCE_ID = "rfx-spatial-scene-tutorial-nodes";
-const TUTORIAL_NODE_HALO_LAYER_ID = "rfx-spatial-scene-tutorial-node-halo";
-const TUTORIAL_NODE_CORE_LAYER_ID = "rfx-spatial-scene-tutorial-node-core";
-const TUTORIAL_NODE_GLYPH_LAYER_ID = "rfx-spatial-scene-tutorial-node-glyph";
-const TUTORIAL_NODE_LABEL_LAYER_ID = "rfx-spatial-scene-tutorial-node-label";
-const RELATIONSHIP_PATH_SOURCE_ID = "rfx-spatial-scene-relationship-paths";
-const RELATIONSHIP_PATH_LAYER_ID = "rfx-spatial-scene-relationship-paths-line";
-const SERVICE_FIELD_SOURCE_ID = "rfx-spatial-scene-service-fields";
-const SERVICE_FIELD_FILL_LAYER_ID = "rfx-spatial-scene-service-fields-fill";
-const SERVICE_FIELD_LINE_LAYER_ID = "rfx-spatial-scene-service-fields-line";
-
-export const EXCHANGE_ORBIT_PERIOD_MS = 225_000;
-export const LOCALITY_ORBIT_PITCH = 60;
-export const ORGANIZATION_ORBIT_PITCH = 75;
-export const ORGANIZATION_ORBIT_ZOOM = 16;
-
-const WEB_MERCATOR_MAX_LATITUDE = 85.05112878;
-const HAMPTON_ROADS_BOUNDS: mapboxgl.LngLatBoundsLike = [
-  [-76.515, 36.615],
-  [-75.86, 37.085],
-];
-
-const EMPTY_FEATURE_COLLECTION = Object.freeze({
-  type: "FeatureCollection" as const,
-  features: [] as never[],
-});
-
-function copyRing(ring: readonly (readonly [number, number])[]): number[][] {
-  return ring.map(([longitude, latitude]) => [longitude, latitude]);
-}
-
-function copyGeometry(
-  geometry: ControlledLocalityMapModel["features"][number]["boundary"]["geometry"],
-): LocalityGeometry {
-  if (geometry.type === "Polygon") {
-    return {
-      type: "Polygon",
-      coordinates: geometry.coordinates.map(copyRing),
-    };
-  }
-  return {
-    type: "MultiPolygon",
-    coordinates: geometry.coordinates.map((polygon) => polygon.map(copyRing)),
-  };
-}
-
-function createHomeLocalityMask(geometry: LocalityGeometry) {
-  const worldRing = [
-    [-180, -WEB_MERCATOR_MAX_LATITUDE],
-    [180, -WEB_MERCATOR_MAX_LATITUDE],
-    [180, WEB_MERCATOR_MAX_LATITUDE],
-    [-180, WEB_MERCATOR_MAX_LATITUDE],
-    [-180, -WEB_MERCATOR_MAX_LATITUDE],
-  ];
-  const exteriorRings: number[][][] = [];
-  const interiorPolygons: number[][][][] = [];
-  const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
-
-  for (const polygon of polygons) {
-    if (polygon[0]) exteriorRings.push(polygon[0].map((point) => [...point]));
-    for (const interiorRing of polygon.slice(1)) {
-      interiorPolygons.push([interiorRing.map((point) => [...point])]);
-    }
-  }
-
-  return {
-    type: "FeatureCollection" as const,
-    features: [
-      {
-        type: "Feature" as const,
-        properties: { purpose: "home-locality-mask" },
-        geometry: {
-          type: "MultiPolygon" as const,
-          coordinates: [
-            [worldRing, ...exteriorRings],
-            ...interiorPolygons,
-          ],
-        },
-      },
-    ],
-  };
-}
-
-function localityBounds(model: ControlledLocalityMapModel): mapboxgl.LngLatBoundsLike {
-  const bounds = model.selectedGeography.bounds;
-  return [
-    [bounds.west, bounds.south],
-    [bounds.east, bounds.north],
-  ];
-}
-
-function localityGeoJson(model: ControlledLocalityMapModel) {
-  const selected = model.features.find((feature) => feature.role === "selected");
-  if (!selected) return EMPTY_FEATURE_COLLECTION;
-  return {
-    type: "FeatureCollection" as const,
-    features: [
-      {
-        type: "Feature" as const,
-        properties: {
-          geographyId: String(selected.geography.id),
-          name: selected.geography.name,
-          releaseState: selected.geography.releaseState,
-        },
-        geometry: copyGeometry(selected.boundary.geometry),
-      },
-    ],
-  };
-}
-
-function localityMaskGeoJson(model: ControlledLocalityMapModel) {
-  const selected = model.features.find((feature) => feature.role === "selected");
-  return selected
-    ? createHomeLocalityMask(copyGeometry(selected.boundary.geometry))
-    : EMPTY_FEATURE_COLLECTION;
-}
-
-function markerGeoJson(marker?: ExchangeHomeMarker | null) {
-  if (!marker) return EMPTY_FEATURE_COLLECTION;
-  return {
-    type: "FeatureCollection" as const,
-    features: [
-      {
-        type: "Feature" as const,
-        properties: {
-          id: marker.id,
-          label: marker.label,
-          identity: organizationInitials(marker.label),
-          accessibleLocationLabel: marker.accessibleLocationLabel ?? "RFxchange organization marker",
-          precision: marker.precision ?? "exact",
-          beaconImage: beaconImageId("own", marker.precision === "approximate" ? "approximate" : "default"),
-        },
-        geometry: {
-          type: "Point" as const,
-          coordinates: [marker.coordinate[0], marker.coordinate[1]],
-        },
-      },
-    ],
-  };
-}
-
-function organizationMarkerGeoJson(
-  markers: readonly ExchangeOrganizationMarker[],
-  focusedMarkerId: string | null,
-) {
-  return {
-    type: "FeatureCollection" as const,
-    features: markers.map((marker) => ({
-      type: "Feature" as const,
-      properties: {
-        id: marker.id,
-        label: marker.label,
-        identity: organizationInitials(marker.label),
-        selected: marker.id === focusedMarkerId ? 1 : 0,
-        precision: marker.precision ?? "exact",
-        beaconImage: beaconImageId(
-          "organization",
-          marker.id === focusedMarkerId
-            ? marker.precision === "approximate"
-              ? "selected-approximate"
-              : "selected"
-            : marker.precision === "approximate"
-              ? "approximate"
-              : "default",
-        ),
-      },
-      geometry: {
-        type: "Point" as const,
-        coordinates: [marker.coordinate[0], marker.coordinate[1]],
-      },
-    })),
-  };
-}
-
-function opportunityMarkerGeoJson(
-  markers: readonly ExchangeOpportunityMarker[],
-  focusedMarkerId: string | null,
-) {
-  return {
-    type: "FeatureCollection" as const,
-    features: markers.map((marker) => ({
-      type: "Feature" as const,
-      properties: {
-        id: marker.id,
-        label: marker.label,
-        selected: marker.id === focusedMarkerId ? 1 : 0,
-        precision: marker.precision ?? "exact",
-        beaconImage: beaconImageId(
-          "opportunities-rfx",
-          marker.id === focusedMarkerId
-            ? marker.precision === "approximate"
-              ? "selected-approximate"
-              : "selected"
-            : marker.precision === "approximate"
-              ? "approximate"
-              : "default",
-        ),
-      },
-      geometry: {
-        type: "Point" as const,
-        coordinates: [marker.coordinate[0], marker.coordinate[1]],
-      },
-    })),
-  };
-}
-
-function relationshipPathGeoJson(paths: readonly ExchangeRelationshipPath[]) {
-  return {
-    type: "FeatureCollection" as const,
-    features: paths.map((path) => ({
-      type: "Feature" as const,
-      properties: { id: path.id, label: path.label, status: path.status },
-      geometry: { type: "LineString" as const, coordinates: [[...path.from], [...path.to]] },
-    })),
-  };
-}
-
-function serviceFieldGeoJson(fields: readonly ExchangeServiceField[]) {
-  return {
-    type: "FeatureCollection" as const,
-    features: fields.map((field) => ({
-      type: "Feature" as const,
-      properties: { id: field.id, label: field.label, selected: field.selected === true },
-      geometry: field.geometry,
-    })),
-  };
-}
-
-function organizationInitials(label: string): string {
-  return label
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toLocaleUpperCase("en-US"))
-    .join("") || "•";
-}
-
-function tutorialNodeGeoJson(overlay?: SyntheticOrientationMapOverlay | null) {
-  if (!overlay) return EMPTY_FEATURE_COLLECTION;
-  return {
-    type: "FeatureCollection" as const,
-    features: overlay.nodes.map((node) => ({
-      type: "Feature" as const,
-      properties: {
-        id: node.id,
-        label: node.label,
-        role: node.role,
-        glyph: node.role === "opportunity" ? "!" : node.role === "issuer" ? "I" : node.role === "responder" ? "R" : "T",
-        provenance: node.provenance,
-      },
-      geometry: { type: "Point" as const, coordinates: [node.coordinate[0], node.coordinate[1]] },
-    })),
-  };
-}
-
-function tutorialPathGeoJson(overlay?: SyntheticOrientationMapOverlay | null) {
-  if (!overlay) return EMPTY_FEATURE_COLLECTION;
-  return {
-    type: "FeatureCollection" as const,
-    features: overlay.paths.map((path) => ({
-      type: "Feature" as const,
-      properties: { id: path.id, kind: path.kind, stage: overlay.stage, provenance: path.provenance },
-      geometry: {
-        type: "LineString" as const,
-        coordinates: path.coordinates.map(([longitude, latitude]) => [longitude, latitude]),
-      },
-    })),
-  };
-}
-
-function validCoordinatePair(value: unknown): readonly [number, number] | null {
-  if (!Array.isArray(value) || value.length < 2) return null;
-  const longitude = value[0];
-  const latitude = value[1];
-  if (
-    typeof longitude !== "number" ||
-    typeof latitude !== "number" ||
-    !Number.isFinite(longitude) ||
-    !Number.isFinite(latitude) ||
-    longitude < -180 ||
-    longitude > 180 ||
-    latitude < -90 ||
-    latitude > 90
-  ) {
-    return null;
-  }
-  return [longitude, latitude] as const;
-}
-
-function validBbox(value: unknown): readonly [number, number, number, number] | null {
-  if (!Array.isArray(value) || value.length !== 4) return null;
-  if (value.some((coordinate) => typeof coordinate !== "number" || !Number.isFinite(coordinate))) {
-    return null;
-  }
-  const [west, south, east, north] = value as number[];
-  if (west >= east || south >= north || west < -180 || east > 180 || south < -90 || north > 90) {
-    return null;
-  }
-  return [west, south, east, north] as const;
-}
-
-function parseMapboxSearchResults(payload: unknown): readonly MapSearchResult[] {
-  if (!payload || typeof payload !== "object" || !("features" in payload)) return [];
-  const features = (payload as { readonly features?: unknown }).features;
-  if (!Array.isArray(features)) return [];
-
-  return Object.freeze(
-    features.flatMap((feature, index) => {
-      if (!feature || typeof feature !== "object") return [];
-      const geometry = "geometry" in feature ? (feature as { geometry?: unknown }).geometry : null;
-      const properties = "properties" in feature
-        ? (feature as { properties?: unknown }).properties
-        : null;
-      if (!geometry || typeof geometry !== "object" || !properties || typeof properties !== "object") {
-        return [];
-      }
-      const propertyMap = properties as Readonly<Record<string, unknown>>;
-      const coordinates = validCoordinatePair(
-        "coordinates" in geometry ? (geometry as { coordinates?: unknown }).coordinates : null,
-      );
-      if (!coordinates) return [];
-      const name = typeof propertyMap.name === "string" ? propertyMap.name.trim() : "";
-      if (!name) return [];
-      const id = typeof propertyMap.mapbox_id === "string" && propertyMap.mapbox_id.trim()
-        ? propertyMap.mapbox_id.trim()
-        : `mapbox-search-${index}-${coordinates[0]}-${coordinates[1]}`;
-      const fullAddress = typeof propertyMap.full_address === "string"
-        ? propertyMap.full_address.trim()
-        : "";
-      const placeFormatted = typeof propertyMap.place_formatted === "string"
-        ? propertyMap.place_formatted.trim()
-        : "";
-      const featureType = typeof propertyMap.feature_type === "string"
-        ? propertyMap.feature_type.trim()
-        : "place";
-      return [Object.freeze({
-        id,
-        name,
-        context: fullAddress || placeFormatted,
-        featureType,
-        center: coordinates,
-        bbox: validBbox(propertyMap.bbox),
-      })];
-    }),
-  );
-}
-
-function bboxFeatureCollection(bbox: MapSearchResult["bbox"]) {
-  if (!bbox) return EMPTY_FEATURE_COLLECTION;
-  const [west, south, east, north] = bbox;
-  return {
-    type: "FeatureCollection" as const,
-    features: [
-      {
-        type: "Feature" as const,
-        properties: { purpose: "search-result-extent" },
-        geometry: {
-          type: "Polygon" as const,
-          coordinates: [[
-            [west, south],
-            [east, south],
-            [east, north],
-            [west, north],
-            [west, south],
-          ]],
-        },
-      },
-    ],
-  };
-}
-
-function searchZoom(featureType: string): number {
-  switch (featureType) {
-    case "address":
-    case "poi":
-      return 17;
-    case "street":
-    case "neighborhood":
-      return 15;
-    case "locality":
-    case "place":
-    case "city":
-      return 12;
-    case "district":
-      return 10;
-    case "region":
-      return 7;
-    case "country":
-      return 4;
-    default:
-      return 13;
-  }
-}
-
-function cameraPadding(
-  activationOverlay: boolean,
-  workspaceOverlay: "left" | "right" | null,
-  adaptiveWorkspace = false,
-) {
-  return workspaceMapPadding(
-    workspaceOverlay ?? (activationOverlay ? "left" : null),
-    { width: typeof window === "undefined" ? 1280 : window.innerWidth, height: typeof window === "undefined" ? 800 : window.innerHeight },
-    adaptiveWorkspace,
-  );
-}
-
-function renderedMapPadding(map: mapboxgl.Map) {
-  const padding = map.getPadding();
-  return {
-    top: padding.top ?? 0,
-    right: padding.right ?? 0,
-    bottom: padding.bottom ?? 0,
-    left: padding.left ?? 0,
-  };
-}
-
-// Spatial pages publish their projection; the root shell owns the single renderer.
-// Embedded onboarding/account previews render in their own bounded container.
 export const ExchangeSceneContext = createContext<((props: ExchangeSpatialSceneProps) => () => void) | null>(null);
 
 export function ExchangeSpatialScene(props: ExchangeSpatialSceneProps) {
@@ -618,17 +75,19 @@ export function ExchangeSpatialScene(props: ExchangeSpatialSceneProps) {
   return registerScene && !props.embedded ? null : <ExchangeSpatialRenderer {...props} />;
 }
 
+const EMPTY_ITEMS = Object.freeze([]);
+
 export function ExchangeSpatialRenderer({
   model,
   mode,
   marker = null,
-  organizationMarkers = [],
-  opportunityMarkers = [],
-  relationshipPaths = [],
-  serviceFields = [],
+  organizationMarkers = EMPTY_ITEMS,
+  opportunityMarkers = EMPTY_ITEMS,
+  relationshipPaths = EMPTY_ITEMS,
+  serviceFields = EMPTY_ITEMS,
   lensProjection = null,
   lensSelection = null,
-  governedAreaGeometries = [],
+  governedAreaGeometries = EMPTY_ITEMS,
   onLensProjectionSelect,
   focusedMarkerId = null,
   onOrganizationMarkerSelect,
@@ -651,39 +110,84 @@ export function ExchangeSpatialRenderer({
     throw new Error("A shared lens projection cannot be combined with legacy domain overlay props.");
   }
   const lensProjectionAdapter = useMemo(
-    () => lensProjection && lensSelection
-      ? adaptLensMapProjection(lensProjection, lensSelection)
-      : lensProjection
-        ? adaptLensMapProjection(lensProjection, {
-            kind: "none",
-            source: null,
-            selectionKey: null,
-            focalIdentity: null,
-            selectedOrganization: null,
-            selectedRecord: null,
-            selectedMarker: null,
-            selectedRelationship: null,
-          })
-        : EMPTY_LENS_PROJECTION_ADAPTER,
+    () =>
+      lensProjection && lensSelection
+        ? adaptLensMapProjection(lensProjection, lensSelection)
+        : lensProjection
+          ? adaptLensMapProjection(lensProjection, {
+              kind: "none",
+              source: null,
+              selectionKey: null,
+              focalIdentity: null,
+              selectedOrganization: null,
+              selectedRecord: null,
+              selectedMarker: null,
+              selectedRelationship: null,
+            })
+          : EMPTY_LENS_PROJECTION_ADAPTER,
     [lensProjection, lensSelection],
   );
   const lensProjectionRenderModel = useMemo(
-    () => createLensProjectionRenderModel(
-      lensProjectionAdapter,
+    () =>
+      createLensProjectionRenderModel(lensProjectionAdapter, governedAreaGeometries, {
+        ownOrganizationId: marker?.organizationId ?? null,
+        zoom: lensProjection?.camera?.zoom ?? initialCamera?.zoom ?? ORGANIZATION_ORBIT_ZOOM,
+      }),
+    [
       governedAreaGeometries,
-      { ownOrganizationId: marker?.organizationId ?? null, zoom: lensProjection?.camera?.zoom ?? initialCamera?.zoom ?? ORGANIZATION_ORBIT_ZOOM },
-    ),
-    [governedAreaGeometries, initialCamera?.zoom, lensProjection?.camera?.zoom, lensProjectionAdapter, marker?.organizationId],
+      initialCamera?.zoom,
+      lensProjection?.camera?.zoom,
+      lensProjectionAdapter,
+      marker?.organizationId,
+    ],
   );
   const homeMarkerIsProjected = useMemo(
-    () => marker !== null && lensProjectionContainsOrganizationMarker(
-      lensProjectionAdapter,
-      marker.id,
-      marker.organizationId,
-    ),
+    () =>
+      marker !== null &&
+      lensProjectionContainsOrganizationMarker(lensProjectionAdapter, marker.id, marker.organizationId),
     [lensProjectionAdapter, marker],
   );
   const sceneMarker = homeMarkerIsProjected ? null : marker;
+  const homeGeoJson = useMemo(() => localityGeoJson(model), [model]);
+  const homeMaskGeoJson = useMemo(() => localityMaskGeoJson(model), [model]);
+  const homeMarkerGeoJson = useMemo(() => markerGeoJson(sceneMarker), [sceneMarker]);
+  const networkMarkersGeoJson = useMemo(
+    () =>
+      organizationMarkerGeoJson(
+        organizationMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
+        null,
+      ),
+    [focusedMarkerId, organizationMarkers],
+  );
+  const selectedNetworkMarkerGeoJson = useMemo(
+    () =>
+      organizationMarkerGeoJson(
+        organizationMarkers.filter((candidate) => candidate.id === focusedMarkerId),
+        focusedMarkerId,
+      ),
+    [focusedMarkerId, organizationMarkers],
+  );
+  const opportunityMarkersGeoJson = useMemo(
+    () =>
+      opportunityMarkerGeoJson(
+        opportunityMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
+        null,
+      ),
+    [focusedMarkerId, opportunityMarkers],
+  );
+  const selectedOpportunityMarkerGeoJson = useMemo(
+    () =>
+      opportunityMarkerGeoJson(
+        opportunityMarkers.filter((candidate) => candidate.id === focusedMarkerId),
+        focusedMarkerId,
+      ),
+    [focusedMarkerId, opportunityMarkers],
+  );
+  const relationshipPathsGeoJson = useMemo(() => relationshipPathGeoJson(relationshipPaths), [relationshipPaths]);
+  const serviceFieldsGeoJson = useMemo(() => serviceFieldGeoJson(serviceFields), [serviceFields]);
+  const tutorialNodes = useMemo(() => tutorialNodeGeoJson(tutorialOverlay), [tutorialOverlay]);
+  const tutorialPaths = useMemo(() => tutorialPathGeoJson(tutorialOverlay), [tutorialOverlay]);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const sdkRef = useRef<typeof import("mapbox-gl").default | null>(null);
@@ -711,93 +215,26 @@ export function ExchangeSpatialRenderer({
   const appliedOverlayRef = useRef({ activationOverlay, workspaceOverlay, adaptiveWorkspace });
   const homeLocalityFocusRef = useRef(homeLocalityFocus);
   homeLocalityFocusRef.current = homeLocalityFocus;
-  const homeGeoJsonRef = useRef(localityGeoJson(model));
-  const homeMaskGeoJsonRef = useRef(localityMaskGeoJson(model));
-  const homeMarkerGeoJsonRef = useRef(markerGeoJson(sceneMarker));
-  const networkMarkerGeoJsonRef = useRef(organizationMarkerGeoJson(
-    organizationMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
-    null,
-  ));
-  const selectedNetworkMarkerGeoJsonRef = useRef(organizationMarkerGeoJson(
-    organizationMarkers.filter((candidate) => candidate.id === focusedMarkerId),
-    focusedMarkerId,
-  ));
-  const opportunityMarkerGeoJsonRef = useRef(opportunityMarkerGeoJson(
-    opportunityMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
-    null,
-  ));
+  const homeGeoJsonRef = useRef(homeGeoJson);
+  const homeMaskGeoJsonRef = useRef(homeMaskGeoJson);
+  const homeMarkerGeoJsonRef = useRef(homeMarkerGeoJson);
+  const networkMarkerGeoJsonRef = useRef(networkMarkersGeoJson);
+  const selectedNetworkMarkerGeoJsonRef = useRef(selectedNetworkMarkerGeoJson);
+  const opportunityMarkerGeoJsonRef = useRef(opportunityMarkersGeoJson);
   const lensProjectionGeoJsonRef = useRef(lensProjectionRenderModel.data);
   const lensProjectionSelectableRef = useRef(lensProjectionRenderModel.selectableByRenderId);
   const lensProjectionClusterRef = useRef(lensProjectionRenderModel.clusterByRenderId);
-  const selectedOpportunityMarkerGeoJsonRef = useRef(opportunityMarkerGeoJson(
-    opportunityMarkers.filter((candidate) => candidate.id === focusedMarkerId),
-    focusedMarkerId,
-  ));
-  const relationshipPathGeoJsonRef = useRef(relationshipPathGeoJson(relationshipPaths));
-  const serviceFieldGeoJsonRef = useRef(serviceFieldGeoJson(serviceFields));
-  const tutorialNodeGeoJsonRef = useRef(tutorialNodeGeoJson(tutorialOverlay));
-  const tutorialPathGeoJsonRef = useRef(tutorialPathGeoJson(tutorialOverlay));
-  const searchMarkerRef = useRef<mapboxgl.Marker | null>(null);
-  const searchAbortRef = useRef<AbortController | null>(null);
+  const selectedOpportunityMarkerGeoJsonRef = useRef(selectedOpportunityMarkerGeoJson);
+  const relationshipPathGeoJsonRef = useRef(relationshipPathsGeoJson);
+  const serviceFieldGeoJsonRef = useRef(serviceFieldsGeoJson);
+  const tutorialNodeGeoJsonRef = useRef(tutorialNodes);
+  const tutorialPathGeoJsonRef = useRef(tutorialPaths);
   const [viewMode, setViewMode] = useState<MapViewMode>(initialCamera?.viewMode ?? "2d");
   const [basemapPreset, setBasemapPreset] = useState<MapBasemapPresetId>("exchange");
-  const [settledPitch, setSettledPitch] = useState(initialCamera?.pitch ?? 0);
-  const [settledCamera, setSettledCamera] = useState<ParticipantMapCamera>(() => initialCamera ?? Object.freeze({
-    longitude: marker?.coordinate[0] ?? model.camera.center.longitude,
-    latitude: marker?.coordinate[1] ?? model.camera.center.latitude,
-    zoom: ORGANIZATION_ORBIT_ZOOM,
-    pitch: 0,
-    bearing: 0,
-    viewMode: "2d",
-  }));
-  const [renderedClusterCount, setRenderedClusterCount] = useState(0);
-  const [renderedClusterPoint, setRenderedClusterPoint] = useState("");
-  const [renderedSelectedMarkerCount, setRenderedSelectedMarkerCount] = useState(0);
-  const [settledPadding, setSettledPadding] = useState({ top: 0, right: 0, bottom: 0, left: 0 });
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState(false);
-  const [cameraInitialization, setCameraInitialization] = useState<"pending" | "restored" | "organization" | "locality">("pending");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<readonly MapSearchResult[]>([]);
-  const [searchStatus, setSearchStatus] = useState<"idle" | "loading" | "error">("idle");
-  const [activeSearchResultId, setActiveSearchResultId] = useState<string | null>(null);
+  const [searchActive, setSearchActive] = useState(false);
   const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN?.trim() ?? "";
-
-  const homeGeoJson = useMemo(() => localityGeoJson(model), [model]);
-  const homeMaskGeoJson = useMemo(() => localityMaskGeoJson(model), [model]);
-  const homeMarkerGeoJson = useMemo(() => markerGeoJson(sceneMarker), [sceneMarker]);
-  const networkMarkersGeoJson = useMemo(
-    () => organizationMarkerGeoJson(
-      organizationMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
-      null,
-    ),
-    [focusedMarkerId, organizationMarkers],
-  );
-  const selectedNetworkMarkerGeoJson = useMemo(
-    () => organizationMarkerGeoJson(
-      organizationMarkers.filter((candidate) => candidate.id === focusedMarkerId),
-      focusedMarkerId,
-    ),
-    [focusedMarkerId, organizationMarkers],
-  );
-  const opportunityMarkersGeoJson = useMemo(
-    () => opportunityMarkerGeoJson(
-      opportunityMarkers.filter((candidate) => candidate.id !== focusedMarkerId),
-      null,
-    ),
-    [focusedMarkerId, opportunityMarkers],
-  );
-  const selectedOpportunityMarkerGeoJson = useMemo(
-    () => opportunityMarkerGeoJson(
-      opportunityMarkers.filter((candidate) => candidate.id === focusedMarkerId),
-      focusedMarkerId,
-    ),
-    [focusedMarkerId, opportunityMarkers],
-  );
-  const relationshipPathsGeoJson = useMemo(() => relationshipPathGeoJson(relationshipPaths), [relationshipPaths]);
-  const serviceFieldsGeoJson = useMemo(() => serviceFieldGeoJson(serviceFields), [serviceFields]);
-  const tutorialNodes = useMemo(() => tutorialNodeGeoJson(tutorialOverlay), [tutorialOverlay]);
-  const tutorialPaths = useMemo(() => tutorialPathGeoJson(tutorialOverlay), [tutorialOverlay]);
 
   modeRef.current = mode;
   modelRef.current = model;
@@ -836,11 +273,15 @@ export function ExchangeSpatialRenderer({
     const map = mapRef.current;
     // moveend is the scheduling boundary; never poll an active camera every frame.
     if (!map || !mapLoadedRef.current || map.isMoving()) return;
-    const expected = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current, adaptiveWorkspaceRef.current);
+    const expected = cameraPadding(
+      activationOverlayRef.current,
+      workspaceOverlayRef.current,
+      adaptiveWorkspaceRef.current,
+    );
     const actual = renderedMapPadding(map);
-    if ((["top", "right", "bottom", "left"] as const).every((side) => Math.abs(actual[side] - expected[side]) < 0.5)) return;
+    if ((["top", "right", "bottom", "left"] as const).every((side) => Math.abs(actual[side] - expected[side]) < 0.5))
+      return;
     map.setPadding(expected);
-    setSettledPadding(renderedMapPadding(map));
   }, []);
 
   const pauseForInteraction = useCallback(() => {
@@ -862,21 +303,22 @@ export function ExchangeSpatialRenderer({
     stopOrbit();
     const map = mapRef.current;
     if (!map || !orbitTargetRef.current) return;
-    stopRotationRef.current = startAmbientMapRotation(map, () => Boolean(
-      continuousMotionRef.current && rotationEnabledRef.current
-      && !reducedMotionRef.current && !manuallyPausedRef.current && !document.hidden
-    ));
+    stopRotationRef.current = startAmbientMapRotation(map, () =>
+      Boolean(
+        continuousMotionRef.current &&
+          rotationEnabledRef.current &&
+          !reducedMotionRef.current &&
+          !manuallyPausedRef.current &&
+          !document.hidden,
+      ),
+    );
   }, [stopOrbit]);
 
   const setLocalityLayerVisibility = useCallback((visible: boolean) => {
     const map = mapRef.current;
     if (!map) return;
     const visibility = visible ? "visible" : "none";
-    for (const layerId of [
-      LOCALITY_MASK_LAYER_ID,
-      LOCALITY_FILL_LAYER_ID,
-      LOCALITY_OUTLINE_LAYER_ID,
-    ]) {
+    for (const layerId of [LOCALITY_MASK_LAYER_ID, LOCALITY_FILL_LAYER_ID, LOCALITY_OUTLINE_LAYER_ID]) {
       if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", visibility);
     }
   }, []);
@@ -887,14 +329,17 @@ export function ExchangeSpatialRenderer({
 
     stopOrbit();
     manuallyPausedRef.current = false;
-    const padding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current, adaptiveWorkspaceRef.current);
+    const padding = cameraPadding(
+      activationOverlayRef.current,
+      workspaceOverlayRef.current,
+      adaptiveWorkspaceRef.current,
+    );
     const activeMode = modeRef.current;
     const activeMarker = markerRef.current;
     setLocalityLayerVisibility(homeLocalityFocusRef.current && activeMode !== "regional");
 
     const persistedCamera = initialCameraRef.current;
     if (persistedCamera) {
-      setCameraInitialization("restored");
       orbitTargetRef.current = [persistedCamera.longitude, persistedCamera.latitude];
       map.jumpTo({
         center: [persistedCamera.longitude, persistedCamera.latitude],
@@ -903,13 +348,11 @@ export function ExchangeSpatialRenderer({
         bearing: persistedCamera.bearing,
         padding,
       });
-      setSettledPadding(renderedMapPadding(map));
       setViewMode(mapViewModeForPitch(map.getPitch()));
       return;
     }
 
     if (activeMode === "organization" && activeMarker) {
-      setCameraInitialization("organization");
       orbitTargetRef.current = activeMarker.coordinate;
       setViewMode("2d");
       map.flyTo({
@@ -919,17 +362,13 @@ export function ExchangeSpatialRenderer({
         bearing: map.getBearing(),
         padding,
         duration: reducedMotionRef.current ? 0 : 650,
-
       });
       if (continuousMotionRef.current) map.once("moveend", startOrbit);
       return;
     }
 
-    const bounds = activeMode === "regional"
-      ? HAMPTON_ROADS_BOUNDS
-      : localityBounds(modelRef.current);
+    const bounds = activeMode === "regional" ? HAMPTON_ROADS_BOUNDS : localityBounds(modelRef.current);
     setViewMode("2d");
-    setCameraInitialization("locality");
     map.fitBounds(bounds, {
       padding,
       pitch: 0,
@@ -960,109 +399,38 @@ export function ExchangeSpatialRenderer({
     });
   }, [pauseForInteraction, setLocalityLayerVisibility]);
 
-  const selectViewMode = useCallback((nextMode: MapViewMode) => {
-    const map = mapRef.current;
-    const option = PARTICIPANT_MAP_VIEW_OPTIONS.find((candidate) => candidate.id === nextMode);
-    if (!map || !option) return;
-    pauseForInteraction();
-    if (map.getLayer("rfx-buildings")) map.setLayoutProperty("rfx-buildings", "visibility", nextMode === "3d" ? "visible" : "none");
-    map.easeTo({
-      pitch: option.pitch,
-      bearing: option.resetBearing ? 0 : map.getBearing(),
-      duration: reducedMotionRef.current ? 0 : 650,
-    });
-  }, [pauseForInteraction]);
-
-  const selectBasemapPreset = useCallback((nextPreset: MapBasemapPresetId) => {
-    const map = mapRef.current;
-    const preset = MAP_BASEMAP_PRESETS.find((candidate) => candidate.id === nextPreset);
-    if (!map || !preset) return;
-    pauseForInteraction();
-    for (const layer of map.getStyle()?.layers ?? []) {
-      if (layer.type === "symbol" && !layer.id.startsWith("rfx-")) {
-        map.setLayoutProperty(layer.id, "visibility", nextPreset === "street" ? "visible" : "none");
-      }
-    }
-    setBasemapPreset(nextPreset);
-  }, [pauseForInteraction]);
-
-  const clearSearchHighlight = useCallback(() => {
-    searchMarkerRef.current?.remove();
-    searchMarkerRef.current = null;
-    setActiveSearchResultId(null);
-    const source = mapRef.current?.getSource(SEARCH_AREA_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
-    source?.setData(EMPTY_FEATURE_COLLECTION);
-  }, []);
-
-  const selectSearchResult = useCallback((result: MapSearchResult) => {
-    const map = mapRef.current;
-    if (!map) return;
-    pauseForInteraction();
-    clearSearchHighlight();
-    setActiveSearchResultId(result.id);
-    setLocalityLayerVisibility(false);
-
-    if (!sdkRef.current) return;
-    searchMarkerRef.current = new sdkRef.current.Marker({ color: "#2e5eaa", scale: 0.9 })
-      .setLngLat([result.center[0], result.center[1]])
-      .addTo(map);
-    const source = map.getSource(SEARCH_AREA_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
-    source?.setData(bboxFeatureCollection(result.bbox));
-
-    if (result.bbox) {
-      const [west, south, east, north] = result.bbox;
-      map.fitBounds([[west, south], [east, north]], {
-        padding: 72,
-        maxZoom: 17,
-        duration: reducedMotionRef.current ? 0 : 850,
-      });
-    } else {
-      map.flyTo({
-        center: [result.center[0], result.center[1]],
-        zoom: searchZoom(result.featureType),
-        duration: reducedMotionRef.current ? 0 : 850,
-      });
-    }
-  }, [clearSearchHighlight, pauseForInteraction, setLocalityLayerVisibility]);
-
-  const submitMapSearch = useCallback(async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const query = searchQuery.trim();
-    if (!query || !token.startsWith("pk.")) return;
-
-    searchAbortRef.current?.abort();
-    const controller = new AbortController();
-    searchAbortRef.current = controller;
-    setSearchStatus("loading");
-
-    try {
+  const selectViewMode = useCallback(
+    (nextMode: MapViewMode) => {
       const map = mapRef.current;
-      const params = new URLSearchParams({
-        q: query,
-        access_token: token,
-        language: "en",
-        limit: "6",
-        types: "country,region,district,place,city,locality,neighborhood,street,address,poi",
+      const option = PARTICIPANT_MAP_VIEW_OPTIONS.find((candidate) => candidate.id === nextMode);
+      if (!map || !option) return;
+      pauseForInteraction();
+      if (map.getLayer("rfx-buildings"))
+        map.setLayoutProperty("rfx-buildings", "visibility", nextMode === "3d" ? "visible" : "none");
+      map.easeTo({
+        pitch: option.pitch,
+        bearing: option.resetBearing ? 0 : map.getBearing(),
+        duration: reducedMotionRef.current ? 0 : 650,
       });
-      if (map) {
-        const center = map.getCenter();
-        params.set("proximity", `${center.lng},${center.lat}`);
+    },
+    [pauseForInteraction],
+  );
+
+  const selectBasemapPreset = useCallback(
+    (nextPreset: MapBasemapPresetId) => {
+      const map = mapRef.current;
+      const preset = MAP_BASEMAP_PRESETS.find((candidate) => candidate.id === nextPreset);
+      if (!map || !preset) return;
+      pauseForInteraction();
+      for (const layer of map.getStyle()?.layers ?? []) {
+        if (layer.type === "symbol" && !layer.id.startsWith("rfx-")) {
+          map.setLayoutProperty(layer.id, "visibility", nextPreset === "street" ? "visible" : "none");
+        }
       }
-      const response = await fetch(
-        `https://api.mapbox.com/search/searchbox/v1/forward?${params.toString()}`,
-        { signal: controller.signal },
-      );
-      if (!response.ok) throw new Error(`Mapbox search failed with HTTP ${response.status}.`);
-      const results = parseMapboxSearchResults(await response.json());
-      setSearchResults(results);
-      setSearchStatus("idle");
-      if (results.length === 1) selectSearchResult(results[0]);
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-      setSearchResults([]);
-      setSearchStatus("error");
-    }
-  }, [searchQuery, selectSearchResult, token]);
+      setBasemapPreset(nextPreset);
+    },
+    [pauseForInteraction],
+  );
 
   useEffect(() => {
     rotationEnabledRef.current = readMapRotationPreference();
@@ -1077,13 +445,11 @@ export function ExchangeSpatialRenderer({
 
     const updatePreference = (event: Event) => {
       const custom = event as CustomEvent<boolean>;
-      rotationEnabledRef.current = typeof custom.detail === "boolean"
-        ? custom.detail
-        : readMapRotationPreference();
+      rotationEnabledRef.current = typeof custom.detail === "boolean" ? custom.detail : readMapRotationPreference();
       if (rotationEnabledRef.current) startOrbit();
       else stopOrbit();
     };
-    const visibilityChanged = () => document.hidden ? stopOrbit() : startOrbit();
+    const visibilityChanged = () => (document.hidden ? stopOrbit() : startOrbit());
     document.addEventListener("visibilitychange", visibilityChanged);
     window.addEventListener(MAP_ROTATION_PREFERENCE_EVENT, updatePreference);
     return () => {
@@ -1098,801 +464,127 @@ export function ExchangeSpatialRenderer({
 
     let disposed = false;
     let teardown: (() => void) | undefined;
-    void import("mapbox-gl").then(({ default: mapboxgl }) => {
-    if (disposed || !containerRef.current) return;
-    sdkRef.current = mapboxgl;
-    const map = new mapboxgl.Map({
-      accessToken: token,
-      container: containerRef.current,
-      style: "mapbox://styles/mapbox/light-v11",
-      center: [-76.12, 36.82],
-      zoom: 8.4,
-      pitch: 0,
-      bearing: -24,
-      minZoom: 0,
-      maxZoom: 24,
-      maxPitch: 85,
-      interactive,
-      attributionControl: true,
-    });
-    mapRef.current = map;
-    const captureRenderedClusters = () => {
-      if (!map.getLayer(NETWORK_CLUSTER_CORE_LAYER_ID)) return;
-      const renderedClusters = map.queryRenderedFeatures({ layers: [NETWORK_CLUSTER_CORE_LAYER_ID] });
-      const clusterIds = new Set(renderedClusters
-        .map((feature) => feature.properties?.cluster_id)
-        .filter((clusterId): clusterId is number => typeof clusterId === "number"));
-      setRenderedClusterCount(clusterIds.size);
-      const firstCluster = renderedClusters[0]?.toJSON();
-      const clusterCoordinate = validCoordinatePair(firstCluster?.geometry.type === "Point"
-        ? firstCluster.geometry.coordinates
-        : null);
-      if (clusterCoordinate) {
-        const projected = map.project([clusterCoordinate[0], clusterCoordinate[1]]);
-        setRenderedClusterPoint(`${projected.x.toFixed(1)},${projected.y.toFixed(1)}`);
-      } else {
-        setRenderedClusterPoint("");
-      }
-      const selectedMarkers = map.getLayer(NETWORK_SELECTED_MARKER_CORE_LAYER_ID)
-        ? map.queryRenderedFeatures({ layers: [NETWORK_SELECTED_MARKER_CORE_LAYER_ID] })
-        : [];
-      setRenderedSelectedMarkerCount(selectedMarkers.length);
-    };
-
-    if (interactive) {
-      map.addControl(
-        new mapboxgl.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: true }),
-        "top-right",
-      );
-    }
-
-    const pauseForMapInteraction = (event: object) => {
-      if ("originalEvent" in event && event.originalEvent) pauseForInteraction();
-    };
-    map.on("error", () => { if (!mapLoadedRef.current) setMapError(true); });
-    map.on("dragstart", pauseForMapInteraction);
-    map.on("rotatestart", pauseForMapInteraction);
-    map.on("pitchstart", pauseForMapInteraction);
-    map.on("wheel", pauseForMapInteraction);
-    map.on("touchstart", pauseForMapInteraction);
-
-    map.on("load", () => {
-      mapLoadedRef.current = true;
-      setMapReady(true);
-      setMapError(false);
-      for (const layer of map.getStyle()?.layers ?? []) {
-        if (layer.type === "symbol") map.setLayoutProperty(layer.id, "visibility", "none");
-      }
-      if (map.getSource("composite")) map.addLayer({
-        id: "rfx-buildings", type: "fill-extrusion", source: "composite", "source-layer": "building",
-        filter: ["==", "extrude", "true"], minzoom: 15,
-        layout: { visibility: initialCameraRef.current?.viewMode === "3d" ? "visible" : "none" },
-        paint: { "fill-extrusion-color": "#c9c5bd", "fill-extrusion-height": ["get", "height"], "fill-extrusion-base": ["get", "min_height"], "fill-extrusion-opacity": 0.6 },
-      });
-      registerExchangeBeaconImages(map);
-      map.addSource(LOCALITY_MASK_SOURCE_ID, { type: "geojson", data: homeMaskGeoJsonRef.current });
-      map.addLayer({
-        id: LOCALITY_MASK_LAYER_ID,
-        type: "fill",
-        source: LOCALITY_MASK_SOURCE_ID,
-        paint: {
-          "fill-color": "#59606a",
-          "fill-opacity": 0.3,
-        },
-      });
-
-      map.addSource(LOCALITY_SOURCE_ID, { type: "geojson", data: homeGeoJsonRef.current });
-      map.addLayer({
-        id: LOCALITY_FILL_LAYER_ID,
-        type: "fill",
-        source: LOCALITY_SOURCE_ID,
-        paint: {
-          "fill-color": "#2e5eaa",
-          "fill-opacity": 0.04,
-        },
-      });
-      map.addLayer({
-        id: LOCALITY_OUTLINE_LAYER_ID,
-        type: "line",
-        source: LOCALITY_SOURCE_ID,
-        paint: {
-          "line-color": "#2e5eaa",
-          "line-opacity": 0.96,
-          "line-width": 2.5,
-        },
-      });
-
-      map.addSource(SEARCH_AREA_SOURCE_ID, { type: "geojson", data: EMPTY_FEATURE_COLLECTION });
-      map.addLayer({
-        id: SEARCH_AREA_FILL_LAYER_ID,
-        type: "fill",
-        source: SEARCH_AREA_SOURCE_ID,
-        paint: {
-          "fill-color": "#2e5eaa",
-          "fill-opacity": 0.09,
-        },
-      });
-      map.addLayer({
-        id: SEARCH_AREA_LINE_LAYER_ID,
-        type: "line",
-        source: SEARCH_AREA_SOURCE_ID,
-        paint: {
-          "line-color": "#2e5eaa",
-          "line-opacity": 1,
-          "line-width": 2.5,
-          "line-dasharray": [1.5, 1.5],
-        },
-      });
-
-      map.addSource(SERVICE_FIELD_SOURCE_ID, { type: "geojson", data: serviceFieldGeoJsonRef.current });
-      map.addLayer({
-        id: SERVICE_FIELD_FILL_LAYER_ID,
-        type: "fill",
-        source: SERVICE_FIELD_SOURCE_ID,
-        paint: {
-          "fill-color": ["case", ["==", ["get", "selected"], true], "#2e5eaa", "#4f718f"],
-          "fill-opacity": ["case", ["==", ["get", "selected"], true], 0.16, 0.07],
-        },
-      });
-      map.addLayer({
-        id: SERVICE_FIELD_LINE_LAYER_ID,
-        type: "line",
-        source: SERVICE_FIELD_SOURCE_ID,
-        paint: {
-          "line-color": ["case", ["==", ["get", "selected"], true], "#2e5eaa", "#4f718f"],
-          "line-opacity": 0.75,
-          "line-width": ["case", ["==", ["get", "selected"], true], 2.5, 1.25],
-          "line-dasharray": [2, 1.5],
-        },
-      });
-      map.addSource(LENS_PROJECTION_SOURCE_ID, {
-        type: "geojson",
-        data: lensProjectionGeoJsonRef.current,
-      });
-      map.addLayer({
-        id: LENS_PROJECTION_AREA_FILL_LAYER_ID,
-        type: "fill",
-        source: LENS_PROJECTION_SOURCE_ID,
-        filter: ["==", ["get", "kind"], "area"],
-        paint: {
-          "fill-color": ["case", ["==", ["get", "selected"], 1], "#d6a23a", "#4f718f"],
-          "fill-opacity": ["case", ["==", ["get", "emphasized"], 1], 0.18, 0.08],
-        },
-      });
-      map.addLayer({
-        id: LENS_PROJECTION_AREA_LINE_LAYER_ID,
-        type: "line",
-        source: LENS_PROJECTION_SOURCE_ID,
-        filter: ["==", ["get", "kind"], "area"],
-        paint: {
-          "line-color": ["case", ["==", ["get", "selected"], 1], "#d6a23a", "#4f718f"],
-          "line-opacity": 0.86,
-          "line-width": ["case", ["==", ["get", "emphasized"], 1], 2.75, 1.5],
-        },
-      });
-      map.addSource(RELATIONSHIP_PATH_SOURCE_ID, { type: "geojson", data: relationshipPathGeoJsonRef.current });
-      map.addLayer({
-        id: RELATIONSHIP_PATH_LAYER_ID,
-        type: "line",
-        source: RELATIONSHIP_PATH_SOURCE_ID,
-        paint: { "line-color": "#b98727", "line-opacity": 0.9, "line-width": 3, "line-dasharray": [2, 1.4] },
-      });
-
-      map.addSource(TUTORIAL_PATH_SOURCE_ID, { type: "geojson", data: tutorialPathGeoJsonRef.current });
-      map.addLayer({
-        id: TUTORIAL_PATH_LAYER_ID,
-        type: "line",
-        source: TUTORIAL_PATH_SOURCE_ID,
-        paint: {
-          "line-color": [
-            "match", ["get", "kind"],
-            "demand-signal", "#d6a23a",
-            "capability-match", "#2e5eaa",
-            "teammate-discovery", "#3b7b57",
-            "joint-response", "#d6a23a",
-            "selected-outcome", "#3b7b57",
-            "#2e5eaa",
-          ],
-          "line-opacity": ["case", ["==", ["get", "stage"], "network-effect"], 1, 0.9],
-          "line-width": ["case", ["==", ["get", "stage"], "network-effect"], 5, 4],
-          "line-dasharray": [1.6, 1.1],
-        },
-      });
-
-      map.addSource(TUTORIAL_NODE_SOURCE_ID, { type: "geojson", data: tutorialNodeGeoJsonRef.current });
-      map.addLayer({
-        id: TUTORIAL_NODE_HALO_LAYER_ID,
-        type: "circle",
-        source: TUTORIAL_NODE_SOURCE_ID,
-        paint: { "circle-radius": 17, "circle-color": "rgba(46,94,170,0.16)" },
-      });
-      map.addLayer({
-        id: TUTORIAL_NODE_CORE_LAYER_ID,
-        type: "circle",
-        source: TUTORIAL_NODE_SOURCE_ID,
-        paint: {
-          "circle-radius": 11,
-          "circle-color": ["match", ["get", "role"], "issuer", "#d6a23a", "responder", "#2e5eaa", "teammate", "#3b7b57", "#8f3c32"],
-          "circle-stroke-color": "#ffffff",
-          "circle-stroke-width": 2.5,
-        },
-      });
-      map.addLayer({
-        id: TUTORIAL_NODE_GLYPH_LAYER_ID,
-        type: "symbol",
-        source: TUTORIAL_NODE_SOURCE_ID,
-        layout: {
-          "text-field": ["get", "glyph"], "text-size": 11, "text-allow-overlap": true,
-          "text-ignore-placement": true, "text-pitch-alignment": "viewport",
-        },
-        paint: { "text-color": "#ffffff" },
-      });
-      map.addLayer({
-        id: TUTORIAL_NODE_LABEL_LAYER_ID,
-        type: "symbol",
-        source: TUTORIAL_NODE_SOURCE_ID,
-        minzoom: 12.5,
-        layout: {
-          "text-field": ["get", "label"], "text-size": 12, "text-offset": [0, 1.8],
-          "text-anchor": "top", "text-allow-overlap": true, "text-ignore-placement": true,
-          "text-pitch-alignment": "viewport",
-        },
-        paint: {
-          "text-color": "#1b2430", "text-halo-color": "rgba(255, 255, 255,0.96)",
-          "text-halo-width": 2,
-        },
-      });
-
-      map.addSource(NETWORK_MARKER_SOURCE_ID, {
-        type: "geojson",
-        data: networkMarkerGeoJsonRef.current,
-        cluster: true,
-        clusterMaxZoom: 10,
-        clusterRadius: 48,
-      });
-      map.addLayer({
-        id: NETWORK_CLUSTER_BACK_LAYER_ID,
-        type: "circle",
-        source: NETWORK_MARKER_SOURCE_ID,
-        filter: ["has", "point_count"],
-        paint: {
-          "circle-radius": ["step", ["get", "point_count"], 15, 10, 19, 40, 23],
-          "circle-color": "#755014",
-          "circle-opacity": 0.7,
-          "circle-translate": [4, 4],
-          "circle-translate-anchor": "viewport",
-        },
-      });
-      map.addLayer({
-        id: NETWORK_CLUSTER_CORE_LAYER_ID,
-        type: "circle",
-        source: NETWORK_MARKER_SOURCE_ID,
-        filter: ["has", "point_count"],
-        paint: {
-          "circle-radius": ["step", ["get", "point_count"], 14, 10, 18, 40, 22],
-          "circle-color": "#1b2430",
-          "circle-opacity": 0.97,
-          "circle-stroke-color": "#2e5eaa",
-          "circle-stroke-width": 2.25,
-        },
-      });
-      map.addLayer({
-        id: NETWORK_CLUSTER_COUNT_LAYER_ID,
-        type: "symbol",
-        source: NETWORK_MARKER_SOURCE_ID,
-        filter: ["has", "point_count"],
-        layout: {
-          "text-field": ["get", "point_count_abbreviated"],
-          "text-size": 11,
-          "text-allow-overlap": true,
-          "text-ignore-placement": true,
-        },
-        paint: { "text-color": "#ffffff" },
-      });
-      map.addSource(NETWORK_SELECTED_MARKER_SOURCE_ID, {
-        type: "geojson",
-        data: selectedNetworkMarkerGeoJsonRef.current,
-      });
-      map.addLayer({
-        id: NETWORK_MARKER_HALO_LAYER_ID,
-        type: "circle",
-        source: NETWORK_SELECTED_MARKER_SOURCE_ID,
-        paint: {
-          "circle-radius": 18,
-          "circle-color": "rgba(46,94,170,0.18)",
-          "circle-stroke-color": "rgba(46,94,170,0.5)",
-          "circle-stroke-width": 2,
-        },
-      });
-      map.addLayer({
-        id: NETWORK_MARKER_CORE_LAYER_ID,
-        type: "symbol",
-        source: NETWORK_MARKER_SOURCE_ID,
-        filter: ["!", ["has", "point_count"]],
-        layout: {
-          "icon-image": ["get", "beaconImage"],
-          "icon-size": 0.76,
-          "icon-anchor": "bottom",
-          "icon-allow-overlap": true,
-          "icon-ignore-placement": true,
-          "icon-pitch-alignment": "viewport",
-          "icon-rotation-alignment": "viewport",
-        },
-      });
-      map.addLayer({
-        id: NETWORK_SELECTED_MARKER_CORE_LAYER_ID,
-        type: "symbol",
-        source: NETWORK_SELECTED_MARKER_SOURCE_ID,
-        layout: {
-          "icon-image": ["get", "beaconImage"],
-          "icon-size": 1.08,
-          "icon-anchor": "bottom",
-          "icon-allow-overlap": true,
-          "icon-ignore-placement": true,
-          "icon-pitch-alignment": "viewport",
-          "icon-rotation-alignment": "viewport",
-        },
-      });
-      map.addLayer({
-        id: NETWORK_MARKER_IDENTITY_LAYER_ID,
-        type: "symbol",
-        source: NETWORK_SELECTED_MARKER_SOURCE_ID,
-        layout: {
-          "text-field": "",
-          "text-size": 1,
-          "text-allow-overlap": true,
-          "text-ignore-placement": true,
-          "text-pitch-alignment": "viewport",
-          "text-rotation-alignment": "viewport",
-        },
-        paint: { "text-color": "#ffffff" },
-      });
-      map.addLayer({
-        id: NETWORK_MARKER_LABEL_LAYER_ID,
-        type: "symbol",
-        source: NETWORK_SELECTED_MARKER_SOURCE_ID,
-        minzoom: 8,
-        layout: {
-          "text-field": ["get", "label"],
-          "text-size": 12,
-          "text-offset": [0, 3.35],
-          "text-anchor": "top",
-          "text-allow-overlap": false,
-          "text-pitch-alignment": "viewport",
-          "text-rotation-alignment": "viewport",
-        },
-        paint: {
-          "text-color": "#1b2430",
-          "text-halo-color": "rgba(255, 255, 255,0.96)",
-          "text-halo-width": 2,
-        },
-      });
-
-      map.addSource(OPPORTUNITY_MARKER_SOURCE_ID, {
-        type: "geojson",
-        data: opportunityMarkerGeoJsonRef.current,
-        cluster: true,
-        clusterMaxZoom: 13,
-        clusterRadius: 36,
-      });
-      map.addLayer({
-        id: OPPORTUNITY_CLUSTER_BACK_LAYER_ID,
-        type: "circle",
-        source: OPPORTUNITY_MARKER_SOURCE_ID,
-        filter: ["has", "point_count"],
-        paint: {
-          "circle-radius": ["step", ["get", "point_count"], 16, 10, 20, 40, 24],
-          "circle-color": "#755014",
-          "circle-opacity": 0.7,
-          "circle-translate": [4, 4],
-          "circle-translate-anchor": "viewport",
-        },
-      });
-      map.addLayer({
-        id: OPPORTUNITY_CLUSTER_LAYER_ID,
-        type: "circle",
-        source: OPPORTUNITY_MARKER_SOURCE_ID,
-        filter: ["has", "point_count"],
-        paint: {
-          "circle-radius": ["step", ["get", "point_count"], 15, 10, 19, 40, 23],
-          "circle-color": "#1b2430",
-          "circle-opacity": 0.97,
-          "circle-stroke-color": "#2e5eaa",
-          "circle-stroke-width": 2.25,
-        },
-      });
-      map.addLayer({
-        id: OPPORTUNITY_CLUSTER_COUNT_LAYER_ID,
-        type: "symbol",
-        source: OPPORTUNITY_MARKER_SOURCE_ID,
-        filter: ["has", "point_count"],
-        layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 11, "text-allow-overlap": true },
-        paint: { "text-color": "#ffffff" },
-      });
-      map.addLayer({
-        id: OPPORTUNITY_MARKER_LAYER_ID,
-        type: "symbol",
-        source: OPPORTUNITY_MARKER_SOURCE_ID,
-        filter: ["!", ["has", "point_count"]],
-        layout: {
-          "icon-image": ["get", "beaconImage"],
-          "icon-size": 0.8,
-          "icon-anchor": "bottom",
-          "icon-allow-overlap": true,
-          "icon-ignore-placement": true,
-          "icon-pitch-alignment": "viewport",
-          "icon-rotation-alignment": "viewport",
-        },
-      });
-      map.addSource(OPPORTUNITY_SELECTED_MARKER_SOURCE_ID, {
-        type: "geojson",
-        data: selectedOpportunityMarkerGeoJsonRef.current,
-      });
-      map.addLayer({
-        id: OPPORTUNITY_SELECTED_HALO_LAYER_ID,
-        type: "circle",
-        source: OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
-        paint: {
-          "circle-radius": 23,
-          "circle-color": "rgba(46,94,170,0.16)",
-          "circle-stroke-color": "rgba(46,94,170,0.55)",
-          "circle-stroke-width": 2,
-          "circle-translate": [0, -18],
-          "circle-translate-anchor": "viewport",
-        },
-      });
-      map.addLayer({
-        id: OPPORTUNITY_SELECTED_MARKER_LAYER_ID,
-        type: "symbol",
-        source: OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
-        layout: {
-          "icon-image": ["get", "beaconImage"],
-          "icon-size": 1.1,
-          "icon-anchor": "bottom",
-          "icon-allow-overlap": true,
-          "icon-ignore-placement": true,
-          "icon-pitch-alignment": "viewport",
-          "icon-rotation-alignment": "viewport",
-        },
-      });
-      map.addLayer({
-        id: OPPORTUNITY_SELECTED_LABEL_LAYER_ID,
-        type: "symbol",
-        source: OPPORTUNITY_SELECTED_MARKER_SOURCE_ID,
-        minzoom: 7,
-        layout: { "text-field": ["get", "label"], "text-size": 12, "text-offset": [0, 3.65], "text-anchor": "top", "text-allow-overlap": false, "text-pitch-alignment": "viewport" },
-        paint: { "text-color": "#1b2430", "text-halo-color": "rgba(255, 255, 255,0.98)", "text-halo-width": 2 },
-      });
-
-      map.addLayer({
-        id: LENS_PROJECTION_CLUSTER_BACK_LAYER_ID,
-        type: "circle",
-        source: LENS_PROJECTION_SOURCE_ID,
-        filter: ["==", ["get", "kind"], "cluster"],
-        paint: {
-          "circle-radius": ["step", ["get", "count"], 15, 10, 19, 40, 23],
-          "circle-color": "#755014",
-          "circle-opacity": 0.7,
-          "circle-translate": [4, 4],
-          "circle-translate-anchor": "viewport",
-        },
-      });
-      map.addLayer({
-        id: LENS_PROJECTION_CLUSTER_LAYER_ID,
-        type: "circle",
-        source: LENS_PROJECTION_SOURCE_ID,
-        filter: ["==", ["get", "kind"], "cluster"],
-        paint: {
-          "circle-radius": ["step", ["get", "count"], 14, 10, 18, 40, 22],
-          "circle-color": "#1b2430",
-          "circle-opacity": 0.97,
-          "circle-stroke-color": "#2e5eaa",
-          "circle-stroke-width": 2.25,
-        },
-      });
-      map.addLayer({
-        id: LENS_PROJECTION_CLUSTER_COUNT_LAYER_ID,
-        type: "symbol",
-        source: LENS_PROJECTION_SOURCE_ID,
-        filter: ["==", ["get", "kind"], "cluster"],
-        layout: { "text-field": ["get", "count"], "text-size": 11, "text-allow-overlap": true },
-        paint: { "text-color": "#ffffff" },
-      });
-      map.addLayer({
-        id: LENS_PROJECTION_SELECTED_HALO_LAYER_ID,
-        type: "circle",
-        source: LENS_PROJECTION_SOURCE_ID,
-        filter: ["all", ["in", ["get", "kind"], ["literal", ["organization", "record"]]], ["==", ["get", "selected"], 1]],
-        paint: {
-          "circle-radius": 17,
-          "circle-color": "rgba(46,94,170,0.18)",
-          "circle-stroke-color": "rgba(46,94,170,0.55)",
-          "circle-stroke-width": 2,
-        },
-      });
-      map.addLayer({
-        id: LENS_PROJECTION_OBJECT_LAYER_ID,
-        type: "symbol",
-        source: LENS_PROJECTION_SOURCE_ID,
-        filter: ["in", ["get", "kind"], ["literal", ["organization", "record"]]],
-        layout: {
-          "icon-image": ["get", "beaconImage"],
-          "icon-size": ["case", ["==", ["get", "selected"], 1], 1.08, 0.76],
-          "icon-anchor": "bottom",
-          "icon-allow-overlap": true,
-          "icon-ignore-placement": true,
-          "icon-pitch-alignment": "viewport",
-          "icon-rotation-alignment": "viewport",
-        },
-      });
-      map.addLayer({
-        id: LENS_PROJECTION_SELECTED_LABEL_LAYER_ID,
-        type: "symbol",
-        source: LENS_PROJECTION_SOURCE_ID,
-        filter: ["all", ["in", ["get", "kind"], ["literal", ["organization", "record"]]], ["==", ["get", "selected"], 1]],
-        minzoom: 7,
-        layout: {
-          "text-field": ["get", "accessibleLabel"],
-          "text-size": 12,
-          "text-offset": [0, 3.45],
-          "text-anchor": "top",
-          "text-allow-overlap": false,
-        },
-        paint: { "text-color": "#1b2430", "text-halo-color": "rgba(255, 255, 255,0.98)", "text-halo-width": 2 },
-      });
-
-      map.addSource(HOME_MARKER_SOURCE_ID, { type: "geojson", data: homeMarkerGeoJsonRef.current });
-      map.addLayer({
-        id: HOME_MARKER_HALO_LAYER_ID,
-        type: "circle",
-        source: HOME_MARKER_SOURCE_ID,
-        paint: {
-          "circle-radius": 20,
-          "circle-color": "rgba(46,94,170,0.18)",
-          "circle-stroke-color": "rgba(46,94,170,0.42)",
-          "circle-stroke-width": 2,
-        },
-      });
-      map.addLayer({
-        id: HOME_MARKER_CORE_LAYER_ID,
-        type: "symbol",
-        source: HOME_MARKER_SOURCE_ID,
-        layout: {
-          "icon-image": ["get", "beaconImage"],
-          "icon-size": 1.02,
-          "icon-anchor": "bottom",
-          "icon-allow-overlap": true,
-          "icon-ignore-placement": true,
-          "icon-pitch-alignment": "viewport",
-          "icon-rotation-alignment": "viewport",
-        },
-      });
-      map.addLayer({
-        id: HOME_MARKER_IDENTITY_LAYER_ID,
-        type: "symbol",
-        source: HOME_MARKER_SOURCE_ID,
-        layout: {
-          "text-field": "",
-          "text-size": 1,
-          "text-allow-overlap": true,
-          "text-ignore-placement": true,
-          "text-pitch-alignment": "viewport",
-          "text-rotation-alignment": "viewport",
-        },
-        paint: {
-          "text-color": "#ffffff",
-        },
-      });
-      map.addLayer({
-        id: HOME_MARKER_LABEL_LAYER_ID,
-        type: "symbol",
-        source: HOME_MARKER_SOURCE_ID,
-        layout: {
-          "text-field": ["get", "label"],
-          "text-size": 13,
-          "text-offset": [0, 3.55],
-          "text-anchor": "top",
-          "text-allow-overlap": true,
-          "text-ignore-placement": true,
-          "text-pitch-alignment": "viewport",
-          "text-rotation-alignment": "viewport",
-        },
-        paint: {
-          "text-color": "#1b2430",
-          "text-halo-color": "rgba(255, 255, 255,0.96)",
-          "text-halo-width": 2.2,
-          "text-halo-blur": 0.5,
-        },
-      });
-
-      if (interactive) {
-        map.on("mouseenter", HOME_MARKER_CORE_LAYER_ID, () => {
-          map.getCanvas().style.cursor = "pointer";
+    void import("mapbox-gl")
+      .then(({ default: mapboxgl }) => {
+        if (disposed || !containerRef.current) return;
+        sdkRef.current = mapboxgl;
+        const map = new mapboxgl.Map({
+          accessToken: token,
+          container: containerRef.current,
+          style: "mapbox://styles/mapbox/light-v11",
+          center: [-76.12, 36.82],
+          zoom: 8.4,
+          pitch: 0,
+          bearing: -24,
+          minZoom: 0,
+          maxZoom: 24,
+          maxPitch: 85,
+          interactive,
+          attributionControl: true,
         });
-        map.on("mouseleave", HOME_MARKER_CORE_LAYER_ID, () => {
-          map.getCanvas().style.cursor = "";
-        });
-        map.on("mouseenter", NETWORK_MARKER_CORE_LAYER_ID, () => {
-          map.getCanvas().style.cursor = "pointer";
-        });
-        map.on("mouseleave", NETWORK_MARKER_CORE_LAYER_ID, () => {
-          map.getCanvas().style.cursor = "";
-        });
-        map.on("mouseenter", NETWORK_SELECTED_MARKER_CORE_LAYER_ID, () => {
-          map.getCanvas().style.cursor = "pointer";
-        });
-        map.on("mouseleave", NETWORK_SELECTED_MARKER_CORE_LAYER_ID, () => {
-          map.getCanvas().style.cursor = "";
-        });
-        map.on("mouseenter", NETWORK_CLUSTER_CORE_LAYER_ID, () => {
-          map.getCanvas().style.cursor = "pointer";
-        });
-        map.on("mouseleave", NETWORK_CLUSTER_CORE_LAYER_ID, () => {
-          map.getCanvas().style.cursor = "";
-        });
-        map.on("click", NETWORK_CLUSTER_CORE_LAYER_ID, (event) => {
-          const feature = event.features?.[0] as unknown as
-            | { readonly properties?: Readonly<Record<string, unknown>>; readonly geometry?: { readonly coordinates?: unknown } }
-            | undefined;
-          const clusterId = feature?.properties?.cluster_id;
-          const coordinate = validCoordinatePair(feature?.geometry?.coordinates);
-          const source = map.getSource(NETWORK_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
-          if (typeof clusterId !== "number" || !coordinate || !source) return;
-          source.getClusterExpansionZoom(clusterId, (error, zoom) => {
-            if (error || typeof zoom !== "number") return;
-            pauseForInteraction();
-            map.easeTo({ center: [coordinate[0], coordinate[1]], zoom, duration: reducedMotionRef.current ? 0 : 650 });
-          });
-        });
-        const selectNetworkMarker = (event: mapboxgl.MapLayerMouseEvent) => {
-          const feature = event.features?.[0] as unknown as
-            | { readonly properties?: Readonly<Record<string, unknown>> }
-            | undefined;
-          const markerId = feature?.properties?.id;
-          if (typeof markerId === "string") {
-            onOrganizationMarkerSelectRef.current?.(markerId);
-          }
-        };
-        map.on("click", NETWORK_MARKER_CORE_LAYER_ID, selectNetworkMarker);
-        map.on("click", NETWORK_SELECTED_MARKER_CORE_LAYER_ID, selectNetworkMarker);
-        for (const layerId of [OPPORTUNITY_MARKER_LAYER_ID, OPPORTUNITY_SELECTED_MARKER_LAYER_ID, OPPORTUNITY_CLUSTER_LAYER_ID]) {
-          map.on("mouseenter", layerId, () => { map.getCanvas().style.cursor = "pointer"; });
-          map.on("mouseleave", layerId, () => { map.getCanvas().style.cursor = ""; });
+        mapRef.current = map;
+
+        if (interactive) {
+          map.addControl(
+            new mapboxgl.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: true }),
+            "top-right",
+          );
         }
-        map.on("click", OPPORTUNITY_CLUSTER_LAYER_ID, (event) => {
-          const feature = event.features?.[0] as unknown as
-            | { readonly properties?: Readonly<Record<string, unknown>>; readonly geometry?: { readonly coordinates?: unknown } }
-            | undefined;
-          const clusterId = feature?.properties?.cluster_id;
-          const coordinate = validCoordinatePair(feature?.geometry?.coordinates);
-          const source = map.getSource(OPPORTUNITY_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
-          if (typeof clusterId !== "number" || !coordinate || !source) return;
-          source.getClusterExpansionZoom(clusterId, (error, zoom) => {
-            if (error || typeof zoom !== "number") return;
-            pauseForInteraction();
-            map.easeTo({ center: [coordinate[0], coordinate[1]], zoom, duration: reducedMotionRef.current ? 0 : 650 });
-          });
-        });
-        const selectOpportunityMarker = (event: mapboxgl.MapLayerMouseEvent) => {
-          const feature = event.features?.[0] as unknown as
-            | { readonly properties?: Readonly<Record<string, unknown>> }
-            | undefined;
-          const markerId = feature?.properties?.id;
-          if (typeof markerId === "string") onOpportunityMarkerSelectRef.current?.(markerId);
-        };
-        map.on("click", OPPORTUNITY_MARKER_LAYER_ID, selectOpportunityMarker);
-        map.on("click", OPPORTUNITY_SELECTED_MARKER_LAYER_ID, selectOpportunityMarker);
-        for (const layerId of [LENS_PROJECTION_OBJECT_LAYER_ID, LENS_PROJECTION_AREA_FILL_LAYER_ID]) {
-          map.on("mouseenter", layerId, (event) => {
-            const selectable = event.features?.[0]?.properties?.selectable === true;
-            map.getCanvas().style.cursor = selectable ? "pointer" : "";
-          });
-          map.on("mouseleave", layerId, () => { map.getCanvas().style.cursor = ""; });
-        }
-        map.on("mouseenter", LENS_PROJECTION_CLUSTER_LAYER_ID, () => { map.getCanvas().style.cursor = "pointer"; });
-        map.on("mouseleave", LENS_PROJECTION_CLUSTER_LAYER_ID, () => { map.getCanvas().style.cursor = ""; });
-        const lensProjectionForEvent = (event: mapboxgl.MapLayerMouseEvent) => {
-          const feature = event.features?.[0] as unknown as
-            | { readonly properties?: Readonly<Record<string, unknown>> }
-            | undefined;
-          const renderId = feature?.properties?.renderId;
-          return typeof renderId === "string"
-            ? lensProjectionSelectableRef.current.get(renderId) ?? null
-            : null;
-        };
-        map.on("click", LENS_PROJECTION_OBJECT_LAYER_ID, (event) => {
-          const projection = lensProjectionForEvent(event);
-          if (projection) onLensProjectionSelectRef.current?.(projection);
-        });
-        map.on("click", LENS_PROJECTION_AREA_FILL_LAYER_ID, (event) => {
-          if (map.queryRenderedFeatures(event.point, {
-            layers: [
-              LENS_PROJECTION_OBJECT_LAYER_ID,
-              HOME_MARKER_CORE_LAYER_ID,
-              LENS_PROJECTION_CLUSTER_LAYER_ID,
-            ],
-          }).length > 0) return;
-          const projection = lensProjectionForEvent(event);
-          if (projection) onLensProjectionSelectRef.current?.(projection);
-        });
-        map.on("click", LENS_PROJECTION_CLUSTER_LAYER_ID, (event) => {
-          if (map.queryRenderedFeatures(event.point, {
-            layers: [LENS_PROJECTION_OBJECT_LAYER_ID, HOME_MARKER_CORE_LAYER_ID],
-          }).length > 0) return;
-          const feature = event.features?.[0] as unknown as
-            | { readonly properties?: Readonly<Record<string, unknown>> }
-            | undefined;
-          const renderId = feature?.properties?.renderId;
-          const cluster = typeof renderId === "string"
-            ? lensProjectionClusterRef.current.get(renderId)
-            : undefined;
-          if (!cluster || cluster.projection.kind !== "cluster") return;
-          pauseForInteraction();
-          map.easeTo({
-            center: [cluster.coordinate[0], cluster.coordinate[1]],
-            zoom: Math.min(map.getZoom() + 2, map.getMaxZoom()),
-            duration: reducedMotionRef.current ? 0 : 650,
-          });
-        });
-        map.on("click", HOME_MARKER_CORE_LAYER_ID, (event) => {
-          if (map.queryRenderedFeatures(event.point, {
-            layers: [
-              NETWORK_CLUSTER_CORE_LAYER_ID,
-              NETWORK_MARKER_CORE_LAYER_ID,
-              NETWORK_SELECTED_MARKER_CORE_LAYER_ID,
-              LENS_PROJECTION_OBJECT_LAYER_ID,
-            ],
-          }).length > 0) return;
-          const markerId = markerRef.current?.id;
-          if (markerId) onOrganizationMarkerSelectRef.current?.(markerId);
-        });
-      }
 
-      sceneInitializationStartedRef.current = true;
-      applyScene();
-    });
+        const pauseForMapInteraction = (event: object) => {
+          if ("originalEvent" in event && event.originalEvent) pauseForInteraction();
+        };
+        map.on("error", () => {
+          if (!mapLoadedRef.current) setMapError(true);
+        });
+        map.on("dragstart", pauseForMapInteraction);
+        map.on("rotatestart", pauseForMapInteraction);
+        map.on("pitchstart", pauseForMapInteraction);
+        map.on("wheel", pauseForMapInteraction);
+        map.on("touchstart", pauseForMapInteraction);
 
-    map.on("moveend", () => {
-      if (!sceneInitializationStartedRef.current) return;
-      const center = map.getCenter();
-      const settledMode = mapViewModeForPitch(map.getPitch());
-      const camera = Object.freeze({
-        longitude: center.lng,
-        latitude: center.lat,
-        zoom: map.getZoom(),
-        pitch: map.getPitch(),
-        bearing: map.getBearing(),
-        viewMode: settledMode,
+        map.on("load", () => {
+          mapLoadedRef.current = true;
+          setMapReady(true);
+          setMapError(false);
+          installSceneLayers(
+            map,
+            {
+              homeGeoJson: homeGeoJsonRef.current,
+              homeMarkerGeoJson: homeMarkerGeoJsonRef.current,
+              homeMaskGeoJson: homeMaskGeoJsonRef.current,
+              lensProjectionGeoJson: lensProjectionGeoJsonRef.current,
+              networkMarkerGeoJson: networkMarkerGeoJsonRef.current,
+              opportunityMarkerGeoJson: opportunityMarkerGeoJsonRef.current,
+              relationshipPathGeoJson: relationshipPathGeoJsonRef.current,
+              selectedNetworkMarkerGeoJson: selectedNetworkMarkerGeoJsonRef.current,
+              selectedOpportunityMarkerGeoJson: selectedOpportunityMarkerGeoJsonRef.current,
+              serviceFieldGeoJson: serviceFieldGeoJsonRef.current,
+              tutorialNodeGeoJson: tutorialNodeGeoJsonRef.current,
+              tutorialPathGeoJson: tutorialPathGeoJsonRef.current,
+            },
+            initialCameraRef.current?.viewMode === "3d",
+          );
+
+          if (interactive)
+            installSceneInteractions(
+              map,
+              () => ({
+                reducedMotion: reducedMotionRef.current,
+                markerId: markerRef.current?.id,
+                selectable: lensProjectionSelectableRef.current,
+                clusters: lensProjectionClusterRef.current,
+              }),
+              pauseForInteraction,
+              (id) => onOrganizationMarkerSelectRef.current?.(id),
+              (id) => onOpportunityMarkerSelectRef.current?.(id),
+              (projection) => onLensProjectionSelectRef.current?.(projection),
+            );
+
+          sceneInitializationStartedRef.current = true;
+          applyScene();
+        });
+
+        map.on("moveend", () => {
+          if (!sceneInitializationStartedRef.current) return;
+          const center = map.getCenter();
+          const settledMode = mapViewModeForPitch(map.getPitch());
+          const camera = Object.freeze({
+            longitude: center.lng,
+            latitude: center.lat,
+            zoom: map.getZoom(),
+            pitch: map.getPitch(),
+            bearing: map.getBearing(),
+            viewMode: settledMode,
+          });
+          setViewMode(settledMode);
+          onCameraChangeRef.current?.(camera);
+          repairGovernedPaddingAfterMovement();
+        });
+
+        teardown = () => {
+          stopOrbit();
+          mapLoadedRef.current = false;
+          sceneInitializationStartedRef.current = false;
+          setMapReady(false);
+          mapRef.current = null;
+          sdkRef.current = null;
+          map.remove();
+        };
+      })
+      .catch(() => {
+        if (!disposed) setMapError(true);
       });
-      setViewMode(settledMode);
-      setSettledPitch(map.getPitch());
-      setSettledCamera(camera);
-      setSettledPadding(renderedMapPadding(map));
-      captureRenderedClusters();
-      onCameraChangeRef.current?.(camera);
-      repairGovernedPaddingAfterMovement();
-    });
-    map.on("idle", captureRenderedClusters);
-
-    teardown = () => {
-      searchAbortRef.current?.abort();
-      searchMarkerRef.current?.remove();
-      stopOrbit();
-      mapLoadedRef.current = false;
-      sceneInitializationStartedRef.current = false;
-      setMapReady(false);
-      mapRef.current = null;
-      sdkRef.current = null;
-      map.remove();
+    return () => {
+      disposed = true;
+      teardown?.();
     };
-    }).catch(() => { if (!disposed) setMapError(true); });
-    return () => { disposed = true; teardown?.(); };
   }, [applyScene, interactive, pauseForInteraction, repairGovernedPaddingAfterMovement, stopOrbit, token]);
 
   useEffect(() => {
     if (!mapReady) return;
-    setLocalityLayerVisibility(homeLocalityFocus && mode !== "regional" && !activeSearchResultId);
-  }, [homeLocalityFocus, mode, activeSearchResultId, mapReady, setLocalityLayerVisibility]);
+    setLocalityLayerVisibility(homeLocalityFocus && mode !== "regional" && !searchActive);
+  }, [homeLocalityFocus, mode, searchActive, mapReady, setLocalityLayerVisibility]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -1905,11 +597,15 @@ export function ExchangeSpatialRenderer({
     markerSource?.setData(homeMarkerGeoJson);
     const networkMarkerSource = map.getSource(NETWORK_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     networkMarkerSource?.setData(networkMarkersGeoJson);
-    const selectedNetworkMarkerSource = map.getSource(NETWORK_SELECTED_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    const selectedNetworkMarkerSource = map.getSource(NETWORK_SELECTED_MARKER_SOURCE_ID) as
+      | mapboxgl.GeoJSONSource
+      | undefined;
     selectedNetworkMarkerSource?.setData(selectedNetworkMarkerGeoJson);
     const opportunityMarkerSource = map.getSource(OPPORTUNITY_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     opportunityMarkerSource?.setData(opportunityMarkersGeoJson);
-    const selectedOpportunityMarkerSource = map.getSource(OPPORTUNITY_SELECTED_MARKER_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
+    const selectedOpportunityMarkerSource = map.getSource(OPPORTUNITY_SELECTED_MARKER_SOURCE_ID) as
+      | mapboxgl.GeoJSONSource
+      | undefined;
     selectedOpportunityMarkerSource?.setData(selectedOpportunityMarkerGeoJson);
     const lensProjectionSource = map.getSource(LENS_PROJECTION_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     lensProjectionSource?.setData(lensProjectionRenderModel.data);
@@ -1946,13 +642,13 @@ export function ExchangeSpatialRenderer({
     if (!mapLoadedRef.current || !map || !mapReady) return;
     const previous = appliedOverlayRef.current;
     if (
-      previous.activationOverlay === activationOverlay
-      && previous.workspaceOverlay === workspaceOverlay
-      && previous.adaptiveWorkspace === adaptiveWorkspace
-    ) return;
+      previous.activationOverlay === activationOverlay &&
+      previous.workspaceOverlay === workspaceOverlay &&
+      previous.adaptiveWorkspace === adaptiveWorkspace
+    )
+      return;
     appliedOverlayRef.current = { activationOverlay, workspaceOverlay, adaptiveWorkspace };
     map.jumpTo({ padding: cameraPadding(activationOverlay, workspaceOverlay, adaptiveWorkspace) });
-    setSettledPadding(renderedMapPadding(map));
   }, [activationOverlay, adaptiveWorkspace, mapReady, workspaceOverlay]);
 
   if (!token.startsWith("pk.")) {
@@ -1963,9 +659,6 @@ export function ExchangeSpatialRenderer({
     );
   }
 
-  const focusedOrganizationMarker = organizationMarkers.find((candidate) => candidate.id === focusedMarkerId);
-  const selectedMarkerIdentity = organizationInitials(focusedOrganizationMarker?.label ?? marker?.label ?? "Organization");
-
   return (
     <figure
       className={`${styles.scene} ${className ?? ""}`}
@@ -1974,116 +667,61 @@ export function ExchangeSpatialRenderer({
       data-interactive={interactive}
       data-workspace-overlay={workspaceOverlay ?? "none"}
       data-adaptive-workspace={adaptiveWorkspace || undefined}
-      data-map-view-mode={viewMode}
-      data-map-basemap={basemapPreset}
-      data-map-pitch={settledPitch.toFixed(2)}
-      data-map-bearing={settledCamera.bearing.toFixed(2)}
-      data-map-center={`${settledCamera.longitude.toFixed(6)},${settledCamera.latitude.toFixed(6)}`}
-      data-map-zoom={settledCamera.zoom.toFixed(2)}
-      data-selected-marker-id={focusedMarkerId ?? marker?.id ?? ""}
-      data-selected-marker-identity={selectedMarkerIdentity}
-      data-network-marker-count={organizationMarkers.length}
-      data-lens-projection={lensProjection ? lensProjection.lens : "none"}
-      data-lens-projection-point-count={lensProjectionAdapter.points.length}
-      data-lens-projection-list-only-count={lensProjectionAdapter.listOnlyObjects.length}
-      data-lens-projection-omitted-count={lensProjectionAdapter.omittedObjects.length}
-      data-lens-projection-area-count={lensProjectionAdapter.areas.length}
-      data-lens-projection-deduplicated-home-marker={homeMarkerIsProjected ? "true" : "false"}
-      data-rendered-cluster-count={renderedClusterCount}
-      data-rendered-cluster-point={renderedClusterPoint}
-      data-rendered-selected-marker-count={renderedSelectedMarkerCount}
-      data-map-padding={`${settledPadding.top},${settledPadding.right},${settledPadding.bottom},${settledPadding.left}`}
       data-map-ready={mapReady}
-      data-camera-initialization={cameraInitialization}
       aria-label={`RFxchange ${mode} spatial scene`}
     >
       <div ref={containerRef} className={styles.map} />
-      {mapError ? <div role="status" className={styles.tokenNotice}>{t("interface.map.unavailable")}</div> : null}
+      {mapError ? (
+        <div role="status" className={styles.tokenNotice}>
+          {t("interface.map.unavailable")}
+        </div>
+      ) : null}
 
       {interactive ? (
         <>
-          {showSearch ? <section className={styles.searchPanel} aria-label="Search the Exchange map">
-            <form className={styles.searchForm} role="search" onSubmit={submitMapSearch}>
-              <label>
-                <span aria-hidden="true" className={styles.searchGlyph}>⌕</span>
-                <span className={styles.srOnly}>Search any geography, address, or place</span>
-                <input
-                  type="search"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Search any geography or place"
-                  autoComplete="off"
-                />
-              </label>
-              <button type="submit" disabled={!searchQuery.trim() || searchStatus === "loading"}>
-                {searchStatus === "loading" ? "Searching…" : "Search"}
-              </button>
-            </form>
-            <div className={styles.homeContext}>
-              <span>Home locality</span>
-              <strong>{model.selectedGeography.name}</strong>
-              <button type="button" onClick={fitHomeLocality}>{t("interface.map.fitHome")}</button>
-            </div>
-            {searchStatus === "error" ? (
-              <p className={styles.searchMessage} role="status">
-                Search is temporarily unavailable. Map navigation remains available.
-              </p>
-            ) : null}
-            {searchResults.length > 0 ? (
-              <ul className={styles.searchResults} aria-label="Map search results">
-                {searchResults.map((result) => (
-                  <li key={result.id}>
-                    <button
-                      type="button"
-                      data-active={activeSearchResultId === result.id}
-                      onClick={() => selectSearchResult(result)}
-                    >
-                      <strong>{result.name}</strong>
-                      <span>{result.context || result.featureType}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            {activeSearchResultId ? (
-              <button type="button" className={styles.clearSearch} onClick={clearSearchHighlight}>
-                Clear search highlight
-              </button>
-            ) : null}
-            <p className={styles.searchHint}>
-              Search moves the camera only and never changes your home locality.
-            </p>
-          </section> : null}
+          {showSearch && mapReady ? (
+            <ExchangeMapSearch
+              map={mapRef.current!}
+              sdk={sdkRef.current!}
+              token={token}
+              localityName={model.selectedGeography.name}
+              onFitLocality={fitHomeLocality}
+              onInteraction={pauseForInteraction}
+              onHighlightChange={setSearchActive}
+            />
+          ) : null}
 
           <details className={styles.mapOptions}>
             <summary>{t("interface.map.options")}</summary>
-          <div className={styles.viewModeControl} role="group" aria-label={t("interface.map.options")}>
-            {PARTICIPANT_MAP_VIEW_OPTIONS.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                data-active={viewMode === option.id}
-                aria-pressed={viewMode === option.id}
-                onClick={() => selectViewMode(option.id)}
-              >
-                {t(`interface.map.${option.id}`)}
+            <div className={styles.viewModeControl} role="group" aria-label={t("interface.map.options")}>
+              {PARTICIPANT_MAP_VIEW_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  data-active={viewMode === option.id}
+                  aria-pressed={viewMode === option.id}
+                  onClick={() => selectViewMode(option.id)}
+                >
+                  {t(`interface.map.${option.id}`)}
+                </button>
+              ))}
+              <span className={styles.controlDivider} aria-hidden="true" />
+              <span className={styles.basemapLabel}>{t("interface.map.basemapLabel")}</span>
+              {MAP_BASEMAP_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  data-active={basemapPreset === preset.id}
+                  aria-pressed={basemapPreset === preset.id}
+                  onClick={() => selectBasemapPreset(preset.id)}
+                >
+                  {t(`interface.map.${preset.id}`)}
+                </button>
+              ))}
+              <button type="button" onClick={fitHomeLocality}>
+                {t("interface.map.fitHome")}
               </button>
-            ))}
-            <span className={styles.controlDivider} aria-hidden="true" />
-            <span className={styles.basemapLabel}>{t("interface.map.basemapLabel")}</span>
-            {MAP_BASEMAP_PRESETS.map((preset) => (
-              <button
-                key={preset.id}
-                type="button"
-                data-active={basemapPreset === preset.id}
-                aria-pressed={basemapPreset === preset.id}
-                onClick={() => selectBasemapPreset(preset.id)}
-              >
-                {t(`interface.map.${preset.id}`)}
-              </button>
-            ))}
-            <button type="button" onClick={fitHomeLocality}>{t("interface.map.fitHome")}</button>
-          </div>
+            </div>
           </details>
         </>
       ) : null}

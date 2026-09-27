@@ -103,3 +103,11 @@ test("observability accepts a bounded caller correlation id and generates one ot
     /^[0-9a-f-]{36}$/,
   );
 });
+
+
+test("operational probe remains private and resource bounded in deployment metadata", async () => {
+  const { runtimeFoundationHealth } = await import("../lib/index.js");
+  assert.deepEqual(runtimeFoundationHealth.__endpoint.httpsTrigger.invoker, ["private"]);
+  assert.equal(runtimeFoundationHealth.__endpoint.maxInstances, 10);
+  assert.equal(runtimeFoundationHealth.__endpoint.availableMemoryMb, 256);
+});

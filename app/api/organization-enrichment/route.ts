@@ -1,27 +1,31 @@
 import { isApplicationRequestOrigin } from "@/src/infrastructure/http/application-request-origin";
+import { NextRequest, NextResponse } from "next/server";
 import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
-import { NextRequest, NextResponse } from "next/server";
 
-import {
-  OrganizationEnrichmentError,
-} from "@/src/application/organization-enrichment/organization-enrichment";
+import { OrganizationEnrichmentError } from "@/src/application/organization-enrichment/organization-enrichment";
 import {
   assertProfileAssetFileSignature,
   OrganizationAssetUploadBoundaryError,
   readBoundedProfileAssetMultipartBody,
   validateProfileAssetFileMetadata,
 } from "@/src/application/storage/organization-asset-upload-boundary";
-import { storeOrganizationAsset, StoredAssetAccessError } from "@/src/application/storage/store-organization-asset";
+import { StoredAssetAccessError, storeOrganizationAsset } from "@/src/application/storage/store-organization-asset";
 import { createOrganizationProfileAsset } from "@/src/domain/organization-enrichment/model";
 import { storedAssetId } from "@/src/domain/storage/model";
-import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
+import {
+  resolveParticipantRoute,
+  RFXCHANGE_SESSION_COOKIE_NAME,
+} from "@/src/infrastructure/auth/participant-route-runtime";
 import { getFirebaseAdminApp } from "@/src/infrastructure/firebase/admin";
+import { createFirestoreFoundationRepositories } from "@/src/infrastructure/firestore/repositories";
 import { getServerFirestore } from "@/src/infrastructure/firestore/runtime";
 import { apiProblem } from "@/src/infrastructure/http/api-problem";
-import { createFirestoreFoundationRepositories } from "@/src/infrastructure/firestore/repositories";
 import { createServerOrganizationEnrichmentService } from "@/src/infrastructure/organization-enrichment/runtime";
-import { FirebasePrivateObjectStore, firebaseStorageBucketFromEnvironment } from "@/src/infrastructure/storage/firebase-private-object-store";
+import {
+  FirebasePrivateObjectStore,
+  firebaseStorageBucketFromEnvironment,
+} from "@/src/infrastructure/storage/firebase-private-object-store";
 import { FirestoreStoredAssetRepository } from "@/src/infrastructure/storage/firestore-stored-asset-repository";
 
 export const runtime = "nodejs";
@@ -225,6 +229,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "A valid organization identity is required." }, { status: 400 });
   }
   try {
+    if (request.nextUrl.searchParams.get("view") === "editor") {
+      const access = await resolveParticipantRoute({ sessionCookie: request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value, requestedOrganizationId: organizationId });
+      if (access.kind !== "authorized") return NextResponse.json({ error: "Current participant authority required." }, { status: access.kind === "unauthenticated" ? 401 : 403 });
+      return NextResponse.json(await createServerOrganizationEnrichmentService().snapshot(String(access.membership.organizationId)), { headers: { "cache-control": "private, no-store" } });
+    }
     const snapshot = await createServerOrganizationEnrichmentService().snapshot(organizationId);
     return NextResponse.json({
       organizationId,

@@ -28,6 +28,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - run: npm ci
       - name: Determine affected checks
         id: scope
         env:
@@ -38,10 +43,6 @@ jobs:
             git fetch --no-tags --depth=1 origin "$RFXCHANGE_BASE_SHA"
           fi
           node scripts/ci-scope.mjs
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24.18.0
-          cache: npm
       - name: Whitespace and source identity
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -52,7 +53,6 @@ jobs:
           else
             git show --format= --check HEAD
           fi
-      - run: npm ci
       - name: Typecheck all applications
         run: npm run typecheck && npm run typecheck:admin && npm run typecheck:marketing && npm run typecheck:accelpo
       - name: Lint
@@ -85,6 +85,8 @@ jobs:
           path: ~/.cache/firebase/emulators
           key: firebase-emulators-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - name: Firebase authorization, tenancy and transaction integration
+        env:
+          RFXCHANGE_FIREBASE_SMOKES: ${{ steps.scope.outputs.smokes }}
         if: steps.scope.outputs.firebase == 'true'
         run: npm run test:firebase
       - name: Validate Functions deploy installation

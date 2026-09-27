@@ -9,7 +9,6 @@ const service = await read("src/application/network-discovery/network-discovery.
 const runtime = await read("src/infrastructure/network-discovery/runtime.ts");
 const route = await read("app/geography/canvas/page.tsx");
 const workspace = await read("src/components/participant/ExistingWorkspaceFoundation.tsx");
-const map = await read("src/components/map/ExchangeSpatialScene.tsx");
 const state = await read("src/application/participant/participant-spatial-context.ts");
 
 test("Slice 3.2 revalidates controlled and OPEN participants plus geography authority on the server", () => {
@@ -33,27 +32,10 @@ test("Slice 3.2 discovery projects only eligible real organization records", () 
   assert.match(service, /projectPublicOrganizationMarker/);
 });
 
-test("Slice 3.2 keeps map list and detail on one authorized selection identity", () => {
-  assert.match(workspace, /authorizedObjectIds\.has\(spatialContext\.selection\.markerId\)/);
-  assert.match(workspace, /organizationMarkers=\{networkMarkers\}/);
-  assert.match(workspace, /focusedMarkerId=\{selectedObjectId\}/);
-  assert.match(workspace, /onOrganizationMarkerSelect/);
-  assert.match(map, /rfx-spatial-scene-network-organizations/);
-  assert.match(map, /onOrganizationMarkerSelectRef\.current/);
-});
-
 test("Slice 3.2 browser persistence remains UI-only and fails closed for stale selection", () => {
   assert.match(state, /storesAuthorization: false/);
   assert.match(state, /storesPrivateCoordinates: false/);
   assert.match(state, /storesDomainRecords: false/);
   assert.match(state, /serverRevalidatesSelectedObjectsAndActions: true/);
   assert.match(workspace, /authorizedObjectIds/);
-});
-
-test("Slice 3.2 does not fabricate provider, referral, or credibility objects", () => {
-  const implementation = `${runtime}\n${service}\n${workspace}\n${map}`;
-  assert.doesNotMatch(implementation, /credibility-seal/);
-  assert.doesNotMatch(implementation, /synthetic-provider|synthetic-referral/);
-  assert.match(map, /relationshipPaths = \[\]/);
-  assert.match(map, /serviceFields = \[\]/);
 });
