@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import { setTimeout as delay } from "node:timers/promises";
 import { initializeApp, deleteApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { initializeApp as initializeClient, deleteApp as deleteClient } from "firebase/app";
@@ -109,6 +110,15 @@ try {
     accounts.set(userId, { disabled: false, emailVerified: true, email: `${name}@example.test`, phoneNumber: "+15555550102", metadata: { lastSignInTime: "2026-09-01T12:00:00Z" } });
     await set("users", userId, { login: { subject: userId }, createdAt: "2026-09-01T12:00:00Z" });
     await set("communicationPreferences", userId, { userId, version: 1, email: true, sms: false, marketingConsent: true, consentTextVersion: COMMUNICATION_CONSENT_VERSION, timeZone: "UTC", phone: null, updatedAt: new Date(now).toISOString() });
+    // Account enrollment is asynchronous. Let its real-clock write complete
+    // before seeding the historical clock used by delivery-policy assertions.
+    const enrollmentRef = db.collection("lifecycleEnrollments").doc(userId);
+    let enrolled = false;
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      if ((await enrollmentRef.get()).exists) { enrolled = true; break; }
+      await delay(100);
+    }
+    assert.equal(enrolled, true, "Account trigger must finish before delivery fixture setup.");
     await set("lifecycleEnrollments", userId, { userId, nextEvaluationAt: new Date(now).toISOString() });
     return userId;
   };
