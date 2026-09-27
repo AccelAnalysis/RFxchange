@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 
 import type { RfxResponseItem } from "../../domain/rfx/cycle";
 import type { RfxResponderWorkspace } from "../../infrastructure/rfx/rfx-cycle-runtime";
-import { ParticipantShell } from "../participant/ParticipantWorkspace";
+import { ParticipantPage } from "../participant/WorkspacePrimitives";
 import styles from "./RfxResponseWorkspace.module.css";
 
 type DraftItem = Readonly<{
@@ -248,7 +248,7 @@ export function RfxResponseWorkspace({ initialWorkspace, returnHref }: Readonly<
     }
   }
 
-  return <ParticipantShell activeItem="opportunities-rfx">
+  return <ParticipantPage activeItem="opportunities-rfx">
     <main className={styles.workspace} data-rfx-response-workspace>
       <header className={styles.header}>
         <p className={styles.eyebrow}>RFx response</p>
@@ -339,5 +339,5 @@ export function RfxResponseWorkspace({ initialWorkspace, returnHref }: Readonly<
         </div> : <p className={styles.status} role="status">{notice}</p>}
       </> : <p className={styles.status} role="status">{notice}</p>}
     </main>
-  </ParticipantShell>;
+  </ParticipantPage>;
 }

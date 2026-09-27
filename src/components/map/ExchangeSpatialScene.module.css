@@ -116,3 +116,9 @@
   .scene :global(.mapboxgl-ctrl-group button + button) { border-top: 0; border-left: 1px solid var(--semantic-border-subtle); }
   .mapOptions .viewModeControl { max-height: calc(100dvh - 130px - env(safe-area-inset-bottom, 0px)); overflow-y: auto; }
 }
+
+.scene[data-embedded] { position: relative; inset: auto; width: 100%; height: 340px; min-height: 0; margin: 0; }
+
+.tokenNotice[data-embedded] { position: relative; min-height: 340px; }
+.scene[data-embedded] .tokenNotice { position: absolute; }
+.scene[data-embedded] .viewModeControl { right: 10px; bottom: 10px; }

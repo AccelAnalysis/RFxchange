@@ -15,9 +15,9 @@ import {
   type OrganizationRelationship,
 } from "../../domain/onboarding/model";
 import {
-  MapboxLocalityCanvas,
-  type ControlledLocalityPointOverlay,
-} from "../map/MapboxLocalityCanvas";
+  ExchangeSpatialScene,
+  type ExchangeHomeMarker,
+} from "../map/ExchangeSpatialScene";
 import { useI18n } from "../i18n/I18nProvider";
 import { BrandWordmark } from "../brand/BrandWordmark";
 import {
@@ -234,7 +234,7 @@ export function ActivationJourneyClient({
     };
   }, [localityQuery, localityStateCode, step]);
 
-  const locationOverlay = useMemo<readonly ControlledLocalityPointOverlay[]>(() => {
+  const locationOverlay = useMemo<readonly ExchangeHomeMarker[]>(() => {
     const candidate = locationCandidates.find(
       (entry) => entry.id === selectedLocationCandidateId,
     );
@@ -242,10 +242,9 @@ export function ActivationJourneyClient({
       ? [
           {
             id: candidate.id,
-            position: candidate.coordinate,
+            coordinate: candidate.coordinate,
             label: candidate.matchedAddress,
-            kind: "location-candidate",
-            privacyLabel: "Private activation location candidate awaiting confirmation.",
+            accessibleLocationLabel: "Private activation location candidate awaiting confirmation.",
           },
         ]
       : [];
@@ -692,7 +691,7 @@ export function ActivationJourneyClient({
             {locationCandidates.length ? (
               <>
                 <div className={styles.mapFrame}>
-                  <MapboxLocalityCanvas model={mapModel} initialZoom="locality" pointOverlays={locationOverlay} />
+                  <ExchangeSpatialScene model={mapModel} mode="locality" organizationMarkers={locationOverlay} embedded showSearch={false} interactive />
                 </div>
                 <div className={styles.results}>
                   {locationCandidates.map((candidate) => (

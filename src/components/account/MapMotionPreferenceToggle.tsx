@@ -14,7 +14,7 @@ export function MapMotionPreferenceToggle() {
   const enabled = useSyncExternalStore(
     subscribeMapRotationPreference,
     readMapRotationPreference,
-    () => true,
+    () => false,
   );
 
   return (

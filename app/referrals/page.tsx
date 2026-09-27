@@ -89,6 +89,5 @@ export default async function ReferralsPage({ searchParams }: ReferralPageProps)
     requestedReferralId={authorizedRequestedReferralId}
     requestedOrganizationId={authorizedRequestedOrganizationId}
     preferOrganizationSelection={Boolean(authorizedRequestedOrganizationId && !authorizedRequestedReferralId)}
-    legacyBareLensIntent={!managementIntent && !requestedReferralId && !requestedOrganizationId}
   />;
 }

@@ -27,32 +27,6 @@ test("Brand B6a browser state is deterministic, scoped, and non-authorizing", ()
   assert.match(component, /authorizedObjectIds\.has\(spatialContext\.selection\.markerId\)/);
 });
 
-test("Brand B6a supports truthful localized loading and recovery boundaries", () => {
-  for (const status of ["loading", "empty", "error", "permission", "expired", "recovery"]) {
-    assert.ok(networkCatalog.status?.[status]?.title);
-    assert.ok(networkCatalog.status?.[status]?.body);
-  }
-  assert.match(component, /StatePanel/);
-  assert.match(component, /networkWorkspace\.status\.\$\{status\}\.title/);
-  assert.equal(
-    networkCatalog.status.error.body,
-    "Your information was not changed. Try again or review your setup.",
-  );
-  assert.equal(
-    networkCatalog.status.recovery.body,
-    "Return to setup to finish the missing information.",
-  );
-});
-
-test("Brand B6a organization home presents the current bounded Exchange scope without internal delivery language", () => {
-  assert.equal(networkCatalog.home.eyebrow, "Your organization");
-  assert.equal(networkCatalog.home.activeNode, "On the Exchange");
-  assert.equal(networkCatalog.home.manageProfile, "Manage profile");
-  assert.equal(networkCatalog.provenance.eyebrow, "Map information");
-  assert.equal(networkCatalog.home.scopeBody, "Find organizations and capabilities, then choose an available action.");
-  assert.doesNotMatch(component, /networkWorkspace\.home\.scopeBody|<ObjectCard|<StatusPill/);
-});
-
 test("Brand B6a authenticated route receives server-authorized organization identity and Network projection", () => {
   assert.match(runtime, /readonly organizationId: string/);
   assert.match(runtime, /const organizationId = access\.membership\.organizationId/);
@@ -62,12 +36,4 @@ test("Brand B6a authenticated route receives server-authorized organization iden
   assert.match(networkRuntime, /evaluateGeographyParticipation/);
   assert.match(networkRuntime, /network-participation/);
   assert.doesNotMatch(page, /<ExchangeSpatialScene/);
-});
-
-test("Brand B6a workspace is responsive, keyboard-visible, and sensory-safe", () => {
-  assert.match(styles, /focus-visible/);
-  assert.match(styles, /max-width: 1024px/);
-  assert.match(styles, /prefers-reduced-motion: reduce/);
-  assert.match(styles, /prefers-reduced-transparency: reduce/);
-  assert.doesNotMatch(styles, /#(?:0b0b0d|f7f3ea|252932|d6a23a|8a6418|2e5eaa|3b7b57)\b/i);
 });

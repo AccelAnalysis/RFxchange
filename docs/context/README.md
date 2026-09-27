@@ -10,7 +10,7 @@ They are **not a replacement for the canonical tracker or dependency map**. They
 - [`EXCHANGE_INTERACTION_ARCHITECTURE.md`](EXCHANGE_INTERACTION_ARCHITECTURE.md) — RFx-first lens hierarchy, participant truthfulness, persistent spatial context, marker/selection behavior, Intelligence/Locations boundary, provider gating and cross-lens workflow rules.
 - [`../program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md`](../program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md) — current product-owner authority for the final Capabilities lens, cross-lens Referrals, shared migration, Stages 3–6 and release acceptance.
 - [`../program/FOUR_LENS_PROGRAM_AUTHORITY.md`](../program/FOUR_LENS_PROGRAM_AUTHORITY.md) — parallel lane delivery, immutable experience requirements and independent acceptance governance.
-- [`../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md`](../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md) — bounded no-Feature-ID authority for the persistent participant shell, exact lens registry, separate Account utilities, scoped loading and transition-performance acceptance.
+- [`../slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md`](../archive/slices/EXCHANGE_SHELL_TRUTHFULNESS_EXECUTION_AUTHORITY.md) — bounded no-Feature-ID authority for the persistent participant shell, exact lens registry, separate Account utilities, scoped loading and transition-performance acceptance.
 - [`USER_JOURNEY.md`](USER_JOURNEY.md) — canonical activation journey from public discovery through OPEN.
 - [`MAP_AND_GEOGRAPHY.md`](MAP_AND_GEOGRAPHY.md) — locality, FIPS, release-state, boundary, camera and marker principles.
 - [`ORGANIZATION_MODEL.md`](ORGANIZATION_MODEL.md) — organization/user hierarchy, claim authority, identity resolution, AMACS-backed capability assertion, profile and location concepts.
@@ -74,8 +74,8 @@ Use these documents together:
 
 - [`../rfx/AMACS_0_5_RECONCILIATION.md`](../rfx/AMACS_0_5_RECONCILIATION.md) — completed release reconciliation and migration authority;
 - [`../rfx/AMACS_INTEGRATION_CONTRACT.md`](../rfx/AMACS_INTEGRATION_CONTRACT.md) — pinned release, runtime projection, search, snapshot and domain-write rules;
-- [`../slices/AI_AMACS_INTERPRETATION_FOUNDATION.md`](../slices/AI_AMACS_INTERPRETATION_FOUNDATION.md) — provider-neutral server implementation, provenance, privacy, cost, fallback and evaluation rules; and
-- [`../slices/SLICE_3_3_MARKET_PROFILE_ENRICHMENT.md`](../slices/SLICE_3_3_MARKET_PROFILE_ENRICHMENT.md) — first product use for seller/responder capability declaration.
+- [`../slices/AI_AMACS_INTERPRETATION_FOUNDATION.md`](../archive/slices/AI_AMACS_INTERPRETATION_FOUNDATION.md) — provider-neutral server implementation, provenance, privacy, cost, fallback and evaluation rules; and
+- [`../slices/SLICE_3_3_MARKET_PROFILE_ENRICHMENT.md`](../archive/slices/SLICE_3_3_MARKET_PROFILE_ENRICHMENT.md) — first product use for seller/responder capability declaration.
 
 The governing interpretation rule is:
 
@@ -95,7 +95,7 @@ The RFx Core planning package is indexed at [`../rfx/README.md`](../rfx/README.m
 - anti-regression and configured-browser acceptance; and
 - the real-data-only B6c RFx map lens.
 
-The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_1_EXECUTION_AUTHORITY.md) through [`../slices/SLICE_4_6_EXECUTION_AUTHORITY.md`](../slices/SLICE_4_6_EXECUTION_AUTHORITY.md). They cover 23 RFx Core Feature IDs: the organization-owned RFx kernel, private structured package/definition, readiness, exact preview, atomic publication, controlled sharing, real permitted opportunity discovery/watch/deadline behavior, and bounded private fit/pursuit/gap assessment. Optional independent assurance remains separate from completion.
+The specific authorities for the implemented Wave 4 slices are [`../slices/SLICE_4_1_EXECUTION_AUTHORITY.md`](../archive/slices/SLICE_4_1_EXECUTION_AUTHORITY.md) through [`../slices/SLICE_4_6_EXECUTION_AUTHORITY.md`](../archive/slices/SLICE_4_6_EXECUTION_AUTHORITY.md). They cover 23 RFx Core Feature IDs: the organization-owned RFx kernel, private structured package/definition, readiness, exact preview, atomic publication, controlled sharing, real permitted opportunity discovery/watch/deadline behavior, and bounded private fit/pursuit/gap assessment. Optional independent assurance remains separate from completion.
 
 ## Current sequencing status
 

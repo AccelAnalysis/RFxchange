@@ -15,7 +15,7 @@ import {
   type OrientationStepKey,
 } from "../../domain/orientation/model";
 import { ExchangeSpatialScene, type ExchangeHomeMarker } from "../map/ExchangeSpatialScene";
-import { ParticipantShell, ResponsiveEdgeSheet, SpatialWorkspace } from "../participant/ParticipantWorkspace";
+import { ParticipantPage, ResponsiveEdgeSheet, SpatialWorkspace } from "../participant/WorkspacePrimitives";
 
 import styles from "./OrientationJourneyClient.module.css";
 
@@ -124,7 +124,7 @@ export function OrientationJourneyClient({
   const part = completed < 4 ? 1 : 2;
 
   return (
-    <ParticipantShell activeItem="Network">
+    <ParticipantPage activeItem="Network">
       <SpatialWorkspace ariaLabel="RFxchange synthetic orientation workspace">
         <ExchangeSpatialScene
           model={model}
@@ -250,6 +250,6 @@ export function OrientationJourneyClient({
           </div>
         </ResponsiveEdgeSheet>
       </SpatialWorkspace>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }

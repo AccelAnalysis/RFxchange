@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { FirstValueDestinationContract, FirstValueIntent } from "../../domain/first-value/model";
-import { OperationalWorkspace, ParticipantShell } from "../participant/ParticipantWorkspace";
+import { OperationalWorkspace, ParticipantPage } from "../participant/WorkspacePrimitives";
 import styles from "./FirstValueChoiceClient.module.css";
 
 interface FirstValueResponse {
@@ -54,7 +54,7 @@ export function FirstValueChoiceClient({
   }
 
   return (
-    <ParticipantShell activeItem="Network">
+    <ParticipantPage activeItem="Network">
       <OperationalWorkspace ariaLabel="Post-orientation first-value selection" className={styles.workspace}>
         <section className={styles.wrap}>
           <p className={styles.eyebrow}>Optional setup · personalize your next step</p>
@@ -92,6 +92,6 @@ export function FirstValueChoiceClient({
           </div>
         </section>
       </OperationalWorkspace>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }

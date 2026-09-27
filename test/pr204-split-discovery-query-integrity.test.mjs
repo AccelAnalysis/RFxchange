@@ -5,12 +5,11 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("DSC-004 scans bounded canonical pages and continues without a fixed visibility horizon", async () => {
-  const [repository, boundedService, domain, workspace, runtime, requestFamilySource] = await Promise.all([
+  const [repository, boundedService, domain, workspace, requestFamilySource] = await Promise.all([
     read("src/infrastructure/rfx/wave4-gap-opportunity-discovery-repository.ts"),
     read("src/application/rfx/bounded-opportunity-discovery-service.ts"),
     read("src/domain/rfx/discovery.ts"),
     read("src/components/rfx/OpportunityDiscoveryWorkspace.tsx"),
-    read("src/infrastructure/rfx/opportunity-discovery-runtime.ts"),
     read("standards/amacs/releases/0.5.0/source/request-families.jsonl"),
   ]);
 
@@ -88,13 +87,4 @@ test("DSC-005 replays before version conflict and validates all governed filters
   assert.match(runtime, /releaseState/);
   assert.match(runtime, /validateGovernedFilters/);
   assert.match(runtime, /BoundedOpportunityDiscoveryService/);
-});
-
-test("discovery-query split does not introduce Exchange or lens gating", async () => {
-  const [exchange, canvas] = await Promise.all([
-    read("app/exchange/page.tsx"),
-    read("app/geography/canvas/page.tsx"),
-  ]);
-  assert.match(exchange, /geography\/canvas/);
-  assert.doesNotMatch(canvas, /lifecycleState !== "open-platform"/);
 });

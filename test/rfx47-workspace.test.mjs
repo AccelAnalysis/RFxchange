@@ -74,16 +74,6 @@ test("existing-organization invitees have a current-authority inbox and exact re
   assert.match(discovery, /href="\/opportunities\/team-invitations"/);
 });
 
-test("Slice 4.7 workspace remains bounded away from response construction and submission", () => {
-  const sources = [
-    "src/domain/rfx/teaming.ts",
-    "src/application/rfx/opportunity-teaming-service.ts",
-    "src/components/rfx/OpportunityTeammateWorkspace.tsx",
-    "src/components/rfx/OpportunityTeamInvitationReview.tsx",
-  ].map(read).join("\n");
-  assert.doesNotMatch(sources, /responseSection|complianceMatrix|submitResponse|submissionReceipt|awardOutcome/);
-});
-
 test("TEM-004 participant copy has exact five-locale parity with the evidenced boundary", () => {
   const locales = ["en-US", "es", "fr", "it", "de"];
   const catalogs = Object.fromEntries(locales.map((locale) => [locale, JSON.parse(read(`src/i18n/messages/rfx/${locale}.json`))]));

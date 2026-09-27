@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -16,15 +15,6 @@ import { createPortsmouthControlledLocalityPreview } from "../src/data/geography
 import {
   createAuthoritativeBoundaryGeometry,
 } from "../src/domain/geography/boundary.ts";
-
-const component = await readFile(
-  new URL("../src/components/map/ControlledLocalityCanvas.tsx", import.meta.url),
-  "utf8",
-);
-const styles = await readFile(
-  new URL("../src/components/map/ControlledLocalityCanvas.module.css", import.meta.url),
-  "utf8",
-);
 
 function contrast(hexA, hexB) {
   const luminance = (hex) => {
@@ -161,19 +151,7 @@ test("coordinate-anchored geometry retains the same projected anchor during zoom
   }
 });
 
-test("controlled canvas preserves layer order, accessible controls and focus contrast", () => {
-  assert.ok(component.includes("model.layers.map"));
-  assert.ok(component.includes("data-layer-order={layer.order}"));
-  assert.ok(component.includes('vectorEffect="non-scaling-stroke"'));
-  assert.ok(component.includes('aria-label="Zoom in"'));
-  assert.ok(component.includes('aria-label="Zoom out"'));
-  assert.ok(component.includes('role="img"'));
-  assert.ok(component.includes("<title"));
-  assert.ok(component.includes("<desc"));
-  assert.ok(
-    styles.includes("prefers-reduced-motion"),
-    "Slice 2.8 marker activation motion must provide a reduced-motion treatment.",
-  );
+test("selected locality outline meets contrast requirements", () => {
   assert.ok(
     contrast(
       CONTROLLED_LOCALITY_LAYER_STYLES["selected-outline-accent"].stroke,

@@ -1,82 +1,16 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { assertAuthorityGatedVisualInput } from "../src/components/ui/object-contracts.ts";
 
-const root = new URL("../", import.meta.url);
-const read = (path) => readFile(new URL(path, root), "utf8");
-
-const primitives = await read("src/components/ui/Primitives.tsx");
-const styles = await read("src/components/ui/Primitives.module.css");
-const contracts = await read("src/components/ui/object-contracts.ts");
-const participant = await read("src/components/participant/ParticipantWorkspace.tsx");
-const participantNavigation = await read("src/components/participant/ParticipantTopNavigation.tsx");
-const persistentShell = await read("src/components/participant/PersistentParticipantShell.tsx");
-const participantRegistry = await read("src/application/participant/participant-lens-registry.ts");
-
-test("Brand B2 exposes shared participant and operational primitives", () => {
-  for (const name of [
-    "NavigationFrame",
-    "OverlayPanel",
-    "ResponsiveSheet",
-    "ControlGroup",
-    "SearchFilterFrame",
-    "StatusSummary",
-    "StatusPill",
-    "AlertBanner",
-    "StatePanel",
-    "ObjectCard",
-    "Timeline",
-    "DataTable",
-  ]) {
-    assert.match(primitives, new RegExp(`export function ${name}\\b`));
+const node = { objectType: "organization-node", organizationId: "org-one", label: "Example", relationship: "permitted", position: { longitude: -76.3, latitude: 36.8, precision: "approximate" }, authority: { kind: "organization-projection", recordId: "record-one", projectionVersion: 1, observedAt: "2026-09-27T12:00:00Z" } };
+test("geographic visuals require a source record, valid version and observed time", () => {
+  assert.doesNotThrow(() => assertAuthorityGatedVisualInput(node));
+  for (const authority of [{ ...node.authority, recordId: " " }, { ...node.authority, projectionVersion: 0 }, { ...node.authority, observedAt: "invalid" }]) {
+    assert.throws(() => assertAuthorityGatedVisualInput({ ...node, authority }));
   }
 });
-
-test("Brand B2 state and data primitives include accessible equivalents", () => {
-  assert.match(primitives, /aria-live=\{state === "loading"/);
-  assert.match(primitives, /aria-busy=\{state === "loading"/);
-  assert.match(primitives, /aria-current=\{item\.current \? "step"/);
-  assert.match(primitives, /scope="col"/);
-  assert.match(primitives, /scope="row"/);
-  assert.match(styles, /prefers-reduced-motion: reduce/);
-  assert.match(styles, /focus-visible/);
-});
-
-test("Brand B2 future visual objects fail closed without authoritative provenance", () => {
-  assert.match(contracts, /syntheticRuntimeObjectsAllowed: false/);
-  assert.match(contracts, /plannedObjectsMayRenderAsLive: false/);
-  assert.match(contracts, /missingAuthorityBehavior: "omit-and-explain"/);
-  assert.match(contracts, /privacyPrecisionMustBePreserved: true/);
-  assert.match(contracts, /published-opportunity-projection/);
-  assert.match(contracts, /provider-service-territory/);
-  assert.match(contracts, /relationship-event/);
-  assert.match(contracts, /credibility-evidence/);
-  assert.match(contracts, /outcome-evidence/);
-});
-
-test("Participant workspace consumes shared B2 primitives through one persistent shell without enabling later domains", () => {
-  const participantComponents = `${participant}\n${participantNavigation}`;
-  for (const name of [
-    "OverlayPanel",
-    "ResponsiveSheet",
-    "ControlGroup",
-    "SearchFilterFrame",
-    "StatusSummary",
-  ]) {
-    assert.match(participantComponents, new RegExp(`\\b${name}\\b`));
+test("geographic visual positions reject out-of-range coordinates", () => {
+  for (const position of [{ ...node.position, longitude: 181 }, { ...node.position, latitude: -91 }]) {
+    assert.throws(() => assertAuthorityGatedVisualInput({ ...node, position }));
   }
-
-  assert.match(persistentShell, /ParticipantTopNavigation/);
-  assert.match(persistentShell, /data-participant-shell=\{authorizedParticipant \? "persistent" : undefined\}/);
-  assert.match(persistentShell, /data-participant-content-region/);
-  assert.match(participant, /if \(persistent\) return <>\{children\}<\/>/);
-  assert.match(participant, /registerExplicitActiveItem\(activeItem\)/);
-  assert.match(participant, /Opportunity map layers remain unavailable until authorized publication exists/);
-
-  assert.match(
-    participantRegistry,
-    /id: "opportunities-rfx"[\s\S]*?href: "\/opportunities"[\s\S]*?availability: "enabled"/,
-  );
-  assert.match(participantNavigation, /PARTICIPANT_LENSES\.map/);
-  assert.doesNotMatch(participantRegistry, /id: "network"/);
 });

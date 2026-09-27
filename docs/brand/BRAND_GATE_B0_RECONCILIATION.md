@@ -28,7 +28,7 @@ B0 updates:
 - `docs/brand/README.md` — changes the package from pre-Wave-2 planning into canonical target brand authority;
 - `docs/brand/BRAND_IMPLEMENTATION_ROADMAP.md` — records B0 completion and stages B6 as B6a/B6b/B6c;
 - `docs/brand/CODEX_WAVE_2_BRAND_AUTHORITY_ADDENDUM.md` — retires the completed Wave 2 addendum as historical evidence;
-- `docs/slices/WAVE_3_ROADMAP.md` and all eight Wave 3 briefs — apply brand reading, scope and domain-availability boundaries.
+- `docs/archive/slices/WAVE_3_ROADMAP.md` and all eight Wave 3 briefs — apply brand reading, scope and domain-availability boundaries.
 
 No tracker, dependency or Feature-ID status changes are included.
 

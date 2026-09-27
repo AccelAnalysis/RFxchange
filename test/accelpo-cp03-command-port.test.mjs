@@ -118,3 +118,7 @@ test("the browser client preserves structured conflict details", async () => {
   assert.equal(JSON.parse(captured.init.body).organizationContext.organizationId, "org-one");
   assert.equal(JSON.parse(captured.init.body).idempotencyKey, validRequest.idempotencyKey);
 });
+
+test("command fingerprints reject undefined object members", () => {
+  assert.throws(() => stableCommandSerialization({ missing: undefined }), /undefined command value/);
+});

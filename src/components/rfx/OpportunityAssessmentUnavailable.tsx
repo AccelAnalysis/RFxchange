@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import type { OpportunityPursuitError } from "../../application/rfx/opportunity-pursuit-service";
 import { useI18n } from "../i18n/I18nProvider";
-import { OperationalWorkspace, ParticipantShell } from "../participant/ParticipantWorkspace";
+import { OperationalWorkspace, ParticipantPage } from "../participant/WorkspacePrimitives";
 import styles from "./OpportunityAssessmentWorkspace.module.css";
 
 export function OpportunityAssessmentUnavailable({ errorCode, returnHref, retryHref }: Readonly<{
@@ -14,7 +14,7 @@ export function OpportunityAssessmentUnavailable({ errorCode, returnHref, retryH
 }>) {
   const { t } = useI18n();
   const dependencyUnavailable = errorCode === "dependency-unavailable";
-  return <ParticipantShell activeItem="opportunities-rfx">
+  return <ParticipantPage activeItem="opportunities-rfx">
     <OperationalWorkspace ariaLabel={t("rfxWorkspace.pursuitUnavailable.ariaLabel")} className={styles.workspace}>
       <section className={styles.unavailable} data-opportunity-assessment-unavailable={errorCode}>
         <h1>{t(`rfxWorkspace.pursuitUnavailable.${dependencyUnavailable ? "dependencyTitle" : "title"}`)}</h1>
@@ -25,5 +25,5 @@ export function OpportunityAssessmentUnavailable({ errorCode, returnHref, retryH
         </nav>
       </section>
     </OperationalWorkspace>
-  </ParticipantShell>;
+  </ParticipantPage>;
 }

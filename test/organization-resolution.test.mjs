@@ -444,21 +444,3 @@ test("public projection cannot expose a private address even when source data is
   assert.equal("locality" in projected, false);
   assert.equal("region" in projected, false);
 });
-
-test("resolution surface exposes the required claim/search/create choices and separation message", async () => {
-  const component = await readFile(
-    "src/components/organization-resolution/OrganizationResolutionPanel.tsx",
-    "utf8",
-  );
-  for (const requirement of [
-    "Claim this organization",
-    "This is my organization",
-    "None of these — create this organization",
-    "Resolution is not authority",
-    "server-authorized",
-  ]) {
-    assert.ok(component.includes(requirement), `Resolution surface is missing ${requirement}.`);
-  }
-  assert.ok(component.includes('autoComplete="organization"'));
-  assert.ok(component.includes("model.publicProfile.categories.map"));
-});

@@ -2,7 +2,7 @@
 
 ## Result
 
-Slice 4.4 implements `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020` and `ACQ-009` at the boundary defined by `docs/slices/SLICE_4_4_EXECUTION_AUTHORITY.md` on the documentation baseline merged through PR #166 at `4ebb0599af7e7a7470b696d8d2a2a9e7b60f2e00`.
+Slice 4.4 implements `ISS-016`, `ISS-018`, `ISS-019`, `ISS-020` and `ACQ-009` at the boundary defined by `docs/archive/slices/SLICE_4_4_EXECUTION_AUTHORITY.md` on the documentation baseline merged through PR #166 at `4ebb0599af7e7a7470b696d8d2a2a9e7b60f2e00`.
 
 The organization-owned RFx aggregate now has a one-way `draft` → `published` transition. Publication creates the first real, minimized responder opportunity projection and controlled share reference. No draft or preview becomes market activity, and the production acquisition adapter no longer falls back to seeded opportunities.
 

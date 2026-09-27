@@ -10,7 +10,7 @@ import type {
 } from "../../domain/rfx/cycle";
 import type { RfxEvaluationFactor } from "../../domain/rfx/model";
 import type { RfxIssuerWorkspace } from "../../infrastructure/rfx/rfx-cycle-runtime";
-import { ParticipantShell } from "../participant/ParticipantWorkspace";
+import { ParticipantPage } from "../participant/WorkspacePrimitives";
 import styles from "./RfxIssuerEvaluationWorkspace.module.css";
 
 type FactorDraft = Readonly<{
@@ -318,7 +318,7 @@ export function RfxIssuerEvaluationWorkspace({
     }
   }
 
-  return <ParticipantShell activeItem="opportunities-rfx">
+  return <ParticipantPage activeItem="opportunities-rfx">
     <main className={styles.workspace} data-rfx-issuer-evaluation-workspace>
       <header className={styles.header}>
         <p className={styles.eyebrow}>Issuer RFx cycle</p>
@@ -431,5 +431,5 @@ export function RfxIssuerEvaluationWorkspace({
       </section>
       <p className={styles.status} role="status">{notice}</p>
     </main>
-  </ParticipantShell>;
+  </ParticipantPage>;
 }

@@ -1,247 +1,33 @@
-# RFxchange Codex Operating Instructions
+# RFxchange engineering instructions
 
-This repository implements **The RFxchange**, an organization-centered, map-based business growth network. Treat these instructions as the repository operating manual for planning and implementation work.
+## Product
 
-## Product model
+- RFxchange is one organization-centered Exchange. Its participant lenses are Opportunities/RFx, Resources, Intelligence and Capabilities, in that order. Referrals is a cross-lens workflow and account utility.
+- The root Next app owns the Exchange and shared authorized APIs. `apps/admin` is the administrative boundary; `apps/marketing` is the acquisition website. AccelPO is the separate purchasing PWA, sharing Firebase identity, organizations, memberships, permissions and entitlements. Do not add another Exchange app or duplicate those services.
+- Organization owners count toward seat allowances. AccelPO remains task-first; community sourcing belongs to RFxchange.
+- Use ordinary business language, focused views, accessible controls and responsive layouts. Preserve map/list selection, geography, privacy-safe coordinates, reduced motion and keyboard access. Consult `docs/design` and `docs/brand` for applicable visual rules.
+- Show real permitted records and accurate loading, empty, restricted and error states. Do not invent market activity or infer verification/credibility from payment or membership status.
 
-- The **organization** is the primary market entity. Individual users authenticate separately but act through one or more organizations with explicit membership, role and permission state.
-- The RFxchange is RFx-centered and organization-centered. Opportunities/RFx is the primary transaction lens and principal market-action proposition; Resources, Intelligence and Capabilities are supporting lenses over the same market.
-- The permanent authenticated participant-lens order is exactly `Opportunities/RFx | Resources | Intelligence | Capabilities`. Referrals is a governed cross-lens function available through applicable records and Menu/Account, not a permanent lens. Availability governs action, not whether a governed permanent lens exists in the information architecture.
-- Opportunities/RFx remains visibly first. Availability requires a separately authorized real participant runtime; current merged Slice 4.5 supplies real permitted opportunity discovery at `/opportunities`. Do not create a placeholder route, fabricated opportunity/beacon/match/response or simulated workflow to broaden it.
-- Network remains the current organization-network view/domain concept within Intelligence. It is not a peer lens. Account and Quick Start are utilities, not market lenses.
-- Administrative navigation remains different: it exposes only implemented, server-authorized destinations. Do not generalize participant unavailable-lens visibility to future administrative sections.
-- The RFxchange is not a generic social network, static directory, conventional bid portal, CRM replacement, procurement system of record or commercial-real-estate listing marketplace.
-- The core product connects organization identity, geography, capability discovery, RFx activity, teaming, referrals, resources, credibility and economic intelligence.
-- Geography is a controlled product concept, not browser presentation state. Locality participation and release state are enforced server-side.
-- Activation culminates in the organization's **real marker appearing on the real controlled map** after required identity, authority, location, profile and geography conditions are satisfied.
-- Organizational claim/authority and Organization Verification are separate concepts. A user may establish authority to manage an organization without making that organization Verified.
-- Commercial status, membership, Founding recognition or sponsorship must never silently alter substantive credibility, verification, RFx qualification, market matching or neutral discovery.
-- Do not fabricate RFxs, opportunity beacons, organizations, matches, providers, referrals, sites, outcomes, statistics, intelligence or market activity to simulate a target experience.
+## Security and integrity
 
-## Vocabulary
+- Authenticate and authorize every protected server read and command; client navigation and cached presentation state never grant authority.
+- Preserve organization/membership isolation, default-denied browser Firestore access, private evidence handling, current lifecycle and geography checks, and same-origin write protection.
+- Use existing domain/application services and provider adapters. Preserve atomic expected-version checks, command replay/fingerprint handling and auditable consequential writes.
+- AI proposals are non-authoritative. Validate AMACS identifiers against the pinned release; acceptance requires an authorized domain command.
+- Never commit secrets, weaken negative authorization tests, expose private data, enable live payments or perform destructive data migrations as a cleanup shortcut.
 
-Use the cross-cutting vocabulary in `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md`:
+## Change loop
 
-- **Lens** — functional market context;
-- **Layer** — map/analytical projection within a lens;
-- **Appearance** — visual treatment only;
-- **Workspace** — interaction composition for a task.
+1. Start from current `main`, inspect affected code and keep unrelated work intact.
+2. Change the existing implementation. Delete superseded components, unused paths and obsolete tests in the same change. Compatibility code needs an actual supported caller and an explicit retirement condition.
+3. Prefer behavioral tests. Component names, incidental attributes, exact prose, file counts and historical tracker arithmetic are not product contracts. Keep tests of authorization, tenancy, transactions, routing, accessibility and observable behavior.
+4. Run `npm run check:fast`. Firebase-sensitive changes also require `npm run test:firebase`; production artifacts require `npm run check:build`. `npm run check` runs all three exactly once. CI computes sensitive paths with `scripts/ci-scope.mjs` and retains a manual full run.
+5. Publish a reviewable branch/PR. Merge only after applicable checks pass on the candidate. Report what is implemented, merged and deployed separately; do not claim production performance without measurement.
 
-**Intelligence** is the functional analytical lens. **Light Appearance** and **Dark Appearance** are presentation terms. **Presentation Mode** is a separate future presentation-safe capability. **High Contrast** is an accessibility treatment. Do not use `Intelligence Dark` as though Intelligence were an appearance, and do not implement Dark Appearance or an appearance preference without explicit authority.
+Node 24.18.x or newer within Node 24 is the development toolchain; deployed Functions use Node 22. Production builds must bind `RFXCHANGE_BUILD_SHA` to their source commit. Keep automatic production rollouts paused unless deployment is explicitly requested; retain the existing rollback path.
 
-Participant-facing truthfulness has four required dimensions:
+## Documentation
 
-1. **Structural truthfulness** — represent the stable governed architecture rather than a temporary taxonomy.
-2. **Capability truthfulness** — visible does not mean available; unavailable permanent lenses are explicit, non-actionable and non-current.
-3. **State truthfulness** — unavailable, loading, empty, error, restricted and recovery states describe the relevant surface accurately.
-4. **Continuity truthfulness** — ordinary authenticated movement remains visibly inside one Exchange and does not resemble a new application launch.
+Current explicit user instructions govern task scope. Read relevant product/security contracts, not a universal list of historical packets. `docs/archive`, old wave/program closeouts and trackers retain provenance; they do not require preserving obsolete UI, new parallel apps, independent acceptance ceremonies or source-text locks. No ordinary cleanup requires tracker arithmetic or extra approval.
 
-Development reporting adds the same truthfulness distinction between **implemented**, **merged**, **live**, and **Verified**. None of those states may be implied by another.
-
-### Participant-language boundary
-
-`docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md` governs what internal vocabulary may cross into ordinary public or participant-facing copy.
-
-> **Development governance is internal. Product truth is external.**
-
-Truthfulness protects the accuracy of what participants can see, do, rely upon, and expect. It does **not** require the product to narrate repository governance, release sequencing, slices, waves, gates, domains, runtime authority, acceptance mechanics, evidence manifests, verification debt, source/build SHA, CI, or other implementation machinery.
-
-Internal engineering terminology may remain in code, tests, logs, admin/developer tooling and repository documentation when it is useful there. Do not copy it into participant UI merely to prove that the product is truthful. Use ordinary business language and preserve the real boundary in behavior, permissions, state and concise copy.
-
-## Source authority
-
-Use these sources together rather than treating one file as universally authoritative:
-
-1. **Current explicit task instructions** define the work requested in the current task.
-2. `docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md` governs the current permanent-lens architecture and successor mobile Exchange program. `docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md` governs Four-Lens completion semantics and makes Independent Acceptance optional assurance. `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md` and `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md` remain governing provenance for parallel delivery and risk-based release mechanics where they do not conflict with those current amendments. Their machine ledgers and delivery matrix carry current packet/experience state but never expand product or domain scope.
-3. `docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md` is the live Feature-ID completion authority. A checked item requires implementation plus the applicable objective tests/evidence, dependencies/ownership satisfaction, durable completion record, and no known material defect under the current Four-Lens Completion Governance Amendment. Independent Acceptance is not required merely to check a completed item.
-4. `docs/tracking/RFxchange_DEPENDENCY_MAP.md` is the live sequencing/dependency authority. Reviewed corrections there supersede seeded spreadsheet dependencies for scheduling.
-5. The applicable `docs/slices/` execution authority defines the approved implementation boundary. A brief cannot mark a feature complete or waive documented acceptance intent.
-6. `docs/context/` contains normalized cross-cutting product rules. `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md`, originally merged through PR #150 and reconciled by the bounded shell gate, governs participant-facing lens hierarchy, structural/capability/state/continuity truthfulness, spatial continuity, workspace boundaries and truthful cross-lens behavior.
-7. `docs/rfx/` contains the converged RFx Core/AMACS/workspace/acceptance package.
-8. `docs/brand/` defines approved target brand architecture, semantic meaning, messaging, map/data grammar, motion, sensory rules, appearance/presentation authority and brand acceptance after Brand Gate B0. `docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md` specifically governs the boundary between internal implementation language and rendered participant language.
-9. `docs/design/` defines the currently implemented visual/UI/presentation baseline. For user-facing UI read `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`; map/geography work also requires `docs/design/MAP_VISUAL_SYSTEM.md`.
-10. Existing production architecture and merged architecture decisions govern implementation mechanics unless the current task intentionally changes them.
-11. `docs/reference/` contains provenance and visual/prototype references. Reference artifacts demonstrate product intent; they are not automatically production architecture.
-
-Authority order for participant-facing work is:
-
-1. current task and authorized slice/gate;
-2. security, privacy, authorization, lifecycle, geography, domain, tracker and dependency authorities;
-3. Mobile Exchange Stages 3–6 authority, Four-Lens Completion Governance Amendment and applicable parallel-delivery/release authority;
-4. Exchange Interaction Architecture and applicable RFx Core authority;
-5. `docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md` and the rest of `docs/brand/` for approved target experience;
-6. `docs/design/` for currently converged implementation baseline; and
-7. existing runtime as implementation evidence and compatibility context.
-
-If sources appear to conflict, do not silently choose the easiest interpretation. Preserve the stricter security/privacy requirement and report the conflict before widening scope. A visual or brand rule never grants authority or expands slice scope.
-
-## Build sequencing
-
-- An explicit participant/product-owner instruction to implement a bounded change is authorization to implement it within the stated scope. Do not insert a generic `proceed?`, approval, acceptance, Control Room or confirmation step before starting or after completing ordinary work when the instruction already supplied that authority.
-- For ordinary Standard work, prefer the smallest sound path: **Implement → Test proportionately → Reconcile with current `main` → Merge when sound → Continue.** Do not manufacture an evidence package, independent-review dependency or manual completion ceremony merely because a change was made.
-- Use the **Four-Lens parallel lane model** only for a declared work packet in `governance/four-lens-workstreams.json`. Work outside that authority retains the single-active-slice or single-active-gate default unless the current task explicitly authorizes otherwise.
-- Parallel work requires explicit lane ownership, exact base SHA, immutable requirement IDs, dependencies, owned/non-owned paths, completion/evidence obligations and stop boundary. A branch dependent on an unmerged candidate must name its exact SHA.
-- The governing Four-Lens completion progression is **Build → Test → Integrate → Release → Improve** under `docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`. Development may proceed in parallel; merge order remains dependency-aware; production release is risk-based; independent assurance is optional unless a separate later authority explicitly requires it for a named action.
-- Reconcile every candidate from current merged `main` and obtain fresh exact-head evidence after dependency changes.
-- Independent review is not a universal completion, tracker, merge, release or development prerequisite. A bounded candidate may be completed and merged as `Implemented — Not Verified` after authorized scope/dependency reconciliation, applicable exact-head CI/evidence, durable completion recording, and an objective current-state determination that no known material finding makes the claimed behavior unsafe or materially false. Do not treat the words `Control Room confirmation` in older text as a universal extra approval from the user.
-- Builders may report bounded work implemented/complete when objective delivery evidence supports that statement. Only an actual independent assurance event may be described as `Verified`; builders must not fabricate or self-label independent verification.
-- For the optional independent-assurance label only, only the Independent Acceptance lane may record `Verified`; this restriction governs the truthfulness of the `Verified` label, not whether ordinary work is complete.
-- Merge and deployment never imply `Verified`.
-- Pre-amendment packet language requiring Independent Acceptance is preserved as historical provenance but is superseded as a Four-Lens completion, tracker, merge, release or later-work gate by `FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, unless a later explicit current authority specifically reactivates independent assurance for a named action.
-- Do not implement future Feature IDs merely because adjacent code makes them convenient.
-- Incidental satisfaction of another Feature ID must be evaluated against that feature's own completion check before tracker status changes.
-- Recalculate the next slice from merged `main`, not from assumptions made on an older branch.
-- Documentation-only planning and reconciliation do not authorize production implementation.
-- No deployment/release blocker becomes a product-domain dependency unless a current canonical dependency authority establishes that edge.
-- Shared participant behavior remains Lane 01-owned. Domain lanes submit a Shared Contract Request instead of creating a private divergent implementation.
-
-Additional explicit human confirmation is reserved for cases where it is materially necessary: payments or new commercial commitments; destructive or practically irreversible operations; consequential privacy/security changes; legal or policy acceptance; critical authentication/authorization/tenant/secrets/data-integrity risk acceptance; or genuine material ambiguity between materially different product outcomes that current authority cannot resolve. Routine copy, layout, visual, responsive, navigation, non-destructive bug, already-directed feature, test and merge work does not require renewed product-owner confirmation.
-
-## Release sequencing
-
-Control Room continues to use the risk classifications in `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md` where they do not conflict with the superseding Four-Lens Completion Governance Amendment:
-
-- **Standard** — bounded presentation/discoverability/non-authorizing/additive behavior: post-merge CI plus applicable runtime/browser/emulator evidence and canonical rollback path.
-- **Elevated** — consequential participant/domain workflow that preserves established authority: Standard requirements plus focused negative authorization/tenant/security evidence, explicit Control Room release authorization, rollback/containment and post-release observation.
-- **Critical** — authentication/authorization, tenant isolation, privacy disclosure, policy/legal acceptance, payments, destructive/irreversible migration/write, secrets/credentials or comparable material-risk changes: Elevated requirements plus direct critical-boundary negative evidence, containment/rollback planning, and explicit participant/product-owner release authority.
-
-Independent reviewer participation is optional for Four-Lens release decisions, so no reviewer-capacity waiver is required merely because a reviewer is unavailable. Optional assurance never substitutes for required safety evidence, and the absence of mandatory assurance never permits a known material security/privacy/integrity defect to ship. A known material critical defect remains non-releasable.
-
-Production deployment may truthfully be reported as `Live in production — not independently verified` when deployment is proven and no optional independent assurance event has occurred. That assurance state is not delivery debt by itself.
-
-## Current wave, stabilization and program boundary
-
-Wave 2 is complete with **43/43 Activation** features.
-
-Wave 3 Slices 3.1 through 3.8 are complete via PRs #107, #120, #126, #128, #130, #132, #137 and #139. Wave 3 Network is **38/38**, with integrated configured-browser and zero-residual evidence in `docs/architecture/WAVE_3_CLOSEOUT.md`.
-
-Brand Gates B0 through B6a are complete. B6b remains **Not Started / intentionally pending** because no bounded convergence gate is currently required. Real RFx publication now makes B6c eligible, but B6c remains Not Started and requires separate authority. Later appearance, sensory, presentation, credibility and outcome gates require separate authority.
-
-All independently executable work under Post-Wave 3 Stabilizations 1–7 is complete. **Stabilization 2C is complete**, with the accepted production source/build/rollout binding and retained rollback recorded in [the canonical 2C procedure and completion record](docs/architecture/POST_WAVE_3_STABILIZATION_2C_SAME_SHA.md). It remains a release-engineering concern, not a product-domain dependency. Each later production rollout must bind `RFXCHANGE_BUILD_SHA` to its exact reviewed merged-main commit before building, preserve paused automatic rollouts and capture the required source, resolved environment, rollout and rollback evidence. Do not weaken this contract or infer deployment of a later commit from the historical closeout; source/build/rendered-SHA claims remain limited to evidence actually available.
-
-PR #150 established the Exchange interaction architecture. PR #160 merged the post-PR-#159 participant convergence implementation; the Four-Lens Shared Experience backlog preserves its implementation evidence, final-head procedural failure and unresolved requirements without rewriting history. Slices 4.1–4.5 then implemented the first 18 RFx Core Feature IDs.
-
-Do not copy current tracker totals, active packet SHAs or lane state into this long-lived operating manual. Read `docs/tracking/RFxchange_MASTER_BUILD_TRACKER.md` for Feature-ID arithmetic and `docs/program/PARALLEL_DELIVERY_MATRIX.md` plus `governance/four-lens-workstreams.json` for the current Four-Lens program state.
-
-The Exchange shell truthfulness/performance gate and post-PR-#159 convergence are historical merged foundations. Current volatile lane, packet, candidate, merge/release and experience status lives only in the current program artifacts/GitHub state.
-
-Stage 2 merged through PR #222 using its historically governed order. The current successor authority now requires `Opportunities/RFx | Resources | Intelligence | Capabilities`; Referrals migrates to a governed cross-lens function and Menu/Account utility. Available behavior consumes server-authorized runtimes. Network remains an Intelligence view/domain concept, Account and Quick Start remain utilities, and navigation context never grants authority.
-
-Slices 4.1–4.5 retain their retroactive independent assurance ledger as historical/optional assurance evidence; optional assurance is not a completion prerequisite. Any known material findings from that ledger still require correction, containment, truthful unavailability or explicit current disposition on their substance. Slice 4.6 PR #171's preserved pre-amendment Independent Acceptance stop boundary remains historical provenance but no longer gates Four-Lens completion, merge, release or later work under the Completion Governance Amendment. Slice 4.7 eligibility must be recalculated from its actual current dependencies and explicitly authorized rather than from missing Independent Acceptance alone.
-
-## AMACS and interpretation boundary
-
-AMACS 0.5.0 is merged in the independent `AccelAnalysis/amacs` repository at `da7879f2609271b067ae6d02875e9388a02c4fe5`. RFxchange reconciliation is complete via PR #123, including deterministic generated projections, runtime contracts, migration evidence and participant-surface isolation.
-
-The AI/AMACS Interpretation Foundation is complete via PR #124. The governing rule is:
-
-> AI or other assistance interprets and proposes. AMACS defines and constrains. The participant confirms. RFxchange stores and operates the authoritative market record.
-
-- Provider/model types remain behind application/infrastructure boundaries.
-- AMACS identifiers validate against the pinned release projection; model memory cannot invent authority.
-- Interpretation records/candidates are non-authoritative.
-- Accepted suggestions require a separate current-authority domain command.
-- Rejected or unresolved suggestions cannot influence matching, publication or public market observations.
-- Manual AMACS browse/search remains available for authorized consumers.
-- Slice 4.1 uses deterministic manual request-family selection and does not need an AI call.
-
-## Required reading before a slice or gate
-
-Before implementing any slice or Brand Gate:
-
-1. Read this file.
-2. Read `docs/context/README.md`.
-3. Read `docs/context/PRODUCT_PRINCIPLES.md`.
-4. Read `docs/context/EXCHANGE_INTERACTION_ARCHITECTURE.md` for participant-facing work.
-5. Read the canonical tracker and dependency map.
-6. For current Mobile Exchange/Four-Lens work, read `docs/program/MOBILE_EXCHANGE_STAGES_3_6_AUTHORITY.md`, `docs/program/FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, `docs/program/FOUR_LENS_PROGRAM_AUTHORITY.md`, `docs/program/BUILD_RELEASE_VERIFY_GOVERNANCE_AMENDMENT.md`, `docs/program/PARALLEL_DELIVERY_MATRIX.md`, `docs/program/CHAT_LANE_CHARTERS.md`, `governance/four-lens-requirements.json` and the exact current work packet.
-7. Read the applicable wave/lens roadmap.
-8. Read the specific slice, lens or Brand Gate authority.
-9. Read the context/RFx documents listed under the authority's **Must read** or governing section.
-10. Inspect existing production abstractions before designing new ones.
-11. If work creates or materially changes user-facing UI, read `docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md`, `docs/brand/README.md`, applicable brand guides, `docs/design/README.md` and `docs/design/RFxchange_DESIGN_SYSTEM.md`.
-12. If work changes map/geography UI, also read `docs/brand/MAP_AND_DATA_VISUAL_GRAMMAR.md` and `docs/design/MAP_VISUAL_SYSTEM.md`.
-13. If work creates customer-facing copy or communications, read `docs/brand/PARTICIPANT_LANGUAGE_FIREWALL.md` and `docs/brand/CONTENT_AND_MESSAGING_SYSTEM.md`.
-14. If work introduces motion, sound, haptics, appearance or Presentation Mode, read the corresponding authority and confirm the capability is explicitly authorized.
-15. If work consumes AMACS or AI interpretation, read the current AMACS integration/reconciliation contracts and keep AMACS semantics separate from provider/model implementation provenance.
-
-## Brand requirement classes
-
-- **Cross-cutting standards** may govern authorized surfaces without claiming a new domain feature: naming, semantic color, typography, messaging, evidence integrity, loading/empty/error states, accessibility, reduced motion, state preservation and performance.
-- **Domain-dependent expressions** may be designed but cannot appear as live product state before authoritative domains exist: opportunity beacons, service fields, referral/team/RFx paths, credibility seals and outcome paths.
-- **Net-new capabilities** require explicit scope, persistence, permissions, tests and tracker treatment where appropriate: Dark Appearance, appearance preferences, Presentation Mode, sonic preferences/runtime, haptics and comparable settings or projections.
-
-## Engineering invariants
-
-- Server-side authorization is authoritative. Client state never grants access.
-- Keep provider subject/Firebase UID, RFxchange user identity, organization membership and administrative authority conceptually separate.
-- An authenticated user does not personally own an organization RFx. The issuing organization owns it; actor user/membership are audit evidence.
-- Reuse the canonical organization-operation authorization boundary for consequential organization-scoped commands.
-- Preserve immutable/auditable history for sensitive administrative, access, claim, credibility, policy and consequential domain decisions.
-- Expected-version checks and aggregate/evidence writes occur atomically where the domain requires optimistic concurrency.
-- Stable command IDs and fingerprints support exact replay; a command ID reused for different intent conflicts.
-- Direct browser Firestore access remains default-denied; trusted server handlers project only permitted data.
-- Do not expose sensitive evidence or private organization data through public projections.
-- Prefer explicit state machines and typed domain contracts over UI-only state.
-- Provider adapters remain behind domain/application boundaries; do not leak Firebase, Microsoft, payment-provider or AI-provider implementation details into domain models.
-- An AI interpretation is non-authoritative. Accepted suggestions require a separate server-authorized domain write; rejected/unresolved suggestions cannot affect authoritative matching or public projection.
-- Do not weaken existing security rules or architecture tests to make new work pass.
-- Motion, sound and visual success states consume authoritative application/domain facts; button clicks and optimistic UI are not authority.
-- Do not fabricate organizations, opportunities, maps, statistics, outcomes, testimonials, provider availability or live network activity.
-- A participant-shell convenience projection must not repeat session verification or organization hydration when already-authorized page data can supply the same non-authorizing display context.
-- Optional Administration resolution must never block the participant shell and must fail closed; direct administrative routes remain independently authorized.
-- Client-side navigation, URL state and persistent shell context never grant organization, lens, record or administrative authority.
-
-## Runtime and validation
-
-Repository/CI development runtime is Node.js **24.18.x** (`package.json` requires `>=24.18.0 <25`). Firebase Functions deploy on **Node.js 22** as pinned in `firebase.json`; the Functions workspace remains testable in the repository toolchain.
-
-Before claiming a slice or gate complete, run slice/gate-specific checks plus repository validation. The canonical full local gate is:
-
-```bash
-npm run check
-```
-
-For Four-Lens packets, use the evidence types declared by each immutable requirement and exact work packet. Cross-lens Shared or Integration candidates must exercise supported multi-lens journeys, exact server revalidation, desktop/mobile, keyboard/accessibility, five locales, clean console/unhandled-rejection behavior and applicable timing evidence without turning a controlled run into a production-network promise.
-
-Run focused product/architecture/dependency/internationalization/emulator checks first where applicable. Production CI must pass on the exact candidate head before ordinary merge and again on merged `main`. Independent review is required only to truthfully claim optional `Verified` assurance, or where a separate current legal, contractual, regulatory or security authority explicitly requires it; it is not a universal Four-Lens completion, tracker, merge or release gate. Brand acceptance supplements and never replaces domain, security, lifecycle, geography, emulator or configured-browser evidence.
-
-For ordinary Standard presentation/copy/layout/discoverability/non-authorizing work, use proportionate focused checks and the repository's existing CI. Do not create additional browser runs, evidence manifests, screenshots, reviewer assignments or approval steps unless the change actually needs them or an applicable current authority explicitly requires them.
-
-## Tracker discipline
-
-- Do not delete, rename or reorder approved Feature IDs casually.
-- Mark `[x]` only after the feature's documented implementation/completion check passes and the required objective validation evidence exists.
-- Under `FOUR_LENS_COMPLETION_GOVERNANCE_AMENDMENT.md`, `Implemented — Not Verified` may be a terminal completion state and may support a checked tracker item when the completion rule is satisfied. Lane 06 assurance is optional; `Verified` remains an additional independent-assurance marker rather than the sole completion state.
-- Update evidence in the same PR as implementation whenever practical.
-- Documentation-only planning/reconciliation must not change progress totals or completion statuses.
-- A visual simulation, architecture document or tutorial never completes the corresponding live domain Feature ID.
-- Existing tracker completion for Slices 4.1–4.5 is preserved; their retroactive assurance records are optional assurance history rather than mandatory verification debt. Material findings still require explicit correction/disposition analysis on their substance.
-- Showing or releasing a lens/route does not itself complete an RFx or lens-experience requirement.
-- Merge/release does not change the optional `Verified` assurance numerator or Feature-ID tracker by itself; tracker progression follows the completion rule and durable evidence.
-
-## Design, brand and visual references
-
-- Treat `docs/brand/` as the approved target experience after B0 and `docs/design/` as the currently implemented/converged baseline.
-- Do not reconstruct design rules from screenshots when brand/design systems address the topic.
-- Read `docs/reference/prototypes/README.md` before using prototype code.
-- Read `docs/reference/screenshots/README.md` before treating screenshots as visual requirements.
-- Preserve anchored geographic markers, authoritative locality geometry, strong selected-locality treatment, muted surrounding context, restrained glassmorphism, reduced container/border chrome and continuous map-first workspace where applicable.
-- Normal markers/nodes are not outlined by default; use fill, glyph, shadow and separate hover/selection emphasis while keeping the geographic anchor fixed.
-- Domain-dependent objects remain absent or truthfully unavailable until their source domains exist.
-- Never copy prototype architecture wholesale merely because it visually demonstrates desired behavior.
-
-## Completion report
-
-Use proportionate reporting. For ordinary bounded implementation, reconciliation or merge work, report only what is useful to establish the result:
-
-- what changed;
-- branch/PR and merge state;
-- the relevant focused/CI result;
-- any material unresolved defect or limitation; and
-- tracker/release impact when there is one.
-
-Do not generate a universal evidence dossier merely because work was completed.
-
-Add detailed release, SHA, risk, rollback, emulator/browser, cross-lens, tracker, dependency or optional-assurance evidence only when the task actually involved those boundaries or the applicable current authority requires them. For a declared Four-Lens packet, include the packet/lane and requirement dispositions needed by that program record. Report `Verified` only when an actual independent assurance event occurred; absence of that optional event is not completion debt.
+Use `docs/architecture/DELIVERY_AND_EXCHANGE_RUNTIME.md` for the current delivery and UI lifecycle. Update documentation when a product/security contract changes; avoid new governance layers.

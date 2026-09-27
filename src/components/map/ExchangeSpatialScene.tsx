@@ -1,6 +1,9 @@
 "use client";
 
 import {
+  createContext,
+  useContext,
+  useLayoutEffect,
   useCallback,
   useEffect,
   useMemo,
@@ -8,7 +11,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import mapboxgl from "mapbox-gl";
+import type mapboxgl from "mapbox-gl";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 import {
@@ -35,6 +38,7 @@ import { beaconImageId, registerExchangeBeaconImages } from "./exchange-beacon-i
 import {
   MAP_ROTATION_PREFERENCE_EVENT,
   readMapRotationPreference,
+  startAmbientMapRotation,
 } from "./map-motion-preference";
 
 import { workspaceMapPadding } from "./workspaceMapPadding";
@@ -103,6 +107,7 @@ export interface ExchangeSpatialSceneProps {
   readonly tutorialOverlay?: SyntheticOrientationMapOverlay | null;
   readonly continuousMotion?: ExchangeContinuousMotion | null;
   readonly className?: string;
+  readonly embedded?: boolean;
 }
 
 type LocalityGeometry = ExchangeSpatialGeometry;
@@ -601,7 +606,19 @@ function renderedMapPadding(map: mapboxgl.Map) {
   };
 }
 
-export function ExchangeSpatialScene({
+// Spatial pages publish their projection; the root shell owns the single renderer.
+// Embedded onboarding/account previews render in their own bounded container.
+export const ExchangeSceneContext = createContext<((props: ExchangeSpatialSceneProps) => () => void) | null>(null);
+
+export function ExchangeSpatialScene(props: ExchangeSpatialSceneProps) {
+  const registerScene = useContext(ExchangeSceneContext);
+  useLayoutEffect(() => {
+    if (registerScene && !props.embedded) return registerScene(props);
+  }, [props, registerScene]);
+  return registerScene && !props.embedded ? null : <ExchangeSpatialRenderer {...props} />;
+}
+
+export function ExchangeSpatialRenderer({
   model,
   mode,
   marker = null,
@@ -627,6 +644,7 @@ export function ExchangeSpatialScene({
   tutorialOverlay = null,
   continuousMotion = null,
   className,
+  embedded = false,
 }: ExchangeSpatialSceneProps) {
   const { t } = useI18n();
   if (lensProjection && (organizationMarkers.length > 0 || opportunityMarkers.length > 0 || serviceFields.length > 0)) {
@@ -668,10 +686,8 @@ export function ExchangeSpatialScene({
   const sceneMarker = homeMarkerIsProjected ? null : marker;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const paddingRepairFrameRef = useRef<number | null>(null);
-  const orbitStartRef = useRef(0);
-  const orbitBearingRef = useRef(0);
+  const sdkRef = useRef<typeof import("mapbox-gl").default | null>(null);
+  const stopRotationRef = useRef<(() => void) | null>(null);
   const orbitTargetRef = useRef<readonly [number, number] | null>(null);
   const mapLoadedRef = useRef(false);
   const sceneInitializationStartedRef = useRef(false);
@@ -723,22 +739,23 @@ export function ExchangeSpatialScene({
   const tutorialPathGeoJsonRef = useRef(tutorialPathGeoJson(tutorialOverlay));
   const searchMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
-  const [viewMode, setViewMode] = useState<MapViewMode>("3d");
+  const [viewMode, setViewMode] = useState<MapViewMode>(initialCamera?.viewMode ?? "2d");
   const [basemapPreset, setBasemapPreset] = useState<MapBasemapPresetId>("exchange");
-  const [settledPitch, setSettledPitch] = useState(ORGANIZATION_ORBIT_PITCH);
+  const [settledPitch, setSettledPitch] = useState(initialCamera?.pitch ?? 0);
   const [settledCamera, setSettledCamera] = useState<ParticipantMapCamera>(() => initialCamera ?? Object.freeze({
     longitude: marker?.coordinate[0] ?? model.camera.center.longitude,
     latitude: marker?.coordinate[1] ?? model.camera.center.latitude,
     zoom: ORGANIZATION_ORBIT_ZOOM,
-    pitch: ORGANIZATION_ORBIT_PITCH,
+    pitch: 0,
     bearing: 0,
-    viewMode: "3d",
+    viewMode: "2d",
   }));
   const [renderedClusterCount, setRenderedClusterCount] = useState(0);
   const [renderedClusterPoint, setRenderedClusterPoint] = useState("");
   const [renderedSelectedMarkerCount, setRenderedSelectedMarkerCount] = useState(0);
   const [settledPadding, setSettledPadding] = useState({ top: 0, right: 0, bottom: 0, left: 0 });
   const [mapReady, setMapReady] = useState(false);
+  const [mapError, setMapError] = useState(false);
   const [cameraInitialization, setCameraInitialization] = useState<"pending" | "restored" | "organization" | "locality">("pending");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<readonly MapSearchResult[]>([]);
@@ -810,37 +827,20 @@ export function ExchangeSpatialScene({
   tutorialPathGeoJsonRef.current = tutorialPaths;
 
   const stopOrbit = useCallback(() => {
-    if (animationFrameRef.current !== null) {
-      window.cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
+    const stop = stopRotationRef.current;
+    stopRotationRef.current = null;
+    stop?.();
   }, []);
 
   const repairGovernedPaddingAfterMovement = useCallback(() => {
-    if (paddingRepairFrameRef.current !== null) {
-      window.cancelAnimationFrame(paddingRepairFrameRef.current);
-    }
-    const repair = () => {
-      const map = mapRef.current;
-      if (!map || !mapLoadedRef.current) {
-        paddingRepairFrameRef.current = null;
-        return;
-      }
-      if (map.isMoving()) {
-        paddingRepairFrameRef.current = window.requestAnimationFrame(repair);
-        return;
-      }
-      paddingRepairFrameRef.current = null;
-      const expectedPadding = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current, adaptiveWorkspaceRef.current);
-      const actualPadding = renderedMapPadding(map);
-      const paddingIsSettled = (["top", "right", "bottom", "left"] as const).every(
-        (side) => Math.abs(actualPadding[side] - expectedPadding[side]) < 0.5,
-      );
-      if (paddingIsSettled) return;
-      map.jumpTo({ padding: expectedPadding });
-      setSettledPadding(renderedMapPadding(map));
-    };
-    paddingRepairFrameRef.current = window.requestAnimationFrame(repair);
+    const map = mapRef.current;
+    // moveend is the scheduling boundary; never poll an active camera every frame.
+    if (!map || !mapLoadedRef.current || map.isMoving()) return;
+    const expected = cameraPadding(activationOverlayRef.current, workspaceOverlayRef.current, adaptiveWorkspaceRef.current);
+    const actual = renderedMapPadding(map);
+    if ((["top", "right", "bottom", "left"] as const).every((side) => Math.abs(actual[side] - expected[side]) < 0.5)) return;
+    map.setPadding(expected);
+    setSettledPadding(renderedMapPadding(map));
   }, []);
 
   const pauseForInteraction = useCallback(() => {
@@ -848,45 +848,24 @@ export function ExchangeSpatialScene({
     stopOrbit();
   }, [stopOrbit]);
 
-  const startOrbit = useCallback(() => {
-    const map = mapRef.current;
-    const target = orbitTargetRef.current;
-    stopOrbit();
-    if (
-      !map ||
-      !target ||
-      !continuousMotionRef.current ||
-      !rotationEnabledRef.current ||
-      reducedMotionRef.current ||
-      manuallyPausedRef.current
-    ) {
-      return;
-    }
-
-    orbitStartRef.current = performance.now();
-    orbitBearingRef.current = map.getBearing();
-
-    const animate = (timestamp: number) => {
-      const activeMap = mapRef.current;
-      const activeTarget = orbitTargetRef.current;
-      if (
-        !activeMap ||
-        !activeTarget ||
-        !continuousMotionRef.current ||
-        !rotationEnabledRef.current ||
-        reducedMotionRef.current ||
-        manuallyPausedRef.current
-      ) {
-        animationFrameRef.current = null;
-        return;
-      }
-      const elapsed = timestamp - orbitStartRef.current;
-      const bearing = orbitBearingRef.current + (elapsed / EXCHANGE_ORBIT_PERIOD_MS) * 360;
-      activeMap.jumpTo({ center: [activeTarget[0], activeTarget[1]], bearing });
-      animationFrameRef.current = window.requestAnimationFrame(animate);
+  useEffect(() => {
+    // Work in a form, sheet or menu also ends ambient motion.
+    document.addEventListener("pointerdown", pauseForInteraction, { passive: true });
+    document.addEventListener("keydown", pauseForInteraction);
+    return () => {
+      document.removeEventListener("pointerdown", pauseForInteraction);
+      document.removeEventListener("keydown", pauseForInteraction);
     };
+  }, [pauseForInteraction]);
 
-    animationFrameRef.current = window.requestAnimationFrame(animate);
+  const startOrbit = useCallback(() => {
+    stopOrbit();
+    const map = mapRef.current;
+    if (!map || !orbitTargetRef.current) return;
+    stopRotationRef.current = startAmbientMapRotation(map, () => Boolean(
+      continuousMotionRef.current && rotationEnabledRef.current
+      && !reducedMotionRef.current && !manuallyPausedRef.current && !document.hidden
+    ));
   }, [stopOrbit]);
 
   const setLocalityLayerVisibility = useCallback((visible: boolean) => {
@@ -932,15 +911,15 @@ export function ExchangeSpatialScene({
     if (activeMode === "organization" && activeMarker) {
       setCameraInitialization("organization");
       orbitTargetRef.current = activeMarker.coordinate;
-      setViewMode("3d");
+      setViewMode("2d");
       map.flyTo({
         center: [activeMarker.coordinate[0], activeMarker.coordinate[1]],
         zoom: ORGANIZATION_ORBIT_ZOOM,
-        pitch: ORGANIZATION_ORBIT_PITCH,
+        pitch: 0,
         bearing: map.getBearing(),
         padding,
-        duration: reducedMotionRef.current ? 0 : 2_400,
-        essential: true,
+        duration: reducedMotionRef.current ? 0 : 650,
+
       });
       if (continuousMotionRef.current) map.once("moveend", startOrbit);
       return;
@@ -949,14 +928,14 @@ export function ExchangeSpatialScene({
     const bounds = activeMode === "regional"
       ? HAMPTON_ROADS_BOUNDS
       : localityBounds(modelRef.current);
-    setViewMode("3d");
+    setViewMode("2d");
     setCameraInitialization("locality");
     map.fitBounds(bounds, {
       padding,
-      pitch: LOCALITY_ORBIT_PITCH,
+      pitch: 0,
       bearing: map.getBearing(),
       maxZoom: activeMode === "regional" ? 9.3 : 12.2,
-      duration: reducedMotionRef.current ? 0 : 2_400,
+      duration: reducedMotionRef.current ? 0 : 650,
     });
     if (continuousMotionRef.current) {
       map.once("moveend", () => {
@@ -986,6 +965,7 @@ export function ExchangeSpatialScene({
     const option = PARTICIPANT_MAP_VIEW_OPTIONS.find((candidate) => candidate.id === nextMode);
     if (!map || !option) return;
     pauseForInteraction();
+    if (map.getLayer("rfx-buildings")) map.setLayoutProperty("rfx-buildings", "visibility", nextMode === "3d" ? "visible" : "none");
     map.easeTo({
       pitch: option.pitch,
       bearing: option.resetBearing ? 0 : map.getBearing(),
@@ -998,12 +978,11 @@ export function ExchangeSpatialScene({
     const preset = MAP_BASEMAP_PRESETS.find((candidate) => candidate.id === nextPreset);
     if (!map || !preset) return;
     pauseForInteraction();
-    map.setConfigProperty("basemap", "lightPreset", preset.lightPreset);
-    map.setConfigProperty("basemap", "theme", preset.theme);
-    map.setConfigProperty("basemap", "showTransitLabels", preset.showTransitLabels);
-    map.setConfigProperty("basemap", "showRoadLabels", preset.showRoadLabels);
-    map.setConfigProperty("basemap", "showPlaceLabels", preset.showPlaceLabels);
-    map.setConfigProperty("basemap", "showPointOfInterestLabels", preset.showPointOfInterestLabels);
+    for (const layer of map.getStyle()?.layers ?? []) {
+      if (layer.type === "symbol" && !layer.id.startsWith("rfx-")) {
+        map.setLayoutProperty(layer.id, "visibility", nextPreset === "street" ? "visible" : "none");
+      }
+    }
     setBasemapPreset(nextPreset);
   }, [pauseForInteraction]);
 
@@ -1023,7 +1002,8 @@ export function ExchangeSpatialScene({
     setActiveSearchResultId(result.id);
     setLocalityLayerVisibility(false);
 
-    searchMarkerRef.current = new mapboxgl.Marker({ color: "#2e5eaa", scale: 0.9 })
+    if (!sdkRef.current) return;
+    searchMarkerRef.current = new sdkRef.current.Marker({ color: "#2e5eaa", scale: 0.9 })
       .setLngLat([result.center[0], result.center[1]])
       .addTo(map);
     const source = map.getSource(SEARCH_AREA_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
@@ -1103,8 +1083,11 @@ export function ExchangeSpatialScene({
       if (rotationEnabledRef.current) startOrbit();
       else stopOrbit();
     };
+    const visibilityChanged = () => document.hidden ? stopOrbit() : startOrbit();
+    document.addEventListener("visibilitychange", visibilityChanged);
     window.addEventListener(MAP_ROTATION_PREFERENCE_EVENT, updatePreference);
     return () => {
+      document.removeEventListener("visibilitychange", visibilityChanged);
       media.removeEventListener("change", updateReducedMotion);
       window.removeEventListener(MAP_ROTATION_PREFERENCE_EVENT, updatePreference);
     };
@@ -1113,24 +1096,18 @@ export function ExchangeSpatialScene({
   useEffect(() => {
     if (!containerRef.current || !token.startsWith("pk.")) return;
 
+    let disposed = false;
+    let teardown: (() => void) | undefined;
+    void import("mapbox-gl").then(({ default: mapboxgl }) => {
+    if (disposed || !containerRef.current) return;
+    sdkRef.current = mapboxgl;
     const map = new mapboxgl.Map({
       accessToken: token,
       container: containerRef.current,
-      style: "mapbox://styles/mapbox/standard",
-      config: {
-        basemap: {
-          lightPreset: "day",
-          theme: "faded",
-          showPointOfInterestLabels: false,
-          showRoadLabels: false,
-          showPlaceLabels: false,
-          showTransitLabels: false,
-          show3dObjects: true,
-        },
-      },
+      style: "mapbox://styles/mapbox/light-v11",
       center: [-76.12, 36.82],
       zoom: 8.4,
-      pitch: LOCALITY_ORBIT_PITCH,
+      pitch: 0,
       bearing: -24,
       minZoom: 0,
       maxZoom: 24,
@@ -1169,15 +1146,29 @@ export function ExchangeSpatialScene({
       );
     }
 
-    map.on("dragstart", pauseForInteraction);
-    map.on("rotatestart", pauseForInteraction);
-    map.on("pitchstart", pauseForInteraction);
-    map.on("wheel", pauseForInteraction);
-    map.on("touchstart", pauseForInteraction);
+    const pauseForMapInteraction = (event: object) => {
+      if ("originalEvent" in event && event.originalEvent) pauseForInteraction();
+    };
+    map.on("error", () => { if (!mapLoadedRef.current) setMapError(true); });
+    map.on("dragstart", pauseForMapInteraction);
+    map.on("rotatestart", pauseForMapInteraction);
+    map.on("pitchstart", pauseForMapInteraction);
+    map.on("wheel", pauseForMapInteraction);
+    map.on("touchstart", pauseForMapInteraction);
 
     map.on("load", () => {
       mapLoadedRef.current = true;
       setMapReady(true);
+      setMapError(false);
+      for (const layer of map.getStyle()?.layers ?? []) {
+        if (layer.type === "symbol") map.setLayoutProperty(layer.id, "visibility", "none");
+      }
+      if (map.getSource("composite")) map.addLayer({
+        id: "rfx-buildings", type: "fill-extrusion", source: "composite", "source-layer": "building",
+        filter: ["==", "extrude", "true"], minzoom: 15,
+        layout: { visibility: initialCameraRef.current?.viewMode === "3d" ? "visible" : "none" },
+        paint: { "fill-extrusion-color": "#c9c5bd", "fill-extrusion-height": ["get", "height"], "fill-extrusion-base": ["get", "min_height"], "fill-extrusion-opacity": 0.6 },
+      });
       registerExchangeBeaconImages(map);
       map.addSource(LOCALITY_MASK_SOURCE_ID, { type: "geojson", data: homeMaskGeoJsonRef.current });
       map.addLayer({
@@ -1883,20 +1874,19 @@ export function ExchangeSpatialScene({
     });
     map.on("idle", captureRenderedClusters);
 
-    return () => {
+    teardown = () => {
       searchAbortRef.current?.abort();
       searchMarkerRef.current?.remove();
       stopOrbit();
-      if (paddingRepairFrameRef.current !== null) {
-        window.cancelAnimationFrame(paddingRepairFrameRef.current);
-        paddingRepairFrameRef.current = null;
-      }
       mapLoadedRef.current = false;
       sceneInitializationStartedRef.current = false;
       setMapReady(false);
       mapRef.current = null;
+      sdkRef.current = null;
       map.remove();
     };
+    }).catch(() => { if (!disposed) setMapError(true); });
+    return () => { disposed = true; teardown?.(); };
   }, [applyScene, interactive, pauseForInteraction, repairGovernedPaddingAfterMovement, stopOrbit, token]);
 
   useEffect(() => {
@@ -1932,6 +1922,7 @@ export function ExchangeSpatialScene({
     const tutorialPathSource = map.getSource(TUTORIAL_PATH_SOURCE_ID) as mapboxgl.GeoJSONSource | undefined;
     tutorialPathSource?.setData(tutorialPaths);
   }, [
+    mapReady,
     homeGeoJson,
     homeMaskGeoJson,
     homeMarkerGeoJson,
@@ -1966,7 +1957,7 @@ export function ExchangeSpatialScene({
 
   if (!token.startsWith("pk.")) {
     return (
-      <div className={`${styles.tokenNotice} ${className ?? ""}`} role="status">
+      <div className={`${styles.tokenNotice} ${className ?? ""}`} data-embedded={embedded || undefined} role="status">
         {t("interface.map.unavailable")}
       </div>
     );
@@ -1979,6 +1970,7 @@ export function ExchangeSpatialScene({
     <figure
       className={`${styles.scene} ${className ?? ""}`}
       data-scene={mode}
+      data-embedded={embedded || undefined}
       data-interactive={interactive}
       data-workspace-overlay={workspaceOverlay ?? "none"}
       data-adaptive-workspace={adaptiveWorkspace || undefined}
@@ -2006,6 +1998,7 @@ export function ExchangeSpatialScene({
       aria-label={`RFxchange ${mode} spatial scene`}
     >
       <div ref={containerRef} className={styles.map} />
+      {mapError ? <div role="status" className={styles.tokenNotice}>{t("interface.map.unavailable")}</div> : null}
 
       {interactive ? (
         <>

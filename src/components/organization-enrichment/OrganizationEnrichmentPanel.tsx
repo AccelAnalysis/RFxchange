@@ -11,8 +11,8 @@ import {
 import { useRouter } from "next/navigation";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
-import type { ExchangeHomeMarker } from "../map/ExchangeSpatialScene";
-import { MapboxLocalityCanvas, type ControlledLocalityPointOverlay } from "../map/MapboxLocalityCanvas";
+
+import { ExchangeSpatialScene, type ExchangeHomeMarker } from "../map/ExchangeSpatialScene";
 import type {
   OrganizationAdditionalLocation,
   OrganizationCredential,
@@ -288,27 +288,24 @@ export function OrganizationEnrichmentLocationMap(props: Readonly<{
 }>) {
   const { t } = useI18n();
   const valueLabel = useCallback((value: string) => t(`organizationEnrichment.values.${value}`), [t]);
-  const overlays = useMemo<readonly ControlledLocalityPointOverlay[]>(() => {
+  const overlays = useMemo<readonly ExchangeHomeMarker[]>(() => {
     const primary = props.homeMarker ? [{
       id: props.homeMarker.id,
-      position: props.homeMarker.coordinate,
+      coordinate: props.homeMarker.coordinate,
       label: props.homeMarker.label,
-      kind: "organization-marker" as const,
-      privacyLabel: props.homeMarker.accessibleLocationLabel,
-      activated: true,
+      accessibleLocationLabel: props.homeMarker.accessibleLocationLabel,
     }] : [];
     const satellites = props.snapshot.mapAdditionalLocations.map((location) => ({
       id: location.id,
-      position: location.coordinate,
+      coordinate: location.coordinate,
       label: `${location.label} · ${t("organizationEnrichment.locations.satellite")}`,
-      kind: "subordinate-location" as const,
-      privacyLabel: `${valueLabel(location.visibility)} · ${location.localityName}`,
+      accessibleLocationLabel: `${valueLabel(location.visibility)} · ${location.localityName}`,
     }));
     return Object.freeze([...primary, ...satellites]);
   }, [props.homeMarker, props.snapshot.mapAdditionalLocations, t, valueLabel]);
 
   return <div className={styles.map}>
-    <MapboxLocalityCanvas model={props.mapModel} initialZoom="focus" pointOverlays={overlays} />
+    <ExchangeSpatialScene model={props.mapModel} mode="locality" organizationMarkers={overlays} embedded showSearch={false} interactive />
     <p>{t("organizationEnrichment.locations.mapHelp")}</p>
   </div>;
 }

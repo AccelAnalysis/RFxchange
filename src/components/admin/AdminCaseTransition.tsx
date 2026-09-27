@@ -44,6 +44,7 @@ export function AdminCaseTransition({
       if (!response.ok) throw new Error(body.error ?? "The case could not be updated.");
       setReason("");
       setNotice(`${readable(nextStatus)} saved.`);
+      // This transition changes server-derived permissions and available workflow actions.
       router.refresh();
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "The case could not be updated.");

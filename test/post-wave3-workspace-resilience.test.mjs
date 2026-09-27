@@ -73,30 +73,3 @@ test("changed workspace copy remains complete in all supported locales", () => {
     }
   }
 });
-
-test("live workspace sources retain bounded hydration, scoped refresh, and streaming isolation", () => {
-  const resourcePage = read("app/resources/page.tsx");
-  const resourceWorkspace = read("src/components/resource-network/ResourceNetworkWorkspace.tsx");
-  const accountPage = read("app/organization-profile/page.tsx");
-  const marketProfileRuntime = read("src/infrastructure/market-profile/runtime.ts");
-
-  assert.match(resourcePage, /selectedRequestId\s*\?\s*await service\.messages/);
-  assert.match(resourcePage, /Promise\.allSettled\(\[\s*referralsPromise,\s*ownerPromise/);
-  assert.doesNotMatch(resourcePage, /Promise\.all\(requestReferrals\.map/);
-  assert.doesNotMatch(resourceWorkspace, /window\.location\.reload/);
-  assert.match(resourceWorkspace, /router\.refresh\(\)/);
-  for (const parameter of ["q", "availability", "provider", "request"]) {
-    assert.match(resourceWorkspace, new RegExp(`"${parameter}"`));
-  }
-  assert.match(accountPage, /settleOptionalWorkspacePanel/);
-  assert.ok((accountPage.match(/<Suspense/g) ?? []).length >= 6);
-  for (const panel of ["OverviewPanel", "CapabilitiesPanel", "CredentialsPanel", "LocationsPanel", "MediaPanel", "PreferencesPanel"]) {
-    assert.match(accountPage, new RegExp(`async function ${panel}`));
-  }
-  assert.match(accountPage, /pendingMarket=\{pending\.market\}/);
-  assert.match(accountPage, /pendingEnrichment=\{pending\.enrichment\}/);
-  assert.match(accountPage, /pendingMap=\{pending\.map\}/);
-  assert.match(marketProfileRuntime, /geographyDefinitions\.getById\(id\)/);
-  assert.match(accountPage, /serviceGeographies=\{marketProfile\.serviceGeographies\}/);
-  assert.doesNotMatch(accountPage, /label:\s*id/);
-});

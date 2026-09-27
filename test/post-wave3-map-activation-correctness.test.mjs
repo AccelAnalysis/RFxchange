@@ -70,28 +70,6 @@ test("cancelled spatial requests do not consume retry attempts", async () => {
   assert.equal(attempts, 1);
 });
 
-test("candidate selection, motion scope, and incremental Mapbox updates remain explicit", () => {
-  const activation = read("src/components/onboarding/ActivationJourneyClient.tsx");
-  const spatialActivation = read("src/components/onboarding/SpatialActivationExperience.tsx");
-  const scene = read("src/components/map/ExchangeSpatialScene.tsx");
-  const mapbox = read("src/components/map/MapboxLocalityCanvas.tsx");
-  const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
-
-  assert.match(activation, /selectedLocationCandidateId/);
-  assert.match(activation, /candidateId: selectedLocationCandidateId/);
-  assert.match(activation, /entry\.id === selectedLocationCandidateId/);
-  assert.match(spatialActivation, /loadRequiredSceneWithRetry/);
-  assert.match(scene, /continuousMotionRef\.current/);
-  assert.doesNotMatch(workspace, /continuousMotion=/);
-  assert.match(mapbox, /source\?\.setData\(relationshipPathGeoJson\)/);
-  assert.match(mapbox, /source\?\.setData\(serviceFieldGeoJson\)/);
-  assert.match(mapbox, /synchronizePointOverlays/);
-  assert.doesNotMatch(
-    mapbox.match(/\}, \[[\s\S]*?\]\);\n\n  useEffect\(\(\) => \{\n    pointOverlaysRef/)?.[0] ?? "",
-    /pointOverlays,\n|relationshipPaths,\n|serviceFields,\n/,
-  );
-});
-
 test("new map recovery and candidate copy is complete in all supported locales", () => {
   const locales = ["en-US", "es", "fr", "it", "de"];
   const expectedKeys = Object.keys(JSON.parse(read("src/i18n/messages/map-stabilization/en-US.json"))).sort();

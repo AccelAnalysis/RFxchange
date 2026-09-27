@@ -7,7 +7,6 @@ import {
   PARTICIPANT_SPATIAL_ACTIVE_KEY,
   commitParticipantSpatialStorage,
   createParticipantSpatialContext,
-  legacyParticipantSpatialStorageKey,
   parseParticipantSpatialContext,
   participantSpatialStorageKey,
   resolveParticipantSpatialStorage,
@@ -24,10 +23,6 @@ export function useParticipantSpatialContext(input: Readonly<{
   activeLens: ParticipantSpatialContext["activeLens"];
 }>): readonly [ParticipantSpatialContext, (update: (current: ParticipantSpatialContext) => ParticipantSpatialContext) => void] {
   const storageKey = useMemo(() => participantSpatialStorageKey(input.scope), [input.scope]);
-  const legacyStorageKey = useMemo(
-    () => legacyParticipantSpatialStorageKey(input.scope),
-    [input.scope],
-  );
   const fallback = useMemo(
     () => createParticipantSpatialContext({ scope: input.scope, homeMarkerId: input.homeMarkerId, activeLens: input.activeLens }),
     [input.activeLens, input.homeMarkerId, input.scope],
@@ -36,9 +31,9 @@ export function useParticipantSpatialContext(input: Readonly<{
   const subscribe = useCallback((notify: () => void) => {
     const handle = (event: Event) => {
       if (event instanceof StorageEvent && event.key
-        && event.key !== storageKey && event.key !== legacyStorageKey) return;
+        && event.key !== storageKey) return;
       if (event instanceof CustomEvent && event.detail
-        && event.detail !== storageKey && event.detail !== legacyStorageKey) return;
+        && event.detail !== storageKey) return;
       if (!(event instanceof StorageEvent) && !(event instanceof CustomEvent)) memory.clear();
       notify();
     };
@@ -48,7 +43,7 @@ export function useParticipantSpatialContext(input: Readonly<{
       window.removeEventListener("storage", handle);
       window.removeEventListener(PARTICIPANT_SPATIAL_CONTEXT_CHANGED_EVENT, handle);
     };
-  }, [legacyStorageKey, storageKey]);
+  }, [storageKey]);
   const getSnapshot = useCallback(() => {
     try {
       const resolution = resolveParticipantSpatialStorage(

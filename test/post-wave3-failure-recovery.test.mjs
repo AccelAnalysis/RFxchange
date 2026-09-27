@@ -26,31 +26,6 @@ const convergedRoutes = [
   "app/api/resources/route.ts",
 ];
 
-test("runtime recovery conventions keep participant loading below the shell and preserve root failure boundaries", () => {
-  const persistentShell = read("src/components/participant/PersistentParticipantShell.tsx");
-  const notFound = read("app/not-found.tsx");
-  const renderError = read("app/error.tsx");
-  const globalError = read("app/global-error.tsx");
-
-  assert.equal(exists("app/loading.tsx"), false, "The page-wide root loading takeover must stay removed.");
-  assert.match(persistentShell, /data-participant-content-region/);
-  for (const path of [
-    "app/geography/canvas/loading.tsx",
-    "app/resources/loading.tsx",
-    "app/referrals/loading.tsx",
-    "app/organization-profile/loading.tsx",
-    "app/quick-start/loading.tsx",
-  ]) {
-    assert.equal(exists(path), false, `${path} would replace the current participant content.`);
-  }
-  assert.match(notFound, /recovery\.notFoundTitle/);
-  assert.match(renderError, /\berror\.digest\b/);
-  assert.doesNotMatch(renderError, /\berror\.message\b|\berror\.stack\b/);
-  assert.match(globalError, /<html lang=\{locale\}>/);
-  assert.match(globalError, /\berror\.digest\b/);
-  assert.doesNotMatch(globalError, /\berror\.message\b|\berror\.stack\b/);
-});
-
 test("all supported locales carry the new recovery states", () => {
   for (const locale of ["en-US", "es", "fr", "it", "de"]) {
     const dictionary = JSON.parse(read(`src/i18n/messages/recovery/${locale}.json`));

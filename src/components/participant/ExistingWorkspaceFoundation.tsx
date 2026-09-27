@@ -48,9 +48,9 @@ import {
   type ExchangeSheetLabels,
 } from "./MobileExchangePrimitives";
 import {
-  ParticipantShell,
+  ParticipantPage,
   SpatialWorkspace,
-} from "./ParticipantWorkspace";
+} from "./WorkspacePrimitives";
 
 import { useWideExchangeLayout } from "./useWideExchangeLayout";
 import styles from "./ExistingWorkspaceFoundation.module.css";
@@ -139,7 +139,7 @@ function WorkspaceBoundary({
   };
   const href = actionHref[status];
   return (
-    <ParticipantShell
+    <ParticipantPage
       activeItem="intelligence"
       unavailableUtilityIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_UTILITIES}
     >
@@ -156,7 +156,7 @@ function WorkspaceBoundary({
           {t(`networkWorkspace.status.${status}.body`)}
         </StatePanel>
       </main>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }
 
@@ -653,7 +653,7 @@ export function ExistingWorkspaceFoundation({
   );
 
   return (
-    <ParticipantShell
+    <ParticipantPage
       activeItem={activeLens}
       unavailableUtilityIds={operationalActionsAvailable ? undefined : MAP_ONLY_UNAVAILABLE_UTILITIES}
     >
@@ -865,6 +865,6 @@ export function ExistingWorkspaceFoundation({
           )}
         </ExchangeBottomSheet>
       </SpatialWorkspace>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }

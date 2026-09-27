@@ -2,7 +2,7 @@
 
 ## Result
 
-Slice 4.3 implements `ISS-007`, `ISS-009` and `ISS-011` at the boundary defined by `docs/slices/SLICE_4_3_EXECUTION_AUTHORITY.md` on the documentation baseline merged through PR #164 at `6dcf09ace96ba1881bd229ab76eef79cde1a33a0`.
+Slice 4.3 implements `ISS-007`, `ISS-009` and `ISS-011` at the boundary defined by `docs/archive/slices/SLICE_4_3_EXECUTION_AUTHORITY.md` on the documentation baseline merged through PR #164 at `6dcf09ace96ba1881bd229ab76eef79cde1a33a0`.
 
 The existing organization-owned private RFx aggregate now carries one versioned definition composed of governed AMACS requirements, a linked responder structure and a linked evaluation definition. The lifecycle remains exactly `draft`; no opportunity projection or publication state exists.
 

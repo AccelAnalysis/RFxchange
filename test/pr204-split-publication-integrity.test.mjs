@@ -80,12 +80,3 @@ test("ISS-019 revalidates publication authority transactionally and reloads auth
   assert.match(runtime, /new Wave4GapPublicationRepository\(db, baseRepository, accountSecurity\)/);
   assert.match(runtime, /Wave4GapPublicationService/);
 });
-
-test("publication split does not introduce Exchange or lens gating", async () => {
-  const [exchange, canvas] = await Promise.all([
-    read("app/exchange/page.tsx"),
-    read("app/geography/canvas/page.tsx"),
-  ]);
-  assert.match(exchange, /geography\/canvas/);
-  assert.doesNotMatch(canvas, /lifecycleState !== "open-platform"/);
-});

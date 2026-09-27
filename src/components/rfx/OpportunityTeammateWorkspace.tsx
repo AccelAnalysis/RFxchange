@@ -7,7 +7,7 @@ import { useState, type FormEvent } from "react";
 import type { RfxGapResolutionContext } from "../../domain/rfx/teaming";
 import type { TeamInvitationView } from "../../application/rfx/opportunity-teaming-service";
 import { useI18n } from "../i18n/I18nProvider";
-import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
+import { ParticipantPage, SpatialWorkspace } from "../participant/WorkspacePrimitives";
 import styles from "./OpportunityTeammateWorkspace.module.css";
 
 export interface OpportunityTeammateCandidateView {
@@ -68,7 +68,7 @@ export function OpportunityTeammateWorkspace({ context, candidates, invitations,
     finally { setBusy(null); }
   }
 
-  return <ParticipantShell activeItem="opportunities-rfx">
+  return <ParticipantPage activeItem="opportunities-rfx">
     <SpatialWorkspace ariaLabel={t("rfxWorkspace.teaming.ariaLabel")} className={styles.workspace}>
       <header className={styles.header}>
         <div><span>{t("rfxWorkspace.teaming.eyebrow")}</span><h1>{t("rfxWorkspace.teaming.title")}</h1><p>{t("rfxWorkspace.teaming.intro")}</p></div>
@@ -103,5 +103,5 @@ export function OpportunityTeammateWorkspace({ context, candidates, invitations,
       </div>
       <section className={styles.invitations} aria-labelledby="invitation-title"><h2 id="invitation-title">{t("rfxWorkspace.teaming.sentInvitations")}</h2>{invitations.length ? <ul>{invitations.map((item) => <li key={item.id}><div><strong>{item.targetDisplayName}</strong><span>{t(`rfxWorkspace.teaming.status.${item.status}`)}</span></div><p>{item.responsibilitySummary}</p>{item.canRevoke ? <button disabled={busy !== null} type="button" onClick={() => revoke(item)}>{t("rfxWorkspace.teaming.revoke")}</button> : null}</li>)}</ul> : <p>{t("rfxWorkspace.teaming.noInvitations")}</p>}</section>
     </SpatialWorkspace>
-  </ParticipantShell>;
+  </ParticipantPage>;
 }

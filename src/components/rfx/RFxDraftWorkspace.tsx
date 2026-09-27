@@ -11,8 +11,8 @@ import type { RfxAggregate } from "../../domain/rfx/model";
 import { useI18n } from "../i18n/I18nProvider";
 import {
   OperationalWorkspace,
-  ParticipantShell,
-} from "../participant/ParticipantWorkspace";
+  ParticipantPage,
+} from "../participant/WorkspacePrimitives";
 import {
   clearRetryStableCommand,
   resolveRetryStableCommand,
@@ -191,7 +191,7 @@ export function RFxDraftWorkspace({
   }
 
   return (
-    <ParticipantShell activeItem="opportunities-rfx">
+    <ParticipantPage activeItem="opportunities-rfx">
       <OperationalWorkspace
         ariaLabel={t("rfxWorkspace.ariaLabel")}
         className={styles.workspace}
@@ -405,6 +405,6 @@ export function RFxDraftWorkspace({
           )}
         </div>
       </OperationalWorkspace>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }

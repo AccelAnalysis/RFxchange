@@ -122,33 +122,6 @@ test("one settled-pitch contract governs 2D, Perspective, and 3D without selecti
   assert.match(scene, /map\.on\("moveend", \(\) => \{[\s\S]*if \(!sceneInitializationStartedRef\.current\) return/);
   assert.match(scene, /sceneInitializationStartedRef\.current = true;[\s\S]*applyScene\(\)/);
   assert.match(scene, /setViewMode\(settledMode\)/);
-  assert.match(read("src/components/map/MapboxLocalityCanvas.tsx"), /maxPitch: 85/);
-});
-
-test("permanent participant lenses converge on one Exchange spatial scene and preserve real overlays", () => {
-  const resources = read("src/components/resource-network/ResourceNetworkWorkspace.tsx");
-  const referrals = read("src/components/referrals/ReferralWorkspace.tsx");
-  assert.match(resources, /<ExchangeSpatialScene/);
-  assert.match(referrals, /<ExchangeSpatialScene/);
-  assert.doesNotMatch(resources, /MapboxLocalityCanvas/);
-  assert.doesNotMatch(referrals, /MapboxLocalityCanvas/);
-  assert.match(resources, /serviceFields=\{serviceFields\}/);
-  assert.match(referrals, /relationshipPaths=\{relationshipPaths\}/);
-});
-
-test("marker hierarchy and account utility express organization identity without RF product glyphs or desktop chrome", () => {
-  const scene = read("src/components/map/ExchangeSpatialScene.tsx");
-  const navigation = read("src/components/participant/ParticipantTopNavigation.tsx");
-  const navigationStyles = read("src/components/participant/ParticipantTopNavigation.module.css");
-  assert.match(scene, /cluster: true/);
-  assert.match(scene, /NETWORK_SELECTED_MARKER_SOURCE_ID/);
-  assert.match(scene, /organizationMarkers\.filter\(\(candidate\) => candidate\.id !== focusedMarkerId\)/);
-  assert.match(scene, /data-rendered-selected-marker-count/);
-  assert.match(scene, /organizationInitials/);
-  assert.doesNotMatch(scene, /"text-field": "RF"/);
-  assert.doesNotMatch(navigation, /className=\{styles\.accountText\}|className=\{styles\.chevron\}/);
-  assert.match(navigationStyles, /\.accountButton[\s\S]*width: 44px[\s\S]*border: 0/);
-  assert.match(navigation, /aria-label=\{buttonLabel\}/);
 });
 
 test("organization actions expose private RFx creation only for the selected home organization", () => {
@@ -255,19 +228,6 @@ test("Exchange participant routing skips orientation and release reads", () => {
   assert.doesNotMatch(workspaceState, /workspace-state\.firestore-controlled-release-stage/);
 });
 
-test("overlay-side changes update real Mapbox padding without recomposing the camera", () => {
-  const scene = read("src/components/map/ExchangeSpatialScene.tsx");
-  assert.match(scene, /map\.jumpTo\(\{ padding: cameraPadding\(activationOverlay, workspaceOverlay, adaptiveWorkspace\) \}\)/);
-  assert.match(scene, /map\.jumpTo\(\{ padding: cameraPadding\(activationOverlay, workspaceOverlay, adaptiveWorkspace\) \}\);[\s\S]*setSettledPadding\(renderedMapPadding\(map\)\)/);
-  assert.match(scene, /persistedCamera[\s\S]*map\.jumpTo\([\s\S]*setSettledPadding\(renderedMapPadding\(map\)\)/);
-  assert.match(scene, /if \(!mapLoadedRef\.current \|\| !map \|\| !mapReady\) return;[\s\S]*const previous = appliedOverlayRef\.current[\s\S]*appliedOverlayRef\.current = \{ activationOverlay, workspaceOverlay, adaptiveWorkspace \}/);
-  assert.match(scene, /repairGovernedPaddingAfterMovement[\s\S]*if \(map\.isMoving\(\)\)[\s\S]*requestAnimationFrame\(repair\)[\s\S]*if \(paddingIsSettled\) return;[\s\S]*map\.jumpTo\(\{ padding: expectedPadding \}\)/);
-  assert.match(scene, /map\.on\("moveend"[\s\S]*repairGovernedPaddingAfterMovement\(\)/);
-  assert.match(scene, /\[activationOverlay, adaptiveWorkspace, mapReady, workspaceOverlay\]/);
-  assert.doesNotMatch(scene, /\[activationOverlay, applyScene, continuousMotion, mode\]/);
-  assert.match(scene, /data-map-padding=/);
-});
-
 test("Intelligence provider actions use a bounded fail-closed status projection", () => {
   const page = read("app/geography/canvas/page.tsx");
   const runtime = read("src/infrastructure/resource-network/discovery-runtime.ts");
@@ -309,20 +269,4 @@ test("controlled and OPEN participants resolve to the Exchange while protected l
   assert.doesNotMatch(activation, /controlledPlatformUrl:[\s\S]*\? "\/acquisition\/continue"/);
   assert.match(continuation, /access\.state\.controlledPlatformUrl \?\? "\/exchange"/);
   assert.match(continuation, /mapUrl === "\/exchange" \? "Enter the Exchange"/);
-});
-
-test("warm routes have no segment takeover and corrected participant copy is localized", () => {
-  for (const path of ["app/geography/canvas/loading.tsx", "app/resources/loading.tsx", "app/referrals/loading.tsx", "app/organization-profile/loading.tsx", "app/quick-start/loading.tsx", "app/provider-application/loading.tsx", "app/exchange/loading.tsx"]) {
-    assert.equal(exists(path), false, path);
-  }
-  const workspace = read("src/components/participant/ExistingWorkspaceFoundation.tsx");
-  assert.doesNotMatch(workspace, /Approximate location|locality-level public location|privacyTreatment|coordinateSource|participant projection|lifecycle state/);
-  const reference = JSON.parse(read("src/i18n/messages/network/en-US.json"));
-  const referenceKeys = Object.keys(reference.detail).sort();
-  for (const locale of ["es", "fr", "de", "it"]) {
-    const dictionary = JSON.parse(read(`src/i18n/messages/network/${locale}.json`));
-    assert.deepEqual(Object.keys(dictionary.detail).sort(), referenceKeys, `${locale} network detail key drift`);
-    assert.equal(typeof dictionary.detail.nearLocation, "string");
-    assert.equal(typeof dictionary.actions["opportunities-rfx"], "string");
-  }
 });

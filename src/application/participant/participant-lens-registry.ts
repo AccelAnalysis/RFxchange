@@ -9,13 +9,6 @@ export type ParticipantLensId = (typeof PARTICIPANT_LENS_IDS)[number];
 export type ParticipantUtilityId = "account" | "quick-start" | "referrals";
 export type ParticipantNavigationState = ParticipantLensId | ParticipantUtilityId | null;
 
-export function migrateLegacyParticipantLensId(value: unknown): ParticipantLensId | null {
-  if (value === "referrals") return "capabilities";
-  return typeof value === "string" && PARTICIPANT_LENS_IDS.includes(value as ParticipantLensId)
-    ? value as ParticipantLensId
-    : null;
-}
-
 type ParticipantLensLabelKey =
   | "participantNavigation.opportunitiesRfx"
   | "participantNavigation.resources"
@@ -100,6 +93,8 @@ const PERSISTENT_PARTICIPANT_PATH_PREFIXES = Object.freeze([
   "/quick-start",
   "/provider-application",
   "/commercial/founding",
+  "/first-value",
+  "/acquisition/continue",
 ]);
 
 function matchesPrefix(pathname: string, prefix: string): boolean {

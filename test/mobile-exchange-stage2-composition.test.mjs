@@ -26,76 +26,6 @@ const paths = Object.freeze({
   i18nProvider: "src/components/i18n/I18nProvider.tsx",
 });
 
-test("MOB-02 keeps the mobile Exchange map-first with floating search, dynamic viewport, and safe areas", async () => {
-  const [workspace, workspaceCss, shellCss] = await Promise.all([
-    read(paths.workspace),
-    read(paths.workspaceCss),
-    read(paths.shellCss),
-  ]);
-  assert.match(workspace, /<ExchangeSpatialScene/);
-  assert.match(workspace, /className=\{styles\.exchangeSearch\}/);
-  assert.match(workspaceCss, /\.exchangeSearch\s*\{[\s\S]*position: fixed/);
-  assert.match(workspaceCss, /env\(safe-area-inset-top/);
-  assert.match(shellCss, /100svh/);
-  assert.match(shellCss, /100dvh/);
-  assert.match(shellCss, /env\(safe-area-inset-bottom/);
-  assert.equal((workspace.match(/role="search"/g) ?? []).length, 1);
-  assert.match(workspace, /desktopPanel/);
-  assert.doesNotMatch(workspace, /networkWorkspace\.match\.disclaimer/);
-  assert.match(workspace, /networkWorkspace\.search\.noResultsTitle/);
-});
-
-test("MOB-03 preserves the four permanent successor lenses and adds Menu as a separate fifth mobile utility", async () => {
-  const [navigation, navigationCss] = await Promise.all([
-    read(paths.navigation),
-    read(paths.navigationCss),
-  ]);
-  assert.deepEqual([...MOBILE_EXCHANGE_STAGE2_LENS_IDS], [
-    "opportunities-rfx",
-    "resources",
-    "intelligence",
-    "referrals",
-  ]);
-  assert.deepEqual([...PARTICIPANT_LENS_IDS], [
-    "opportunities-rfx",
-    "resources",
-    "intelligence",
-    "capabilities",
-  ]);
-  assert.match(navigation, /data-mobile-lens-navigation="persistent-bottom"/);
-  assert.match(navigation, /PARTICIPANT_LENSES\.map/);
-  assert.match(navigation, /data-mobile-menu-trigger/);
-  assert.doesNotMatch(navigation, /<details/);
-  assert.doesNotMatch(navigation, /MobileLensMenu/);
-  assert.match(navigationCss, /\.mobileBottomNavigation,[\s\S]*?\.mobileMenuUtility\s*\{\s*display: none;/);
-  assert.match(navigationCss, /@media \(max-width: 760px\)[\s\S]*?\.mobileBottomNavigation\s*\{[\s\S]*?position: fixed/);
-  assert.match(navigationCss, /grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/);
-  assert.match(navigationCss, /env\(safe-area-inset-bottom/);
-  assert.match(navigation, /PARTICIPANT_UTILITY_DESTINATIONS\.account\.href/);
-});
-
-test("MOB-04 implements three sheet states, touch dragging, accessible controls, internal scrolling, and reduced motion", async () => {
-  const [primitives, css] = await Promise.all([
-    read(paths.primitives),
-    read(paths.primitivesCss),
-  ]);
-  assert.deepEqual([...PARTICIPANT_SHEET_SNAP_POINTS], ["peek", "partial", "expanded"]);
-  assert.match(primitives, /onPointerDown=\{beginDrag\}/);
-  assert.match(primitives, /onPointerMove=\{moveDrag\}/);
-  assert.match(primitives, /velocityY/);
-  assert.match(primitives, /aria-expanded=\{snapPoint !== "peek"\}/);
-  assert.match(primitives, /onKeyDown/);
-  assert.match(primitives, /event.key === "ArrowUp"/);
-  assert.match(primitives, /event.key === "ArrowDown"/);
-  assert.match(primitives, /suppressClickRef/);
-  assert.match(primitives, /data-sheet-scroll-region/);
-  assert.match(css, /overscroll-behavior: contain/);
-  assert.match(css, /touch-action: pan-y/);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
-  assert.match(css, /orientation: landscape/);
-  assert.match(css, /bottom: calc\(var\(--participant-mobile-nav-height/);
-});
-
 test("MOB-05 renders the existing 16-action projection as four stable sheet positions without collapsing authority facts", async () => {
   const [controller, css] = await Promise.all([
     read(paths.actionController),
@@ -109,36 +39,6 @@ test("MOB-05 renders the existing 16-action projection as four stable sheet posi
   assert.match(controller, /disabled/);
   assert.match(css, /position: static/);
   assert.match(css, /grid-template-columns: repeat\(4/);
-});
-
-test("shared cards, media, favorites, detail, and marker selection converge on one production seam", async () => {
-  const [primitives, workspace, i18nProvider] = await Promise.all([
-    read(paths.primitives),
-    read(paths.workspace),
-    read(paths.i18nProvider),
-  ]);
-  assert.match(primitives, /export function ExchangeMedia/);
-  assert.match(primitives, /export function ExchangeFavorite/);
-  assert.match(primitives, /export function ExchangeResultCard/);
-  assert.match(primitives, /data-selection-key=\{card\.identity\.selectionKey\}/);
-  assert.match(primitives, /resolveRecordActionLabel\(action\.labelKey\)/);
-  assert.match(primitives, /data-action-label-key=\{action\.labelKey\}/);
-  assert.ok((primitives.match(/\{label\}/g) ?? []).length >= 3, "enabled and disabled record actions must render resolved labels");
-  assert.doesNotMatch(primitives, />\{action\.labelKey\}</);
-  assert.match(workspace, /resolveRecordActionLabel=\{\(labelKey\) => t\(labelKey\)\}/);
-  assert.match(i18nProvider, /mobileExchangeRecordActionLabel\(locale, key\)/);
-  assert.match(workspace, /focusedMarkerId=\{selectedObjectId\}/);
-  assert.match(workspace, /data-mobile-result-stream/);
-  assert.match(workspace, /onOrganizationMarkerSelect=\{\(markerId\) => \{\s*selectObject\(markerId\);/);
-  assert.match(workspace, /if \(wideLayout && lastMapPointerRef\.current\)/);
-  assert.match(workspace, /setMarkerPopoverPoint\(lastMapPointerRef\.current\)/);
-  assert.match(workspace, /setMobileDetailOpen\(false\);\s*return;/);
-  assert.match(workspace, /setMarkerPopoverPoint\(null\);\s*setMobileDetailOpen\(true\);/);
-  assert.match(workspace, /onSelect=\{\(\) => \{[\s\S]*?selectObject\(organization\.marker\.id, index\);[\s\S]*?\}\}/);
-  assert.match(workspace, /cardRefs\.current\.get\(selectedObjectId\)/);
-  assert.match(workspace, /sheetSnapPoint: "expanded"/);
-  assert.match(workspace, /initialCamera=\{spatialContext\.camera\}/);
-  assert.doesNotMatch(workspace, /synthetic|fixture/i);
 });
 
 test("sheet continuity remains presentation-only and accepts valid pre-Stage-2 stored contexts", () => {

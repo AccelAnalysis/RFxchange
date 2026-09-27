@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import type { NetworkEducationPath } from "../../application/network-education/catalog";
 import type { NetworkEducationProgress } from "../../domain/network-education/model";
 import { useI18n } from "../i18n/I18nProvider";
-import { OperationalWorkspace, ParticipantShell } from "../participant/ParticipantWorkspace";
+import { OperationalWorkspace, ParticipantPage } from "../participant/WorkspacePrimitives";
 
 import styles from "./QuickStartWorkspace.module.css";
 
@@ -56,7 +56,7 @@ export function QuickStartWorkspace({ initialSnapshot }: Readonly<{ initialSnaps
   const pathProgress = useMemo(() => Object.fromEntries(snapshot.paths.map((path) => [path.key, path.items.filter((item) => snapshot.progress.completedItemKeys.includes(item.key)).length])), [snapshot.paths, snapshot.progress.completedItemKeys]);
 
   return (
-    <ParticipantShell activeItem="Quick Start">
+    <ParticipantPage activeItem="Quick Start">
       <OperationalWorkspace ariaLabel={t("networkEducation.ariaLabel")} className={styles.workspace}>
         <header className={styles.hero}>
           <div>
@@ -113,6 +113,6 @@ export function QuickStartWorkspace({ initialSnapshot }: Readonly<{ initialSnaps
           <button className={styles.primary} type="button" disabled={busy} onClick={() => void mutate("guide-completed")}>{t("networkEducation.completeGuide")}</button>
         </footer>
       </OperationalWorkspace>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }

@@ -2,7 +2,7 @@
 
 ## Result
 
-Slice 4.2 implements `ISS-005` and `ISS-006` at the boundary defined by `docs/slices/SLICE_4_2_EXECUTION_AUTHORITY.md` on the documentation baseline merged through PR #162 at `f2d16b9cbf7aa019d8cbd0d798f10f15782f54ec`.
+Slice 4.2 implements `ISS-005` and `ISS-006` at the boundary defined by `docs/archive/slices/SLICE_4_2_EXECUTION_AUTHORITY.md` on the documentation baseline merged through PR #162 at `f2d16b9cbf7aa019d8cbd0d798f10f15782f54ec`.
 
 The existing organization-owned Slice 4.1 RFx aggregate now carries one private, versioned package with distinct market-need dimensions, structured scope, requested outputs, timing, governed performance location, estimated value, engagement term, foundation requirements and six server-derived module statuses. The lifecycle remains exactly `draft`.
 

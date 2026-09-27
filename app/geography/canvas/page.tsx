@@ -20,7 +20,6 @@ import {
 } from "@/src/infrastructure/network-discovery/runtime";
 import { projectAuthorizedIntelligenceMobileExchange } from "@/src/infrastructure/intelligence/mobile-exchange-intelligence-runtime";
 import { loadOptionalOfficialResourceProviderOrganizationIds } from "@/src/infrastructure/resource-network/discovery-runtime";
-import { migrateLegacyParticipantLensId } from "@/src/application/participant/participant-lens-registry";
 import { getRequestLocale } from "@/src/i18n/server";
 
 interface GeographyCanvasPageProps {
@@ -33,22 +32,6 @@ function firstSearchParam(value: string | string[] | undefined): string | null {
     return value[0].trim();
   }
   return null;
-}
-
-function migratedCanvasLensUrl(
-  params: Readonly<Record<string, string | string[] | undefined>>,
-): string | null {
-  if (firstSearchParam(params.lens) !== "referrals") return null;
-  const migratedLens = migrateLegacyParticipantLensId("referrals");
-  if (!migratedLens) return null;
-  const migrated = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    for (const item of Array.isArray(value) ? value : value === undefined ? [] : [value]) {
-      migrated.append(key, key === "lens" ? migratedLens : item);
-    }
-  }
-  if (!migrated.has("lens")) migrated.set("lens", migratedLens);
-  return `/geography/canvas?${migrated.toString()}`;
 }
 
 function resolveAcquisitionIntent(value: string | null): FoundingAcquisitionIntent | null {
@@ -117,8 +100,6 @@ export default async function GeographyCanvasPage({
   searchParams,
 }: GeographyCanvasPageProps) {
   const params = searchParams ? await searchParams : {};
-  const migratedLensUrl = migratedCanvasLensUrl(params);
-  if (migratedLensUrl) redirect(migratedLensUrl);
   const requestedOrganizationId = firstSearchParam(params.organizationId);
   const selectedOrganizationId = firstSearchParam(params.selectedOrganization);
   const capability = firstSearchParam(params.q);

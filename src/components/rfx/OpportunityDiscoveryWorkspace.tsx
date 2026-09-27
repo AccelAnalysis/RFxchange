@@ -20,10 +20,10 @@ import {
 import { StatePanel, StatusPill } from "../ui";
 import {
   MapOverlaySurface,
-  ParticipantShell,
+  ParticipantPage,
   ResponsiveEdgeSheet,
   SpatialWorkspace,
-} from "../participant/ParticipantWorkspace";
+} from "../participant/WorkspacePrimitives";
 import { ExchangeRoomActionController } from "../participant/ExchangeRoomActionController";
 import { useParticipantSpatialContext } from "../participant/useParticipantSpatialContext";
 
@@ -55,9 +55,19 @@ function queryHref(result: OpportunityDiscoveryResult, selectedReference?: strin
   return params.size ? `/opportunities?${params.toString()}` : "/opportunities";
 }
 
-export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope, result, selectedReference, rfxCreateAuthorized }: Props) {
+export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope, result: serverResult, selectedReference, rfxCreateAuthorized }: Props) {
   const { t } = useI18n();
   const router = useRouter();
+  const [localResult, setLocalResult] = useState<Readonly<{ source: OpportunityDiscoveryResult; value: OpportunityDiscoveryResult }> | null>(null);
+  // New server props invalidate local projections, including organization/session changes.
+  const result = localResult?.source === serverResult ? localResult.value : serverResult;
+
+  async function reloadResult() {
+    const response = await fetch(`/api${queryHref(result, null)}`, { cache: "no-store" });
+    if (!response.ok) throw new Error("request-failed");
+    const value = await response.json() as OpportunityDiscoveryResult;
+    setLocalResult({ source: serverResult, value });
+  }
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [saveLabel, setSaveLabel] = useState(result.query.text || t("rfxWorkspace.discovery.saved.defaultLabel"));
@@ -161,7 +171,7 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
         query: { ...result.query, cursor: null },
       });
       setMessage(t("rfxWorkspace.discovery.saved.confirmed"));
-      router.refresh();
+      await reloadResult();
     } catch {
       setMessage(t("rfxWorkspace.discovery.actionError"));
     } finally {
@@ -175,7 +185,7 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
     try {
       await post({ action: "set-watch", commandId: crypto.randomUUID(), reference: item.reference, watching: !item.watched });
       setMessage(item.watched ? t("rfxWorkspace.discovery.watch.removed") : t("rfxWorkspace.discovery.watch.confirmed"));
-      router.refresh();
+      await reloadResult();
     } catch {
       setMessage(t("rfxWorkspace.discovery.actionError"));
     } finally {
@@ -198,7 +208,7 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
         status,
       });
       setMessage(t("rfxWorkspace.discovery.saved.updated"));
-      router.refresh();
+      await reloadResult();
     } catch {
       setMessage(t("rfxWorkspace.discovery.actionError"));
     } finally {
@@ -208,7 +218,7 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
 
   const selectedMarkerId = selected ? markerId(selected.reference) : null;
   return (
-    <ParticipantShell activeItem="opportunities-rfx">
+    <ParticipantPage activeItem="opportunities-rfx">
       <SpatialWorkspace ariaLabel={t("rfxWorkspace.discovery.ariaLabel")}>
         <ExchangeSpatialScene
           model={model}
@@ -260,6 +270,6 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
           placement="sheet"
         /><div className={styles.pills}><StatusPill tone="information">{t("rfxWorkspace.discovery.detail.discovered")}</StatusPill>{selected.deadlineState === "due-soon" ? <StatusPill tone="connection">{t("rfxWorkspace.discovery.detail.dueSoon")}</StatusPill> : null}</div><p>{selected.summary}</p><dl><div><dt>{t("rfxWorkspace.discovery.detail.issuer")}</dt><dd>{selected.issuerDisplayName}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.requestType")}</dt><dd>{selected.requestFamilyLabel}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.location")}</dt><dd>{selected.localities.map((locality) => locality.label).join(" · ")}</dd></div><div><dt>{t("rfxWorkspace.discovery.detail.deadline")}</dt><dd>{selected.responseDeadline}</dd></div></dl><section><h3>{t("rfxWorkspace.discovery.detail.requirements")}</h3><ul>{selected.projection.payload.requirements.map((requirement, index) => <li key={`${requirement.title}-${index}`}><strong>{requirement.title}</strong><span>{requirement.description}</span></li>)}</ul></section><p className={styles.disclaimer}>{t("rfxWorkspace.discovery.detail.disclaimer")}</p></article></ResponsiveEdgeSheet> : null}
       </SpatialWorkspace>
-    </ParticipantShell>
+    </ParticipantPage>
   );
 }

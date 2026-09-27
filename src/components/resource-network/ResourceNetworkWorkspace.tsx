@@ -29,7 +29,7 @@ import {
 } from "../map/ExchangeSpatialScene";
 import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
-import { ParticipantShell, SpatialWorkspace } from "../participant/ParticipantWorkspace";
+import { ParticipantPage, SpatialWorkspace } from "../participant/WorkspacePrimitives";
 import { ExchangeBottomSheet, ExchangeResultCard } from "../participant/MobileExchangePrimitives";
 import { useParticipantSpatialContext } from "../participant/useParticipantSpatialContext";
 import { useWideExchangeLayout } from "../participant/useWideExchangeLayout";
@@ -371,6 +371,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
   }
 
   function refreshAuthoritativeState() {
+    // Resource/referral commands can change visibility and available actions; revalidate the server projection.
     startNavigation(() => router.refresh());
   }
 
@@ -444,7 +445,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     finally { setBusy(false); }
   }
 
-  return <ParticipantShell activeItem="Resources">
+  return <ParticipantPage activeItem="Resources">
     <SpatialWorkspace ariaLabel={t("resourceNetworkWorkspace.ariaLabel")} className={styles.workspace}>
       {/* Stage 3 rendered serviceFields={serviceFields}; Stage 4 consumes the shared
           lens projection instead so the same map never receives duplicate overlays. */}
@@ -579,7 +580,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
         </div>
       </ExchangeBottomSheet>
     </SpatialWorkspace>
-  </ParticipantShell>;
+  </ParticipantPage>;
 }
 
 function ResourceComposer({ busy, profile, geographyIds, onSubmit }: Readonly<{ busy: boolean; profile: ProviderServiceProfile; geographyIds: readonly string[]; onSubmit(body: Record<string, unknown>): void }>) {

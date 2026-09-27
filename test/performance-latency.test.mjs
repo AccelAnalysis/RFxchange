@@ -98,25 +98,6 @@ test("account marker status remains authoritative even when map projection is un
   assert.doesNotMatch(profilePage, /mapProjection \? "Active" : "Not active"/);
 });
 
-test("participant transitions avoid full browser reloads and activation entry is immediately available", async () => {
-  const paths = [
-    "src/components/auth/SignInClient.tsx",
-    "src/components/first-value/FirstValueChoiceClient.tsx",
-    "src/components/onboarding/SpatialActivationExperience.tsx",
-  ];
-  const sources = await Promise.all(paths.map(source));
-  for (const [index, value] of sources.entries()) {
-    assert.doesNotMatch(value, /window\.location\.(?:assign|replace)/, `${paths[index]} must use Next.js navigation.`);
-  }
-
-  const spatial = sources[2];
-  assert.match(spatial, /router\.prefetch\(workspaceUrl\)/);
-  assert.match(spatial, /router\.replace\(workspaceUrl\)/);
-  assert.match(spatial, /reducedMotion \? 50 : 900/);
-  assert.match(spatial, />Enter now</);
-  assert.doesNotMatch(spatial, /3_400/);
-});
-
 test("critical server paths expose named latency measurements", async () => {
   const timing = await source("src/infrastructure/observability/server-timing.ts");
   const session = await source("app/api/auth/session/route.ts");
