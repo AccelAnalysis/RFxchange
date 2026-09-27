@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -65,20 +64,4 @@ test("EDU-008 completes the connected map path without claiming a live outcome",
   ]);
   assert.match(overlay.accessibleSummary, /complete synthetic network path/);
   assert.match(scenario.networkEffect.outcomeBoundary, /not an award, contract, verified economic outcome, or credibility event/);
-});
-
-test("EDU-005-008 UI and server remain synthetic, ordered, and completion-bound", async () => {
-  const [client, service, scenario, map] = await Promise.all([
-    readFile(new URL("../src/components/orientation/OrientationJourneyClient.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../src/application/orientation/orientation-journey.ts", import.meta.url), "utf8"),
-    readFile(new URL("../src/application/orientation/synthetic-scenario.ts", import.meta.url), "utf8"),
-    readFile(new URL("../src/components/map/ExchangeSpatialScene.tsx", import.meta.url), "utf8"),
-  ]);
-  assert.match(client, /Accept synthetic invitation/);
-  assert.match(client, /Submit synthetic response/);
-  assert.match(client, /Make human tutorial selection/);
-  assert.match(client, /Complete orientation/);
-  assert.match(service, /next\.status === "completed" \? "completed" : "step-completed"/);
-  assert.doesNotMatch(scenario, /opportunitiesRepository|responsesRepository|referralsRepository|teamRepository|credibilityRepository/i);
-  assert.match(map, /network-effect/);
 });

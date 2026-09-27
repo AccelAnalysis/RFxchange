@@ -1,3 +1,4 @@
+import { UpdatesFixture } from "./updates-fixture.mjs";
 import React, { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { usePathname } from './navigation.mjs';
@@ -20,6 +21,7 @@ function App() {
   const pathname = usePathname();
   return React.createElement(I18nProvider, { locale: 'en-US', dictionary: getDictionary('en-US') },
     React.createElement(PersistentParticipantShell, null,
+      pathname === '/update-tests' ? React.createElement(UpdatesFixture) :
       pathname === '/signin' ? React.createElement('main', null, 'Signed out') :
       pathname === '/resources' ? React.createElement(SpatialPage, { key: 'resources', lens: 'resources' }) :
       React.createElement(SpatialPage, { key: 'opportunities', lens: 'opportunities-rfx' })));

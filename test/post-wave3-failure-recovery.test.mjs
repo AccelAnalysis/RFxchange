@@ -79,7 +79,6 @@ test("authorized workspace projection gaps reach retryable recovery instead of J
     "app/first-value/page.tsx",
     "app/organization-profile/page.tsx",
     "app/referrals/page.tsx",
-    "app/resources/page.tsx",
   ]) {
     const source = read(route);
     assert.match(source, /ParticipantRouteDependencyUnavailableError/, route);

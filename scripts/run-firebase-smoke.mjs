@@ -1,7 +1,8 @@
+import { pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 
 // One emulator process; keep authorization, tenant, transaction and provider smoke coverage.
-const scripts = [
+export const FIREBASE_SMOKE_SCRIPTS = [
   "scripts/smoke-firebase-auth-emulator.mjs",
   "scripts/smoke-firebase-user-resolution-emulator.mjs",
   "scripts/smoke-firebase-server-session-emulator.mjs",
@@ -34,8 +35,14 @@ const scripts = [
   "scripts/smoke-sad-runtime-emulator.mjs",
   "scripts/validate-market-ready-founding-commerce-firestore-emulator.mjs"
 ];
-for (const script of scripts) {
+export function runFirebaseSmoke() {
+const requested = process.env.RFXCHANGE_FIREBASE_SMOKES ? JSON.parse(process.env.RFXCHANGE_FIREBASE_SMOKES) : FIREBASE_SMOKE_SCRIPTS;
+if (!Array.isArray(requested) || !requested.length || requested.some(script => !FIREBASE_SMOKE_SCRIPTS.includes(script))) throw new Error("Invalid Firebase smoke selection");
+for (const script of FIREBASE_SMOKE_SCRIPTS.filter(script => requested.includes(script))) {
   const result = spawnSync(process.execPath, ["--experimental-transform-types", "--experimental-loader", "./scripts/node-typescript-source-loader.mjs", script], { stdio: "inherit", env: process.env });
   if (result.error) throw result.error;
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) runFirebaseSmoke();

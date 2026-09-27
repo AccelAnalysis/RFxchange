@@ -2,7 +2,10 @@ import { isApplicationRequestOrigin } from "@/src/infrastructure/http/applicatio
 import { NextRequest, NextResponse } from "next/server";
 
 import { MarketProfileError } from "@/src/application/market-profile/market-profile";
-import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
+import {
+  RFXCHANGE_SESSION_COOKIE_NAME,
+  resolveParticipantRoute,
+} from "@/src/infrastructure/auth/participant-route-runtime";
 import { apiProblem } from "@/src/infrastructure/http/api-problem";
 import { createServerMarketProfileService } from "@/src/infrastructure/market-profile/runtime";
 
@@ -74,4 +77,15 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return responseFor(request, error);
   }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const organizationId = request.nextUrl.searchParams.get("organizationId") ?? "";
+    if (!organizationId) return NextResponse.json({ error: "Organization required." }, { status: 400 });
+    const access = await resolveParticipantRoute({ sessionCookie: request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value, requestedOrganizationId: organizationId });
+    if (access.kind !== "authorized") return NextResponse.json({ error: "Current participant authority required." }, { status: access.kind === "unauthenticated" ? 401 : 403 });
+    const service = await createServerMarketProfileService();
+    return NextResponse.json(await service.snapshot(String(access.membership.organizationId)), { headers: { "cache-control": "private, no-store" } });
+  } catch (error) { return responseFor(request, error); }
 }

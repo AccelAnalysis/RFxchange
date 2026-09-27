@@ -1,11 +1,18 @@
-import { randomUUID } from "node:crypto";
+import { loadAuthorizedResourceWorkspace } from "@/src/infrastructure/resource-network/workspace-runtime";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 
 import { ResourceNetworkError, type ResourceNetworkScope } from "@/src/application/resource-network/resource-network";
-import { RFXCHANGE_SESSION_COOKIE_NAME, resolveParticipantRoute } from "@/src/infrastructure/auth/participant-route-runtime";
+import {
+  RFXCHANGE_SESSION_COOKIE_NAME,
+  resolveParticipantRoute,
+} from "@/src/infrastructure/auth/participant-route-runtime";
 import { apiProblem } from "@/src/infrastructure/http/api-problem";
-import { attemptProviderInvitation, createServerResourceNetworkService } from "@/src/infrastructure/resource-network/runtime";
+import {
+  attemptProviderInvitation,
+  createServerResourceNetworkService,
+} from "@/src/infrastructure/resource-network/runtime";
 
 export const runtime = "nodejs";
 
@@ -42,6 +49,11 @@ function problem(request: NextRequest, error: unknown, operation: "load" | "chan
 
 export async function GET(request: NextRequest) {
   try {
+    if (request.nextUrl.searchParams.get("view") === "workspace") {
+      const access = await resolveParticipantRoute({ sessionCookie: request.cookies.get(RFXCHANGE_SESSION_COOKIE_NAME)?.value, requestedOrganizationId: request.nextUrl.searchParams.get("scopeOrganization") ?? undefined });
+      if (access.kind !== "authorized" || access.state.lifecycleState !== "open-platform") return NextResponse.json({ error: "Resource Network access unavailable." }, { status: access.kind === "unauthenticated" ? 401 : 403 });
+      return NextResponse.json(await loadAuthorizedResourceWorkspace(access, Object.fromEntries(request.nextUrl.searchParams)), { headers: { "cache-control": "private, no-store" } });
+    }
     const access = await scope();
     if (access instanceof NextResponse) return access;
     const referralId = request.nextUrl.searchParams.get("referralId");

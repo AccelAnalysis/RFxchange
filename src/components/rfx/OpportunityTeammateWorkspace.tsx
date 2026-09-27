@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import type { RfxGapResolutionContext } from "../../domain/rfx/teaming";
 import type { TeamInvitationView } from "../../application/rfx/opportunity-teaming-service";
+import type { RfxGapResolutionContext } from "../../domain/rfx/teaming";
 import { useI18n } from "../i18n/I18nProvider";
 import { ParticipantPage, SpatialWorkspace } from "../participant/WorkspacePrimitives";
 import styles from "./OpportunityTeammateWorkspace.module.css";
@@ -28,9 +27,14 @@ interface Props {
 
 const capacities = ["capability-contributor", "delivery-support", "subject-matter-support"] as const;
 
-export function OpportunityTeammateWorkspace({ context, candidates, invitations, serviceAreas, query, returnHref }: Props) {
+export function OpportunityTeammateWorkspace({ context, candidates, invitations: serverInvitations, serviceAreas, query, returnHref }: Props) {
   const { t } = useI18n();
-  const router = useRouter();
+  const [localInvitations, setLocalInvitations] = useState<{ source: readonly TeamInvitationView[]; value: readonly TeamInvitationView[] } | null>(null);
+  const invitations = localInvitations?.source === serverInvitations ? localInvitations.value : serverInvitations;
+  async function applyInvitation(response: Response) {
+    const { invitation } = await response.json() as { invitation: TeamInvitationView };
+    setLocalInvitations(current => ({ source: serverInvitations, value: [invitation, ...(current?.source === serverInvitations ? current.value : serverInvitations).filter(item => item.id !== invitation.id)] }));
+  }
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -53,7 +57,7 @@ export function OpportunityTeammateWorkspace({ context, candidates, invitations,
       });
       if (!response.ok) throw new Error("create-failed");
       setNotice(t("rfxWorkspace.teaming.invitationCreated"));
-      router.refresh();
+      await applyInvitation(response);
     } catch { setNotice(t("rfxWorkspace.teaming.invitationError")); }
     finally { setBusy(null); }
   }
@@ -63,7 +67,7 @@ export function OpportunityTeammateWorkspace({ context, candidates, invitations,
     try {
       const response = await fetch("/api/opportunities/teaming", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "revoke", commandId: crypto.randomUUID(), invitationId: invitation.id, expectedVersion: invitation.version }) });
       if (!response.ok) throw new Error("revoke-failed");
-      setNotice(t("rfxWorkspace.teaming.invitationRevoked")); router.refresh();
+      await applyInvitation(response); setNotice(t("rfxWorkspace.teaming.invitationRevoked"));
     } catch { setNotice(t("rfxWorkspace.teaming.invitationError")); }
     finally { setBusy(null); }
   }

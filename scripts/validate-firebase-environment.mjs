@@ -1,8 +1,9 @@
 import { readFile } from "node:fs/promises";
+import { parseEnv } from "node:util";
 
 const firebaserc = JSON.parse(await readFile(new URL("../.firebaserc", import.meta.url), "utf8"));
 const firebaseConfig = JSON.parse(await readFile(new URL("../firebase.json", import.meta.url), "utf8"));
-const envExample = await readFile(new URL("../.env.example", import.meta.url), "utf8");
+const envExample = parseEnv(await readFile(new URL("../.env.example", import.meta.url), "utf8"));
 
 const failures = [];
 
@@ -35,13 +36,13 @@ if (firebaseConfig.emulators?.singleProjectMode !== true) {
   failures.push("firebase.json must enable emulator singleProjectMode.");
 }
 
-if (!envExample.includes("RFXCHANGE_ENV=development")) {
+if (envExample.RFXCHANGE_ENV !== "development") {
   failures.push(".env.example must declare the local default RFXCHANGE_ENV=development.");
 }
 
-for (const forbidden of ["PRIVATE_KEY=", "SERVICE_ACCOUNT=", "STRIPE_SECRET_KEY=", "MICROSOFT_CLIENT_SECRET="]) {
-  if (envExample.split("\n").some((line) => line.trim().startsWith(forbidden))) {
-    failures.push(`.env.example must not define privileged secret variable ${forbidden.slice(0, -1)}.`);
+for (const forbidden of ["PRIVATE_KEY", "SERVICE_ACCOUNT", "STRIPE_SECRET_KEY", "MICROSOFT_CLIENT_SECRET"]) {
+  if (Object.hasOwn(envExample, forbidden)) {
+    failures.push(`.env.example must not define privileged secret variable ${forbidden}.`);
   }
 }
 

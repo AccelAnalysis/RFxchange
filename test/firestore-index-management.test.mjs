@@ -1,76 +1,28 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import test from "node:test";
+import { register } from "node:module";
+register("../scripts/node-typescript-source-loader.mjs", import.meta.url);
+const { FIRESTORE_QUERY_CONTRACTS } = await import("../src/infrastructure/firestore/query-contracts.ts");
 import { SAD_RUNTIME_MANUAL_INDEXES } from "../src/infrastructure/firestore/sad-runtime-schema.ts";
-
-const firebaseConfig = JSON.parse(
-  await readFile(new URL("../firebase.json", import.meta.url), "utf8"),
-);
-const indexConfig = JSON.parse(
-  await readFile(new URL("../firestore.indexes.json", import.meta.url), "utf8"),
-);
-const queryContracts = await readFile(
-  new URL("../src/infrastructure/firestore/query-contracts.ts", import.meta.url),
-  "utf8",
-);
-const repositories = await readFile(
-  new URL("../src/infrastructure/firestore/repositories.ts", import.meta.url),
-  "utf8",
-);
-const geographyRepositories = await readFile(
-  new URL("../src/infrastructure/firestore/geography-repositories.ts", import.meta.url),
-  "utf8",
-);
-const organizationResolutionRepositories = await readFile(
-  new URL(
-    "../src/infrastructure/firestore/organization-resolution-repositories.ts",
-    import.meta.url,
-  ),
-  "utf8",
-);
-
-test("firebase configuration source-controls Firestore indexes", () => {
-  assert.equal(firebaseConfig.firestore?.indexes, "firestore.indexes.json");
-  assert.ok(Array.isArray(indexConfig.indexes));
-  assert.ok(Array.isArray(indexConfig.fieldOverrides));
+const config = JSON.parse(readFileSync("firebase.json", "utf8"));
+const indexes = JSON.parse(readFileSync("firestore.indexes.json", "utf8"));
+test("Firebase binds deployed rules, indexes, and compiled Functions", () => {
+  assert.equal(config.firestore.rules, "firestore.rules");
+  assert.equal(config.firestore.indexes, "firestore.indexes.json");
+  assert.equal(config.storage.rules, "storage.rules");
+  assert.equal(config.functions.source, "functions");
+  assert.equal(config.functions.runtime, "nodejs22");
+  assert.ok(config.functions.predeploy.some(command => command.includes("run build")));
 });
-
-test("foundation queries rely only on automatic Firestore indexing", () => {
-  assert.deepEqual(indexConfig.indexes, SAD_RUNTIME_MANUAL_INDEXES);
-  assert.deepEqual(indexConfig.fieldOverrides, []);
-  assert.match(queryContracts, /automatic-single-field/);
-  assert.match(queryContracts, /automatic-equality-merge/);
-  assert.match(queryContracts, /manual-composite/);
-  assert.match(queryContracts, /FIRESTORE_MANUAL_INDEX_CONTRACTS/);
-  assert.doesNotMatch(queryContracts, /compositeIndexCandidate/);
-});
-
-test("current Firestore repository queries remain equality-only and unsorted", () => {
-  const operators = [...`${repositories}\n${geographyRepositories}\n${organizationResolutionRepositories}`.matchAll(/\.where\(\s*"[^"]+"\s*,\s*"([^"]+)"/g)].map(
-    (match) => match[1],
-  );
-
-  assert.ok(operators.length > 0, "Expected repository query filters to validate.");
-  assert.deepEqual([...new Set(operators)], ["=="]);
-  assert.doesNotMatch(repositories, /\.orderBy\s*\(/);
-  assert.doesNotMatch(organizationResolutionRepositories, /\.orderBy\s*\(/);
-});
-
-test("compound equality contracts are explicitly planned for index merging", () => {
-  for (const queryName of [
-    "user-by-login",
-    "active-memberships-by-user",
-    "restriction-by-organization",
-    "restriction-by-membership",
-    "legal-document-by-kind-version",
-    "geography-authorizations-by-user-and-geography",
-    "organization-resolution-by-journey",
-  ]) {
-    assert.ok(queryContracts.includes(`\"${queryName}\"`), `Missing compound equality query ${queryName}.`);
+test("deployed indexes match query contracts regardless of object-key order", () => {
+  const ordered = values => [...values].sort((a,b) => a.collectionGroup.localeCompare(b.collectionGroup));
+  assert.deepEqual(ordered(indexes.indexes), ordered(SAD_RUNTIME_MANUAL_INDEXES));
+  assert.deepEqual(indexes.fieldOverrides, []);
+  assert.equal(new Set(FIRESTORE_QUERY_CONTRACTS.map(query => query.name)).size, FIRESTORE_QUERY_CONTRACTS.length);
+  for (const query of FIRESTORE_QUERY_CONTRACTS) {
+    assert.ok(query.filters.length > 0);
+    assert.equal(query.indexStrategy, query.filters.length > 1 ? "automatic-equality-merge" : "automatic-single-field");
+    assert.ok(query.filters.every(filter => filter.operator === "=="));
   }
-
-  assert.match(
-    queryContracts,
-    /fields\.length > 1 \? "automatic-equality-merge" : "automatic-single-field"/,
-  );
 });

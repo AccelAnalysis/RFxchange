@@ -4,11 +4,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
+import { exchangeRoomLocaleCatalog } from "../../application/participant/exchange-room-locale";
+import type {
+  ExchangeGovernedAreaGeometry,
+  ExchangeLensSelectableProjection,
+} from "../../application/participant/lens-map-projection-adapter";
 import type { ParticipantSpatialScope } from "../../application/participant/participant-spatial-context";
-import {
-  resourcesWorkspaceMutationHref,
-  type ResourcesMobileWorkspaceQuery,
-} from "../../application/resource-network/resource-network-workspace";
 import {
   buildResourcesMobileProjection,
   resourcesMobileCopy,
@@ -16,27 +17,30 @@ import {
   type ResourcesMobileAuthorization,
   type ResourcesMobileSelectionInput,
 } from "../../application/resource-network/mobile-resource-exchange";
-import { exchangeRoomLocaleCatalog } from "../../application/participant/exchange-room-locale";
-import type { ExchangeGovernedAreaGeometry, ExchangeLensSelectableProjection } from "../../application/participant/lens-map-projection-adapter";
-import type { ProviderDiscoveryProjection, ProviderRequestMessageProjection, ProviderResourceProjection } from "../../domain/resource-network/model";
-import type { ProviderServiceProfile } from "../../domain/resource-providers/model";
 import type { PublicResourceListing } from "../../application/resource-network/public-resource-listing";
+import {
+  resourcesWorkspaceMutationHref,
+  type ResourcesMobileWorkspaceQuery,
+} from "../../application/resource-network/resource-network-workspace";
 import type { RecipientReferralProjection, SenderReferralProjection } from "../../domain/referrals/model";
+import type {
+  ProviderDiscoveryProjection,
+  ProviderRequestMessageProjection,
+  ProviderResourceProjection,
+} from "../../domain/resource-network/model";
+import type { ProviderServiceProfile } from "../../domain/resource-providers/model";
+import { useI18n } from "../i18n/I18nProvider";
 import {
   ExchangeSpatialScene,
   type ExchangeHomeMarker,
   type ExchangeOrganizationMarker,
 } from "../map/ExchangeSpatialScene";
-import { useI18n } from "../i18n/I18nProvider";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
-import { ParticipantPage, SpatialWorkspace } from "../participant/WorkspacePrimitives";
 import { ExchangeBottomSheet, ExchangeResultCard } from "../participant/MobileExchangePrimitives";
 import { useParticipantSpatialContext } from "../participant/useParticipantSpatialContext";
 import { useWideExchangeLayout } from "../participant/useWideExchangeLayout";
-import {
-  clearRetryStableCommand,
-  resolveRetryStableCommand,
-} from "../referrals/retry-stable-command";
+import { ParticipantPage, SpatialWorkspace } from "../participant/WorkspacePrimitives";
+import { clearRetryStableCommand, resolveRetryStableCommand } from "../referrals/retry-stable-command";
 
 import styles from "./ResourceNetworkWorkspace.module.css";
 
@@ -96,7 +100,10 @@ function browserSessionStorage(): Storage | null {
   }
 }
 
-export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, organizations, providers, resources, listings = [], referrals, owner, adjunctState, authorization, commandRecoveryScope, queryState, selectedMessages, selectedMessagesUnavailable }: Props) {
+export function ResourceNetworkWorkspace(serverProps: Props) {
+  const [localWorkspace, setLocalWorkspace] = useState<{ source: Props; value: Props } | null>(null);
+  const { model, homeMarker, spatialScope, organizations, providers, resources, listings = [], referrals, owner, adjunctState, authorization, commandRecoveryScope, queryState, selectedMessages, selectedMessagesUnavailable } = localWorkspace?.source === serverProps ? localWorkspace.value : serverProps;
+
   const { t, locale } = useI18n();
   const wideLayout = useWideExchangeLayout();
   const router = useRouter();
@@ -370,9 +377,22 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
     }
   }
 
-  function refreshAuthoritativeState() {
-    // Resource/referral commands can change visibility and available actions; revalidate the server projection.
-    startNavigation(() => router.refresh());
+  async function refreshAuthoritativeState() {
+    try {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("view", "workspace");
+      params.set("scopeOrganization", spatialScope.organizationId);
+      // Canonical detail routes encode selection in the pathname rather than the query.
+      for (const [key, value] of [["provider", queryState.providerId], ["resource", queryState.resourceId], ["request", queryState.requestId]] as const) {
+        if (value) params.set(key, value); else params.delete(key);
+      }
+      const response = await fetch(`/api/resources?${params}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("projection-unavailable");
+      setLocalWorkspace({ source: serverProps, value: await response.json() as Props });
+    } catch {
+      // Exceptional recovery does not turn a confirmed command into a failed one.
+      startNavigation(() => router.refresh());
+    }
   }
 
   async function post(url: string, body: Record<string, unknown>) {
@@ -422,7 +442,7 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
         : null;
       const requestId = typeof referral?.id === "string" ? referral.id : null;
       if (requestId) updateWorkspaceQuery({ request: requestId });
-      else refreshAuthoritativeState();
+      else await refreshAuthoritativeState();
     } catch {
       // An uncertain response keeps the same command in memory and actor-scoped session storage.
       // Re-entering the same provider, service, publication and summary after reload replays it.
@@ -433,14 +453,14 @@ export function ResourceNetworkWorkspace({ model, homeMarker, spatialScope, orga
 
   async function resourceAction(body: Record<string, unknown>) {
     setBusy(true); setNotice(null);
-    try { await post("/api/resources", { ...body, commandId: `resource-${crypto.randomUUID()}` }); refreshAuthoritativeState(); }
+    try { await post("/api/resources", { ...body, commandId: `resource-${crypto.randomUUID()}` }); await refreshAuthoritativeState(); }
     catch { setNotice(mobileCopy.resourceActionFailed); }
     finally { setBusy(false); }
   }
 
   async function referralAction(body: Record<string, unknown>) {
     setBusy(true); setNotice(null);
-    try { await post("/api/referrals", { ...body, commandId: `provider-request-${crypto.randomUUID()}` }); refreshAuthoritativeState(); }
+    try { await post("/api/referrals", { ...body, commandId: `provider-request-${crypto.randomUUID()}` }); await refreshAuthoritativeState(); }
     catch { setNotice(mobileCopy.providerActionFailed); }
     finally { setBusy(false); }
   }

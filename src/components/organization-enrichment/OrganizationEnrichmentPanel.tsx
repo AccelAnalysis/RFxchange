@@ -1,18 +1,10 @@
 "use client";
 
-import {
-  useCallback,
-  useMemo,
-  useState,
-  type FormEvent,
-  type KeyboardEvent,
-  type ReactNode,
-} from "react";
 import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 
 import type { ControlledLocalityMapModel } from "../../application/geography/controlled-locality-map";
 
-import { ExchangeSpatialScene, type ExchangeHomeMarker } from "../map/ExchangeSpatialScene";
 import type {
   OrganizationAdditionalLocation,
   OrganizationCredential,
@@ -20,6 +12,7 @@ import type {
   PublicOrganizationAdditionalLocation,
 } from "../../domain/organization-enrichment/model";
 import { useI18n } from "../i18n/I18nProvider";
+import { ExchangeSpatialScene, type ExchangeHomeMarker } from "../map/ExchangeSpatialScene";
 import { WorkflowExplainer } from "../network-education/WorkflowExplainer";
 
 import styles from "./OrganizationEnrichmentPanel.module.css";
@@ -62,6 +55,15 @@ export function OrganizationEnrichmentPanel(props: Readonly<{
 }>) {
   const { t } = useI18n();
   const router = useRouter();
+  const [localSnapshot, setLocalSnapshot] = useState<{ source: Snapshot; value: Snapshot } | null>(null);
+  const snapshot = localSnapshot?.source === props.snapshot ? localSnapshot.value : props.snapshot;
+  async function reloadSnapshot() {
+    try {
+      const response = await fetch(`/api/organization-enrichment?view=editor&organizationId=${encodeURIComponent(props.organizationId)}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("projection-unavailable");
+      setLocalSnapshot({ source: props.snapshot, value: await response.json() as Snapshot });
+    } catch { router.refresh(); } // Recover a projection failure without resubmitting a committed command.
+  }
   const [tab, setTab] = useState<EnrichmentTab>("credentials");
   const [notice, setNotice] = useState<Readonly<{ tone: "success" | "error"; text: string }> | null>(null);
   const [busy, setBusy] = useState(false);
@@ -86,7 +88,7 @@ export function OrganizationEnrichmentPanel(props: Readonly<{
     try {
       const result = await postJson({ organizationId: props.organizationId, commandId: commandId(prefix), action, input });
       setNotice({ tone: "success", text: t("organizationEnrichment.common.saved") });
-      router.refresh();
+      await reloadSnapshot();
       return result;
     } catch (error) {
       setNotice({ tone: "error", text: error instanceof Error ? error.message : t("organizationEnrichment.common.error") });
@@ -129,7 +131,7 @@ export function OrganizationEnrichmentPanel(props: Readonly<{
       if (!response.ok) throw new Error(typeof payload.error === "string" ? payload.error : t("organizationEnrichment.common.error"));
       form.reset();
       setNotice({ tone: "success", text: t("organizationEnrichment.media.uploaded") });
-      router.refresh();
+      await reloadSnapshot();
     } catch (error) {
       setNotice({ tone: "error", text: error instanceof Error ? error.message : t("organizationEnrichment.common.error") });
     } finally {
@@ -203,7 +205,7 @@ export function OrganizationEnrichmentPanel(props: Readonly<{
           </form>
           <div className={styles.records}>
             <h3>{t("organizationEnrichment.credentials.recorded")}</h3>
-            {props.snapshot.credentials.filter((record) => record.status !== "retired").length ? props.snapshot.credentials.filter((record) => record.status !== "retired").map((record) => (
+            {snapshot.credentials.filter((record) => record.status !== "retired").length ? snapshot.credentials.filter((record) => record.status !== "retired").map((record) => (
               <article key={record.id} className={styles.record}>
                 <div><strong>{record.label}</strong><span>{record.issuer} · {valueLabel(record.status)} · {valueLabel(record.visibility)}</span></div>
                 <p>{record.identifierValue || t("organizationEnrichment.credentials.noIdentifier")}</p>
@@ -229,7 +231,7 @@ export function OrganizationEnrichmentPanel(props: Readonly<{
           </form>
           <div className={styles.records}>
             <h3>{t("organizationEnrichment.media.recorded")}</h3>
-            {props.snapshot.profileAssets.filter((record) => record.publicationStatus !== "retired").length ? props.snapshot.profileAssets.filter((record) => record.publicationStatus !== "retired").map((record) => (
+            {snapshot.profileAssets.filter((record) => record.publicationStatus !== "retired").length ? snapshot.profileAssets.filter((record) => record.publicationStatus !== "retired").map((record) => (
               <article key={record.id} className={styles.record}>
                 <div><strong>{record.title}</strong><span>{valueLabel(record.kind)} · {valueLabel(record.publicationStatus)}</span></div>
                 <p>{record.description || t("organizationEnrichment.media.noDescription")}</p>
@@ -261,7 +263,7 @@ export function OrganizationEnrichmentPanel(props: Readonly<{
             </form>
             <div className={styles.records}>
               <h3>{t("organizationEnrichment.locations.recorded")}</h3>
-              {props.snapshot.additionalLocations.filter((record) => record.lifecycleStatus === "active").length ? props.snapshot.additionalLocations.filter((record) => record.lifecycleStatus === "active").map((record) => (
+              {snapshot.additionalLocations.filter((record) => record.lifecycleStatus === "active").length ? snapshot.additionalLocations.filter((record) => record.lifecycleStatus === "active").map((record) => (
                 <article key={record.id} className={styles.record}>
                   <div><strong>{record.label}</strong><span>{valueLabel(record.visibility)} · {valueLabel(record.publicationStatus)}</span></div>
                   <p>{record.physicalAddress.locality}, {record.physicalAddress.regionCode} · {record.geocodeProvenance.provider}</p>

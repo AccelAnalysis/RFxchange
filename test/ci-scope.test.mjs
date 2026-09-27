@@ -1,22 +1,36 @@
-import assert from "node:assert/strict";
-import test from "node:test";
-import { ciScope } from "../scripts/ci-scope.mjs";
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { ciScope } from '../scripts/ci-scope.mjs';
+import { FIREBASE_SMOKE_SCRIPTS } from '../scripts/run-firebase-smoke.mjs';
 
-test("presentation and documentation changes skip emulators", () => {
-  assert.equal(ciScope(["src/components/map/ExchangeSpatialScene.tsx", "src/components/a.css", "docs/a.md", "AGENTS.md"]).firebase, false);
-});
-test("server, security, dependency and test boundaries select Firebase coverage", () => {
-  for (const path of ["app/api/new/route.ts", "app/actions.ts", "apps/admin/src/action.ts", "src/domain/a.ts", "src/application/a.ts", "src/infrastructure/a.ts", "src/accelpo/a.ts", "src/config/a.ts", "functions/src/a.ts", "firestore.rules", "firestore.indexes.json", "storage.rules", "firebase.json", "package-lock.json", "scripts/smoke.mjs", "test/auth.test.mjs", ".github/workflows/ci.yml", "new-server-directory/action.ts"]) {
-    assert.equal(ciScope([path]).firebase, true, path);
+test('ordinary unit, browser, presentation and tooling edits skip Firebase', () => {
+  for (const file of ['test/auth.test.mjs', 'test/browser/mapbox.mjs', 'scripts/smoke-exchange-runtime.mjs', 'scripts/validate-internationalization.mjs', 'app/resources/page.tsx', 'src/components/map/ExchangeSpatialScene.tsx', 'docs/security.md']) {
+    assert.equal(ciScope([file]).firebase, false, file);
   }
 });
-test("manual full runs and mixed changes retain integration coverage", () => {
-  assert.equal(ciScope([], true).firebase, true);
-  assert.equal(ciScope(["docs/a.md", "firestore.rules"]).firebase, true);
+test('changed emulator tests select themselves without unrelated suites', () => {
+  const file = 'scripts/smoke-market-profile-enrichment-emulator.mjs';
+  assert.deepEqual(ciScope([file]).scripts, [file]);
 });
-test("browser coverage follows UI runtime changes and skips documents", () => {
-  assert.equal(ciScope(['src/components/map/ExchangeSpatialScene.tsx']).browser, true);
+test('domain and persistence changes follow transitive smoke imports', () => {
+  for (const file of ['src/domain/market-profile/model.ts', 'src/infrastructure/firestore/market-profile.ts']) {
+    const { scripts } = ciScope([file]);
+    assert.ok(scripts.includes('scripts/smoke-market-profile-enrichment-emulator.mjs'));
+    assert.ok(scripts.length < FIREBASE_SMOKE_SCRIPTS.length);
+  }
+});
+test('security, dependency, workflow and unknown server changes retain full coverage', () => {
+  for (const file of ['firestore.rules', 'firestore.indexes.json', 'storage.rules', 'firebase.json', 'package-lock.json', 'functions/src/a.ts', '.github/workflows/ci.yml', 'app/api/resources/route.ts', 'app/actions.ts', 'new-server-directory/action.ts', 'scripts/ci-scope.mjs']) {
+    assert.deepEqual(ciScope([file]).scripts, FIREBASE_SMOKE_SCRIPTS, file);
+  }
+});
+test('full and mixed runs cannot lose required suites', () => {
+  assert.deepEqual(ciScope([], true).scripts, FIREBASE_SMOKE_SCRIPTS);
+  assert.deepEqual(ciScope(['test/a.test.mjs', 'firestore.rules']).scripts, FIREBASE_SMOKE_SCRIPTS);
+});
+test('browser coverage follows UI and browser tests', () => {
+  assert.equal(ciScope(['app/resources/page.tsx']).browser, true);
   assert.equal(ciScope(['test/browser/mapbox.mjs']).browser, true);
-  assert.equal(ciScope(['docs/design.md']).browser, false);
+  assert.equal(ciScope(['test/auth.test.mjs']).browser, false);
   assert.equal(ciScope([], true).browser, true);
 });

@@ -56,8 +56,8 @@ function joined(values: readonly string[]): string {
  * authorized by the server. Private evidence bytes remain behind their separate access boundary.
  */
 export function ProviderReviewConsole({
-  applications,
-  detail,
+  applications: serverApplications,
+  detail: serverDetail,
   canReview,
 }: Readonly<{
   applications: readonly QueueItem[];
@@ -65,6 +65,9 @@ export function ProviderReviewConsole({
   canReview: boolean;
 }>) {
   const router = useRouter();
+  const [localDetail, setLocalDetail] = useState<{ source: Detail | null; value: Detail } | null>(null);
+  const detail = localDetail?.source === serverDetail ? localDetail.value : serverDetail;
+  const applications = serverApplications.map(item => detail && item.organizationId === String(detail.application.organizationId) ? { ...item, status: detail.application.status, version: detail.application.version } : item);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -87,8 +90,11 @@ export function ProviderReviewConsole({
       const body = await response.json() as { error?: string };
       if (!response.ok) throw new Error(body.error ?? "Review action failed.");
       setNotice(`${readable(action)} saved.`);
-      // This transition changes server-derived permissions and available workflow actions.
-      router.refresh();
+      try {
+        const response = await fetch(`/api/admin/provider-applications?organizationId=${encodeURIComponent(String(detail.application.organizationId))}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("projection-unavailable");
+        setLocalDetail({ source: serverDetail, value: await response.json() as Detail });
+      } catch { router.refresh(); }
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Review action failed.");
     } finally {
