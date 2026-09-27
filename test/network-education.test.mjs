@@ -1,12 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFile } from "node:fs/promises";
 
 import { authenticatedServerContext } from "../src/application/auth/server-session.ts";
 import {
   NETWORK_EDUCATION_CATALOG_VERSION,
   NETWORK_EDUCATION_PATHS,
-  NETWORK_EXPLAINER_KEYS,
   recommendedEducationPath,
 } from "../src/application/network-education/catalog.ts";
 import { NetworkEducationError, NetworkEducationService } from "../src/application/network-education/network-education.ts";

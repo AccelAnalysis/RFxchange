@@ -9,10 +9,8 @@ const service = await read("src/application/network-discovery/network-discovery.
 const runtime = await read("src/infrastructure/network-discovery/runtime.ts");
 const route = await read("app/geography/canvas/page.tsx");
 const workspace = await read("src/components/participant/ExistingWorkspaceFoundation.tsx");
-const workspaceStyles = await read("src/components/participant/ExistingWorkspaceFoundation.module.css");
 const map = await read("src/components/map/ExchangeSpatialScene.tsx");
 const state = await read("src/application/participant/participant-spatial-context.ts");
-const networkCopy = JSON.parse(await read("src/i18n/messages/network/en-US.json"));
 
 test("Slice 3.2 revalidates controlled and OPEN participants plus geography authority on the server", () => {
   assert.match(route, /resolveParticipantRoute/);

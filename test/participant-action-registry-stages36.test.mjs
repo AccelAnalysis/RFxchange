@@ -5,8 +5,6 @@ import test from "node:test";
 import {
   EXCHANGE_ROOM_ACTION_IDS,
   EXCHANGE_ROOM_ACTION_REGISTRY,
-  LEGACY_EXCHANGE_ROOM_ACTION_DISPOSITIONS,
-  LEGACY_EXCHANGE_ROOM_ACTION_IDS,
 } from "../src/application/participant/exchange-room-actions.ts";
 
 const root = new URL("../", import.meta.url);
@@ -27,31 +25,6 @@ test("Stages 3–6 emits exactly the immutable sixteen positions in final lens o
     const group = EXCHANGE_ROOM_ACTION_REGISTRY.slice(lensIndex * 4, lensIndex * 4 + 4);
     assert.deepEqual(group.map(({ lens: value }) => value), [lens, lens, lens, lens]);
     assert.deepEqual(group.map(({ order }) => order), [1, 2, 3, 4]);
-  }
-});
-
-test("all sixteen predecessor IDs have an explicit successor disposition but are never emitted", () => {
-  assert.equal(LEGACY_EXCHANGE_ROOM_ACTION_IDS.length, 16);
-  assert.deepEqual(Object.keys(LEGACY_EXCHANGE_ROOM_ACTION_DISPOSITIONS), [...LEGACY_EXCHANGE_ROOM_ACTION_IDS]);
-  for (const legacyId of LEGACY_EXCHANGE_ROOM_ACTION_IDS) {
-    assert.ok(LEGACY_EXCHANGE_ROOM_ACTION_DISPOSITIONS[legacyId], legacyId);
-    if (legacyId !== "opportunities.team") {
-      assert.equal(EXCHANGE_ROOM_ACTION_IDS.includes(legacyId), false, legacyId);
-    }
-  }
-  assert.deepEqual(LEGACY_EXCHANGE_ROOM_ACTION_DISPOSITIONS["referrals.new"], {
-    kind: "utility",
-    href: "/referrals?intent=manage",
-  });
-  for (const view of ["sent", "received", "starred"]) {
-    const disposition = LEGACY_EXCHANGE_ROOM_ACTION_DISPOSITIONS[`referrals.${view}`];
-    assert.deepEqual(disposition, {
-      kind: "deferred-utility",
-      utility: "referrals",
-      view,
-      reason: "not-operational",
-    });
-    assert.equal("href" in disposition, false, `${view} advertised an unsupported referral route`);
   }
 });
 

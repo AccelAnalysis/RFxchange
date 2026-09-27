@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
-const exists = (path) => existsSync(new URL(path, root));
 
 const convergedRoutes = [
   "src/infrastructure/admin/http/provider-applications.ts",

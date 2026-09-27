@@ -7,13 +7,9 @@ const read = (path) => readFile(new URL(path, root), "utf8");
 
 const state = await read("src/application/participant/participant-spatial-context.ts");
 const component = await read("src/components/participant/ExistingWorkspaceFoundation.tsx");
-const styles = await read("src/components/participant/ExistingWorkspaceFoundation.module.css");
 const page = await read("app/geography/canvas/page.tsx");
 const runtime = await read("src/infrastructure/geography/participant-map-runtime.ts");
 const networkRuntime = await read("src/infrastructure/network-discovery/runtime.ts");
-const networkCatalog = JSON.parse(
-  await read("src/i18n/messages/network/en-US.json"),
-);
 
 test("Brand B6a browser state is deterministic, scoped, and non-authorizing", () => {
   assert.match(state, /participantId/);

@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { authenticatedServerContext } from "../src/application/auth/server-session.ts";

@@ -10,12 +10,6 @@ import { createServerReferralNetworkService } from "@/src/infrastructure/referra
 
 interface ReferralPageProps { readonly searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>; }
 
-function firstSearchParam(value: string | string[] | undefined): string | null {
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) return value[0] ?? null;
-  return null;
-}
-
 function referralCounterpartyOrganizationId(
   referral: Awaited<ReturnType<ReturnType<typeof createServerReferralNetworkService>["snapshot"]>>[number],
 ): string | null {
@@ -36,7 +30,6 @@ export default async function ReferralsPage({ searchParams }: ReferralPageProps)
   const mapProjection = await loadAuthorizedParticipantMapProjection(access);
   if (!mapProjection) throw new ParticipantRouteDependencyUnavailableError("workspace-state", new Error("Authorized referral map projection is incomplete."));
   const params: Readonly<Record<string, string | string[] | undefined>> = searchParams ? await searchParams : {};
-  const managementIntent = firstSearchParam(params.intent) === "manage";
   const requestedOrganization = params.organization;
   const requestedOrganizationId = typeof requestedOrganization === "string"
     ? requestedOrganization

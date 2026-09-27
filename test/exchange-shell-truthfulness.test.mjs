@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
-const exists = (path) => existsSync(new URL(path, root));
 
 function loadRegistryContract() {
   const script = `

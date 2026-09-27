@@ -3,13 +3,10 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
-  PARTICIPANT_SHEET_SNAP_POINTS,
   createParticipantSpatialContext,
   parseParticipantSpatialContext,
   serializeParticipantSpatialContext,
 } from "../src/application/participant/participant-spatial-context.ts";
-import { PARTICIPANT_LENS_IDS } from "../src/application/participant/participant-lens-registry.ts";
-import { MOBILE_EXCHANGE_STAGE2_LENS_IDS } from "../src/application/participant/mobile-exchange-stage2-legacy.ts";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
