@@ -63,10 +63,16 @@ export function OpportunityDiscoveryWorkspace({ model, homeMarker, spatialScope,
   const result = localResult?.source === serverResult ? localResult.value : serverResult;
 
   async function reloadResult() {
-    const response = await fetch(`/api${queryHref(result, null)}`, { cache: "no-store" });
-    if (!response.ok) throw new Error("request-failed");
-    const value = await response.json() as OpportunityDiscoveryResult;
-    setLocalResult({ source: serverResult, value });
+    try {
+      const response = await fetch(`/api${queryHref(result, null)}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("request-failed");
+      const value = await response.json() as OpportunityDiscoveryResult;
+      setLocalResult({ source: serverResult, value });
+    } catch {
+      // The command already committed. Preserve its success confirmation and
+      // recover the authorized projection without inviting a duplicate command.
+      router.refresh();
+    }
   }
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
